@@ -133,6 +133,7 @@
             'mass_mailing/static/src/xml/mass_mailing_mobile_preview.xml',
             'mass_mailing/static/src/js/tours/**/*',
             'mass_mailing/static/src/fields/**/*',
+            ('remove', 'mass_mailing/static/src/fields/mass_mailing_html_field/mass_mailing_snippet_menu*'),
         ],
         'web.assets_backend_lazy': [
             'mass_mailing/static/src/views/mass_mailing_subscription_graph_renderer.js',

@@ -106,15 +106,15 @@ export class FontPlugin extends Plugin {
         handle_delete_backward_word: { callback: p.handleDeleteBackward.bind(p), sequence: 20 },
         toolbarCategory: [
             {
-                id: "font",
+                id: "typo",
                 sequence: 10,
             },
-            { id: "font-size", sequence: 29 },
+            { id: "size", sequence: 29 },
         ],
         toolbarItems: [
             {
-                id: "font",
-                category: "font",
+                id: "typo",
+                category: "typo",
                 Component: FontSelector,
                 props: {
                     getItems: () => fontItems,
@@ -123,7 +123,7 @@ export class FontPlugin extends Plugin {
             },
             {
                 id: "font-size",
-                category: "font-size",
+                category: "size",
                 Component: FontSelector,
                 props: {
                     getItems: () => p.fontSizeItems,

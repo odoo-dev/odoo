@@ -15,7 +15,7 @@ import { debounce, throttleForAnimation } from "@web/core/utils/timing";
 import { uniqueId } from "@web/core/utils/functions";
 import { sortBy, unique } from "@web/core/utils/arrays";
 import { browser } from "@web/core/browser/browser";
-import { Toolbar } from "@web_editor/js/editor/toolbar";
+import { Toolbar as LegacyToolbar } from "@web_editor/js/editor/toolbar";
 import {
     Component,
     EventBus,
@@ -1858,7 +1858,7 @@ class SnippetsMenu extends Component {
 
     static template = "web_editor.SnippetsMenu";
 
-    static components = { Toolbar, LinkTools };
+    static components = { LegacyToolbar, LinkTools };
 
     setup() {
         super.setup(...arguments);
@@ -1871,7 +1871,7 @@ class SnippetsMenu extends Component {
             showCustomizePanel: false,
             invisibleElements: [],
             currentTab: SnippetsMenu.tabs.BLOCKS,
-            toolbarTitle: "",
+            toolbarTitle: _t("Inline Text"),
             showToolbar: false,
             search: "",
             canUndo: false,
@@ -2062,17 +2062,19 @@ class SnippetsMenu extends Component {
         document.addEventListener("touchend", this.__onTouchEvent, true);
 
         this._toolbarWrapperEl = this.toolbarWrapperRef.el;
-        this._toolbarWrapperEl.style.display = 'contents';
+        if (this._toolbarWrapperEl) {
+            this._toolbarWrapperEl.style.display = 'contents';
 
-        const toolbarEl = this._toolbarWrapperEl.firstChild;
-        toolbarEl.classList.remove('oe-floating');
-        // if (this.options.wysiwyg.toolbarEl) {
-        //     this.options.wysiwyg.toolbarEl.classList.add('d-none');
-        //     this.options.wysiwyg.setupToolbar(toolbarEl);
-        // }
-        // this._addToolbar();
-        this._checkEditorToolbarVisibilityCallback = this._checkEditorToolbarVisibility.bind(this);
-        // $(this.options.wysiwyg.odooEditor.document.body).on('click', this._checkEditorToolbarVisibilityCallback);
+            const toolbarEl = this._toolbarWrapperEl.querySelector('div');
+            toolbarEl.classList.remove('oe-floating');
+            if (this.options.wysiwyg.toolbarEl) {
+                this.options.wysiwyg.toolbarEl.classList.add('d-none');
+                this.options.wysiwyg.setupToolbar(toolbarEl);
+            }
+            this._addToolbar();
+            this._checkEditorToolbarVisibilityCallback = this._checkEditorToolbarVisibility.bind(this);
+            $(this.options.wysiwyg.odooEditor.document.body).on('click', this._checkEditorToolbarVisibilityCallback);
+        }
 
         // Prepare snippets editor environment
         this.$snippetEditorArea = $('<div/>', {
@@ -4650,6 +4652,10 @@ class SnippetsMenu extends Component {
         await this._updateInvisibleDOM();
     }
     _addToolbar(toolbarMode = "text") {
+        this._checkEditorToolbarVisibility();
+        if (!this._toolbarWrapperEl) {
+            return;
+        }
         // TODO: Now that the toolbar is not removed every time
         // `_updateRightPanelContent` is called, we should probably rename this
         // method ot "_updateToolbar" and remove some of the now useless code,
@@ -4685,7 +4691,6 @@ class SnippetsMenu extends Component {
             $dropdown.on('hide.bs.dropdown', (ev) => this.options.wysiwyg.onColorpaletteDropdownHide(ev));
         }
 
-        this._checkEditorToolbarVisibility();
     }
     /**
      * Update editor UI visibility based on the current range.
@@ -4703,7 +4708,7 @@ class SnippetsMenu extends Component {
             return;
         }
         this.state.showToolbar = Boolean(range &&
-            $currentSelectionTarget.parents('#wrapwrap, .iframe-editor-wrapper').length &&
+            $currentSelectionTarget.parents('#wrapwrap, .o_mass_mailing_iframe').length &&
             !closestElement(selection.anchorNode, '[data-oe-model]:not([data-oe-type="html"]):not([data-oe-field="arch"]):not([data-oe-translation-source-sha])') &&
             !closestElement(selection.focusNode, '[data-oe-model]:not([data-oe-type="html"]):not([data-oe-field="arch"]):not([data-oe-translation-source-sha])') &&
             !(e && $(e.target).closest('.fa, img').length) &&

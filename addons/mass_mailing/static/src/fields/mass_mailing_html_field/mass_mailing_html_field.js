@@ -25,6 +25,7 @@ export class MassMailingHtmlField extends HtmlField {
         this.state = useState({
             showMassMailingTemplateSelector: content.toString() === "",
             iframeDocument: null,
+            toolbarInfos: undefined,
         });
         this.fieldConfig = reactive({
             selectedTheme: null,
@@ -52,7 +53,7 @@ export class MassMailingHtmlField extends HtmlField {
             this.getColorPickerTemplateService = this.env.services.get_color_picker_template;
 
             const { MassMailingSnippetsMenu } = await odoo.loader.modules.get(
-                "@mass_mailing/js/snippets.editor"
+                "@mass_mailing/fields/mass_mailing_html_field/mass_mailing_snippet_menu"
             );
             this.MassMailingSnippetsMenu = MassMailingSnippetsMenu;
         });
@@ -172,6 +173,7 @@ export class MassMailingHtmlField extends HtmlField {
                 );
             },
             trigger_up: (ev) => this._trigger_up(ev),
+            toolbarInfos: state.toolbarInfos,
         };
     }
     async onSelectMassMailingTemplate(templateInfos, templateHTML) {
@@ -245,6 +247,8 @@ export class MassMailingHtmlField extends HtmlField {
                 doc.body.append(editable);
                 editor.attachTo(editable);
 
+                this.state.toolbarInfos = editor.shared.getToolbarInfo();
+
                 // todo: should this be in its own plugin? DRAG BUILDING BLOCKS HERE
                 const subEditable = this.editor.editable.querySelector(".o_editable");
                 if (subEditable) {
@@ -269,6 +273,7 @@ export class MassMailingHtmlField extends HtmlField {
                 canRedo: this.editor.shared.canRedo(),
             });
         };
+        config.disableFloatingToolbar = true;
         return config;
     }
 }

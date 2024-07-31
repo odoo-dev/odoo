@@ -53,7 +53,6 @@ export class Wysiwyg extends Component {
             ...this.props.config,
             embeddedComponentInfo: { app: this.__owl__.app, env: this.env },
             getLocalOverlayContainer: () => overlayRef?.el,
-            disableFloatingToolbar: this.props.toolbar,
         };
         this.editor = new Editor(config, this.env.services);
         this.props.onLoad(this.editor);

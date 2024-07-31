@@ -4,6 +4,7 @@ export class Toolbar extends Component {
     static template = "html_editor.Toolbar";
     static props = {
         class: { type: String, optional: true },
+        useDefaultClasses: { type: Boolean, optional: true },
         toolbar: {
             type: Object,
             shape: {
@@ -25,6 +26,9 @@ export class Toolbar extends Component {
                 },
             },
         },
+    };
+    static defaultProps = {
+        useDefaultClasses: true,
     };
 
     setup() {

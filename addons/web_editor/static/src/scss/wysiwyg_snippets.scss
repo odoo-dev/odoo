@@ -505,7 +505,7 @@
             margin-top: $o-we-sidebar-content-field-spacing;
             padding: 0 $o-we-sidebar-content-padding-base 0 $o-we-sidebar-content-indent;
             grid-template-areas:
-                "typo typo style style colors"
+                "typo typo style style color"
                 "size align list list link"
                 "ai animate animate hilight hilight"
                 "translate translate . . ."
@@ -673,7 +673,7 @@
 
             #colorInputButtonGroup {
                 position: static;
-                grid-area: colors;
+                grid-area: color;
 
                 .dropdown-toggle:after {
                     display: none; // remove ballon
@@ -793,6 +793,123 @@
 
             :not(.dropup) > .dropdown-menu.colorpicker-menu {
                 top: 2em; // TODO Ugly and not precise, conflict with row-gap of grid
+            }
+        }
+
+        // todo: move this in a proper file
+        .o-we-toolbar {
+            position: relative;
+            background: transparent;
+            margin-top: $o-we-sidebar-content-field-spacing;
+            padding: 0 $o-we-sidebar-content-padding-base 0 $o-we-sidebar-content-indent;
+            grid-template-areas:
+                "typo typo style style color"
+                "size align list list link"
+                "ai animate animate hilight hilight"
+                "options options options options options"
+                "options2 options2 options2 options2 options2"
+                "options3 options3 options3 options3 options3";
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            grid-template-rows:
+                minmax($o-we-sidebar-content-field-height, auto)
+                minmax($o-we-sidebar-content-field-height, auto)
+                minmax($o-we-sidebar-content-field-height, auto)
+                auto
+                auto
+                auto;
+            row-gap: $o-we-sidebar-content-field-spacing;
+            column-gap: $o-we-sidebar-content-field-multi-spacing;
+            width: 100%;
+            height: auto;
+            border-bottom: none;
+            display: grid;
+
+            &::before {
+                display: none; // remove ballon
+            }
+
+            .fa {
+                font-size: $o-we-sidebar-font-size;
+            }
+
+            .btn-group {
+                height: 100%;
+            }
+            .btn {
+                @extend %we-generic-button;
+                display: flex;
+                padding: ($o-we-sidebar-content-field-height * .12) ($o-we-sidebar-content-field-button-group-button-spacing - 2.5);
+                align-items: center;
+                justify-content: center;
+            }
+
+            .dropdown-menu {
+                border-color: $o-we-sidebar-content-field-dropdown-border-color;
+                padding: 0;
+
+                > li ~ li {
+                    border-top: $o-we-sidebar-content-field-dropdown-item-spacing solid transparent;
+                }
+            }
+
+            .dropdown-item {
+                @include we-icon-button('', $align: left); // Always a padding on the left
+                background-color: $o-we-sidebar-content-field-dropdown-item-bg;
+                color: $o-we-sidebar-content-field-dropdown-item-color;
+                border-radius: 0;
+                padding-top: 5px;
+                padding-bottom: 5px;
+
+                &:hover, &:focus {
+                    background: $o-we-dropdown-item-bg-hover;
+                    color: $o-we-dropdown-item-hover-color;
+                }
+            }
+
+            .btn + .btn {
+                @include border-start-radius(0);
+            }
+            .btn-group > .btn:not(:last-of-type) {
+                @include border-end-radius(0);
+            }
+
+            align-items: center;
+            align-content: stretch;
+            justify-content: center;
+
+            .o-we-toolbar-vertical-seperator {
+                display: none;
+            }
+
+            .btn-group[name="typo"] {
+                grid-area: typo;
+            }
+            .btn-group[name="style"] {
+                grid-area: style;
+            }
+            .btn-group[name="color"] {
+                grid-area: color;
+            }
+            .btn-group[name="size"] {
+                grid-area: size;
+            }
+            .btn-group[name="align"] {
+                grid-area: align;
+            }
+            .btn-group[name="list"] {
+                grid-area: list;
+            }
+            .btn-group[name="link"] {
+                grid-area: link;
+            }
+            .btn-group[name="ai"] {
+                grid-area: ai;
+            }
+            .btn-group[name="animate"] {
+                grid-area: animate;
+            }
+            .btn-group[name="hilight"] {
+                grid-area: hilight;
             }
         }
 
