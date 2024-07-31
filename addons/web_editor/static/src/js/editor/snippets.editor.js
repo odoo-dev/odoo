@@ -4560,11 +4560,15 @@ var SnippetsMenu = Widget.extend({
                 }
             }
 
-            this.getEditableArea().find('.o_snippet_mobile_invisible, .o_snippet_desktop_invisible').toArray().find((snippetSection) => {
-                if (snippetSection.dataset.invisible === "1") {
-                    this._activateSnippet(false);
-                }
-            });
+            const invisibleSnippetSection = this.getEditableArea()
+                .find('.o_snippet_mobile_invisible, .o_snippet_desktop_invisible')
+                .toArray()
+                .find((snippetSection) => {
+                    return snippetSection.dataset.invisible === '1';
+                });
+            if (invisibleSnippetSection) {
+                this._activateSnippet(false);
+            }
             // This is async but using the main editor mutex, currently locked.
             this._updateInvisibleDOM();
 
