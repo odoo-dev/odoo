@@ -134,9 +134,9 @@ export class MassMailingHtmlField extends HtmlField {
                     },
                     computeFontSizeSelectorValues() {},
 
-                    historyStep() {},
-                    historyCanRedo() {},
-                    historyCanUndo() {},
+                    historyStep() {
+                        editor.dispatch("ADD_STEP");
+                    },
 
                     historyPauseSteps() {},
                     historyUnpauseSteps() {},
