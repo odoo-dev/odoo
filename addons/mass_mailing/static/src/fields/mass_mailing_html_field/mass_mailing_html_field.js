@@ -258,7 +258,10 @@ export class MassMailingHtmlField extends HtmlField {
                             "DRAG BUILDING BLOCKS HERE"
                         );
                     }
-                    subEditable.setAttribute("contenteditable", false);
+                    if (!subEditable.innerHTML.trim()) {
+                        // The contenteditable true should be set when dropping a snippet inside the editable.
+                        subEditable.setAttribute("contenteditable", false);
+                    }
                 }
             },
             // copyCss: true,
