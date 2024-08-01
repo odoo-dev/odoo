@@ -175,12 +175,16 @@ export class EmbeddedComponentPlugin extends Plugin {
         return this.hostToStateChangeManagerMap.get(host);
     }
 
-    mountComponent(host, { Component, getProps, StateChangeManager }) {
+    mountComponent(host, { Component, getProps, name, StateChangeManager }) {
         const props = getProps?.(host) || {};
         const { dev, translateFn, getRawTemplate } = this.app;
         const env = Object.create(this.env);
         if (StateChangeManager) {
             env.getStateChangeManager = this.getStateChangeManager.bind(this);
+        }
+        for (const cb of this.resources["embedded_component_env"]) {
+            // Add plugin specific additional environments
+            Object.assign(env, cb(name));
         }
         const app = new App(Component, {
             test: dev,
