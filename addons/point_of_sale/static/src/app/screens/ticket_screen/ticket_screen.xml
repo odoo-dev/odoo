@@ -2,6 +2,7 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="point_of_sale.TicketScreen">
+        <t t-set="_filteredOrderList" t-value="getFilteredOrderList()" />
         <div class="ticket-screen screen h-100 bg-100">
             <div class="screen-full-width d-flex w-100 h-100">
                 <div t-if="!ui.isSmall || pos.ticket_screen_mobile_pane === 'left'" class="rightpane pane-border d-flex flex-column flex-grow-1 w-100 h-100 h-lg-100 bg-200 overflow-y-auto">
@@ -46,7 +47,6 @@
                         </div>
                     </div>
                     <div class="orders overflow-y-auto flex-grow-1">
-                        <t t-set="_filteredOrderList" t-value="getFilteredOrderList()" />
                         <t t-if="_filteredOrderList.length !== 0">
                             <div class="header-row d-flex text-bg-700 fw-bolder" t-att-class="{ 'd-none': ui.isSmall }">
                                 <div class="col wide p-2">Date</div>
@@ -128,7 +128,9 @@
                         </button>
                     </div>
                 </div>
-                <div class="leftpane d-flex flex-column flex-grow-1 gap-2 w-100 h-100 h-lg-100 bg-200 p-2" t-if="!ui.isSmall || pos.ticket_screen_mobile_pane === 'right'">
+                <!-- Hide the cart pane if no orders to list after having a search term -->
+                <t t-set="_shouldHideCart" t-value="_filteredOrderList.length === 0 and !this.state.search.searchTerm" />
+                <div t-if="(!ui.isSmall || pos.ticket_screen_mobile_pane === 'right') and !_shouldHideCart" class="leftpane d-flex flex-column flex-grow-1 gap-2 w-100 h-100 h-lg-100 bg-200 p-2">
                     <t t-set="_selectedSyncedOrder" t-value="getSelectedOrder()" />
                     <t t-set="_selectedOrderlineId" t-value="getSelectedOrderlineId()" />
                     <t t-if="_selectedSyncedOrder?.get_orderlines()?.length" > 
