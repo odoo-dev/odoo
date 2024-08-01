@@ -69,6 +69,7 @@ export class MassMailingHtmlField extends HtmlField {
     }
 
     get snippetMenuProps() {
+        const self = this;
         const editor = this.editor;
         const state = this.state;
         const options = {
@@ -84,6 +85,9 @@ export class MassMailingHtmlField extends HtmlField {
                 },
                 get $editable() {
                     return $(editor.editable);
+                },
+                get lastMediaClicked() {
+                    return self.lastMediaClicked;
                 },
                 getEditable: () => $(editor.editable),
                 isSaving: () => false,
@@ -253,6 +257,8 @@ export class MassMailingHtmlField extends HtmlField {
                 doc.body.append(editable);
                 editor.attachTo(editable);
 
+                this.bindLastMediaClicked(doc);
+
                 if (this.focusEditableOnLoad) {
                     editor.editable.focus();
                     this.shouldFocusOnLoad = false;
@@ -289,6 +295,35 @@ export class MassMailingHtmlField extends HtmlField {
         };
         config.disableFloatingToolbar = true;
         return config;
+    }
+
+    /**
+     * Bind the last media clicked in the iframe to the lastMediaClicked
+     * property.
+     *
+     * todo: to refactor
+     *
+     * @param {Document} doc
+     */
+    bindLastMediaClicked(doc) {
+        const basicMediaSelector = "img, .fa, .o_image, .media_iframe_video";
+        // (see isImageSupportedForStyle).
+        const mediaSelector = basicMediaSelector
+            .split(",")
+            .map((s) => `${s}:not([data-oe-xpath])`)
+            .join(",");
+        doc.defaultView.addEventListener(
+            "mousedown",
+            (e) => {
+                const isInMedia =
+                    e.target &&
+                    e.target.matches(mediaSelector) &&
+                    !e.target.parentElement.classList.contains("o_stars") &&
+                    (e.target.isContentEditable || e.target.parentElement?.isContentEditable);
+                this.lastMediaClicked = isInMedia && e.target;
+            },
+            true
+        );
     }
 }
 
