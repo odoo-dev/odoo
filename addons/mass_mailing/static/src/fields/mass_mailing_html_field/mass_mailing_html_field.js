@@ -219,12 +219,14 @@ export class MassMailingHtmlField extends HtmlField {
         const props = super.wysiwygProps;
         return {
             ...props,
+            class: "h-100",
             contentClass: "o_in_iframe",
             iframe: true,
             onIframeLoaded: async (doc, editor) => {
                 this.state.iframeDocument = doc;
                 doc.body.classList.add("editor_enable");
                 doc.body.classList.add("o_mass_mailing_iframe");
+                doc.body.classList.add("o_in_iframe");
                 const iframeBundle = await this.iframeBundle;
                 const massMailingBundle = await this.massMailingBundle;
                 function addStyle(href) {
@@ -242,7 +244,6 @@ export class MassMailingHtmlField extends HtmlField {
                 addStyle(iframeBundle.cssLibs[0]);
                 addStyle(massMailingBundle.cssLibs[0]);
                 addScript(iframeBundle.jsLibs[0]);
-                doc.body.classList.add("o_in_iframe");
                 const editable = doc.createElement("div");
                 doc.body.append(editable);
                 editor.attachTo(editable);

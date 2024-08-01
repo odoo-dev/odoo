@@ -16,7 +16,7 @@
             </t>
         </xpath>
         <xpath expr="//div[@class='h-100']" position="attributes">
-            <attribute name="class">h-100 d-flex</attribute>
+            <attribute name="class">d-flex h-100</attribute>
         </xpath>
     </t>
 </templates>
