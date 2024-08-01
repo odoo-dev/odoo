@@ -7,19 +7,17 @@
             <div class="screen-full-width d-flex w-100 h-100">
                 <div t-if="!ui.isSmall || pos.ticket_screen_mobile_pane === 'left'" class="rightpane pane-border d-flex flex-column flex-grow-1 w-100 h-100 h-lg-100 bg-200 overflow-y-auto">
                     <div class="controls d-flex align-items-center justify-content-between mt-1 mt-lg-0 p-2 bg-400">
-                        <t t-if="!ui.isSmall">
-                            <div class="buttons d-flex gap-2">
-                                <button t-if="!ui.isSmall" class="discard btn btn-lg btn-light" t-on-click="() => this.closeTicketScreen()">
-                                    <span class="search-icon">
-                                        <i class="fa fa-angle-double-left"/>
-                                    </span>
-                                    <t t-if="!ui.isSmall">
-                                        Back
-                                    </t>
-                                </button>
-                                <button t-if="allowNewOrders" class="highlight btn btn-lg btn-primary" t-on-click="() => this.onCreateNewOrder()">New Order</button>
-                            </div>
-                        </t>
+                        <div class="buttons d-flex gap-2">
+                            <button class="discard btn btn-lg btn-light" t-on-click="() => this.closeTicketScreen()">
+                                <span class="search-icon">
+                                    <i class="fa fa-angle-double-left"/>
+                                </span>
+                                <t t-if="!ui.isSmall">
+                                    Back
+                                </t>
+                            </button>
+                            <button t-if="allowNewOrders" class="highlight btn btn-lg btn-primary" t-on-click="() => this.onCreateNewOrder()">New Order</button>
+                        </div>
                         <t t-if="ui.isSmall and allowNewOrders">
                             <button class="highlight btn btn-lg btn-primary" t-on-click="() => this.onCreateNewOrder()">
                                 <span class="search-icon">
