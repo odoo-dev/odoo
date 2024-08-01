@@ -34,6 +34,7 @@ import { initElementForEdition } from "./utils/sanitize";
  * @property { boolean } [dropImageAsAttachment]
  * @property { CollaborationConfig } [collaboration]
  * @property { Function } getRecordInfo
+ * @property { string[] } [disabledToolbarButtonIds]
  */
 
 function sortPlugins(plugins) {
