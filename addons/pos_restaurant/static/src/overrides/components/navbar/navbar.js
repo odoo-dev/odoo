@@ -47,7 +47,7 @@ patch(Navbar.prototype, {
         return typeof this.getTable()?.table_number === "number";
     },
     get showSwitchTableButton() {
-        return this.pos.mainScreen.component.name == 'FloorScreen';
+        return this.pos.mainScreen.component.name === "FloorScreen";
     },
     onSwitchButtonClick() {
         const mode = this.pos.floorPlanStyle === "kanban" ? "default" : "kanban";

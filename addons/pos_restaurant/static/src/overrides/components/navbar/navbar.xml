@@ -26,9 +26,11 @@
                     Table <small class="px-2 py-1 rounded bg-dark bg-opacity-25 fw-bolder"><t t-esc="getTable().getName()"/></small>
                 </button>   
 
-                <div t-if="pos.get_order() and !pos.get_order()?.table_id" t-attf-class="table-free-order-label btn btn-primary btn-lg lh-lg">
-                    <t t-if="!ui.isSmall" t-esc="pos.get_order().getFloatingOrderName()"/>
-                </div>        
+                <div t-if="pos.get_order() and !pos.get_order()?.table_id" 
+                    t-attf-class="table-free-order-label btn btn-primary btn-lg lh-lg" 
+                    t-on-click="() => this.switchTable()"
+                    t-esc="pos.get_order().getFloatingOrderName()"
+                />
                 <t t-if="!pos.orderToTransferUuid">
                     <div t-if="!pos.selectedOrderUuid and !pos.selectedTable" t-attf-class="d-flex overflow-x-auto {{ ui.isSmall ? 'flex-shrink-0' : 'flex-shrink-1'}}">
                         <div t-if="!ui.isSmall" class="ms-1 me-2 my-2 border-end border"/>
