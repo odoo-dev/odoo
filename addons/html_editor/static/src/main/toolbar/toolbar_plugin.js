@@ -21,17 +21,25 @@ export class ToolbarPlugin extends Plugin {
         }
         this.categories = this.resources.toolbarCategory.sort((a, b) => a.sequence - b.sequence);
         this.buttonGroups = [];
+
+        const toolbarItems = !this.config.disabledToolbarButtonIds
+            ? this.resources.toolbarItems
+            : this.resources.toolbarItems.filter(
+                  (button) => !this.config.disabledToolbarButtonIds.includes(button.id)
+              );
+
         for (const category of this.categories) {
-            this.buttonGroups.push({
-                ...category,
-                buttons: this.resources.toolbarItems.filter(
-                    (command) => command.category === category.id
-                ),
-            });
+            const buttons = toolbarItems.filter((command) => command.category === category.id);
+            if (buttons.length === 0) {
+                this.buttonGroups.push({
+                    ...category,
+                    buttons,
+                });
+            }
         }
         this.buttonsDict = Object.assign(
             {},
-            ...this.resources.toolbarItems.map((button) => ({ [button.id]: button }))
+            ...toolbarItems.map((button) => ({ [button.id]: button }))
         );
 
         this.overlay = this.shared.createOverlay(Toolbar, { position: "top-start" });

@@ -294,6 +294,7 @@ export class MassMailingHtmlField extends HtmlField {
             });
         };
         config.disableFloatingToolbar = true;
+        config.disabledToolbarButtonIds = new Set(["remove_format", "codeview"]);
         return config;
     }
 
