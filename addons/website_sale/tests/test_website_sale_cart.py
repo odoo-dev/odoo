@@ -8,11 +8,10 @@ from odoo.tests import tagged
 
 from odoo.addons.base.tests.common import BaseUsersCommon
 from odoo.addons.product.tests.common import ProductAttributesCommon
-from odoo.addons.website.tools import MockRequest
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.addons.website_sale.controllers.payment import PaymentPortal
 from odoo.addons.website_sale.models.product_template import ProductTemplate
-from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
+from odoo.addons.website_sale.tests.common import WebsiteSaleCommon, mock_website_sale_request
 
 
 @tagged('post_install', '-at_install')
@@ -35,34 +34,34 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
         # Unlink published product.
         product_id = self.product.id
         self.product.unlink()
+        website = self.website.with_user(self.public_user)
 
-        with self.assertRaises(UserError):
-            with MockRequest(self.product.with_user(self.public_user).env, website=self.website.with_user(self.public_user)):
-                self.WebsiteSaleController.cart_update_json(product_id=product_id, add_qty=1)
+        with self.assertRaises(UserError), mock_website_sale_request(website.env, website=website):
+            self.WebsiteSaleController.cart_update_json(product_id=product_id, add_qty=1)
 
     def test_add_cart_unpublished_product(self):
         # Try to add an unpublished product
         self.product.website_published = False
+        website = self.website.with_user(self.public_user)
 
-        with self.assertRaises(UserError):
-            with MockRequest(self.product.with_user(self.public_user).env, website=self.website.with_user(self.public_user)):
-                self.WebsiteSaleController.cart_update_json(product_id=self.product.id, add_qty=1)
+        with self.assertRaises(UserError), mock_website_sale_request(website.env, website=website):
+            self.WebsiteSaleController.cart_update_json(product_id=self.product.id, add_qty=1)
 
         # public but remove sale_ok
         self.product.sale_ok = False
         self.product.website_published = True
+        website = self.website.with_user(self.public_user)
 
-        with self.assertRaises(UserError):
-            with MockRequest(self.product.with_user(self.public_user).env, website=self.website.with_user(self.public_user)):
-                self.WebsiteSaleController.cart_update_json(product_id=self.product.id, add_qty=1)
+        with self.assertRaises(UserError), mock_website_sale_request(website.env, website=website):
+            self.WebsiteSaleController.cart_update_json(product_id=self.product.id, add_qty=1)
 
     def test_add_cart_archived_product(self):
         # Try to add an archived product
         self.product.active = False
+        website = self.website.with_user(self.public_user)
 
-        with self.assertRaises(UserError):
-            with MockRequest(self.product.with_user(self.public_user).env, website=self.website.with_user(self.public_user)):
-                self.WebsiteSaleController.cart_update_json(product_id=self.product.id, add_qty=1)
+        with self.assertRaises(UserError), mock_website_sale_request(website.env, website=website):
+            self.WebsiteSaleController.cart_update_json(product_id=self.product.id, add_qty=1)
 
     def test_zero_price_product_rule(self):
         """
@@ -89,20 +88,24 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
             'website_published': True,
         })
 
-        with self.assertRaises(UserError, msg="'consu' product type is not allowed to have a 0 price sale"):
-            with MockRequest(self.env, website=website_prevent_zero_price):
-                self.WebsiteSaleController.cart_update_json(product_id=product_consu.id, add_qty=1)
+        with (
+            self.assertRaises(UserError, msg="'consu' product type is not allowed to have a 0 price sale"),
+            mock_website_sale_request(self.env, website=website_prevent_zero_price)
+        ):
+            self.WebsiteSaleController.cart_update_json(product_id=product_consu.id, add_qty=1)
 
-        with patch.object(ProductTemplate, '_get_product_types_allow_zero_price', lambda pt: ['no']):
+        with (
+            patch.object(ProductTemplate, '_get_product_types_allow_zero_price', lambda pt: ['no']),
+            mock_website_sale_request(self.env, website=website_prevent_zero_price),
+        ):
             # service_tracking 'no' should not raise error
-            with MockRequest(self.env, website=website_prevent_zero_price):
-                self.WebsiteSaleController.cart_update_json(product_id=product_service.id, add_qty=1)
+            self.WebsiteSaleController.cart_update_json(product_id=product_service.id, add_qty=1)
 
     def test_update_cart_before_payment(self):
         website = self.website.with_user(self.public_user)
-        with MockRequest(self.product.with_user(self.public_user).env, website=website):
+        with mock_website_sale_request(self.product.with_user(self.public_user).env, website=website) as request:
             self.WebsiteSaleController.cart_update_json(product_id=self.product.id, add_qty=1)
-            sale_order = website.sale_get_order()
+            sale_order = request.cart
             sale_order.access_token = 'test_token'
             old_amount = sale_order.amount_total
             self.WebsiteSaleController.cart_update_json(product_id=self.product.id, add_qty=1)
@@ -112,7 +115,7 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
 
     def test_check_order_delivery_before_payment(self):
         website = self.website.with_user(self.public_user)
-        with MockRequest(self.product.with_user(self.public_user).env, website=website):
+        with mock_website_sale_request(self.product.with_user(self.public_user).env, website=website):
             sale_order = self.env['sale.order'].create({
                 'partner_id': self.public_user.id,
                 'order_line': [Command.create({'product_id': self.product.id})],
@@ -129,23 +132,24 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
 
         SaleOrderLine = self.env['sale.order.line']
 
-        with MockRequest(self.product.with_user(portal_user).env, website=website):
+        with mock_website_sale_request(self.product.with_user(portal_user).env, website=website) as req:
             # add the product to the cart
             self.WebsiteSaleController.cart_update_json(product_id=self.product.id, add_qty=1)
-            sale_order = website.sale_get_order()
-            self.assertEqual(sale_order.amount_untaxed, 1000.0)
+            self.assertEqual(req.cart.amount_untaxed, 1000.0)
 
             # remove the product from the cart
-            self.WebsiteSaleController.cart_update_json(product_id=self.product.id, line_id=sale_order.order_line.id, set_qty=0)
-            self.assertEqual(sale_order.amount_total, 0.0)
-            self.assertEqual(sale_order.order_line, SaleOrderLine)
+            self.WebsiteSaleController.cart_update_json(
+                product_id=self.product.id, line_id=req.cart.order_line.id, set_qty=0
+            )
+            self.assertEqual(req.cart.amount_total, 0.0)
+            self.assertEqual(req.cart.order_line, SaleOrderLine)
 
             # removing the product again doesn't add a line with zero quantity
             self.WebsiteSaleController.cart_update_json(product_id=self.product.id, set_qty=0)
-            self.assertEqual(sale_order.order_line, SaleOrderLine)
+            self.assertEqual(req.cart.order_line, SaleOrderLine)
 
             self.WebsiteSaleController.cart_update_json(product_id=self.product.id, add_qty=0)
-            self.assertEqual(sale_order.order_line, SaleOrderLine)
+            self.assertEqual(req.cart.order_line, SaleOrderLine)
 
     def test_unpublished_accessory_product_visibility(self):
         # Check if unpublished product is shown to public user
@@ -155,12 +159,8 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
         })
 
         self.product.accessory_product_ids = [Command.link(accessory_product.id)]
-
-        website = self.website.with_user(self.public_user)
-        with MockRequest(self.product.with_user(self.public_user).env, website=self.website.with_user(self.public_user)):
-            self.WebsiteSaleController.cart_update_json(product_id=self.product.id, add_qty=1)
-            sale_order = website.sale_get_order()
-            self.assertEqual(len(sale_order._cart_accessories()), 0)
+        self.empty_cart._cart_update(product_id=self.product.id, add_qty=1)
+        self.assertEqual(len(self.empty_cart.with_user(self.public_user)._cart_accessories()), 0)
 
     def test_cart_new_fpos_from_geoip(self):
         fpos_be = self.env["account.fiscal.position"].create({
@@ -171,11 +171,10 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
         })
 
         website = self.website.with_user(self.public_user)
-        with MockRequest(website.env, website=website, country_code='BE'):
+        with mock_website_sale_request(website.env, website=website, country_code='BE') as req:
             self.WebsiteSaleController.cart_update_json(product_id=self.product.id, add_qty=1)
-            sale_order = website.sale_get_order()
             self.assertEqual(
-                sale_order.fiscal_position_id, fpos_be,
+                req.cart.fiscal_position_id, fpos_be,
                 "Fiscal position should be determined from GEOIP country for public users."
             )
 
@@ -334,14 +333,11 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
             'sale_ok': True,
             'website_published': True,
         })
-        with MockRequest(self.env(user=user), website=website):
+        with mock_website_sale_request(self.env(user=user), website=website) as req:
             self.WebsiteSaleController.cart_update_json(product_id=product.id, add_qty=1)
-            order = website.sale_get_order()
 
             # pre-condition: the order contains an active product
-            self.assertRecordValues(order.order_line, [{
-                "product_id": product.id,
-            }])
+            self.assertRecordValues(req.cart.order_line, [{"product_id": product.id}])
             self.assertTrue(product.active)
 
             # Act: archive the product and open the cart
@@ -349,33 +345,30 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
             self.WebsiteSaleController.cart()
 
             # Assert: the line has been removed
-            self.assertFalse(order.order_line)
+            self.assertFalse(req.cart.order_line)
 
     def test_keep_note_line(self):
         """If an order has a line containing a note,
         it is not removed when opening the order in the cart."""
-        # Arrange
-        user = self.public_user
-        website = self.website.with_user(user)
-        with MockRequest(self.env(user=user), website=website):
-            order = website.sale_get_order(force_create=True)
-            order.order_line = [
-                Command.create({
-                    "name": "Note",
-                    "display_type": "line_note",
-                })
-            ]
-
-            # pre-condition: the order contains only a note line
-            self.assertRecordValues(order.order_line, [{
+        self.empty_cart.order_line = [
+            Command.create({
+                "name": "Note",
                 "display_type": "line_note",
-            }])
+            })
+        ]
+        website = self.website.with_user(self.public_user)
+        # pre-condition: the order contains only a note line
+        self.assertRecordValues(self.empty_cart.order_line, [{
+            "display_type": "line_note",
+        }])
+        with mock_website_sale_request(website.env, website=website, sale_order_id=self.empty_cart.id) as req:
+            self.assertEqual(req.cart, self.empty_cart)
 
             # Act: open the cart
             self.WebsiteSaleController.cart()
 
             # Assert: the line is still there
-            self.assertRecordValues(order.order_line, [{
+            self.assertRecordValues(self.empty_cart.order_line, [{
                 "display_type": "line_note",
             }])
 

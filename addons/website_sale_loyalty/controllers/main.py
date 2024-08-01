@@ -13,10 +13,10 @@ class WebsiteSale(main.WebsiteSale):
 
     @route()
     def pricelist(self, promo, **post):
-        order = request.website.sale_get_order()
-        if not order:
+        order_sudo = request.cart
+        if not order_sudo:
             return request.redirect('/shop')
-        coupon_status = order._try_apply_code(promo)
+        coupon_status = order_sudo._try_apply_code(promo)
         if coupon_status.get('not_found'):
             return super().pricelist(promo, **post)
         elif coupon_status.get('error'):
@@ -26,7 +26,7 @@ class WebsiteSale(main.WebsiteSale):
             if len(coupon_status) == 1:
                 coupon, rewards = next(iter(coupon_status.items()))
                 if request.env.context.get('product_id') or (len(rewards) == 1 and not rewards.multi_product):
-                    reward_successfully_applied = self._apply_reward(order, rewards, coupon)
+                    reward_successfully_applied = self._apply_reward(order_sudo, rewards, coupon)
 
             if reward_successfully_applied:
                 request.session['successful_code'] = promo
@@ -34,21 +34,16 @@ class WebsiteSale(main.WebsiteSale):
 
     @route()
     def shop_payment(self, **post):
-        order = request.website.sale_get_order()
-        if order:
-            order._update_programs_and_rewards()
-            order._auto_apply_rewards()
+        if order_sudo := request.cart:
+            order_sudo._update_programs_and_rewards()
+            order_sudo._auto_apply_rewards()
         return super().shop_payment(**post)
 
     @route()
     def cart(self, **post):
-        order = request.website.sale_get_order()
-        if order and order.state != 'draft':
-            request.session['sale_order_id'] = None
-            order = request.website.sale_get_order()
-        if order:
-            order._update_programs_and_rewards()
-            order._auto_apply_rewards()
+        if order_sudo:= request.cart:
+            order_sudo._update_programs_and_rewards()
+            order_sudo._auto_apply_rewards()
         return super().cart(**post)
 
     @route(['/coupon/<string:code>'], type='http', auth='public', website=True, sitemap=False)
@@ -60,9 +55,9 @@ class WebsiteSale(main.WebsiteSale):
         code = code.strip()
 
         request.session['pending_coupon_code'] = code
-        order = request.website.sale_get_order()
-        if order:
-            result = order._try_pending_coupon()
+        order_sudo = request.cart
+        if order_sudo:
+            result = order_sudo._try_pending_coupon()
             if isinstance(result, dict) and 'error' in result:
                 url_query['coupon_error'] = result['error']
             else:
@@ -75,7 +70,7 @@ class WebsiteSale(main.WebsiteSale):
 
     @route('/shop/claimreward', type='http', auth='public', website=True, sitemap=False)
     def claim_reward(self, reward_id, code=None, **post):
-        order_sudo = request.website.sale_get_order()
+        order_sudo = request.cart
         redirect = post.get('r', '/shop/cart')
         if not order_sudo:
             return request.redirect(redirect)
@@ -128,13 +123,3 @@ class WebsiteSale(main.WebsiteSale):
             request.session['error_promo_code'] = reward_status['error']
             return False
         return True
-
-    @route()
-    def cart_update_json(self, *args, set_qty=None, **kwargs):
-        # When a reward line is deleted we remove it from the auto claimable rewards
-        if set_qty == 0:
-            request.update_context(website_sale_loyalty_delete=True)
-            # We need to update the website since `get_sale_order` is called on the website
-            # and does not follow the request's context
-            request.website = request.website.with_context(website_sale_loyalty_delete=True)
-        return super().cart_update_json(*args, set_qty=set_qty, **kwargs)

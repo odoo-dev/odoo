@@ -1,16 +1,13 @@
-# coding: utf-8
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+from odoo.tests import tagged
+
 from odoo.addons.website_sale.controllers.main import WebsiteSale
-from odoo.addons.website.tools import MockRequest
-from odoo.tests import TransactionCase, tagged
+from odoo.addons.website_sale.tests.common import WebsiteSaleCommon, mock_website_sale_request
+
 
 @tagged('post_install', '-at_install')
-class WebsiteSaleVisitorTests(TransactionCase):
-
-    def setUp(self):
-        super().setUp()
-        self.website = self.env.ref('website.default_website')
-        self.WebsiteSaleController = WebsiteSale()
-        self.cookies = {}
+class WebsiteSaleVisitorTests(WebsiteSaleCommon):
 
     def test_create_visitor_on_tracked_product(self):
         self.WebsiteSaleController = WebsiteSale()
@@ -22,15 +19,15 @@ class WebsiteSaleVisitorTests(TransactionCase):
             'website_published': True,
         })
 
-        with MockRequest(self.env, website=self.website):
-            self.cookies = self.WebsiteSaleController.products_recently_viewed_update(product.id)
+        with mock_website_sale_request(self.env, website=self.website):
+            cookies = self.WebsiteSaleController.products_recently_viewed_update(product.id)
 
         new_visitors = self.env['website.visitor'].search([('id', 'not in', existing_visitors.ids)])
         new_tracks = self.env['website.track'].search([('id', 'not in', existing_tracks.ids)])
         self.assertEqual(len(new_visitors), 1, "A visitor should be created after visiting a tracked product")
         self.assertEqual(len(new_tracks), 1, "A track should be created after visiting a tracked product")
 
-        with MockRequest(self.env, website=self.website, cookies=self.cookies):
+        with mock_website_sale_request(self.env, website=self.website, cookies=cookies):
             self.WebsiteSaleController.products_recently_viewed_update(product.id)
 
         new_visitors = self.env['website.visitor'].search([('id', 'not in', existing_visitors.ids)])
@@ -44,7 +41,7 @@ class WebsiteSaleVisitorTests(TransactionCase):
             'list_price': 320.0,
         })
 
-        with MockRequest(self.env, website=self.website, cookies=self.cookies):
+        with mock_website_sale_request(self.env, website=self.website, cookies=cookies):
             self.WebsiteSaleController.products_recently_viewed_update(product.id)
 
         new_visitors = self.env['website.visitor'].search([('id', 'not in', existing_visitors.ids)])
@@ -66,17 +63,19 @@ class WebsiteSaleVisitorTests(TransactionCase):
             'sale_ok': True,
         })
 
-        self.website = self.website.with_user(public_user).with_context(website_id=self.website.id)
+        website = self.website.with_user(public_user)
         snippet_filter = self.env.ref('website_sale.dynamic_filter_newest_products')
 
-        res = snippet_filter._prepare_values(limit=16, search_domain=[])
+        with mock_website_sale_request(website.env, website=website):
+            res = snippet_filter._prepare_values(limit=16, search_domain=[])
         res_products = [res_product['_record'] for res_product in res]
         self.assertIn(product, res_products)
 
         product.product_tmpl_id.company_id = new_company
         product.product_tmpl_id.flush_recordset(['company_id'])
 
-        res = snippet_filter._prepare_values(limit=16, search_domain=[])
+        with mock_website_sale_request(website.env, website=website):
+            res = snippet_filter._prepare_values(limit=16, search_domain=[])
         res_products = [res_product['_record'] for res_product in res]
         self.assertNotIn(product, res_products)
 
@@ -84,6 +83,7 @@ class WebsiteSaleVisitorTests(TransactionCase):
         """Test that a product is :
         - displayed after visiting it
         - not displayed after changing it company."""
+        self.WebsiteSaleController = WebsiteSale()
         new_company = self.env['res.company'].create({
             'name': 'Test Company',
         })
@@ -104,9 +104,9 @@ class WebsiteSaleVisitorTests(TransactionCase):
         self.assertFalse(res)
 
         # AFTER VISITING THE PRODUCT
-        with MockRequest(self.website.env, website=self.website):
-            self.cookies = self.WebsiteSaleController.products_recently_viewed_update(product.id)
-        with MockRequest(self.website.env, website=self.website, cookies=self.cookies):
+        with mock_website_sale_request(self.website.env, website=self.website):
+            cookies = self.WebsiteSaleController.products_recently_viewed_update(product.id)
+        with mock_website_sale_request(self.website.env, website=self.website, cookies=cookies):
             res = snippet_filter._prepare_values(limit=16, search_domain=[])
         res_products = [res_product['_record'] for res_product in res]
         self.assertIn(product, res_products)
@@ -114,6 +114,6 @@ class WebsiteSaleVisitorTests(TransactionCase):
         # AFTER CHANGING PRODUCT COMPANY
         product.product_tmpl_id.company_id = new_company
         product.product_tmpl_id.flush_recordset(['company_id'])
-        with MockRequest(self.website.env, website=self.website, cookies=self.cookies):
+        with mock_website_sale_request(self.website.env, website=self.website, cookies=cookies):
             res = snippet_filter._prepare_values(limit=16, search_domain=[])
         self.assertFalse(res)

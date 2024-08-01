@@ -24,10 +24,10 @@ class Website(models.Model):
             self.env['stock.warehouse'].sudo().search([('company_id', '=', self.company_id.id)], limit=1).id
         )
 
-    # FIXME VFE check if still needed
-    def sale_get_order(self, *args, **kwargs):
-        so = super().sale_get_order(*args, **kwargs)
-        return so.with_context(warehouse_id=so.warehouse_id.id) if so else so
-
     def _get_product_available_qty(self, product, **kwargs):
         return product.with_context(warehouse_id=self._get_warehouse_available()).free_qty
+
+    def _get_and_cache_current_order(self):
+        if order_sudo := super()._get_and_cache_current_order():
+            order_sudo = order_sudo.with_context(warehouse_id=order_sudo.warehouse_id.id)
+        return order_sudo

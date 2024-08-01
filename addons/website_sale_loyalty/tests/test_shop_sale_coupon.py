@@ -9,7 +9,7 @@ from odoo.tests import HttpCase, tagged
 from odoo.addons.sale.tests.test_sale_product_attribute_value_config import (
     TestSaleProductAttributeValueCommon,
 )
-from odoo.addons.website.tools import MockRequest
+from odoo.addons.website_sale.tests.common import mock_website_sale_request
 from odoo.addons.website_sale_loyalty.controllers.main import WebsiteSale
 
 
@@ -421,16 +421,6 @@ class TestWebsiteSaleCoupon(HttpCase):
             'taxes_id': [],
         })
 
-        order = self.empty_order
-        order.write({
-            'website_id': website.id,
-            'order_line': [
-                Command.create({
-                    'product_id': product.id,
-                }),
-            ]
-        })
-
         WebsiteSaleController = WebsiteSale()
 
         installed_modules = set(self.env['ir.module.module'].search([
@@ -439,15 +429,17 @@ class TestWebsiteSaleCoupon(HttpCase):
         for _ in http._generate_routing_rules(installed_modules, nodb_only=False):
             pass
 
-        with MockRequest(self.env, website=website, sale_order_id=order.id) as request:
-            # Check the base cart value
-            self.assertEqual(order.amount_total, 100.0, "The base cart value is incorrect.")
+        # Check the base cart value
+        with mock_website_sale_request(self.env, website=website) as request:
+
+            WebsiteSaleController.cart_update(product.id)
+            self.assertEqual(request.cart.amount_total, 100.0, "The base cart value is incorrect.")
 
             # Apply coupon for the first time
             WebsiteSaleController.pricelist(promo=self.coupon.code)
 
             # Check that the coupon has been applied
-            self.assertEqual(order.amount_total, 90.0, "The coupon is not applied.")
+            self.assertEqual(request.cart.amount_total, 90.0, "The coupon is not applied.")
 
             # Apply the coupon again
             WebsiteSaleController.pricelist(promo=self.coupon.code)
@@ -456,7 +448,7 @@ class TestWebsiteSaleCoupon(HttpCase):
 
             # Check that the coupon stay applied
             self.assertEqual(bool(error_msg), True, "Apply a coupon twice should display an error message")
-            self.assertEqual(order.amount_total, 90.0, "Apply a coupon twice shouldn't delete it")
+            self.assertEqual(request.cart.amount_total, 90.0, "Apply a coupon twice shouldn't delete it")
 
     def test_03_remove_coupon_with_different_taxes_on_products(self):
         """

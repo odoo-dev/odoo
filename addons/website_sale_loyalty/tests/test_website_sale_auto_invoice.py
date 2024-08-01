@@ -3,22 +3,17 @@
 from odoo.fields import Command
 from odoo.tests import tagged
 
-from odoo.addons.website.tools import MockRequest
 from odoo.addons.website_sale.controllers.main import WebsiteSale
-from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
+from odoo.addons.website_sale.tests.common import WebsiteSaleCommon, mock_website_sale_request
 
 
 @tagged('post_install', '-at_install')
 class TestWebsiteSaleAutoInvoice(WebsiteSaleCommon):
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.Controller = WebsiteSale()
-
     def test_automatic_invoice_on_zero_amount(self):
         # Set automatic invoice
         self.env['ir.config_parameter'].sudo().set_param('sale.automatic_invoice', 'True')
+        Controller = WebsiteSale()
 
         # Create a discount code
         program = self.env['loyalty.program'].sudo().create({
@@ -35,15 +30,16 @@ class TestWebsiteSaleAutoInvoice(WebsiteSaleCommon):
                     'discount': 100,
                 })
             ]
-            }
-        )
+        })
 
         # Apply discount
         self.cart._try_apply_code("100code")
         self.cart._apply_program_reward(program.reward_ids, program.coupon_ids)
 
-        with MockRequest(self.env, sale_order_id=self.cart.id, website=self.website):
-            self.Controller.shop_payment_validate()
+        website = self.website.with_user(self.public_user)
+        with mock_website_sale_request(website.env, website=website, sale_order_id=self.cart.id) as request:
+            self.assertEqual(request.cart, self.cart)
+            Controller.shop_payment_validate()
         self.assertTrue(
             self.cart.invoice_ids, "Invoices should be generated for orders with zero total amount",
         )

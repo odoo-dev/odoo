@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import fields
+from odoo.tests import tagged
 
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.addons.product.tests.test_product_attribute_value_config import TestProductAttributeValueCommon
-from odoo.tests import tagged
+from odoo.addons.product.tests.test_product_attribute_value_config import (
+    TestProductAttributeValueCommon,
+)
 
 
 @tagged("post_install", "-at_install")
@@ -17,7 +18,7 @@ class TestSaleProductAttributeValueCommon(AccountTestInvoicingCommon, TestProduc
         cls.computer.company_id = cls.env.company
         cls.computer = cls.computer.with_env(cls.env)
         cls.env['product.pricelist'].sudo().search([]).action_archive()
-        cls.env['product.pricelist'].create({'name': 'Base Pricelist'})
+        cls.pricelist = cls.env['product.pricelist'].create({'name': 'Base Pricelist'})
 
     @classmethod
     def _setup_currency(cls, currency_ratio=2):

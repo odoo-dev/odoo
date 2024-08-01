@@ -3,6 +3,7 @@
 import logging
 
 from odoo import api, fields, models
+from odoo.http import request
 from odoo.osv import expression
 from odoo.tools import float_compare, float_is_zero, is_html_empty
 from odoo.tools.translate import html_translate
@@ -261,9 +262,9 @@ class ProductTemplate(models.Model):
         if not self:
             return {}
 
-        pricelist = website.pricelist_id
+        pricelist = request.pricelist
         currency = website.currency_id
-        fiscal_position = website.fiscal_position_id.sudo()
+        fiscal_position_sudo = request.fiscal_position
         date = fields.Date.context_today(self)
 
         pricelist_prices = pricelist._compute_price_rule(self, 1.0)
@@ -274,7 +275,7 @@ class ProductTemplate(models.Model):
             pricelist_price, pricelist_rule_id = pricelist_prices[template.id]
 
             product_taxes = template.sudo().taxes_id._filter_taxes_by_company(self.env.company)
-            taxes = fiscal_position.map_tax(product_taxes)
+            taxes = fiscal_position_sudo.map_tax(product_taxes)
 
             base_price = None
             template_price_vals = {
@@ -455,8 +456,8 @@ class ProductTemplate(models.Model):
         :returns: additional product/template information
         :rtype: dict
         """
-        pricelist = website.pricelist_id
-        currency = website.currency_id
+        pricelist = request.pricelist.with_context(self.env.context)
+        currency = website.currency_id.with_context(self.env.context)
 
         # Pricelist price doesn't have to be converted
         pricelist_price, pricelist_rule_id = pricelist._get_product_price_rule(
@@ -507,12 +508,10 @@ class ProductTemplate(models.Model):
         )
 
         # Apply taxes
-        fiscal_position = website.fiscal_position_id.sudo()
-
         product_taxes = product_or_template.sudo().taxes_id._filter_taxes_by_company(self.env.company)
         taxes = self.env['account.tax']
         if product_taxes:
-            taxes = fiscal_position.map_tax(product_taxes)
+            taxes = request.fiscal_position.map_tax(product_taxes)
             # We do not apply taxes on the compare_list_price value because it's meant to be
             # a strict value displayed as is.
             for price_key in ('price', 'list_price', 'price_extra'):
@@ -626,12 +625,12 @@ class ProductTemplate(models.Model):
             self.env.cr.execute("SELECT id FROM %s WHERE website_sequence IS NULL" % self._table)
             prod_tmpl_ids = self.env.cr.dictfetchall()
             max_seq = self._default_website_sequence()
-            query = """
-                UPDATE {table}
+            query = f"""
+                UPDATE {self._table}
                 SET website_sequence = p.web_seq
                 FROM (VALUES %s) AS p(p_id, web_seq)
                 WHERE id = p.p_id
-            """.format(table=self._table)
+            """
             values_args = [(prod_tmpl['id'], max_seq + i * 5) for i, prod_tmpl in enumerate(prod_tmpl_ids)]
             self.env.cr.execute_values(query, values_args)
         else:
@@ -839,10 +838,8 @@ class ProductTemplate(models.Model):
     def _get_contextual_pricelist(self):
         """ Override to fallback on website current pricelist """
         pricelist = super()._get_contextual_pricelist()
-        if not pricelist:
-            website = ir_http.get_request_website()
-            if website:
-                return website.pricelist_id
+        if request and request.is_frontend and not pricelist:
+            return request.pricelist
         return pricelist
 
     def _website_show_quick_add(self):

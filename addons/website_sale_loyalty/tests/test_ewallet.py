@@ -1,10 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import http, Command
-from odoo.tests import tagged, HttpCase
-from odoo.addons.website.tools import MockRequest
+from odoo import Command, http
+from odoo.tests import HttpCase, tagged
+
+from odoo.addons.website_sale.tests.common import WebsiteSaleCommon, mock_website_sale_request
 from odoo.addons.website_sale_loyalty.controllers.main import WebsiteSale
-from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
+
 
 @tagged('post_install', '-at_install')
 class TestEwallet(HttpCase, WebsiteSaleCommon):
@@ -14,7 +15,6 @@ class TestEwallet(HttpCase, WebsiteSaleCommon):
         super().setUpClass()
 
         cls.WebsiteSaleController = WebsiteSale()
-        cls.website = cls.env['website'].browse(1)
 
         cls.product.write({'taxes_id': [Command.clear()]})
 
@@ -29,6 +29,7 @@ class TestEwallet(HttpCase, WebsiteSaleCommon):
             'program_type': 'ewallet',
             'trigger': 'auto',
             'applies_on': 'future',
+            'website_id': cls.website.id,
             'rule_ids': [Command.create({
                 'reward_point_mode': 'money',
                 'reward_point_amount': 10,
@@ -53,10 +54,11 @@ class TestEwallet(HttpCase, WebsiteSaleCommon):
             'points_granted': 10,
         }).generate_coupons()
 
-        self.ewallet_program.coupon_ids[0].partner_id = self.env.user.partner_id
-
         order = self.empty_cart
-        with MockRequest(self.env, website=self.website, sale_order_id=order.id):
+        self.ewallet_program.coupon_ids[0].partner_id = order.partner_id
+        website = self.website.with_user(self.public_user)
+
+        with mock_website_sale_request(website.env, website=website, sale_order_id=order.id):
             self.WebsiteSaleController.cart_update_json(self.product.id, set_qty=1)
             self.assertEqual(order.amount_total, 20)
             self.WebsiteSaleController.claim_reward(self.ewallet_program.reward_ids[0].id)
