@@ -3,6 +3,7 @@ import { EventBus, onWillStart, reactive, useState, useSubEnv } from "@odoo/owl"
 import { getBundle, LazyComponent, loadBundle } from "@web/core/assets";
 import { registry } from "@web/core/registry";
 import { Mutex } from "@web/core/utils/concurrency";
+import { useService } from "@web/core/utils/hooks";
 import weUtils from "@web_editor/js/common/utils";
 import { MassMailingTemplateSelector, switchImages } from "./mass_mailing_template_selector";
 
@@ -21,11 +22,13 @@ export class MassMailingHtmlField extends HtmlField {
 
     setup() {
         super.setup();
+        this.ui = useService("ui");
         const content = this.props.record.data[this.props.name];
         this.state = useState({
             showMassMailingTemplateSelector: content.toString() === "",
             iframeDocument: null,
             toolbarInfos: undefined,
+            isBasicTheme: this.value.toString().search("o_basic_theme") >= 0,
         });
         this.fieldConfig = reactive({
             selectedTheme: null,
@@ -35,6 +38,8 @@ export class MassMailingHtmlField extends HtmlField {
             canUndo: false,
             canRedo: false,
         });
+
+        this.focusEditableOnLoad = false;
 
         useSubEnv({
             switchImages,
@@ -57,6 +62,10 @@ export class MassMailingHtmlField extends HtmlField {
             );
             this.MassMailingSnippetsMenu = MassMailingSnippetsMenu;
         });
+    }
+
+    get displaySnippetsMenu() {
+        return this.state.iframeDocument && !this.state.isBasicTheme && !this.ui.isSmall;
     }
 
     get snippetMenuProps() {
@@ -179,17 +188,13 @@ export class MassMailingHtmlField extends HtmlField {
     async onSelectMassMailingTemplate(templateInfos, templateHTML) {
         await this.updateValue(templateHTML);
         this.state.showMassMailingTemplateSelector = false;
+        this.state.isBasicTheme = templateInfos.name === "basic";
+        if (templateInfos.name === "basic") {
+            this.focusEditableOnLoad = true;
+        }
 
         // todo: to implement: this.fieldConfig.selectedTheme = templateInfos;
         // this.fieldConfig.selectedTheme = templateInfos;
-
-        // todo: to implement: setSnippetsMenuFolded
-        // this.wysiwyg.setSnippetsMenuFolded(uiUtils.isSmall() || themeName === "basic");
-
-        // todo: to implement templateInfos.name === "basic" && this.wysiwyg.$editable[0].focus();
-        // if (templateInfos.name === "basic") {
-        //     this.wysiwyg.$editable[0].focus();
-        // }
 
         // todo: to implement: commitChanges
         // The value of the field gets updated upon editor blur. If for any
@@ -247,6 +252,11 @@ export class MassMailingHtmlField extends HtmlField {
                 doc.body.append(editable);
                 editor.attachTo(editable);
 
+                if (this.focusEditableOnLoad) {
+                    editor.editable.focus();
+                    this.shouldFocusOnLoad = false;
+                }
+
                 this.state.toolbarInfos = editor.shared.getToolbarInfo();
 
                 // todo: should this be in its own plugin? DRAG BUILDING BLOCKS HERE
@@ -271,7 +281,7 @@ export class MassMailingHtmlField extends HtmlField {
     getConfig() {
         const config = super.getConfig(...arguments);
         config.onChange = () => {
-            Object.assign(this.wysiwygState, {
+            Object.assign(this.historyState, {
                 canUndo: this.editor.shared.canUndo(),
                 canRedo: this.editor.shared.canRedo(),
             });

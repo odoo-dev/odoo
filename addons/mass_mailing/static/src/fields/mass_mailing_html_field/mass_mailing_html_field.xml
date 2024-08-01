@@ -10,7 +10,7 @@
             </t>
             <t t-else="">
                 <div class="w-100">$0</div>
-                <div class="" t-if="this.state.iframeDocument">
+                <div class="" t-if="this.displaySnippetsMenu">
                     <t t-component="this.MassMailingSnippetsMenu" t-props="this.snippetMenuProps"/>
                 </div>
             </t>
