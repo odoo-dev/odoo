@@ -8,7 +8,15 @@ import { NumberPopup } from "@point_of_sale/app/utils/input_popups/number_popup"
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { useService } from "@web/core/utils/hooks";
-import { Component, onMounted, useRef, useState, onWillStart, useEffect } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    useRef,
+    useState,
+    onWillStart,
+    useEffect,
+    useExternalListener,
+} from "@odoo/owl";
 import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
 import { loadImage } from "@point_of_sale/utils";
 import { getDataURLFromFile } from "@web/core/utils/urls";
@@ -113,6 +121,16 @@ export class FloorScreen extends Component {
             this.state.potentialLink?.parent &&
             this.state.potentialLink.time + TABLE_LINKING_DELAY < Date.now();
 
+        useExternalListener(window, "keyup", (ev) => {
+            if (
+                ev.key === "Escape" &&
+                this.pos.isEditMode &&
+                this.state.selectedTableIds.length == 0 &&
+                !this.state.potentialLink
+            ) {
+                this.pos.isEditMode = false;
+            }
+        });
         useDraggable({
             ref: this.map,
             elements: ".table",
