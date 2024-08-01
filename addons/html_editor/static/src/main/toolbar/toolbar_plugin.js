@@ -12,7 +12,21 @@ export class ToolbarPlugin extends Plugin {
     });
 
     setup() {
-        this.buttonGroups = this.resources.toolbarGroup.sort((a, b) => a.sequence - b.sequence);
+        if (this.config.disabledToolbarButtonIds) {
+            this.buttonGroups = [];
+            for (const group of this.resources.toolbarGroup) {
+                group.buttons = group.buttons.filter(
+                    (button) => !this.config.disabledToolbarButtonIds.has(button.id)
+                );
+                if (group.buttons.length) {
+                    this.buttonGroups.push(group);
+                }
+            }
+        } else {
+            this.buttonGroups = this.resources.toolbarGroup;
+        }
+        this.buttonGroups.sort((a, b) => a.sequence - b.sequence);
+
         this.overlay = this.shared.createOverlay(Toolbar, { position: "top-start" });
         this.state = reactive({
             buttonsActiveState: {},
