@@ -20,12 +20,15 @@
             <div t-if="!ui.isSmall"  class="pos-centerheader d-flex justify-content-center">
                 <img class="pos-logo pos-logo mw-100" height="42" t-on-click="() => debug.toggleWidget()" src="/web/static/img/logo.png" alt="Logo" />
             </div>
-            <div class="pos-rightheader d-flex justify-content-end ms-auto" t-if="pos.shouldShowNavbarButtons()">
+            <div t-if="pos.shouldShowNavbarButtons()"
+                class="pos-rightheader d-flex justify-content-end"
+                t-att-class="{ 'ms-auto': !ui.isSmall, 'me-1 position-absolute end-0 width-100 pos-nav-small': ui.isSmall }"
+            >
                 <div class="status-buttons d-flex flex-grow-1 align-items-center justify-content-end gap-1">
                     <Input tModel="[pos, 'searchProductWord']"
                     class="'p-0'"
                     isSmall="ui.isSmall"
-                    placeholder.translate="'Search products...'"
+                    placeholder.translate="Search products..."
                     icon="{type: 'fa', value: 'fa-search'}"
                     debounceMillis="500"
                     t-if="pos.showSearchButton()" />
@@ -37,7 +40,8 @@
                         <div t-if="this.pos.data.network.offline" class="fa fa-fw fa-chain-broken text-danger"/>
                         <div t-else="" class="fa fa-fw fa-spin fa-circle-o-notch text-warning"/>
                     </div>
-                    <CashierName />
+                    <!-- No need to show the cashier name on small screens -->
+                    <CashierName t-if="!ui.isSmall"/>
                     <Dropdown>
                         <button class="btn btn-light btn-lg lh-lg">
                             <i class="fa fa-fw fa-bars"/>
@@ -49,7 +53,7 @@
                                     <i class="fa fa-fw fa-desktop"/>
                                 </span>
                             </div>
-                            <div class="p-2">
+                            <div class="p-2 pos-burger-menu-items">
                                 <DropdownItem t-if="!isDisplayStandalone" onSelected="() => window.open(this.appUrl)">
                                     Install App
                                 </DropdownItem>

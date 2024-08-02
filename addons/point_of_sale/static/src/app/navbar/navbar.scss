@@ -1,5 +1,8 @@
 .pos-leftheader, .pos-rightheader {
     width: 45%;
+    &.pos-nav-small {
+        width: auto;
+    }
 }
 
 .pos-centerheader {
