@@ -11,8 +11,8 @@
                 Switch Floor View
             </DropdownItem>
         </xpath>
-        <xpath expr="//div[hasclass('pos-leftheader')]" position="inside">
-            <div t-if="pos.config.module_pos_restaurant" class="d-flex align-items-stretch flex-grow-1 flex-shrink-0 gap-1 position-relative">
+        <xpath expr="//div[hasclass('pos-leftheader')]/t" position="before">
+            <div t-if="pos.config.module_pos_restaurant" class="d-flex flex-shrink-0 gap-1 position-relative">
                <div class="navbar-menu d-flex d-lg-grid gap-1">
                     <button class="back-button btn btn-lg lh-lg" t-attf-class="{{ isFloorScreenActive() ? 'btn-primary' : '' }}" t-on-click="onClickPlanButton">
                         Plan
@@ -26,10 +26,10 @@
                         <t t-esc="getTable().getName()"/>
                     </button>  
                     <div t-if="pos.get_order() and !pos.get_order()?.table_id" 
-                    t-attf-class="table-free-order-label btn btn-primary btn-lg lh-lg" 
-                    t-on-click="() => this.switchTable()"
-                    t-esc="pos.get_order().getFloatingOrderName()"
-                />
+                        t-attf-class="table-free-order-label btn btn-primary btn-lg lh-lg" 
+                        t-on-click="() => this.switchTable()"
+                        t-esc="pos.get_order().getFloatingOrderName()"
+                    />
                 </div>
                 <div class="d-flex align-items-center" t-if="pos.orderToTransferUuid">
                     <strong class="ms-2">

@@ -3,23 +3,22 @@
 
     <t t-name="point_of_sale.Navbar">
         <div class="pos-topheader d-flex align-items-center justify-content-between px-2 py-1 m-0 bg-white border-bottom">
-            <div t-if="pos.config.module_pos_restaurant" class="pos-leftheader"/>
-            <div t-if="!ui.isSmall"  class="pos-centerheader d-flex justify-content-center">
-                <img class="pos-logo pos-logo mw-100" height="42" t-on-click="() => debug.toggleWidget()" src="/web/static/img/logo.png" alt="Logo" />
-            </div>
-            <div class="my-2 d-flex overflow-hidden">
+            <div class="pos-leftheader d-flex">
                 <t t-if="showTabs()">
-                    <div t-attf-class="d-flex overflow-x-auto {{ ui.isSmall ? 'flex-shrink-0' : 'flex-shrink-1'}}">
-                        <div t-if="!ui.isSmall" class="ms-1 me-2 my-2 border-end border"/>
+                    <div t-if="!ui.isSmall" class="ms-1 me-2 my-2 border-start border"/>
+                    <div t-attf-class=" d-flex overflow-x-auto {{ ui.isSmall ? 'flex-shrink-0' : 'flex-shrink-1'}}">
                         <ListContainer items="getFloatingOrders()" t-slot-scope="scope">
                             <t t-set="order" t-value="scope.item"/>
-                            <button t-esc="order.getFloatingOrderName()" class="btn btn-lg lh-lg tab text-nowrap" t-on-click="() => this.selectFloatingOrder(order)"/>
+                            <button t-esc="order.getFloatingOrderName()" t-attf-class="{{pos.get_order()?.id === order.id ? 'btn-primary' : ''}}" class="btn btn-lg lh-lg tab text-nowrap" t-on-click="() => this.selectFloatingOrder(order)"/>
                         </ListContainer>
                     </div>
                     <button class="btn btn-light btn-lg border-transparent lh-lg" style="padding: 0.3125rem 0.625rem;" t-on-click="newFloatingOrder">
                         <i class="fa fa-fw fa-lg fa-plus-circle" aria-hidden="true"/>
                     </button>
                 </t>
+            </div>
+            <div t-if="!ui.isSmall"  class="pos-centerheader d-flex justify-content-center">
+                <img class="pos-logo pos-logo mw-100" height="42" t-on-click="() => debug.toggleWidget()" src="/web/static/img/logo.png" alt="Logo" />
             </div>
             <div class="pos-rightheader d-flex justify-content-end ms-auto" t-if="pos.shouldShowNavbarButtons()">
                 <div class="status-buttons d-flex flex-grow-1 align-items-center justify-content-end gap-1">
