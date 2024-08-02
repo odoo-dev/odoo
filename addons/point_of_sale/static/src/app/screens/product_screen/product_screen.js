@@ -135,9 +135,10 @@ export class ProductScreen extends Component {
                 ${this.pos.numpadMode === button.value ? "active" : ""}
                 ${button.value === "quantity" ? "numpad-qty rounded-0 rounded-top mb-0" : ""}
                 ${button.value === "price" ? "numpad-price rounded-0 rounded-bottom mt-0" : ""}
-                ${button.value === "discount"
-                    ? "numpad-discount my-0 rounded-0 border-top border-bottom"
-                    : ""
+                ${
+                    button.value === "discount"
+                        ? "numpad-discount my-0 rounded-0 border-top border-bottom"
+                        : ""
                 }
             `,
         }));
