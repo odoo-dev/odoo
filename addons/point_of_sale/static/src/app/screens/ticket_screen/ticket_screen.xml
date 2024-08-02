@@ -166,7 +166,6 @@
                                     <ActionpadWidget 
                                         partner="getSelectedOrder()?.get_partner()"
                                         actionName.translate="Refund"
-                                        actionType="'refund'"
                                         actionToTrigger.bind="onDoRefund"
                                     />
                                 </div>
@@ -179,7 +178,10 @@
                             </div>
                         </div>
                     </t>
-                    <CenteredIcon t-else="" icon="'fa-shopping-cart fa-4x'" text.translate="'Select an order'" class="'bg-100 h-100'"/>
+                    <t t-else="">
+                        <CenteredIcon icon="'fa-shopping-cart fa-4x'" text.translate="'Select an order'" class="'bg-100 h-100'"/>
+                        <BackButton t-if="ui.isSmall" onClick="() => pos.onClickBackButton()"/>
+                    </t>
                 </div>
             </div>
         </div>

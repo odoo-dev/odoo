@@ -9,14 +9,10 @@ export class ActionpadWidget extends Component {
     static components = { SelectPartnerButton, BackButton };
     static props = {
         partner: { type: [Object, { value: null }], optional: true },
-        actionName: String,
-        actionType: String,
-        isActionButtonHighlighted: { type: Boolean, optional: true },
         onClickMore: { type: Function, optional: true },
         actionName: String,
         actionToTrigger: Function,
         showActionButton: { type: Boolean, optional: true },
-        slots: { type: Object, optional: true },
     };
     static defaultProps = {
         showActionButton: true,
