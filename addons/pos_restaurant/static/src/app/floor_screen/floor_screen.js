@@ -119,8 +119,10 @@ export class FloorScreen extends Component {
             this.state.potentialLink?.parent &&
             this.state.potentialLink.time + TABLE_LINKING_DELAY < Date.now();
 
-        useExternalListener(window, "keyup", (ev) => {
+        useExternalListener(window, "keydown", (ev) => {
+            const overlayElements = document.querySelectorAll(".o-overlay-item");
             if (
+                overlayElements.length == 0 &&
                 ev.key === "Escape" &&
                 this.pos.isEditMode &&
                 this.state.selectedTableIds.length == 0 &&
