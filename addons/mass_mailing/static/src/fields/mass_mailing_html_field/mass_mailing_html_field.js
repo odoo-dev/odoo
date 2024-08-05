@@ -7,6 +7,7 @@ import { useService } from "@web/core/utils/hooks";
 import weUtils from "@web_editor/js/common/utils";
 import { MassMailingTemplateSelector, switchImages } from "./mass_mailing_template_selector";
 import { JustifyPlugin } from "@html_editor/main/justify_plugin";
+import { closestElement } from "@html_editor/utils/dom_traversal";
 
 // const legacyEventToNewEvent = {
 //     historyStep: "ADD_STEP",
@@ -68,6 +69,7 @@ export class MassMailingHtmlField extends HtmlField {
 
     get snippetMenuProps() {
         const self = this;
+        /** @type {import("../../../../../html_editor/static/src/editor").Editor} */
         const editor = this.editor;
         const state = this.state;
         const options = {
@@ -121,18 +123,65 @@ export class MassMailingHtmlField extends HtmlField {
                      * attribute.
                      */
                     bindExecCommand(element) {
-                        // for (const buttonEl of element.querySelectorAll("[data-call]")) {
-                        //     buttonEl.addEventListener("click", (ev) => {
-                        //         if (!this.isSelectionInEditable()) {
-                        //             this.historyResetLatestComputedSelection(true);
-                        //         }
-                        //         const arg1 = buttonEl.dataset.arg1;
-                        //         const args = (arg1 && arg1.split(",")) || [];
-                        //         this.execCommand(buttonEl.dataset.call, ...args);
-                        //         ev.preventDefault();
-                        //         this._updateToolbar();
-                        //     });
-                        // }
+                        const commands = {
+                            removeFormat: "FORMAT_REMOVE_FORMAT",
+                            addColumn: (el) => {
+                                editor.dispatch("ADD_COLUMN", {
+                                    position: el.dataset.arg1,
+                                    reference: closestElement(
+                                        editor.shared.getEditableSelection().anchorNode,
+                                        "td"
+                                    ),
+                                });
+                            },
+                            addRow: (el) => {
+                                editor.dispatch("ADD_ROW", {
+                                    position: el.dataset.arg1,
+                                    reference: closestElement(
+                                        editor.shared.getEditableSelection().anchorNode,
+                                        "tr"
+                                    ),
+                                });
+                            },
+                            removeColumn: (el) => {
+                                editor.dispatch("REMOVE_COLUMN", {
+                                    cell: closestElement(
+                                        editor.shared.getEditableSelection().anchorNode,
+                                        "td"
+                                    ),
+                                });
+                            },
+                            removeRow: (el) => {
+                                editor.dispatch("REMOVE_ROW", {
+                                    row: closestElement(
+                                        editor.shared.getEditableSelection().anchorNode,
+                                        "tr"
+                                    ),
+                                });
+                            },
+                            resetSize: (el) => {
+                                editor.dispatch("RESET_SIZE", {
+                                    table: closestElement(
+                                        editor.shared.getEditableSelection().anchorNode,
+                                        "table"
+                                    ),
+                                });
+                            },
+                        };
+                        for (const buttonEl of element.querySelectorAll("[data-call]")) {
+                            buttonEl.addEventListener("click", (ev) => {
+                                const command = commands[buttonEl.dataset.call];
+                                if (!command) {
+                                    return;
+                                }
+                                ev.preventDefault();
+                                if (typeof command === "function") {
+                                    command(buttonEl);
+                                } else {
+                                    editor.dispatch(command);
+                                }
+                            });
+                        }
                     },
                     computeFontSizeSelectorValues() {},
 
