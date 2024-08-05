@@ -1,5 +1,5 @@
 import { Plugin } from "@html_editor/plugin";
-import { isBlock } from "@html_editor/utils/blocks";
+import { closestBlock, isBlock } from "@html_editor/utils/blocks";
 import { fillEmpty } from "@html_editor/utils/dom";
 import { isVisibleTextNode } from "@html_editor/utils/dom_info";
 import {
@@ -10,13 +10,14 @@ import {
 import {
     convertNumericToUnit,
     getCSSVariableValue,
+    getFontSizeDisplayValue,
     getHtmlStyle,
 } from "@html_editor/utils/formatting";
 import { DIRECTIONS } from "@html_editor/utils/position";
 import { _t } from "@web/core/l10n/translation";
-import { FontSelector } from "./font_selector";
+import { ToolbarItemSelector } from "./toolbar_item_selector";
 
-const fontItems = [
+const tagItems = [
     {
         name: _t("Header 1 Display 1"),
         tagName: "h1",
@@ -115,21 +116,45 @@ export class FontPlugin extends Plugin {
             {
                 id: "typo",
                 category: "typo",
-                Component: FontSelector,
+                Component: ToolbarItemSelector,
                 props: {
-                    getItems: () => fontItems,
-                    command: "SET_TAG",
+                    getItems: () => tagItems,
+                    getEditableSelection: p.shared.getEditableSelection.bind(p),
+                    onSelected: (item) => p.dispatch("SET_TAG", item),
+                    getItemFromSelection: (selection) => {
+                        const anchorNode = selection.anchorNode;
+                        const block = closestBlock(anchorNode);
+                        const tagName = block.tagName.toLowerCase();
+
+                        const matchingItems = tagItems.filter((item) => {
+                            return item.tagName === tagName;
+                        });
+
+                        if (!matchingItems.length) {
+                            return { name: "Normal" };
+                        }
+
+                        return (
+                            matchingItems.find((item) =>
+                                block.classList.contains(item.extraClass)
+                            ) || matchingItems[0]
+                        );
+                    },
                 },
             },
             {
                 id: "font-size",
                 category: "size",
-                Component: FontSelector,
+                Component: ToolbarItemSelector,
                 props: {
                     getItems: () => p.fontSizeItems,
-                    isFontSize: true,
-                    command: "FORMAT_FONT_SIZE_CLASSNAME",
-                    document: p.document,
+                    getEditableSelection: p.shared.getEditableSelection.bind(p),
+                    onSelected: (item) => p.dispatch("FORMAT_FONT_SIZE_CLASSNAME", item),
+                    getItemFromSelection: (selection) => {
+                        return {
+                            name: Math.round(getFontSizeDisplayValue(selection, p.document)),
+                        };
+                    },
                 },
             },
         ],

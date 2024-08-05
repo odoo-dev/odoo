@@ -76,7 +76,6 @@ export const MAIN_PLUGINS = [
     ColumnPlugin,
     EmojiPlugin,
     HintPlugin,
-    JustifyPlugin,
     ListPlugin,
     MediaPlugin,
     ShortCutPlugin,

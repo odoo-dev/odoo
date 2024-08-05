@@ -181,7 +181,7 @@ test("toolbar works: can select font", async () => {
     expect(".o-we-toolbar [name='font']").toHaveText("Normal");
 
     await contains(".o-we-toolbar [name='font'] .dropdown-toggle").click();
-    await contains(".o_font_selector_menu .dropdown-item:contains('Header 2')").click();
+    await contains(".o_toolbar_item_selector_menu .dropdown-item:contains('Header 2')").click();
     expect(getContent(el)).toBe("<h2>[test]</h2>");
     expect(".o-we-toolbar [name='font']").toHaveText("Header 2");
 });
@@ -211,9 +211,9 @@ test("toolbar works: can select font size", async () => {
             return getFontSizeFromVar(item.variableName).toString();
         })
     );
-    expect(queryAllTexts(".o_font_selector_menu .dropdown-item")).toEqual([...sizes]);
+    expect(queryAllTexts(".o_toolbar_item_selector_menu .dropdown-item")).toEqual([...sizes]);
     const h1Size = getFontSizeFromVar("h1-font-size").toString();
-    await contains(`.o_font_selector_menu .dropdown-item:contains('${h1Size}')`).click();
+    await contains(`.o_toolbar_item_selector_menu .dropdown-item:contains('${h1Size}')`).click();
     expect(getContent(el)).toBe(`<p><span class="h1-fs">[test]</span></p>`);
     expect(".o-we-toolbar [name='font-size']").toHaveText(h1Size);
 });

@@ -6,6 +6,7 @@ import { Mutex } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
 import weUtils from "@web_editor/js/common/utils";
 import { MassMailingTemplateSelector, switchImages } from "./mass_mailing_template_selector";
+import { JustifyPlugin } from "@html_editor/main/justify_plugin";
 
 // const legacyEventToNewEvent = {
 //     historyStep: "ADD_STEP",
@@ -284,6 +285,7 @@ export class MassMailingHtmlField extends HtmlField {
 
     getConfig() {
         const config = super.getConfig(...arguments);
+        config.Plugins = [...config.Plugins, JustifyPlugin];
         config.onChange = () => {
             Object.assign(this.historyState, {
                 canUndo: this.editor.shared.canUndo(),
