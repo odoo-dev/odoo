@@ -1,5 +1,5 @@
 import { Plugin } from "@html_editor/plugin";
-import { isBlock } from "@html_editor/utils/blocks";
+import { closestBlock, isBlock } from "@html_editor/utils/blocks";
 import { fillEmpty } from "@html_editor/utils/dom";
 import { isVisibleTextNode, paragraphRelatedElements } from "@html_editor/utils/dom_info";
 import {
@@ -10,13 +10,14 @@ import {
 import {
     convertNumericToUnit,
     getCSSVariableValue,
+    getFontSizeDisplayValue,
     getHtmlStyle,
 } from "@html_editor/utils/formatting";
 import { DIRECTIONS } from "@html_editor/utils/position";
 import { _t } from "@web/core/l10n/translation";
-import { FontSelector } from "./font_selector";
+import { ToolbarItemSelector } from "./toolbar_item_selector";
 
-const fontItems = [
+const tagItems = [
     {
         name: _t("Header 1 Display 1"),
         tagName: "h1",
@@ -97,113 +98,142 @@ export class FontPlugin extends Plugin {
     static name = "font";
     static dependencies = ["split", "selection"];
     /** @type { (p: FontPlugin) => Record<string, any> } */
-    static resources = (p) => ({
-        split_element_block: [
-            { callback: p.handleSplitBlockPRE.bind(p) },
-            { callback: p.handleSplitBlockHeading.bind(p) },
-        ],
-        handle_delete_backward: { callback: p.handleDeleteBackward.bind(p) },
-        handle_delete_backward_word: { callback: p.handleDeleteBackward.bind(p) },
-        toolbarGroup: [
-            {
-                id: "typo",
-                sequence: 10,
-                buttons: [
-                    {
-                        id: "typo",
-                        Component: FontSelector,
-                        props: {
-                            getItems: () => fontItems,
-                            command: "SET_TAG",
+    static resources = (p) => {
+        return {
+            split_element_block: [
+                { callback: p.handleSplitBlockPRE.bind(p) },
+                { callback: p.handleSplitBlockHeading.bind(p) },
+            ],
+            handle_delete_backward: { callback: p.handleDeleteBackward.bind(p) },
+            handle_delete_backward_word: { callback: p.handleDeleteBackward.bind(p) },
+            toolbarGroup: [
+                {
+                    id: "typo",
+                    sequence: 10,
+                    buttons: [
+                        {
+                            id: "typo",
+                            Component: ToolbarItemSelector,
+                            props: {
+                                getItems: () => tagItems,
+                                getEditableSelection: p.shared.getEditableSelection.bind(p),
+                                onSelected: (item) => p.dispatch("SET_TAG", item),
+                                getItemFromSelection: (selection) => {
+                                    const anchorNode = selection.anchorNode;
+                                    const block = closestBlock(anchorNode);
+                                    const tagName = block.tagName.toLowerCase();
+
+                                    const matchingItems = tagItems.filter((item) => {
+                                        return item.tagName === tagName;
+                                    });
+
+                                    if (!matchingItems.length) {
+                                        return { name: "Normal" };
+                                    }
+
+                                    return (
+                                        matchingItems.find((item) =>
+                                            block.classList.contains(item.extraClass)
+                                        ) || matchingItems[0]
+                                    );
+                                },
+                            },
                         },
-                    },
-                ],
-            },
-            {
-                id: "size",
-                sequence: 29,
-                buttons: [
-                    {
-                        id: "font-size",
-                        Component: FontSelector,
-                        props: {
-                            getItems: () => p.fontSizeItems,
-                            isFontSize: true,
-                            command: "FORMAT_FONT_SIZE_CLASSNAME",
-                            document: p.document,
+                    ],
+                },
+                {
+                    id: "size",
+                    sequence: 29,
+                    buttons: [
+                        {
+                            id: "font-size",
+                            Component: ToolbarItemSelector,
+                            props: {
+                                getItems: () => p.fontSizeItems,
+                                getEditableSelection: p.shared.getEditableSelection.bind(p),
+                                onSelected: (item) =>
+                                    p.dispatch("FORMAT_FONT_SIZE_CLASSNAME", item),
+                                getItemFromSelection: (selection) => {
+                                    return {
+                                        name: Math.round(
+                                            getFontSizeDisplayValue(selection, p.document)
+                                        ),
+                                    };
+                                },
+                            },
                         },
+                    ],
+                },
+            ],
+            powerboxCategory: { id: "format", name: _t("Format"), sequence: 30 },
+            powerboxCommands: [
+                {
+                    name: _t("Heading 1"),
+                    description: _t("Big section heading"),
+                    category: "format",
+                    fontawesome: "fa-header",
+                    action(dispatch) {
+                        dispatch("SET_TAG", { tagName: "H1" });
                     },
-                ],
-            },
-        ],
-        powerboxCategory: { id: "format", name: _t("Format"), sequence: 30 },
-        powerboxCommands: [
-            {
-                name: _t("Heading 1"),
-                description: _t("Big section heading"),
-                category: "format",
-                fontawesome: "fa-header",
-                action(dispatch) {
-                    dispatch("SET_TAG", { tagName: "H1" });
                 },
-            },
-            {
-                name: _t("Heading 2"),
-                description: _t("Medium section heading"),
-                category: "format",
-                fontawesome: "fa-header",
-                action(dispatch) {
-                    dispatch("SET_TAG", { tagName: "H2" });
+                {
+                    name: _t("Heading 2"),
+                    description: _t("Medium section heading"),
+                    category: "format",
+                    fontawesome: "fa-header",
+                    action(dispatch) {
+                        dispatch("SET_TAG", { tagName: "H2" });
+                    },
                 },
-            },
-            {
-                name: _t("Heading 3"),
-                description: _t("Small section heading"),
-                category: "format",
-                fontawesome: "fa-header",
-                action(dispatch) {
-                    dispatch("SET_TAG", { tagName: "H3" });
+                {
+                    name: _t("Heading 3"),
+                    description: _t("Small section heading"),
+                    category: "format",
+                    fontawesome: "fa-header",
+                    action(dispatch) {
+                        dispatch("SET_TAG", { tagName: "H3" });
+                    },
                 },
-            },
-            {
-                category: "format",
-                name: _t("Text"),
-                description: _t("Paragraph block"),
-                fontawesome: "fa-paragraph",
-                action(dispatch) {
-                    dispatch("SET_TAG", { tagName: "P" });
+                {
+                    category: "format",
+                    name: _t("Text"),
+                    description: _t("Paragraph block"),
+                    fontawesome: "fa-paragraph",
+                    action(dispatch) {
+                        dispatch("SET_TAG", { tagName: "P" });
+                    },
                 },
-            },
-            {
-                category: "structure",
-                name: _t("Quote"),
-                description: _t("Add a blockquote section"),
-                fontawesome: "fa-quote-right",
-                action(dispatch) {
-                    dispatch("SET_TAG", { tagName: "blockquote" });
+                {
+                    category: "structure",
+                    name: _t("Quote"),
+                    description: _t("Add a blockquote section"),
+                    fontawesome: "fa-quote-right",
+                    action(dispatch) {
+                        dispatch("SET_TAG", { tagName: "blockquote" });
+                    },
                 },
-            },
-            {
-                category: "structure",
-                name: _t("Code"),
-                description: _t("Add a code section"),
-                fontawesome: "fa-code",
-                action(dispatch) {
-                    dispatch("SET_TAG", { tagName: "pre" });
+                {
+                    category: "structure",
+                    name: _t("Code"),
+                    description: _t("Add a code section"),
+                    fontawesome: "fa-code",
+                    action(dispatch) {
+                        dispatch("SET_TAG", { tagName: "pre" });
+                    },
                 },
-            },
-        ],
-        emptyBlockHints: [
-            { selector: "H1", hint: _t("Heading 1") },
-            { selector: "H2", hint: _t("Heading 2") },
-            { selector: "H3", hint: _t("Heading 3") },
-            { selector: "H4", hint: _t("Heading 4") },
-            { selector: "H5", hint: _t("Heading 5") },
-            { selector: "H6", hint: _t("Heading 6") },
-            { selector: "PRE", hint: _t("Code") },
-            { selector: "BLOCKQUOTE", hint: _t("Quote") },
-        ],
-    });
+            ],
+            emptyBlockHints: [
+                { selector: "H1", hint: _t("Heading 1") },
+                { selector: "H2", hint: _t("Heading 2") },
+                { selector: "H3", hint: _t("Heading 3") },
+                { selector: "H4", hint: _t("Heading 4") },
+                { selector: "H5", hint: _t("Heading 5") },
+                { selector: "H6", hint: _t("Heading 6") },
+                { selector: "PRE", hint: _t("Code") },
+                { selector: "BLOCKQUOTE", hint: _t("Quote") },
+            ],
+        };
+    };
 
     get fontSizeItems() {
         const style = getHtmlStyle(this.document);
