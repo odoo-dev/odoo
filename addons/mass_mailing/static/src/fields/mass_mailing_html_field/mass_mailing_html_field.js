@@ -47,10 +47,7 @@ export class MassMailingHtmlField extends HtmlField {
         });
 
         onWillStart(async () => {
-            await loadBundle("web_editor.backend_assets_wysiwyg");
-
-            await loadBundle("web_editor.assets_wysiwyg");
-            await loadBundle("mass_mailing.assets_snippets_menu");
+            await loadBundle("mass_mailing.assets_mass_mailing_html_field");
 
             this.iframeBundle = getBundle("web_editor.wysiwyg_iframe_editor_assets");
             this.massMailingBundle = getBundle("mass_mailing.iframe_css_assets_edit");

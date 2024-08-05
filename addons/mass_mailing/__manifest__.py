@@ -158,6 +158,12 @@
             'mass_mailing/static/src/fields/mass_mailing_html_field/mass_mailing_snippet_menu.js',
             'mass_mailing/static/src/fields/mass_mailing_html_field/mass_mailing_snippet_menu.xml'
         ],
+        'mass_mailing.assets_mass_mailing_html_field': [
+            ('include', 'web_editor.backend_assets_wysiwyg'),
+            ('include', 'web_editor.assets_wysiwyg'),
+            ('include', 'mass_mailing.assets_snippets_menu'),
+            ('include', 'mass_mailing.assets_wysiwyg'),
+        ],
         'web.assets_frontend': [
             'mass_mailing/static/src/js/tours/**/*',
         ],
