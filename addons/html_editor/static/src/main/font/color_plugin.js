@@ -17,6 +17,7 @@ import { reactive } from "@odoo/owl";
 export class ColorPlugin extends Plugin {
     static name = "color";
     static dependencies = ["selection", "split", "history", "zws"];
+    /** @type { (p: ColorPlugin) => Record<string, any> } */
     static resources = (p) => ({
         toolbarGroup: {
             id: "color",
@@ -29,6 +30,7 @@ export class ColorPlugin extends Plugin {
                         type: "foreground",
                         getUsedCustomColors: () => p.getUsedCustomColors("color"),
                         getSelectedColors: () => p.selectedColors,
+                        dispatch: p.dispatch.bind(p),
                     },
                 },
                 {
@@ -38,6 +40,7 @@ export class ColorPlugin extends Plugin {
                         type: "background",
                         getUsedCustomColors: () => p.getUsedCustomColors("background"),
                         getSelectedColors: () => p.selectedColors,
+                        dispatch: p.dispatch.bind(p),
                     },
                 },
             ],
