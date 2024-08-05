@@ -14,6 +14,7 @@ import { _t } from "@web/core/l10n/translation";
 import { CashOpeningPopup } from "@point_of_sale/app/store/cash_opening_popup/cash_opening_popup";
 import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product_screen";
 import { TicketScreen } from "@point_of_sale/app/screens/ticket_screen/ticket_screen";
+import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
 import { EditListPopup } from "@point_of_sale/app/store/select_lot_popup/select_lot_popup";
 import { ProductConfiguratorPopup } from "./product_configurator_popup/product_configurator_popup";
 import { ComboConfiguratorPopup } from "./combo_configurator_popup/combo_configurator_popup";
@@ -1559,6 +1560,23 @@ export class PosStore extends Reactive {
             },
             false
         );
+    }
+
+    showBackButton() {
+        const screenWoBackBtnMobile = [ProductScreen, TicketScreen];
+        return (
+            (this.ui.isSmall && !screenWoBackBtnMobile.includes(this.mainScreen.component)) ||
+            (this.mobile_pane === "left" && this.mainScreen.component === ProductScreen)
+        );
+    }
+    async onClickBackButton() {
+        if (
+            this.mobile_pane == "left" ||
+            this.mainScreen.component === PaymentScreen
+        ) {
+            this.mobile_pane = "right";
+            this.showScreen("ProductScreen");
+        }
     }
 
     showSearchButton() {
