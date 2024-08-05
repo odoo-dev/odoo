@@ -162,15 +162,15 @@
                                 </div>
                                 <div class="subpads d-flex flex-column">
                                     <Numpad class="'pb-2'" buttons="getNumpadButtons()"/>
-                                    <ActionpadWidget
+                                    <ActionpadWidget 
                                         partner="getSelectedOrder()?.get_partner()"
-                                        actionName="constructor.numpadActionName"
-                                        actionType="'refund'"
+                                        actionName="'Refund'"
                                         actionToTrigger.bind="onDoRefund"
-                                        isActionButtonHighlighted="getHasItemsToRefund()" />
+                                    />
                                 </div>
                             </t>
-                            <div t-else="" class="pads border-top" >
+                            <div t-else="" class="pads border-top d-flex gap-2" >
+                                <BackButton onClick="() => pos.onClickBackButton()"/>
                                 <button class="button validation load-order-button w-100 btn btn-lg btn-primary py-3" t-on-click="() => this._setOrder(_selectedSyncedOrder)">
                                     <span class="d-block">Load Order</span>
                                 </button>

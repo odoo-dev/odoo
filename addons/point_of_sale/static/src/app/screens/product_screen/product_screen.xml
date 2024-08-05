@@ -10,14 +10,14 @@
                         <ControlButtons t-if="!ui.isSmall" onClickMore.bind="displayAllControlPopup"/>
                     </div>
                     <div class="subpads d-flex flex-column gap-2">
-                        <t t-if="currentOrder.lines.length != 0">
-                            <Numpad t-if="pos.get_order().uiState.selected_orderline_uuid" class="'d-grid m-n1'" buttons="getNumpadButtons()" onClick.bind="onNumpadClick"/>
-                            <ActionpadWidget
-                                partner="currentOrder?.get_partner()"
-                                actionName="constructor.numpadActionName"
-                                actionType="'payment'"
-                                onClickMore.bind="displayAllControlPopup" />
-                        </t>
+                        <Numpad t-if="!currentOrder.is_empty() and pos.get_order().uiState.selected_orderline_uuid" class="'d-grid m-n1'" buttons="getNumpadButtons()" onClick.bind="onNumpadClick"/>
+                        <ActionpadWidget 
+                            partner="currentOrder?.get_partner()" 
+                            onClickMore.bind="displayAllControlPopup"
+                            actionName="'Payment'"
+                            actionToTrigger="() => pos.pay()"
+                            showActionButton="!currentOrder.is_empty()"
+                        />
                     </div>
                 </div>
             </div>

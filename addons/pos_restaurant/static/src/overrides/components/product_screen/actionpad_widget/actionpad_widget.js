@@ -1,6 +1,7 @@
 import { patch } from "@web/core/utils/patch";
 import { ActionpadWidget } from "@point_of_sale/app/screens/product_screen/action_pad/action_pad";
 import { useState } from "@odoo/owl";
+import { TicketScreen } from "@point_of_sale/app/screens/ticket_screen/ticket_screen";
 /**
  * @props partner
  */
@@ -13,7 +14,7 @@ patch(ActionpadWidget.prototype, {
         });
     },
     get swapButton() {
-        return this.props.actionType === "payment" && this.pos.config.module_pos_restaurant;
+        return this.pos.config.module_pos_restaurant && this.pos.mainScreen.component !== TicketScreen;
     },
     get currentOrder() {
         return this.pos.get_order();

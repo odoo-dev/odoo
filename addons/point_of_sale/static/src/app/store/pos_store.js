@@ -1563,14 +1563,19 @@ export class PosStore extends Reactive {
     }
 
     showBackButton() {
-        const screenWoBackBtnMobile = [ProductScreen, TicketScreen];
         return (
-            (this.ui.isSmall && !screenWoBackBtnMobile.includes(this.mainScreen.component)) ||
+            (this.ui.isSmall && this.mainScreen.component !== ProductScreen) ||
             (this.mobile_pane === "left" && this.mainScreen.component === ProductScreen)
         );
     }
     async onClickBackButton() {
-        if (
+        if (this.mainScreen.component === TicketScreen) {
+            if (this.ticket_screen_mobile_pane == "left") {
+                this.closeScreen();
+            } else {
+                this.ticket_screen_mobile_pane = "left";
+            }
+        } else if (
             this.mobile_pane == "left" ||
             this.mainScreen.component === PaymentScreen
         ) {
