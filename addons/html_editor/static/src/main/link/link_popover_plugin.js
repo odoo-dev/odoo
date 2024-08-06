@@ -67,7 +67,7 @@ export class LinkPopoverPlugin extends Plugin {
     handleCommand(command, payload) {
         switch (command) {
             case "TOGGLE_LINK_TOOLS":
-                this.toggleLinkTools(payload.options);
+                this.toggleLinkPopover(payload.options);
                 break;
         }
     }
@@ -76,13 +76,13 @@ export class LinkPopoverPlugin extends Plugin {
         this.addDomListener(this.editable, "click", (ev) => {
             if (ev.target.tagName === "A" && ev.target.isContentEditable) {
                 ev.preventDefault();
-                this.toggleLinkTools({ link: ev.target });
+                this.toggleLinkPopover({ link: ev.target });
             }
         });
         this.services.command.add(
             "Create link",
             () => {
-                this.toggleLinkTools();
+                this.toggleLinkPopover();
             },
             {
                 hotkey: "control+k",
@@ -169,53 +169,11 @@ export class LinkPopoverPlugin extends Plugin {
      * @param {Object} options
      * @param {HTMLElement} options.link
      */
-    toggleLinkTools({ link } = {}) {
+    toggleLinkPopover({ link } = {}) {
         if (!link) {
-            link = this.getOrCreateLink();
+            link = this.shared.getOrCreateLink();
         }
         this.linkElement = link;
-    }
-    /**
-     * get the link from the selection or create one if there is none
-     *
-     * @return {HTMLElement}
-     */
-    getOrCreateLink() {
-        const selection = this.shared.getEditableSelection();
-        const linkElement = findInSelection(selection, "a");
-        if (linkElement) {
-            if (
-                !linkElement.contains(selection.anchorNode) ||
-                !linkElement.contains(selection.focusNode)
-            ) {
-                this.shared.splitSelection();
-                const selectedNodes = this.shared.getSelectedNodes();
-                let before = linkElement.previousSibling;
-                while (before !== null && selectedNodes.includes(before)) {
-                    linkElement.insertBefore(before, linkElement.firstChild);
-                    before = linkElement.previousSibling;
-                }
-                let after = linkElement.nextSibling;
-                while (after !== null && selectedNodes.includes(after)) {
-                    linkElement.appendChild(after);
-                    after = linkElement.nextSibling;
-                }
-                this.shared.setCursorEnd(linkElement);
-                this.dispatch("ADD_STEP");
-            }
-            return linkElement;
-        } else {
-            // create a new link element
-            const link = this.document.createElement("a");
-            if (!selection.isCollapsed) {
-                const content = this.shared.extractContent(selection);
-                link.append(content);
-            }
-            this.shared.domInsert(link);
-            this.shared.setCursorEnd(link);
-            this.dispatch("ADD_STEP");
-            return link;
-        }
     }
     /**
      * Remove the link from the collapsed selection

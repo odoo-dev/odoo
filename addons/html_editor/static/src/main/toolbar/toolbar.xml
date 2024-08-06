@@ -6,15 +6,15 @@
                 <span class="o-we-toolbar-vertical-seperator"></span>
                 <div class="btn-group" t-att-name="buttonGroup.id">
                     <t t-foreach="buttonGroup.buttons" t-as="button" t-key="button.id">
-                        <t t-if="state.buttonsAvailableState[button.id]">
+                        <t t-if="button.state.isAvailable">
                             <t t-if="button.Component">
                                 <t t-component="button.Component" t-props="button.props"/>
                             </t>
                             <button t-else=""
                                 class="btn btn-light"
                                 t-attf-class="btn btn-light
-                                    {{ state.buttonsActiveState[button.id] ? 'active': ''}}
-                                    {{ state.buttonsDisabledState[button.id] ? 'disabled': ''}}"
+                                    {{ button.state.isActive ? 'active': ''}}
+                                    {{ !button.state.isEnabled ? 'disabled': ''}}"
                                 t-att-title="button.name"
                                 t-att-name="button.id"
                                 t-on-click="() => button.action(this.props.toolbar.dispatch)">

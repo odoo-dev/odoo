@@ -3,7 +3,7 @@ import { unwrapContents } from "@html_editor/utils/dom";
 import { isVisible } from "@html_editor/utils/dom_info";
 import { closestElement } from "@html_editor/utils/dom_traversal";
 import { DIRECTIONS, leftPos, nodeSize, rightPos } from "@html_editor/utils/position";
-import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
+import { callbacksForCursorUpdate, findInSelection } from "@html_editor/utils/selection";
 import { _t } from "@web/core/l10n/translation";
 import { EMAIL_REGEX, URL_REGEX, deduceURLfromText } from "./utils";
 
@@ -15,7 +15,7 @@ export class LinkPlugin extends Plugin {
     static name = "link";
     static dependencies = ["dom", "selection", "split", "line_break", "overlay"];
     // @phoenix @todo: do we want to have createLink and insertLink methods in link plugin?
-    static shared = ["createLink", "insertLink", "getPathAsUrlCommand"];
+    static shared = ["getOrCreateLink", "createLink", "insertLink", "getPathAsUrlCommand"];
     /** @type { (p: LinkPlugin) => Record<string, any> } */
     static resources = (p) => ({
         split_element_block: { callback: p.handleSplitBlock.bind(p) },
@@ -61,6 +61,48 @@ export class LinkPlugin extends Plugin {
         }
         link.innerText = label;
         return link;
+    }
+    /**
+     * get the link from the selection or create one if there is none
+     *
+     * @return {HTMLElement}
+     */
+    getOrCreateLink() {
+        const selection = this.shared.getEditableSelection();
+        const linkElement = findInSelection(selection, "a");
+        if (linkElement) {
+            if (
+                !linkElement.contains(selection.anchorNode) ||
+                !linkElement.contains(selection.focusNode)
+            ) {
+                this.shared.splitSelection();
+                const selectedNodes = this.shared.getSelectedNodes();
+                let before = linkElement.previousSibling;
+                while (before !== null && selectedNodes.includes(before)) {
+                    linkElement.insertBefore(before, linkElement.firstChild);
+                    before = linkElement.previousSibling;
+                }
+                let after = linkElement.nextSibling;
+                while (after !== null && selectedNodes.includes(after)) {
+                    linkElement.appendChild(after);
+                    after = linkElement.nextSibling;
+                }
+                this.shared.setCursorEnd(linkElement);
+                this.dispatch("ADD_STEP");
+            }
+            return linkElement;
+        } else {
+            // create a new link element
+            const link = this.document.createElement("a");
+            if (!selection.isCollapsed) {
+                const content = this.shared.extractContent(selection);
+                link.append(content);
+            }
+            this.shared.domInsert(link);
+            this.shared.setCursorEnd(link);
+            this.dispatch("ADD_STEP");
+            return link;
+        }
     }
     /**
      * @param {string} url

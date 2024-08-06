@@ -10,6 +10,7 @@ import { useService } from "@web/core/utils/hooks";
 import weUtils from "@web_editor/js/common/utils";
 import { MassMailingTemplateSelector, switchImages } from "./mass_mailing_template_selector";
 import { LinkPopoverPlugin } from "@html_editor/main/link/link_popover_plugin";
+import { LinkToolsPlugin } from "@html_editor/main/link/link_tools_plugin";
 
 // const legacyEventToNewEvent = {
 //     historyStep: "ADD_STEP",
@@ -31,6 +32,9 @@ export class MassMailingHtmlField extends HtmlField {
             showMassMailingTemplateSelector: this.value.toString() === "",
             iframeDocument: null,
             toolbarInfos: undefined,
+            linkToolState: {
+                linkToolProps: undefined,
+            },
             isBasicTheme: this.value.toString().search("o_basic_theme") >= 0,
         });
         this.fieldConfig = reactive({
@@ -60,13 +64,12 @@ export class MassMailingHtmlField extends HtmlField {
             this.iframeBundle = getBundle("web_editor.wysiwyg_iframe_editor_assets");
             this.massMailingBundle = getBundle("mass_mailing.iframe_css_assets_edit");
 
-            this.getColorPickerTemplateService = this.env.services.get_color_picker_template;
-
             const { MassMailingSnippetsMenu } = await odoo.loader.modules.get(
                 "@mass_mailing/fields/mass_mailing_html_field/mass_mailing_snippet_menu"
             );
             this.MassMailingSnippetsMenu = MassMailingSnippetsMenu;
         });
+        this.getColorpickerTemplate = useService("get_color_picker_template");
     }
 
     onApplyExternalContent(record) {
@@ -113,9 +116,7 @@ export class MassMailingHtmlField extends HtmlField {
                 getValue: () => this.editor.getContent(),
                 getEditable: () => $(self.editor.editable),
                 isSaving: () => false,
-                getColorpickerTemplate: () => {
-                    return this.getColorPickerTemplateService();
-                },
+                getColorpickerTemplate: this.getColorpickerTemplate,
                 state: {
                     toolbarProps: {},
                 },
@@ -258,6 +259,7 @@ export class MassMailingHtmlField extends HtmlField {
             trigger_up: (ev) => this._trigger_up(ev),
             toolbarInfos: state.toolbarInfos,
             toggleCodeView: this.toggleCodeView.bind(this),
+            linkToolProps: state.linkToolState.linkToolProps,
         };
     }
     async onSelectMassMailingTemplate(templateInfos, templateHTML) {
@@ -328,14 +330,16 @@ export class MassMailingHtmlField extends HtmlField {
                 doc.body.append(editable);
                 editor.attachTo(editable);
 
+                this.state.linkToolState = this.editor.shared.getLinktoolState();
+
                 this.bindLastMediaClicked(doc);
 
                 if (this.focusEditableOnLoad) {
-                    editor.editable.focus();
+                    this.editor.editable.focus();
                     this.shouldFocusOnLoad = false;
                 }
 
-                this.state.toolbarInfos = editor.shared.getToolbarInfo();
+                this.state.toolbarInfos = this.editor.shared.getToolbarInfo();
 
                 // todo: should this be in its own plugin? DRAG BUILDING BLOCKS HERE
                 const subEditable = this.editor.editable.querySelector(".o_editable");
@@ -359,7 +363,9 @@ export class MassMailingHtmlField extends HtmlField {
     getConfig() {
         const config = super.getConfig(...arguments);
         config.Plugins = config.Plugins.filter((x) => x !== LinkPopoverPlugin);
-        config.Plugins = [...config.Plugins, JustifyPlugin];
+        config.Plugins.push(JustifyPlugin);
+        config.Plugins.push(LinkToolsPlugin);
+        config.getColorpickerTemplate = this.getColorpickerTemplate;
         config.disableFloatingToolbar = true;
         config.disabledToolbarButtonIds = new Set(["remove_format", "codeview"]);
         return config;

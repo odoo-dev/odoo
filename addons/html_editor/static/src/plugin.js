@@ -48,6 +48,7 @@
  * @property { SanitizePlugin['sanitize'] } sanitize
  * @property { DeletePlugin['deleteRange'] } deleteRange
  * @property { LinkPlugin['createLink'] } createLink
+ * @property { LinkPlugin['getOrCreateLink'] } getOrCreateLink
  * @property { LinkPlugin['insertLink'] } insertLink
  * @property { LinkPlugin['getPathAsUrlCommand'] } getPathAsUrlCommand
  * @property { DomPlugin['domInsert'] } domInsert
@@ -67,6 +68,7 @@
  * @property { CollaborationPlugin['getSnapshotSteps'] } getSnapshotSteps
  * @property { CollaborationPlugin['resetFromSteps'] } resetFromSteps
  * @property { CollaborationOdooPlugin['getPeerMetadata'] } getPeerMetadata
+ * @property { ToolbarPlugin['getToolbarInfo'] } getToolbarInfo
  */
 
 export class Plugin {
