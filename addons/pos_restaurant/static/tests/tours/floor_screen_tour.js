@@ -33,7 +33,7 @@ registry.category("web_tour.tours").add("FloorScreenTour", {
 
             //test copy floor
             FloorScreen.clickFloor("Main Floor"),
-            FloorScreen.clickEditButton("Copy"),
+            FloorScreen.clickEditButton("Clone"),
             FloorScreen.selectedFloorIs("Main Floor (copy)"),
             FloorScreen.hasTable("2"),
             FloorScreen.hasTable("4"),
@@ -54,7 +54,10 @@ registry.category("web_tour.tours").add("FloorScreenTour", {
 
             // test add table
             FloorScreen.clickFloor("Main Floor"),
-            FloorScreen.clickEditButton("Add"),
+            {
+                trigger: `.edit-buttons i[aria-label="Add Table"]`,
+                run: "click",
+            },
             FloorScreen.selectedTableIs("1"),
             FloorScreen.clickEditButton("Rename"),
 
@@ -64,7 +67,7 @@ registry.category("web_tour.tours").add("FloorScreenTour", {
             FloorScreen.selectedTableIs("100"),
 
             // test duplicate table
-            FloorScreen.clickEditButton("Copy"),
+            FloorScreen.clickEditButton("Clone"),
             // the name is the first number available on the floor
             FloorScreen.selectedTableIs("1"),
             FloorScreen.clickEditButton("Rename"),
@@ -85,7 +88,7 @@ registry.category("web_tour.tours").add("FloorScreenTour", {
             FloorScreen.selectedTableIs("1"),
             FloorScreen.ctrlClickTable("3"),
             FloorScreen.selectedTableIs("3"),
-            FloorScreen.clickEditButton("Copy"),
+            FloorScreen.clickEditButton("Clone"),
             FloorScreen.selectedTableIs("2"),
             FloorScreen.selectedTableIs("4"),
 
@@ -125,7 +128,7 @@ registry.category("web_tour.tours").add("FloorScreenTour", {
             FloorScreen.table({ name: "4" }),
 
             // change shape
-            FloorScreen.clickEditButton("MakeRound"),
+            FloorScreen.clickEditButton("Make Round"),
 
             // Opening product screen in main floor should go back to main floor
             FloorScreen.clickSaveEditButton(),
