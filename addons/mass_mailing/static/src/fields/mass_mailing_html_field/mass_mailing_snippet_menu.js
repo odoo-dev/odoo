@@ -13,6 +13,7 @@ export class MassMailingSnippetsMenu extends snippetsEditor.SnippetsMenu {
     static optionsTabStructure = [["design-options", _t("Design Options")]];
     static props = {
         ...snippetsEditor.SnippetsMenu.props,
+        linkToolProps: { type: Object, optional: true },
         toolbarInfos: { type: Object, optional: true },
         toggleCodeView: { type: Function },
     };

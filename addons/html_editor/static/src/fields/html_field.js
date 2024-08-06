@@ -15,6 +15,8 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { HtmlViewer } from "./html_viewer";
 import { TranslationButton } from "@web/views/fields/translation_button";
 
+/** @typedef {import("../editor").Editor} Editor */
+
 /**
  * Check whether the current value contains nodes that would break
  * on insertion inside an existing body.
@@ -165,6 +167,9 @@ export class HtmlField extends Component {
         }
     }
 
+    /**
+     * @param {Editor} editor
+     */
     onEditorLoad(editor) {
         this.editor = editor;
     }

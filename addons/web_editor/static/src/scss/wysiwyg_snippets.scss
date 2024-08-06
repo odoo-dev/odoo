@@ -805,18 +805,12 @@
             grid-template-areas:
                 "typo typo style style color"
                 "size align list list link"
-                "ai animate animate hilight hilight"
-                "options options options options options"
-                "options2 options2 options2 options2 options2"
-                "options3 options3 options3 options3 options3";
+                "ai animate animate hilight hilight";
             grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
             grid-template-rows:
                 minmax($o-we-sidebar-content-field-height, auto)
                 minmax($o-we-sidebar-content-field-height, auto)
-                minmax($o-we-sidebar-content-field-height, auto)
-                auto
-                auto
-                auto;
+                minmax($o-we-sidebar-content-field-height, auto);
             row-gap: $o-we-sidebar-content-field-spacing;
             column-gap: $o-we-sidebar-content-field-multi-spacing;
             width: 100%;
@@ -841,29 +835,6 @@
                 padding: ($o-we-sidebar-content-field-height * .12) ($o-we-sidebar-content-field-button-group-button-spacing - 2.5);
                 align-items: center;
                 justify-content: center;
-            }
-
-            .dropdown-menu {
-                border-color: $o-we-sidebar-content-field-dropdown-border-color;
-                padding: 0;
-
-                > li ~ li {
-                    border-top: $o-we-sidebar-content-field-dropdown-item-spacing solid transparent;
-                }
-            }
-
-            .dropdown-item {
-                @include we-icon-button('', $align: left); // Always a padding on the left
-                background-color: $o-we-sidebar-content-field-dropdown-item-bg;
-                color: $o-we-sidebar-content-field-dropdown-item-color;
-                border-radius: 0;
-                padding-top: 5px;
-                padding-bottom: 5px;
-
-                &:hover, &:focus {
-                    background: $o-we-dropdown-item-bg-hover;
-                    color: $o-we-dropdown-item-hover-color;
-                }
             }
 
             .btn + .btn {
@@ -910,6 +881,89 @@
             }
             .btn-group[name="hilight"] {
                 grid-area: hilight;
+            }
+        }
+        // todo: move this in a proper file
+        we-customizeblock-option.o-we-linktools {
+            we-title {
+                &.o_short_title {
+                    width: unset !important;
+                    padding-right: 0 !important;
+                }
+                &.o_long_title {
+                    width: fit-content !important;
+                    padding-right: 10px !important;
+                }
+            }
+            .highlighted-text {
+                color: white;
+                font-weight: bold;
+                padding: 1px;
+            }
+            input::placeholder {
+                font-style: italic;
+            }
+            we-input:not(.o_we_small_input) {
+                &, div, input {
+                    width: 100% !important;
+                }
+            }
+
+            .dropdown {
+                position: unset;
+                width: 100%;
+
+                .dropdown-toggle {
+                    padding: 0;
+                    width: 100%;
+
+                    &::after {
+                        display: none;
+                    }
+                }
+                .dropdown-menu.show {
+                    position: absolute !important;
+                    padding: 0;
+                    width: 100%;
+                    border-color: $o-we-dropdown-border-color;
+
+                    &[data-popper-placement$="start"] {
+                        left: -$o-we-sidebar-content-padding-base !important;
+                    }
+
+                    we-button:not(.fa) {
+                        display: flex;
+                        align-items: center;
+                        height: $o-we-sidebar-content-field-dropdown-item-height;
+                        text-align: left;
+                        font-family: $o-we-font-family;
+                        font-size: 12px;
+                        font-weight: 400;
+
+                        div {
+                            width: 100%;
+                        }
+                    }
+
+                    .dropdown-item::before {
+                        display: none;
+                    }
+                }
+            }
+            .dropdown-toggle {
+                background: transparent;
+                border: none;
+                padding: 7px;
+
+                &[aria-expanded="true"] {
+                    background: #555555;
+                }
+            }
+            .dropdown-menu {
+                background: #222222;
+                min-width: max-content;
+                min-width: -webkit-max-content;
+                text-align: center;
             }
         }
 

@@ -20,6 +20,7 @@ export class ToolbarPlugin extends Plugin {
             categoryIds.add(category.id);
         }
         this.categories = this.resources.toolbarCategory.sort((a, b) => a.sequence - b.sequence);
+        /** @type {Array} */
         this.buttonGroups = [];
 
         const toolbarItems = !this.config.disabledToolbarButtonIds
@@ -30,6 +31,16 @@ export class ToolbarPlugin extends Plugin {
 
         for (const category of this.categories) {
             const buttons = toolbarItems.filter((command) => command.category === category.id);
+            for (const button of buttons) {
+                if (!("state" in button)) {
+                    button.state = reactive({});
+                }
+                applyDefaultProps(button.state, {
+                    isAvailable: true,
+                    isEnabled: true,
+                    isActive: false,
+                });
+            }
             if (buttons.length > 0) {
                 this.buttonGroups.push({
                     ...category,
@@ -44,9 +55,6 @@ export class ToolbarPlugin extends Plugin {
 
         this.overlay = this.shared.createOverlay(Toolbar, { position: "top-start" });
         this.state = reactive({
-            buttonsActiveState: {},
-            buttonsDisabledState: {},
-            buttonsAvailableState: {},
             namespace: undefined,
         });
         this.updateSelection = null;
@@ -158,17 +166,26 @@ export class ToolbarPlugin extends Plugin {
         for (const buttonGroup of this.buttonGroups) {
             if (buttonGroup.namespace === this.state.namespace) {
                 for (const button of buttonGroup.buttons) {
-                    this.state.buttonsActiveState[button.id] = button.isFormatApplied?.(
-                        selection,
-                        nodes
-                    );
-                    this.state.buttonsDisabledState[button.id] =
-                        button.hasFormat != null && !button.hasFormat?.(selection);
-                    this.state.buttonsAvailableState[button.id] =
-                        button.isAvailable === undefined || button.isAvailable(selection);
+                    if (button.isAvailable) {
+                        button.state.isAvailable = button.isAvailable?.(selection, nodes);
+                    }
+                    if (button.hasFormat) {
+                        button.state.isEnabled = button.hasFormat?.(selection, nodes);
+                    }
+                    if (button.isFormatApplied) {
+                        button.state.isActive = button.isFormatApplied?.(selection, nodes);
+                    }
                 }
             }
         }
         this.updateSelection = null;
+    }
+}
+
+function applyDefaultProps(props, defaultProps) {
+    for (const propName in defaultProps) {
+        if (props[propName] === undefined) {
+            props[propName] = defaultProps[propName];
+        }
     }
 }

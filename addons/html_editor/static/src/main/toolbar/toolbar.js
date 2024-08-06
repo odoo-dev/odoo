@@ -15,9 +15,6 @@ export class Toolbar extends Component {
                 state: {
                     type: Object,
                     shape: {
-                        buttonsActiveState: Object,
-                        buttonsDisabledState: Object,
-                        buttonsAvailableState: Object,
                         namespace: {
                             type: String,
                             optional: true,
