@@ -70,6 +70,7 @@
       </cac:Price>
       <cac:Item>
         <cbc:Name>product_a</cbc:Name>
+        <cbc:Description>product_a</cbc:Description>
         <cac:ClassifiedTaxCategory>
           <cbc:ID>S</cbc:ID>
           <cbc:Percent>15.0</cbc:Percent>
