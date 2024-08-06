@@ -70,7 +70,6 @@ export class MassMailingHtmlField extends HtmlField {
     get snippetMenuProps() {
         const self = this;
         /** @type {import("../../../../../html_editor/static/src/editor").Editor} */
-        const editor = this.editor;
         const state = this.state;
         const options = {
             mutex: new Mutex(),
@@ -84,12 +83,12 @@ export class MassMailingHtmlField extends HtmlField {
                     return state.iframeDocument;
                 },
                 get $editable() {
-                    return $(editor.editable);
+                    return $(self.editor.editable);
                 },
                 get lastMediaClicked() {
                     return self.lastMediaClicked;
                 },
-                getEditable: () => $(editor.editable),
+                getEditable: () => $(self.editor.editable),
                 isSaving: () => false,
                 getColorpickerTemplate: () => {
                     return this.getColorPickerTemplateService();
@@ -99,10 +98,10 @@ export class MassMailingHtmlField extends HtmlField {
                 },
                 historyState: this.historyState,
                 undo: () => {
-                    editor.dispatch("HISTORY_UNDO");
+                    self.editor.dispatch("HISTORY_UNDO");
                 },
                 redo: () => {
-                    editor.dispatch("HISTORY_REDO");
+                    self.editor.dispatch("HISTORY_REDO");
                 },
                 odooEditor: {
                     get document() {
@@ -123,6 +122,7 @@ export class MassMailingHtmlField extends HtmlField {
                      * attribute.
                      */
                     bindExecCommand(element) {
+                        const editor = self.editor;
                         const commands = {
                             removeFormat: "FORMAT_REMOVE_FORMAT",
                             addColumn: (el) => {
@@ -186,7 +186,7 @@ export class MassMailingHtmlField extends HtmlField {
                     computeFontSizeSelectorValues() {},
 
                     historyStep() {
-                        editor.dispatch("ADD_STEP");
+                        self.editor.dispatch("ADD_STEP");
                     },
 
                     historyPauseSteps() {},
@@ -234,6 +234,7 @@ export class MassMailingHtmlField extends HtmlField {
             },
             trigger_up: (ev) => this._trigger_up(ev),
             toolbarInfos: state.toolbarInfos,
+            toggleCodeView: this.toggleCodeView.bind(this),
         };
     }
     async onSelectMassMailingTemplate(templateInfos, templateHTML) {

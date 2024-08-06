@@ -23,6 +23,7 @@ import {
     onMounted,
     onWillStart,
     onWillUnmount,
+    onWillUpdateProps,
     useEffect,
     useRef,
     useState,
@@ -888,7 +889,7 @@ var SnippetEditor = Widget.extend({
             elements: elementsSelector,
             handle: handle,
             scrollingElement: $scrollable[0],
-            enable: () => !!this.$el.find('.o_move_handle:visible').length || this.dragStarted,
+            enable: () => (!!this.$el.find('.o_move_handle:visible').length || this.dragStarted) && this.isDraggable,
             helper: () => {
                 const cloneEl = this.$el[0].cloneNode(true);
                 cloneEl.style.width = "24px";
@@ -1866,6 +1867,7 @@ class SnippetsMenu extends Component {
         this.$body = $((this.options.document || document).body);
         this.customEvents = SnippetsMenu.custom_events;
         this.tabs = SnippetsMenu.tabs;
+        this.isDraggable = true;
 
         this.state = useState({
             showCustomizePanel: false,
@@ -1951,6 +1953,12 @@ class SnippetsMenu extends Component {
             this.el.classList.add("o_loaded");
             this.el.ownerDocument.body.classList.toggle('editor_has_snippets', !this.folded);
         });
+
+        onWillUpdateProps((nextProps) => {
+            this.options = Object.assign({}, nextProps.options);
+            this.$body = $((this.options.document || document).body);
+            this.options.getDragAndDropOptions = this._getDragAndDropOptions.bind(this);
+        })
 
         onWillUnmount(() => {
             this.onWillUnmount();
@@ -3574,6 +3582,7 @@ class SnippetsMenu extends Component {
             scrollingElement: $scrollingElement[0],
             handle: '.oe_snippet_thumbnail:not(.o_we_already_dragging)',
             cancel: '.oe_snippet.o_disabled',
+            enable: () => this.isDraggable,
             dropzones: () => {
                 return $dropZones.toArray();
             },
