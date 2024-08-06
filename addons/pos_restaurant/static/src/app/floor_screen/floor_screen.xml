@@ -20,7 +20,7 @@
                     </button>
                 </div>
                 <!-- Right Side Div -->
-                <div t-if="pos.isEditMode" class="edit-buttons d-flex flex-wrap gap-2 m-2 overflow-x-auto">
+                <div t-if="pos.isEditMode" class="edit-buttons d-flex gap-2 m-2 overflow-x-auto" t-att-class="{'mx-auto': ui.isSmall}">
                     <div class="d-flex gap-1 p-1 rounded-3 bg-200">
                         <t t-if="hasSelectedTable">
                             <span class="mx-2 align-self-center text-uppercase smaller fw-bolder">Table <t t-esc="firstSelectedTable.table_number" /></span>
@@ -73,12 +73,13 @@
                             <i class="fa fa-trash fa-fw" role="img" aria-label="Delete" title="Delete"/>
                         </button>
                     </div>
-                    <button t-attf-class="btn btn-outline-secondary btn-lg d-flex align-items-center lh-lg " t-on-click.stop="createTable">
-                        <i class="fa fa-plus-circle me-2" role="img" aria-label="Add Table" title="Add Table"/>
-                        Table
+                    <button t-attf-class="btn btn-outline-secondary btn-lg d-flex align-items-center justify-content-center gap-2 lh-lg " t-on-click.stop="createTable">
+                        <i class="fa fa-plus-circle" role="img" aria-label="Add Table" title="Add Table"/>
+                        <t t-if="!ui.isSmall">Table</t>
                     </button>
                     <button t-attf-class="btn btn-primary btn-lg" t-on-click.stop="closeEditMode">
-                        Save
+                        <t t-if="!ui.isSmall">Save</t>
+                        <i t-else="" class="fa fa-floppy-o" role="img" aria-label="Save" title="Save"/>
                     </button>
                 </div>
                 <div t-if="pos.orderToTransferUuid" class="d-flex align-items-center justify-content-between px-3 gap-2 border-bottom bg-view overflow-x-auto">
