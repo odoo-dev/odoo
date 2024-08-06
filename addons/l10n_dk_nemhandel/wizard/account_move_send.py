@@ -62,7 +62,7 @@ class AccountMoveSend(models.TransientModel):
     @api.depends('move_ids')
     def _compute_nemhandel_warning(self):
         for wizard in self:
-            invalid_partners = wizard.move_ids.partner_id.commercial_partner_id.filtered(lambda partner: not partner.account_peppol_is_endpoint_valid)
+            invalid_partners = wizard.move_ids.partner_id.commercial_partner_id.filtered(lambda partner: not partner.l10n_dk_nemhandel_is_endpoint_valid)
             if not invalid_partners:
                 wizard.nemhandel_warning = False
             else:
@@ -94,7 +94,7 @@ class AccountMoveSend(models.TransientModel):
         }
         for wizard in self:
             edi_user = wizard.company_id.account_edi_proxy_client_ids.filtered(
-                lambda usr: usr.proxy_type == 'l10n_dk_nemhandel'
+                lambda usr: usr.proxy_type == 'nemhandel'
             )
             mode = mode_strings.get(edi_user.edi_mode)
             wizard.l10n_dk_nemhandel_mode_info = f' ({mode})' if mode else ''
@@ -154,7 +154,7 @@ class AccountMoveSend(models.TransientModel):
                     invoice_data['error'] = _('Please verify partner configuration in partner settings.')
                     continue
 
-                receiver_identification = f"{partner.l10n_dk_nemhandel_identifier_type}:{partner.l10n_dk_nemhandel_identifier_value}"
+                receiver_identification = f"{partner.l10n_dk_nemhandel_identifier_type}/{partner.l10n_dk_nemhandel_identifier_value}"
                 params['documents'].append({
                     'filename': filename,
                     'receiver': receiver_identification,
@@ -166,7 +166,7 @@ class AccountMoveSend(models.TransientModel):
             return
 
         edi_user = next(iter(invoices_data)).company_id.account_edi_proxy_client_ids.filtered(
-            lambda u: u.proxy_type == 'l10n_dk_nemhandel')
+            lambda u: u.proxy_type == 'nemhandel')
 
         try:
             response = edi_user._make_request(

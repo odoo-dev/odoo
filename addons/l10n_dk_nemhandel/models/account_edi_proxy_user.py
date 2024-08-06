@@ -14,7 +14,7 @@ class AccountEdiProxyClientUser(models.Model):
     _inherit = 'account_edi_proxy_client.user'
 
     l10n_dk_nemhandel_verification_code = fields.Char(string='SMS verification code')
-    proxy_type = fields.Selection(selection_add=[('l10n_dk_nemhandel', 'Nemhandel')], ondelete={'l10n_dk_nemhandel': 'cascade'})
+    proxy_type = fields.Selection(selection_add=[('nemhandel', 'Nemhandel')], ondelete={'nemhandel': 'cascade'})
 
     # -------------------------------------------------------------------------
     # HELPER METHODS
@@ -30,7 +30,7 @@ class AccountEdiProxyClientUser(models.Model):
             if (
                 e.code == 'no_such_user'
                 and not self.active
-                and not self.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'l10n_dk_nemhandel')
+                and not self.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'nemhandel')
             ):
                 self.company_id.write({
                     'l10n_dk_nemhandel_proxy_state': 'not_registered',
@@ -44,7 +44,7 @@ class AccountEdiProxyClientUser(models.Model):
     def _get_proxy_urls(self):
         urls = super()._get_proxy_urls()
         # TODO
-        urls['l10n_dk_nemhandel'] = {
+        urls['nemhandel'] = {
             'prod': 'http://127.0.0.1:8079',
             'test': 'http://127.0.0.1:8079',
             'demo': 'demo',
@@ -68,7 +68,7 @@ class AccountEdiProxyClientUser(models.Model):
     # -------------------------------------------------------------------------
 
     def _get_proxy_identification(self, company, proxy_type):
-        if proxy_type == 'l10n_dk_nemhandel':
+        if proxy_type == 'nemhandel':
             if not company.l10n_dk_nemhandel_identifier_type or not company.l10n_dk_nemhandel_identifier_value:
                 raise UserError(
                     _("Please fill in the Identifier Type and Value."))

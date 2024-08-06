@@ -138,10 +138,10 @@ def handle_demo(func, self, *args, **kwargs):
     """
     def get_demo_mode_account_edi_proxy_client_user(self, args, kwargs):
         if self.id:
-            return self.edi_mode == 'demo' and self.proxy_type == 'l10n_dk_nemhandel'
+            return self.edi_mode == 'demo' and self.proxy_type == 'nemhandel'
         demo_param = self.env['ir.config_parameter'].get_param('l10n_dk_nemhandel.edi.mode') == 'demo'
         if len(args) > 1 and 'proxy_type' in args[1]:
-            return demo_param and args[1]['proxy_type'] == 'l10n_dk_nemhandel'
+            return demo_param and args[1]['proxy_type'] == 'nemhandel'
         return demo_param
 
     def get_demo_mode_res_config_settings(self, args, kwargs):
@@ -150,7 +150,7 @@ def handle_demo(func, self, *args, **kwargs):
         return self.l10n_dk_nemhandel_edi_mode == 'demo'
 
     def get_demo_mode_res_partner(self, args, kwargs):
-        l10n_dk_nemhandel_edi_user = self.env.company.account_edi_proxy_client_ids.filtered(lambda user: user.proxy_type == 'l10n_dk_nemhandel')
+        l10n_dk_nemhandel_edi_user = self.env.company.account_edi_proxy_client_ids.filtered(lambda user: user.proxy_type == 'nemhandel')
         if l10n_dk_nemhandel_edi_user:
             return l10n_dk_nemhandel_edi_user.edi_mode == 'demo'
         return False

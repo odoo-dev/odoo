@@ -48,7 +48,7 @@ class ResConfigSettings(models.TransientModel):
         }
 
         if not edi_user:
-            edi_user = self.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'l10n_dk_nemhandel')
+            edi_user = self.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'nemhandel')
 
         params = params or {}
         try:
@@ -92,7 +92,7 @@ class ResConfigSettings(models.TransientModel):
     @api.depends("company_id.account_edi_proxy_client_ids")
     def _compute_l10n_dk_nemhandel_edi_user(self):
         for config in self:
-            config.l10n_dk_nemhandel_edi_user = config.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'l10n_dk_nemhandel')
+            config.l10n_dk_nemhandel_edi_user = config.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'nemhandel')
 
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS
@@ -215,7 +215,7 @@ class ResConfigSettings(models.TransientModel):
         #
         # raise UserError("meuh")
 
-        edi_user = edi_proxy_client.sudo()._register_proxy_user(company, 'l10n_dk_nemhandel', self.l10n_dk_nemhandel_edi_mode)
+        edi_user = edi_proxy_client.sudo()._register_proxy_user(company, 'nemhandel', self.l10n_dk_nemhandel_edi_mode)
         self.l10n_dk_nemhandel_proxy_state = 'not_verified'
 
         # if there is an error when activating the participant below,
