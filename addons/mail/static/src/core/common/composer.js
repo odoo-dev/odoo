@@ -210,6 +210,9 @@ export class Composer extends Component {
         if (this.props.placeholder) {
             return this.props.placeholder;
         }
+        if (this.thread?.read_only) {
+            return _t("This channel is read only");
+        }
         if (this.thread) {
             if (this.thread.channel_type === "channel") {
                 const threadName = this.thread.displayName;
@@ -563,7 +566,9 @@ export class Composer extends Component {
                     this.notifySendFromMailbox();
                 }
                 if (accidentalDiscard) {
-                    const editor = document.querySelector(".o_mail_composer_form_view .note-editable");
+                    const editor = document.querySelector(
+                        ".o_mail_composer_form_view .note-editable"
+                    );
                     const editorIsEmpty = !editor || !editor.innerText.replace(/^\s*$/gm, "");
                     if (!editorIsEmpty) {
                         this.saveContent();
