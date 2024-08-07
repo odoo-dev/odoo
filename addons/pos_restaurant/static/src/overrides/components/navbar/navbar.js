@@ -95,8 +95,4 @@ patch(Navbar.prototype, {
             this.selectFloatingOrder(floating_order);
         }
     },
-    getFloatingOrders() {
-        const result = super.getFloatingOrders();
-        return result.filter((o) => !o.table_id);
-    },
 });

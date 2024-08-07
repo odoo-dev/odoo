@@ -14,7 +14,9 @@ patch(ActionpadWidget.prototype, {
         });
     },
     get swapButton() {
-        return this.pos.config.module_pos_restaurant && this.pos.mainScreen.component !== TicketScreen;
+        return (
+            this.pos.config.module_pos_restaurant && this.pos.mainScreen.component !== TicketScreen
+        );
     },
     get currentOrder() {
         return this.pos.get_order();

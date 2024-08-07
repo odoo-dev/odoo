@@ -183,7 +183,7 @@ export function clickControlButtonMore() {
         {
             isActive: ["mobile"],
             content: "click Actions button",
-            trigger: '.mobile-more-button',
+            trigger: ".mobile-more-button",
             run: "click",
         },
         {
@@ -200,7 +200,7 @@ export function clickInternalNoteButton() {
         {
             isActive: ["mobile"],
             content: "click Actions button",
-            trigger: '.mobile-more-button',
+            trigger: ".mobile-more-button",
             run: "click",
         },
         {

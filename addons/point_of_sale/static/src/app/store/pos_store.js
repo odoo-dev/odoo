@@ -1575,10 +1575,7 @@ export class PosStore extends Reactive {
             } else {
                 this.ticket_screen_mobile_pane = "left";
             }
-        } else if (
-            this.mobile_pane == "left" ||
-            this.mainScreen.component === PaymentScreen
-        ) {
+        } else if (this.mobile_pane == "left" || this.mainScreen.component === PaymentScreen) {
             this.mobile_pane = "right";
             this.showScreen("ProductScreen");
         }

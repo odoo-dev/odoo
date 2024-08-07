@@ -40,7 +40,7 @@ export class TicketScreen extends Component {
         ReprintReceiptButton,
         SearchBar,
         Numpad,
-        BackButton
+        BackButton,
     };
     static props = {
         destinationOrder: { type: Object, optional: true },
