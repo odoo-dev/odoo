@@ -1,0 +1,5 @@
+<templates>
+    <t t-name="html_editor.EmbeddedVideoBlueprint">
+        <div t-att-data-embedded-props="behaviorProps" data-embedded="video"/>
+    </t>
+</templates>

@@ -37,7 +37,9 @@ export function isImageUrl(url) {
 /**
  * @param {string} platform
  * @param {string} videoId
- * @param {object} params
+ * @param {Object} params
+ * @throws {Error} if the given video config is not recognized
+ * @returns {URL}
  */
 export function getVideoUrl(platform, videoId, params) {
     let url;
