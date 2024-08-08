@@ -10,9 +10,9 @@
 </t>
 
 <t t-name="website.s_timeline_overlay_option">
-    <Overlay targetEl="$overlay[0].querySelector('.o_overlay_options_wrap')">
+    <WeOverlay target="'.o_overlay_options_wrap'">
         <WeButton timelineCard="''" noPreview="'true'" class="'o_we_overlay_opt'"><i class="fa fa-fw fa-angle-left"/><i class="fa fa-fw fa-angle-right"/></WeButton>
-    </Overlay>
+    </WeOverlay>
 </t>
 
 <t t-name="website.s_timeline_color_option">

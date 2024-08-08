@@ -12,34 +12,31 @@
     </WeRow>
     <t t-if="renderContext.formInfo.fields">
         <t t-foreach="renderContext.formInfo.fields" t-as="field" t-key="field.name">
-            <WeRow>
-                <t t-set-slot="title"><t t-out="field.string"/></t>
-                <t t-if="field.type === 'many2one'">
-                    <WeSelect
-                        noPreview="'true'"
-                        fieldName="field.name"
-                        isSelect="'true'"
-                    >
-                        <WeButton t-if="!field.required" addActionField="'0'">
-                            None
-                        </WeButton>
-                        <WeButton t-foreach="field.records" t-as="record" t-key="record.id"
-                            addActionField="record.id.toString()"
-                        >
-                            <t t-out="record.display_name"/>
-                        </WeButton>
-                    </WeSelect>
-                    <WeButton t-if="field.createAction" class="'fa fa-fw fa-plus'"
-                        tooltip.translate="Create New" noPreview="'true'"
-                        promptSaveRedirect="field.createAction"
-                    />
-                </t>
-                <WeInput t-if="field.type === 'char'" class="'o_we_large'"
+            <WeRow t-if="field.type === 'many2one'" title="field.string">
+                <WeSelect
                     noPreview="'true'"
                     fieldName="field.name"
-                    addActionField="''"
+                    isSelect="'true'"
+                >
+                    <WeButton t-if="!field.required" addActionField="'0'">
+                        None
+                    </WeButton>
+                    <WeButton t-foreach="field.records" t-as="record" t-key="record.id"
+                        addActionField="record.id.toString()"
+                    >
+                        <t t-out="record.display_name"/>
+                    </WeButton>
+                </WeSelect>
+                <WeButton t-if="field.createAction" class="'fa fa-fw fa-plus'"
+                    tooltip.translate="Create New" noPreview="'true'"
+                    promptSaveRedirect="field.createAction"
                 />
             </WeRow>
+            <WeInput t-if="field.type === 'char'" class="'o_we_large'" title="field.string"
+                noPreview="'true'"
+                fieldName="field.name"
+                addActionField="''"
+            />
         </t>
     </t>
     <WeRow title.translate="Marked Fields">
@@ -94,7 +91,7 @@
 <t t-name="website.s_website_form_field_required_option">
     <!-- Disable the delete option of model required fields and show
     alert and tooltip on delete buttons -->
-    <we-alert class="mt-2"></we-alert>
+    <we-alert class="mt-2"><span t-out="env.renderContext.alertText"/></we-alert>
 </t>
 
 <t t-name="website.s_website_form_field_option">
@@ -153,9 +150,7 @@
             selectAttribute="'3#' + unit_textarea_height"
             attributeName="'rows'"/>
     </WeRow>
-    <WeRow title.translate="Label">
-        <WeInput class="'o_we_large'" setLabelText="''"/>
-    </WeRow>
+    <WeInput title.translate="Label" class="'o_we_large'" setLabelText="''"/>
     <WeRow title.translate="Position" class="'o_we_sublevel_1'">
         <WeButtonGroup>
             <WeButton tooltip.translate="Hide" selectLabelPosition="'none'">
@@ -173,27 +168,18 @@
         </WeButtonGroup>
     </WeRow>
     <WeCheckbox title.translate="Description" toggleDescription="'true'" noPreview="'true'"/>
-    <WeRow title.translate="Placeholder">
-        <t t-set="apply_to" t-translation="off"></t>
-        <WeInput class="'o_we_large'"
-            selectAttribute="''" attributeName="'placeholder'"
-            applyTo="`input[type='text'], input[type='email'], input[type='number'], input[type='tel'], input[type='url'], textarea`"/>
-    </WeRow>
+    <WeInput title.translate="Placeholder" class="'o_we_large'"
+        selectAttribute="''" attributeName="'placeholder'"
+        applyTo="`input[type='text'], input[type='email'], input[type='number'], input[type='tel'], input[type='url'], textarea`"/>
     <!-- TODO: @owl-options see if all these cannot be inside the same row -->
     <t t-set="default_value_label">Default Value</t>
-    <WeRow title="default_value_label">
-        <WeInput class="'o_we_large'" selectTextareaValue="''" applyTo="'textarea'"/>
-    </WeRow>
+    <WeInput title="default_value_label" class="'o_we_large'" selectTextareaValue="''" applyTo="'textarea'"/>
     <WeCheckbox title="default_value_label" selectAttribute="'checked'" attributeName="'checked'"
                 applyTo="`.col-sm > * > input[type='checkbox']`" noPreview="'true'"/>
-    <WeRow title="default_value_label">
-        <WeInput class="'o_we_large'" selectAttribute="''" attributeName="'value'" selectProperty="''"
-                  propertyName="'value'" applyTo="`input[type='text']:not(.datetimepicker-input), input[type='email'], input[type='tel'], input[type='url']`"/>
-    </WeRow>
-    <WeRow title="default_value_label">
-        <WeInput class="'o_we_large'" selectAttribute="''" attributeName="'value'" selectProperty="''"
-                  step="'1'" propertyName="'value'" applyTo="`input[type='number']`"/>
-    </WeRow>
+    <WeInput title="default_value_label" class="'o_we_large'" selectAttribute="''" attributeName="'value'" selectProperty="''"
+              propertyName="'value'" applyTo="`input[type='text']:not(.datetimepicker-input), input[type='email'], input[type='tel'], input[type='url']`"/>
+    <WeInput title="default_value_label" class="'o_we_large'" selectAttribute="''" attributeName="'value'" selectProperty="''"
+              step="'1'" propertyName="'value'" applyTo="`input[type='number']`"/>
     <WeRow title="default_value_label">
         <WeDatetime selectAttribute="''" attributeName="'value'" selectValueProperty="''"
                            applyTo="'.s_website_form_datetime input'"/>

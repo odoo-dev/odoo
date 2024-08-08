@@ -157,6 +157,8 @@
         'mass_mailing.assets_snippets_menu': [
             ('include', 'web_editor.assets_snippets_menu'),
             'mass_mailing/static/src/js/snippets.editor.js',
+            'mass_mailing/static/src/js/snippets.registry.js',
+            'mass_mailing/static/src/js/design_tab.xml',
             'mass_mailing/static/src/xml/mass_mailing.editor.xml',
         ],
         'web.assets_frontend': [

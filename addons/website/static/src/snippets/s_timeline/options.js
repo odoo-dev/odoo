@@ -34,7 +34,7 @@ registerWebsiteOption("Timeline (Multiple)", {
 });
 registerWebsiteOption("Timeline (Move row)", {
     selector: ".s_timeline_row",
-    "drop-near": ".s_timeline_row",
+    dropNear: ".s_timeline_row",
 });
 registerWebsiteOption("Timeline (Overlay)", {
     Class: TimelineOption,

@@ -11,12 +11,9 @@ class GoogleMap extends SnippetOption {
      */
     async onBuilt(options) {
         this.env.gmapApiRequest({
-            data: {
-                editableMode: true,
-                configureIfNecessary: true,
-                onSuccess: (key) => key,
-            },
-            stopPropagation: () => {},
+            editableMode: true,
+            configureIfNecessary: true,
+            onSuccess: (key) => key,
         });
         await super.onBuilt(...arguments);
     }
