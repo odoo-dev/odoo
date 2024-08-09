@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import _, api, fields, models
+from odoo import _, api, fields, models, Command
 
 
 class AccountMove(models.Model):
@@ -97,3 +97,28 @@ class AccountMove(models.Model):
             and not self.ubl_cii_xml_id \
             and self.is_sale_document() \
             and bool(self.partner_id.commercial_partner_id.ubl_cii_format)
+
+    def _get_line_charge_vals_list(self, lines_vals):
+        """ Get invoice line charges values list.
+
+        param list line_vals: List of allowance charges values.
+        :return: List of invoice line values.
+        """
+        return [{
+            'sequence': 0,  # be sure to put these lines above the 'real' invoice lines
+            'name': name,
+            'quantity': quantity,
+            'price_unit': price_unit,
+            'tax_ids': [Command.set(tax_ids)],
+        } for name, quantity, price_unit, tax_ids in lines_vals]
+
+    def _get_specific_tax(self, name, amount_type, amount, tax_type):
+        tax = self.env['account.tax']
+        AccountMoveLine = self.env['account.move.line']
+        if hasattr(AccountMoveLine, '_predict_specific_tax'):
+            # company check is already done in the prediction query
+            predicted_tax_id = AccountMoveLine._predict_specific_tax(
+                self, name, self.partner_id, amount_type, amount, tax_type,
+            )
+            tax = self.env['account.tax'].browse(predicted_tax_id)
+        return tax
