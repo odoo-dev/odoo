@@ -35,9 +35,11 @@
                 data-color-prefix="alert-"/>
         </div>
         <div data-selector=".s_mail_alert .s_alert">
-            <t t-call="mass_mailing.snippet_options_border_widgets">
+            <!-- TODO @owl-options: do convert & uncomment this. Just commented
+                in legacy to avoid errors. -->
+            <!-- <t t-call="mass_mailing.snippet_options_border_widgets">
                 <t t-set="so_rounded_no_dependencies" t-value="True"/>
-            </t>
+            </t> -->
         </div>
     </xpath>
 </template>

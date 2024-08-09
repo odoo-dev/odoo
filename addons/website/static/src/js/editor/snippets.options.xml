@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates id="template" xml:space="preserve">
+<!-- =================================================================== -->
+<!-- Modify generic snippet options                                      -->
+<!-- =================================================================== -->
+
 <t t-name="website.snippet_options_background_options" t-inherit="web_editor.snippet_options_background_options">
     <xpath expr="//WeButton[@toggleBgImage]" position="after">
         <t t-if="option.withVideos">
@@ -11,6 +15,18 @@
         </t>
     </xpath>
 </t>
+
+<t t-inherit="web_editor.ImageTools" t-inherit-mode="extension">
+    <xpath expr="//WeButton[@name=&quot;'image_transform_opt'&quot;]" position="attributes">
+        <attribute name="dependencies">'no_animation_opt'</attribute>
+    </xpath>
+</t>
+
+
+<!-- =================================================================== -->
+<!-- Adding website specific snippet options                             -->
+<!-- =================================================================== -->
+
 <t t-name="website.BackgroundVideo">
     <WeRow class="'o_we_sublevel_1'" title.translate="Video">
         <WeMediapicker tooltip.translate="Edit video"
@@ -331,23 +347,28 @@
     </WeSelect>
 </t>
 
+<t t-name="website.snippet_save_option">
+    <WeButton class="'fa fa-fw fa-save o_we_link o_we_hover_warning'"
+        tooltip.translate="Save the block to use it elsewhere"
+        saveSnippet="''"
+        noPreview="'true'"
+    />
+</t>
+
 <t t-name="website.TestSnippetOption" t-inherit="web_editor.TestSnippetOption" t-inherit-mode="extension">
     <xpath expr="//WeRow" position="before">
-        <WeRow>
-            <t t-set-slot="title">URL</t>
+        <WeRow title.translate="URL">
             <WeUrlPicker selectDataAttribute="''" attributeName="'url'"/>
         </WeRow>
         <!-- Do not annoy devs with GMap key
-        <WeRow>
-            <t t-set-slot="title">Address</t>
+        <WeRow title.translate="Address">
             <WeGpsPicker selectDataAttribute="''" attributeName="'mapGps'"
                 setFormattedAddress="''"
-                placeholder="'e.g. De Brouckere, Brussels, Belgium'"
+                placeholder.translate="e.g. De Brouckere, Brussels, Belgium"
                 noPreview="'true'"/>
         </WeRow>
         -->
-        <WeRow>
-            <t t-set-slot="title">Font</t>
+        <WeRow title.translate="Font">
             <WeFontFamilyPicker selectMethod="'selectDataAttribute'" attributeName="'font'"/>
         </WeRow>
     </xpath>
@@ -367,8 +388,9 @@
                 t-att-value="this.state.value"
             />
         </div>
+        <t t-set="tooltip">Preview this URL in a new tab</t>
         <we-button class="o_we_redirect_to o_we_link ms-1"
-            title="Preview this URL in a new tab"
+            t-att-data-tooltip="tooltip"
             t-on-click="() => { this._onRedirectTo(); }"
         >
             <i class="fa fa-fw fa-external-link"/>
@@ -387,7 +409,10 @@
     </we-input>
 </t>
 <t t-name="website.WeFontFamilyPicker">
-    <we-select class="o_we_user_value_widget" t-att-class="getAllClasses()" t-on-click="_onClick">
+    <we-select class="o_we_user_value_widget" t-att-class="getAllClasses()" t-on-click="_onClick"
+                t-att="getAllDataAttributes()">
+        <WeTitle t-if="props.slots?.title || props.title"
+               title="props.title" slots="{title: props.slots?.title}"/>
         <div>
             <we-toggler t-out="state.toggler.textContent" t-att-class="{ 'active': state.opened }"/>
             <we-selection-items t-ref="menu">
@@ -404,7 +429,6 @@
                                     <i role="button"
                                        t-on-click.prevent="() => this._onDeleteFontClick(font)"
                                        class="link-danger fa fa-trash-o o_we_delete_font_btn"
-                                       title="Delete this font"
                                        t-att-aria-label="delete_font_title"
                                        t-att-title="delete_font_title"/>
                                 </t>
@@ -596,6 +620,217 @@
     <WeButton class="'fa fa-fw fa-angle-double-right'" tooltip.translate="Move to last"
             position="'last'" noPreview="'true'"/>
 </WeRow>
+</t>
+
+<!-- Website Animate -->
+<t t-name="website.WebsiteAnimate">
+    <!-- Animation mode -->
+    <WeRow title.translate="Animation">
+        <WeSelect dependencies="'!image_transform_opt'" isAnimationTypeSelection="'true'"
+                  noPreview="'true'">
+            <WeButton animationMode="''" selectClass="''" name="'no_animation_opt'">None</WeButton>
+            <WeButton animationMode="'onAppearance'" forceAnimation="'true'"
+                      selectClass="'o_animate'" name="'animation_on_appearance_opt'">
+                On Appearance
+            </WeButton>
+            <WeButton animationMode="'onScroll'" selectClass="'o_animate o_animate_on_scroll'"
+                      forceAnimation="'true'" name="'animation_on_scroll_opt'">
+                On Scroll
+            </WeButton>
+            <WeButton animationMode="'onHover'" selectClass="'o_animate_on_hover'"
+                      name="'animation_on_hover_opt'">
+                On Hover
+            </WeButton>
+        </WeSelect>
+        <WeButtonGroup dependencies="'animation_on_scroll_opt'" noPreview="'true'"
+                       forceAnimation="'true'">
+            <WeButton selectClass="''">In</WeButton>
+            <WeButton selectClass="'o_animate_out'">Out</WeButton>
+        </WeButtonGroup>
+    </WeRow>
+    <!-- Effect -->
+    <WeSelect title.translate="Effect" class="'o_we_sublevel_1'" name="'animation_effect_opt'">
+        <WeButton selectClass="''" name="'o_anim_no_effect_opt'"
+                  dependencies="'no_animation_opt'">None</WeButton>
+        <WeButton selectClass="'o_anim_fade_in'" trigger="'animation_direction_in_place_opt'">
+            Fade
+        </WeButton>
+        <WeButton selectClass="'o_anim_slide_in'" name="'o_anim_slide_in_opt'"
+                  trigger="'animation_direction_from_right_opt'">Slide</WeButton>
+        <WeButton selectClass="'o_anim_bounce_in'" trigger="'animation_direction_in_place_opt'">
+            Bounce
+        </WeButton>
+        <WeButton selectClass="'o_anim_rotate_in'" name="'o_anim_rotate_opt'"
+                  trigger="'animation_direction_in_place_opt'">
+            Rotate
+        </WeButton>
+        <WeButton selectClass="'o_anim_zoom_out'" trigger="'animation_direction_in_place_opt'">
+            Zoom Out
+        </WeButton>
+        <WeButton selectClass="'o_anim_zoom_in'" trigger="'animation_direction_in_place_opt'">
+            Zoom In
+        </WeButton>
+        <WeButton selectClass="'o_anim_flash'" dependencies="'animation_on_appearance_opt'"
+                  trigger="'animation_direction_in_place_opt'">
+            Flash
+        </WeButton>
+        <WeButton selectClass="'o_anim_pulse'" dependencies="'animation_on_appearance_opt'"
+                  trigger="'animation_direction_in_place_opt'">
+            Pulse
+        </WeButton>
+        <WeButton selectClass="'o_anim_shake'" dependencies="'animation_on_appearance_opt'"
+                  trigger="'animation_direction_in_place_opt'">
+            Shake
+        </WeButton>
+        <WeButton selectClass="'o_anim_tada'" dependencies="'animation_on_appearance_opt'"
+                  trigger="'animation_direction_in_place_opt'">
+            Tada
+        </WeButton>
+        <WeButton selectClass="'o_anim_flip_in_x'" dependencies="'animation_on_appearance_opt'"
+                  trigger="'animation_direction_in_place_opt'">
+            Flip-In-X
+        </WeButton>
+        <WeButton selectClass="'o_anim_flip_in_y'" dependencies="'animation_on_appearance_opt'"
+                  trigger="'animation_direction_in_place_opt'">
+            Flip-In-Y
+        </WeButton>
+    </WeSelect>
+    <!-- Direction -->
+    <WeSelect title.translate="Direction" class="'o_we_sublevel_1'"
+              name="'animation_direction_opt'" animation="'true'">
+        <WeButton selectClass="''" name="'animation_direction_in_place_opt'"
+                  dependencies="'!o_anim_slide_in_opt'">
+            In Place
+        </WeButton>
+        <WeButton selectClass="'o_anim_from_right'" name="'animation_direction_from_right_opt'"
+                  dependencies="'!o_anim_rotate_opt'">
+            From Right
+        </WeButton>
+        <WeButton selectClass="'o_anim_from_left'" dependencies="'!o_anim_rotate_opt'">
+            From Left
+        </WeButton>
+        <WeButton selectClass="'o_anim_from_bottom'" dependencies="'!o_anim_rotate_opt'">
+            From Bottom
+        </WeButton>
+        <WeButton selectClass="'o_anim_from_top'" dependencies="'!o_anim_rotate_opt'">
+            From Top
+        </WeButton>
+        <WeButton selectClass="'o_anim_from_top_right'" dependencies="'o_anim_rotate_opt'">
+            From Top Right
+        </WeButton>
+        <WeButton selectClass="'o_anim_from_top_left'" dependencies="'o_anim_rotate_opt'">
+            From Top Left
+        </WeButton>
+        <WeButton selectClass="'o_anim_from_bottom_right'" dependencies="'o_anim_rotate_opt'">
+            From Bottom Right
+        </WeButton>
+        <WeButton selectClass="'o_anim_from_bottom_left'" dependencies="'o_anim_rotate_opt'">
+            From Bottom Left
+        </WeButton>
+    </WeSelect>
+    <!-- Trigger -->
+    <WeSelect title.translate="Trigger" class="'o_we_sublevel_1'"
+              dependencies="'animation_on_appearance_opt'" name="'animation_trigger_opt'">
+        <WeButton selectClass="''">First Time Only</WeButton>
+        <WeButton selectClass="'o_animate_both_scroll'">Every Time</WeButton>
+    </WeSelect>
+    <!-- Intensity -->
+    <WeRange title.translate="Intensity" class="'o_we_sublevel_1'" name="'animation_intensity_opt'"
+             animationIntensity="''" min="'1'" max="'100'" step="'1'" displayRangeValue="'true'"
+             noPreview="'true'"/>
+    <!-- Scroll Zone -->
+    <WeRow title.translate="Scroll Zone" class="'o_we_sublevel_1'">
+        <WeInput unit="'%'" step="'1'" dependencies="'animation_on_scroll_opt'" noPreview="'true'"
+                 selectDataAttribute="''" attributeName="'scrollZoneStart'" forceAnimation="'true'"/>
+        <span class="mx-2">to</span>
+        <WeInput unit="'%'" step="'1'" dependencies="'animation_on_scroll_opt'" noPreview="'true'"
+                 selectDataAttribute="''" attributeName="'scrollZoneEnd'" forceAnimation="'true'"/>
+    </WeRow>
+    <!-- Start After -->
+    <WeInput title.translate="Start After" class="'o_we_sublevel_1 o_we_small_input'"
+             dependencies="'animation_on_appearance_opt'" name="'animation_delay_opt'"
+             selectStyle="'0s'" cssProperty="'animation-delay'" unit="'s'"/>
+    <!-- Duration -->
+    <WeInput title.translate="Duration" class="'o_we_sublevel_1 o_we_small_input'"
+             dependencies="'animation_on_appearance_opt'"
+             selectStyle="'0.4s'" cssProperty="'animation-duration'" unit="'s'"/>
+</t>
+
+<t t-name="website.ImageHoverAnimate" t-inherit="website.WebsiteAnimate">
+    <!-- Hover effects options -->
+    <xpath expr="//WeRow" position="after">
+        <WeSelect title.translate="Effect" class="'o_we_sublevel_1'" attributeName="'hoverEffect'"
+                  showHoverEffect="''" setImgShapeHoverEffect="'true'"
+                  dependencies="'animation_on_hover_opt'">
+            <WeButton selectDataAttribute="''" name="'hover_effect_none_opt'">None</WeButton>
+            <WeButton selectDataAttribute="'overlay'" name="'hover_effect_overlay_opt'">Overlay</WeButton>
+            <WeButton selectDataAttribute="'image_zoom_in'" name="'hover_effect_zoom_in_opt'">Zoom In</WeButton>
+            <WeButton selectDataAttribute="'image_zoom_out'" name="'hover_effect_zoom_out_opt'">Zoom Out</WeButton>
+            <WeButton selectDataAttribute="'dolly_zoom'" name="'hover_effect_dolly_zoom_opt'">Dolly Zoom</WeButton>
+            <WeButton selectDataAttribute="'outline'" name="'hover_effect_outline_opt'">Outline</WeButton>
+            <WeButton selectDataAttribute="'image_mirror_blur'" name="'hover_effect_mirror_blur_opt'">Mirror Blur</WeButton>
+        </WeSelect>
+        <WeRange title.translate="Intensity" class="'o_we_sublevel_2'" selectDataAttribute="''"
+                    attributeName="'hoverEffectIntensity'" showHoverEffect="''"
+                    dependencies="'hover_effect_zoom_in_opt, hover_effect_zoom_out_opt, hover_effect_mirror_blur_opt, hover_effect_dolly_zoom_opt'"
+                    min="'1'" max="'100'" step="'1'" displayRangeValue="'true'" noPreview="'true'"/>
+        <WeColorpicker title="renderContext.hoverEffectColorLabel" class="'o_we_sublevel_2'"
+                       dependencies="'hover_effect_dolly_zoom_opt, hover_effect_overlay_opt, hover_effect_zoom_in_opt, hover_effect_zoom_out_opt, hover_effect_outline_opt'"
+                       excluded="'theme, common'" name="'hover_effect_color_opt'"
+                       setHoverEffectColor="'true'" showHoverEffect="''" noPreview="'true'"/>
+        <WeInput title.translate="Stroke Width" class="'o_we_sublevel_2'"
+                 dependencies="'hover_effect_outline_opt'"
+                 selectDataAttribute="''" showHoverEffect="''"
+                 attributeName="'hoverEffectStrokeWidth'" noPreview="'true'"
+                 step="'1'" min="'1'" unit="'px'"/>
+    </xpath>
+</t>
+<t t-name="website.ImageToolsAnimate">
+    <t t-call="web_editor.ImageTools"/>
+    <t t-call="web_editor.IconTools"/>
+    <t t-call="website.ImageHoverAnimate"/>
+</t>
+
+<t t-name="website.WeTextHighlightBtn" t-inherit="web_editor.WeButton" t-inherit-mode="primary">
+    <xpath expr="//t[@t-slot='default']" position="inside">Text</xpath>
+</t>
+
+<!-- Text highlight effects -->
+<t t-name="website.TextHighlight">
+    <!-- Text highlight style -->
+    <WeTextHighlightSelect title.translate="Highlight" name="'text_highlight_opt'" class="'o_we_select_grid'">
+        <div class="grid gap-0">
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_underline'" setTextHighlight="'underline'" selectLabel.translate="Underline"/>
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_freehand_1'" setTextHighlight="'freehand_1'" selectLabel.translate="Freehand 1"/>
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_freehand_2 o_text_highlight_fill'" setTextHighlight="'freehand_2'" selectLabel.translate="Freehand 2"/>
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_freehand_3 o_text_highlight_fill'" setTextHighlight="'freehand_3'" selectLabel.translate="Freehand 3"/>
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_double'" setTextHighlight="'double'" selectLabel.translate="Double"/>
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_wavy'" setTextHighlight="'wavy'" selectLabel.translate="Wavy"/>
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_circle_1'" setTextHighlight="'circle_1'" selectLabel.translate="Circle 1"/>
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_circle_2 o_text_highlight_fill'" setTextHighlight="'circle_2'" selectLabel.translate="Circle 2"/>
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_circle_3 o_text_highlight_fill'" setTextHighlight="'circle_3'" selectLabel.translate="Circle 3"/>
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_over_underline'" setTextHighlight="'over_underline'" selectLabel.translate="Over And Underline"/>
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_scribble_1'" setTextHighlight="'scribble_1'" selectLabel.translate="Scribble 1"/>
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_scribble_2 o_text_highlight_fill'" setTextHighlight="'scribble_2'" selectLabel.translate="Scribble 2"/>
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_scribble_3 o_text_highlight_fill'" setTextHighlight="'scribble_3'" selectLabel.translate="Scribble 3"/>
+            <WeTextHighlightBtn class="'g-col-4 text-black-50'" selectClass="'o_text_highlight_scribble_4 o_text_highlight_fill'" setTextHighlight="'scribble_4'" selectLabel.translate="Scribble 4"/>
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_jagged'" setTextHighlight="'jagged'" selectLabel.translate="Jagged"/>
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_cross'" setTextHighlight="'cross'" selectLabel.translate="Cross"/>
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_diagonal'" setTextHighlight="'diagonal'" selectLabel.translate="Diagonal"/>
+            <WeTextHighlightBtn class="'g-col-4'" selectClass="'o_text_highlight_strikethrough'" setTextHighlight="'strikethrough'" selectLabel.translate="Strikethrough"/>
+            <WeTextHighlightBtn class="'g-col-4 text-black-50'" selectClass="'o_text_highlight_bold o_text_highlight_fill'" setTextHighlight="'bold'" selectLabel.translate="Bold"/>
+            <WeTextHighlightBtn class="'g-col-4 text-black-50'" selectClass="'o_text_highlight_bold_1 o_text_highlight_fill'" setTextHighlight="'bold_1'" selectLabel.translate="Bold 1"/>
+            <WeTextHighlightBtn class="'g-col-4 text-black-50'" selectClass="'o_text_highlight_bold_2 o_text_highlight_fill'" setTextHighlight="'bold_2'" selectLabel.translate="Bold 2"/>
+        </div>
+    </WeTextHighlightSelect>
+    <!-- Text highlight color -->
+    <WeColorpicker title.translate="Color" class="'o_we_sublevel_1'"
+                   dependencies="'text_highlight_opt'"
+                   cssProperty="'--text-highlight-color'" selectStyle="''"/>
+    <!-- Text highlight thickness -->
+    <WeInput title.translate="Thickness" class="'o_we_sublevel_1 o_we_small_input'"
+             dependencies="'text_highlight_opt'"
+             cssProperty="'--text-highlight-width'" selectStyle="''" unit="'px'"/>
 </t>
 
 </templates>

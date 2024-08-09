@@ -2,11 +2,14 @@
 
 import options from "@web_editor/js/editor/snippets.options.legacy";
 import { MediaDialog } from "@web_editor/components/media_dialog/media_dialog";
+import { SnippetSave } from "@web_editor/js/editor/snippets.options";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import "@website/js/editor/snippets.options";
 import { rpc } from "@web/core/network/rpc";
+import { patch } from "@web/core/utils/patch";
 import { renderToElement } from "@web/core/utils/render";
+import { ImageToolsAnimate } from "@website/js/editor/snippets.options";
 
 options.registry.WebsiteSaleGridLayout = options.Class.extend({
     /**
@@ -734,12 +737,12 @@ options.registry.WebsiteSaleProductAttribute = options.Class.extend({
 });
 
 // Disable save for alternative products snippet
-options.registry.SnippetSave.include({
+patch(SnippetSave.prototype, {
     /**
      * @override
      */
     async _computeVisibility() {
-        return await this._super(...arguments)
+        return await super._computeVisibility(...arguments)
             && !this.$target.hasClass('o_wsale_alternative_products');
     }
 });
@@ -795,15 +798,14 @@ options.registry.ReplaceMedia.include({
     }
 });
 
-options.registry.ImageTools.include({
-
+patch(ImageToolsAnimate.prototype, {
     /**
      * @override
      */
     _computeMaxDisplayWidth() {
         const img = this._getImg();
 
-        this._super(...arguments);
+        super._computeMaxDisplayWidth(...arguments);
         // If the image is within an element with class '.o_img_with_max_suggested_width', set its
         // width to MAX_SUGGESTED_WIDTH. This ensures the zoom feature works on product images,
         // addressing the issue where optimized images couldn't be zoomed.
@@ -811,5 +813,4 @@ options.registry.ImageTools.include({
             return Math.round(this.MAX_SUGGESTED_WIDTH);
         }
     },
-
 });

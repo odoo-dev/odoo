@@ -628,9 +628,15 @@ var SnippetEditor = Widget.extend({
      * Returns the OWL Options templates to mount their widgets.
      * The widgets will handle requesting the initial updateUI
      * @TODO owl-options Implement visibility.
+     * 
+     * @param {Object} [params]
+     * @param {boolean} [params.text] - if true, return only Toolbar options; if
+     * false, return all but Toolbar options.
      */
-    getOptions() {
-        return this.snippetOptions.filter((option) => !option.instance.isRestrictedGroup);
+    getOptions(params = {text: false}) {
+        return this.snippetOptions.filter((option) => {
+            return !option.instance.isRestrictedGroup && !!option.textSelector === params.text;
+        });
     },
     /**
      * @param {boolean} [show]
@@ -770,7 +776,7 @@ var SnippetEditor = Widget.extend({
                 this._customize$Elements = this._customize$Elements
                     .concat(parentEditor._customize$Elements);
                 // TODO: @owl-options This was meant to have the same behavior
-                // as the old editor, but as of now, options are just added 
+                // as the old editor, but as of now, options are just added
                 // with a loop on "enabledEditorHierarchy", so this would lead
                 // to duplicate option Components.
                 // this.snippetOptions = [...this.snippetOptions,...parentEditor.snippetOptions];
@@ -2151,10 +2157,14 @@ class SnippetsMenu extends Component {
             blockPreviewOverlays: this._onBlockPreviewOverlays.bind(this),
             cloneSnippet: this._cloneSnippet.bind(this),
             cleanUI: this._cleanUI.bind(this),
+            disableLoadingEffect: this._onDisableLoadingEffect.bind(this),
+            enableLoadingEffect: this._onEnableLoadingEffect.bind(this),
             requestSave: (data) => this._onSaveRequest.call(this, { data }),
             removeSnippet: this._onRemoveSnippet.bind(this),
+            snippetThumbnailUrlRequest: (data) => this._onSnippetThumbnailURLRequest.call(this, { data }),
             isElementSelected: (data) => this._onIsElementSelected.call(this, { data }),
             hideOverlay: this._onHideOverlay.bind(this),
+            ownerDocument: (function() { return this.el.ownerDocument }).bind(this),
             unblockPreviewOverlays: this._onUnblockPreviewOverlays.bind(this),
             updateInvisibleDOM: this._onUpdateInvisibleDom.bind(this),
             userValueWidgetOpening: this._onUserValueWidgetOpening.bind(this),
@@ -5169,8 +5179,8 @@ class SnippetsMenu extends Component {
         // Delay the mutex until all post drop actions are done. It cannot be
         // awaited inside the mutex because callPostSnippetDrop locks the mutex
         // and it needs to be awaited because callPostSnippetDrop also creates
-        // editors, but it does so outside the mutex. However, calling 
-        // updateOptionsUI while editors are being created creates race 
+        // editors, but it does so outside the mutex. However, calling
+        // updateOptionsUI while editors are being created creates race
         // conditions
         if (this.postSnippetDropPromise) {
             await this.postSnippetDropPromise;

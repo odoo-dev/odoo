@@ -1,25 +1,28 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { registry } from "@web/core/registry";
 import options from "@web_editor/js/editor/snippets.options.legacy";
+import { Many2oneOption } from "@web_editor/js/editor/snippets.options";
+import { updateOption } from "@web_editor/js/editor/snippets.registry";
 import "@website/js/editor/snippets.options";
 import { uniqueId } from "@web/core/utils/functions";
+import { patch } from "@web/core/utils/patch";
 
 const NEW_TAG_PREFIX = 'new-blog-tag-';
 
-options.registry.many2one.include({
-
+patch(Many2oneOption.prototype, {
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
     /**
      * @override
+     * TODO: check why it's there and possibly remove the patch entirely. This
+     * "overrides" a method that does not exist on the parent.
      */
-    _selectRecord: function ($opt) {
+    _selectRecord($opt) {
         var self = this;
-        this._super.apply(this, arguments);
+        super._selectRecord.apply(this, arguments);
         if (this.$target.data('oe-field') === 'author_id') {
             var $nodes = $('[data-oe-model="blog.post"][data-oe-id="' + this.$target.data('oe-id') + '"][data-oe-field="author_avatar"]');
             $nodes.each(function () {
@@ -189,6 +192,6 @@ options.registry.BlogPostTagSelection = options.Class.extend({
 });
 
 // Hides ContainerWidth option for content in blog posts
-const ContainerWidthOption = registry.category("snippet_options").get("container_width");
-ContainerWidthOption.exclude = ContainerWidthOption.exclude + ", #o_wblog_post_content *";
-registry.category("snippet_options").add("container_width", ContainerWidthOption, { force: true });
+updateOption("container_width", {
+    exclude: (ContainerWidthOption) => ContainerWidthOption.exclude + ", #o_wblog_post_content *",
+});

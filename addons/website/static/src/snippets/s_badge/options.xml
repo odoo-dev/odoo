@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+<t t-name="website.s_badge_options">
+    <WeColorpicker title.translate="Color" name="'badge_colorpicker_opt'"
+        selectStyle="'true'"
+        cssProperty="'background-color'"
+        colorPrefix="'bg-'"/>
+</t>
+
+</templates>
