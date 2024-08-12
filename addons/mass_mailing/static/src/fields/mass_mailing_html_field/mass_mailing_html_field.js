@@ -6,7 +6,6 @@ import { getBundle, LazyComponent, loadBundle } from "@web/core/assets";
 import { registry } from "@web/core/registry";
 import { Mutex } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
-import { useRecordObserver } from "@web/model/relational_model/utils";
 import weUtils from "@web_editor/js/common/utils";
 import { MassMailingTemplateSelector, switchImages } from "./mass_mailing_template_selector";
 
@@ -26,9 +25,8 @@ export class MassMailingHtmlField extends HtmlField {
     setup() {
         super.setup();
         this.ui = useService("ui");
-        const content = this.props.record.data[this.props.name];
         Object.assign(this.state, {
-            showMassMailingTemplateSelector: content.toString() === "",
+            showMassMailingTemplateSelector: this.value.toString() === "",
             iframeDocument: null,
             toolbarInfos: undefined,
             isBasicTheme: this.value.toString().search("o_basic_theme") >= 0,
@@ -62,14 +60,14 @@ export class MassMailingHtmlField extends HtmlField {
             );
             this.MassMailingSnippetsMenu = MassMailingSnippetsMenu;
         });
+    }
 
-        let lastResId;
-        useRecordObserver((record) => {
-            if (record.resId !== lastResId) {
-                this.resetSnippetsMenu();
-                lastResId = record.resId;
-            }
-        });
+    onApplyExternalContent(record) {
+        super.onApplyExternalContent(...arguments);
+        this.resetSnippetsMenu();
+        const content = record.data[this.props.name].toString();
+        this.state.showMassMailingTemplateSelector = content === "";
+        this.state.isBasicTheme = content.search("o_basic_theme") >= 0;
     }
 
     get displaySnippetsMenu() {
