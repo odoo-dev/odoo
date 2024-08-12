@@ -34,23 +34,26 @@ export class CustomContentKanbanLikeWidget extends Component {
         useEffect((saleOrderTemplate) => {
             this.updateState(this.props.record.resId);
         }, () => [this.props.record.data.sale_order_template_id]);
-        useEffect((customizablePdfFormFields) => {
-            // TODO VCR use the json to directly get custom form field instead of reliy on get_update_included_pdf_params.
-            const { headers, lines, footers } = JSON.parse(customizablePdfFormFields);
-            this.state.headers = headers;
-            this.state.lines = lines;
-            this.state.footers = footers;
-        }, () => [this.props.record.data.customizable_pdf_form_fields]);
+        // useEffect((customizablePdfFormFields) => {
+        //     const { headers, line, footers } = JSON.parse(customizablePdfFormFields);
+        //     // this.state.headers = headers;
+        //     // this.state.lines = line;
+        //     // this.state.footers = footers;
+        // }, () => [this.props.record.data.customizable_pdf_form_fields]);
     }
 
     async updateState(id) {
-        await this.props.record.save();  // To display documents of potentially unsaved SOL.
-        const { headers, lines, footers } = await this.orm.call(
-            'sale.order', 'get_update_included_pdf_params', [id]
-        )
-        this.state.headers = headers;
-        this.state.lines = lines;
-        this.state.footers = footers
+        const saved = await this.props.record.save();  // To display documents of potentially unsaved SOL.
+        if (saved) {  // do not fetch wrong form data if record was not saved.
+            // FIXME VCR the route is called twice, why ?
+            // FIXME VCR called on save/leave, should be avoided
+            const { headers, lines, footers } = await this.orm.call(
+                'sale.order', 'get_update_included_pdf_params', [id]
+            )
+            this.state.headers = headers;
+            this.state.lines = lines;
+            this.state.footers = footers
+        }
     }
 
     updateJson() {
@@ -68,7 +71,7 @@ export class CustomContentKanbanLikeWidget extends Component {
             }})),
             'line': Object.assign({}, ...this.state.lines.map(line => {
                 return {
-                    [line.id]: Object.assign({}, ...line.files.map(doc => {
+                    [line.id]: Object.assign({}, ...line.files.filter(f => f.is_selected).map(doc => {
                         return {
                             [doc.id]: {
                                 document_name: doc.name,
@@ -132,4 +135,3 @@ export const customContentKanbanLikeWidget = {
 registry.category("view_widgets").add(
     "customContentKanbanLikeWidget", customContentKanbanLikeWidget
 );
-

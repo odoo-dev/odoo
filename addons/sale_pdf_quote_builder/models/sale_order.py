@@ -70,7 +70,7 @@ class SaleOrder(models.Model):
         for line in self.order_line:
             if line.available_product_document_ids:
                 lines_params.append({
-                    'name': _("Product") + " > " + line.name,
+                    'name': _("Product") + " > " + line.name.splitlines()[0],
                     'id': line.id,
                     'files': [{
                         'name': doc.name.rstrip('.pdf'),
@@ -115,6 +115,7 @@ class SaleOrder(models.Model):
 
     # === BUSINESS METHODS === #
 
+    # FIXME EDM dead code below ?
     def save_included_pdf(self, selected_pdf):
         """ Configure the PDF that should be included in the PDF quote builder for a given quote
 
