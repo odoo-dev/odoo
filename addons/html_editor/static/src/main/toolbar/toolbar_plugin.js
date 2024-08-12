@@ -30,7 +30,7 @@ export class ToolbarPlugin extends Plugin {
 
         for (const category of this.categories) {
             const buttons = toolbarItems.filter((command) => command.category === category.id);
-            if (buttons.length === 0) {
+            if (buttons.length > 0) {
                 this.buttonGroups.push({
                     ...category,
                     buttons,
