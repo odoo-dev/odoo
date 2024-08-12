@@ -25,7 +25,7 @@ export class ToolbarPlugin extends Plugin {
         const toolbarItems = !this.config.disabledToolbarButtonIds
             ? this.resources.toolbarItems
             : this.resources.toolbarItems.filter(
-                  (button) => !this.config.disabledToolbarButtonIds.includes(button.id)
+                  (button) => !this.config.disabledToolbarButtonIds.has(button.id)
               );
 
         for (const category of this.categories) {
