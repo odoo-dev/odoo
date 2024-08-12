@@ -47,7 +47,6 @@ export class Wysiwyg extends Component {
         });
         const overlayRef = useRef("localOverlay");
         const contentRef = useRef("content");
-        this.editor = this.props.editor;
         const config = {
             ...this.props.config,
             embeddedComponentInfo: { app: this.__owl__.app, env: this.env },
