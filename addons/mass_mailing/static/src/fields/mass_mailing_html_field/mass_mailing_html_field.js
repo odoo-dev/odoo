@@ -1,7 +1,7 @@
 import { htmlField, HtmlField } from "@html_editor/fields/html_field";
 import { JustifyPlugin } from "@html_editor/main/justify_plugin";
 import { closestElement } from "@html_editor/utils/dom_traversal";
-import { EventBus, onWillStart, reactive, useSubEnv } from "@odoo/owl";
+import { EventBus, onWillStart, reactive, useRef, useSubEnv } from "@odoo/owl";
 import { getBundle, LazyComponent, loadBundle } from "@web/core/assets";
 import { registry } from "@web/core/registry";
 import { Mutex } from "@web/core/utils/concurrency";
@@ -46,6 +46,8 @@ export class MassMailingHtmlField extends HtmlField {
             switchImages,
             fieldConfig: this.fieldConfig,
         });
+
+        this.editorRef = useRef("editor");
 
         onWillStart(async () => {
             await loadBundle("mass_mailing.assets_mass_mailing_html_field");
@@ -96,6 +98,9 @@ export class MassMailingHtmlField extends HtmlField {
                 },
                 get $editable() {
                     return $(self.editor.editable);
+                },
+                get $iframe() {
+                    return $(self.editorRef.el).find("iframe");
                 },
                 get lastMediaClicked() {
                     return self.lastMediaClicked;
