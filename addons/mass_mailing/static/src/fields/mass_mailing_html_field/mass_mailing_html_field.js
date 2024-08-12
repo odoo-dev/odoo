@@ -1,13 +1,14 @@
 import { htmlField, HtmlField } from "@html_editor/fields/html_field";
-import { EventBus, onWillStart, reactive, useState, useSubEnv } from "@odoo/owl";
+import { JustifyPlugin } from "@html_editor/main/justify_plugin";
+import { closestElement } from "@html_editor/utils/dom_traversal";
+import { EventBus, onWillStart, reactive, useSubEnv } from "@odoo/owl";
 import { getBundle, LazyComponent, loadBundle } from "@web/core/assets";
 import { registry } from "@web/core/registry";
 import { Mutex } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
+import { useRecordObserver } from "@web/model/relational_model/utils";
 import weUtils from "@web_editor/js/common/utils";
 import { MassMailingTemplateSelector, switchImages } from "./mass_mailing_template_selector";
-import { JustifyPlugin } from "@html_editor/main/justify_plugin";
-import { closestElement } from "@html_editor/utils/dom_traversal";
 
 // const legacyEventToNewEvent = {
 //     historyStep: "ADD_STEP",
@@ -26,7 +27,7 @@ export class MassMailingHtmlField extends HtmlField {
         super.setup();
         this.ui = useService("ui");
         const content = this.props.record.data[this.props.name];
-        this.state = useState({
+        Object.assign(this.state, {
             showMassMailingTemplateSelector: content.toString() === "",
             iframeDocument: null,
             toolbarInfos: undefined,
@@ -42,7 +43,7 @@ export class MassMailingHtmlField extends HtmlField {
         });
 
         this.focusEditableOnLoad = false;
-
+        this.snippetsMenuBus = new EventBus();
         useSubEnv({
             switchImages,
             fieldConfig: this.fieldConfig,
@@ -61,10 +62,23 @@ export class MassMailingHtmlField extends HtmlField {
             );
             this.MassMailingSnippetsMenu = MassMailingSnippetsMenu;
         });
+
+        let lastResId;
+        useRecordObserver((record) => {
+            if (record.resId !== lastResId) {
+                this.resetSnippetsMenu();
+                lastResId = record.resId;
+            }
+        });
     }
 
     get displaySnippetsMenu() {
-        return this.state.iframeDocument && !this.state.isBasicTheme && !this.ui.isSmall;
+        return (
+            this.state.iframeDocument &&
+            !this.state.isBasicTheme &&
+            !this.ui.isSmall &&
+            !this.state.showCodeView
+        );
     }
 
     get snippetMenuProps() {
@@ -208,7 +222,7 @@ export class MassMailingHtmlField extends HtmlField {
             },
         };
         return {
-            bus: new EventBus(),
+            bus: this.snippetsMenuBus,
             folded: false,
             options,
             setCSSVariables: (element) => {
@@ -336,15 +350,38 @@ export class MassMailingHtmlField extends HtmlField {
     getConfig() {
         const config = super.getConfig(...arguments);
         config.Plugins = [...config.Plugins, JustifyPlugin];
-        config.onChange = () => {
-            Object.assign(this.historyState, {
-                canUndo: this.editor.shared.canUndo(),
-                canRedo: this.editor.shared.canRedo(),
-            });
-        };
         config.disableFloatingToolbar = true;
         config.disabledToolbarButtonIds = new Set(["remove_format", "codeview"]);
         return config;
+    }
+
+    resetSnippetsMenu() {
+        this.state.iframeDocument = null;
+        this.historyState.canUndo = false;
+        this.historyState.canRedo = false;
+    }
+
+    async getEditorContent() {
+        if (this.displaySnippetsMenu) {
+            const cleanedProms = [];
+            this.snippetsMenuBus.trigger("CLEAN_FOR_SAVE", { proms: cleanedProms });
+            await Promise.all(cleanedProms);
+        }
+        const el = await super.getEditorContent();
+        return el;
+    }
+
+    onChange() {
+        super.onChange(...arguments);
+        Object.assign(this.historyState, {
+            canUndo: this.editor.isDestroyed ? false : this.editor.shared.canUndo(),
+            canRedo: this.editor.isDestroyed ? false : this.editor.shared.canRedo(),
+        });
+    }
+
+    toggleCodeView() {
+        super.toggleCodeView();
+        this.resetSnippetsMenu();
     }
 
     /**
