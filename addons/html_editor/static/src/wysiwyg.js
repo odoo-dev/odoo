@@ -83,6 +83,9 @@ export class Wysiwyg extends Component {
                         } else {
                             this.editor.attachTo(el.contentDocument.body);
                         }
+                        el.contentWindow.onblur = () => {
+                            this.props.onBlur();
+                        };
                     }
                 };
                 if (el.contentDocument.readyState === "complete") {
