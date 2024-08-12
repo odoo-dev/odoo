@@ -105,6 +105,7 @@ export class MassMailingHtmlField extends HtmlField {
                 get lastMediaClicked() {
                     return self.lastMediaClicked;
                 },
+                getValue: () => this.editor.getContent(),
                 getEditable: () => $(self.editor.editable),
                 isSaving: () => false,
                 getColorpickerTemplate: () => {
