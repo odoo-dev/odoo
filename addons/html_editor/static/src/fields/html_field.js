@@ -77,10 +77,7 @@ export class HtmlField extends Component {
         useRecordObserver((record) => {
             // Reset Wysiwyg when we discard or onchange value
             if (!this.isDirty && this.lastValue !== record.data[this.props.name].toString()) {
-                this.state.key++;
-                this.state.containsComplexHTML = computeContainsComplexHTML(
-                    record.data[this.props.name]
-                );
+                this.onApplyExternalContent(record);
             }
         });
         useRecordObserver((record) => {
@@ -120,6 +117,12 @@ export class HtmlField extends Component {
 
     get isTranslatable() {
         return this.props.record.fields[this.props.name].translate;
+    }
+
+    onApplyExternalContent(record) {
+        this.state.key++;
+        this.lastValue = record.data[this.props.name].toString();
+        this.state.containsComplexHTML = computeContainsComplexHTML(record.data[this.props.name]);
     }
 
     async updateValue(value) {
