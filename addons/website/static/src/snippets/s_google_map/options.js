@@ -70,6 +70,6 @@ class GoogleMap extends SnippetOption {
 }
 registerWebsiteOption("GoogleMap", {
     Class: GoogleMap,
-    template: "website.s_google_map_option",
+    template: "website.s_google_map_options",
     selector: ".s_google_map",
 });

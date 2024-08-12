@@ -13,4 +13,6 @@ registerWebsiteOption("MasonryLayout", {
     Class: MasonryLayout,
     template: "website.s_masonry_block_options",
     selector: ".s_masonry_block",
+}, {
+    sequence: 10,
 });

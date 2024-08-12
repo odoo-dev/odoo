@@ -4,6 +4,7 @@ import FormEditorRegistry from "@website/js/form_editor_registry";
 import {
     SnippetOption,
 } from "@web_editor/js/editor/snippets.options";
+import { registerContentAdditionSelector } from "@web_editor/js/editor/snippets.registry";
 import {
     registerWebsiteOption,
 } from "@website/js/editor/snippets.registry";
@@ -498,7 +499,7 @@ export class WebsiteFormEditor extends FormEditor {
         await super.updateUI(...arguments);
         // End Message UI
         this.updateUIEndMessage();
-    
+
         const formKey = this.activeForm.website_form_key;
         const formInfo = FormEditorRegistry.get(formKey, null);
         formInfo.fields.forEach(field => {
@@ -1703,6 +1704,7 @@ registerWebsiteOption("WebsiteFormEditor", {
     selector: ".s_website_form",
     target: "form",
 }, { sequence: 10 });
+registerContentAdditionSelector(".s_website_form");
 
 registerWebsiteOption("AddFieldForm", {
     Class: AddFieldForm,

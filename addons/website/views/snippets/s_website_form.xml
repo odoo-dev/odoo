@@ -97,14 +97,6 @@
     </section>
 </template>
 
-<template id="s_website_form_options" inherit_id="website.snippet_options">
-    <!-- Extend drop locations to columns -->
-    <xpath expr="//t[@t-set='so_content_addition_selector']" position="inside">, .s_website_form</xpath>
-
-    <xpath expr="//div" position="after">
-    </xpath>
-</template>
-
 
 <record id="website.s_website_form_000_scss" model="ir.asset">
     <field name="name">Website form 000 SCSS</field>

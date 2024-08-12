@@ -2,6 +2,7 @@
 
 import options from "@web_editor/js/editor/snippets.options.legacy";
 import { loadImage } from "@web_editor/js/editor/image_processing";
+import { registerSnippetAdditionSelector } from "@web_editor/js/editor/snippets.registry";
 const SelectUserValueWidget = options.userValueWidgetsRegistry['we-select'];
 import weUtils from "@web_editor/js/common/utils";
 import {
@@ -11,11 +12,14 @@ import {
     transformFontFamilySelector,
 } from "@mass_mailing/js/mass_mailing_design_constants";
 import { isCSSColor, normalizeCSSColor } from "@web/core/utils/colors";
+import { registerMassMailingOption } from "./snippets.registry";
 
 
 //--------------------------------------------------------------------------
 // Options
 //--------------------------------------------------------------------------
+
+registerSnippetAdditionSelector(".o_mail_snippet_general");
 
 // Adding compatibility for the outlook compliance of mailings.
 // Commit of such compatibility : a14f89c8663c9cafecb1cc26918055e023ecbe42
@@ -321,4 +325,14 @@ options.registry.DesignTab = options.Class.extend({
     _getRule(selectorText) {
         return [...(this.styleSheet.cssRules || this.styleSheet.rules)].find(rule => rule.selectorText === selectorText);
     },
+});
+
+registerMassMailingOption("mass_mailing_block_width", {
+    template: "mass_mailing.block_width_option",
+    selector: ".s_mail_blockquote, .s_mail_text_highlight",
+});
+
+registerMassMailingOption("mass_mailing_block_align", {
+    template: "mass_mailing.block_align_option",
+    selector: ".s_mail_blockquote, .s_mail_text_highlight",
 });
