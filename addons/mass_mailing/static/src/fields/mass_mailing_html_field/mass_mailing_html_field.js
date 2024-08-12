@@ -3,6 +3,7 @@ import { JustifyPlugin } from "@html_editor/main/justify_plugin";
 import { closestElement } from "@html_editor/utils/dom_traversal";
 import { EventBus, onWillStart, reactive, useRef, useSubEnv } from "@odoo/owl";
 import { getBundle, LazyComponent, loadBundle } from "@web/core/assets";
+import { ensureJQuery } from "@web/core/ensure_jquery";
 import { registry } from "@web/core/registry";
 import { Mutex } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
@@ -50,7 +51,10 @@ export class MassMailingHtmlField extends HtmlField {
         this.editorRef = useRef("editor");
 
         onWillStart(async () => {
-            await loadBundle("mass_mailing.assets_mass_mailing_html_field");
+            await Promise.all([
+                ensureJQuery(),
+                loadBundle("mass_mailing.assets_mass_mailing_html_field"),
+            ]);
 
             this.iframeBundle = getBundle("web_editor.wysiwyg_iframe_editor_assets");
             this.massMailingBundle = getBundle("mass_mailing.iframe_css_assets_edit");
