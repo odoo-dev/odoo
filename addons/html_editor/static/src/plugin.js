@@ -51,6 +51,7 @@
  * @property { LinkPlugin['getOrCreateLink'] } getOrCreateLink
  * @property { LinkPlugin['insertLink'] } insertLink
  * @property { LinkPlugin['getPathAsUrlCommand'] } getPathAsUrlCommand
+ * @property { LinkPlugin['linkOptions'] } linkOptions
  * @property { DomPlugin['domInsert'] } domInsert
  * @property { DomPlugin['copyAttributes'] } copyAttributes
  * @property { SplitPlugin['isUnsplittable'] } isUnsplittable
