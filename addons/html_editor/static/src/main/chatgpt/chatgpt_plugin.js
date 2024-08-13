@@ -32,6 +32,7 @@ export class ChatGPTPlugin extends Plugin {
                 id: "translate",
                 category: "translate",
                 Component: LanguageSelector,
+                props: { dispatch: p.dispatch },
             },
         ],
 
