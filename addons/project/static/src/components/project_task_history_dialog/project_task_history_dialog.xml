@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="project.project_task_history_dialog" t-inherit="web_editor.HistoryDialog" t-inherit-mode="primary">
+        <xpath expr="//t[@t-foreach='state.revisionsData']" position="before">
+            <a type="object" href="#" role="button"
+                t-attf-class="p-3 btn btn-outline-primary o_add_current_history #{state.revisionId === (state.revisionsData.length + 1) ? 'active' : ''}"
+                t-on-click="() => this.updateCurrentRevision(state.revisionsData.length + 1)">
+                Add Current History
+            </a>
+        </xpath>
+    </t>
+</templates>

@@ -3,10 +3,10 @@
 import { FormController } from '@web/views/form/form_controller';
 import { _t } from "@web/core/l10n/translation";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import HistoryDialog from '@web_editor/components/history_dialog/history_dialog';
 import { useService } from '@web/core/utils/hooks';
 import { markup } from '@odoo/owl';
 import { escape } from '@web/core/utils/strings';
+import { ProjectTaskHistoryDialog } from "../../components/project_task_history_dialog/project_task_history_dialog";
 
 export const subTaskDeleteConfirmationMessage = _t(
     `Deleting a task will also delete its associated sub-tasks. \
@@ -30,7 +30,7 @@ export class ProjectTaskFormController extends FormController {
             openHistoryDialog: {
                 sequence: 50,
                 icon: "fa fa-history",
-                description: _t("Restore History"),
+                description: _t("Version History"),
                 callback: () => this.openHistoryDialog(),
             },
         };
@@ -60,9 +60,7 @@ export class ProjectTaskFormController extends FormController {
             return;
         }
 
-        this.dialogService.add(
-            HistoryDialog,
-            {
+        this.dialogService.add(ProjectTaskHistoryDialog, {
                 title: _t("Task Description History"),
                 noContentHelper: markup(
                     `<span class='text-muted fst-italic'>${escape(
@@ -71,7 +69,7 @@ export class ProjectTaskFormController extends FormController {
                         )
                     )}</span>`
                 ),
-                recordId: this.props.resId,
+                recordId: record.resId,
                 recordModel: this.props.resModel,
                 versionedFieldName,
                 historyMetadata,

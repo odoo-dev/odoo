@@ -88,9 +88,9 @@ registry.category("web_tour.tours").add("project_task_history_tour", {
         run: "click",
     }, {
         content: "Verify that 4 revisions are displayed (default empty description after the creation of the task + 3 edits)",
-        trigger: ".modal .html-history-dialog .revision-list .btn",
+        trigger: ".modal .html-history-dialog .revision-list .btn:not(.o_add_current_history)",
         run: function () {
-            const items = document.querySelectorAll(".revision-list .btn");
+            const items = document.querySelectorAll(".revision-list .btn:not(.o_add_current_history)");
             if (items.length !== 4) {
                 throw new Error('Expect 4 Revisions in the history dialog, got ' + items.length);
             }
@@ -100,8 +100,24 @@ registry.category("web_tour.tours").add("project_task_history_tour", {
         trigger: `.modal .history-container .tab-pane:contains("${baseDescriptionContent} 2")`,
         run: "click",
     }, {
+        content: "Go to the add current history",
+        trigger: ".modal .html-history-dialog .revision-list .btn:contains('Add Current History')",
+        run: "click",
+    }, {
+        content: "Verify that comparison text",
+        trigger: `.modal .history-container .tab-pane:contains("${baseDescriptionContent} 3")`,
+        run: "click",
+    }, {
+        content: "Go to content tab",
+        trigger: ".modal .history-container .nav-item:contains(Content)",
+        run: "click",
+    }, {
+        content: "Verify that content text",
+        trigger: `.modal .history-container .tab-pane:contains("${baseDescriptionContent} 3")`,
+        run: "click",
+    }, {
         content: "Go to the third revision related to the second edit",
-        trigger: ".modal .html-history-dialog .revision-list .btn:nth-child(2)",
+        trigger: ".modal .html-history-dialog .revision-list .btn:nth-child(3)",
         run: "click",
     }, {
         content: "Verify that the active revision is the one clicked in the previous step",
