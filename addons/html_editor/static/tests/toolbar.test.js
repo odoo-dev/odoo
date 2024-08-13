@@ -178,12 +178,12 @@ test("toolbar works: can select font", async () => {
     expect(".o-we-toolbar").toHaveCount(0);
     setContent(el, "<p>[test]</p>");
     await waitFor(".o-we-toolbar");
-    expect(".o-we-toolbar [name='font']").toHaveText("Normal");
+    expect(".o-we-toolbar [name='typo']").toHaveText("Normal");
 
-    await contains(".o-we-toolbar [name='font'] .dropdown-toggle").click();
+    await contains(".o-we-toolbar [name='typo'] .dropdown-toggle").click();
     await contains(".o_toolbar_item_selector_menu .dropdown-item:contains('Header 2')").click();
     expect(getContent(el)).toBe("<h2>[test]</h2>");
-    expect(".o-we-toolbar [name='font']").toHaveText("Header 2");
+    expect(".o-we-toolbar [name='typo']").toHaveText("Header 2");
 });
 
 test("toolbar works: can select font size", async () => {
@@ -201,11 +201,11 @@ test("toolbar works: can select font size", async () => {
     expect(".o-we-toolbar").toHaveCount(0);
     setContent(el, "<p>[test]</p>");
     await waitFor(".o-we-toolbar");
-    expect(".o-we-toolbar [name='font-size']").toHaveText(
+    expect(".o-we-toolbar [name='size']").toHaveText(
         getFontSizeFromVar("body-font-size").toString()
     );
 
-    await contains(".o-we-toolbar [name='font-size'] .dropdown-toggle").click();
+    await contains(".o-we-toolbar [name='size'] .dropdown-toggle").click();
     const sizes = new Set(
         fontSizeItems.map((item) => {
             return getFontSizeFromVar(item.variableName).toString();
@@ -215,7 +215,7 @@ test("toolbar works: can select font size", async () => {
     const h1Size = getFontSizeFromVar("h1-font-size").toString();
     await contains(`.o_toolbar_item_selector_menu .dropdown-item:contains('${h1Size}')`).click();
     expect(getContent(el)).toBe(`<p><span class="h1-fs">[test]</span></p>`);
-    expect(".o-we-toolbar [name='font-size']").toHaveText(h1Size);
+    expect(".o-we-toolbar [name='size']").toHaveText(h1Size);
 });
 
 test("toolbar should not open on keypress tab inside table", async () => {
@@ -363,11 +363,11 @@ test("toolbar correctly process inheritance buttons chain", async () => {
     await waitFor(".o-we-toolbar");
     expect(".btn-group[name='test_group']").toHaveCount(1);
     expect("button[name='test_btn']").toHaveCount(1);
-    expect("button[name='test_btn']").toHaveClass("fa-square");
+    expect("button[name='test_btn'] span").toHaveClass("fa-square");
     expect("button[name='test_btn']").toHaveAttribute("title", "Test Button");
 
     expect("button[name='test_btn2']").toHaveCount(1);
-    expect("button[name='test_btn2']").toHaveClass("fa-square");
+    expect("button[name='test_btn2'] span").toHaveClass("fa-square");
     expect("button[name='test_btn2']").toHaveAttribute("title", "Test Button 2");
 });
 
