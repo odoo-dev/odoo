@@ -120,11 +120,6 @@ export class LinkToolsPlugin extends Plugin {
             shouldFocusUrl,
             getColorpickerTemplate: this.config.getColorpickerTemplatem,
         };
-        // todo: adapt this code (focus on linktool)
-        // // update the shouldFocusUrl prop to focus on url when double click and click edit link
-        // this.state.linkToolProps.shouldFocusUrl = shouldFocusUrl;
-
-        // this.bindOnClick();
     }
     closeLinkTools() {
         this.state.linkToolProps = undefined;
@@ -143,29 +138,5 @@ export class LinkToolsPlugin extends Plugin {
         if (!isInAnchor || !isInFocus) {
             this.closeLinkTools();
         }
-    }
-    bindOnClick() {
-        this.odooEditor.document.removeEventListener("click", this._onClick, true);
-        document.removeEventListener("click", this._onClick, true);
-        this._onClick = (ev) => {
-            if (
-                !ev.target.closest("#create-link") &&
-                (!ev.target.closest(".oe-toolbar") ||
-                    !ev.target.closest("we-customizeblock-option")) &&
-                !ev.target.closest(".ui-autocomplete") &&
-                (!this.state.linkToolProps ||
-                    ![ev.target, ...wysiwygUtils.ancestors(ev.target)].includes(
-                        this.linkToolsInfos.link
-                    ))
-            ) {
-                // Destroy the link tools on click anywhere outside the
-                // toolbar if the target is the orgiginal target not in the original target.
-                this.destroyLinkTools();
-                this.odooEditor.document.removeEventListener("click", this._onClick, true);
-                document.removeEventListener("click", this._onClick, true);
-            }
-        };
-        this.odooEditor.document.addEventListener("click", this._onClick, true);
-        document.addEventListener("click", this._onClick, true);
     }
 }
