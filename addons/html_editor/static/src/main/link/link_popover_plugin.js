@@ -21,7 +21,7 @@ export class LinkPopoverPlugin extends Plugin {
                 id: "link",
                 category: "link",
                 action(dispatch) {
-                    dispatch("CREATE_LINK_ON_SELECTION");
+                    dispatch("TOGGLE_LINK_POPOVER");
                 },
                 icon: "fa-link",
                 name: "link",
@@ -49,7 +49,7 @@ export class LinkPopoverPlugin extends Plugin {
                 category: "navigation",
                 fontawesome: "fa-link",
                 action(dispatch) {
-                    dispatch("TOGGLE_LINK");
+                    dispatch("TOGGLE_LINK_POPOVER");
                 },
             },
             {
@@ -58,7 +58,7 @@ export class LinkPopoverPlugin extends Plugin {
                 category: "navigation",
                 fontawesome: "fa-link",
                 action(dispatch) {
-                    dispatch("TOGGLE_LINK");
+                    dispatch("TOGGLE_LINK_POPOVER");
                 },
             },
         ],
@@ -66,7 +66,7 @@ export class LinkPopoverPlugin extends Plugin {
     });
     handleCommand(command, payload) {
         switch (command) {
-            case "TOGGLE_LINK_TOOLS":
+            case "TOGGLE_LINK_POPOVER":
                 this.toggleLinkPopover(payload.options);
                 break;
         }

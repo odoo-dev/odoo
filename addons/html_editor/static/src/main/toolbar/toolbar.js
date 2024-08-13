@@ -30,17 +30,18 @@ export class Toolbar extends Component {
 
     setup() {
         this.state = useState(this.props.toolbar.state);
+        this.buttonGroups = useState(this.props.toolbar.buttonGroups);
     }
 
     getFilteredButtonGroups() {
         if (this.state.namespace) {
-            const filteredGroups = this.props.toolbar.buttonGroups.filter(
+            const filteredGroups = this.buttonGroups.filter(
                 (group) => group.namespace === this.state.namespace
             );
             if (filteredGroups.length > 0) {
                 return filteredGroups;
             }
         }
-        return this.props.toolbar.buttonGroups.filter((group) => group.namespace === undefined);
+        return this.buttonGroups.filter((group) => group.namespace === undefined);
     }
 }

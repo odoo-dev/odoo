@@ -27,29 +27,29 @@ test("can shape an image", async () => {
     click("img");
     await waitFor(".o-we-toolbar");
 
-    click(".o-we-toolbar .fa-square");
+    click(".o-we-toolbar [name='shape_rounded']");
     await animationFrame();
-    expect(".o-we-toolbar .fa-square.active").toHaveCount(1);
+    expect(".o-we-toolbar [name='shape_rounded'].active").toHaveCount(1);
     expect("img.rounded").toHaveCount(1);
 
-    click(".o-we-toolbar .fa-square");
+    click(".o-we-toolbar [name='shape_rounded']");
     await animationFrame();
-    expect(".o-we-toolbar .fa-square.active").toHaveCount(0);
+    expect(".o-we-toolbar [name='shape_rounded'].active").toHaveCount(0);
     expect("img.rounded").toHaveCount(0);
 
-    click(".o-we-toolbar .fa-circle-o");
+    click(".o-we-toolbar [name='shape_circle']");
     await animationFrame();
-    expect(".o-we-toolbar .fa-circle-o.active").toHaveCount(1);
+    expect(".o-we-toolbar [name='shape_circle'].active").toHaveCount(1);
     expect("img.rounded-circle").toHaveCount(1);
 
-    click(".o-we-toolbar .fa-sun-o");
+    click(".o-we-toolbar [name='shape_shadow']");
     await animationFrame();
-    expect(".o-we-toolbar .fa-sun-o.active").toHaveCount(1);
+    expect(".o-we-toolbar [name='shape_shadow'].active").toHaveCount(1);
     expect("img.shadow").toHaveCount(1);
 
-    click(".o-we-toolbar .fa-picture-o");
+    click(".o-we-toolbar [name='shape_thumbnail']");
     await animationFrame();
-    expect(".o-we-toolbar .fa-picture-o.active").toHaveCount(1);
+    expect(".o-we-toolbar [name='shape_thumbnail'].active").toHaveCount(1);
     expect("img.img-thumbnail").toHaveCount(1);
 });
 
@@ -60,13 +60,13 @@ test("can undo a shape", async () => {
     click("img");
     await waitFor(".o-we-toolbar");
 
-    click(".o-we-toolbar .fa-square");
+    click(".o-we-toolbar [name='shape_rounded']");
     await animationFrame();
-    expect(".o-we-toolbar .fa-square.active").toHaveCount(1);
+    expect(".o-we-toolbar [name='shape_rounded'].active").toHaveCount(1);
     expect("img.rounded").toHaveCount(1);
     editor.dispatch("HISTORY_UNDO");
     await animationFrame();
-    expect(".o-we-toolbar .fa-square.active").toHaveCount(0);
+    expect(".o-we-toolbar [name='shape_rounded'].active").toHaveCount(0);
     expect("img.rounded").toHaveCount(0);
 });
 
@@ -243,7 +243,8 @@ test("Can transform an image", async () => {
 });
 
 test("jquery transform overlay is rightly positioned in iframe", async () => {
-    const { el } = await setupEditor(`
+    const { el } = await setupEditor(
+        `
         <img class="img-fluid test-image" src="${base64Img}">
     `,
         { props: { iframe: true } }
