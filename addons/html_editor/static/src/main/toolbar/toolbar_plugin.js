@@ -35,7 +35,7 @@ export class ToolbarPlugin extends Plugin {
                 if (!("state" in button)) {
                     button.state = reactive({});
                 }
-                applyDefaultProps(button.state, {
+                applyDefaults(button.state, {
                     isAvailable: true,
                     isEnabled: true,
                     isActive: false,
@@ -182,10 +182,10 @@ export class ToolbarPlugin extends Plugin {
     }
 }
 
-function applyDefaultProps(props, defaultProps) {
-    for (const propName in defaultProps) {
-        if (props[propName] === undefined) {
-            props[propName] = defaultProps[propName];
+function applyDefaults(obj, defaultObj) {
+    for (const propertyName in defaultObj) {
+        if (obj[propertyName] === undefined) {
+            obj[propertyName] = defaultObj[propertyName];
         }
     }
 }
