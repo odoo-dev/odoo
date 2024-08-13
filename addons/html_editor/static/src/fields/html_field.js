@@ -208,6 +208,9 @@ export class HtmlField extends Component {
                 },
                 peerId: this.generateId(),
             },
+            linkOptions: {
+                forceNewWindow: true,
+            },
             dropImageAsAttachment: true, // @todo @phoenix always true ?
             dynamicPlaceholder: this.dynamicPlaceholder,
             dynamicPlaceholderResModel:

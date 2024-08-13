@@ -17,9 +17,7 @@ import { initElementForEdition } from "./utils/sanitize";
  * @property { String } collaboration.collaborationChannel.collaborationFieldName
  * @property { Number } collaboration.collaborationChannel.collaborationResId
  * @property { 'start' | 'focus' } [collaboration.collaborativeTrigger]
-/**
-
-/**
+ *
  * @typedef { Object } EditorConfig
  * @property { string } [content]
  * @property { boolean } [allowInlineAtRoot]
@@ -35,6 +33,8 @@ import { initElementForEdition } from "./utils/sanitize";
  * @property { CollaborationConfig } [collaboration]
  * @property { Function } getRecordInfo
  * @property { string[] } [disabledToolbarButtonIds]
+ * @property { Object } [linkConfig]
+ * @property { Boolean } [linkConfig.forceNewWindow]
  */
 
 function sortPlugins(plugins) {

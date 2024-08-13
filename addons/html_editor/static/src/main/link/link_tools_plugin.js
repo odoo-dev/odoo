@@ -5,7 +5,7 @@ import { effect } from "@web/core/utils/reactive";
 
 export class LinkToolsPlugin extends Plugin {
     static name = "link_tools";
-    static dependencies = ["link", "toolbar"];
+    static dependencies = ["link", "toolbar", "selection"];
     static shared = ["openLinkTools", "getLinktoolState"];
     /** @type { (p: LinkToolsPlugin) => Record<string, any> } */
     static resources = (p) => {
@@ -14,6 +14,7 @@ export class LinkToolsPlugin extends Plugin {
         });
         return {
             mutation_filtered_classes: ["oe_edited_link"],
+            onSelectionChange: p.onSelectionChange.bind(p),
             toolbarCategory: {
                 id: "link",
                 sequence: 40,
@@ -47,18 +48,8 @@ export class LinkToolsPlugin extends Plugin {
     getLinktoolState() {
         return this.state;
     }
-
-    toggleLinkTools() {
-        if (this.state.linkToolProps) {
-            this.closeLinkTools();
-        } else {
-            this.openLinkTools();
-        }
-    }
-
-    abracadabraLinkTools() {
-        // todo: check to adapt this code (shouldFocusUrl)
-        // const shouldFocusUrl = options.shouldFocusUrl === undefined ? true : options.shouldFocusUrl;
+    toggleLinkTools({ shouldFocusUrl = true } = {}) {
+        // todo: (activate_image_link_tool)
         // if (
         //     options.link &&
         //     options.link.querySelector(mediaSelector) &&
@@ -75,57 +66,24 @@ export class LinkToolsPlugin extends Plugin {
         //     }
         //     return;
         // }
-        // if (options.forceOpen || !this.state.linkToolProps) {
-        //     this.openLinkTools();
-        // } else {
-        //     this.destroyLinkTools();
-        // }
+        if (!this.state.linkToolProps) {
+            this.openLinkTools({ shouldFocusUrl });
+        } else {
+            this.closeLinkTools();
+        }
     }
-
     /**
      * @param {Object} [options]
      * @param {boolean} [options.shouldFocusUrl] If true, the url input will be
      * focused.
      */
     openLinkTools({ shouldFocusUrl } = {}) {
-        // todo: adapt this code (link button state)
-        // const $button = $(this.toolbarEl.querySelector("#create-link"));
-
-        // todo: adapt this code (prevent opening linktool when already opened
-        // on the same link or if one ancestor is the link of the current
-        // linktool).
-        // if (
-        //     this.state.linkToolProps ||
-        //     [options.link, ...ancestors(options.link)].includes(this.linkToolsInfos.link)
-        // ) {
-        //     return;
-        // }
-
         const link = this.shared.getOrCreateLink();
-        // const { link } = this.shared.getOrCreateLink({
-        //     containerNode: this.odooEditor.editable,
-        //     startNode: this.lastMediaClicked,
-        // });
-        // todo: adapt this code (link preview class oe_edited_link)
-        // const addHintClasses = () => {
-        //     link.classList.add("oe_edited_link");
-        //     // todo: adapt this code (link button state)
-        //     // $button.addClass("active");
-        // };
-        // const removeHintClasses = () => {
-        //     link.classList.remove("oe_edited_link");
-        //     // todo: adapt this code (link button state)
-        //     // $button.removeClass("active");
-        // };
-        // this.linkToolsInfos = {
-        //     link,
-        //     removeHintClasses,
-        // };
-        // addHintClasses();
+        this.currentLink = link;
         const self = this;
 
         this.state.linkToolProps = {
-            // ...this.options.linkOptions,
+            ...this.config.linkOptions,
             wysiwyg: {
                 odooEditor: {
                     observerUnactive() {},
@@ -160,14 +118,6 @@ export class LinkToolsPlugin extends Plugin {
             // display the label input (e.g. some mega menu links).
             needLabel: !link.querySelector(".fa, img"),
             shouldFocusUrl,
-            onColorCombinationClassChange: (colorCombinationClass) => {
-                // todo: adapt this code (colorCombinationClass)
-                // this.linkToolsInfos.colorCombinationClass = colorCombinationClass;
-            },
-            // todo: adapt this code (link preview class oe_edited_link)
-            // onPreApplyLink: removeHintClasses,
-            // onPostApplyLink: addHintClasses,
-            // onDestroy: removeHintClasses,
             getColorpickerTemplate: this.config.getColorpickerTemplatem,
         };
         // todo: adapt this code (focus on linktool)
@@ -179,7 +129,21 @@ export class LinkToolsPlugin extends Plugin {
     closeLinkTools() {
         this.state.linkToolProps = undefined;
     }
+    onSelectionChange(selection) {
+        if (!this.state.linkToolProps) {
+            return;
+        }
+        const isInAnchor =
+            selection.anchorNode === this.currentLink ||
+            this.currentLink.contains(selection.anchorNode);
+        const isInFocus =
+            selection.focusNode === this.currentLink ||
+            this.currentLink.contains(selection.focusNode);
 
+        if (!isInAnchor || !isInFocus) {
+            this.closeLinkTools();
+        }
+    }
     bindOnClick() {
         this.odooEditor.document.removeEventListener("click", this._onClick, true);
         document.removeEventListener("click", this._onClick, true);
