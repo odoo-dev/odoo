@@ -318,8 +318,8 @@ export class MassMailingHtmlField extends HtmlField {
             contentClass: "o_in_iframe",
             iframe: true,
             onIframeLoaded: async (doc, editor) => {
+                await this.populateIframeDocument(doc);
                 this.state.iframeDocument = doc;
-                this.populateIframeDocument(doc);
                 const editable = doc.createElement("div");
                 doc.body.append(editable);
                 editor.attachTo(editable);
