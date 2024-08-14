@@ -12,6 +12,8 @@ import { Mutex } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
 import weUtils from "@web_editor/js/common/utils";
 import { MassMailingTemplateSelector, switchImages } from "./mass_mailing_template_selector";
+import { LinkPopoverPlugin } from "@html_editor/main/link/link_popover_plugin";
+import { LinkToolsPlugin } from "@html_editor/main/link/link_tools_plugin";
 import { getCSSRules, toInline } from "@mail/views/web/fields/html_mail_field/convert_inline";
 import { parseHTML } from "@html_editor/utils/html";
 
@@ -274,6 +276,7 @@ export class MassMailingHtmlField extends HtmlField {
     }
     async onSelectMassMailingTemplate(templateInfos, templateHTML) {
         await this.updateValue(templateHTML);
+        await this.updateInlineField(templateHTML);
         this.state.showMassMailingTemplateSelector = false;
         this.state.isBasicTheme = templateInfos.name === "basic";
         if (templateInfos.name === "basic") {
@@ -356,15 +359,17 @@ export class MassMailingHtmlField extends HtmlField {
         const el = await super.getEditorContent();
         return el;
     }
-    async onUpdateCodeview(htmlValue) {
-        await super.onUpdateCodeview(htmlValue);
-        return this.updateInlineField(parseHTML(document, htmlValue).children[0]);
+
+    async updateCodeview(content) {
+        await super.updateCodeview(...arguments);
+        return this.updateInlineField(parseHTML(document, content).children[0]);
     }
-    async fullyUpdateValue() {
-        const el = await super.fullyUpdateValue(...arguments);
+
+    async updateEditorContent(el) {
+        await super.updateEditorContent(...arguments);
         await this.updateInlineField(el);
-        return el;
     }
+
     async updateInlineField(el) {
         el.classList.remove("odoo-editor-editable");
         let temporaryIframe;
@@ -386,6 +391,7 @@ export class MassMailingHtmlField extends HtmlField {
             temporaryIframe.remove();
         }
     }
+
     async makeIframe() {
         const iframe = document.createElement("iframe");
         iframe.style.height = "0px";
@@ -400,6 +406,7 @@ export class MassMailingHtmlField extends HtmlField {
         await this.populateIframeDocument(iframe.contentDocument, { loadJS: false });
         return iframe;
     }
+
     async populateIframeDocument(doc, { loadJS = true } = {}) {
         doc.body.classList.add("editor_enable");
         doc.body.classList.add("o_mass_mailing_iframe");
