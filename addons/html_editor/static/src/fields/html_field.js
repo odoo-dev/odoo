@@ -144,26 +144,26 @@ export class HtmlField extends Component {
     async _commitChanges({ urgent }) {
         if (this.isDirty) {
             if (this.state.showCodeView) {
-                await this.onUpdateCodeview(this.codeViewRef.el.value);
+                await this.updateCodeview(this.codeViewRef.el.value);
                 return;
             }
 
             if (urgent) {
                 await this.updateValue(this.editor.getContent());
             }
-            this.fullyUpdateValue({ urgent });
+            await this.updateEditorContent(await this.getEditorContent(), { urgent });
         }
     }
-    onUpdateCodeview(el) {
-        return this.updateValue(el);
+
+    updateCodeview(content) {
+        return this.updateValue(content);
     }
-    async fullyUpdateValue({ urgent }) {
-        const el = await this.getEditorContent();
+
+    async updateEditorContent(el, { urgent }) {
         const content = el.innerHTML;
         if (!urgent || (urgent && this.lastValue !== content)) {
             await this.updateValue(content);
         }
-        return el;
     }
 
     async commitChanges({ urgent } = {}) {
