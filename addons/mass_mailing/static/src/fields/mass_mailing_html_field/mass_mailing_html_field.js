@@ -50,9 +50,6 @@ export class MassMailingHtmlField extends HtmlField {
             },
             isBasicTheme: this.value.toString().search("o_basic_theme") >= 0,
         });
-        this.fieldConfig = reactive({
-            $scrollable: null,
-        });
         this.historyState = reactive({
             canUndo: false,
             canRedo: false,

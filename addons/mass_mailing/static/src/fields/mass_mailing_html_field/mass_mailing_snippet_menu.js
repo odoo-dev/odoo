@@ -34,22 +34,6 @@ export class MassMailingSnippetsMenu extends snippetsEditor.SnippetsMenu {
      */
     setup() {
         super.setup();
-        this.fieldConfig = useState(this.env.fieldConfig);
-
-        // When the scrollable changes, it invalidates the current drag and
-        // drop config. In the case of the snippetsMenu, it can be altered,
-        // But in the case of snippetEditor, destroying them should be good
-        // enough.
-        useEffect(
-            ($scrollable) => {
-                this._mutex.exec(async () => {
-                    this.options.$scrollable = $scrollable;
-                    this._makeSnippetDraggable();
-                    await this._destroyEditors();
-                });
-            },
-            () => [this.fieldConfig.$scrollable]
-        );
     }
     /**
      * @override
