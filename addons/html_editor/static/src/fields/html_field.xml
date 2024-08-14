@@ -9,7 +9,8 @@
         <t t-else="">
             <div class="h-100" t-att-class="{'o_show_codeview': state.showCodeView, 'o_field_translate': isTranslatable}">
                 <t t-if="state.showCodeView">
-                    <textarea t-ref="codeView" class="o_codeview" t-att-value="this.value" t-on-change="onChange"/>
+                    <textarea t-ref="codeView" class="o_codeview" t-att-value="this.value" t-on-change="onChange"
+                    t-on-blur="onBlur"/>
                 </t>
                 <t t-else="">
                     <Wysiwyg
