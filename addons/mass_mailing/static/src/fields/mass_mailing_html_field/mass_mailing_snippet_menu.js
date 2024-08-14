@@ -15,6 +15,7 @@ export class MassMailingSnippetsMenu extends snippetsEditor.SnippetsMenu {
         ...snippetsEditor.SnippetsMenu.props,
         linkToolProps: { type: Object, optional: true },
         toolbarInfos: { type: Object, optional: true },
+        selectedTheme: { type: Object },
         toggleCodeView: { type: Function },
     };
     static components = {
@@ -35,21 +36,6 @@ export class MassMailingSnippetsMenu extends snippetsEditor.SnippetsMenu {
         super.setup();
         this.fieldConfig = useState(this.env.fieldConfig);
 
-        let firstRender = true;
-        useEffect(
-            (selectedTheme) => {
-                // Avoid running this on first render as the template is already
-                // loaded for the selected theme by the normal flow.
-                if (firstRender) {
-                    firstRender = false;
-                    return;
-                }
-                this._loadSnippetsTemplates().then(() => {
-                    this.reloadSnippetDropzones();
-                });
-            },
-            () => [this.fieldConfig.selectedTheme]
-        );
         // When the scrollable changes, it invalidates the current drag and
         // drop config. In the case of the snippetsMenu, it can be altered,
         // But in the case of snippetEditor, destroying them should be good
@@ -81,7 +67,7 @@ export class MassMailingSnippetsMenu extends snippetsEditor.SnippetsMenu {
      * @override
      */
     _computeSnippetTemplates(html) {
-        this.env.switchImages(this.fieldConfig.selectedTheme, $(html));
+        this.env.switchImages(this.props.selectedTheme, $(html));
         html.querySelectorAll("img").forEach((img) => img.setAttribute("loading", "lazy"));
         return super._computeSnippetTemplates(html);
     }
