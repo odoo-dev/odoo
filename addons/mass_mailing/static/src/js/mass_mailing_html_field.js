@@ -145,7 +145,6 @@ export class MassMailingHtmlField extends HtmlField {
             // Replace the body to only contain the target as we do not care for
             // other elements (e.g. sidebar, toolbar, ...)
             const clonedBody = clonedHtmlNode.querySelector('body');
-            // todo: we do not use iframetarget anymore, the editable is in the body
             const clonedIframeTarget = clonedHtmlNode.querySelector('#iframe_target');
             clonedBody.replaceChildren(clonedIframeTarget);
             clonedHtmlNode.querySelectorAll('script').forEach(script => script.remove()); // Remove scripts.
@@ -377,7 +376,6 @@ export class MassMailingHtmlField extends HtmlField {
         });
 
         // Clear any previous theme class before adding new one.
-        // todo: ensure we remove the classes from the body in case we add them ?
         this.wysiwyg.$iframeBody.closest('body').removeClass(this._themeClassNames);
         this.fieldConfig.selectedTheme = this._getSelectedTheme(themesParams);
         if (this.fieldConfig.selectedTheme) {
