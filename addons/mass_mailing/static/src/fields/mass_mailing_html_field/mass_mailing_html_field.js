@@ -281,12 +281,6 @@ export class MassMailingHtmlField extends HtmlField {
         }
 
         this.state.selectedTheme = templateInfos;
-
-        // todo: to implement: commitChanges
-        // The value of the field gets updated upon editor blur. If for any
-        // reason, the selection was not in the editable before modifying
-        // another field, ensure that the value is properly set.
-        // await this.commitChanges();
     }
 
     // -----------------------------------------------------------------------------
