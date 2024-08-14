@@ -51,7 +51,6 @@ export class MassMailingHtmlField extends HtmlField {
             isBasicTheme: this.value.toString().search("o_basic_theme") >= 0,
         });
         this.fieldConfig = reactive({
-            selectedTheme: null,
             $scrollable: null,
         });
         this.historyState = reactive({
@@ -273,6 +272,7 @@ export class MassMailingHtmlField extends HtmlField {
             toolbarInfos: state.toolbarInfos,
             toggleCodeView: this.toggleCodeView.bind(this),
             linkToolProps: state.linkToolState.linkToolProps,
+            selectedTheme: state.selectedTheme,
         };
     }
     async onSelectMassMailingTemplate(templateInfos, templateHTML) {
@@ -283,8 +283,7 @@ export class MassMailingHtmlField extends HtmlField {
             this.focusEditableOnLoad = true;
         }
 
-        // todo: to implement: this.fieldConfig.selectedTheme = templateInfos;
-        // this.fieldConfig.selectedTheme = templateInfos;
+        this.state.selectedTheme = templateInfos;
 
         // todo: to implement: commitChanges
         // The value of the field gets updated upon editor blur. If for any
