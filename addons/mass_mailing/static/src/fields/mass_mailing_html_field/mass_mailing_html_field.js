@@ -12,6 +12,16 @@ import { Mutex } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
 import weUtils from "@web_editor/js/common/utils";
 import { MassMailingTemplateSelector, switchImages } from "./mass_mailing_template_selector";
+import { getCSSRules, toInline } from "@mail/views/web/fields/html_mail_field/convert_inline";
+import { parseHTML } from "@html_editor/utils/html";
+
+const cssRulesByElement = new WeakMap();
+function getCachedCSSRules(el) {
+    if (!cssRulesByElement.has(el)) {
+        cssRulesByElement.set(el, getCSSRules(el.ownerDocument));
+    }
+    return cssRulesByElement.get(el);
+}
 
 // const legacyEventToNewEvent = {
 //     historyStep: "ADD_STEP",
@@ -24,6 +34,7 @@ export class MassMailingHtmlField extends HtmlField {
     static components = { ...HtmlField.components, LazyComponent, MassMailingTemplateSelector };
     static props = {
         ...HtmlField.props,
+        inlineField: { type: String, optional: true },
         filterTemplates: Boolean,
     };
 
@@ -308,26 +319,7 @@ export class MassMailingHtmlField extends HtmlField {
             iframe: true,
             onIframeLoaded: async (doc, editor) => {
                 this.state.iframeDocument = doc;
-                doc.body.classList.add("editor_enable");
-                doc.body.classList.add("o_mass_mailing_iframe");
-                doc.body.classList.add("o_in_iframe");
-                const iframeBundle = await this.iframeBundle;
-                const massMailingBundle = await this.massMailingBundle;
-                function addStyle(href) {
-                    const link = doc.createElement("link");
-                    link.rel = "stylesheet";
-                    link.href = href;
-                    doc.head.appendChild(link);
-                }
-                function addScript(src) {
-                    const script = doc.createElement("script");
-                    script.type = "text/javascript";
-                    script.src = src;
-                    doc.head.appendChild(script);
-                }
-                addStyle(iframeBundle.cssLibs[0]);
-                addStyle(massMailingBundle.cssLibs[0]);
-                addScript(iframeBundle.jsLibs[0]);
+                this.populateIframeDocument(doc);
                 const editable = doc.createElement("div");
                 doc.body.append(editable);
                 editor.attachTo(editable);
@@ -373,6 +365,84 @@ export class MassMailingHtmlField extends HtmlField {
         }
         const el = await super.getEditorContent();
         return el;
+    }
+    async onUpdateCodeview(htmlValue) {
+        await super.onUpdateCodeview(htmlValue);
+        return this.updateInlineField(parseHTML(document, htmlValue).children[0]);
+    }
+    async fullyUpdateValue() {
+        const el = await super.fullyUpdateValue(...arguments);
+        await this.updateInlineField(el);
+        return el;
+    }
+    async updateInlineField(el) {
+        el.classList.remove("odoo-editor-editable");
+        let temporaryIframe;
+        if (!this.state.iframeDocument) {
+            temporaryIframe = await this.makeIframe();
+        }
+        const iframeDocument = this.state.iframeDocument || temporaryIframe.contentDocument;
+        iframeDocument.body.append(el);
+        if (el.querySelector(".o_basic_theme")) {
+            for (const element of el.querySelectorAll("*")) {
+                element.style["font-family"] = "";
+            }
+        }
+        await toInline(el, getCachedCSSRules(el));
+        el.remove();
+        const fieldName = this.props.inlineField;
+        await this.props.record.update({ [fieldName]: el.innerHTML });
+        if (temporaryIframe) {
+            temporaryIframe.remove();
+        }
+    }
+    async makeIframe() {
+        const iframe = document.createElement("iframe");
+        iframe.style.height = "0px";
+        iframe.style.visibility = "hidden";
+        // Make sure no scripts get executed.
+        iframe.setAttribute("sandbox", "allow-same-origin");
+        const iframePromise = new Promise((resolve) => {
+            iframe.addEventListener("load", resolve, { once: true });
+        });
+        document.body.append(iframe);
+        await iframePromise;
+        await this.populateIframeDocument(iframe.contentDocument, { loadJS: false });
+        return iframe;
+    }
+    async populateIframeDocument(doc, { loadJS = true } = {}) {
+        doc.body.classList.add("editor_enable");
+        doc.body.classList.add("o_mass_mailing_iframe");
+        doc.body.classList.add("o_in_iframe");
+        const iframeBundle = await this.iframeBundle;
+        const massMailingBundle = await this.massMailingBundle;
+        function addStyle(href) {
+            const link = doc.createElement("link");
+            link.rel = "stylesheet";
+            link.href = href;
+            const promise = new Promise((resolve, reject) => {
+                link.onload = resolve;
+                link.onerror = reject;
+            });
+            doc.head.appendChild(link);
+            return promise;
+        }
+        function addScript(src) {
+            const script = doc.createElement("script");
+            script.type = "text/javascript";
+            script.src = src;
+            const promise = new Promise((resolve, reject) => {
+                script.onload = resolve;
+                script.onerror = reject;
+            });
+            doc.head.appendChild(script);
+            return promise;
+        }
+        await Promise.all([
+            addStyle(iframeBundle.cssLibs[0]),
+            addStyle(massMailingBundle.cssLibs[0]),
+            loadJS && addScript(iframeBundle.jsLibs[0]),
+        ]);
     }
 
     onChange() {
@@ -451,8 +521,7 @@ export const massMailingHtmlField = {
     extractProps({ attrs, options }) {
         const props = htmlField.extractProps(...arguments);
         props.filterTemplates = Boolean(options.filterTemplates);
-        //     props.inlineField = options['inline-field'];
-        //     props.iframeHtmlClass = attrs.iframeHtmlClass;
+        props.inlineField = options["inline-field"];
         return props;
     },
     // fieldDependencies: [{ name: 'body_html', type: 'html', readonly: 'false' }],
