@@ -1,5 +1,8 @@
 import { htmlField, HtmlField } from "@html_editor/fields/html_field";
 import { JustifyPlugin } from "@html_editor/main/justify_plugin";
+import { LinkPopoverPlugin } from "@html_editor/main/link/link_popover_plugin";
+import { LinkToolsPlugin } from "@html_editor/main/link/link_tools_plugin";
+import { Plugin } from "@html_editor/plugin";
 import { closestElement } from "@html_editor/utils/dom_traversal";
 import { EventBus, onWillStart, reactive, useRef, useSubEnv } from "@odoo/owl";
 import { getBundle, LazyComponent, loadBundle } from "@web/core/assets";
@@ -9,14 +12,13 @@ import { Mutex } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
 import weUtils from "@web_editor/js/common/utils";
 import { MassMailingTemplateSelector, switchImages } from "./mass_mailing_template_selector";
-import { LinkPopoverPlugin } from "@html_editor/main/link/link_popover_plugin";
-import { LinkToolsPlugin } from "@html_editor/main/link/link_tools_plugin";
 
 // const legacyEventToNewEvent = {
 //     historyStep: "ADD_STEP",
 //     historyUndo: "HISTORY_UNDO",
 //     historyRedo: "HISTORY_REDO",
 // };
+
 export class MassMailingHtmlField extends HtmlField {
     static template = "mass_mailing.MassMailingHtmlField";
     static components = { ...HtmlField.components, LazyComponent, MassMailingTemplateSelector };
@@ -340,21 +342,6 @@ export class MassMailingHtmlField extends HtmlField {
                 }
 
                 this.state.toolbarInfos = this.editor.shared.getToolbarInfo();
-
-                // todo: should this be in its own plugin? DRAG BUILDING BLOCKS HERE
-                const subEditable = this.editor.editable.querySelector(".o_editable");
-                if (subEditable) {
-                    if (subEditable.getAttribute("data-editor-message") === null) {
-                        subEditable.setAttribute(
-                            "data-editor-message",
-                            "DRAG BUILDING BLOCKS HERE"
-                        );
-                    }
-                    if (!subEditable.innerHTML.trim()) {
-                        // The contenteditable true should be set when dropping a snippet inside the editable.
-                        subEditable.setAttribute("contenteditable", false);
-                    }
-                }
             },
             // copyCss: true,
         };
@@ -365,6 +352,7 @@ export class MassMailingHtmlField extends HtmlField {
         config.Plugins = config.Plugins.filter((x) => x !== LinkPopoverPlugin);
         config.Plugins.push(JustifyPlugin);
         config.Plugins.push(LinkToolsPlugin);
+        config.Plugins.push(DragBlockPlugin);
         config.getColorpickerTemplate = this.getColorpickerTemplate;
         config.disableFloatingToolbar = true;
         config.disabledToolbarButtonIds = new Set(["remove_format", "codeview"]);
@@ -427,6 +415,21 @@ export class MassMailingHtmlField extends HtmlField {
             },
             true
         );
+    }
+}
+
+class DragBlockPlugin extends Plugin {
+    setup() {
+        const subEditable = this.editable.querySelector(".o_editable");
+        if (subEditable) {
+            if (subEditable.getAttribute("data-editor-message") === null) {
+                subEditable.setAttribute("data-editor-message", "DRAG BUILDING BLOCKS HERE");
+            }
+            if (!subEditable.innerHTML.trim()) {
+                // The contenteditable true should be set when dropping a snippet inside the editable.
+                subEditable.setAttribute("contenteditable", false);
+            }
+        }
     }
 }
 
