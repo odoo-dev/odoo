@@ -4,9 +4,11 @@
 import logging
 import pytz
 import textwrap
+import re
 
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
+from urllib.parse import urlparse
 
 from odoo import _, api, Command, fields, models, tools
 from odoo.addons.base.models.res_partner import _tz_get
@@ -229,6 +231,9 @@ class EventEvent(models.Model):
         compute_sudo=True)
     country_id = fields.Many2one(
         'res.country', 'Country', related='address_id.country_id', readonly=False, store=True)
+    event_url = fields.Char(string='Event URL',
+        help="""This URL can be set for online events, and will be used in links redirecting the attendees to the event.
+            By default, the links redirect to the website event page if website is installed.""")
     lang = fields.Selection(_lang_get, string='Language',
         help="All the communication emails sent to attendees will be translated in this language.")
     # ticket reports
@@ -611,6 +616,23 @@ class EventEvent(models.Model):
         for event in self:
             if event.date_end < event.date_begin:
                 raise ValidationError(_('The closing date cannot be earlier than the beginning date.'))
+
+    @api.constrains('event_url')
+    def _check_event_url(self):
+        for event in self:
+            if event.event_url and not re.match(tools.mail.TEXT_URL_REGEX, event.event_url):
+                raise ValidationError(_('Please enter a valid event URL.'))
+
+    @api.onchange('event_url', 'address_id')
+    def _onchange_event_url(self):
+        if self.event_url:
+            if self.address_id:
+                self.event_url = ''
+            else:
+                parsed_url = urlparse(self.event_url)
+                if not (parsed_url.scheme in {'http', 'https'} and parsed_url.netloc):
+                    self.event_url = f"https://{self.event_url}"
+
 
     @api.model_create_multi
     def create(self, vals_list):
