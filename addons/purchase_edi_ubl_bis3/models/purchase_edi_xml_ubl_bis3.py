@@ -16,60 +16,11 @@ class PurchaseEdiXmlUBLBIS3(models.AbstractModel):
     def _export_purchase_order_filename(self, purchase_order):
         return f"{purchase_order.name.replace('/', '_')}_ubl_bis3.xml"
 
-    def _get_country_vals(self, country):
-        return {
-            'country': country,
-
-            'identification_code': country.code,
-            'name': country.name,
-        }
-
-    def _get_partner_address_vals(self, partner):
-        return {
-            'street_name': partner.street,
-            'additional_street_name': partner.street2,
-            'city_name': partner.city,
-            'postal_zone': partner.zip,
-            'country_subentity': partner.state_id.name,
-            'country_identification_code': partner.country_id.code
-        }
-
-    def _get_partner_party_tax_scheme_vals(self, partner):
-        return {
-            'company_id': partner.vat,
-            'tax_scheme_vals': {'id': 'VAT'},
-        }
-
-    def _get_partner_party_legal_entity_vals(self, partner):
-        return {
-            'registration_name': partner.name,
-            'company_id': partner.vat,
-            'registration_address_vals': self._get_partner_address_vals(partner),
-        }
-
-    def _get_partner_contact_vals(self, partner):
-        return {
-            'name': partner.name,
-            'telephone': partner.phone or partner.mobile,
-            'electronic_mail': partner.email,
-        }
-
     def _get_partner_party_vals(self, partner, role):
-        vals = {
-            'party_name': partner.display_name,
-            'postal_address_vals': self._get_partner_address_vals(partner),
-            'contact_vals': self._get_partner_contact_vals(partner),
-        }
-        if role == 'customer':
-            vals['party_tax_scheme_vals'] = self._get_partner_party_tax_scheme_vals(partner.commercial_partner_id)
-        return vals
-
-    def _get_delivery_party_vals(self, delivery):
-        return {
-            'party_name': delivery.display_name,
-            'postal_address_vals': self._get_partner_address_vals(delivery),
-            'contact_vals': self._get_partner_contact_vals(delivery),
-        }
+        partner_party_vals = super()._get_partner_party_vals(partner, role)
+        if role == 'delivery':
+            del partner_party_vals['party_tax_scheme_vals']
+        return partner_party_vals
 
     def _get_payment_terms_vals(self, payment_term):
         return {
@@ -202,15 +153,19 @@ class PurchaseEdiXmlUBLBIS3(models.AbstractModel):
 
             'format_float': self.format_float,
 
+            'AddressType_template': 'account_edi_ubl_cii.ubl_21_AddressType',
+            'PaymentTermsType_template': 'account_edi_ubl_cii.ubl_21_PaymentTermsType',
+            'PartyType_template': 'account_edi_ubl_cii.ubl_21_PartyType',
+
             'vals': {
                 'id': order.partner_ref or order.name,
                 'issue_date': order.create_date.date(),
                 'note': html2plaintext(order.notes) if order.notes else False,
                 'originator_document_reference': order.origin,
                 'document_currency_code': order.currency_id.name.upper(),
-                'delivery_party_vals': self._get_delivery_party_vals(delivery),
                 'supplier_party_vals': self._get_partner_party_vals(supplier, role='supplier'),
                 'customer_party_vals': self._get_partner_party_vals(customer, role='customer'),
+                'delivery_party_vals': self._get_partner_party_vals(delivery, role='delivery'),
                 'payment_terms_vals': self._get_payment_terms_vals(order.payment_term_id),
                 'anticipated_monetary_total_vals': anticipated_monetary_total_vals,
                 'tax_amount': order.amount_tax,

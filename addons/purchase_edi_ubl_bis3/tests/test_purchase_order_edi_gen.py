@@ -1,15 +1,18 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+
+from datetime import datetime
+from lxml import etree
+
 from odoo.tests import tagged
 from odoo.tools import file_open
 
-from lxml import etree
-from datetime import datetime
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 
 @tagged('post_install', '-at_install')
 class TestPurchaseOrderEDIGen(AccountTestInvoicingCommon):
     def test_purchase_order_download_edi(self):
+        self.env.company.vat = "BE0246697724"
         po = self.env['purchase.order'].create({
             'name': 'My PO',
             'partner_id': self.partner_a.id,

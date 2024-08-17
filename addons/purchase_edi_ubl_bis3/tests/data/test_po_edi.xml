@@ -16,10 +16,15 @@
         </cac:Country>
       </cac:PostalAddress>
       <cac:PartyTaxScheme>
+        <cbc:CompanyID>BE0246697724</cbc:CompanyID>
         <cac:TaxScheme>
           <cbc:ID>VAT</cbc:ID>
         </cac:TaxScheme>
       </cac:PartyTaxScheme>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>company_1_data</cbc:RegistrationName>
+        <cbc:CompanyID>BE0246697724</cbc:CompanyID>
+      </cac:PartyLegalEntity>
       <cac:Contact>
         <cbc:Name>company_1_data</cbc:Name>
       </cac:Contact>
@@ -30,6 +35,9 @@
       <cac:PartyName>
         <cbc:Name>partner_a</cbc:Name>
       </cac:PartyName>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>partner_a</cbc:RegistrationName>
+      </cac:PartyLegalEntity>
       <cac:Contact>
         <cbc:Name>partner_a</cbc:Name>
       </cac:Contact>
@@ -45,6 +53,10 @@
           <cbc:IdentificationCode>US</cbc:IdentificationCode>
         </cac:Country>
       </cac:PostalAddress>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>company_1_data</cbc:RegistrationName>
+        <cbc:CompanyID>BE0246697724</cbc:CompanyID>
+      </cac:PartyLegalEntity>
       <cac:Contact>
         <cbc:Name>company_1_data</cbc:Name>
       </cac:Contact>
@@ -92,6 +104,7 @@
       </cac:Price>
       <cac:Item>
         <cbc:Name>product_a</cbc:Name>
+        <cbc:Description>product_a</cbc:Description>
         <cac:ClassifiedTaxCategory>
           <cbc:ID>S</cbc:ID>
           <cbc:Percent>15.0</cbc:Percent>
