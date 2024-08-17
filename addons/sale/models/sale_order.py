@@ -1042,11 +1042,7 @@ class SaleOrder(models.Model):
         :rtype: bool
         :raise: UserError if trying to confirm cancelled SO's
         """
-        if not all(order._can_be_confirmed() for order in self):
-            raise UserError(_(
-                "The following orders are not in a state requiring confirmation: %s",
-                ", ".join(self.mapped('display_name')),
-            ))
+        self._check_can_be_confirmed()
 
         self.order_line._validate_analytic_distribution()
 
@@ -1079,9 +1075,23 @@ class SaleOrder(models.Model):
         user = self[:1].create_uid
         return user and user.sudo().has_group('sale.group_auto_done_setting')
 
-    def _can_be_confirmed(self):
-        self.ensure_one()
-        return self.state in {'draft', 'sent'}
+    def _check_can_be_confirmed(self):
+        """ Check whether order can be confirmed or not if not then raise error. """
+        for order in self:
+            if order.state not in {'draft', 'sent'}:
+                raise UserError(_(
+                    "The following orders are not in a state requiring confirmation: %s",
+                    ", ".join(self.mapped('display_name')),
+                ))
+            if any(
+                not line.display_type
+                and not line.is_downpayment
+                and not line.product_id
+                for line in order.order_line
+            ):
+                raise ValidationError(_(
+                    "A line on these orders missing a product, you cannot confirm it."
+                ))
 
     def _prepare_confirmation_values(self):
         """ Prepare the sales order confirmation values.
