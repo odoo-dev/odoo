@@ -474,8 +474,6 @@ export class MassMailingHtmlField extends HtmlField {
      * Bind the last media clicked in the iframe to the lastMediaClicked
      * property.
      *
-     * todo: to refactor
-     *
      * @param {Document} doc
      */
     bindLastMediaClicked(doc) {
