@@ -277,7 +277,7 @@ export class MassMailingHtmlField extends HtmlField {
     }
     async onSelectMassMailingTemplate(templateInfos, templateHTML) {
         await this.updateValue(templateHTML);
-        await this.updateInlineField(templateHTML);
+        await this.updateInlineField(parseHTML(document, templateHTML).children[0]);
         this.state.showMassMailingTemplateSelector = false;
         this.state.isBasicTheme = templateInfos.name === "basic";
         if (templateInfos.name === "basic") {
@@ -344,6 +344,7 @@ export class MassMailingHtmlField extends HtmlField {
         config.disabledToolbarButtonIds = new Set(["remove_format", "codeview"]);
         config.resources = Object.assign({}, config.resources, {
             toolbarItems: [
+                ...(config.resources?.toolbarItems || []),
                 {
                     id: "insert_media",
                     category: "link",
