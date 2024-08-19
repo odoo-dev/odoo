@@ -1018,7 +1018,6 @@ var SnippetEditor = Widget.extend({
             self.dragState.dragHelperEl.remove();
             self.dragState.backgroundGridEl.remove();
 
-            // todo: use makeSavePoint
             self.options.wysiwyg.odooEditor.observerActive('dragAndDropMoveSnippet');
             gridUtils._resizeGrid(rowEl);
             self.options.wysiwyg.odooEditor.observerUnactive('dragAndDropMoveSnippet');
