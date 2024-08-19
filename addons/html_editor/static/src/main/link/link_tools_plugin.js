@@ -49,23 +49,6 @@ export class LinkToolsPlugin extends Plugin {
         return this.state;
     }
     toggleLinkTools({ shouldFocusUrl = true } = {}) {
-        // todo: (activate_image_link_tool)
-        // if (
-        //     options.link &&
-        //     options.link.querySelector(mediaSelector) &&
-        //     !options.link.textContent.trim() &&
-        //     wysiwygUtils.isImg(this.lastElement)
-        // ) {
-        //     // If the link contains a media without text, the link is
-        //     // editable in the media options instead.
-        //     if (options.shoudFocusUrl) {
-        //         // Wait for the editor panel to be fully updated.
-        //         this.mutex.exec(() => {
-        //             this.odooEditor.dispatchEvent(new Event("activate_image_link_tool"));
-        //         });
-        //     }
-        //     return;
-        // }
         if (!this.state.linkToolProps) {
             this.openLinkTools({ shouldFocusUrl });
         } else {
