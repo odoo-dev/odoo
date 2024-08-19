@@ -136,6 +136,9 @@ export class MassMailingHtmlField extends HtmlField {
                 redo: () => {
                     self.editor.dispatch("HISTORY_REDO");
                 },
+                openMediaDialog() {
+                    self.editor.dispatch("REPLACE_IMAGE");
+                },
                 odooEditor: {
                     get document() {
                         return state.iframeDocument;
