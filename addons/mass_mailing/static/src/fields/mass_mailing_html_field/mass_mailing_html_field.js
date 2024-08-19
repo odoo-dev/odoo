@@ -342,6 +342,19 @@ export class MassMailingHtmlField extends HtmlField {
         config.getColorpickerTemplate = this.getColorpickerTemplate;
         config.disableFloatingToolbar = true;
         config.disabledToolbarButtonIds = new Set(["remove_format", "codeview"]);
+        config.resources = Object.assign({}, config.resources, {
+            toolbarItems: [
+                {
+                    id: "insert_media",
+                    category: "link",
+                    name: "Insert Media",
+                    icon: "fa-file-image-o",
+                    action(dispatch) {
+                        dispatch("INSERT_MEDIA");
+                    },
+                },
+            ],
+        });
         return config;
     }
 
