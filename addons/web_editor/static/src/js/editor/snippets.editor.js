@@ -4127,8 +4127,7 @@ class SnippetsMenu extends Component {
         if (!$target.closest('we-button, we-toggler, we-select, .o_we_color_preview').length) {
             this._closeWidgets();
         }
-        // todo: we do not use #iframe_target anymore
-        if (!$target.closest('body > *').length || $target.is('#iframe_target')) {
+        if (!$target.closest('body > *').length) {
             return;
         }
         if ($target.closest(this._notActivableElementsSelector).length) {
