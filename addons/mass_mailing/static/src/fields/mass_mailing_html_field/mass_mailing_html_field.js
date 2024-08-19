@@ -12,8 +12,6 @@ import { Mutex } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
 import weUtils from "@web_editor/js/common/utils";
 import { MassMailingTemplateSelector, switchImages } from "./mass_mailing_template_selector";
-import { LinkPopoverPlugin } from "@html_editor/main/link/link_popover_plugin";
-import { LinkToolsPlugin } from "@html_editor/main/link/link_tools_plugin";
 import { getCSSRules, toInline } from "@mail/views/web/fields/html_mail_field/convert_inline";
 import { parseHTML } from "@html_editor/utils/html";
 
