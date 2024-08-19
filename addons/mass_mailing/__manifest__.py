@@ -129,7 +129,6 @@
             'mass_mailing/static/src/js/mass_mailing_mobile_preview.js',
             'mass_mailing/static/src/js/mass_mailing_html_field.js',
             'mass_mailing/static/src/xml/mailing_filter_widget.xml',
-            'mass_mailing/static/src/xml/mass_mailing.xml',
             'mass_mailing/static/src/xml/mass_mailing_mobile_preview.xml',
             'mass_mailing/static/src/js/tours/**/*',
             'mass_mailing/static/src/fields/**/*',
