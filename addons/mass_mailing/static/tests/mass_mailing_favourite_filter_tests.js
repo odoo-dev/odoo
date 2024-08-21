@@ -9,6 +9,7 @@ let fixture;
 let serverData;
 
 QUnit.module('mass_mailing_favourite_filter', {}, function () {
+
 QUnit.module('favorite filter widget', (hooks) => {
     hooks.beforeEach(() => {
         fixture = testUtils.getFixture();
@@ -110,7 +111,7 @@ QUnit.module('favorite filter widget', (hooks) => {
         setupViewRegistries();
     });
 
-    QUnit.test('create favorite filter', async (assert) => {
+    QUnit.debug('create favorite filter', async (assert) => {
         assert.expect(8);
 
         await makeView({
@@ -132,6 +133,7 @@ QUnit.module('favorite filter widget', (hooks) => {
                 </form>`,
             mockRPC: function (_, { args, model, method }) {
                 if (method === 'create' && model === 'mailing.filter') {
+                    debugger
                     assert.deepEqual(args[0],
                         [{mailing_domain: '[["new_user","=",True]]', mailing_model_id: 1, name: 'event promo - new users'}],
                         "should pass correct data in create");
@@ -169,7 +171,9 @@ QUnit.module('favorite filter widget', (hooks) => {
         await testUtils.click(fixture.querySelector('.o_field_mailing_filter input'));
         assert.containsN($dropdown, 'li.ui-menu-item', 3,
             "there should be two existing filters and a search more btn");
+            debugger
         await testUtils.clickSave(fixture);
+        debugger
     });
 
     QUnit.test('unlink favorite filter', async (assert) => {
