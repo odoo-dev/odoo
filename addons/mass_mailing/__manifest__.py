@@ -174,7 +174,6 @@
         ],
         'web.assets_unit_tests': [
             'mass_mailing/static/tests/mass_mailing_html_field.test.js',
-            'mass_mailing/static/tests/mass_mailing_favorite_filter.test.js',
         ],
         'web.qunit_suite_tests': [
             'mass_mailing/static/tests/mass_mailing_favourite_filter_tests.js',

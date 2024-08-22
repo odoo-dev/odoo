@@ -29,7 +29,7 @@ registry.category("web_tour.tours").add('mass_mailing_code_view_tour', {
             content: 'Select item from dropdown',
             run: 'click',
         }, {
-            trigger: 'div[name="body_arch"] :iframe #default',
+            trigger: 'div[name="body_arch"] .o_mail_theme_selector_new [name="default"]',
             content: markup('Choose this <b>theme</b>.'),
             run: 'click',
         }, {

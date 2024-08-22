@@ -35,15 +35,15 @@ registry.category("web_tour.tours").add('mailing_editor_theme', {
             run: "click",
         },
         {
-            trigger: ":iframe .o_mail_theme_selector_new",
+            trigger: ".o_mail_theme_selector_new",
         },
         {
             content: "Pick the basic theme",
-            trigger: ':iframe #basic',
+            trigger: '.o_mail_theme_selector_new [name="basic"]',
             run: "click",
         },
         {
-            trigger: ":iframe html:not(:has(.o_mail_theme_selector_new))",
+            trigger: ":not(:has(.o_mail_theme_selector_new))",
         },
         {
             content: "Make sure the snippets menu is hidden",
@@ -56,7 +56,7 @@ registry.category("web_tour.tours").add('mailing_editor_theme', {
             run: "click",
         },
         {
-            trigger: ":iframe .o_mail_theme_selector_new",
+            trigger: ".o_mail_theme_selector_new",
         },
         {
             content: "Fill in Subject",
@@ -75,7 +75,7 @@ registry.category("web_tour.tours").add('mailing_editor_theme', {
         },
         {
             content: "Pick the newsletter theme",
-            trigger: ':iframe #newsletter',
+            trigger: ':iframe [name="newsletter"]',
             run: "click",
         },
         {

@@ -21,9 +21,9 @@ registry.category("web_tour.tours").add('snippets_mailing_menu_toolbar_mobile', 
     {
         isActive: ["mobile"],
         content: "Check templates available in theme selector",
-        trigger: ':iframe .o_mail_theme_selector_new',
+        trigger: '.o_mail_theme_selector_new',
         run: function () {
-            if (this.anchor.querySelector("#empty")) {
+            if (this.anchor.querySelector("[name='empty']")) {
                 console.error('The empty template should not be visible on mobile.');
             }
         },

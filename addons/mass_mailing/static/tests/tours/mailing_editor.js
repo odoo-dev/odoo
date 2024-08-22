@@ -20,7 +20,7 @@ registry.category("web_tour.tours").add('mailing_editor', {
     run: "click",
 }, {
     content: 'choose the theme "empty" to edit the mailing with snippets',
-    trigger: '[name="body_arch"] :iframe #empty',
+    trigger: '[name="body_arch"] .o_mail_theme_selector_new [name="empty]',
     run() {
         this.anchor.click();
     }

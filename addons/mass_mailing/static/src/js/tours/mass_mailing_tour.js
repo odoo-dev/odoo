@@ -48,13 +48,13 @@
         run: 'click',
     }, {
         isActive: ["enterprise"],
-        trigger: 'div[name="body_arch"] :iframe #newsletter',
+        trigger: 'div[name="body_arch"] .o_mail_theme_selector_new [name="newsletter"]',
         content: markup(_t('Choose this <b>theme</b>.')),
         tooltipPosition: 'left',
         run: 'click',
     }, {
         isActive: ["community"],
-        trigger: 'div[name="body_arch"] :iframe #default',
+        trigger: 'div[name="body_arch"] .o_mail_theme_selector_new [name="default"]',
         content: markup(_t('Choose this <b>theme</b>.')),
         tooltipPosition: 'right',
         run: 'click',

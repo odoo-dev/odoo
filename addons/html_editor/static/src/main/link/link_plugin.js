@@ -20,6 +20,7 @@ export class LinkPlugin extends Plugin {
     static resources = (p) => ({
         split_element_block: { callback: p.handleSplitBlock.bind(p) },
         handle_insert_line_break_element: { callback: p.handleInsertLineBreak.bind(p) },
+        powerboxCategory: { id: "navigation", name: _t("Navigation"), sequence: 50 },
     });
     setup() {
         this.addDomListener(this.editable, "keydown", (ev) => {

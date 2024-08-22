@@ -19,7 +19,7 @@ registry.category("web_tour.tours").add('snippets_mailing_menu_toolbar', {
     },
     {
         content: "Wait for the theme selector to load.",
-        trigger: ':iframe .o_mail_theme_selector_new',
+        trigger: '.o_mail_theme_selector_new',
         run: "click",
     },
     {
@@ -34,12 +34,12 @@ registry.category("web_tour.tours").add('snippets_mailing_menu_toolbar', {
     },
     {
         content: "Make sure the empty template is an option on non-mobile devices.",
-        trigger: ':iframe #empty',
+        trigger: '.o_mail_theme_selector_new [name="empty"]',
         run: () => null,
     },
     {
         content: "Click on the default 'welcome' template.",
-        trigger: ':iframe #default',
+        trigger: '.o_mail_theme_selector_new [name="default"]',
         run: "click",
     },
     { // necessary to wait for the cursor to be placed in the first p

@@ -889,7 +889,7 @@ var SnippetEditor = Widget.extend({
             elements: elementsSelector,
             handle: handle,
             scrollingElement: $scrollable[0],
-            enable: () => (!!this.$el.find('.o_move_handle:visible').length || this.dragStarted) && this.isDraggable,
+            enable: () => (!!this.$el.find('.o_move_handle:visible').length || this.dragStarted),
             helper: () => {
                 const cloneEl = this.$el[0].cloneNode(true);
                 cloneEl.style.width = "24px";

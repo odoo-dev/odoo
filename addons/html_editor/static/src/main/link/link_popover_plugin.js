@@ -40,8 +40,6 @@ export class LinkPopoverPlugin extends Plugin {
                 isAvailable: isSelectionHasLink,
             },
         ],
-
-        powerboxCategory: { id: "navigation", name: _t("Navigation"), sequence: 50 },
         powerboxItems: [
             {
                 name: _t("Link"),

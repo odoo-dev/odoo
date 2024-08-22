@@ -29,7 +29,7 @@ registry.category('web_tour.tours').add('mailing_campaign', {
         },
         {
             content: 'Pick the basic theme',
-            trigger: ":iframe #basic",
+            trigger: ".o_mail_theme_selector_new [name='basic']",
             run: "click",
         },
         {
