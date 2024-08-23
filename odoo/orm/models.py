@@ -33,6 +33,7 @@ import logging
 import operator
 import pytz
 import re
+import typing
 import uuid
 import warnings
 from collections import defaultdict, deque
@@ -73,9 +74,8 @@ from .identifiers import NewId
 from .utils import OriginIds, expand_ids, check_pg_name, check_object_name, check_property_field_value_name, origin_ids, PREFETCH_MAX, READ_GROUP_ALL_TIME_GRANULARITY, READ_GROUP_TIME_GRANULARITY, READ_GROUP_NUMBER_GRANULARITY
 from odoo.osv import expression
 
-import typing
 if typing.TYPE_CHECKING:
-    from collections.abc import Reversible
+    from collections.abc import Collection, Reversible
     from .environments import Environment
     from .registry import Registry
     from .types import Self, ValuesType, IdType
@@ -452,7 +452,7 @@ class BaseModel(metaclass=MetaModel):
     env: Environment
     id: IdType | typing.Literal[False]
     display_name: str | typing.Literal[False]
-    pool: Registry
+    pool: Registry  # available on the Concrete class
 
     _fields: dict[str, Field]
     _auto = False
