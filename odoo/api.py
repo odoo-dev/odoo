@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 """The Odoo API module defines Odoo Environments and method decorators.
@@ -10,14 +9,17 @@ from __future__ import annotations
 __all__ = [
     'Environment',
     'Meta',
-    'model',
-    'constrains', 'depends', 'onchange', 'returns',
     'call_kw',
+    'constrains',
+    'depends',
+    'model',
+    'onchange',
+    'returns',
 ]
 
+import itertools
 import logging
 import typing
-import warnings
 from collections import defaultdict
 from collections.abc import Mapping
 from contextlib import contextmanager
@@ -30,29 +32,34 @@ try:
 except ImportError:
     from decorator import decorator
 
-from .exceptions import AccessError, UserError, CacheMiss
-from .tools import clean_context, frozendict, lazy_property, OrderedSet, Query, SQL
-from .tools.translate import get_translation, get_translated_module, LazyGettext
-from odoo.tools.misc import StackMap
+from .exceptions import AccessError, CacheMiss, UserError
+from .tools import SQL, OrderedSet, Query, clean_context, frozendict, lazy_property
+from .tools.misc import StackMap, SENTINEL
+from .tools.translate import LazyGettext, get_translated_module, get_translation
 
 if typing.TYPE_CHECKING:
     from collections.abc import Callable
+
     from odoo.models import BaseModel
+
+T = typing.TypeVar('T')
+if typing.TYPE_CHECKING:
+    from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
+
+    from .fields import Field
+    from .models import BaseModel
+    from .sql_db import BaseCursor
+
+    Decorator = Callable[[T], T]
+
     try:
         from typing_extensions import Self  # noqa: F401
     except ImportError:
         from typing import Self  # noqa: F401
 
-    # not sure Self can work outside of a class?
-    S = typing.TypeVar("S", bound=BaseModel)
-    CreateCaller = Callable[[S, 'ValuesType' | list['ValuesType']], S]
-    CreateCallee = Callable[[S, list['ValuesType']], S]
-    CreateLegacyCallee = Callable[[S, 'ValuesType'], S]
-
-DomainType = list[str | tuple[str, str, typing.Any]]
+DomainType = list[typing.Literal["&", "|", "!"] | tuple[str, str, typing.Any]]
 ContextType = Mapping[str, typing.Any]
 ValuesType = dict[str, typing.Any]
-T = typing.TypeVar('T')
 
 _logger = logging.getLogger(__name__)
 
@@ -97,18 +104,16 @@ class NewId:
 IdType: typing.TypeAlias = int | NewId
 
 
-class Params(object):
-    def __init__(self, args, kwargs):
+class Params:
+    def __init__(self, args: Iterable, kwargs: Mapping):
         self.args = args
         self.kwargs = kwargs
 
-    def __str__(self):
-        params = []
-        for arg in self.args:
-            params.append(repr(arg))
-        for item in sorted(self.kwargs.items()):
-            params.append("%s=%r" % item)
-        return ', '.join(params)
+    def __str__(self) -> str:
+        return ', '.join(itertools.chain(
+            (repr(arg) for arg in self.args),
+            (f"{key}={value!r}" for key, value in sorted(self.kwargs.items())),
+        ))
 
 
 class Meta(type):
@@ -119,7 +124,7 @@ class Meta(type):
 
     def __new__(meta, name, bases, attrs):
         # dummy parent class to catch overridden methods decorated with 'returns'
-        parent = type.__new__(meta, name, bases, {})
+        parent: Meta = type.__new__(meta, name, bases, {})
 
         for key, value in list(attrs.items()):
             if not key.startswith('__') and callable(value):
@@ -142,12 +147,15 @@ class Meta(type):
 #  - method._api: decorator function, used for re-applying decorator
 #
 
-def attrsetter(attr, value):
+def attrsetter(attr, value) -> Decorator:
     """ Return a function that sets ``attr`` on its argument and returns it. """
-    return lambda method: setattr(method, attr, value) or method
+    def setter(method):
+        setattr(method, attr, value)
+        return method
+    return setter
 
 
-def propagate(method1, method2):
+def propagate(method1: T | None, method2: T) -> T:
     """ Propagate decorators from ``method1`` to ``method2``, and return the
         resulting method.
     """
@@ -158,7 +166,17 @@ def propagate(method1, method2):
     return method2
 
 
-def constrains(*args: str) -> Callable[[T], T]:
+@typing.overload
+def constrains(func: Callable[[BaseModel], Collection[str]], /) -> Decorator:
+    ...
+
+
+@typing.overload
+def constrains(*args: str) -> Decorator:
+    ...
+
+
+def constrains(*args):
     """Decorate a constraint checker.
 
     Each argument must be a field name used in the check::
@@ -192,11 +210,11 @@ def constrains(*args: str) -> Callable[[T], T]:
 
     """
     if args and callable(args[0]):
-        args = args[0]
+        [args] = args
     return attrsetter('_constrains', args)
 
 
-def ondelete(*, at_uninstall):
+def ondelete(*, at_uninstall: bool) -> Decorator:
     """
     Mark a method to be executed during :meth:`~odoo.models.BaseModel.unlink`.
 
@@ -255,7 +273,7 @@ def ondelete(*, at_uninstall):
     return attrsetter('_ondelete', at_uninstall)
 
 
-def onchange(*args):
+def onchange(*args: str) -> Decorator:
     """Return a decorator to decorate an onchange method for given fields.
 
     In the form views where the field appears, the method will be called
@@ -304,7 +322,17 @@ def onchange(*args):
     return attrsetter('_onchange', args)
 
 
-def depends(*args: str) -> Callable[[T], T]:
+@typing.overload
+def depends(func: Callable[[BaseModel], Collection[str]], /) -> Decorator:
+    ...
+
+
+@typing.overload
+def depends(*args: str) -> Decorator:
+    ...
+
+
+def depends(*args) -> Decorator:
     """ Return a decorator that specifies the field dependencies of a "compute"
         method (for new-style function fields). Each argument must be a string
         that consists in a dot-separated sequence of field names::
@@ -329,7 +357,7 @@ def depends(*args: str) -> Callable[[T], T]:
     return attrsetter('_depends', args)
 
 
-def depends_context(*args):
+def depends_context(*args: str) -> Decorator:
     """ Return a decorator that specifies the context dependencies of a
     non-stored "compute" method.  Each argument is a key in the context's
     dictionary::
@@ -355,7 +383,7 @@ def depends_context(*args):
     return attrsetter('_depends_context', args)
 
 
-def returns(model, downgrade=None, upgrade=None):
+def returns(model: str, downgrade=None, upgrade=None) -> Decorator:
     """ Return a decorator for methods that return instances of ``model``.
 
         :param model: a model name, or ``'self'`` for the current model
@@ -392,7 +420,7 @@ def returns(model, downgrade=None, upgrade=None):
     return attrsetter('_returns', (model, downgrade, upgrade))
 
 
-def downgrade(method, value, self, args, kwargs):
+def _downgrade(method, value, self, args, kwargs):
     """ Convert ``value`` returned by ``method`` on ``self`` to traditional style. """
     spec = getattr(method, '_returns', None)
     if not spec:
@@ -426,9 +454,9 @@ def model(method: T) -> T:
                 ...
 
     """
-    if method.__name__ == 'create':
-        return model_create_single(method)
-    method._api = 'model'
+    if method.__name__ == 'create':  # type: ignore
+        return model_create_multi(method)  # type: ignore
+    method._api = 'model'  # type: ignore
     return method
 
 
@@ -441,47 +469,19 @@ def readonly(method: T) -> T:
                 ...
 
     """
-    method._readonly = True
+    method._readonly = True  # type: ignore
     return method
 
-_create_logger = logging.getLogger(__name__ + '.create')
-
 
 @decorator
-def _model_create_single(create: CreateLegacyCallee[S], self: S, arg: ValuesType | list[ValuesType]) -> CreateCaller[S]:
-    # 'create' expects a dict and returns a record
-    if isinstance(arg, Mapping):
-        return create(self, typing.cast(ValuesType, arg))
-    if len(arg) > 1:
-        _create_logger.debug("%s.create() called with %d dicts", self, len(arg))
-    return self.browse().concat(*(create(self, vals) for vals in arg))
-
-
-def model_create_single(method: CreateLegacyCallee[S]) -> CreateCaller[S]:
-    """ Decorate a method that takes a dictionary and creates a single record.
-        The method may be called with either a single dict or a list of dicts::
-
-            record = model.create(vals)
-            records = model.create([vals, ...])
-    """
-    warnings.warn(
-        f"The model {method.__module__} is not overriding the create method in batch",
-        DeprecationWarning
-    )
-    wrapper = typing.cast('CreateCaller[S]', _model_create_single(method))  # pylint: disable=no-value-for-parameter
-    wrapper._api = 'model_create'
-    return wrapper
-
-
-@decorator
-def _model_create_multi(create: CreateCallee[S], self: S, arg: ValuesType | list[ValuesType]) -> CreateCaller[S]:
+def _model_create_multi(create: Callable[[T, list[ValuesType]], T], self: T, arg: ValuesType | list[ValuesType]) -> T:
     # 'create' expects a list of dicts and returns a recordset
     if isinstance(arg, Mapping):
         return create(self, [typing.cast(ValuesType, arg)])
     return create(self, arg)
 
 
-def model_create_multi(method: CreateCallee[S]) -> CreateCaller[S]:
+def model_create_multi(method: Callable[[T, list[ValuesType]], T]) -> Callable[[T, list[ValuesType] | ValuesType], T]:
     """ Decorate a method that takes a list of dictionaries and creates multiple
         records. The method may be called with either a single dict or a list of
         dicts::
@@ -489,12 +489,12 @@ def model_create_multi(method: CreateCallee[S]) -> CreateCaller[S]:
             record = model.create(vals)
             records = model.create([vals, ...])
     """
-    wrapper = typing.cast('CreateCaller[S]', _model_create_multi(method))  # pylint: disable=no-value-for-parameter
+    wrapper = _model_create_multi(method)  # pylint: disable=no-value-for-parameter
     wrapper._api = 'model_create'
     return wrapper
 
 
-def call_kw(model, name, args, kwargs):
+def call_kw(model: BaseModel, name: str, args: Sequence, kwargs: Mapping) -> typing.Any:
     """ Invoke the given method ``name`` on the recordset ``model``. """
     method = getattr(model, name, None)
     if not method:
@@ -520,12 +520,13 @@ def call_kw(model, name, args, kwargs):
         # special case for method 'create'
         result = result.id if isinstance(args[0], Mapping) else result.ids
     else:
-        result = downgrade(method, result, recs, args, kwargs)
+        result = _downgrade(method, result, recs, args, kwargs)
 
     return result
 
 
-class Environment(Mapping):
+# Cannot map to BaseModel to avoid circular dependencies
+class Environment(Mapping[str, typing.Any]):
     """ The environment stores various contextual data used by the ORM:
 
     - :attr:`cr`: the current database cursor (for database queries);
@@ -540,17 +541,20 @@ class Environment(Mapping):
 
     cr: BaseCursor
     uid: int
+    uid_origin: int | None
     context: frozendict
     su: bool
+    transaction: Transaction
     registry: Registry
     cache: Cache
-    transaction: Transaction
+    _cache_key: dict[Field, typing.Any]
+    _protected: StackMap
 
-    def reset(self):
+    def reset(self) -> None:
         """ Reset the transaction, see :meth:`Transaction.reset`. """
         self.transaction.reset()
 
-    def __new__(cls, cr, uid, context, su=False, uid_origin=None):
+    def __new__(cls, cr: BaseCursor, uid: int, context: dict, su: bool = False, uid_origin: int | None = None):
         if uid == SUPERUSER_ID:
             su = True
 
@@ -588,11 +592,11 @@ class Environment(Mapping):
     # Mapping methods
     #
 
-    def __contains__(self, model_name):
+    def __contains__(self, model_name) -> bool:
         """ Test whether the given model exists. """
         return model_name in self.registry
 
-    def __getitem__(self, model_name: str) -> BaseModel:
+    def __getitem__(self, model_name: typing.Any) -> BaseModel:
         """ Return an empty recordset from the given model. """
         return self.registry[model_name](self, (), ())
 
@@ -613,7 +617,13 @@ class Environment(Mapping):
     def __hash__(self):
         return object.__hash__(self)
 
-    def __call__(self, cr=None, user=None, context=None, su=None):
+    def __call__(
+        self,
+        cr: BaseCursor | None = None,
+        user: int | BaseModel | None = None,
+        context: dict | None = None,
+        su: bool | None = None,
+    ) -> Environment:
         """ Return an environment based on ``self`` with modified parameters.
 
         :param cr: optional database cursor to change the current cursor
@@ -632,7 +642,7 @@ class Environment(Mapping):
         su = (user is None and self.su) if su is None else su
         return Environment(cr, uid, context, su, self.uid_origin)
 
-    def ref(self, xml_id, raise_if_not_found=True):
+    def ref(self, xml_id: str, raise_if_not_found: bool = True) -> BaseModel | None:
         """ Return the record corresponding to the given ``xml_id``.
 
         :param str xml_id: record xml_id, under the format ``<module.id>``
@@ -652,22 +662,22 @@ class Environment(Mapping):
                 raise ValueError('No record found for unique ID %s. It may have been deleted.' % (xml_id))
         return None
 
-    def is_superuser(self):
+    def is_superuser(self) -> bool:
         """ Return whether the environment is in superuser mode. """
         return self.su
 
-    def is_admin(self):
+    def is_admin(self) -> bool:
         """ Return whether the current user has group "Access Rights", or is in
             superuser mode. """
         return self.su or self.user._is_admin()
 
-    def is_system(self):
+    def is_system(self) -> bool:
         """ Return whether the current user has group "Settings", or is in
             superuser mode. """
         return self.su or self.user._is_system()
 
     @lazy_property
-    def user(self):
+    def user(self) -> BaseModel:
         """Return the current user (as an instance).
 
         :returns: current user - sudoed
@@ -675,7 +685,7 @@ class Environment(Mapping):
         return self(su=True)['res.users'].browse(self.uid)
 
     @lazy_property
-    def company(self):
+    def company(self) -> BaseModel:
         """Return the current company (as an instance).
 
         If not specified in the context (`allowed_company_ids`),
@@ -705,7 +715,7 @@ class Environment(Mapping):
         return self.user.company_id.with_env(self)
 
     @lazy_property
-    def companies(self):
+    def companies(self) -> BaseModel:
         """Return a recordset of the enabled companies by the user.
 
         If not specified in the context(`allowed_company_ids`),
@@ -745,7 +755,7 @@ class Environment(Mapping):
         return self['res.company'].browse(user_company_ids)
 
     @lazy_property
-    def lang(self):
+    def lang(self) -> str | None:
         """Return the current language code.
 
         :rtype: str
@@ -757,7 +767,7 @@ class Environment(Mapping):
         return lang or None
 
     @lazy_property
-    def _lang(self):
+    def _lang(self) -> str:
         """Return the technical language code of the current context for **model_terms** translated field
 
         :rtype: str
@@ -786,7 +796,7 @@ class Environment(Mapping):
         lang = self.lang or 'en_US'
         if isinstance(source, str):
             assert not (args and kwargs), "Use args or kwargs, not both"
-            args = args or kwargs
+            format_args = args or kwargs
         elif isinstance(source, LazyGettext):
             # translate a lazy text evaluation
             assert not args and not kwargs, "All args should come from the lazy text"
@@ -795,15 +805,15 @@ class Environment(Mapping):
             raise TypeError(f"Cannot translate {source!r}")
         if lang == 'en_US':
             # we ignore the module as en_US is not translated
-            return get_translation('base', 'en_US', source, args)
+            return get_translation('base', 'en_US', source, format_args)
         try:
             module = get_translated_module(2)
-            return get_translation(module, lang, source, args)
+            return get_translation(module, lang, source, format_args)
         except Exception:  # noqa: BLE001
             _logger.debug('translation went wrong for "%r", skipped', source, exc_info=True)
         return source
 
-    def clear(self):
+    def clear(self) -> None:
         """ Clear all record caches, and discard all fields to recompute.
             This may be useful when recovering from a failed ORM operation.
         """
@@ -811,7 +821,7 @@ class Environment(Mapping):
         self._cache_key.clear()
         self.transaction.clear()
 
-    def invalidate_all(self, flush=True):
+    def invalidate_all(self, flush: bool = True) -> None:
         """ Invalidate the cache of all records.
 
         :param flush: whether pending updates should be flushed before invalidation.
@@ -822,29 +832,37 @@ class Environment(Mapping):
             self.flush_all()
         self.cache.invalidate()
 
-    def _recompute_all(self):
+    def _recompute_all(self) -> None:
         """ Process all pending computations. """
         for field in list(self.fields_to_compute()):
             self[field.model_name]._recompute_field(field)
 
-    def flush_all(self):
+    def flush_all(self) -> None:
         """ Flush all pending computations and updates to the database. """
         self._recompute_all()
         for model_name in OrderedSet(field.model_name for field in self.cache.get_dirty_fields()):
             self[model_name].flush_model()
 
-    def is_protected(self, field, record):
+    def is_protected(self, field: Field, record: BaseModel) -> bool:
         """ Return whether `record` is protected against invalidation or
             recomputation for `field`.
         """
         return record.id in self._protected.get(field, ())
 
-    def protected(self, field):
+    def protected(self, field: Field) -> BaseModel:
         """ Return the recordset for which ``field`` should not be invalidated or recomputed. """
         return self[field.model_name].browse(self._protected.get(field, ()))
 
+    @typing.overload
+    def protecting(self, what: Collection[Field], records: BaseModel) -> typing.ContextManager[None]:
+        ...
+
+    @typing.overload
+    def protecting(self, what: Collection[tuple[Field, BaseModel]]) -> typing.ContextManager[None]:
+        ...
+
     @contextmanager
-    def protecting(self, what, records=None):
+    def protecting(self, what, records: BaseModel | None = None) -> Iterator[None]:
         """ Prevent the invalidation or recomputation of fields on records.
         The parameters are either:
 
@@ -854,13 +872,14 @@ class Environment(Mapping):
         protected = self._protected
         try:
             protected.pushmap()
+            ids_by_field: Mapping[Field, Sequence[IdType]]
             if records is not None:  # Handle first signature
-                ids_by_field = {field: records._ids for field in what}
+                ids_by_field = dict.fromkeys(what, records._ids)
             else:  # Handle second signature
                 ids_by_field = defaultdict(list)
                 for fields, what_records in what:
                     for field in fields:
-                        ids_by_field[field].extend(what_records._ids)
+                        ids_by_field[field].extend(what_records._ids)  # type: ignore
 
             for field, rec_ids in ids_by_field.items():
                 ids = protected.get(field)
@@ -869,32 +888,32 @@ class Environment(Mapping):
         finally:
             protected.popmap()
 
-    def fields_to_compute(self):
+    def fields_to_compute(self) -> Collection[Field]:
         """ Return a view on the field to compute. """
         return self.transaction.tocompute.keys()
 
-    def records_to_compute(self, field):
+    def records_to_compute(self, field: Field) -> BaseModel:
         """ Return the records to compute for ``field``. """
         ids = self.transaction.tocompute.get(field, ())
         return self[field.model_name].browse(ids)
 
-    def is_to_compute(self, field, record):
+    def is_to_compute(self, field: Field, record: BaseModel) -> bool:
         """ Return whether ``field`` must be computed on ``record``. """
         return record.id in self.transaction.tocompute.get(field, ())
 
-    def not_to_compute(self, field, records):
+    def not_to_compute(self, field: Field, records: BaseModel) -> BaseModel:
         """ Return the subset of ``records`` for which ``field`` must not be computed. """
         ids = self.transaction.tocompute.get(field, ())
         return records.browse(id_ for id_ in records._ids if id_ not in ids)
 
-    def add_to_compute(self, field, records):
+    def add_to_compute(self, field: Field, records: BaseModel) -> None:
         """ Mark ``field`` to be computed on ``records``. """
         if not records:
-            return records
+            return
         assert field.store and field.compute, "Cannot add to recompute no-store or no-computed field"
         self.transaction.tocompute[field].update(records._ids)
 
-    def remove_to_compute(self, field, records):
+    def remove_to_compute(self, field: Field, records: BaseModel) -> None:
         """ Mark ``field`` as computed on ``records``. """
         if not records:
             return
@@ -905,7 +924,7 @@ class Environment(Mapping):
         if not ids:
             del self.transaction.tocompute[field]
 
-    def cache_key(self, field):
+    def cache_key(self, field: Field) -> typing.Any:
         """ Return the cache key of the given ``field``. """
         try:
             return self._cache_key[field]
@@ -941,13 +960,13 @@ class Environment(Mapping):
             self._cache_key[field] = result
             return result
 
-    def flush_query(self, query: SQL):
+    def flush_query(self, query: SQL) -> None:
         """ Flush all the fields in the metadata of ``query``. """
         fields_to_flush = tuple(query.to_flush)
         if not fields_to_flush:
             return
 
-        fnames_to_flush = defaultdict(OrderedSet)
+        fnames_to_flush: defaultdict[str, OrderedSet[str]] = defaultdict(OrderedSet)
         for field in fields_to_flush:
             fnames_to_flush[field.model_name].add(field.name)
         for model_name, field_names in fnames_to_flush.items():
@@ -981,21 +1000,22 @@ class Transaction:
     """ A object holding ORM data structures for a transaction. """
     __slots__ = ('_Transaction__file_open_tmp_paths', 'cache', 'envs', 'protected', 'registry', 'tocompute')
 
-    def __init__(self, registry):
+    def __init__(self, registry: Registry):
         self.registry = registry
         # weak set of environments
-        self.envs = WeakSet()
-        self.envs.data = OrderedSet()  # make the weakset OrderedWeakSet
+        self.envs: WeakSet[Environment] = WeakSet()
+        # make the weakset OrderedWeakSet
+        self.envs.data = OrderedSet()  # type: ignore
         # cache for all records
         self.cache = Cache()
         # fields to protect {field: ids}
-        self.protected = StackMap()
+        self.protected: StackMap[Field, OrderedSet[IdType]] = StackMap()
         # pending computations {field: ids}
-        self.tocompute = defaultdict(OrderedSet)
+        self.tocompute: defaultdict[Field, OrderedSet[IdType]] = defaultdict(OrderedSet)
         # temporary directories (managed in odoo.tools.file_open_temporary_directory)
-        self.__file_open_tmp_paths = ()  # noqa: PLE0237
+        self.__file_open_tmp_paths = ()  # type: ignore # noqa: PLE0237
 
-    def flush(self):
+    def flush(self) -> None:
         """ Flush pending computations and updates in the transaction. """
         env_to_flush = None
         for env in self.envs:
@@ -1006,12 +1026,12 @@ class Transaction:
         if env_to_flush is not None:
             env_to_flush.flush_all()
 
-    def clear(self):
+    def clear(self) -> None:
         """ Clear the caches and pending computations and updates in the translations. """
         self.cache.clear()
         self.tocompute.clear()
 
-    def reset(self):
+    def reset(self) -> None:
         """ Reset the transaction.  This clears the transaction, and reassigns
             the registry on all its environments.  This operation is strongly
             recommended after reloading the registry.
@@ -1025,8 +1045,7 @@ class Transaction:
 
 
 # sentinel value for optional parameters
-NOTHING = object()
-EMPTY_DICT = frozendict()
+EMPTY_DICT = frozendict()  # type: ignore
 
 
 class Cache:
@@ -1053,18 +1072,18 @@ class Cache:
 
     def __init__(self):
         # {field: {record_id: value}, field: {context_key: {record_id: value}}}
-        self._data = defaultdict(dict)
+        self._data: defaultdict[Field, dict[IdType, typing.Any] | dict[typing.Any, dict[IdType, typing.Any]]] = defaultdict(dict)
 
         # {field: set[id]} stores the fields and ids that are changed in the
         # cache, but not yet written in the database; their changed values are
         # in `_data`
-        self._dirty = defaultdict(OrderedSet)
+        self._dirty: defaultdict[Field, set[IdType]] = defaultdict(OrderedSet)
 
         # {field: {record_id: ids}} record ids to be added to the values of
         # x2many fields if they are not in cache yet
-        self._patches = defaultdict(lambda: defaultdict(list))
+        self._patches: defaultdict[Field, defaultdict[IdType, list[IdType]]] = defaultdict(lambda: defaultdict(list))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         # for debugging: show the cache content and dirty flags as stars
         data = {}
         for field, field_cache in sorted(self._data.items(), key=lambda item: str(item[0])):
@@ -1084,21 +1103,21 @@ class Cache:
                 }
         return repr(data)
 
-    def _get_field_cache(self, model, field):
+    def _get_field_cache(self, model: BaseModel, field: Field) -> Mapping:
         """ Return the field cache of the given field, but not for modifying it. """
         field_cache = self._data.get(field, EMPTY_DICT)
         if field_cache and field in model.pool.field_depends_context:
             field_cache = field_cache.get(model.env.cache_key(field), EMPTY_DICT)
         return field_cache
 
-    def _set_field_cache(self, model, field):
+    def _set_field_cache(self, model: BaseModel, field: Field) -> dict[IdType, typing.Any]:
         """ Return the field cache of the given field for modifying it. """
         field_cache = self._data[field]
         if field in model.pool.field_depends_context:
             field_cache = field_cache.setdefault(model.env.cache_key(field), {})
         return field_cache
 
-    def contains(self, record, field):
+    def contains(self, record: BaseModel, field: Field) -> bool:
         """ Return whether ``record`` has a value for ``field``. """
         field_cache = self._get_field_cache(record, field)
         if field.translate:
@@ -1110,7 +1129,7 @@ class Cache:
 
         return record.id in field_cache
 
-    def contains_field(self, field):
+    def contains_field(self, field: Field) -> bool:
         """ Return whether ``field`` has a value for at least one record. """
         cache = self._data.get(field)
         if not cache:
@@ -1120,7 +1139,7 @@ class Cache:
             return any(value for value in cache.values())
         return True
 
-    def get(self, record, field, default=NOTHING):
+    def get(self, record: BaseModel, field: Field, default=SENTINEL):
         """ Return the value of ``field`` for ``record``. """
         try:
             field_cache = self._get_field_cache(record, field)
@@ -1130,11 +1149,11 @@ class Cache:
                 return cache_value[lang]
             return cache_value
         except KeyError:
-            if default is NOTHING:
+            if default is SENTINEL:
                 raise CacheMiss(record, field) from None
             return default
 
-    def set(self, record, field, value, dirty=False, check_dirty=True):
+    def set(self, record: BaseModel, field: Field, value: typing.Any, dirty: bool = False, check_dirty: bool = True) -> None:
         """ Set the value of ``field`` for ``record``.
         One can normally make a clean field dirty but not the other way around.
         Updating a dirty field without ``dirty=True`` is a programming error and
@@ -1172,7 +1191,7 @@ class Cache:
         elif record_id in self._dirty.get(field, ()):
             _logger.error("cache.set() removing flag dirty on %s.%s", record, field.name, stack_info=True)
 
-    def update(self, records, field, values, dirty=False, check_dirty=True):
+    def update(self, records: BaseModel, field: Field, values: Iterable, dirty: bool = False, check_dirty: bool = True) -> None:
         """ Set the values of ``field`` for several ``records``.
         One can normally make a clean field dirty but not the other way around.
         Updating a dirty field without ``dirty=True`` is a programming error and
@@ -1199,7 +1218,7 @@ class Cache:
 
         self.update_raw(records, field, values, dirty, check_dirty)
 
-    def update_raw(self, records, field, values, dirty=False, check_dirty=True):
+    def update_raw(self, records: BaseModel, field: Field, values: Iterable, dirty: bool = False, check_dirty: bool = True) -> None:
         """ This is a variant of method :meth:`~update` without the logic for
         translated fields.
         """
@@ -1221,7 +1240,7 @@ class Cache:
             if dirty_ids and not dirty_ids.isdisjoint(records._ids):
                 _logger.error("cache.update() removing flag dirty on %s.%s", records, field.name, stack_info=True)
 
-    def insert_missing(self, records, field, values):
+    def insert_missing(self, records: BaseModel, field: Field, values: Iterable) -> None:
         """ Set the values of ``field`` for the records in ``records`` that
         don't have a value yet.  In other words, this does not overwrite
         existing values in cache.
@@ -1257,7 +1276,7 @@ class Cache:
             for id_, val in zip(records._ids, values):
                 field_cache.setdefault(id_, val)
 
-    def patch(self, records, field, new_id):
+    def patch(self, records: BaseModel, field: Field, new_id: NewId):
         """ Apply a patch to an x2many field on new records. The patch consists
         in adding new_id to its value in cache. If the value is not in cache
         yet, it will be applied once the value is put in cache with method
@@ -1272,7 +1291,7 @@ class Cache:
             else:
                 self._patches[field][id_].append(new_id)
 
-    def patch_and_set(self, record, field, value):
+    def patch_and_set(self, record: BaseModel, field: Field, value: typing.Any) -> typing.Any:
         """ Set the value of ``field`` for ``record``, like :meth:`set`, but
         apply pending patches to ``value`` and return the value actually put
         in cache.
@@ -1285,7 +1304,7 @@ class Cache:
         self.set(record, field, value)
         return value
 
-    def remove(self, record, field):
+    def remove(self, record: BaseModel, field: Field) -> None:
         """ Remove the value of ``field`` for ``record``. """
         assert record.id not in self._dirty.get(field, ())
         try:
@@ -1294,7 +1313,7 @@ class Cache:
         except KeyError:
             pass
 
-    def get_values(self, records, field):
+    def get_values(self, records: BaseModel, field: Field) -> Iterator[typing.Any]:
         """ Return the cached values of ``field`` for ``records``. """
         field_cache = self._get_field_cache(records, field)
         for record_id in records._ids:
@@ -1303,7 +1322,7 @@ class Cache:
             except KeyError:
                 pass
 
-    def get_until_miss(self, records, field):
+    def get_until_miss(self, records: BaseModel, field: Field) -> list[typing.Any]:
         """ Return the cached values of ``field`` for ``records`` until a value is not found. """
         field_cache = self._get_field_cache(records, field)
         if field.translate:
@@ -1323,7 +1342,7 @@ class Cache:
                 break
         return vals
 
-    def get_records_different_from(self, records, field, value):
+    def get_records_different_from(self, records: BaseModel, field: Field, value: typing.Any) -> BaseModel:
         """ Return the subset of ``records`` that has not ``value`` for ``field``. """
         field_cache = self._get_field_cache(records, field)
         if field.translate:
@@ -1348,13 +1367,13 @@ class Cache:
                     ids.append(record_id)
         return records.browse(ids)
 
-    def get_fields(self, record):
+    def get_fields(self, record: BaseModel) -> Iterator[Field]:
         """ Return the fields with a value for ``record``. """
         for name, field in record._fields.items():
             if name != 'id' and record.id in self._get_field_cache(record, field):
                 yield field
 
-    def get_records(self, model, field, all_contexts=False):
+    def get_records(self, model: BaseModel, field: Field, all_contexts: bool = False) -> BaseModel:
         """ Return the records of ``model`` that have a value for ``field``.
         By default the method checks for values in the current context of ``model``.
         But when ``all_contexts`` is true, it checks for values *in all contexts*.
@@ -1366,7 +1385,7 @@ class Cache:
             ids = self._get_field_cache(model, field)
         return model.browse(ids)
 
-    def get_missing_ids(self, records, field):
+    def get_missing_ids(self, records: BaseModel, field: Field) -> Iterator[IdType]:
         """ Return the ids of ``records`` that have no value for ``field``. """
         field_cache = self._get_field_cache(records, field)
         if field.translate:
@@ -1380,15 +1399,15 @@ class Cache:
                 if record_id not in field_cache:
                     yield record_id
 
-    def get_dirty_fields(self):
+    def get_dirty_fields(self) -> Collection[Field]:
         """ Return the fields that have dirty records in cache. """
         return self._dirty.keys()
 
-    def get_dirty_records(self, model, field):
+    def get_dirty_records(self, model: BaseModel, field: Field) -> BaseModel:
         """ Return the records that for which ``field`` is dirty in cache. """
         return model.browse(self._dirty.get(field, ()))
 
-    def has_dirty_fields(self, records, fields=None):
+    def has_dirty_fields(self, records: BaseModel, fields: Collection[Field] | None = None) -> bool:
         """ Return whether any of the given records has dirty fields.
 
         :param fields: a collection of fields or ``None``; the value ``None`` is
@@ -1406,13 +1425,13 @@ class Cache:
                 for field in fields
             )
 
-    def clear_dirty_field(self, field):
+    def clear_dirty_field(self, field: Field) -> Collection[IdType]:
         """ Make the given field clean on all records, and return the ids of the
         formerly dirty records for the field.
         """
         return self._dirty.pop(field, ())
 
-    def invalidate(self, spec=None):
+    def invalidate(self, spec: Collection[tuple[Field, Collection[IdType] | None]] | None = None) -> None:
         """ Invalidate the cache, partially or totally depending on ``spec``.
 
         If a field is context-dependent, invalidating it for a given record
@@ -1447,7 +1466,7 @@ class Cache:
         self._dirty.clear()
         self._patches.clear()
 
-    def check(self, env):
+    def check(self, env: Environment) -> None:
         """ Check the consistency of the cache for the given environment. """
         depends_context = env.registry.field_depends_context
         invalids = []
@@ -1542,4 +1561,5 @@ class Starred:
 # keep those imports here in order to handle cyclic dependencies correctly
 from odoo import SUPERUSER_ID
 from odoo.modules.registry import Registry
+
 from .sql_db import BaseCursor
