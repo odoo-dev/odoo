@@ -228,15 +228,14 @@ class ResConfigSettings(models.TransientModel):
         if vat[:2].isalpha():
             vat = vat[2:]
 
-        company_details = {
-            'nemhandel_phone_number': self.l10n_dk_nemhandel_phone_number,
-            'nemhandel_contact_email': self.l10n_dk_nemhandel_contact_email,
-            'nemhandel_company_cvr': vat,
-            'nemhandel_company_name': company.name,
-        }
-
         params = {
-            'company_details': company_details,
+            'company_details': {
+                'nemhandel_phone_number': self.l10n_dk_nemhandel_phone_number,
+                'nemhandel_contact_email': self.l10n_dk_nemhandel_contact_email,
+                'nemhandel_company_cvr': vat,
+                'nemhandel_company_name': company.name,
+                'nemhandel_country_code': company.country_id.code,
+            },
         }
 
         self._call_l10n_dk_nemhandel_proxy(
