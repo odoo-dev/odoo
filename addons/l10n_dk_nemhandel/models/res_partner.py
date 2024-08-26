@@ -1,14 +1,11 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 import requests
-from lxml import etree
-from hashlib import md5
-from urllib import parse
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+
+from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
 from odoo.addons.l10n_dk_nemhandel.tools.demo_utils import handle_demo
+from odoo.exceptions import UserError
 
-TIMEOUT = 10
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
@@ -71,29 +68,18 @@ class ResPartner(models.Model):
 
     @api.model
     def _check_l10n_dk_nemhandel_participant_exists(self, edi_identification):
-        # TODO check if partner exists
-        # hash_participant = md5(edi_identification.lower().encode()).hexdigest()
-        # endpoint_participant = parse.quote_plus(f"iso6523-actorid-upis::{edi_identification}")
-        # peppol_param = self.env['ir.config_parameter'].sudo().get_param('account_peppol.edi.mode', False)
-        # sml_zone = 'acc.edelivery' if peppol_param == 'test' else 'edelivery'
-        # smp_url = f"http://B-{hash_participant}.iso6523-actorid-upis.{sml_zone}.tech.ec.europa.eu/{endpoint_participant}"
-        #
-        # try:
-        #     response = requests.get(smp_url, timeout=TIMEOUT)
-        # except requests.exceptions.ConnectionError:
-        #     return False
-        # if response.status_code != 200:
-        #     return False
-        # participant_info = etree.XML(response.content)
-        # participant_identifier = participant_info.findtext('{*}ParticipantIdentifier')
-        # service_metadata = participant_info.find('.//{*}ServiceMetadataReference')
-        # service_href = ''
-        # if service_metadata is not None:
-        #     service_href = service_metadata.attrib.get('href', '')
-        # if edi_identification != participant_identifier or 'hermes-belgium' in service_href:
-        #     # all Belgian companies are pre-registered on hermes-belgium, so they will
-        #     # technically have an existing SMP url but they are not real Peppol participants
-        #     return False
+        edi_user = self.env.company.account_edi_proxy_client_ids.filtered(lambda user: user.proxy_type == 'nemhandel')
+        try:
+            response = edi_user._make_request(
+                url=f"{edi_user._get_server_url()}/api/nemhandel/1/check_user_exists",
+                params={'edi_identification': edi_identification},
+            )
+        except requests.exceptions.ConnectionError:
+            return False
+        except AccountEdiProxyError:
+            raise UserError(_('An error occurred while connecting to the IAP server. Please retry later or contact Odoo support.'))
+        if response.get('code') == 203:
+            return False
         return True
 
     @handle_demo
@@ -108,10 +94,10 @@ class ResPartner(models.Model):
         """
         self.ensure_one()
 
-        if not self.peppol_eas and self.peppol_endpoint:
+        if not self.l10n_dk_nemhandel_identifier_type and self.l10n_dk_nemhandel_identifier_value:
             self.l10n_dk_nemhandel_is_endpoint_valid = False
         else:
-            edi_identification = f'{self.l10n_dk_nemhandel_identifier_type}:{self.l10n_dk_nemhandel_identifier_value}'.lower()
+            edi_identification = f'{self.l10n_dk_nemhandel_identifier_type}/{self.l10n_dk_nemhandel_identifier_value}'
             self.l10n_dk_nemhandel_validity_last_check = fields.Date.context_today(self)
             self.l10n_dk_nemhandel_is_endpoint_valid = self._check_l10n_dk_nemhandel_participant_exists(edi_identification)
         return False
