@@ -16,4 +16,9 @@ commandRegistry
         channel_types: ["channel", "chat", "group"],
         help: _t("List users in the current channel"),
         methodName: "execute_command_who",
+    })
+    .add(":shortcut", {
+        channel_types: ["channel", "chat", "group"],
+        help: _t("Insert a canned response (defined is Discuss)"),
+        methodName: "execute_command_me",
     });
