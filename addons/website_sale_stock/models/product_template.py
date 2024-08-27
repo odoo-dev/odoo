@@ -20,16 +20,22 @@ class ProductTemplate(models.Model):
         return self.is_storable and self.product_variant_id._is_sold_out()
 
     def _website_show_quick_add(self):
-        return (self.allow_out_of_stock_order or not self._is_sold_out()) and super()._website_show_quick_add()
+        return (
+            super()._website_show_quick_add()
+            and (self.allow_out_of_stock_order or not self._is_sold_out())
+        )
 
     def _get_additionnal_combination_info(self, product_or_template, quantity, date, website):
         res = super()._get_additionnal_combination_info(product_or_template, quantity, date, website)
 
+        if not self.env.context.get('website_sale_stock_get_quantity'):
+            return res
+
         product_or_template = product_or_template.sudo()
         res.update({
-            'product_type': product_or_template.type,
             'allow_out_of_stock_order': product_or_template.allow_out_of_stock_order,
             'available_threshold': product_or_template.available_threshold,
+            'is_storable': product_or_template.is_storable,
         })
         if product_or_template.is_product_variant:
             product = product_or_template
