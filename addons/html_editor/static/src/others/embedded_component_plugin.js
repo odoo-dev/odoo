@@ -169,10 +169,11 @@ export class EmbeddedComponentPlugin extends Plugin {
         if (getEditableDescendants) {
             env.getEditableDescendants = getEditableDescendants;
         }
-        for (const cb of this.resources["embedded_component_env"] || []) {
-            // Add plugin specific additional environments
-            Object.assign(env, cb(name));
-        }
+        this.dispatch("SETUP_NEW_COMPONENT", {
+            name,
+            env,
+            props,
+        });
         const app = new App(Component, {
             test: dev,
             env,
