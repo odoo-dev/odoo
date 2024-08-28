@@ -163,7 +163,9 @@ export class HtmlViewer extends Component {
         return this.embeddedComponents(this.props.config.embeddedComponents)[host.dataset.embedded];
     }
 
-    mountComponent(host, { Component, getEditableDescendants, getProps }) {
+    setupNewComponent({ name, env, props }) {}
+
+    mountComponent(host, { Component, getEditableDescendants, getProps, name }) {
         const props = getProps?.(host) || {};
         const mainApp = this.__owl__.app;
         const { dev, translateFn, getRawTemplate } = mainApp;
@@ -176,6 +178,11 @@ export class HtmlViewer extends Component {
         if (getEditableDescendants) {
             env.getEditableDescendants = getEditableDescendants;
         }
+        this.setupNewComponent({
+            name,
+            env,
+            props,
+        });
         const app = new App(Component, {
             test: dev,
             env,
