@@ -123,11 +123,11 @@ class ResConfigSettings(models.TransientModel):
         headers = {'Accept': 'application/json'}
         a = requests.get('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/participant/list', cert=c, headers=headers).json()
         #
-        if a and a.get('Participants'):
-            p_id = a['Participants'][0].get('Id')
-
-            g = requests.delete(f'https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/participant/{p_id}', cert=c, headers=headers)
-            print(g.text)
+        # if a and a.get('Participants'):
+        #     p_id = a['Participants'][0].get('Id')
+        #
+        #     g = requests.delete(f'https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/participant/{p_id}', cert=c, headers=headers)
+        #     print(g.text)
         participant_json = requests.get('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/participant/GLN/5798009811578', cert=c, headers=headers).json()
         print("hey")
         # b = [hey.get('OwnerService').get('ProfilingId') for hey in participant_json.get('ParticipantBindings', [{}])]
