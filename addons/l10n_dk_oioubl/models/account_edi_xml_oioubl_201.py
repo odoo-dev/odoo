@@ -64,8 +64,7 @@ class AccountEdiXmlOIOUBL201(models.AbstractModel):
         vals = super()._export_invoice_vals(invoice)
         vals['PaymentTermsType_template'] = 'l10n_dk_oioubl.oioubl_PaymentTermsType'
         vals['vals'].update({
-            'customization_id': 'OIOUBL-2.1',
-            'ubl_version_id': 2.1,  # TODO testing
+            'customization_id': 'OIOUBL-2.01',
             # ProfileID is the property that define which documents the company can send and receive
             # 'Procurement-BilSim-1.0' is the simplest one: invoice and bill
             # https://www.oioubl.info/documents/en/en/Guidelines/OIOUBL_GUIDE_PROFILES.pdf
