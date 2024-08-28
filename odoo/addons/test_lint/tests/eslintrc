@@ -33,6 +33,18 @@
             {
                 "selector": "CallExpression[callee.name='_t'] > :first-child[value=/(.*%s){2,}/]",
                 "message": "Usage of _t function with multiple unnamed placeholders"
+            },
+            {
+                "selector": "CallExpression[callee.object.name='notificationService'][callee.property.name='add'] > Literal",
+                "message": "String passed to 'notificationService.add()' should be translated."
+            },
+            {
+                "selector": "CallExpression[callee.object.object.name='env'][callee.property.name='raiseError'] > Literal",
+                "message": "String passed to 'env.raiseError()' should be translated."
+            },
+            {
+                "selector": "CallExpression[callee.object.name='window'][callee.property.name='alert'] > Literal",
+                "message": "String passed to 'window.alert()' should be translated."
             }
         ],
         "no-unused-vars": ["error", { "vars": "all", "args": "none", "ignoreRestSiblings": false, "caughtErrors": "all" }]
