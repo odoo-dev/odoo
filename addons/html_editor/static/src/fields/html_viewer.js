@@ -10,6 +10,7 @@ import {
 } from "@odoo/owl";
 import { getBundle } from "@web/core/assets";
 import { memoize } from "@web/core/utils/functions";
+import { TableOfContentManager } from "@html_editor/others/embedded_components/table_of_content/table_of_content_manager";
 
 // Ensure all links are opened in a new tab.
 function retargetLinks(container) {
@@ -79,6 +80,7 @@ export class HtmlViewer extends Component {
                 },
                 () => [this.props.config.value, this.readonlyElementRef?.el]
             );
+            this.tocManager = new TableOfContentManager(this.readonlyElementRef);
         }
     }
 
@@ -163,7 +165,13 @@ export class HtmlViewer extends Component {
         return this.embeddedComponents(this.props.config.embeddedComponents)[host.dataset.embedded];
     }
 
-    setupNewComponent({ name, env, props }) {}
+    setupNewComponent({ name, env, props }) {
+        if (name === "table-of-content") {
+            Object.assign(props, {
+                manager: this.tocManager,
+            });
+        }
+    }
 
     mountComponent(host, { Component, getEditableDescendants, getProps, name }) {
         const props = getProps?.(host) || {};
