@@ -77,6 +77,19 @@ def first(records):
     return next(iter(records)) if len(records) > 1 else records
 
 
+def expand_ids(id0, ids):
+    """ Return an iterator of unique ids from the concatenation of ``[id0]`` and
+        ``ids``, and of the same kind (all real or all new).
+    """
+    yield id0
+    seen = {id0}
+    kind = bool(id0)
+    for id_ in ids:
+        if id_ not in seen and bool(id_) == kind:
+            yield id_
+            seen.add(id_)
+
+
 def resolve_mro(model, name, predicate):
     """ Return the list of successively overridden values of attribute ``name``
         in mro order on ``model`` that satisfy ``predicate``.  Model registry
@@ -1022,15 +1035,6 @@ class Field(MetaField('DummyField', (object,), {}), typing.Generic[T]):
         """
         return False if value is None else value
 
-    def convert_to_record_multi(self, values, records):
-        """ Convert a list of values from the cache format to the record format.
-        Some field classes may override this method to add optimizations for
-        batch processing.
-        """
-        # spare the method lookup overhead
-        convert = self.convert_to_record
-        return [convert(value, record) for value, record in zip(values, records)]
-
     def convert_to_read(self, value, record, use_display_name=True):
         """ Convert ``value`` from the record format to the format returned by
         method :meth:`BaseModel.read`.
@@ -1259,7 +1263,7 @@ class Field(MetaField('DummyField', (object,), {}), typing.Generic[T]):
         #
         if self.store and record.id:
             # real record: fetch from database
-            recs = record._in_cache_without(self)
+            recs = self._in_cache_without(record, PREFETCH_MAX)
             try:
                 recs._fetch_field(self)
             except AccessError:
@@ -1284,7 +1288,7 @@ class Field(MetaField('DummyField', (object,), {}), typing.Generic[T]):
                 value = self.convert_to_cache(False, record, validate=False)
                 env.cache.set(record, self, value)
             else:
-                recs = record if self.recursive else record._in_cache_without(self)
+                recs = record if self.recursive else self._in_cache_without(record, PREFETCH_MAX)
                 try:
                     self.compute_value(recs)
                 except (AccessError, MissingError):
@@ -1336,17 +1340,29 @@ class Field(MetaField('DummyField', (object,), {}), typing.Generic[T]):
 
         return self.convert_to_record(value, record)
 
-    def mapped(self, records):
-        """ Return the values of ``self`` for ``records``, either as a list
-        (scalar fields), or as a recordset (relational fields).
+    def _in_cache_without(self, record, limit):
+        """ Return records to prefetch that have no value in cache for ``field``
+            (:class:`Field` instance), including ``self``.
+            Return at most ``limit`` records.
+        """
+        ids = expand_ids(record.id, record._prefetch_ids)
+        ids = record.env.cache.get_missing_ids(record.browse(ids), self)
+        if limit:
+            ids = itertools.islice(ids, limit)
+        # Those records are aimed at being either fetched, or computed.  But the
+        # method '_fetch_field' is not correct with new records: it considers
+        # them as forbidden records, and clears their cache!  On the other hand,
+        # compute methods are not invoked with a mix of real and new records for
+        # the sake of code simplicity.
+        return record.browse(ids)
+
+    def mapped_cache(self, records):
+        """ Return the values of ``self`` for ``records``, as a list of values
+        from the cache.
 
         This method is meant to be used internally and has very little benefit
         over a simple call to `~odoo.models.BaseModel.mapped()` on a recordset.
         """
-        if self.name == 'id':
-            # not stored in cache
-            return list(records._ids)
-
         if self.compute and self.store:
             # process pending computations
             self.recompute(records)
@@ -1363,7 +1379,7 @@ class Field(MetaField('DummyField', (object,), {}), typing.Generic[T]):
             self.__get__(first(remaining))
             vals += records.env.cache.get_until_miss(remaining, self)
 
-        return self.convert_to_record_multi(vals, records)
+        return vals
 
     def __set__(self, records, value):
         """ set the value of field ``self`` on ``records`` """
@@ -3002,8 +3018,16 @@ class _Relational(Field[M], typing.Generic[M]):
         # base case: do the regular access
         if records is None or len(records._ids) <= 1:
             return super().__get__(records, owner)
-        # multirecord case: use mapped
-        return self.mapped(records)
+        # multirecord case: use mapped_cache and convert in a batch
+        values = self.mapped_cache(records)
+        return self.convert_to_record_relational(values, records)
+
+    def convert_to_record_relational(self, values, records):
+        """ Convert a list of values from the cache format to the record format.
+        Some field classes may override this method to add optimizations for
+        batch processing.
+        """
+        raise NotImplementedError
 
     def setup_nonrelated(self, model):
         super().setup_nonrelated(model)
@@ -3214,7 +3238,7 @@ class Many2one(_Relational[M]):
         prefetch_ids = PrefetchMany2one(record, self)
         return record.pool[self.comodel_name](record.env, ids, prefetch_ids)
 
-    def convert_to_record_multi(self, values, records):
+    def convert_to_record_relational(self, values, records):
         # return the ids as a recordset without duplicates
         prefetch_ids = PrefetchMany2one(records, self)
         ids = tuple(unique(id_ for id_ in values if id_ is not None))
@@ -4360,7 +4384,7 @@ class _RelationalMulti(_Relational[M], typing.Generic[M]):
             corecords = corecords.filtered(Comodel._active_name).with_prefetch(prefetch_ids)
         return corecords
 
-    def convert_to_record_multi(self, values, records):
+    def convert_to_record_relational(self, values, records):
         # return the list of ids as a recordset without duplicates
         prefetch_ids = PrefetchX2many(records, self)
         Comodel = records.pool[self.comodel_name]
@@ -5325,6 +5349,6 @@ def apply_required(model, field_name):
 # pylint: disable=wrong-import-position
 from .exceptions import AccessError, MissingError, UserError
 from .models import (
-    check_pg_name, expand_ids, is_definition_class,
+    check_pg_name, is_definition_class,
     BaseModel, PREFETCH_MAX,
 )

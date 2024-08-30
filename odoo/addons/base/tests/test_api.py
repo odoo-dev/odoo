@@ -615,14 +615,11 @@ class TestAPI(SavepointCaseWithUserDemo):
     def test_80_map(self):
         """ Check map on recordsets. """
         ps = self.partners
-        parents = ps.browse()
-        for p in ps:
-            parents |= p.parent_id
+        parents = [p.parent_id for p in ps]
 
         # map a single field
         self.assertEqual(ps.mapped(lambda p: p.parent_id), parents)
         self.assertEqual(ps.mapped('parent_id'), parents)
-        self.assertEqual(ps.parent_id, parents)
 
         # map a sequence of fields
         self.assertEqual(
@@ -631,15 +628,15 @@ class TestAPI(SavepointCaseWithUserDemo):
         )
         self.assertEqual(
             ps.mapped('parent_id.name'),
-            [p.name for p in parents]
+            [p.parent_id.name for p in ps]
         )
         self.assertEqual(
             ps.parent_id.mapped('name'),
-            [p.name for p in parents]
+            [p.name for p in ps.parent_id]
         )
 
         # map an empty sequence of fields
-        self.assertEqual(ps.mapped(''), ps)
+        self.assertEqual(ps.mapped(''), list(ps))
 
     @mute_logger('odoo.models')
     def test_80_sorted(self):
