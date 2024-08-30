@@ -181,7 +181,7 @@ class TestAr(AccountTestInvoicingCommon):
         cls.tax_no_gravado_purchase = cls._search_tax(cls, 'iva_no_gravado', type_tax_use='purchase')
 
         # ==== Products ====
-        uom_unit = cls.env.ref('uom.product_uom_unit')
+        uom_unit = cls.uom_unit
         uom_hour = cls.env.ref('uom.product_uom_hour')
 
         cls.product_iva_21 = cls.env['product.product'].create({

@@ -98,7 +98,6 @@ class TestWarehouse(TestStockCommon):
 
     def test_basic_move(self):
         product = self.product_3.with_user(self.user_stock_manager)
-        product.is_storable = True
         picking_out = self.env['stock.picking'].create({
             'partner_id': self.partner.id,
             'picking_type_id': self.env.ref('stock.picking_type_out').id,
@@ -532,8 +531,6 @@ class TestWarehouse(TestStockCommon):
             'resupply_wh_ids': [Command.link(warehouse_A.id)],
         })
         self.product_3.write({
-            'type': 'consu',
-            'is_storable': True,
             'route_ids': [Command.link(warehouse_B.resupply_route_ids.id)],
         })
         self.env['stock.quant']._update_available_quantity(self.product_3, warehouse_A.lot_stock_id, 1.0)

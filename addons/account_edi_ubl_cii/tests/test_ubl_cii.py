@@ -16,18 +16,15 @@ class TestAccountEdiUblCii(AccountTestInvoicingCommon):
         super().setUpClass()
         cls.company_data_2 = cls.setup_other_company()
 
-        cls.uom_units = cls.env.ref('uom.product_uom_unit')
-        cls.uom_dozens = cls.env.ref('uom.product_uom_dozen')
-
         cls.displace_prdct = cls.env['product.product'].create({
             'name': 'Displacement',
-            'uom_id': cls.uom_units.id,
+            'uom_id': cls.uom_unit.id,
             'standard_price': 90.0,
         })
 
         cls.place_prdct = cls.env['product.product'].create({
             'name': 'Placement',
-            'uom_id': cls.uom_units.id,
+            'uom_id': cls.uom_unit.id,
             'standard_price': 80.0,
         })
 
@@ -41,19 +38,19 @@ class TestAccountEdiUblCii(AccountTestInvoicingCommon):
         line_vals = [
             {
                 'product_id': self.place_prdct.id,
-                'product_uom_id': self.uom_units.id,
+                'product_uom_id': self.uom_unit.id,
                 'tax_ids': [self.company_data_2['default_tax_sale'].id]
             }, {
                 'product_id': self.displace_prdct.id,
-                'product_uom_id': self.uom_units.id,
+                'product_uom_id': self.uom_unit.id,
                 'tax_ids': [self.company_data_2['default_tax_sale'].id]
             }, {
                 'product_id': self.displace_prdct.id,
-                'product_uom_id': self.uom_units.id,
+                'product_uom_id': self.uom_unit.id,
                 'tax_ids': [self.company_data_2['default_tax_sale'].id]
             }, {
                 'product_id': self.displace_prdct.id,
-                'product_uom_id': self.uom_dozens.id,
+                'product_uom_id': self.uom_dozen.id,
                 'tax_ids': [self.company_data_2['default_tax_sale'].id]
             }
         ]

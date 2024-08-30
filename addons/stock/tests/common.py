@@ -58,70 +58,41 @@ class TestStockCommon(TestProductCommon):
         cls.categ_kgm = cls.ModelDataObj._xmlid_to_res_id('uom.product_uom_categ_kgm')
 
         # Product Created A, B, C, D
-        cls.productA = cls.ProductObj.create({'name': 'Product A', 'is_storable': True})
-        cls.productB = cls.ProductObj.create({'name': 'Product B', 'is_storable': True})
-        cls.productC = cls.ProductObj.create({'name': 'Product C', 'is_storable': True})
-        cls.productD = cls.ProductObj.create({'name': 'Product D', 'is_storable': True})
-        cls.productE = cls.ProductObj.create({'name': 'Product E', 'is_storable': True})
+        (
+            cls.productA,
+            cls.productB,
+            cls.productC,
+            cls.productD,
+            cls.productE,
+        ) = cls.ProductObj.create([
+            {'name': 'Product A', 'is_storable': True},
+            {'name': 'Product B', 'is_storable': True},
+            {'name': 'Product C', 'is_storable': True},
+            {'name': 'Product D', 'is_storable': True},
+            {'name': 'Product E', 'is_storable': True},
+        ])
 
         # Configure unit of measure.
-        cls.uom_kg = cls.env['uom.uom'].search([('category_id', '=', cls.categ_kgm), ('uom_type', '=', 'reference')], limit=1)
+        cls.uom_kg = cls.uom_kgm
         cls.uom_kg.write({
             'name': 'Test-KG',
             'rounding': 0.000001})
-        cls.uom_tone = cls.UomObj.create({
-            'name': 'Test-Tone',
-            'category_id': cls.categ_kgm,
-            'uom_type': 'bigger',
-            'factor_inv': 1000.0,
-            'rounding': 0.001})
         cls.uom_gm = cls.UomObj.create({
             'name': 'Test-G',
             'category_id': cls.categ_kgm,
             'uom_type': 'smaller',
             'factor': 1000.0,
             'rounding': 0.001})
-        cls.uom_mg = cls.UomObj.create({
-            'name': 'Test-MG',
-            'category_id': cls.categ_kgm,
-            'uom_type': 'smaller',
-            'factor': 100000.0,
-            'rounding': 0.001})
         # Check Unit
-        cls.uom_unit = cls.env['uom.uom'].search([('category_id', '=', cls.categ_unit), ('uom_type', '=', 'reference')], limit=1)
         cls.uom_unit.write({
             'name': 'Test-Unit',
             'rounding': 0.001})
-        cls.uom_dozen = cls.UomObj.create({
-            'name': 'Test-DozenA',
-            'category_id': cls.categ_unit,
-            'factor_inv': 12,
-            'uom_type': 'bigger',
-            'rounding': 0.001})
-        cls.uom_sdozen = cls.UomObj.create({
-            'name': 'Test-SDozenA',
-            'category_id': cls.categ_unit,
-            'factor_inv': 144,
-            'uom_type': 'bigger',
-            'rounding': 0.001})
-        cls.uom_sdozen_round = cls.UomObj.create({
-            'name': 'Test-SDozenA Round',
-            'category_id': cls.categ_unit,
-            'factor_inv': 144,
-            'uom_type': 'bigger',
-            'rounding': 1.0})
+        cls.uom_dozen.rounding = 0.001
 
-        # Product for different unit of measure.
-        cls.DozA = cls.ProductObj.create({'name': 'Dozon-A', 'is_storable': True, 'uom_id': cls.uom_dozen.id, 'uom_po_id': cls.uom_dozen.id})
-        cls.SDozA = cls.ProductObj.create({'name': 'SuperDozon-A', 'is_storable': True, 'uom_id': cls.uom_sdozen.id, 'uom_po_id': cls.uom_sdozen.id})
-        cls.SDozARound = cls.ProductObj.create({'name': 'SuperDozenRound-A', 'is_storable': True, 'uom_id': cls.uom_sdozen_round.id, 'uom_po_id': cls.uom_sdozen_round.id})
-        cls.UnitA = cls.ProductObj.create({'name': 'Unit-A', 'is_storable': True})
-        cls.kgB = cls.ProductObj.create({'name': 'kg-B', 'is_storable': True, 'uom_id': cls.uom_kg.id, 'uom_po_id': cls.uom_kg.id})
-        cls.gB = cls.ProductObj.create({'name': 'g-B', 'is_storable': True, 'uom_id': cls.uom_gm.id, 'uom_po_id': cls.uom_gm.id})
-
-        cls.env.ref('base.group_user').write({'implied_ids': [
+        cls.group_user.write({'implied_ids': [
             (4, cls.env.ref('base.group_multi_company').id),
             (4, cls.env.ref('stock.group_production_lot').id),
+            (4, cls.group_uom.id),
         ]})
         #######################################################################
         # TODO: refactor these changes from common2.py
@@ -158,18 +129,19 @@ class TestStockCommon(TestProductCommon):
             'location_id': cls.warehouse_1.lot_stock_id.id,
         })
 
-        # Partner
-        cls.partner_1 = cls.env['res.partner'].create({
-            'name': 'Julia Agrolait',
-            'email': 'julia@agrolait.example.com',
-        })
-
         # Product
-        cls.product_3 = cls.env['product.product'].create({
-            'name': 'Stone',  # product_3
-            'uom_id': cls.uom_dozen.id,
-            'uom_po_id': cls.uom_dozen.id,
-        })
+        cls.product_2, cls.product_3 = cls.env['product.product'].create([
+            {
+                'name': 'Wood',  # product_2
+                'is_storable': True,
+            },
+            {
+                'name': 'Stone',  # product_3
+                'uom_id': cls.uom_dozen.id,
+                'uom_po_id': cls.uom_dozen.id,
+                'is_storable': True,
+            }
+        ])
 
         # Existing data
         cls.existing_inventories = cls.env['stock.quant'].search([('inventory_quantity', '!=', 0.0)])

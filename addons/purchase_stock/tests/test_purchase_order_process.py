@@ -61,7 +61,7 @@ class TestPurchaseOrderProcess(PurchaseTestCommon):
 
     def test_02_vendor_delay_report_partially_cancelled_purchase_order(self):
         """ Test vendor delay reports for partially cancelled purchase order"""
-        partner = self.partner_1
+        partner = self.partner
         purchase_order = self.env['purchase.order'].create({
             'partner_id': partner.id,
             'order_line': [

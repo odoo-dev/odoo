@@ -1134,7 +1134,6 @@ class TestUi(TestPointOfSaleHttpCommon):
             'available_in_pos': True,
             'list_price': 100,
             'taxes_id': [(6, 0, self.tax1.ids)],
-            'categ_id': self.env.ref('product.product_category_all').id,
         })
 
         #add the fiscal position to the PoS
@@ -1147,12 +1146,10 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'FiscalPositionNoTaxRefund', login="pos_user")
 
     def test_lot_refund(self):
-
         self.product1 = self.env['product.product'].create({
             'name': 'Product A',
             'is_storable': True,
             'tracking': 'serial',
-            'categ_id': self.env.ref('product.product_category_all').id,
             'available_in_pos': True,
         })
 
@@ -1164,7 +1161,6 @@ class TestUi(TestPointOfSaleHttpCommon):
             'name': 'Product A',
             'is_storable': True,
             'tracking': 'lot',
-            'categ_id': self.env.ref('product.product_category_all').id,
             'available_in_pos': True,
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()

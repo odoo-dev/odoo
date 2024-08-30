@@ -92,20 +92,20 @@ class TestSaEdiCommon(AccountEdiTestCommon):
         # Large cabinet product
         cls.product_a = cls.env['product.product'].create({
             'name': 'Product A',
-            'uom_id': cls.env.ref('uom.product_uom_unit').id,
+            'uom_id': cls.uom_unit.id,
             'standard_price': 320.0,
             'default_code': 'P0001',
         })
         cls.product_b = cls.env['product.product'].create({
             'name': 'Product B',
-            'uom_id': cls.env.ref('uom.product_uom_unit').id,
+            'uom_id': cls.uom_unit.id,
             'standard_price': 15.8,
             'default_code': 'P0002',
         })
 
         cls.product_burger = cls.env['product.product'].create({
             'name': 'Burger',
-            'uom_id': cls.env.ref('uom.product_uom_unit').id,
+            'uom_id': cls.uom_unit.id,
             'standard_price': 265.00,
         })
 

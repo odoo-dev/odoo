@@ -8,13 +8,11 @@ from odoo.exceptions import UserError
 
 
 class TestUnbuild(TestMrpCommon):
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.stock_location = cls.env.ref('stock.stock_location_stock')
-        cls.env.ref('base.group_user').write({
-            'implied_ids': [(4, cls.env.ref('stock.group_production_lot').id)]
-        })
 
     def test_unbuild_standart(self):
         """ This test creates a MO and then creates 3 unbuild
@@ -747,7 +745,7 @@ class TestUnbuild(TestMrpCommon):
         bom_1 = self.env['mrp.bom'].create({
             'product_id': product_1.id,
             'product_tmpl_id': product_1.product_tmpl_id.id,
-            'product_uom_id': self.env.ref('uom.product_uom_unit').id,
+            'product_uom_id': self.uom_unit.id,
             'product_qty': 1.0,
             'type': 'normal',
             'bom_line_ids': [
@@ -761,7 +759,7 @@ class TestUnbuild(TestMrpCommon):
         self.env['mrp.bom'].create({
             'product_id': product_2.id,
             'product_tmpl_id': product_2.product_tmpl_id.id,
-            'product_uom_id': self.env.ref('uom.product_uom_unit').id,
+            'product_uom_id': self.uom_unit.id,
             'product_qty': 1.0,
             'type': 'normal',
             'bom_line_ids': [
@@ -826,7 +824,7 @@ class TestUnbuild(TestMrpCommon):
         bom_1 = self.env['mrp.bom'].create({
             'product_id': finished_product.id,
             'product_tmpl_id': finished_product.product_tmpl_id.id,
-            'product_uom_id': self.env.ref('uom.product_uom_unit').id,
+            'product_uom_id': self.uom_unit.id,
             'product_qty': 1.0,
             'type': 'normal',
             'bom_line_ids': [

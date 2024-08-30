@@ -68,7 +68,7 @@ class TestSaleMrpLeadTime(TestStockCommon):
 
         # Create sale order of product_1
         order_form = Form(self.env['sale.order'])
-        order_form.partner_id = self.partner_1
+        order_form.partner_id = self.partner
         with order_form.order_line.new() as line:
             line.product_id = self.product_1
             line.product_uom_qty = 10
@@ -119,7 +119,7 @@ class TestSaleMrpLeadTime(TestStockCommon):
 
         # Create sale order of product_1
         order_form = Form(self.env['sale.order'])
-        order_form.partner_id = self.partner_1
+        order_form.partner_id = self.partner
         order_form.warehouse_id = warehouse
         with order_form.order_line.new() as line:
             line.product_id = self.product_1

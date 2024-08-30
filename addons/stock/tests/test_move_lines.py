@@ -12,13 +12,11 @@ class StockMoveLine(TestStockCommon):
         super().setUpClass()
         cls.env.user.groups_id += cls.env.ref("stock.group_tracking_owner")
         cls.env.user.groups_id += cls.env.ref("stock.group_tracking_lot")
-        cls.env.user.groups_id += cls.env.ref("stock.group_production_lot")
         cls.env.user.groups_id += cls.env.ref('stock.group_stock_multi_locations')
         cls.product = cls.env['product.product'].create({
             'name': 'Product A',
             'is_storable': True,
             'tracking': 'lot',
-            'categ_id': cls.env.ref('product.product_category_all').id,
         })
         cls.shelf1 = cls.env['stock.location'].create({
             'name': 'Shelf 1',
@@ -31,10 +29,6 @@ class StockMoveLine(TestStockCommon):
         cls.lot = cls.env['stock.lot'].create({
             'product_id': cls.product.id,
             'name': 'Lot 1',
-        })
-        cls.partner = cls.env['res.partner'].create({
-            'name': 'The Owner',
-            'email': 'owner@example.com',
         })
 
         cls.quant = cls.env['stock.quant'].create({
@@ -49,7 +43,7 @@ class StockMoveLine(TestStockCommon):
 
     def test_pick_from_1(self):
         """ test quant display_name """
-        self.assertEqual(self.quant.display_name, 'WH/Stock/Shelf 1 - Lot 1 - Pack A - The Owner')
+        self.assertEqual(self.quant.display_name, 'WH/Stock/Shelf 1 - Lot 1 - Pack A - Test Partner')
 
     def test_pick_from_2(self):
         """ Create a move line from a quant"""

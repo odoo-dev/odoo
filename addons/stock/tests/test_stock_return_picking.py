@@ -13,16 +13,16 @@ class TestReturnPicking(TestStockCommon):
             'location_id': self.stock_location,
             'location_dest_id': self.customer_location})
         move_1 = self.MoveObj.create({
-            'name': self.UnitA.name,
-            'product_id': self.UnitA.id,
+            'name': self.productA.name,
+            'product_id': self.productA.id,
             'product_uom_qty': 2,
             'product_uom': self.uom_unit.id,
             'picking_id': picking_out.id,
             'location_id': self.stock_location,
             'location_dest_id': self.customer_location})
         move_2 = self.MoveObj.create({
-            'name': self.UnitA.name,
-            'product_id': self.UnitA.id,
+            'name': self.productA.name,
+            'product_id': self.productA.id,
             'product_uom_qty': 1,
             'product_uom': self.uom_dozen.id,
             'picking_id': picking_out.id,
@@ -43,11 +43,11 @@ class TestReturnPicking(TestStockCommon):
         ReturnPickingLineObj = self.env['stock.return.picking.line']
         # Check return line of uom_unit move
         return_line = ReturnPickingLineObj.search([('move_id', '=', move_1.id), ('wizard_id.picking_id', '=', picking_out.id)], limit=1)
-        self.assertEqual(return_line.product_id.id, self.UnitA.id, 'Return line should have exact same product as outgoing move')
+        self.assertEqual(return_line.product_id.id, self.productA.id, 'Return line should have exact same product as outgoing move')
         self.assertEqual(return_line.uom_id.id, self.uom_unit.id, 'Return line should have exact same uom as product uom')
         # Check return line of uom_dozen move
         return_line = ReturnPickingLineObj.search([('move_id', '=', move_2.id), ('wizard_id.picking_id', '=', picking_out.id)], limit=1)
-        self.assertEqual(return_line.product_id.id, self.UnitA.id, 'Return line should have exact same product as outgoing move')
+        self.assertEqual(return_line.product_id.id, self.productA.id, 'Return line should have exact same product as outgoing move')
         self.assertEqual(return_line.uom_id.id, self.uom_unit.id, 'Return line should have exact same uom as product uom')
 
     def test_return_picking_SN_pack(self):
@@ -159,8 +159,8 @@ class TestReturnPicking(TestStockCommon):
             'location_dest_id': self.stock_location,
             'partner_id': partner.id,
             'move_ids': [(0, 0, {
-                'name': self.UnitA.name,
-                'product_id': self.UnitA.id,
+                'name': self.productA.name,
+                'product_id': self.productA.id,
                 'product_uom_qty': 1,
                 'product_uom': self.uom_unit.id,
                 'location_id': self.stock_location,
@@ -185,6 +185,10 @@ class TestReturnPicking(TestStockCommon):
         Then, attempt to return the quantity that was delivered. The quantity should be properly verified
         to not be equal to 0 and the return should be created.
         """
+        # Product for different unit of measure.
+        gB = self.ProductObj.create(
+            {'name': 'g-B', 'is_storable': True, 'uom_id': self.uom_gm.id, 'uom_po_id': self.uom_gm.id},
+        )
         delivery_picking = self.PickingObj.create({
             'picking_type_id': self.picking_type_out,
             'location_id': self.stock_location,
@@ -192,7 +196,7 @@ class TestReturnPicking(TestStockCommon):
         })
         out_move = self.MoveObj.create({
             'name': "OUT move",
-            'product_id': self.gB.id,
+            'product_id': gB.id,
             'product_uom_qty': 10,
             'picking_id': delivery_picking.id,
             'location_id': self.stock_location,

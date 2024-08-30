@@ -245,7 +245,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
 
         product = self.env['product.product'].create({
             'name': 'product',
-            'uom_id': self.env.ref('uom.product_uom_unit').id,
+            'uom_id': self.uom_unit.id,
             'standard_price': 110.0,
             'supplier_taxes_id': [(6, 0, tax_price_include.ids)],
         })
@@ -390,7 +390,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
 
         product = self.env['product.product'].create({
             'name': 'product',
-            'uom_id': self.env.ref('uom.product_uom_unit').id,
+            'uom_id': self.uom_unit.id,
             'standard_price': 110.0,
             'supplier_taxes_id': [(6, 0, tax_price_include_1.ids)],
         })
@@ -2544,7 +2544,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
         tax = self.company_data['default_tax_purchase']
         product = self.env['product.product'].create({
             'name': 'product',
-            'uom_id': self.env.ref('uom.product_uom_unit').id,
+            'uom_id': self.uom_unit.id,
             'standard_price': 0.0,
             'supplier_taxes_id': [Command.set(tax.ids)],
         })

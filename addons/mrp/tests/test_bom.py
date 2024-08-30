@@ -14,9 +14,8 @@ class TestBoM(TestMrpCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.env.ref('base.group_user').write({'implied_ids': [
+        cls.group_user.write({'implied_ids': [
             (4, cls.env.ref('product.group_product_variant').id),
-            (4, cls.env.ref('mrp.group_mrp_routings').id),
         ]})
 
     def test_01_explode(self):
@@ -368,8 +367,8 @@ class TestBoM(TestMrpCommon):
         self.assertEqual(kit_product_qty, 8)
 
     def test_14_bom_kit_qty_multi_uom(self):
-        uom_dozens = self.env.ref('uom.product_uom_dozen')
-        uom_unit = self.env.ref('uom.product_uom_unit')
+        uom_dozens = self.uom_dozen
+        uom_unit = self.uom_unit
         product_unit = self.env['product.product'].create({
             'name': 'Test units',
             'type': 'consu',
@@ -408,7 +407,7 @@ class TestBoM(TestMrpCommon):
         precision.digits = 5
 
         # We set the Unit(s) rounding to 0.0001 (digit = 4)
-        uom_unit = self.env.ref('uom.product_uom_unit')
+        uom_unit = self.uom_unit
         uom_unit.rounding = 0.0001
 
         _ = self.env['mrp.bom'].create({
@@ -436,8 +435,8 @@ class TestBoM(TestMrpCommon):
         self.assertEqual(float_repr(float_round(kit_product_qty, precision_digits=precision.digits), precision_digits=precision.digits), '-384.00000')
 
     def test_13_bom_kit_qty_multi_uom(self):
-        uom_dozens = self.env.ref('uom.product_uom_dozen')
-        uom_unit = self.env.ref('uom.product_uom_unit')
+        uom_dozens = self.uom_dozen
+        uom_unit = self.uom_unit
         product_unit = self.env['product.product'].create({
             'name': 'Test units',
             'is_storable': True,
@@ -612,8 +611,6 @@ class TestBoM(TestMrpCommon):
             'name': 'Deserts Table'
         })
 
-        # Required to display `operation_ids` in the form view
-        self.env.user.groups_id += self.env.ref("mrp.group_mrp_routings")
         with Form(bom_crumble) as bom:
             with bom.bom_line_ids.new() as line:
                 line.product_id = butter
@@ -753,8 +750,8 @@ class TestBoM(TestMrpCommon):
     def test_bom_report_dozens(self):
         """ Simulate a drawer bom with dozens as bom units
         """
-        uom_dozen = self.env.ref('uom.product_uom_dozen')
-        uom_unit = self.env.ref('uom.product_uom_unit')
+        uom_dozen = self.uom_dozen
+        uom_unit = self.uom_unit
         drawer = self.env['product.product'].create({
             'name': 'drawer',
             'is_storable': True,
@@ -780,8 +777,6 @@ class TestBoM(TestMrpCommon):
             'name': 'Deserts Table'
         })
 
-        # Required to display `operation_ids` in the form view
-        self.env.user.groups_id += self.env.ref("mrp.group_mrp_routings")
         with Form(bom_drawer) as bom:
             with bom.bom_line_ids.new() as line:
                 line.product_id = screw
@@ -1024,9 +1019,10 @@ class TestBoM(TestMrpCommon):
         Check the Price for 80 units of Finished -> 2.92$:
         """
         # Create a products templates
-        uom_unit = self.env.ref('uom.product_uom_unit')
+        uom_unit = self.uom_unit
         uom_kg = self.env.ref('uom.product_uom_kgm')
-        uom_dozen = self.env.ref('uom.product_uom_dozen')
+        uom_dozen = self.uom_dozen
+        self.uom_dozen.rounding = 0.01  # return to default value (cf stock common)
         uom_litre = self.env.ref('uom.product_uom_litre')
 
         finished = self.env['product.product'].create({
@@ -1091,7 +1087,7 @@ class TestBoM(TestMrpCommon):
         self.assertAlmostEqual(report_values['lines']['bom_cost'], 2.92)
 
     def test_bom_report_capacity_with_quantity_of_0(self):
-        uom_unit = self.env.ref('uom.product_uom_unit')
+        uom_unit = self.uom_unit
         location = self.env.ref('stock.stock_location_stock')
 
         target = self.env['product.product'].create({
@@ -1162,7 +1158,7 @@ class TestBoM(TestMrpCommon):
         """ Test report bom structure with duplicated components.
         """
         location = self.env.ref('stock.stock_location_stock')
-        uom_unit = self.env.ref('uom.product_uom_unit')
+        uom_unit = self.uom_unit
         final_product_tmpl = self.env['product.template'].create({'name': 'Final Product', 'is_storable': True})
         component_product = self.env['product.product'].create({'name': 'Compo 1', 'is_storable': True})
 
@@ -1208,7 +1204,7 @@ class TestBoM(TestMrpCommon):
         """
         Cannot set a BOM line on a BOM with the same product as the BOM itself
         """
-        uom_unit = self.env.ref('uom.product_uom_unit')
+        uom_unit = self.uom_unit
         finished = self.env['product.product'].create({
             'name': 'Finished',
             'is_storable': True,
@@ -1229,7 +1225,7 @@ class TestBoM(TestMrpCommon):
         """
         Cannot set a BOM line on a BOM with the same product variant as the BOM itself
         """
-        uom_unit = self.env.ref('uom.product_uom_unit')
+        uom_unit = self.uom_unit
         bom_finished = Form(self.env['mrp.bom'])
         bom_finished.product_tmpl_id = self.product_7_template
         bom_finished.product_id = self.product_7_3
@@ -1247,7 +1243,7 @@ class TestBoM(TestMrpCommon):
         Usecase for example A black T-shirt made  from a white T-shirt and
         black color.
         """
-        uom_unit = self.env.ref('uom.product_uom_unit')
+        uom_unit = self.uom_unit
         bom_finished = Form(self.env['mrp.bom'])
         bom_finished.product_tmpl_id = self.product_7_template
         bom_finished.product_id = self.product_7_3
@@ -1262,7 +1258,7 @@ class TestBoM(TestMrpCommon):
         """
         Can set a BOM line on a BOM with a product variant when the BOM has no variant selected
         """
-        uom_unit = self.env.ref('uom.product_uom_unit')
+        uom_unit = self.uom_unit
         bom_finished = Form(self.env['mrp.bom'])
         bom_finished.product_tmpl_id = self.product_6.product_tmpl_id
         # no product_id
@@ -1427,9 +1423,9 @@ class TestBoM(TestMrpCommon):
         then to generate a new BoM from this MO.
         Checks the generated BoM has the expected BoM lines UoM and quantity.
         """
-        self.env.user.groups_id += self.env.ref('uom.group_uom')
-        uom_unit = self.env.ref('uom.product_uom_unit')
-        uom_dozen = self.env.ref('uom.product_uom_dozen')
+        self.env.user.groups_id += self.group_uom
+        uom_unit = self.uom_unit
+        uom_dozen = self.uom_dozen
         # Creates some products.
         common_vals = {'is_storable': True}
         finished_product = self.env['product.product'].create(dict(common_vals, name="CO² Molecule"))
@@ -1638,9 +1634,9 @@ class TestBoM(TestMrpCommon):
         then modifies the BoM's component's quantity and update the MO.
         Checks the MO's raw moves' quantities are correctly updated.
         """
-        self.env.user.groups_id += self.env.ref('uom.group_uom')
-        uom_unit = self.env.ref('uom.product_uom_unit')
-        uom_dozen = self.env.ref('uom.product_uom_dozen')
+        self.env.user.groups_id += self.group_uom
+        uom_unit = self.uom_unit
+        uom_dozen = self.uom_dozen
         # Creates a BoM.
         common_vals = {'is_storable': True}
         finished_product = self.env['product.product'].create(dict(common_vals, name="Monster in Jar"))
@@ -2167,7 +2163,7 @@ class TestBoM(TestMrpCommon):
 
     def test_availability_bom_type_kit(self):
         """ Product should only be available if bom type is kit """
-        uom_unit = self.env.ref('uom.product_uom_unit')
+        uom_unit = self.uom_unit
         location = self.env.ref('stock.stock_location_stock')
         product_one = self.env['product.product'].create({
             'name': 'Product',

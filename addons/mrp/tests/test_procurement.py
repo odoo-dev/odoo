@@ -227,7 +227,7 @@ class TestProcurement(TestMrpCommon):
         move_dest = self.env['stock.move'].create({
             'name': 'move_orig',
             'product_id': product_1.id,
-            'product_uom': self.ref('uom.product_uom_unit'),
+            'product_uom': self.uom_unit.id,
             'location_id': self.ref('stock.stock_location_stock'),
             'location_dest_id': self.ref('stock.stock_location_output'),
             'product_uom_qty': 10,
@@ -287,7 +287,7 @@ class TestProcurement(TestMrpCommon):
         move_dest = self.env['stock.move'].create({
             'name': 'move_bottle',
             'product_id': product_bottle.id,
-            'product_uom': self.ref('uom.product_uom_unit'),
+            'product_uom': self.uom_unit.id,
             'location_id': self.ref('stock.stock_location_stock'),
             'location_dest_id': self.ref('stock.stock_location_output'),
             'product_uom_qty': 10,
@@ -325,7 +325,7 @@ class TestProcurement(TestMrpCommon):
         move_dest = self.env['stock.move'].create({
             'name': 'Customer MTO Move',
             'product_id': product.id,
-            'product_uom': self.ref('uom.product_uom_unit'),
+            'product_uom': self.uom_unit.id,
             'location_id': self.ref('stock.stock_location_stock'),
             'location_dest_id': self.ref('stock.stock_location_output'),
             'product_uom_qty': 10,
@@ -341,7 +341,7 @@ class TestProcurement(TestMrpCommon):
         comp1 = self.env['product.product'].create({
             'name': 'egg',
         })
-        move_values = production._get_move_raw_values(comp1, 40.0, self.env.ref('uom.product_uom_unit'))
+        move_values = production._get_move_raw_values(comp1, 40.0, self.uom_unit)
         self.env['stock.move'].create(move_values)
 
         production.action_confirm()
@@ -564,12 +564,10 @@ class TestProcurement(TestMrpCommon):
             'name': 'product',
             'is_storable': True,
             'route_ids': [(4, self.ref('stock.route_warehouse0_mto')), (4, self.ref('mrp.route_warehouse0_manufacture'))],
-            'categ_id': self.env.ref('product.product_category_all').id
         })
         component = self.env['product.product'].create({
             'name': 'component',
             'is_storable': True,
-            'categ_id': self.env.ref('product.product_category_all').id
         })
         self.env['mrp.bom'].create({
             'product_id': product.id,

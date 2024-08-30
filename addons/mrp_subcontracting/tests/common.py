@@ -7,8 +7,8 @@ class TestMrpSubcontractingCommon(TransactionCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestMrpSubcontractingCommon, cls).setUpClass()
-        cls.env.ref('base.group_user').write({'implied_ids': [(4, cls.env.ref('stock.group_production_lot').id)]})
+        super().setUpClass()
+
         # 1: Create a subcontracting partner
         main_partner = cls.env['res.partner'].create({'name': 'main_partner'})
         cls.subcontractor_partner1 = cls.env['res.partner'].create({
@@ -17,21 +17,20 @@ class TestMrpSubcontractingCommon(TransactionCase):
             'company_id': cls.env.ref('base.main_company').id,
         })
         # 2. Create a BOM of subcontracting type
-        cls.comp1 = cls.env['product.product'].create({
-            'name': 'Component1',
-            'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
-        })
-        cls.comp2 = cls.env['product.product'].create({
-            'name': 'Component2',
-            'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
-        })
-        cls.finished = cls.env['product.product'].create({
-            'name': 'finished',
-            'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
-        })
+        cls.comp1, cls.comp2, cls.finished = cls.env['product.product'].create([
+            {
+                'name': 'Component1',
+                'is_storable': True,
+            },
+            {
+                'name': 'Component2',
+                'is_storable': True,
+            },
+            {
+                'name': 'finished',
+                'is_storable': True,
+            },
+        ])
         bom_form = Form(cls.env['mrp.bom'])
         bom_form.type = 'subcontract'
         bom_form.consumption = 'strict'
@@ -49,7 +48,6 @@ class TestMrpSubcontractingCommon(TransactionCase):
         cls.comp2comp = cls.env['product.product'].create({
             'name': 'component for Component2',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
         })
         bom_form = Form(cls.env['mrp.bom'])
         bom_form.product_tmpl_id = cls.comp2.product_tmpl_id

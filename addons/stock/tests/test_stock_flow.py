@@ -11,7 +11,6 @@ class TestStockFlow(TestStockCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.env.ref('base.group_user').write({'implied_ids': [(4, cls.env.ref('stock.group_production_lot').id)]})
         decimal_product_uom = cls.env.ref('product.decimal_product_uom')
         decimal_product_uom.digits = 3
         cls.partner_company2 = cls.env['res.partner'].create({
@@ -24,6 +23,40 @@ class TestStockFlow(TestStockCommon):
             'partner_id': cls.partner_company2.id,
             'name': 'My Company (Chicago)-demo',
         })
+
+        cls.uom_tone = cls.UomObj.create({
+            'name': 'Test-Tone',
+            'category_id': cls.categ_kgm,
+            'uom_type': 'bigger',
+            'factor_inv': 1000.0,
+            'rounding': 0.001})
+        cls.uom_sdozen = cls.UomObj.create({
+            'name': 'Test-SDozenA',
+            'category_id': cls.categ_unit,
+            'factor_inv': 144,
+            'uom_type': 'bigger',
+            'rounding': 0.001})
+        cls.uom_sdozen_round = cls.UomObj.create({
+            'name': 'Test-SDozenA Round',
+            'category_id': cls.categ_unit,
+            'factor_inv': 144,
+            'uom_type': 'bigger',
+            'rounding': 1.0})
+
+        # Product for different unit of measure.
+        (
+            cls.DozA,
+            cls.SDozA,
+            cls.SDozARound,
+            cls.kgB,
+            cls.gB,
+        ) = cls.ProductObj.create([
+            {'name': 'Dozon-A', 'is_storable': True, 'uom_id': cls.uom_dozen.id, 'uom_po_id': cls.uom_dozen.id},
+            {'name': 'SuperDozon-A', 'is_storable': True, 'uom_id': cls.uom_sdozen.id, 'uom_po_id': cls.uom_sdozen.id},
+            {'name': 'SuperDozenRound-A', 'is_storable': True, 'uom_id': cls.uom_sdozen_round.id, 'uom_po_id': cls.uom_sdozen_round.id},
+            {'name': 'kg-B', 'is_storable': True, 'uom_id': cls.uom_kg.id, 'uom_po_id': cls.uom_kg.id},
+            {'name': 'g-B', 'is_storable': True, 'uom_id': cls.uom_gm.id, 'uom_po_id': cls.uom_gm.id},
+        ])
 
     @mute_logger('odoo.addons.base.models.ir_model', 'odoo.models')
     def test_00_picking_create_and_transfer_quantity(self):

@@ -19,7 +19,7 @@ class TestItEdiDDT(TestItEdi):
         super().setUpClass()
 
         # UoM
-        uom_unit = cls.env.ref('uom.product_uom_unit')
+        uom_unit = cls.uom_unit
         uom_hour = cls.env.ref('uom.product_uom_hour')
 
         # Tax

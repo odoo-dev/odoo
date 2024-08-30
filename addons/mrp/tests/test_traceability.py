@@ -15,17 +15,11 @@ _logger = logging.getLogger(__name__)
 class TestTraceability(TestMrpCommon):
     TRACKING_TYPES = ['none', 'serial', 'lot']
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.env.ref('base.group_user').write({'implied_ids': [(4, cls.env.ref('stock.group_production_lot').id)]})
-
     def _create_product(self, tracking):
         return self.env['product.product'].create({
             'name': 'Product %s' % tracking,
             'is_storable': True,
             'tracking': tracking,
-            'categ_id': self.env.ref('product.product_category_all').id,
         })
 
     def test_tracking_types_on_mo(self):
@@ -73,7 +67,7 @@ class TestTraceability(TestMrpCommon):
             bom = self.env['mrp.bom'].create({
                 'product_id': finished_product.id,
                 'product_tmpl_id': finished_product.product_tmpl_id.id,
-                'product_uom_id': self.env.ref('uom.product_uom_unit').id,
+                'product_uom_id': self.uom_unit.id,
                 'product_qty': 1.0,
                 'type': 'normal',
                 'bom_line_ids': [
@@ -86,7 +80,7 @@ class TestTraceability(TestMrpCommon):
             mo_form = Form(self.env['mrp.production'])
             mo_form.product_id = finished_product
             mo_form.bom_id = bom
-            mo_form.product_uom_id = self.env.ref('uom.product_uom_unit')
+            mo_form.product_uom_id = self.uom_unit
             mo_form.product_qty = 1
             mo = mo_form.save()
             mo.action_confirm()

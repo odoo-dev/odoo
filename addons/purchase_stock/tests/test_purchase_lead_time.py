@@ -101,7 +101,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
         product_1 = self.env['product.product'].create({
             'name': 'AAA',
             'route_ids': [(4, self.route_buy)],
-            'seller_ids': [(0, 0, {'partner_id': self.partner_1.id, 'delay': 5})]
+            'seller_ids': [(0, 0, {'partner_id': self.partner.id, 'delay': 5})]
         })
 
         # create a move for product_1 from stock to output and reserve to trigger the
@@ -306,7 +306,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
 
         self.env['product.supplierinfo'].search([('product_tmpl_id', '=', self.product_1.product_tmpl_id.id)]).unlink()
         self.env['product.supplierinfo'].create({
-            'partner_id': self.partner_1.id,
+            'partner_id': self.partner.id,
             'min_qty': 1,
             'price': 1,
             'delay': 7,
@@ -314,7 +314,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
         })
 
         self.env['procurement.group'].run_scheduler()
-        purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.partner_1.id)])
+        purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.partner.id)])
 
         today = datetime.combine(fields.Datetime.now(), time(12))
         self.assertEqual(purchase_order.date_order, today)

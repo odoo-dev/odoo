@@ -18,7 +18,7 @@ class TestEdiJson(L10nInTestInvoicingCommon):
 
         cls.product_a_discount = cls.env['product.product'].create({
             'name': 'product_a discount',
-            'uom_id': cls.env.ref('uom.product_uom_unit').id,
+            'uom_id': cls.uom_unit.id,
             'lst_price': 400.0,
             'standard_price': 400.0,
             'property_account_income_id': cls.company_data['default_account_revenue'].id,
@@ -31,7 +31,7 @@ class TestEdiJson(L10nInTestInvoicingCommon):
             ) + cls.env.ref("account.%s_cess_5_plus_1591_sale" % (cls.company_data["company"].id))
         product_with_cess = cls.env["product.product"].create({
             "name": "product_with_cess",
-            "uom_id": cls.env.ref("uom.product_uom_unit").id,
+            "uom_id": cls.uom_unit.id,
             "lst_price": 1000.0,
             "standard_price": 800.0,
             "property_account_income_id": cls.company_data["default_account_revenue"].id,

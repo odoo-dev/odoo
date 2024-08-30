@@ -115,7 +115,7 @@ class TestUBLBE(TestUBLCommon, TestAccountMoveSendCommon):
                 {
                     'product_id': self.product_a.id,
                     'quantity': 2.0,
-                    'product_uom_id': self.env.ref('uom.product_uom_dozen').id,
+                    'product_uom_id': self.uom_dozen.id,
                     'price_unit': 990.0,
                     'discount': 10.0,
                     'tax_ids': [(6, 0, self.tax_21.ids)],
@@ -123,14 +123,14 @@ class TestUBLBE(TestUBLCommon, TestAccountMoveSendCommon):
                 {
                     'product_id': self.product_b.id,
                     'quantity': 10.0,
-                    'product_uom_id': self.env.ref('uom.product_uom_unit').id,
+                    'product_uom_id': self.uom_unit.id,
                     'price_unit': 100.0,
                     'tax_ids': [(6, 0, self.tax_12.ids)],
                 },
                 {
                     'product_id': self.product_b.id,
                     'quantity': -1.0,
-                    'product_uom_id': self.env.ref('uom.product_uom_unit').id,
+                    'product_uom_id': self.uom_unit.id,
                     'price_unit': 100.0,
                     'tax_ids': [(6, 0, self.tax_12.ids)],
                 },
@@ -173,7 +173,7 @@ class TestUBLBE(TestUBLCommon, TestAccountMoveSendCommon):
                 {
                     'product_id': self.product_a.id,
                     'quantity': 2.0,
-                    'product_uom_id': self.env.ref('uom.product_uom_dozen').id,
+                    'product_uom_id': self.uom_dozen.id,
                     'price_unit': 990.0,
                     'discount': 10.0,
                     'tax_ids': [(6, 0, self.tax_21.ids)],
@@ -181,14 +181,14 @@ class TestUBLBE(TestUBLCommon, TestAccountMoveSendCommon):
                 {
                     'product_id': self.product_b.id,
                     'quantity': 10.0,
-                    'product_uom_id': self.env.ref('uom.product_uom_unit').id,
+                    'product_uom_id': self.uom_unit.id,
                     'price_unit': 100.0,
                     'tax_ids': [(6, 0, self.tax_12.ids)],
                 },
                 {
                     'product_id': self.product_b.id,
                     'quantity': -1.0,
-                    'product_uom_id': self.env.ref('uom.product_uom_unit').id,
+                    'product_uom_id': self.uom_unit.id,
                     'price_unit': 100.0,
                     'tax_ids': [(6, 0, self.tax_12.ids)],
                 },

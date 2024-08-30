@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from datetime import datetime, timedelta
 
-from odoo.addons.mrp.tests.common import TestMrpCommon
 from odoo.tests import Form
-from odoo.tests.common import TransactionCase
+
+from odoo.addons.mrp.tests.common import TestMrpCommon
+from odoo.addons.uom.tests.common import UomCommon
 
 
 class TestMrpProductionBackorder(TestMrpCommon):
@@ -12,7 +14,6 @@ class TestMrpProductionBackorder(TestMrpCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.env.ref('base.group_user').write({'implied_ids': [(4, cls.env.ref('stock.group_production_lot').id)]})
         cls.stock_location = cls.env.ref('stock.stock_location_stock')
         warehouse_form = Form(cls.env['stock.warehouse'])
         warehouse_form.name = 'Test Warehouse'
@@ -861,35 +862,32 @@ class TestMrpProductionBackorder(TestMrpCommon):
         self.assertRecordValues(mo_never, [{'state': 'done', 'qty_produced': qty_produced, 'mrp_production_backorder_count': 1, 'priority': '0'}])
 
 
-class TestMrpWorkorderBackorder(TransactionCase):
+class TestMrpWorkorderBackorder(UomCommon):
     @classmethod
     def setUpClass(cls):
-        super(TestMrpWorkorderBackorder, cls).setUpClass()
-        cls.uom_unit = cls.env['uom.uom'].search([
-            ('category_id', '=', cls.env.ref('uom.product_uom_categ_unit').id),
-            ('uom_type', '=', 'reference')
-        ], limit=1)
-        cls.finished1 = cls.env['product.product'].create({
-            'name': 'finished1',
-            'type': 'consu',
-            'is_storable': True,
-        })
-        cls.compfinished1 = cls.env['product.product'].create({
-            'name': 'compfinished1',
-            'type': 'consu',
-            'is_storable': True,
-        })
-        cls.compfinished2 = cls.env['product.product'].create({
-            'name': 'compfinished2',
-            'type': 'consu',
-            'is_storable': True,
-        })
-        cls.workcenter1 = cls.env['mrp.workcenter'].create({
-            'name': 'workcenter1',
-        })
-        cls.workcenter2 = cls.env['mrp.workcenter'].create({
-            'name': 'workcenter2',
-        })
+        super().setUpClass()
+
+        cls.finished1, cls.compfinished1, cls.compfinished2 = cls.env['product.product'].create([
+            {
+                'name': 'finished1',
+                'type': 'consu',
+                'is_storable': True,
+            },
+            {
+                'name': 'compfinished1',
+                'type': 'consu',
+                'is_storable': True,
+            },
+            {
+                'name': 'compfinished2',
+                'type': 'consu',
+                'is_storable': True,
+            },
+        ])
+        cls.workcenter1, cls.workcenter2 = cls.env['mrp.workcenter'].create([
+            {'name': 'workcenter1'},
+            {'name': 'workcenter2'},
+        ])
 
         cls.bom_finished1 = cls.env['mrp.bom'].create({
             'product_id': cls.finished1.id,

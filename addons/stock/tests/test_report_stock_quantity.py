@@ -16,7 +16,6 @@ class TestReportStockQuantity(tests.TransactionCase):
             'name': 'Mellohi',
             'default_code': 'C418',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
             'tracking': 'lot',
             'barcode': 'scan_me'
         })

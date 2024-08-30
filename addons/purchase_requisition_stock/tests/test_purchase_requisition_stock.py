@@ -194,7 +194,7 @@ class TestPurchaseRequisitionStock(TestPurchaseRequisitionCommon):
         """Check that alt PO correctly copies the original PO values"""
         # create original PO
         orig_po = self.env['purchase.order'].create({
-            'partner_id': self.res_partner_1.id,
+            'partner_id': self.partner.id,
             'picking_type_id': self.env['stock.picking.type'].search([['code', '=', 'outgoing']], limit=1).id,
             'dest_address_id': self.env['res.partner'].create({'name': 'delivery_partner'}).id,
         })
@@ -209,7 +209,7 @@ class TestPurchaseRequisitionStock(TestPurchaseRequisitionCommon):
         # create an alt PO
         action = orig_po.action_create_alternative()
         alt_po_wiz = Form(self.env['purchase.requisition.create.alternative'].with_context(**action['context']))
-        alt_po_wiz.partner_id = self.res_partner_1
+        alt_po_wiz.partner_id = self.partner
         alt_po_wiz.copy_products = True
         alt_po_wiz = alt_po_wiz.save()
         alt_po_wiz.action_create_alternative()
@@ -312,13 +312,13 @@ class TestPurchaseRequisitionStock(TestPurchaseRequisitionCommon):
         """ Check that the group_id is propagated in the alternative PO"""
         pg1 = self.env['procurement.group'].create({})
         orig_po = self.env['purchase.order'].create({
-            'partner_id': self.res_partner_1.id,
+            'partner_id': self.partner.id,
             'group_id': pg1.id
         })
         # Creates an alternative PO
         action = orig_po.action_create_alternative()
         alt_po_wizard_form = Form(self.env['purchase.requisition.create.alternative'].with_context(**action['context']))
-        alt_po_wizard_form.partner_id = self.res_partner_1
+        alt_po_wizard_form.partner_id = self.partner
         alt_po_wizard_form.copy_products = True
         alt_po_wizard = alt_po_wizard_form.save()
         alt_po_id = alt_po_wizard.action_create_alternative()['res_id']

@@ -2,9 +2,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import Command
-from odoo.tests import Form
-from odoo.tests import common
 from odoo.exceptions import ValidationError
+from odoo.tests import Form, common
 
 
 class TestMrpByProduct(common.TransactionCase):
@@ -17,17 +16,27 @@ class TestMrpByProduct(common.TransactionCase):
         route_manufacture = cls.warehouse.manufacture_pull_id.route_id.id
         route_mto = cls.warehouse.mto_pull_id.route_id.id
         cls.uom_unit_id = cls.env.ref('uom.product_uom_unit').id
-        def create_product(name, route_ids=[]):
-            return cls.env['product.product'].create({
-                'name': name,
-                'is_storable': True,
-                'route_ids': route_ids})
 
         # Create product A, B, C.
         # --------------------------
-        cls.product_a = create_product('Product A', route_ids=[(6, 0, [route_manufacture, route_mto])])
-        cls.product_b = create_product('Product B', route_ids=[(6, 0, [route_manufacture, route_mto])])
-        cls.product_c_id = create_product('Product C', route_ids=[]).id
+        cls.product_a, cls.product_b, cls.product_c = cls.env['product.product'].create([
+            {
+                'name': 'Product A',
+                'is_storable': True,
+                'route_ids': [Command.set([route_manufacture, route_mto])],
+            },
+            {
+                'name': 'Product B',
+                'is_storable': True,
+                'route_ids': [Command.set([route_manufacture, route_mto])],
+            },
+            {
+                'name': 'Product C',
+                'is_storable': True,
+                'route_ids': []
+            },
+        ])
+        cls.product_c_id = cls.product_c.id
         cls.bom_byproduct = cls.MrpBom.create({
             'product_tmpl_id': cls.product_a.product_tmpl_id.id,
             'product_qty': 1.0,
@@ -41,26 +50,28 @@ class TestMrpByProduct(common.TransactionCase):
             'is_storable': True,
             'tracking': 'serial',
         })
-        cls.sn_1 = cls.env['stock.lot'].create({
-            'name': 'Serial_01',
-            'product_id': cls.produced_serial.id
-        })
-        cls.sn_2 = cls.env['stock.lot'].create({
-            'name': 'Serial_02',
-            'product_id': cls.produced_serial.id
-        })
+        cls.sn_1, cls.sn_2 = cls.env['stock.lot'].create([
+            {
+                'name': 'Serial_01',
+                'product_id': cls.produced_serial.id
+            },
+            {
+                'name': 'Serial_02',
+                'product_id': cls.produced_serial.id
+            }
+        ])
 
     def test_00_mrp_byproduct(self):
         """ Test by product with production order."""
         # Create BOM for product B
         # ------------------------
-        bom_product_b = self.MrpBom.create({
+        self.MrpBom.create({
             'product_tmpl_id': self.product_b.product_tmpl_id.id,
             'product_qty': 1.0,
             'type': 'normal',
             'product_uom_id': self.uom_unit_id,
             'bom_line_ids': [(0, 0, {'product_id': self.product_c_id, 'product_uom_id': self.uom_unit_id, 'product_qty': 2})]
-            })
+        })
 
         # Create production order for product A
         # -------------------------------------

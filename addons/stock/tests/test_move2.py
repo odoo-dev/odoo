@@ -1,19 +1,27 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 
-from odoo.addons.stock.tests.common import TestStockCommon
-from odoo.exceptions import UserError
-
-from odoo import Command
-from odoo.tests import Form
-from odoo.tools import float_is_zero, float_compare
-
-from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
+from odoo.exceptions import UserError
+from odoo.fields import Command
+from odoo.tests import Form
+
+from odoo.addons.stock.tests.common import TestStockCommon
+
+
 class TestPickShip(TestStockCommon):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        # Product for different unit of measure.
+        cls.gB = cls.ProductObj.create(
+            {'name': 'g-B', 'is_storable': True, 'uom_id': cls.uom_gm.id, 'uom_po_id': cls.uom_gm.id},
+        )
+
     def create_pick_ship(self):
         picking_client = self.env['stock.picking'].create({
             'location_id': self.pack_location,
@@ -114,7 +122,6 @@ class TestPickShip(TestStockCommon):
         product_unreserve = self.env['product.product'].create({
             'name': 'product unreserve',
             'is_storable': True,
-            'categ_id': self.env.ref('product.product_category_all').id,
         })
         stock_location = self.env['stock.location'].browse(self.stock_location)
         self.env['stock.quant']._update_available_quantity(product_unreserve, stock_location, 4.0)
@@ -2529,7 +2536,6 @@ class TestStockUOM(TestStockCommon):
         product_G = self.env['product.product'].create({
             'name': 'Product G',
             'is_storable': True,
-            'categ_id': self.env.ref('product.product_category_all').id,
             'uom_id': self.uom_gm.id,
             'uom_po_id': self.uom_gm.id,
         })
@@ -2582,7 +2588,6 @@ class TestStockUOM(TestStockCommon):
         """
         precision = self.env.ref('product.decimal_product_uom')
         precision.digits = 3
-        precision_digits = precision.digits
 
         self.uom_kg.rounding = 0.0001
         self.uom_gm.rounding = 0.01
@@ -2590,7 +2595,6 @@ class TestStockUOM(TestStockCommon):
         product_LtDA = self.env['product.product'].create({
             'name': 'Product Less than DA',
             'is_storable': True,
-            'categ_id': self.env.ref('product.product_category_all').id,
             'uom_id': self.uom_gm.id,
             'uom_po_id': self.uom_gm.id,
         })
@@ -2598,7 +2602,6 @@ class TestStockUOM(TestStockCommon):
         product_GtDA = self.env['product.product'].create({
             'name': 'Product Greater than DA',
             'is_storable': True,
-            'categ_id': self.env.ref('product.product_category_all').id,
             'uom_id': self.uom_gm.id,
             'uom_po_id': self.uom_gm.id,
         })
@@ -2693,16 +2696,6 @@ class TestStockUOM(TestStockCommon):
 
 
 class TestRoutes(TestStockCommon):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.product1 = cls.env['product.product'].create({
-            'name': 'product a',
-            'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
-        })
-        cls.uom_unit = cls.env.ref('uom.product_uom_unit')
-        cls.partner = cls.env['res.partner'].create({'name': 'Partner'})
 
     def _enable_pick_ship(self):
         self.wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.id)], limit=1)
@@ -2727,12 +2720,12 @@ class TestRoutes(TestStockCommon):
         })
         resupply_route = self.env['stock.route'].search([('supplier_wh_id', '=', warehouse_2.id), ('supplied_wh_id', '=', warehouse_1.id)])
         self.assertTrue(resupply_route, "Ressuply route not found")
-        self.product1.write({'route_ids': [(4, resupply_route.id), (4, self.env.ref('stock.route_warehouse0_mto').id)]})
+        self.productA.write({'route_ids': [(4, resupply_route.id), (4, self.env.ref('stock.route_warehouse0_mto').id)]})
         self.wh = warehouse_1
 
-        replenish_wizard = self.env['product.replenish'].with_context(default_product_tmpl_id=self.product1.product_tmpl_id.id).create({
-            'product_id': self.product1.id,
-            'product_tmpl_id': self.product1.product_tmpl_id.id,
+        replenish_wizard = self.env['product.replenish'].with_context(default_product_tmpl_id=self.productA.product_tmpl_id.id).create({
+            'product_id': self.productA.id,
+            'product_tmpl_id': self.productA.product_tmpl_id.id,
             'product_uom_id': self.uom_unit.id,
             'quantity': self.product_uom_qty,
             'warehouse_id': self.wh.id,
@@ -2747,7 +2740,7 @@ class TestRoutes(TestStockCommon):
         if picking_id and model_name:
             last_picking_id = self.env[model_name].browse(int(picking_id))
         self.assertTrue(last_picking_id, 'Picking not found')
-        move_line = last_picking_id.move_ids.search([('product_id', '=', self.product1.id)])
+        move_line = last_picking_id.move_ids.search([('product_id', '=', self.productA.id)])
         self.assertTrue(move_line,'The product is not in the picking')
         self.assertEqual(move_line[0].product_uom_qty, self.product_uom_qty, 'Quantities does not match')
         self.assertEqual(move_line[1].product_uom_qty, self.product_uom_qty, 'Quantities does not match')
@@ -2780,7 +2773,7 @@ class TestRoutes(TestStockCommon):
             'name': 'move with a route',
             'location_id': stock_location.id,
             'location_dest_id': stock_location.id,
-            'product_id': self.product1.id,
+            'product_id': self.productA.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 1.0,
             'route_ids': [(4, route.id)]
@@ -3240,7 +3233,6 @@ class TestAutoAssign(TestStockCommon):
             'name': 'PSerial',
             'is_storable': True,
             'tracking': 'serial',
-            'categ_id': self.env.ref('product.product_category_all').id,
         })
 
         move = self.env['stock.move'].create({

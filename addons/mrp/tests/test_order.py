@@ -15,11 +15,6 @@ from odoo.addons.mrp.tests.common import TestMrpCommon
 
 class TestMrpOrder(TestMrpCommon):
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.env.ref('base.group_user').write({'implied_ids': [(4, cls.env.ref('stock.group_production_lot').id)]})
-
     def test_access_rights_manager(self):
         """ Checks an MRP manager can create, confirm and cancel a manufacturing order. """
         man_order_form = Form(self.env['mrp.production'].with_user(self.user_mrp_manager))
@@ -370,8 +365,6 @@ class TestMrpOrder(TestMrpCommon):
 
     def test_update_quantity_4(self):
         """ Workcenter 1 has 10' start time and 5' stop time """
-        # Required for `workerorder_ids` to be visible in the view
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
         bom = self.env['mrp.bom'].create({
             'product_id': self.product_6.id,
             'product_tmpl_id': self.product_6.product_tmpl_id.id,
@@ -436,8 +429,6 @@ class TestMrpOrder(TestMrpCommon):
 
     def test_qty_producing(self):
         """Qty producing should be the qty remain to produce, instead of 0"""
-        # Required for `workerorder_ids` to be visible in the view
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
         bom = self.env['mrp.bom'].create({
             'product_id': self.product_6.id,
             'product_tmpl_id': self.product_6.product_tmpl_id.id,
@@ -478,7 +469,7 @@ class TestMrpOrder(TestMrpCommon):
             there is a recursion error
             (with the default getrecursionlimit of 1000)
         """
-        product_uom_id = self.env.ref('uom.product_uom_unit').id
+        product_uom_id = self.uom_unit.id
         mo_no_company = self.env['mrp.production'].create({
             'product_id': self.product.id,
             'product_uom_id': product_uom_id,
@@ -1002,7 +993,7 @@ class TestMrpOrder(TestMrpCommon):
         """
         # Required for `byproduct_ids` to be visible in the view
         self.env.user.groups_id += self.env.ref('mrp.group_mrp_byproducts')
-        dozen = self.env.ref('uom.product_uom_dozen')
+        dozen = self.uom_dozen
         self.byproduct1 = self.env['product.product'].create({
             'name': 'Byproduct 1',
             'is_storable': True,
@@ -1544,7 +1535,7 @@ class TestMrpOrder(TestMrpCommon):
         mo = mo_form.save()
         move = self.env['stock.move'].create({
             'product_id': self.product_2.id,
-            'product_uom': self.ref('uom.product_uom_unit'),
+            'product_uom': self.uom_unit.id,
             'production_id': mo.id,
             'location_dest_id': self.ref('stock.stock_location_output'),
         })
@@ -1580,7 +1571,7 @@ class TestMrpOrder(TestMrpCommon):
             move = self.env['stock.move'].create({
                 'name': 'mrp_move_' + str(i),
                 'product_id': self.product_2.id,
-                'product_uom': self.ref('uom.product_uom_unit'),
+                'product_uom': self.uom_unit.id,
                 'production_id': mo.id,
                 'location_id': self.ref('stock.stock_location_stock'),
                 'location_dest_id': self.ref('stock.stock_location_output'),
@@ -1743,8 +1734,8 @@ class TestMrpOrder(TestMrpCommon):
         """ Produce a finished product tracked by serial number. Set another
         UoM on the bom. The produce wizard should keep the UoM of the product (unit)
         and quantity = 1."""
-        dozen = self.env.ref('uom.product_uom_dozen')
-        unit = self.env.ref('uom.product_uom_unit')
+        dozen = self.uom_dozen
+        unit = self.uom_unit
         plastic_laminate = self.env['product.product'].create({
             'name': 'Plastic Laminate',
             'is_storable': True,
@@ -1818,7 +1809,7 @@ class TestMrpOrder(TestMrpCommon):
         bom = self.env['mrp.bom'].create({
             'product_id': finished_product.id,
             'product_tmpl_id': finished_product.product_tmpl_id.id,
-            'product_uom_id': self.env.ref('uom.product_uom_unit').id,
+            'product_uom_id': self.uom_unit.id,
             'product_qty': 1.0,
             'type': 'normal',
             'bom_line_ids': [(5, 0), (0, 0, {'product_id': product_raw.id})]
@@ -1827,7 +1818,7 @@ class TestMrpOrder(TestMrpCommon):
         mo_form = Form(self.env['mrp.production'])
         mo_form.product_id = finished_product
         mo_form.bom_id = bom
-        mo_form.product_uom_id = self.env.ref('uom.product_uom_unit')
+        mo_form.product_uom_id = self.uom_unit
         mo_form.product_qty = 1
         mo = mo_form.save()
 
@@ -2015,7 +2006,7 @@ class TestMrpOrder(TestMrpCommon):
     def test_immediate_validate_uom_2(self):
         """The rounding precision of a component should be based on the UoM used in the MO for this component,
         not on the produced product's UoM nor the default UoM of the component"""
-        uom_units = self.env.ref('uom.product_uom_unit')
+        uom_units = self.uom_unit
         uom_L = self.env.ref('uom.product_uom_litre')
         uom_cL = self.env['uom.uom'].create({
             'name': 'cL',
@@ -2093,9 +2084,6 @@ class TestMrpOrder(TestMrpCommon):
         we do not create a new move line due to extra reserved quantity
         caused by decimal rounding conversions.
         """
-
-        picking_type = self.env['stock.picking.type'].search([('code', '=', 'mrp_operation')])[0]
-
         # the overall decimal accuracy is set to 3 digits
         precision = self.env.ref('product.decimal_product_uom')
         precision.digits = 3
@@ -2124,7 +2112,6 @@ class TestMrpOrder(TestMrpCommon):
             'name': 'Product Component',
             'is_storable': True,
             'tracking': 'lot',
-            'categ_id': self.env.ref('product.product_category_all').id,
             'uom_id': uom_L.id,
             'uom_po_id': uom_L.id,
         })
@@ -2133,7 +2120,6 @@ class TestMrpOrder(TestMrpCommon):
             'name': 'Product Final',
             'is_storable': True,
             'tracking': 'lot',
-            'categ_id': self.env.ref('product.product_category_all').id,
             'uom_id': uom_L.id,
             'uom_po_id': uom_L.id,
         })
@@ -2649,8 +2635,6 @@ class TestMrpOrder(TestMrpCommon):
         Create a second one in 10 minutes (expected should NOT go from 15 to 12.5, it should go from 15 to 10)
         """
         # First production, the default is 60 and there is 0 productions of that operation
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
         production_form = Form(self.env['mrp.production'])
         production_form.bom_id = self.bom_4
         production = production_form.save()
@@ -2697,8 +2681,6 @@ class TestMrpOrder(TestMrpCommon):
         Test that when tracking the 2 last production, if we make one with under capacity, and one with normal capacity,
         the two are equivalent (1 done with capacity 2 in 10mn = 2 done with capacity 2 in 10mn)
         """
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
         production_form = Form(self.env['mrp.production'])
         production_form.bom_id = self.bom_5
         production = production_form.save()
@@ -2750,8 +2732,6 @@ class TestMrpOrder(TestMrpCommon):
         5 -> 30mn
         ...
         """
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
         production_form = Form(self.env['mrp.production'])
         production_form.bom_id = self.bom_6
         production = production_form.save()
@@ -3083,8 +3063,6 @@ class TestMrpOrder(TestMrpCommon):
         """
             Check that the work order is started only once when clicking the start button several times.
         """
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
         production_form = Form(self.env['mrp.production'])
         production_form.bom_id = self.bom_2
         production_form.product_qty = 1
@@ -3193,8 +3171,6 @@ class TestMrpOrder(TestMrpCommon):
         -> The user replans one of the WO: the warnings should disappear and the
         WO should be postponed.
         """
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
         mos = self.env['mrp.production']
         for _ in range(2):
             mo_form = Form(self.env['mrp.production'])
@@ -3225,8 +3201,6 @@ class TestMrpOrder(TestMrpCommon):
         -> The user replans one of the WO: the warnings should disappear and the
         WO should be postponed.
         """
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
         mos = self.env['mrp.production']
         for _ in range(2):
             mo_form = Form(self.env['mrp.production'])
@@ -3271,10 +3245,6 @@ class TestMrpOrder(TestMrpCommon):
                 Add a second WO scheduled before the other one (with different WC)
                 Confirm => MO should Replan without Error
         """
-
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
-
         mos = self.env['mrp.production']
         for _ in range(2):
             mo_form = Form(self.env['mrp.production'])
@@ -3646,8 +3616,6 @@ class TestMrpOrder(TestMrpCommon):
     def test_workcenter_specific_capacities(self):
         """ Test that the duraction expected is correctly computed when specific capacities are defined on the workcenter.
         """
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
         self.workcenter_2.update({
             'time_start': 10,
             'time_stop': 20,

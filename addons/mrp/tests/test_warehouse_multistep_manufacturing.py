@@ -12,8 +12,6 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Required for `uom_id` to be visible in the view
-        cls.env.user.groups_id += cls.env.ref('uom.group_uom')
         # Required for `manufacture_steps` to be visible in the view
         cls.env.user.groups_id += cls.env.ref('stock.group_adv_location')
         # Create warehouse
@@ -22,8 +20,6 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         warehouse_form.name = 'Test Warehouse'
         warehouse_form.code = 'TWH'
         cls.warehouse = warehouse_form.save()
-
-        cls.uom_unit = cls.env.ref('uom.product_uom_unit')
 
         # Create manufactured product
         product_form = Form(cls.env['product.product'])

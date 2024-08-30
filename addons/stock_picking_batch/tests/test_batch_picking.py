@@ -25,12 +25,10 @@ class TestBatchPicking(TransactionCase):
         cls.productA = cls.env['product.product'].create({
             'name': 'Product A',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
         })
         cls.productB = cls.env['product.product'].create({
             'name': 'Product B',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
         })
 
         cls.client_1 = cls.env['res.partner'].create({'name': 'Client 1'})

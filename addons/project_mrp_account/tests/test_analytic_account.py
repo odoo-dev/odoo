@@ -129,8 +129,6 @@ class TestAnalyticAccount(TestMrpAnalyticAccount):
         """Test when workcenter and MO are using the same analytic account, no
         duplicated lines will be post.
         """
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
         # set wc analytic account to be different from the one on the bom
         analytic_plan = self.env['account.analytic.plan'].create({'name': 'Plan Test'})
         wc_analytic_account = self.env['account.analytic.account'].create({'name': 'wc_analytic_account', 'plan_id': analytic_plan.id})
@@ -179,8 +177,6 @@ class TestAnalyticAccount(TestMrpAnalyticAccount):
         """ Check if the MO account analytic lines are correctly updated
             after the change of the MO account analytic (ie. we change the project linked to the MO).
         """
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
         # create a mo
         mo_form = Form(self.env['mrp.production'])
         mo_form.product_id = self.product
@@ -440,7 +436,6 @@ class TestAnalyticAccount(TestMrpAnalyticAccount):
         ie. The MO is producing the product and there is a project linked to the MO that has at least one analytic plan set,
         and all its mandatory plans set (the ones that are constrained by the 'Manufacturing Order' domain).
         """
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
         self.applicability.business_domain = 'manufacturing_order'
         self.project[f'{self.analytic_plan._column_name()}'] = False  # Remove the AA from the mandatory plan of the project
         new_analytic_plan = self.env['account.analytic.plan'].create({

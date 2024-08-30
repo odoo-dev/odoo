@@ -17,7 +17,6 @@ class TestRobustness(TransactionCase):
         cls.product1 = cls.env['product.product'].create({
             'name': 'Product A',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
         })
 
     def test_uom_factor(self):

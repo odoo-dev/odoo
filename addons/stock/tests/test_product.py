@@ -16,23 +16,22 @@ class TestVirtualAvailable(TestStockCommon):
 
         # Make `product3` a storable product for this test. Indeed, creating quants
         # and playing with owners is not possible for consumables.
-        cls.product_3.is_storable = True
-        cls.env['stock.picking.type'].browse(cls.env.ref('stock.picking_type_out').id).reservation_method = 'manual'
+        cls.env['stock.picking.type'].browse(cls.picking_type_out).reservation_method = 'manual'
 
         cls.env['stock.quant'].create({
             'product_id': cls.product_3.id,
-            'location_id': cls.env.ref('stock.stock_location_stock').id,
+            'location_id': cls.stock_location,
             'quantity': 30.0})
 
         cls.env['stock.quant'].create({
             'product_id': cls.product_3.id,
-            'location_id': cls.env.ref('stock.stock_location_stock').id,
+            'location_id': cls.stock_location,
             'quantity': 10.0,
             'owner_id': cls.user_stock_user.partner_id.id})
 
         cls.picking_out = cls.env['stock.picking'].create({
             'state': 'draft',
-            'picking_type_id': cls.env.ref('stock.picking_type_out').id
+            'picking_type_id': cls.picking_type_out,
         })
         cls.env['stock.move'].create({
             'name': 'a move',
@@ -40,12 +39,13 @@ class TestVirtualAvailable(TestStockCommon):
             'product_uom_qty': 3.0,
             'product_uom': cls.product_3.uom_id.id,
             'picking_id': cls.picking_out.id,
-            'location_id': cls.env.ref('stock.stock_location_stock').id,
+            'location_id': cls.stock_location,
             'location_dest_id': cls.env.ref('stock.stock_location_customers').id})
 
         cls.picking_out_2 = cls.env['stock.picking'].create({
             'state': 'draft',
-            'picking_type_id': cls.env.ref('stock.picking_type_out').id})
+            'picking_type_id': cls.picking_type_out,
+        })
         cls.env['stock.move'].create({
             'restrict_partner_id': cls.user_stock_user.partner_id.id,
             'name': 'another move',
@@ -53,7 +53,7 @@ class TestVirtualAvailable(TestStockCommon):
             'product_uom_qty': 5.0,
             'product_uom': cls.product_3.uom_id.id,
             'picking_id': cls.picking_out_2.id,
-            'location_id': cls.env.ref('stock.stock_location_stock').id,
+            'location_id': cls.stock_location,
             'location_dest_id': cls.env.ref('stock.stock_location_customers').id})
 
     def test_without_owner(self):

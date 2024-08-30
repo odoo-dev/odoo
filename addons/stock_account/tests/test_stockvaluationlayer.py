@@ -20,7 +20,6 @@ class TestStockValuationCommon(TransactionCase):
         cls.product1 = cls.env['product.product'].create({
             'name': 'product1',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
         })
         cls.picking_type_in = cls.env.ref('stock.picking_type_in')
         cls.picking_type_out = cls.env.ref('stock.picking_type_out')
@@ -1121,11 +1120,9 @@ class TestAngloSaxonAccounting(AccountTestInvoicingCommon, TestStockValuationCom
             'account_type': 'expense',
             'reconcile': True,
         })
-        cls.uom_unit = cls.env.ref('uom.product_uom_unit')
         cls.product1 = cls.env['product.product'].create({
             'name': 'product1',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
             'property_account_expense_id': cls.expense_account.id,
         })
         cls.product1.categ_id.write({

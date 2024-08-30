@@ -13,15 +13,12 @@ class TestHSNsummary(TestTaxCommon):
         cls.test_hsn_code_1 = '1234'
         cls.test_hsn_code_2 = '4321'
 
-        cls.uom_unit = cls.env.ref('uom.product_uom_unit')
-        cls.uom_dozen = cls.env.ref('uom.product_uom_dozen')
-
         cls.product_a.l10n_in_hsn_code = cls.test_hsn_code_1
         cls.product_b.l10n_in_hsn_code = cls.test_hsn_code_2
         cls.product_c = cls.env['product.product'].create({
             'name': 'product_c',
             'l10n_in_hsn_code': cls.test_hsn_code_1,
-            'uom_id': cls.env.ref('uom.product_uom_unit').id,
+            'uom_id': cls.uom_unit.id,
             'lst_price': 1000.0,
             'property_account_income_id': cls.company_data['default_account_revenue'].id,
         })

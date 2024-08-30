@@ -61,12 +61,10 @@ class TestStockValuationBase(TransactionCase):
             'name': 'Product A',
             'is_storable': True,
             'default_code': 'prda',
-            'categ_id': cls.env.ref('product.product_category_all').id,
         })
         cls.product2 = cls.env['product.product'].create({
             'name': 'Product B',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
         })
         cls.inventory_user = cls.env['res.users'].create({
             'name': 'Pauline Poivraisselle',

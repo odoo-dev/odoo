@@ -14,7 +14,6 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
         super().setUpClass()
 
         cls.env.user.company_id.anglo_saxon_accounting = True
-        cls.uom_unit = cls.env.ref('uom.product_uom_unit')
 
     @classmethod
     def _create_product(cls, **kwargs):

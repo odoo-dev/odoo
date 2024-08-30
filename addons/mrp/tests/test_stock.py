@@ -12,7 +12,6 @@ class TestWarehouseMrp(common.TestMrpCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        unit = cls.env.ref("uom.product_uom_unit")
         cls.stock_location = cls.env.ref('stock.stock_location_stock')
         cls.depot_location = cls.env['stock.location'].create({
             'name': 'Depot',
@@ -37,12 +36,12 @@ class TestWarehouseMrp(common.TestMrpCommon):
         cls.bom_laptop = cls.env['mrp.bom'].create({
             'product_tmpl_id': cls.laptop.product_tmpl_id.id,
             'product_qty': 1,
-            'product_uom_id': unit.id,
+            'product_uom_id': cls.uom_unit.id,
             'consumption': 'flexible',
             'bom_line_ids': [(0, 0, {
                 'product_id': cls.graphics_card.id,
                 'product_qty': 1,
-                'product_uom_id': unit.id
+                'product_uom_id': cls.uom_unit.id
             })],
             'operation_ids': [
                 (0, 0, {'name': 'Cutting Machine', 'workcenter_id': cls.workcenter_1.id, 'time_cycle': 12, 'sequence': 1}),
@@ -478,7 +477,7 @@ class TestKitPicking(common.TestMrpCommon):
         """ Test the `stock.move.line` method `_get_aggregated_product_quantities`,
         who returns data used to print delivery slips, using kits.
         """
-        uom_unit = self.env.ref('uom.product_uom_unit')
+        uom_unit = self.uom_unit
         kit, kit_component_1, kit_component_2, not_kit_1, not_kit_2 = self.env['product.product'].create([{
             'name': name,
             'is_storable': True,

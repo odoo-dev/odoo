@@ -487,7 +487,6 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
             'name': 'Table Kit',
             'type': 'consu',
             'invoice_policy': 'delivery',
-            'categ_id': self.env.ref('product.product_category_all').id,
         })
         # Remove the MTO route as purchase is not installed and since the procurement removal the exception is directly raised
         product.write({'route_ids': [(6, 0, [self.company_data['default_warehouse'].manufacture_pull_id.route_id.id])]})

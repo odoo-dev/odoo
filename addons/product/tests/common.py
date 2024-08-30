@@ -170,15 +170,13 @@ class TestProductCommon(ProductVariantsCommon):
             'rounding': 0.001,
         })
 
-        cls.product_1, cls.product_2 = cls.env['product.product'].create([{
-            'name': 'Courage',  # product_1
+        cls.product_1 = cls.env['product.product'].create({
+            'name': 'Courage',
             'type': 'consu',
             'default_code': 'PROD-1',
             'uom_id': cls.uom_dunit.id,
             'uom_po_id': cls.uom_dunit.id,
-        }, {
-            'name': 'Wood',  # product_2
-        }])
+        })
 
         # Kept for reduced diff in other modules (mainly stock & mrp)
         cls.prod_att_1 = cls.color_attribute

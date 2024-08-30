@@ -32,13 +32,13 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         quantity = 26
 
         # Create a pruchase requisition with type blanket order and two product
-        line1 = (0, 0, {'product_id': self.product_09.id, 'product_qty': quantity, 'product_uom_id': self.product_uom_id.id, 'price_unit': price_product09})
-        line2 = (0, 0, {'product_id': self.product_13.id, 'product_qty': quantity, 'product_uom_id': self.product_uom_id.id, 'price_unit': price_product13})
+        line1 = (0, 0, {'product_id': self.product_09.id, 'product_qty': quantity, 'product_uom_id': self.uom_unit.id, 'price_unit': price_product09})
+        line2 = (0, 0, {'product_id': self.product_13.id, 'product_qty': quantity, 'product_uom_id': self.uom_unit.id, 'price_unit': price_product13})
 
         requisition_blanket = self.env['purchase.requisition'].create({
             'line_ids': [line1, line2],
             'requisition_type': 'blanket_order',
-            'vendor_id': self.res_partner_1.id,
+            'vendor_id': self.partner.id,
         })
 
         # confirm the requisition
@@ -46,21 +46,20 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
 
         # Check for both product that the new supplier info(purchase.requisition.vendor_id) is added to the purchase tab
         # and check the quantity
-        seller_partner1 = self.res_partner_1
         supplierinfo09 = self.env['product.supplierinfo'].search([
-            ('partner_id', '=', seller_partner1.id),
+            ('partner_id', '=', self.partner.id),
             ('product_id', '=', self.product_09.id),
             ('purchase_requisition_id', '=', requisition_blanket.id),
         ])
-        self.assertEqual(supplierinfo09.partner_id, seller_partner1, 'The supplierinfo is not correct')
+        self.assertEqual(supplierinfo09.partner_id, self.partner, 'The supplierinfo is not correct')
         self.assertEqual(supplierinfo09.price, price_product09, 'The supplierinfo is not correct')
 
         supplierinfo13 = self.env['product.supplierinfo'].search([
-            ('partner_id', '=', seller_partner1.id),
+            ('partner_id', '=', self.partner.id),
             ('product_id', '=', self.product_13.id),
             ('purchase_requisition_id', '=', requisition_blanket.id),
         ])
-        self.assertEqual(supplierinfo13.partner_id, seller_partner1, 'The supplierinfo is not correct')
+        self.assertEqual(supplierinfo13.partner_id, self.partner, 'The supplierinfo is not correct')
         self.assertEqual(supplierinfo13.price, price_product13, 'The supplierinfo is not correct')
 
         # Put the requisition in done Status
@@ -74,7 +73,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         """ Create a blanket order + an RFQ for it """
 
         bo_form = Form(self.env['purchase.requisition'])
-        bo_form.vendor_id = self.res_partner_1
+        bo_form.vendor_id = self.partner
         bo_form.requisition_type = 'blanket_order'
         with bo_form.line_ids.new() as line:
             line.product_id = self.product_09
@@ -147,7 +146,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         """Directly link POs to each other as 'Alternatives': check that wizards and
         their flows correctly work."""
         orig_po = self.env['purchase.order'].create({
-            'partner_id': self.res_partner_1.id,
+            'partner_id': self.partner.id,
         })
         unit_price = 50
         po_form = Form(orig_po)
@@ -167,7 +166,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         # first flow: check that creating an alt PO correctly auto-links both POs to each other
         action = orig_po.action_create_alternative()
         alt_po_wiz = Form(self.env['purchase.requisition.create.alternative'].with_context(**action['context']))
-        alt_po_wiz.partner_id = self.res_partner_1
+        alt_po_wiz.partner_id = self.partner
         alt_po_wiz.copy_products = True
         alt_po_wiz = alt_po_wiz.save()
         alt_po_wiz.action_create_alternative()
@@ -198,7 +197,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         # second flow: create extra alt PO, check that all 3 POs are correctly auto-linked
         action = orig_po.action_create_alternative()
         alt_po_wiz = Form(self.env['purchase.requisition.create.alternative'].with_context(**action['context']))
-        alt_po_wiz.partner_id = self.res_partner_1
+        alt_po_wiz.partner_id = self.partner
         alt_po_wiz.copy_products = True
         alt_po_wiz = alt_po_wiz.save()
         alt_po_wiz.action_create_alternative()
@@ -224,7 +223,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         pos = []
         for _ in range(5):
             pos += self.env['purchase.order'].create({
-                'partner_id': self.res_partner_1.id,
+                'partner_id': self.partner.id,
             }).ids
         pos = self.env['purchase.order'].browse(pos)
         po_1, po_2, po_3, po_4, po_5 = pos
@@ -261,7 +260,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         alternative is chosen and thus the PO line's quantity was set to 0. """
         # Creates a first Purchase Order.
         po_form = Form(self.env['purchase.order'])
-        po_form.partner_id = self.res_partner_1
+        po_form.partner_id = self.partner
         with po_form.order_line.new() as line:
             line.product_id = self.product_09
             line.product_qty = 1
@@ -271,7 +270,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         # Creates an alternative PO.
         action = po_1.action_create_alternative()
         alt_po_wizard_form = Form(self.env['purchase.requisition.create.alternative'].with_context(**action['context']))
-        alt_po_wizard_form.partner_id = self.res_partner_1
+        alt_po_wizard_form.partner_id = self.partner
         alt_po_wizard_form.copy_products = True
         alt_po_wizard = alt_po_wizard_form.save()
         alt_po_wizard.action_create_alternative()
@@ -294,7 +293,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         # Creates a first Purchase Order.
         po_form = Form(self.env['purchase.order'])
         self.product_09.standard_price = 10
-        po_form.partner_id = self.res_partner_1
+        po_form.partner_id = self.partner
         with po_form.order_line.new() as line:
             line.product_id = self.product_09
             line.product_qty = 1
@@ -305,7 +304,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         # Creates an alternative PO.
         action = po_1.action_create_alternative()
         alt_po_wizard_form = Form(self.env['purchase.requisition.create.alternative'].with_context(**action['context']))
-        alt_po_wizard_form.partner_id = self.res_partner_1
+        alt_po_wizard_form.partner_id = self.partner
         alt_po_wizard_form.copy_products = True
         alt_po_wizard = alt_po_wizard_form.save()
         alt_po_wizard.action_create_alternative()
@@ -328,7 +327,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         requisition_blanket = self.env['purchase.requisition'].create({
             'line_ids': [line1],
             'requisition_type': 'blanket_order',
-            'vendor_id': self.res_partner_1.id,
+            'vendor_id': self.partner.id,
         })
         requisition_blanket.action_confirm()
         # lazy reproduction of clicking on "New Quotation" act_window button
@@ -340,7 +339,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         # Creates an alternative PO.
         action = po_1.action_create_alternative()
         alt_po_wizard_form = Form(self.env['purchase.requisition.create.alternative'].with_context(**action['context']))
-        alt_po_wizard_form.partner_id = self.res_partner_1
+        alt_po_wizard_form.partner_id = self.partner
         alt_po_wizard_form.copy_products = True
         alt_po_wizard = alt_po_wizard_form.save()
         alt_po_wizard.action_create_alternative()
@@ -477,20 +476,20 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         """ Create a Purchase Template + an RFQ for it """
 
         self.supplierinfo10 = self.env['product.supplierinfo'].create({
-            'partner_id': self.res_partner_1.id,
+            'partner_id': self.partner.id,
             'product_id': self.product_09.id,
             'price': 15.0,
             'min_qty': 2.0,
         })
 
         # Create a purchase requisition with type purchase template and two products
-        line1 = Command.create({'product_id': self.product_09.id, 'product_uom_id': self.product_uom_id.id})
-        line2 = Command.create({'product_id': self.product_13.id, 'product_uom_id': self.product_uom_id.id})
+        line1 = Command.create({'product_id': self.product_09.id, 'product_uom_id': self.uom_unit.id})
+        line2 = Command.create({'product_id': self.product_13.id, 'product_uom_id': self.uom_unit.id})
 
         purchase_template = self.env['purchase.requisition'].create({
             'line_ids': [line1, line2],
             'requisition_type': 'purchase_template',
-            'vendor_id': self.res_partner_1.id,
+            'vendor_id': self.partner.id,
         })
 
         # update the product_qty to get the Unit price
@@ -514,7 +513,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         Create two requisitions with the same product, but only one of them has a PO linked.
         Check that the ordered quantity is correctly computed.
         """
-        self.bo_requisition.vendor_id = self.res_partner_1
+        self.bo_requisition.vendor_id = self.partner
         self.bo_requisition.requisition_type = 'purchase_template'
         requisition_2 = self.bo_requisition.copy({'name': 'requisition_2'})
         # Create purchase order from purchase requisition
@@ -532,7 +531,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
             Check that PO lines of PO generated by alternative compute taxes
         """
         product = self.product_13
-        vendor = self.res_partner_1
+        vendor = self.partner
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = vendor
         with po_form.order_line.new() as line:
@@ -555,7 +554,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         po_1 = Form(self.env['purchase.order'])
         res_partner_2 = self.env['res.partner'].create({'name': 'Vendor 2'})
         res_partner_3 = self.env['res.partner'].create({'name': 'Vendor 3'})
-        po_1.partner_id = self.res_partner_1
+        po_1.partner_id = self.partner
         with po_1.order_line.new() as po_line:
             po_line.product_id = self.product_09
             po_line.product_qty = 1
