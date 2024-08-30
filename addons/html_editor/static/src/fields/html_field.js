@@ -1,13 +1,15 @@
+import { stripHistoryIds } from "@html_editor/others/collaboration/collaboration_odoo_plugin";
 import {
     COLLABORATION_PLUGINS,
-    MAIN_PLUGINS,
     DYNAMIC_PLACEHOLDER_PLUGINS,
     EMBEDDED_COMPONENT_PLUGINS,
+    MAIN_PLUGINS,
 } from "@html_editor/plugin_sets";
 import {
     MAIN_EMBEDDINGS,
     READONLY_MAIN_EMBEDDINGS,
 } from "@html_editor/others/embedded_components/embedding_sets";
+import { HTMLEquals } from "@html_editor/utils/html";
 import { Wysiwyg } from "@html_editor/wysiwyg";
 import { Component, status, useRef, useState } from "@odoo/owl";
 import { localization } from "@web/core/l10n/localization";
@@ -17,8 +19,8 @@ import { Mutex } from "@web/core/utils/concurrency";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { useRecordObserver } from "@web/model/relational_model/utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { HtmlViewer } from "./html_viewer";
 import { TranslationButton } from "@web/views/fields/translation_button";
+import { HtmlViewer } from "./html_viewer";
 
 /**
  * Check whether the current value contains nodes that would break
@@ -80,12 +82,16 @@ export class HtmlField extends Component {
         this.lastValue = this.props.record.data[this.props.name].toString();
         useRecordObserver((record) => {
             // Reset Wysiwyg when we discard or onchange value
-            if (!this.isDirty && this.lastValue !== record.data[this.props.name].toString()) {
-                this.state.key++;
-                this.state.containsComplexHTML = computeContainsComplexHTML(
-                    record.data[this.props.name]
-                );
-                this.lastValue = record.data[this.props.name].toString();
+            const newValue = record.data[this.props.name];
+            if (!this.isDirty) {
+                const value = this.clearValueToCompare(newValue.toString());
+                if (!HTMLEquals(this.lastValue, value)) {
+                    this.state.key++;
+                    this.state.containsComplexHTML = computeContainsComplexHTML(
+                        record.data[this.props.name]
+                    );
+                    this.lastValue = value;
+                }
             }
         });
         useRecordObserver((record) => {
@@ -118,8 +124,15 @@ export class HtmlField extends Component {
         return this.props.record.fields[this.props.name].translate;
     }
 
+    clearValueToCompare(value) {
+        if (this.props.isCollaborative) {
+            value = stripHistoryIds(value);
+        }
+        return value;
+    }
+
     async updateValue(value) {
-        this.lastValue = value;
+        this.lastValue = this.clearValueToCompare(value);
         this.isDirty = false;
         await this.props.record.update({ [this.props.name]: this.lastValue }).catch(() => {
             this.isDirty = true;
@@ -141,13 +154,12 @@ export class HtmlField extends Component {
                 await this.updateValue(this.codeViewRef.el.value);
                 return;
             }
-
             if (urgent) {
                 await this.updateValue(this.editor.getContent());
             }
             const el = await this.getEditorContent();
             const content = el.innerHTML;
-            if (!urgent || (urgent && this.lastValue !== content)) {
+            if (!urgent || (urgent && !HTMLEquals(this.lastValue, content))) {
                 await this.updateValue(content);
             }
         }
