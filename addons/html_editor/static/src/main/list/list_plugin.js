@@ -14,7 +14,7 @@ import {
     getAdjacents,
     selectElements,
 } from "@html_editor/utils/dom_traversal";
-import { childNodeIndex } from "@html_editor/utils/position";
+import { childNodeIndex, nodeSize } from "@html_editor/utils/position";
 import { leftLeafOnlyNotBlockPath } from "@html_editor/utils/dom_state";
 import { _t } from "@web/core/l10n/translation";
 import { compareListTypes, createList, insertListAfter, isListItem } from "./utils";
@@ -30,7 +30,7 @@ function isListActive(listMode) {
 
 export class ListPlugin extends Plugin {
     static name = "list";
-    static dependencies = ["tabulation", "split", "selection", "delete", "dom"];
+    static dependencies = ["tabulation", "split", "selection", "delete", "dom", "color"];
     /** @type { (p: ListPlugin) => Record<string, any> } */
     static resources = (p) => ({
         handle_delete_backward: { callback: p.handleDeleteBackward.bind(p), sequence: 10 },
@@ -38,6 +38,7 @@ export class ListPlugin extends Plugin {
         handle_tab: { callback: p.handleTab.bind(p), sequence: 10 },
         handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 10 },
         split_element_block: { callback: p.handleSplitBlock.bind(p) },
+        colorApply: p.applyListColor.bind(p),
         toolbarCategory: {
             id: "list",
             sequence: 30,
@@ -532,6 +533,7 @@ export class ListPlugin extends Plugin {
         const dir = ul.getAttribute("dir");
         let p;
         let toMove = li.lastChild;
+        const listColor = li.style.color;
         while (toMove) {
             if (isBlock(toMove)) {
                 if (p && isVisible(p)) {
@@ -555,12 +557,21 @@ export class ListPlugin extends Plugin {
         if (p && isVisible(p)) {
             cursors.update(callbacksForCursorUpdate.after(ul, p));
             ul.after(p);
+            this.shared.setSelection({
+                anchorNode: p.firstChild,
+                anchorOffset: 0,
+                focusNode: p.lastChild,
+                focusOffset: nodeSize(p.lastChild),
+            });
         }
         cursors.update(callbacksForCursorUpdate.remove(li));
         li.remove();
         if (!ul.firstElementChild) {
             cursors.update(callbacksForCursorUpdate.remove(ul));
             ul.remove();
+        }
+        if (listColor) {
+            this.dispatch("APPLY_COLOR", { color: listColor, mode: "color" });
         }
         cursors.restore();
     }
@@ -742,5 +753,27 @@ export class ListPlugin extends Plugin {
             pointerOffsetY >= checkboxPosition.top &&
             pointerOffsetY <= checkboxPosition.bottom
         );
+    }
+
+    applyListColor(color, mode) {
+        const selectedNodes = new Set(
+            this.shared
+                .getSelectedNodes()
+                .map((n) => closestElement(n, "li"))
+                .filter(Boolean)
+        );
+        if (!selectedNodes.size || mode !== "color") {
+            return;
+        }
+        for (const list of selectedNodes) {
+            if (this.shared.isNodeContentsFullySelected(list)) {
+                [...descendants(list)].map((n) => {
+                    if (n.nodeType === Node.ELEMENT_NODE && n.style.color) {
+                        n.style.color = "";
+                    }
+                });
+                this.shared.colorElement(list, color, mode);
+            }
+        }
     }
 }
