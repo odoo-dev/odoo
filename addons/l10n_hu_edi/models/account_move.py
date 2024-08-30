@@ -315,7 +315,7 @@ class AccountMove(models.Model):
         hu_vat_regex = re.compile(r'\d{8}-[1-5]-\d{2}')
 
         # This contains all the advance invoices that correspond to final invoices in `self`.
-        advance_invoices = self.filtered(lambda m: not m._is_downpayment()).invoice_line_ids._get_downpayment_lines().mapped('move_id')
+        advance_invoices = self.filtered(lambda m: not m._is_downpayment()).invoice_line_ids._get_downpayment_lines().move_id
 
         checks = {
             'company_vat_missing': {
@@ -877,7 +877,7 @@ class AccountMove(models.Model):
                     # In this case, we add a reference to the *last-paid* advance invoice (NAV only allows us to report one) if one exists,
                     # otherwise we don't add anything.
 
-                    advance_invoices = line._get_downpayment_lines().mapped('move_id').filtered(lambda m: m.state == 'posted')
+                    advance_invoices = line._get_downpayment_lines().move_id.filtered(lambda m: m.state == 'posted')
                     reconciled_moves = advance_invoices._get_reconciled_amls().move_id
                     last_reconciled_payment = reconciled_moves.filtered(lambda m: m.origin_payment_id or m.statement_line_id).sorted('date', reverse=True)[:1]
 
