@@ -801,10 +801,10 @@ class ProductProduct(models.Model):
         result = super().toggle_active()
         # We deactivate product templates which are active with no active variants.
         tmpl_to_deactivate = self.filtered(lambda product: (product.product_tmpl_id.active
-                                                            and not product.product_tmpl_id.product_variant_ids)).mapped('product_tmpl_id')
+                                                            and not product.product_tmpl_id.product_variant_ids)).product_tmpl_id
         # We activate product templates which are inactive with active variants.
         tmpl_to_activate = self.filtered(lambda product: (not product.product_tmpl_id.active
-                                                          and product.product_tmpl_id.product_variant_ids)).mapped('product_tmpl_id')
+                                                          and product.product_tmpl_id.product_variant_ids)).product_tmpl_id
         (tmpl_to_deactivate + tmpl_to_activate).toggle_active()
         return result
 

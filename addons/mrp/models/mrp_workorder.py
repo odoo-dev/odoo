@@ -289,8 +289,8 @@ class MrpWorkorder(models.Model):
 
     def unlink(self):
         # Removes references to workorder to avoid Validation Error
-        (self.mapped('move_raw_ids') | self.mapped('move_finished_ids')).write({'workorder_id': False})
-        self.mapped('leave_id').unlink()
+        (self.move_raw_ids | self.move_finished_ids).write({'workorder_id': False})
+        self.leave_id.unlink()
         mo_dirty = self.production_id.filtered(lambda mo: mo.state in ("confirmed", "progress", "to_close"))
 
         for workorder in self:
@@ -387,7 +387,7 @@ class MrpWorkorder(models.Model):
     def _compute_working_users(self):
         """ Checks whether the current user is working, all the users currently working and the last user that worked. """
         for order in self:
-            order.working_user_ids = [(4, order.id) for order in order.time_ids.filtered(lambda time: not time.date_end).sorted('date_start').mapped('user_id')]
+            order.working_user_ids = [(4, order.id) for order in order.time_ids.filtered(lambda time: not time.date_end).sorted('date_start').user_id]
             if order.working_user_ids:
                 order.last_working_user_id = order.working_user_ids[-1]
             elif order.time_ids:
@@ -488,7 +488,7 @@ class MrpWorkorder(models.Model):
         res = super().create(values)
 
         # resequence the workorders if necessary
-        for mo in res.mapped('production_id'):
+        for mo in res.production_id:
             if len(set(mo.workorder_ids.mapped('sequence'))) != len(mo.workorder_ids):
                 mo._resequence_workorders()
 
@@ -503,7 +503,7 @@ class MrpWorkorder(models.Model):
         return res
 
     def _action_confirm(self):
-        for production in self.mapped("production_id"):
+        for production in self.production_id:
             production._link_workorders_and_moves()
 
     def _get_byproduct_move_to_update(self):
@@ -720,7 +720,7 @@ class MrpWorkorder(models.Model):
             'context': {'default_company_id': self.production_id.company_id.id,
                         'default_workorder_id': self.id,
                         'default_production_id': self.production_id.id,
-                        'product_ids': (self.production_id.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel')) | self.production_id.move_finished_ids.filtered(lambda x: x.state == 'done')).mapped('product_id').ids},
+                        'product_ids': (self.production_id.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel')) | self.production_id.move_finished_ids.filtered(lambda x: x.state == 'done')).product_id.ids},
             'target': 'new',
         }
 

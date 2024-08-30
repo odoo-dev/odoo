@@ -213,7 +213,7 @@ class CrmIapLeadMiningRequest(models.Model):
             # will become ['175','176','177','190','191']
             all_industry_ids = [
                 reveal_id.strip()
-                for reveal_ids in self.mapped('industry_ids.reveal_ids')
+                for reveal_ids in self.industry_ids.reveal_ids
                 for reveal_id in reveal_ids.split(',')
             ]
             payload['industry_ids'] = all_industry_ids
@@ -222,7 +222,7 @@ class CrmIapLeadMiningRequest(models.Model):
                             'contact_filter_type': self.contact_filter_type})
             if self.contact_filter_type == 'role':
                 payload.update({'preferred_role': self.preferred_role_id.reveal_id,
-                                'other_roles': self.role_ids.mapped('reveal_id')})
+                                'other_roles': self.role_ids.reveal_id})
             elif self.contact_filter_type == 'seniority':
                 payload['seniority'] = self.seniority_id.reveal_id
         return payload

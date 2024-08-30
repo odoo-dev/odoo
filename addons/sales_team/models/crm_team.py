@@ -176,8 +176,8 @@ class CrmTeam(models.Model):
                                   )
             elif other_memberships:
                 member_warning = _("Adding %(user_names)s in this team would remove them from their current teams (%(team_names)s).",
-                                   user_names=", ".join(other_memberships.mapped('user_id.name')),
-                                   team_names=", ".join(other_memberships.mapped('crm_team_id.name'))
+                                   user_names=", ".join(other_memberships.user_id.mapped('name')),
+                                   team_names=", ".join(other_memberships.crm_team_id.mapped('name'))
                                   )
             if member_warning:
                 team.member_warning = member_warning + " " + _("To add a Salesperson into multiple Teams, activate the Multi-Team option in settings.")

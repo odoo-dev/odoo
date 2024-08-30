@@ -586,7 +586,7 @@ class MailingMailing(models.Model):
             'params': {
                 'message': _(
                     'Design added to the %s Templates!',
-                    ', '.join(self.mapped('mailing_model_id.name')),
+                    ', '.join(self.mailing_model_id.mapped('name')),
                 ),
                 'next': {'type': 'ir.actions.act_window_close'},
                 'sticky': False,
@@ -604,7 +604,7 @@ class MailingMailing(models.Model):
             'params': {
                 'message': _(
                     'Design removed from the %s Templates!',
-                    ', '.join(self.mapped('mailing_model_id.name')),
+                    ', '.join(self.mailing_model_id.mapped('name')),
                 ),
                 'next': {'type': 'ir.actions.act_window_close'},
                 'sticky': False,
@@ -667,7 +667,7 @@ class MailingMailing(models.Model):
             ('mailing_id', 'in', self.ids),
             ('state', '=', 'exception')
         ])
-        failed_mails.mapped('mailing_trace_ids').unlink()
+        failed_mails.mailing_trace_ids.unlink()
         failed_mails.unlink()
         self.action_put_in_queue()
 

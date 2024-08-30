@@ -193,12 +193,11 @@ class Base(models.AbstractModel):
     _description = 'Base'
 
 
-class Unknown(models.AbstractModel):
+class _Unknown(models.AbstractModel):
     """
     Abstract model used as a substitute for relational fields with an unknown
     comodel.
     """
-    _name = '_unknown'
     _description = 'Unknown'
 
 

@@ -509,7 +509,11 @@ class Base(models.AbstractModel):
             return ''
 
         try:
-            field_value = self.mapped(field_path)
+            last_model = self
+            path, _dummy, last_fname = field_path.rpartition(".")
+            for part in (path.split('.') if path else ()):
+                last_model = last_model[part]
+            field_value = last_model.mapped(last_fname)
         except KeyError:
             raise exceptions.UserError(
                 _("%(model_name)s.%(field_path)s does not seem to be a valid field path", model_name=self._name, field_path=field_path)
@@ -527,12 +531,6 @@ class Base(models.AbstractModel):
                              for value in field_value if value and isinstance(value, datetime)])
         # find last field / last model when having chained fields
         # e.g. 'partner_id.country_id.state' -> ['partner_id.country_id', 'state']
-        field_path_models = field_path.rsplit('.', 1)
-        if len(field_path_models) > 1:
-            last_model_path, last_fname = field_path_models
-            last_model = self.mapped(last_model_path)
-        else:
-            last_model, last_fname = self, field_path
         last_field = last_model._fields[last_fname]
         # if selection -> return value, not the key
         if last_field.type == 'selection':
