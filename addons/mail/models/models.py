@@ -518,8 +518,9 @@ class Base(models.AbstractModel):
             raise exceptions.UserError(
                 _("We were not able to fetch value of field '%(field)s'", field=field_path)
             ) from err
-        if isinstance(field_value, models.Model):
-            return ' '.join((value.display_name or '') for value in field_value)
+        if any(isinstance(value, models.Model) for value in field_value):
+            records = field_value[0].union(*field_value[1:])
+            return ' '.join(name for name in records.mapped('display_name') if name)
         if any(isinstance(value, datetime) for value in field_value):
             tz = self._mail_get_timezone()
             return ' '.join([f"{tools.format_datetime(self.env, value, tz=tz)} {tz}"
