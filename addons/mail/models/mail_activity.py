@@ -204,7 +204,7 @@ class MailActivity(models.Model):
           * unlink: access rule OR (``mail_post_access`` or write) rights on related documents);
         """
         result = super()._check_access(operation)
-        if not self:
+        if not any(self._ids):
             return result
 
         # determine activities on which to check the related document

@@ -67,7 +67,8 @@ class CalendarAttendee(models.Model):
                 values['email'] = email[0] if email else ''
                 values['common_name'] = values.get("common_name")
         attendees = super().create(vals_list)
-        attendees._subscribe_partner()
+        # sudo, because user may not have access to read on the event
+        attendees.sudo()._subscribe_partner()
         return attendees
 
     def unlink(self):

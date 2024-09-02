@@ -193,7 +193,7 @@ class ResourceMixin(models.AbstractModel):
         compute_leaves = self.env.context.get('compute_leaves', True)
 
         for calendar, records in records_by_calendar.items():
-            resources = self.resource_id
+            resources = self.sudo().resource_id
             all_intervals = calendar._work_intervals_batch(from_datetime, to_datetime, resources, domain, compute_leaves=compute_leaves)
             for record in records:
                 intervals = all_intervals[record.resource_id.id]

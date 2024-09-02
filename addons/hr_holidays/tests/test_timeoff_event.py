@@ -26,7 +26,7 @@ class TestTimeoffEvent(TestHrHolidaysCommon):
 
         # Finding the event corresponding to the leave
         search_criteria = [
-            ('name', 'like', self.holiday.employee_id.name),
+            ('name', 'like', self.holiday.employee_id.sudo().name),
             ('start_date', '>=', self.holiday.request_date_from),
             ('stop_date', '<=', self.holiday.request_date_to),
         ]

@@ -332,11 +332,12 @@ class HrLeaveAllocation(models.Model):
         and idx is the index for the plan in the ordered set of levels
         """
         self.ensure_one()
-        if not self.accrual_plan_id.level_ids:
+        accrual_plan = self.accrual_plan_id.sudo()
+        if not accrual_plan.level_ids:
             return (False, False)
         # Sort by sequence which should be equivalent to the level
         if not level_ids:
-            level_ids = self.accrual_plan_id.level_ids.sorted('sequence')
+            level_ids = accrual_plan.level_ids.sorted('sequence')
         current_level = False
         current_level_idx = -1
         for idx, level in enumerate(level_ids):
@@ -345,7 +346,7 @@ class HrLeaveAllocation(models.Model):
                 current_level_idx = idx
         # If transition_mode is set to `immediately` or we are currently on the first level
         # the current_level is simply the first level in the list.
-        if current_level_idx <= 0 or self.accrual_plan_id.transition_mode == "immediately":
+        if current_level_idx <= 0 or accrual_plan.transition_mode == "immediately":
             return (current_level, current_level_idx)
         # In this case we have to verify that the 'previous level' is not the current one due to `end_of_accrual`
         level_start_date = self.date_from + get_timedelta(current_level.start_count, current_level.start_type)
@@ -669,16 +670,17 @@ class HrLeaveAllocation(models.Model):
                 raise UserError(_('Incorrect state for new allocation'))
             employee_id = values.get('employee_id', False)
             if not values.get('department_id'):
-                values.update({'department_id': self.env['hr.employee'].browse(employee_id).department_id.id})
+                values.update({'department_id': self.env['hr.employee'].browse(employee_id).sudo().department_id.id})
         allocations = super(HrLeaveAllocation, self.with_context(mail_create_nosubscribe=True)).create(vals_list)
         allocations._add_lastcalls()
         for allocation in allocations:
+            employee = allocation.employee_id.sudo()
             partners_to_subscribe = set()
-            if allocation.employee_id.user_id:
-                partners_to_subscribe.add(allocation.employee_id.user_id.partner_id.id)
+            if employee.user_id:
+                partners_to_subscribe.add(employee.user_id.partner_id.id)
             if allocation.validation_type == 'hr':
-                partners_to_subscribe.add(allocation.employee_id.parent_id.user_id.partner_id.id)
-                partners_to_subscribe.add(allocation.employee_id.leave_manager_id.partner_id.id)
+                partners_to_subscribe.add(employee.parent_id.user_id.partner_id.id)
+                partners_to_subscribe.add(employee.leave_manager_id.partner_id.id)
             allocation.message_subscribe(partner_ids=tuple(partners_to_subscribe))
             if not self._context.get('import_file'):
                 allocation.activity_update()
@@ -818,8 +820,8 @@ class HrLeaveAllocation(models.Model):
             return
         is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
         is_manager = self.env.user.has_group('hr_holidays.group_hr_holidays_manager')
-        for allocation in self:
-            val_type = allocation.holiday_status_id.sudo().allocation_validation_type
+        for allocation in self.sudo():
+            val_type = allocation.holiday_status_id.allocation_validation_type
             if state == 'confirm':
                 continue
 
@@ -828,7 +830,7 @@ class HrLeaveAllocation(models.Model):
 
             if is_officer or self.env.user == allocation.employee_id.leave_manager_id:
                 # use ir.rule based first access check: department, members, ... (see security.xml)
-                allocation.check_access('write')
+                allocation.sudo(False).check_access('write')
 
             if allocation.employee_id == current_employee and not is_manager and not val_type == 'no_validation':
                 raise UserError(_('Only a time off Manager can approve its own requests.'))

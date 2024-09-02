@@ -350,18 +350,19 @@ If you really, really need access, perhaps you can win over your friendly admini
         child_record = ChildModel.create({'parent_id': self.record.id}).with_user(self.user)
         with self.debug_mode(), self.assertRaises(AccessError) as ctx:
             _ = child_record.parent_id
+        record = child_record.sudo()
         self.assertEqual(
             ctx.exception.args[0],
-            """Uh-oh! Looks like you have stumbled upon some top-secret records.
+            f"""Uh-oh! Looks like you have stumbled upon some top-secret records.
 
-Sorry, %s (id=%s) doesn't have 'read' access to:
-- %s, %s (%s: %s)
+Sorry, {self.user.name} (id={self.user.id}) doesn't have 'read' access to:
+- {record._description}, {record.display_name} ({record._name}: {record.id})
 
 Blame the following rules:
 - rule 0
 
 If you really, really need access, perhaps you can win over your friendly administrator with a batch of freshly baked cookies."""
-        % (self.user.name, self.user.id, child_record._description, child_record.display_name, child_record._name, child_record.id))
+        )
 
     def test_warn_company_access(self):
         """ because of prefetching, read() goes through a different codepath
@@ -372,20 +373,21 @@ If you really, really need access, perhaps you can win over your friendly admini
         self._make_rule('rule 0', "[('company_id', '=', user.company_id.id)]", attr='read')
         with self.debug_mode(), self.assertRaises(AccessError) as ctx:
             _ = self.record.val
+        record = self.record.sudo()
         self.assertEqual(
             ctx.exception.args[0],
-            """Uh-oh! Looks like you have stumbled upon some top-secret records.
+            f"""Uh-oh! Looks like you have stumbled upon some top-secret records.
 
-Sorry, %s (id=%s) doesn't have 'read' access to:
-- %s, %s (%s: %s, company=%s)
+Sorry, {self.user.name} (id={self.user.id}) doesn't have 'read' access to:
+- {record._description}, {record.display_name} ({record._name}: {record.id}, company={record.company_id.display_name})
 
 Blame the following rules:
 - rule 0
 
 If you really, really need access, perhaps you can win over your friendly administrator with a batch of freshly baked cookies.
 
-This seems to be a multi-company issue, you might be able to access the record by switching to the company: %s."""
-        % (self.user.name, self.user.id, self.record._description, self.record.display_name, self.record._name, self.record.id, self.record.sudo().company_id.display_name, self.record.sudo().company_id.display_name))
+This seems to be a multi-company issue, you might be able to access the record by switching to the company: {record.company_id.display_name}.""",
+        )
         p = self.env['test_access_right.inherits'].create({'some_id': self.record.id})
         self.env.flush_all()
         self.env.invalidate_all()

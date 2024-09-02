@@ -760,6 +760,8 @@ class ResUsers(models.Model):
                     user.partner_id.write({'company_id': user.company_id.id})
 
         if 'company_id' in values or 'company_ids' in values:
+            # Access cache depends on the company, clear it
+            self.env.transaction.clear_access_cache()
             # Reset lazy properties `company` & `companies` on all envs,
             # and also their _cache_key, which may depend on them.
             # This is unlikely in a business code to change the company of a user and then do business stuff

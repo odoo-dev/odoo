@@ -36,6 +36,10 @@ class _Relational(Field[M], typing.Generic[M]):
         if records is None or len(records._ids) <= 1:
             return super().__get__(records, owner)
         # multirecord case: use mapped
+        env = records.env
+        if not env.su and not self.is_accessible(env):
+            records.check_field_access_rights('read', [self.name])
+        records.check_access('read')
         return self.mapped(records)
 
     def setup_nonrelated(self, model):
@@ -333,7 +337,7 @@ class Many2one(_Relational[M]):
         cache = records.env.cache
         corecord = self.convert_to_record(value, records)
         for invf in records.pool.field_inverses[self]:
-            valid_records = records.filtered_domain(invf.get_domain_list(corecord))
+            valid_records = records.sudo().filtered_domain(invf.get_domain_list(corecord))
             if not valid_records:
                 continue
             ids0 = cache.get(corecord, invf, None)
@@ -421,7 +425,7 @@ class _RelationalMulti(_Relational[M], typing.Generic[M]):
             Comodel._active_name
             and self.context.get('active_test', record.env.context.get('active_test', True))
         ):
-            corecords = corecords.filtered(Comodel._active_name).with_prefetch(prefetch_ids)
+            corecords = corecords.sudo().filtered(Comodel._active_name).with_prefetch(prefetch_ids).sudo(corecords.env.su)
         return corecords
 
     def convert_to_record_multi(self, values, records):
@@ -434,7 +438,7 @@ class _RelationalMulti(_Relational[M], typing.Generic[M]):
             Comodel._active_name
             and self.context.get('active_test', records.env.context.get('active_test', True))
         ):
-            corecords = corecords.filtered(Comodel._active_name).with_prefetch(prefetch_ids)
+            corecords = corecords.sudo().filtered(Comodel._active_name).with_prefetch(prefetch_ids).sudo(corecords.env.su)
         return corecords
 
     def convert_to_read(self, value, record, use_display_name=True):
@@ -1054,7 +1058,7 @@ class Many2many(_RelationalMulti[M]):
                 self.read(records.browse(missing_ids))
 
         # determine new relation {x: ys}
-        old_relation = {record.id: set(record[self.name]._ids) for record in records}
+        old_relation = {record.id: set() if create else set(record[self.name]._ids) for record in records}
         new_relation = {x: set(ys) for x, ys in old_relation.items()}
 
         # operations on new relation

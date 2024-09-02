@@ -343,7 +343,7 @@ class PurchaseOrderLine(models.Model):
                 values.append(val)
             line.move_dest_ids.created_purchase_line_ids = [Command.clear()]
 
-        return self.env['stock.move'].create(values)
+        return picking.env['stock.move'].create(values)
 
     def _find_candidate(self, product_id, product_qty, product_uom, location_id, name, origin, company_id, values):
         """ Return the record in self where the procument with values passed as

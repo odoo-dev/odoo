@@ -332,7 +332,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
         move.partner_id = partner
 
         move.action_post()
-        self.assertEqual(move.message_partner_ids, self.env.user.partner_id | existing_partners | partner)
+        self.assertEqual(self.test_move.message_partner_ids, self.env.user.partner_id | existing_partners | partner)
 
     def test_misc_move_onchange(self):
         ''' Test the behavior on onchanges for account.move having 'entry' as type. '''

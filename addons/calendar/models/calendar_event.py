@@ -578,11 +578,11 @@ class CalendarEvent(models.Model):
                 detached_events = event._apply_recurrence_values(recurrence_values)
                 detached_events.active = False
 
-        events.filtered(lambda event: event.start > fields.Datetime.now()).attendee_ids._send_invitation_emails()
+        events.sudo().filtered(lambda event: event.start > fields.Datetime.now()).attendee_ids._send_invitation_emails()
 
-        events._sync_activities(fields={f for vals in vals_list for f in vals.keys()})
+        events.sudo()._sync_activities(fields={f for vals in vals_list for f in vals})
         if not self.env.context.get('dont_notify'):
-            alarm_events = self.env['calendar.event']
+            alarm_events = self.env['calendar.event'].sudo()
             for event, values in zip(events, vals_list):
                 if values.get('allday'):
                     # All day events will trigger the _inverse_date method which will create the trigger.
@@ -748,7 +748,7 @@ class CalendarEvent(models.Model):
     def _check_private_event_conditions(self):
         """ Checks if the event is private, returning True if the conditions match and False otherwise. """
         self.ensure_one()
-        event_is_private = (self.privacy == 'private' or (not self.privacy and self.user_id and self.user_id.calendar_default_privacy == 'private'))
+        event_is_private = (self.privacy == 'private' or (not self.privacy and self.user_id and self.user_id.sudo().calendar_default_privacy == 'private'))
         user_is_not_partner = self.user_id.id != self.env.uid and self.env.user.partner_id not in self.partner_ids
         return event_is_private and user_is_not_partner
 

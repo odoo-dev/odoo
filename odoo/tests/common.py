@@ -2131,6 +2131,8 @@ def users(*logins):
                     # switch user and execute func
                     self.uid = user_id[login]
                     func(*args, **kwargs)
+                    # make sure all is flushed/recomputed
+                    self.env.flush_all()
                 # Invalidate the cache between subtests, in order to not reuse
                 # the former user's cache (`test_read_mail`, `test_write_mail`)
                 self.env.invalidate_all()

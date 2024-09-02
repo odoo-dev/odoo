@@ -328,6 +328,7 @@ class Environment(Mapping):
         if flush:
             self.flush_all()
         self.cache.invalidate()
+        self.transaction.clear_access_cache()
 
     def _recompute_all(self):
         """ Process all pending computations. """
@@ -486,7 +487,7 @@ class Environment(Mapping):
 
 class Transaction:
     """ A object holding ORM data structures for a transaction. """
-    __slots__ = ('_Transaction__file_open_tmp_paths', 'cache', 'envs', 'protected', 'registry', 'tocompute')
+    __slots__ = ('_Transaction__file_open_tmp_paths', 'access_read', 'access_write', 'cache', 'envs', 'protected', 'registry', 'tocompute')
 
     def __init__(self, registry):
         self.registry = registry
@@ -499,6 +500,10 @@ class Transaction:
         self.protected = StackMap()
         # pending computations {field: ids}
         self.tocompute = defaultdict(OrderedSet)
+        # permission cache for record access by user
+        # {model_name: {(user_id, company_ids): {record_id: bool}}}
+        self.access_read = defaultdict(lambda: defaultdict(dict))
+        self.access_write = defaultdict(lambda: defaultdict(dict))
         # temporary directories (managed in odoo.tools.file_open_temporary_directory)
         self.__file_open_tmp_paths = ()  # noqa: PLE0237
 
@@ -515,8 +520,18 @@ class Transaction:
 
     def clear(self):
         """ Clear the caches and pending computations and updates in the translations. """
+        self.clear_access_cache()
         self.cache.clear()
         self.tocompute.clear()
+
+    def clear_access_cache(self, model_name=None):
+        """ Clear the access cache for record rule checks. """
+        if model_name:
+            self.access_read.pop(model_name, None)
+            self.access_write.pop(model_name, None)
+        else:
+            self.access_read.clear()
+            self.access_write.clear()
 
     def reset(self):
         """ Reset the transaction.  This clears the transaction, and reassigns

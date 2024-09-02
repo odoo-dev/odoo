@@ -18,4 +18,4 @@ class BusListenerMixin(models.AbstractModel):
         else:
             store = Store(*args, **kwargs)
         if res := store.get_result():
-            self._bus_send(notification_type, res, subchannel=subchannel)
+            self.sudo()._bus_send(notification_type, res, subchannel=subchannel)

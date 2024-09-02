@@ -434,7 +434,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
                 composer_form.attachment_ids.add(attachment)
             composer = composer_form.save()
 
-        with self.assertQueryCount(admin=53, employee=53):  # tm+com 52/52
+        with self.assertQueryCount(admin=53, employee=53):  # tm+com 52/52 XXX check this, now 54
             composer._action_send_mail()
 
         # notifications
@@ -657,7 +657,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
             for idx in range(10)
         ])
 
-        with self.assertQueryCount(admin=3, employee=2):
+        with self.assertQueryCount(admin=3, employee=2):  # XXX ouch, now 8!
             records._message_log_with_view(
                 'test_mail.mail_template_simple_test',
                 render_values={'partner': self.customer.with_env(self.env)}

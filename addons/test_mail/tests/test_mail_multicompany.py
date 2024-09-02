@@ -139,6 +139,11 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
         # ------------------------------------------------------------
         # Other company (no access)
         # ------------------------------------------------------------
+        post_avoid_acl_fields = dict(
+            record_name='CustomName',  # avoid ACL on display_name
+            reply_to='custom.reply.to@test.example.com',  # avoid ACL in notify_get_reply_to
+            record_company_id=self.env.company.id,  # avoid ACL on company data
+        )
 
         _original_car = MailMessage._check_access
         with patch.object(MailMessage, '_check_access',
@@ -147,12 +152,12 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
                 test_records_mc_c1.message_post(
                     body='<p>Hello</p>',
                     message_type='comment',
-                    record_name='CustomName',  # avoid ACL on display_name
-                    reply_to='custom.reply.to@test.example.com',  # avoid ACL in notify_get_reply_to
                     subtype_xmlid='mail.mt_comment',
+                    **post_avoid_acl_fields,
                 )
-            self.assertEqual(mock_msg_car.call_count, 2,
-                             'Check at model level succeeds and check at record level fails')
+            self.assertEqual(
+                mock_msg_car.call_count, 5,
+                'Check at model level succeeds and checks at record level fail')
         with self.assertRaises(AccessError):
             _name = test_records_mc_c1.name
 
@@ -176,9 +181,8 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
             body='<p>Hello</p>',
             message_type='comment',
             parent_id=initial_message.id,
-            record_name='CustomName',  # avoid ACL on display_name
-            reply_to='custom.reply.to@test.example.com',  # avoid ACL in notify_get_reply_to
             subtype_xmlid='mail.mt_comment',
+            **post_avoid_acl_fields,
         )
 
         # now able to post as was notified of parent message
@@ -216,9 +220,8 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
             attachment_ids=attachments.ids,
             body='<p>Hello</p>',
             message_type='comment',
-            record_name='CustomName',  # avoid ACL on display_name
-            reply_to='custom.reply.to@test.example.com',  # avoid ACL in notify_get_reply_to
             subtype_xmlid='mail.mt_comment',
+            **post_avoid_acl_fields,
         )
         self.assertTrue(attachments < message.attachment_ids)
         self.assertEqual(
@@ -250,9 +253,8 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
                 attachment_ids=attachments.ids,
                 body='<p>Hello</p>',
                 message_type='comment',
-                record_name='CustomName',  # avoid ACL on display_name
-                reply_to='custom.reply.to@test.example.com',  # avoid ACL in notify_get_reply_to
                 subtype_xmlid='mail.mt_comment',
+                **post_avoid_acl_fields,
             )
 
     @freeze_time('2023-11-22 08:00:00')

@@ -189,7 +189,7 @@ class LivechatController(http.Controller):
             store.add(channel)
             store.add(channel, {"isLoaded": not chatbot_script, "scrollUnread": False})
             if guest:
-                store.add({"guest_token": guest._format_auth_cookie()})
+                store.add({"guest_token": guest.sudo()._format_auth_cookie()})
         request.env["res.users"]._init_store_data(store)
         return store.get_result()
 

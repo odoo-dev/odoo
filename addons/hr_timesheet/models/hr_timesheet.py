@@ -345,7 +345,7 @@ class AccountAnalyticLine(models.Model):
             ))
         return {
             fname: project[fname].id
-            for fname in self._get_plan_fnames()
+            for fname in self.sudo()._get_plan_fnames()
         }
 
     def _timesheet_postprocess(self, values):

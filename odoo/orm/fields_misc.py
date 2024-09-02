@@ -87,3 +87,6 @@ class Id(Field[IdType | typing.Literal[False]]):
 
     def __set__(self, record, value):
         raise TypeError("field 'id' cannot be assigned")
+
+    def mapped(self, records):
+        return list(records._ids)

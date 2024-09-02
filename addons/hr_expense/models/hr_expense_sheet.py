@@ -689,7 +689,7 @@ class HrExpenseSheet(models.Model):
                 "Please specify if the expenses for this report were paid by the company, or the employee"
             ))
 
-        missing_email_employees = self.filtered(lambda sheet: not sheet.employee_id.work_email).employee_id
+        missing_email_employees = self.sudo().filtered(lambda sheet: not sheet.employee_id.work_email).employee_id
         if missing_email_employees:
             action = self.env['ir.actions.actions']._for_xml_id('hr.open_view_employee_list_my')
             action['domain'] = [('id', 'in', missing_email_employees.ids)]

@@ -550,7 +550,7 @@ class BaseAutomation(models.Model):
             :returns: dict -- evaluation context given to safe_eval
         """
         self.ensure_one()
-        model = self.env[self.model_name]
+        model = self.env[self.sudo().model_name]
         eval_context = {
             'datetime': safe_eval.datetime,
             'dateutil': safe_eval.dateutil,

@@ -411,7 +411,7 @@ class Base(models.AbstractModel):
         self.ensure_one()
         headers['X-Odoo-Objects'] = f"{self._name}-{self.id}"
         if 'Return-Path' not in headers:
-            company = self._mail_get_companies(default=self.env.company)[self.id]
+            company = self.sudo()._mail_get_companies(default=self.env.company)[self.id]
             if company.bounce_email:
                 headers['Return-Path'] = company.bounce_email
         return headers
@@ -431,7 +431,7 @@ class Base(models.AbstractModel):
         """
         self.ensure_one()
         return Markup("<a href=# data-oe-model='%s' data-oe-id='%s'>%s</a>") % (
-            self._name, self.id, title or self.display_name)
+            self._name, self.id, title or self.sudo().display_name)
 
     @api.model
     def _get_backend_root_menu_ids(self):
@@ -465,7 +465,7 @@ class Base(models.AbstractModel):
                 _("We were not able to fetch value of field '%(field)s'", field=field_path)
             ) from err
         if isinstance(field_value, models.Model):
-            return ' '.join((value.display_name or '') for value in field_value)
+            return ' '.join((value.display_name or '') for value in field_value.sudo())
         if any(isinstance(value, datetime) for value in field_value):
             tz = self._mail_get_timezone()
             return ' '.join([f"{tools.format_datetime(self.env, value, tz=tz)} {tz}"

@@ -446,12 +446,12 @@ class SlideSlide(models.Model):
         ])
 
         for record in self:
-            record.user_membership_id = next(
+            record.user_membership_id = user_membership = next(
                 (slide_partner for slide_partner in slide_partners if slide_partner.slide_id == record),
-                self.env['slide.slide.partner']
+                slide_partners.browse(),
             )
-            record.user_vote = record.user_membership_id.vote
-            record.user_has_completed = record.user_membership_id.completed
+            record.user_vote = user_membership.vote
+            record.user_has_completed = user_membership.completed
 
     @api.depends('slide_category', 'google_drive_id', 'video_source_type', 'youtube_id')
     def _compute_embed_code(self):

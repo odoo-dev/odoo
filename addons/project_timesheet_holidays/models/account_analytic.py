@@ -42,9 +42,9 @@ class AccountAnalyticLine(models.Model):
         return super()._check_can_write(values)
 
     def _check_can_create(self):
-        if not self.env.su and any(task.is_timeoff_task for task in self.task_id):
+        if not self.env.su and any(task.is_timeoff_task for task in self.task_id.sudo()):
             raise UserError(_('You cannot create timesheets for a task that is linked to a time off type. Please use the Time Off application to request new time off instead.'))
-        return  super()._check_can_create()
+        return super()._check_can_create()
 
     def _get_favorite_project_id_domain(self, employee_id=False):
         return expression.AND([

@@ -74,7 +74,7 @@ class ResUsers(models.Model):
 
     @api.depends("res_users_settings_id.calendar_default_privacy")
     def _compute_calendar_default_privacy(self):
-        for user in self:
+        for user in self.sudo():
             user.calendar_default_privacy = user.res_users_settings_id.calendar_default_privacy
 
     def _inverse_calendar_res_users_settings(self):

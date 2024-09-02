@@ -663,6 +663,7 @@ class StockPicking(models.Model):
         'Bulk Weight', compute='_compute_bulk_weight', help="Total weight of products which are not in a package.")
     shipping_weight = fields.Float(
         "Weight for Shipping", compute='_compute_shipping_weight', readonly=False,
+        compute_sudo=True,
         help="Total weight of packages and products not in a package. "
         "Packages with no shipping weight specified will default to their products' total weight. "
         "This is the weight used to compute the cost of the shipping.")
@@ -870,7 +871,7 @@ class StockPicking(models.Model):
     def _compute_shipping_weight(self):
         for picking in self:
             # if shipping weight is not assigned => default to calculated product weight
-            packages_weight = picking.move_line_ids.result_package_id.sudo()._get_weight(picking.id)
+            packages_weight = picking.move_line_ids.result_package_id._get_weight(picking.id)
             picking.shipping_weight = (
                 picking.weight_bulk +
                 sum(pack.shipping_weight or packages_weight[pack] for pack in picking.move_line_ids.result_package_id)

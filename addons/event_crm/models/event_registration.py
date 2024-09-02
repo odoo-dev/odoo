@@ -230,7 +230,7 @@ class EventRegistration(models.Model):
 
         registration_phone = sorted_self._find_first_notnull('phone')
         if valid_partner:
-            contact_vals = self.env['crm.lead']._prepare_values_from_partner(valid_partner)
+            contact_vals = self.env['crm.lead'].sudo()._prepare_values_from_partner(valid_partner)
             # force email_from / phone only if not set on partner because those fields are now synchronized automatically
             if not valid_partner.email:
                 contact_vals['email_from'] = sorted_self._find_first_notnull('email')
