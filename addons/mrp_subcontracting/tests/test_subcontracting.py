@@ -1460,6 +1460,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         })
         action = picking_receipt.with_user(self.portal_user).with_context({'is_subcontracting_portal': 1}).move_ids.action_show_details()
         with Form(picking_receipt.move_ids.with_context(action['context']), view=action['view_id']) as move_form:
+            # XXX Form created with a portal user?
             with move_form.move_line_ids.edit(0) as move_line:
                 move_line.lot_id = lot1
                 move_line.picked = True

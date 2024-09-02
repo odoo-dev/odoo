@@ -739,7 +739,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
         ])
         partner_ids = self.partner_admin.ids
 
-        with self.assertQueryCount(admin=5, employee=4):
+        with self.assertQueryCount(admin=5, employee=4):  # XXX now too high?
             records._message_log_with_view(
                 'test_mail.mail_template_simple_test',
                 render_values={'partner': self.customer.with_env(self.env)},

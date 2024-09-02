@@ -171,7 +171,7 @@ class MailGuest(models.Model):
         expiration_date = datetime.now() + timedelta(days=365)
         request.future_response.set_cookie(
             self._cookie_name,
-            self._format_auth_cookie(),
+            self.sudo()._format_auth_cookie(),
             httponly=True,
             expires=expiration_date,
         )

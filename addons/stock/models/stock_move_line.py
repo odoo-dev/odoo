@@ -260,13 +260,13 @@ class StockMoveLine(models.Model):
                 and self.location_dest_id == default_dest_location:
             quantity = self.quantity_product_uom
             self.location_dest_id = default_dest_location._get_putaway_strategy(
-                self.product_id, quantity=quantity, package=self.result_package_id, excluded_sml_ids=self.ids)
+                self.product_id, quantity=quantity, package=self.result_package_id.sudo(), excluded_sml_ids=self.ids)
 
     def _apply_putaway_strategy(self):
         if self.env.context.get('avoid_putaway_rules'):
             return
         self = self.with_context(do_not_unreserve=True)
-        for (package), smls in groupby(self, lambda sml: (sml.result_package_id.outermost_package_id)):
+        for (package), smls in groupby(self, lambda sml: (sml.result_package_id.sudo().outermost_package_id)):
             smls = self.env['stock.move.line'].concat(smls)
             locations = smls.move_id.location_dest_id.child_internal_location_ids
             excluded_smls = set(smls.ids)

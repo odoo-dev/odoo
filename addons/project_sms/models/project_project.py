@@ -18,7 +18,8 @@ class ProjectProject(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         projects = super().create(vals_list)
-        projects._send_sms()
+        if any('stage_id' in vals for vals in vals_list):
+            projects._send_sms()
         return projects
 
     def write(self, vals):

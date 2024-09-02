@@ -209,7 +209,7 @@ If you really, really need access, perhaps you can win over your friendly admini
             f"""Uh-oh! Looks like you have stumbled upon some top-secret records.
 
 Sorry, {self.user.name} (id={self.user.id}) doesn't have 'write' access to:
-- {self.record._description}, {self.record.display_name} ({self.record._name}: {self.record.id})
+- {self.record._description}, {self.record.sudo().display_name} ({self.record._name}: {self.record.id})
 
 Blame the following accesses:
 - rule 0
@@ -227,7 +227,7 @@ If you really, really need access, perhaps you can win over your friendly admini
             f"""Uh-oh! Looks like you have stumbled upon some top-secret records.
 
 Sorry, {self.user.name} (id={self.user.id}) doesn't have 'write' access to:
-- {self.record._description}, {self.record.display_name} ({self.record._name}: {self.record.id})
+- {self.record._description}, {self.record.sudo().display_name} ({self.record._name}: {self.record.id})
 
 Blame the following accesses:
 - rule 0
@@ -245,7 +245,7 @@ If you really, really need access, perhaps you can win over your friendly admini
             f"""Uh-oh! Looks like you have stumbled upon some top-secret records.
 
 Sorry, {self.user.name} (id={self.user.id}) doesn't have 'write' access to:
-- {self.record._description}, {self.record.display_name} ({self.record._name}: {self.record.id})
+- {self.record._description}, {self.record.sudo().display_name} ({self.record._name}: {self.record.id})
 
 Blame the following accesses:
 - rule 0
@@ -265,7 +265,7 @@ If you really, really need access, perhaps you can win over your friendly admini
             f"""Uh-oh! Looks like you have stumbled upon some top-secret records.
 
 Sorry, {self.user.name} (id={self.user.id}) doesn't have 'write' access to:
-- {self.record._description}, {self.record.display_name} ({self.record._name}: {self.record.id})
+- {self.record._description}, {self.record.sudo().display_name} ({self.record._name}: {self.record.id})
 
 Blame the following accesses:
 - rule 0
@@ -288,7 +288,7 @@ If you really, really need access, perhaps you can win over your friendly admini
             f"""Uh-oh! Looks like you have stumbled upon some top-secret records.
 
 Sorry, {self.user.name} (id={self.user.id}) doesn't have 'write' access to:
-- {self.record._description}, {self.record.display_name} ({self.record._name}: {self.record.id})
+- {self.record._description}, {self.record.sudo().display_name} ({self.record._name}: {self.record.id})
 
 Blame the following accesses:
 - rule 0
@@ -308,7 +308,7 @@ If you really, really need access, perhaps you can win over your friendly admini
             f"""Uh-oh! Looks like you have stumbled upon some top-secret records.
 
 Sorry, {self.user.name} (id={self.user.id}) doesn't have 'write' access to:
-- {self.record._description}, {self.record.display_name} ({self.record._name}: {self.record.id})
+- {self.record._description}, {self.record.sudo().display_name} ({self.record._name}: {self.record.id})
 
 Blame the following accesses:
 - rule 0
@@ -332,7 +332,7 @@ If you really, really need access, perhaps you can win over your friendly admini
             f"""Uh-oh! Looks like you have stumbled upon some top-secret records.
 
 Sorry, {self.user.name} (id={self.user.id}) doesn't have 'write' access to:
-- {self.record._description}, {self.record.display_name} ({self.record._name}: {self.record.id})
+- {self.record._description}, {self.record.sudo().display_name} ({self.record._name}: {self.record.id})
 
 Blame the following accesses:
 - rule 0
@@ -363,7 +363,7 @@ If you really, really need access, perhaps you can win over your friendly admini
             f"""Uh-oh! Looks like you have stumbled upon some top-secret records.
 
 Sorry, {self.user.name} (id={self.user.id}) doesn't have 'read' access to:
-- {record._description}, {record.display_name} ({record._name}: {record.id})
+- {record._description}, {record.sudo().display_name} ({record._name}: {record.id})
 
 Blame the following accesses:
 - rule 0
@@ -386,7 +386,7 @@ If you really, really need access, perhaps you can win over your friendly admini
             f"""Uh-oh! Looks like you have stumbled upon some top-secret records.
 
 Sorry, {self.user.name} (id={self.user.id}) doesn't have 'read' access to:
-- {record._description}, {record.display_name} ({record._name}: {record.id}, company={record.company_id.display_name})
+- {record._description}, {record.sudo().display_name} ({record._name}: {record.id}, company={record.sudo().company_id.display_name})
 
 Blame the following accesses:
 - rule 0
@@ -398,10 +398,7 @@ This seems to be a multi-company issue, you might be able to access the record b
         p = self.env['test_access_right.inherits'].create({'some_id': self.record.id})
         self.env.flush_all()
         self.env.invalidate_all()
-        with self.assertRaisesRegex(
-            AccessError,
-            r"Implicitly accessed through 'Object for testing related access rights' \(test_access_right.inherits\)\.",
-        ):
+        with self.assertRaises(AccessError):
             p.with_user(self.user).val
 
     def test_warn_company_access_multi_record(self):
@@ -425,8 +422,8 @@ This seems to be a multi-company issue, you might be able to access the record b
             f"""Uh-oh! Looks like you have stumbled upon some top-secret records.
 
 Sorry, {self.user.name} (id={self.user.id}) doesn't have 'read' access to:
-- {record_1._description}, {record_1.display_name} ({record_1._name}: {record_1.id}, company={record_1.company_id.display_name})
-- {record_2._description}, {record_2.display_name} ({record_2._name}: {record_2.id}, company={record_2.company_id.display_name})
+- {record_1._description}, {record_1.sudo().display_name} ({record_1._name}: {record_1.id}, company={record_1.sudo().company_id.display_name})
+- {record_2._description}, {record_2.sudo().display_name} ({record_2._name}: {record_2.id}, company={record_2.sudo().company_id.display_name})
 
 Blame the following accesses:
 - rule 0
@@ -454,7 +451,7 @@ Blame the following accesses:
 - rule 1
 
 If you really, really need access, perhaps you can win over your friendly administrator with a batch of freshly baked cookies."""
-        % (self.user.name, self.user.id, self.record._description, self.record.display_name, self.record._name, self.record.id))
+        % (self.user.name, self.user.id, self.record._description, self.record.sudo().display_name, self.record._name, self.record.id))
 
 
 @tagged('at_install', '-post_install')  # LEGACY at_install

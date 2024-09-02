@@ -1992,17 +1992,17 @@ class HrEmployee(models.Model):
         }
 
     def _get_tz(self, date=None):
-        self.ensure_one()
-        tz = self.tz
+        emp = self.ensure_one().sudo()
+        tz = emp.tz
         if date:
             date = fields.Date.to_date(date)
-            tz = self.sudo()._get_version(date).tz
-        return tz or self.user_partner_id.tz or self.company_id.tz or 'UTC'
+            tz = emp._get_version(date).tz
+        return tz or emp.user_partner_id.tz or emp.company_id.tz or 'UTC'
 
     def _get_tz_batch(self, date=None):
         # Finds the first valid timezone in his tz, his partner tz or UTC
         # Returns a dict {employee_id: tz}
-        return {emp.id: emp._get_tz(date=date) for emp in self}
+        return {emp.id: emp._get_tz(date=date) for emp in self.sudo()}
 
     def _get_first_contract_version_at(self, date):
         """Return {employee_id: version} with the lowest-id version in contract at ``date``."""

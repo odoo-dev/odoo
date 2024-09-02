@@ -48,7 +48,7 @@ class IrDefault(models.Model):
         if self.env.su:
             return
         for record in self:
-            if field := record.field_id:
+            if field := record.field_id.sudo():
                 model = self.env[field.model]
                 model.check_field_access(model._fields[field.name], 'write')
 

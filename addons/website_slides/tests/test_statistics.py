@@ -146,14 +146,14 @@ class TestChannelStatistics(common.SlidesCase):
         self.assertEqual(member_emp.completion, 100)
         self.assertEqual(channel_emp.completion, 100)
         self.assertTrue(channel_emp.completed)
-        self.assertFalse(slide_emp.user_membership_id.completed)
+        self.assertFalse(slide_emp.sudo().user_membership_id.completed)
         self.slide.invalidate_model(['user_has_completed'])
         slide_publisher = self.slide.with_user(self.user_officer)
         slide_publisher.action_mark_uncompleted()
         self.assertEqual(member_publisher.completion, 0)
         self.assertEqual(channel_publisher.completion, 0)
         self.assertFalse(channel_publisher.completed)
-        self.assertFalse(slide_emp.user_membership_id.completed)
+        self.assertFalse(slide_emp.sudo().user_membership_id.completed)
 
     @mute_logger('odoo.models')
     def test_channel_user_statistics_complete_check_member(self):

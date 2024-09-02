@@ -168,6 +168,8 @@ class AccountAutomaticEntryWizard(models.TransientModel):
         return _("Cut-off {label}") if self.percentage == 100 else _("Cut-off {label} {percent}%")
 
     def _get_move_dict_vals_change_account(self):
+        self.ensure_one()
+        assert self.destination_account_id, "Missing destination account"
         line_vals = []
 
         # Group data from selected move lines

@@ -172,7 +172,7 @@ class AccountAnalyticLine(models.Model):
     def write(self, vals):
         affected_move_lines = self.move_line_id
         res = super().write(vals)
-        if any(field in vals for field in ['amount', 'move_line_id'] + self._get_plan_fnames()):
+        if any(field in vals for field in ['amount', 'move_line_id'] + self.sudo()._get_plan_fnames()):
             if 'move_line_id' in vals:
                 affected_move_lines |= self.move_line_id
             affected_move_lines._update_analytic_distribution()
