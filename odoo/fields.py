@@ -1219,15 +1219,22 @@ class Field(MetaField('DummyField', (object,), {}), typing.Generic[T]):
         if record is None:
             return self         # the field is accessed through the owner class
 
+        env = record.env
+
+        if not env.su and not self.is_accessible(env):
+            record.check_field_access_rights('read', [self.name])
+
         if not record._ids:
             # null record -> return the null value for this field
+            record.check_access('read')
             value = self.convert_to_cache(False, record, validate=False)
             return self.convert_to_record(value, record)
 
-        env = record.env
-
-        # only a single record may be accessed
-        record.ensure_one()
+        # only a single record may be accessed and is accessible
+        if env.su:
+            record.ensure_one()
+        elif not env.transaction.access_read[record._name][(env.uid, *env.companies.ids)].get(record.id):
+            record.check_access('read')
 
         if self.compute and self.store:
             # process pending computations
@@ -1343,30 +1350,36 @@ class Field(MetaField('DummyField', (object,), {}), typing.Generic[T]):
         This method is meant to be used internally and has very little benefit
         over a simple call to `~odoo.models.BaseModel.mapped()` on a recordset.
         """
-        if self.name == 'id':
-            # not stored in cache
-            return list(records._ids)
+        env = records.env
+        if not env.su:
+            if not self.is_accessible(env):
+                records.check_field_access_rights('read', [self.name])
+            records.check_access('read')
 
         if self.compute and self.store:
             # process pending computations
             self.recompute(records)
 
         # retrieve values in cache, and fetch missing ones
-        vals = records.env.cache.get_until_miss(records, self)
+        vals = env.cache.get_until_miss(records, self)
         while len(vals) < len(records):
             # It is important to construct a 'remaining' recordset with the
             # _prefetch_ids of the original recordset, in order to prefetch as
             # many records as possible. If not done this way, scenarios such as
             # [rec.line_ids.mapped('name') for rec in recs] would generate one
             # query per record in `recs`!
-            remaining = records.__class__(records.env, records._ids[len(vals):], records._prefetch_ids)
+            remaining = records.__class__(env, records._ids[len(vals):], records._prefetch_ids)
             self.__get__(first(remaining))
-            vals += records.env.cache.get_until_miss(remaining, self)
+            vals += env.cache.get_until_miss(remaining, self)
 
         return self.convert_to_record_multi(vals, records)
 
     def __set__(self, records, value):
         """ set the value of field ``self`` on ``records`` """
+        # access check:
+        # - protected: should be already checked, usually called for computed fields
+        # - new_ids: just check access to model
+        # - other_ids: access is checked in Model.write()
         protected_ids = []
         new_ids = []
         other_ids = []
@@ -1385,6 +1398,7 @@ class Field(MetaField('DummyField', (object,), {}), typing.Generic[T]):
 
         if new_ids:
             # new records: no business logic
+            records.browse().check_access('write')
             new_records = records.__class__(records.env, tuple(new_ids), records._prefetch_ids)
             with records.env.protecting(records.pool.field_computed.get(self, [self]), new_records):
                 if self.relational:
@@ -1452,9 +1466,22 @@ class Field(MetaField('DummyField', (object,), {}), typing.Generic[T]):
 
     def compute_value(self, records):
         """ Invoke the compute method on ``records``; the results are in cache. """
-        env = records.env
         if self.compute_sudo:
             records = records.sudo()
+        elif self.store and 'write_uid' in records._fields:
+            # in case we have a stored field computed without sudo
+            # run the computation with the user that last updated the record
+            # (often used in TransientModel)
+            env = records.env
+            user_records = records.sudo().grouped('write_uid')
+            if len(user_records) > 1:
+                # compute each group separately
+                for records in user_records.values():
+                    self.compute_value(records.sudo(env.su))
+                return
+            records = records.with_user(next(iter(user_records))).sudo(env.su)
+        env = records.env
+
         fields = records.pool.field_computed[self]
 
         # Just in case the compute method does not assign a value, we already
@@ -1467,7 +1494,7 @@ class Field(MetaField('DummyField', (object,), {}), typing.Generic[T]):
                 env.remove_to_compute(field, records)
 
         try:
-            with records.env.protecting(fields, records):
+            with env.protecting(fields, records):
                 records._compute_field_value(self)
         except Exception:
             for field in fields:
@@ -1700,7 +1727,7 @@ class Monetary(Field[float]):
             # currencies, which is functional nonsense and should not happen
             # BEWARE: do not prefetch other fields, because 'value' may be in
             # cache, and would be overridden by the value read from database!
-            currency = record[:1].with_context(prefetch_fields=False)[currency_field_name]
+            currency = record[:1].sudo().with_context(prefetch_fields=False)[currency_field_name]
             currency = currency.with_env(record.env)
 
         value = float(value or 0.0)
@@ -3003,6 +3030,10 @@ class _Relational(Field[M], typing.Generic[M]):
         if records is None or len(records._ids) <= 1:
             return super().__get__(records, owner)
         # multirecord case: use mapped
+        env = records.env
+        if not env.su and not self.is_accessible(env):
+            records.check_field_access_rights('read', [self.name])
+        records.check_access('read')
         return self.mapped(records)
 
     def setup_nonrelated(self, model):
@@ -3300,7 +3331,7 @@ class Many2one(_Relational[M]):
         cache = records.env.cache
         corecord = self.convert_to_record(value, records)
         for invf in records.pool.field_inverses[self]:
-            valid_records = records.filtered_domain(invf.get_domain_list(corecord))
+            valid_records = records.sudo().filtered_domain(invf.get_domain_list(corecord))
             if not valid_records:
                 continue
             ids0 = cache.get(corecord, invf, None)
@@ -4357,7 +4388,7 @@ class _RelationalMulti(_Relational[M], typing.Generic[M]):
             Comodel._active_name
             and self.context.get('active_test', record.env.context.get('active_test', True))
         ):
-            corecords = corecords.filtered(Comodel._active_name).with_prefetch(prefetch_ids)
+            corecords = corecords.sudo().filtered(Comodel._active_name).with_prefetch(prefetch_ids).sudo(corecords.env.su)
         return corecords
 
     def convert_to_record_multi(self, values, records):
@@ -4370,7 +4401,7 @@ class _RelationalMulti(_Relational[M], typing.Generic[M]):
             Comodel._active_name
             and self.context.get('active_test', records.env.context.get('active_test', True))
         ):
-            corecords = corecords.filtered(Comodel._active_name).with_prefetch(prefetch_ids)
+            corecords = corecords.sudo().filtered(Comodel._active_name).with_prefetch(prefetch_ids).sudo(corecords.env.su)
         return corecords
 
     def convert_to_read(self, value, record, use_display_name=True):
@@ -4990,7 +5021,7 @@ class Many2many(_RelationalMulti[M]):
                 self.read(records.browse(missing_ids))
 
         # determine new relation {x: ys}
-        old_relation = {record.id: set(record[self.name]._ids) for record in records}
+        old_relation = {record.id: set() if create else set(record[self.name]._ids) for record in records}
         new_relation = {x: set(ys) for x, ys in old_relation.items()}
 
         # operations on new relation
@@ -5271,6 +5302,10 @@ class Id(Field[IdType | typing.Literal[False]]):
 
     def __set__(self, record, value):
         raise TypeError("field 'id' cannot be assigned")
+
+    def mapped(self, records):
+        # not stored in cache
+        return list(records._ids)
 
 
 class PrefetchMany2one:

@@ -988,7 +988,8 @@ class Base(models.AbstractModel):
                     # record accordingly; because we don't actually assign the
                     # modified field on the record, the modification on the
                     # parent record has to be done explicitly
-                    parent = record[field.related.split('.')[0]]
+                    # adding sudo() because we may not have permissions on the related field
+                    parent = record[field.related.split('.')[0]].sudo()
                     parent[field_name] = record[field_name]
 
         result = {'warnings': OrderedSet()}

@@ -355,7 +355,7 @@ class Survey(http.Controller):
             survey_content = request.env['ir.qweb']._render('survey.survey_fill_form_in_progress', survey_data)
 
         survey_progress = False
-        if answer_sudo.state == 'in_progress' and not survey_data.get('question', request.env['survey.question']).is_page:
+        if answer_sudo.state == 'in_progress' and not survey_data.get('question', survey_sudo.env['survey.question']).is_page:
             if survey_sudo.questions_layout == 'page_per_section':
                 page_ids = survey_sudo.page_ids.ids
                 survey_progress = request.env['ir.qweb']._render('survey.survey_progression', {

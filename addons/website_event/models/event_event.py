@@ -419,7 +419,7 @@ class EventEvent(models.Model):
                 name=f'{name} {self.name}', template=xml_id,
                 add_menu=False, ispage=False)
             view_id = page_result['view_id']
-            view = self.env["ir.ui.view"].browse(view_id)
+            view = self.env["ir.ui.view"].browse(view_id).sudo()
             url = f"/event/{self.env['ir.http']._slug(self)}/page/{view.key.split('.')[-1]}"  # url contains starting "/"
 
         website_menu = self.env['website.menu'].sudo().create({

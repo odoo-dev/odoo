@@ -14,7 +14,7 @@ class StockPicking(models.Model):
 
         for picking in self:
             project = picking.project_id
-            sale_order = project.reinvoiced_sale_order_id
+            sale_order = project.sudo().reinvoiced_sale_order_id
             if not (sale_order and picking.picking_type_id.analytic_costs):
                 continue
             reinvoicable_stock_moves = picking.move_ids.filtered(lambda m: m.product_id.expense_policy in {'sales_price', 'cost'})

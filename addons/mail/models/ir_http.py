@@ -24,7 +24,7 @@ class IrHttp(models.AbstractModel):
         result["storeData"] = store.get_result()
         guest = self.env['mail.guest']._get_guest_from_context()
         if not request.session.uid and guest:
-            user_context = {'lang': guest.lang}
+            user_context = {'lang': guest.sudo().lang}
             mods = odoo.conf.server_wide_modules or []
             lang = user_context.get("lang")
             translation_hash = self.env['ir.http'].sudo().get_web_translations_hash(mods, lang)

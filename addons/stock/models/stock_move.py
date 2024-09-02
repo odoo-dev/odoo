@@ -1982,15 +1982,14 @@ Please change the quantity done or the rounding precision of your unit of measur
         picking = moves_todo.mapped('picking_id')
         moves_todo.write({'state': 'done', 'date': fields.Datetime.now()})
 
-        move_dests_per_company = defaultdict(lambda: self.env['stock.move'])
-
         # Break move dest link if move dest and move_dest source are not the same,
         # so that when move_dests._action_assign is called, the move lines are not created with
         # the new location, they should not be created at all.
         moves_to_push = moves_todo.filtered(lambda m: not m._skip_push())
         if moves_to_push:
             moves_to_push._push_apply()
-        for move_dest in moves_todo.move_dest_ids:
+        move_dests_per_company = defaultdict(self.env['stock.move'].sudo)
+        for move_dest in moves_todo.move_dest_ids.sudo():
             move_dests_per_company[move_dest.company_id.id] |= move_dest
         for company_id, move_dests in move_dests_per_company.items():
             move_dests.sudo().with_company(company_id)._action_assign()

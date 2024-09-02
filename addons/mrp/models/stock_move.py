@@ -696,12 +696,13 @@ class StockMove(models.Model):
 
     def _update_candidate_moves_list(self, candidate_moves_set):
         super()._update_candidate_moves_list(candidate_moves_set)
-        for production in self.mapped('raw_material_production_id'):
+        self_sudo = self.sudo()
+        for production in self_sudo.raw_material_production_id:
             candidate_moves_set.add(production.move_raw_ids.filtered(lambda m: m.product_id in self.product_id))
-        for production in self.mapped('production_id'):
+        for production in self_sudo.production_id:
             candidate_moves_set.add(production.move_finished_ids.filtered(lambda m: m.product_id in self.product_id))
         # this will include sibling pickings as a result of merging MOs
-        for picking in self.move_dest_ids.raw_material_production_id.picking_ids:
+        for picking in self_sudo.move_dest_ids.raw_material_production_id.picking_ids:
             candidate_moves_set.add(picking.move_ids)
 
     def _prepare_procurement_values(self):
