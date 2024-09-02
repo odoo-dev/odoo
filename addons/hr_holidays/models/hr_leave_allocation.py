@@ -461,14 +461,14 @@ class HrLeaveAllocation(models.Model):
                 "current_level": (lvl4, lvl4_idx),
             }
         """
-        self.ensure_one()
-        if not self.accrual_plan_id or not self.accrual_plan_id.level_ids or (self.date_to and target_date > self.date_to):
+        accrual_plan = self.ensure_one().accrual_plan_id.sudo()
+        sorted_levels = accrual_plan.level_ids
+        if not sorted_levels or (self.date_to and target_date > self.date_to):
             return None
         lvls_boundaries = self._get_lvls_boundaries()
         if target_date < lvls_boundaries[0]:
             return None
 
-        sorted_levels = self.accrual_plan_id.level_ids
         current_lvl_start = False
         current_lvl_idx = False
         for lvl_idx, lvl_start in enumerate(lvls_boundaries):
@@ -895,7 +895,7 @@ class HrLeaveAllocation(models.Model):
             )
 
     def add_follower(self, employee_id):
-        employee = self.env['hr.employee'].browse(employee_id)
+        employee = self.env['hr.employee'].browse(employee_id).sudo()
         if employee.user_id:
             self.message_subscribe(partner_ids=employee.user_id.partner_id.ids)
 
@@ -912,9 +912,10 @@ class HrLeaveAllocation(models.Model):
         is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
         skip_auto_approve = self.env.context.get('allocation_skip_auto_approve', False)
         for allocation in allocations:
+            employee = allocation.employee_id.sudo()
             partners_to_subscribe = set()
-            if allocation.employee_id.user_id:
-                partners_to_subscribe.add(allocation.employee_id.user_id.partner_id.id)
+            if employee.user_id:
+                partners_to_subscribe.add(employee.user_id.partner_id.id)
             if allocation.validation_type == 'hr':
                 partners_to_subscribe.add(allocation.employee_id.sudo().parent_id.user_id.partner_id.id)
                 partners_to_subscribe.add(allocation.employee_id.leave_manager_id.partner_id.id)
@@ -931,7 +932,8 @@ class HrLeaveAllocation(models.Model):
         if values.get('state'):
             self._check_approval_update(values['state'])
 
-        self.add_follower(employee_id)
+        self.check_access('write')
+        self._add_employee_follower(employee_id)
 
         tracked_fields = {'number_of_days_display', 'number_of_hours', 'state', 'date_to'}
         tracked_updates = tracked_fields.intersection(values)

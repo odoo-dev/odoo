@@ -318,7 +318,7 @@ class MailFollowers(models.Model):
             # add transitive closure of implied groups; note that the field
             # all_implied_ids relies on ormcache'd data, which shouldn't add
             # more queries
-            groups = self.env['res.groups'].browse(set(groups or [])).all_implied_ids.ids
+            groups = self.env['res.groups'].browse(set(groups or [])).sudo().all_implied_ids.ids
             for res_id_to_update in to_update:
                 # avoid updating already existing information, unnecessary dict update
                 if not res_id and partner_id in doc_infos[res_id_to_update]:

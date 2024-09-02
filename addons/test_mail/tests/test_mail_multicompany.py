@@ -145,6 +145,11 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
         # ------------------------------------------------------------
         # Other company (no access)
         # ------------------------------------------------------------
+        post_avoid_acl_fields = dict(
+            record_name='CustomName',  # avoid ACL on display_name
+            reply_to='custom.reply.to@test.example.com',  # avoid ACL in notify_get_reply_to
+            record_company_id=self.env.company.id,  # avoid ACL on company data
+        )
 
         self.assertTrue(self.env['mail.message'].has_access('create'), 'Check at model level succeeds')
         with self.assertRaises(AccessError):
@@ -182,6 +187,7 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
             parent_id=initial_message.id,
             reply_to='custom.reply.to@test.example.com',  # avoid ACL in notify_get_reply_to
             subtype_xmlid='mail.mt_comment',
+            **post_avoid_acl_fields,
         )
 
         # record_name and reply_to may generate ACLs issues when computed by
@@ -213,6 +219,7 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
             message_type='comment',
             reply_to='custom.reply.to@test.example.com',  # avoid ACL in notify_get_reply_to
             subtype_xmlid='mail.mt_comment',
+            **post_avoid_acl_fields,
         )
         self.assertTrue(attachments < message.attachment_ids)
         self.assertEqual(
@@ -247,6 +254,7 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
                 message_type='comment',
                 reply_to='custom.reply.to@test.example.com',  # avoid ACL in notify_get_reply_to
                 subtype_xmlid='mail.mt_comment',
+                **post_avoid_acl_fields,
             )
 
     def test_recipients_multi_company(self):

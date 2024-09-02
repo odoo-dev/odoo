@@ -415,7 +415,11 @@ class PurchaseOrderLine(models.Model):
                     val['company_id'] = line.order_id.picking_type_id.company_id.id
                 values.append(val)
 
-        return self.env['stock.move'].create(values)
+        if picking is False:
+            env = self.env
+        else:
+            env = picking.env
+        return env['stock.move'].create(values)
 
     def _find_candidate(self, product_id, product_qty, product_uom, location_id, name, origin, company_id, values):
         """ Return the record in self where the procument with values passed as

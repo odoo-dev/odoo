@@ -233,7 +233,8 @@ class PurchaseOrder(models.Model):
                 if picking.state == 'done':
                     picking.message_post(body=self.env._("The purchase order %s this receipt is linked to was cancelled.", order._get_html_link()))
 
-        order_lines = self.env['purchase.order.line'].browse(order_lines_ids)
+        order_lines = self.env['purchase.order.line'].sudo().browse(order_lines_ids)
+        StockMove = order_lines.env['stock.move']
         moves_to_cancel_ids = OrderedSet()
         moves_to_recompute_ids = OrderedSet()
         for order_line in order_lines:
@@ -253,16 +254,16 @@ class PurchaseOrder(models.Model):
                     moves_to_recompute_ids.update(move_dest_ids.ids)
 
         if moves_to_cancel_ids:
-            moves_to_cancel = self.env['stock.move'].browse(moves_to_cancel_ids)
+            moves_to_cancel = StockMove.browse(moves_to_cancel_ids)
             moves_to_cancel._action_cancel()
 
         if moves_to_recompute_ids:
-            moves_to_recompute = self.env['stock.move'].browse(moves_to_recompute_ids)
+            moves_to_recompute = StockMove.browse(moves_to_recompute_ids)
             moves_to_recompute.write({'procure_method': 'make_to_stock'})
             moves_to_recompute._recompute_state()
 
         if pickings_to_cancel_ids:
-            pikings_to_cancel = self.env['stock.picking'].browse(pickings_to_cancel_ids)
+            pikings_to_cancel = StockMove.env['stock.picking'].browse(pickings_to_cancel_ids)
             pikings_to_cancel.action_cancel()
 
         return super().button_cancel()

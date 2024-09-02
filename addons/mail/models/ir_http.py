@@ -23,6 +23,6 @@ class IrHttp(models.AbstractModel):
         result["storeData"] = store.as_dict()
         guest = self.env['mail.guest']._get_guest_from_context()
         if not request.session.uid and guest:
-            user_context = {'lang': guest.lang}
+            user_context = {'lang': guest.sudo().lang}
             result["user_context"] = user_context
         return result
