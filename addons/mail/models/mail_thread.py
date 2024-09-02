@@ -2409,7 +2409,7 @@ class MailThread(models.AbstractModel):
         if 'record_alias_domain_id' not in msg_values:
             msg_values['record_alias_domain_id'] = self.sudo()._mail_get_alias_domains(default_company=self.env.company)[self.id].id
         if 'record_company_id' not in msg_values:
-            msg_values['record_company_id'] = self._mail_get_companies(default=self.env.company)[self.id].id
+            msg_values['record_company_id'] = self.sudo()._mail_get_companies(default=self.env.company)[self.id].id
         if 'reply_to' not in msg_values:
             msg_values['reply_to'] = self._notify_get_reply_to(default=email_from, author_id=author_id)[self.id]
 
@@ -3508,7 +3508,7 @@ class MailThread(models.AbstractModel):
                         [
                             ("res_model", "=", message.model),
                             ("res_id", "=", message.res_id),
-                            ("partner_id", "in", users.partner_id.ids),
+                            ("partner_id", "in", users.sudo().partner_id.ids),
                         ],
                     )
                 ),
@@ -3839,7 +3839,8 @@ class MailThread(models.AbstractModel):
 
         :return: dictionary of values used when rendering notification layout;
         """
-        lang = force_email_lang if force_email_lang else self.env.lang
+        message_sudo = message.sudo()  # need access to values
+        lang = force_email_lang or self.env.lang
         record_wlang = self.with_context(lang=lang)
 
         author = message.author_id
@@ -3864,10 +3865,10 @@ class MailThread(models.AbstractModel):
 
         # record, model
         if not model_description:
-            model_description = record_wlang._get_model_description(message.model)
-        record_name = textwrap.shorten(force_record_name or message.with_context(lang=lang).record_name or '', width=100, placeholder='...')
+            model_description = record_wlang._get_model_description(message_sudo.model)
+        record_name = textwrap.shorten(force_record_name or message_sudo.with_context(lang=lang).record_name or '', width=100, placeholder='...')
 
-        subtype_id = message.subtype_id.id
+        subtype_id = message_sudo.subtype_id.id
         is_discussion = subtype_id == self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
 
         if 'email_notification_subtitles' in self.env.context:
@@ -3879,7 +3880,7 @@ class MailThread(models.AbstractModel):
             # message
             'is_discussion': is_discussion,
             'message': message,
-            'subtype': message.subtype_id,
+            'subtype': message_sudo.subtype_id,
             # record
             'model_description': model_description,
             'record': record_wlang,

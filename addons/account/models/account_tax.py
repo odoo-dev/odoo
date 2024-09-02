@@ -4999,7 +4999,7 @@ class AccountTax(models.Model):
         company = company or self.env.company
         taxes = self.env['account.tax']
         while not taxes and company:
-            taxes = self.filtered(lambda t: t.company_id == company)
+            taxes = self.filtered(lambda t: t.sudo().company_id == company)
             company = company.sudo().parent_id
         return taxes
 

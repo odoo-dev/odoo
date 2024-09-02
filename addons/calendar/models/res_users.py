@@ -72,7 +72,7 @@ class ResUsers(models.Model):
         fallback_default_privacy = 'public'
         # sudo: any user has access to other users calendar_default_privacy setting
         if any(not user.sudo().res_users_settings_id.calendar_default_privacy for user in self):
-            fallback_default_privacy = self._default_user_calendar_default_privacy()
+            fallback_default_privacy = self.sudo()._default_user_calendar_default_privacy()
 
         for user in self:
             user.calendar_default_privacy = user.sudo().res_users_settings_id.calendar_default_privacy or fallback_default_privacy

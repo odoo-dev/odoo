@@ -197,9 +197,7 @@ class ResourceMixin(models.AbstractModel):
             containing at least an attendance.
         """
         result = {}
-        records_by_calendar = defaultdict(lambda: self.env[self._name])
-        for record in self:
-            records_by_calendar[calendar or record.resource_calendar_id or record.company_id.resource_calendar_id] += record
+        records_by_calendar = self.sudo().grouped(lambda record: calendar or record.resource_calendar_id or record.company_id.resource_calendar_id)
 
         # naive datetimes are made explicit in UTC
         if not from_datetime.tzinfo:

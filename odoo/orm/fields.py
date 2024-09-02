@@ -2075,9 +2075,22 @@ class Field[T]:
 
     def compute_value(self, records: BaseModel) -> None:
         """ Invoke the compute method on ``records``; the results are in cache. """
-        env = records.env
         if self.compute_sudo:
             records = records.sudo()
+        elif self.store and 'write_uid' in records._fields:
+            # XXX transaction.default_env should solve the need for this
+            # in case we have a stored field computed without sudo
+            # run the computation with the user that last updated the record
+            # (often used in TransientModel)
+            env = records.env
+            user_records = records.sudo().grouped('write_uid')
+            if len(user_records) > 1:
+                # compute each group separately
+                for records in user_records.values():
+                    self.compute_value(records.sudo(env.su))
+                return
+            records = records.with_user(next(iter(user_records))).sudo(env.su)
+        env = records.env
         fields = records.pool.field_computed[self]
 
         # Just in case the compute method does not assign a value, we already

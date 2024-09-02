@@ -2374,8 +2374,6 @@ Please change the quantity done or the rounding precision in your settings.""",
         picking = moves_todo.mapped('picking_id')
         moves_todo.write({'state': 'done', 'date': fields.Datetime.now()})
 
-        move_dests_per_company = defaultdict(lambda: self.env['stock.move'])
-
         # Apply allocated location if relevant.
         moves._apply_allocation()
 
@@ -2386,6 +2384,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         if moves_to_push:
             moves_to_push._push_apply()
 
+        move_dests_per_company = defaultdict(self.env['stock.move'].sudo)
         for move in moves_todo:
             for move_dest in move.sudo().move_dest_ids:
                 if not move_dest.location_id._child_of(move.location_dest_id) and not move.location_dest_id._child_of(move_dest.location_id):

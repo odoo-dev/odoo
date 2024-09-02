@@ -14,6 +14,7 @@ class StockForecasted_Product_Product(models.AbstractModel):
             return line
 
         picking = move_out.picking_id
+        sale = picking.sale_id.sudo()
         # If read is False, line['move_out'] is a stock.move record and will trigger a record update
         if read:
             line['move_out'].update({
@@ -21,10 +22,10 @@ class StockForecasted_Product_Product(models.AbstractModel):
                     'id': picking.id,
                     'priority': picking.priority,
                     'sale_id': {
-                        'id': picking.sale_id.id,
-                        'amount_untaxed': picking.sale_id.amount_untaxed,
-                        'currency_id': picking.sale_id.currency_id.read(fields=['id', 'name'])[0],
-                        'partner_id': picking.sale_id.partner_id.read(fields=['id', 'display_name'])[0],
+                        'id': sale.id,
+                        'amount_untaxed': sale.amount_untaxed,
+                        'currency_id': sale.currency_id.read(fields=['id', 'name'])[0],
+                        'partner_id': sale.partner_id.read(fields=['id', 'name'])[0],
                     }
                 }
             })

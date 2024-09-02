@@ -409,8 +409,8 @@ class TestAccessRights(TransactionCase):
             'res_record': f'res.partner,{self.raoul.partner_id.id}',
         })
 
-        self.assertEqual(event.res_model_id.model, 'res.partner')
-        self.assertEqual(event.res_id, self.raoul.partner_id.id)
+        self.assertEqual(event.sudo().res_model_id.model, 'res.partner')
+        self.assertEqual(event.sudo().res_id, self.raoul.partner_id.id)
         self.assertEqual(
             event.with_user(self.john).read(['res_record'])[0]['res_record'],
             f'res.partner,{self.raoul.partner_id.id}',
@@ -463,8 +463,8 @@ class TestAccessRights(TransactionCase):
                     'res_record': f'{model},{res_id}',
                 })
 
-                self.assertEqual(inverse_event.res_model_id.model, model)
-                self.assertEqual(inverse_event.res_id, res_id)
+                self.assertEqual(inverse_event.sudo().res_model_id.model, model)
+                self.assertEqual(inverse_event.sudo().res_id, res_id)
                 self.assertEqual(
                     inverse_event.with_user(self.john).read(['res_record'])[0]['res_record'],
                     f'{model},{res_id}',

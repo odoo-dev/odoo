@@ -545,8 +545,8 @@ been taken for this time off type. Changing it now would affect existing employe
                         'unit_of_measure': work_entry_type.unit_of_measure,
                         'allows_negative': work_entry_type.allows_negative,
                         'max_allowed_negative': work_entry_type.max_allowed_negative,
-                        'employee_company': employee.company_id.id,
-                        'employee_country': employee.company_id.country_id.id,
+                        'employee_company': employee.sudo().company_id.id,
+                        'employee_country': employee.sudo().company_id.country_id.id,
                         'color': work_entry_type.color,
                     },
                     work_entry_type.requires_allocation,
@@ -601,8 +601,9 @@ been taken for this time off type. Changing it now would affect existing employe
                                                                             target_date
                                                                         )
                 if closest_expiration_date:
+                    employee_sudo = employee.sudo()
                     closest_allocation_expire = format_date(self.env, closest_expiration_date)
-                    calendar = employee.resource_calendar_id
+                    calendar = employee_sudo.resource_calendar_id
                     start_datetime = datetime.combine(target_date, time.min, tzinfo=UTC)
                     end_datetime = datetime.combine(closest_expiration_date, time.max, tzinfo=UTC)
                     closest_allocation_dict = {}

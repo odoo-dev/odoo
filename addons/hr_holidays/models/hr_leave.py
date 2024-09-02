@@ -167,7 +167,7 @@ class HrLeave(models.Model):
         tracking=True, domain=lambda self: self._get_employee_domain(), default=lambda self: self.env.user.employee_id)
     employee_company_id = fields.Many2one(related='employee_id.company_id', string="Employee Company", store=True)
     company_id = fields.Many2one('res.company', compute='_compute_company_id', store=True, index=True)
-    active_employee = fields.Boolean(related='employee_id.active', string='Employee Active')
+    active_employee = fields.Boolean(related='employee_id.active', string='Employee Active', related_sudo=True)
     tz_mismatch = fields.Boolean(compute='_compute_tz_mismatch')
     tz = fields.Selection(_tz_get, compute='_compute_tz')
     department_id = fields.Many2one(
@@ -530,7 +530,7 @@ class HrLeave(models.Model):
         is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
 
         for leave in self:
-            if is_officer or leave.user_id == self.env.user or leave.employee_id.leave_manager_id == self.env.user:
+            if is_officer or leave.user_id == self.env.user or leave.employee_id.sudo().leave_manager_id == self.env.user:
                 leave.name = leave.sudo().private_name
             else:
                 leave.name = '*****'
@@ -539,7 +539,7 @@ class HrLeave(models.Model):
         is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
 
         for leave in self:
-            if is_officer or leave.user_id == self.env.user or leave.employee_id.leave_manager_id == self.env.user:
+            if is_officer or leave.user_id == self.env.user or leave.employee_id.sudo().leave_manager_id == self.env.user:
                 leave.sudo().private_name = leave.name
 
     def _search_description(self, operator, value):
@@ -741,7 +741,7 @@ class HrLeave(models.Model):
     @api.depends('employee_id')
     def _compute_department_id(self):
         for holiday in self:
-            holiday.department_id = holiday.employee_id.department_id
+            holiday.department_id = holiday.employee_id.sudo().department_id
 
     @api.depends('request_date_from', 'request_date_to', 'work_entry_type_id')
     def _compute_has_mandatory_day(self):
@@ -754,7 +754,7 @@ class HrLeave(models.Model):
             )
 
             for leave in self:
-                department_ids = leave.employee_id.department_id.ids
+                department_ids = leave.employee_id.sudo().department_id.ids
                 domain = [
                     ('start_date', '<=', leave.request_date_to),
                     ('end_date', '>=', leave.request_date_from),
@@ -777,7 +777,7 @@ class HrLeave(models.Model):
 
     @api.depends('number_of_days')
     def _compute_work_entry_type_increases_duration(self):
-        durations = self._get_durations(check_work_entry_type=False)
+        durations = self.sudo()._get_durations(check_work_entry_type=False)
         for leave in self:
             days = durations[leave.id][0]
             if leave.work_entry_type_request_unit == 'day' and leave.work_entry_type_requires_allocation and days < leave.number_of_days:
@@ -1298,7 +1298,7 @@ class HrLeave(models.Model):
                 leave.display_name = self.env._("%(name)s: %(duration)s", name=short_leave_name,
                                                 duration=leave.duration_display)
             else:
-                target = leave.employee_id.name or ""
+                target = leave.employee_id.sudo().name or ""
                 display_date = format_date(self.env, date_from_utc) or ""
                 if leave.number_of_days > 1 and date_from_utc and date_to_utc:
                     display_date += self.env._(' to %(date_to_utc)s',
@@ -1338,8 +1338,8 @@ class HrLeave(models.Model):
             self = self.with_context(employee_id=employee_id)
         return super().onchange(values, field_names, fields_spec)
 
-    def add_follower(self, employee_id):
-        employee = self.env['hr.employee'].browse(employee_id)
+    def _add_employee_follower(self, employee_id):
+        employee = self.env['hr.employee'].browse(employee_id).sudo()
         if employee.user_id:
             self.message_subscribe(partner_ids=employee.user_id.partner_id.ids)
 
@@ -1349,7 +1349,7 @@ class HrLeave(models.Model):
 
         is_leave_user = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
         if state == 'validate1':
-            employees = employees.filtered(lambda employee: employee.leave_manager_id != self.env.user)
+            employees = employees.sudo().filtered(lambda employee: employee.leave_manager_id != self.env.user)
             if employees and not is_leave_user:
                 raise AccessError(_('You cannot first approve a time off for %s, because you are not his time off manager', employees[0].name))
         elif state == 'validate' and not is_leave_user:
@@ -1388,9 +1388,9 @@ class HrLeave(models.Model):
                 # eg : holidays_user can create a leave request with validation_type = 'manager' for someone else
                 # but they can only write on it if they are leave_manager_id
                 holiday_sudo = holiday.sudo()
-                holiday_sudo.add_follower(holiday.employee_id.id)
+                holiday_sudo._add_employee_follower(holiday.employee_id.id)
                 if holiday.validation_type == 'manager':
-                    holiday_sudo.message_subscribe(partner_ids=holiday.employee_id.leave_manager_id.partner_id.ids)
+                    holiday_sudo.message_subscribe(partner_ids=holiday_sudo.employee_id.leave_manager_id.partner_id.ids)
                 if holiday.validation_type == 'no_validation' or self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
                     # Automatic validation should be done in sudo, because user might not have the rights to do it by himself
                     holiday_sudo.action_approve()
@@ -1410,8 +1410,12 @@ class HrLeave(models.Model):
         values = vals
         is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user') or self.env.is_superuser()
         if not is_officer and values.keys() - {'attachment_ids', 'supported_attachment_ids', 'message_main_attachment_id'}:
-            if any(hol.date_from.date() < fields.Date.today() and hol.employee_id.leave_manager_id != self.env.user
-                   and hol.state not in ('confirm', 'draft') for hol in self):
+            if any(
+                hol.date_from.date() < fields.Date.today()
+                and hol.employee_id.leave_manager_id != self.env.user
+                and hol.state not in ('confirm', 'draft')
+                for hol in self.sudo()
+            ):
                 raise UserError(_('You must have manager rights to modify/validate a time off that already begun'))
             if any(leave.state == 'cancel' for leave in self):
                 raise UserError(_('Only a manager can modify a canceled leave.'))
@@ -1443,9 +1447,7 @@ class HrLeave(models.Model):
                 self.filtered(lambda leave: leave.work_entry_type_id.time_off_selectable)._check_validity()
             self.env['hr.leave.allocation'].invalidate_model(['leaves_taken', 'max_leaves'])  # missing dependency on compute
         if not self.env.context.get('leave_fast_create'):
-            for holiday in self:
-                if employee_id:
-                    holiday.add_follower(employee_id)
+            self._add_employee_follower(employee_id)
 
         return result
 
@@ -1491,11 +1493,11 @@ class HrLeave(models.Model):
         """
         self.ensure_one()
         return {
-            'name': _("%s: Time Off", self.employee_id.name),
+            'name': _("%s: Time Off", self.employee_id.sudo().name),
             'date_from': self.date_from,
             'holiday_id': self.id,
             'date_to': self.date_to,
-            'resource_id': self.employee_id.resource_id.id,
+            'resource_id': self.employee_id.sudo().resource_id.id,
             'calendar_id': self.resource_calendar_id.id,
             'work_entry_type_id': self.work_entry_type_id.id,
             'count_as': self.work_entry_type_id.count_as,
@@ -1541,7 +1543,7 @@ class HrLeave(models.Model):
         for holiday in holidays:
             user_tz = ZoneInfo(holiday.tz)
             utc_tz = holiday.date_from.replace(tzinfo=UTC).astimezone(user_tz)
-            notify_partner_ids = holiday.employee_id.user_id.partner_id.ids
+            notify_partner_ids = holiday.employee_id.sudo().user_id.partner_id.ids
             holiday.message_post(
                 body=_(
                     'Your %(work_entry_type)s planned on %(date)s has been accepted',
@@ -1566,7 +1568,7 @@ class HrLeave(models.Model):
             user = holiday.user_id
             meeting_name = _(
                 "%(employee)s on Time Off : %(duration)s",
-                employee=holiday.employee_id.name or holiday.category_id.name,
+                employee=holiday.employee_id.sudo().name or holiday.category_id.name,
                 duration=holiday.duration_display)
             allday_value = (holiday.work_entry_type_request_unit != 'half_day' or holiday.request_date_from_period == 'am' and holiday.request_date_to_period == 'pm')
             if holiday.work_entry_type_request_unit == 'hour':
@@ -1594,7 +1596,7 @@ class HrLeave(models.Model):
                 'res_id': holiday.id,
             }
             # Add the partner_id (if exist) as an attendee
-            partner_id = (user and user.partner_id) or (holiday.employee_id and holiday.employee_id.work_contact_id)
+            partner_id = (user and user.partner_id) or (holiday.employee_id and holiday.employee_id.sudo().work_contact_id)
             if partner_id:
                 meeting_values['partner_ids'] = [(4, partner_id.id)]
             result[user.id].append(meeting_values)
@@ -1764,10 +1766,10 @@ class HrLeave(models.Model):
         self.mapped('meeting_id').write({'active': False})
         # Post a second message, more verbose than the tracking message
         for holiday in self:
-            if holiday.employee_id.user_id:
+            if user := holiday.employee_id.sudo().user_id:
                 holiday.message_post(
                     body=_('Your %(work_entry_type)s planned on %(date)s has been refused', work_entry_type=holiday.work_entry_type_id.display_name, date=holiday.date_from),
-                    partner_ids=holiday.employee_id.user_id.partner_id.ids)
+                    partner_ids=user.partner_id.ids)
 
         self.activity_update()
         return True
@@ -1776,7 +1778,7 @@ class HrLeave(models.Model):
         leaves = self.filtered(lambda hol: (hol.validation_type == 'both' and hol.state in ['validate1', 'validate']) or (hol.validation_type == 'manager' and hol.state == 'validate'))
         model_description = self.env['ir.model']._get('hr.holidays').name
         for holiday in leaves:
-            responsible = holiday.employee_id.leave_manager_id.partner_id.ids
+            responsible = holiday.employee_id.sudo().leave_manager_id.partner_id.ids
             if responsible:
                 holiday.sudo().with_context(
                     email_notification_force_header=True,
@@ -1883,7 +1885,7 @@ class HrLeave(models.Model):
         is_in_past = self.date_from and self.date_from.date() < fields.Date.context_today(self)
 
         is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
-        is_time_off_manager = self.employee_id.leave_manager_id == self.env.user
+        is_time_off_manager = self.employee_id.sudo().leave_manager_id == self.env.user
 
         if is_own_leave and (not is_in_past or is_officer):
             state_result['validate1'].add('cancel')
@@ -1918,10 +1920,8 @@ class HrLeave(models.Model):
         if self.env.is_superuser():
             return True
 
-        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
-
         for holiday in self:
-            is_time_off_manager = holiday.employee_id.leave_manager_id == self.env.user
+            is_time_off_manager = holiday.employee_id.sudo().leave_manager_id == self.env.user
             dict_all_possible_state = holiday._get_next_states_by_state()
             validation_type = holiday.validation_type
             error_message = ""
@@ -1998,17 +1998,18 @@ class HrLeave(models.Model):
         self.ensure_one()
 
         responsible = self.env['res.users']
+        employee = self.employee_id.sudo()
         if self.validation_type == 'manager' or (self.validation_type == 'both' and self.state == 'confirm'):
-            if self.employee_id.leave_manager_id:
-                responsible = self.employee_id.leave_manager_id
-            elif self.employee_id.parent_id.user_id:
-                responsible = self.employee_id.parent_id.user_id
-            elif self.employee_id.hr_responsible_id:
-                responsible = self.employee_id.hr_responsible_id
+            if employee.leave_manager_id:
+                responsible = employee.leave_manager_id
+            elif employee.parent_id.user_id:
+                responsible = employee.parent_id.user_id
+            elif employee.hr_responsible_id:
+                responsible = employee.hr_responsible_id
         elif self.validation_type == 'hr' or (self.validation_type == 'both' and self.state == 'validate1'):
-            if self.employee_id.hr_responsible_id:
-                responsible = self.employee_id.hr_responsible_id
-        return responsible
+            if employee.hr_responsible_id:
+                responsible = employee.hr_responsible_id
+        return responsible.with_env(self.env)
 
     def _get_to_clean_activities(self):
         return ['hr_holidays.mail_act_leave_approval', 'hr_holidays.mail_act_leave_second_approval']
@@ -2083,7 +2084,7 @@ class HrLeave(models.Model):
             if leave.user_id:
                 recipient = leave.user_id.partner_id.id
             elif leave.employee_id:
-                recipient = leave.employee_id.work_contact_id.id
+                recipient = leave.employee_id.sudo().work_contact_id.id
 
             if recipient:
                 self.env['mail.thread'].sudo().message_notify(

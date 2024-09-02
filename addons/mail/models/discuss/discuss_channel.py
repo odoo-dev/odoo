@@ -802,11 +802,13 @@ class DiscussChannel(models.Model):
 
     def _subscribe_users_automatically_get_members(self):
         """ Return new members per channel ID """
-        return dict(
-            (channel.id,
-             ((channel.group_ids.all_user_ids.partner_id.filtered(lambda p: p.active) - channel.channel_partner_ids).ids))
-                for channel in self
-            )
+        return {
+            channel.id: (
+                channel.sudo().group_ids.all_user_ids.partner_id.filtered(lambda p: p.active)
+                - channel.channel_partner_ids
+            ).ids
+            for channel in self
+        }
 
     def action_unfollow(self):
         if self.channel_type in self._types_allowing_unfollow():

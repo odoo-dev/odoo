@@ -51,7 +51,7 @@ class AccountAnalyticLine(models.Model):
         return super()._check_can_write(values)
 
     def _check_can_create(self):
-        if not self.env.su and any(task.is_timeoff_task for task in self.task_id):
+        if not self.env.su and any(task.is_timeoff_task for task in self.task_id.sudo()):
             raise UserError(self.env._('Timesheets related to time off cannot be created or modified. Please manage your requests in the Time Off app instead.'))
         return  super()._check_can_create()
 

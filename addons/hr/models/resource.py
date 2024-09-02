@@ -76,8 +76,8 @@ class ResourceResource(models.Model):
 
     def _inverse_calendar_id(self):
         for resource in self:
-            if resource.calendar_id != resource.employee_id.resource_calendar_id:
-                resource.employee_id.resource_calendar_id = resource.calendar_id
+            if resource.calendar_id != resource.sudo().employee_id.resource_calendar_id:
+                resource.sudo().employee_id.resource_calendar_id = resource.calendar_id
 
     def _get_resource_without_contract(self):
         employee_ids_with_active_contracts = {

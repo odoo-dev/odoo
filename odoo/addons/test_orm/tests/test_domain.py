@@ -963,7 +963,8 @@ class TestDomainOptimize(TransactionCase):
         )
 
     def test_sudo_optimize(self):
-        model = self.env['test_orm.discussion'].with_user(self.env.ref('base.public_user'))
+        user = self.env['res.users'].create({'login': 'test_sudo_optimize', 'name': 'test'})
+        model = self.env['test_orm.discussion'].with_user(user)
         self.assertEqual(
             Domain('moderator', 'any', Domain('login', 'like', 'one')).optimize_full(model),
             Domain('moderator', 'any', Domain('login', 'like', 'one')),

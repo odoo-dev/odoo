@@ -29,7 +29,7 @@ from odoo.addons.calendar.models.utils import interval_from_events
 from odoo.addons.mail.tools.discuss import Store
 from odoo.tools.intervals import intervals_overlap
 from odoo.tools.translate import _
-from odoo.tools.misc import get_lang, babel_locale_parse
+from odoo.tools.misc import get_lang, babel_locale_parse, partition
 from odoo.tools import SQL, html2plaintext, html_sanitize, is_html_empty, single_email_re
 from odoo.exceptions import UserError, ValidationError
 
@@ -881,10 +881,10 @@ class CalendarEvent(models.Model):
         for event, event_values in zip(events, vals_list):
             if any(command[0] != 0 for command in event_values.get('meeting_activity_ids') or []):
                 to_sync_activities += event
-        to_sync_activities._sync_activities(fields={f for vals in vals_list for f in vals})
+        to_sync_activities.sudo()._sync_activities(fields={f for vals in vals_list for f in vals})
 
         if not self.env.context.get('dont_notify'):
-            alarm_events = self.env['calendar.event']
+            alarm_events = self.env['calendar.event'].sudo()
             for event, values in zip(events, vals_list):
                 if values.get('allday'):
                     # All day events will trigger the _inverse_date method which will create the trigger.
@@ -909,11 +909,17 @@ class CalendarEvent(models.Model):
         if not private_fields:
             return super()._fetch_query(query, fields)
 
-        fields_to_fetch = list(fields) + [self._fields[name] for name in ('privacy', 'user_id', 'partner_ids', 'create_uid')]
+        # read (fetch) x2many fields separately for public events because the user may not have access to them
+        fields_to_fetch, x2many_fields = partition(lambda field: field.name in public_fnames or not field.type.endswith('2many'), fields)
+        fields_to_fetch.extend(self._fields[name] for name in ('privacy', 'user_id', 'partner_ids', 'create_uid'))
         events = super()._fetch_query(query, fields_to_fetch)
 
         # determine private events to which the user does not participate or is not the creator
         others_private_events = events.filtered(lambda ev: ev._check_private_event_conditions())
+        # fetch the x2many fields for public events
+        if public_events := (events - others_private_events):
+            for field in x2many_fields:
+                field.read(public_events)
         if not others_private_events:
             return events
 

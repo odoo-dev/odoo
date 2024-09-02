@@ -38,7 +38,7 @@ def add_guest_to_context(func):
             )
         token = req.cookies.get(req.env["mail.guest"]._cookie_name, "")
         guest = req.env["mail.guest"]._get_guest_from_token(token)
-        if guest and not guest.timezone and not req.env.cr.readonly:
+        if guest and not guest.sudo().timezone and not req.env.cr.readonly:
             timezone = req.env["mail.guest"]._get_timezone_from_request(req)
             if timezone:
                 guest._update_timezone(timezone)

@@ -535,13 +535,11 @@ class StockPackage(models.Model):
             Since we can only have a single _parent field on the model, we need to do this manually.
             :returns: A list containing all parent ids
         """
-        def fetch_next_parents(packages):
-            if packages.package_dest_id:
-                return set(packages.ids) | fetch_next_parents(packages.package_dest_id)
-            else:
-                return set(packages.ids)
-
-        return list(fetch_next_parents(self))
+        result = packages = self.sudo()
+        while dest_packages := packages.package_dest_id:
+            packages = dest_packages
+            result |= packages
+        return result.ids
 
     def _apply_package_dest_for_entire_packs(self, allowed_package_ids=None):
         """ When a package is assigned to a picking, if all of its container is added,

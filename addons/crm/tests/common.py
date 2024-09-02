@@ -469,11 +469,11 @@ class TestCrmCommon(TestSalesCommon, MailCase):
 
         # save opportunity value before being modified by merge process
         fields_all = self.FIELDS_FIRST_SET + self.merge_fields
-        original_opp_values = dict(
-            (fname, opportunity[fname])
+        original_opp_values = {
+            fname: opportunity[fname]
             for fname in fields_all
             if fname in opportunity
-        )
+        }
 
         def _find_value(lead, fname):
             if lead == opportunity:
