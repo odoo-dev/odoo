@@ -1,13 +1,15 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests import Form
-from odoo.addons.mrp.tests.common import TestMrpCommon
-from odoo.exceptions import UserError
+import logging
 
 from datetime import datetime
-import logging
+
 from freezegun import freeze_time
+
+from odoo.exceptions import UserError
+from odoo.tests import Form
+
+from odoo.addons.mrp.tests.common import TestMrpCommon
 
 _logger = logging.getLogger(__name__)
 
@@ -117,11 +119,12 @@ class TestTraceability(TestMrpCommon):
             self.assertEqual(final_product['unfoldable'], True, "Final product should always be unfoldable")
 
             # Find parts of the final products
-            lines = self.env['stock.traceability.report'].get_lines(final_product['id'], **{
-                'level': final_product['level'],
-                'model_id': final_product['model_id'],
-                'model_name': final_product['model'],
-            })
+            lines = self.env['stock.traceability.report'].get_lines(
+                final_product['id'],
+                level=final_product['level'],
+                model_id=final_product['model_id'],
+                model_name=final_product['model'],
+            )
             self.assertEqual(len(lines), 3, "There should be 3 lines. 1 for untracked, 1 for lot, and 1 for serial")
 
             for line in lines:
@@ -361,23 +364,10 @@ class TestTraceability(TestMrpCommon):
         the user can produce several productA and can then produce some productB again
         """
         stock_location = self.env.ref('stock.stock_location_stock')
-        picking_type = self.env['stock.picking.type'].search([('code', '=', 'mrp_operation')])[0]
-
-        productA, productB, productC = self.env['product.product'].create([{
-            'name': 'Product A',
-            'is_storable': True,
-        }, {
-            'name': 'Product B',
-            'is_storable': True,
-            'tracking': 'lot',
-        }, {
-            'name': 'Product C',
-            'type': 'consu',
-        }])
 
         lot_B01, lot_B02, lot_B03 = self.env['stock.lot'].create([{
             'name': 'lot %s' % i,
-            'product_id': productB.id,
+            'product_id': self.productB.id,
         } for i in [1, 2, 3]])
 
         self.env['mrp.bom'].create([{
@@ -387,14 +377,14 @@ class TestTraceability(TestMrpCommon):
             'product_qty': 1.0,
             'type': 'normal',
             'bom_line_ids': [(0, 0, {'product_id': component.id, 'product_qty': 1})],
-        } for finished, component in [(productA, productB), (productB, productC)]])
+        } for finished, component in [(self.productA, self.productB), (self.productB, self.productC)]])
 
-        self.env['stock.quant']._update_available_quantity(productB, stock_location, 10, lot_id=lot_B01)
-        self.env['stock.quant']._update_available_quantity(productB, stock_location, 5, lot_id=lot_B02)
+        self.env['stock.quant']._update_available_quantity(self.productB, stock_location, 10, lot_id=lot_B01)
+        self.env['stock.quant']._update_available_quantity(self.productB, stock_location, 5, lot_id=lot_B02)
 
         # Produce 15 x productA
         mo_form = Form(self.env['mrp.production'])
-        mo_form.product_id = productA
+        mo_form.product_id = self.productA
         mo_form.product_qty = 15
         mo = mo_form.save()
         mo.action_confirm()
@@ -402,7 +392,7 @@ class TestTraceability(TestMrpCommon):
 
         # Produce 15 x productB
         mo_form = Form(self.env['mrp.production'])
-        mo_form.product_id = productB
+        mo_form.product_id = self.productB
         mo_form.product_qty = 15
         mo = mo_form.save()
         mo.action_confirm()
@@ -415,7 +405,7 @@ class TestTraceability(TestMrpCommon):
         self.assertEqual(lot_B01.product_qty, 0)
         self.assertEqual(lot_B02.product_qty, 0)
         self.assertEqual(lot_B03.product_qty, 15)
-        self.assertEqual(productA.qty_available, 15)
+        self.assertEqual(self.productA.qty_available, 15)
 
     def test_last_delivery_traceability(self):
         """
