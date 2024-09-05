@@ -8,7 +8,25 @@ from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCom
 
 
 @odoo.tests.tagged('post_install', '-at_install')
+<<<<<<< saas-17.4
 class TestFrontend(TestPointOfSaleHttpCommon):
+||||||| 796caaccf592f2ea662befc0879daa6ee77d1dd8
+class TestFrontend(AccountTestInvoicingCommon, HttpCaseWithUserDemo):
+
+    def _get_url(self):
+        return f"/pos/ui?config_id={self.pos_config.id}"
+
+    def start_pos_tour(self, tour_name, login="pos_user", **kwargs):
+        self.start_tour(self._get_url(), tour_name, login=login, **kwargs)
+=======
+class TestFrontendCommon(AccountTestInvoicingCommon, HttpCaseWithUserDemo):
+
+    def _get_url(self):
+        return f"/pos/ui?config_id={self.pos_config.id}"
+
+    def start_pos_tour(self, tour_name, login="pos_user", **kwargs):
+        self.start_tour(self._get_url(), tour_name, login=login, **kwargs)
+>>>>>>> 2e5a0d9b5d8b427104247572dafa3b503b221e34
 
     @classmethod
     def setUpClass(cls):
@@ -210,6 +228,9 @@ class TestFrontend(TestPointOfSaleHttpCommon):
 
         pricelist = cls.env['product.pricelist'].create({'name': 'Restaurant Pricelist'})
         cls.pos_config.write({'pricelist_id': pricelist.id})
+
+
+class TestFrontend(TestFrontendCommon):
 
     def test_01_pos_restaurant(self):
         self.pos_user.write({
