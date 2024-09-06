@@ -163,7 +163,17 @@ HTMLElement.prototype.oDeleteForward = function (offset) {
         return;
     }
 
-    const nextSibling = this.nextSibling;
+    let nextSibling = this.nextSibling;
+    while (nextSibling && isWhitespace(nextSibling)) {
+        const left = getState(nextSibling, childNodeIndex(nextSibling), DIRECTIONS.LEFT).cType;
+        const right = getState(nextSibling, childNodeIndex(nextSibling), DIRECTIONS.RIGHT).cType;
+        if (left === CTYPES.BLOCK_OUTSIDE && right === CTYPES.BLOCK_OUTSIDE) {
+            // If the next sibling is a whitespace, remove it.
+            nextSibling.remove();
+            nextSibling = this.nextSibling;
+        }
+    }
+
     if (
         (
             offset === this.childNodes.length ||
