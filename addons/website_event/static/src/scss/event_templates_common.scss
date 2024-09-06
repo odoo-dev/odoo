@@ -18,6 +18,11 @@ $o-wevent-color: $body-color;
         border: $border-width solid var(--o-border-color);
         border-left: $border-width * 3 solid var(--bg-solid);
     }
+    a.o_wesession_list_item:hover {
+        .o_wesession_list_item_title {
+            text-decoration: underline;
+        }
+    }
 
     /*
      * COMMON MENU STYLING
