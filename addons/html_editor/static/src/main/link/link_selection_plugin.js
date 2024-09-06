@@ -51,6 +51,7 @@ export class LinkSelectionPlugin extends Plugin {
     static name = "link_selection";
     static dependencies = ["selection"];
     /** @type { (p: LinkSelectionPlugin) => Record<string, any> } */
+    static shared = ["padLinkWithZwnbsp"];
     static resources = (p) => ({
         mutation_filtered_classes: ["o_link_in_selection"],
         link_ignore_classes: ["o_link_in_selection"],
@@ -94,7 +95,11 @@ export class LinkSelectionPlugin extends Plugin {
         this.removeFEFFs(root, { exclude: isLegitZwnbsp });
 
         for (const link of selectElements(root, "a")) {
-            this.padLinkWithZwnbsp(link);
+            if (this.isLinkEligibleForZwnbsp(link)) {
+                // Only add the ZWNBSP for simple (possibly styled) text links, and
+                // never in a nav.
+                this.padLinkWithZwnbsp(link);
+            }
         }
     }
 
@@ -109,9 +114,7 @@ export class LinkSelectionPlugin extends Plugin {
         const defaultFilter = (node) =>
             node.nodeType === Node.TEXT_NODE &&
             node.textContent.includes("\uFEFF") &&
-            node.parentElement.isContentEditable &&
-            !isProtected(node) &&
-            !isProtecting(node);
+            node.parentElement.isContentEditable;
 
         const combinedFilter = (node) => defaultFilter(node) && !exclude(node);
         const nodes = descendants(root).filter(combinedFilter);
@@ -144,11 +147,6 @@ export class LinkSelectionPlugin extends Plugin {
      * @param {HTMLAnchorElement} link
      */
     padLinkWithZwnbsp(link) {
-        if (!this.isLinkEligibleForZwnbsp(link)) {
-            // Only add the ZWNBSP for simple (possibly styled) text links, and
-            // never in a nav.
-            return;
-        }
         const cursors = this.shared.preserveSelection();
         if (!isZwnbsp(link.firstChild)) {
             cursors.shiftOffset(link, 1);
@@ -174,6 +172,8 @@ export class LinkSelectionPlugin extends Plugin {
         return (
             link.isContentEditable &&
             this.editable.contains(link) &&
+            !isProtected(link) &&
+            !isProtecting(link) &&
             !this.resources.excludeLinkZwnbsp?.some((callback) => callback(link))
         );
     }
