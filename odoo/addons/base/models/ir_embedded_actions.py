@@ -18,6 +18,7 @@ class IrEmbeddedActions(models.Model):
     # It is required to have either action_id or python_method
     action_id = fields.Many2one('ir.actions.act_window', string="Action Id", ondelete="cascade")
     python_method = fields.Char(help="Python method returning an action")
+    server_action_id = fields.Many2one('ir.actions.server', string="Server Action Id", ondelete="cascade")
 
     user_id = fields.Many2one('res.users', string="Embedded user", help="User specific embedded action. If empty, shared embedded action", ondelete="cascade")
     is_deletable = fields.Boolean(compute="_compute_is_deletable")
@@ -32,13 +33,6 @@ class IrEmbeddedActions(models.Model):
 
     _sql_constraints = [
         (
-            'check_only_one_action_defined',
-            """CHECK(
-                (action_id IS NOT NULL AND python_method IS NULL) OR
-                (action_id IS NULL AND python_method IS NOT NULL)
-            )""",
-            'Constraint to ensure that either an XML action or a python_method is defined, but not both.'
-        ), (
             'check_python_method_requires_name',
             """CHECK(
                 NOT (python_method IS NOT NULL AND name IS NULL)
@@ -46,6 +40,12 @@ class IrEmbeddedActions(models.Model):
             'Constraint to ensure that if a python_method is defined, then the name must also be defined.'
         )
     ]
+
+    @api.constrains('action_id', 'python_method', 'server_action_id')
+    def _check_only_one_action_defined(self):
+        for action in self:
+            if bool(action.action_id) + bool(action.python_method) + bool(action.server_action_id) != 1:
+                raise UserError(_('One and only one action should be set.'))
 
     @api.model_create_multi
     def create(self, vals_list):
