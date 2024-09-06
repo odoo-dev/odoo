@@ -25,96 +25,103 @@ class ViewAssetsDialog extends Component {
 
 async function getUsedBundles() {
     const url = "./";
-    const regex = /(\/web\/assets\/[^"]+)(?=")/gm;
+    const regex = /\/web\/assets\/[^"]+(?=")/gm;
 
-    const page = await fetch(url)
-        .then( r => r.text() )
-        .then( t => {return(t);});
+    const page = await fetch(url).then((r) => r.text());
+    const matches = page.match(regex);
 
-    const matches = page.match(regex); // get all bundles declared in 'page'
-    let bundles = [];
-    matches.forEach((match) => {
-        let parts = match.match(/[^\/]+(?=\.min)/gm);
-        bundles.push({path : match, name : parts[parts.length - 1]});
+    return matches.map((match) => {
+        const name = match.split('/').pop().split('.min')[0];
+        return { path: match, name };
     });
-    return bundles;
 }
 
 function getStats(bundle) {
     const regex = /\/\* \/([\s\S]*?)\*\//;
-    let parts = bundle.split(regex);
-    parts.splice(0,1);
-    let parts_info = [];
-    for (let i = 0; i < parts.length; i+=2){
-        let data = parts[i + 1];
-        parts_info.push({
-            'file': parts[i],
-            'data': data,
-            'length': byteSizeConvert(data),
-        });
-    }
-    return parts_info.sort(function(a, b){return a.length - b.length;}).reverse();
+    return bundle.split(regex)
+        .slice(1)
+        .reduce((acc, _, i, arr) => {
+            if (i % 2 === 0) {
+                const file = arr[i];
+                const data = arr[i + 1];
+                acc.push({
+                    file,
+                    data,
+                    length: byteSizeConvert(data),
+                });
+            }
+            return acc;
+        }, [])
+        .sort((a, b) => b.length - a.length);
 }
 
-function getModuleStats(bundle) {
-    const stats = getStats(bundle);
-    const module_info = {};
-    for(const stat in stats) {
-        const module = stats[stat]['file'].split('/');
-        if (module_info[module[0]]) {
-            module_info[module[0]]+=Number(stats[stat]['length']);
-        } else {
-            module_info[module[0]] = Number(stats[stat]['length']);
-        }
-    }
+const combinedInfo = {};
+// Combine the bundle state of JS and CSS.
+function getModuleStats(bundleContent, bundleName) {
+    const stats = getStats(bundleContent);
+    const moduleInfo = stats.reduce((acc, stat) => {
+        const module = stat.file.split('/')[0];
+        acc[module] = (acc[module] || 0) + stat.length;
+        return acc;
+    }, {});
 
-    const info = [];
-    for(const [key, value] of Object.entries(module_info)) {
-        info.push({'name':key, 'length':value, 'size':readableFileSize(value) });
-    }
+    combinedInfo[bundleName] = combinedInfo[bundleName] || { data: {}, length: 0 };
 
-    return info.sort(function(a, b){return a.length - b.length;}).reverse();
+    let totalSize = 0;
+    const info = Object.entries(moduleInfo).map(([name, length]) => {
+        const size = readableFileSize(length);
+        combinedInfo[bundleName].data[name] = {
+            name,
+            length: (combinedInfo[bundleName].data[name]?.length || 0) + length,
+            size: readableFileSize((combinedInfo[bundleName].data[name]?.length || 0) + length),
+        };
+        totalSize += combinedInfo[bundleName].data[name].length;
+        return { name, length, size };
+    });
+
+    combinedInfo[bundleName].length = totalSize;
+
+    return info.sort((a, b) => b.length - a.length);
 }
 
-const byteSizeConvert = str => new Blob([str]).size;
+const byteSizeConvert = (str) => new Blob([str]).size;
 
-function readableFileSize(attachmentSize) {
-    const fileSize = attachmentSize ?? 0;
-    if (!fileSize) {
-      return `0 kb`;
-    }
+function readableFileSize(fileSize = 0) {
     const sizeInKb = fileSize / 1024;
-    if (sizeInKb > 1024) {
-      return `${(sizeInKb / 1024).toFixed(2)} mb`;
-    } else {
-      return `${sizeInKb.toFixed(2)} kb`;
-    }
-  }
+    return sizeInKb > 1024
+        ? `${(sizeInKb / 1024).toFixed(2)} mb`
+        : `${sizeInKb.toFixed(2)} kb`;
+}
 
 export function viewAssetsSize({ env }) {
     return {
         type: "item",
         description: _t("View Assets Size"),
-        callback: async() => {
-            const bundles= await getUsedBundles();
-            let output="";
-            for (let bundle in bundles){
-                const url = location.origin + bundles[bundle].path;
-                const bundle_content = await fetch(url)
-                    .then( r => r.text() )
-                    .then( t => {return(t);});
-                const isCssFile = url.endsWith("css");
-                // Asset's module wise stats
-                const moduleStats = getModuleStats(bundle_content);
-                output+="Assets in " + bundles[bundle].name + "(" + (isCssFile?'CSS':'JS') + ")" + " :" + readableFileSize(byteSizeConvert(bundle_content)) + " Bytes\n";
-                for (let stat in moduleStats ) {
-                    const percentage = (Number(moduleStats[stat].length)/Number(bundle_content.length))*100;
-                    output += moduleStats[stat].name + " : "  + percentage.toFixed(2) + "% (" + moduleStats[stat].size + ")\n";
-                }
-                output+='\n';
+        callback: async () => {
+            const bundles = await getUsedBundles();
+            let output = "";
+
+            for (const { path, name } of bundles) {
+                const url = `${location.origin}${path}`;
+                const bundleContent = await fetch(url).then((r) => r.text());
+                getModuleStats(bundleContent, name);
             }
 
-            env.services.dialog.add(ViewAssetsDialog, { output } );
+            output += "====================== Assets stats ( > 5% )=====================\n";
+            for (const [bundle, { data, length }] of Object.entries(combinedInfo)) {
+                output += `Assets in ${bundle} : ${readableFileSize(length)}\n\n`;
+                const info = Object.values(data).sort((a, b) => b.length - a.length);
+                for (const { name, length, size } of Object.values(info)) {
+                    const percentage = (length / combinedInfo[bundle].length) * 100;
+                    if ( percentage >= 5) {
+                        output += `${name} : ${percentage.toFixed(2)}% (${size})\n`;
+                    }
+                }
+
+                output += '\n';
+            }
+
+            env.services.dialog.add(ViewAssetsDialog, { output });
         },
         sequence: 450,
     };
