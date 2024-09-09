@@ -184,7 +184,7 @@ class TestHasGroup(TransactionCase):
         """
         group_0 = self.env.ref(self.group0)  # the group to which test_user already belongs
         group_U = self.env["res.groups"].create({"name": "U", "implied_ids": [Command.set([self.grp_internal.id])]})
-        self.grp_internal.implied_ids = False  # only there to simplify the test by not having to care about its trans_implied_ids
+        self.grp_internal.implied_ids = False  # only there to simplify the test
 
         self.test_user.write({'groups_id': [Command.link(group_U.id)]})
         self.assertEqual(

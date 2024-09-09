@@ -681,7 +681,7 @@ actual arch.
             error = _(
                 "View '%(name)s' accessible only to groups %(groups)s ",
                 name=self.key,
-                groups=", ".join([g.name for g in self.groups_id]
+                groups=", ".join([g.name for g in self.group_ids]
             ))
         else:
             error = _("View '%(name)s' is private", name=self.key)
