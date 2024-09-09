@@ -198,6 +198,29 @@ function computePosition(popper, target, { container, margin, position }) {
 }
 
 /**
+ * avoir deux sets de solutions: une avec les el visibles et une avec les el qui débordent
+ *
+ * choix:
+ * - dans les visibles, prendre celui dont la diff entre les deux bords (target et popper) est la plus petite
+ * - dans les partiellement visibles, prendre celui dont la diff entre les deux bords (target et popper) est la plus petite également
+ *
+ * optimisation:
+ * - on peut parfois détecter que l'une des directions est 1a éliminer
+ */
+
+/**
+ * Ce qu'on devrait plutôt faire:
+ * - calculer les shifts nécessaires dans les 4 directions (en ignorant les variants?)
+ * - prendre le match où la différence entre le bord du popper et celui du target est minimale
+ *
+ * Peut-être aussi optimiser pour:
+ * - ne pas prendre en compte les 3 variants, car ça revient probablement au même de check le shift
+ *   sur un seul des variants ?
+ * - s'arrêter si le shift rentre dans l'écran, car de toute façon on respecte le choix de la
+ *   position souhaitée dans ce cas ?
+ */
+
+/**
  * Repositions the popper element relatively to the target element (according to options).
  * The positioning strategy is always a fixed positioning with top and left.
  *
