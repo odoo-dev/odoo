@@ -74,41 +74,29 @@
             </div>
             <div class="offcanvas-body p-0">
                 <div class="accordion accordion-flush">
-                    <div t-if="option_track_wishlist" class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed"
-                                type="button"
-                                data-bs-toggle="collapse"
-                                data-bs-target=".o_wevent_offcanvas_fav"
-                                aria-expanded="false"
-                                aria-controls="o_wevent_offcanvas_fav">
-                                Favorites
-                            </button>
-                        </h2>
-                        <div class="o_wevent_offcanvas_fav accordion-collapse collapse">
-                            <div class="accordion-body pt-0">
-                                <ul class="list-group list-group-flush">
-                                    <!-- Optional wishlist filter -->
-                                    <li class="list-group-item border-0 px-0">
-                                        <a t-att-href="'/event/%s/track?%s' % (
-                                                slug(event),
-                                                keep_query('*', search_wishlist='')
-                                            )"
-                                            class="d-flex align-items-center justify-content-between text-reset">
-                                            All Talks
-                                        </a>
-                                    </li>
-                                    <li class="list-group-item border-0 px-0">
-                                        <a t-att-href="'/event/%s/track?%s' % (
-                                                slug(event),
-                                                keep_query('*', search_wishlist='1')
-                                            )"
-                                            t-attf-class="d-flex align-items-center justify-content-between text-reset #{'active' if search_wishlist else ''}">
-                                            Favorites
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
+                    <div class="o_wevent_offcanvas_fav accordion">
+                        <div class="accordion-body pt-0">
+                            <ul class="list-group list-group-flush">
+                                <!-- Optional wishlist filter -->
+                                <li class="list-group-item border-0 px-0">
+                                    <a t-att-href="'/event/%s/track?%s' % (
+                                            slug(event),
+                                            keep_query('*', search_wishlist='')
+                                        )"
+                                        class="d-flex align-items-center justify-content-between text-reset">
+                                        All Talks
+                                    </a>
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <a t-att-href="'/event/%s/track?%s' % (
+                                            slug(event),
+                                            keep_query('*', search_wishlist='1')
+                                        )"
+                                        t-attf-class="d-flex align-items-center justify-content-between text-reset #{'active' if search_wishlist else ''}">
+                                        Favorites
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                     <t t-foreach="tag_categories" t-as="tag_category">

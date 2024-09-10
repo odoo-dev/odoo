@@ -81,6 +81,11 @@ $o-wevent-color: $body-color;
             box-shadow: 0 0 0 0.25rem rgba(134, 102, 126, 0.5);
         }
     }
+
+    input[type="search"]::-webkit-search-cancel-button {
+        display: block;
+        opacity: 1;
+    }
 }
 
 .o_wevent_badge {
