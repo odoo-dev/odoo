@@ -47,6 +47,22 @@ patch(OrderSummary.prototype, {
                 return;
             }
         }
+
+        const numpadMode = this.pos.numpadMode;
+        if (
+            selectedLine?.uiState?.isRewardLineProduct &&
+            ["price", "discount"].includes(numpadMode) &&
+            key !== "Backspace"
+        ) {
+            let notificationString = _t("You cannot update price of Reward.");
+            if (numpadMode === "discount") {
+                notificationString = _t("You cannot add discount on Reward.");
+            }
+            if (notificationString) {
+                this.notification.add(notificationString, 4000);
+                return;
+            }
+        }
         return super.updateSelectedOrderline({ buffer, key });
     },
     /**
@@ -82,6 +98,31 @@ patch(OrderSummary.prototype, {
             (selectedLine.is_reward_line && ["", "remove"].includes(val))
         ) {
             super._setValue(val);
+        }
+        if (val === "" && !selectedLine.uiState.isRewardLineProduct) {
+            let settlePoints =
+                this.currentOrder.getLoyaltyPoints()[0]?.points.total -
+                selectedLine?.uiState.pointsApplied;
+            const sortedRewardLines = this.currentOrder
+                ._get_reward_lines()
+                .sort((a, b) => b.points_cost - a.points_cost);
+            sortedRewardLines.forEach((line) => {
+                const relatedLine = this.currentOrder.lines.find(
+                    (li) =>
+                        li.product_id.id === line._reward_product_id.id &&
+                        li.uiState.isRewardLineProduct
+                );
+                while (relatedLine && line?.qty >= 1 && settlePoints < 0) {
+                    if (line?.qty === 1) {
+                        this.currentOrder.removeOrderline(relatedLine);
+                    } else {
+                        relatedLine.set_quantity(relatedLine?.get_quantity() - 1);
+                        line.points_cost -= line?.points_cost / line?.qty;
+                        line?.set_quantity(relatedLine?.get_quantity());
+                    }
+                    settlePoints += line?.points_cost / line?.qty;
+                }
+            });
         }
         if (!selectedLine.is_reward_line || (selectedLine.is_reward_line && val === "remove")) {
             this.pos.updateRewards();

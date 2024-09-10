@@ -169,7 +169,7 @@ patch(ControlButtons.prototype, {
                     product_id: args["product"] || reward.reward_product_ids[0],
                     qty: potentialQty || 1,
                 },
-                {}
+                { isRewardLineProduct: true }
             );
             return true;
         } else {
