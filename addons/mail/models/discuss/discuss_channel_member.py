@@ -4,6 +4,7 @@ import logging
 import requests
 import uuid
 from markupsafe import Markup
+from datetime import timedelta
 
 from odoo import api, fields, models, _
 from odoo.addons.mail.tools.discuss import Store
@@ -48,6 +49,18 @@ class ChannelMember(models.Model):
     # RTC
     rtc_session_ids = fields.One2many(string="RTC Sessions", comodel_name='discuss.channel.rtc.session', inverse_name='channel_member_id')
     rtc_inviting_session_id = fields.Many2one('discuss.channel.rtc.session', string='Ringing session')
+
+    @api.autovacuum
+    def _gc_unpin_outdated_sub_channels(self):
+        members = self.env["discuss.channel.member"].search(
+            [
+                ("channel_id.parent_channel_id", "!=", False),
+                ("last_interest_dt", "<", fields.Datetime.now() - timedelta(days=2)),
+            ]
+        )
+        members.unpin_dt = fields.Datetime.now()
+        for member in members:
+            member._bus_send("discuss.channel/unpin", {"id": member.channel_id.id})
 
     @api.constrains('partner_id')
     def _contrains_no_public_member(self):
@@ -172,6 +185,11 @@ class ChannelMember(models.Model):
         # help the ORM to detect changes
         res.partner_id.invalidate_recordset(["channel_ids"])
         res.guest_id.invalidate_recordset(["channel_ids"])
+        # Always link members to parent channels as well. Member list should be
+        # kept in sync.
+        for member in res:
+            if parent := member.channel_id.parent_channel_id:
+                parent.add_members(partner_ids=member.partner_id.ids, guest_ids=member.guest_id.ids)
         return res
 
     def write(self, vals):
@@ -184,6 +202,21 @@ class ChannelMember(models.Model):
     def unlink(self):
         # sudo: discuss.channel.rtc.session - cascade unlink of sessions for self member
         self.sudo().rtc_session_ids.unlink()  # ensure unlink overrides are applied
+        # Always unlink members of sub-channels as well. Member list should be
+        # kept in sync.
+        sub_member_domain = expression.AND(
+            [
+                [("channel_id", "in", self.channel_id.sub_channel_ids.ids)],
+                expression.OR(
+                    [
+                        [("partner_id", "in", self.partner_id.ids)],
+                        [("guest_id", "in", self.guest_id.ids)],
+                    ]
+                ),
+            ]
+        )
+        for member in self.search(sub_member_domain):
+            member.channel_id._action_unfollow(partner=member.partner_id, guest=member.guest_id)
         return super().unlink()
 
     def _bus_channel(self):
