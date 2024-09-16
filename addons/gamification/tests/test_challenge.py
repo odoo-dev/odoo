@@ -77,7 +77,7 @@ class test_challenge(TestGamificationCommon):
                 'email': f'{kind}_{age}',
                 'group_ids': [(6, 0, group_ids)],
             }
-            for kind, group_ids.all_implied_ids in (
+            for kind, group_ids in (
                 ('Portal', []),
                 ('Internal', [self.env.ref('base.group_user').id]),
             )
