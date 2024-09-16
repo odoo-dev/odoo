@@ -72,9 +72,17 @@ class SaleEdiCommon(models.AbstractModel):
             lines_values += self._retrieve_line_charges(order, line_values, line_values['tax_id'])
             if not line_values['product_uom']:
                 line_values.pop('product_uom')  # if no uom, pop it so it's inferred from the product_id
+            if not line_values['product_id']:
+                line_values['edi_product_ref'] = self._get_edi_product_ref(line_tree)
             lines_values.append(line_values)
 
         return lines_values, logs
+
+    def _get_edi_product_ref(self, line_tree):
+        product_xpath_dict = self._get_line_xpaths()['product']
+        product_vals = {k: self._find_value(v, line_tree) for k, v in product_xpath_dict.items()}
+        # Edi doc should always export code and name
+        return f"{product_vals['default_code']},{product_vals['name']}"
 
     def _import_payment_term_id(self, order, tree, xapth):
         """ Return payment term from given tree. """

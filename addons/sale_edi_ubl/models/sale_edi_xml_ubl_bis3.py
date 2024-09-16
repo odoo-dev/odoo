@@ -48,6 +48,7 @@ class SaleEdiXmlUBLBIS3(models.AbstractModel):
             'order_line': [Command.create(line_vals) for line_vals in lines_vals],
         }
         order.write(order_values)
+        order.order_line.filtered(lambda line: not line.product_id)._set_edi_product_ref(tree, './{*}OrderLine/{*}LineItem')
         logs += partner_logs + delivery_partner_logs + currency_logs + line_logs + allowance_charges_logs
 
         return logs

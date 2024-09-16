@@ -57,3 +57,12 @@ class SaleOrder(models.Model):
             'price_unit': price_unit,
             'tax_id': [Command.set(tax_ids)],
         } for name, quantity, price_unit, tax_ids in lines_vals]
+
+    def _action_confirm(self):
+        res = super()._action_confirm()
+        for line in self.order_line:
+            if not line.edi_product_ref:
+                continue
+            line._set_edi_product_ref_on_product()
+
+        return res
