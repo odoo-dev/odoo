@@ -60,7 +60,7 @@ export class TicketScreen extends Component {
         this.dialog = useService("dialog");
         this.numberBuffer = useService("number_buffer");
         this.doPrint = useTrackedAsync((_selectedSyncedOrder) =>
-            this.pos.printReceipt({ order: _selectedSyncedOrder })
+            this.doPrint(_selectedSyncedOrder)
         );
         this.numberBuffer.use({
             triggerAtInput: (event) => this._onUpdateSelectedOrderline(event),
@@ -83,6 +83,9 @@ export class TicketScreen extends Component {
             // Show updated list of synced orders when going back to the screen.
             this.onFilterSelected(this.state.filter);
         });
+    }
+    async doPrint(order) {
+        await this.pos.printReceipt({ order: order });
     }
     async onFilterSelected(selectedFilter) {
         this.state.filter = selectedFilter;

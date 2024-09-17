@@ -322,16 +322,9 @@ class PosSession(models.Model):
             # the .xml files as the CoA is not yet installed.
             pos_config = self.env['pos.config'].browse(config_id)
 
-            pos_name = self.env['ir.sequence'].with_context(
-                company_id=pos_config.company_id.id
-            ).next_by_code('pos.session')
-            if vals.get('name'):
-                pos_name += ' ' + vals['name']
-
             update_stock_at_closing = pos_config.company_id.point_of_sale_update_stock_quantities == "closing"
 
             vals.update({
-                'name': pos_name,
                 'config_id': config_id,
                 'update_stock_at_closing': update_stock_at_closing,
             })
@@ -1649,6 +1642,7 @@ class PosSession(models.Model):
 
     def set_opening_control(self, cashbox_value: int, notes: str):
         self.state = 'opened'
+        self.name = self.env['ir.sequence'].with_context(company_id=self.config_id.company_id.id).next_by_code('pos.session')
 
         cash_payment_method_ids = self.config_id.payment_method_ids.filtered(lambda pm: pm.is_cash_count)
         if cash_payment_method_ids:

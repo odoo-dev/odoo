@@ -27,11 +27,7 @@ patch(ReceiptScreen.prototype, {
         this.pos.showScreen("ProductScreen");
     },
     isContinueSplitting() {
-        if (
-            this.pos.config.module_pos_restaurant &&
-            !this.pos.selectedTable &&
-            !this.currentOrder.originalSplittedOrder
-        ) {
+        if (this.pos.config.module_pos_restaurant) {
             const originalOrderUuid = this.currentOrder.uiState.splittedOrderUuid;
 
             if (!originalOrderUuid) {
