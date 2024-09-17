@@ -344,7 +344,13 @@ export function makeActionManager(env, router = _router) {
                     action_id: actionRequest,
                     context: ctx,
                 });
-                action = await actionCache[key];
+                try {
+                    action = await actionCache[key];
+                } catch (error) {
+                    // Do not cache errors, check identity, lost connection during RPCs, ...
+                    delete actionCache[key];
+                    throw error;
+                }
                 if (action.help) {
                     action.help = markup(action.help);
                 }

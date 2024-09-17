@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="auth_timeout.CheckIdentityForm">
+        <p role="alert" class="alert alert-danger" t-if="state.error" t-esc="state.error"/>
+        <div class="text-center border rounded mb-3 p-3">
+            <img t-attf-src="/web/image/res.users/{{user.userId}}/avatar_128" class="o_avatar rounded me-1"/>
+            Signed in as <strong t-out="user.login"/>
+        </div>
+        <div class="border rounded mb-3 p-3 bg-light">
+            <form id="password" t-if="state.authMethod === 'password'" t-on-submit.prevent="onSubmit">
+                <input type="hidden" name="type" value="password"/>
+                <input type="password" name="password" class="form-control" placeholder="Password" autocomplete="off"/>
+                <div class="text-end mb-3">
+                    <a href="/password_reset">Forgot password?</a>
+                </div>
+                <div class="text-center d-grid">
+                    <button type="submit" class="btn btn-primary">Confirm</button>
+                </div>
+            </form>
+            <form id="passkey" t-if="state.authMethod === 'webauthn'" t-on-submit.prevent="onSubmit">
+                <input type="hidden" name="type" value="webauthn"/>
+                <input type="hidden" name="webauthn_response"/>
+                <div class="text-center">
+                    <i class="fa fa-3x fa-shield" aria-hidden="true"/>
+                    <h2>Passkey</h2>
+                </div>
+                <div>
+                    When you are ready, authenticate using the button below.
+                </div>
+                <div class="text-center gap-1 d-grid mb-1 pt-3">
+                    <button type="submit" class="btn btn-primary">Use passkey</button>
+                </div>
+            </form>
+        </div>
+        <div t-if="user.authMethods.length > 1" class="border rounded mb-3 p-3">
+            <h6>Having problems ?</h6>
+            <ul>
+                <li t-if="state.authMethod !== 'password'">
+                    <a href="#" t-on-click="onChangeAuthMethod" data-auth-method="password">Use your password</a>
+                </li>
+                <li t-if="user.authMethods.indexOf('webauthn') !== -1 &amp;&amp; state.authMethod !== 'webauthn'">
+                    <a href="#" t-on-click="onChangeAuthMethod" data-auth-method="webauthn">Use your passkey</a>
+                </li>
+            </ul>
+        </div>
+    </t>
+    <t t-name="auth_timeout.CheckIdentityDialog">
+        <Dialog title.translate="Confirm access" size="'md'" contentClass="'o_error_dialog'" footer="false">
+            <t t-call="auth_timeout.CheckIdentityForm"/>
+        </Dialog>
+    </t>
+
+</templates>
