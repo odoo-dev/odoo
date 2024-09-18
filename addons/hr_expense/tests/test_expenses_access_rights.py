@@ -31,7 +31,7 @@ class TestExpensesAccessRights(TestExpenseCommon, HttpCase):
             'name': 'expense_1',
             'date': '2016-01-01',
             'product_id': self.product_a.id,
-            'unit_amount': 10.0,
+            'price_unit': 10.0,
             'employee_id': self.expense_employee.id,
         })
 
@@ -46,11 +46,11 @@ class TestExpensesAccessRights(TestExpenseCommon, HttpCase):
             'payment_mode': expense.payment_mode,
         })
         expense_sheet.with_user(self.expense_user_employee).action_submit_sheet()
-        self.assertEqual(expense.state, 'reported')  # Todo change in 17.0+
+        self.assertEqual(expense.state, 'submitted')
 
         # Employee can also revert from the submitted state to a draft state
-        expense_sheet.with_user(self.expense_user_employee).reset_expense_sheets()
-        self.assertEqual(expense.state, 'draft')  # Todo change in 17.0+
+        expense_sheet.with_user(self.expense_user_employee).action_reset_approval_expense_sheets()
+        self.assertEqual(expense.state, 'reported')
 
     def test_expense_sheet_access_rights(self):
         # The expense employee is able to a create an expense sheet.
