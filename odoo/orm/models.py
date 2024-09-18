@@ -68,7 +68,6 @@ from .fields_misc import Id
 from .fields_temporal import Datetime
 from .fields_textual import Char
 
-from .database_objects import DatabaseObject, Constraint, Index, UniqueIndex
 from .identifiers import NewId
 from .utils import OriginIds, expand_ids, check_pg_name, check_object_name, check_property_field_value_name, origin_ids, PREFETCH_MAX, READ_GROUP_ALL_TIME_GRANULARITY, READ_GROUP_TIME_GRANULARITY, READ_GROUP_NUMBER_GRANULARITY
 from odoo.osv import expression
@@ -76,6 +75,7 @@ from odoo.osv import expression
 import typing
 if typing.TYPE_CHECKING:
     from collections.abc import Reversible
+    from .database_objects import DatabaseObject
     from .environments import Environment
     from .registry import Registry
     from .types import Self, ValuesType, IdType
@@ -203,6 +203,8 @@ class MetaModel(api.Meta):
         attrs.setdefault('__slots__', ())
         # this collects the fields defined on the class (via Field.__set_name__())
         attrs.setdefault('_field_definitions', [])
+        # this collects the SQL object definition on the class (via DatabaseObject.__set_name__())
+        attrs.setdefault('_class_database_objects', {})
 
         if attrs.get('_register', True):
             # determine '_module'
@@ -514,7 +516,7 @@ class BaseModel(metaclass=MetaModel):
     """
     _table = None                   #: SQL table name used by model if :attr:`_auto`
     _table_query = None             #: SQL expression of the table's content (optional)
-    _sql_constraints: list[tuple[str, str, str]] = []   #: SQL constraints [(name, sql_def, message)]
+    _database_objects: dict[str, DatabaseObject] = frozendict()  #: SQL constraints and indexes
 
     _rec_name = None                #: field to use for labeling records, default: ``name``
     _rec_names_search: list[str] | None = None    #: fields to consider in ``name_search``
@@ -624,13 +626,12 @@ class BaseModel(metaclass=MetaModel):
         the Python sense) from all classes that define the model, and possibly
         other registry classes.
         """
-        if getattr(cls, '_constraints', None):
+        if hasattr(cls, '_constraints'):
             _logger.warning("Model attribute '_constraints' is no longer supported, "
                             "please use @api.constrains on methods instead.")
-
-        # Keep links to non-inherited constraints in cls; this is useful for
-        # instance when exporting translations
-        cls._local_sql_constraints = cls.__dict__.get('_sql_constraints', [])
+        if hasattr(cls, '_sql_constraints'):
+            _logger.warning("Model attribute '_sql_constraints' is no longer supported, "
+                            "please define model.Constraint on the model.")
 
         # all models except 'base' implicitly inherit from 'base'
         name = cls._name
@@ -654,6 +655,7 @@ class BaseModel(metaclass=MetaModel):
                 '_inherit_children': OrderedSet(),      # names of children models
                 '_inherits_children': set(),            # names of children models
                 '_fields': {},                          # populated in _setup_base()
+                '_database_objects': {},                     # populated in _setup_base()
             })
             check_parent = cls._build_model_check_parent
 
@@ -722,9 +724,9 @@ class BaseModel(metaclass=MetaModel):
         cls._description = cls._name
         cls._table = cls._name.replace('.', '_')
         cls._log_access = cls._auto
+        database_objects = {}
         inherits = {}
         depends = {}
-        _sql_constraints = {}
 
         for base in reversed(cls.__base_classes):
             if is_definition_class(base):
@@ -740,21 +742,8 @@ class BaseModel(metaclass=MetaModel):
             for mname, fnames in base._depends.items():
                 depends.setdefault(mname, []).extend(fnames)
 
-            for cons in base._sql_constraints:
-                if not isinstance(cons, DatabaseObject):
-                    # XXX this will be removed before merging
-                    cons_name, definition, *cons_message = cons
-                    match definition.strip().lower().split():
-                        case ["index", *_]:
-                            cons = Index(definition[5:].strip())
-                        case ["unique", "index", *_]:
-                            cons = UniqueIndex(definition[13:].strip(), *cons_message)
-                        case _:
-                            cons = Constraint(definition, *cons_message)
-                    cons.__set_name__(cls, cons_name)
-                _sql_constraints[cons.key] = cons
-
-        cls._sql_constraints = list(_sql_constraints.values())
+            database_objects.update(base._database_objects or base._class_database_objects)
+        database_objects.update(cls._class_database_objects)
 
         # avoid assigning an empty dict to save memory
         if inherits:
@@ -3353,11 +3342,10 @@ class BaseModel(metaclass=MetaModel):
             _logger.error('parent_path field on model %r should be indexed! Add index=True to the field definition.', self._name)
 
     def _add_sql_constraints(self):
-        """ Modify this model's database table constraints so they match the one
-        in _sql_constraints.
-
+        """ Modify this model's database table constraints and indexes
+        so they match the ones in _database_objects.
         """
-        for cons in self._sql_constraints:
+        for cons in self._database_objects.values():
             cons.sync_database_object(self)
 
     @api.model
@@ -3594,6 +3582,15 @@ class BaseModel(metaclass=MetaModel):
             cls._active_name = 'active'
         elif 'x_active' in cls._fields:
             cls._active_name = 'x_active'
+
+        # 7. determine database_objects
+        database_objects = {}
+        for klass in reversed(cls._model_classes):
+            # this condition is an optimization of is_definition_class(klass)
+            if isinstance(klass, MetaModel):
+                database_objects.update(klass._class_database_objects)
+        database_objects.update(cls._class_database_objects)
+        cls._database_objects = frozendict(database_objects)
 
     @api.model
     def _setup_fields(self):
