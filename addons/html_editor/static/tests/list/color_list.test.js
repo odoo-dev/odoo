@@ -1,7 +1,13 @@
 import { click, waitFor } from "@odoo/hoot-dom";
 import { setupEditor, testEditor } from "../_helpers/editor";
 import { expect, test } from "@odoo/hoot";
-import { setColor, splitBlock, toggleOrderedList } from "../_helpers/user_actions";
+import {
+    setColor,
+    setFontSize,
+    splitBlock,
+    toggleOrderedList,
+    toggleUnorderedList,
+} from "../_helpers/user_actions";
 import { getContent } from "../_helpers/selection";
 import { animationFrame } from "@odoo/hoot-mock";
 
@@ -166,3 +172,35 @@ test("should change color of subpart of a list item (2)", async () => {
 });
 
 // @todo: write test case for remove format on list partially selected also find something better than color: initial.
+
+test("should apply font size to list if completely selected", async () => {
+    await testEditor({
+        contentBefore: `<ul><li>[abc</li><li>def]</li></ul>`,
+        stepFunction: setFontSize("18px"),
+        contentAfter: `<ul style="font-size: 18px; list-style-position: inside;"><li>[abc</li><li>def]</li></ul>`,
+    });
+});
+
+test("should not apply font size to list itself if partially selected", async () => {
+    await testEditor({
+        contentBefore: `<ul><li>[abc]</li><li>def</li></ul>`,
+        stepFunction: setFontSize("18px"),
+        contentAfter: `<ul><li><span style="font-size: 18px;">[abc]</span></li><li>def</li></ul>`,
+    });
+});
+
+test("should carry font size of list to paragraph", async () => {
+    await testEditor({
+        contentBefore: `<ul style="font-size: 20px;"><li>[]abc</li><li>def</li></ul>`,
+        stepFunction: toggleUnorderedList,
+        contentAfter: `<p><span style="font-size: 20px;">[]abc</span></p><ul style="font-size: 20px;"><li>def</li></ul>`,
+    });
+});
+
+test("should carry font class of list to paragraph", async () => {
+    await testEditor({
+        contentBefore: `<ul class="display-2-fs"><li>[]abc</li><li>def</li></ul>`,
+        stepFunction: toggleUnorderedList,
+        contentAfter: `<p><span class="display-2-fs">[]abc</span></p><ul class="display-2-fs"><li>def</li></ul>`,
+    });
+});
