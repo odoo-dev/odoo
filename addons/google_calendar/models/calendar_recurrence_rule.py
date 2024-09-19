@@ -22,6 +22,11 @@ class CalendarRecurrence(models.Model):
         detached_events = super()._apply_recurrence(specific_values_creation, no_send_edit,
                                                     generic_values_creation)
 
+        # When modifying a recurrence, method _apply_recurrence() writes on
+        # field 'recurrence_id' of self.base_event_id without changing it
+        # value. But the dependent field 'google_id' must be recomputed.
+        self.env.add_to_compute(self.base_event_id._fields['google_id'], self.base_event_id)
+
         google_service = GoogleCalendarService(self.env['google.service'])
 
         # If a synced event becomes a recurrence, the event needs to be deleted from
