@@ -21,7 +21,13 @@ export class LinkPreview extends Record {
 
     /** @type {number} */
     id;
-    message = Record.one("mail.message", { inverse: "linkPreviews" });
+    messages = Record.many("mail.message", {
+        onDelete() {
+            if (this.messages.length === 0) {
+                this.delete();
+            }
+        },
+    });
     /** @type {string} */
     image_mimetype;
     /** @type {string} */
