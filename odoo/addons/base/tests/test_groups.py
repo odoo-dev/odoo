@@ -690,9 +690,9 @@ class TestGroupsOdoo(common.TransactionCase):
             'name': 'A User',
             'login': 'a_user',
             'email': 'a@user.com',
-            'groups_id': self.env.ref('base.group_user').ids,
+            'group_ids': self.env.ref('base.group_user').ids,
         })
         with self.assertRaisesRegex(ValidationError, "The user cannot have more than one user types."):
-            user.groups_id = [(4, self.env.ref('base.group_public').id)]
+            user.group_ids = [(4, self.env.ref('base.group_public').id)]
         with self.assertRaisesRegex(ValidationError, "The user cannot have more than one user types."):
-            user.groups_id = [(4, self.env.ref('base.group_portal').id)]
+            user.group_ids = [(4, self.env.ref('base.group_portal').id)]

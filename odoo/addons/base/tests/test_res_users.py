@@ -128,7 +128,7 @@ class TestUsers(TransactionCase):
             'name': 'Internal',
             'login': 'user_internal',
             'password': 'password',
-            'groups_id': [self.env.ref('base.group_user').id],
+            'group_ids': [self.env.ref('base.group_user').id],
         })
 
         with self.assertRaises(UserError, msg='Internal users should not be able to deactivate their account'):
@@ -147,7 +147,7 @@ class TestUsers(TransactionCase):
             'name': 'Portal',
             'login': 'portal_user',
             'password': 'password',
-            'groups_id': [self.env.ref('base.group_portal').id],
+            'group_ids': [self.env.ref('base.group_portal').id],
         })
         portal_partner = portal_user.partner_id
 
@@ -155,7 +155,7 @@ class TestUsers(TransactionCase):
             'name': 'Portal',
             'login': 'portal_user_2',
             'password': 'password',
-            'groups_id': [self.env.ref('base.group_portal').id],
+            'group_ids': [self.env.ref('base.group_portal').id],
         })
         portal_partner_2 = portal_user_2.partner_id
 
@@ -244,7 +244,7 @@ class TestUsers2(TransactionCase):
     def test_reified_groups(self):
         """ The groups handler doesn't use the "real" view with pseudo-fields
         during installation, so it always works (because it uses the normal
-        groups_id field).
+        group_ids field).
         """
         # use the specific views which has the pseudo-fields
         f = Form(self.env['res.users'], view='base.view_users_form')
@@ -252,14 +252,14 @@ class TestUsers2(TransactionCase):
         f.login = "bob"
         user = f.save()
 
-        self.assertIn(self.env.ref('base.group_user'), user.groups_id)
+        self.assertIn(self.env.ref('base.group_user'), user.group_ids)
 
         # all template user groups are copied
         default_user = self.env.ref('base.default_user')
-        self.assertEqual(default_user.groups_id, user.groups_id)
+        self.assertEqual(default_user.group_ids, user.group_ids)
 
     def test_reified_groups_on_change(self):
-        """Test that a change on a reified fields trigger the onchange of groups_id."""
+        """Test that a change on a reified fields trigger the onchange of group_ids."""
         group_public = self.env.ref('base.group_public')
         group_portal = self.env.ref('base.group_portal')
         group_user = self.env.ref('base.group_user')
@@ -277,13 +277,13 @@ class TestUsers2(TransactionCase):
         self.assertFalse(user_form.share)
 
         user_form[group_field_name] = group_portal.id
-        self.assertTrue(user_form.share, 'The groups_id onchange should have been triggered')
+        self.assertTrue(user_form.share, 'The group_ids onchange should have been triggered')
 
         user_form[group_field_name] = group_user.id
-        self.assertFalse(user_form.share, 'The groups_id onchange should have been triggered')
+        self.assertFalse(user_form.share, 'The group_ids onchange should have been triggered')
 
         user_form[group_field_name] = group_public.id
-        self.assertTrue(user_form.share, 'The groups_id onchange should have been triggered')
+        self.assertTrue(user_form.share, 'The group_ids onchange should have been triggered')
 
 
 class TestUsersTweaks(TransactionCase):
