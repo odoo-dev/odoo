@@ -2377,7 +2377,8 @@ class Base(models.AbstractModel):
                     # modified field on the record, the modification on the
                     # parent record has to be done explicitly
                     parent = record[field.related.split('.')[0]]
-                    parent[field_name] = record[field_name]
+                    parent._update_cache({field_name: record[field_name]})
+                    parent.modified([field_name])
 
         result = {'warnings': OrderedSet()}
 
