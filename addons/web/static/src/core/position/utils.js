@@ -1,4 +1,7 @@
 import { localization } from "@web/core/l10n/localization";
+import { omit } from "../utils/objects";
+
+const { abs, ceil, floor } = Math;
 
 /**
  * @typedef {"top" | "left" | "bottom" | "right"} Direction
@@ -129,10 +132,11 @@ function computePosition(popper, target, { container, margin, position }) {
     };
 
     function getPositioningData(d = directions[0], v = variants[0], containerRestricted = false) {
+        const result = { direction: DIRECTIONS[d], variant: VARIANTS[v] };
         const vertical = ["t", "b"].includes(d);
         const variantPrefix = vertical ? "v" : "h";
         const directionValue = directionsData[d];
-        const variantValue = variantsData[variantPrefix + v];
+        let variantValue = variantsData[variantPrefix + v];
 
         if (containerRestricted) {
             const [directionSize, variantSize] = vertical
@@ -155,46 +159,55 @@ function computePosition(popper, target, { container, margin, position }) {
                 }
             }
 
-            // Abort if outside container boundaries
+            // Compute overflow
             const directionOverflow =
-                Math.ceil(directionValue) < Math.floor(directionMin) ||
-                Math.floor(directionValue + directionSize) > Math.ceil(directionMax);
+                ceil(directionValue) < floor(directionMin) // negative overflow
+                    ? ceil(directionValue) - floor(directionMin)
+                    : floor(directionValue + directionSize) > ceil(directionMax) // positive overflow
+                    ? floor(directionValue + directionSize) - ceil(directionMax)
+                    : 0;
             const variantOverflow =
-                Math.ceil(variantValue) < Math.floor(variantMin) ||
-                Math.floor(variantValue + variantSize) > Math.ceil(variantMax);
-            if (directionOverflow || variantOverflow) {
-                return null;
+                ceil(variantValue) < floor(variantMin) // negative overflow
+                    ? ceil(variantValue) - floor(variantMin)
+                    : floor(variantValue + variantSize) > ceil(variantMax) // positive overflow
+                    ? floor(variantValue + variantSize) - ceil(variantMax)
+                    : 0;
+            // All non zero values of variantOverflow lead to the same loss value since it can be
+            // corrected by shifting
+            result.loss = abs(directionOverflow) + (abs(variantOverflow) && 1);
+            if (directionOverflow) {
+                result.loss += 1_000_000;
             }
+            // Shift the variant with overflow amount
+            variantValue -= variantOverflow;
         }
-
         const positioning = vertical
             ? { top: directionValue, left: variantValue }
             : { top: variantValue, left: directionValue };
-        return {
-            // Subtract the offsets of the containing block (relative to the
-            // viewport). It can be done like that because the style top and
-            // left were reset to 0px in `reposition`
-            // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
-            top: positioning.top - popBox.top,
-            left: positioning.left - popBox.left,
-            direction: DIRECTIONS[d],
-            variant: VARIANTS[v],
-        };
+        // Subtract the offsets of the containing block (relative to the
+        // viewport). It can be done like that because the style top and
+        // left were reset to 0px in `reposition`
+        // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
+        result.top = positioning.top - popBox.top;
+        result.left = positioning.left - popBox.left;
+        return result;
     }
 
     // Find best solution
+    const matches = [];
     for (const d of directions) {
         for (const v of variants) {
             const match = getPositioningData(d, v, true);
-            if (match) {
-                // Position match have been found.
+            if (!match.loss) {
+                // A perfect position match has been found.
                 return match;
             }
+            matches.push(match);
         }
     }
-
-    // Fallback to default position if no best solution found
-    return getPositioningData();
+    // Settle for the first match with the least loss
+    const bestMatch = matches.sort((a, b) => a.loss - b.loss)[0];
+    return omit(bestMatch, "loss");
 }
 
 /**
