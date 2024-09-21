@@ -949,6 +949,10 @@ class MailMail(models.Model):
                             raise
                 if res:  # mail has been sent at least once, no major exception occurred
                     message_id = res
+                    # field 'message_id' is inherited and possibly doesn't change, but the code
+                    # expects some error if one cannot write on parent record,
+                    # see TestMessagePost.test_manual_send_user_notification_email_from_queue.
+                    mail.mail_message_id.check_access('write')
                     mail.write({'state': 'sent', 'message_id': res, 'failure_type': False, 'failure_reason': False})
                     if not modules.module.current_test:
                         _logger.info(
