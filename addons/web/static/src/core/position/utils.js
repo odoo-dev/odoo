@@ -33,9 +33,12 @@ const DIRECTIONS = { t: "top", r: "right", b: "bottom", l: "left" };
 /** @type {{[v: string]: Variant}} */
 const VARIANTS = { s: "start", m: "middle", e: "end", f: "fit" };
 /** @type DirectionFlipOrder */
-const DIRECTION_FLIP_ORDER = { top: "tbrl", right: "rltb", bottom: "btrl", left: "lrbt" };
+// const DIRECTION_FLIP_ORDER = { top: "tbrl", right: "rltb", bottom: "btrl", left: "lrbt" };
+const DIRECTION_FLIP_ORDER = { top: "tb", right: "rl", bottom: "bt", left: "lr" };
 /** @type VariantFlipOrder */
-const VARIANT_FLIP_ORDER = { start: "sme", middle: "mse", end: "ems", fit: "f" };
+// const VARIANT_FLIP_ORDER = { start: "sme", middle: "mse", end: "ems", fit: "f" };
+// const VARIANT_FLIP_ORDER = { start: "se", middle: "m", end: "es", fit: "f" };
+const VARIANT_FLIP_ORDER = { start: "s", middle: "m", end: "e", fit: "f" };
 /** @type DirectionFlipOrder */
 const FIT_FLIP_ORDER = { top: "tb", right: "rl", bottom: "bt", left: "lr" };
 

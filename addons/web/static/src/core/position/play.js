@@ -58,6 +58,9 @@ class PlayAction extends Component {
             get position() {
                 return position;
             },
+            set position(val) {
+                position = val;
+            },
         });
 
         this.unlock = posCtrl.unlock;
