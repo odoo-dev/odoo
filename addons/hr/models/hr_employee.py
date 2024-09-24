@@ -396,25 +396,37 @@ class HrEmployee(models.Model):
 
     def get_formview_id(self, access_uid=None):
         """ Override this method in order to redirect many2one towards the right model depending on access_uid """
+        user = self.env.user
         if access_uid:
-            self_sudo = self.with_user(access_uid)
-        else:
-            self_sudo = self
+            user = self.env['res.users'].browse(access_uid).sudo()
 
+<<<<<<< master
         if self_sudo.browse().has_access('read'):
             return super().get_formview_id(access_uid=access_uid)
+||||||| 05f9f43b93e10745b130a7ee185261e9a259ef2a
+        if self_sudo.browse().has_access('read'):
+            return super(HrEmployeePrivate, self).get_formview_id(access_uid=access_uid)
+=======
+        if user.has_group('hr.group_hr_user'):
+            return super(HrEmployeePrivate, self).get_formview_id(access_uid=access_uid)
+>>>>>>> fe7a55caf63c7719198ce44c0ccf478409304672
         # Hardcode the form view for public employee
         return self.env.ref('hr.hr_employee_public_view_form').id
 
     def get_formview_action(self, access_uid=None):
         """ Override this method in order to redirect many2one towards the right model depending on access_uid """
+<<<<<<< master
         res = super().get_formview_action(access_uid=access_uid)
+||||||| 05f9f43b93e10745b130a7ee185261e9a259ef2a
+        res = super(HrEmployeePrivate, self).get_formview_action(access_uid=access_uid)
+=======
+        res = super(HrEmployeePrivate, self).get_formview_action(access_uid=access_uid)
+        user = self.env.user
+>>>>>>> fe7a55caf63c7719198ce44c0ccf478409304672
         if access_uid:
-            self_sudo = self.with_user(access_uid)
-        else:
-            self_sudo = self
+            user = self.env['res.users'].browse(access_uid).sudo()
 
-        if not self_sudo.browse().has_access('read'):
+        if not user.has_group('hr.group_hr_user'):
             res['res_model'] = 'hr.employee.public'
 
         return res
