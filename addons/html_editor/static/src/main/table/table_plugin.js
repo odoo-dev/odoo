@@ -498,7 +498,16 @@ export class TablePlugin extends Plugin {
         this._currentMouseState = ev.type;
         this._lastMousedownPosition = [ev.x, ev.y];
         this.deselectTable();
-        if (this.isPointerInsideCell(ev)) {
+        const td = closestElement(ev.target, "td");
+        if (
+            td &&
+            !isProtected(td) &&
+            !isProtecting(td) &&
+            ((isEmptyBlock(td) && ev.detail === 2) || ev.detail === 3)
+        ) {
+            ev.preventDefault();
+            this.selectTableCells(this.shared.getEditableSelection());
+        } else if (this.isPointerInsideCell(ev)) {
             this.editable.addEventListener("mousemove", this.onMousemove);
             const currentSelection = this.shared.getEditableSelection();
             // disable dragging on table
