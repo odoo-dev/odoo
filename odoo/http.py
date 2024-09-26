@@ -233,6 +233,7 @@ def get_default_session():
         'debug': '',
         'login': None,
         'uid': None,
+        'user_agent': None,
         'session_token': None,
         '_trace': [],
     }
@@ -1119,6 +1120,15 @@ class Session(collections.abc.MutableMapping):
 
     def touch(self):
         self.is_dirty = True
+
+    def verify_user_agent(self, request):
+        user_agent = str(request.httprequest.user_agent)
+        session = request.session
+        if session.user_agent is None:
+            session.user_agent = user_agent
+        if session.user_agent != user_agent:
+            _logger.warning('User agent changed for user %i, original: %s, new: %s', session.uid, session.user_agent, user_agent)
+            session.logout()
 
     def update_trace(self, request):
         """
