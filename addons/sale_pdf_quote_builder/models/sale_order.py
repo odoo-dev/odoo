@@ -62,10 +62,10 @@ class SaleOrder(models.Model):
         ) or {}
 
         headers_available = self.available_product_document_ids.filtered(
-            lambda doc: doc.document_type == 'header'
+            lambda doc: doc.document_type == 'header' and doc.check_access('read')
         )
         footers_available = self.available_product_document_ids.filtered(
-            lambda doc: doc.document_type == 'footer'
+            lambda doc: doc.document_type == 'footer' and doc.check_access('read')
         )
         selected_documents = self.quotation_document_ids
         selected_headers = selected_documents.filtered(lambda doc: doc.document_type == 'header')
