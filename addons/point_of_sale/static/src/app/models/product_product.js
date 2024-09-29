@@ -40,14 +40,6 @@ export class ProductProduct extends Base {
         return this.attribute_line_ids.map((a) => a.product_template_value_ids).flat().length > 1;
     }
 
-    needToConfigure() {
-        return (
-            this.isConfigurable() &&
-            this.attribute_line_ids.length > 0 &&
-            !this.attribute_line_ids.every((l) => l.attribute_id.create_variant === "always")
-        );
-    }
-
     isCombo() {
         return this.combo_ids.length;
     }
@@ -124,7 +116,7 @@ export class ProductProduct extends Base {
     // product.pricelist.item records are loaded with a search_read
     // and were automatically sorted based on their _order by the
     // ORM. After that they are added in this order to the pricelists.
-    get_price(pricelist, quantity, price_extra = 0, recurring = false) {
+    get_price(pricelist, quantity, price_extra = 0, recurring = false, list_price = false) {
         // In case of nested pricelists, it is necessary that all pricelists are made available in
         // the POS. Display a basic alert to the user in the case where there is a pricelist item
         // but we can't load the base pricelist to get the price when calling this method again.
@@ -140,7 +132,7 @@ export class ProductProduct extends Base {
         }
 
         const rules = !pricelist ? [] : this.cachedPricelistRules[pricelist?.id] || [];
-        let price = this.lst_price + (price_extra || 0);
+        let price = (list_price || this.lst_price) + (price_extra || 0);
         const rule = rules.find((rule) => !rule.min_quantity || quantity >= rule.min_quantity);
         if (!rule) {
             return price;
@@ -148,7 +140,7 @@ export class ProductProduct extends Base {
 
         if (rule.base === "pricelist") {
             if (rule.base_pricelist_id) {
-                price = this.get_price(rule.base_pricelist_id, quantity, 0, true);
+                price = this.get_price(rule.base_pricelist_id, quantity, 0, true, list_price);
             }
         } else if (rule.base === "standard_price") {
             price = this.standard_price;
@@ -211,19 +203,43 @@ export class ProductProduct extends Base {
         return fields.some((field) => this[field] && this[field].includes(searchWord));
     }
 
+    get productName() {
+        const productTmplValIds = this.attribute_line_ids
+            .map((l) => l.product_template_value_ids)
+            .flat();
+        return productTmplValIds.length > 1 ? this.name : this.display_name;
+    }
+
     _isArchivedCombination(attributeValueIds) {
         if (!this._archived_combinations) {
             return false;
         }
+        const excludedPTAV = new Set();
+        let isCombinationArchived = false;
         for (const archivedCombination of this._archived_combinations) {
             const ptavCommon = archivedCombination.filter((ptav) =>
                 attributeValueIds.includes(ptav)
             );
             if (ptavCommon.length === attributeValueIds.length) {
-                return true;
+                // all attributes must be disabled from each other
+                archivedCombination.forEach((ptav) => excludedPTAV.add(ptav));
+            } else if (ptavCommon.length === attributeValueIds.length - 1) {
+                // In this case we only need to disable the remaining ptav
+                const disablePTAV = archivedCombination.find(
+                    (ptav) => !attributeValueIds.includes(ptav)
+                );
+                excludedPTAV.add(disablePTAV);
+            }
+            if (ptavCommon.length === attributeValueIds.length) {
+                isCombinationArchived = true;
             }
         }
-        return false;
+        this.attribute_line_ids.forEach((attribute_line) => {
+            attribute_line.product_template_value_ids.forEach((ptav) => {
+                ptav["excluded"] = excludedPTAV.has(ptav.id);
+            });
+        });
+        return isCombinationArchived;
     }
 }
 registry.category("pos_available_models").add(ProductProduct.pythonModel, ProductProduct);

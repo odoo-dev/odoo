@@ -1,4 +1,4 @@
-import { Component, onMounted, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl";
 import { useSelfOrder } from "@pos_self_order/app/self_order_service";
 import { attributeFlatter, attributeFormatter } from "@pos_self_order/app/utils";
 import { floatIsZero } from "@web/core/utils/numbers";
@@ -31,6 +31,7 @@ export class AttributeSelection extends Component {
 
         this.initAttribute();
         onMounted(this.onMounted);
+        onWillUnmount(this.onWillUnmount);
     }
 
     onMounted() {
@@ -62,6 +63,13 @@ export class AttributeSelection extends Component {
         }
     }
 
+    onWillUnmount() {
+        // clearing excluded tags from attribute values
+        this.props.product.attribute_line_ids.forEach((attr) => {
+            attr.product_template_value_ids.forEach((ptav) => (ptav["excluded"] = false));
+        });
+    }
+
     get showNextBtn() {
         for (const attrSelection of Object.values(this.selectedValues)) {
             if (!attrSelection) {
@@ -88,12 +96,6 @@ export class AttributeSelection extends Component {
             : attribute.product_template_value_ids;
     }
 
-    availableAttributes() {
-        return this.props.product.attribute_line_ids.filter(
-            (a) => a.attribute_id.create_variant !== "always"
-        );
-    }
-
     initAttribute() {
         const initCustomValue = (value) => {
             const selectedValue = this.selfOrder.editedLine?.custom_attribute_value_ids.find(
@@ -115,7 +117,7 @@ export class AttributeSelection extends Component {
             return false;
         };
 
-        for (const attr of this.availableAttributes()) {
+        for (const attr of this.props.product.attribute_line_ids) {
             this.selectedValues[attr.id] = {};
 
             for (const value of attr.product_template_value_ids) {

@@ -164,12 +164,6 @@ export class ProductScreen extends Component {
     get items() {
         return this.currentOrder.lines?.reduce((items, line) => items + line.qty, 0) ?? 0;
     }
-    getProductName(product) {
-        const productTmplValIds = product.attribute_line_ids
-            .map((l) => l.product_template_value_ids)
-            .flat();
-        return productTmplValIds.length > 1 ? product.name : product.display_name;
-    }
     async _getProductByBarcode(code) {
         let product = this.pos.models["product.product"].getBy("barcode", code.base_code);
 
@@ -205,11 +199,12 @@ export class ProductScreen extends Component {
             return;
         }
 
-        await this.pos.addLineToCurrentOrder(
-            { product_id: product },
-            { code },
-            product.needToConfigure()
-        );
+        const configure =
+            product.isConfigurable() &&
+            product.attribute_line_ids.length > 0 &&
+            !product.attribute_line_ids.every((l) => l.attribute_id.create_variant === "always");
+
+        await this.pos.addLineToCurrentOrder({ product_id: product }, { code }, configure);
         this.numberBuffer.reset();
     }
     async _getPartnerByBarcode(code) {

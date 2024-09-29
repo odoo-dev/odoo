@@ -215,6 +215,21 @@ export class SelfOrder extends Reactive {
         };
 
         if (Object.entries(selectedValues).length > 0) {
+            const productVariant = this.models["product.product"].find(
+                (prd) =>
+                    prd.raw.product_tmpl_id === product.raw.product_tmpl_id &&
+                    prd.product_template_variant_value_ids.every((ptav) => {
+                        return Object.values(selectedValues).some((value) => ptav.id == value);
+                    })
+            );
+            if (productVariant) {
+                Object.assign(values, {
+                    product_id: productVariant,
+                    price_unit: productVariant.lst_price,
+                    tax_ids: productVariant.taxes_id.map((tax) => ["link", tax]),
+                });
+            }
+
             values.attribute_value_ids = Object.values(selectedValues)
                 .map((a) => {
                     if (typeof a === "object") {
@@ -222,15 +237,20 @@ export class SelfOrder extends Reactive {
                             if (value === true) {
                                 const attrVal =
                                     this.models["product.template.attribute.value"].get(key);
-                                values.price_extra += attrVal.price_extra;
-                                acc.push(["link", attrVal]);
+                                if (attrVal.attribute_id.create_variant !== "always") {
+                                    values.price_extra += attrVal.price_extra;
+                                    acc.push(["link", attrVal]);
+                                }
                             }
                             return acc;
                         }, []);
                     } else {
                         const attrVal = this.models["product.template.attribute.value"].get(a);
-                        values.price_extra += attrVal.price_extra;
-                        return [["link", attrVal]];
+                        if (attrVal.attribute_id.create_variant !== "always") {
+                            values.price_extra += attrVal.price_extra;
+                            return [["link", attrVal]];
+                        }
+                        return [];
                     }
                 })
                 .flat();
@@ -418,6 +438,7 @@ export class SelfOrder extends Reactive {
     }
 
     initData() {
+        this.processSelfProductAttributes();
         this.productCategories = this.models["pos.category"].getAll();
         this.productByCategIds = this.models["product.product"].getAllBy("pos_categ_ids");
         const isSpecialProduct = (p) => this.config._pos_special_products_ids.includes(p.id);
@@ -457,6 +478,23 @@ export class SelfOrder extends Reactive {
                 this.kitchenPrinters.push(printer);
             }
         }
+    }
+
+    async processSelfProductAttributes() {
+        const productByTmplId = {};
+        this.models["product.product"].getAll().forEach((product) => {
+            if (product.product_template_variant_value_ids.length > 0) {
+                if (!productByTmplId[product.raw.product_tmpl_id]) {
+                    productByTmplId[product.raw.product_tmpl_id] = [];
+                }
+                productByTmplId[product.raw.product_tmpl_id].push(product);
+            }
+        });
+        Object.values(productByTmplId).forEach((products) => {
+            for (let i = 0; i < products.length - 1; i++) {
+                products[i].available_in_pos = false;
+            }
+        });
     }
 
     create_printer(printer) {
@@ -580,6 +618,12 @@ export class SelfOrder extends Reactive {
                 return;
             }
         }
+    }
+
+    getProductsToDispaly(categoryId) {
+        return (
+            this.productByCategIds[categoryId]?.filter((product) => product.available_in_pos) || []
+        );
     }
 
     cancelOrder() {
@@ -797,8 +841,7 @@ export class SelfOrder extends Reactive {
 
     getProductDisplayPrice(product) {
         const pricelist = this.config.pricelist_id;
-        const price = product.get_price(pricelist, 1);
-
+        const price = product.get_price(pricelist, 1, 0, false, product.list_price);
         let taxes = product.taxes_id;
 
         // Fiscal position.
