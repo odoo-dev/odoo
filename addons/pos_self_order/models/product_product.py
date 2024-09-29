@@ -53,10 +53,19 @@ class ProductProduct(models.Model):
     def _load_pos_self_data(self, data):
         domain = self._load_pos_self_data_domain(data)
         fields = self._load_pos_self_data_fields(data['pos.config']['data'][0]['id'])
+        products = self.with_context(display_default_code=False).search_read(domain, fields, load=False)
+        self._process_pos_self_ui_product_product(products)
         return {
-            'data': self.with_context(display_default_code=False).search_read(domain, fields, load=False),
+            'data': products,
             'fields': fields,
         }
+
+    def _process_pos_self_ui_product_product(self, products):
+        loaded_product_tmpl_ids = list({p['product_tmpl_id'] for p in products})
+        archived_combinations = self._get_archived_combinations_per_product_tmpl_id(loaded_product_tmpl_ids)
+        for product in products:
+            if archived_combinations.get(product['product_tmpl_id']):
+                product['_archived_combinations'] = archived_combinations[product['product_tmpl_id']]
 
     def _filter_applicable_attributes(self, attributes_by_ptal_id: Dict) -> List[Dict]:
         """

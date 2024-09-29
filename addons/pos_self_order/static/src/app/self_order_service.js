@@ -215,11 +215,40 @@ export class SelfOrder extends Reactive {
         };
 
         if (Object.entries(selectedValues).length > 0) {
-            values.attribute_value_ids = Object.values(selectedValues).map((a) => {
-                const attrVal = this.models["product.template.attribute.value"].get(a);
-                values.price_extra += attrVal.price_extra;
-                return ["link", attrVal];
-            });
+            const productVariant = this.models["product.product"].find(
+                (prd) =>
+                    prd.raw.product_tmpl_id === product.raw.product_tmpl_id &&
+                    prd.product_template_variant_value_ids.every((ptav) => {
+                        return Object.values(selectedValues).some((value) => ptav.id == value);
+                    })
+            );
+            if (productVariant) {
+                Object.assign(values, {
+                    product_id: productVariant,
+                    price_unit: productVariant.lst_price,
+                    tax_ids: productVariant.taxes_id.map((tax) => ["link", tax]),
+                });
+            }
+
+            values.attribute_value_ids = Object.entries(selectedValues).reduce(
+                (acc, [attributeId, options]) => {
+                    const optionEntries = Object.entries(
+                        typeof options === "object" ? options : { [options]: true }
+                    ).filter(([, isSelected]) => isSelected); // Only true values
+
+                    optionEntries.forEach(([optionId]) => {
+                        const attrVal = this.models["product.template.attribute.value"].get(
+                            Number(optionId)
+                        );
+                        if (attrVal.attribute_id.create_variant !== "always") {
+                            values.price_extra += attrVal.price_extra;
+                        }
+                        acc.push(["link", attrVal]);
+                    });
+                    return acc;
+                },
+                []
+            );
 
             if (Object.values(customValues).length > 0) {
                 values.custom_attribute_value_ids = Object.values(customValues)
@@ -404,6 +433,7 @@ export class SelfOrder extends Reactive {
     }
 
     initData() {
+        this.processSelfProductAttributes();
         this.productCategories = this.models["pos.category"].getAll();
         this.productByCategIds = this.models["product.product"].getAllBy("pos_categ_ids");
         const productWoCat = this.models["product.product"].filter(
@@ -437,6 +467,23 @@ export class SelfOrder extends Reactive {
                 this.kitchenPrinters.push(printer);
             }
         }
+    }
+
+    async processSelfProductAttributes() {
+        const productByTmplId = {};
+        this.models["product.product"].getAll().forEach((product) => {
+            if (product.product_template_variant_value_ids.length > 0) {
+                if (!productByTmplId[product.raw.product_tmpl_id]) {
+                    productByTmplId[product.raw.product_tmpl_id] = [];
+                }
+                productByTmplId[product.raw.product_tmpl_id].push(product);
+            }
+        });
+        Object.values(productByTmplId).forEach((products) => {
+            for (let i = 0; i < products.length - 1; i++) {
+                products[i].available_in_pos = false;
+            }
+        });
     }
 
     create_printer(printer) {
@@ -555,6 +602,12 @@ export class SelfOrder extends Reactive {
                 return;
             }
         }
+    }
+
+    getProductsToDispaly(categoryId) {
+        return (
+            this.productByCategIds[categoryId]?.filter((product) => product.available_in_pos) || []
+        );
     }
 
     cancelOrder() {
@@ -771,9 +824,7 @@ export class SelfOrder extends Reactive {
     }
 
     getProductDisplayPrice(product) {
-        const pricelist = this.config.pricelist_id;
-        const price = product.get_price(pricelist, 1);
-
+        const price = product.list_price;
         let taxes = product.taxes_id;
 
         // Fiscal position.

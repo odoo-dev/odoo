@@ -28,7 +28,7 @@
                             productId="product.id"
                             product="product"
                             class="pos.productViewMode"
-                            name="getProductName(product)"
+                            name="product.productName"
                             color="product.pos_categ_ids?.at(-1)?.color"
                             price="this.getProductPrice(product)"
                             imageUrl="pos.config.show_product_images and this.getProductImage(product)"

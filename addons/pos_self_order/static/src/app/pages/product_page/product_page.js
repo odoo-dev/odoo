@@ -50,6 +50,24 @@ export class ProductPage extends Component {
         );
     }
 
+    isArchivedCombination() {
+        const variantAttributeValueIds = this.getVariantAttributeValueIds();
+        if (variantAttributeValueIds.length === 0) {
+            return false;
+        }
+        return this.props.product._isArchivedCombination(variantAttributeValueIds);
+    }
+
+    getVariantAttributeValueIds() {
+        const attribute_value_ids = [];
+        for (const att_component of Object.values(this.state.selectedValues)) {
+            if (att_component) {
+                attribute_value_ids.push(Number(att_component));
+            }
+        }
+        return attribute_value_ids.flat();
+    }
+
     initState() {
         const editedLine = this.selfOrder.editedLine;
 

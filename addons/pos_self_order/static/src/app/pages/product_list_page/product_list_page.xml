@@ -60,7 +60,7 @@
                     t-attf-categId="{{category.id}}"
                     t-ref="productsWithCategory_{{category.id}}"
                     class="product-list-category d-empty-none bg-view px-3 pb-4">
-                    <t t-set="products" t-value="this.selfOrder.productByCategIds[category.id] || []" />
+                    <t t-set="products" t-value="this.selfOrder.getProductsToDispaly(category.id)" />
                     <t t-set="availableProducts" t-value="!state.searchInput ? products : getFilteredProducts(products)" />
                     <t t-set="nbrItem" t-value="availableProducts.length + nbrItem" />
                     <t t-if="availableProducts.length > 0">
