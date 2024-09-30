@@ -212,6 +212,24 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingHalfUpCashAndBank"
         ].flat(),
 });
 
+registry.category("web_tour.tours").add("test_cash_rounding_order_with_invoice", {
+    test: true,
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.addOrderline("random_product", "1"),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("partner_a"),
+            ProductScreen.clickPayButton(),
+
+            PaymentScreen.clickPaymentMethod("Cash"),
+
+            PaymentScreen.clickInvoiceButton(),
+            PaymentScreen.clickValidate(),
+        ].flat(),
+});
+
 registry.category("web_tour.tours").add("PaymentScreenTotalDueWithOverPayment", {
     test: true,
     steps: () =>

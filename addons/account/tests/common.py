@@ -279,6 +279,7 @@ class AccountTestInvoicingCommon(ProductCommon):
                     ('account_type', '=', 'expense'),
                     ('id', '!=', company.account_journal_early_pay_discount_loss_account_id.id)
                 ], limit=1),
+            'default_pos_account_receivable': company.account_default_pos_receivable_account_id,
             'default_account_receivable': cls.env['res.partner']._fields['property_account_receivable_id'].get_company_dependent_fallback(
                 cls.env['res.partner'].with_company(company)
             ),
