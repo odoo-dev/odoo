@@ -22,15 +22,15 @@ registry.category("web_tour.tours").add("course_reviews", {
         },
         {
             // If it fails here, it means the log note is considered as a review
-            trigger: "span:contains(Add Review)",
+            trigger: "#ratingComposerRoot:shadow span:contains(Add Review)",
             run: "click",
         },
         {
-            trigger: ".modal.modal_shown.show div.o_portal_chatter_composer_body textarea",
+            trigger: "#ratingComposerRoot:shadow .o-mail-Composer-input",
             run: "edit Great course!",
         },
         {
-            trigger: ".modal.modal_shown.show button.o_portal_chatter_composer_btn",
+            trigger: "#ratingComposerRoot:shadow .o-mail-Composer-send:enabled",
             run: "click",
         },
         {
@@ -39,26 +39,15 @@ registry.category("web_tour.tours").add("course_reviews", {
         },
         {
             // If it fails here, it means the system is allowing you to add another review.
-            trigger: "span:contains(Edit Review)",
+            trigger: "#ratingComposerRoot:shadow span:contains(Edit Review)",
             run: "click",
         },
         {
-            trigger: "div.o_portal_chatter_composer_body textarea:value(Great course!)",
+            trigger: "#ratingComposerRoot:shadow .o-mail-Composer-input",
             run: "edit Mid course!",
         },
         {
-            trigger: ".modal.modal_shown.show button.o_portal_chatter_composer_btn",
-            run: "click",
-        },
-        {
-            content: "Reload page (fetch message)",
-            trigger: ".modal",
-            run() {
-                location.reload();
-            },
-        },
-        {
-            trigger: "a[id=review-tab]",
+            trigger: "#ratingComposerRoot:shadow .o-mail-Composer-send:enabled",
             run: "click",
         },
         {

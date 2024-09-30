@@ -4,7 +4,6 @@ import {
     convertBrToLineBreak,
     decorateEmojis,
     htmlToTextContentInline,
-    prettifyMessageContent,
 } from "@mail/utils/common/format";
 import { createDocumentFragmentFromContent } from "@mail/utils/common/html";
 
@@ -291,12 +290,7 @@ export class Message extends Record {
     isEmpty = fields.Attr(false, {
         /** @this {import("models").Message} */
         compute() {
-            return (
-                this.isBodyEmpty &&
-                this.attachment_ids.length === 0 &&
-                this.trackingValues.length === 0 &&
-                !this.subtype_description
-            );
+            return this.computeIsEmpty();
         },
     });
     isBodyEmpty = fields.Attr(undefined, {
@@ -463,6 +457,15 @@ export class Message extends Record {
         return Boolean(this.thread?.selfFollower && thread?.model === "mail.box");
     }
 
+    computeIsEmpty() {
+        return (
+            this.isBodyEmpty &&
+            this.attachment_ids.length === 0 &&
+            this.trackingValues.length === 0 &&
+            !this.subtype_description
+        );
+    }
+
     async copyLink() {
         let notification = _t("Message Link Copied!");
         let type = "info";
@@ -475,31 +478,30 @@ export class Message extends Record {
         this.store.env.services.notification.add(notification, { type });
     }
 
-    async edit(
-        body,
-        attachments = [],
-        { mentionedChannels = [], mentionedPartners = [], mentionedRoles = [] } = {}
-    ) {
-        if (convertBrToLineBreak(this.body) === body && attachments.length === 0) {
+    skipEdit(body, updateData) {
+        return (
+            convertBrToLineBreak(this.body) === body &&
+            (updateData.attachments.length === 0 ||
+                (updateData.attachments.length === this.attachment_ids.length &&
+                    this.attachment_ids.every((attachment, index) =>
+                        attachment.eq(updateData.attachments[index])
+                    )))
+        );
+    }
+
+    async edit(body, updateData) {
+        const skip = this.skipEdit(body, updateData);
+        if (skip) {
             return;
         }
-        const validMentions = this.store.getMentionsFromText(body, {
-            mentionedChannels,
-            mentionedPartners,
-            mentionedRoles,
-        });
         const hadLink = this.hasLink; // to remove old previews if message no longer contains any link
         const data = await rpc("/mail/message/update_content", {
-            attachment_ids: attachments
-                .concat(this.attachment_ids)
-                .map((attachment) => attachment.id),
-            attachment_tokens: attachments
-                .concat(this.attachment_ids)
-                .map((attachment) => attachment.access_token),
-            body: await prettifyMessageContent(body, { validMentions }),
             message_id: this.id,
-            partner_ids: validMentions?.partners?.map((partner) => partner.id),
-            role_ids: validMentions?.roles?.map((role) => role.id),
+            ...(await this.store.getMessageUpdateParams({
+                body,
+                message: this,
+                updateData,
+            })),
             ...this.thread.rpcParams,
         });
         this.store.insert(data);
@@ -549,16 +551,18 @@ export class Message extends Record {
         );
     }
 
-    async remove() {
-        await rpc("/mail/message/update_content", {
+    get removeParams() {
+        return {
             attachment_ids: [],
             attachment_tokens: [],
             body: "",
             message_id: this.id,
             ...this.thread.rpcParams,
-        });
-        this.body = "";
-        this.attachment_ids = [];
+        };
+    }
+
+    async remove() {
+        this.store.insert(await rpc("/mail/message/update_content", this.removeParams));
     }
 
     async setDone() {

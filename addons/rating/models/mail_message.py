@@ -49,3 +49,6 @@ class MailMessage(models.Model):
                     and records._has_field_access(records._fields["rating_avg"], 'read')
                 ):
                     store.add(records, ["rating_avg", "rating_count"], as_thread=True)
+
+    def _filter_empty(self):
+        return super()._filter_empty().filtered(lambda msg: not msg.rating_id)
