@@ -5707,7 +5707,11 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
                 destroy: () => {
                     this.subRoots.delete(node);
                     node.destroy();
-                    this.scheduler.processTasks();
+                    if (this.scheduler.frame === 0) {
+                        // can't process all apps tasks synchronously, if `destroy` is called while some other part
+                        // of the App is still alive, tasks should be processed following the ongoing lifecycle
+                        this.scheduler.frame = this.scheduler.requestAnimationFrame(() => this.scheduler.processTasks());
+                    }
                 },
             };
         }
