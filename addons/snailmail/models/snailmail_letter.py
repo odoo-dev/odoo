@@ -455,9 +455,19 @@ class SnailmailLetter(models.Model):
         required_keys = ['street', 'city', 'zip', 'country_id']
         return all(record[key] for key in required_keys)
 
+    def _get_cover_address_split(self):
+        if self.country_id.code == 'DE':
+            # https://help.pingen.com/en/faq-post/adressanforderungen-deutsche-post#unerlaubter-inhalt-plz-zeile
+            address_split = self.partner_id.with_context(show_address=True, lang='de_DE').display_name.split('\n')
+            if self.street2:
+                address_split[1] += ' // ' + address_split[2]
+                address_split.pop(2)
+            return address_split
+        return self.partner_id.with_context(show_address=True, lang='en_US').display_name.split('\n')
+
     def _append_cover_page(self, invoice_bin: bytes):
         out_writer = PdfFileWriter()
-        address_split = self.partner_id.with_context(show_address=True, lang='en_US').display_name.split('\n')
+        address_split = self._get_cover_address_split()
         address_split[0] = self.partner_id.name or self.partner_id.parent_id and self.partner_id.parent_id.name or address_split[0]
         address = '<br/>'.join(address_split)
         address_x = 118 * mm
