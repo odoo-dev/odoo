@@ -400,8 +400,7 @@ class AccountPayment(models.Model):
             if not payment.state:
                 payment.state = 'draft'
             if (
-                not payment.outstanding_account_id
-                and payment.invoice_ids
+                payment.invoice_ids
                 and all(invoice.payment_state == 'paid' for invoice in payment.invoice_ids)
             ):
                 payment.state = 'paid'
@@ -855,12 +854,21 @@ class AccountPayment(models.Model):
 
         payments = super().create(vals_list)
 
+        # Outstanding account should be set on the payment in community edition to force the generation of journal entries on the payment
+        # This is required because no reconciliation is possible in community, which would prevent the user to reconcile the bank statement with the invoice
+        accounting_installed = self.env['account.move']._get_invoice_in_payment_state() == 'in_payment'
+
         for i, (pay, vals) in enumerate(zip(payments, vals_list)):
             if (
                 write_off_line_vals_list[i] is not None
                 or force_balance_vals_list[i] is not None
                 or linecomplete_line_vals_list[i] is not None
+                or not accounting_installed
             ):
+                if not accounting_installed and not pay.outstanding_account_id:
+                    outstanding_account = self._get_outstanding_account(pay.payment_type)
+                    pay.outstanding_account_id = outstanding_account.id
+
                 pay._generate_journal_entry(
                     write_off_line_vals=write_off_line_vals_list[i],
                     force_balance=force_balance_vals_list[i],
@@ -874,6 +882,21 @@ class AccountPayment(models.Model):
                 }:
                     pay.move_id.write(move_vals)
         return payments
+
+    def _get_outstanding_account(self, payment_type):
+        account_mapping = {
+            'inbound': ('account_journal_payment_debit_account_id', 'asset_receivable'),
+            'outbound': ('account_journal_payment_credit_account_id', 'liability_payable')
+        }
+
+        account_ref, account_type = account_mapping[payment_type]
+        outstanding_account = self.with_context(company_id=self.company_id).env['account.chart.template'].ref(account_ref, raise_if_not_found=False)
+        if not outstanding_account:
+            outstanding_account = self.env['account.account'].search([('account_type', '=', account_type)], limit=1, order='code')
+
+        if not outstanding_account:
+            raise UserError("No outstanding account could be found to make the payment")
+        return outstanding_account
 
     def write(self, vals):
         if vals.get('state') == 'in_process' and not vals.get('move_id'):
