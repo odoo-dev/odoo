@@ -2,3 +2,92 @@
 requires = ["setuptools>=41"]
 build-backend = "pep517_odoo"
 backend-path = ["setup"]
+
+[project]
+name = "odoo"
+dynamic = ["version"]
+description = "Odoo Server"
+authors = [
+    {name = "Odoo S.A.", email = "info@odoo.com"}
+]
+readme = "README.md"
+keywords = ["odoo", "framework"]
+license = {file = "LICENSE"}
+classifiers = [
+    # https://pypi.org/pypi?%3Aaction=list_classifiers
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Programming Language :: Python :: 3",
+]
+# XXX requires-python should be parsed instead of trying to find odoo.MIN_PY_VERSION
+# XXX these variables should also be moved to odoo/release.py
+requires-python = ">=3.10"
+dependencies = [
+    'asn1crypto',
+    'babel >= 1.0',
+    'cbor2',
+    'chardet',
+    'cryptography',
+    'decorator',
+    'docutils',
+    'geoip2',
+    'gevent',
+    'greenlet',
+    'idna',
+    'Jinja2',
+    'lxml',  # windows binary http://www.lfd.uci.edu/~gohlke/pythonlibs/
+    'libsass',
+    'MarkupSafe',
+    'num2words',
+    'ofxparse',
+    'openpyxl',
+    'passlib',
+    'pillow',  # windows binary http://www.lfd.uci.edu/~gohlke/pythonlibs/
+    'polib',
+    'psutil',  # windows binary code.google.com/p/psutil/downloads/list
+    'psycopg2 >= 2.2',
+    'pyopenssl',
+    'PyPDF2',
+    'pyserial',
+    'python-dateutil',
+    'python-stdnum',
+    'pytz',
+    'pyusb >= 1.0.0b1',
+    'qrcode',
+    'reportlab',  # windows binary pypi.python.org/pypi/reportlab
+    'rjsmin',
+    'requests',
+    'urllib3',
+    'vobject',
+    'werkzeug',
+    'xlrd',
+    'xlsxwriter',
+    'xlwt',
+    'zeep',
+]
+
+[project.optional-dependencies]
+ldap = ["python-ldap"]
+test = [
+    "freezegun==1.1.0 ; python_version < '3.11'",  # (Jammy)
+    "freezegun==1.2.1 ; python_version >= '3.11'",
+    "typing_extensions==4.4.0 ; python_version < '3.12'",
+]
+
+[project.scripts]
+# XXX odoo is there for backward-compatibility with deb install
+odoo = "odoo.cli:main"
+odoo-bin = "odoo.cli:main"
+
+[project.urls]
+"Homepage" = "https://www.odoo.com"
+"Repository" = "https://github.com/odoo/odoo"
+"Download" = "https://www.odoo.com/page/download"
+"Documentation" = "https://www.odoo.com/documentation"
+"Bug Tracker" = "https://www.odoo.com/help"
+
+[tool.setuptools]
+packages = ["odoo"]
+
+[tool.setuptools.dynamic]
+version = {attr = "odoo.release.version"}

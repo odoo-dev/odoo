@@ -27,7 +27,7 @@ a distributed server, an object database, a dynamic GUI,
 customizable reports, and XML-RPC interfaces.
 
 %generate_buildrequires
-%pyproject_buildrequires
+%pyproject_buildrequires -p
 
 %prep
 %autosetup
@@ -105,5 +105,6 @@ EOF
 
 %files
 %{_bindir}/odoo
+%{_bindir}/odoo-bin
 %{python3_sitelib}/%{name}-*.dist-info/
 %{python3_sitelib}/%{name}

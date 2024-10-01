@@ -16,6 +16,7 @@ version_info = (18, 3, 0, ALPHA, 1, '')
 series = serie = major_version = '.'.join(str(s) for s in version_info[:2])
 version = series + RELEASE_LEVELS_DISPLAY[version_info[3]] + str(version_info[4] or '') + version_info[5]
 
+# XXX code below duplicates pyproject.toml info and can be fetched using importlib.metadata
 product_name = 'Odoo'
 description = 'Odoo Server'
 long_desc = '''Odoo is a complete ERP and CRM. The main features are accounting (analytic
