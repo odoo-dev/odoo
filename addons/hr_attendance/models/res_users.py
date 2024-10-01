@@ -41,7 +41,10 @@ class User(models.Model):
             "type": "ir.actions.act_window",
             "name": _("Attendances This Month"),
             "res_model": "hr.attendance",
-            "views": [[self.env.ref('hr_attendance.hr_attendance_employee_simple_tree_view').id, "list"]],
+            "views": [
+                [self.env.ref('hr_attendance.hr_attendance_validated_hours_employee_simple_tree_view').id, "list"],
+                [self.env.ref('hr_attendance.hr_attendance_employee_simple_form_view').id, "form"],
+            ],
             "context": {
                 "create": 0
             },
