@@ -1,7 +1,12 @@
 [build-system]
-requires = ["setuptools>=41"]
-build-backend = "pep517_odoo"
-backend-path = ["setup"]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# XXX building read-openpyxl
+# docker run -it -v $PWD/odoo:/mnt/odoo:ro ubuntu
+# apt update && apt install -y python3-{build,venv}
+# cd /mnt/odoo
+# python3 -m build -o /tmp/build
 
 [project]
 name = "odoo"
@@ -183,3 +188,12 @@ packages = ["odoo"]
 
 [tool.setuptools.dynamic]
 version = {attr = "odoo.release.version"}
+
+[tool.hatch]
+version = {path = "odoo/release.py"}
+
+[tool.hatch.build.targets.sdist.force-include]
+"./addons" = "odoo/addons"
+
+[tool.hatch.build.targets.wheel]
+packages = ["odoo"]
