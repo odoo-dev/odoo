@@ -73,6 +73,7 @@ ldap = ["python-ldap"]
 test = [
     "freezegun==1.1.0 ; python_version < '3.11'",  # (Jammy)
     "freezegun==1.2.1 ; python_version >= '3.11'",
+    "ruff==0.6.5",
     "typing_extensions==4.4.0 ; python_version < '3.12'",
 ]
 runbot = [
@@ -184,3 +185,108 @@ packages = ["odoo"]
 
 [tool.setuptools.dynamic]
 version = {attr = "odoo.release.version"}
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.ruff]
+fix = false
+show-fixes = true
+output-format = "full"
+line-length = 120
+preview = true
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+	"A",  # (builtin-shadowing)
+	"ANN", # (flake8-annotations)
+	"ARG", # (unused-arguments)
+	"B", # (flake8-bugbear)
+	"B904", # (reraise-no-cause)
+	"C408", # (unnecessary-collection-call)
+	"C420", # (unnecessary-dict-comprehension-for-iterable)
+	"C901", # (complex-structure)
+	"COM812", # (missing-trailing-comma)
+	"CPY001", # (flake8_copyright)
+	"D", # (pydocstyle)
+	"DOC", # (docstring-missing-returns)
+	"DTZ", # (datetime-now-without-tz-arg)
+	"E266", # (multiple-leading-hashes-for-block-comment)
+	"E501", # (line-too-long)
+	"E713", # (not-in-test)
+	"E741", # (ambiguous-variable-name)
+	"EM101", # (raw-string-in-exception)
+	"EM102", # (f-string-in-exception)
+	"ERA001", # (commented-out-code)
+	"FA100", # (future-rewritable-type-annotation)
+	"FA102", # (future-required-type-annotation)
+	"FBT", # (flake8-boolean-trap)
+	"FIX", # (flake8-fixme)
+	"FURB101", # (read-whole-file)
+	"FURB103", # (write-whole-file)
+	"FURB118", # (reimplemented-operator)
+	"FURB152", # (math-constant)
+	"I001", # (unsorted-imports)
+	"INP001", # (implicit-namespace-package)
+	"N", # (pep8-naming)
+	"PD", # (pandas-vet)
+	"PERF", # (Perflint)
+	"PGH003", # (blanket-type-ignore)
+	"PIE790", # (no-unnecessary-pass)
+	"PIE808", # (unnecessary-range-start)
+	"PLC2701", # (import-private-name)
+	"PLR", # (pylint-refactoring)
+	"PLW2901", # (redefined-loop-name)
+	"PT", # (flake8-pytest-style)
+	"PTH", # (flake8-use-pathlib)
+	"Q", # (flake8-quotes)
+	"RET", # (flake8-return)
+	"RET502", # (implicit-return-value)
+	"RET503", # (implicit-return)
+	"RSE102", # (unnecessary-paren-on-raise-exception)
+	"RUF001", # (ambiguous-unicode-character-string)
+	"RUF005", # (collection-literal-concatenation)
+	"RUF012", # (mutable-class-default)
+	"RUF021", # (parenthesize-chained-operators)
+	"RUF100", # (unused-noqa)
+	"S", # (flake8-bandit)
+	"SIM102", # (collapsible-if)
+	"SIM108",  # (if-else-block-instead-of-if-exp)
+	"SIM117",  # ( multiple-with-statements)
+	"SLF001",  # (private-member-access)
+	"TD",  # (flake8-todos)
+	"TID252",  # (relative-imports)
+	"TRY002",  # (raise-vanilla-class)
+	"TRY003",  # (raise-vanilla-args)
+	"TRY300",  # (try-consider-else)
+	"TRY400",  # (error-instead-of-exception)
+	"UP006",  # (non-pep585-annotation)
+	"UP007",  # (non-pep604-annotation)
+	"UP031",  # (printf-string-formatting)
+	"UP038",  # (non-pep604-isinstance)
+]
+
+[tool.ruff.lint.flake8-builtins]
+builtins-ignorelist = ["format", "id", "type"]
+
+[tool.ruff.lint.isort]
+section-order = ["future", "standard-library", "third-party", "first-party", "odoo-addons", "local-folder"]
+known-first-party = ["odoo"]
+known-local-folder = ["odoo.addons", "odoo.upgrade"]
+
+[tool.ruff.lint.isort.sections]
+odoo-addons = ["odoo.addons", "openerp.addons"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.per-file-ignores]
+"*/__init__.py" = [
+    "F401",
+    "F403",
+]
+# ignore docstring lint for tests files
+"*/tests/*.py" = ["D"]
+# and for upgrade scripts
+"*/*/{pre,post,end}-*.py" = ["D"]
