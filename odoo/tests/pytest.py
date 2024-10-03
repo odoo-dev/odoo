@@ -5,16 +5,23 @@ only when their containing modules are installed in the provided database.
 
 ## Sadness on the stack:
 
-- odoo tests currently really don't like xdist
-- parameterization is not supported with unittest, and pytest-repeat uses parametrization
+- parametrization is not supported with unittest, and pytest-repeat uses
+  parametrization meaning pytest-repeat can't be used to work with (or try and
+  suss out) nondeterminism
+- pytest-rerunfailures seems to not work at all
+- xdist broadly works fine but causes persistent false positive tour failures,
+  which generally but don't necessarily disappear when re-running the tours
+  (using `--lf`) without xdist
 """
 import importlib
 import os
+import pathlib
 import secrets
 import shutil
 import sys
 import threading
 import unittest
+from collections.abc import Iterator
 from contextlib import closing
 from os import environ
 from pathlib import Path
@@ -25,6 +32,7 @@ from typing import Iterable
 import _pytest.python
 import appdirs
 import psycopg2
+import py
 import pytest
 
 import odoo
@@ -58,7 +66,7 @@ collect_ignore = [
     "setup",
 ]
 
-def pytest_addoption(parser):
+def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addoption(
         # sadly -d is off-limit
         "--database", "--db",
@@ -74,7 +82,7 @@ def pytest_addoption(parser):
 
 
 @pytest.hookimpl(tryfirst=True)
-def pytest_configure(config: pytest.Config):
+def pytest_configure(config: pytest.Config) -> None:
     if config.getoption("--help"):
         return
 
@@ -96,7 +104,7 @@ def pytest_configure(config: pytest.Config):
         config.addinivalue_line("python_files", "*/tests/test_*.py")
 
 
-def pytest_ignore_collect(collection_path, path, config):
+def pytest_ignore_collect(collection_path: pathlib.Path, path: py.path.local, config: pytest.Config) -> bool | None:
     """ Skips collection for modules which are not installed in the current
     database.
     """
@@ -119,7 +127,7 @@ def _get_default_datadir() -> str:
 
 
 @pytest.hookimpl(wrapper=True)
-def pytest_collection(session: pytest.Session):
+def pytest_collection(session: pytest.Session) -> object:
     # needs to be performed before collection in order to import modules in the
     # correct order
     database = session.config.getoption('--database')
@@ -148,7 +156,7 @@ def pytest_collection(session: pytest.Session):
 
 
 @pytest.fixture(scope='session')
-def odoo_session(pytestconfig: pytest.Config):
+def odoo_session(pytestconfig: pytest.Config) -> Iterator[registry.Registry]:
     # remove odoo test harness's retry magic, pytest has rerunfailures as well
     # as failure selection (--lf, --sw, ...) and it breaks because pytest
     # doesn't fully implement `unittest.TestResult`
@@ -198,12 +206,14 @@ def odoo_session(pytestconfig: pytest.Config):
 
 
 @pytest.fixture
-def odoo_test(odoo_session):
+def odoo_test(odoo_session: registry.Registry, request: pytest.FixtureRequest) -> Iterator[None]:
+    module.current_test = request.node.nodeid
     yield
+    module.current_test = True
 
 
 @pytest.fixture(scope='session')
-def odoo_http(odoo_session):
+def odoo_http(odoo_session: registry.Registry) -> Iterator[None]:
     """For :class:`HttpCase` tests, we need to start the http server and
     pregenerate the assets.
     """
@@ -250,7 +260,7 @@ def import_path(
 _pytest.python.import_path = import_path
 
 
-def pytest_pycollect_makemodule(module_path, path, parent):
+def pytest_pycollect_makemodule(module_path: pathlib.Path, path: py.path.local, parent: pytest.Item) -> pytest.Module:
     return OdooModule.from_parent(parent, path=module_path)
 
 
