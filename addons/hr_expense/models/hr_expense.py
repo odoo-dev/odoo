@@ -446,7 +446,6 @@ class HrExpense(models.Model):
 
     @api.depends('product_id', 'company_id')
     def _compute_account_id(self):
-        property_field = self.env['product.category']._fields['property_account_expense_categ_id']
         for _expense in self:
             expense = _expense.with_company(_expense.company_id)
             if not expense.product_id:
@@ -970,7 +969,7 @@ class HrExpense(models.Model):
         Returned expense accounts are the first expense account encountered in the following list:
         1. expense account of the expense itself
         2. expense account of the product
-        3. expense account of the product category
+        3. expense account of the company
         4. expense account on the purchase journal for employee expense
         """
 

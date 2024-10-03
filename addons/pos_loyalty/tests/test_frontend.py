@@ -1025,7 +1025,7 @@ class TestUi(TestPointOfSaleHttpCommon):
     def test_discount_with_reward_product_domain(self):
         self.env['loyalty.program'].search([]).write({'active': False})
 
-        product_category_base = self.env.ref('product.product_category_furniture')
+        product_category_base = self.env.ref('product.product_category_consumable')
         product_category_office = self.env['product.category'].create({
             'name': 'Office furnitures',
             'parent_id': product_category_base.id
@@ -1213,7 +1213,7 @@ class TestUi(TestPointOfSaleHttpCommon):
     def test_discount_specific_products(self):
         self.env['loyalty.program'].search([]).write({'active': False})
 
-        product_category_base = self.env.ref('product.product_category_office')
+        product_category_base = self.env.ref('product.product_category_consumable')
         product_category_office = self.env['product.category'].create({
             'name': 'Office furnitures',
             'parent_id': product_category_base.id
@@ -1237,7 +1237,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'list_price': 50,
                 'available_in_pos': True,
                 'taxes_id': False,
-                'categ_id': product_category_office.id
+                'categ_id': product_category_office.id,
             }
         )
 

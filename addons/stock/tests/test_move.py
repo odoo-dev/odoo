@@ -992,7 +992,7 @@ class StockMove(TransactionCase):
 
         child_category = self.env['product.category'].create({
             'name': 'child_category',
-            'parent_id': self.ref('product.product_category_services'),
+            'parent_id': self.ref('product.product_category_consumable'),
         })
         shelf1_location = self.env['stock.location'].create({
             'name': 'shelf1',
@@ -1125,7 +1125,7 @@ class StockMove(TransactionCase):
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
         warehouse.reception_steps = 'two_steps'
 
-        basic_category = self.env.ref('product.product_category_services')
+        basic_category = self.env.ref('product.product_category_consumable')
         child_locations = self.env['stock.location']
         categs = self.env['product.category']
 

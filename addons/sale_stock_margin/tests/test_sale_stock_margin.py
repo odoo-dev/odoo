@@ -42,11 +42,10 @@ class TestSaleStockMargin(TestStockValuationCommon):
         })
 
     def _create_product(self):
-        product_category = self.env['product.category'].create({'name': 'Product Category'})
         product_template = self.env['product.template'].create({
             'name': 'Super product',
             'is_storable': True,
-            'categ_id': product_category.id,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         product_template.categ_id.property_cost_method = 'fifo'
         return product_template.product_variant_ids

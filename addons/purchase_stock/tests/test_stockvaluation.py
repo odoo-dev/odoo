@@ -26,9 +26,6 @@ class TestStockValuation(TransactionCase):
             'name': 'Wood Corner Partner',
             'company_id': cls.env.user.company_id.id,
         })
-        cls.cat = cls.env['product.category'].create({
-            'name': 'cat',
-        })
         cls.product1 = cls.env['product.product'].create({
             'name': 'Large Desk',
             'standard_price': 1299.0,
@@ -36,7 +33,7 @@ class TestStockValuation(TransactionCase):
             # Ignore tax calculations for these tests.
             'supplier_taxes_id': False,
             'is_storable': True,
-            'categ_id': cls.cat.id,
+            'categ_id': cls.env.ref('product.product_category_consumable').id,
         })
         Account = cls.env['account.account']
         cls.stock_input_account = Account.create({

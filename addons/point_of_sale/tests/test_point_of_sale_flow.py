@@ -1622,21 +1622,15 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
         self.assertEqual(refund.picking_ids.move_line_ids_without_package.owner_id.id, order.picking_ids.move_line_ids_without_package.owner_id.id, "The owner of the refund is not the same as the owner of the original order")
 
     def test_journal_entries_category_without_account(self):
-        #create a new product category without account
-        category = self.env['product.category'].create({
-            'name': 'Category without account',
-            'property_account_income_categ_id': False,
-            'property_account_expense_categ_id': False,
-        })
+        # Set company's default accounts to false
+        self.env.company.income_account_id = False
+        self.env.company.expense_account_id = False
         product = self.env['product.product'].create({
             'name': 'Product with category without account',
             'is_storable': True,
-            'categ_id': category.id,
             'property_account_income_id': False,
             'property_account_expense_id': False,
         })
-        self.env.company.income_account_id = False
-        self.env.company.expense_account_id = False
         account = self.env['account.account'].create({
             'name': 'Account for category without account',
             'code': 'X1111',

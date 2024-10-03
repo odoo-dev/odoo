@@ -17,7 +17,7 @@ class TestMrpSubcontractingCommon(TransactionCase):
             'company_id': cls.env.ref('base.main_company').id,
         })
         # 2. Create a BOM of subcontracting type
-        cls.product_category = cls.env['product.category'].create({'name': 'Product Category'})
+        cls.product_category = cls.env.ref('product.product_category_consumable')
         cls.comp1 = cls.env['product.product'].create({
             'name': 'Component1',
             'is_storable': True,
