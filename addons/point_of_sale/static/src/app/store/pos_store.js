@@ -330,6 +330,7 @@ export class PosStore extends Reactive {
             order.uiState.displayed = false;
             await this.afterOrderDeletion();
         }
+        return orderIsDeleted;
     }
     async afterOrderDeletion() {
         this.set_order(
@@ -343,7 +344,7 @@ export class PosStore extends Reactive {
             if (order && (await this._onBeforeDeleteOrder(order))) {
                 if (
                     typeof order.id === "number" &&
-                    Object.keys(order.last_order_preparation_change).length > 0
+                    Object.keys(order.last_order_preparation_change.lines).length > 0
                 ) {
                     await this.sendOrderInPreparation(order, true);
                 }
