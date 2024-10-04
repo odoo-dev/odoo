@@ -153,6 +153,37 @@ export class FloorScreen extends Component {
                 table.position_h = table.getX();
                 table.position_v = table.getY();
                 if (table.parent_id) {
+                    const destinationTable = this.pos.getMainTable(table);
+                    if (this.pos.mergedTableOrders[destinationTable.id]?.[table.id]) {
+                        const orderToRestore =
+                            this.pos.mergedTableOrders[destinationTable.id][table.id]?.[0];
+
+                        this.pos.restoreOrdersToOriginalTable(orderToRestore);
+
+                        const destinationTableOrder =
+                            this.pos.getActiveOrdersOnTable(destinationTable)[0];
+
+                        const orderRestoreLines = Object.keys(
+                            orderToRestore.last_order_preparation_change.lines
+                        ).length;
+                        const destinationOrderLines = Object.keys(
+                            destinationTableOrder.last_order_preparation_change.lines
+                        ).length;
+
+                        if (orderRestoreLines > 0) {
+                            this.pos.sendOrderInPreparationUpdateLastChange(orderToRestore);
+                        }
+                        if (destinationOrderLines > 0) {
+                            this.pos.sendOrderInPreparationUpdateLastChange(destinationTableOrder);
+                        }
+                        delete this.pos.mergedTableOrders[destinationTable.id][table.id];
+                    }
+                    if (
+                        this.pos.mergedTableOrders[destinationTable.id] &&
+                        !Object.keys(this.pos.mergedTableOrders[destinationTable.id]).length
+                    ) {
+                        delete this.pos.mergedTableOrders[destinationTable.id];
+                    }
                     this.pos.data.write("restaurant.table", [table.id], {
                         parent_id: null,
                     });
@@ -230,7 +261,17 @@ export class FloorScreen extends Component {
                 }
                 const oToTrans = this.pos.getActiveOrdersOnTable(table)[0];
                 if (oToTrans) {
-                    this.pos.transferOrder(oToTrans.uuid, this.state.potentialLink.parent);
+                    const destinationTable = this.pos.getMainTable(this.state.potentialLink.parent);
+                    if (table.id === this.state.potentialLink?.child.id) {
+                        this.pos.mergedTableOrders[destinationTable.id] ??= {};
+                        this.pos.mergedTableOrders[destinationTable.id][table.id] ??= [];
+                        this.pos.mergedTableOrders[destinationTable.id][table.id].push(oToTrans);
+                    }
+                    this.pos.transferOrder(oToTrans.uuid, this.state.potentialLink.parent, false);
+
+                    if (Object.keys(oToTrans.last_order_preparation_change.lines).length > 0) {
+                        this.pos.sendOrderInPreparation(oToTrans, true);
+                    }
                 }
                 this.pos.data.write("restaurant.table", [table.id], {
                     parent_id: this.state.potentialLink.parent.id,
