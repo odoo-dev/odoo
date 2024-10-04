@@ -285,20 +285,20 @@ class ProductTemplate(models.Model):
                 ),
             }
             if pricelist_rule_id:  # If a rule was applied, there might be a discount
-                # For ecommerce flows, the base price is always the product sales price
-                # which can be computed by calling `_compute_base_price` without a pricelist rule
-                pricelist_base_price = template.env['product.pricelist.item']._compute_base_price(
-                    product=template,
-                    quantity=1.0,
-                    date=date,
-                    uom=template.uom_id,
-                    currency=currency,
-                )
-                if pricelist_base_price != pricelist_price:
-                    base_price = pricelist_base_price
-                    template_price_vals['base_price'] = self._apply_taxes_to_price(
-                        base_price, currency, product_taxes, taxes, self, website=website,
+                pricelist_item = template.env['product.pricelist.item'].browse(pricelist_rule_id)
+                if pricelist_item.compute_price == 'percentage':
+                    pricelist_base_price = pricelist_item._compute_base_price(
+                        product=template,
+                        quantity=1.0,
+                        date=date,
+                        uom=template.uom_id,
+                        currency=currency,
                     )
+                    if pricelist_base_price != pricelist_price:
+                        base_price = pricelist_base_price
+                        template_price_vals['base_price'] = self._apply_taxes_to_price(
+                            base_price, currency, product_taxes, taxes, self, website=website,
+                        )
 
             if not base_price and comparison_prices_enabled and template.compare_list_price:
                 template_price_vals['base_price'] = template.currency_id._convert(
@@ -469,15 +469,15 @@ class ProductTemplate(models.Model):
 
         price_before_discount = pricelist_price
         if pricelist_rule_id:  # If a rule was applied, there might be a discount
-            # For ecommerce flows, the base price is always the product sales price
-            # which can be computed by calling `_compute_base_price` without a pricelist rule
-            price_before_discount = self.env['product.pricelist.item']._compute_base_price(
-                product=product_or_template,
-                quantity=quantity or 1.0,
-                date=date,
-                uom=product_or_template.uom_id,
-                currency=currency,
-            )
+            pricelist_item = self.env['product.pricelist.item'].browse(pricelist_rule_id)
+            if pricelist_item.compute_price == 'percentage':
+                price_before_discount = self.env['product.pricelist.item']._compute_base_price(
+                    product=product_or_template,
+                    quantity=quantity or 1.0,
+                    date=date,
+                    uom=product_or_template.uom_id,
+                    currency=currency,
+                )
 
         has_discounted_price = price_before_discount > pricelist_price
         combination_info = {

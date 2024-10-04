@@ -199,7 +199,7 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
             strikethrough_price = self._get_strikethrough_price(
                 product_or_template.with_context(
                     **product_or_template._get_product_price_context(combination)
-                ), currency, date, basic_product_information['price']
+                ), pricelist, currency, date, basic_product_information['price']
             )
             price = self._apply_taxes_to_price(
                 basic_product_information['price'], product_or_template, currency
@@ -237,7 +237,7 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
             return self._apply_taxes_to_price(price_extra, product_or_template, currency)
         return price_extra
 
-    def _get_strikethrough_price(self, product_or_template, currency, date, price):
+    def _get_strikethrough_price(self, product_or_template, pricelist, currency, date, price):
         """ Return the strikethrough price of the product, if there is one.
 
         :param recordset product_or_template: The product for which to compute the strikethrough
@@ -251,20 +251,25 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
         :rtype: float|None
         :return: The strikethrough price of the product, if there is one.
         """
-        sales_price = request.env['product.pricelist.item']._compute_base_price(
-            product_or_template,
-            1.0,
-            product_or_template.uom_id,
-            date,
-            currency,
+        pricelist_item = pricelist.item_ids.filtered(
+            lambda item: item.product_tmpl_id.id == product_or_template.product_tmpl_id.id
         )
-        if currency.compare_amounts(sales_price, price) == 1:
-            # apply taxes
-            return self._apply_taxes_to_price(
-                sales_price,
+        # Only show strikethrough if compute_price is set to 'percentage'
+        if pricelist_item.compute_price == 'percentage':
+            sales_price = request.env['product.pricelist.item']._compute_base_price(
                 product_or_template,
+                1.0,
+                product_or_template.uom_id,
+                date,
                 currency,
             )
+            if currency.compare_amounts(sales_price, price) == 1:
+                # apply taxes
+                return self._apply_taxes_to_price(
+                    sales_price,
+                    product_or_template,
+                    currency,
+                )
 
         # First, try to use `compare_list_price` as the strikethrough price.
         if (
