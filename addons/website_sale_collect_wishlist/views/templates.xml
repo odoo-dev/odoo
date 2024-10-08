@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="unavailable_products_warning" inherit_id="website_sale_collect.unavailable_products_warning">
+        <div name="o_wsale_collect_warning" position="inside">
+            <a
+                href="#"
+                class="o_update_wishlist small"
+                t-att-data-product-template-id="order_line.product_id.product_tmpl_id.id"
+                t-att-data-product-product-id="order_line.product_id.id"
+                data-action="o_wishlist"
+                title="Save for later"
+            >
+                <i t-att-data-product-id="order_line.product_id.id" class="fa fa-heart-o"/>
+            </a>
+        </div>
+    </template>
+</odoo>

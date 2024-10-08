@@ -9,7 +9,7 @@
                 t-as="order_line"
                 t-attf-class="d-flex m-2 position-relative"
             >
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2" name="o_wsale_collect_warning">
                     <a t-att-href="order_line.product_id.website_url">
                         <span
                             t-field="order_line.product_id.image_128"
