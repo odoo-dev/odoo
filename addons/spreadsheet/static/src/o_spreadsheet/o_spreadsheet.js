@@ -33416,7 +33416,7 @@ function getColumnsNumber(env) {
 }
 
 const pivotProperties = {
-    name: _t("Edit Pivot"),
+    name: _t("See pivot properties"),
     execute(env) {
         const position = env.model.getters.getActivePosition();
         const pivotId = env.model.getters.getPivotIdFromPosition(position);
@@ -33570,8 +33570,7 @@ cellMenuRegistry
 })
     .add("pivot_properties", {
     ...pivotProperties,
-    sequence: 160,
-    separator: true,
+    sequence: 170,
 });
 
 const sortRange = {
