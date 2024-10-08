@@ -6327,6 +6327,12 @@ class BaseModel(metaclass=MetaModel):
                 if field.compute and field.store:
                     # process pending computations in batch
                     field.recompute(self)
+                # XXX temporary logger
+                caller = inspect.currentframe().f_back
+                if caller.f_code.co_name == 'mapped':
+                    caller = caller.f_back
+                if field.relational and caller.f_code.co_name not in ('filtered_domain', 'flush', '_find_value_from_field_path', 'parse'):
+                    _logger.warning("XXX mappedrelational: %s", func, stack_info=True)
                 func = field.__get__
             else:
                 *path_start, last_name = func.split(".")
