@@ -233,7 +233,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             'classified_tax_category_vals': tax_category_vals_list,
         }
 
-    def _get_document_allowance_charge_vals_list(self, invoice):
+    def _get_document_allowance_charge_vals_list(self, invoice, taxes_vals=None):
         """
         https://docs.peppol.eu/poacc/billing/3.0/bis/#_document_level_allowance_or_charge
         Usage for early payment discounts:
@@ -346,7 +346,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         # Price subtotal with discount / quantity:
         gross_price_unit = gross_price_subtotal / line.quantity if line.quantity else 0.0
 
-        uom = super()._get_uom_unece_code(line.product_uom_id)
+        uom = self._get_uom_unece_code(line.product_uom_id)
 
         return {
             'currency': line.currency_id,
@@ -377,7 +377,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         """
         allowance_charge_vals_list = self._get_invoice_line_allowance_vals_list(line, tax_values_list=taxes_vals)
 
-        uom = super()._get_uom_unece_code(line.product_uom_id)
+        uom = self._get_uom_unece_code(line.product_uom_id)
         total_fixed_tax_amount = sum(
             vals['amount']
             for vals in allowance_charge_vals_list
@@ -481,7 +481,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         line_extension_amount = 0.0
 
         invoice_lines = invoice.invoice_line_ids.filtered(lambda line: line.display_type not in ('line_note', 'line_section') and line._check_edi_line_tax_required())
-        document_allowance_charge_vals_list = self._get_document_allowance_charge_vals_list(invoice)
+        document_allowance_charge_vals_list = self._get_document_allowance_charge_vals_list(invoice, taxes_vals)
         invoice_line_vals_list = []
         for line_id, line in enumerate(invoice_lines):
             line_taxes_vals = taxes_vals['tax_details_per_record'][line]
@@ -580,7 +580,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             vals['document_type'] = 'credit_note'
             vals['main_template'] = 'account_edi_ubl_cii.ubl_20_CreditNote'
             vals['vals']['document_type_code'] = 381
-        else: # invoice.move_type == 'out_invoice'
+        else:  # invoice.move_type == 'out_invoice'
             vals['document_type'] = 'invoice'
             vals['main_template'] = 'account_edi_ubl_cii.ubl_20_Invoice'
             vals['vals']['document_type_code'] = 380
@@ -627,7 +627,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             'phone': self._find_value(f'.//cac:{role}Party/cac:Party//cbc:Telephone', tree),
             'email': self._find_value(f'.//cac:{role}Party/cac:Party//cbc:ElectronicMail', tree),
             'name': self._find_value(f'.//cac:{role}Party/cac:Party//cbc:Name', tree) or
-                    self._find_value(f'.//cac:{role}Party/cac:Party//cbc:RegistrationName', tree),
+            self._find_value(f'.//cac:{role}Party/cac:Party//cbc:RegistrationName', tree),
             'country_code': self._find_value(f'.//cac:{role}Party/cac:Party//cac:Country//cbc:IdentificationCode', tree),
         }
 
