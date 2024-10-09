@@ -72,7 +72,107 @@ class ProductTemplate(models.Model):
 
 
 class ProductProduct(models.Model):
+<<<<<<< master
     _inherit = ["product.product"]
+||||||| 73b63a319cf76e7d52c9ea53dd7fbed7b4384bbe
+    _inherit = "product.product"
+
+    @api.model
+    def _load_pos_data_fields(self, config_id):
+        params = super()._load_pos_data_fields(config_id)
+        params += ['self_order_available']
+        return params
+
+    @api.model
+    def _load_pos_self_data_fields(self, config_id):
+        params = super()._load_pos_self_data_fields(config_id)
+        params += ['public_description']
+        return params
+
+    def _load_pos_self_data(self, data):
+        domain = self._load_pos_data_domain(data)
+
+        # Add custom fields for 'formula' taxes.
+        fields = set(self._load_pos_data_fields(data['pos.config']['data'][0]['id']))
+        taxes = self.env['account.tax'].search(self.env['account.tax']._load_pos_data_domain(data))
+        product_fields = taxes._eval_taxes_computation_prepare_product_fields()
+        fields = list(fields.union(product_fields))
+
+        config = self.env['pos.config'].browse(data['pos.config']['data'][0]['id'])
+        products = self.with_context(display_default_code=False).search_read(
+            domain,
+            fields,
+            limit=config.get_limited_product_count(),
+            order='sequence,default_code,name',
+            load=False
+        )
+
+        data['pos.config']['data'][0]['_product_default_values'] = \
+            self.env['account.tax']._eval_taxes_computation_prepare_product_default_values(product_fields)
+
+        return {
+            'data': products,
+            'fields': fields,
+        }
+=======
+    _inherit = "product.product"
+
+    @api.model
+    def _load_pos_data_fields(self, config_id):
+        params = super()._load_pos_data_fields(config_id)
+        params += ['self_order_available']
+        return params
+
+    @api.model
+    def _load_pos_self_data_fields(self, config_id):
+        params = super()._load_pos_self_data_fields(config_id)
+        params += ['public_description']
+        return params
+
+    def _load_pos_self_data(self, data):
+        domain = self._load_pos_data_domain(data)
+        config_id = data['pos.config']['data'][0]['id']
+
+        # Add custom fields for 'formula' taxes.
+        fields = set(self._load_pos_data_fields(config_id))
+        taxes = self.env['account.tax'].search(self.env['account.tax']._load_pos_data_domain(data))
+        product_fields = taxes._eval_taxes_computation_prepare_product_fields()
+        fields = list(fields.union(product_fields))
+
+        config = self.env['pos.config'].browse(config_id)
+        products = self.with_context(display_default_code=False).search_read(
+            domain,
+            fields,
+            limit=config.get_limited_product_count(),
+            order='sequence,default_code,name',
+            load=False
+        )
+
+        data['pos.config']['data'][0]['_product_default_values'] = \
+            self.env['account.tax']._eval_taxes_computation_prepare_product_default_values(product_fields)
+
+        self._compute_product_price_with_pricelist(products, config_id)
+        return {
+            'data': products,
+            'fields': fields,
+        }
+>>>>>>> 22b4d3724cd826675d51d212b95826217655f18a
+
+    def _compute_product_price_with_pricelist(self, products, config_id):
+        config = self.env['pos.config'].browse(config_id)
+        pricelist = config.pricelist_id
+
+        product_ids = [product['id'] for product in products]
+        product_objs = self.env['product.product'].browse(product_ids)
+
+        product_map = {product.id: product for product in product_objs}
+
+        for product in products:
+            product_obj = product_map.get(product['id'])
+            if product_obj:
+                product['lst_price'] = pricelist._get_product_price(
+                    product_obj, 1.0, currency=config.currency_id
+                )
 
     def _filter_applicable_attributes(self, attributes_by_ptal_id: Dict) -> List[Dict]:
         """
