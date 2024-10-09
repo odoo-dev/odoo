@@ -7,7 +7,7 @@ registry.category("web_tour.tours").add("discuss_channel_tour", {
     url: "/odoo/action-mail.action_discuss",
     steps: () => [
         {
-            trigger: ".o-mail-DiscussSidebarCategory-channel .o-mail-DiscussSidebarCategory-add",
+            trigger: ".o-mail-DiscussSidebarCategories-search",
             content: markup(
                 _t(
                     "<p>Channels make it easy to organize information across different topics and groups.</p> <p>Try to <b>create your first channel</b> (e.g. sales, marketing, product XYZ, after work party, etc).</p>"
@@ -17,13 +17,13 @@ registry.category("web_tour.tours").add("discuss_channel_tour", {
             run: "click",
         },
         {
-            trigger: ".o-discuss-ChannelSelector input",
+            trigger: ".o_command_palette_search input",
             content: markup(_t("<p>Create a channel here.</p>")),
             tooltipPosition: "bottom",
             run: `edit SomeChannel_${new Date().getTime()}`,
         },
         {
-            trigger: ".o-discuss-ChannelSelector-suggestion",
+            trigger: ".o_command:contains('Create Channel')",
             content: markup(_t("<p>Create a public or private channel.</p>")),
             run: "click",
             tooltipPosition: "right",
@@ -71,20 +71,6 @@ registry.category("web_tour.tours").add("discuss_channel_tour", {
             ),
             tooltipPosition: "bottom",
             run: "click",
-        },
-        {
-            trigger: ".o-mail-DiscussSidebarCategory-chat .o-mail-DiscussSidebarCategory-add",
-            content: markup(
-                _t(
-                    "<p><b>Chat with coworkers</b> in real-time using direct messages.</p><p><i>You might need to invite users from the Settings app first.</i></p>"
-                )
-            ),
-            tooltipPosition: "bottom",
-            run: "click",
-        },
-        {
-            isActive: ["auto"],
-            trigger: ".o-discuss-ChannelSelector",
         },
     ],
 });
