@@ -1387,8 +1387,23 @@ msgid ""
 msgstr ""
 
 #. module: account
+<<<<<<< 17.0
 #: model:ir.model.fields,field_description:account.field_res_config_settings__module_account_avatax
 msgid "Account Avatax"
+||||||| 84ce4473c4f7affd4b77c86fc5b31d2821b1bec6
+=======
+#. odoo-python
+#: code:addons/account/models/account_move_line.py:0
+#, python-format
+msgid "Account %s is of payable type, but is used in a sale operation."
+msgstr ""
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_line.py:0
+#, python-format
+msgid "Account %s is of receivable type, but is used in a purchase operation."
+>>>>>>> 4ddcc78159d488232429c33044d33a4fce0e2b21
 msgstr ""
 
 #. module: account
