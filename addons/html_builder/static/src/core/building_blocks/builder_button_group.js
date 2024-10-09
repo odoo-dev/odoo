@@ -4,13 +4,14 @@ import {
     useVisibilityObserver,
     useApplyVisibility,
     useSelectableComponent,
-} from "../utils";
+} from "./utils";
 import { BuilderComponent } from "./builder_component";
 
 export class BuilderButtonGroup extends Component {
     static template = "html_builder.BuilderButtonGroup";
     static props = {
         ...basicContainerBuilderComponentProps,
+        id: { type: String, optional: true },
         slots: { type: Object, optional: true },
     };
     static components = { BuilderComponent };

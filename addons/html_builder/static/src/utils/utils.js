@@ -1,4 +1,4 @@
-import { DependencyManager } from "../core/dependency_manager";
+import { DependencyManager } from "../core/plugins/dependency_manager";
 import { useSubEnv } from "@odoo/owl";
 import { SIZES, MEDIAS_BREAKPOINTS } from "@web/core/ui/ui_service";
 import { _t } from "@web/core/l10n/translation";
@@ -122,37 +122,4 @@ export function getValueFromVar(value) {
         return match[1];
     }
     return value;
-}
-
-/**
- * Converts a value to a ratio.
- *
- * @param {string} value
- */
-export function toRatio(value) {
-    const inputValueAsNumber = Number(value);
-    const ratio = inputValueAsNumber >= 0 ? 1 + inputValueAsNumber : 1 / (1 - inputValueAsNumber);
-    return `${ratio.toFixed(2)}x`;
-}
-
-/**
- * Returns the list of selector, exclude and applyTo on which an option is
- * applied.
- * @param {Array<Object>} builderOptions - All the builder options
- * @param {Class} optionClass - The applied option
- */
-export function getSelectorParams(builderOptions, optionClass) {
-    const selectorParams = [];
-    const optionClassName = optionClass.name;
-    for (const builderOption of builderOptions) {
-        const { OptionComponent } = builderOption;
-        if (
-            OptionComponent &&
-            (OptionComponent.name === optionClassName ||
-                OptionComponent.prototype instanceof optionClass)
-        ) {
-            selectorParams.push(builderOption);
-        }
-    }
-    return selectorParams;
 }

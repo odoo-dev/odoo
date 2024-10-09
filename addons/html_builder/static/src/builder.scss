@@ -103,7 +103,7 @@
     }
 }
 
-%o_we_sublevel > .hb-row-label::before {
+%o_we_sublevel > div:first-child::before {
     content: "└"; // TODO The size and look of this depends on the
                   // browser default font, we should use a SVG instead.
     display: inline-block;
@@ -118,7 +118,7 @@
         @extend %o_we_sublevel;
 
         @if $level > 1 {
-            > div:first-of-type::before {
+            > div:first-child::before {
                 padding-left: ($level - 1) * 0.6em;
             }
         }
@@ -206,16 +206,5 @@ div:hover>.o_we_shape_animated_label {
 @include media-breakpoint-down(md) {
     .o_we_shape:not(.o_shape_show_mobile) {
         display: none;
-    }
-}
-
-// TODO Gray scale HUE slider
-.o_we_slider_tint input[type="range"] {
-    appearance: none;
-    &::-webkit-slider-thumb {
-        appearance: auto !important;
-    }
-    &::-moz-range-thumb {
-        appearance: auto !important;
     }
 }

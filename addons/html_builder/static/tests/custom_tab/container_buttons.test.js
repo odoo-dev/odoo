@@ -10,9 +10,9 @@ import {
     dummyBase64Img,
     addPlugin,
     addActionOption,
-    waitForSnippetDialog,
 } from "../website_helpers";
 import { contains, onRpc } from "@web/../tests/web_test_helpers";
+import { animationFrame } from "@odoo/hoot-mock";
 import { Deferred, queryText, tick } from "@odoo/hoot-dom";
 import { undo } from "@html_editor/../tests/_helpers/user_actions";
 import { Plugin } from "@html_editor/plugin";
@@ -139,8 +139,7 @@ test("Use the sidebar 'save snippet' buttons", async () => {
         ".o_customize_tab .options-container > div:contains('Button') button.oe_snippet_save";
 
     // Check that there is no custom section.
-    const customGroupSelector =
-        ".o-snippets-menu #snippet_groups .o_snippet[data-snippet-group='custom'] .o_snippet_thumbnail_area";
+    const customGroupSelector = "div[data-category='snippet_groups'] span:contains('Custom')";
     expect(".o-snippets-menu div:contains('Custom Inner Content')").toHaveCount(0);
     expect(customGroupSelector).toHaveCount(0);
 
@@ -166,7 +165,7 @@ test("Use the sidebar 'save snippet' buttons", async () => {
     ).toHaveCount(1);
     expect(customGroupSelector).toHaveCount(1);
     await contains(customGroupSelector).click();
-    await waitForSnippetDialog();
+    await animationFrame();
     expect(
         ".o_add_snippet_dialog .o_add_snippet_iframe:iframe span:contains('Custom Dummy Section')"
     ).toHaveCount(1);
@@ -304,29 +303,27 @@ test("applying option container button should wait for actions in progress", asy
     });
 
     const { getEditableContent, getEditor } = await setupWebsiteBuilder(`
-        <div class="test-options-target o-paragraph">plop</div>
+        <div class="test-options-target">plop</div>
     `);
     const editor = getEditor();
     const editable = getEditableContent();
 
     await contains(":iframe .test-options-target").click();
     await contains("[data-action-id='customAction']").click();
-    expect(editable).toHaveInnerHTML(`<div class="test-options-target o-paragraph">plop</div>`);
+    expect(editable).toHaveInnerHTML(`<div class="test-options-target">plop</div>`);
 
     await contains(".test_button").click();
-    expect(editable).toHaveInnerHTML(`<div class="test-options-target o-paragraph">plop</div>`);
+    expect(editable).toHaveInnerHTML(`<div class="test-options-target">plop</div>`);
 
     customActionDef.resolve();
     await tick();
     expect(editable).toHaveInnerHTML(
-        `<div class="test-options-target o-paragraph customAction overlayButton">plop</div>`
+        `<div class="test-options-target customAction overlayButton">plop</div>`
     );
 
     undo(editor);
-    expect(editable).toHaveInnerHTML(
-        `<div class="test-options-target customAction o-paragraph">plop</div>`
-    );
+    expect(editable).toHaveInnerHTML(`<div class="test-options-target customAction">plop</div>`);
 
     undo(editor);
-    expect(editable).toHaveInnerHTML(`<div class="test-options-target o-paragraph">plop</div>`);
+    expect(editable).toHaveInnerHTML(`<div class="test-options-target">plop</div>`);
 });

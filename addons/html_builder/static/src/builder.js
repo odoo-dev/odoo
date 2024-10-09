@@ -22,16 +22,14 @@ import { useSetupAction } from "@web/search/action_hook";
 import { InvisibleElementsPanel } from "./sidebar/invisible_elements_panel";
 import { BlockTab } from "./sidebar/block_tab";
 import { CustomizeTab } from "./sidebar/customize_tab";
-import { ThemeTab } from "@html_builder/website_builder/plugins/theme_tab";
 import { CORE_PLUGINS } from "./core/core_plugins";
 import { EDITOR_COLOR_CSS_VARIABLES, getCSSVariableValue } from "./utils/utils_css";
 
 export class Builder extends Component {
     static template = "html_builder.Builder";
-    static components = { BlockTab, CustomizeTab, InvisibleElementsPanel, ThemeTab };
+    static components = { BlockTab, CustomizeTab, InvisibleElementsPanel };
     static props = {
         closeEditor: { type: Function },
-        reloadEditor: { type: Function, optional: true },
         snippetsName: { type: String },
         toggleMobile: { type: Function },
         overlayRef: { type: Function },
@@ -39,7 +37,6 @@ export class Builder extends Component {
         iframeLoaded: { type: Object },
         isMobile: { type: Boolean },
         Plugins: { type: Array, optional: true },
-        config: { type: Object, optional: true },
     };
 
     setup() {
@@ -55,6 +52,7 @@ export class Builder extends Component {
         useHotkey("control+z", () => this.undo());
         useHotkey("control+y", () => this.redo());
         useHotkey("control+shift+z", () => this.redo());
+        this.websiteService = useService("website");
         this.orm = useService("orm");
         this.dialog = useService("dialog");
         this.ui = useService("ui");
@@ -62,50 +60,37 @@ export class Builder extends Component {
 
         const editorBus = new EventBus();
 
-        const mainPlugins = removePlugins(
-            [...MAIN_PLUGINS],
-            ["PowerButtonsPlugin", "DoubleClickImagePreviewPlugin"]
-        );
+        const mainPlugins = removePlugins([...MAIN_PLUGINS], ["PowerButtonsPlugin"]);
         const Plugins = [...mainPlugins, ...CORE_PLUGINS, ...(this.props.Plugins || [])];
         // TODO: maybe do a different config for the translate mode and the
         // "regular" mode.
         this.editor = new Editor(
             {
                 Plugins,
-                isTranslation: this.props.isTranslation,
-                ...this.props.config,
                 onChange: ({ isPreviewing }) => {
+                    this.state.canUndo = this.editor.shared.history.canUndo();
+                    this.state.canRedo = this.editor.shared.history.canRedo();
                     if (!isPreviewing) {
-                        this.state.canUndo = this.editor.shared.history.canUndo();
-                        this.state.canRedo = this.editor.shared.history.canRedo();
                         this.updateInvisibleEls();
-                        editorBus.trigger("UPDATE_EDITING_ELEMENT");
-                        editorBus.trigger("DOM_UPDATED");
                     }
+                    editorBus.trigger("UPDATE_EDITING_ELEMENT");
+                    editorBus.trigger("STEP_ADDED", { isPreviewing });
                 },
-                reloadEditor: this.props.reloadEditor,
                 resources: {
-                    trigger_dom_updated: () => {
-                        editorBus.trigger("DOM_UPDATED");
-                    },
-                    on_mobile_preview_clicked: () => {
-                        editorBus.trigger("DOM_UPDATED");
-                    },
                     change_current_options_containers_listeners: (currentOptionsContainers) => {
                         this.state.currentOptionsContainers = currentOptionsContainers;
                         if (!currentOptionsContainers.length) {
-                            // If there is no option, fallback on the current
-                            // fallback tab.
-                            this.setTab(this.noSelectionTab);
+                            // There is no options, fallback on the blocks tab
+                            this.setTab("blocks");
                             return;
                         }
                         this.setTab("customize");
                     },
                     unsplittable_node_predicates: (/** @type {Node} */ node) =>
                         node.querySelector?.("[data-oe-translation-source-sha]"),
-                    can_display_toolbar: (namespace) => !["image", "icon"].includes(namespace),
-
-                    // disable the toolbar for images and icons
+                    can_display_toolbar: (namespace) =>
+                        // disable the toolbar for images and icons
+                        namespace === undefined ? true : false,
                 },
                 getRecordInfo: (editableEl) => {
                     if (!editableEl) {
@@ -127,8 +112,6 @@ export class Builder extends Component {
                 replaceSnippet: async (snippet) => await this.snippetModel.replaceSnippet(snippet),
                 saveSnippet: (snippetEl, cleanForSaveHandlers) =>
                     this.snippetModel.saveSnippet(snippetEl, cleanForSaveHandlers),
-                getShared: () => this.editor.shared,
-                updateInvisibleElementsPanel: () => this.updateInvisibleEls(),
             },
             this.env.services
         );
@@ -162,7 +145,6 @@ export class Builder extends Component {
         });
 
         onMounted(() => {
-            this.editor.document.body.classList.add("editor_enable");
             this.setCSSVariables();
             // TODO: onload editor
             this.updateInvisibleEls();
@@ -172,8 +154,6 @@ export class Builder extends Component {
                 this.updateInvisibleEls(nextProps.isMobile);
             }
         });
-        // Fallback tab when no option is active.
-        this.noSelectionTab = "blocks";
     }
 
     setCSSVariables() {
@@ -222,23 +202,8 @@ export class Builder extends Component {
         this.props.closeEditor();
     }
 
-    /**
-     * Called when clicking on a tab. Sets the active tab to the given tab.
-     *
-     * @param {String} tab the tab to set
-     */
-    onTabClick(tab) {
-        this.setTab(tab);
-        // Deactivate the options when clicking on the "BLOCKS" or "THEME" tabs.
-        if (tab === "theme" || tab === "blocks") {
-            this.editor.shared["builder-options"].deactivateContainers();
-        }
-    }
-
     setTab(tab) {
         this.state.activeTab = tab;
-        // Set the fallback tab on the "THEME" tab if it was selected.
-        this.noSelectionTab = tab === "theme" ? "theme" : "blocks";
     }
 
     undo() {

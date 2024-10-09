@@ -35,7 +35,18 @@ export class ImageCropPlugin extends Plugin {
         if (!selectedImg) {
             return;
         }
-        return registry.category("main_components").add("ImageCropping", {
+
+        this.imageCropProps.media = selectedImg;
+
+        const onClose = () => {
+            registry.category("main_components").remove("ImageCropping");
+        };
+
+        const onSave = () => {
+            this.dependencies.history.addStep();
+        };
+
+        registry.category("main_components").add("ImageCropping", {
             Component: ImageCrop,
             props: {
                 media: selectedImg,

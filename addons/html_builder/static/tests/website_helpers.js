@@ -1,6 +1,5 @@
 import { Builder } from "@html_builder/builder";
-import { SetupEditorPlugin } from "@html_builder/core/setup_editor_plugin";
-import { VersionControlPlugin } from "@html_builder/core/version_control_plugin";
+import { SetupEditorPlugin } from "@html_builder/core/plugins/setup_editor_plugin";
 import { EditInteractionPlugin } from "@html_builder/website_builder/plugins/edit_interaction_plugin";
 import { WebsiteSessionPlugin } from "@html_builder/website_builder/plugins/website_session_plugin";
 import { WebsiteBuilder } from "@html_builder/website_preview/website_builder_action";
@@ -9,8 +8,8 @@ import { insertText } from "@html_editor/../tests/_helpers/user_actions";
 import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
 import { defineMailModels, startServer } from "@mail/../tests/mail_test_helpers";
-import { after, before, describe } from "@odoo/hoot";
-import { advanceTime, animationFrame, click, queryOne, tick, waitFor } from "@odoo/hoot-dom";
+import { after, describe } from "@odoo/hoot";
+import { advanceTime, animationFrame, click, queryOne, waitFor } from "@odoo/hoot-dom";
 import {
     contains,
     defineModels,
@@ -18,7 +17,6 @@ import {
     mockService,
     models,
     mountWithCleanup,
-    onRpc,
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
 import { loadBundle } from "@web/core/assets";
@@ -27,7 +25,6 @@ import { registry } from "@web/core/registry";
 import { uniqueId } from "@web/core/utils/functions";
 import { WebClient } from "@web/webclient/webclient";
 import { getWebsiteSnippets } from "./snippets_getter.hoot";
-import { WebsiteSystrayItem } from "@html_builder/website_preview/website_systray_item";
 
 class Website extends models.Model {
     _name = "website";
@@ -54,9 +51,6 @@ export function defineWebsiteModels() {
     describe.current.tags("desktop");
     defineMailModels();
     defineModels([Website, IrUiView]);
-    before(() => {
-        onRpc("/website/theme_customize_data_get", () => []);
-    });
 }
 
 /**
@@ -69,12 +63,8 @@ export async function setupWebsiteBuilder(
         snippets,
         openEditor = true,
         loadIframeBundles = false,
-        loadAssetsFrontendJS = false,
         hasToCreateWebsite = true,
-        versionControl = false,
         styleContent,
-        headerContent = "",
-        beforeWrapwrapContent = "",
     } = {}
 ) {
     // TODO: fix when the iframe is reloaded and become empty (e.g. discard button)
@@ -87,7 +77,7 @@ export async function setupWebsiteBuilder(
     let editableContent;
     await mountWithCleanup(WebClient);
     let originalIframeLoaded;
-    let resolveIframeLoaded = () => {};
+    let resolveIframeLoaded = () => { };
     const iframeLoaded = new Promise((resolve) => {
         resolveIframeLoaded = (el) => {
             const iframe = el;
@@ -96,54 +86,38 @@ export async function setupWebsiteBuilder(
                 style.innerHTML = styleContent;
                 iframe.contentDocument.head.appendChild(style);
             }
-            iframe.contentDocument.documentElement.setAttribute(
-                "data-main-object",
-                "website.page(4,)"
-            );
-            iframe.contentDocument.body.innerHTML = `
-                ${beforeWrapwrapContent}
-                <div id="wrapwrap">${headerContent} <div id="wrap" class="oe_structure oe_empty" data-oe-model="ir.ui.view" data-oe-id="539" data-oe-field="arch">${websiteContent}</div></div>`;
+            iframe.contentDocument.body.innerHTML = `<div id="wrapwrap"><div id="wrap" class="oe_structure oe_empty" data-oe-model="ir.ui.view" data-oe-id="539" data-oe-field="arch">${websiteContent}</div></div>`;
             resolve(el);
         };
     });
-    let resolveEditAssetsLoaded = () => {};
-    const editAssetsLoaded = new Promise((resolve) => {
-        resolveEditAssetsLoaded = () => resolve();
-    });
 
     patchWithCleanup(WebsiteBuilder.prototype, {
-        setIframeLoaded() {
-            super.setIframeLoaded();
-            this.publicRootReady.resolve();
+        setup() {
+            super.setup();
             originalIframeLoaded = this.iframeLoaded;
-            this.iframeLoaded = iframeLoaded;
         },
-        async loadAssetsEditBundle() {
+        get systrayProps() {
+            return {
+                onNewPage: this.onNewPage.bind(this),
+                onEditPage: this.onEditPage.bind(this),
+                iframeLoaded: iframeLoaded,
+            };
+        },
+        get menuProps() {
+            const props = super.menuProps;
+            props.iframeLoaded = iframeLoaded;
+            return props;
+        },
+        loadAssetsEditBundle() {
             // To instantiate interactions in the iframe test we need to
             // load the edit and frontend bundle in it. The problem is that
             // Hoot does not have control of this iframe and therefore
-            // does not mock anything in it (location, rpc, ...). So we don't
-            // load the website.assets_edit_frontend bundle.
-
-            if (loadIframeBundles) {
-                await loadBundle("html_builder.inside_builder_style", {
-                    targetDoc: queryOne("iframe[data-src^='/website/force/1']").contentDocument,
-                });
-            }
-            await resolveEditAssetsLoaded();
-        },
-    });
-    patchWithCleanup(WebsiteSystrayItem.prototype, {
-        get isRestrictedEditor() {
-            return true;
-        },
-        get canEdit() {
-            return true;
+            // does not mock anything in it (location, rpc, ...).
         },
     });
     await getService("action").doAction({
         name: "Website Builder",
-        tag: "website_preview",
+        tag: "egg_website_preview",
         type: "ir.actions.client",
     });
 
@@ -152,8 +126,8 @@ export async function setupWebsiteBuilder(
             super.setup();
             // See loadAssetsEditBundle override in WebsiteBuilder patch.
             this.websiteEditService = {
-                update: () => {},
-                stop: () => {},
+                update: () => { },
+                stop: () => { },
             };
         },
     });
@@ -186,45 +160,37 @@ export async function setupWebsiteBuilder(
         });
     }
 
-    if (!versionControl) {
-        patchWithCleanup(VersionControlPlugin.prototype, {
-            hasAccessToOutdatedEl() {
-                return true;
-            },
+    const iframe = queryOne("iframe[data-src^='/website/force/1']");
+    if (loadIframeBundles) {
+        loadBundle("html_builder.inside_builder_style", {
+            targetDoc: iframe.contentDocument,
+        });
+
+        loadBundle("web.assets_frontend", {
+            targetDoc: iframe.contentDocument,
+            js: false,
         });
     }
-
-    const iframe = queryOne("iframe[data-src^='/website/force/1']");
     if (isBrowserFirefox()) {
         await originalIframeLoaded;
-    }
-    if (loadIframeBundles) {
-        await loadBundle("web.assets_frontend", {
-            targetDoc: iframe.contentDocument,
-            js: loadAssetsFrontendJS,
-        });
     }
     resolveIframeLoaded(iframe);
     await animationFrame();
     if (openEditor) {
-        await openBuilderSidebar(editAssetsLoaded);
+        await openBuilderSidebar();
     }
     return {
         getEditor: () => editor,
         getEditableContent: () => editableContent,
-        openBuilderSidebar: async () => await openBuilderSidebar(editAssetsLoaded),
     };
 }
 
-async function openBuilderSidebar(editAssetsLoaded) {
+export async function openBuilderSidebar() {
     // The next line allow us to await asynchronous fetches and cache them before it is used
     await Promise.all([getWebsiteSnippets(), loadBundle("html_builder.assets")]);
 
     await click(".o-website-btn-custo-primary");
-    await editAssetsLoaded;
-    // advanceTime linked to the setTimeout in the WebsiteBuilder component
-    // tick needed to wait for the timeout to be called before advancing time.
-    await tick();
+    // linked to the setTimeout in the WebsiteBuilder component
     await advanceTime(200);
     await animationFrame();
 }
@@ -245,8 +211,6 @@ export function addOption({
     sequence,
     cleanForSave,
     props,
-    editableOnly,
-    title,
 }) {
     const pluginId = uniqueId("test-option");
     const Class = makeOptionPlugin({
@@ -259,8 +223,6 @@ export function addOption({
         sequence,
         cleanForSave,
         props,
-        editableOnly,
-        title,
     });
     registry.category("website-plugins").add(pluginId, Class);
     after(() => {
@@ -277,8 +239,6 @@ function makeOptionPlugin({
     OptionComponent,
     cleanForSave,
     props,
-    editableOnly,
-    title,
 }) {
     const option = {
         OptionComponent,
@@ -288,8 +248,6 @@ function makeOptionPlugin({
         applyTo,
         cleanForSave,
         props,
-        editableOnly,
-        title,
     };
 
     const Class = {
@@ -363,10 +321,9 @@ export function getSnippetStructure({
     keywords = [],
     groupName,
     imagePreview = "",
-    moduleId = "",
 }) {
     keywords = keywords.join(", ");
-    return `<div name="${name}" data-oe-snippet-id="123" data-o-image-preview="${imagePreview}" data-oe-keywords="${keywords}" data-o-group="${groupName}"  data-module-id="${moduleId}">${content}</div>`;
+    return `<div name="${name}" data-oe-snippet-id="123" data-o-image-preview="${imagePreview}" data-oe-keywords="${keywords}" data-o-group="${groupName}">${content}</div>`;
 }
 
 export function getInnerContent({
@@ -401,13 +358,13 @@ export async function setupWebsiteBuilderWithDummySnippet(content) {
             ),
         },
     };
-    const { getEditor, getEditableContent, openBuilderSidebar } = await setupWebsiteBuilder(
+    const { getEditor, getEditableContent } = await setupWebsiteBuilder(
         content || "",
         snippetsStructure
     );
     const snippetContent = getSnippetEl(true);
 
-    return { getEditor, getEditableContent, openBuilderSidebar, snippetContent };
+    return { getEditor, getEditableContent, snippetContent };
 }
 
 export async function confirmAddSnippet(snippetName) {
@@ -415,32 +372,11 @@ export async function confirmAddSnippet(snippetName) {
     if (snippetName) {
         previewSelector += " [data-snippet='" + snippetName + "']";
     }
-    await waitForSnippetDialog();
+    await waitFor(".o_add_snippet_dialog iframe.show.o_add_snippet_iframe");
     await contains(previewSelector).click();
     await animationFrame();
 }
 
-export async function insertCategorySnippet({ group, snippet } = {}) {
-    await contains(
-        `.o-snippets-menu #snippet_groups .o_snippet${
-            group ? `[data-snippet-group=${group}]` : ""
-        } .o_snippet_thumbnail .o_snippet_thumbnail_area`
-    ).click();
-    await confirmAddSnippet(snippet);
-}
-
-export async function waitForSnippetDialog() {
-    await animationFrame();
-    await loadBundle("html_builder.iframe_add_dialog", {
-        targetDoc: queryOne("iframe.o_add_snippet_iframe").contentDocument,
-        js: false,
-    });
-    await waitFor(".o_add_snippet_dialog iframe.show.o_add_snippet_iframe");
-}
-
-/**
- * @param {string | string[]} snippetName
- */
 export async function setupWebsiteBuilderWithSnippet(snippetName, options = {}) {
     mockService("website", {
         get currentWebsite() {
@@ -452,13 +388,8 @@ export async function setupWebsiteBuilderWithSnippet(snippetName, options = {}) 
             };
         },
     });
-
-    let html = "";
-    const snippetNames = Array.isArray(snippetName) ? snippetName : [snippetName];
-    for (const name of snippetNames) {
-        html += (await getStructureSnippet(name)).outerHTML;
-    }
-    return setupWebsiteBuilder(html, {
+    const snippetEl = await getStructureSnippet(snippetName);
+    return setupWebsiteBuilder(snippetEl.outerHTML, {
         ...options,
         hasToCreateWebsite: false,
     });
@@ -475,11 +406,4 @@ export async function insertStructureSnippet(editor, snippetName) {
     const parentEl = editor.editable.querySelector("#wrap") || editor.editable;
     parentEl.append(snippetEl);
     editor.shared.history.addStep();
-}
-
-/**
- * Returns the dragged helper when drag and dropping snippets.
- */
-export function getDragHelper() {
-    return document.body.querySelector(".o_draggable_dragging .o_snippet_thumbnail");
 }

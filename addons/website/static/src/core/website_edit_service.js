@@ -49,38 +49,49 @@ registry.category("services").add("website_edit", {
         let editableInteractions = null;
         let previewInteractions = null;
 
-        return {
-            isEditingTranslations() {
-                return !!publicInteractions.el.closest("html").dataset.edit_translations;
-            },
-            update(target, mode) {
-                // editMode = true;
-                // const currentEditMode = this.website_edit.mode === "edit";
-                // interactions are already started. we only restart them if the
-                // public root is not just starting.
+        const update = (target, mode) => {
+            // editMode = true;
+            // const currentEditMode = this.website_edit.mode === "edit";
+            const shouldActivateEditInteractions = editMode !== mode;
+            // interactions are already started. we only restart them if the
+            // public root is not just starting.
 
-                publicInteractions.stopInteractions(target);
-                if (mode === "edit") {
-                    if (!editableInteractions) {
-                        const builders = registry.category("public.interactions.edit").getAll();
-                        editableInteractions = buildEditableInteractions(builders);
-                    }
-                    publicInteractions.editMode = true;
-                    publicInteractions.activate(editableInteractions);
-                } else if (mode === "preview") {
-                    if (!previewInteractions) {
-                        const builders = registry.category("public.interactions.preview").getAll();
-                        previewInteractions = buildEditableInteractions(builders);
-                    }
-                    publicInteractions.activate(previewInteractions, target);
-                } else {
-                    publicInteractions.startInteractions(target);
+            publicInteractions.stopInteractions(target);
+            if (shouldActivateEditInteractions) {
+                if (!editableInteractions) {
+                    const builders = registry.category("public.interactions.edit").getAll();
+                    editableInteractions = buildEditableInteractions(builders);
                 }
-            },
-            stopInteractions(target) {
-                publicInteractions.stopInteractions(target);
-            },
+                editMode = true;
+                publicInteractions.editMode = true;
+                publicInteractions.activate(editableInteractions);
+            } else {
+                publicInteractions.startInteractions(target);
+            }
         };
+
+        const stop = (target) => {
+            publicInteractions.stopInteractions(target);
+        }
+
+        const isEditingTranslations = () => {
+            return !!publicInteractions.el.closest("html").dataset.edit_translations;
+        };
+
+        const websiteEditService = { isEditingTranslations, update, stop };
+
+        // Transfer the iframe website_edit service to the EditInteractionPlugin
+        window.parent.document.addEventListener("edit_interaction_plugin_loaded", (ev) => {
+            ev.currentTarget.dispatchEvent(
+                new CustomEvent("transfer_website_edit_service", {
+                    detail: {
+                        websiteEditService,
+                    },
+                })
+            );
+        });
+
+        return websiteEditService;
     },
 });
 

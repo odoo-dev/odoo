@@ -1,5 +1,5 @@
 import { Builder } from "@html_builder/builder";
-import { SetupEditorPlugin } from "@html_builder/core/setup_editor_plugin";
+import { SetupEditorPlugin } from "@html_builder/core/plugins/setup_editor_plugin";
 import { LocalOverlayContainer } from "@html_editor/local_overlay_container";
 import { Plugin } from "@html_editor/plugin";
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
@@ -12,11 +12,8 @@ import {
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
 import { isBrowserFirefox } from "@web/core/browser/feature_detection";
-import { registry } from "@web/core/registry";
 import { uniqueId } from "@web/core/utils/functions";
 import { getWebsiteSnippets } from "./snippets_getter.hoot";
-import { after } from "@odoo/hoot";
-import { withSequence } from "@html_editor/utils/resource";
 
 function getSnippetView(snippets) {
     const { snippet_groups, snippet_custom, snippet_structure, snippet_content } = snippets;
@@ -152,9 +149,6 @@ export async function setupHTMLBuilder(content = "", { snippetContent, dropzoneS
         Plugins.push(P);
     }
 
-    const BuilderTestPlugins = registry.category("builder-test-plugins").getAll();
-    Plugins.push(...BuilderTestPlugins);
-
     let _resolve;
     const prom = new Promise((resolve) => {
         _resolve = resolve;
@@ -177,55 +171,4 @@ export async function setupHTMLBuilder(content = "", { snippetContent, dropzoneS
         builderEl: comp.env.builderRef.el.querySelector(".o-website-builder_sidebar"),
         snippetContent: snippets.snippet_content.join(""),
     };
-}
-
-export function addBuilderPlugin(Plugin) {
-    registry.category("builder-test-plugins").add(Plugin.id, Plugin);
-    after(() => {
-        registry.category("builder-test-plugins").remove(Plugin.id);
-    });
-}
-
-export function addBuilderOption({
-    selector,
-    exclude,
-    applyTo,
-    template,
-    OptionComponent,
-    sequence,
-    cleanForSave,
-    props,
-}) {
-    const pluginId = uniqueId("test-option");
-    const option = {
-        OptionComponent: OptionComponent,
-        template,
-        selector,
-        exclude,
-        applyTo,
-        cleanForSave,
-        props,
-    };
-
-    const P = {
-        [pluginId]: class extends Plugin {
-            static id = pluginId;
-            resources = {
-                builder_options: sequence ? withSequence(sequence, option) : option,
-            };
-        },
-    }[pluginId];
-
-    addBuilderPlugin(P);
-}
-
-export function addBuilderAction(actions = {}) {
-    const pluginId = uniqueId("test-action-plugin");
-    class P extends Plugin {
-        static id = pluginId;
-        resources = {
-            builder_actions: actions,
-        };
-    }
-    addBuilderPlugin(P);
 }

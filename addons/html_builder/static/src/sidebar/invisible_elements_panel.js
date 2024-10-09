@@ -18,10 +18,6 @@ export class InvisibleElementsPanel extends Component {
         });
     }
 
-    get shared() {
-        return this.env.editor.shared;
-    }
-
     updateInvisibleElementsPanel(invisibleEls) {
         // descendantPerSnippet: a map with its keys set to invisible
         // snippets that have invisible descendants. The value corresponding
@@ -78,15 +74,10 @@ export class InvisibleElementsPanel extends Component {
 
     toggleElementVisibility(invisibleEntry) {
         const toggleVisibility = (snippetEl) => {
-            const show = this.shared.visibility.toggleTargetVisibility(snippetEl);
+            const show = this.env.editor.shared.visibility.toggleTargetVisibility(snippetEl);
             invisibleEntry.isVisible = show;
-
-            this.shared.disableSnippets.disableUndroppableSnippets();
-            if (show) {
-                this.shared["builder-options"].updateContainers(snippetEl);
-            } else {
-                this.shared["builder-options"].deactivateContainers();
-            }
+            this.env.editor.shared["builder-options"].updateContainers(snippetEl);
+            // TODO _disableUndroppableSnippets
         };
 
         // When toggling the visibility of an element to "Hide", also toggle all

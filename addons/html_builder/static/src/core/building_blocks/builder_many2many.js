@@ -5,7 +5,7 @@ import {
     getAllActionsAndOperations,
     useBuilderComponent,
     useDomState,
-} from "../utils";
+} from "./utils";
 import { BuilderComponent } from "./builder_component";
 import { BasicMany2Many } from "./basic_many2many";
 
@@ -18,8 +18,14 @@ export class BuilderMany2Many extends Component {
         fields: { type: Array, element: String, optional: true },
         domain: { type: Array, optional: true },
         limit: { type: Number, optional: true },
+        id: { type: String, optional: true },
     };
-    static defaultProps = BuilderComponent.defaultProps;
+    static defaultProps = {
+        ...BuilderComponent.defaultProps,
+        fields: [],
+        domain: [],
+        limit: 10,
+    };
     static components = { BuilderComponent, BasicMany2Many };
 
     setup() {
@@ -61,9 +67,6 @@ export class BuilderMany2Many extends Component {
                 fieldNames: [props.m2oField],
             });
             this.state.searchModel = modelData[props.m2oField].relation;
-            if (!this.state.searchModel) {
-                throw new Error(`m2oField ${props.m2oField} is not a relation field`);
-            }
         } else {
             this.state.searchModel = props.model;
         }

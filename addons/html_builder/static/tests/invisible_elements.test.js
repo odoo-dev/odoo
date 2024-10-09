@@ -1,7 +1,7 @@
 import { InvisibleElementsPanel } from "@html_builder/sidebar/invisible_elements_panel";
 import { unformat } from "@html_editor/../tests/_helpers/format";
 import { expect, test } from "@odoo/hoot";
-import { click, queryAllTexts, queryFirst, queryOne } from "@odoo/hoot-dom";
+import { click, queryAllTexts, queryFirst, queryOne, waitFor } from "@odoo/hoot-dom";
 import { xml } from "@odoo/owl";
 import { contains, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import {
@@ -11,7 +11,6 @@ import {
     getSnippetStructure,
     invisibleEl,
     setupWebsiteBuilder,
-    waitForSnippetDialog,
 } from "./website_helpers";
 
 defineWebsiteModels();
@@ -73,12 +72,8 @@ test("Add an element on the invisible elements tab", async () => {
             ),
         },
     });
-    await click(
-        queryFirst(
-            ".o-snippets-menu #snippet_groups .o_snippet_thumbnail .o_snippet_thumbnail_area"
-        )
-    );
-    await waitForSnippetDialog();
+    await click(queryFirst(`.o-snippets-menu [data-category="snippet_groups"] div`));
+    await waitFor(".o_add_snippet_dialog iframe.show.o_add_snippet_iframe", { timeout: 500 });
     await contains(
         ".o_add_snippet_dialog .o_add_snippet_iframe:iframe .o_snippet_preview_wrap"
     ).click();

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-<t t-name="html_builder.BackgroundOption">
+<t t-name="html_builder.BackgroundComponent">
     <!-- BackgroundToggler -->
-    <BuilderRow label.translate="Background" t-if="props.withColors or props.withImages">
+    <BuilderRow label.translate="Background" t-if="props.withColor or props.withImages">
     <!-- todo adapt when colorpicker is implemented: snippet_options_background_color_widget-->
-        <t t-if="props.withColors" t-call="html_builder.BackgroundColorWidgetOption"/>
+        <BuilderColorPicker title.translate="Color" styleAction="'background-color'" t-if="props.withColors"/>
         <t t-if="props.withImages">
             <BuilderButton
                 action="'toggleBgImage'"
@@ -17,20 +17,20 @@
             <t t-if="props.withShapes">
                 <BuilderButton
                     action="'toggleBgShape'"
+                    actionParam="showBackgroundShapes.bind(this)"
                     preview="false"
                     id="'toggle_bg_shape_id'"
                     iconImg="'/html_builder/static/img/options/bg_shape.svg'"
-                    title="'Shape'"
                 />
             </t>
         </t>
     </BuilderRow>
     <t t-if="props.withImages">
-        <BackgroundImageOption/>
-        <BackgroundPositionOption/>
+        <BackgroundImage/>
+        <BackgroundPosition/>
         <!-- TODO: BackgroundOptimize-->
         <!-- Color filter -->
-        <BuilderRow t-if="this.showColorFilter()" label.translate="Color Filter" level="2">
+        <BuilderRow t-if="isActiveItem('toggle_bg_image_id')" label.translate="Color Filter" level="2">
             <!-- TODO handle all the attributes -->
             <BuilderColorPicker action="'selectFilterColor'"/>
         </BuilderRow>
@@ -42,13 +42,12 @@
                             data-excluded="theme, common"
             />
         </div> -->
-        <BackgroundShapeOption t-if="props.withShapes"/>
+        <BackgroundShape
+            getShapeData="props.getShapeData"
+            showBackgroundShapes="showBackgroundShapes.bind(this)"
+            allPossiblesShapes="this.props.shapesInfo.allPossiblesShapes"
+        />
     </t>
-</t>
-
-<!-- TODO: handle bg_color_opt-->
-<t t-name="html_builder.BackgroundColorWidgetOption">
-    <BuilderColorPicker title.translate="Color" styleAction="'background-color'"/>
 </t>
 
 </templates>

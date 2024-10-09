@@ -694,6 +694,7 @@ export class HistoryPlugin extends Plugin {
         if (stepState) {
             this.stepsStates.set(currentStep.id, stepState);
         }
+        
         this.handleObserverRecords();
         const currentMutationsCount = currentStep.mutations.length;
         if (currentMutationsCount === 0) {
@@ -1116,10 +1117,7 @@ export class HistoryPlugin extends Plugin {
                 revertOperation();
                 revertOperation = this.makeSavePoint();
                 this.isPreviewing = true;
-                operation(...args);
-                // The operation should be similar than in the 'commit'
-                // (normalize etc...) hence the 'addStep'.
-                this.addStep();
+                return operation(...args);
             },
             commit: (...args) => {
                 revertOperation();

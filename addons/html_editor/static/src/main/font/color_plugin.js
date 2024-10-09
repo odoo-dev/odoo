@@ -33,6 +33,7 @@ export class ColorPlugin extends Plugin {
     static shared = [
         "colorElement",
         "getPropsForColorSelector",
+        ,
         "removeAllColor",
         "getElementColors",
     ];
@@ -96,6 +97,7 @@ export class ColorPlugin extends Plugin {
      */
     getPropsForColorSelector(type) {
         const mode = type === "foreground" ? "color" : "backgroundColor";
+        const title = type === "foreground" ? _t("Font Color") : _t("Background Color");
         return {
             type,
             mode,
@@ -125,11 +127,11 @@ export class ColorPlugin extends Plugin {
         Object.assign(this.selectedColors, this.getElementColors(el));
     }
 
-    getElementColors(el) {
-        const elStyle = getComputedStyle(el);
+    getElementColors(element) {
+        const elStyle = getComputedStyle(element);
         const backgroundImage = elStyle.backgroundImage;
         const hasGradient = isColorGradient(backgroundImage);
-        const hasTextGradientClass = el.classList.contains("text-gradient");
+        const hasTextGradientClass = element.classList.contains("text-gradient");
 
         let backgroundColor = elStyle.backgroundColor;
         const activeTab = document
@@ -147,9 +149,9 @@ export class ColorPlugin extends Plugin {
         }
 
         return {
-            color: hasGradient && hasTextGradientClass ? backgroundImage : rgbaToHex(elStyle.color),
+            color: hasGradient && hasTextGradientClass ? backgroundImage : rgbToHex(elStyle.color),
             backgroundColor:
-                hasGradient && !hasTextGradientClass ? backgroundImage : rgbaToHex(backgroundColor),
+                hasGradient && !hasTextGradientClass ? backgroundImage : rgbToHex(backgroundColor),
         };
     }
 

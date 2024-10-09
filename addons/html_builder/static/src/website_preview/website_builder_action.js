@@ -1,4 +1,3 @@
-import { LocalOverlayContainer } from "@html_editor/local_overlay_container";
 import {
     Component,
     onMounted,
@@ -9,51 +8,27 @@ import {
     useSubEnv,
 } from "@odoo/owl";
 import { LazyComponent, loadBundle } from "@web/core/assets";
-import { browser } from "@web/core/browser/browser";
-import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { ResizablePanel } from "@web/core/resizable_panel/resizable_panel";
-import { Deferred } from "@web/core/utils/concurrency";
-import { uniqueId } from "@web/core/utils/functions";
-import { useChildRef, useService } from "@web/core/utils/hooks";
-import { effect } from "@web/core/utils/reactive";
+import { useService, useChildRef } from "@web/core/utils/hooks";
 import { standardActionServiceProps } from "@web/webclient/actions/action_service";
-import { AddPageDialog } from "@website/components/dialog/add_page_dialog";
-import { ResourceEditor } from "@website/components/resource_editor/resource_editor";
 import { WebsiteSystrayItem } from "./website_systray_item";
+import { uniqueId } from "@web/core/utils/functions";
+import { LocalOverlayContainer } from "@html_editor/local_overlay_container";
 
 export class WebsiteBuilder extends Component {
     static template = "html_builder.WebsiteBuilder";
-    static components = { LazyComponent, LocalOverlayContainer, ResizablePanel, ResourceEditor };
+    static components = { LazyComponent, LocalOverlayContainer };
     static props = { ...standardActionServiceProps };
 
     setup() {
-        this.target = null;
         this.orm = useService("orm");
-        this.notification = useService("notification");
-        this.dialog = useService("dialog");
-        this.websiteService = useService("website");
-        this.ui = useService("ui");
-
         this.websiteContent = useRef("iframe");
         useSubEnv({
             builderRef: useRef("container"),
         });
-        this.state = useState({ isEditing: false, key: 1 });
-        this.websiteContext = useState(this.websiteService.context);
-        onMounted(() => {
-            // You can't wait for rendering because the Builder depends on the page style synchronously.
-            effect(
-                (websiteContext) => {
-                    if (websiteContext.isMobile) {
-                        this.websitePreviewRef.el.classList.add("o_is_mobile");
-                    } else {
-                        this.websitePreviewRef.el.classList.remove("o_is_mobile");
-                    }
-                },
-                [this.websiteContext]
-            );
-        });
+        this.state = useState({ isEditing: false, isMobile: false });
+        this.websiteService = useService("website");
+        this.ui = useService("ui");
         // TODO: to remove: this is only needed to not use the website systray
         // when using the "website preview" app.
         this.websiteService.useMysterious = true;
@@ -67,28 +42,17 @@ export class WebsiteBuilder extends Component {
         this.websitePreviewRef = useRef("website_preview");
 
         onWillStart(async () => {
-            const updateWebsiteId = (websiteId) => {
-                const encodedPath = encodeURIComponent(this.path);
-                this.initialUrl = `/website/force/${encodeURIComponent(
-                    websiteId
-                )}?path=${encodedPath}`;
-                this.websiteService.currentWebsiteId = websiteId;
-            };
-            const backendWebsiteId = this.props.action.context.params?.website_id;
-            const proms = [
+            const [backendWebsiteRepr] = await Promise.all([
+                this.orm.call("website", "get_current_website"),
                 this.websiteService.fetchWebsites(),
                 this.websiteService.fetchUserGroups(),
-            ];
-            if (backendWebsiteId) {
-                updateWebsiteId(backendWebsiteId);
-                await Promise.all(proms);
-            } else {
-                const [backendWebsiteRepr] = await Promise.all([
-                    this.orm.call("website", "get_current_website"),
-                    ...proms,
-                ]);
-                updateWebsiteId(backendWebsiteRepr[0]);
-            }
+            ]);
+            this.backendWebsiteId = backendWebsiteRepr[0];
+            const encodedPath = encodeURIComponent(this.path);
+            this.initialUrl = `/website/force/${encodeURIComponent(
+                this.backendWebsiteId
+            )}?path=${encodedPath}`;
+            this.websiteService.currentWebsiteId = this.backendWebsiteId;
         });
         onMounted(() => {
             const { enable_editor, edit_translations } = this.props.action.context.params || {};
@@ -97,13 +61,15 @@ export class WebsiteBuilder extends Component {
                 this.onEditPage();
             }
         });
-        this.publicRootReady = new Deferred();
         this.setIframeLoaded();
         this.addSystrayItems();
         onWillDestroy(() => {
-            registry.category("systray").remove("website.WebsiteSystrayItem");
+            window.parent.document.removeEventListener(
+                "website_edit_loaded",
+                this.updateEditInteraction
+            );
             this.websiteService.useMysterious = false;
-            this.websiteService.currentWebsiteId = null;
+            registry.category("systray").remove("website.WebsiteSystrayItem");
         });
     }
 
@@ -111,15 +77,13 @@ export class WebsiteBuilder extends Component {
         const WebsitePlugins = registry.category("website-plugins").getAll();
         return {
             closeEditor: this.reloadIframeAndCloseEditor.bind(this),
-            reloadEditor: this.reloadEditor.bind(this),
             snippetsName: "website.snippets",
             toggleMobile: this.toggleMobile.bind(this),
             overlayRef: this.overlayRef,
             isTranslation: this.translation,
             iframeLoaded: this.iframeLoaded,
-            isMobile: this.websiteContext.isMobile,
+            isMobile: this.state.isMobile,
             Plugins: WebsitePlugins,
-            config: { initialTarget: this.target },
         };
     }
 
@@ -142,19 +106,12 @@ export class WebsiteBuilder extends Component {
     }
 
     onNewPage() {
-        this.dialog.add(AddPageDialog, {
-            onAddPage: () => {
-                this.websiteService.context.showNewContentModal = false;
-            },
-            websiteId: this.websiteService.currentWebsite.id,
-        });
+        console.log("todo: new page");
     }
 
-    async onEditPage() {
+    onEditPage() {
         document.querySelector(".o_main_navbar").setAttribute("style", "margin-top: -100%;");
-        await this.iframeLoaded;
-        await this.publicRootReady;
-        await this.loadAssetsEditBundle();
+        this.loadAssetsEditBundle();
 
         setTimeout(() => {
             this.state.isEditing = true;
@@ -162,27 +119,21 @@ export class WebsiteBuilder extends Component {
         }, 200);
     }
 
-    async loadAssetsEditBundle() {
-        await Promise.all([
-            // TODO Should be website.assets_edit_frontend, but that is currently
-            // still used by website, so let's not impact it yet.
-            loadBundle("html_builder.assets_edit_frontend", {
-                targetDoc: this.websiteContent.el.contentDocument,
-            }),
-            loadBundle("html_builder.inside_builder_style", {
-                targetDoc: this.websiteContent.el.contentDocument,
-            }),
-        ]);
+    loadAssetsEditBundle() {
+        loadBundle("website.assets_edit_frontend", {
+            targetDoc: this.websiteContent.el.contentDocument,
+        });
     }
 
     onIframeLoad(ev) {
-        history.pushState(null, "", ev.target.contentWindow.location.pathname);
+        // history.pushState(null, "", ev.target.contentWindow.location.pathname);
+        loadBundle("html_builder.inside_builder_style", {
+            targetDoc: this.websiteContent.el.contentDocument,
+        });
         this.websiteService.pageDocument = this.websiteContent.el.contentDocument;
-        this.websiteContent.el.setAttribute("is-ready", "true");
         if (this.translation) {
             deleteQueryParam("edit_translations", this.websiteService.contentWindow, true);
         }
-        this.preparePublicRootReady();
         this.resolveIframeLoaded();
     }
 
@@ -209,54 +160,15 @@ export class WebsiteBuilder extends Component {
         return path;
     }
 
-    async reloadEditor(param) {
-        this.target = param.target || null;
-        await this.reloadIframe(this.state.isEditing, param.url);
-        // trigger an new instance of the builder menu
-        this.state.key++;
-
-        this.notification.add(_t("Your modifications were saved to apply this option."), {
-            title: _t("Content saved."),
-            type: "success",
-        });
-    }
-
     async reloadIframeAndCloseEditor() {
-        const isEditing = false;
-        await this.reloadIframe(isEditing);
-        document.querySelector(".o_main_navbar").removeAttribute("style");
-        this.state.isEditing = isEditing;
-        this.addSystrayItems();
-    }
-
-    async reloadIframe(isEditing = true, url) {
         this.ui.block();
-        this.preparePublicRootReady();
         this.setIframeLoaded();
-        if (url) {
-            this.websiteContent.el.contentWindow.location = url;
-        } else {
-            this.websiteContent.el.contentWindow.location.reload();
-        }
+        this.websiteContent.el.contentWindow.location.reload();
         await this.iframeLoaded;
-        if (isEditing) {
-            await this.publicRootReady;
-            await this.loadAssetsEditBundle();
-        }
         this.ui.unblock();
-    }
-
-    preparePublicRootReady() {
-        const deferred = new Deferred();
-        this.publicRootReady = deferred;
-        this.websiteContent.el.contentWindow.addEventListener(
-            "PUBLIC-ROOT-READY",
-            (event) => {
-                this.websiteContent.el.setAttribute("is-ready", "true");
-                deferred.resolve();
-            },
-            { once: true }
-        );
+        document.querySelector(".o_main_navbar").removeAttribute("style");
+        this.state.isEditing = false;
+        this.addSystrayItems();
     }
 
     setIframeLoaded() {
@@ -268,18 +180,11 @@ export class WebsiteBuilder extends Component {
     }
 
     toggleMobile() {
+        this.state.isMobile = !this.state.isMobile;
         // Adding the mobile class directly, to not wait for the component
         // re-rendering.
-        this.websiteService.context.isMobile = !this.websiteService.context.isMobile;
-    }
-
-    get aceEditorWidth() {
-        const storedWidth = browser.localStorage.getItem("ace_editor_width");
-        return storedWidth ? parseInt(storedWidth) : 720;
-    }
-
-    onResourceEditorResize(width) {
-        browser.localStorage.setItem("ace_editor_width", width);
+        this.websitePreviewRef.el.classList.toggle("o_is_mobile", this.state.isMobile);
+        this.websiteService.context.isMobile = this.state.isMobile;
     }
 }
 
@@ -313,4 +218,4 @@ function isTopWindowURL({ host, pathname }) {
     );
 }
 
-registry.category("actions").add("website_preview", WebsiteBuilder);
+registry.category("actions").add("egg_website_preview", WebsiteBuilder);

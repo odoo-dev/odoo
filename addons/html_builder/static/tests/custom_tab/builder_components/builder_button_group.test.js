@@ -1,27 +1,32 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { hover } from "@odoo/hoot-dom";
 import { xml } from "@odoo/owl";
 import { contains } from "@web/../tests/web_test_helpers";
-import { addBuilderAction, addBuilderOption, setupHTMLBuilder } from "../../helpers";
+import {
+    addActionOption,
+    addOption,
+    defineWebsiteModels,
+    setupWebsiteBuilder,
+} from "../../website_helpers";
 
-describe.current.tags("desktop");
+defineWebsiteModels();
 
 test("change the editingElement of sub widget through `applyTo` prop", async () => {
-    addBuilderAction({
+    addActionOption({
         customAction: {
             apply: ({ editingElement }) => {
                 expect.step(`customAction ${editingElement.className}`);
             },
         },
     });
-    addBuilderOption({
+    addOption({
         selector: ".test-options-target",
         template: xml`
                     <BuilderButtonGroup applyTo="'.a'">
                         <BuilderButton action="'customAction'"/>
                     </BuilderButtonGroup>`,
     });
-    await setupHTMLBuilder(`
+    await setupWebsiteBuilder(`
                 <div class="test-options-target">
                     <div class="a">b</div>
                 </div>
@@ -29,24 +34,24 @@ test("change the editingElement of sub widget through `applyTo` prop", async () 
     await contains(":iframe .test-options-target").click();
     expect(".options-container").toBeDisplayed();
     await hover("[data-action-id='customAction']");
-    expect.verifySteps(["customAction a o-paragraph"]);
+    expect.verifySteps(["customAction a"]);
 });
 test("should propagate actionParam in the context", async () => {
-    addBuilderAction({
+    addActionOption({
         customAction: {
-            apply: ({ param: { mainParam: testParam } }) => {
-                expect.step(`customAction ${testParam}`);
+            apply: ({ param }) => {
+                expect.step(`customAction ${param}`);
             },
         },
     });
-    addBuilderOption({
+    addOption({
         selector: ".test-options-target",
         template: xml`
                     <BuilderButtonGroup actionParam="'myParam'">
                         <BuilderButton action="'customAction'"/>
                     </BuilderButtonGroup>`,
     });
-    await setupHTMLBuilder(`
+    await setupWebsiteBuilder(`
                 <div class="test-options-target">
                     <div class="a">b</div>
                 </div>
@@ -57,7 +62,7 @@ test("should propagate actionParam in the context", async () => {
     expect.verifySteps(["customAction myParam"]);
 });
 test("prevent preview of all buttons", async () => {
-    addBuilderOption({
+    addOption({
         selector: ".test-options-target",
         template: xml`
                     <BuilderButtonGroup preview="false">
@@ -71,7 +76,7 @@ test("prevent preview of all buttons", async () => {
                         <BuilderButton action="'customAction4'"/>
                     </BuilderButtonGroup>`,
     });
-    addBuilderAction({
+    addActionOption({
         customAction1: {
             apply: () => expect.step(`customAction1`),
         },
@@ -85,7 +90,7 @@ test("prevent preview of all buttons", async () => {
             apply: () => expect.step(`customAction4`),
         },
     });
-    await setupHTMLBuilder(`
+    await setupWebsiteBuilder(`
                 <div class="test-options-target">
                     <div class="a">b</div>
                 </div>
@@ -102,12 +107,12 @@ test("prevent preview of all buttons", async () => {
     expect.verifySteps(["customAction4"]);
 });
 test("hide/display base on applyTo", async () => {
-    addBuilderOption({
+    addOption({
         selector: ".parent-target",
         template: xml`<BuilderButton applyTo="'.child-target'" classAction="'my-custom-class'"/>`,
     });
 
-    addBuilderOption({
+    addOption({
         selector: ".parent-target",
         template: xml`
                 <BuilderButtonGroup applyTo="'.my-custom-class'">
@@ -115,9 +120,7 @@ test("hide/display base on applyTo", async () => {
                 </BuilderButtonGroup>`,
     });
 
-    await setupHTMLBuilder(
-        `<div class="parent-target o-paragraph"><div class="child-target">b</div></div>`
-    );
+    await setupWebsiteBuilder(`<div class="parent-target"><div class="child-target">b</div></div>`);
     await contains(":iframe .parent-target").click();
     expect(".options-container .btn-group").toHaveCount(0);
 
@@ -126,12 +129,12 @@ test("hide/display base on applyTo", async () => {
 });
 
 test("hide/display base on applyTo - 2", async () => {
-    addBuilderOption({
+    addOption({
         selector: ".parent-target",
         template: xml`<BuilderButton applyTo="'.child-target'" classAction="'my-custom-class'"/>`,
     });
 
-    addBuilderOption({
+    addOption({
         selector: ".parent-target",
         template: xml`
                 <BuilderButtonGroup>
@@ -139,9 +142,7 @@ test("hide/display base on applyTo - 2", async () => {
                 </BuilderButtonGroup>`,
     });
 
-    await setupHTMLBuilder(
-        `<div class="parent-target o-paragraph"><div class="child-target">b</div></div>`
-    );
+    await setupWebsiteBuilder(`<div class="parent-target"><div class="child-target">b</div></div>`);
     await contains(":iframe .parent-target").click();
     expect(".options-container .btn-group").not.toBeVisible();
 
@@ -150,38 +151,21 @@ test("hide/display base on applyTo - 2", async () => {
 });
 
 test("click on BuilderButton with empty value should remove styleAction", async () => {
-    addBuilderOption({
+    addOption({
         selector: ".test-options-target",
         template: xml`<BuilderButtonGroup>
             <BuilderButton styleAction="'width'" styleActionValue="''"/>
             <BuilderButton styleAction="'width'" styleActionValue="'25%'"/>
         </BuilderButtonGroup>`,
     });
-    const { contentEl } = await setupHTMLBuilder(`<div class="test-options-target">b</div>`);
+    const { getEditableContent } = await setupWebsiteBuilder(`<div class="test-options-target">b</div>`);
+    const editableContent = getEditableContent();
     await contains(":iframe .test-options-target").click();
     await contains("[data-style-action='width'][data-style-action-value='25%']").click();
-    expect(contentEl).toHaveInnerHTML(
-        `<div class="test-options-target o-paragraph" style="width: 25% !important;">b</div>`
+    expect(editableContent).toHaveInnerHTML(
+        `<div class="test-options-target" style="width: 25% !important;">b</div>`
     );
 
     await contains("[data-style-action='width'][data-style-action-value='']").click();
-    expect(contentEl).toHaveInnerHTML(
-        `<div class="test-options-target o-paragraph" style="">b</div>`
-    );
-});
-
-test("button that matches with the highest priority should be active", async () => {
-    addBuilderOption({
-        selector: ".test-options-target",
-        template: xml`<BuilderButtonGroup>
-            <BuilderButton classAction="'a'" >a</BuilderButton>
-            <BuilderButton classAction="'a b'">a b</BuilderButton>
-            <BuilderButton classAction="'a b c'">a b c</BuilderButton>
-        </BuilderButtonGroup>`,
-    });
-    await setupHTMLBuilder(`<div class="test-options-target a b">b</div>`);
-    await contains(":iframe .test-options-target").click();
-    expect("[data-class-action='a']").not.toHaveClass("active");
-    expect("[data-class-action='a b']").toHaveClass("active");
-    expect("[data-class-action='a b c']").not.toHaveClass("active");
+    expect(editableContent).toHaveInnerHTML(`<div class="test-options-target" style="">b</div>`);
 });

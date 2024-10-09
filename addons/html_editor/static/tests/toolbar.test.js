@@ -867,52 +867,6 @@ test("close the toolbar if the selection contains any nodes (traverseNode = [], 
     expect(".o-we-toolbar").toHaveCount(0);
 });
 
-test.tags("desktop");
-// TODO mysterious egg
-test.todo("should not close image cropper while loading media", async () => {
-    onRpc("/html_editor/get_image_info", () => ({
-        original: {
-            image_src: "#",
-        },
-    }));
-    onRpc("/web/image/__odoo__unknown__src__/", async () => {
-        await delay(50);
-        return {};
-    });
-
-    await setupEditor(`<p>[<img src="#">]</p>`);
-    await waitFor(".o-we-toolbar");
-
-    await click('button[name="image_transform"]');
-    await animationFrame();
-
-    await click('.btn[name="image_crop"]');
-    await animationFrame();
-
-    await waitFor('.btn[title="Discard"]', { timeout: 1000 });
-    await click('.btn[title="Discard"]');
-    await animationFrame();
-
-    // cropper should not close as the cropper still loading the image.
-    expect('.btn[title="Discard"]').toHaveCount(1);
-
-    // once the image loaded we should be able to close
-    await waitFor('img[src^="blob:"]', { timeout: 2000 });
-    await click('.btn[title="Discard"]');
-    await waitForNone('.btn[title="Discard"]', { timeout: 1000 });
-
-    await click("img");
-    await waitFor(".o-we-toolbar", { timeout: 1000 });
-
-    await click('button[name="image_transform"]');
-    await animationFrame();
-
-    await waitFor('.btn[name="image_crop"]', { timeout: 1000 });
-    await click('.btn[name="image_crop"]');
-    await waitFor('.btn[title="Discard"]', { timeout: 1000 });
-    expect('.btn[title="Discard"]').toHaveCount(1);
-});
-
 test("toolbar shouldn't be visible if can_display_toolbar === false", async () => {
     const { el } = await setupEditor("<p>[test]<img></p>", {
         config: { resources: { can_display_toolbar: (namespace) => namespace !== "image" } },

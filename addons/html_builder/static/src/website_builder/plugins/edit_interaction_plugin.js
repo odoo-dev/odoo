@@ -5,17 +5,8 @@ export class EditInteractionPlugin extends Plugin {
     static id = "edit_interaction";
 
     resources = {
-        normalize_handlers: this.restartInteractions.bind(this),
-        content_manually_updated_handlers: this.restartInteractions.bind(this),
-        before_save_handlers: () => this.stopInteractions(),
-        on_will_clone_handlers: ({ originalEl }) => {
-            this.stopInteractions(originalEl);
-        },
-        on_cloned_handlers: ({ originalEl }) => {
-            this.restartInteractions(originalEl);
-            // The clonedEl is implicitly started because it is a newly
-            // inserted content.
-        },
+        update_interactions: this.startInteractions.bind(this),
+        on_remove_handlers: this.stopInteractions.bind(this),
     };
 
     setup() {
@@ -26,21 +17,16 @@ export class EditInteractionPlugin extends Plugin {
             this.updateEditInteraction.bind(this),
             { once: true }
         );
-        const event = new CustomEvent("edit_interaction_plugin_loaded");
-        event.shared = this.config.getShared();
-        window.parent.document.dispatchEvent(event);
-    }
-    destroy() {
-        this.websiteEditService?.uninstallPatches?.();
-        this.stopInteractions();
+        window.parent.document.dispatchEvent(new CustomEvent("edit_interaction_plugin_loaded"));
     }
 
     updateEditInteraction({ detail: { websiteEditService } }) {
         this.websiteEditService = websiteEditService;
-        this.websiteEditService.installPatches();
+        const targetEl = this.document.querySelector("#wrapwrap");
+        this.startInteractions(targetEl);
     }
 
-    restartInteractions(element) {
+    startInteractions(element) {
         if (!this.websiteEditService) {
             throw new Error("website edit service not loaded");
         }

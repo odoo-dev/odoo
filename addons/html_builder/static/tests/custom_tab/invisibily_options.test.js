@@ -75,7 +75,7 @@ test("check invisible element after save", async () => {
         "[data-container-title='Column'] button[data-action-id='toggleDeviceVisibility']"
     ).click();
     expect(":iframe .row").toHaveInnerHTML(`
-        <div class="col-lg-3 o_colored_level d-lg-none o_snippet_desktop_invisible" data-invisible="1">
+        <div class="col-lg-3 d-lg-none o_snippet_desktop_invisible" data-invisible="1">
             <p>TEST</p>
         </div>
     `);
@@ -86,7 +86,7 @@ test("check invisible element after save", async () => {
         <section class="o_colored_level">
             <div class="container">
                 <div class="row">
-                    <div class="col-lg-3 o_colored_level d-lg-none o_snippet_desktop_invisible" data-invisible="1">
+                    <div class="col-lg-3 d-lg-none o_snippet_desktop_invisible" data-invisible="1">
                         <p>TEST</p>
                     </div>
                 </div>
@@ -142,28 +142,4 @@ test("hide on mobile and toggle mobile view", async () => {
 
     await contains("button[data-action='mobile']").click();
     expect(".o_we_invisible_el_panel").not.toBeDisplayed();
-});
-
-test("Hide element conditionally", async () => {
-    await setupWebsiteBuilder(websiteContent);
-
-    await contains(":iframe section").click();
-    await contains("[data-label='Visibility'] button.dropdown").click();
-    await contains("div[data-action-id='forceVisible']:contains(Conditionally)").click();
-    expect(":iframe section").toHaveClass("o_snippet_invisible");
-    expect(".o_we_invisible_el_panel .o_we_invisible_entry").toHaveCount(1);
-    expect(".o_we_invisible_el_panel .o_we_invisible_entry i").toHaveClass("fa-eye");
-
-    await contains(".o_we_invisible_el_panel .o_we_invisible_entry").click();
-    expect(":iframe section.o_snippet_invisible").toHaveClass("o_conditional_hidden");
-    expect(":iframe section").toHaveAttribute("data-invisible", "1");
-    expect(".o_we_invisible_el_panel .o_we_invisible_entry i").toHaveClass("fa-eye-slash");
-
-    await contains(".o_we_invisible_el_panel .o_we_invisible_entry").click();
-    expect(":iframe section.o_snippet_invisible").not.toHaveClass("o_conditional_hidden");
-    expect(":iframe section").not.toHaveAttribute("data-invisible");
-
-    await contains("[data-label='Visibility'] button.dropdown").click();
-    await contains("div[data-action-id='forceVisible']").click();
-    expect(":iframe section").not.toHaveClass("o_snippet_invisible");
 });

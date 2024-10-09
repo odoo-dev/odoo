@@ -1,7 +1,7 @@
 import { Builder } from "@html_builder/builder";
 import { WebsiteBuilder } from "@html_builder/website_preview/website_builder_action";
 import { EditWebsiteSystrayItem } from "@html_builder/website_preview/edit_website_systray_item";
-import { setContent, setSelection } from "@html_editor/../tests/_helpers/selection";
+import { setContent } from "@html_editor/../tests/_helpers/selection";
 import { insertText } from "@html_editor/../tests/_helpers/user_actions";
 import { expect, test } from "@odoo/hoot";
 import { animationFrame, manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
@@ -19,8 +19,6 @@ const websiteServiceInTranslateMode = {
             defaultLangName: "English (US)",
         },
     },
-    // Minimal context to avoid crashes.
-    context: { showNewContentModal: false },
 };
 
 test("systray in translate mode", async () => {
@@ -66,8 +64,7 @@ test("translate text", async () => {
     const editor = await setupSidebarBuilderForTranslation({
         websiteContent: getTranslateEditable("Hello"),
     });
-    const textNode = editor.editable.querySelector("span").firstChild;
-    setSelection({ anchorNode: textNode, anchorOffset: 1 });
+    setContent(editor.editable.querySelector("#wrap"), getTranslateEditable("H[]ello"));
     await insertText(editor, "1");
     await contains(".o-snippets-top-actions button:contains(Save)").click();
     expect(resultSave.length).toBe(1);

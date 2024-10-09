@@ -1,13 +1,6 @@
 import { setSelection } from "@html_editor/../tests/_helpers/selection";
 import { expect, test } from "@odoo/hoot";
-import {
-    animationFrame,
-    click,
-    press,
-    queryAllTexts,
-    queryFirst,
-    runAllTimers,
-} from "@odoo/hoot-dom";
+import { animationFrame, click, queryAllTexts, queryFirst, runAllTimers } from "@odoo/hoot-dom";
 import { xml } from "@odoo/owl";
 import { contains } from "@web/../tests/web_test_helpers";
 import {
@@ -22,8 +15,8 @@ defineWebsiteModels();
 test("call a specific action with some params and value (BuilderSelectItem)", async () => {
     addActionOption({
         customAction: {
-            apply: ({ param: { mainParam: testParam }, value }) => {
-                expect.step(`customAction ${testParam} ${value}`);
+            apply: ({ param, value }) => {
+                expect.step(`customAction ${param} ${value}`);
             },
         },
     });
@@ -115,14 +108,14 @@ test("hide/display BuilderSelect based on applyTo", async () => {
     const editableContent = getEditableContent();
     await contains(":iframe .parent-target").click();
     expect(editableContent).toHaveInnerHTML(
-        `<div class="parent-target"><div class="child-target b o-paragraph">b</div></div>`
+        `<div class="parent-target"><div class="child-target b">b</div></div>`
     );
     expect("[data-class-action='my-custom-class']").not.toHaveClass("active");
     expect(".options-container button.dropdown-toggle").toHaveCount(0);
 
     await contains("[data-class-action='my-custom-class']").click();
     expect(editableContent).toHaveInnerHTML(
-        `<div class="parent-target"><div class="child-target b o-paragraph my-custom-class">b</div></div>`
+        `<div class="parent-target"><div class="child-target b my-custom-class">b</div></div>`
     );
     expect("[data-class-action='my-custom-class']").toHaveClass("active");
     expect(".options-container button.dropdown-toggle").toHaveCount(1);
@@ -145,12 +138,12 @@ test("hide/display BuilderSelectItem base on applyTo", async () => {
                 </BuilderSelect>`,
     });
     const { getEditableContent } = await setupWebsiteBuilder(
-        `<div class="parent-target"><div class="child-target o-paragraph">b</div></div>`
+        `<div class="parent-target"><div class="child-target">b</div></div>`
     );
     const editableContent = getEditableContent();
     await contains(":iframe .parent-target").click();
     expect(editableContent).toHaveInnerHTML(
-        `<div class="parent-target"><div class="child-target o-paragraph">b</div></div>`
+        `<div class="parent-target"><div class="child-target">b</div></div>`
     );
     expect("[data-class-action='my-custom-class']").not.toHaveClass("active");
     expect(".options-container button.dropdown-toggle").toHaveCount(1);
@@ -159,7 +152,7 @@ test("hide/display BuilderSelectItem base on applyTo", async () => {
 
     await contains("[data-class-action='my-custom-class']").click();
     expect(editableContent).toHaveInnerHTML(
-        `<div class="parent-target"><div class="child-target o-paragraph my-custom-class">b</div></div>`
+        `<div class="parent-target"><div class="child-target my-custom-class">b</div></div>`
     );
     expect("[data-class-action='my-custom-class']").toHaveClass("active");
     await contains(".options-container button.dropdown-toggle").click();
@@ -208,7 +201,7 @@ test("use BuilderSelect with styleAction", async () => {
 
     await contains(".o-dropdown--menu div:contains(dotted)").click();
     expect(editableContent).toHaveInnerHTML(
-        `<div class="parent-target o-paragraph" style="border-style: dotted;">b</div>`
+        `<div class="parent-target" style="border-style: dotted !important;">b</div>`
     );
     expect(".we-bg-options-container .dropdown").toHaveText("dotted");
 });
@@ -233,98 +226,5 @@ test("do not put inline style on an element which already has this style through
     expect(":iframe hr").toHaveStyle({ "border-top-style": "dotted" });
     await contains(".we-bg-options-container .dropdown").click();
     await contains(".o-dropdown--menu  div:contains('inset')").click();
-    expect(":iframe hr").not.toHaveStyle("border-top-style", { inline: true });
-});
-test("revert a preview when cancelling a BuilderSelect by clicking outside of it", async () => {
-    addOption({
-        selector: ".test",
-        template: xml`
-                <BuilderSelect dataAttributeAction="'choice'">
-                    <BuilderSelectItem dataAttributeActionValue="'0'">0</BuilderSelectItem>
-                    <BuilderSelectItem dataAttributeActionValue="'1'">1</BuilderSelectItem>
-                </BuilderSelect>`,
-    });
-    await setupWebsiteBuilder(`<div class="test">Test</div>`);
-    await contains(":iframe .test").click();
-    expect(":iframe .test").not.toHaveAttribute("data-choice");
-    await contains(".we-bg-options-container .dropdown").click();
-    await contains(".o-dropdown--menu  div:contains('0')").hover();
-    expect(":iframe .test").toHaveAttribute("data-choice", "0");
-    await click(".we-bg-options-container");
-    expect(":iframe .test").not.toHaveAttribute("data-choice");
-});
-test("revert a preview when cancelling a BuilderSelect with escape", async () => {
-    addOption({
-        selector: ".test",
-        template: xml`
-                <BuilderSelect dataAttributeAction="'choice'">
-                    <BuilderSelectItem dataAttributeActionValue="'0'">0</BuilderSelectItem>
-                    <BuilderSelectItem dataAttributeActionValue="'1'">1</BuilderSelectItem>
-                </BuilderSelect>`,
-    });
-    await setupWebsiteBuilder(`<div class="test">Test</div>`);
-    await contains(":iframe .test").click();
-    expect(":iframe .test").not.toHaveAttribute("data-choice");
-    await contains(".we-bg-options-container .dropdown").click();
-    await contains(".o-dropdown--menu  div:contains('0')").hover();
-    expect(":iframe .test").toHaveAttribute("data-choice", "0");
-    await press("escape");
-    expect(":iframe .test").not.toHaveAttribute("data-choice");
-});
-test("preview when cycling through options with the keyboard", async () => {
-    addOption({
-        selector: ".test",
-        template: xml`
-                <BuilderSelect dataAttributeAction="'choice'">
-                    <BuilderSelectItem dataAttributeActionValue="'0'">0</BuilderSelectItem>
-                    <BuilderSelectItem dataAttributeActionValue="'1'">1</BuilderSelectItem>
-                </BuilderSelect>`,
-    });
-    await setupWebsiteBuilder(`<div class="test">Test</div>`);
-    await contains(":iframe .test").click();
-    expect(":iframe .test").not.toHaveAttribute("data-choice");
-    await contains(".we-bg-options-container .dropdown").press("enter");
-    await press("arrowdown");
-    expect(":iframe .test").toHaveAttribute("data-choice", "0");
-});
-test("revert a preview selected with the keyboard when cancelling with escape", async () => {
-    addOption({
-        selector: ".test",
-        template: xml`
-                <BuilderSelect dataAttributeAction="'choice'">
-                    <BuilderSelectItem dataAttributeActionValue="'0'">0</BuilderSelectItem>
-                    <BuilderSelectItem dataAttributeActionValue="'1'">1</BuilderSelectItem>
-                </BuilderSelect>`,
-    });
-    await setupWebsiteBuilder(`<div class="test">Test</div>`);
-    await contains(":iframe .test").click();
-    expect(":iframe .test").not.toHaveAttribute("data-choice");
-    await contains(".we-bg-options-container .dropdown").press("enter");
-    await press("arrowdown");
-    expect(".o-dropdown--menu  div:contains('0')").toBeFocused();
-    await press("escape");
-    expect(":iframe .test").not.toHaveAttribute("data-choice");
-});
-
-test("isApplied shouldn't be called when the element is removed from the DOM", async () => {
-    addActionOption({
-        customAction: {
-            isApplied: ({ editingElement: el }) => {
-                expect(el.isConnected).toBe(true);
-            },
-            apply: () => {},
-        },
-    });
-    addOption({
-        selector: ".test",
-        template: xml`
-                <BuilderSelect action="'customAction'">
-                    <BuilderSelectItem actionParam="'0'">0</BuilderSelectItem>
-                    <BuilderSelectItem actionParam="'1'">1</BuilderSelectItem>
-                </BuilderSelect>`,
-    });
-    await setupWebsiteBuilder(`<div class="test">Test</div>`);
-    await contains(":iframe .test").click();
-    await contains(".fa-trash ").click();
-    expect(":iframe .test").toHaveCount(0);
+    expect(":iframe hr").not.toHaveStyle("border-top-style");
 });

@@ -1,4 +1,3 @@
-import { BaseOptionComponent, useDomState } from "@html_builder/core/utils";
 import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, click, hover, runAllTimers } from "@odoo/hoot-dom";
 import { xml } from "@odoo/owl";
@@ -17,8 +16,8 @@ const falsy = () => false;
 test("call a specific action with some params and value", async () => {
     addActionOption({
         customAction: {
-            apply: ({ param: { mainParam: testParam }, value }) => {
-                expect.step(`customAction ${testParam} ${value}`);
+            apply: ({ param, value }) => {
+                expect.step(`customAction ${param} ${value}`);
             },
         },
     });
@@ -123,26 +122,6 @@ test("should toggle when not in a BuilderButtonGroup", async () => {
     await contains("[data-class-action='c1']").click();
     expect(":iframe .test-options-target").not.toHaveClass("test-options-target c1");
 });
-test("should call apply when the button is active and none of its actions have a clean method", async () => {
-    addActionOption({
-        customAction: {
-            apply() {
-                expect.step(`customAction apply`);
-            },
-        },
-    });
-    addOption({
-        selector: ".test-options-target",
-        template: xml`<BuilderButton action="'customAction'" preview="false"/>`,
-    });
-    await setupWebsiteBuilder(`<div class="test-options-target">b</div>`);
-    await contains(":iframe .test-options-target").click();
-    await contains("[data-action-id='customAction']").click();
-    expect.verifySteps(["customAction apply"]);
-    await contains("[data-action-id='customAction']").click();
-    expect.verifySteps(["customAction apply"]);
-});
-
 test("should not toggle when in a BuilderButtonGroup", async () => {
     addOption({
         selector: ".test-options-target",
@@ -173,19 +152,19 @@ test("clean another action", async () => {
     await click("[data-class-action='my-custom-class1']");
     expect(":iframe .test-options-target").toHaveAttribute(
         "class",
-        "test-options-target o-paragraph my-custom-class1"
+        "test-options-target my-custom-class1"
     );
     await click("[data-class-action='my-custom-class2']");
     expect(":iframe .test-options-target").toHaveAttribute(
         "class",
-        "test-options-target o-paragraph my-custom-class2"
+        "test-options-target my-custom-class2"
     );
 });
 test("clean should provide the next action value", async () => {
     addActionOption({
         customAction: {
             clean({ nextAction }) {
-                expect.step(`customAction clean ${nextAction.param.mainParam} ${nextAction.value}`);
+                expect.step(`customAction clean ${nextAction.param} ${nextAction.value}`);
             },
             apply() {
                 expect.step(`customAction apply`);
@@ -308,15 +287,15 @@ test("apply classAction on multi elements", async () => {
     await contains(":iframe .test-options-target").click();
     expect(editableContent).toHaveInnerHTML(`
             <div class="test-options-target">
-                <div class="target-apply o-paragraph">a</div>
-                <div class="target-apply o-paragraph">b</div>
+                <div class="target-apply">a</div>
+                <div class="target-apply">b</div>
             </div>`);
 
     await contains("[data-class-action='my-custom-class']").click();
     expect(editableContent).toHaveInnerHTML(`
             <div class="test-options-target">
-                <div class="target-apply o-paragraph my-custom-class">a</div>
-                <div class="target-apply o-paragraph my-custom-class">b</div>
+                <div class="target-apply my-custom-class">a</div>
+                <div class="target-apply my-custom-class">b</div>
             </div>`);
 });
 test("hide/display base on applyTo", async () => {
@@ -334,19 +313,19 @@ test("hide/display base on applyTo", async () => {
     });
 
     const { getEditableContent } = await setupWebsiteBuilder(
-        `<div class="parent-target o-paragraph"><div class="child-target">b</div></div>`
+        `<div class="parent-target"><div class="child-target">b</div></div>`
     );
     const editableContent = getEditableContent();
     await contains(":iframe .parent-target").click();
     expect(editableContent).toHaveInnerHTML(
-        `<div class="parent-target o-paragraph"><div class="child-target">b</div></div>`
+        `<div class="parent-target"><div class="child-target">b</div></div>`
     );
     expect("[data-class-action='my-custom-class']").not.toHaveClass("active");
     expect("[data-class-action='test']").toHaveCount(0);
 
     await contains("[data-class-action='my-custom-class']").click();
     expect(editableContent).toHaveInnerHTML(
-        `<div class="parent-target o-paragraph"><div class="child-target my-custom-class">b</div></div>`
+        `<div class="parent-target"><div class="child-target my-custom-class">b</div></div>`
     );
     expect("[data-class-action='my-custom-class']").toHaveClass("active");
     expect("[data-class-action='test']").toHaveCount(1);
@@ -356,11 +335,11 @@ describe("inherited actions", () => {
     function makeAction(n, { async, isApplied } = {}) {
         const action = {
             isApplied,
-            clean({ param: { mainParam: testParam }, value }) {
-                expect.step(`customAction${n} clean ${testParam} ${value}`);
+            clean({ param, value }) {
+                expect.step(`customAction${n} clean ${param} ${value}`);
             },
-            apply: ({ param: { mainParam: testParam }, value }) => {
-                expect.step(`customAction${n} apply ${testParam} ${value}`);
+            apply: ({ param, value }) => {
+                expect.step(`customAction${n} apply ${param} ${value}`);
             },
         };
         if (async) {
@@ -368,8 +347,8 @@ describe("inherited actions", () => {
             const promise = new Promise((r) => {
                 resolve = r;
             });
-            action.load = async ({ param: { mainParam: testParam }, value }) => {
-                expect.step(`customAction${n} load ${testParam} ${value}`);
+            action.load = async ({ param, value }) => {
+                expect.step(`customAction${n} load ${param} ${value}`);
                 return promise;
             };
             return { action, resolve };
@@ -652,65 +631,4 @@ test("do not load when an operation is cleaned", async () => {
     await contains("[data-action-id='customAction']").click();
     await contains("[data-action-id='customAction']").click();
     expect.verifySteps(["load", "apply", "clean"]);
-});
-
-class SubTestOption extends BaseOptionComponent {
-    static template = xml`
-        <BuilderContext applyTo="this.domState.applyTo">
-            <BuilderButton classAction="'actionClass'">actionClass</BuilderButton>
-        </BuilderContext>
-    `;
-    static props = {};
-    setup() {
-        super.setup();
-        this.domState = useDomState((el) => ({
-            applyTo: el.matches(".first") ? ".a" : ".b",
-        }));
-    }
-}
-
-class TestOption extends BaseOptionComponent {
-    static template = xml`
-        <BuilderButton classAction="'secondCase'">secondCase</BuilderButton>
-        <BuilderContext applyTo="this.domState.applyTo">
-            <SubTestOption/>
-        </BuilderContext>
-    `;
-    static props = {};
-    static components = {
-        SubTestOption,
-    };
-    setup() {
-        super.setup();
-        this.domState = useDomState((el) => ({
-            applyTo: el.matches(".secondCase") ? ".second" : ".first",
-        }));
-    }
-}
-
-test("consecutive dynamic applyTo", async () => {
-    addOption({
-        selector: ".selector",
-        Component: TestOption,
-    });
-    await setupWebsiteBuilder(`
-        <div class="selector">
-            <div class="first">
-                <div class="a">a</div>
-                <div class="b">b</div>
-            </div>
-            <div class="second">
-                <div class="a">a</div>
-                <div class="b">b</div>
-            </div>
-        </div>
-    `);
-    await contains(":iframe .selector").click();
-    await contains("[data-class-action='actionClass']").click();
-    expect(":iframe .first .a").toHaveClass("actionClass");
-    expect(":iframe .first .b").not.toHaveClass("actionClass");
-    await contains("[data-class-action='secondCase']").click();
-    await contains("[data-class-action='actionClass']").click();
-    expect(":iframe .second .a").not.toHaveClass("actionClass");
-    expect(":iframe .second .b").toHaveClass("actionClass");
 });

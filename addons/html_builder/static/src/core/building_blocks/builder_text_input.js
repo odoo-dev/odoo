@@ -5,7 +5,7 @@ import {
     basicContainerBuilderComponentProps,
     useInputBuilderComponent,
     useBuilderComponent,
-} from "../utils";
+} from "./utils";
 import { BuilderComponent } from "./builder_component";
 
 export class BuilderTextInput extends Component {
@@ -13,6 +13,7 @@ export class BuilderTextInput extends Component {
     static props = {
         ...basicContainerBuilderComponentProps,
         ...textInputBasePassthroughProps,
+        id: { type: String, optional: true },
         default: { type: String, optional: true },
     };
     static components = {

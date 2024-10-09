@@ -1,6 +1,5 @@
 import { Plugin } from "@html_editor/plugin";
 import {
-    ICON_SELECTOR,
     MEDIA_SELECTOR,
     isIconElement,
     isProtected,
@@ -12,7 +11,6 @@ import { rpc } from "@web/core/network/rpc";
 import { MediaDialog } from "./media_dialog/media_dialog";
 import { rightPos } from "@html_editor/utils/position";
 import { withSequence } from "@html_editor/utils/resource";
-import { closestElement } from "@html_editor/utils/dom_traversal";
 
 /**
  * @typedef { Object } MediaShared
@@ -67,7 +65,6 @@ export class MediaPlugin extends Plugin {
         clipboard_content_processors: this.clean.bind(this),
         clipboard_text_processors: (text) => text.replace(/\u200B/g, ""),
 
-        selectors_for_feff_providers: () => ICON_SELECTOR,
         before_save_handlers: this.savePendingImages.bind(this),
     };
 

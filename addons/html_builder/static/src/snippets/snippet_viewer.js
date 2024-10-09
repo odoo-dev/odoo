@@ -49,7 +49,7 @@ export class SnippetViewer extends Component {
 
     onClick(snippet) {
         if (snippet.moduleId) {
-            this.props.snippetModel.installSnippetModule(snippet);
+            this.props.snippetModel.installModule(snippet);
         } else {
             this.props.selectSnippet(snippet);
         }
@@ -64,12 +64,9 @@ export class SnippetViewer extends Component {
     }
 
     getSelectedSnippets() {
-        const snippetStructures = this.props.snippetModel.snippetStructures.filter(
-            (snippet) => !snippet.isExcluded && !snippet.isDisabled
-        );
+        const snippetStructures = this.props.snippetModel.snippetStructures;
         if (this.props.state.search) {
-            const strMatches = (str) =>
-                str.toLowerCase().includes(this.props.state.search.toLowerCase());
+            const strMatches = (str) => str.toLowerCase().includes(this.props.state.search);
             return snippetStructures.filter(
                 (snippet) => strMatches(snippet.title) || strMatches(snippet.keyWords || "")
             );

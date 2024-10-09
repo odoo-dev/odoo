@@ -7,12 +7,6 @@ import { addOption, defineWebsiteModels, setupWebsiteBuilder } from "../../websi
 
 class Test extends models.Model {
     _name = "test";
-    _records = [
-        { id: 1, name: "First" },
-        { id: 2, name: "Second" },
-        { id: 3, name: "Third" },
-    ];
-    name = fields.Char();
 }
 class TestBase extends models.Model {
     _name = "test.base";
@@ -46,7 +40,7 @@ test("model many2many: find tag, select tag, unselect tag", async () => {
     );
 
     await contains(":iframe .test-options-target").click();
-    const modelEdit = getEditor().shared.cachedModel.useModelEdit({
+    const modelEdit = getEditor().shared.CachedModel.useModelEdit({
         model: "test.base",
         recordId: 1,
     });
@@ -55,13 +49,13 @@ test("model many2many: find tag, select tag, unselect tag", async () => {
     expect(modelEdit.get("rel")).toEqual([]);
 
     await contains(".btn.o-dropdown").click();
-    expect("input").toHaveCount(1);
+    expect("input").toHaveCount(2); // search + create
     await contains("input").click();
     await delay(300); // debounce
     await animationFrame();
     expect("span.o-dropdown-item").toHaveCount(3);
     await contains("span.o-dropdown-item").click();
-    expect(modelEdit.get("rel")).toEqual([{ id: 1, name: "First", display_name: "First" }]);
+    expect(modelEdit.get("rel")).toEqual([{ id: 1, name: "First" }]);
     expect("table tr").toHaveCount(1);
 
     await contains(".btn.o-dropdown").click();
@@ -71,18 +65,18 @@ test("model many2many: find tag, select tag, unselect tag", async () => {
     expect("span.o-dropdown-item").toHaveCount(2);
     await contains("span.o-dropdown-item").click();
     expect(modelEdit.get("rel")).toEqual([
-        { id: 1, name: "First", display_name: "First" },
-        { id: 2, name: "Second", display_name: "Second" },
+        { id: 1, name: "First" },
+        { id: 2, name: "Second" },
     ]);
     expect("table tr").toHaveCount(2);
 
     await contains("button.fa-minus").click();
-    expect(modelEdit.get("rel")).toEqual([{ id: 2, name: "Second", display_name: "Second" }]);
+    expect(modelEdit.get("rel")).toEqual([{ id: 2, name: "Second" }]);
     expect("table tr").toHaveCount(1);
     expect("table input").toHaveValue("Second");
 
     await contains(".o-snippets-tabs button").click();
-    await contains(":iframe .test-options-target").click();
+    await contains(".o-snippets-tabs button:nth-child(2)").click();
     expect("table tr").toHaveCount(1);
     expect("table input").toHaveValue("Second");
 });

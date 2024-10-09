@@ -7,7 +7,7 @@ import {
     getAllActionsAndOperations,
     useBuilderComponent,
     useDomState,
-} from "../utils";
+} from "./utils";
 import { isColorGradient } from "@web/core/utils/colors";
 
 // TODO replace by useInputBuilderComponent after extract unit by AGAU
@@ -18,41 +18,40 @@ export function useColorPickerBuilderComponent() {
     const state = useDomState(getState);
     const applyOperation = comp.env.editor.shared.history.makePreviewableOperation((applySpecs) => {
         for (const applySpec of applySpecs) {
+            let actionValue = applySpec.actionValue;
+            if (actionValue.startsWith("color-prefix-")) {
+                actionValue = `var(${actionValue.replace("color-prefix-", "--")})`;
+            }
             applySpec.apply({
                 editingElement: applySpec.editingElement,
                 param: applySpec.actionParam,
-                value: applySpec.actionValue,
+                value: actionValue,
                 loadResult: applySpec.loadResult,
                 dependencyManager: comp.env.dependencyManager,
             });
         }
     });
     function getState(editingElement) {
-        // if (!editingElement || !editingElement.isConnected) {
-        //     // TODO try to remove it. We need to move hook in BuilderComponent
-        //     return {};
-        // }
+        if (!editingElement || !editingElement.isConnected) {
+            // TODO try to remove it. We need to move hook in BuilderComponent
+            return {};
+        }
         const actionWithGetValue = getAllActions().find(
             ({ actionId }) => getAction(actionId).getValue
         );
         const { actionId, actionParam } = actionWithGetValue;
         const actionValue = getAction(actionId).getValue({ editingElement, param: actionParam });
         return {
-            selectedColor: actionValue || "#FFFFFF00",
+            selectedColor: actionValue,
         };
-    }
-    function getColor(colorValue) {
-        return colorValue.startsWith("color-prefix-")
-            ? `var(${colorValue.replace("color-prefix-", "--")})`
-            : colorValue;
     }
 
     function onApply(colorValue) {
-        callOperation(applyOperation.commit, { userInputValue: getColor(colorValue) });
+        callOperation(applyOperation.commit, { userInputValue: colorValue });
     }
     let onPreview = (colorValue) => {
         callOperation(applyOperation.preview, {
-            userInputValue: getColor(colorValue),
+            userInputValue: colorValue,
             operationParams: {
                 cancellable: true,
                 cancelPrevious: () => applyOperation.revert(),
@@ -78,14 +77,8 @@ export class BuilderColorPicker extends Component {
     static props = {
         ...basicContainerBuilderComponentProps,
         noTransparency: { type: Boolean, optional: true },
-        enabledTabs: { type: Array, optional: true },
         unit: { type: String, optional: true },
         title: { type: String, optional: true },
-        getUsedCustomColors: { type: Function, optional: true },
-        selectedTab: { type: String, optional: true },
-    };
-    static defaultProps = {
-        getUsedCustomColors: () => [],
     };
     static components = {
         ColorSelector: ColorSelector,
@@ -97,23 +90,15 @@ export class BuilderColorPicker extends Component {
         const { state, onApply, onPreview, onPreviewRevert } = useColorPickerBuilderComponent();
         this.colorButton = useRef("colorButton");
         this.state = state;
-        this.state.defaultTab = this.props.selectedTab || "solid"; // TODO: select the correct tab based on the color
-        useColorPicker(
-            "colorButton",
-            {
-                state,
-                applyColor: onApply,
-                applyColorPreview: onPreview,
-                applyColorResetPreview: onPreviewRevert,
-                getUsedCustomColors: this.props.getUsedCustomColors,
-                colorPrefix: "color-prefix-",
-                noTransparency: this.props.noTransparency,
-                enabledTabs: this.props.enabledTabs,
-            },
-            {
-                onClose: onPreviewRevert,
-            }
-        );
+        useColorPicker("colorButton", {
+            state,
+            applyColor: onApply,
+            applyColorPreview: onPreview,
+            applyColorResetPreview: onPreviewRevert,
+            getUsedCustomColors: () => [],
+            colorPrefix: "color-prefix-",
+            noTransparency: this.props.noTransparency,
+        });
     }
 
     getSelectedColorStyle() {

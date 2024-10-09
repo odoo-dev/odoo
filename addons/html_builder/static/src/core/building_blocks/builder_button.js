@@ -1,9 +1,5 @@
 import { Component } from "@odoo/owl";
-import {
-    clickableBuilderComponentProps,
-    useActionInfo,
-    useSelectableItemComponent,
-} from "../utils";
+import { clickableBuilderComponentProps, useSelectableItemComponent } from "./utils";
 import { BuilderComponent } from "./builder_component";
 
 export class BuilderButton extends Component {
@@ -12,6 +8,7 @@ export class BuilderButton extends Component {
     static props = {
         ...clickableBuilderComponentProps,
 
+        id: { type: String, optional: true },
         title: { type: String, optional: true },
         label: { type: String, optional: true },
         iconImg: { type: String, optional: true },
@@ -30,7 +27,6 @@ export class BuilderButton extends Component {
     };
 
     setup() {
-        this.info = useActionInfo();
         const { state, operation } = useSelectableItemComponent(this.props.id);
         this.state = state;
         this.onClick = operation.commit;

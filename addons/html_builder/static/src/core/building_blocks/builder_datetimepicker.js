@@ -4,11 +4,7 @@ import { ConversionError, formatDateTime, parseDateTime } from "@web/core/l10n/d
 import { pick } from "@web/core/utils/objects";
 import { BuilderComponent } from "./builder_component";
 import { BuilderTextInputBase, textInputBasePassthroughProps } from "./builder_text_input_base";
-import {
-    basicContainerBuilderComponentProps,
-    useBuilderComponent,
-    useInputBuilderComponent,
-} from "../utils";
+import { basicContainerBuilderComponentProps, useBuilderComponent, useInputBuilderComponent } from "./utils";
 
 const { DateTime } = luxon;
 
@@ -17,6 +13,7 @@ export class BuilderDateTimePicker extends Component {
     static props = {
         ...basicContainerBuilderComponentProps,
         ...textInputBasePassthroughProps,
+        id: { type: String, optional: true },
         default: { type: String, optional: true },
         type: { type: [{ value: "date" }, { value: "datetime" }], optional: true },
         format: { type: String, optional: true },
@@ -77,7 +74,9 @@ export class BuilderDateTimePicker extends Component {
         if (this.state.value === undefined) {
             value = this.getDefaultValue();
         }
-        return value !== undefined ? DateTime.fromSeconds(parseInt(value)) : undefined;
+        return value !== undefined
+            ? DateTime.fromSeconds(parseInt(value))
+            : undefined;
     }
 
     formatRawValue(rawValue) {
@@ -101,7 +100,9 @@ export class BuilderDateTimePicker extends Component {
     }
 
     get displayValue() {
-        return this.state.value !== undefined ? this.formatRawValue(this.state.value) : undefined;
+        return this.state.value !== undefined
+            ? this.formatRawValue(this.state.value)
+            : undefined;
     }
 
     get textInputBaseProps() {

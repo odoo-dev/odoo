@@ -1,3 +1,4 @@
+import { SIZES, MEDIAS_BREAKPOINTS } from "@web/core/ui/ui_service";
 import { normalizeCSSColor, isCSSColor, isColorGradient } from "@web/core/utils/colors";
 
 let editableWindow = window;
@@ -499,6 +500,19 @@ export function shouldEditableMediaBeEditable(mediaEl) {
     );
 }
 /**
+ * Checks if the view of the targeted element is mobile.
+ *
+ * @param {HTMLElement} targetEl - target of the editor
+ * @returns {boolean}
+ */
+export function isMobileView(targetEl) {
+    const mobileViewThreshold = MEDIAS_BREAKPOINTS[SIZES.LG].minWidth;
+    const clientWidth =
+        targetEl.ownerDocument.defaultView?.frameElement?.clientWidth ||
+        targetEl.ownerDocument.documentElement.clientWidth;
+    return clientWidth && clientWidth < mobileViewThreshold;
+}
+/**
  * Returns the label of a link element.
  *
  * @param {HTMLElement} linkEl
@@ -555,41 +569,11 @@ export async function isImageCorsProtected(img) {
 }
 
 /**
- * Applies only the needed CSS in the style attribute:
- * - no attribute if value is already the wanted one (possibly from a class)
- * - plain attribute if that change is sufficient to make it applied
- * - important attribute if the plain one did not work
- *
- * @param {HTMLElement} el
- * @param {string} cssProp
- * @param {string} cssValue
- * @param {CSSStyleDeclaration} computedStyle of el
- * @param {boolean} force to always apply as important
- * @param {boolean} allowImportant to avoid applying the style as important
- * @returns {boolean} if a value was applied
+ * @param {string} src
+ * @returns {Promise<Boolean>}
  */
-export function applyNeededCss(
-    el,
-    cssProp,
-    cssValue,
-    computedStyle = window.getComputedStyle(el),
-    { force = false, allowImportant = true } = {}
-) {
-    if (force) {
-        el.style.setProperty(cssProp, cssValue, allowImportant ? "important" : "");
-        return true;
-    }
-    el.style.removeProperty(cssProp);
-    if (!areCssValuesEqual(computedStyle.getPropertyValue(cssProp), cssValue, cssProp)) {
-        el.style.setProperty(cssProp, cssValue);
-        // If change had no effect then make it important.
-        if (
-            allowImportant &&
-            !areCssValuesEqual(computedStyle.getPropertyValue(cssProp), cssValue, cssProp)
-        ) {
-            el.style.setProperty(cssProp, cssValue, "important");
-        }
-        return true;
-    }
-    return false;
+export async function isSrcCorsProtected(src) {
+    const dummyImg = document.createElement("img");
+    dummyImg.src = src;
+    return isImageCorsProtected(dummyImg);
 }

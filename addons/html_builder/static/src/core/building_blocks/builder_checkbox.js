@@ -2,11 +2,10 @@ import { Component } from "@odoo/owl";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import {
     clickableBuilderComponentProps,
-    useActionInfo,
     useClickableBuilderComponent,
     useDependencyDefinition,
     useDomState,
-} from "../utils";
+} from "./utils";
 import { BuilderComponent } from "./builder_component";
 
 export class BuilderCheckbox extends Component {
@@ -14,20 +13,17 @@ export class BuilderCheckbox extends Component {
     static components = { BuilderComponent, CheckBox };
     static props = {
         ...clickableBuilderComponentProps,
+        id: { type: String, optional: true },
     };
 
     setup() {
-        this.info = useActionInfo();
-        const { operation, isApplied, onReady } = useClickableBuilderComponent();
+        const { operation, isApplied } = useClickableBuilderComponent();
         if (this.props.id) {
-            useDependencyDefinition(this.props.id, { isActive: isApplied }, { onReady });
+            useDependencyDefinition(this.props.id, { isActive: isApplied });
         }
-        this.state = useDomState(
-            () => ({
-                isActive: isApplied(),
-            }),
-            { onReady }
-        );
+        this.state = useDomState(() => ({
+            isActive: isApplied(),
+        }));
         this.onChange = operation.commit;
     }
 

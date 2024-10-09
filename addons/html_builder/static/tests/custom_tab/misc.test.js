@@ -1,17 +1,13 @@
-import { BaseOptionComponent, useDomState } from "@html_builder/core/utils";
+import { useDomState } from "@html_builder/core/building_blocks/utils";
 import { setContent, setSelection } from "@html_editor/../tests/_helpers/selection";
 import { redo, undo } from "@html_editor/../tests/_helpers/user_actions";
 import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, queryAllTexts, queryFirst } from "@odoo/hoot-dom";
 import { Component, onWillStart, xml } from "@odoo/owl";
 import { contains, patchWithCleanup } from "@web/../tests/web_test_helpers";
+import { defaultBuilderComponents } from "../../src/core/default_builder_components";
 import { OptionsContainer } from "../../src/sidebar/option_container";
-import {
-    addActionOption,
-    addOption,
-    defineWebsiteModels,
-    setupWebsiteBuilder,
-} from "../website_helpers";
+import { addOption, defineWebsiteModels, setupWebsiteBuilder } from "../website_helpers";
 
 defineWebsiteModels();
 
@@ -30,11 +26,12 @@ test("Open custom tab with template option", async () => {
 });
 
 test("Open custom tab with Component option", async () => {
-    class TestOption extends BaseOptionComponent {
+    class TestOption extends Component {
         static template = xml`
             <BuilderRow label="'Row 1'">
                 Test
             </BuilderRow>`;
+        static components = { ...defaultBuilderComponents };
         static props = {};
     }
     addOption({
@@ -45,21 +42,6 @@ test("Open custom tab with Component option", async () => {
     await contains(":iframe .test-options-target").click();
     expect(".options-container").toBeDisplayed();
     expect(queryAllTexts(".options-container > div")).toEqual(["Yop", "Row 1\nTest"]);
-});
-
-test("OptionContainer should display custom title", async () => {
-    addOption({
-        selector: ".test-options-target",
-        template: xml`
-        <BuilderRow label="'Row 1'">
-            Test
-        </BuilderRow>`,
-        title: "My custom title",
-    });
-    await setupWebsiteBuilder(`<div class="test-options-target" data-name="Yop">b</div>`);
-    await contains(":iframe .test-options-target").click();
-    expect(".options-container").toBeDisplayed();
-    expect(queryAllTexts(".options-container > div")).toEqual(["My custom title", "Row 1\nTest"]);
 });
 
 test("Don't display option base on exclude", async () => {
@@ -347,7 +329,7 @@ test("hide/display option container base on selector", async () => {
         </div>`);
     await contains(":iframe .sub-child-target").click();
     expect("[data-class-action='test']").not.toBeDisplayed();
-    const selectorRowLabel = ".options-container .hb-row:not(.d-none) .hb-row-label";
+    const selectorRowLabel = ".options-container .hb-row:not(.d-none) > div:nth-child(1)";
     expect(queryAllTexts(selectorRowLabel)).toEqual(["Row 1", "Row 3"]);
 
     await contains("[data-class-action='my-custom-class']").click();
@@ -403,7 +385,7 @@ test("no need to define 'isApplied' method for custom action if the widget alrea
         a
         </div>`);
     await contains(":iframe .s_test").click();
-    expect(".options-container [data-class-action='alert-info']").toHaveText("Info");
+    expect(".options-container .we-bg-options-container button").toHaveText("Info");
 });
 
 test("useDomState callback shouldn't be called when the editingElement is removed", async () => {
@@ -423,7 +405,6 @@ test("useDomState callback shouldn't be called when the editingElement is remove
     }
     addOption({
         selector: ".s_test",
-        editableOnly: false,
         Component: TestOption,
     });
 
@@ -444,73 +425,6 @@ test("useDomState callback shouldn't be called when the editingElement is remove
     await animationFrame();
     expect(".options-container .test_option").toHaveCount(1);
     expect.verifySteps(["useDomState 1"]);
-});
-
-test("Update editing elements at dom change with multiple levels of applyTo", async () => {
-    addActionOption({
-        customAction: {
-            apply: ({ editingElement }) => {
-                const createdEl = editingElement.cloneNode(true);
-                const parentEl = editingElement.parentElement;
-                parentEl.appendChild(createdEl);
-            },
-        },
-    });
-    addOption({
-        selector: ".parent-target",
-        template: xml`<BuilderRow label="'Row 1'" applyTo="'.child-target'">
-            <BuilderButton action="'customAction'" />
-            <BuilderButton applyTo="'.sub-child-target'" classAction="'my-custom-class'"/>
-        </BuilderRow>`,
-    });
-
-    await setupWebsiteBuilder(`
-        <div class="parent-target">
-            <div class="child-target">
-                <div class="sub-child-target">b</div>
-            </div>
-        </div>`);
-    await contains(":iframe .parent-target").click();
-    await contains("[data-action-id='customAction']").click();
-    await contains("[data-class-action='my-custom-class']").click();
-    expect(":iframe .sub-child-target").toHaveClass("my-custom-class");
-});
-
-test("An option should only appear if its target is inside an editable area, unless specified otherwise", async () => {
-    addOption({
-        selector: ".test-target",
-        template: xml`
-            <BuilderButton classAction="'dummy-class-a'">Option A</BuilderButton>
-        `,
-    });
-    addOption({
-        selector: ".test-target",
-        editableOnly: false,
-        template: xml`
-            <BuilderButton classAction="'dummy-class-b'">Option B</BuilderButton>
-        `,
-    });
-    const { getEditor } = await setupWebsiteBuilder(`<div></div>`);
-    const editor = getEditor();
-    setContent(
-        editor.editable,
-        `<div class="content">
-            <div class="test-target test-not-editable">NOT IN EDITABLE</div>
-        </div>
-        <div class="content o_editable">
-            <div class="test-target test-editable">IN EDITABLE</div>
-        </div>`
-    );
-    editor.shared.history.addStep();
-
-    await contains(":iframe .test-not-editable").click();
-    expect(queryAllTexts(".options-container [data-class-action]")).toEqual(["Option B"]);
-
-    await contains(":iframe .test-editable").click();
-    expect(queryAllTexts(".options-container [data-class-action]")).toEqual([
-        "Option A",
-        "Option B",
-    ]);
 });
 
 describe("isActiveItem", () => {
