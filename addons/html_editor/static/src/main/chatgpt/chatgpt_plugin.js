@@ -43,6 +43,7 @@ export class ChatGPTPlugin extends Plugin {
                 isDisabled: this.isReplaceableByAI.bind(this),
                 Component: LanguageSelector,
                 props: {
+                    title: _t("Translate with AI"),
                     onSelected: (language) => this.openDialog({ language }),
                     isDisabled: (selection) => {
                         return this.isReplaceableByAI(selection);
