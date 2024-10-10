@@ -37,6 +37,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_din5008_sale/models/sale.py:0
 #: code:addons/l10n_din5008_sale/models/sale.py:0
+<<<<<<< saas-17.2
+||||||| c8ee4b071fd6839ce1345dd6a9ef4d468305911b
+#, python-format
+=======
+#, python-format
+>>>>>>> 864f800918033b429608c2f7cd2c968e141e9fc2
 msgid "Invoicing Address:"
 msgstr ""
 
@@ -114,5 +120,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_din5008_sale/models/sale.py:0
 #: code:addons/l10n_din5008_sale/models/sale.py:0
+<<<<<<< saas-17.2
+||||||| c8ee4b071fd6839ce1345dd6a9ef4d468305911b
+#, python-format
+=======
+#, python-format
+>>>>>>> 864f800918033b429608c2f7cd2c968e141e9fc2
 msgid "Shipping Address:"
 msgstr ""

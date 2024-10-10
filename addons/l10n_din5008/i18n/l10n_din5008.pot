@@ -183,12 +183,25 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_din5008/models/account_move.py:0
 #: code:addons/l10n_din5008/models/account_move.py:0
+<<<<<<< saas-17.2
+||||||| c8ee4b071fd6839ce1345dd6a9ef4d468305911b
+#, python-format
+=======
+#, python-format
+>>>>>>> 864f800918033b429608c2f7cd2c968e141e9fc2
 msgid "Invoicing Address:"
 msgstr ""
 
 #. module: l10n_din5008
 #. odoo-python
 #: code:addons/l10n_din5008/models/account_move.py:0
+<<<<<<< saas-17.2
+||||||| c8ee4b071fd6839ce1345dd6a9ef4d468305911b
+#: code:addons/l10n_din5008/models/account_move.py:0
+#, python-format
+=======
+#, python-format
+>>>>>>> 864f800918033b429608c2f7cd2c968e141e9fc2
 msgid "Invoicing and Shipping Address:"
 msgstr ""
 
@@ -243,6 +256,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_din5008/models/account_move.py:0
 #: code:addons/l10n_din5008/models/account_move.py:0
+<<<<<<< saas-17.2
+||||||| c8ee4b071fd6839ce1345dd6a9ef4d468305911b
+#, python-format
+=======
+#, python-format
+>>>>>>> 864f800918033b429608c2f7cd2c968e141e9fc2
 msgid "Shipping Address:"
 msgstr ""
 
