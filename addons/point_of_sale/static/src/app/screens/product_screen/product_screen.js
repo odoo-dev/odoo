@@ -383,6 +383,15 @@ export class ProductScreen extends Component {
         );
     }
 
+    getProductCartQty(product) {
+        const productTmplId = product.raw.product_tmpl_id;
+
+        return this.currentOrder.lines.reduce(
+            (acc, ol) => (ol.product_id.raw.product_tmpl_id === productTmplId ? acc + ol.qty : acc),
+            0
+        );
+    }
+
     async onPressEnterKey() {
         const { searchProductWord } = this.pos;
         if (!searchProductWord) {
