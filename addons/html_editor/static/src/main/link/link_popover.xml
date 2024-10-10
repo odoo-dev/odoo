@@ -15,7 +15,19 @@
                             <input t-ref="label" class="o_we_label_link form-control form-control-sm" t-model="state.label" title="Label" placeholder="Type your link label"/>
                         </div>
                         <div class="input-group mb-1">
-                            <input t-ref="url" class="o_we_href_input_link form-control form-control-sm" t-model="state.url" title="URL" placeholder="Type your URL" t-on-keydown="onKeydownEnter"/>
+                            <!-- <input t-ref="url" class="o_we_href_input_link form-control form-control-sm" t-model="state.url" title="URL" placeholder="Type your URL" t-on-keydown="onKeydownEnter"/> -->
+                            <AutoCompleteInLinkpopover
+                                sources="sources"
+                                value="state.url"
+                                input="urlRef"
+                                onSelect.bind="onSelect"
+                                onInput.bind="onInput"
+                                dropdown="true"
+                                autofocus="true"
+                                placeholder="'Type your URL'"
+                                inputClass="'o_we_href_input_link form-control form-control-sm'"
+                                t-on-keydown="onKeydownEnter"
+                            />
                         </div>
                         <div class="input-group" t-on-change="onChangeClasses">
                             <select name="link_type" class="form-select form-select-sm" t-att-class="{'mb-1': state.type !==  ''}" t-on-change="(ev)=>this.state.type = ev.target.value">

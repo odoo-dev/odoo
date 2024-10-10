@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="html_editor.AutoCompleteInLinkpopover" t-inherit="web.AutoComplete">
+        <xpath expr="//input[@t-ref='input']" position="attributes">
+            <attribute name="class" remove="o_input pe-3" separator=" " />
+            <attribute name="t-attf-class" add="{{inputClass}}" separator=" " />
+        </xpath>
+    </t>
+</templates>

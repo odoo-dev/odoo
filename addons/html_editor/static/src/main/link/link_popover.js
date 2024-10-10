@@ -1,11 +1,32 @@
 import { _t } from "@web/core/l10n/translation";
+import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { Component, useState, onMounted, useRef } from "@odoo/owl";
-import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { useAutofocus, useService, useChildRef } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
 import { cleanZWChars, deduceURLfromText } from "./utils";
 
+export class AutoCompleteInLinkpopover extends AutoComplete {
+    static props = {
+        ...AutoComplete.props,
+        inputClass: { type: String, optional: true },
+    };
+    static template = "html_editor.AutoCompleteInLinkpopover";
+    setup() {
+        super.setup();
+    }
+
+    get inputClass() {
+        let classList = "o_input pe-3";
+        if (this.props.inputClass) {
+            classList = this.props.inputClass;
+        }
+        return classList;
+    }
+}
+
 export class LinkPopover extends Component {
     static template = "html_editor.linkPopover";
+    static components = { AutoCompleteInLinkpopover };
     static props = {
         linkEl: { validate: (el) => el.nodeType === Node.ELEMENT_NODE },
         onApply: Function,
@@ -44,6 +65,7 @@ export class LinkPopover extends Component {
         this.ui = useService("ui");
         this.notificationService = useService("notification");
         this.http = useService("http");
+        this.urlRef = useChildRef();
 
         this.state = useState({
             editing: this.props.linkEl.href ? false : true,
@@ -67,7 +89,7 @@ export class LinkPopover extends Component {
 
         this.editingWrapper = useRef("editing-wrapper");
         useAutofocus({
-            refName: this.state.isImage || this.state.label !== "" ? "url" : "label",
+            refName: this.state.isImage || this.state.label !== "" ? this.urlRef.name : "label",
             mobile: true,
         });
         onMounted(() => {
@@ -273,5 +295,21 @@ export class LinkPopover extends Component {
             (this.state.type ? `btn btn-${style}${this.state.type}` : "") +
             (this.state.type && shapeClasses ? ` ${shapeClasses}` : "") +
             (this.state.type && this.state.buttonSize ? " btn-" + this.state.buttonSize : "");
+    }
+    get sources() {
+        return [
+            {
+                optionTemplate: "website.AutoCompleteWithPagesItem",
+                options: async (term) => {
+                    return [];
+                },
+            },
+        ];
+    }
+    onSelect(option) {
+        this.state.url = option;
+    }
+    onInput({ inputValue }) {
+        this.state.url = inputValue;
     }
 }
