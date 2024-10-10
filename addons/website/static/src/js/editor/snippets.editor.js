@@ -167,6 +167,7 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
     _patchForComputeSnippetTemplates($html) {
         this._super(...arguments);
 
+<<<<<<< 17.0
         // TODO adapt in master: as a stable fix we corrected the behavior of
         // the logo button that led to an error when switching from Text to
         // Logo. Remove me in master.
@@ -218,6 +219,43 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
         $html.find('we-checkbox[data-dependencies="!footer_copyright_opt"]')[0]?.remove();
         $html.find('[data-name="header_language_selector_none_opt"]')[0]?.remove();
         $html.find('we-select[data-dependencies="!header_language_selector_none_opt"]')[0]?.removeAttribute("data-dependencies");
+||||||| c991ad65821e2022868b9bb8b1e899795ceba0a7
+        // TODO adapt in master: as a stable fix we decided to introduce a new
+        // option for image in grid mode to change the default "cover" display
+        // into "contain" should the user prefer it. Note: to be sure, this
+        // targets all images but is only displayed if the image acts as a grid
+        // image (parent column has the right class).
+        $html.find('[data-js="WebsiteAnimate"]').eq(0).before($(_.str.sprintf(`
+            <div data-js="GridImage" data-selector="img">
+                <we-select string="%s">
+                    <we-button data-change-grid-image-mode="cover">%s</we-button>
+                    <we-button data-change-grid-image-mode="contain">%s</we-button>
+                </we-select>
+            </div>
+        `, _t("Position"), _t("Cover"), _t("Contain"))));
+        // TODO remove me in master
+        $html.find('[data-attribute-name="interval"]')[0].dataset.attributeName = "bsInterval";
+=======
+        // TODO adapt in master: as a stable fix we decided to introduce a new
+        // option for image in grid mode to change the default "cover" display
+        // into "contain" should the user prefer it. Note: to be sure, this
+        // targets all images but is only displayed if the image acts as a grid
+        // image (parent column has the right class).
+        $html.find('[data-js="WebsiteAnimate"]').eq(0).before($(_.str.sprintf(`
+            <div data-js="GridImage" data-selector="img">
+                <we-select string="%s">
+                    <we-button data-change-grid-image-mode="cover">%s</we-button>
+                    <we-button data-change-grid-image-mode="contain">%s</we-button>
+                </we-select>
+            </div>
+        `, _t("Position"), _t("Cover"), _t("Contain"))));
+        // TODO remove me in master
+        $html.find('[data-attribute-name="interval"]')[0].dataset.attributeName = "bsInterval";
+        // TODO adapt in 17.0: changing the `data-apply-to` attribute of the
+        // grid padding option so it is not applied on inner rows.
+        const $gridPaddingOptions = $html.find('[data-css-property="--grid-item-padding-y"], [data-css-property="--grid-item-padding-x"]');
+        $gridPaddingOptions.attr("data-apply-to", ".row.o_grid_mode");
+>>>>>>> 0a46811397b9101576fe8fd40b13846e44c73237
     },
     /**
      * Depending of the demand, reconfigure they gmap key or configure it
