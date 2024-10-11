@@ -2,7 +2,7 @@
 <odoo>
 
 <template id="s_carousel_intro" name="Carousel Intro">
-    <section class="s_carousel_intro_wrapper p-0">
+    <section class="s_carousel_intro_wrapper p-0" data-vcss="001">
         <t t-set="uniq" t-value="datetime.datetime.now().microsecond"/>
         <div t-attf-id="myCarouselIntro{{uniq}}" class="s_carousel_intro s_carousel_default carousel slide carousel-dark" data-bs-interval="10000">
             <!-- Content -->
@@ -56,7 +56,7 @@
                     </div>
                 </div>
             </div>
-            <div class="s_carousel_intro_controllers container position-absolute start-50 bottom-0 translate-middle-x w-100 mb-md-4 o_not_editable">
+            <div class="s_carousel_intro_controllers o_horizontal_controllers container position-absolute start-50 bottom-0 translate-middle-x w-100 mb-md-4 o_not_editable">
                 <div class="s_carousel_intro_controllers_row row gap-3 gap-lg-5 justify-content-between flex-nowrap flex-row-reverse">
                     <!-- Controls -->
                     <div class="o_arrows_wrapper gap-2 w-auto p-0">
@@ -144,6 +144,13 @@
     <field name="name">Carousel Intro 000 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
     <field name="path">website/static/src/snippets/s_carousel_intro/000.scss</field>
+    <field name="active" eval="False"/>
+</record>
+
+<record id="website.s_carousel_intro_001_scss" model="ir.asset">
+    <field name="name">Carousel Intro 001 SCSS</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="path">website/static/src/snippets/s_carousel_intro/001.scss</field>
 </record>
 
 </odoo>
