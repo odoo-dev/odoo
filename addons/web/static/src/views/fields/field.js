@@ -86,7 +86,7 @@ class DefaultField extends Component {
     static props = ["*"];
 }
 
-export function getFieldFromRegistry(fieldType, widget, viewType, jsClass) {
+function getFieldFromRegistry(fieldType, widget, viewType, jsClass, modelName, name) {
     const prefixes = jsClass ? [jsClass, viewType, ""] : [viewType, ""];
     const findInRegistry = (key) => {
         for (const prefix of prefixes) {
@@ -100,7 +100,9 @@ export function getFieldFromRegistry(fieldType, widget, viewType, jsClass) {
         const field = findInRegistry(widget);
         if (field) {
             if (field.supportedTypes && !field.supportedTypes?.includes(fieldType)) {
-                console.warn(`The widget: ${widget} don't support the type ${fieldType}`);
+                console.warn(
+                    `The widget: ${widget} don't support the type ${fieldType} for ${modelName}.${name}`
+                );
             }
             return field;
         }
@@ -195,7 +197,14 @@ export class Field extends Component {
         if (!fields[name]) {
             throw new Error(`"${modelName}"."${name}" field is undefined.`);
         }
-        const field = getFieldFromRegistry(fields[name].type, widget, viewType, jsClass);
+        const field = getFieldFromRegistry(
+            fields[name].type,
+            widget,
+            viewType,
+            jsClass,
+            modelName,
+            name
+        );
         const fieldInfo = {
             name,
             type: fields[name].type,
