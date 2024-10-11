@@ -18,6 +18,7 @@ export class EditorOverlay extends Component {
         getContainer: Function,
         history: Object,
         close: Function,
+        isEditorDestroyed: Function,
 
         // Props from createOverlay
         positionOptions: { type: Object, optional: true },
@@ -106,7 +107,12 @@ export class EditorOverlay extends Component {
             range = this.lastSelection.range;
         }
         let rect = range.getBoundingClientRect();
-        if (rect.x === 0 && rect.width === 0 && rect.height === 0) {
+        if (
+            rect.x === 0 &&
+            rect.width === 0 &&
+            rect.height === 0 &&
+            !this.props.isEditorDestroyed()
+        ) {
             // Attention, using disableObserver and enableObserver is always dangerous (when we add or remove nodes)
             // because if another mutation uses the target that is not observed, that mutation can never be applied
             // again (when undo/redo and in collaboration).

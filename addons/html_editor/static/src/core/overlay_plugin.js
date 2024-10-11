@@ -102,6 +102,7 @@ export class Overlay {
                     bus: this.bus,
                     getContainer: this.getContainer,
                     close: this.close.bind(this),
+                    isEditorDestroyed: this.isEditorDestroyed.bind(this),
                     history: {
                         enableObserver: this.plugin.shared.enableObserver,
                         disableObserver: this.plugin.shared.disableObserver,
@@ -119,6 +120,10 @@ export class Overlay {
         if (this._remove) {
             this._remove();
         }
+    }
+
+    isEditorDestroyed() {
+        return this.plugin.isDestroyed;
     }
 
     updatePosition() {
