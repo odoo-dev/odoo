@@ -124,26 +124,19 @@
     </template>
 
     <template id="website_payment.donation_input" name="Donation input">
+        <input name="o_donation_amount"
+               type="number"
+               class="form-control o_amount_input"
+               t-att-min="donation_options.get('minimumAmount')"
+               t-att-value="amount"
+               t-att-max="donation_options.get('customAmount') == 'slider' and donation_options.get('maximumAmount') or undefined"
+               placeholder="Amount to donate"
+               id="other_amount_value"
+        />
         <t t-if="donation_options.get('customAmount') == 'slider'">
-            <input name="o_donation_amount"
-                type="number"
-                class="form-control o_amount_input"
-                t-att-min="donation_options.get('minimumAmount')"
-                t-att-max="donation_options.get('maximumAmount')"
-                t-att-value="amount"
-                placeholder="Amount to donate"
-                id="other_amount_value"
-            />
-        </t>
-        <t t-else="">
-            <input name="o_donation_amount"
-                type="number"
-                class="form-control o_amount_input"
-                t-att-min="donation_options.get('minimumAmount')"
-                t-att-value="amount"
-                placeholder="Amount to donate"
-                id="other_amount_value"
-            />
+            <p class="text-danger d-none" id="warningMaxMessageId">
+                The maximum donation amount is <t t-out="currency"/><t t-out="donation_options.get('maximumAmount')"/>
+            </p>
         </t>
         <p class="text-danger d-none" id="warningMessageId">Please enter valid donation amount.</p>
         <p class="text-danger d-none" id="warningMinMessageId">

@@ -131,9 +131,13 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
         const isOtherAmountChecked = otherAmountRadioEl ? otherAmountRadioEl.checked : true;
         if (
             donationAmountInputEl &&
-            (donationAmountInputEl.value === "" ||
-                parseFloat(donationAmountInputEl.value) <= 0) &&
-                isOtherAmountChecked) {
+            isOtherAmountChecked &&
+            (
+                donationAmountInputEl.value === "" ||
+                parseFloat(donationAmountInputEl.value) <= 0 ||
+                parseFloat(donationAmountInputEl.value) > parseFloat(donationAmountInputEl.max)
+            )
+        ) {
             return donationAmountInputEl.focus();
         }
 

@@ -45,12 +45,19 @@ publicWidget.registry.WebsitePaymentDonation = publicWidget.Widget.extend({
         const inputEl = document.querySelector("#other_amount_value");
         const warningMessageEl = document.querySelector("#warningMessageId");
         const warningMinMessageEl = document.querySelector("#warningMinMessageId");
+        const warningMaxMessageEl = document.querySelector("#warningMaxMessageId");
         const value = parseFloat(inputEl.value);
         warningMessageEl.classList.toggle("d-none", Boolean(value));
         if (value) {
             warningMinMessageEl.classList.toggle("d-none", !(inputEl.min > value));
+            if (warningMaxMessageEl) {
+                warningMaxMessageEl.classList.toggle("d-none", !(inputEl.max < value));
+            }
         } else {
             warningMinMessageEl.classList.add("d-none");
+            if (warningMaxMessageEl) {
+                warningMaxMessageEl.classList.add("d-none");
+            }
         }
     },
     /**
@@ -64,5 +71,9 @@ publicWidget.registry.WebsitePaymentDonation = publicWidget.Widget.extend({
         document.querySelector("#other_amount_value").value = "";
         document.querySelector("#warningMinMessageId").classList.add("d-none");
         document.querySelector("#warningMessageId").classList.add("d-none");
+        const warningMaxMessageEl = document.querySelector("#warningMaxMessageId");
+        if (warningMaxMessageEl) {
+            warningMaxMessageEl.classList.add("d-none");
+        }
     },
 });
