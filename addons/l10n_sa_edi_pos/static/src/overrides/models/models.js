@@ -1,9 +1,9 @@
 /** @odoo-module */
 
-import { Order } from "@point_of_sale/app/store/models";
+import { PosOrder } from "@point_of_sale/app/models/pos_order";
 import { patch } from "@web/core/utils/patch";
 
-patch(Order.prototype, {
+patch(PosOrder.prototype, {
     setup(_defaultObj, options) {
         super.setup(...arguments);
         if (this.pos.isSACompany) {
