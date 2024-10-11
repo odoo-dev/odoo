@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import re
 import typing
-import warnings
 
 from odoo.tools import sql
 
@@ -33,7 +31,9 @@ class DatabaseObject:
         self.key = ''
 
     def __set_name__(self, owner, name):
-        self.key = name
+        assert name.startswith('_'), "Names of SQL objects in a model must start with '_'"
+        self.key = name[1:]
+        owner._class_database_objects[self.key] = self
 
     @property
     def definition(self) -> str:
@@ -68,7 +68,6 @@ class Constraint(DatabaseObject):
 
     The definition of the constraint is used to `ADD CONSTRAINT` on the table.
     """
-    _FOREIGN_KEY_RE = re.compile(r'\sforeign\s+key\b.*', re.IGNORECASE)
 
     def __init__(
         self,
@@ -90,12 +89,6 @@ class Constraint(DatabaseObject):
         self._definition = definition
         if message:
             self.message = message
-        if self._FOREIGN_KEY_RE.match(definition):
-            self._type = 'FK'
-        elif not definition:
-            self._type = 'VIRTUAL'
-        else:
-            self._type = 'CONSTRAINT'
 
     @property
     def definition(self):
@@ -113,14 +106,7 @@ class Constraint(DatabaseObject):
             # constraint exists but its definition may have changed
             sql.drop_constraint(cr, model._table, conname)
 
-        if self._type == 'VIRTUAL':
-            # virtual constraint (e.g. implemented by a custom index)
-            warnings.warn(f"Since 19.0, stop using virtual constraints, give a proper defintion like INDEX for '{conname}'", DeprecationWarning)
-            model.pool.post_init(sql.check_index_exist, cr, conname)
-        elif self._type == "FK":
-            model.pool.post_init(sql.add_constraint, cr, model._table, conname, definition)
-        else:
-            model.pool.post_constraint(sql.add_constraint, cr, model._table, conname, definition)
+        model.pool.post_constraint(sql.add_constraint, cr, model._table, conname, definition)
 
 
 class Index(DatabaseObject):
