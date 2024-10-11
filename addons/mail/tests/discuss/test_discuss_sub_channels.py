@@ -31,26 +31,27 @@ class TestDiscussSubChannels(HttpCase):
             self.env["discuss.channel.member"]._gc_unpin_outdated_sub_channels()
             self.assertTrue(self_member.is_pinned)
 
-    def test_02_sub_channel_members_sync_with_parent(self):
-        parent = self.env["discuss.channel"].create({"name": "General"})
-        parent.action_unfollow()
-        self.assertFalse(any(m.is_self for m in parent.channel_member_ids))
+    def test_02_sub_channel_members(self):
+        bob_user = new_test_user(self.env, "bob_user", groups="base.group_user")
+        baz_user = new_test_user(self.env, "baz_user", groups="base.group_user")
+        parent = self.env["discuss.channel"].with_user(bob_user).create({"name": "General"})
+        self.assertTrue(any(m.is_self for m in parent.channel_member_ids))
+        parent.add_members(partner_ids=[baz_user.partner_id.id])
         parent._create_sub_channel()
         sub_channel = parent.sub_channel_ids[0]
-        # Member created for sub channel (_create_sub_channel): should also be
-        # created for the parent channel.
-        self.assertTrue(any(m.is_self for m in parent.channel_member_ids))
-        self.assertTrue(any(m.is_self for m in sub_channel.channel_member_ids))
+        # Member created for sub channel (_create_sub_channel): should be only
+        # the sub channel creator.
+        self.assertTrue(sub_channel.channel_member_ids.partner_id == bob_user.partner_id)
         # Member removed from parent channel: should also be removed from the sub
         # channel.
         parent.action_unfollow()
-        self.assertFalse(any(m.is_self for m in parent.channel_member_ids))
-        self.assertFalse(any(m.is_self for m in sub_channel.channel_member_ids))
+        self.assertFalse(bob_user.parent_id in parent.channel_member_ids.partner_id)
+        self.assertFalse(bob_user.parent_id in sub_channel.channel_member_ids.partner_id)
         # Member created for sub channel (add_members): should also be created
         # for parent.
-        sub_channel.add_members(partner_ids=[self.env.user.partner_id.id])
-        self.assertTrue(any(m.is_self for m in parent.channel_member_ids))
-        self.assertTrue(any(m.is_self for m in sub_channel.channel_member_ids))
+        sub_channel.add_members(partner_ids=[bob_user.partner_id.id])
+        self.assertTrue(bob_user.partner_id in parent.channel_member_ids.partner_id)
+        self.assertTrue(bob_user.partner_id in sub_channel.channel_member_ids.partner_id)
 
     def test_03_cannot_create_recursive_sub_channel(self):
         parent = self.env["discuss.channel"].create({"name": "General"})
@@ -93,3 +94,30 @@ class TestDiscussSubChannels(HttpCase):
             msg="Cannot create Hello world!: initial message should belong to parent channel.",
         ):
             parent._create_sub_channel(from_message_id=random_channel.message_ids[0].id)
+
+    def test_07_unlink_sub_channel(self):
+        bob_user = new_test_user(self.env, "bob_user", groups="base.group_user")
+        baz_user = new_test_user(self.env, "baz_user", groups="base.group_user")
+        parent_1 = self.env["discuss.channel"].with_user(bob_user).create({"name": "Parent 1"})
+        parent_1_baz_member = parent_1.add_members(partner_ids=[baz_user.partner_id.id])
+        parent_1_sub_channel_1 = parent_1._create_sub_channel(name="Parent 1 Sub 1")
+        parent_1_sub_channel_1.add_members(partner_ids=[baz_user.partner_id.id])
+        parent_1_sub_channel_2 = parent_1._create_sub_channel(name="Parent 1 Sub 2")
+        parent_1_sub_channel_2.add_members(partner_ids=[baz_user.partner_id.id])
+        parent_2 = self.env["discuss.channel"].with_user(baz_user).create({"name": "Parent 2"})
+        parent_2_bob_member = parent_2.add_members(partner_ids=[bob_user.partner_id.id])
+        parent_2_sub_channel = parent_2._create_sub_channel(name="Parent 2 Sub")
+        parent_2_sub_channel.add_members(partner_ids=[bob_user.partner_id.id])
+        members_to_unlink = parent_1_baz_member + parent_2_bob_member
+        members_to_unlink.sudo().unlink()
+        self.assertFalse(
+            parent_1_baz_member
+            in parent_1.channel_member_ids | parent_1.sub_channel_ids.channel_member_ids
+        )
+        self.assertFalse(
+            parent_2_bob_member
+            in parent_2.channel_member_ids | parent_2.sub_channel_ids.channel_member_ids
+        )
+        self.assertTrue(bob_user.partner_id in parent_1_sub_channel_1.channel_member_ids.partner_id)
+        self.assertTrue(bob_user.partner_id in parent_1_sub_channel_2.channel_member_ids.partner_id)
+        self.assertTrue(baz_user.partner_id in parent_2_sub_channel.channel_member_ids.partner_id)
