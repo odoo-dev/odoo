@@ -1,5 +1,6 @@
 from odoo import fields, models, api
 from odoo.tools import Query
+from odoo.exceptions import UserError
 
 
 class AccountCodeMapping(models.Model):
@@ -71,4 +72,16 @@ class AccountCodeMapping(models.Model):
 
     def _inverse_code(self):
         for record in self:
-            record.account_id.with_company(record.company_id._origin).code = record.code
+            allowed_company_ids = (record.company_id | self.env.companies).ids
+            record.account_id.with_context({'allowed_company_ids': allowed_company_ids}).code = record.code
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if any(field_name not in vals for field_name in ('account_id', 'company_id', 'code')):
+                raise UserError(self.env._("When modifying a code mapping for an account, you must specify both the company and the code for that company."))
+
+            account = self.env['account.account'].browse(vals['account_id'])
+            account.with_company(vals['company_id']).code = vals['code']
+
+        return self.browse()
