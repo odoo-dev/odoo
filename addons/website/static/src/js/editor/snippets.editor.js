@@ -10,6 +10,7 @@ import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/utils/util
 import { Component, onMounted, useRef, useState } from "@odoo/owl";
 import { throttleForAnimation } from "@web/core/utils/timing";
 import { applyTextHighlight, switchTextHighlight } from "@website/js/text_processing";
+import { isVisible } from "@web/core/utils/ui";
 
 const getDeepRange = OdooEditorLib.getDeepRange;
 const getTraversedNodes = OdooEditorLib.getTraversedNodes;
@@ -122,7 +123,12 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
                 }
             }
             if (!isSVGMutation || isNewContentMutation) {
-                for (const targetEl of textHighlightEls) {
+                // No need to adapt the effects on hidden targets, since they
+                // will be immediately fixed by the `resizeObserver` once they
+                // become visible. This will also prevent conflicts with the
+                // field's synchronizations in some specific cases (e.g. desktop
+                // & mobile navbar duplicated fields with highlighted content).
+                for (const targetEl of [...textHighlightEls].filter(isVisible)) {
                     this._adaptHighlightOnEdit(targetEl);
                 }
             }
