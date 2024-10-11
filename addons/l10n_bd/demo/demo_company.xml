@@ -30,6 +30,13 @@
     <function model="account.chart.template" name="try_loading">
         <value eval="[]"/>
         <value>bd</value>
+<<<<<<< saas-17.4
         <value model="res.company" eval="obj().env.ref('base.demo_company_bd')"/>
+||||||| ff2441e426bcd2dd68351ecc5df2630471d60726
+        <value model="res.company" eval="obj().env.ref('l10n_bd.demo_company_bd')"/>
+=======
+        <value model="res.company" eval="obj().env.ref('l10n_bd.demo_company_bd')"/>
+        <value name="install_demo" eval="True"/>
+>>>>>>> 267da5916fa107f2d47d8f192c91b1245bb2dd96
     </function>
 </odoo>
