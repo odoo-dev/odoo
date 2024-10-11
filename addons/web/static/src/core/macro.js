@@ -1,6 +1,6 @@
 import { browser } from "@web/core/browser/browser";
 import { isVisible } from "@web/core/utils/ui";
-import { Mutex } from "@web/core/utils/concurrency";
+import { debounce } from "@web/core/utils/timing";
 
 /**
  * @typedef MacroStep
@@ -34,8 +34,6 @@ export const ACTION_HELPERS = {
     },
 };
 
-const mutex = new Mutex();
-
 class TimeoutError extends Error {}
 
 class Macro {
@@ -47,21 +45,27 @@ class Macro {
         this.checkDelay = descr.checkDelay || 0;
         this.isComplete = false;
         this.steps = descr.steps;
+        this.stepEl = new Array(this.steps.length).fill(false);
         this.onStep = descr.onStep || (() => {});
         this.onError = descr.onError;
         this.onTimeout = descr.onTimeout;
-        this.setTimer();
+        this.debounceAdvance = debounce(() => this.advance(), 50);
+        this.macroMutationObserver = new MacroMutationObserver(() => {
+            if (!this.stepEl[this.currentIndex]) {
+                this.debounceAdvance();
+            }
+        });
     }
 
     async advance() {
         if (this.isComplete) {
             return;
         }
-        const step = this.steps[this.currentIndex];
-        const [proceedToAction, el] = this.checkTrigger(step);
+        const [proceedToAction, el] = this.checkTrigger();
         if (proceedToAction) {
-            this.safeCall(this.onStep, el, step);
-            const actionResult = await this.performAction(el, step);
+            this.stepEl[this.currentIndex] = el;
+            this.safeCall(this.onStep, el);
+            const actionResult = await this.performAction(el);
             if (!actionResult) {
                 // If falsy action result, it means the action worked properly.
                 // So we can proceed to the next step.
@@ -71,10 +75,18 @@ class Macro {
                     browser.clearTimeout(this.timeout);
                 } else {
                     this.setTimer();
-                    await this.advance();
+                    if (this.currentStep.trigger) {
+                        await this.debounceAdvance();
+                    } else {
+                        await this.advance();
+                    }
                 }
             }
         }
+    }
+
+    get currentStep() {
+        return this.steps[this.currentIndex];
     }
 
     /**
@@ -82,7 +94,8 @@ class Macro {
      * @param {{ trigger: string | () => Element | null }} param0
      * @returns {[proceedToAction: boolean; el: Element | undefined]}
      */
-    checkTrigger({ trigger }) {
+    checkTrigger() {
+        const trigger = this.currentStep.trigger;
         let el;
 
         if (!trigger) {
@@ -110,13 +123,13 @@ class Macro {
      * @param {Element} el
      * @param {Step} step
      */
-    async performAction(el, step) {
-        const action = step.action;
+    async performAction(el) {
+        const action = this.currentStep.action;
         let actionResult;
         if (action in ACTION_HELPERS) {
-            actionResult = ACTION_HELPERS[action](el, step);
+            actionResult = ACTION_HELPERS[action](el, this.currentStep);
         } else if (typeof action === "function") {
-            actionResult = await this.safeCall(action, el, step);
+            actionResult = await this.safeCall(action, el);
         }
         return actionResult;
     }
@@ -126,7 +139,7 @@ class Macro {
             return;
         }
         try {
-            return fn(...args);
+            return fn(...args, this.currentStep);
         } catch (e) {
             this.handleError(e);
         }
@@ -148,6 +161,12 @@ class Macro {
         }
     }
 
+    start(target) {
+        this.setTimer();
+        this.macroMutationObserver.observe(target);
+        this.advance();
+    }
+
     handleError(error) {
         // mark the macro as complete, so it can be cleaned up from the
         // engine
@@ -166,11 +185,8 @@ class Macro {
 export class MacroEngine {
     constructor(params = {}) {
         this.isRunning = false;
-        this.timeout = null;
         this.target = params.target || document.body;
-        this.defaultCheckDelay = params.defaultCheckDelay ?? 750;
         this.macros = new Set();
-        this.macroMutationObserver = new MacroMutationObserver(() => this.delayedCheck());
     }
 
     async activate(descr, exclusive = false) {
@@ -193,42 +209,19 @@ export class MacroEngine {
     start() {
         if (!this.isRunning) {
             this.isRunning = true;
-            this.macroMutationObserver.observe(this.target);
         }
-        this.delayedCheck();
+        this.advanceMacros();
     }
 
     stop() {
         if (this.isRunning) {
             this.isRunning = false;
-            browser.clearTimeout(this.timeout);
-            this.timeout = null;
             this.macroMutationObserver.disconnect();
         }
     }
 
-    delayedCheck() {
-        if (this.timeout) {
-            browser.clearTimeout(this.timeout);
-        }
-        this.timeout = browser.setTimeout(
-            () => mutex.exec(this.advanceMacros.bind(this)),
-            this.getCheckDelay() || this.defaultCheckDelay
-        );
-    }
-
-    getCheckDelay() {
-        // If a macro has a checkDelay different from 0, use it. Select the minimum.
-        // For example knowledge has a macro with a delay of 10ms. We don't want to wait
-        // longer because of other running tours.
-        return [...this.macros]
-            .map((m) => m.checkDelay)
-            .filter((delay) => delay > 0)
-            .reduce((m, v) => Math.min(m, v), this.defaultCheckDelay);
-    }
-
     async advanceMacros() {
-        await Promise.all([...this.macros].map((macro) => macro.advance()));
+        await Promise.all([...this.macros].map((macro) => macro.start(this.target)));
         for (const macro of this.macros) {
             if (macro.isComplete) {
                 this.macros.delete(macro);
