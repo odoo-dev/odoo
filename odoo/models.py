@@ -7600,7 +7600,6 @@ class Constraint(DatabaseObject):
 
     The definition of the constraint is used to `ADD CONSTRAINT` on the table.
     """
-    _FOREIGN_KEY_RE = re.compile(r'\sforeign\s+key\b.*', re.IGNORECASE)
 
     def __init__(
         self,
@@ -7621,11 +7620,6 @@ class Constraint(DatabaseObject):
         super().__init__()
         self._definition = definition
         self._set_message(message)
-        # see 'ir.model.constraint'.type
-        if self._FOREIGN_KEY_RE.match(definition):
-            self._type = 'f'
-        else:
-            self._type = 'u'
 
     @property
     def definition(self):
@@ -7643,10 +7637,7 @@ class Constraint(DatabaseObject):
             # constraint exists but its definition may have changed
             sql.drop_constraint(cr, model._table, conname)
 
-        if self._type == "f":
-            model.pool.post_init(sql.add_constraint, cr, model._table, conname, definition)
-        else:
-            model.pool.post_constraint(sql.add_constraint, cr, model._table, conname, definition)
+        model.pool.post_constraint(sql.add_constraint, cr, model._table, conname, definition)
 
 
 class Index(DatabaseObject):
