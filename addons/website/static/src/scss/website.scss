@@ -1074,6 +1074,30 @@ $-o-carousel-controllers-size: map-get($spacers, 5);
         }
     }
 
+    // Horizontal controllers
+    .o_horizontal_controllers {
+        @include media-breakpoint-up(md) {
+            .carousel-indicators {
+                position: relative;
+                min-width: 0;
+                margin: 0;
+            }
+
+            .carousel-control-prev, .carousel-control-next {
+                position: relative;
+                width: auto;
+            }
+        }
+
+        .o_arrows_wrapper {
+            display: flex;
+        }
+    }
+
+    &.s_carousel_arrows_hidden .o_horizontal_controllers .o_arrows_wrapper {
+        display: none;
+    }
+
     // Content
     .carousel-inner {
         // Create a new stacking context to ensure that elements like indicators
