@@ -188,6 +188,7 @@ function getPartialValueEditorInfo(fieldDef, operator, params = {}) {
             return {
                 component: DateTimeInput,
                 extractProps: ({ value, update }) => ({
+                    rounding: 5,
                     value:
                         params.startEmpty || value === false
                             ? false
@@ -201,7 +202,14 @@ function getPartialValueEditorInfo(fieldDef, operator, params = {}) {
                 }),
                 isSupported: (value) =>
                     value === false || (typeof value === "string" && isParsable(type, value)),
-                defaultValue: () => genericSerializeDate(type, DateTime.local()),
+                defaultValue: () => {
+                    const now = DateTime.local();
+                    const roundedMinutes = Math.round(now.minute / 5) * 5;
+                    return genericSerializeDate(
+                        type,
+                        now.set({ minute: roundedMinutes, second: 0, millisecond: 0 })
+                    );
+                },
                 stringify: (value) => {
                     if (value === false) {
                         return _t("False");

@@ -2239,4 +2239,22 @@ QUnit.module("Components", (hooks) => {
             `Dateis between03|11|2023 and 13|11|2023`
         );
     });
+
+    QUnit.test("datetime default values are rounded to the closed 5 minutes", async (assert) => {
+        patchDate(2023, 9, 5, 15, 8, 0);
+        await makeDomainSelector();
+        await addNewRule(target);
+        await openModelFieldSelectorPopover(target);
+        await click(
+            target.querySelector(
+                ".o_model_field_selector_popover_item[data-name='datetime'] .o_model_field_selector_popover_item_name"
+            )
+        );
+        assert.equal(target.querySelector(".o_datetime_input").value, "10/05/2023 15:10:00");
+        await click(target, ".o_datetime_input");
+        assert.deepEqual(
+            Array.from(document.querySelectorAll(".o_time_picker_select")).map((e) => e.value),
+            ["15", "10"]
+        );
+    });
 });
