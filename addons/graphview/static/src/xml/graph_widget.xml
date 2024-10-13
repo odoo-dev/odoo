@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="graphview.CytoscapeGraphWidget" owl="1">
+        <div class="o_cytoscape_container" style="width: 100%; height: calc(100vh - 200px); position: relative;">
+            <form class="o_cytoscape_search" t-on-submit="onSearchSubmit" style="position: absolute; top: 10px; left: 10px; z-index: 10; display: flex;">
+                <input type="text" t-ref="search" placeholder="Search module..." style="padding: 5px; flex-grow: 1;"/>
+                <button type="submit" style="padding: 5px 10px; margin-left: 5px;">Search</button>
+            </form>
+            <div class="o_cytoscape_graph" t-ref="graph" style="width: 100%; height: 100%;"/>
+        </div>
+    </t>
+</templates>
