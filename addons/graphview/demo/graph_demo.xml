@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="demo_graph" model="graphview.graph">
+            <field name="name">Demo Graph</field>
+            <field name="nodes" eval="[
+                {'data': {'id': 'a', 'label': 'Node A'}},
+                {'data': {'id': 'b', 'label': 'Node B'}},
+                {'data': {'id': 'c', 'label': 'Node C'}}
+            ]"/>
+            <field name="edges" eval="[
+                {'data': {'source': 'a', 'target': 'b', 'label': 'A to B'}},
+                {'data': {'source': 'b', 'target': 'c', 'label': 'B to C'}}
+            ]"/>
+            <field name="layout" eval="{'name': 'grid'}"/>
+            <field name="stylesheet" eval="[
+                {
+                    'selector': 'node',
+                    'style': {
+                        'content': 'data(label)',
+                        'text-valign': 'center',
+                        'text-halign': 'center',
+                        'background-color': '#11479e'
+                    }
+                },
+                {
+                    'selector': 'edge',
+                    'style': {
+                        'content': 'data(label)',
+                        'curve-style': 'bezier',
+                        'target-arrow-shape': 'triangle'
+                    }
+                }
+            ]"/>
+        </record>
+    </data>
+</odoo>

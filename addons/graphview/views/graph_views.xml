@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_graphview_graph_form" model="ir.ui.view">
+        <field name="name">graphview.graph.form</field>
+        <field name="model">graphview.graph</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="graphdata" widget="cytoscape_graph" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_graphview_graph_list" model="ir.ui.view">
+        <field name="name">graphview.graph.list</field>
+        <field name="model">graphview.graph</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_graphview_graph" model="ir.actions.act_window">
+        <field name="name">Graph View</field>
+        <field name="res_model">graphview.graph</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_generate_dependencies" model="ir.actions.server">
+        <field name="name">Generate Module Dependencies</field>
+        <field name="model_id" ref="model_graphview_graph"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.create_module_dep()
+        </field>
+    </record>
+
+    <menuitem id="menu_graphview" name="Graph View" action="action_graphview_graph" sequence="10"/>
+    <menuitem id="menu_generate_dependencies" name="Generate Dependencies" action="action_generate_dependencies" parent="menu_graphview" sequence="20"/>
+</odoo>
