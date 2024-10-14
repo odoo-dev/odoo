@@ -12,10 +12,17 @@ class TestAutomation(TransactionCaseWithUserDemo):
 
     def test_01_on_create_or_write(self):
         """ Simple on_create with admin user """
+<<<<<<< 17.0
         model = self.env.ref("base.model_res_partner")
         automation = self.env["base.automation"].create({
+||||||| d0828eecf60f7c8622d6875b8651eb663bc7d695
+        self.env["base.automation"].create([{
+=======
+        self.env["base.automation"].create({
+>>>>>>> 564eef0daadf29172d7bace786aac0a81a96d075
             "name": "Force Archived Contacts",
             "trigger": "on_create_or_write",
+<<<<<<< 17.0
             "model_id": model.id,
             "trigger_field_ids": [(6, 0, [
                 self.env.ref("base.field_res_partner__name").id,
@@ -37,6 +44,43 @@ class TestAutomation(TransactionCaseWithUserDemo):
             "model_id": model.id,
         })
         automation.write({"action_server_ids": [Command.link(action.id)]})
+||||||| d0828eecf60f7c8622d6875b8651eb663bc7d695
+            "model_id": self.env.ref("base.model_res_partner").id,
+            "type": "ir.actions.server",
+            "trigger_field_ids": [(6, 0, [self.env.ref("base.field_res_partner__name").id])],
+            "fields_lines": [(0, 0, {
+                "col1": self.env.ref("base.field_res_partner__active").id,
+                "evaluation_type": "equation",
+                "value": "False",
+            })],
+        },
+        {
+            "name": "Bilbo time senstive reminder",
+            "trigger": "on_time",
+            "model_id": self.env.ref("hr_contract.model_hr_contract").id,
+            "type": "ir.actions.server",
+            "trigger_field_ids": [],
+            "trg_date_range": -7,
+            "trg_date_range_type": "day",
+            "trg_date_id": self.env.ref("hr_contract.field_hr_contract__date_end").id,
+            "fields_lines": [],
+        }])
+
+        # verify the "Base Action Rule: check and execute" frequency is set correctly with negative numbers.
+        cron = self.env["ir.cron"].search([("cron_name", "=", "Base Action Rule: check and execute")])
+        self.assertEqual(cron.interval_number, 240)
+        self.assertEqual(cron.interval_type, "minutes")
+=======
+            "model_id": self.env.ref("base.model_res_partner").id,
+            "type": "ir.actions.server",
+            "trigger_field_ids": [(6, 0, [self.env.ref("base.field_res_partner__name").id])],
+            "fields_lines": [(0, 0, {
+                "col1": self.env.ref("base.field_res_partner__active").id,
+                "evaluation_type": "equation",
+                "value": "False",
+            })],
+        })
+>>>>>>> 564eef0daadf29172d7bace786aac0a81a96d075
 
         # verify the partner can be created and the action still runs
         bilbo = self.env["res.partner"].create({"name": "Bilbo Baggins"})
@@ -48,6 +92,7 @@ class TestAutomation(TransactionCaseWithUserDemo):
         self.assertFalse(bilbo.active)
 
         # verify the "Base Action Rule: check and execute" frequency is updated correctly when a new action is created.
+<<<<<<< 17.0
         automation = self.env["base.automation"].create([
             {
                 "name": "Bilbo time senstive reminder in a hurry",
@@ -66,6 +111,51 @@ class TestAutomation(TransactionCaseWithUserDemo):
                 "trg_date_range": 60,
                 "trg_date_range_type": "minutes",
                 "trg_date_id": self.env.ref("hr_contract.field_hr_contract__date_end").id,
+||||||| d0828eecf60f7c8622d6875b8651eb663bc7d695
+        self.env["base.automation"].create([
+        {
+            "name": "Bilbo time senstive reminder in a hurry",
+            "trigger": "on_time",
+            "model_id": self.env.ref("hr_contract.model_hr_contract").id,
+            "type": "ir.actions.server",
+            "trigger_field_ids": [],
+            "trg_date_range": -60,
+            "trg_date_range_type": "minutes",
+            "trg_date_id": self.env.ref("hr_contract.field_hr_contract__date_end").id,
+            "fields_lines": [],
+        },
+         {
+            "name": "Bilbo time senstive reminder late",
+            "trigger": "on_time",
+            "model_id": self.env.ref("hr_contract.model_hr_contract").id,
+            "type": "ir.actions.server",
+            "trigger_field_ids": [],
+            "trg_date_range": 60,
+            "trg_date_range_type": "minutes",
+            "trg_date_id": self.env.ref("hr_contract.field_hr_contract__date_end").id,
+            "fields_lines": [],
+        }])
+        cron = self.env["ir.cron"].search([("cron_name", "=", "Base Action Rule: check and execute")])
+=======
+        self.env["base.automation"].create([
+            {
+                "name": "Bilbo time senstive reminder in a hurry",
+                "trigger": "on_time",
+                "model_id": self.env.ref("base.model_res_partner").id,
+                "trigger_field_ids": [],
+                "trg_date_range": -60,
+                "trg_date_range_type": "minutes",
+                "trg_date_id": self.env.ref("base.field_res_partner__write_date").id,
+            },
+            {
+                "name": "Bilbo time senstive reminder late",
+                "trigger": "on_time",
+                "model_id": self.env.ref("base.model_res_partner").id,
+                "trigger_field_ids": [],
+                "trg_date_range": 60,
+                "trg_date_range_type": "minutes",
+                "trg_date_id": self.env.ref("base.field_res_partner__write_date").id,
+>>>>>>> 564eef0daadf29172d7bace786aac0a81a96d075
             }
             ])
 
@@ -136,6 +226,7 @@ class TestAutomation(TransactionCaseWithUserDemo):
         self_portal = self.env["ir.filters"].with_user(self.user_demo.id)
 
         # simulate a onchange call on name
+<<<<<<< 17.0
         result = self_portal.onchange({}, [], {"name": {}, "active": {}})
         self.assertEqual(result["value"]["active"], False)
 
@@ -199,3 +290,25 @@ class TestAutomation(TransactionCaseWithUserDemo):
 
         allowed_models = self.env['ir.model'].search(domain)
         self.assertTrue(base_model._name not in allowed_models.mapped('model'), "The base model should not be in the allowed models")
+||||||| d0828eecf60f7c8622d6875b8651eb663bc7d695
+        onchange = self_portal.onchange({}, [], {"name": "1", "active": ""})
+        self.assertEqual(onchange["value"]["active"], False)
+
+    def test_04__get_cron_interval(self):
+        """ Simple on_create with admin user """
+        self.env["base.automation"].create({
+            "name": "Force Archived Contacts",
+            "trigger": "on_create_or_write",
+            "model_id": self.env.ref("base.model_res_partner").id,
+            "type": "ir.actions.server",
+            "trigger_field_ids": [(6, 0, [self.env.ref("base.field_res_partner__name").id])],
+            "fields_lines": [(0, 0, {
+                "col1": self.env.ref("base.field_res_partner__active").id,
+                "evaluation_type": "equation",
+                "value": "False",
+            })],
+        })
+=======
+        onchange = self_portal.onchange({}, [], {"name": "1", "active": ""})
+        self.assertEqual(onchange["value"]["active"], False)
+>>>>>>> 564eef0daadf29172d7bace786aac0a81a96d075
