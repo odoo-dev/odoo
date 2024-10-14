@@ -76,25 +76,11 @@ class HrAttendance(models.Model):
             self.env['hr.attendance.overtime'].flush_model(['duration'])
             self.env.cr.execute('''
                 WITH employee_time_zones AS (
-                    SELECT
-                        employee.id AS employee_id,
-                        CASE
-                            WHEN resource.tz IS NOT NULL THEN resource.tz
-                            WHEN calendar.id IS NOT NULL THEN calendar.tz
-                            ELSE 'utc'
-                        END AS timezone
-                    FROM hr_employee employee
-                        LEFT JOIN resource_resource resource
-                            ON employee.resource_id = resource.id
-                        LEFT JOIN res_company company
-                            ON employee.company_id = company.id
-                        LEFT JOIN resource_calendar calendar
-                            ON
-                                calendar.id = employee.resource_calendar_id
-                                OR (
-                                    employee.resource_calendar_id IS NULL
-                                    AND company.resource_calendar_id = calendar.id
-                                )
+                    SELECT employee.id AS employee_id,
+                           calendar.tz AS timezone
+                      FROM hr_employee employee
+                INNER JOIN resource_calendar calendar
+                        ON calendar.id = employee.resource_calendar_id
                 )
                 SELECT att.id AS att_id,
                        att.worked_hours AS att_wh,
@@ -233,7 +219,7 @@ class HrAttendance(models.Model):
         #Returns a tuple containing the datetime in naive UTC of the employee's start of the day
         # and the date it was for that employee
         if not dt.tzinfo:
-            date_employee_tz = pytz.utc.localize(dt).astimezone(pytz.timezone(employee._get_tz()))
+            date_employee_tz = pytz.utc.localize(dt).astimezone(pytz.timezone(employee._get_calendar_tz()))
         else:
             date_employee_tz = dt
         start_day_employee_tz = date_employee_tz.replace(hour=0, minute=0, second=0)
