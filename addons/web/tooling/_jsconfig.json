@@ -9,6 +9,7 @@
     },
     "include": ["addons/**/*.js", "addons/**/*.ts"],
     "exclude": [
+        "addons/**/lib/hoot*/*",
         "addons/**/lib/ace",
         "addons/**/lib/bootstrap",
         "addons/**/lib/Chart",

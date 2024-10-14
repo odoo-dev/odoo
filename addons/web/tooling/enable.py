@@ -61,7 +61,7 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
 
     odoo_modules = get_odoo_modules(ODOO_PATH.joinpath("addons"))
-    with open("./_jsconfig.json", "r") as f:
+    with open(TOOLING_PATH.joinpath("_jsconfig.json"), "r") as f:
         jsconfig_file = f.read()
 
     odoo_paths = dict()
@@ -88,6 +88,7 @@ if __name__ == "__main__":
         exclude = js_config.get("exclude", [])
         for i, path in enumerate(exclude):
              exclude[i] = path_relative_to_odoo(str(data["path_addon_to_odoo"]), path)
+        exclude.append("node_modules")
         js_config["exclude"] = exclude
 
         with open(data["path_odoo_to_addon"].joinpath("jsconfig.json"), "w+") as f:
