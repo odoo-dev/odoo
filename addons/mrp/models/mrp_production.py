@@ -1511,6 +1511,7 @@ class MrpProduction(models.Model):
     def action_assign(self):
         for production in self:
             production.move_raw_ids._action_assign()
+            production.workorder_ids._update_state()
         return True
 
     def button_plan(self):
@@ -2177,6 +2178,7 @@ class MrpProduction(models.Model):
 
     def do_unreserve(self):
         (self.move_finished_ids | self.move_raw_ids).filtered(lambda x: x.state not in ('done', 'cancel'))._do_unreserve()
+        self.workorder_ids._update_state()
 
     def button_scrap(self):
         self.ensure_one()

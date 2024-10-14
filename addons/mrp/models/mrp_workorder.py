@@ -67,8 +67,8 @@ class MrpWorkorder(models.Model):
         ('progress', 'In Progress'),
         ('done', 'Finished'),
         ('cancel', 'Cancelled')], string='Status',
-        compute='_compute_state', store=True,
-        default='pending', copy=False, readonly=True, recursive=True, index=True)
+        store=True,
+        default='pending', copy=False, readonly=True, index=True)
     leave_id = fields.Many2one(
         'resource.calendar.leaves',
         help='Slot into workcenter calendar once planned',
@@ -150,12 +150,9 @@ class MrpWorkorder(models.Model):
                                      domain="[('allow_workorder_dependencies', '=', True), ('id', '!=', id), ('production_id', '=', production_id)]",
                                      copy=False)
 
-    @api.depends('production_availability', 'blocked_by_workorder_ids.state', 'qty_ready')
-    def _compute_state(self):
-        # Force to compute the production_availability right away.
-        # It is a trick to force that the state of workorder is computed at the end of the
-        # cyclic depends with the mo.state, mo.reservation_state and wo.state and avoid recursion error
-        self.mapped('production_availability')
+    def _update_state(self):
+        # FIXME : MO q10, WO (a8,b10,c8) -> MO2 q2, WO (a2,b0,c2);
+        # On mark_done of MO2, WO a&c do (ready -> done), but WO b do (cancel-> progress)
         for workorder in self:
             if workorder.state not in ('pending', 'waiting', 'ready'):
                 continue
@@ -232,6 +229,7 @@ class MrpWorkorder(models.Model):
                 workorder.production_id.qty_producing = workorder.qty_producing
                 workorder.production_id._set_qty_producing()
 
+    @api.depends('state', 'production_state', 'qty_produced', 'qty_producing', 'qty_remaining', 'blocked_by_workorder_ids')
     def _compute_qty_ready(self):
         for workorder in self:
             if workorder.production_state not in ('confirmed', 'progress') or workorder.state in ('cancel', 'done'):
@@ -244,7 +242,8 @@ class MrpWorkorder(models.Model):
             for wo in workorder.blocked_by_workorder_ids:
                 if wo.state != 'cancel':
                     workorder_qty_ready = min(workorder_qty_ready, wo.qty_produced + wo.qty_reported_from_previous_wo)
-            workorder.qty_ready = workorder_qty_ready - workorder.qty_produced
+            workorder.qty_ready = workorder_qty_ready - workorder.qty_produced - workorder.qty_reported_from_previous_wo
+        self._update_state()
 
     # Both `date_start` and `date_finished` are related fields on `leave_id`. Let's say
     # we slide a workorder on a gantt view, a single call to write is made with both
@@ -456,12 +455,12 @@ class MrpWorkorder(models.Model):
 
     def write(self, values):
         if 'qty_produced' in values:
-            if self.state in ['done', 'cancel']:
-                raise UserError(_('You cannot change the quantity done of a work order that is in done or cancel state.'))
+            if any(w.state in ['done', 'cancel'] for w in self):
+                raise UserError(_('You cannot change the quantity produced of a work order that is in done or cancel state.'))
             elif float_compare(values['qty_produced'], 0, precision_rounding=self.product_uom_id.rounding) < 0:
                 raise UserError(_('The quantity produced must be positive.'))
             elif float_compare(values['qty_produced'], self.qty_production, precision_rounding=self.product_uom_id.rounding) > 0:
-                raise UserError(_('The quantity produced must less or equal than the quantity to produce.'))
+                raise UserError(_('The quantity produced must be less or equal than the quantity to produce.'))
         if 'production_id' in values and any(values['production_id'] != w.production_id.id for w in self):
             raise UserError(_('You cannot link this work order to another manufacturing order.'))
         if 'workcenter_id' in values:
@@ -498,7 +497,21 @@ class MrpWorkorder(models.Model):
                         workorder.production_id.with_context(force_date=True).write({
                             'date_finished': fields.Datetime.to_datetime(values['date_finished'])
                         })
-        return super(MrpWorkorder, self).write(values)
+        res = super(MrpWorkorder, self).write(values)
+        if 'qty_produced' in values:
+            for wo in self:
+                wo.qty_producing = wo.qty_produced
+            self._set_qty_producing()
+        workorders_to_update = None
+        for wo in self:
+            if 'state' in values and wo.needed_by_workorder_ids:
+                if wo.state in ('done', 'cancel'):
+                    workorders_to_update = wo.needed_by_workorder_ids.filtered(lambda w: w.state == "pending")
+                else:
+                    workorders_to_update = wo.needed_by_workorder_ids.filtered(lambda w: w.state in ('waiting', 'ready'))
+            if workorders_to_update:
+                workorders_to_update._update_state()
+        return res
 
     @api.model_create_multi
     def create(self, values):
