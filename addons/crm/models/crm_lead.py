@@ -488,7 +488,7 @@ class CrmLead(models.Model):
         for lead in self:
             lead.is_automated_probability = tools.float_compare(lead.probability, lead.automated_probability, 2) == 0
 
-    @api.depends(lambda self: ['stage_id', 'team_id'] + self._pls_get_safe_fields())
+    @api.depends(lambda self: ['active', 'stage_id', 'team_id'] + self._pls_get_safe_fields())
     def _compute_probabilities(self):
         lead_probabilities = self._pls_get_naive_bayes_probabilities()
         for lead in self:
@@ -746,6 +746,7 @@ class CrmLead(models.Model):
 
         now = self.env.cr.now()
         stage_updated, stage_is_won = False, False
+        active_updated = 'active' in vals
         # stage change (or reset): update date_last_stage_update if at least one
         # lead does not have the same stage
         if 'stage_id' in vals:
@@ -767,14 +768,22 @@ class CrmLead(models.Model):
                 vals['date_open'] = now
 
         # stage change with new stage: update probability and date_closed
-        if vals.get('probability', 0) >= 100 or not vals.get('active', True):
+        if not vals.get('active', True):
+            # lost/archived
             vals['date_closed'] = fields.Datetime.now()
+            vals['probability'] = 0
+            vals['automated_probability'] = 0
+        elif vals.get('probability', 0) >= 100:
+            # won
+            vals['date_closed'] = fields.Datetime.now()
+            vals['lost_reason_id'] = False
+            vals['active'] = True  # force trigger _compute_probabilities
         elif vals.get('probability', 0) > 0:
             vals['date_closed'] = False
         elif stage_updated and not stage_is_won and not 'probability' in vals:
             vals['date_closed'] = False
 
-        if any(field in ['active', 'stage_id'] for field in vals):
+        if active_updated or stage_updated:
             self._handle_won_lost(vals)
 
         if not stage_is_won:
@@ -981,19 +990,6 @@ class CrmLead(models.Model):
     # ------------------------------------------------------------
     # ACTIONS
     # ------------------------------------------------------------
-
-    def toggle_active(self):
-        """ When archiving: mark probability as 0. When re-activating
-        update probability again, for leads and opportunities. """
-        res = super().toggle_active()
-        activated = self.filtered(lambda lead: lead.active)
-        archived = self.filtered(lambda lead: not lead.active)
-        if activated:
-            activated.write({'lost_reason_id': False})
-            activated._compute_probabilities()
-        if archived:
-            archived.write({'probability': 0, 'automated_probability': 0})
-        return res
 
     def action_set_lost(self, **additional_values):
         """ Lost semantic: probability = 0 or active = False """
