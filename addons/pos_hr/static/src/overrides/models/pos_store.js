@@ -13,9 +13,21 @@ patch(PosStore.prototype, {
     async processServerData() {
         await super.processServerData(...arguments);
         if (this.config.module_pos_hr) {
+<<<<<<< saas-17.4
             const saved_cashier_id = Number(sessionStorage.getItem("connected_cashier"));
             if (saved_cashier_id) {
                 this.set_cashier(this.models["hr.employee"].get(saved_cashier_id));
+||||||| a7596042d23bc8bb43d680a8eb2dab5b6537291e
+            const saved_cashier_id = Number(sessionStorage.getItem("connected_cashier"));
+            this.employee_security = this.data.custom.employee_security;
+            if (saved_cashier_id) {
+                this.set_cashier(this.employee_security[saved_cashier_id]);
+=======
+            this.employee_security = this.data.custom.employee_security;
+            const savedCashier = this._getConnectedCashier();
+            if (savedCashier) {
+                this.set_cashier(savedCashier);
+>>>>>>> 061558571d311522f17e35d5d72e609700146088
             } else {
                 this.reset_cashier();
             }
@@ -29,7 +41,7 @@ patch(PosStore.prototype, {
     async afterProcessServerData() {
         await super.afterProcessServerData(...arguments);
         if (this.config.module_pos_hr) {
-            const saved_cashier = Number(sessionStorage.getItem("connected_cashier"));
+            const saved_cashier = this._getConnectedCashier();
             this.hasLoggedIn = saved_cashier ? true : false;
         }
     },
@@ -43,14 +55,48 @@ patch(PosStore.prototype, {
         return order;
     },
     reset_cashier() {
+<<<<<<< saas-17.4
         this.cashier = false;
         sessionStorage.removeItem("connected_cashier");
+||||||| a7596042d23bc8bb43d680a8eb2dab5b6537291e
+        this.cashier = {
+            name: null,
+            id: null,
+            barcode: null,
+            user_id: null,
+            pin: null,
+            role: null,
+        };
+        sessionStorage.removeItem("connected_cashier");
+=======
+        this.cashier = {
+            name: null,
+            id: null,
+            barcode: null,
+            user_id: null,
+            pin: null,
+            role: null,
+        };
+        this._resetConnectedCashier();
+>>>>>>> 061558571d311522f17e35d5d72e609700146088
     },
     set_cashier(employee) {
         this.cashier = employee;
+<<<<<<< saas-17.4
         sessionStorage.setItem("connected_cashier", employee.id);
         const o = this.get_order();
         if (o && !o.get_orderlines().length) {
+||||||| a7596042d23bc8bb43d680a8eb2dab5b6537291e
+        this.cashier.role = this.employee_security[employee.id].role;
+        sessionStorage.setItem("connected_cashier", employee.id);
+        const selectedOrder = this.get_order();
+        if (selectedOrder && !selectedOrder.get_orderlines().length) {
+=======
+        this.cashier.role = this.employee_security[employee.id].role;
+        this._storeConnectedCashier(employee);
+        const selectedOrder = this.get_order();
+        if (selectedOrder && !selectedOrder.get_orderlines().length) {
+>>>>>>> 061558571d311522f17e35d5d72e609700146088
             // Order without lines can be considered to be un-owned by any employee.
             // We set the cashier on that order to the currently set employee.
             o.update({ employee_id: employee });
@@ -101,6 +147,19 @@ patch(PosStore.prototype, {
             message,
         ]);
     },
+    _getConnectedCashier() {
+        const cashier_id = Number(sessionStorage.getItem(`connected_cashier_${this.config.id}`));
+        if (cashier_id && this.employee_security[cashier_id]) {
+            return this.employee_security[cashier_id];
+        }
+        return false;
+    },
+    _storeConnectedCashier(employee) {
+        sessionStorage.setItem(`connected_cashier_${this.config.id}`, employee.id);
+    },
+    _resetConnectedCashier() {
+        sessionStorage.removeItem(`connected_cashier_${this.config.id}`);
+    },
 
     /**
      * @override
@@ -110,5 +169,11 @@ patch(PosStore.prototype, {
             return super.shouldShowCashControl(...arguments) && this.hasLoggedIn;
         }
         return super.shouldShowCashControl(...arguments);
+    },
+    closePos() {
+        if (this.config.module_pos_hr) {
+            this._resetConnectedCashier();
+        }
+        return super.closePos(...arguments);
     },
 });
