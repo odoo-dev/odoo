@@ -53,6 +53,7 @@ class AccountTestInvoicingCommon(ProductCommon):
 
         cls.maxDiff = None
         cls.company_data = cls.collect_company_accounting_data(cls.env.company)
+        cls._ensure_main_company()
 
         # ==== Taxes ====
         cls.tax_sale_a = cls.company_data['default_tax_sale']
@@ -210,6 +211,18 @@ class AccountTestInvoicingCommon(ProductCommon):
             groups_id=cls.get_default_groups().ids,
             company_id=cls.env.company.id,
         )
+
+    @classmethod
+    def _ensure_main_company(cls):
+        """ Ensure that the main company's data doesn't impact tests.
+
+        Instead we set it to be the main test company instead.
+        This is a an additional layer to avoid any side effect from (demo) data
+        or how the database was initialized.
+        """
+        patch_main_company = patch('odoo.addons.base.models.res_company.Company._get_main_company', return_value=cls.env.company)
+        patch_main_company.start()
+        cls.addClassCleanup(patch_main_company.stop)
 
     @classmethod
     def _create_company(cls, **create_values):
