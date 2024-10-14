@@ -2280,9 +2280,9 @@ class AccountMove(models.Model):
         ''' Assert the move is fully balanced debit = credit.
         An error is raised if it's not the case.
         '''
-        with self._disable_recursion(container, 'check_move_validity', default=True, target=False) as disabled:
+        with self._disable_recursion(container, 'check_move_validity', default=True, target=False) as new_env:
             yield
-            if disabled:
+            if new_env is None:
                 return
 
         unbalanced_moves = self._get_unbalanced_moves(container)
@@ -2987,8 +2987,8 @@ class AccountMove(models.Model):
 
     @contextmanager
     def _sync_dynamic_lines(self, container):
-        with self._disable_recursion(container, 'skip_invoice_sync') as disabled:
-            if disabled:
+        with self._disable_recursion(container, 'skip_invoice_sync') as new_env:
+            if new_env is None:
                 yield
                 return
             def update_containers():
@@ -5798,27 +5798,22 @@ class AccountMove(models.Model):
                         yet in the context
         :param target: the value of the context key meaning that we shouldn't
                        recurse
-        :return: True iff we should just exit the context manager
+        :return: Environment iff we should update the environment, otherwise None
         """
-
-        disabled = container['records'].env.context.get(key, default) == target
-        previous_values = {}
-        previous_envs = set(self.env.transaction.envs)
-        if not disabled:  # it wasn't disabled yet, disable it now
-            for env in self.env.transaction.envs:
-                previous_values[env] = env.context.get(key, EMPTY)
-                env.context = frozendict({**env.context, key: target})
+        records = container['records']
+        if records.env.context.get(key, default) == target:
+            yield None
+            return
+        env = self.env
+        default_env = env.transaction.default_env
+        new_env = self.with_context(key=target).env
         try:
-            yield disabled
+            container['records'] = records.with_env(new_env)
+            new_env.transaction.default_env = new_env
+            yield new_env
         finally:
-            for env, val in previous_values.items():
-                if val != EMPTY:
-                    env.context = frozendict({**env.context, key: val})
-                else:
-                    env.context = frozendict({k: v for k, v in env.context.items() if k != key})
-            for env in (self.env.transaction.envs - previous_envs):
-                if key in env.context:
-                    env.context = frozendict({k: v for k, v in env.context.items() if k != key})
+            env.transaction.default_env = default_env
+            container['records'] = records
 
     # ------------------------------------------------------------
     # MAIL.THREAD

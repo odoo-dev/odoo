@@ -540,17 +540,19 @@ class Environment(Mapping):
 
     cr: BaseCursor
     uid: int
+    uid_origin: int | None
     context: frozendict
     su: bool
-    registry: Registry
     cache: Cache
     transaction: Transaction
+    _su_env: Environment | None = None
 
     def reset(self):
         """ Reset the transaction, see :meth:`Transaction.reset`. """
+        warnings.warn("Since 19.0, use directly `transaction.reset()`", DeprecationWarning)
         self.transaction.reset()
 
-    def __new__(cls, cr, uid, context, su=False, uid_origin=None):
+    def __init__(self, cr, uid, context, su=False, uid_origin=None):
         if uid == SUPERUSER_ID:
             su = True
 
@@ -564,25 +566,18 @@ class Environment(Mapping):
         if transaction is None:
             transaction = cr.transaction = Transaction(Registry(cr.dbname))
 
-        # if env already exists, return it
-        for env in transaction.envs:
-            if (env.cr, env.uid, env.su, env.uid_origin, env.context) == (cr, uid, su, uid_origin, context):
-                return env
-
-        # otherwise create environment, and add it in the set
-        assert isinstance(cr, BaseCursor)
-        self = object.__new__(cls)
+        # create environment, and add it in the set
         self.cr, self.uid, self.su, self.uid_origin = cr, uid, su, uid_origin
         self.context = frozendict(context)
         self.transaction = transaction
-        self.registry = transaction.registry
         self.cache = transaction.cache
+
+        # the default transaction's envrionment is the first environment created (without su if possible)
+        if (transaction.default_env is None or (not su and transaction.default_env.su)) and uid is not None:
+            transaction.default_env = self
 
         self._cache_key = {}                    # memo {field: cache_key}
         self._protected = transaction.protected
-
-        transaction.envs.add(self)
-        return self
 
     #
     # Mapping methods
@@ -625,12 +620,22 @@ class Environment(Mapping):
         :returns: environment with specified args (new or existing one)
         :rtype: :class:`Environment`
         """
+        if su is not None and (cr is None and user is None and context is None):
+            # switching to sudo is a very common operation, let's cache the env
+            return self if su == self.su else self._not_su_env
         cr = self.cr if cr is None else cr
         uid = self.uid if user is None else int(user)
         if context is None:
             context = clean_context(self.context) if su and not self.su else self.context
         su = (user is None and self.su) if su is None else su
         return Environment(cr, uid, context, su, self.uid_origin)
+
+    @lazy_property
+    def _not_su_env(self):
+        """Cached environment with inverse of the ``self.su``."""
+        env = Environment(self.cr, self.uid, self.context, not self.su, self.uid_origin)
+        env._not_su_env = self
+        return env
 
     def ref(self, xml_id, raise_if_not_found=True):
         """ Return the record corresponding to the given ``xml_id``.
@@ -665,6 +670,20 @@ class Environment(Mapping):
         """ Return whether the current user has group "Settings", or is in
             superuser mode. """
         return self.su or self.user._is_system()
+
+    @lazy_property
+    def _registry(self):
+        """Return the registry associated with the transaction."""
+        return self.transaction.registry
+
+    @property
+    def registry(self):
+        """Return the registry associated with the transaction, reset if necessary."""
+        registry = self._registry
+        if registry is not self.transaction.registry:
+            self.clear()
+            registry = self._registry
+        return registry
 
     @lazy_property
     def user(self):
@@ -979,13 +998,12 @@ class Environment(Mapping):
 
 class Transaction:
     """ A object holding ORM data structures for a transaction. """
-    __slots__ = ('_Transaction__file_open_tmp_paths', 'cache', 'envs', 'protected', 'registry', 'tocompute')
+    __slots__ = ('_Transaction__file_open_tmp_paths', 'cache', 'default_env', 'protected', 'registry', 'tocompute')
 
     def __init__(self, registry):
         self.registry = registry
-        # weak set of environments
-        self.envs = WeakSet()
-        self.envs.data = OrderedSet()  # make the weakset OrderedWeakSet
+        # default environment
+        self.default_env = None
         # cache for all records
         self.cache = Cache()
         # fields to protect {field: ids}
@@ -997,12 +1015,7 @@ class Transaction:
 
     def flush(self):
         """ Flush pending computations and updates in the transaction. """
-        env_to_flush = None
-        for env in self.envs:
-            if isinstance(env.uid, int) or env.uid is None:
-                env_to_flush = env
-                if env.uid is not None:
-                    break
+        env_to_flush = self.default_env
         if env_to_flush is not None:
             env_to_flush.flush_all()
 
@@ -1017,11 +1030,9 @@ class Transaction:
             recommended after reloading the registry.
         """
         self.registry = Registry(self.registry.db_name)
-        for env in self.envs:
-            env.registry = self.registry
-            lazy_property.reset_all(env)
-            env._cache_key.clear()
         self.clear()
+        if self.default_env is not None:
+            self.default_env.clear()
 
 
 # sentinel value for optional parameters
