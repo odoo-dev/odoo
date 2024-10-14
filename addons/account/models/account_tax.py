@@ -1064,17 +1064,32 @@ class AccountTax(models.Model):
 
         # Mark the base to be computed in the descending order. The order doesn't matter for no special mode or 'total_excluded' but
         # it must be in the reverse order when special_mode is 'total_included'.
+        subsequent_taxes = self.env['account.tax']
         for tax in reversed(sorted_taxes):
-            if 'tax_amount' not in taxes_data[tax.id]:
+            tax_data = taxes_data[tax.id]
+            if 'tax_amount' not in tax_data:
                 continue
 
-            total_tax_amount = sum(taxes_data[other_tax.id]['tax_amount'] for other_tax in taxes_data[tax.id]['batch'])
-            base = raw_base + taxes_data[tax.id]['extra_base_for_base']
-            if taxes_data[tax.id]['price_include'] and special_mode in (False, 'total_included'):
+            # Base amount.
+            total_tax_amount = sum(taxes_data[other_tax.id]['tax_amount'] for other_tax in tax_data['batch'])
+            base = raw_base + tax_data['extra_base_for_base']
+            if tax_data['price_include'] and special_mode in (False, 'total_included'):
                 base -= total_tax_amount
-            taxes_data[tax.id]['base'] = base
+            tax_data['base'] = base
+
+            # Subsequent taxes.
+            tax_data['taxes'] = self.env['account.tax']
+            if tax.include_base_amount:
+                tax_data['taxes'] |= subsequent_taxes
+
+            # Reverse charge.
             if tax.has_negative_factor:
-                reverse_charge_taxes_data[tax.id]['base'] = base
+                reverse_charge_tax_data = reverse_charge_taxes_data[tax.id]
+                reverse_charge_tax_data['base'] = base
+                reverse_charge_tax_data['taxes'] = tax_data['taxes']
+
+            if tax.is_base_affected:
+                subsequent_taxes |= tax
 
         taxes_data_list = []
         for tax_data in taxes_data.values():
@@ -1097,6 +1112,7 @@ class AccountTax(models.Model):
             'taxes_data': [
                 {
                     'tax': tax_data['tax'],
+                    'taxes': tax_data['taxes'],
                     'group': batching_results['group_per_tax'].get(tax_data['tax'].id) or self.env['account.tax'],
                     'batch': batching_results['batch_per_tax'][tax_data['tax'].id],
                     'tax_amount': tax_data['tax_amount'],
@@ -1656,7 +1672,6 @@ class AccountTax(models.Model):
                     nb_of_errors -= 1
                     index = (index + 1) % len(sorted_tax_reps_data)
 
-        subsequent_taxes = self.env['account.tax']
         subsequent_tags = self.env['account.account.tag']
         for tax_data in reversed(taxes_data):
             tax = tax_data['tax']
@@ -1665,12 +1680,11 @@ class AccountTax(models.Model):
                 tax_rep = tax_rep_data['tax_rep']
 
                 # Compute subsequent taxes/tags.
-                tax_rep_data['taxes'] = self.env['account.tax']
+                tax_rep_data['taxes'] = tax_data['taxes']
                 tax_rep_data['tax_tags'] = self.env['account.account.tag']
                 if include_caba_tags or tax.tax_exigibility == 'on_invoice':
                     tax_rep_data['tax_tags'] = tax_rep.tag_ids
                 if tax.include_base_amount:
-                    tax_rep_data['taxes'] |= subsequent_taxes
                     tax_rep_data['tax_tags'] |= subsequent_tags
 
                 # Add the accounting grouping_key to create the tax lines.
@@ -1683,7 +1697,6 @@ class AccountTax(models.Model):
                 )
 
             if tax.is_base_affected:
-                subsequent_taxes |= tax
                 if include_caba_tags or tax.tax_exigibility == 'on_invoice':
                     subsequent_tags |= tax[repartition_lines_field].filtered(lambda x: x.repartition_type == 'base').tag_ids
 
@@ -2185,6 +2198,47 @@ class AccountTax(models.Model):
             'tax_lines_to_update': tax_lines_to_update,
             'base_lines_to_update': base_lines_to_update,
         }
+
+    # -------------------------------------------------------------------------
+    # BASE LINES HELPERS
+    # -------------------------------------------------------------------------
+
+    def _exclude_not_scalable_taxes_from_base_lines(self, base_lines, grouping_function=None):
+        all_new_base_lines = []
+        for base_line in base_lines:
+            taxes = base_line['tax_ids']
+            taxes_data = base_line['tax_details']['taxes_data']
+            new_taxes = self.env['account.tax']
+            new_base_lines = []
+            for tax_data in reversed(taxes_data):
+                tax = tax_data['tax']
+                if (
+                    tax.amount_type in ('fixed', 'code')
+                    and tax.include_base_amount
+                ):
+                    new_base_lines.append(self._prepare_base_line_for_taxes_computation(
+                        base_line,
+                        **{
+                            'price_unit': tax_data['tax_amount_currency'],
+                            'quantity': 1.0,
+                            'tax_ids': new_taxes,
+                            'special_type': 'sub_base_line',
+                        },
+                    ))
+                    continue
+
+                new_taxes += tax
+
+            if new_base_lines:
+                new_base_lines.append(self._prepare_base_line_for_taxes_computation(
+                    base_line,
+                    tax_ids=new_taxes,
+                ))
+            else:
+                new_base_lines.append(dict(base_line))
+
+            all_new_base_lines += new_base_lines
+        return all_new_base_lines
 
     # -------------------------------------------------------------------------
     # END HELPERS IN BOTH PYTHON/JAVASCRIPT (account_tax.js)
