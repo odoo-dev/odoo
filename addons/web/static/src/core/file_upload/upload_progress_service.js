@@ -57,7 +57,7 @@ export class UploadProgressManager extends Component {
     }
 
     cancelAllUpload() {
-        if (this.state.uploadInProgress || this.props.uploadInProgress) {
+        if (this.state.uploadInProgress) {
             this.dialogService.add(ConfirmationDialog, {
                 title: "Confirmation",
                 confirmLabel: "Continue Uploads",
@@ -75,9 +75,10 @@ export class UploadProgressManager extends Component {
                 },
             });
         } else {
-            this.state.isVisible = false;
             if (this.props.files) {
                 this.props.close(false);
+            } else {
+                this.state.isVisible = false;
             }
         }
     }
