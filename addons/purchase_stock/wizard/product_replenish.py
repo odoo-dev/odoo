@@ -85,7 +85,7 @@ class ProductReplenish(models.TransientModel):
 
     def _get_date_planned(self, route_id, **kwargs):
         date = super()._get_date_planned(route_id, **kwargs)
-        if route_id.name != 'Buy':
+        if route_id.with_context(lang='en_US').name != 'Buy':
             return date
 
         supplier = kwargs.get('supplier')
