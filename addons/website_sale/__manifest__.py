@@ -56,6 +56,7 @@
 
         # Website snippets
         'views/snippets/snippets.xml',
+        'views/snippets/test_xml.xml',
         'views/snippets/s_add_to_cart.xml',
         'views/snippets/s_dynamic_snippet_products.xml',
         'views/snippets/s_dynamic_snippet_products_preview_data.xml',
