@@ -672,6 +672,7 @@ class Registry(Mapping):
                         warnings.warn(
                             "PostgreSQL function 'unaccent' is present but not immutable, "
                             "therefore trigram indexes may not be effective.",
+                            stacklevel=1,
                         )
                     expression = f'{column_expression} gin_trgm_ops'
                     method = 'gin'
