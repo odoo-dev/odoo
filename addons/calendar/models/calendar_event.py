@@ -288,7 +288,7 @@ class CalendarEvent(models.Model):
     def _compute_user_can_edit(self):
         new_events = self.filtered(lambda ev: isinstance(ev.id, models.NewId))
         new_events.user_can_edit = True
-        edit_events = (self - new_events)._filter_access_rules('write')
+        edit_events = (self - new_events)._filtered_access('write')
         edit_events.user_can_edit = True
         (self - edit_events - new_events).user_can_edit = False
 
@@ -599,7 +599,6 @@ class CalendarEvent(models.Model):
     def _fetch_query(self, query, fields):
         if self.env.su:
             return super()._fetch_query(query, fields)
-
         public_fnames = self._get_public_fields()
         private_fields = [field for field in fields if field.name not in public_fnames]
         if not private_fields:
@@ -607,7 +606,6 @@ class CalendarEvent(models.Model):
 
         fields_to_fetch = list(fields) + [self._fields[name] for name in ('privacy', 'user_id', 'partner_ids')]
         events = super()._fetch_query(query, fields_to_fetch)
-
         # determine private events to which the user does not participate
         others_private_events = events.filtered(lambda ev: ev._check_private_event_conditions())
         if not others_private_events:
