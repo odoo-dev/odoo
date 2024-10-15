@@ -67,7 +67,7 @@ patch(PosStore.prototype, {
                 tables
                     .map((t) => t["<-pos.order.table_id"])
                     .flat()
-                    .filter((o) => !o.finalized)
+                    .filter((o) => !o.finalized && typeof o.id === "number")
             ),
         ];
         await this.loadServerOrders([
@@ -90,6 +90,12 @@ patch(PosStore.prototype, {
             tableByIds[table.id].uiState.orderCount = table.orders;
             tableByIds[table.id].uiState.skipCount = table.skip_changes;
         }
+    },
+    getEmptyOrderScreen() {
+        if (this.config.module_pos_restaurant) {
+            return { name: "FloorScreen", props: { floor: this.selectedTable?.floor } };
+        }
+        return super.getEmptyOrderScreen(...arguments);
     },
     get categoryCount() {
         const orderChange = this.getOrderChanges().orderlines;
