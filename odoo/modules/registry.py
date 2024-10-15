@@ -574,7 +574,7 @@ class Registry(Mapping):
             key = (func, args[:3], dict(kwargs, definition=None))
             same = [f"args={a[1:]}, kwargs={kw}" for (f, a, kw) in self._constraint_queue if (f, a[:3], dict(kw, definition=None)) == key]
             if same:
-                _logger.warning("Skipping already applied constraints: %s", ", ".join(same))
+                _schema.info("Skipping already applied constraints: %s", ", ".join(same))
             self._constraint_queue = deque((f, a, kw) for (f, a, kw) in self._constraint_queue if (f, a[:3], dict(kw, definition=None)) != key)
 
     def finalize_constraints(self):
