@@ -5,7 +5,6 @@ import uuid
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError, UserError
-from odoo.tools.float_utils import float_round
 
 JOFOTARA_URL = "https://backend.jofotara.gov.jo/core/invoices/"
 INVOICE_NUMBERS = {

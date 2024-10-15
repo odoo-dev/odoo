@@ -198,7 +198,6 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
             'line_quantity': line.quantity,
             'line_quantity_attrs': {'unitCode': self._get_uom_unece_code()},
             'line_extension_amount': taxes_vals['base_line']['tax_details']['raw_total_excluded'],
-            'allowance_charge_vals': self._get_invoice_line_allowance_vals_list(line, taxes_vals),
             'tax_total_vals': self._get_invoice_line_tax_totals_vals_list(line, taxes_vals),
             'item_vals': self._get_invoice_line_item_vals(line, taxes_vals),
             'price_vals': self._get_invoice_line_price_vals(line, taxes_vals),
@@ -213,9 +212,9 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
             'currency': JO_CURRENCY,
             'currency_dp': self._get_currency_decimal_places(),
             'tax_exclusive_amount': line_extension_amount + allowance_total_amount,
-            'tax_inclusive_amount': line_extension_amount + tax_amount,
+            'tax_inclusive_amount': abs(invoice.amount_total_signed),  # This is the most important value (i.e., it has to match the value in Odoo)
             'allowance_total_amount': allowance_total_amount,
-            'payable_amount': line_extension_amount + tax_amount,
+            'payable_amount': abs(invoice.amount_total_signed),  # This is the most important value (i.e., it has to match the value in Odoo)
             'prepaid_amount': 0 if invoice._get_jo_invoice_type_number() == 4 else None,
         }
 
@@ -277,6 +276,44 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
     # export methods
     ####################################################
 
+    def _balance_rounding_errors(self, vals):
+        def round_to_9dp(value):
+            return float_round(value, 9)
+
+        tax_inclusive_amount = 0
+        for line_val in vals['line_vals']:
+            unit_price = round_to_9dp(line_val['price_vals']['price_amount'])
+            quantity = round_to_9dp(line_val['line_quantity'])
+            discount = round_to_9dp(line_val['price_vals']['allowance_charge_vals'][0]['amount'])
+            total_tax_amount = round_to_9dp(sum(subtotal['tax_amount'] for subtotal in line_val['tax_total_vals'][0]['tax_subtotal_vals']) if line_val['tax_total_vals'] else 0)
+
+            tax_inclusive_amount += ((unit_price * quantity) - discount + total_tax_amount)
+
+        rounding_error = tax_inclusive_amount - vals['monetary_total_vals']['tax_inclusive_amount']
+
+        if round_to_9dp(rounding_error) == 0:
+            return
+
+        line_val['line_extension_amount'] -= rounding_error
+        general_tax_percent = 0
+        if line_val['tax_total_vals']:
+            line_val['tax_total_vals'][0]['rounding_amount'] -= rounding_error
+            for subtotal in line_val['tax_total_vals'][0]['tax_subtotal_vals']:
+                subtotal['taxable_amount'] -= rounding_error
+                if subtotal['tax_category_vals']['percent']:
+                    general_tax_percent = subtotal['tax_category_vals']['percent'] / 100
+
+        price_unit_error = rounding_error / (quantity * (1 + general_tax_percent))
+        vals['monetary_total_vals']['tax_exclusive_amount'] -= price_unit_error * quantity
+        tax_error = price_unit_error * quantity * general_tax_percent
+        vals['tax_total_vals'][0]['tax_amount'] -= tax_error
+        line_val['price_vals']['price_amount'] -= price_unit_error
+        if line_val['tax_total_vals']:
+            line_val['tax_total_vals'][0]['tax_amount'] -= tax_error
+            for subtotal in line_val['tax_total_vals'][0]['tax_subtotal_vals']:
+                if subtotal['tax_category_vals']['percent']:
+                    subtotal['tax_amount'] -= tax_error
+
     def _export_invoice_vals(self, invoice):
         vals = super()._export_invoice_vals(invoice)
 
@@ -311,6 +348,8 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
             },
             'billing_reference_vals': self._get_billing_reference_vals(invoice)
         })
+
+        self._balance_rounding_errors(vals['vals'])
 
         return vals
 
