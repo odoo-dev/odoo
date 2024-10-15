@@ -19,7 +19,7 @@ class CalendarPopoverDeleteWizard(models.TransientModel):
     )
 
     def close(self):
-        return self.record.unlink_event(self.record.partner_id.id, self.delete)
+        return self.record.action_unlink_event(self.record.partner_id.id, self.delete)
 
     @api.depends('record')
     def _compute_recipient_ids(self):
@@ -59,21 +59,21 @@ class CalendarPopoverDeleteWizard(models.TransientModel):
         event = self.record
         deletion_type = self._context.get('default_recurrence')
         # Send email notification
-        template = self.env.ref('calendar.calendar_template_delete_event')
-        template.send_mail(event.id, email_layout_xmlid='mail.mail_notification_light', force_send=True)
+        self.env.ref('calendar.calendar_template_delete_event').send_mail(
+            event.id, email_layout_xmlid='mail.mail_notification_light', force_send=True
+        )
 
+        # Unlink recurrent events.
         if event.recurrency:
-            if not event or not deletion_type:
-                pass
-            elif deletion_type in ['one', 'self_only']:
+            if deletion_type in ['one', 'self_only']:
                 event.unlink()
-            else:
-                deletion_options = {
-                    'next': 'future_events',
-                    'all': 'all_events'
-                }
-                deletion_method = deletion_options.get(deletion_type, '')
-                event.action_mass_deletion(deletion_method)
+            elif deletion_type in ['next', 'all']:
+                event.action_mass_deletion('future_events' if deletion_type == 'next' else 'all_events')
         else:
             event.unlink()
-        return {'type': 'ir.actions.act_url', 'target': 'self', 'url': '/odoo/calendar'}
+
+        return {
+            'type': 'ir.actions.act_url',
+            'target': 'self',
+            'url': '/odoo/calendar'
+        }

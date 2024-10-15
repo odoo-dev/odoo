@@ -741,14 +741,19 @@ class TestUpdateRecurrentEvents(TestRecurrentEvents):
 
     def test_unlink_recurrence_wizard_next(self):
         event = self.events[1]
-        wizard = self.env['calendar.popover.delete.wizard'].with_context(form_view_ref='calendar.calendar_popover_delete_view').create({'record': event.id})
+        wizard = self.env['calendar.popover.delete.wizard'].with_context(
+            form_view_ref='calendar.calendar_popover_delete_view').create(
+                {
+                    'record': event.id
+                }
+        )
         form = Form(wizard)
         form.delete = 'next'
         form.save()
         wizard.close()
         wizard_delete = self.env['calendar.popover.delete.wizard'].with_context(
-        form_view_ref='calendar.view_event_delete_wizard_form',
-        default_recurrence='next'
+            form_view_ref='calendar.view_event_delete_wizard_form',
+            default_recurrence='next'
         ).create({'record': event.id})
         form_delete = Form(wizard_delete)
         form_delete.save()
@@ -758,13 +763,19 @@ class TestUpdateRecurrentEvents(TestRecurrentEvents):
 
     def test_unlink_recurrence_wizard_all(self):
         event = self.events[1]
-        wizard = self.env['calendar.popover.delete.wizard'].with_context(form_view_ref='calendar.calendar_popover_delete_view').create({'record': event.id})
+        wizard = self.env['calendar.popover.delete.wizard'].with_context(
+            form_view_ref='calendar.calendar_popover_delete_view').create(
+                {
+                    'record': event.id
+                }
+        )
         form = Form(wizard)
         form.delete = 'all'
         form.save()
         wizard.close()
-        wizard_delete = self.env['calendar.popover.delete.wizard'].with_context(form_view_ref='calendar.view_event_delete_wizard_form',
-        default_recurrence='all'
+        wizard_delete = self.env['calendar.popover.delete.wizard'].with_context(
+            form_view_ref='calendar.view_event_delete_wizard_form',
+            default_recurrence='all'
         ).create({'record': event.id})
         form_delete = Form(wizard_delete)
         form_delete.save()

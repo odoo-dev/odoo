@@ -471,12 +471,17 @@ class TestEventNotifications(TransactionCase, MailCase, MockEmail, CronMixinCase
             'show_as': 'busy',
         })
 
-        wizard = self.env['calendar.popover.delete.wizard'].with_context(form_view_ref='calendar.calendar_popover_delete_view').create({'record': event.id})
+        wizard = self.env['calendar.popover.delete.wizard'].with_context(
+            form_view_ref='calendar.calendar_popover_delete_view').create(
+                {
+                    'record': event.id
+                }
+        )
         form = Form(wizard)
         form.delete = 'next'
         form.save()
         wizard.close()
-        event.unlink_event()
+        event.action_unlink_event()
         wizard = self.env['calendar.popover.delete.wizard'].create({
             'record': event.id,
             'subject': 'Event Cancellation',

@@ -180,3 +180,17 @@ class ResUsers(models.Model):
                 sync_status = 'sync_stopped'
         res['microsoft_calendar'] = sync_status
         return res
+
+    def _has_any_active_synchronization(self):
+        """
+        Check if synchronization is active for Microsoft Calendar.
+        This function retrieves the synchronization status from the user's environment
+        and checks if the Microsoft Calendar synchronization is active.
+
+        Returns:
+            bool: True if synchronization is active for Microsoft Calendar, False otherwise.
+        """
+        sync_status = self.env.user.check_synchronization_status()
+        if 'microsoft_calendar' in sync_status and sync_status['microsoft_calendar'] == 'sync_active' and self.check_calendar_credentials():
+            return True
+        return super()._has_any_active_synchronization()

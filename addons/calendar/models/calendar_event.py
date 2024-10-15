@@ -810,15 +810,7 @@ class CalendarEvent(models.Model):
             new_event.write({'partner_ids': [(Command.set(old_event.partner_ids.ids))]})
         return new_events
 
-    def is_synchronization_active(self):
-        """
-        Check if synchronization is active for Google Calendar.
-        Returns:
-            bool: True if synchronization is active for Google Calendar, False otherwise.
-        """
-        return False
-
-    def unlink_event(self, attendee_id=None, recurrence=False):
+    def action_unlink_event(self, attendee_id=None, recurrence=False):
         """
         Delete the event after displaying the delete wizard if necessary.
 
@@ -827,15 +819,22 @@ class CalendarEvent(models.Model):
 
         :return: Action to delete the event
         """
-        if self.is_synchronization_active() or len(self.ids) > 1:
+        if self.user_id._has_any_active_synchronization() or len(self.ids) > 1:
             self.unlink()
-            return {'type': 'ir.actions.act_url', 'target': 'self', 'url': '/odoo/calendar'}
+            return {
+                'type': 'ir.actions.act_url',
+                'target': 'self',
+                'url': '/odoo/calendar'
+            }
+
         template_id = self.env['ir.model.data']._xmlid_to_res_id(
             'calendar.calendar_template_delete_event', raise_if_not_found=False
         )
         lang = self.env.context.get('lang')
         template = self.env['mail.template'].browse(template_id)
         if template.lang:
+            # This method ensures that the template is translated according
+            # to the user's or record's language settings.
             lang = template._render_lang(self.ids)[self.id]
         context = {
             'default_use_template': bool(template_id),

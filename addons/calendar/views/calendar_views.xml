@@ -469,7 +469,7 @@
         <field name="binding_model_id" ref="calendar.model_calendar_event"/>
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
-        <field name="code">action = records.unlink_event()</field>
+        <field name="code">action = records.action_unlink_event()</field>
     </record>
 
     <!-- Menus -->
