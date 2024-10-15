@@ -427,7 +427,11 @@ class ResourceCalendar(models.Model):
                     tz_dates[(tz, end_dt)] = end
                 dt0 = string_to_datetime(leave_date_from).astimezone(tz)
                 dt1 = string_to_datetime(leave_date_to).astimezone(tz)
-                result[resource.id].append((max(start, dt0), min(end, dt1), leave))
+                aaa = self._work_intervals_batch(dt0, dt1)
+                # breakpoint()
+
+                result[resource.id] += aaa[0]._items
+                # result[resource.id].append((max(start, dt0), min(end, dt1), leave))
 
         return {r.id: Intervals(result[r.id]) for r in resources_list}
 
