@@ -472,6 +472,18 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
                 if fname == 'headers':
                     fvalue = literal_eval(mail[fname])
                     self.assertDictEqual(fvalue, expected_fvalue)
+                elif fname == 'attachments_info':
+                    for attachment_info in expected_fvalue:
+                        attachment = next((attach for attach in mail.attachment_ids if attach.name == attachment_info['name']), False)
+                        self.assertTrue(
+                            bool(attachment),
+                            f'Attachment {attachment_info["name"]} not found in attachments',
+                        )
+                        if attachment_info.get('raw'):
+                            self.assertEqual(attachment[1], attachment_info['raw'])
+                        if attachment_info.get('type'):
+                            self.assertEqual(attachment[2], attachment_info['type'])
+                    self.assertEqual(len(expected_fvalue), len(mail.attachment_ids))
                 else:
                     self.assertEqual(
                         mail[fname], expected_fvalue,
