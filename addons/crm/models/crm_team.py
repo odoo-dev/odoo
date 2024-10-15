@@ -41,7 +41,7 @@ class Team(models.Model):
     lead_all_assigned_month_count = fields.Integer(
         string='# Leads/Opps assigned this month', compute='_compute_lead_all_assigned_month_count',
         help="Number of leads and opportunities assigned this last month.")
-    lead_all_assigned_month_exceeded = fields.Boolean('Exceed monthly lead assignement', compute="_compute_lead_all_assigned_month_count",
+    lead_all_assigned_month_exceeded = fields.Boolean('Exceed monthly lead assignment', compute="_compute_lead_all_assigned_month_count",
         help="True if the monthly lead assignment count is greater than the maximum assignment limit, false otherwise."
     )
     opportunities_count = fields.Integer(

@@ -162,10 +162,10 @@ class OdooBaseChecker(BaseChecker):
                 return True
             right_operand = self._is_constexpr(node.right, args_allowed=args_allowed)
             return left_operand and right_operand
-        elif isinstance(node, astroid.Name) or isinstance(node, astroid.AssignName): # Variable: find the assignement instruction in the AST and infer its value.
-            assignements = node.lookup(node.name)
+        elif isinstance(node, (astroid.Name, astroid.AssignName)):  # Variable: find the assignment instruction in the AST and infer its value.
+            assignments = node.lookup(node.name)
             assigned_node = []
-            for n in assignements[1]: #assignement[0] contains the scope, so assignment[1] contains the assignement nodes
+            for n in assignments[1]:  # assignment[0] contains the scope, so assignment[1] contains the assignment nodes
                 if isinstance(n.parent, astroid.FunctionDef):
                     assigned_node += [args_allowed]
                 elif isinstance(n.parent, astroid.Arguments):

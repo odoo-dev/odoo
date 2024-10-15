@@ -1350,7 +1350,7 @@ msgstr ""
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__lead_all_assigned_month_exceeded
-msgid "Exceed monthly lead assignement"
+msgid "Exceed monthly lead assignment"
 msgstr ""
 
 #. module: crm

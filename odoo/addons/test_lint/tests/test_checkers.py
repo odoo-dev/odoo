@@ -296,7 +296,7 @@ class TestSqlLint(TransactionCase):
             value = 'bbb'
             op1 , val1 = (operator,value)
             self.env.cr.execute('query' + op1) #@
-        """) #Test tuple assignement
+        """)  # Test tuple assignment
         with self.assertMessages():
             checker.visit_call(node)
 

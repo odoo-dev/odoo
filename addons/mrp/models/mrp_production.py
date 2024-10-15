@@ -1213,7 +1213,7 @@ class MrpProduction(models.Model):
             if qty_producing_uom != 1:
                 self.qty_producing = self.product_id.uom_id._compute_quantity(1, self.product_uom_id, rounding_method='HALF-UP')
 
-        # waiting for a preproduction move before assignement
+        # waiting for a preproduction move before assignment
         is_waiting = self.warehouse_id.manufacture_steps != 'mrp_one_step' and self.picking_ids.filtered(lambda p: p.picking_type_id == self.warehouse_id.pbm_type_id and p.state not in ('done', 'cancel'))
 
         for move in (self.move_raw_ids.filtered(lambda m: not is_waiting or m.product_id.tracking == 'none') | self.move_finished_ids.filtered(lambda m: m.product_id != self.product_id)):
