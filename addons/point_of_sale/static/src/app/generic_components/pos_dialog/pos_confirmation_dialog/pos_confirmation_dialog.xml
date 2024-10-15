@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="point_of_sale.PosConfirmationDialog" t-inherit="web.ConfirmationDialog" t-inherit-mode="primary">
+        <xpath expr="//Dialog" position="replace">
+            <PosDialog size="'md'" title="props.title" modalRef="modalRef" hideCloseButton="props.hideCloseButton">
+                <p t-out="props.body" class="text-prewrap"/>
+                <t t-set-slot="footer">
+                    <button class="btn" t-att-class="props.confirmClass" t-on-click="_confirm" t-esc="props.confirmLabel"/>
+                    <button t-if="props.cancel" class="btn btn-secondary" t-on-click="_cancel" t-esc="props.cancelLabel"/>
+                </t>
+            </PosDialog>
+        </xpath>
+    </t>
+
+</templates>
