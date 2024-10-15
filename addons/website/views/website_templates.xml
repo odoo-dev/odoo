@@ -182,7 +182,9 @@
             <t t-set="_additional_btn_color" t-valuef="btn btn-outline-secondary"/>
         </t>
     </xpath>
-
+    <xpath expr="//header" position="before">
+        <div id="snippet_placeholder" class="o_editable"></div>
+    </xpath>
     <xpath expr="//footer" position="attributes">
         <attribute name="data-name">Footer</attribute>
         <!-- Background now controlled by css configuration, using color combinations -->
@@ -485,7 +487,6 @@
     <xpath expr="//header//nav" position="replace">
         <t t-call="website.navbar">
             <t t-set="_navbar_classes" t-valuef="d-none d-lg-block shadow-sm"/>
-
             <div id="o_main_nav" class="o_main_nav container">
                 <!-- Brand -->
                 <t t-call="website.placeholder_header_brand">

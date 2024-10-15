@@ -327,6 +327,7 @@
                 </t>
                 <t t-snippet="website.s_opening_hours" string="Opening Hours" group="contact_and_forms"/>
                 <t t-snippet="website.s_contact_info" string="Contact Info" group="contact_and_forms"/>
+                <t t-snippet="website.s_disclaimer" string="Disclaimer" group="contact_and_forms"/>
 
                 <!-- Products group -->
                 <t id="sale_products_hook"/>
@@ -981,7 +982,8 @@
     <t t-set="so_snippet_addition_selector" t-translation="off">section, .parallax, .s_hr</t>
     <div id="so_snippet_addition"
         t-att-data-selector="so_snippet_addition_selector"
-        data-drop-in=":not(p).oe_structure:not(.oe_structure_solo), :not(.o_mega_menu):not(p)[data-oe-type=html], :not(p).oe_structure.oe_structure_solo:not(:has(> section:not(.s_snippet_group), > div:not(.o_hook_drop_zone)))"/>
+        data-exclude=".s_disclaimer"
+        data-drop-in=":not(p).oe_structure:not(.oe_structure_solo), :not(.o_mega_menu):not(p)[data-oe-type=html], :not(p).oe_structure.oe_structure_solo:not(:has(> section:not(.s_snippet_group), > div:not(.o_hook_drop_zone))), #snippet_placeholder"/>
         <!-- /!\ drop-in here is partly duplicated for s_popup (see dedicated options) -->
         <!-- TODO should be improved -->
 
@@ -1160,7 +1162,6 @@
     <div data-selector="#wrapwrap > header"
          data-no-check="true"
          groups="website.group_website_designer">
-
         <we-select string="Scroll Effect" data-dependencies="!header_sidebar_opt" class="o_scroll_effects_selector" data-variable="header-scroll-effect">
             <t t-set="header_effect_standard_label">Standard</t>
             <t t-set="header_effect_scroll_label">Scroll</t>
