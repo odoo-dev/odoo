@@ -2,7 +2,7 @@
 
 import { ChatGPTDialog } from '@web_editor/js/wysiwyg/widgets/chatgpt_dialog';
 import { useState, useEffect, useRef } from "@odoo/owl";
-import { useAutofocus } from "@web/core/utils/hooks";
+import { useAutofocus, useChildRef } from "@web/core/utils/hooks";
 import { session } from "@web/session";
 import { browser } from "@web/core/browser/browser";
 
@@ -32,14 +32,32 @@ export class ChatGPTPromptDialog extends ChatGPTDialog {
                 content: 'What do you need ?',
             }],
             messages: [],
+            updateScroll: false,
         });
         this.promptInputRef = useRef('promptInput');
+        this.modalRef = useChildRef();
         useAutofocus({ refName: 'promptInput' });
         useEffect(() => {
             // Resize the textarea to fit its content.
             this.promptInputRef.el.style.height = 0;
             this.promptInputRef.el.style.height = this.promptInputRef.el.scrollHeight + 'px';
         }, () => [this.state.prompt]);
+        useEffect(() => {
+            // Scroll to the latest message whenever new message
+            // is inserted.
+            const modalEl = this.modalRef.el.querySelector("main.modal-body");
+            const lastMessageEl = modalEl.lastElementChild;
+            let scrollDiff;
+            if (lastMessageEl.clientHeight > modalEl.clientHeight) {
+                scrollDiff = modalEl.scrollHeight - lastMessageEl.clientHeight;
+            } else {
+                scrollDiff = modalEl.scrollHeight - modalEl.clientHeight;
+            }
+            modalEl.scrollTo({
+                top: scrollDiff,
+                behavior: "smooth",
+            })
+        }, () => [this.state.updateScroll]);
     }
 
     //--------------------------------------------------------------------------
@@ -60,6 +78,7 @@ export class ChatGPTPromptDialog extends ChatGPTDialog {
         const conversation = { role: 'user', content: prompt };
         this.state.conversationHistory.push(conversation);
         this.state.messages.push({ author: 'assistant', id: messageId });
+        this.toggleUpdateScroll();
         this.state.prompt = '';
         this._generate(prompt, (content, isError) => {
             if (isError) {
@@ -77,7 +96,11 @@ export class ChatGPTPromptDialog extends ChatGPTDialog {
                 id: messageId,
             };
             this._unfreezeInput();
+            this.toggleUpdateScroll();
         });
+    }
+    toggleUpdateScroll() {
+        this.state.updateScroll = !this.state.updateScroll;
     }
 
     //--------------------------------------------------------------------------
