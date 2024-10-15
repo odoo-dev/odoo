@@ -1,4 +1,5 @@
 /** @odoo-module **/
+/* global Carousel */
 
 /**
  * Provides a way to start JS code for snippets' initialization and animations.
@@ -478,6 +479,8 @@ registry.slider = publicWidget.Widget.extend({
             this.options.wysiwyg.odooEditor.observerUnactive("disable_controls");
             this.controlEls.forEach(controlEl => controlEl.removeAttribute("data-bs-slide"));
             indicatorEls.forEach(indicatorEl => indicatorEl.removeAttribute("data-bs-slide-to"));
+            this.el.setAttribute("data-bs-ride", "false");
+            Carousel.getOrCreateInstance(this.el)._config.ride = false;
             this.options.wysiwyg.odooEditor.observerActive("disable_controls");
             // Redirect the clicks on the active slide, in order to start the
             // carousel options.
