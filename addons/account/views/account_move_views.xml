@@ -1217,7 +1217,7 @@
                                                 <label for="name" string="Description" invisible="display_type in ('line_note', 'line_section')"/>
                                                 <label for="name" string="Section" invisible="display_type != 'line_section'"/>
                                                 <label for="name" string="Note" invisible="display_type != 'line_note'"/>
-                                                <field name="name" widget="text" nolabel="1"/>
+                                                <field name="name" nolabel="1"/>
                                                 <field name="quantity"/>
                                                 <field name="product_uom_category_id" invisible="1"/>
                                                 <field name="product_uom_id" groups="uom.group_uom"/>
