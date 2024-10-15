@@ -3,7 +3,10 @@
 import { startServer } from "@bus/../tests/helpers/mock_python_environment";
 import { patchWebsocketWorkerWithCleanup } from "@bus/../tests/helpers/mock_websocket";
 import { addBusServicesToRegistry } from "@bus/../tests/helpers/test_utils";
-import { AWAY_DELAY as ACTUAL_AWAY_DELAY, imStatusService } from "@bus/im_status_service";
+import {
+    AWAY_DELAY as ACTUAL_AWAY_DELAY,
+    imStatusService,
+} from "@mail/core/common/im_status_service";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { mockTimeout, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
