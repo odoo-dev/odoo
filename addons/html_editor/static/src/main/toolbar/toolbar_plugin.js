@@ -127,6 +127,11 @@ export class ToolbarPlugin extends Plugin {
             case "STEP_ADDED":
                 this.updateToolbar();
                 break;
+            case "CLOSE_TOOLBAR":
+                if (this.overlay.isOpen) {
+                    this.overlay.close();
+                }
+                break;
         }
     }
 
