@@ -53,7 +53,7 @@ export function makeAsyncHandler(fct, preventDefault, stopPropagation) {
 
         _lock();
         const result = fct.apply(this, arguments);
-        Promise.resolve(result).then(_unlock, _unlock);
+        Promise.resolve(result).finally(_unlock);
         return result;
     };
 }
@@ -101,10 +101,15 @@ export function makeButtonHandler(fct) {
         // part, the button is disabled without any visual effect.
         buttonEl.classList.add('pe-none');
         Promise.resolve(DEBOUNCE && new Promise(r => setTimeout(r, DEBOUNCE)))
-            .then(function () {
+            .then(async function () {
                 buttonEl.classList.remove('pe-none');
                 const restore = addButtonLoadingEffect(buttonEl);
-                return Promise.resolve(result).then(restore, restore);
+                try {
+                    await result;
+                } catch {
+                    // Ignore rejections caused by result as we are in a different Promise; just wait for its settlement
+                }
+                restore();
             });
 
         return result;
