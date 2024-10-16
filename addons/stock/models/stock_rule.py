@@ -238,7 +238,7 @@ class StockRule(models.Model):
     def _push_prepare_move_copy_values(self, move_to_copy, new_date):
         company_id = self.company_id.id
         copied_quantity = move_to_copy.quantity
-        group_id = self._get_group_id(self.group_id)
+        group_id = self._get_group_id(move_to_copy.group_id)
 
         if float_compare(move_to_copy.product_uom_qty, 0, precision_rounding=move_to_copy.product_uom.rounding) < 0:
             copied_quantity = move_to_copy.product_uom_qty
