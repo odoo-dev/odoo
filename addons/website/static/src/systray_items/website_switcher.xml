@@ -2,10 +2,12 @@
 <templates xml:space="preserve">
 <t t-name="website.WebsiteSwitcherSystray">
     <div class="o_menu_systray_item o_website_switcher_container">
-        <Dropdown>
+        <Dropdown menuClass="{'mw-100': false}"> <!-- `o_website_switcher w-100` -->
             <button data-hotkey="w" class="mx-1 border-0">
-                <div class="d-none d-md-flex align-items-md-center">
-                    <span t-esc="websiteService.currentWebsite.name" class="me-2 text-truncate" style="max-width: 200px"/>
+                <!-- <div class="d-none d-md-flex align-items-md-center">
+                    <span t-esc="websiteService.currentWebsite.name" class="me-2 text-truncate" style="max-width: 200px"/> -->
+                <div class="d-none d-md-block">
+                    <span t-esc="websiteService.currentWebsite.name" class="me-2"/>
                     <i class="fa fa-caret-down"/>
                 </div>
                 <div class="d-md-none">
@@ -13,20 +15,24 @@
                 </div>
             </button>
             <t t-set-slot="content">
-                <t t-set="tooltipValue">This website does not have a domain configured.</t>
-                <t t-foreach="getElements()" t-as="element" t-key="element_index">
-                    <DropdownItem
-                        onSelected="element.callback"
-                        class="element.class + ' text-truncate'"
-                        attrs="!element.domain
-                            ? {'style': 'width: 350px', 'data-tooltip': tooltipValue, 'data-tooltip-position': 'left'}
-                            : {'style': 'width: 350px'}">
-                        <t t-if="!element.domain">
-                            <span class="fa fa-warning me-2 text-warning"/>
-                        </t>
-                        <t t-out="element.name"/>
-                    </DropdownItem>
-                </t>
+                <div class="o_dropdown_container w-100 w-lg-auto h-100 px-3 mb-4 mb-lg-0 border-end">
+                    <t t-set="tooltipValue">This website does not have a domain configured.</t>
+                    <t t-foreach="getElements()" t-as="element" t-key="element_index">
+                        <DropdownItem
+                            onSelected="element.callback"
+                            class="element.class + ' text-truncate'"
+                            attrs="!element.domain ? {'data-tooltip': tooltipValue, 'data-tooltip-position': 'left'} : undefined">
+                            <!-- class="element.class + ' text-truncate'"
+                            attrs="!element.domain
+                                ? {'style': 'width: 350px', 'data-tooltip': tooltipValue, 'data-tooltip-position': 'left'}
+                                : {'style': 'width: 350px'}"> -->
+                            <t t-if="!element.domain">
+                                <span class="fa fa-warning me-2 text-warning"/>
+                            </t>
+                            <t t-out="element.name"/>
+                        </DropdownItem>
+                    </t>
+                </div>
             </t>
         </Dropdown>
     </div>
