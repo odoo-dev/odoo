@@ -86,7 +86,7 @@ export class EventRegistrationSummaryDialog extends Component {
         if (this.props.model) {
             this.props.model.load();
         }
-        if (this.props.doNextScan) {
+        if (this.props.doNextScan && window.ZXing) {
             this.onScanNext();
         }
     }
