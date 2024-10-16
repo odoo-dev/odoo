@@ -250,6 +250,8 @@ class AccountFiscalPosition(models.Model):
         eu_partner = partner.country_code in eu_country_codes
         eu_delivery = delivery.country_code in eu_country_codes
         domestic_delivery = delivery_country == company.country_id
+        intra_eu = eu_partner and eu_delivery
+        partner_vat_from_company_country = partner.vat and partner.vat[:2] == company.country_code
 
         vat_required = bool(partner.vat) or domestic_delivery
 
@@ -259,6 +261,12 @@ class AccountFiscalPosition(models.Model):
         if eu_delivery and not eu_vat_partner and not eu_partner:
             delivery_country = company.country_id
             vat_required = True
+
+        # If it is an intra EU delivery, partner has EU VAT and his VAT is from the same country as the company
+        # then assing the company's country as delivery country
+        # in order to get the domestic FP
+        if intra_eu and eu_vat_partner and partner_vat_from_company_country:
+            delivery_country = company.country_id
 
         # If the delivery is to the same country as the company's country (domestic delivery),
         # the partner has a valid EU VAT number but is not from the EU,

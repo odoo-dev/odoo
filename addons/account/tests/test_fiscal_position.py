@@ -209,6 +209,11 @@ class TestFiscalPosition(common.TransactionCase):
             'vat': 'BE0246697724',
             'country_id': self.be.id,
         })
+        partner_be_nl_delivery = self.env['res.partner'].create({
+            'name': 'BE VAT - NL COUNTRY',
+            'vat': 'BE0246697724',
+            'country_id': self.nl.id,
+        })
         partner_be_no_vat = self.env['res.partner'].create({
             'name': 'BE NO VAT',
             'country_id': self.be.id,
@@ -220,6 +225,11 @@ class TestFiscalPosition(common.TransactionCase):
         })
         partner_nl_no_vat = self.env['res.partner'].create({
             'name': 'NL NO VAT',
+            'country_id': self.nl.id,
+        })
+        partner_nl_be_vat = self.env['res.partner'].create({
+            'name': 'NL BE VAT',
+            'vat': 'BE0477472701',
             'country_id': self.nl.id,
         })
         partner_fr_vat = self.env['res.partner'].create({
@@ -286,6 +296,9 @@ class TestFiscalPosition(common.TransactionCase):
             {'partner': partner_fr_no_vat, 'delivery': partner_nl_no_vat, 'expected_fp': fp_oss_nl},
             {'partner': partner_fr_vat, 'delivery': partner_nl_vat, 'expected_fp': fp_eu_intra},
             {'partner': partner_fr_vat, 'delivery': partner_nl_no_vat, 'expected_fp': fp_eu_intra},
+            {'partner': partner_be_nl_delivery, 'delivery': partner_be_vat, 'expected_fp': fp_be_nat},
+            {'partner': partner_be_nl_delivery, 'delivery': partner_nl_vat, 'expected_fp': fp_be_nat},
+            {'partner': partner_nl_be_vat, 'delivery': partner_nl_be_vat, 'expected_fp': fp_be_nat},
         ]
 
         for vals in data:
