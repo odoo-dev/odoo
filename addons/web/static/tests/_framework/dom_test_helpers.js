@@ -196,8 +196,11 @@ export function contains(target, options) {
          * @param {DragAndDropOptions} [dropOptions]
          * @param {PointerOptions} [dragOptions]
          */
-        dragAndDrop: async (target, dropOptions, dragOptions) => {
-            const [from, to] = await Promise.all([nodePromise, waitFor(target)]);
+        dragAndDrop: async (target, dropOptions, dragOptions, queryOptions = options) => {
+            const [from, to] = await Promise.all([
+                nodePromise,
+                waitFor(target /* , queryOptions */),
+            ]);
             const { drop, moveTo } = await drag(from, dragOptions);
 
             await waitForTouchDelay(dropOptions?.pointerDownDuration);
