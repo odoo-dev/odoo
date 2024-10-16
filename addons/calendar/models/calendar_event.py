@@ -750,14 +750,10 @@ class Meeting(models.Model):
         """ Checks if the event is private, returning True if the conditions match and False otherwise. """
         self.ensure_one()
 
-        if self.user_id:
-            default_privacy1 = self.with_user(SUPERUSER_ID).user_id.calendar_default_privacy # inverse these and it won't work anymore
-            default_privacy = self.user_id.with_user(self.user_id).calendar_default_privacy
-            print(default_privacy1, default_privacy)
-        else:
-            default_privacy = self.user_id.res_users_settings_id.calendar_default_privacy
-
-        event_is_private = (self.privacy == 'private' or (not self.privacy and self.user_id and self.user_id.calendar_default_privacy == 'private'))
+        # PROBLEM: When 'res_users_settings_id' is defined in 'user_id', its computed field 'calendar_default_privacy'
+        # it is showing as False for internal users using 'with_user' since 'res_users_settings_id' is not fetched (although it's created).
+        owner_private_privacy = self.user_id and self.with_user(self.user_id).user_id.calendar_default_privacy == 'private'
+        event_is_private = (self.privacy == 'private' or (not self.privacy and owner_private_privacy))
         user_is_not_partner = self.user_id.id != self.env.uid and self.env.user.partner_id not in self.partner_ids
         return event_is_private and user_is_not_partner
 

@@ -77,6 +77,9 @@ class Users(models.Model):
     def _compute_calendar_default_privacy(self):
         for user in self:
             user.calendar_default_privacy = user.res_users_settings_id.calendar_default_privacy
+            print("I'm", self.env.user.name)
+            print(user.name, "accessing default privacy through 'with_user':", user.with_user(user).res_users_settings_id.calendar_default_privacy)
+            print(self.env.user.name, "accessing it directly:", user.res_users_settings_id.calendar_default_privacy)
 
     def _inverse_calendar_res_users_settings(self):
         """

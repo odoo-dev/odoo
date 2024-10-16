@@ -311,3 +311,21 @@ class TestAccessRights(TransactionCase):
                 self.john.with_user(self.admin_system_user).write({'calendar_default_privacy': privacy})
             with self.assertRaises(AccessError):
                 self.admin_system_user.with_user(self.john).write({'calendar_default_privacy': privacy})
+
+    def test_access_calendar_default_privacy(self):
+        # Update admin calendar_default_privacy with 'private'.
+        self.admin_user.with_user(self.admin_user).write({'calendar_default_privacy': 'private'})
+        admin_user_private_evt = self.create_event(self.admin_user, name='My Event', privacy=False, partner_ids=[self.admin_user.partner_id.id])
+
+        self.assertTrue(
+            admin_user_private_evt.with_user(self.raoul)._check_private_event_conditions(),
+            "Privacy check must be True since the new event is private (following John's calendar default privacy)."
+        )
+        self.assertFalse(
+            self.admin_user.with_user(self.raoul).calendar_default_privacy,
+            "When acessing John's calendar default privacy as Raoul, it should be shown as False."
+        )
+        self.assertFalse(
+            self.admin_user.with_user(self.admin_user).calendar_default_privacy,
+            "When acessing John's calendar default privacy as John itself, it should be shown as 'private'."
+        )
