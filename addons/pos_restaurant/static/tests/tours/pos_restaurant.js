@@ -10,6 +10,7 @@ import * as ProductScreenPos from "@point_of_sale/../tests/tours/helpers/Product
 import * as ProductScreenResto from "@pos_restaurant/../tests/tours/helpers/ProductScreenTourMethods";
 import * as Order from "@point_of_sale/../tests/tours/helpers/generic_components/OrderWidgetMethods";
 import * as TicketScreen from "@point_of_sale/../tests/tours/helpers/TicketScreenTourMethods";
+import * as PosLoyalty from "@pos_loyalty/../tests/tours/PosLoyaltyTourMethods";
 import { inLeftSide, negateStep } from "@point_of_sale/../tests/tours/helpers/utils";
 import { registry } from "@web/core/registry";
 
@@ -237,3 +238,19 @@ registry.category("web_tour.tours").add("BillScreenTour", {
         BillScreen.isQRCodeShown(),
     ].flat(),
 });
+
+registry.category("web_tour.tours").add("PosRestaurantRewardStay", {
+    test: true,
+    steps: () =>
+        [
+            ProductScreen.confirmOpeningPopup(),
+            FloorScreen.clickTable("5"),
+
+            ProductScreen.clickHomeCategory(),
+            ProductScreen.clickDisplayedProduct("Water"),
+            ProductScreen.totalAmountIs("1.98"),
+            FloorScreen.backToFloor(),
+            FloorScreen.clickTable("5"),
+            ProductScreen.totalAmountIs("1.98"),
+        ].flat()
+})
