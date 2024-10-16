@@ -1,10 +1,9 @@
 // @odoo-module ignore
 
-/**
- *------------------------------------------------------------------------------
- * Odoo Web Boostrap Code
- *------------------------------------------------------------------------------
- */
+//-----------------------------------------------------------------------------
+// Odoo Web Boostrap Code
+//-----------------------------------------------------------------------------
+
 (function () {
     "use strict";
 
@@ -47,23 +46,23 @@
 
     class ModuleLoader {
         /**
-         * Mapping name => { deps, fn }
-         * @type {typeof odoo.loader.factories}
+         * Mapping [name => { deps, fn }]
+         * @type {Map<string, OdooModuleFactory>}
          */
         factories = new Map();
         /**
          * Names of modules waiting to be started
-         * @type {typeof odoo.loader.jobs}
+         * @type {Set<string>}
          */
         jobs = new Set();
         /**
          * Names of failed modules
-         * @type {typeof odoo.loader.failed}
+         * @type {Set<string>}
          */
         failed = new Set();
         /**
-         * Mapping name => value
-         * @type {typeof odoo.loader.modules}
+         * Mapping [name => value]
+         * @type {Map<string, OdooModule>}
          */
         modules = new Map();
 
@@ -72,16 +71,16 @@
         /** @type {Promise<void> | null} */
         checkErrorProm = null;
 
-        /** @type {typeof odoo.define} */
+        /** @type {OdooModuleDefineFn} */
         define(name, deps, factory, lazy = false) {
             if (typeof name !== "string") {
-                throw new Error(`Invalid name definition: ${name} (should be a string)"`);
+                throw new Error(`Module name should be a string, got: ${name}`);
             }
-            if (!(deps instanceof Array)) {
-                throw new Error(`Dependencies should be defined by an array: ${deps}`);
+            if (!Array.isArray(deps) || deps.some((dep) => typeof dep !== "string")) {
+                throw new Error(`Module dependencies should be an array of strings, got: ${deps}`);
             }
             if (typeof factory !== "function") {
-                throw new Error(`Factory should be defined by a function ${factory}`);
+                throw new Error(`Module factory should be a function, got: ${factory}`);
             }
             if (this.factories.has(name)) {
                 return; // Ignore duplicate modules
@@ -126,11 +125,13 @@
 
         /**
          * @param {string} name
+         * @returns {OdooModule}
          */
         startModule(name) {
             const require = (dependency) => this.modules.get(dependency);
             this.jobs.delete(name);
             const factory = this.factories.get(name);
+            /** @type {OdooModule | null} */
             let value = null;
             try {
                 value = factory.fn(require);
@@ -142,6 +143,7 @@
             this.bus.dispatchEvent(
                 new CustomEvent("module-started", { detail: { moduleName: name, module: value } })
             );
+            return value;
         }
 
         findErrors() {
@@ -162,7 +164,7 @@
 
             function visitJob(job, visited) {
                 if (visited.has(job)) {
-                    const jobs = Array.from(visited).concat([job]);
+                    const jobs = [...visited, job];
                     const index = jobs.indexOf(job);
                     return jobs
                         .slice(index)

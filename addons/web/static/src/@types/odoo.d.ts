@@ -1,19 +1,26 @@
-interface OdooModule {
+interface OdooModuleFactory {
     deps: string[];
-    fn: OdooModuleFactory;
+    fn: OdooModuleFactoryFn;
     ignoreMissingDeps: boolean;
 }
 
-type OdooModuleFactory<T = string> = (require: (dependency: T) => any) => any;
+type OdooModule = Record<string, any>;
 
-type OdooModuleDefineFn = <T = string>(name: string, deps: T[], factory: OdooModuleFactory<T>, lazy?: boolean) => void;
+type OdooModuleDefineFn = <T = string>(
+    name: string,
+    deps: T[],
+    factory: OdooModuleFactoryFn<T>,
+    lazy?: boolean
+) => OdooModule;
+
+type OdooModuleFactoryFn<T = string> = (require: (dependency: T) => OdooModule) => OdooModule;
 
 class ModuleLoader {
     define: OdooModuleDefineFn;
-    factories: Map<string, OdooModule>;
+    factories: Map<string, OdooModuleFactory>;
     failed: Set<string>;
     jobs: Set<string>;
-    modules: Map<string, any>;
+    modules: Map<string, OdooModule>;
 }
 
 declare const odoo: {

@@ -4,7 +4,7 @@ import { App } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { getPopoverForTarget } from "@web/core/popover/popover";
-import { getTemplate } from "@web/core/templates";
+import { getTemplate, globalGetTemplate } from "@web/core/templates";
 import { patch } from "@web/core/utils/patch";
 import { getMockEnv, makeMockEnv } from "./env_test_helpers";
 
@@ -84,7 +84,7 @@ export function getDropdownMenu(togglerSelector) {
 export async function mountWithCleanup(ComponentClass, options) {
     const config = {
         env: options?.env || getMockEnv() || (await makeMockEnv()),
-        getTemplate,
+        getTemplate: globalGetTemplate || getTemplate,
         props: options?.props || {},
         translateFn: _t,
     };

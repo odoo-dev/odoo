@@ -1,5 +1,11 @@
 // ! WARNING: this module cannot depend on modules not ending with ".hoot" (except libs) !
 
+/**
+ * @typedef {import("@odoo/owl").App} App
+ *
+ * @typedef {ReturnType<App["_compileTemplate"]>} TemplateFunction
+ */
+
 //-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
@@ -52,21 +58,57 @@ const { loader } = odoo;
 
 /**
  * @param {string} name
- * @param {OdooModule} module
+ * @param {OdooModuleFactory} factory
  */
-export function makeTemplateFactory(name, module) {
+export function makeTemplateFactory(name, factory) {
     return () => {
-        if (!loader.modules.has(name)) {
-            const factory = module.fn;
-            module.fn = (...args) => {
-                const exports = factory(...args);
-
-                exports.registerTemplateProcessor(replaceAttributes);
-
-                return exports;
-            };
-            loader.startModule(name);
+        if (loader.modules.has(name)) {
+            return loader.modules.get(name);
         }
-        return loader.modules.get(name);
+
+        /**
+         * @this {App}
+         * @param {string} name
+         */
+        function globalGetTemplate(name) {
+            if (!(name in compiledTemplates)) {
+                const rawTemplate = originalGetTemplate(name) || this.rawTemplates[name];
+                compiledTemplates[name] =
+                    rawTemplate && typeof rawTemplate !== "function"
+                        ? this._compileTemplate(name, rawTemplate)
+                        : rawTemplate;
+            }
+            return compiledTemplates[name];
+        }
+
+        function mockedClearProcessedTemplates() {
+            originalClearProcessedTemplates();
+
+            compiledTemplates = {};
+        }
+
+        /** @type {Record<string, TemplateFunction} */
+        let compiledTemplates = {};
+        /** @type {() => void} */
+        let originalClearProcessedTemplates;
+        /** @type {(name: string) => (string | Element | TemplateFunction)} */
+        let originalGetTemplate;
+
+        const factoryFn = factory.fn;
+        factory.fn = (...args) => {
+            const exports = factoryFn(...args);
+
+            originalClearProcessedTemplates = exports.clearProcessedTemplates;
+            originalGetTemplate = exports.getTemplate;
+
+            exports.clearProcessedTemplates = mockedClearProcessedTemplates;
+            exports.globalGetTemplate = globalGetTemplate;
+
+            exports.registerTemplateProcessor(replaceAttributes);
+
+            return exports;
+        };
+
+        return loader.startModule(name);
     };
 }
