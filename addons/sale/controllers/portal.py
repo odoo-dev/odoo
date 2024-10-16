@@ -116,7 +116,7 @@ class CustomerPortal(payment_portal.PaymentPortal):
         download=False,
         downpayment=None,
         link_amount=None,
-        installment=False,
+        installment=None,
         **kw
     ):
         try:
@@ -167,8 +167,8 @@ class CustomerPortal(payment_portal.PaymentPortal):
         # Payment values
         if order_sudo._has_to_be_paid() or link_amount:
             if link_amount:
-                installment = (installment
-                               or float(link_amount) != order_sudo._get_prepayment_required_amount())
+                installment = installment == 'true' if installment is not None \
+                              else float(link_amount) != order_sudo.amount_total - order_sudo.amount_paid
             values.update(
                 self._get_payment_values(
                     order_sudo,
@@ -189,7 +189,8 @@ class CustomerPortal(payment_portal.PaymentPortal):
         return request.render('sale.sale_order_portal_template', values)
 
     def _get_payment_values(
-            self, order_sudo,
+            self,
+            order_sudo,
             downpayment=False,
             installment=False,
             link_amount=None,
@@ -199,6 +200,8 @@ class CustomerPortal(payment_portal.PaymentPortal):
 
         :param sale.order order_sudo: The sales order being paid.
         :param bool downpayment: Whether the current payment is a downpayment.
+        :param bool installment: Whether the current payment is an installment.
+        :param float link_amount: Payment amount contained in link.
         :param dict kwargs: Locally unused data passed to `_get_compatible_providers` and
                             `_get_available_tokens`.
         :return: The payment-specific values.
@@ -213,7 +216,7 @@ class CustomerPortal(payment_portal.PaymentPortal):
             else:
                 amount = order_sudo.amount_total - order_sudo.amount_paid
         else:
-            if installment == 'false':
+            if not installment:
                 if float(link_amount) >= order_sudo.amount_due:
                     amount = order_sudo.amount_total - order_sudo.amount_paid
                 else:

@@ -22,7 +22,6 @@
         <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
             <t t-set="portal_client_category_enable" t-value="True"/>
             <t t-set="portal_alert_category_enable" t-value="True"/>
-            <t t-set="portal_alert_category_enable" t-value="True"/>
         </xpath>
         <div id="portal_alert_category" position="inside">
             <t t-call="portal.portal_docs_entry">
@@ -141,9 +140,15 @@
                             <h4>
                                 <div>
                                     Down payment
-                                    (<b t-esc="sale_order.prepayment_percent * 100"/>%)
                                 </div>
-                                <t t-out="sale_order._get_prepayment_required_amount()" data-id="total_amount" class="mb-0 text-break" t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"/>
+                                <h3>
+                                    <t t-out="sale_order._get_prepayment_required_amount()"
+                                       data-id="total_amount"
+                                       class="mb-0 text-break"
+                                       t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"
+                                    />
+                                    (<b t-esc="sale_order.prepayment_percent * 100"/>%)
+                                </h3>
                             </h4>
                         </t>
                     </t>
@@ -151,11 +156,15 @@
                         <t t-if="sale_order.state in 'draft,sent' and sale_order.require_payment">
                             <t t-if="sale_order.amount_paid > 0">
                                 <div class="alert alert-success" role="alert">
-                                    Amount paid: <span t-field="sale_order.amount_paid"/>
+                                    Amount paid:
+                                    <span t-field="sale_order.amount_paid"
+                                          t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"
+                                    />
                                 </div>
                             </t>
                             <div class="alert alert-warning" role="alert">
-                                Amount due: <span t-esc="sale_order.amount_due"/>
+                                Left to pay:
+                                <span t-field="sale_order.amount_due"/>
                             </div>
                         </t>
                         <div class="d-flex flex-column gap-4 mt-3">

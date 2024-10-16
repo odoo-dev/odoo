@@ -921,11 +921,6 @@ class SaleOrder(models.Model):
                 line.selected_combo_items = False
                 self.order_line = delete_commands + create_commands + update_commands
 
-    @api.onchange('amount_paid', 'prepayment_percent')
-    def _onchange_amount_due(self):
-        for order in self:
-            order.amount_due = order._get_prepayment_required_amount() - order.amount_paid
-
     #=== CRUD METHODS ===#
 
     @api.model_create_multi
