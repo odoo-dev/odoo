@@ -88,6 +88,20 @@
     & > p {
         margin-bottom: 0 !important;
     }
+    & odoo-markdown {
+        p, ul, pre, blockquote {
+            margin-bottom: 0 !important;
+        }
+        blockquote {
+            padding: map-get($spacers, 1) !important;
+        }
+        pre {
+            padding: map-get($spacers, 2) !important;
+        }
+        ul {
+            padding-left: 1rem !important;
+        }
+    }
 
     // overflow: auto can break rendering of next element of a frequent broken Outlook 365
     // warning table. If detected, we prevent the issue by removing flotation.
@@ -111,6 +125,7 @@
         }
     }
 }
+
 .o-mail-Message-bubble {
     --border-opacity: 0.15;
 

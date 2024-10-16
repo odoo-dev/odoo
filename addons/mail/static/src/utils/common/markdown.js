@@ -1,4 +1,5 @@
-const SAFE_URL_PATTERN = /^(?!(javascript:|vbscript:|data:))(?:[a-z0-9+.-]+:|[^&:/?#]*(?:[/?#]|$))/i;
+const SAFE_URL_PATTERN =
+    /^(?!(javascript:|vbscript:|data:))(?:[a-z0-9+.-]+:|[^&:/?#]*(?:[/?#]|$))/i;
 
 // Extracted from the marked library
 function cleanUrl(href) {
@@ -6,9 +7,8 @@ function cleanUrl(href) {
         return null;
     }
     try {
-        href = encodeURI(href).replace(/%25/g, '%');
-    }
-    catch {
+        href = encodeURI(href).replace(/%25/g, "%");
+    } catch {
         return null;
     }
     return href;
@@ -33,45 +33,47 @@ export function markdown(markdown) {
                     if (title) {
                         out += ' title="' + title + '"';
                     }
-                    out += ' target="_blank">' + text + '</a>';
+                    out += ' target="_blank">' + text + "</a>";
                     return out;
                 },
                 code({ text, lang, escaped }) {
-                    const langString = (lang || '').match(/^\S*/)?.[0];
-                    const code = text.replace(/\n$/, '') + '\n';
+                    const langString = (lang || "").match(/^\S*/)?.[0];
+                    const code = text.replace(/\n$/, "") + "\n";
                     if (!langString) {
-                        return '<pre><code>'
-                            + code
-                            + '</code></pre>\n';
+                        return "<pre><code>" + code + "</code></pre>\n";
                     }
-                    return '<pre><code class="language-'
-                        + langString
-                        + '">'
-                        + code
-                        + '</code></pre>\n';
-                }
+                    return (
+                        '<pre><code class="language-' + langString + '">' + code + "</code></pre>\n"
+                    );
+                },
             },
             tokenizer: {
+                hr() {
+                    return;
+                },
+                lheading() {
+                    return;
+                },
                 codespan(src) {
                     // override this token to avoid unecessary escaping
                     const cap = this.rules.inline.code.exec(src);
                     if (cap) {
-                        let text = cap[2].replace(/\n/g, ' ');
+                        let text = cap[2].replace(/\n/g, " ");
                         const hasNonSpaceChars = /[^ ]/.test(text);
                         const hasSpaceCharsOnBothEnds = /^ /.test(text) && / $/.test(text);
                         if (hasNonSpaceChars && hasSpaceCharsOnBothEnds) {
                             text = text.substring(1, text.length - 1);
                         }
                         return {
-                            type: 'codespan',
+                            type: "codespan",
                             raw: cap[0],
-                            text
+                            text,
                         };
                     }
-                }
-            }
+                },
+            },
         };
         odooMarked = new window.marked.Marked(odooRenderer);
     }
     return odooMarked.parse(markdown);
-};
+}

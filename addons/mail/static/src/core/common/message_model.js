@@ -55,7 +55,9 @@ export class Message extends Record {
                 const htmlDoc = parser.parseFromString(this.body, "text/html");
                 const markdownElements = htmlDoc.querySelectorAll("odoo-markdown");
                 for (const markdownElement of markdownElements) {
-                    markdownElement.innerHTML = markdown(markdownElement.innerHTML);
+                    markdownElement.innerHTML = markdown(
+                        markdownElement.innerHTML.replace(/&gt;/g, ">") // markdown's tokenizer expects un-escaped blockquotes to detect them
+                    );
                 }
                 return markup(htmlDoc.body.innerHTML);
             }
@@ -433,7 +435,9 @@ export class Message extends Record {
             mentionedPartners,
         });
         const postData = {
-            attachment_ids: attachments.concat(this.attachment_ids).map((attachment) => attachment.id),
+            attachment_ids: attachments
+                .concat(this.attachment_ids)
+                .map((attachment) => attachment.id),
             attachment_tokens: attachments
                 .concat(this.attachment_ids)
                 .map((attachment) => attachment.access_token),
