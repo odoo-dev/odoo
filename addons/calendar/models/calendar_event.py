@@ -10,7 +10,7 @@ from werkzeug.urls import url_parse
 import pytz
 import uuid
 
-from odoo import api, fields, models, Command
+from odoo import api, fields, models, Command, SUPERUSER_ID
 from odoo.osv.expression import AND
 from odoo.addons.base.models.res_partner import _tz_get
 from odoo.addons.calendar.models.calendar_attendee import Attendee
@@ -749,6 +749,14 @@ class Meeting(models.Model):
     def _check_private_event_conditions(self):
         """ Checks if the event is private, returning True if the conditions match and False otherwise. """
         self.ensure_one()
+
+        if self.user_id:
+            default_privacy1 = self.with_user(SUPERUSER_ID).user_id.calendar_default_privacy # inverse these and it won't work anymore
+            default_privacy = self.user_id.with_user(self.user_id).calendar_default_privacy
+            print(default_privacy1, default_privacy)
+        else:
+            default_privacy = self.user_id.res_users_settings_id.calendar_default_privacy
+
         event_is_private = (self.privacy == 'private' or (not self.privacy and self.user_id and self.user_id.calendar_default_privacy == 'private'))
         user_is_not_partner = self.user_id.id != self.env.uid and self.env.user.partner_id not in self.partner_ids
         return event_is_private and user_is_not_partner
