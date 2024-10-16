@@ -351,9 +351,9 @@ class HrEmployeePrivate(models.Model):
         if access_uid:
             self_sudo = self.with_user(access_uid)
         else:
-            self_sudo = self
+            self_sudo = self.env.user
 
-        if self_sudo.user_has_groups('hr.group_hr_user'):
+        if self_sudo.has_group('hr.group_hr_user'):
             return super(HrEmployeePrivate, self).get_formview_id(access_uid=access_uid)
         # Hardcode the form view for public employee
         return self.env.ref('hr.hr_employee_public_view_form').id
@@ -364,9 +364,9 @@ class HrEmployeePrivate(models.Model):
         if access_uid:
             self_sudo = self.with_user(access_uid)
         else:
-            self_sudo = self
+            self_sudo = self.env.user
 
-        if not self_sudo.user_has_groups('hr.group_hr_user'):
+        if not self_sudo.has_group('hr.group_hr_user'):
             res['res_model'] = 'hr.employee.public'
 
         return res
