@@ -1,4 +1,4 @@
-import { Component, onWillStart, useExternalListener, useState } from "@odoo/owl";
+import { Component, onWillStart, onWillUnmount, useExternalListener, useState } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { browser } from "@web/core/browser/browser";
@@ -6,6 +6,7 @@ import { debounce } from "@web/core/utils/timing";
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { useService } from "@web/core/utils/hooks";
 import { ActionPanel } from "@mail/discuss/core/common/action_panel";
+import { monitorAudio } from "@mail/discuss/call/common/media_monitoring";
 
 export class CallSettings extends Component {
     static template = "discuss.CallSettings";
@@ -17,10 +18,16 @@ export class CallSettings extends Component {
 
     setup() {
         super.setup();
+        this.audioMonitorPromise = undefined;
+        this.audioTrack = null;
+        this.disconnectAudioMonitor = undefined;
+        this.isClosed = false;
         this.notification = useService("notification");
         this.store = useState(useService("mail.store"));
         this.rtc = useState(useService("discuss.rtc"));
         this.state = useState({
+            isTestMicrophoneReady: true,
+            volume: 0,
             userDevices: [],
         });
         this.pttExtService = useState(useService("discuss.ptt_extension"));
@@ -50,6 +57,45 @@ export class CallSettings extends Component {
             }
             this.state.userDevices = await browser.navigator.mediaDevices.enumerateDevices();
         });
+        onWillUnmount(async () => {
+            this.isClosed = true;
+            await this.audioMonitorPromise;
+            this.audioTrack?.stop();
+            this.disconnectAudioMonitor?.();
+        });
+    }
+
+    async testMicrophoneVolume() {
+        if (!this.state.isTestMicrophoneReady) {
+            return;
+        }
+        this.state.isTestMicrophoneReady = false;
+        this.disconnectAudioMonitor?.();
+        this.disconnectAudioMonitor = undefined;
+        if (this.audioTrack) {
+            this.audioTrack.stop();
+            this.audioTrack = null;
+            this.state.isTestMicrophoneReady = true;
+            this.state.volume = 0;
+            return;
+        }
+        const audioStream = await browser.navigator.mediaDevices.getUserMedia({
+            audio: this.store.settings.audioConstraints,
+        });
+        const track = audioStream.getAudioTracks()[0];
+        if (this.isClosed) {
+            track.stop();
+            return;
+        }
+        this.audioMonitorPromise = monitorAudio(track, {
+            onTic: (volume) => {
+                this.state.volume = volume;
+            },
+            processInterval: 100,
+        });
+        this.disconnectAudioMonitor = await this.audioMonitorPromise;
+        this.audioTrack = track;
+        this.state.isTestMicrophoneReady = true;
     }
 
     get pushToTalkKeyText() {
@@ -111,10 +157,6 @@ export class CallSettings extends Component {
 
     onChangeDelay(ev) {
         this.store.settings.setDelayValue(ev.target.value);
-    }
-
-    onChangeThreshold(ev) {
-        this.store.settings.setThresholdValue(parseFloat(ev.target.value));
     }
 
     onChangeBlur(ev) {
