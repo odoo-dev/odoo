@@ -2890,7 +2890,7 @@ class Selection(Field[str | typing.Literal[False]]):
             if 'selection' in field.args:
                 value_modules.clear()
                 if isinstance(field.args['selection'], list):
-                    for value, label in field.args['selection']:
+                    for value, _label in field.args['selection']:
                         value_modules[value].add(module)
             if 'selection_add' in field.args:
                 for value_label in field.args['selection_add']:
@@ -3594,7 +3594,7 @@ class Properties(Field):
         # ids per model we need to fetch in batch to put in cache
         ids_per_model = defaultdict(OrderedSet)
 
-        for record, record_values in zip(records, values_list):
+        for record_values in values_list:
             for property_definition in record_values:
                 comodel = property_definition.get('comodel')
                 type_ = property_definition.get('type')
@@ -5039,7 +5039,7 @@ class Many2many(_RelationalMulti[M]):
             if to_create:
                 # create lines in batch, and link them
                 lines = comodel.create([vals for ids, vals in to_create])
-                for line, (ids, vals) in zip(lines, to_create):
+                for line, (ids, _vals) in zip(lines, to_create):
                     relation_add(ids, line.id)
 
             if to_delete:
