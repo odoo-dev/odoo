@@ -363,6 +363,13 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
             this.selectActionEl.append(option);
         });
 
+            // Remove the 'id' from form fields to ensure unique IDs are generated
+            // when multiple form snippets are added to the page.
+            for (const field of FormEditorRegistry.get(this.activeForm.website_form_key)
+                .formFields) {
+                delete field.id;
+            }
+
         return _super(...arguments);
     },
     /**
