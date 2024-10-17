@@ -29,7 +29,7 @@ from markupsafe import Markup, escape as markup_escape
 from psycopg2.extras import Json as PsycopgJson
 
 from .api import ContextType, DomainType, IdType, NewId, ValuesType
-from .models import BaseModel, check_property_field_value_name
+from .models import BaseModel, check_property_field_value_name, class_name_to_model_name
 from .netsvc import ColoredFormatter, GREEN, RED, DEFAULT, COLOR_PATTERN
 from .tools import (
     float_repr, float_round, float_compare, float_is_zero, human_size,
@@ -336,6 +336,7 @@ class Field(MetaField('DummyField', (object,), {}), typing.Generic[T]):
         self._sequence = next(_global_seq)
         self.args = {key: val for key, val in kwargs.items() if val is not SENTINEL}
 
+
     def __str__(self):
         if self.name is None:
             return "<%s.%s>" % (__name__, type(self).__name__)
@@ -608,11 +609,15 @@ class Field(MetaField('DummyField', (object,), {}), typing.Generic[T]):
             field = model.pool[model_name]._fields.get(name)
             if field is None:
                 raise KeyError(
-                    f"Field {name} referenced in related field definition {self} does not exist."
+                    f"Field {name!r} referenced in related field definition {self} does not exist."
                 )
             if not field._setup_done:
                 field.setup(model.env[model_name])
             model_name = field.comodel_name
+            if model_name == '_unknown':
+                raise KeyError(
+                    f"Targeted model from {name!r} in {self.related!r} in related field definition {self} does not exist."
+                )
 
         self.related_field = field
 
@@ -3007,8 +3012,30 @@ class _Relational(Field[M], typing.Generic[M]):
 
     def setup_nonrelated(self, model):
         super().setup_nonrelated(model)
+
+        if not self.comodel_name:
+            for cls in model.__class__._model_classes:
+                field = getattr(cls, self.name, None)
+                if hasattr(field, '__orig_class__'):
+                    # determine the model name from typing
+                    args = field.__orig_class__.__args__[0]
+                    if isinstance(args, type):
+                        # title = fields.Many2one[ResPartnerTitle]()
+                        class_name = args.__name__
+                        comodel_name = args._name
+                    else:
+                        # title = fields.Many2one['ResPartnerTitle']()
+                        class_name = args.__forward_arg__.split('.').pop()
+                        comodel_name = class_name_to_model_name(class_name)
+
+                    if comodel_name not in model.pool:
+                        _logger.warning("Field %s with unknown comodel name %r from the class %r", self, comodel_name, class_name)
+                        self.comodel_name = '_unknown'
+                    else:
+                        self.comodel_name = comodel_name
+
         if self.comodel_name not in model.pool:
-            _logger.warning("Field %s with unknown comodel_name %r", self, self.comodel_name)
+            _logger.warning("Field %r with unknown comodel_name %r", self, self.comodel_name)
             self.comodel_name = '_unknown'
 
     def get_domain_list(self, model):
