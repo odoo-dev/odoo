@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" height="100%">
+    <style>
+        @media only screen and (min-height: 128px) {
+            .preview_shape {
+                display: none;
+            }
+        }
+        @media only screen and (max-height: 128px) {
+            .transition_shape {
+                display: none;
+            }
+        }
+    </style>
+    <g class="transition_shape">
+        <svg viewBox="0 0 64 64" preserveAspectRatio="none" fill="#383E45" width="100%" height="64">
+            <path d="M64 0V64L0 0H64Z"/>
+        </svg>
+        <g transform="translate(0 -64)">
+            <svg viewBox="0 0 64 64" preserveAspectRatio="none" fill="#3AADAA" width="100%" height="64" y="100%">
+                <path d="M64 64V0L0 64H64Z"/>
+            </svg>
+        </g>
+    </g>
+
+    <g class="preview_shape">
+        <svg viewBox="0 0 64 64" preserveAspectRatio="none" fill="#383E45" width="100%" height="24">
+            <path d="M64 0V64L0 0H64Z"/>
+        </svg>
+        <g transform="translate(0 -24)">
+            <svg viewBox="0 0 64 64" preserveAspectRatio="none" fill="#3AADAA" width="100%" height="24" y="100%">
+                <path d="M64 64V0L0 64H64Z"/>
+            </svg>
+        </g>
+    </g>
+</svg>

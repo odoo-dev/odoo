@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" height="100%">
+    <style>
+        @media only screen and (min-height: 128px) {
+            .preview_shape {
+                display: none;
+            }
+        }
+        @media only screen and (max-height: 128px) {
+            .transition_shape {
+                display: none;
+            }
+        }
+    </style>
+    <g class="transition_shape">
+        <svg viewBox="0 0 64 64" preserveAspectRatio="none" fill="#383E45" width="100%" height="64">
+            <path d="M64 64L64 5.59506e-06L8.74228e-08 0L0 1C16.9739 1 33.2525 7.6377 45.2548 19.4522C57.2571 31.2671 64 47.2915 64 64Z"/>
+        </svg>
+        <g transform="translate(0 -64)">
+            <svg viewBox="0 0 64 64" preserveAspectRatio="none" fill="#3AADAA" width="100%" height="64" y="100%">
+                <path d="M0 0V64H64V63C47.0261 63 30.7475 56.3623 18.7452 44.5479C6.74286 32.7329 0 16.7085 0 0Z"/>
+            </svg>
+        </g>
+    </g>
+
+    <g class="preview_shape">
+        <svg viewBox="0 0 64 64" preserveAspectRatio="none" fill="#383E45" width="100%" height="24">
+            <path d="M64 64L64 5.59506e-06L8.74228e-08 0L0 1C16.9739 1 33.2525 7.6377 45.2548 19.4522C57.2571 31.2671 64 47.2915 64 64Z"/>
+        </svg>
+        <g transform="translate(0 -24)">
+            <svg viewBox="0 0 64 64" preserveAspectRatio="none" fill="#3AADAA" width="100%" height="24" y="100%">
+                <path d="M0 0V64H64V63C47.0261 63 30.7475 56.3623 18.7452 44.5479C6.74286 32.7329 0 16.7085 0 0Z"/>
+            </svg>
+        </g>
+    </g>
+</svg>

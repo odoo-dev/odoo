@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <svg viewBox="0 0 64 32" preserveAspectRatio="xMinYMin meet" fill="#383E45" width="100%">
+        <path d="M32 32L64 0L2.79753e-06 -5.59506e-06L32 32Z"/>
+    </svg>
+    <svg viewBox="0 0 64 32" preserveAspectRatio="xMinYMax meet" fill="#3AADAA" width="100%">
+        <path d="M32 0L0 32H64L32 0Z"/>
+    </svg>
+</svg>

@@ -479,7 +479,22 @@ $o-color-extras-nesting-selector: '&, .o_colored_level &';
     @return $-palette;
 }
 
+.o_we_shape {
+    --TransitionShape--size: 64px;
+    --TransitionShapeSm--size: 32px;
+    --TransitionShapeLg--size: 128px;
+    --TransitionShapeXl--size: 256px;
+}
+
+.o_we_shape_btn_content .o_we_shape {
+    --TransitionShape--size: 24px;
+    --TransitionShapeSm--size: var(--TransitionShape--size);
+    --TransitionShapeLg--size: var(--TransitionShape--size);
+    --TransitionShapeXl--size: 50%;
+}
+
 // format: (module_name: (shape_filename: ('position': X, 'size': Y, 'colors': (1, [3], ...)), ...))
+// var(--TransitionShape--size): 64px;
 $o-bg-shapes: ('web_editor': (
     'Airy/01': ('position': bottom, 'size': 100% auto, 'colors': (1)),
     'Airy/02': ('position': top, 'size': 100% auto, 'colors': (1)),
@@ -636,6 +651,28 @@ $o-bg-shapes: ('web_editor': (
     'Zigs/04': ('position': bottom, 'size': 100% auto, 'colors': (1)),
     'Zigs/05': ('position': bottom, 'size': 100% auto, 'colors': (3)),
     'Zigs/06': ('position': bottom, 'size': 30px 100%, 'colors': (4, 5), 'repeat-x': true),
+    'Transitions/01': ('position': bottom, 'size': 100% var(--TransitionShape--size), 'colors': (1)),
+    'Transitions/02': ('position': bottom, 'size': 100%, 'colors': (1, 5)),
+    'Transitions/03': ('position': bottom, 'size': 100% var(--TransitionShape--size), 'colors': (1)),
+    'Transitions/04': ('position': bottom, 'size': 100% var(--TransitionShape--size), 'colors': (1)),
+    'Transitions/05': ('position': bottom, 'size': 100% var(--TransitionShape--size), 'colors': (1)),
+    'Transitions/06': ('position': bottom, 'size': 100% var(--TransitionShape--size), 'colors': (1)),
+    'Transitions/07': ('position': bottom, 'size': 100% var(--TransitionShape--size), 'colors': (1)),
+    'Transitions/08': ('position': bottom, 'size': 100% var(--TransitionShape--size), 'colors': (1)),
+    'Transitions/09': ('position': bottom, 'size': 100% var(--TransitionShape--size), 'colors': (1)),
+    'Transitions/10': ('position': bottom, 'size': 100% var(--TransitionShape--size), 'colors': (1)),
+    'Transitions/11': ('position': bottom, 'size': 100%, 'colors': (1, 5)),
+    'Transitions/12': ('position': bottom, 'size': 100% var(--TransitionShape--size), 'colors': (1)),
+    // 'Transitions/13': ('position': bottom, 'size': 100% var(--TransitionShape--size), 'colors': (1)),
+    // 'Transitions/14': ('position': bottom, 'size': 100% var(--TransitionShape--size), 'colors': (1)),
+    'Transitions/13': ('position': bottom, 'size': 100% var(--TransitionShapeLg--size), 'colors': (1)),
+    'Transitions/14': ('position': bottom, 'size': 100% var(--TransitionShapeXl--size), 'colors': (1)),
+    'Transitions/15': ('position': bottom, 'size': var(--TransitionShapeSm--size) 100%, 'colors': (1), 'repeat-x': true),
+    'Transitions/16': ('position': bottom, 'size': var(--TransitionShapeSm--size) 100%, 'colors': (1, 5), 'repeat-x': true),
+    'Transitions/17': ('position': bottom, 'size': var(--TransitionShapeSm--size) 100%, 'colors': (1), 'repeat-x': true),
+    'Transitions/18': ('position': bottom, 'size': var(--TransitionShapeSm--size) 100%, 'colors': (1, 5), 'repeat-x': true),
+    'Transitions/19': ('position': bottom, 'size': 100%, 'colors': (1)),
+    'Transitions/20': ('position': bottom, 'size': 100% var(--TransitionShape--size), 'colors': (1)),
 ));
 
 @function change-shape-colors-mapping($module, $shape-name, $mapping, $shapes: $o-bg-shapes) {
