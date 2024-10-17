@@ -55,12 +55,6 @@ class PortalChatter(http.Controller):
             store.add(partner, {"is_user_publisher": True})
         return store.get_result()
 
-    @http.route(['/mail/update_is_internal'], type='json', auth="user", website=True)
-    def portal_message_update_is_internal(self, message_id, is_internal):
-        message = request.env['mail.message'].browse(int(message_id))
-        message.write({'is_internal': is_internal})
-        return message.is_internal
-
 
 class MailController(mail.MailController):
 
