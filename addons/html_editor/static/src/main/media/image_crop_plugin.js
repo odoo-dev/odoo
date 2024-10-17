@@ -7,7 +7,7 @@ import { withSequence } from "@html_editor/utils/resource";
 
 export class ImageCropPlugin extends Plugin {
     static name = "image_crop";
-    static dependencies = ["image", "selection"];
+    static dependencies = ["image", "selection", "media"];
     resources = {
         toolbarCategory: withSequence(27, {
             id: "image_crop",
@@ -41,6 +41,7 @@ export class ImageCropPlugin extends Plugin {
                     return;
                 }
                 this.imageCropProps.media = selectedImg;
+                this.shared.savePendingImages();
                 this.openCropImage();
                 break;
             }
