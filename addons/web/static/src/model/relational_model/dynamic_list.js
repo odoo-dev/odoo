@@ -267,6 +267,9 @@ export class DynamicList extends DataPoint {
         if (!Object.keys(changes).length) {
             return;
         }
+        if (!record._checkValidity()) {
+            return;
+        }
         const validSelection = this.selection.filter((record) => {
             return Object.keys(changes).every((fieldName) => {
                 if (record._isReadonly(fieldName)) {
