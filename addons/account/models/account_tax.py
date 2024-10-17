@@ -2,7 +2,7 @@
 from odoo import api, fields, models, _, Command
 from odoo.osv import expression
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import frozendict, groupby, split_every
+from odoo.tools import frozendict, groupby, html2plaintext, split_every
 from odoo.tools.float_utils import float_round
 from odoo.tools.misc import clean_context, formatLang
 from odoo.tools.translate import html_translate
@@ -2318,6 +2318,9 @@ class AccountTax(models.Model):
             return -candidate['price_subtotal']
 
         return [same_product, same_price_subtotal, biggest_amount]
+
+    def get_description(self):
+        return html2plaintext(self.description) if self.description else self.name
 
 
 class AccountTaxRepartitionLine(models.Model):
