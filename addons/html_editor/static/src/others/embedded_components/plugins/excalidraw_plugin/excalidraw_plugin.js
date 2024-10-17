@@ -34,6 +34,9 @@ export class ExcalidrawPlugin extends Plugin {
                         "html_editor.EmbeddedExcalidrawBlueprint",
                         {
                             embeddedProps: JSON.stringify({ source: href }),
+                        },
+                        {
+                            document: this.document,
                         }
                     );
                     this.shared.domInsert(templateBlock);
