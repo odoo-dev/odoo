@@ -22,7 +22,7 @@ export class ProductInfoPopup extends Component {
         return isAccessibleToEveryUser || isCashierManager;
     }
     editProduct() {
-        this.pos.editProduct(this.props.product);
+        this.pos.editProduct(this.props.productTemplate.product_variant_ids[0]);
         this.props.close();
     }
     get allowProductEdition() {
