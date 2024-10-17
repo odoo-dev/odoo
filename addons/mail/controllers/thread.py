@@ -165,34 +165,29 @@ class ThreadController(http.Controller):
     def _is_message_editable(self, message, **kwargs):
         return message.sudo().is_current_user_or_guest_author or request.env.user._is_admin()
 
-    @http.route("/mail/message/get_followers", methods=["POST"], type="json", auth="public")
-    def message_get_followers(self, thread_id, thread_model, limit=20, offset=0, filter_recipients=False):
+    @http.route("/mail/thread/get_followers", methods=["POST"], type="json", auth="public")
+    def mail_thread_get_followers(self, id, thread_id, thread_model, limit=20, offset=0):
         domain = [
             ("res_id", "=", thread_id),
             ("res_model", "=", thread_model),
             ("partner_id", "!=", request.env.user.partner_id.id),
         ]
-        if filter_recipients:
-            subtype_id = request.env["ir.model.data"]._xmlid_to_res_id("mail.mt_comment")
-            subtype_domain = [
-                ("subtype_ids", "=", subtype_id),
-                ("partner_id.active", "=", True),
-            ]
-            domain = expression.AND([domain, subtype_domain])
-        followersCount = request.env["mail.followers"].search_count(
-                    [("res_id", "=", thread_id), ("res_model", "=", thread_model)]
-                )
-        self_follower = request.env["mail.followers"].search(
-            [
-                ("res_id", "=", thread_id),
-                ("res_model", "=", thread_model),
-                ["partner_id", "=", request.env.user.partner_id.id],
-            ]
-        )
-        res = request.env["mail.followers"].search(domain, offset=offset, limit=limit, order="name ASC")
-        return {
-            "data": Store(res).get_result(),
-            "followers": Store.many_ids(res),
-            "selfFollower": Store(self_follower).get_result(),
-            "followersCount": followersCount
-            }
+        if not offset:
+            self_follower = request.env["mail.followers"].search(
+                [
+                    ("res_id", "=", thread_id),
+                    ("res_model", "=", thread_model),
+                    ["partner_id", "=", request.env.user.partner_id.id],
+                ]
+            )
+        data = request.env["mail.followers"].search(domain, offset=offset, limit=limit+1, order="name ASC")
+        followerListView = {
+                "id": id,
+                "followersFullyLoaded": len(data) <= limit,
+        }
+        if not offset:
+            followerListView["selfFollower"] = Store.one_id(self_follower)
+            followerListView["followers"] = Store.many_ids(data)
+        else:
+            followerListView["followers"] = Store.many_ids(data, "ADD")
+        return Store(data).add({"followerListView": followerListView}).get_result()

@@ -107,6 +107,7 @@ export class Store extends BaseStore {
     // messaging menu
     menu = { counter: 0 };
     chatHub = Record.one("ChatHub", { compute: () => ({}) });
+    followerListView = Record.many("FollowerListView");
     failures = Record.many("Failure", {
         /**
          * @param {import("models").Failure} f1

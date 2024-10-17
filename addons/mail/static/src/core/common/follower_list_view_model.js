@@ -23,50 +23,20 @@ export class FollowerListView extends Record {
     thread_id;
     /** @type {string} */
     thread_model;
-
     followers = Record.many("mail.followers");
-
-    /** @type {number} */
-    followersCount;
-
     selfFollower = Record.one("mail.followers");
+    /** @type {boolean} */
+    followersFullyLoaded;
 
-    get followersFullyLoaded() {
-        return (
-            this.followersCount ===
-            (this.selfFollower ? this.followers.length + 1 : this.followers.length)
-        );
-    }
-
-    async loadMoreFollowers() {
-        const res = await this.store.env.services.orm.call(
-            this.thread_model,
-            "message_get_followers",
-            [[this.thread_id], 20, this.followers.length]
-        );
-        if (res["mail.followers"]?.length) {
-            this.store.insert(res);
-            this.followers.add(...res["mail.followers"]);
-        }
-    }
-
-    async get_follower() {
-        const res = await rpc("/mail/message/get_followers", {
+    async loadFollowers(offset = this.followers.length) {
+        const res = await rpc("/mail/thread/get_followers", {
+            id: this.id,
             thread_id: this.thread_id,
             thread_model: this.thread_model,
             limit: 20,
-            offset: this.followers.length,
-            filter_recipients: false,
+            offset: offset,
         });
-        const { selfFollower, followersCount, data } = res;
-        const followers = data?.["mail.followers"] || [];
-        if (selfFollower?.["mail.followers"]?.length) {
-            [this.selfFollower] = selfFollower["mail.followers"];
-        }
-        if (followersCount) {
-            this.followersCount = followersCount;
-        }
-        this.followers.add(...followers);
+        this.store.insert(res);
     }
 }
 
