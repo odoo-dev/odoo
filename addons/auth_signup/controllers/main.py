@@ -165,7 +165,7 @@ class AuthSignupHome(Home):
         login, password = request.env['res.users'].sudo().signup(values, token)
         request.env.cr.commit()     # as authenticate will use its own cursor we need to commit the current transaction
         credential = {'login': login, 'password': password, 'type': 'password'}
-        request.session.authenticate(request.db, credential)
+        request.session.authenticate(request.env, credential)
 
 class AuthBaseSetup(BaseSetup):
     @http.route()

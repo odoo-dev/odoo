@@ -32,22 +32,20 @@ class ResUsers(models.Model):
             }
         }
 
-    @classmethod
-    def _login(cls, db, credential, user_agent_env):
+    def _login(self, credential, user_agent_env):
         if credential['type'] == 'webauthn':
             webauthn = json.loads(credential['webauthn_response'])
-            with Registry(db).cursor() as cr:
-                cr.execute(SQL("""
-                    SELECT login
-                      FROM auth_passkey_key key
-                      JOIN res_users usr ON usr.id = key.create_uid
-                     WHERE credential_identifier=%s
-                """, webauthn['id']))
-                res = cr.fetchone()
-                if not res:
-                    raise AccessDenied(_('Unknown passkey'))
-                credential['login'] = res[0]
-        return super()._login(db, credential, user_agent_env=user_agent_env)
+            self.env.cr.execute(SQL("""
+                SELECT login
+                    FROM auth_passkey_key key
+                    JOIN res_users usr ON usr.id = key.create_uid
+                    WHERE credential_identifier=%s
+            """, webauthn['id']))
+            res = self.env.cr.fetchone()
+            if not res:
+                raise AccessDenied(_('Unknown passkey'))
+            credential['login'] = res[0]
+        return super()._login(credential, user_agent_env=user_agent_env)
 
     def _check_credentials(self, credential, env):
         if credential['type'] == 'webauthn':
