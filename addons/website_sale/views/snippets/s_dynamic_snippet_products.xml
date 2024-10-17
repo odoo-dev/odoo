@@ -8,8 +8,16 @@
     </template>
     <template id="s_dynamic_snippet_products_new_1" name="Products">
         <t t-call="website.s_dynamic_snippet_template">
-            <t t-set="snippet_name" t-value="'s_dynamic_snippet_products_new_1'"/>
+            <t t-set="snippet_name" t-value="'s_dynamic_snippet_products'"/>
+            <t t-set="snippet_template_key" t-value="'website_sale.dynamic_filter_template_product_product_add_to_cart'"/>
             <t t-call="website_sale.s_image_gallery_new"/>
+        </t>
+    </template>
+    <template id="dynamic_filter_template_product_product_mini_image_preview_data" name="Products">
+        <t t-call="website.s_dynamic_snippet_template">
+            <t t-set="snippet_name" t-value="'s_dynamic_snippet_products'"/>
+             <t t-set="snippet_template_key" t-value="'website_sale.dynamic_filter_template_product_product_horizontal_card'"/>
+            <t t-call="website_sale.dynamic_filter_template_product_product_mini_image"/>
         </t>
     </template>
     <template id="s_dynamic_snippet_products_options" inherit_id="website.snippet_options">

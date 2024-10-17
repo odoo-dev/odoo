@@ -116,6 +116,7 @@ const DynamicSnippet = publicWidget.Widget.extend({
      * @private
      */
     async _fetchData() {
+        debugger;
         if (this._isConfigComplete()) {
             const nodeData = this.el.dataset;
             const filterFragments = await rpc(
