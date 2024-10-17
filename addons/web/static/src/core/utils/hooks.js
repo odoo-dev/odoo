@@ -170,7 +170,8 @@ export function useSpellCheck({ refName } = {}) {
         (el) => {
             if (el) {
                 const inputs =
-                    ["INPUT", "TEXTAREA"].includes(el.nodeName) || el.contenteditable
+                    ["INPUT", "TEXTAREA"].includes(el.nodeName) ||
+                    el.getAttribute("contenteditable") !== false
                         ? [el]
                         : el.querySelectorAll("input, textarea, [contenteditable=true]");
                 inputs.forEach((input) => {
