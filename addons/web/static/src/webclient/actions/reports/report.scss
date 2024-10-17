@@ -211,11 +211,11 @@ blockquote {
     -webkit-box-flex: 1 !important;
 }
 
-// Report footer need to support bootstrap columns (2, 3 and 4 columns)
+// Report footer and columns command need to support bootstrap columns (2, 3 and 4 columns)
 // Even if the width is smaller than the media querry limit from bootstrap.
 // This need come from the footer being editable via the Odoo editor.
 
-.footer {
+.footer, .o_text_columns{
     .row {
         -webkit-box-flex: 1 !important;
     }
