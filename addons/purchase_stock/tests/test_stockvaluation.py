@@ -77,10 +77,7 @@ class TestStockValuation(TransactionCase):
         # Create and set a new weight unit.
         kgm = self.env.ref('uom.product_uom_kgm')
         ap = self.env['uom.uom'].create({
-            'category_id': kgm.category_id.id,
             'name': 'Algerian Pounds',
-            'uom_type': 'bigger',
-            'ratio': 2.47541,
             'rounding': 0.001,
         })
         kgm_price = 100
@@ -1952,9 +1949,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         uom_unit = self.env.ref('uom.product_uom_unit')
         uom_hundred = self.env['uom.uom'].create({
             'name': '100 x U',
-            'category_id': uom_unit.category_id.id,
             'ratio': 100.0,
-            'uom_type': 'bigger',
             'rounding': uom_unit.rounding,
         })
         self.product1.write({

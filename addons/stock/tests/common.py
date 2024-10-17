@@ -54,8 +54,6 @@ class TestStockCommon(TestProductCommon):
         output_location.active = True
         cls.output_location = output_location.id
         cls.customer_location = cls.ModelDataObj._xmlid_to_res_id('stock.stock_location_customers')
-        cls.categ_unit = cls.ModelDataObj._xmlid_to_res_id('uom.product_uom_categ_unit')
-        cls.categ_kgm = cls.ModelDataObj._xmlid_to_res_id('uom.product_uom_categ_kgm')
 
         # Product Created A, B, C, D
         cls.productA = cls.ProductObj.create({'name': 'Product A', 'is_storable': True})
@@ -65,50 +63,38 @@ class TestStockCommon(TestProductCommon):
         cls.productE = cls.ProductObj.create({'name': 'Product E', 'is_storable': True})
 
         # Configure unit of measure.
-        cls.uom_kg = cls.env['uom.uom'].search([('category_id', '=', cls.categ_kgm), ('uom_type', '=', 'reference')], limit=1)
+        cls.uom_kg = cls.env.ref('uom.product_uom_kgm')
         cls.uom_kg.write({
             'name': 'Test-KG',
             'rounding': 0.000001})
         cls.uom_tone = cls.UomObj.create({
             'name': 'Test-Tone',
-            'category_id': cls.categ_kgm,
-            'uom_type': 'bigger',
             'factor_inv': 1000.0,
             'rounding': 0.001})
         cls.uom_gm = cls.UomObj.create({
             'name': 'Test-G',
-            'category_id': cls.categ_kgm,
-            'uom_type': 'smaller',
             'factor': 1000.0,
             'rounding': 0.001})
         cls.uom_mg = cls.UomObj.create({
             'name': 'Test-MG',
-            'category_id': cls.categ_kgm,
-            'uom_type': 'smaller',
             'factor': 100000.0,
             'rounding': 0.001})
         # Check Unit
-        cls.uom_unit = cls.env['uom.uom'].search([('category_id', '=', cls.categ_unit), ('uom_type', '=', 'reference')], limit=1)
+        cls.uom_unit = cls.env.ref('uom.product_uom_unit')
         cls.uom_unit.write({
             'name': 'Test-Unit',
             'rounding': 0.001})
         cls.uom_dozen = cls.UomObj.create({
             'name': 'Test-DozenA',
-            'category_id': cls.categ_unit,
             'factor_inv': 12,
-            'uom_type': 'bigger',
             'rounding': 0.001})
         cls.uom_sdozen = cls.UomObj.create({
             'name': 'Test-SDozenA',
-            'category_id': cls.categ_unit,
             'factor_inv': 144,
-            'uom_type': 'bigger',
             'rounding': 0.001})
         cls.uom_sdozen_round = cls.UomObj.create({
             'name': 'Test-SDozenA Round',
-            'category_id': cls.categ_unit,
             'factor_inv': 144,
-            'uom_type': 'bigger',
             'rounding': 1.0})
 
         # Product for different unit of measure.

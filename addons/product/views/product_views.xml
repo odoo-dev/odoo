@@ -188,7 +188,7 @@
                         <page
                             string="Inventory"
                             name="inventory"
-                            groups="product.group_stock_packaging"
+                            groups="uom.group_uom"
                             invisible="type in ['service', 'combo']"
                         >
                             <group name="inventory">
@@ -204,12 +204,6 @@
                                         <field name="volume_uom_name"/>
                                     </div>
                                 </group>
-                            </group>
-                            <group name="packaging" string="Packaging"
-                                colspan="4"
-                                invisible="(type != 'consu' or product_variant_count &gt; 1) and not is_product_variant"
-                                groups="product.group_stock_packaging">
-                                <field colspan="2" name="packaging_ids" nolabel="1" context="{'list_view_ref':'product.product_packaging_tree_view2', 'default_company_id': company_id}"/>
                             </group>
                         </page>
                     </notebook>
@@ -381,9 +375,9 @@
                             </group>
                         </group>
                         <group>
-                            <group name="packaging" string="Packaging" groups="product.group_stock_packaging">
-                                <field colspan="2" name="packaging_ids" nolabel="1"
-                                    context="{'list_view_ref':'product.product_packaging_tree_view2', 'default_company_id': company_id}"/>
+                            <group name="packaging" string="Packaging" groups="uom.group_uom">
+                                <!-- <field colspan="2" name="packaging_ids" nolabel="1"
+                                    context="{'list_view_ref':'product.product_packaging_tree_view2', 'default_company_id': company_id}"/> -->
                             </group>
                         </group>
                     </sheet>
@@ -498,9 +492,6 @@
                 <field name="list_price" position="after">
                    <field name="lst_price" class="oe_inline" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}"/>
                 </field>
-                <group name="packaging" position="attributes">
-                    <attribute name="invisible">0</attribute>
-                </group>
                 <field name="name" position="after">
                     <field name="product_tmpl_id" class="oe_inline" readonly="1" invisible="1" required="id"/>
                 </field>

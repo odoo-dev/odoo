@@ -2049,8 +2049,6 @@ class TestMrpOrder(TestMrpCommon):
         uom_L = self.env.ref('uom.product_uom_litre')
         uom_cL = self.env['uom.uom'].create({
             'name': 'cL',
-            'category_id': uom_L.category_id.id,
-            'uom_type': 'smaller',
             'factor': 100,
             'rounding': 1,
         })
@@ -2132,19 +2130,14 @@ class TestMrpOrder(TestMrpCommon):
 
         # define L and ml, L has rounding .001 but ml has rounding .01
         # when producing e.g. 187.5ml, it will be rounded to .188L
-        categ_test = self.env['uom.category'].create({'name': 'Volume Test'})
 
         uom_L = self.env['uom.uom'].create({
             'name': 'Test Liters',
-            'category_id': categ_test.id,
-            'uom_type': 'reference',
             'rounding': 0.001
         })
 
         uom_ml = self.env['uom.uom'].create({
             'name': 'Test ml',
-            'category_id': categ_test.id,
-            'uom_type': 'smaller',
             'rounding': 0.01,
             'factor_inv': 0.001,
         })
@@ -3475,9 +3468,7 @@ class TestMrpOrder(TestMrpCommon):
 
         self.box250 = self.env['uom.uom'].create({
             'name': 'box250',
-            'category_id': self.env.ref('uom.product_uom_categ_unit').id,
-            'ratio': 250.0,
-            'uom_type': 'bigger',
+            'factor': 250.0,
             'rounding': 1.0,
         })
 

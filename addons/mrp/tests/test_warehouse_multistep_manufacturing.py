@@ -325,8 +325,6 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         one_unit_uom = self.env.ref('uom.product_uom_unit')
         [two_units_uom, four_units_uom] = self.env['uom.uom'].create([{
             'name': 'x%s' % i,
-            'category_id': self.ref('uom.product_uom_categ_unit'),
-            'uom_type': 'bigger',
             'factor_inv': i,
         } for i in [2, 4]])
 

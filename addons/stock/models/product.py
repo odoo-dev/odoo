@@ -726,6 +726,7 @@ class ProductTemplate(models.Model):
         string="Category Routes", related='categ_id.total_route_ids', related_sudo=False)
     show_on_hand_qty_status_button = fields.Boolean(compute='_compute_show_qty_status_button')
     show_forecasted_qty_status_button = fields.Boolean(compute='_compute_show_qty_status_button')
+    uom_ids = fields.Many2many('uom.uom', string='Packagings')
 
     @api.depends('type')
     def compute_is_storable(self):
@@ -1081,18 +1082,11 @@ class ProductCategory(models.Model):
         return []
 
 
-class ProductPackaging(models.Model):
-    _inherit = ["product.packaging"]
-
-    package_type_id = fields.Many2one('stock.package.type', 'Package Type')
-    route_ids = fields.Many2many(
-        'stock.route', 'stock_route_packaging', 'packaging_id', 'route_id', 'Routes',
-        domain=[('packaging_selectable', '=', True)],
-        help="Depending on the modules installed, this will allow you to define the route of the product in this packaging: whether it will be bought, manufactured, replenished on order, etc.")
-
-
 class UomUom(models.Model):
     _inherit = ['uom.uom']
+
+    package_type_id = fields.Many2one('stock.package.type', string='Package Type')
+    product_uom_ids = fields.One2many('product.uom', 'uom_id', string='Barcodes', domain=lambda self: [('product_id', '=', self.env.context.get('product_id'))])
 
     def write(self, values):
         # Users can not update the factor if open stock moves are based on it

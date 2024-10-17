@@ -739,8 +739,6 @@ class PurchaseOrder(models.Model):
                 for rfq_line in rfqs.order_line:
                     existing_line = oldest_rfq.order_line.filtered(lambda l: l.product_id == rfq_line.product_id and
                                                                                 l.product_uom == rfq_line.product_uom and
-                                                                                l.product_packaging_id == rfq_line.product_packaging_id and
-                                                                                l.product_packaging_qty == rfq_line.product_packaging_qty and
                                                                                 l.analytic_distribution == rfq_line.analytic_distribution and
                                                                                 l.discount == rfq_line.discount and
                                                                                 abs(l.date_planned - rfq_line.date_planned).total_seconds() <= 86400  # 24 hours in seconds
@@ -1063,19 +1061,7 @@ class PurchaseOrder(models.Model):
                 price=seller.price_discounted,
                 min_qty=seller.min_qty,
             )
-        # Check if the product uses some packaging.
-        packaging = self.env['product.packaging'].search(
-            [('product_id', '=', product.id), ('purchase', '=', True)], limit=1
-        )
-        if packaging:
-            qty = packaging.product_uom_id._compute_quantity(packaging.qty, product.uom_po_id)
-            product_infos.update(
-                packaging={
-                    'id': packaging.id,
-                    'name': packaging.display_name,
-                    'qty': qty,
-                }
-            )
+
         return product_infos
 
     def get_confirm_url(self, confirm_type=None):

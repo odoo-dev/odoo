@@ -1756,9 +1756,6 @@ class StockPicking(models.Model):
 
     def _put_in_pack(self, move_line_ids):
         package = self.env['stock.quant.package'].create({})
-        package_type = move_line_ids.move_id.product_packaging_id.package_type_id
-        if len(package_type) == 1:
-            package.package_type_id = package_type
         if len(move_line_ids) == 1:
             default_dest_location = move_line_ids._get_default_dest_location()
             move_line_ids.location_dest_id = default_dest_location._get_putaway_strategy(

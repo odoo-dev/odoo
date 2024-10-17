@@ -209,10 +209,10 @@ class TestMrpStockReports(TestReportsCommon):
         superkit = self.env['product.product'].create({
             'name': 'Super Kit',
             'type': 'consu',
-            'packaging_ids': [(0, 0, {
-                'name': '6-pack',
-                'qty': 6,
-            })],
+            # 'packaging_ids': [(0, 0, {
+            #     'name': '6-pack',
+            #     'qty': 6,
+            # })],
         })
 
         compo01, compo02 = self.env['product.product'].create([{
@@ -241,7 +241,7 @@ class TestMrpStockReports(TestReportsCommon):
                 move.product_uom = self.env.ref('uom.product_uom_dozen')
                 move.product_uom_qty = 2
             picking = picking_form.save()
-            picking.move_ids.product_packaging_id = superkit.packaging_ids
+            # picking.move_ids.product_packaging_id = superkit.packaging_ids
             picking.action_confirm()
 
             picking.move_ids.write({'quantity': 12, 'picked': True})
