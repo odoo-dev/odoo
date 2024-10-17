@@ -1,6 +1,13 @@
 import { normalizeCSSColor } from "@web/core/utils/colors";
 import { removeClass } from "./dom";
-import { isBold, isDirectionSwitched, isItalic, isStrikeThrough, isUnderline } from "./dom_info";
+import {
+    isBold,
+    isDirectionSwitched,
+    isItalic,
+    isStrikeThrough,
+    isUnderline,
+    isTextNode,
+} from "./dom_info";
 import { closestElement } from "./dom_traversal";
 
 /**
@@ -90,7 +97,10 @@ export const formatsSpecs = {
         removeStyle: (node) => removeStyle(node, "font-size"),
     },
     setFontSizeClassName: {
-        isFormatted: (node) => FONT_SIZE_CLASSES.find((cls) => node?.classList?.contains(cls)),
+        isFormatted: (node) => {
+            const element = isTextNode(node) ? closestElement(node) : node;
+            return FONT_SIZE_CLASSES.find((cls) => element?.classList.contains(cls));
+        },
         hasStyle: (node, props) => FONT_SIZE_CLASSES.find((cls) => node.classList.contains(cls)),
         addStyle: (node, props) => node.classList.add(props.className),
         removeStyle: (node) => removeClass(node, ...FONT_SIZE_CLASSES, ...TEXT_STYLE_CLASSES),
