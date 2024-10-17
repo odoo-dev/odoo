@@ -1,5 +1,5 @@
 .configurator_color{
-    &.attribute_value_not_available {
+    &.ptav-not-available {
         opacity: 1;
 
         &:after {
@@ -13,10 +13,10 @@
         }
     }
 }
-.attribute_value_not_available{
+.ptav-not-available{
     opacity: .5;
 }
-option.attribute_value_not_available {
+option.ptav-not-available {
     opacity: 1;
     color: #ccc;
 }

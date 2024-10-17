@@ -9,7 +9,7 @@
                 <t t-if="shouldShowCombo(combo)">
                     <h3 class="me-auto mb-3" t-esc="combo.name"/>
                     <div class="product-list d-grid gap-1">
-                        <div t-foreach="combo.combo_line_ids" t-as="combo_line" t-key="combo_line.id" class="m-2" t-att-class="{'attribute_value_not_available' : isArchived(combo_line)}">
+                        <div t-foreach="combo.combo_line_ids" t-as="combo_line" t-key="combo_line.id" class="m-2" t-att-class="{'ptav-not-available' : isArchived(combo_line)}">
                             <t t-set="product" t-value="combo_line.product_id"/>
                             <input type="radio"
                                 t-attf-name="combo-{{combo.id}}"
