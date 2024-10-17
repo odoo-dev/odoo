@@ -1456,17 +1456,19 @@ export class PosStore extends Reactive {
                     this.orderPreparationCategories,
                     cancelled
                 );
-                if (changes.cancelled.length > 0 || changes.new.length > 0) {
-                    const isPrintSuccessful = await order.printChanges(
+
+                if (changes.cancelled.length > 0 || changes.new.length > 0 || changes.generalNote) {
+                    const deniedPrints = await order.printChanges(
                         false,
                         this.orderPreparationCategories,
                         cancelled,
                         this.unwatched.printers
                     );
-                    if (!isPrintSuccessful) {
+                    if (deniedPrints.length) {
+                        const failedReceipts = deniedPrints.join(", ");
                         this.dialog.add(AlertDialog, {
                             title: _t("Printing failed"),
-                            body: _t("Failed in printing the changes in the order"),
+                            body: _t("Failed in printing %s changes of the order", failedReceipts),
                         });
                     }
                 }

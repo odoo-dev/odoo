@@ -66,13 +66,20 @@ patch(ControlButtons.prototype, {
             { once: true }
         );
     },
-    clickTakeAway() {
+    async clickTakeAway() {
         const isTakeAway = !this.currentOrder.takeaway;
         const defaultFp = this.pos.config?.default_fiscal_position_id ?? false;
         const takeawayFp = this.pos.config.takeaway_fp_id;
 
         this.currentOrder.takeaway = isTakeAway;
         this.currentOrder.update({ fiscal_position_id: isTakeAway ? takeawayFp : defaultFp });
+        await this.currentOrder.printChanges(
+            false,
+            this.pos.orderPreparationCategories,
+            false,
+            this.pos.unwatched.printers,
+            true
+        );
     },
     editFloatingOrderName(order) {
         this.dialog.add(TextInputPopup, {

@@ -2,70 +2,72 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="point_of_sale.OrderChangeReceipt">
-        <div class="pos-receipt">
-            <div class="pos-receipt-order-data"><t t-esc="changes.name" /></div>
-            <t t-if="changes.floor_name || changes.table_name">
-                <br />
-                <div class="pos-receipt-title">
-                    <t t-esc="changes.floor_name" /> / <t t-esc="changes.table_name"/>
-                </div>
-            </t>
-            <div class="pos-receipt-title">
-                <t t-esc="changes.tracking_number"/>
-            </div>
-            <br />
-            <br />
-            <t t-if="changes.cancelled.length > 0">
-                <div class="pos-order-receipt-cancel">
-                    <div class="pos-receipt-title">
-                        CANCELLED
-                        <t t-esc='changes.time.hours'/>:<t t-esc='changes.time.minutes'/>
-                    </div>
-                    <br />
-                    <br />
-                    <t t-foreach="changes.cancelled" t-as="change" t-key="change_index">
-                        <div class="multiprint-flex">
-                            <span class="product-quantity" t-esc="change.quantity"/>
-                            <span class="product-name" t-esc="change.name"/>
-                        </div>
-                        <t t-if="change.note">
-                            <div>
-                                NOTE
-                                <span class="pos-receipt-right-align">...</span>
-                            </div>
-                            <div><span class="pos-receipt-left-padding">--- <t t-esc="change.note" /></span></div>
-                            <br/>
+        <div class="pos-receipt m-0 p-0">
+            <!-- Receipt Header -->
+            <div class="receipt-header">
+                <div class="pos-receipt-title text-center medium">
+                    <t t-if="changes.diningModeUpdate">
+                        <t t-if="changes.takeaway">
+                            Dine In -> Take Out
+                        </t>
+                        <t t-else="">
+                            Take Out -> Dine In
                         </t>
                     </t>
-                    <br />
-                    <br />
-                </div>
-            </t>
-            <t t-if="changes.new.length > 0">
-                <div class="pos-receipt-title">
-                    NEW
-                    <t t-esc='changes.time.hours'/>:<t t-esc='changes.time.minutes'/>
-                </div>
-                <br />
-                <br />
-                <t t-foreach="changes.new" t-as="change" t-key="change_index">
-                    <div class="multiprint-flex">
-                        <span class="product-quantity" t-esc="change.quantity"/>
-                        <span class="product-name" t-esc="change.name"/>
-                    </div>
-                    <t t-if="change.note">
-                        <div>
-                            NOTE
-                            <span class="pos-receipt-right-align">...</span>
-                        </div>
-                        <div><span class="pos-receipt-left-padding">--- <t t-esc="change.note" /></span></div>
-                        <br/>
+                    <t t-else="">
+                        <t t-if="changes.takeaway">Take Out</t>
+                        <t t-else="">Dine In</t>
                     </t>
+                </div>
+                <div class="order-details d-flex justify-content-between fs-2">
+                    <div t-esc="changes.config_name"/><div t-esc="changes.time"/>
+                </div>
+                <div t-if="changes.table_name" class="floor-details fs-2 text-center my-3">
+                    <span t-esc="changes.floor_name"/> / <span t-esc="changes.table_name"/><br/>
+                    <div><span>Order <t t-esc="changes.tracking_number"/></span></div>
+                </div>
+            </div>
+            <div class="text-center lh-1">---------------------------------------------------------------------</div>
+
+            <!-- Receipt Body -->
+            <div class="pos-receipt-body">
+                <!-- Operational Title -->
+                <t t-if="operational_title">
+                    <div class="pos-receipt-title text-center" t-esc="operational_title" />
                 </t>
-                <br />
-                <br />
-            </t>
+                <!-- Order Lines -->
+                <t t-foreach="changedlines" t-as="line" t-key="change_index">
+                    <div class="orderline my-1">
+                        <div class="multiprint-flex medium">
+                            <span class="me-3" t-esc="line.quantity"/> <span class="product-name" t-esc="line.name"/>
+                        </div>
+                        <t t-debug="pdb"/>
+                        <div t-if="line.note" class="fs-2 mx-4 fst-italic">
+                            <span>---  <t t-foreach="line.note.split('\n')" t-as="subNote" t-key="internal_note"><t t-esc="subNote"/>, </t></span><br/>
+                        </div>
+                    </div>
+                </t>
+                <!-- General Note -->
+                <t t-debug="pdb"/>
+                <t t-if="noteChanged or (changes.diningModeUpdate and changes.order_note.length)">
+                    <div class="fw-bolder medium mt-4">General Note</div>
+                    <div class="fs-2">
+                        <t t-if="changes.order_note">
+                            <t t-foreach="changes.order_note.split('\n')" t-as="subNote" t-key="general_note">
+                                • <t t-esc="subNote"/><br/>
+                            </t>
+                        </t>
+                        <!-- if removed all general Notes -->
+                        <t t-else="">
+                            No Order Level Notes for the Order.
+                        </t>
+                    </div>
+                </t>
+            </div>
+            <!-- Receipt Footer -->
+            <div class="pos-receipt-footer text-center mt-4 fs-2">
+                <span>Order By: <t t-esc="changes.employee_name"/></span>
+            </div>
         </div>
     </t>
-
 </templates>
