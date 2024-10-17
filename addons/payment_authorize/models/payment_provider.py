@@ -100,11 +100,8 @@ class PaymentProvider(models.Model):
         :return: The validation currency
         :rtype: recordset of `res.currency`
         """
-        res = super()._get_validation_currency()
-        if self.code != 'authorize':
-            return res
-
-        return self.available_currency_ids[0]
+        # return company currency since authorize.net supports all currencies
+        return super()._get_validation_currency()
 
     def _authorize_get_inline_form_values(self):
         """ Return a serialized JSON of the required values to render the inline form.
