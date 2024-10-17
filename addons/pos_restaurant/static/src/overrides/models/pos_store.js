@@ -90,6 +90,18 @@ patch(PosStore.prototype, {
             tableByIds[table.id].uiState.orderCount = table.orders;
             tableByIds[table.id].uiState.skipCount = table.skip_changes;
         }
+        if (this.selectedTable) {
+            const o = this.get_order();
+            if (o) {
+                const uuid = o.uuid;
+                this.addPendingOrder([o.id]);
+                await this.syncAllOrders({ cancel_table_notification: true });
+
+                const order = this.models["pos.order"].find((order) => order.uuid === uuid);
+                await this.sendOrderInPreparation(order);
+                order.updateLastOrderChange();
+            }
+        }
     },
     get categoryCount() {
         const orderChange = this.getOrderChanges().orderlines;
