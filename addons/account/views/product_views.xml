@@ -20,7 +20,7 @@
                  <field name="tax_string"/>
              </xpath>
              <xpath expr="//div[@name='sales_price']" position="after">
-                 <field name="taxes_id" widget="many2many_tags"
+                 <field name="taxes_id" widget="many2many_tax_tags"
                         context="{'default_type_tax_use': 'sale', 'search_default_sale': 1}"
                         options="{'create': false, 'create_edit': false}"/>
              </xpath>
