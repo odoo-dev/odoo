@@ -6,15 +6,15 @@
         <DropdownItem onSelected="() => this.onClickAddFollowers()" attrs="{ href: '#' }">
             Add Followers
         </DropdownItem>
-        <div t-if="followerListView.followers.length > 0" role="separator" class="dropdown-divider"/>
+        <div t-if="followerListView?.followers.length > 0" role="separator" class="dropdown-divider"/>
     </t>
-    <t t-if="followerListView.selfFollower">
+    <t t-if="followerListView?.selfFollower">
         <t t-call="mail.Follower">
             <t t-set="follower" t-value="followerListView.selfFollower"/>
         </t>
-        <div t-if="followerListView.followers.length > 0" role="separator" class="dropdown-divider"/>
+        <div t-if="followerListView?.followers.length > 0" role="separator" class="dropdown-divider"/>
     </t>
-    <t t-if="followerListView.followers.length > 0">
+    <t t-if="followerListView?.followers.length > 0">
         <t t-foreach="followerListView.followers" t-as="follower" t-key="follower.id">
             <t t-call="mail.Follower">
                 <t t-set="follower" t-value="follower"/>

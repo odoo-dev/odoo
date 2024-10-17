@@ -37,7 +37,7 @@ export class FollowerList extends Component {
                 thread_id: this.props.thread.id,
                 thread_model: this.props.thread.model,
             });
-            await this.followerListView.get_follower();
+            await this.followerListView.loadFollowers();
         });
 
         onWillUnmount(() => {
