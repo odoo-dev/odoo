@@ -2685,7 +2685,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_notification_manager .o_notification");
         assert.equal(
             target.querySelector(".o_notification").textContent,
-            "Invalid fields: Display Name"
+            "Invalid fields: Display name"
         );
     });
 

@@ -440,10 +440,13 @@ export class Record extends DataPoint {
             this._setInvalidField(fieldName);
         }
         const isValid = !this._invalidFields.size;
-        if (!isValid && displayNotification) {
-            const items = [...this._invalidFields].map((fieldName) => {
-                return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
-            }, this);
+        if ((!isValid && displayNotification) || unsetRequiredFields.length > 0) {
+            const items = [...new Set([...this._invalidFields, ...unsetRequiredFields])].map(
+                (fieldName) => {
+                    return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
+                },
+                this
+            );
             this._closeInvalidFieldsNotification = this.model.notification.add(
                 markup(`<ul>${items.join("")}</ul>`),
                 {
@@ -451,6 +454,7 @@ export class Record extends DataPoint {
                     type: "danger",
                 }
             );
+            return false;
         }
         return isValid;
     }

@@ -125,7 +125,10 @@ export class DynamicList extends DataPoint {
                 }
             } else {
                 if (!this.model._urgentSave) {
-                    await this.editedRecord.checkValidity();
+                    const isvalid = await this.editedRecord.checkValidity();
+                    if (!isvalid) {
+                        return;
+                    }
                     if (!this.editedRecord) {
                         return true;
                     }
@@ -264,6 +267,9 @@ export class DynamicList extends DataPoint {
 
     async _multiSave(record) {
         const changes = record._getChanges();
+        if (!record._checkValidity()) {
+            return;
+        }
         if (!Object.keys(changes).length) {
             return;
         }
