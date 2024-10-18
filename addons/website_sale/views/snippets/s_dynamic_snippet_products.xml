@@ -6,6 +6,7 @@
             <t t-call="website_sale.s_dynamic_snippet_products_preview_data"/>
         </t>
     </template>
+
     <template id="s_dynamic_filter_template_product_product_borderless_2" name="Products">
         <t t-call="website.s_dynamic_snippet_template">
             <t t-set="snippet_name" t-value="'s_dynamic_snippet_products'"/>
@@ -13,6 +14,7 @@
             <t t-call="website_sale.dynamic_filter_template_product_product_borderless_2_preview_data"/>
         </t>
     </template>
+
     <template id="s_dynamic_filter_template_product_product_card_group" name="Products">
         <t t-call="website.s_dynamic_snippet_template">
             <t t-set="snippet_name" t-value="'s_dynamic_snippet_products'"/>
@@ -23,6 +25,7 @@
             <t t-call="website_sale.dynamic_filter_template_product_product_card_group_preview_data"/>
         </t>
     </template>
+
     <template id="s_dynamic_filter_template_product_product_centered" name="Products">
         <t t-call="website.s_dynamic_snippet_template">
             <t t-set="snippet_name" t-value="'s_dynamic_snippet_products'"/>
@@ -31,6 +34,7 @@
             <t t-call="website_sale.dynamic_filter_template_product_product_centered_preview_data"/>
         </t>
     </template>
+
     <template id="s_dynamic_filter_template_product_product_add_to_cart" name="Products">
         <t t-call="website.s_dynamic_snippet_template">
             <t t-set="snippet_name" t-value="'s_dynamic_snippet_products'"/>
@@ -39,6 +43,7 @@
             <t t-call="website_sale.dynamic_filter_template_product_product_add_to_cart_preview_data"/>
         </t>
     </template>
+
     <template id="s_dynamic_filter_template_product_product_view_detail" name="Products">
         <t t-call="website.s_dynamic_snippet_template">
             <t t-set="snippet_name" t-value="'s_dynamic_snippet_products'"/>
@@ -48,6 +53,7 @@
             <t t-call="website_sale.dynamic_filter_template_product_product_view_detail_preview_data"/>
         </t>
     </template>
+
     <template id="s_dynamic_filter_template_product_product_horizontal_card" name="Products">
         <t t-call="website.s_dynamic_snippet_template">
             <t t-set="snippet_name" t-value="'s_dynamic_snippet_products'"/>
@@ -56,11 +62,44 @@
             <t t-set="snippet_element_on_small_device" t-value="1" />
             <t t-set="snippet_classes" t-value="'s_product_product_horizontal_card'"/>
             <t t-set="snippet_classes" t-value="'o_carousel_multiple_rows'"/>
-            o_carousel_multiple_rows
             <t t-set="snippet_template_key" t-value="'website_sale.dynamic_filter_template_product_product_horizontal_card'"/>
             <t t-call="website_sale.dynamic_filter_template_product_product_horizontal_card_preview_data"/>
         </t>
     </template>
+
+    <template id="s_dynamic_filter_template_product_product_horizontal_card_2" name="Products">
+        <t t-call="website.s_dynamic_snippet_template">
+            <t t-set="snippet_name" t-value="'s_dynamic_snippet_products'"/>
+            <t t-set="snippet_no_of_element" t-value="2" />
+            <t t-set="snippet_row_per_slide" t-value="2" />
+            <t t-set="snippet_element_on_small_device" t-value="1" />
+            <t t-set="snippet_classes" t-value="'s_product_product_horizontal_card_2'"/>
+            <t t-set="snippet_classes" t-value="'o_carousel_multiple_rows'"/>
+            <t t-set="snippet_template_key" t-value="'website_sale.dynamic_filter_template_product_product_horizontal_card_2'"/>
+            <t t-call="website_sale.dynamic_filter_template_product_product_horizontal_card_2_preview_data"/>
+        </t>
+    </template>
+
+    <template id="s_dynamic_filter_template_product_product_mini_image" name="Products">
+        <t t-call="website.s_dynamic_snippet_template">
+            <t t-set="snippet_name" t-value="'s_dynamic_snippet_products'"/>
+            <t t-set="snippet_element_on_small_device" t-value="1" />
+            <t t-set="snippet_classes" t-value="'s_product_product_mini_image'"/>
+            <t t-set="snippet_template_key" t-value="'website_sale.dynamic_filter_template_product_product_mini_image'"/>
+            <t t-call="website_sale.dynamic_filter_template_product_product_mini_image_preview_data"/>
+        </t>
+    </template>
+
+    <template id="s_dynamic_filter_template_product_product_mini_name" name="Products">
+        <t t-call="website.s_dynamic_snippet_template">
+            <t t-set="snippet_name" t-value="'s_dynamic_snippet_products'"/>
+            <t t-set="snippet_element_on_small_device" t-value="1" />
+            <t t-set="snippet_classes" t-value="'s_product_product_mini_name'"/>
+            <t t-set="snippet_template_key" t-value="'website_sale.dynamic_filter_template_product_product_mini_name'"/>
+            <t t-call="website_sale.dynamic_filter_template_product_product_mini_name_preview_data"/>
+        </t>
+    </template>
+
     <template id="s_dynamic_snippet_products_options" inherit_id="website.snippet_options">
         <xpath expr="." position="inside">
             <t t-call="website.dynamic_snippet_carousel_options_template">
