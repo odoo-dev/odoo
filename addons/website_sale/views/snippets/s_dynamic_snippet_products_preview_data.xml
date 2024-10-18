@@ -92,4 +92,474 @@
             </a>
         </div>
     </template>
+
+    <template id="dynamic_filter_template_product_product_centered_preview_data" name="dynamic filter template product centered preview data">
+        <div class="carousel slide s_dialog_preview" data-bs-ride="carousel" id="s_dynamic_snippet_14" data-bs-interval="5000">
+            <div class="carousel-inner row w-100 mx-auto" role="listbox" aria-label="Carousel">
+                <div role="option" class="carousel-item active" style="min-height: 376px;">
+                    <div class="s_dynamic_snippet_row row g-3">
+                        <div class="d-flex flex-grow-0 flex-shrink-0 col-3">
+                            <div class="o_carousel_product_card card w-100">
+                                <input type="hidden" name="product-id" data-product-id="52"/>
+                                <a class="o_carousel_product_img_link position-absolute mx-auto" href="/shop/warranty-39#attribute_values=7">
+                                    <img class="card-img-top rounded-0" loading="lazy" src="/web/image/product.product/52/image_512?unique=10c51fb" alt="Warranty (2 year)"/>
+                                </a>
+                                <div class="o_carousel_product_card_body card-body d-flex flex-column justify-content-between">
+                                    <div class="card-title h5 text-center">Warranty (2 year)</div>
+                                    <div class="text-center">
+                                        <div class="h5">
+                                            <span class="fw-bold" name="product_price" data-oe-type="monetary" data-oe-expression="data['price']">
+                                                <span class="oe_currency_value">38.00</span>
+                                            </span>
+                                        </div>
+                                        <div class="h6 mb-0">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="o_carousel_product_card_footer d-flex align-items-center justify-content-center pb-4">
+                                    <a class="btn btn-primary d-block" href="/shop/warranty-39#attribute_values=7">
+                                        View Product
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-grow-0 flex-shrink-0 col-3">
+                            <div class="o_carousel_product_card card w-100">
+                                <input type="hidden" name="product-id" data-product-id="51"/>
+                                <a class="o_carousel_product_img_link position-absolute mx-auto" href="/shop/warranty-39#attribute_values=6">
+                                    <img class="card-img-top rounded-0" loading="lazy" src="/web/image/product.product/51/image_512?unique=10c51fb" alt="Warranty (1 year)"/>
+                                </a>
+                                <div class="o_carousel_product_card_body card-body d-flex flex-column justify-content-between">
+                                    <div class="card-title h5 text-center">Warranty (1 year)</div>
+                                    <div class="text-center">
+                                        <div class="h5">
+                                            <span class="fw-bold" name="product_price" data-oe-type="monetary" data-oe-expression="data['price']">
+                                                <span class="oe_currency_value">20.00</span>
+                                            </span>
+                                        </div>
+                                        <div class="h6 mb-0">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="o_carousel_product_card_footer d-flex align-items-center justify-content-center pb-4">
+                                    <a class="btn btn-primary d-block" href="/shop/warranty-39#attribute_values=6">
+                                        View Product
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-grow-0 flex-shrink-0 col-3">
+                            <div class="o_carousel_product_card card w-100">
+                                <input type="hidden" name="product-id" data-product-id="44"/>
+                                <a class="o_carousel_product_img_link position-absolute mx-auto" href="/shop/customizable-desk-9#attribute_values=17,4">
+                                    <img class="card-img-top rounded-0" loading="lazy" src="/web/image/product.product/44/image_512?unique=10c51fb" alt="Customizable Desk (Custom, White)"/>
+                                </a>
+                                <div class="o_carousel_product_card_body card-body d-flex flex-column justify-content-between">
+                                    <div class="card-title h5 text-center">Customizable Desk (Custom, White)</div>
+                                    <div class="text-center">
+                                        <div class="h5">
+                                            <span class="fw-bold" name="product_price" data-oe-type="monetary" data-oe-expression="data['price']">
+                                                <span class="oe_currency_value">750.00</span>
+                                            </span>
+                                        </div>
+                                        <div class="h6 mb-0">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="o_carousel_product_card_footer d-flex align-items-center justify-content-center pb-4">
+                                    <a class="btn btn-primary d-block" href="/shop/customizable-desk-9#attribute_values=17,4">
+                                        View Product
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-grow-0 flex-shrink-0 col-3">
+                            <div class="o_carousel_product_card card w-100">
+                                <input type="hidden" name="product-id" data-product-id="45"/>
+                                <a class="o_carousel_product_img_link position-absolute mx-auto" href="/shop/customizable-desk-9#attribute_values=17,5">
+                                    <img class="card-img-top rounded-0" loading="lazy" src="/web/image/product.product/45/image_512?unique=10c51fb" alt="Customizable Desk (Custom, Black)" />
+                                </a>
+                                <div class="o_carousel_product_card_body card-body d-flex flex-column justify-content-between">
+                                    <div class="card-title h5 text-center">Customizable Desk (Custom, Black)</div>
+                                    <div class="text-center">
+                                        <div class="h5">
+                                            <span class="fw-bold" name="product_price" data-oe-type="monetary" data-oe-expression="data['price']">
+                                                <span class="oe_currency_value">750.00</span>
+                                            </span>
+                                        </div>
+                                        <div class="h6 mb-0">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="o_carousel_product_card_footer d-flex align-items-center justify-content-center pb-4">
+                                    <a class="btn btn-primary d-block" href="/shop/customizable-desk-9#attribute_values=17,5">
+                                        View Product
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="s_dynamic_snippet_arrow_bottom px-3 px-md-0 pt-2 d-flex justify-content-between">
+                <a class="carousel-control-prev position-md-absolute w-auto" data-bs-slide="prev" role="button" aria-label="Previous" title="Previous" href="#s_dynamic_snippet_14">
+                    <span class="oi oi-chevron-left ms-md-n4 rounded-pill p-3 bg-700" contenteditable="false">​</span>
+                    <span class="visually-hidden">Previous</span>
+                </a>
+                <a class="carousel-control-next position-md-absolute w-auto" data-bs-slide="next" role="button" aria-label="Next" title="Next" href="#s_dynamic_snippet_14">
+                    <span class="oi oi-chevron-right me-md-n4 rounded-pill p-3 bg-700" contenteditable="false">​</span>
+                    <span class="visually-hidden">Next</span>
+                </a>
+            </div>
+        </div>
+    </template>
+
+    <template id="dynamic_filter_template_product_product_card_group_preview_data" name="dynamic filter template product product mini image">
+        <div class="carousel slide s_dialog_preview" data-bs-ride="carousel" id="s_dynamic_snippet_7" data-bs-interval="5000">
+            <div class="carousel-inner row w-100 mx-auto" role="listbox" aria-label="Carousel">
+                <div role="option" class="carousel-item o_card_group rounded active" style="min-height: 420.312px;">
+                        <div class="s_dynamic_snippet_row row g-3">
+                            <div class="d-flex flex-grow-0 flex-shrink-0 col-6">
+                                <div class="o_carousel_product_card card w-100 rounded-0 border-top-0 border-start-0" data-url="/shop/rent001-projector-160">
+                                    <input type="hidden" name="product-id" data-product-id="235" />
+                                    <div class="o_carousel_product_card_body card-body justify-content-between h-100 p-3">
+                                        <div class="row h-100">
+                                            <div class="col-8 d-flex flex-column">
+                                                <div class="card-title h5">Projector</div>
+                                                    <div class="d-flex justify-content-between align-items-center flex-wrap w-100 mt-auto">
+                                                        <div class="h5 text-primary mb-0 me-2">
+                                                            <span class="fw-bold">From</span>
+                                                                <span class="fw-bold" name="product_price" data-oe-type="monetary" data-oe-expression="data['price']">$ <span class="oe_currency_value">5.00</span></span>
+                                                                <span class="fw-bold">
+                                                                    /
+                                                                    3
+                                                                    Hours
+                                                                </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <div class="col-4 position-static">
+                                                <div class="overflow-hidden position-static">
+                                                    <a class="stretched-link o_dynamic_product_hovered" href="/shop/rent001-projector-160">
+                                                        <img class="img img-fluid o_img_product_square o_img_product_cover h-auto" loading="lazy" src="/web/image/product.product/235/image_512?unique=e6574ec" alt="Projector"/>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-grow-0 flex-shrink-0 col-6">
+                                <div class="o_carousel_product_card card w-100 rounded-0 border-top-0 border-start-0" data-url="/shop/customizable-desk-9#attribute_values=47,4">
+                                    <input type="hidden" name="product-id" data-product-id="189" />
+                                    <div class="o_carousel_product_card_body card-body justify-content-between h-100 p-3">
+                                        <div class="row h-100">
+                                            <div class="col-8 d-flex flex-column">
+                                                <div class="card-title h5">Customizable Desk (Custom, White)</div>
+                                                <div class="card-text h6 text-muted">160x80cm, with large legs.</div>
+                                                <div class="d-flex justify-content-between align-items-center flex-wrap w-100 mt-auto">
+                                                    <div class="h5 text-primary mb-0 me-2">
+                                                        <span class="fw-bold" name="product_price" data-oe-type="monetary" data-oe-expression="data['price']">$ <span class="oe_currency_value">750.00</span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4 position-static">
+                                                <div class="overflow-hidden position-static">
+                                                    <a class="stretched-link o_dynamic_product_hovered" href="/shop/customizable-desk-9#attribute_values=47,4">
+                                                        <img class="img img-fluid o_img_product_square o_img_product_cover h-auto" loading="lazy" src="/web/image/product.product/189/image_512?unique=611a6f0" alt="Customizable Desk (Custom, White)" />
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <div class="s_dynamic_snippet_row row g-3">
+                        <div class="d-flex flex-grow-0 flex-shrink-0 col-6">
+                            <div class="o_carousel_product_card card w-100 rounded-0 border-top-0 border-start-0" data-url="/shop/chair-floor-protection-117">
+                                <input type="hidden" name="product-id" data-product-id="192" />
+                                <div class="o_carousel_product_card_body card-body justify-content-between h-100 p-3">
+                                    <div class="row h-100">
+                                        <div class="col-8 d-flex flex-column">
+                                            <div class="card-title h5">Chair floor protection</div>
+                                            <div class="card-text h6 text-muted">Office chairs can harm your floor: protect it.</div>
+                                            <div class="d-flex justify-content-between align-items-center flex-wrap w-100 mt-auto">
+                                                <div class="h5 text-primary mb-0 me-2">
+                                                    <span class="fw-bold" name="product_price" data-oe-type="monetary" data-oe-expression="data['price']">$ <span class="oe_currency_value">12.00</span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-4 position-static">
+                                            <div class="overflow-hidden position-static">
+                                                <a class="stretched-link o_dynamic_product_hovered" href="/shop/chair-floor-protection-117">
+                                                    <img class="img img-fluid o_img_product_square o_img_product_cover h-auto" loading="lazy" src="/web/image/product.product/192/image_512?unique=b29061b" alt="Chair floor protection" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-grow-0 flex-shrink-0 col-6">
+                            <div class="o_carousel_product_card card w-100 rounded-0 border-top-0 border-start-0" data-url="/shop/customizable-desk-9#attribute_values=47,5">
+                                <input type="hidden" name="product-id" data-product-id="190" />
+                                <div class="o_carousel_product_card_body card-body justify-content-between h-100 p-3">
+                                    <div class="row h-100">
+                                        <div class="col-8 d-flex flex-column">
+                                            <div class="card-title h5">Customizable Desk (Custom, Black)</div>
+                                            <div class="card-text h6 text-muted">160x80cm, with large legs.</div>
+                                            <div class="d-flex justify-content-between align-items-center flex-wrap w-100 mt-auto">
+                                                <div class="h5 text-primary mb-0 me-2">
+                                                    <span class="fw-bold" name="product_price" data-oe-type="monetary" data-oe-expression="data['price']">$ <span class="oe_currency_value">750.00</span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-4 position-static">
+                                            <div class="overflow-hidden position-static">
+                                                <a class="stretched-link o_dynamic_product_hovered" href="/shop/customizable-desk-9#attribute_values=47,5">
+                                                    <img class="img img-fluid o_img_product_square o_img_product_cover h-auto" loading="lazy" src="/web/image/product.product/190/image_512?unique=b29061b" alt="Customizable Desk (Custom, Black)" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a class="carousel-control-prev position-md-absolute w-auto" data-bs-slide="prev" role="button" aria-label="Previous" title="Previous" href="#s_dynamic_snippet_7"><span class="oi oi-chevron-left ms-md-n4 rounded-pill p-3 bg-700" contenteditable="false">​</span><span class="visually-hidden">Previous</span></a><a class="carousel-control-next position-md-absolute w-auto" data-bs-slide="next" role="button" aria-label="Next" title="Next" href="#s_dynamic_snippet_7">
+                <span class="oi oi-chevron-right me-md-n4 rounded-pill p-3 bg-700" contenteditable="false">​</span>
+                <span class="visually-hidden">Next</span>
+            </a>   
+        </div>
+    </template>
+
+    <template id="dynamic_filter_template_product_product_borderless_2_preview_data" name="dynamic filter template product borderless 2">
+        <div class="carousel slide s_dialog_preview" data-bs-ride="carousel" id="s_dynamic_snippet_7" data-bs-interval="5000"><div class="carousel-inner row w-100 mx-auto" role="listbox" aria-label="Carousel"><div role="option" class="carousel-item active" style="min-height: 448.188px;">
+            <div class="s_dynamic_snippet_row row g-3">
+                <div class="d-flex flex-grow-0 flex-shrink-0 col-3">
+                    <div class="o_carousel_product_card card w-100 border-0 bg-transparent">
+                        <a class="o_carousel_product_img_link o_dynamic_product_hovered" href="/shop/warranty-39#attribute_values=7">
+                            <div class="overflow-hidden rounded">
+                                <img class="card-img-top o_img_product_square o_img_product_cover h-auto" loading="lazy" src="/web/image/product.product/52/image_512?unique=75e47ab" alt="Warranty (2 year)" />
+                            </div>
+                        </a>
+                    <div class="o_carousel_product_card_body h-100 p-3 d-flex flex-column justify-content-between">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+                            <div class="h5 mb-0 me-4">
+                                    <span class="fw-bold" name="product_price" data-oe-type="monetary" data-oe-expression="data['price']">$ <span class="oe_currency_value">38.00</span></span>
+                                </div>
+                                <div class="h6 mb-0">
+                                </div>
+                            </div>
+                            <div class="card-title h6 flex-grow-1 w-100 mt-2 mb-3">Warranty (2 year)</div>
+                            <div class="text-end o_dynamic_snippet_btn_wrapper">
+                                <button type="button" role="button" class="btn btn-primary js_add_cart w-100" title="Add to Cart" data-product-id="52" data-product-template-id="39" data-product-selected="True">
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex flex-grow-0 flex-shrink-0 col-3">
+                    <div class="o_carousel_product_card card w-100 border-0 bg-transparent">
+                        <a class="o_carousel_product_img_link o_dynamic_product_hovered" href="/shop/warranty-39#attribute_values=6">
+                            <div class="overflow-hidden rounded">
+                                <img class="card-img-top o_img_product_square o_img_product_cover h-auto" loading="lazy" src="/web/image/product.product/51/image_512?unique=75e47ab" alt="Warranty (1 year)" />
+                            </div>
+                        </a>
+                        <div class="o_carousel_product_card_body h-100 p-3 d-flex flex-column justify-content-between">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+                                <div class="h5 mb-0 me-4">
+                                    <span class="fw-bold" name="product_price" data-oe-type="monetary" data-oe-expression="data['price']">$ <span class="oe_currency_value">20.00</span></span>
+                                </div>
+                                <div class="h6 mb-0">
+                                </div>
+                            </div>
+                            <div class="card-title h6 flex-grow-1 w-100 mt-2 mb-3">Warranty (1 year)</div>
+                            <div class="text-end o_dynamic_snippet_btn_wrapper">
+                                <button type="button" role="button" class="btn btn-primary js_add_cart w-100" title="Add to Cart" data-product-id="51" data-product-template-id="39" data-product-selected="True">
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex flex-grow-0 flex-shrink-0 col-3">
+                    <div class="o_carousel_product_card card w-100 border-0 bg-transparent">
+                            <a class="o_carousel_product_img_link o_dynamic_product_hovered" href="/shop/customizable-desk-9#attribute_values=17,4">
+                                <div class="overflow-hidden rounded">
+                                    <img class="card-img-top o_img_product_square o_img_product_cover h-auto" loading="lazy" src="/web/image/product.product/44/image_512?unique=75e47ab" alt="Customizable Desk (Custom, White)" />
+                                </div>
+                            </a>
+                        <div class="o_carousel_product_card_body h-100 p-3 d-flex flex-column justify-content-between">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+                                <div class="h5 mb-0 me-4">
+                                    <span class="fw-bold" name="product_price" data-oe-type="monetary" data-oe-expression="data['price']">$ <span class="oe_currency_value">750.00</span></span>
+                                </div>
+                                <div class="h6 mb-0">
+                                </div>
+                            </div>
+                            <div class="card-title h6 flex-grow-1 w-100 mt-2 mb-3">Customizable Desk (Custom, White)</div>
+                            <div class="text-end o_dynamic_snippet_btn_wrapper">
+                                <button type="button" role="button" class="btn btn-primary js_add_cart w-100" title="Add to Cart" data-product-id="44" data-product-template-id="9" data-product-selected="True">
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex flex-grow-0 flex-shrink-0 col-3">
+                    <div class="o_carousel_product_card card w-100 border-0 bg-transparent">
+                        <a class="o_carousel_product_img_link o_dynamic_product_hovered" href="/shop/customizable-desk-9#attribute_values=17,5">
+                            <div class="overflow-hidden rounded">
+                                <img class="card-img-top o_img_product_square o_img_product_cover h-auto" loading="lazy" src="/web/image/product.product/45/image_512?unique=75e47ab" alt="Customizable Desk (Custom, Black)" />
+                            </div>
+                        </a>
+                        <div class="o_carousel_product_card_body h-100 p-3 d-flex flex-column justify-content-between">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+                                <div class="h5 mb-0 me-4">
+                                    <span class="fw-bold" name="product_price" data-oe-type="monetary" data-oe-expression="data['price']">$ <span class="oe_currency_value">750.00</span></span>
+                                </div>
+                                <div class="h6 mb-0">
+                                </div>
+                            </div>
+                            <div class="card-title h6 flex-grow-1 w-100 mt-2 mb-3">Customizable Desk (Custom, Black)</div>
+                            <div class="text-end o_dynamic_snippet_btn_wrapper">
+                                <button type="button" role="button" class="btn btn-primary js_add_cart w-100" title="Add to Cart" data-product-id="45" data-product-template-id="9" data-product-selected="True">
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a class="carousel-control-prev position-md-absolute w-auto" data-bs-slide="prev" role="button" aria-label="Previous" title="Previous" href="#s_dynamic_snippet_7"><span class="oi oi-chevron-left ms-md-n4 rounded-pill p-3 bg-700" contenteditable="false">​</span><span class="visually-hidden">Previous</span></a><a class="carousel-control-next position-md-absolute w-auto" data-bs-slide="next" role="button" aria-label="Next" title="Next" href="#s_dynamic_snippet_7"><span class="oi oi-chevron-right me-md-n4 rounded-pill p-3 bg-700" contenteditable="false">​</span><span class="visually-hidden">Next</span></a></div></div>
+    </template>
+
+    <template id="dynamic_filter_template_product_product_add_to_cart_preview_data" name="dynamic filter template Product add to cart">
+        <div class="carousel slide s_dialog_preview" data-bs-ride="carousel" id="s_dynamic_snippet_7" data-bs-interval="5000">
+            <div class="carousel-inner row w-100 mx-auto" role="listbox" aria-label="Carousel">
+                <div role="option" class="carousel-item active" style="min-height: 410.188px;">
+                    <div class="s_dynamic_snippet_row row g-3">
+                        <div class="d-flex flex-grow-0 flex-shrink-0 col-3">
+                            <div class="o_carousel_product_card card h-100 w-100">
+                                <a class="o_carousel_product_img_link o_dynamic_product_hovered overflow-hidden" href="/shop/warranty-39#attribute_values=7">
+                                    <img class="card-img-top o_img_product_square o_img_product_cover h-auto" loading="lazy" src="/web/image/product.product/52/image_512?unique=308acb3" alt="Warranty (2 year)"/>
+                                </a>
+                                <div class="o_carousel_product_card_body card-body d-flex flex-wrap">
+                                    <a class="text-decoration-none d-block w-100" href="/shop/warranty-39#attribute_values=7">
+                                        <div class="h6 card-title mb-0">Warranty (2 year)</div>
+                                    </a>
+                                    <div class="mt-2">
+                                    </div>
+                                    <div class="w-100 d-flex flex-wrap flex-md-column flex-lg-row align-items-center align-self-end justify-content-between mt-3">
+                                        <div class="py-2">
+                                            <span class="fw-bold" name="product_price" data-oe-type="monetary" data-oe-expression="data['price']">
+                                                <span class="oe_currency_value">38.00</span>
+                                            </span>
+                                        </div>
+                                        <div class="o_dynamic_snippet_btn_wrapper">
+                                            <button type="button" role="button" class="btn btn-primary js_add_cart ms-auto" title="Add to Cart" data-product-id="52" data-product-template-id="39" data-product-selected="True">
+                                                <i class="fa fa-fw fa-shopping-cart" contenteditable="false">​</i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-grow-0 flex-shrink-0 col-3">
+                            <div class="o_carousel_product_card card h-100 w-100">
+                                <a class="o_carousel_product_img_link o_dynamic_product_hovered overflow-hidden" href="/shop/warranty-39#attribute_values=6">
+                                    <img class="card-img-top o_img_product_square o_img_product_cover h-auto" loading="lazy" src="/web/image/product.product/51/image_512?unique=308acb3" alt="Warranty (1 year)"/>
+                                </a>
+                                <div class="o_carousel_product_card_body card-body d-flex flex-wrap">
+                                    <a class="text-decoration-none d-block w-100" href="/shop/warranty-39#attribute_values=6">
+                                        <div class="h6 card-title mb-0">Warranty (1 year)</div>
+                                    </a>
+                                    <div class="mt-2">
+                                    </div>
+                                    <div class="w-100 d-flex flex-wrap flex-md-column flex-lg-row align-items-center align-self-end justify-content-between mt-3">
+                                        <div class="py-2">
+                                            <span class="fw-bold" name="product_price" data-oe-type="monetary" data-oe-expression="data['price']">
+                                                <span class="oe_currency_value">20.00</span>
+                                            </span>
+                                        </div>
+                                        <div class="o_dynamic_snippet_btn_wrapper">
+                                            <button type="button" role="button" class="btn btn-primary js_add_cart ms-auto" title="Add to Cart" data-product-id="51" data-product-template-id="39" data-product-selected="True">
+                                                <i class="fa fa-fw fa-shopping-cart" contenteditable="false">​</i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-grow-0 flex-shrink-0 col-3">
+                            <div class="o_carousel_product_card card h-100 w-100">
+                                <a class="o_carousel_product_img_link o_dynamic_product_hovered overflow-hidden" href="/shop/customizable-desk-9#attribute_values=17,4">
+                                    <img class="card-img-top o_img_product_square o_img_product_cover h-auto" loading="lazy" src="/web/image/product.product/44/image_512?unique=308acb3" alt="Customizable Desk (Custom, White)"/>
+                                </a>
+                                <div class="o_carousel_product_card_body card-body d-flex flex-wrap">
+                                    <a class="text-decoration-none d-block w-100" href="/shop/customizable-desk-9#attribute_values=17,4">
+                                        <div class="h6 card-title mb-0">Customizable Desk (Custom, White)</div>
+                                    </a>
+                                    <div class="mt-2">
+                                    </div>
+                                    <div class="w-100 d-flex flex-wrap flex-md-column flex-lg-row align-items-center align-self-end justify-content-between mt-3">
+                                        <div class="py-2">
+                                            <span class="fw-bold" name="product_price" data-oe-type="monetary" data-oe-expression="data['price']">
+                                                <span class="oe_currency_value">750.00</span>
+                                            </span>
+                                        </div>
+                                        <div class="o_dynamic_snippet_btn_wrapper">
+                                            <button type="button" role="button" class="btn btn-primary js_add_cart ms-auto" title="Add to Cart" data-product-id="44" data-product-template-id="9" data-product-selected="True">
+                                                <i class="fa fa-fw fa-shopping-cart" contenteditable="false">​</i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-grow-0 flex-shrink-0 col-3">
+                            <div class="o_carousel_product_card card h-100 w-100">
+                                <a class="o_carousel_product_img_link o_dynamic_product_hovered overflow-hidden" href="/shop/customizable-desk-9#attribute_values=17,5">
+                                    <img class="card-img-top o_img_product_square o_img_product_cover h-auto" loading="lazy" src="/web/image/product.product/45/image_512?unique=308acb3" alt="Customizable Desk (Custom, Black)"/>
+                                </a>
+                                <div class="o_carousel_product_card_body card-body d-flex flex-wrap">
+                                    <a class="text-decoration-none d-block w-100" href="/shop/customizable-desk-9#attribute_values=17,5">
+                                        <div class="h6 card-title mb-0">Customizable Desk (Custom, Black)</div>
+                                    </a>
+                                    <div class="mt-2">
+                                    </div>
+                                    <div class="w-100 d-flex flex-wrap flex-md-column flex-lg-row align-items-center align-self-end justify-content-between mt-3">
+                                        <div class="py-2">
+                                            <span class="fw-bold" name="product_price" data-oe-type="monetary" data-oe-expression="data['price']">
+                                                <span class="oe_currency_value">750.00</span>
+                                            </span>
+                                        </div>
+                                        <div class="o_dynamic_snippet_btn_wrapper">
+                                            <button type="button" role="button" class="btn btn-primary js_add_cart ms-auto" title="Add to Cart" data-product-id="45" data-product-template-id="9" data-product-selected="True">
+                                                <i class="fa fa-fw fa-shopping-cart" contenteditable="false">​</i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a class="carousel-control-prev position-md-absolute w-auto" data-bs-slide="prev" role="button" aria-label="Previous" title="Previous" href="#s_dynamic_snippet_7">
+                <span class="oi oi-chevron-left ms-md-n4 rounded-pill p-3 bg-700" contenteditable="false">​</span>
+                <span class="visually-hidden">Previous</span>
+            </a>
+            <a class="carousel-control-next position-md-absolute w-auto" data-bs-slide="next" role="button" aria-label="Next" title="Next" href="#s_dynamic_snippet_7">
+                <span class="oi oi-chevron-right me-md-n4 rounded-pill p-3 bg-700" contenteditable="false">​</span>
+                <span class="visually-hidden">Next</span>
+            </a>
+        </div>
+    </template>
 </odoo>
