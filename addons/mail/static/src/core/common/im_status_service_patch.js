@@ -20,7 +20,15 @@ export const imStatusServicePatch = {
                 if (!persona) {
                     return; // Do not store unknown persona's status
                 }
-                persona.im_status = im_status;
+                if (im_status == "online" && persona?.out_of_office_date_end) {
+                    persona.im_status = "leave_online";
+                } else if (im_status == "offline" && persona?.out_of_office_date_end) {
+                    persona.im_status = "leave_offline";
+                } else if (im_status == "away" && persona?.out_of_office_date_end) {
+                    persona.im_status = "leave_away";
+                } else {
+                    persona.im_status = im_status;
+                }
                 if (persona.type !== "guest" || persona.notEq(store.self)) {
                     return; // Partners are already handled by the original service
                 }
