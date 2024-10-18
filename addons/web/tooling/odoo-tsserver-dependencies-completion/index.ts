@@ -4,16 +4,36 @@ function init(modules: { typescript: typeof import("typescript/lib/tsserverlibra
     const ts = modules.typescript;
   
     function create(info: ts.server.PluginCreateInfo) {
-      // Get a list of things to remove from the completion list from the config object.
-      // If nothing was specified, we'll just remove 'caller'
-      const whatToRemove: string[] = info.config.remove || ["caller"];
+      const logger = info.project.projectService.logger;
+      const depsMap = info.config.depsMap || {};
+      const fileNameRe = /\/(?<module>\w+)\/static\/(?<subdir>\w+)\//
+      function getFilenameInfo(fileName: string) {
+        const m = fileName.match(fileNameRe);
+        if (m) {
+          return m.groups;
+        }
+        return {}
+      }
+      function getDependencies(moduleName: string|undefined) {
+        if (!moduleName || !(moduleName in depsMap)) {
+          return null;
+        }
+        return ["odoo", moduleName, ...(depsMap[moduleName] || [])]
+      }
+      function isImportOdooValid(originModuleName: string, data: ts.CompletionEntryData) {
+        const deps = getDependencies(originModuleName);
+        if (!deps) {
+          return true;
+        }
+        const { moduleSpecifier, fileName } = data;
+        if (moduleSpecifier) {
+          return deps.some(d => moduleSpecifier.startsWith(`@${d}/`))
+        } else if (fileName) {
+          return deps.some(d => fileName.includes(`/${d}/static/`))
+        }
+        return true;
+      }
   
-      // Diagnostic logging
-      info.project.projectService.logger.info(
-        "I'm getting set up now! Check the log for this message."
-      );
-  
-      // Set up decorator object
       const proxy: ts.LanguageService = Object.create(null);
       for (let k of Object.keys(info.languageService) as Array<keyof ts.LanguageService>) {
         const x = info.languageService[k]!;
@@ -25,20 +45,23 @@ function init(modules: { typescript: typeof import("typescript/lib/tsserverlibra
         const prior = info.languageService.getCompletionsAtPosition(fileName, position, options);
         if (!prior) return
         
-        const isTestFile = fileName.includes("/tests/")
+        const fileNameInfo = getFilenameInfo(fileName);
 
         const oldLength = prior.entries.length;
         prior.entries = prior.entries.filter((e) => {
-            if (!isTestFile && e.data) {
-                return (e.data.fileName || "").includes("/tests/") ? false : true;
+            if (e.data) {
+                if (fileNameInfo.subdir === "src" && (e.data.fileName || "").includes("/tests/")) {
+                  return false
+                }
+                return isImportOdooValid(fileNameInfo.module, e.data)
             }
             return true;
-        })
+        });
   
         // Sample logging for diagnostic purposes
         if (oldLength !== prior.entries.length) {
           const entriesRemoved = oldLength - prior.entries.length;
-          info.project.projectService.logger.info(
+          logger.info(
             `Removed ${entriesRemoved} entries from the completion list`
           );
         }
