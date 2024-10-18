@@ -479,6 +479,20 @@ $o-color-extras-nesting-selector: '&, .o_colored_level &';
     @return $-palette;
 }
 
+.o_we_shape {
+    --ConnectionShape--size: 64px;
+    --ConnectionShapeSm--size: 32px;
+    --ConnectionShapeLg--size: 128px;
+    --ConnectionShapeXl--size: 256px;
+}
+
+.o_we_shape_btn_content .o_we_shape {
+    --ConnectionShape--size: 24px;
+    --ConnectionShapeSm--size: var(--ConnectionShape--size);
+    --ConnectionShapeLg--size: var(--ConnectionShape--size);
+    --ConnectionShapeXl--size: 50%;
+}
+
 // format: (module_name: (shape_filename: ('position': X, 'size': Y, 'colors': (1, [3], ...)), ...))
 $o-bg-shapes: ('web_editor': (
     'Airy/01': ('position': bottom, 'size': 100% auto, 'colors': (1)),
@@ -636,6 +650,24 @@ $o-bg-shapes: ('web_editor': (
     'Zigs/04': ('position': bottom, 'size': 100% auto, 'colors': (1)),
     'Zigs/05': ('position': bottom, 'size': 100% auto, 'colors': (3)),
     'Zigs/06': ('position': bottom, 'size': 30px 100%, 'colors': (4, 5), 'repeat-x': true),
+    'Connections/01': ('position': bottom, 'size': 100% var(--ConnectionShape--size), 'colors': (1)),
+    'Connections/02': ('position': bottom, 'size': 100% var(--ConnectionShape--size), 'colors': (1)),
+    'Connections/03': ('position': bottom, 'size': 100% var(--ConnectionShape--size), 'colors': (1)),
+    'Connections/04': ('position': bottom, 'size': 100% var(--ConnectionShape--size), 'colors': (1)),
+    'Connections/05': ('position': bottom, 'size': 100% var(--ConnectionShape--size), 'colors': (1)),
+    'Connections/06': ('position': bottom, 'size': 100% var(--ConnectionShape--size), 'colors': (1)),
+    'Connections/07': ('position': bottom, 'size': 100% var(--ConnectionShape--size), 'colors': (1)),
+    'Connections/08': ('position': bottom, 'size': 100% var(--ConnectionShape--size), 'colors': (1)),
+    'Connections/09': ('position': bottom, 'size': 100% var(--ConnectionShape--size), 'colors': (1)),
+    'Connections/10': ('position': bottom, 'size': 100% var(--ConnectionShape--size), 'colors': (1)),
+    'Connections/11': ('position': bottom, 'size': 100%, 'colors': (1)),
+    'Connections/12': ('position': bottom, 'size': 100% var(--ConnectionShape--size), 'colors': (1)),
+    'Connections/13': ('position': bottom, 'size': 100% var(--ConnectionShape--size), 'colors': (1)),
+    'Connections/14': ('position': bottom, 'size': 100% var(--ConnectionShape--size), 'colors': (1)),
+    'Connections/15': ('position': bottom, 'size': var(--ConnectionShapeSm--size) 100%, 'colors': (1), 'repeat-x': true),
+    'Connections/16': ('position': bottom, 'size': var(--ConnectionShapeSm--size) 100%, 'colors': (1), 'repeat-x': true),
+    'Connections/17': ('position': bottom, 'size': 100% var(--ConnectionShapeLg--size), 'colors': (1)),
+    'Connections/18': ('position': bottom, 'size': 100% var(--ConnectionShapeXl--size), 'colors': (1)),
 ));
 
 @function change-shape-colors-mapping($module, $shape-name, $mapping, $shapes: $o-bg-shapes) {

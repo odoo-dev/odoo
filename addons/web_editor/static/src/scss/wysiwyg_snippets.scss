@@ -1324,6 +1324,9 @@
                         height: 75px;
                     }
                 }
+                &[string="Connections"] we-button[data-shape] {
+                    grid-column: span 2;
+                }
                 we-button.active {
                     outline: 4px solid $o-we-color-success;
                     outline-offset: -4px;
