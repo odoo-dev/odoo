@@ -39,6 +39,7 @@ import { messageActionsRegistry, useMessageActions } from "./message_actions";
 import { cookie } from "@web/core/browser/cookie";
 import { rpc } from "@web/core/network/rpc";
 import { escape } from "@web/core/utils/strings";
+import { useDebounced } from "@web/core/utils/timing";
 import { MessageActionMenuMobile } from "./message_action_menu_mobile";
 import { discussComponentRegistry } from "./discuss_component_registry";
 
@@ -168,16 +169,13 @@ export class Message extends Component {
         });
         useEffect(
             () => {
-                if (this.messageBody.el) {
-                    this.prepareMessageBody(this.messageBody.el);
-                }
                 if (this.shadowBody.el) {
                     const bodyEl = document.createElement("span");
                     bodyEl.innerHTML = this.state.showTranslation
                         ? this.message.translationValue
                         : this.props.messageSearch?.highlight(this.message.body) ??
                           this.message.body;
-                    this.prepareMessageBody(bodyEl);
+                    this.debouncedPrepareMessageBody(bodyEl);
                     this.shadowRoot.appendChild(bodyEl);
                     return () => {
                         this.shadowRoot.removeChild(bodyEl);
@@ -190,6 +188,15 @@ export class Message extends Component {
                 this.props.messageSearch?.searchTerm,
                 this.message.body,
             ]
+        );
+        this.debouncedPrepareMessageBody = useDebounced(this.prepareMessageBody, 50);
+        useEffect(
+            () => {
+                if (this.messageBody.el && !this.state.isEditing) {
+                    this.debouncedPrepareMessageBody(this.messageBody.el);
+                }
+            },
+            () => [!this.state.isEditing && this.message.body]
         );
     }
 
@@ -401,9 +408,6 @@ export class Message extends Component {
 
     /** @param {HTMLElement} bodyEl */
     prepareMessageBody(bodyEl) {
-        if (!bodyEl) {
-            return;
-        }
         const linkEls = bodyEl.querySelectorAll(".o_channel_redirect");
         for (const linkEl of linkEls) {
             const text = linkEl.textContent.substring(1); // remove '#' prefix
