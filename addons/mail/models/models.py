@@ -232,7 +232,7 @@ class Base(models.AbstractModel):
             email_cc_lst, email_to_lst = [], []
             # main recipients (res.partner)
             recipients_all = customers.get(record.id)
-            recipient_ids = recipients_all.filtered(lambda p: p.email).ids
+            recipients = recipients_all.filtered(lambda p: p.email)
             # to computation
             to_fn = next(
                 (
@@ -262,17 +262,17 @@ class Base(models.AbstractModel):
             if not prioritize_email or not email_to_lst:
                 # if no valid recipients nor emails, fallback on recipients even
                 # invalid to have at least some information
-                if recipient_ids:
-                    partner_ids = recipient_ids or recipients_all.ids
+                if recipients:
+                    partner_ids = recipients.ids or recipients_all.ids
                     email_to = False
                 else:
                     partner_ids = [] if email_to_lst else recipients_all.ids
                     email_to = ','.join(email_to_lst)
             # if emails match partners, use partners to have more information
-            elif len(email_to_lst) == len(recipient_ids) and all(
-                tools.email_normalize(email) in recipient_ids.mapped('email_normalized') for email in email_to_lst
+            elif len(email_to_lst) == len(recipients) and all(
+                tools.email_normalize(email) in recipients.mapped('email_normalized') for email in email_to_lst
             ):
-                partner_ids = recipient_ids
+                partner_ids = recipients.ids
                 email_to = False
             else:
                 partner_ids = []
