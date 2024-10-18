@@ -55,7 +55,10 @@ class SaleAdvancePaymentInv(models.TransientModel):
 
             # split the downpayment amount into 2: doi amount and other amount
             down_total = downpayment_line.price_unit
-            amount_total = sum(order.order_line.mapped("price_total"))
+            if all(advance_product_taxes.mapped('price_include')):
+                amount_total = order.amount_total
+            else:
+                amount_total = order.amount_untaxed
             doi_down = invoice.currency_id.round(doi_total / amount_total * down_total)
             other_down = down_total - doi_down
 
