@@ -65,7 +65,7 @@ insertModelFields("discuss.channel", {
             return this.pyEnv.currentPartnerId;
         },
     },
-    avatarCacheKey: { string: "Avatar Cache Key", type: "datetime" },
+    avatar_cache_key: { string: "Avatar Cache Key", type: "datetime" },
     channel_member_ids: {
         default() {
             return [

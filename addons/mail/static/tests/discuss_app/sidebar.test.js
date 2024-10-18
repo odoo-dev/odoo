@@ -756,7 +756,7 @@ test("channel - avatar: should have correct avatar", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({
         name: "test",
-        avatarCacheKey: "notaDateCache",
+        avatar_cache_key: "notaDateCache",
     });
     await start();
     await openDiscuss();
@@ -769,7 +769,7 @@ test("channel - avatar: should have correct avatar", async () => {
 test("channel - avatar: should update avatar url from bus", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({
-        avatarCacheKey: "notaDateCache",
+        avatar_cache_key: "notaDateCache",
         name: "test",
     });
     await start();
@@ -783,7 +783,7 @@ test("channel - avatar: should update avatar url from bus", async () => {
         { image_128: "This field does not matter" },
     ]);
     const result = pyEnv["discuss.channel"].search_read([["id", "=", channelId]]);
-    const newCacheKey = result[0]["avatarCacheKey"];
+    const newCacheKey = result[0]["avatar_cache_key"];
     await contains(
         `img[data-src='${getOrigin()}/web/image/discuss.channel/${channelId}/avatar_128?unique=${newCacheKey}']`,
         { count: 2 }
