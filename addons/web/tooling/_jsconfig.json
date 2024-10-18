@@ -1,31 +1,35 @@
 {
     "compilerOptions": {
         "moduleResolution": "node",
-        "baseUrl": ".",
+        "baseUrl": "${configDir}",
         "target": "ES2022",
         "noEmit": true,
         "disableSizeLimit": true,
-        "paths": {}
+        "typeRoots": [
+            "*/static/src/@types",
+            "mail/static/src/js/tooling/types",
+            "web/tooling/types"
+        ]
     },
-    "include": ["addons/**/*.js", "addons/**/*.ts"],
+    "include": ["**/*.js", "**/*.ts"],
     "exclude": [
-        "addons/**/lib/hoot*/*",
-        "addons/**/lib/ace",
-        "addons/**/lib/bootstrap",
-        "addons/**/lib/Chart",
-        "addons/**/lib/chartjs-adapter-luxon",
-        "addons/**/lib/fullcalendar",
-        "addons/**/lib/jquery",
-        "addons/**/lib/luxon",
-        "addons/**/lib/odoo_ui_icons",
-        "addons/**/lib/owl",
-        "addons/**/lib/pdfjs",
-        "addons/**/lib/popper",
-        "addons/**/lib/qunit",
-        "addons/**/lib/signature_pad",
-        "addons/**/lib/stacktracejs",
-        "addons/**/lib/zxing-library",
-        "addons/**/l10n*",
-        "addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js"
+        "**/node_modules",
+        "**/lib/ace",
+        "**/lib/bootstrap",
+        "**/lib/Chart",
+        "**/lib/chartjs-adapter-luxon",
+        "**/lib/fullcalendar",
+        "**/lib/jquery",
+        "**/lib/luxon",
+        "**/lib/odoo_ui_icons",
+        "**/lib/owl",
+        "**/lib/pdfjs",
+        "**/lib/popper",
+        "**/lib/qunit",
+        "**/lib/signature_pad",
+        "**/lib/stacktracejs",
+        "**/lib/zxing-library",
+        "**/l10n*",
+        "spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js"
     ]
 }
