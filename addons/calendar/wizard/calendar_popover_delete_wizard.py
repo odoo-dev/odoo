@@ -5,7 +5,7 @@ from odoo import api, fields, models
 
 
 class CalendarPopoverDeleteWizard(models.TransientModel):
-    _inherit = 'mail.composer.mixin'
+    _inherit = ['mail.composer.mixin']
     _description = 'Calendar Popover Delete Wizard'
 
 
@@ -28,23 +28,23 @@ class CalendarPopoverDeleteWizard(models.TransientModel):
 
     @api.depends('record')
     def _compute_subject(self):
-        for wizard_subject in self.filtered('template_id'):
-            wizard_subject.subject = wizard_subject.template_id._render_field(
+        for wizard in self.filtered('template_id'):
+            wizard.subject = wizard.template_id._render_field(
                 'subject',
-                [wizard_subject.record.id],
+                [wizard.record.id],
                 compute_lang=True,
                 options={'post_process': True},
-            )[wizard_subject.record.id]
+            )[wizard.record.id]
 
     @api.depends('record')
     def _compute_body(self):
-        for wizard_body in self.filtered('template_id'):
-            wizard_body.body = wizard_body.template_id._render_field(
+        for wizard in self.filtered('template_id'):
+            wizard.body = wizard.template_id._render_field(
                 'body_html',
-                [wizard_body.record.id],
+                [wizard.record.id],
                 compute_lang=True,
                 options={'post_process': True},
-            )[wizard_body.record.id]
+            )[wizard.record.id]
 
     def action_cancel(self):
         return {'type': 'ir.actions.act_window_close'}
@@ -58,6 +58,7 @@ class CalendarPopoverDeleteWizard(models.TransientModel):
         self.ensure_one()
         event = self.record
         deletion_type = self._context.get('default_recurrence')
+
         # Send email notification
         self.env.ref('calendar.calendar_template_delete_event').send_mail(
             event.id, email_layout_xmlid='mail.mail_notification_light', force_send=True

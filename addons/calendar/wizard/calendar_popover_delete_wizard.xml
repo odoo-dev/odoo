@@ -26,9 +26,8 @@
                 <group col="2">
                     <field name="recipient_ids"
                            widget="many2many_tags_email"
-                           context="{'force_email': True,
-                                     'show_email': True,
-                                     'no_create_edit': True}"/>
+                           context="{'force_email': True,' show_email': True, 'no_create_edit': True}"
+                    />
                 </group>
                 <group col="2">
                     <field name="subject" placeholder="Subject"/>

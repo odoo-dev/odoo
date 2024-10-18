@@ -451,9 +451,9 @@ class TestEventNotifications(TransactionCase, MailCase, MockEmail, CronMixinCase
         events.unlink()
 
     def test_calendar_recurring_event_delete_notification(self):
-        """
-            Check that we can delete recurring event notification and decline events.
-        """
+        """ Check that we can delete recurring event notification and decline events. """
+        # Test preparation
+        # Setup for creating a test event with recurring properties
         user_admin = self.env.ref('base.user_admin')
         start = datetime.combine(date.today(), datetime.min.time()).replace(hour=9)
         stop = datetime.combine(date.today(), datetime.min.time()).replace(hour=12)
@@ -470,17 +470,16 @@ class TestEventNotifications(TransactionCase, MailCase, MockEmail, CronMixinCase
             'privacy': 'public',
             'show_as': 'busy',
         })
-
+        # Test execution
+        # Deleting the next occurrence of the event using the delete wizard
         wizard = self.env['calendar.popover.delete.wizard'].with_context(
-            form_view_ref='calendar.calendar_popover_delete_view').create(
-                {
-                    'record': event.id
-                }
-        )
+            form_view_ref='calendar.calendar_popover_delete_view').create({'record': event.id})
         form = Form(wizard)
         form.delete = 'next'
         form.save()
         wizard.close()
+        # Test execution
+        # Unlink the event and send a cancellation notification
         event.action_unlink_event()
         wizard = self.env['calendar.popover.delete.wizard'].create({
             'record': event.id,
@@ -488,6 +487,8 @@ class TestEventNotifications(TransactionCase, MailCase, MockEmail, CronMixinCase
             'body': 'The event has been cancelled.',
             'recipient_ids': [(6, 0, [user_admin.partner_id.id])],
         })
+        # Test expected results
+        # Simulate sending the email and ensure one email is sent
         with self.mock_mail_gateway():
             wizard.action_send_mail_and_delete()
         self.assertEqual(len(self._new_mails), 1)
