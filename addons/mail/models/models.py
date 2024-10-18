@@ -229,7 +229,7 @@ class Base(models.AbstractModel):
         prioritize_email = getattr(self, '_mail_defaults_to_email', False)
         primary_email_fn = self._mail_get_primary_email_field()
         for record in self:
-            email_cc, email_to = False, False
+            email_cc_lst, email_to_lst = [], []
             # main recipients (res.partner)
             recipients_all = customers.get(record.id)
             recipient_ids = recipients_all.filtered(lambda p: p.email).ids
@@ -247,9 +247,7 @@ class Base(models.AbstractModel):
             )
             if to_fn:
                 # keep value to ease debug / trace update if cannot normalize
-                email_to = ','.join(
-                    tools.email_normalize_all(record[to_fn]) or [record[to_fn]]
-                )
+                email_to_lst = tools.mail.email_split_and_format_normalize(record[to_fn]) or [record[to_fn]]
             # cc computation
             cc_fn = next(
                 (
@@ -258,14 +256,31 @@ class Base(models.AbstractModel):
                 ), False
             )
             if cc_fn:
-                email_cc = ','.join(
-                    tools.email_normalize_all(record[cc_fn]) or [record[cc_fn]]
-                )
+                email_cc_lst = tools.mail.email_split_and_format_normalize(record[cc_fn]) or [record[cc_fn]]
+            # prioritize recipients: default, or when to == recipients emails, or
+            # when no email_to
+            if not prioritize_email or not email_to_lst:
+                # if no valid recipients nor emails, fallback on recipients even
+                # invalid to have at least some information
+                if recipient_ids:
+                    partner_ids = recipient_ids or recipients_all.ids
+                    email_to = False
+                else:
+                    partner_ids = [] if email_to_lst else recipients_all.ids
+                    email_to = ','.join(email_to_lst)
+            # if emails match partners, use partners to have more information
+            elif len(email_to_lst) == len(recipient_ids) and all(
+                tools.email_normalize(email) in recipient_ids.mapped('email_normalized') for email in email_to_lst
+            ):
+                partner_ids = recipient_ids
+                email_to = False
+            else:
+                partner_ids = []
+                email_to = ','.join(email_to_lst)
             res[record.id] = {
-                'email_cc': email_cc,
-                'email_to': email_to if prioritize_email or not recipient_ids else False,
-                # last fallback, even ill-defined partners (aka no email) are taken as recipient
-                'partner_ids': (recipient_ids or recipients_all.ids) if not prioritize_email or not email_to else [],
+                'email_cc': ','.join(email_cc_lst),
+                'email_to': email_to,
+                'partner_ids': partner_ids,
             }
         return res
 
