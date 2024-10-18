@@ -356,7 +356,7 @@ Q2hhdXNz77+977+9ZSBkZSBCcnV4ZWxsZXM8L2NiYzpTdHJlZXROYW1lPg0KPC9JbnZvaWNlPg0K
 --00000000000005d9da05fa394cc0--
 """
 
-MAIL_MULTIPART_OMITTED_CHARSET = """Return-Path: <whatever-2a840@postmaster.twitter.com>
+MAIL_MULTIPART_OMITTED_CHARSET_XML = """Return-Path: <whatever-2a840@postmaster.twitter.com>
 To: {to}
 cc: {cc}
 Received: by mail1.openerp.com (Postfix, from userid 10002)
@@ -397,6 +397,48 @@ Content-ID: <f_lgxgdqx40>
 X-Attachment-Id: f_lgxgdqx40
 
 PEludm9pY2U+Q2hhdXNzw6llIGRlIEJydXhlbGxlczwvSW52b2ljZT4=
+--00000000000005d9da05fa394cc0--
+"""
+
+MAIL_MULTIPART_OMITTED_CHARSET_CSV = """Return-Path: <whatever-2a840@postmaster.twitter.com>
+To: {to}
+cc: {cc}
+Received: by mail1.openerp.com (Postfix, from userid 10002)
+    id 5DF9ABFB2A; Fri, 10 Aug 2012 16:16:39 +0200 (CEST)
+From: {email_from}
+Subject: {subject}
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+    boundary="00000000000005d9da05fa394cc0"
+Date: Fri, 10 Aug 2012 14:16:26 +0000
+Message-ID: {msg_id}
+{extra}
+
+--00000000000005d9da05fa394cc0
+Content-Type: multipart/alternative; boundary="00000000000005d9d905fa394cbe"
+
+--00000000000005d9d905fa394cbe
+Content-Type: text/plain; charset="UTF-8"
+
+Dear customer,
+
+Please find attached the UBL attachment of your invoice
+
+Cheers,
+
+--00000000000005d9d905fa394cbe
+Content-Type: text/html; charset="UTF-8"
+
+<div dir="ltr">Dear customer,<div><br></div><div>Please find attached the UBL attachment of your invoice</div><div><br></div><div>Cheers,</div></div>
+
+--00000000000005d9d905fa394cbe--
+
+--00000000000005d9da05fa394cc0
+Content-Disposition: attachment; filename="bis3.csv"
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/csv; name="bis3.csv"
+
+=EF=BB=BFAuftraggeber;LieferadresseStra=C3=9Fe;=
 --00000000000005d9da05fa394cc0--
 """
 
