@@ -1162,13 +1162,13 @@ class PosOrder(models.Model):
         }
 
     def action_send_mail(self):
-        template_id = self.env['ir.model.data']._xmlid_to_res_id('point_of_sale.pos_email_marketing_template', raise_if_not_found=False)
+        template = self.env['mail.template'].search([('model', '=', self._name)], limit=1)
         return {
             'name': _('Send Email'),
             'view_mode': 'form',
             'res_model': 'mail.compose.message',
             'type': 'ir.actions.act_window',
-            'context': {'default_composition_mode': 'mass_mail', 'default_template_id': template_id},
+            'context': {'default_composition_mode': 'mass_mail', 'default_template_id': template.id},
             'target': 'new'
         }
 
