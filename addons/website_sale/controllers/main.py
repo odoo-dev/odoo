@@ -1084,6 +1084,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         error = dict()
         error_message = []
 
+        partner_su = request.env['res.partner'].sudo()
         if data.get('partner_id'):
             partner_su = request.env['res.partner'].sudo().browse(int(data['partner_id'])).exists()
             if partner_su:
@@ -1125,6 +1126,18 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 # If the billing address is also used as shipping one, the phone is required as well
                 # because it's required for shipping addresses
                 required_fields.append('phone')
+            if _update_mode == 'new':
+                order_sudo = request.website.sale_get_order()
+                if not order_sudo._is_public_order():
+                    for fname in partner_su._commercial_fields():
+                        if fname not in data and fname in required_fields:
+                            required_fields.remove(fname)
+            else:  # 'edit'
+                order_sudo = request.website.sale_get_order()
+                if partner_su and order_sudo.partner_id != partner_su:
+                    for fname in partner_su._commercial_fields():
+                        if fname not in data and fname in required_fields:
+                            required_fields.remove(fname)
 
         # error message for empty required fields
         for field_name in required_fields:
@@ -1235,9 +1248,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 new_values['type'] = 'delivery'
                 new_values['parent_id'] = commercial_partner.id
         return new_values, errors, error_msg
-
-    def force_show_vat(self):
-        return False
 
     @http.route(['/shop/address'], type='http', methods=['GET', 'POST'], auth="public", website=True, sitemap=False)
     def address(self, **kw):
@@ -1374,7 +1384,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
             'is_public_user': is_public_user,
             'is_public_order': order._is_public_order(),
             'use_same': is_public_user or ('use_same' in kw and str2bool(kw.get('use_same') or '0')),
-            'force_show_vat': self.force_show_vat(),
         }
         render_values.update(self._get_country_related_render_values(kw, render_values))
         return request.render("website_sale.address", render_values)

@@ -1946,7 +1946,7 @@
                                         <t t-if="website._display_partner_b2b_fields()">
                                             <div class="w-100"/>
                                             <t t-set='vat_warning' t-value="'vat' in checkout and checkout['vat'] and not can_edit_vat" />
-                                            <t t-if="force_show_vat or (mode == ('new', 'billing') and is_public_order
+                                            <t t-if="(mode == ('new', 'billing') and is_public_order
                                                 or mode == ('edit', 'billing') and partner_id == website_sale_order.partner_id.id)
                                                 and (can_edit_vat or 'vat' in checkout and checkout['vat'])">
                                                 <div t-attf-class="#{error.get('company_name') and 'o_has_error'} col-lg-6 mb-2">
