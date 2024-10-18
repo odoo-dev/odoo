@@ -10,7 +10,7 @@ class WebsiteSaleComboConfiguratorController(SaleComboConfiguratorController, We
 
     @route(
         route='/website_sale/combo_configurator/get_data',
-        type='json',
+        type='rpc',
         auth='public',
         website=True,
     )
@@ -31,7 +31,7 @@ class WebsiteSaleComboConfiguratorController(SaleComboConfiguratorController, We
 
     @route(
         route='/website_sale/combo_configurator/get_price',
-        type='json',
+        type='rpc',
         auth='public',
         website=True,
     )
@@ -47,7 +47,7 @@ class WebsiteSaleComboConfiguratorController(SaleComboConfiguratorController, We
 
     @route(
         '/website_sale/combo_configurator/update_cart',
-        type='json',
+        type='rpc',
         auth='public',
         methods=['POST'],
         website=True,

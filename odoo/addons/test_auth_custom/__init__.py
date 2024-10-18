@@ -17,6 +17,6 @@ class TestController(Controller):
     def _http(self):
         raise NotImplementedError
 
-    @route('/test_auth_custom/json', type="json", auth="thing", cors="*")
+    @route('/test_auth_custom/json', type="rpc", auth="thing", cors="*")
     def _json(self):
         raise NotImplementedError
