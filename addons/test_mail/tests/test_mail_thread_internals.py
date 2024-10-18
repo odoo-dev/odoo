@@ -137,22 +137,22 @@ class TestAPI(MailCommon, TestRecipients):
         for record, expected in zip(test_records, [
             {
                 # customer_id first for partner_ids; partner > email
-                'email_cc': False, 'email_to': False,
+                'email_cc': '', 'email_to': '',
                 'partner_ids': (self.partner_1 + self.partner_2).ids,
             }, {
                 # partner > email
-                'email_cc': 'email.cc@test.example.com', 'email_to': False, 'partner_ids': self.partner_1.ids,
+                'email_cc': 'email.cc@test.example.com', 'email_to': '', 'partner_ids': self.partner_1.ids,
             }, {
                 # partner > email
-                'email_cc': False, 'email_to': False, 'partner_ids': self.partner_1.ids,
+                'email_cc': '', 'email_to': '', 'partner_ids': self.partner_1.ids,
             }, {
-                'email_cc': False, 'email_to': 'unknown@test.example.com', 'partner_ids': [],
+                'email_cc': '', 'email_to': 'unknown@test.example.com', 'partner_ids': [],
             }, {
-                'email_cc': 'email.cc@test.example.com', 'email_to': False, 'partner_ids': [],
+                'email_cc': 'email.cc@test.example.com', 'email_to': '', 'partner_ids': [],
             }, {
-                'email_cc': False, 'email_to': False, 'partner_ids': void_partner.ids,
+                'email_cc': '', 'email_to': '', 'partner_ids': void_partner.ids,
             }, {
-                'email_cc': False, 'email_to': False, 'partner_ids': [],
+                'email_cc': '', 'email_to': '', 'partner_ids': [],
             },
         ]):
             with self.subTest(name=record.name):

@@ -264,7 +264,7 @@ class Base(models.AbstractModel):
                 # invalid to have at least some information
                 if recipients:
                     partner_ids = recipients.ids or recipients_all.ids
-                    email_to = False
+                    email_to = ''
                 else:
                     partner_ids = [] if email_to_lst else recipients_all.ids
                     email_to = ','.join(email_to_lst)
@@ -273,7 +273,7 @@ class Base(models.AbstractModel):
                 tools.email_normalize(email) in recipients.mapped('email_normalized') for email in email_to_lst
             ):
                 partner_ids = recipients.ids
-                email_to = False
+                email_to = ''
             else:
                 partner_ids = []
                 email_to = ','.join(email_to_lst)
