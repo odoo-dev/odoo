@@ -26680,7 +26680,8 @@ class PDFFunctionFactory {
     isEvalSupported = true
   }) {
     this.xref = xref;
-    this.isEvalSupported = isEvalSupported !== false;
+    // Odoo: don't support scripting
+    this.isEvalSupported = false;
   }
   create(fn) {
     const cachedFunction = this.getCached(fn);

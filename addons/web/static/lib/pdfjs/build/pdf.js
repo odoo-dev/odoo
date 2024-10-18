@@ -539,13 +539,9 @@ function isLittleEndian() {
   const view32 = new Uint32Array(buffer8.buffer, 0, 1);
   return view32[0] === 1;
 }
+// Odoo: don't support scripting
 function isEvalSupported() {
-  try {
-    new Function("");
-    return true;
-  } catch {
-    return false;
-  }
+  return false;
 }
 class util_FeatureTest {
   static get isLittleEndian() {

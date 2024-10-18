@@ -1464,7 +1464,8 @@ class BaseExternalServices {
 class BasePreferences {
   #defaults = Object.freeze({
     altTextLearnMoreUrl: "",
-    annotationEditorMode: 0,
+    // Odoo
+    annotationEditorMode: -1,
     annotationMode: 2,
     cursorToolOnLoad: 0,
     defaultZoomDelay: 400,
@@ -1477,9 +1478,12 @@ class BasePreferences {
     enableNewAltTextWhenAddingImage: true,
     enablePermissions: false,
     enablePrintAutoRotate: true,
-    enableScripting: true,
+    // Odoo: don't support scripting (#115302)
+    enableScripting: false,
+    // Odoo: disable stamp editor
     enableUpdatedAddImage: false,
-    externalLinkTarget: 0,
+    // ODOO: open links in new tabs to keep odoo document (#84594)
+    externalLinkTarget: 2,
     highlightEditorColors: "yellow=#FFFF98,green=#53FFBC,blue=#80EBFF,pink=#FFCBE6,red=#FF4F5F",
     historyUpdateUrl: false,
     ignoreDestinationZoom: false,
@@ -1498,7 +1502,8 @@ class BasePreferences {
     disableStream: false,
     enableHWA: true,
     enableXfa: true,
-    viewerCssTheme: 0
+    // Odoo
+    viewerCssTheme: document.cookie.includes("color_scheme=dark") ? 2 : 1,
   });
   #initializedPromise = null;
   constructor() {
@@ -13855,7 +13860,8 @@ const PDFViewerApplication = {
     });
     pagesPromise.then(() => {
       this._unblockDocumentLoadEvent();
-      this._initializeAutoPrint(pdfDocument, openActionPromise);
+      // Odoo: don't support scripting (#115302)
+      // this._initializeAutoPrint(pdfDocument, openActionPromise);
     }, reason => {
       this._documentError("pdfjs-loading-error", {
         message: reason.message
