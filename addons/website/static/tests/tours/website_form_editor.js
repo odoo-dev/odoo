@@ -398,9 +398,6 @@ odoo.define('website.tour.form_editor', function (require) {
             content: "Click submit button to show edit popover",
             trigger: '.s_website_form_send',
         }, {
-            content: "Click on Edit Link in Popover",
-            trigger: '.o_edit_menu_popover .o_we_edit_link',
-        }, {
             content: "Check that no URL field is suggested",
             trigger: '#toolbar:has(#url_row:hidden)',
             run: () => null,
