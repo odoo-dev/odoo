@@ -93,9 +93,10 @@ export class ClipboardPlugin extends Plugin {
 
     onCut(ev) {
         this.onCopy(ev);
-        this.dispatch("HISTORY_STAGE_SELECTION");
-        this.dispatch("DELETE_SELECTION");
-        this.dispatch("ADD_STEP");
+        this.record(() => {
+            this.dispatch("HISTORY_STAGE_SELECTION");
+            this.dispatch("DELETE_SELECTION");
+        });
     }
 
     /**
@@ -209,18 +210,18 @@ export class ClipboardPlugin extends Plugin {
 
         ev.preventDefault();
 
-        this.dispatch("HISTORY_STAGE_SELECTION");
+        this.record(() => {
+            this.dispatch("HISTORY_STAGE_SELECTION");
 
-        this.getResource("before_paste").forEach((handler) => handler(selection));
-        // refresh selection after potential changes from `before_paste` handlers
-        selection = this.shared.getEditableSelection();
+            this.getResource("before_paste").forEach((handler) => handler(selection));
+            // refresh selection after potential changes from `before_paste` handlers
+            selection = this.shared.getEditableSelection();
 
-        this.handlePasteUnsupportedHtml(selection, ev.clipboardData) ||
-            this.handlePasteOdooEditorHtml(ev.clipboardData) ||
-            this.handlePasteHtml(selection, ev.clipboardData) ||
-            this.handlePasteText(selection, ev.clipboardData);
-
-        this.dispatch("ADD_STEP");
+            this.handlePasteUnsupportedHtml(selection, ev.clipboardData) ||
+                this.handlePasteOdooEditorHtml(ev.clipboardData) ||
+                this.handlePasteHtml(selection, ev.clipboardData) ||
+                this.handlePasteText(selection, ev.clipboardData);
+        });
     }
     /**
      * @param {EditorSelection} selection
@@ -230,7 +231,9 @@ export class ClipboardPlugin extends Plugin {
         const targetSupportsHtmlContent = isHtmlContentSupported(selection.anchorNode);
         if (!targetSupportsHtmlContent) {
             const text = clipboardData.getData("text/plain");
-            this.shared.domInsert(text);
+            this.record(() => {
+                this.shared.domInsert(text);
+            });
             return true;
         }
     }
@@ -243,7 +246,9 @@ export class ClipboardPlugin extends Plugin {
             const fragment = parseHTML(this.document, odooEditorHtml);
             this.shared.sanitize(fragment);
             if (fragment.hasChildNodes()) {
-                this.shared.domInsert(fragment);
+                this.record(() => {
+                    this.shared.domInsert(fragment);
+                });
             }
             return true;
         }
@@ -265,14 +270,19 @@ export class ClipboardPlugin extends Plugin {
             if (files.length && !clipboardElem.querySelector("table")) {
                 // @phoenix @todo: should it be handled in image plugin?
                 return this.addImagesFiles(files).then((html) => {
-                    this.shared.domInsert(html);
-                    this.dispatch("ADD_STEP");
+                    this.record(() => {
+                        this.shared.domInsert(html);
+                    });
                 });
             } else {
                 if (closestElement(selection.anchorNode, "a")) {
-                    this.shared.domInsert(clipboardElem.textContent);
+                    this.record(() => {
+                        this.shared.domInsert(clipboardElem.textContent);
+                    });
                 } else {
-                    this.shared.domInsert(clipboardElem);
+                    this.record(() => {
+                        this.shared.domInsert(clipboardElem);
+                    });
                 }
             }
             return true;
@@ -307,7 +317,9 @@ export class ClipboardPlugin extends Plugin {
                     return replaceContent;
                 });
             });
-            this.shared.domInsert(modifiedTextFragment);
+            this.record(() => {
+                this.shared.domInsert(modifiedTextFragment);
+            });
             if (textIndex < textFragments.length) {
                 // Break line by inserting new paragraph and
                 // remove current paragraph's bottom margin.
@@ -586,16 +598,19 @@ export class ClipboardPlugin extends Plugin {
         if (image) {
             const fragment = this.document.createDocumentFragment();
             fragment.append(image);
-            this.shared.domInsert(fragment);
-            this.dispatch("ADD_STEP");
+            this.record(() => {
+                this.shared.domInsert(fragment);
+            });
         } else if (fileTransferItems.length) {
             const html = await this.addImagesFiles(fileTransferItems);
-            this.shared.domInsert(html);
-            this.dispatch("ADD_STEP");
+            this.record(() => {
+                this.shared.domInsert(html);
+            });
         } else if (htmlTransferItem) {
             htmlTransferItem.getAsString((pastedText) => {
-                this.shared.domInsert(this.prepareClipboardData(pastedText));
-                this.dispatch("ADD_STEP");
+                this.record(() => {
+                    this.shared.domInsert(this.prepareClipboardData(pastedText));
+                });
             });
         }
     }

@@ -147,16 +147,17 @@ export class FormatPlugin extends Plugin {
     }
 
     removeFormat() {
-        for (const format of Object.keys(formatsSpecs)) {
-            if (!formatsSpecs[format].removeStyle || !this.hasSelectionFormat(format)) {
-                continue;
+        this.record(() => {
+            for (const format of Object.keys(formatsSpecs)) {
+                if (!formatsSpecs[format].removeStyle || !this.hasSelectionFormat(format)) {
+                    continue;
+                }
+                this._formatSelection(format, { applyStyle: false });
             }
-            this._formatSelection(format, { applyStyle: false });
-        }
-        for (const callback of this.getResource("removeFormat")) {
-            callback();
-        }
-        this.dispatch("ADD_STEP");
+            for (const callback of this.getResource("removeFormat")) {
+                callback();
+            }
+        });
     }
 
     /**
@@ -190,6 +191,9 @@ export class FormatPlugin extends Plugin {
 
     formatSelection(...args) {
         if (this._formatSelection(...args)) {
+            // the add_step is conditional :
+            // format affect existing content => we want a step
+            // format is done on a collapsed range and will only affect future content => we don't want a step
             this.dispatch("ADD_STEP");
         }
     }
@@ -331,6 +335,7 @@ export class FormatPlugin extends Plugin {
 
         if (selectedTextNodes[0] && selectedTextNodes[0].textContent === "\u200B") {
             this.shared.setCursorStart(selectedTextNodes[0]);
+            return false;
         } else if (selectedTextNodes.length) {
             const firstNode = selectedTextNodes[0];
             const lastNode = selectedTextNodes[selectedTextNodes.length - 1];

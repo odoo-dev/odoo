@@ -75,14 +75,15 @@ export class DynamicPlaceholderPlugin extends Plugin {
             return;
         }
 
-        const t = document.createElement("T");
-        t.setAttribute("t-out", `object.${chain}`);
-        if (defaultValue?.length) {
-            t.innerText = defaultValue;
-        }
+        this.record(() => {
+	        const t = document.createElement("T");
+	        t.setAttribute("t-out", `object.${chain}`);
+	        if (defaultValue?.length) {
+	            t.innerText = defaultValue;
+	        }
 
-        this.shared.domInsert(t);
-        this.dispatch("ADD_STEP");
+	        this.shared.domInsert(t);
+        });
     }
 
     onClose() {

@@ -154,19 +154,19 @@ export class DeletePlugin extends Plugin {
      * @param {"character"|"word"|"line"} granularity
      */
     delete(direction, granularity) {
-        const selection = this.shared.getEditableSelection();
+        this.record(() => {
+            const selection = this.shared.getEditableSelection();
 
-        if (!selection.isCollapsed) {
-            this.deleteSelection(selection);
-        } else if (direction === "backward") {
-            this.deleteBackward(selection, granularity);
-        } else if (direction === "forward") {
-            this.deleteForward(selection, granularity);
-        } else {
-            throw new Error("Invalid direction");
-        }
-
-        this.dispatch("ADD_STEP");
+            if (!selection.isCollapsed) {
+                this.deleteSelection(selection);
+            } else if (direction === "backward") {
+                this.deleteBackward(selection, granularity);
+            } else if (direction === "forward") {
+                this.deleteForward(selection, granularity);
+            } else {
+                throw new Error("Invalid direction");
+            }
+        });
     }
 
     // --------------------------------------------------------------------------

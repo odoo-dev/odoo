@@ -30,15 +30,15 @@ export class ExcalidrawPlugin extends Plugin {
             ExcalidrawDialog,
             {
                 saveLink: (href) => {
-                    const templateBlock = renderToElement(
-                        "html_editor.EmbeddedExcalidrawBlueprint",
-                        {
-                            embeddedProps: JSON.stringify({ source: href }),
-                        }
-                    );
-                    this.shared.domInsert(templateBlock);
-
-                    this.dispatch("ADD_STEP");
+                    this.record(() => {
+                        const templateBlock = renderToElement(
+                            "html_editor.EmbeddedExcalidrawBlueprint",
+                            {
+                                embeddedProps: JSON.stringify({ source: href }),
+                            }
+                        );
+                        this.shared.domInsert(templateBlock);
+                    });
 
                     restoreSelection = () => {};
                 },

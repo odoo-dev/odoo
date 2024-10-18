@@ -91,9 +91,10 @@ export class ColumnPlugin extends Plugin {
     handleCommand(command, payload) {
         switch (command) {
             case "COLUMNIZE": {
-                const { numberOfColumns, addParagraphAfter } = payload;
-                this.columnize(numberOfColumns, addParagraphAfter);
-                this.dispatch("ADD_STEP");
+                this.record(() => {
+                    const { numberOfColumns, addParagraphAfter } = payload;
+                    this.columnize(numberOfColumns, addParagraphAfter);
+                });
                 break;
             }
         }

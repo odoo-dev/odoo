@@ -28,15 +28,16 @@ export class VideoPlugin extends Plugin {
      * @param {Object} media
      */
     insertVideo(media) {
-        const videoBlock = renderToElement("html_editor.EmbeddedVideoBlueprint", {
-            embeddedProps: JSON.stringify({
-                videoId: media.videoId,
-                platform: media.platform,
-                params: media.params || {},
-            }),
+        this.record(() => {
+            const videoBlock = renderToElement("html_editor.EmbeddedVideoBlueprint", {
+                embeddedProps: JSON.stringify({
+                    videoId: media.videoId,
+                    platform: media.platform,
+                    params: media.params || {},
+                }),
+            });
+            this.shared.domInsert(videoBlock);
         });
-        this.shared.domInsert(videoBlock);
-        this.dispatch("ADD_STEP");
     }
 
     /**

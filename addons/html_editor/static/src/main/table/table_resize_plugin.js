@@ -293,8 +293,7 @@ export class TableResizePlugin extends Plugin {
             const stopResizing = (ev) => {
                 ev.preventDefault();
                 this.isResizingTable = false;
-                this.setTableResizeCursor(false);
-                this.dispatch("ADD_STEP");
+                this.record(() => this.setTableResizeCursor(false));
                 this.document.removeEventListener("mousemove", resizeTable);
                 this.document.removeEventListener("mouseup", stopResizing);
                 this.document.removeEventListener("mouseleave", stopResizing);

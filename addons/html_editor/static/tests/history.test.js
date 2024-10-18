@@ -244,9 +244,10 @@ describe("step", () => {
         await testEditor({
             contentBefore: `<div contenteditable="false"></div>`,
             stepFunction: async (editor) => {
-                const editable = '<div contenteditable="true">abc</div>';
-                editor.editable.querySelector("div").innerHTML = editable;
-                editor.dispatch("ADD_STEP");
+                editor.record(() => {
+                    const editable = '<div contenteditable="true">abc</div>';
+                    editor.editable.querySelector("div").innerHTML = editable;
+                });
             },
             contentAfter: `<div contenteditable="false"><div contenteditable="true">abc</div></div>`,
         });
@@ -265,9 +266,10 @@ describe("prevent mutationFilteredClasses to be set from history", () => {
         await testEditor({
             contentBefore: `<p>a</p>`,
             stepFunction: async (editor) => {
-                const p = editor.editable.querySelector("p");
-                p.className = "x";
-                editor.dispatch("ADD_STEP");
+                editor.record(() => {
+                    const p = editor.editable.querySelector("p");
+                    p.className = "x";
+                });
                 const history = editor.plugins.find((p) => p.constructor.name === "history");
                 expect(history.steps.length).toBe(1);
             },

@@ -120,9 +120,10 @@ export class IconPlugin extends Plugin {
                 }
                 for (const classString of selectedIcon.classList) {
                     if (classString.match(/^fa-[2-5]x$/)) {
-                        selectedIcon.classList.remove(classString);
+                        this.record(() => {
+                            selectedIcon.classList.remove(classString);
+                        });
                     }
-                    this.dispatch("ADD_STEP");
                 }
                 if (payload !== "1") {
                     selectedIcon.classList.add(`fa-${payload}x`);

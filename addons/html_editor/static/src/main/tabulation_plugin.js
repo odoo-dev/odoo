@@ -65,14 +65,13 @@ export class TabulationPlugin extends Plugin {
             }
         }
 
-        const selection = this.shared.getEditableSelection();
-        if (selection.isCollapsed) {
-            this.insertTab();
-        } else {
-            const traversedBlocks = this.shared.getTraversedBlocks();
-            this.indentBlocks(traversedBlocks);
-        }
-        this.dispatch("ADD_STEP");
+        this.record(() => {
+            if (this.shared.getEditableSelection().isCollapsed) {
+                this.insertTab();
+            } else {
+                this.indentBlocks(this.shared.getTraversedBlocks());
+            }
+        });
     }
 
     handleShiftTab() {
@@ -81,13 +80,13 @@ export class TabulationPlugin extends Plugin {
                 return;
             }
         }
-        const traversedBlocks = this.shared.getTraversedBlocks();
-        this.outdentBlocks(traversedBlocks);
-        this.dispatch("ADD_STEP");
+        this.record(() => this.outdentBlocks(this.shared.getTraversedBlocks()));
     }
 
     insertTab() {
-        this.shared.domInsert(parseHTML(this.document, tabHtml));
+        this.record(() => {
+            this.shared.domInsert(parseHTML(this.document, tabHtml));
+        });
     }
 
     indentBlocks(blocks) {

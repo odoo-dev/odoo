@@ -85,7 +85,7 @@ export class Plugin {
      * @param {import("./editor").EditorConfig} config
      * @param {*} services
      */
-    constructor(document, editable, shared, dispatch, config, services) {
+    constructor(document, editable, shared, record, dispatch, config, services) {
         /** @type { Document } **/
         this.document = document;
         /** @type { HTMLElement } **/
@@ -95,6 +95,7 @@ export class Plugin {
         this.services = services;
         /** @type { SharedMethods } **/
         this.shared = shared;
+        this.record = record;
         this.dispatch = dispatch;
         this._cleanups = [];
         /**
@@ -105,6 +106,14 @@ export class Plugin {
     }
 
     setup() {}
+
+    /**
+     * add it here so it is available in tooling
+     *
+     * @param { Function } action
+     * @return { any }
+     */
+    record(action) {}
 
     /**
      * add it here so it is available in tooling

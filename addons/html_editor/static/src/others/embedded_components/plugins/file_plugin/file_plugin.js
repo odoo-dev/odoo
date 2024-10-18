@@ -73,9 +73,10 @@ export class FilePlugin extends Plugin {
     }
 
     onSaveMediaDialog(element, { restoreSelection }) {
-        restoreSelection();
-        this.shared.domInsert(element);
-        this.dispatch("ADD_STEP");
+        this.record(() => {
+            restoreSelection();
+            this.shared.domInsert(element);
+        });
     }
 
     setupNewFile({ name, env }) {
