@@ -33,15 +33,20 @@ class PaymentTransaction(models.Model):
                 'tx': self,
                 'comment': comment,
             }, minimal_qcontext=True)
-            self.env.ref('website_payment.mail_template_donation').send_mail(
-                self.id,
-                email_layout_xmlid="mail.mail_notification_light",
-                email_values={
-                    'email_to': recipient_email if is_internal_notification else self.partner_email,
-                    'email_from': self.company_id.email_formatted,
-                    'author_id': self.partner_id.id,
-                    'subject': subject,
-                    'body_html': body,
+            body = self.env['mail.render.mixin']._render_encapsulate(
+                'mail.mail_notification_light',
+                body,
+                add_context={
+                    # the 'mail_notification_light' expects a mail.message 'message' context, let's give it one
+                    'message': self.env['mail.message'].sudo().new(dict(body=body, record_name=self.display_name)),
+                    'company': self.company_id,
                 },
-                force_send=True,
+                context_record=self,
             )
+            self.env['mail.mail'].sudo().create({
+                'author_id': self.partner_id.id,
+                'body_html': body,
+                'email_from': self.company_id.email_formatted,
+                'email_to': recipient_email if is_internal_notification else self.partner_email,
+                'subject': subject,
+            }).send()
