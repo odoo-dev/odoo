@@ -490,3 +490,77 @@ export const useMovable = makeDraggableHook({
         return { top, left };
     },
 });
+
+/**
+ * @param {*} param0
+ * @param {boolean} param0.isAlignedRight
+ * @param {import("@web/core/utils/hooks").Ref} param0.root
+ * @returns {{style: Readonly<string>}}
+ */
+export function useMessageActionsPosition({ root, isAlignedRight }) {
+    const content = useRef("content");
+    const header = useRef("header");
+    const actions = useRef("actions");
+    const gap = 4;
+    const state = useState({
+        _actionsWidth: null,
+        _contentWidth: null,
+        _headerWidth: null,
+        get style() {
+            if (!state._contentWidth || !state._actionsWidth) {
+                return "";
+            }
+            // Positionned at the edge of the message bubble initially.
+            let offset = 0;
+            let transform = "translateY(-60%)";
+            let position = isAlignedRight ? "left" : "right";
+            const willHideHeader = state._headerWidth > state._contentWidth - state._actionsWidth;
+            const isContentTooSmall = state._contentWidth / 2 < state._actionsWidth;
+            if (willHideHeader || isContentTooSmall) {
+                // Position it next to the header or the bubble in order to keep
+                // the menu as close as possible.
+                position = isAlignedRight ? "right" : "left";
+                const parentRect = root.el.parentNode.getBoundingClientRect();
+                const contentRect = content.el.getBoundingClientRect();
+                const headerRect = header.el?.getBoundingClientRect();
+                const anchorRect =
+                    (isAlignedRight && headerRect?.left > contentRect.left) ||
+                    (!isAlignedRight && headerRect?.right < contentRect.right)
+                        ? headerRect
+                        : contentRect;
+                offset = Math.abs(
+                    isAlignedRight
+                        ? anchorRect.left - contentRect.right - gap
+                        : anchorRect.right - contentRect.left + gap
+                );
+                if (anchorRect === contentRect) {
+                    transform = "translateY(0)";
+                }
+                const start =
+                    position === "left"
+                        ? contentRect.left - parentRect.left
+                        : contentRect.right - parentRect.left;
+                const willOverflow =
+                    position === "left"
+                        ? start + state._actionsWidth + offset > parentRect.width
+                        : start - state._actionsWidth - offset < 0;
+                if (willOverflow) {
+                    // Best effort, put it in the bubble according to the alignment.
+                    transform = "translateY(0)";
+                    offset = 0;
+                    position = isAlignedRight ? "left" : "right";
+                }
+            }
+            return `${position}: ${offset}px; transform: ${transform};`;
+        },
+    });
+    useEffect(
+        (contentWidth, headerWidth, actionsWidth) => {
+            state._contentWidth = contentWidth ?? state._contentWidth;
+            state._headerWidth = headerWidth ?? state._headerWidth;
+            state._actionsWidth = actionsWidth ?? state._actionsWidth;
+        },
+        () => [content.el?.offsetWidth, header.el?.offsetWidth, actions.el?.offsetWidth]
+    );
+    return state;
+}

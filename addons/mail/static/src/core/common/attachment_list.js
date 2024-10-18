@@ -155,4 +155,13 @@ export class AttachmentList extends Component {
             (this.env.message && this.props.attachments.length > 1)
         );
     }
+
+    get attStyle() {
+        // Only take the required amount of space up to 12 columns, each
+        // attachment takes 4 columns.
+        return `grid-template-columns: repeat(${Math.min(
+            this.props.attachments.length * 4,
+            12
+        )}, 1fr);`;
+    }
 }

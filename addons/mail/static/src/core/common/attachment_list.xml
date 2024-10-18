@@ -37,7 +37,7 @@
                     <ImageActions actions="getActions(attachment)" imagesHeight="props.imagesHeight"/>
                 </div>
             </div>
-            <div class="grid row-gap-0 column-gap-0">
+            <div class="grid row-gap-0 column-gap-0" t-att-style="attStyle">
                 <!-- t-attf-class overridden in extensions -->
                 <div
                     t-foreach="cards" t-as="attachment" t-key="attachment.id"
