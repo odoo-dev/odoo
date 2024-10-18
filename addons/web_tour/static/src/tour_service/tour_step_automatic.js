@@ -7,6 +7,18 @@ import { callWithUnloadCheck } from "./tour_utils";
 import { TourHelpers } from "./tour_helpers";
 import { TourStep } from "./tour_step";
 
+function getParentFrame(node) {
+    const nodeDocument = node.ownerDocument;
+    const view = nodeDocument.defaultView;
+    if (view !== view.parent) {
+        for (const iframe of view.parent.document.getElementsByTagName("iframe")) {
+            if (iframe.contentDocument === nodeDocument) {
+                return iframe;
+            }
+        }
+    }
+    return null;
+}
 export class TourStepAutomatic extends TourStep {
     triggerFound = false;
     hasRun = false;
@@ -146,6 +158,8 @@ export class TourStepAutomatic extends TourStep {
             return `The cause is that trigger (${this.trigger}) element cannot be found in DOM. TIP: You can use :not(:visible) to force the search for an invisible element.`;
         } else if (this.isBlocked) {
             return "Element has been found but DOM is blocked by UI.";
+        } else if (this.hasModal) {
+            return `Element has been found but it's not allowed to do action on an element that's below a modal.`;
         } else if (!this.hasRun) {
             return `Element has been found. The error seems to be with step.run.`;
         }
@@ -185,7 +199,21 @@ export class TourStepAutomatic extends TourStep {
             ? nodes.at(0)
             : nodes.find(_legacyIsVisible);
         this.triggerFound = !!triggerEl;
+        if (triggerEl && this.hasAction) {
+            const overlays = hoot.queryFirst(".popover, .o-we-command");
+            this.hasModal = hoot.queryFirst(".modal:visible:not(.o_inactive_modal):last");
+            if (this.hasModal && !overlays && !this.trigger.startsWith("body")) {
+                return this.hasModal.contains(getParentFrame(triggerEl)) ||
+                    this.hasModal.contains(triggerEl)
+                    ? triggerEl
+                    : false;
+            }
+        }
         return triggerEl;
+    }
+
+    get hasAction() {
+        return ["string", "function"].includes(typeof this.run);
     }
 
     /**

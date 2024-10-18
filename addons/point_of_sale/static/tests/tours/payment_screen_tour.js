@@ -65,6 +65,11 @@ registry.category("web_tour.tours").add("PaymentScreenTour2", {
     steps: () =>
         [
             Chrome.startPoS(),
+            {
+                content: "Click on Open Register",
+                trigger: ".modal .btn:contains(open register)",
+                run: "click",
+            },
             ProductScreen.addOrderline("Letter Tray", "1", "10"),
             ProductScreen.clickPayButton(),
 

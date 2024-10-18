@@ -3,6 +3,12 @@ import { registry } from "@web/core/registry";
 registry.category("web_tour.tours").add("invited_on_payment_course_public", {
     steps: () => [
         {
+            isActive: ["body:has(.modal)"],
+            content: "Close Oops modal",
+            trigger: ".modal button:contains(close)",
+            run: "click",
+        },
+        {
             trigger: '.o_wslides_identification_banner a:contains("Log in")',
             content: "Check that there is an identification banner",
         },
