@@ -32,8 +32,11 @@ export function deduceUrl(url) {
 
 export function constructFullProductName(line) {
     let attributeString = "";
+    const isDynamic = line.product_id.attribute_line_ids.some(
+        (al) => al.attribute_id.create_variant == "dynamic"
+    );
 
-    if (line.attribute_value_ids && line.attribute_value_ids.length > 0) {
+    if (line.attribute_value_ids && line.attribute_value_ids.length > 0 && !isDynamic) {
         for (const value of line.attribute_value_ids) {
             if (value.is_custom) {
                 const customValue = line.custom_attribute_value_ids.find(

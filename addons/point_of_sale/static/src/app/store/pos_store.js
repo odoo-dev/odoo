@@ -578,17 +578,33 @@ export class PosStore extends Reactive {
 
             if (payload) {
                 // Find candidate based on instantly created variants.
-                const instantlySelectedIds = this.models["product.template.attribute.value"]
+                const attributeValues = this.models["product.template.attribute.value"]
                     .readMany(payload.attribute_value_ids)
-                    .filter((value) => value.attribute_id.create_variant === "always")
                     .map((value) => value.id);
 
-                const candidate = productTemplate.product_variant_ids.find((variant) => {
+                let candidate = productTemplate.product_variant_ids.find((variant) => {
                     const attributeIds = variant.product_template_variant_value_ids.map(
                         (value) => value.id
                     );
-                    return instantlySelectedIds.every((id) => attributeIds.includes(id));
+                    return (
+                        attributeValues.every((id) => attributeIds.includes(id)) &&
+                        attributeValues.length
+                    );
                 });
+
+                const isDynamic = productTemplate.attribute_line_ids.some(
+                    (line) => line.attribute_id.create_variant === "dynamic"
+                );
+
+                if (!candidate && isDynamic) {
+                    // Need to create the new product.
+                    const result = await this.data.callRelated(
+                        "product.template",
+                        "create_product_variant_from_pos",
+                        [productTemplate.id, payload.attribute_value_ids, this.config.id]
+                    );
+                    candidate = result["product.product"][0];
+                }
 
                 Object.assign(values, {
                     attribute_value_ids: payload.attribute_value_ids
@@ -1193,7 +1209,7 @@ export class PosStore extends Reactive {
         // check back-end method `get_product_info_pos` to see what it returns
         // We do this so it's easier to override the value returned and use it in the component template later
         const productInfo = await this.data.call("product.product", "get_product_info_pos", [
-            [product.id],
+            [product?.id],
             productTemplate.get_price(order.pricelist_id, quantity, priceExtra, false, product),
             quantity,
             this.config.id,
