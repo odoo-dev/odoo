@@ -20,21 +20,37 @@ class SaleAdvancePaymentInv(models.TransientModel):
             # includes the case there is no order.l10n_it_edi_doi_id
             return invoice
 
-        # Check that the order actually has lines contributing to the declaration
-        order_doi_lines = order.order_line.filtered(lambda line: line.tax_id.ids == doi_tax.ids)
-        if not order_doi_lines:
-            return invoice
-
         doi_total = 0
-        for line in order_doi_lines:
+        for line in order.order_line:
+            if line.tax_id.ids != doi_tax.ids:
+                continue
             price_reduce = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
             doi_total += price_reduce * line.product_uom_qty
+
+        # The tax on the downpayment product was possibly mapped by the doi fiscal position
+        # Here we do a custom mapping that does not map taxes that will be mapped to the special doi tax
+        doi_fiscal_position = order.l10n_it_edi_doi_id.company_id.l10n_it_edi_doi_fiscal_position_id
+        advance_product_taxes = self.product_id.taxes_id.filtered(lambda tax: tax.company_id == order.company_id)
+        if advance_product_taxes and doi_fiscal_position and order.fiscal_position_id == doi_fiscal_position:
+            custom_mapped_taxes = self.env['account.tax']
+            for tax in advance_product_taxes:
+                mapped_tax = doi_fiscal_position.map_tax(tax)
+                custom_mapped_taxes |= tax if mapped_tax == doi_tax else mapped_tax
+            advance_product_taxes = custom_mapped_taxes
 
         for invoice_line in invoice.invoice_line_ids:
             if not invoice_line.is_downpayment:
                 continue
             downpayment_line = invoice_line.sale_line_ids.filtered(lambda line: line.is_downpayment)
             if len(downpayment_line) != 1:
+                continue
+
+            if advance_product_taxes:
+                downpayment_line.tax_id = advance_product_taxes
+                invoice_line.tax_ids = advance_product_taxes
+
+            if order.currency_id.is_zero(doi_total):
+                # The order has no lines contributing to the declaration of intent
                 continue
 
             # split the downpayment amount into 2: doi amount and other amount
