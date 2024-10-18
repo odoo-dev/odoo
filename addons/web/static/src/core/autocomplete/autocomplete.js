@@ -1,5 +1,6 @@
 import { Deferred } from "@web/core/utils/concurrency";
 import { useAutofocus, useForwardRefToParent, useService } from "@web/core/utils/hooks";
+import { scrollTo } from "@web/core/utils/scrolling";
 import { useDebounced } from "@web/core/utils/timing";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { usePosition } from "@web/core/position/position_hook";
@@ -393,12 +394,14 @@ export class AutoComplete extends Component {
                 if (!this.isOpened) {
                     this.open(true);
                 }
+                this.scroll();
                 break;
             case "arrowdown":
                 this.navigate(+1);
                 if (!this.isOpened) {
                     this.open(true);
                 }
+                this.scroll();
                 break;
             default:
                 return;
@@ -423,5 +426,13 @@ export class AutoComplete extends Component {
         if (this.isOpened && !this.root.el.contains(ev.target)) {
             this.cancel();
         }
+    }
+
+    scroll() {
+        if (!this.activeSourceOptionId) {
+            return;
+        }
+        const activeOptionEl = this.inputRef.el.nextElementSibling.querySelector(`#${this.activeSourceOptionId}`);
+        scrollTo(activeOptionEl);
     }
 }
