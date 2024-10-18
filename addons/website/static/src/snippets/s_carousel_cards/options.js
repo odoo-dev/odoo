@@ -2,7 +2,7 @@ import { renderToElement } from "@web/core/utils/render";
 import options from "@web_editor/js/editor/snippets.options";
 import "@website/js/editor/snippets.options";
 
-options.registry.CarouselCards = options.registry.Carousel.extend({
+options.registry.CarouselCards = options.registry.CarouselBottomControllers.extend({
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------

@@ -85,15 +85,16 @@
     <xpath expr="//div" position="attributes">
         <attribute name="data-target">.s_carousel_intro</attribute>
         <attribute name="data-exclude"/>
-        <attribute name="data-js">CarouselIntro</attribute>
+        <attribute name="data-js">CarouselBottomControllers</attribute>
+        <!-- <attribute name="data-js">CarouselIntro</attribute> -->
     </xpath>
     <xpath expr="//we-button[@data-select-class='s_carousel_arrows_hidden']" position="attributes">
         <attribute name="data-name">carousel_arrows_hidden_opt</attribute>
-        <attribute name="data-hidden-controllers">true</attribute>
+        <!-- <attribute name="data-hidden-controllers">true</attribute> -->
     </xpath>
     <xpath expr="//we-button[@data-select-class='s_carousel_indicators_hidden']" position="attributes">
         <attribute name="data-name">carousel_indicators_hidden_opt</attribute>
-        <attribute name="data-hidden-controllers">true</attribute>
+        <!-- <attribute name="data-hidden-controllers">true</attribute> -->
     </xpath>
     <xpath expr="//we-select" position="replace">
         <we-select string="Controllers" data-apply-to=".s_carousel_intro_controllers_row">
