@@ -108,7 +108,7 @@ class TestAPI(MailCommon, TestRecipients):
             }, {
                 'customer_id': self.partner_1.id,
                 'customer_email': '"Forced" <forced@test.example.com>',
-                'email_cc': 'email.cc@test.example.com',
+                'email_cc': '"CC" <email.cc@test.example.com>',
                 'name': 'Email Forced + CC',
             }, {
                 'customer_id': self.partner_1.id,
@@ -118,7 +118,7 @@ class TestAPI(MailCommon, TestRecipients):
                 'customer_email': '"Unknown" <unknown@test.example.com>',
                 'name': 'Email only',
             }, {
-                'email_cc': 'email.cc@test.example.com',
+                'email_cc': '"CC" <email.cc@test.example.com>',
                 'name': 'CC only',
             }, {
                 'customer_id': void_partner.id,
@@ -141,14 +141,14 @@ class TestAPI(MailCommon, TestRecipients):
                 'partner_ids': (self.partner_1 + self.partner_2).ids,
             }, {
                 # partner > email
-                'email_cc': 'email.cc@test.example.com', 'email_to': '', 'partner_ids': self.partner_1.ids,
+                'email_cc': '"CC" <email.cc@test.example.com>', 'email_to': '', 'partner_ids': self.partner_1.ids,
             }, {
                 # partner > email
                 'email_cc': '', 'email_to': '', 'partner_ids': self.partner_1.ids,
             }, {
-                'email_cc': '', 'email_to': 'unknown@test.example.com', 'partner_ids': [],
+                'email_cc': '', 'email_to': '"Unknown" <unknown@test.example.com>', 'partner_ids': [],
             }, {
-                'email_cc': 'email.cc@test.example.com', 'email_to': '', 'partner_ids': [],
+                'email_cc': '"CC" <email.cc@test.example.com>', 'email_to': '', 'partner_ids': [],
             }, {
                 'email_cc': '', 'email_to': '', 'partner_ids': void_partner.ids,
             }, {
@@ -162,12 +162,12 @@ class TestAPI(MailCommon, TestRecipients):
         with patch.object(type(self.env["mail.test.recipients"]), "_mail_defaults_to_email", True):
             self.assertEqual(
                 test_records[1]._message_get_default_recipients()[test_records[1].id],
-                {'email_cc': 'email.cc@test.example.com', 'email_to': 'forced@test.example.com', 'partner_ids': []},
+                {'email_cc': '"CC" <email.cc@test.example.com>', 'email_to': '"Forced" <forced@test.example.com>', 'partner_ids': []},
                 'Mail: prioritize email should not return partner if email is found'
             )
             self.assertEqual(
                 test_records[2]._message_get_default_recipients()[test_records[2].id],
-                {'email_cc': False, 'email_to': False, 'partner_ids': self.partner_1.ids},
+                {'email_cc': '', 'email_to': '', 'partner_ids': self.partner_1.ids},
                 'Mail: prioritize email should not return partner if email is found'
             )
 
