@@ -237,6 +237,14 @@ var NameAndSignature = Widget.extend({
         return {width, height};
     },
     /**
+     * Check if edit mode is enabled
+     *
+     * @returns {Boolean}
+     */
+    isEditModeEnabled() {
+        return document.body.classList.contains('editor_enable');
+    },
+    /**
      * (Re)initializes the signature area:
      *  - set the correct width and height of the drawing based on the width
      *      of the container and the ratio option
@@ -247,7 +255,7 @@ var NameAndSignature = Widget.extend({
      * @returns {Deferred}
      */
     resetSignature: function () {
-        if (!this.$signatureField) {
+        if (!this.$signatureField || this.isEditModeEnabled()) {
             // no action if called before start
             return Promise.reject();
         }
