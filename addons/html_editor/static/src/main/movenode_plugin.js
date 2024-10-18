@@ -369,26 +369,27 @@ export class MoveNodePlugin extends Plugin {
         this.dropzoneHintContainer.replaceChildren();
 
         if (this._currentDropHintElementPosition) {
-            const [position, focusElelement] = this._currentDropHintElementPosition;
-            this._currentDropHintElementPosition = undefined;
-            const previousParent = movableElement.parentElement;
-            if (position === "top") {
-                focusElelement.before(movableElement);
-            } else if (position === "bottom") {
-                focusElelement.after(movableElement);
-            }
-            if (previousParent.innerHTML.trim() === "") {
-                const p = document.createElement("p");
-                const br = document.createElement("br");
-                p.append(br);
-                previousParent.append(p);
-            }
-            const selectionPosition = endPos(movableElement);
-            this.shared.setSelection({
-                anchorNode: selectionPosition[0],
-                anchorOffset: selectionPosition[1],
+            this.record(() => {
+                const [position, focusElelement] = this._currentDropHintElementPosition;
+                this._currentDropHintElementPosition = undefined;
+                const previousParent = movableElement.parentElement;
+                if (position === "top") {
+                    focusElelement.before(movableElement);
+                } else if (position === "bottom") {
+                    focusElelement.after(movableElement);
+                }
+                if (previousParent.innerHTML.trim() === "") {
+                    const p = document.createElement("p");
+                    const br = document.createElement("br");
+                    p.append(br);
+                    previousParent.append(p);
+                }
+                const selectionPosition = endPos(movableElement);
+                this.shared.setSelection({
+                    anchorNode: selectionPosition[0],
+                    anchorOffset: selectionPosition[1],
+                });
             });
-            this.dispatch("ADD_STEP");
         }
     }
     onMousemove(e) {

@@ -306,8 +306,7 @@ async function createPeers(peerIds) {
 }
 
 async function insertEditorText(editor, text) {
-    await insertText(editor, text);
-    editor.dispatch("ADD_STEP");
+    await editor.record(() => insertText(editor, text));
 }
 
 beforeEach(() => {

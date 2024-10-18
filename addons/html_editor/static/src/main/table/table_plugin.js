@@ -58,36 +58,28 @@ export class TablePlugin extends Plugin {
     handleCommand(command, payload) {
         switch (command) {
             case "INSERT_TABLE":
-                this.insertTable(payload);
-                this.dispatch("ADD_STEP");
+                this.record(() => {this.insertTable(payload);});
                 break;
             case "ADD_COLUMN":
-                this.addColumn(payload);
-                this.dispatch("ADD_STEP");
+                this.record(() => {this.addColumn(payload);});
                 break;
             case "ADD_ROW":
-                this.addRow(payload);
-                this.dispatch("ADD_STEP");
+                this.record(() => {this.addRow(payload);});
                 break;
             case "REMOVE_COLUMN":
-                this.removeColumn(payload);
-                this.dispatch("ADD_STEP");
+                this.record(() => {this.removeColumn(payload);});
                 break;
             case "REMOVE_ROW":
-                this.removeRow(payload);
-                this.dispatch("ADD_STEP");
+                this.record(() => {this.removeRow(payload);});
                 break;
             case "MOVE_COLUMN":
-                this.moveColumn(payload);
-                this.dispatch("ADD_STEP");
+                this.record(() => {this.moveColumn(payload);});
                 break;
             case "MOVE_ROW":
-                this.moveRow(payload);
-                this.dispatch("ADD_STEP");
+                this.record(() => {this.moveRow(payload);});
                 break;
             case "RESET_SIZE":
-                this.resetSize(payload);
-                this.dispatch("ADD_STEP");
+                this.record(() => {this.resetSize(payload);});
                 break;
             case "DELETE_TABLE":
                 this.deleteTable(payload);
@@ -109,9 +101,10 @@ export class TablePlugin extends Plugin {
             // Move cursor to next cell.
             const shouldAddNewRow = !this.shiftCursorToTableCell(1);
             if (shouldAddNewRow) {
-                this.addRow({ position: "after", reference: findInSelection(selection, "tr") });
-                this.shiftCursorToTableCell(1);
-                this.dispatch("ADD_STEP");
+                this.record(() => {
+                    this.addRow({ position: "after", reference: findInSelection(selection, "tr") });
+                    this.shiftCursorToTableCell(1);
+                });
             }
             return true;
         }

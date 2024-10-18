@@ -734,25 +734,26 @@ export class SelectionPlugin extends Plugin {
      */
     fixSelectionOnEditableRootCreateP(nodeAfterCursor, nodeBeforeCursor) {
         if (this.isPointerDown && !this.preventNextPointerdownFix) {
-            // The setSelection at the end of this fix could trigger another
-            // setSelection (that would re-trigger this fix). So this flag is
-            // used to prevent to fix twice from the same mouse event.
-            this.preventNextPointerdownFix = true;
+            this.record(() => {
+                // The setSelection at the end of this fix could trigger another
+                // setSelection (that would re-trigger this fix). So this flag is
+                // used to prevent to fix twice from the same mouse event.
+                this.preventNextPointerdownFix = true;
 
-            const p = this.document.createElement("p");
-            p.append(this.document.createElement("br"));
-            if (!nodeAfterCursor) {
-                // Cursor is at the end of the editable.
-                this.editable.append(p);
-            } else if (!nodeBeforeCursor) {
-                // Cursor is at the beginning of the editable.
-                this.editable.prepend(p);
-            } else {
-                // Cursor is between two non-p blocks
-                nodeAfterCursor.before(p);
-            }
-            this.setCursorStart(p);
-            this.dispatch("ADD_STEP");
+                const p = this.document.createElement("p");
+                p.append(this.document.createElement("br"));
+                if (!nodeAfterCursor) {
+                    // Cursor is at the end of the editable.
+                    this.editable.append(p);
+                } else if (!nodeBeforeCursor) {
+                    // Cursor is at the beginning of the editable.
+                    this.editable.prepend(p);
+                } else {
+                    // Cursor is between two non-p blocks
+                    nodeAfterCursor.before(p);
+                }
+                this.setCursorStart(p);
+            });
             return true;
         }
         return false;

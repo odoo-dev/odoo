@@ -203,23 +203,25 @@ export class ImagePlugin extends Plugin {
                 if (!selectedImg) {
                     return;
                 }
-                const mutuallyExclusiveShapes = {
-                    SHAPE_ROUNDED: "rounded-circle",
-                    SHAPE_CIRCLE: "rounded",
-                };
-                selectedImg.classList.remove(mutuallyExclusiveShapes[command]);
-                selectedImg.classList.toggle(commandToClassNameDict[command]);
-                this.dispatch("ADD_STEP");
+                this.record(() => {
+                    const mutuallyExclusiveShapes = {
+                        SHAPE_ROUNDED: "rounded-circle",
+                        SHAPE_CIRCLE: "rounded",
+                    };
+                    selectedImg.classList.remove(mutuallyExclusiveShapes[command]);
+                    selectedImg.classList.toggle(commandToClassNameDict[command]);
+                });
                 break;
             }
             case "SHAPE_SHADOW":
             case "SHAPE_THUMBNAIL": {
-                const selectedImg = this.getSelectedImage();
-                if (!selectedImg) {
-                    return;
-                }
-                selectedImg.classList.toggle(commandToClassNameDict[command]);
-                this.dispatch("ADD_STEP");
+                this.record(() => {
+                    const selectedImg = this.getSelectedImage();
+                    if (!selectedImg) {
+                        return;
+                    }
+                    selectedImg.classList.toggle(commandToClassNameDict[command]);
+                });
                 break;
             }
             case "UPDATE_IMAGE_DESCRIPTION": {
@@ -227,9 +229,10 @@ export class ImagePlugin extends Plugin {
                 if (!selectedImg) {
                     return;
                 }
-                selectedImg.setAttribute("alt", payload.description);
-                selectedImg.setAttribute("title", payload.tooltip);
-                this.dispatch("ADD_STEP");
+                this.record(() => {
+                    selectedImg.setAttribute("alt", payload.description);
+                    selectedImg.setAttribute("title", payload.tooltip);
+                });
                 break;
             }
             case "RESIZE_IMAGE": {
@@ -237,8 +240,9 @@ export class ImagePlugin extends Plugin {
                 if (!selectedImg) {
                     return;
                 }
-                selectedImg.style.width = payload;
-                this.dispatch("ADD_STEP");
+                this.record(() => {
+                    selectedImg.style.width = payload;
+                });
                 break;
             }
             case "SET_IMAGE_PADDING": {
@@ -246,13 +250,14 @@ export class ImagePlugin extends Plugin {
                 if (!selectedImg) {
                     return;
                 }
-                for (const classString of selectedImg.classList) {
-                    if (classString.match(/^p-[0-9]$/)) {
-                        selectedImg.classList.remove(classString);
+                this.record(() => {
+                    for (const classString of selectedImg.classList) {
+                        if (classString.match(/^p-[0-9]$/)) {
+                            selectedImg.classList.remove(classString);
+                        }
                     }
-                }
-                selectedImg.classList.add(`p-${payload.padding}`);
-                this.dispatch("ADD_STEP");
+                    selectedImg.classList.add(`p-${payload.padding}`);
+                });
                 break;
             }
             case "PREVIEW_IMAGE": {
@@ -282,9 +287,10 @@ export class ImagePlugin extends Plugin {
             case "DELETE_IMAGE": {
                 const selectedImg = this.getSelectedImage();
                 if (selectedImg) {
-                    selectedImg.remove();
-                    this.closeImageTransformation();
-                    this.dispatch("ADD_STEP");
+                    this.record(() => {
+                        selectedImg.remove();
+                        this.closeImageTransformation();
+                    });
                 }
             }
         }
@@ -330,17 +336,23 @@ export class ImagePlugin extends Plugin {
             const restoreSavepoint = this.shared.makeSavePoint();
             // Open powerbox with commands to embed media or paste as link.
             // Insert URL as text, revert it later if a command is triggered.
-            this.shared.domInsert(text);
-            this.dispatch("ADD_STEP");
+            this.record(() =>
+                this.record(() => {
+                    this.shared.domInsert(text);
+                })
+            );
             const embedImageCommand = {
                 name: _t("Embed Image"),
                 description: _t("Embed the image in the document."),
                 fontawesome: "fa-image",
                 action: () => {
-                    const img = document.createElement("IMG");
-                    img.setAttribute("src", url);
-                    this.shared.domInsert(img);
-                    this.dispatch("ADD_STEP");
+                    this.record(() => {
+                        const img = document.createElement("IMG");
+                        img.setAttribute("src", url);
+                        this.record(() => {
+                            this.shared.domInsert(img);
+                        });
+                    });
                 },
             };
             const commands = [embedImageCommand, this.shared.getPathAsUrlCommand(text, url)];

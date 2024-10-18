@@ -26,20 +26,21 @@ export class LineBreakPlugin extends Plugin {
     }
 
     insertLineBreak() {
-        let selection = this.shared.getEditableSelection();
-        if (!selection.isCollapsed) {
-            // @todo @phoenix collapseIfZWS is not tested
-            // this.shared.collapseIfZWS();
-            this.dispatch("RESET_TABLE_SELECTION");
-            this.dispatch("DELETE_SELECTION");
-            selection = this.shared.getEditableSelection();
-        }
+        this.record(() => {
+            let selection = this.shared.getEditableSelection();
+            if (!selection.isCollapsed) {
+                // @todo @phoenix collapseIfZWS is not tested
+                // this.shared.collapseIfZWS();
+                this.dispatch("RESET_TABLE_SELECTION");
+                this.dispatch("DELETE_SELECTION");
+                selection = this.shared.getEditableSelection();
+            }
 
-        const targetNode = selection.anchorNode;
-        const targetOffset = selection.anchorOffset;
+            const targetNode = selection.anchorNode;
+            const targetOffset = selection.anchorOffset;
 
-        this.insertLineBreakNode({ targetNode, targetOffset });
-        this.dispatch("ADD_STEP");
+            this.insertLineBreakNode({ targetNode, targetOffset });
+        });
     }
     insertLineBreakNode({ targetNode, targetOffset }) {
         if (targetNode.nodeType === Node.TEXT_NODE) {

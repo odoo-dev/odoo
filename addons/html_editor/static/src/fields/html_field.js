@@ -195,8 +195,9 @@ export class HtmlField extends Component {
         await this.commitChanges();
         this.state.showCodeView = !this.state.showCodeView;
         if (!this.state.showCodeView && this.editor) {
-            this.editor.editable.innerHTML = this.value;
-            this.editor.dispatch("ADD_STEP");
+            this.editor.record(() => {
+                this.editor.editable.innerHTML = this.value;
+            });
         }
     }
 

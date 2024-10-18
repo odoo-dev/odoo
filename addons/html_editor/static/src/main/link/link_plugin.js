@@ -26,11 +26,7 @@ function isLinkActive(selection) {
     if (linkElementFocus && linkElementAnchor) {
         return linkElementAnchor === linkElementFocus;
     }
-    if (linkElementAnchor || linkElementFocus) {
-        return true;
-    }
-
-    return false;
+    return !!(linkElementAnchor || linkElementFocus)
 }
 
 function isSelectionHasLink(selection) {
@@ -258,14 +254,15 @@ export class LinkPlugin extends Plugin {
     insertLink(url, label) {
         const selection = this.shared.getEditableSelection();
         let link = closestElement(selection.anchorNode, "a");
-        if (link) {
-            link.setAttribute("href", url);
-            link.innerText = label;
-        } else {
-            link = this.createLink(url, label);
-            this.shared.domInsert(link);
-        }
-        this.dispatch("ADD_STEP");
+        this.record(() => {
+            if (link) {
+                link.setAttribute("href", url);
+                link.innerText = label;
+            } else {
+                link = this.createLink(url, label);
+                this.shared.domInsert(link);
+            }
+        });
         const linkParent = link.parentElement;
         const linkOffset = Array.from(linkParent.childNodes).indexOf(link);
         this.shared.setSelection(
@@ -283,8 +280,9 @@ export class LinkPlugin extends Plugin {
             description: _t("Create an URL."),
             fontawesome: "fa-link",
             action: () => {
-                this.shared.domInsert(this.createLink(url, text));
-                this.dispatch("ADD_STEP");
+                this.record(() => {
+                    this.shared.domInsert(this.createLink(url, text));
+                });
             },
         };
         return pasteAsURLCommand;
@@ -318,9 +316,10 @@ export class LinkPlugin extends Plugin {
         const selection = selectionData.editableSelection;
         const props = {
             onRemove: () => {
-                this.removeLink();
-                this.overlay.close();
-                this.dispatch("ADD_STEP");
+                this.record(() => {
+                    this.removeLink();
+                    this.overlay.close();
+                });
             },
             onCopy: () => {
                 this.overlay.close();
@@ -354,11 +353,12 @@ export class LinkPlugin extends Plugin {
                     isImage: true,
                     linkEl: this.linkElement,
                     onApply: (url, _) => {
-                        this.linkElement.href = url;
-                        this.shared.setCursorEnd(this.linkElement);
-                        this.shared.focusEditable();
-                        this.removeCurrentLinkIfEmtpy();
-                        this.dispatch("ADD_STEP");
+                        this.record(() => {
+                            this.linkElement.href = url;
+                            this.shared.setCursorEnd(this.linkElement);
+                            this.shared.focusEditable();
+                            this.removeCurrentLinkIfEmtpy();
+                        });
                     },
                 };
 
@@ -395,25 +395,26 @@ export class LinkPlugin extends Plugin {
                 isImage: false,
                 linkEl: this.linkElement,
                 onApply: (url, label, classes) => {
-                    this.linkElement.href = url;
-                    if (cleanZWChars(this.linkElement.innerText) === label) {
-                        this.overlay.close();
-                        this.shared.setSelection(this.shared.getEditableSelection());
-                    } else {
-                        const restore = prepareUpdate(...leftPos(this.linkElement));
-                        this.linkElement.innerText = label;
-                        restore();
-                        this.overlay.close();
-                        this.shared.setCursorEnd(this.linkElement);
-                    }
-                    if (classes) {
-                        this.linkElement.className = classes;
-                    } else {
-                        this.linkElement.removeAttribute("class");
-                    }
-                    this.shared.focusEditable();
-                    this.removeCurrentLinkIfEmtpy();
-                    this.dispatch("ADD_STEP");
+                    this.record(() => {
+	                    this.linkElement.href = url;
+	                    if (cleanZWChars(this.linkElement.innerText) === label) {
+	                        this.overlay.close();
+	                        this.shared.setSelection(this.shared.getEditableSelection());
+	                    } else {
+	                        const restore = prepareUpdate(...leftPos(this.linkElement));
+	                        this.linkElement.innerText = label;
+	                        restore();
+	                        this.overlay.close();
+	                        this.shared.setCursorEnd(this.linkElement);
+	                    }
+	                    if (classes) {
+	                        this.linkElement.className = classes;
+	                    } else {
+	                        this.linkElement.removeAttribute("class");
+	                    }
+	                    this.shared.focusEditable();
+	                    this.removeCurrentLinkIfEmtpy();
+                    });
                 },
             };
 
@@ -437,20 +438,21 @@ export class LinkPlugin extends Plugin {
                 !linkElement.contains(selection.anchorNode) ||
                 !linkElement.contains(selection.focusNode)
             ) {
-                this.shared.splitSelection();
-                const selectedNodes = this.shared.getSelectedNodes();
-                let before = linkElement.previousSibling;
-                while (before !== null && selectedNodes.includes(before)) {
-                    linkElement.insertBefore(before, linkElement.firstChild);
-                    before = linkElement.previousSibling;
-                }
-                let after = linkElement.nextSibling;
-                while (after !== null && selectedNodes.includes(after)) {
-                    linkElement.appendChild(after);
-                    after = linkElement.nextSibling;
-                }
-                this.shared.setCursorEnd(linkElement);
-                this.dispatch("ADD_STEP");
+                this.record(() => {
+                    this.shared.splitSelection();
+                    const selectedNodes = this.shared.getSelectedNodes();
+                    let before = linkElement.previousSibling;
+                    while (before !== null && selectedNodes.includes(before)) {
+                        linkElement.insertBefore(before, linkElement.firstChild);
+                        before = linkElement.previousSibling;
+                    }
+                    let after = linkElement.nextSibling;
+                    while (after !== null && selectedNodes.includes(after)) {
+                        linkElement.appendChild(after);
+                        after = linkElement.nextSibling;
+                    }
+                    this.shared.setCursorEnd(linkElement);
+                });
             }
             return linkElement;
         } else {
@@ -493,8 +495,7 @@ export class LinkPlugin extends Plugin {
             !this.linkElement.hasAttribute("t-attf-href") &&
             !this.linkElement.hasAttribute("t-att-href")
         ) {
-            this.removeLink();
-            this.dispatch("ADD_STEP");
+            this.record(() => {this.removeLink();});
         }
     }
 
@@ -513,78 +514,79 @@ export class LinkPlugin extends Plugin {
     }
 
     removeLinkFromSelection() {
-        const selection = this.shared.splitSelection();
-        const cursors = this.shared.preserveSelection();
+        this.record(() => {
+            const selection = this.shared.splitSelection();
+            const cursors = this.shared.preserveSelection();
 
-        // If not, unlink only the part(s) of the link(s) that are selected:
-        // `<a>a[b</a>c<a>d</a>e<a>f]g</a>` => `<a>a</a>[bcdef]<a>g</a>`.
-        let { anchorNode, focusNode, anchorOffset, focusOffset } = selection;
-        const direction = selection.direction;
-        // Split the links around the selection.
-        let [startLink, endLink] = [
-            closestElement(anchorNode, "a"),
-            closestElement(focusNode, "a"),
-        ];
-        // to remove link from selected images
-        const selectedNodes = this.shared.getSelectedNodes();
-        const selectedImageNodes = selectedNodes.filter((node) => node.tagName === "IMG");
-        if (selectedImageNodes && startLink && endLink && startLink === endLink) {
-            for (const imageNode of selectedImageNodes) {
-                let imageLink;
-                if (direction === DIRECTIONS.RIGHT) {
-                    imageLink = this.shared.splitAroundUntil(imageNode, endLink);
-                } else {
-                    imageLink = this.shared.splitAroundUntil(imageNode, startLink);
+            // If not, unlink only the part(s) of the link(s) that are selected:
+            // `<a>a[b</a>c<a>d</a>e<a>f]g</a>` => `<a>a</a>[bcdef]<a>g</a>`.
+            let {anchorNode, focusNode, anchorOffset, focusOffset} = selection;
+            const direction = selection.direction;
+            // Split the links around the selection.
+            let [startLink, endLink] = [
+                closestElement(anchorNode, "a"),
+                closestElement(focusNode, "a"),
+            ];
+            // to remove link from selected images
+            const selectedNodes = this.shared.getSelectedNodes();
+            const selectedImageNodes = selectedNodes.filter((node) => node.tagName === "IMG");
+            if (selectedImageNodes && startLink && endLink && startLink === endLink) {
+                for (const imageNode of selectedImageNodes) {
+                    let imageLink;
+                    if (direction === DIRECTIONS.RIGHT) {
+                        imageLink = this.shared.splitAroundUntil(imageNode, endLink);
+                    } else {
+                        imageLink = this.shared.splitAroundUntil(imageNode, startLink);
+                    }
+                    cursors.update(callbacksForCursorUpdate.unwrap(imageLink));
+                    unwrapContents(imageLink);
+                    // update the links at the selection
+                    [startLink, endLink] = [
+                        closestElement(anchorNode, "a"),
+                        closestElement(focusNode, "a"),
+                    ];
                 }
-                cursors.update(callbacksForCursorUpdate.unwrap(imageLink));
-                unwrapContents(imageLink);
-                // update the links at the selection
-                [startLink, endLink] = [
-                    closestElement(anchorNode, "a"),
-                    closestElement(focusNode, "a"),
-                ];
+                cursors.restore();
+                // when only unlink an inline image, add step after the unwrapping
+                if (
+                    selectedImageNodes.length === 1 &&
+                    selectedImageNodes.length === selectedNodes.length
+                ) {
+                    this.dispatch("ADD_STEP");
+                    return;
+                }
             }
-            cursors.restore();
-            // when only unlink an inline image, add step after the unwrapping
-            if (
-                selectedImageNodes.length === 1 &&
-                selectedImageNodes.length === selectedNodes.length
-            ) {
-                this.dispatch("ADD_STEP");
-                return;
+            if (startLink && startLink.isConnected) {
+                anchorNode = this.shared.splitAroundUntil(anchorNode, startLink);
+                anchorOffset = direction === DIRECTIONS.RIGHT ? 0 : nodeSize(anchorNode);
+                this.shared.setSelection(
+                    {anchorNode, anchorOffset, focusNode, focusOffset},
+                    {normalize: true}
+                );
             }
-        }
-        if (startLink && startLink.isConnected) {
-            anchorNode = this.shared.splitAroundUntil(anchorNode, startLink);
-            anchorOffset = direction === DIRECTIONS.RIGHT ? 0 : nodeSize(anchorNode);
-            this.shared.setSelection(
-                { anchorNode, anchorOffset, focusNode, focusOffset },
-                { normalize: true }
+            // Only split the end link if it was not already done above.
+            if (endLink && endLink.isConnected) {
+                focusNode = this.shared.splitAroundUntil(focusNode, endLink);
+                focusOffset = direction === DIRECTIONS.RIGHT ? nodeSize(focusNode) : 0;
+                this.shared.setSelection(
+                    {anchorNode, anchorOffset, focusNode, focusOffset},
+                    {normalize: true}
+                );
+            }
+            const targetedNodes = this.shared.getSelectedNodes();
+            const links = new Set(
+                targetedNodes
+                    .map((node) => closestElement(node, "a"))
+                    .filter((a) => a && a.isContentEditable)
             );
-        }
-        // Only split the end link if it was not already done above.
-        if (endLink && endLink.isConnected) {
-            focusNode = this.shared.splitAroundUntil(focusNode, endLink);
-            focusOffset = direction === DIRECTIONS.RIGHT ? nodeSize(focusNode) : 0;
-            this.shared.setSelection(
-                { anchorNode, anchorOffset, focusNode, focusOffset },
-                { normalize: true }
-            );
-        }
-        const targetedNodes = this.shared.getSelectedNodes();
-        const links = new Set(
-            targetedNodes
-                .map((node) => closestElement(node, "a"))
-                .filter((a) => a && a.isContentEditable)
-        );
-        if (links.size) {
-            for (const link of links) {
-                cursors.update(callbacksForCursorUpdate.unwrap(link));
-                unwrapContents(link);
+            if (links.size) {
+                for (const link of links) {
+                    cursors.update(callbacksForCursorUpdate.unwrap(link));
+                    unwrapContents(link);
+                }
+                cursors.restore();
             }
-            cursors.restore();
-        }
-        this.dispatch("ADD_STEP");
+        });
     }
 
     removeEmptyLinks(root) {

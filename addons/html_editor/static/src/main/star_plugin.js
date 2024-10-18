@@ -49,18 +49,19 @@ export class StarPlugin extends Plugin {
             const previousStars = getAdjacentPreviousSiblings(node, isStar);
             const nextStars = getAdjacentNextSiblings(node, isStar);
             if (nextStars.length || previousStars.length) {
-                const shouldToggleOff =
-                    node.classList.contains("fa-star") &&
-                    (!nextStars[0] || !nextStars[0].classList.contains("fa-star"));
-                for (const star of [...previousStars, node]) {
-                    star.classList.toggle("fa-star-o", shouldToggleOff);
-                    star.classList.toggle("fa-star", !shouldToggleOff);
-                }
-                for (const star of nextStars) {
-                    star.classList.toggle("fa-star-o", true);
-                    star.classList.toggle("fa-star", false);
-                }
-                this.dispatch("ADD_STEP");
+                this.record(() => {
+                    const shouldToggleOff =
+                        node.classList.contains("fa-star") &&
+                        (!nextStars[0] || !nextStars[0].classList.contains("fa-star"));
+                    for (const star of [...previousStars, node]) {
+                        star.classList.toggle("fa-star-o", shouldToggleOff);
+                        star.classList.toggle("fa-star", !shouldToggleOff);
+                    }
+                    for (const star of nextStars) {
+                        star.classList.toggle("fa-star-o", true);
+                        star.classList.toggle("fa-star", false);
+                    }
+                });
             }
             ev.stopPropagation();
             ev.preventDefault();
@@ -70,7 +71,8 @@ export class StarPlugin extends Plugin {
     addStars(length) {
         const stars = Array.from({ length }, () => '<i class="fa fa-star-o"></i>').join("");
         const html = `\u200B<span contenteditable="false" class="o_stars">${stars}</span>\u200B`;
-        this.shared.domInsert(parseHTML(this.document, html));
-        this.dispatch("ADD_STEP");
+        this.record(() => {
+            this.shared.domInsert(parseHTML(this.document, html));
+        });
     }
 }

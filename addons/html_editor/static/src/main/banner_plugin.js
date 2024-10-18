@@ -66,33 +66,37 @@ export class BannerPlugin extends Plugin {
     }
 
     insertBanner(title, emoji, alertClass) {
-        const bannerElement = parseHTML(
-            this.document,
-            `<div class="o_editor_banner user-select-none o_not_editable lh-1 d-flex align-items-center alert alert-${alertClass} pb-0 pt-3" role="status" contenteditable="false">
+        this.record(() => {
+            const bannerElement = parseHTML(
+                this.document,
+                `<div class="o_editor_banner user-select-none o_not_editable lh-1 d-flex align-items-center alert alert-${alertClass} pb-0 pt-3" role="status" contenteditable="false">
                 <i class="o_editor_banner_icon mb-3 fst-normal" aria-label="${title}">${emoji}</i>
                 <div class="w-100 px-3" contenteditable="true">
                     <p><br></p>
                 </div>
             </div`
-        ).childNodes[0];
-        this.shared.domInsert(bannerElement);
-        // If the first child of editable is contenteditable false element
-        // a chromium bug prevents selecting the container. Prepend a
-        // zero-width space so it's no longer the first child.
-        if (this.editable.firstChild === bannerElement) {
-            const zws = document.createTextNode("\u200B");
-            bannerElement.before(zws);
-        }
-        this.shared.setCursorStart(bannerElement.querySelector(".o_editor_banner > div > p"));
-        this.dispatch("ADD_STEP");
+            ).childNodes[0];
+            this.record(() => {
+                this.shared.domInsert(bannerElement);
+            });
+            // If the first child of editable is contenteditable false element
+            // a chromium bug prevents selecting the container. Prepend a
+            // zero-width space so it's no longer the first child.
+            if (this.editable.firstChild === bannerElement) {
+                const zws = document.createTextNode("\u200B");
+                bannerElement.before(zws);
+            }
+            this.shared.setCursorStart(bannerElement.querySelector(".o_editor_banner > div > p"));
+        });
     }
 
     onBannerEmojiChange(iconElement) {
         this.shared.showEmojiPicker({
             target: iconElement,
             onSelect: (emoji) => {
-                iconElement.textContent = emoji;
-                this.dispatch("ADD_STEP");
+                this.record(() => {
+                    iconElement.textContent = emoji;
+                });
             },
         });
     }

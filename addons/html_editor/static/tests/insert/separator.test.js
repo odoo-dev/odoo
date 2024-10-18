@@ -59,11 +59,12 @@ describe("insert separator", () => {
 
     test("should set the contenteditable attribute to false on the separator when inserted as a child after normalization", async () => {
         const { el, editor } = await setupEditor("<p>[]<br></p>");
-        const div = editor.document.createElement("div");
-        const separator = editor.document.createElement("hr");
-        div.append(separator);
-        el.append(div);
-        editor.dispatch("ADD_STEP");
+        editor.record(() => {
+            const div = editor.document.createElement("div");
+            const separator = editor.document.createElement("hr");
+            div.append(separator);
+            el.append(div);
+        });
         expect(getContent(el)).toBe(
             `<p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p><div><hr contenteditable="false"></div>`
         );
