@@ -5189,9 +5189,11 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         self.assertRecordValues(caba_move.line_ids.sorted('id').sorted('sequence'), expected_caba_move_line_values)
 
     def test_partial_payments_auto_validation(self):
-        def create_move_payment(move, payment_amount):
-            payment = self.init_payment(amount=payment_amount, post=True, currency=move.currency_id)
+        def create_move_payment(move, payment_amount, with_outstanding_account=False):
+            payment = self.init_payment(amount=payment_amount, post=False, currency=move.currency_id)
+            payment.payment_method_line_id = self.company_data['default_journal_bank'].inbound_payment_method_line_ids[0 if with_outstanding_account else 1]
             payment.invoice_ids |= move
+            payment.action_post()
             self.assertEqual(payment.state, 'in_process')
             return payment
 
@@ -5227,3 +5229,13 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         self.assertEqual(payment1.state, 'paid')
         self.assertEqual(payment2.state, 'in_process')
         self.assertEqual(payment3.state, 'in_process')
+
+        customer_invoice_outstanding = self.init_invoice(move_type='out_invoice', amounts=[300], post=True)
+        payment1 = create_move_payment(customer_invoice_outstanding, 12, True)
+        payment2 = create_move_payment(customer_invoice_outstanding, 12)
+        reconcile_move(customer_invoice_outstanding, 12)
+        reconcile_move(customer_invoice_outstanding, 12)
+        self.assertEqual(payment1.state, 'in_process')
+        self.assertEqual(payment2.state, 'paid')
+        reconcile_move(payment1.move_id, 12)
+        self.assertEqual(payment1.state, 'paid')

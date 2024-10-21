@@ -143,7 +143,7 @@ class AccountPartialReconcile(models.Model):
     @api.model
     def _pay_matched_payment(self, partials):
         for partial in partials:
-            matched_payments = (partial.credit_move_id | partial.debit_move_id).move_id.matched_payment_ids
+            matched_payments = (partial.credit_move_id | partial.debit_move_id).move_id.matched_payment_ids.filtered(lambda payment: not payment.outstanding_account_id)
             amount = 0
             for matched_payment in matched_payments:
                 if matched_payment.payment_type == 'inbound':
