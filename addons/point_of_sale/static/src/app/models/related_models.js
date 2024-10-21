@@ -1,31 +1,7 @@
 import { reactive, toRaw } from "@odoo/owl";
-import { uuidv4 } from "@point_of_sale/utils";
-import { effect } from "@web/core/utils/reactive";
+import { uuidv4, proxyTrapUtil, getAllGetters, lazyComputed } from "@point_of_sale/utils";
 
 const ID_CONTAINER = {};
-
-function lazyComputed(obj, propName, compute) {
-    const key = Symbol(propName);
-    Object.defineProperty(obj, propName, {
-        get() {
-            return this[key]();
-        },
-        configurable: true,
-    });
-
-    effect(
-        function recompute(obj) {
-            const value = [];
-            obj[key] = () => {
-                if (!value.length) {
-                    value.push(compute(obj));
-                }
-                return value[0];
-            };
-        },
-        [obj]
-    );
-}
 
 function uuid(model) {
     if (!(model in ID_CONTAINER)) {
@@ -327,22 +303,6 @@ export class Base {
     }
 }
 
-function getAllGetters(proto) {
-    const getterNames = new Set();
-    const getters = new Set();
-    while (proto !== null) {
-        const descriptors = Object.getOwnPropertyDescriptors(proto);
-        for (const [name, descriptor] of Object.entries(descriptors)) {
-            if (descriptor.get && !getterNames.has(name)) {
-                getterNames.add(name);
-                getters.add([name, descriptor.get]);
-            }
-        }
-        proto = Object.getPrototypeOf(proto);
-    }
-    return getters;
-}
-
 export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
     const indexes = opts.databaseIndex || {};
     const database = opts.databaseTable || {};
@@ -473,19 +433,6 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
         return records[model].has(id);
     }
 
-    // If value is more than 0, then the proxy trap is disabled.
-    let proxyTrapDisabled = 0;
-    function withoutProxyTrap(fn) {
-        return function (...args) {
-            try {
-                proxyTrapDisabled += 1;
-                return fn(...args);
-            } finally {
-                proxyTrapDisabled -= 1;
-            }
-        };
-    }
-
     /**
      * This check assumes that if the first element is a command, then the rest are commands.
      */
@@ -497,6 +444,8 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
         );
     }
 
+    const { withoutProxyTrap, isDisabled: isProxyTrapDisabled } = proxyTrapUtil;
+
     const modelClassesAndProxyTrapsCache = {};
     function getClassAndProxyTrap(model) {
         if (model in modelClassesAndProxyTrapsCache) {
@@ -505,7 +454,7 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
         const fields = getFields(model);
         const proxyTrap = {
             set(target, prop, value, receiver) {
-                if (proxyTrapDisabled || !(prop in fields)) {
+                if (isProxyTrapDisabled() || !(prop in fields)) {
                     return Reflect.set(target, prop, value, receiver);
                 }
                 const updateRecord = withoutProxyTrap(() => {
@@ -521,7 +470,7 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
                 return updateRecord();
             },
             get(target, prop, receiver) {
-                if (proxyTrapDisabled || !getters.has(prop)) {
+                if (isProxyTrapDisabled() || !getters.has(prop)) {
                     return Reflect.get(target, prop, receiver);
                 }
                 const getLazyGetterValue = withoutProxyTrap(() => {
