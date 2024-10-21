@@ -3,12 +3,14 @@ import { EmojisFieldCommon } from "@mail/views/web/fields/emojis_field_common/em
 import { useRef } from "@odoo/owl";
 
 import { registry } from "@web/core/registry";
-import { CharField, charField } from "@web/views/fields/char/char_field";
+import { CharField } from "@web/views/fields/char/char_field";
 
 /**
  * Extension of the FieldChar that will add emojis support
  */
 export class EmojisCharField extends EmojisFieldCommon(CharField) {
+    static additionalClasses = [...(super.additionalClasses || []), "o_field_text"];
+
     static template = "mail.EmojisCharField";
     static components = { ...CharField.components };
     setup() {
@@ -22,10 +24,4 @@ export class EmojisCharField extends EmojisFieldCommon(CharField) {
     }
 }
 
-export const emojisCharField = {
-    ...charField,
-    component: EmojisCharField,
-    additionalClasses: [...(charField.additionalClasses || []), "o_field_text"],
-};
-
-registry.category("fields").add("char_emojis", emojisCharField);
+registry.category("fields").add("char_emojis", EmojisCharField);

@@ -10,6 +10,40 @@ import { TranslationButton } from "../translation_button";
 import { Component, useEffect, useExternalListener, useRef } from "@odoo/owl";
 
 export class CharField extends Component {
+    static displayName = _t("Text");
+    static supportedTypes = ["char"];
+    static supportedOptions = [
+        {
+            label: _t("Dynamic placeholder"),
+            name: "dynamic_placeholder",
+            type: "boolean",
+            help: _t("Enable this option to allow the input to display a dynamic placeholder."),
+        },
+        {
+            label: _t("Model reference field"),
+            name: "dynamic_placeholder_model_reference_field",
+            type: "field",
+            availableTypes: ["char"],
+        },
+        {
+            label: _t("Placeholder field"),
+            name: "placeholder_field",
+            type: "field",
+            availableTypes: ["char"],
+        },
+    ];
+    static extractProps({ attrs, options }) {
+        return {
+            isPassword: exprToBoolean(attrs.password),
+            dynamicPlaceholder: options.dynamic_placeholder || false,
+            dynamicPlaceholderModelReferenceField:
+                options.dynamic_placeholder_model_reference_field || "",
+            autocomplete: attrs.autocomplete,
+            placeholder: attrs.placeholder,
+            placeholderField: options.placeholder_field,
+        };
+    }
+
     static template = "web.CharField";
     static components = {
         TranslationButton,
@@ -103,39 +137,4 @@ export class CharField extends Component {
     }
 }
 
-export const charField = {
-    component: CharField,
-    displayName: _t("Text"),
-    supportedTypes: ["char"],
-    supportedOptions: [
-        {
-            label: _t("Dynamic placeholder"),
-            name: "dynamic_placeholder",
-            type: "boolean",
-            help: _t("Enable this option to allow the input to display a dynamic placeholder."),
-        },
-        {
-            label: _t("Model reference field"),
-            name: "dynamic_placeholder_model_reference_field",
-            type: "field",
-            availableTypes: ["char"],
-        },
-        {
-            label: _t("Placeholder field"),
-            name: "placeholder_field",
-            type: "field",
-            availableTypes: ["char"],
-        },
-    ],
-    extractProps: ({ attrs, options }) => ({
-        isPassword: exprToBoolean(attrs.password),
-        dynamicPlaceholder: options.dynamic_placeholder || false,
-        dynamicPlaceholderModelReferenceField:
-            options.dynamic_placeholder_model_reference_field || "",
-        autocomplete: attrs.autocomplete,
-        placeholder: attrs.placeholder,
-        placeholderField: options.placeholder_field,
-    }),
-};
-
-registry.category("fields").add("char", charField);
+registry.category("fields").add("char", CharField);
