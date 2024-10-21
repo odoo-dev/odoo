@@ -3407,7 +3407,6 @@ class MailThread(models.AbstractModel):
                 data.get('lang') or force_email_lang or self.env.lang,
                 [],
             ).append(data)
-
         for lang, lang_recipients_data in lang_to_recipients.items():
             record_wlang = self.with_context(lang=lang)
             lang_model_description = model_description
