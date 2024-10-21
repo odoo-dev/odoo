@@ -115,9 +115,13 @@ class ProjectCustomerPortal(CustomerPortal):
             return request.redirect('/my')
         if project_sudo.collaborator_count and project_sudo.with_user(request.env.user)._check_project_sharing_access():
             values = {'project_id': project_id}
+            task = request.env['project.task']
             if task_id:
-                values['task_id'] = task_id
-            return request.render("project.project_sharing_portal", values)
+                task = request.env['project.task'].browse(int(task_id))
+            return request.render(
+                "project.project_sharing_portal",
+                {'session_info': self._prepare_project_sharing_session_info(project_sudo, task)},
+            )
         project_sudo = project_sudo if access_token else project_sudo.with_user(request.env.user)
         if not groupby:
             groupby = 'stage_id'
@@ -165,17 +169,23 @@ class ProjectCustomerPortal(CustomerPortal):
             currencies=request.env['ir.http'].get_currencies(),
         )
         if task:
-            session_info['open_task_action'] = task.action_project_sharing_open_task()
+            session_info['task_id'] = task.id
         return session_info
 
-    @http.route("/my/projects/<int:project_id>/project_sharing", type="http", auth="user", methods=['GET'])
-    def render_project_backend_view(self, project_id, task_id=None):
+    @http.route("/my/projects/<int:project_id>/<int:task_id>", type="http", auth="user", methods=['GET'])
+    def render_project_backend_view(self, project_id, task_id):
         project = request.env['project.project'].sudo().browse(project_id)
-        if not project.exists() or not project.with_user(request.env.user)._check_project_sharing_access():
+        if not (
+            project.exists()
+            and project.with_user(request.env.user)._check_project_sharing_access()
+            and task_id
+            and (
+                task := request.env['project.task'].browse(int(task_id)))
+                and task.exists()
+            ):
             return request.not_found()
-        task = task_id and request.env['project.task'].browse(int(task_id))
         return request.render(
-            'project.project_sharing_embed',
+            'project.project_sharing_portal',
             {'session_info': self._prepare_project_sharing_session_info(project, task)},
         )
 

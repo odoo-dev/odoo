@@ -9,7 +9,7 @@
                 <search string="Tasks">
                     <field name="name" string="Tasks" filter_domain="['|', ('name', 'ilike', self), ('id', 'ilike', self)]"/>
                     <field name="tag_ids"/>
-                    <field name="stage_id"/>
+                    <field name="stage_id" domain="[('user_id', '=', False), ('project_ids', '=?', context.get('default_project_id'))]"/>
                     <field name="milestone_id" groups="project.group_project_milestone"/>
                     <field name="partner_id" operator="child_of"/>
                     <filter string="Followed" name="followed_by_me" domain="[('message_is_follower', '=', True)]"/>
@@ -681,7 +681,7 @@
                                 <div class="text-muted d-flex flex-column">
                                     <field t-if="record.parent_id.raw_value" invisible="context.get('default_parent_id', False)" name="parent_id"/>
                                     <field invisible="context.get('default_project_id', False)" name="project_id" options="{'no_open': True}"/>
-                                    <field name="partner_id"/>    
+                                    <field name="partner_id"/>
                                     <field t-if="record.allow_milestones.raw_value and record.milestone_id.raw_value" t-att-class="record.has_late_and_unreached_milestone.raw_value and !record.state.raw_value.startsWith('1_') ? 'text-danger' : ''" name="milestone_id" options="{'no_open': True}"/>
                                 </div>
                                 <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>

@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
-import { useBus, useService } from '@web/core/utils/hooks';
-import { ActionContainer } from '@web/webclient/actions/action_container';
+import { useBus, useService } from "@web/core/utils/hooks";
+import { ActionContainer } from "@web/webclient/actions/action_container";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { useOwnDebugContext } from "@web/core/debug/debug_context";
-import { session } from '@web/session';
+import { session } from "@web/session";
 import { Component, useEffect, useExternalListener, useState } from "@odoo/owl";
 
 export class ProjectSharingWebClient extends Component {
@@ -14,7 +14,7 @@ export class ProjectSharingWebClient extends Component {
 
     setup() {
         window.parent.document.body.style.margin = "0"; // remove the margin in the parent body
-        this.actionService = useService('action');
+        this.actionService = useService("action");
         useOwnDebugContext({ categories: ["default"] });
         this.state = useState({
             fullscreen: false,
@@ -34,23 +34,24 @@ export class ProjectSharingWebClient extends Component {
     }
 
     async _showView() {
-        const { action_name, action_context, project_id, project_name, open_task_action } = session;
+        const { action_name, action_context, project_id, project_name, task_id } = session;
         const action = await this.actionService.loadAction(action_name, {
             active_id: project_id,
         });
         action.display_name = project_name;
-        await this.actionService.doAction(
-            action,
-            {
-                clearBreadcrumbs: true,
-                additionalContext: {
-                    active_id: project_id,
-                    ...action_context,
-                }
-            }
-        );
-        if (open_task_action) {
-            await this.actionService.doAction(open_task_action);
+        action.path = "project_sharing";
+        await this.actionService.doAction(action, {
+            // clearBreadcrumbs: true,
+            additionalContext: {
+                active_id: project_id,
+                ...action_context,
+            },
+            // stackPosition: "replaceCurrentAction",
+        });
+        if (task_id) {
+            await this.actionService.switchView("form", {
+                resId: task_id,
+            });
         }
     }
 
