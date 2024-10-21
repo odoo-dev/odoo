@@ -1,7 +1,7 @@
 /* global waitForWebfonts */
 
 import { Mutex } from "@web/core/utils/concurrency";
-import { markRaw, reactive } from "@odoo/owl";
+import { markRaw } from "@odoo/owl";
 import { floatIsZero } from "@web/core/utils/numbers";
 import { registry } from "@web/core/registry";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -43,8 +43,9 @@ import { CashMovePopup } from "@point_of_sale/app/navbar/cash_move_popup/cash_mo
 import { ClosePosPopup } from "../navbar/closing_popup/closing_popup";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { unaccent } from "@web/core/utils/strings";
+import { Reactive } from "@web/core/utils/reactive";
 
-export class PosStore {
+export class PosStore extends Reactive {
     loadingSkipButtonIsShown = false;
     mainScreen = { name: null, component: null };
 
@@ -63,6 +64,7 @@ export class PosStore {
         "mail.sound_effects",
     ];
     constructor() {
+        super(...arguments);
         const getters = new Map();
         for (const [name, func] of getAllGetters(PosStore.prototype)) {
             if (name.startsWith("__") && name.endsWith("__")) {
@@ -78,20 +80,18 @@ export class PosStore {
         for (const [lazyName, func] of getters.values()) {
             lazyComputed(this, lazyName, func);
         }
-        const proxiedInstance = reactive(
-            new Proxy(this, {
-                get(target, prop, receiver) {
-                    if (proxyTrapUtil.isDisabled() || !getters.has(prop)) {
-                        return Reflect.get(target, prop, receiver);
-                    }
-                    const getLazyGetterValue = proxyTrapUtil.withoutProxyTrap(() => {
-                        const [lazyName] = getters.get(prop);
-                        return receiver[lazyName];
-                    });
-                    return getLazyGetterValue();
-                },
-            })
-        );
+        const proxiedInstance = new Proxy(this, {
+            get(target, prop, receiver) {
+                if (proxyTrapUtil.isDisabled() || !getters.has(prop)) {
+                    return Reflect.get(target, prop, receiver);
+                }
+                const getLazyGetterValue = proxyTrapUtil.withoutProxyTrap(() => {
+                    const [lazyName] = getters.get(prop);
+                    return receiver[lazyName];
+                });
+                return getLazyGetterValue();
+            },
+        });
         this.ready = this.setup(...arguments).then(() => proxiedInstance);
     }
     // use setup instead of constructor because setup can be patched.
