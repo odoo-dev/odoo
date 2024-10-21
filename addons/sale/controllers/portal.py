@@ -152,6 +152,8 @@ class CustomerPortal(payment_portal.PaymentPortal):
                     subtype_xmlid="sale.mt_order_viewed",
                 )
 
+        link_amount = self._cast_as_float(link_amount)
+
         backend_url = f'/odoo/action-{order_sudo._get_portal_return_action().id}/{order_sudo.id}'
         values = {
             'sale_order': order_sudo,
@@ -168,7 +170,7 @@ class CustomerPortal(payment_portal.PaymentPortal):
         if order_sudo._has_to_be_paid() or link_amount:
             if link_amount:
                 installment = installment == 'true' if installment is not None \
-                              else float(link_amount) != order_sudo.amount_total - order_sudo.amount_paid
+                              else link_amount != order_sudo.amount_total - order_sudo.amount_paid
             values.update(
                 self._get_payment_values(
                     order_sudo,
@@ -217,12 +219,12 @@ class CustomerPortal(payment_portal.PaymentPortal):
                 amount = order_sudo.amount_total - order_sudo.amount_paid
         else:
             if not installment:
-                if float(link_amount) >= order_sudo.amount_due:
+                if link_amount >= order_sudo.amount_due:
                     amount = order_sudo.amount_total - order_sudo.amount_paid
                 else:
                     amount = order_sudo._get_prepayment_required_amount() - order_sudo.amount_paid
             else:
-                amount = float(link_amount)
+                amount = link_amount
 
         currency = order_sudo.currency_id
 

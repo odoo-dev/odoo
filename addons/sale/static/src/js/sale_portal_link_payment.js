@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import publicWidget from "@web/legacy/js/public/public_widget";
+import publicWidget from '@web/legacy/js/public/public_widget';
 
 publicWidget.registry.PortalLinkPayment = publicWidget.Widget.extend({
     selector: '.o_portal_sale_sidebar',
@@ -9,7 +9,7 @@ publicWidget.registry.PortalLinkPayment = publicWidget.Widget.extend({
         'click button[name="o_sale_portal_amount_confirmation_button"]': '_onClickAmountConfirmationButton',
     }),
 
-    start: async function () {
+    async start() {
         this.AmountInstallmentlButton = document.querySelector(
             'button[name="o_sale_portal_amount_installment_button"]'
         );

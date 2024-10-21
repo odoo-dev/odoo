@@ -130,39 +130,41 @@
                 <!-- Sidebar -->
                 <t t-call="portal.portal_record_sidebar" id="sale_order_portal_sidebar">
                     <t t-set="classes" t-value="'col-lg-4 col-xxl-3 d-print-none'"/>
-                    <t t-if="sale_order.amount_total == sale_order._get_prepayment_required_amount()">
-                        <t t-set="title">
-                            <h2 t-field="sale_order.amount_total" data-id="total_amount" class="mb-0 text-break" />
-                        </t>
-                    </t>
-                    <t t-else="">
+                    <t t-if="sale_order.prepayment_percent != 1.0 and sale_order.state in 'draft,sent'">
                         <t t-set="title">
                             <h4>
                                 <div>
                                     Down payment
                                 </div>
                                 <h3>
-                                    <t t-out="sale_order._get_prepayment_required_amount()"
-                                       data-id="total_amount"
-                                       class="mb-0 text-break"
-                                       t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"
+                                    <t
+                                        t-out="sale_order._get_prepayment_required_amount()"
+                                        data-id="total_amount"
+                                        class="mb-0 text-break"
+                                        t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"
                                     />
                                     (<b t-esc="sale_order.prepayment_percent * 100"/>%)
                                 </h3>
                             </h4>
                         </t>
                     </t>
+                    <t t-else="sale_order.amount_total == sale_order._get_prepayment_required_amount()">
+                        <t t-set="title">
+                            <h2 t-field="sale_order.amount_total" data-id="total_amount" class="mb-0 text-break" />
+                        </t>
+                    </t>
                     <t t-set="entries">
-                        <t t-if="sale_order.state in 'draft,sent' and sale_order.require_payment">
+                        <t t-if="sale_order.state in 'draft,sent'">
                             <t t-if="sale_order.amount_paid > 0">
                                 <div class="alert alert-success" role="alert">
                                     Amount paid:
-                                    <span t-field="sale_order.amount_paid"
-                                          t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"
+                                    <span
+                                        t-field="sale_order.amount_paid"
+                                        t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"
                                     />
                                 </div>
                             </t>
-                            <div class="alert alert-warning" role="alert">
+                            <div t-if="sale_order.require_payment" class="alert alert-warning" role="alert">
                                 Left to pay:
                                 <span t-field="sale_order.amount_due"/>
                             </div>
@@ -252,7 +254,6 @@
                                 <main class="modal-body" id="sign-dialog">
                                     <t t-set="prepayment_amount" t-value="sale_order._get_prepayment_required_amount()"/>
                                     <t t-set="prepayment_available" t-value="sale_order.prepayment_percent and sale_order.prepayment_percent != 1.0"/>
-                                    <t t-set="amount_total_left_to_pay" t-value="sale_order.amount_total - sale_order.amount_paid"/>
                                     <!-- Display choices only if a pre payment can confirm the order. -->
                                     <div t-if="prepayment_available"
                                          id="o_sale_portal_prepayment_buttons"
@@ -273,17 +274,17 @@
                                     <div class="mb-3">
                                         <!-- The widget associated with this modal will hide and show divs in function of the amount selected. -->
                                         <span t-if="prepayment_available">
-                                                <span id="o_sale_portal_use_amount_prepayment">
-                                                    By paying a <u>down payment</u> of
-                                                    <span
-                                                        t-esc="prepayment_amount - sale_order.amount_paid"
-                                                        t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"
-                                                        class="fw-bold"
-                                                    />
-                                                    <t t-if="sale_order.amount_due == prepayment_amount">
-                                                        (<b t-esc="sale_order.prepayment_percent * 100"/>%),
-                                                    </t>
-                                                </span>
+                                            <span id="o_sale_portal_use_amount_prepayment">
+                                                By paying a <u>down payment</u> of
+                                                <span
+                                                    t-esc="prepayment_amount - sale_order.amount_paid"
+                                                    t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"
+                                                    class="fw-bold"
+                                                />
+                                                <t t-if="sale_order.amount_due == prepayment_amount">
+                                                    (<b t-esc="sale_order.prepayment_percent * 100"/>%),
+                                                </t>
+                                            </span>
                                             <span id="o_sale_portal_use_amount_total">
                                                 By paying,
                                             </span>
@@ -321,49 +322,63 @@
                                     <div
                                         id="o_sale_portal_link_buttons"
                                         class="d-flex btn-group mb-3"
-                                        role="group">
-                                        <t t-set="installment_amount" t-value="float(link_amount) != sale_order.amount_total - sale_order.amount_paid"/>
+                                        role="group"
+                                    >
+                                        <t t-set="installment_amount" t-value="link_amount != amount_total_left_to_pay"/>
                                         <t t-if="installment_amount">
-                                            <button name="o_sale_portal_amount_installment_button" class="btn btn-light active">
-                                            Installment <br/>
-                                            <span t-esc="float(link_amount)"
-                                                  t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"
-                                                  class="fw-bold"/>
+                                            <button
+                                                name="o_sale_portal_amount_installment_button"
+                                                class="btn btn-light active">
+                                                <t t-if="link_amount &lt; sale_order.amount_due">
+                                                    Installment <br/>
+                                                </t>
+                                                <t t-else="">
+                                                    Down payment <br/>
+                                                </t>
+                                                <span
+                                                    t-esc="link_amount"
+                                                    t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"
+                                                    class="fw-bold"
+                                                />
                                             </button>
-                                            <t t-if="float(link_amount) &lt; sale_order.amount_due and sale_order.amount_due != (sale_order.amount_total-sale_order.amount_paid)">
+                                            <t t-if="link_amount &lt; sale_order.amount_due and sale_order.amount_due != (sale_order.amount_total-sale_order.amount_paid)">
                                                 <button name="o_sale_portal_amount_confirmation_button" class="btn btn-light">
-                                                    Downpayment <br/>
-                                                    <span t-esc="sale_order.amount_due - sale_order.amount_paid"
-                                                          t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"
-                                                          class="fw-bold"
+                                                    Down payment <br/>
+                                                    <span
+                                                        t-esc="sale_order.amount_due"
+                                                        t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"
+                                                        class="fw-bold"
                                                     />
                                                 </button>
                                             </t>
                                             <t t-else="">
                                                 <button name="o_sale_portal_amount_confirmation_button" class="btn btn-light">
                                                     Full amount<br/>
-                                                    <span t-esc="sale_order.amount_total - sale_order.amount_paid"
-                                                          t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"
-                                                          class="fw-bold"
+                                                    <span
+                                                        t-esc="amount_total_left_to_pay"
+                                                        t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"
+                                                        class="fw-bold"
                                                     />
                                                 </button>
                                             </t>
                                         </t>
                                     </div>
-                                    <div t-if="(float(link_amount) >= (sale_order.amount_due or sale_order.amount_total - sale_order.amount_paid) or installment=='false') and sale_order._has_to_be_paid()">
+                                    <div t-if="(link_amount >= (sale_order.amount_due or amount_total_left_to_pay) or installment=='false') and sale_order._has_to_be_paid()">
                                         By paying,
                                         <t t-if="installment != 'false'">
-                                            <b t-out="float(link_amount)"
-                                               t-options="{'widget': 'monetary','display_currency': sale_order.currency_id}"
+                                            <b
+                                                t-out="link_amount"
+                                                t-options="{'widget': 'monetary','display_currency': sale_order.currency_id}"
                                             />
                                         </t>
-                                        <t t-elif="float(link_amount) &lt; sale_order.amount_due">
-                                            <b t-out="sale_order.amount_due"
-                                               t-options="{'widget': 'monetary','display_currency': sale_order.currency_id}"
+                                        <t t-elif="link_amount &lt; sale_order.amount_due">
+                                            <b
+                                                t-out="sale_order.amount_due"
+                                                t-options="{'widget': 'monetary','display_currency': sale_order.currency_id}"
                                             />
                                         </t>
                                         <t t-else="">
-                                            <b t-out="sale_order.amount_total - sale_order.amount_paid"
+                                            <b t-out="amount_total_left_to_pay"
                                                t-options="{'widget': 'monetary','display_currency': sale_order.currency_id}"
                                             />
                                         </t>
@@ -373,7 +388,7 @@
                                     </div>
                                     <div t-if="link_amount and not sale_order._has_to_be_paid()">
                                         Amount:
-                                        <span t-esc="float(link_amount)"
+                                        <span t-esc="link_amount"
                                                   t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"
                                                   class="fw-bold"/>
                                     </div>
