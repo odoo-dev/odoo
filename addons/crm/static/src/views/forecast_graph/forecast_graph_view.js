@@ -1,14 +1,8 @@
-/** @odoo-module **/
-
-import { registry } from "@web/core/registry";
-import { GraphViewDescription } from "@web/views/graph/graph_view";
 import { ForecastSearchModel } from "@crm/views/forecast_search_model";
+import { GraphController } from "@web/views/graph/graph_controller";
+import { registry } from "@web/core/registry";
 
 class ForecastGraphSearchModel extends ForecastSearchModel {
-    /**
-     * @override
-     * @private
-     */
     _getIrFilterDescription() {
         this.preparingIrFilterDescription = true;
         const result = super._getIrFilterDescription(...arguments);
@@ -26,12 +20,8 @@ class ForecastGraphSearchModel extends ForecastSearchModel {
     }
 }
 
-export class ForecastGraphViewDescription extends GraphViewDescription {
+class ForecastGraphController extends GraphController {
     static SearchModel = ForecastGraphSearchModel;
+}
 
-    onSearchFilter() {
-
-    }
-};
-
-registry.category("views_new").add("forecast_graph", ForecastGraphViewDescription);
+registry.category("views_new").add("forecast_graph", ForecastGraphController);

@@ -68,10 +68,10 @@ export class IntegerField extends Component {
     }
 }
 
-export const integerField = {
-    component: IntegerField,
-    displayName: _t("Integer"),
-    supportedOptions: [
+export class IntegerFieldDescription {
+    Component = IntegerField;
+    displayName = _t("Integer");
+    supportedOptions = [
         {
             label: _t("Format number"),
             name: "enable_formatting",
@@ -104,18 +104,22 @@ export const integerField = {
             default: 0,
             help: _t("Use it with the 'User-friendly format' option to customize the formatting."),
         },
-    ],
-    supportedTypes: ["integer"],
-    isEmpty: (record, fieldName) => record.data[fieldName] === false,
-    extractProps: ({ attrs, options }) => ({
-        formatNumber:
-            options?.enable_formatting !== undefined ? Boolean(options.enable_formatting) : true,
-        humanReadable: !!options.human_readable,
-        inputType: options.type,
-        step: options.step,
-        placeholder: attrs.placeholder,
-        decimals: options.decimals || 0,
-    }),
-};
+    ];
+    supportedTypes = ["integer"];
+    isEmpty = (record, fieldName) => record.data[fieldName] === false;
+    getComponentProps({ attrs, options }) {
+        return {
+            formatNumber:
+                options?.enable_formatting !== undefined
+                    ? Boolean(options.enable_formatting)
+                    : true,
+            humanReadable: !!options.human_readable,
+            inputType: options.type,
+            step: options.step,
+            placeholder: attrs.placeholder,
+            decimals: options.decimals || 0,
+        };
+    }
+}
 
-registry.category("fields").add("integer", integerField);
+registry.category("fields_new").add("integer", IntegerFieldDescription);

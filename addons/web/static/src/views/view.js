@@ -27,6 +27,7 @@ const viewRegistry = registry.category("views_new");
 
 viewRegistry.addValidation({
     Component: { validate: (c) => c.prototype instanceof Component },
+    getComponentProps: { type: Function, optional: true },
     "*": true,
 });
 
@@ -401,7 +402,7 @@ export class View extends Component {
         const finalProps = descr?.getComponentProps(viewProps, this.env.config) || viewProps;
 
         // prepare the WithSearch component props
-        this.Controller = descr.Controller;
+        this.Controller = descr.Component;
         this.componentProps = finalProps;
         this.withSearchProps = {
             ...toRaw(props),

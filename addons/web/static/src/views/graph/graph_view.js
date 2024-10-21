@@ -8,8 +8,7 @@ import { GraphSearchModel } from "./graph_search_model";
 
 const viewRegistry = registry.category("views_new");
 
-export class GraphViewDescription {
-    Controller = GraphController; // -> Component
+class GraphViewDescription {
     SearchModel = GraphSearchModel;
     ArchParser = GraphArchParser;
     Model = GraphModel;
@@ -17,7 +16,8 @@ export class GraphViewDescription {
     searchMenuTypes = ["filter", "groupBy", "comparison", "favorite"];
     buttonTemplate = "web.GraphView.Buttons";
 
-    getComponentProps(genericProps) {
+    Component = GraphController;
+    getComponentProps(genericProps, config) {
         let modelParams;
         if (genericProps.state) {
             modelParams = genericProps.state.metaData;
