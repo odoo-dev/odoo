@@ -16,8 +16,8 @@ export class OrderlineNoteButton extends Component {
     };
     static defaultProps = {
         label: _t("Customer Note"),
-        getter: (orderline) => orderline.get_customer_note(),
-        setter: (orderline, note) => orderline.set_customer_note(note),
+        getter: (orderline) => orderline.getCustomerNote(),
+        setter: (orderline, note) => orderline.setCustomerNote(note),
         class: "",
     };
 
@@ -29,7 +29,7 @@ export class OrderlineNoteButton extends Component {
         return this.props.label == _t("General Note") ? this.addGeneralNote() : this.addLineNotes();
     }
     async addLineNotes() {
-        const selectedOrderline = this.pos.get_order().get_selected_orderline();
+        const selectedOrderline = this.pos.getOrder().getSelectedOrderline();
         const selectedNote = this.props.getter(selectedOrderline);
         const oldNote = selectedOrderline.getNote();
         const payload = await this.openTextInput(selectedNote);
@@ -58,7 +58,7 @@ export class OrderlineNoteButton extends Component {
         return { confirmed: typeof payload === "string", inputNote: payload, oldNote };
     }
     async addGeneralNote() {
-        const selectedOrder = this.pos.get_order();
+        const selectedOrder = this.pos.getOrder();
         const selectedNote = selectedOrder.general_note || "";
         const payload = await this.openTextInput(selectedNote);
         selectedOrder.general_note = payload;

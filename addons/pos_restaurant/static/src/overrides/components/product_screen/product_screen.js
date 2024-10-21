@@ -10,12 +10,12 @@ patch(ProductScreen.prototype, {
         super.setup(...arguments);
 
         onMounted(() => {
-            this.pos.addPendingOrder([this.pos.get_order().id]);
+            this.pos.addPendingOrder([this.pos.getOrder().id]);
         });
     },
     get selectedOrderlineQuantity() {
-        const order = this.pos.get_order();
-        const orderline = order.get_selected_orderline();
+        const order = this.pos.getOrder();
+        const orderline = order.getSelectedOrderline();
         const isForPreparation = orderline.product_id.pos_categ_ids
             .map((categ) => categ.id)
             .some((id) => this.pos.orderPreparationCategories.has(id));
@@ -25,7 +25,7 @@ patch(ProductScreen.prototype, {
             isForPreparation
         ) {
             const changes = Object.values(this.pos.getOrderChanges().orderlines).find(
-                (change) => change.name == orderline.get_full_product_name()
+                (change) => change.name == orderline.getFullProductName()
             );
             return changes ? changes.quantity : false;
         }
@@ -47,7 +47,7 @@ patch(ProductScreen.prototype, {
     get primaryReviewButton() {
         return (
             !this.primaryOrderButton &&
-            !this.pos.get_order().is_empty() &&
+            !this.pos.getOrder().isEmpty() &&
             this.pos.config.module_pos_restaurant
         );
     },

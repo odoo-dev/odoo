@@ -4,6 +4,7 @@ import { Base } from "./related_models";
 export class AccountTax extends Base {
     static pythonModel = "account.tax";
 
+    // never used
     get sum_repartition_factor() {
         if (this.amount_type !== "group") {
             const factorSum = this.repartition_line_ids.reduce(

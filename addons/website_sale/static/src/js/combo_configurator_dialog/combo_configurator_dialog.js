@@ -21,7 +21,7 @@ patch(ComboConfiguratorDialog.prototype, {
         super.setup(...arguments);
 
         if (this.props.isFrontend) {
-            this.getPriceUrl = '/website_sale/combo_configurator/get_price';
+            this.getPriceUrl = '/website_sale/combo_configurator/getPrice';
         }
     },
 

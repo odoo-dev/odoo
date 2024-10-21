@@ -15,6 +15,6 @@ class HrPayslipWorkedDays(models.Model):
                     and not worked_day.payslip_id.edited \
                     and worked_day.payslip_id.wage_type == "monthly" \
                     and worked_day.payslip_id.struct_id.country_id.code == "{{codeUpper}}" \
-                    and worked_day.is_paid \
+                    and worked_day.isPaid \
                     and worked_day.work_entry_type_id.code == "LEAVE110":
                 worked_day.amount *= 0.80
