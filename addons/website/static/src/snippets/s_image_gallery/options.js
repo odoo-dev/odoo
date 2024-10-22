@@ -261,6 +261,12 @@ options.registry.gallery = options.Class.extend({
      * @see this.selectClass for parameters
      */
     mode: function (previewMode, widgetValue, params) {
+        // Prevents preview because changing the mode remove custo (e.g. columns
+        // size, inner content, etc.)
+        // TODO: Remove in master, add "data-no-preview" in the XML.
+        if (previewMode == true) {
+            return;
+        }
         widgetValue = widgetValue || 'slideshow'; // FIXME should not be needed
         this.$target.css('height', '');
         this.$target
