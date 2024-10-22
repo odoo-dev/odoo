@@ -1,15 +1,11 @@
-#!/usr/bin/env node
+import fs from "node:fs";
+import { parseArgs } from "node:util";
 
-const fs = require("node:fs");
-const parser = require("@babel/parser");
-const babelGenerator = require("@babel/generator");
-// const babel = require("@babel/core");
-const { operation } = require("./operation");
-const { executeOnJsFilesInDir } = require("./executeOnJsFilesInDir");
+import generator from "@babel/generator";
+import parser from "@babel/parser";
 
-const generate = babelGenerator.default;
-
-const { parseArgs } = require("node:util");
+import { executeOnJsFilesInDir } from "./execute_on_js_files_in_dir";
+import { operation } from "./operation";
 
 const sep =
     "\n=========================================================================================================\n";
@@ -34,7 +30,7 @@ function makeGetAST() {
             // normalize path (absolute)
             if (!cacheAST[filePath]) {
                 const fileContent = fs.readFileSync(filePath, "utf-8");
-                const ast = parser.parse(fileContent, { ecmaVersion: 2022, sourceType: "module" });
+                const ast = parser.parse(fileContent, { sourceType: "module" });
                 cacheAST[filePath] = ast;
             }
             return cacheAST[filePath];
@@ -55,13 +51,9 @@ for (const filePath in cacheAST) {
     console.log(sep, `(${count}) `, filePath, sep);
     count++;
     const ast = cacheAST[filePath];
-    const result = generate(ast);
+    const result = generator(ast);
     console.log(result.code);
     if (values.write) {
         // should write on file
     }
 }
-
-// const result = babel.transformSync(data, {
-//     plugins: [() => ({ visitor })],
-// });

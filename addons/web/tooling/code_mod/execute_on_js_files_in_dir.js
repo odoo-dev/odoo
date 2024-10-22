@@ -1,7 +1,7 @@
-const fs = require("node:fs");
-const path = require("node:path");
+import fs from 'node:fs';
+import path from "node:path";
 
-function executeOnJsFilesInDir(dirPath, operation) {
+export function executeOnJsFilesInDir(dirPath, operation) {
     const fsDir = fs.opendirSync(dirPath);
     let fsDirent;
     while ((fsDirent = fsDir.readSync())) {
@@ -14,5 +14,3 @@ function executeOnJsFilesInDir(dirPath, operation) {
     }
     fsDir.closeSync();
 }
-
-exports.executeOnJsFilesInDir = executeOnJsFilesInDir;

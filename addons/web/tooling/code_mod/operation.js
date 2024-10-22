@@ -1,6 +1,5 @@
-const t = require("@babel/types");
-const babelTraverse = require("@babel/traverse");
-const traverse = babelTraverse.default;
+import traverse from "@babel/traverse";
+import * as t from "@babel/types";
 
 // for ast descriptions see https://github.com/babel/babel/blob/master/packages/babel-parser/ast/spec.md
 
@@ -153,9 +152,7 @@ const visitor = {
     },
 };
 
-function operation(filePath, { getAST }) {
+export function operation(filePath, { getAST }) {
     const ast = getAST(filePath);
     traverse(ast, visitor);
 }
-
-exports.operation = operation;
