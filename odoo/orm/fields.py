@@ -22,9 +22,6 @@ if typing.TYPE_CHECKING:
     from .models import BaseModel
 T = typing.TypeVar("T")
 
-# hacky-ish way to prevent access to a field through the ORM (except for sudo mode)
-NO_ACCESS='.'
-
 IR_MODELS = (
     'ir.model', 'ir.model.data', 'ir.model.fields', 'ir.model.fields.selection',
     'ir.model.relation', 'ir.model.constraint', 'ir.module.module',
