@@ -950,20 +950,12 @@ class HrLeaveAllocation(models.Model):
         local_msg_vals = dict(msg_vals or {})
 
         self.ensure_one()
-        hr_actions = []
-        if self.state == 'confirm':
-            app_action = self._notify_get_action_link('controller', controller='/allocation/validate', **local_msg_vals)
-            hr_actions += [{'url': app_action, 'title': _('Approve')}]
-        if self.state in ['confirm', 'validate']:
-            ref_action = self._notify_get_action_link('controller', controller='/allocation/refuse', **local_msg_vals)
-            hr_actions += [{'url': ref_action, 'title': _('Refuse')}]
 
         holiday_user_group_id = self.env.ref('hr_holidays.group_hr_holidays_user').id
         new_group = (
             'group_hr_holidays_user',
             lambda pdata: pdata['type'] == 'user' and holiday_user_group_id in pdata['groups'],
             {
-                'actions': hr_actions,
                 'active': True,
                 'has_button_access': True,
             }
