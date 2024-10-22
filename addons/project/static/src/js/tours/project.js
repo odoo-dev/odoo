@@ -259,17 +259,13 @@ registry.category("web_tour.tours").add('project_tour', {
 }, 
 {
     isActive: ["auto"],
-    trigger: ".project_task_state_selection_menu.dropdown-menu",
+    trigger: ".dropdown-menu",
 },
 {
     isActive: ["auto"],
-    trigger: ".project_task_state_selection_menu.dropdown-menu span.text-danger",
+    trigger: ".dropdown-menu span.text-danger",
     content: markup(_t("Mark the task as <b>Cancelled</b>")),
     run: "click",
-}, {
-    isActive: ["auto"],
-    trigger: ".o-overlay-container:not(:has(.project_task_state_selection_menu))",
-    allowInvisible: true,
 }, {
     isActive: ["auto"],
     trigger: ".o_kanban_record .oe_kanban_content .o_widget_subtask_counter .subtask_list_button:contains('1/2')",
