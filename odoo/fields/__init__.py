@@ -19,7 +19,7 @@ from odoo.orm.fields_binary import Binary, Image
 from odoo.orm.commands import Command
 
 # TODO these should not be exposed here
-from odoo.orm.fields import determine, first
+from odoo.orm.fields import first
 from datetime import date, datetime
 from odoo.tools import date_utils
 
