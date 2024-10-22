@@ -20,7 +20,6 @@ from odoo.orm.models import (
     fix_import_export_id_paths,
     is_definition_class,
     parse_read_group_spec,
-    to_company_ids,
 )
 from odoo.orm.utils import (
     PREFETCH_MAX,
