@@ -4184,7 +4184,7 @@ export class OdooEditor extends EventTarget {
     /**
      * @private
      */
-    _onSelectionChange() {
+    _onSelectionChange(ev) {
         const currentKeyPress = this._currentKeyPress;
         delete this._currentKeyPress;
         const selection = this.document.getSelection();
@@ -4195,6 +4195,40 @@ export class OdooEditor extends EventTarget {
             return;
         }
         const anchorNode = selection.anchorNode;
+        const isSelectionInEditable = this.isSelectionInEditable(selection);
+        if (this._isMouseStateActive && selection.isCollapsed && isSelectionInEditable) {
+            const range = getDeepRange(this.editable);
+            const { startContainer, startOffset, endContainer, endOffset } = range;
+            const linkElement = closestElement(startContainer, "a");
+            if (linkElement) {
+                const parentBlockElement = closestBlock(linkElement);
+                const linkIndex = [...parentBlockElement.childNodes].indexOf(linkElement);
+                const linkDescendants = descendants(linkElement);
+                const isZeroWidthSpace = (node) =>
+                    node.nodeType === Node.TEXT_NODE && node.nodeValue === "\uFEFF";
+
+                // Check if the cursor is positioned at the begining of link.
+                const isStart = isZeroWidthSpace(startContainer)
+                    ? linkDescendants.indexOf(startContainer) === 0
+                    : startContainer.nodeType === Node.TEXT_NODE &&
+                    linkDescendants.indexOf(startContainer) === 1 &&
+                    startOffset === 0;
+
+                // Check if the cursor is positioned at the end of link.
+                const isEnd = isZeroWidthSpace(endContainer)
+                    ? linkDescendants.indexOf(endContainer) === linkDescendants.length - 1
+                    : endContainer.nodeType === Node.TEXT_NODE &&
+                    linkDescendants.indexOf(endContainer) === linkDescendants.length - 2 &&
+                    endOffset === nodeSize(endContainer);
+
+                // Handle selection movement.
+                if (isStart || isEnd) {
+                    ev.preventDefault();
+                    delete this._isMouseStateActive;
+                    setSelection(parentBlockElement, isStart ? linkIndex - 1 : linkIndex + 2);
+                }
+            }
+        }
         // Correct cursor if at editable root.
         if (
             selection.isCollapsed &&
@@ -4212,7 +4246,6 @@ export class OdooEditor extends EventTarget {
                 this.deselectTable();
             }
         }
-        const isSelectionInEditable = this.isSelectionInEditable(selection);
         if (!appliedCustomSelection) {
             this._updateToolbar(!selection.isCollapsed && isSelectionInEditable);
         }
@@ -4632,12 +4665,13 @@ export class OdooEditor extends EventTarget {
 
     _onMouseup(ev) {
         this._currentMouseState = ev.type;
-
+        this._isMouseStateActive = true;
         this._fixFontAwesomeSelection();
     }
 
     _onMouseDown(ev) {
         this._currentMouseState = ev.type;
+        this._isMouseStateActive = true;
         this._lastMouseClickPosition = [ev.x, ev.y];
 
         if (this.canActivateContentEditable) {
