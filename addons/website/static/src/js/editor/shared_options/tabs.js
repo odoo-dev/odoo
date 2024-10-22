@@ -101,13 +101,6 @@ options.registry.NavTabsStyle = options.Class.extend({
      * @see this.selectClass for parameters
      */
     setStyle(previewMode, widgetValue, params) {
-        // const $nav = this.$target.find('.s_tabs_nav:first .nav');
-        // const isPills = widgetValue === 'pills';
-        // $nav.toggleClass('nav-tabs card-header-tabs', !isPills);
-        // $nav.toggleClass('nav-pills', isPills);
-        // this.$target.find('.s_tabs_nav:first').toggleClass('card-header', !isPills).toggleClass('mb-3', isPills);
-        // this.$target.toggleClass('card', !isPills);
-        // this.$target.find('.s_tabs_content:first').toggleClass('card-body', !isPills);
         const isTabs = widgetValue === 'nav-tabs';
         const isBtns = widgetValue === 'nav-buttons';
 

@@ -204,6 +204,9 @@
                 <t t-snippet="website.s_tabs" string="Tabs" group="content">
                     <keywords>navigation, sections, multi-tab, panel, toggle</keywords>
                 </t>
+                <t t-snippet="website.s_tabs_images" string="Tabs Images" group="content">
+                    <keywords>image, picture, photo, illustration, media, visual, slider, tabs, switch, tabbed, sections, navigation</keywords>
+                </t>
                 <t t-snippet="website.s_timeline" string="Timeline" group="content">
                     <keywords>history, story, events, milestones, chronology, sequence, progression, achievements</keywords>
                 </t>
@@ -498,6 +501,69 @@
                                 data-name="bg_video_opt"
                                 data-dependencies="bg_video_opt"/>
             </we-row>
+        </div>
+    </xpath>
+</template>
+
+<template id="snippet_options_tabs">
+    <xpath expr="." position="inside">
+        <div data-js="NavTabs" data-selector="section.s_tabs, section.s_tabs_images">
+            <we-button data-add-item="" data-item=".tab-content:first > .tab-pane.active" data-no-preview="true" class="o_we_text_success ms-0" title="Add Tab" aria-label="Add Tab">
+                <i class="fa fa-fw fa-plus"/>
+            </we-button>
+            <we-button data-remove-item="" data-item=".tab-content:first > .tab-pane.active" data-name="remove_tab_opt" data-no-preview="true" class="o_we_text_danger me-3" title="Remove Tab" aria-label="Remove Tab">
+                <i class="fa fa-fw fa-minus"/>
+            </we-button>
+        </div>
+        <div data-js="NavTabsStyle" data-selector="section" data-target=".s_tabs_main">
+            <we-select string="Style">
+                <we-button data-set-style="nav-underline" data-name="underline_opt">Underline</we-button>
+                <we-button data-set-style="nav-tabs" data-name="tabs_opt" data-trigger="horizontal_opt">Tabs</we-button>
+                <we-button data-set-style="nav-buttons" data-name="buttons_opt" data-trigger="horizontal_opt">Buttons</we-button>
+                <we-button data-set-style="nav-pills" data-name="pills_opt">Pills</we-button>
+            </we-select>
+            <we-colorpicker
+                string="Background"
+                class="o_we_sublevel_1"
+                data-apply-to=".s_tabs_nav"
+                data-select-style="true"
+                data-css-property="--tabs-bg-color"
+                data-no-transparency="true"
+                data-color-prefix="bg-"
+                data-dependencies="tabs_opt, buttons_opt"
+            />
+            <we-colorpicker
+                string="Links Color"
+                class="o_we_sublevel_1"
+                data-apply-to=".s_tabs_nav .nav-link"
+                data-select-style="true"
+                data-css-property="--tabs-link-color"
+                data-no-transparency="true"
+                data-color-prefix="text-"
+                data-dependencies="tabs_opt, buttons_opt"
+            />
+            <we-select string="Direction" data-dependencies="pills_opt, underline_opt">
+                <we-button data-set-direction="horizontal" data-name="horizontal_opt">Horizontal</we-button>
+                <we-button data-set-direction="vertical">Vertical</we-button>
+            </we-select>
+            <we-select string="Fill and Justify" data-apply-to=".s_tabs_nav:first .nav" data-dependencies="horizontal_opt">
+                <we-button data-select-class="">Regular</we-button>
+                <we-button data-select-class="nav-fill">Full Width</we-button>
+                <we-button data-select-class="nav-justified">Equal Widths</we-button>
+            </we-select>
+            <we-select string="Alignment" class="o_we_sublevel_1" data-apply-to=".s_tabs_nav:first .nav" data-name="alignment_opt" data-dependencies="horizontal_opt">
+                <we-button data-select-class="">Left</we-button>
+                <we-button data-select-class="justify-content-center mx-auto">Center</we-button>
+                <we-button data-select-class="justify-content-end ms-auto">Right</we-button>
+            </we-select>
+            <we-button-group string="Slide" data-apply-to=".s_tabs_content:first">
+                <we-button class="fa fa-fw fa-long-arrow-left" title="Slide Left" data-select-class="s_tabs_slide_left"/>
+                <we-button class="fa fa-fw fa-long-arrow-up" title="Slide Up" data-select-class="s_tabs_slide_up"/>
+                <we-button class="fa fa-fw fa-long-arrow-down" title="Slide Down" data-select-class="s_tabs_slide_down"/>
+                <we-button class="fa fa-fw fa-long-arrow-right" title="Slide Right" data-select-class="s_tabs_slide_right"/>
+                <we-button class="fa fa-fw fa-ban" title="No Slide Effect" data-select-class=""/>
+            </we-button-group>
+            <div data-js="TabsNavItems" data-selector=".nav-item"/>
         </div>
     </xpath>
 </template>
@@ -2292,6 +2358,9 @@
     <div data-js="SwitchableViews" data-selector="#wrapwrap > main" data-no-check="true" groups="website.group_website_designer">
             <!-- Options will be populated by JS -->
     </div>
+
+    <!-- Tabs snippets -->
+    <t t-call="website.snippet_options_tabs"/>
 
     </xpath>
 </template>
