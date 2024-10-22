@@ -5,7 +5,6 @@
 # TODO we should only expose *Model objects here, maybe check_comp*
 
 from odoo.orm.models import (
-    GC_UNLINK_LIMIT,
     LOG_ACCESS_COLUMNS,
     MAGIC_COLUMNS,
     READ_GROUP_DISPLAY_FORMAT,
@@ -22,12 +21,8 @@ from odoo.orm.models import (
     parse_read_group_spec,
 )
 from odoo.orm.utils import (
-    PREFETCH_MAX,
     READ_GROUP_TIME_GRANULARITY,
     check_method_name,
     check_object_name,
     check_pg_name,
-    check_property_field_value_name,
-    expand_ids,
-    regex_object_name,
 )
