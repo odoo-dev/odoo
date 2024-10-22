@@ -55,7 +55,7 @@ class AccountAccount(models.Model):
         company_id = formula_params["company_id"] or self.env.company.id
         company = self.env["res.company"].browse(company_id)
 
-        account_ids = self.with_company(company_id)._search_accounts_with_codes_or_types(codes=codes).ids
+        account_ids = self._get_all_accounts([formula_params]).ids
 
         start = formula_params['date_from_boundary']
         end = formula_params['date_to_boundary']
@@ -84,21 +84,6 @@ class AccountAccount(models.Model):
                 [domain, [("move_id.state", "=", "posted")]]
             )
         return domain
-
-    def _search_accounts_with_codes_or_types(self, codes=[], types=[], extra_domains=[]):
-        code_domain = expression.OR(
-            [
-                ("code", "=like", f"{code}%"),
-            ]
-            for code in codes
-        )
-        payable_receivable_domain = [('account_type', 'in', types)]
-        domain = expression.AND([
-            expression.OR([code_domain, payable_receivable_domain]),
-            extra_domains,
-        ])
-
-        return self.env["account.account"].search(domain)
 
     def _pre_process_date_period_boundaries(self, args_list):
         for args in args_list:
@@ -152,18 +137,20 @@ class AccountAccount(models.Model):
         return timeline
 
     def _get_all_accounts(self, args_list):
-        company_ids = list({args['company_id'] or self.env.company.id for args in args_list})
-        account_codes = tuple({
-            code
+        company_to_codes = {
+            args['company_id'] or self.env.company_id: tuple({code for code in args["codes"] if code})
             for args in args_list
-            for code in args["codes"]
-            if code
-        })
+        }
 
-        all_accounts = self._search_accounts_with_codes_or_types(
-            codes=account_codes,
-            extra_domains=[*self.env['account.account']._check_company_domain(company_ids)]
-        )
+        all_accounts = self.env['account.account']
+        for company_id, codes in company_to_codes.items():
+            domain = expression.OR(
+                [
+                    ("code", "=like", f"{code}%"),
+                ]
+                for code in codes
+            )
+            all_accounts |= self.env["account.account"].with_company(company_id).search(domain)
 
         return all_accounts
 
@@ -265,7 +252,7 @@ class AccountAccount(models.Model):
             states = ['posted', 'draft'] if args['include_unposted'] else ['posted']
             periods = args['date_periods']
 
-            accounts = all_accounts.filtered(lambda acc: acc.code.startswith(subcodes))
+            accounts = all_accounts.filtered(lambda acc: acc.with_company(company_id).code.startswith(subcodes))
 
             cell_data = {field: 0.0 for field in fields}
             for account in accounts:
