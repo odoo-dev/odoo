@@ -134,13 +134,6 @@ const GallerySliderWidget = publicWidget.Widget.extend({
 
         var index;
         var page;
-
-        // Function to set the first button as active and start the carousel with the first image
-        function resetCarousel() {
-            $lis.removeClass('active').first().addClass('active');
-            self.$carousel.carousel(0);
-        }
-
         update();
 
         function hide() {
@@ -188,10 +181,6 @@ const GallerySliderWidget = publicWidget.Widget.extend({
             }
         });
         this.$carousel.on('slid.bs.carousel.gallery_slider', update);
-
-        if (!this.editableMode) {
-            resetCarousel();
-        }
 
         return this._super.apply(this, arguments);
     },

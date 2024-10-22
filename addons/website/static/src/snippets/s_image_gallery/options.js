@@ -318,6 +318,13 @@ options.registry.GalleryLayout = options.registry.CarouselHandler.extend({
             }, 0.2 * _slideDuration);
         });
     },
+        /**
+     * @override
+     */
+    cleanForSave() {
+       debugger;
+       // update the codee accordingly here
+    },
 });
 
 options.registry.gallery = options.registry.GalleryLayout.extend({
