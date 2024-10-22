@@ -4048,7 +4048,7 @@ class MailThread(models.AbstractModel):
                        'auth_login', 'pid', 'hash')
         ))
 
-        if link_type in ['view', 'follow', 'unfollow']:
+        if link_type in ['view', 'unfollow']:
             base_link = '/mail/%s' % link_type
         elif link_type == 'controller':
             controller = kwargs.get('controller')
