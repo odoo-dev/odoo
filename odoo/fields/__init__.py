@@ -18,8 +18,5 @@ from odoo.orm.fields_binary import Binary, Image
 
 from odoo.orm.commands import Command
 
-# TODO these should not be exposed here
-from datetime import date, datetime
-
 # hacky-ish way to prevent access to a field through the ORM (except for sudo mode)
 NO_ACCESS = '.'  # noqa: F811
