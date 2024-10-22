@@ -5197,10 +5197,10 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             self.assertEqual(payment.state, 'in_process')
             return payment
 
-        def reconcile_move(move, transaction_amount, balance=None, date='2023-09-30'):
+        def reconcile_move(move, transaction_amount, balance=None, date='2023-09-30', currency=None):
             move_line = move.line_ids.filtered(lambda l: l.account_id.account_type in ('asset_receivable', 'liability_payable'))[0]
             rec_account = move_line.account_id
-            rec_line = self.create_line_for_reconciliation(-(balance or transaction_amount), -transaction_amount, move.currency_id, date, account_1=rec_account)
+            rec_line = self.create_line_for_reconciliation(-(balance or transaction_amount), -transaction_amount, currency or move.currency_id, date, account_1=rec_account)
             amls = rec_line + move_line
             amls.reconcile()
 
@@ -5226,6 +5226,16 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         payment2 = create_move_payment(customer_invoice_foreign, 60)
         payment3 = create_move_payment(customer_invoice_foreign, 15)
         reconcile_move(customer_invoice_foreign, 30, 15)
+        self.assertEqual(payment1.state, 'paid')
+        self.assertEqual(payment2.state, 'in_process')
+        self.assertEqual(payment3.state, 'in_process')
+
+        foreign_currency2 = self.other_currency
+        customer_invoice_different_currencies = self.init_invoice(move_type='out_invoice', amounts=[100], post=True)
+        payment1 = create_move_payment(customer_invoice_different_currencies, 5)
+        payment2 = create_move_payment(customer_invoice_different_currencies, 10)
+        payment3 = create_move_payment(customer_invoice_different_currencies, 20)
+        reconcile_move(customer_invoice_different_currencies, 10, currency=foreign_currency2)
         self.assertEqual(payment1.state, 'paid')
         self.assertEqual(payment2.state, 'in_process')
         self.assertEqual(payment3.state, 'in_process')
