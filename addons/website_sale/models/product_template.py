@@ -874,8 +874,7 @@ class ProductTemplate(models.Model):
                 self.env.company
             )
             if product_taxes:
-                fiscal_position = website.fiscal_position_id.sudo()
-                taxes = fiscal_position.map_tax(product_taxes)
+                taxes = request.fiscal_position.map_tax(product_taxes)
                 return self._apply_taxes_to_price(
                     price, currency, product_taxes, taxes, product_or_template, website=website
                 )

@@ -159,9 +159,13 @@ class Delivery(WebsiteSale):
         self._include_country_and_state_in_address(partial_delivery_address)
         partial_delivery_address, _side_values = self._parse_form_data(partial_delivery_address)
         if order_sudo._is_anonymous_cart():
+            # The partner_shipping_id and partner_invoice_id will be automatically computed when
             # changing the partner_id of the SO. This allows website_sale to avoid creating
             # duplicates.
             partial_delivery_address['name'] = _(
+                'Anonymous express checkout partner for order %s',
+                order_sudo.name,
+            )
             new_partner_sudo = self._create_new_address(
                 address_values=partial_delivery_address,
                 address_type='delivery',

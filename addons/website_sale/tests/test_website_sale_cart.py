@@ -378,11 +378,14 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
         portal_user.write(self.dummy_partner_address_values)
         self.carrier.country_ids = [Command.set((2,))]
         self.product.type = 'consu'
-        with (MockRequest(self.product.with_user(portal_user).env, website=website), patch(
-            'odoo.addons.website_sale.models.sale_order.SaleOrder._get_preferred_delivery_method',
-            return_value=self.env['delivery.carrier'],
-        )):
-            order = website.sale_get_order(force_create=True)
+        with (
+            mock_website_sale_request(website.env, website=website) as req,
+            patch(
+                'odoo.addons.website_sale.models.sale_order.SaleOrder._get_preferred_delivery_method',
+                return_value=self.env['delivery.carrier'],
+            )
+        ):
+            order = req.website._create_cart()
             order.order_line = [
                 Command.create({
                     'product_id': self.product.id,

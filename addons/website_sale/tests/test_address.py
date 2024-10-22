@@ -100,7 +100,6 @@ class TestCheckoutAddress(BaseUsersCommon, WebsiteSaleCommon):
         so = self._create_so(partner_id=self.demo_partner.id)
 
         env = api.Environment(self.env.cr, self.demo_user.id, {})
-        # change also website env for `sale_get_order` to not change order partner_id
         with mock_website_sale_request(env, website=self.website.with_env(env), sale_order_id=so.id) as req:
             req.httprequest.method = "POST"
 
@@ -123,7 +122,6 @@ class TestCheckoutAddress(BaseUsersCommon, WebsiteSaleCommon):
         so = self._create_so(partner_id=self.website.user_id.partner_id.id)
 
         env = api.Environment(self.env.cr, self.website.user_id.id, {})
-        # change also website env for `sale_get_order` to not change order partner_id
         with mock_website_sale_request(env, website=self.website.with_env(env), sale_order_id=so.id) as req:
             req.httprequest.method = "POST"
 
@@ -253,7 +251,6 @@ class TestCheckoutAddress(BaseUsersCommon, WebsiteSaleCommon):
         so = self._create_so(partner_id=self.portal_partner.id)
 
         env = api.Environment(self.env.cr, self.portal_user.id, {})
-        # change also website env for `sale_get_order` to not change order partner_id
         with mock_website_sale_request(env, website=self.website.with_env(env), sale_order_id=so.id) as req:
             req.httprequest.method = "POST"
 
@@ -363,7 +360,6 @@ class TestCheckoutAddress(BaseUsersCommon, WebsiteSaleCommon):
         so = self._create_so(partner_id=self.demo_partner.id)
 
         env = api.Environment(self.env.cr, self.demo_user.id, {})
-        # change also website env for `sale_get_order` to not change order partner_id
         with mock_website_sale_request(env, website=self.website.with_env(env), sale_order_id=so.id) as req:
             req.httprequest.method = "POST"
 
@@ -488,7 +484,6 @@ class TestCheckoutAddress(BaseUsersCommon, WebsiteSaleCommon):
         self.assertFalse(colleague._can_be_edited_by_current_customer(so, 'delivery'))
 
         env = api.Environment(self.env.cr, user.id, {})
-        # change also website env for `sale_get_order` to not change order partner_id
         with mock_website_sale_request(env, website=self.website.with_env(env), sale_order_id=so.id):
 
             # Invalid addresses unaccessible to current customer
