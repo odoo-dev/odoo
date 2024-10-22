@@ -1,11 +1,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models
+from odoo import api, fields, models
 from odoo.addons.base.models.res_users import is_selection_groups
 
 
 class ResUsers(models.Model):
     _inherit = ["res.users"]
+
+    discuss_role_ids = fields.Many2many("discuss.role", string="Roles")
 
     @api.model_create_multi
     def create(self, vals_list):

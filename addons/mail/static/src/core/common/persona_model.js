@@ -64,6 +64,7 @@ export class Persona extends Record {
     type;
     /** @type {string} */
     name;
+    roles = Record.many("Role");
     country = Record.one("Country");
     /** @type {string} */
     email;

@@ -163,7 +163,7 @@ export function escapeAndCompactTextContent(content) {
  * @param validRecords.partners {Array}
  * @return {string}
  */
-function generateMentionsLinks(body, { partners = [], threads = [], specialMentions = [] }) {
+function generateMentionsLinks(body, { partners = [], roles= [], threads = [], specialMentions = [] }) {
     const mentions = [];
     for (const partner of partners) {
         const placeholder = `@-mention-partner-${partner.id}`;
@@ -176,6 +176,13 @@ function generateMentionsLinks(body, { partners = [], threads = [], specialMenti
             text,
         });
         body = body.replace(text, placeholder);
+    }
+    for (const role of roles) {
+        const text = `@${escape(role.name)}`;
+        body = body.replace(
+            `${text}`,
+            `<a href="#" class="o-discuss-mention">${text}</a>`
+        );
     }
     for (const thread of threads) {
         const placeholder = `#-mention-channel-${thread.id}`;

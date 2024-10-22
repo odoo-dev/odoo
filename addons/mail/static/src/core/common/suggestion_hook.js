@@ -96,6 +96,7 @@ class UseSuggestion {
     clearRawMentions() {
         this.composer.mentionedChannels.length = 0;
         this.composer.mentionedPartners.length = 0;
+        this.composer.mentionedRoles.length = 0;
     }
     clearCannedResponses() {
         this.composer.cannedResponses = [];
@@ -181,6 +182,12 @@ class UseSuggestion {
             this.composer.mentionedPartners.add({
                 id: option.partner.id,
                 type: "partner",
+            });
+        }
+        if (option.role) {
+            this.composer.mentionedRoles.add({
+                id: option.role.id,
+                type: "role",
             });
         }
         if (option.thread) {

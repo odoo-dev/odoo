@@ -24,6 +24,7 @@ export class Composer extends Record {
     attachments = Record.many("ir.attachment");
     message = Record.one("mail.message");
     mentionedPartners = Record.many("Persona");
+    mentionedRoles = Record.many("Role");
     mentionedChannels = Record.many("Thread");
     cannedResponses = Record.many("mail.canned.response");
     text = "";

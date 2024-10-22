@@ -11,6 +11,7 @@
                 <data>
                     <field name="email" position="before">
                         <field name="notification_type" widget="radio" readonly="0"/>
+                        <field name="discuss_role_ids" widget="many2many_tags"/>
                     </field>
                     <field name="signature" position="attributes">
                         <attribute name="widget">html_mail</attribute>
@@ -29,6 +30,7 @@
                     <field name="signature" position="before">
                         <field name="notification_type" widget="radio"
                             invisible="share"/>
+                        <field name="discuss_role_ids" widget="many2many_tags"/>
                     </field>
                     <field name="signature" position="attributes">
                         <attribute name="widget">html_mail</attribute>

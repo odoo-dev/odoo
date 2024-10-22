@@ -23,7 +23,10 @@ export class SuggestionService {
         const cleanedSearchTerm = cleanTerm(term);
         switch (delimiter) {
             case "@": {
-                await this.fetchPartners(cleanedSearchTerm, thread);
+                await new Promise.all([
+                    this.fetchPartners(cleanedSearchTerm, thread),
+                    this.fetchRoles(cleanedSearchTerm),
+                ]);
                 break;
             }
             case "#":
@@ -53,6 +56,19 @@ export class SuggestionService {
             kwargs
         );
         this.store.insert(data);
+    }
+
+    /**
+     * @param {string} term
+     * @param {import("models").Thread} [thread]
+     */
+    async fetchRoles(term) {
+        const data = await this.orm.silent.searchRead(
+            "discuss.role",
+            [["name", "ilike", term]],
+            ["id", "name"]
+        );
+        this.store.Role.insert(data);
     }
 
     /**
@@ -119,7 +135,12 @@ export class SuggestionService {
         const cleanedSearchTerm = cleanTerm(term);
         switch (delimiter) {
             case "@": {
-                return this.searchPartnerSuggestions(cleanedSearchTerm, thread, sort);
+                const partners = this.searchPartnerSuggestions(cleanedSearchTerm, thread, sort);
+                const roles = this.searchRoleSuggestions(cleanedSearchTerm, sort);
+                return {
+                    type: "PartnerAndRole",
+                    suggestions: [...partners.suggestions, ...roles.suggestions],
+                };
             }
             case "#":
                 return this.searchChannelSuggestions(cleanedSearchTerm, sort);
@@ -129,6 +150,42 @@ export class SuggestionService {
         return {
             type: undefined,
             suggestions: [],
+        };
+    }
+
+    searchRoleSuggestions(cleanedSearchTerm, sort) {
+        const roles = Object.values(this.store.Role.records)
+            .filter((role) => cleanTerm(role.name).includes(cleanedSearchTerm))
+            .map((role) => ({
+                ...role,
+                isRole: true,
+            }));
+        const sortFunc = (r1, r2) => {
+            const cleanedName1 = cleanTerm(r1.name);
+            const cleanedName2 = cleanTerm(r2.name);
+            if (
+                cleanedName1.startsWith(cleanedSearchTerm) &&
+                !cleanedName2.startsWith(cleanedSearchTerm)
+            ) {
+                return -1;
+            }
+            if (
+                !cleanedName1.startsWith(cleanedSearchTerm) &&
+                cleanedName2.startsWith(cleanedSearchTerm)
+            ) {
+                return 1;
+            }
+            if (cleanedName1 < cleanedName2) {
+                return -1;
+            }
+            if (cleanedName1 > cleanedName2) {
+                return 1;
+            }
+            return r1.id - r2.id;
+        };
+        return {
+            type: "Role",
+            suggestions: sort ? roles.sort(sortFunc) : roles,
         };
     }
 
