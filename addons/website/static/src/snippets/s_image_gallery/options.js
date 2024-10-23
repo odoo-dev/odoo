@@ -318,12 +318,12 @@ options.registry.GalleryLayout = options.registry.CarouselHandler.extend({
             }, 0.2 * _slideDuration);
         });
     },
-        /**
+    /**
      * @override
      */
     cleanForSave() {
-       debugger;
-       // update the codee accordingly here
+        // Set Indicator to the first image on save
+        this._updateIndicator(0);
     },
 });
 
@@ -355,6 +355,8 @@ options.registry.gallery = options.registry.GalleryLayout.extend({
         if (this.$target.hasClass('slideshow')) {
             this.$target.removeAttr('style');
         }
+        // Set Indicator to the first image on save
+        this._updateIndicator(0);
     },
 
     //--------------------------------------------------------------------------

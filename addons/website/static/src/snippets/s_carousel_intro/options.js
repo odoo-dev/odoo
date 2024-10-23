@@ -5,6 +5,9 @@ options.registry.CarouselIntro = options.registry.Carousel.extend({
     /**
      * @override
      */
+
+    // SHSA- to check unused code ?
+
     async _computeWidgetState(methodName, params) {
         // Prevent the "Controllers" option from being "centered" when
         // arrows and indicators are displayed.
