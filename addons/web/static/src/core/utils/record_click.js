@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "@odoo/owl";
+import { isMacOS } from "@web/core/browser/feature_detection";
 
 const EXCLUDED_TAGS = ["a", "button", "img"];
 //FIXME must support debounce, I guess...
@@ -22,9 +23,10 @@ export function useRecordClick({ refName, onOpen, excludedSelectors = [] }) {
                 return;
             }
         }
-        const ctrlKey = (ev.ctrlKey && ev.button === 0) || ev.button === 1;
+        const ctrlKey = isMacOS() ? ev.metaKey : ev.ctrlKey;
+        const midlleClick = (ctrlKey && ev.button === 0) || ev.button === 1;
         if ([0, 1].includes(ev.button)) {
-            onOpen(ev, ctrlKey);
+            onOpen(ev, midlleClick);
             ev.preventDefault();
             ev.stopPropagation();
         }
