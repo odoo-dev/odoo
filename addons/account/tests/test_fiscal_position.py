@@ -299,12 +299,29 @@ class TestFiscalPosition(common.TransactionCase):
             {'partner': partner_be_nl_delivery, 'delivery': partner_be_vat, 'expected_fp': fp_be_nat},
             {'partner': partner_be_nl_delivery, 'delivery': partner_nl_vat, 'expected_fp': fp_be_nat},
             {'partner': partner_nl_be_vat, 'delivery': partner_nl_be_vat, 'expected_fp': fp_be_nat},
+            {'partner': partner_nl_be_vat, 'delivery': partner_nl_be_vat, 'expected_fp': fp_be_nat},
+            {'partner': partner_nl_be_vat, 'delivery': partner_fr_vat, 'expected_fp': fp_be_nat},
+            {'partner': partner_nl_be_vat, 'delivery': partner_fr_no_vat, 'expected_fp': fp_be_nat},
+            {'partner': partner_be_vat, 'delivery': partner_be_vat, 'expected_fp': fp_be_nat},
+            {'partner': partner_be_vat, 'delivery': partner_be_no_vat, 'expected_fp': fp_be_nat},
+            {'partner': partner_be_no_vat, 'delivery': partner_be_vat, 'expected_fp': fp_be_nat},
+            {'partner': partner_be_no_vat, 'delivery': partner_be_no_vat, 'expected_fp': fp_be_nat},
+            {'partner': partner_be_vat, 'delivery': partner_nl_vat, 'expected_fp': fp_be_nat},
+            {'partner': partner_be_vat, 'delivery': partner_nl_no_vat, 'expected_fp': fp_be_nat},
+            {'partner': partner_be_no_vat, 'delivery': partner_nl_vat, 'expected_fp': fp_oss_nl},
+            {'partner': partner_be_no_vat, 'delivery': partner_nl_no_vat, 'expected_fp': fp_oss_nl},
         ]
 
         for vals in data:
             fp = self.env['account.fiscal.position'].with_company(self.env.company)._get_fiscal_position(vals['partner'], vals['delivery'])
             with self.subTest(partner=vals['partner'].name, delivery=vals['delivery'].name, fp=fp.name, expected_fp=vals['expected_fp'].name):
                 self.assertEqual(fp, vals['expected_fp'])
+
+        self.env.company.vat = 'NL999999999B99'
+        print(self.env.company.country_id.name)
+        fp = self.env['account.fiscal.position'].with_company(self.env.company)._get_fiscal_position(partner_nl_vat, partner_nl_vat)
+        with self.subTest(partner=partner_nl_vat.name, delivery=partner_nl_vat.name, fp=fp.name, expected_fp=fp_be_nat.name):
+            self.assertEqual(fp, fp_be_nat)
 
     def test_fiscal_position_constraint(self):
         """

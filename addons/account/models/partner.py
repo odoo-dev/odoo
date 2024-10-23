@@ -181,7 +181,7 @@ class AccountFiscalPosition(models.Model):
         return super(AccountFiscalPosition, self).write(vals)
 
     @api.model
-    def _get_fpos_by_region(self, country_id=False, state_id=False, zipcode=False, vat_required=False):
+    def _get_fpos_by_region(self, country_id=False, state_id=False, zipcode=False, vat_required=False, foreign_vat=None):
         if not country_id:
             return False
         base_domain = self._prepare_fpos_base_domain(vat_required)
@@ -258,8 +258,9 @@ class AccountFiscalPosition(models.Model):
         eu_delivery = delivery.country_code in eu_country_codes
         eu_partner = partner.country_code in eu_country_codes
         intra_eu = eu_fiscal_partner and eu_partner and eu_delivery
+        company_code = company.vat[:2] if company.vat else company.account_fiscal_country_id.code
 
-        domestic_fiscal_partner = partner.vat and partner.vat[:2] == company.country_code
+        domestic_fiscal_partner = partner.vat and partner.vat[:2] == company_code
         domestic_delivery = delivery_country == company.country_id
 
         vat_required = bool(partner.vat) or domestic_delivery
@@ -267,7 +268,7 @@ class AccountFiscalPosition(models.Model):
         # There are 2 "corner" cases here:
         # - The delivery is within the EU, and both the partner's country and fiscal country are outside the EU.
         # - An intra community transaction where both the company and partner share the same fiscal country.
-        # In these cases, we assign the company's country as the delivery country and force 'vat_required' to True
+        # In these cases, we assign the company's fiscal country (based on his VAT number) as the delivery country and force 'vat_required' to True
         # in order to get the domestic FP
         if (eu_delivery and not eu_fiscal_partner and not eu_partner) or (intra_eu and domestic_fiscal_partner):
             delivery_country = company.country_id
