@@ -84,7 +84,7 @@ class TestConfigManager(TransactionCase):
             'save': False,
             'init': {},
             'update': {},
-            'without_demo': False,
+            'without_demo': '',
             'demo': {},
             'import_partial': '',
             'pidfile': '',
@@ -115,34 +115,34 @@ class TestConfigManager(TransactionCase):
             'logfile': '',
             'syslog': False,
             'log_handler': [':INFO'],
-            'log_db': False,
+            'log_db': '',
             'log_db_level': 'warning',
             'log_level': 'info',
 
             # SMTP
-            'email_from': False,
-            'from_filter': False,
+            'email_from': '',
+            'from_filter': '',
             'smtp_server': 'localhost',
             'smtp_port': 25,
             'smtp_ssl': False,
-            'smtp_user': False,
-            'smtp_password': False,
-            'smtp_ssl_certificate_filename': False,
-            'smtp_ssl_private_key_filename': False,
+            'smtp_user': '',
+            'smtp_password': '',
+            'smtp_ssl_certificate_filename': '',
+            'smtp_ssl_private_key_filename': '',
 
             # database
-            'db_name': False,
-            'db_user': False,
-            'db_password': False,
+            'db_name': '',
+            'db_user': '',
+            'db_password': '',
             'pg_path': '',
-            'db_host': False,
-            'db_port': False,
+            'db_host': '',
+            'db_port': None,
             'db_sslmode': 'prefer',
             'db_maxconn': 64,
-            'db_maxconn_gevent': False,
+            'db_maxconn_gevent': None,
             'db_template': 'template0',
-            'db_replica_host': False,
-            'db_replica_port': False,
+            'db_replica_host': '',
+            'db_replica_port': None,
 
             # i18n
             'load_language': None,
@@ -170,9 +170,9 @@ class TestConfigManager(TransactionCase):
             **({
                 'workers': 0,
                 'limit_memory_soft': 2048 * 1024 * 1024,
-                'limit_memory_soft_gevent': False,
+                'limit_memory_soft_gevent': None,
                 'limit_memory_hard': 2560 * 1024 * 1024,
-                'limit_memory_hard_gevent': False,
+                'limit_memory_hard_gevent': None,
                 'limit_time_cpu': 60,
                 'limit_time_real': 120,
                 'limit_time_real_cron': -1,
@@ -316,7 +316,8 @@ class TestConfigManager(TransactionCase):
         # test that loading the Odoo 16.0 generated default config works
         # with a modern version
         config_path = file_path('base/tests/config/16.0.conf')
-        self.config._parse_config(['--config', config_path])
+        with self.assertLogs('odoo.tools.config', 'WARNING') as capture:
+            self.config._parse_config(['--config', config_path])
         with self.assertNoLogs('py.warnings'):
             self.config._warn_deprecated_options()
         self.assertConfigEqual({
@@ -324,17 +325,17 @@ class TestConfigManager(TransactionCase):
             'admin_passwd': 'admin',
             'config': config_path,
             'csv_internal_sep': ',',
-            'db_host': False,
+            'db_host': '',
             'db_maxconn': 64,
-            'db_name': False,
-            'db_password': False,
-            'db_port': False,
+            'db_name': '',
+            'db_password': '',
+            'db_port': None,
             'db_sslmode': 'prefer',
             'db_template': 'template0',
-            'db_user': False,
+            'db_user': '',
             'dbfilter': '',
             'demo': {},
-            'email_from': False,
+            'email_from': '',
             'geoip_city_db': '/usr/share/GeoIP/GeoLite2-City.mmdb',
             'http_enable': True,
             'http_interface': '',
@@ -342,7 +343,7 @@ class TestConfigManager(TransactionCase):
             'import_partial': '',
             'list_db': True,
             'load_language': None,
-            'log_db': False,
+            'log_db': '',
             'log_db_level': 'warning',
             'log_handler': [':INFO'],
             'log_level': 'info',
@@ -357,11 +358,11 @@ class TestConfigManager(TransactionCase):
             'screencasts': '',
             'screenshots': '/tmp/odoo_tests',
             'server_wide_modules': 'base,web',
-            'smtp_password': False,
+            'smtp_password': '',
             'smtp_port': 25,
             'smtp_server': 'localhost',
             'smtp_ssl': False,
-            'smtp_user': False,
+            'smtp_user': '',
             'syslog': False,
             'test_enable': False,
             'test_file': '',
@@ -371,7 +372,7 @@ class TestConfigManager(TransactionCase):
             'unaccent': False,
             'update': {},
             'upgrade_path': '',
-            'without_demo': False,
+            'without_demo': '',
 
             # options that are not taken from the file (also in 14.0)
             'addons_path': f'{PROJECT_PATH}/odoo/addons,{PROJECT_PATH}/addons',
@@ -390,9 +391,9 @@ class TestConfigManager(TransactionCase):
             **({
                 'workers': 0,
                 'limit_memory_soft': 2048 * 1024 * 1024,
-                'limit_memory_soft_gevent': False,
+                'limit_memory_soft_gevent': None,
                 'limit_memory_hard': 2560 * 1024 * 1024,
-                'limit_memory_hard_gevent': False,
+                'limit_memory_hard_gevent': None,
                 'limit_time_cpu': 60,
                 'limit_time_real': 120,
                 'limit_time_real_cron': -1,
@@ -400,19 +401,39 @@ class TestConfigManager(TransactionCase):
             } if IS_POSIX else {}),
 
             # new options since 14.0
-            'db_maxconn_gevent': False,
-            'db_replica_host': False,
-            'db_replica_port': False,
+            'db_maxconn_gevent': None,
+            'db_replica_host': '',
+            'db_replica_port': None,
             'geoip_country_db': '/usr/share/GeoIP/GeoLite2-Country.mmdb',
-            'from_filter': False,
+            'from_filter': '',
             'gevent_port': 8072,
-            'smtp_ssl_certificate_filename': False,
-            'smtp_ssl_private_key_filename': False,
+            'smtp_ssl_certificate_filename': '',
+            'smtp_ssl_private_key_filename': '',
             'websocket_keep_alive_timeout': 3600,
             'websocket_rate_limit_burst': 10,
             'websocket_rate_limit_delay': 0.2,
             'x_sendfile': False,
         })
+
+        output = [
+            ("WARNING:odoo.tools.config:option {} reads 'False' in the "
+             "config file at {} but isn't a boolean option, assume ''").format(
+                option, config_path)
+            for option in (
+                'db_host', 'db_name', 'db_password', 'db_user', 'email_from',
+                'from_filter', 'log_db', 'smtp_password',
+                'smtp_ssl_certificate_filename',
+                'smtp_ssl_private_key_filename', 'smtp_user', 'without_demo',
+            )
+        ]
+        output.insert(
+            3,
+            "WARNING:odoo.tools.config:option db_port reads 'False' in "
+            f"the config file at {config_path} but isn't a boolean "
+            "option, assume None"
+        )
+        self.assertEqual(capture.output, output)
+
 
     def test_05_repeat_parse_config(self):
         """Emulate multiple calls to parse_config()"""
