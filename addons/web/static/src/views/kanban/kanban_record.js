@@ -211,29 +211,7 @@ export class KanbanRecord extends Component {
         );
         useRecordClick({
             excludedSelectors: CANCEL_GLOBAL_CLICK,
-            onOpen: (ev, newWindow) => {
-                const { archInfo, forceGlobalClick, openRecord, record } = this.props;
-                if (!forceGlobalClick && archInfo.openAction) {
-                    this.action.doActionButton(
-                        {
-                            name: archInfo.openAction.action,
-                            type: archInfo.openAction.type,
-                            resModel: record.resModel,
-                            resId: record.resId,
-                            resIds: record.resIds,
-                            context: record.context,
-                            onClose: async () => {
-                                await record.model.root.load();
-                            },
-                        },
-                        {
-                            newWindow,
-                        }
-                    );
-                } else if (forceGlobalClick || this.props.archInfo.canOpenRecords) {
-                    openRecord(record);
-                }
-            },
+            onOpen: this.onOpenRecord.bind(this),
             refName: "root",
         });
         this.rootRef = useRef("root");
@@ -247,6 +225,30 @@ export class KanbanRecord extends Component {
         const { archInfo, record } = this.props;
         const { name } = archInfo.fieldNodes[fieldId];
         return getFormattedValue(record, name, archInfo.fieldNodes[fieldId]);
+    }
+
+    onOpenRecord(ev, newWindow) {
+        const { archInfo, forceGlobalClick, openRecord, record } = this.props;
+        if (!forceGlobalClick && archInfo.openAction) {
+            this.action.doActionButton(
+                {
+                    name: archInfo.openAction.action,
+                    type: archInfo.openAction.type,
+                    resModel: record.resModel,
+                    resId: record.resId,
+                    resIds: record.resIds,
+                    context: record.context,
+                    onClose: async () => {
+                        await record.model.root.load();
+                    },
+                },
+                {
+                    newWindow,
+                }
+            );
+        } else if (forceGlobalClick || this.props.archInfo.canOpenRecords) {
+            openRecord(record, undefined, { newWindow });
+        }
     }
 
     /**
