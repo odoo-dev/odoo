@@ -15,6 +15,14 @@ class Command:
     name = None
 
     @property
+    def stdout(self):
+        return sys.stdout
+
+    @property
+    def stderr(self):
+        return sys.stderr
+
+    @property
     def prog(self):
         return f'{Path(sys.argv[0]).name} {self.name}'
 
