@@ -12,6 +12,7 @@ import { fileTypeMagicWordMap } from "@web/views/fields/image/image_field";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { useViewCompiler } from "@web/views/view_compiler";
 import { Widget } from "@web/views/widgets/widget";
+import { useRecordClick } from "@web/core/utils/record_click";
 import { getFormattedValue } from "../utils";
 import { KANBAN_CARD_ATTRIBUTE, KANBAN_MENU_ATTRIBUTE } from "./kanban_arch_parser";
 import { KanbanCompiler } from "./kanban_compiler";
@@ -25,9 +26,7 @@ const { COLORS } = ColorList;
 const formatters = registry.category("formatters");
 
 // These classes determine whether a click on a record should open it.
-export const CANCEL_GLOBAL_CLICK = ["a", ".dropdown", ".oe_kanban_action", "[data-bs-toggle]"].join(
-    ","
-);
+export const CANCEL_GLOBAL_CLICK = [".dropdown", ".oe_kanban_action", "[data-bs-toggle]"];
 
 /**
  * Returns the index of a color determined by a given record.
@@ -210,6 +209,33 @@ export class KanbanRecord extends Component {
         useRecordObserver((record) =>
             Object.assign(this.dataState.record, getFormattedRecord(record))
         );
+        useRecordClick({
+            excludedSelectors: CANCEL_GLOBAL_CLICK,
+            onOpen: (ev, newWindow) => {
+                const { archInfo, forceGlobalClick, openRecord, record } = this.props;
+                if (!forceGlobalClick && archInfo.openAction) {
+                    this.action.doActionButton(
+                        {
+                            name: archInfo.openAction.action,
+                            type: archInfo.openAction.type,
+                            resModel: record.resModel,
+                            resId: record.resId,
+                            resIds: record.resIds,
+                            context: record.context,
+                            onClose: async () => {
+                                await record.model.root.load();
+                            },
+                        },
+                        {
+                            newWindow,
+                        }
+                    );
+                } else if (forceGlobalClick || this.props.archInfo.canOpenRecords) {
+                    openRecord(record);
+                }
+            },
+            refName: "root",
+        });
         this.rootRef = useRef("root");
     }
 
@@ -265,31 +291,6 @@ export class KanbanRecord extends Component {
         }
         classes.push(archInfo.cardClassName);
         return classes.join(" ");
-    }
-
-    /**
-     * @param {MouseEvent} ev
-     */
-    onGlobalClick(ev) {
-        if (ev.target.closest(CANCEL_GLOBAL_CLICK)) {
-            return;
-        }
-        const { archInfo, forceGlobalClick, openRecord, record } = this.props;
-        if (!forceGlobalClick && archInfo.openAction) {
-            this.action.doActionButton({
-                name: archInfo.openAction.action,
-                type: archInfo.openAction.type,
-                resModel: record.resModel,
-                resId: record.resId,
-                resIds: record.resIds,
-                context: record.context,
-                onClose: async () => {
-                    await record.model.root.load();
-                },
-            });
-        } else if (forceGlobalClick || this.props.archInfo.canOpenRecords) {
-            openRecord(record);
-        }
     }
 
     /**

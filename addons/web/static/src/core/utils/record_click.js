@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "@odoo/owl";
 
-const EXCLUDED_TAGS = ["A", "BUTTON", "IMG"];
+const EXCLUDED_TAGS = ["a", "button", "img"];
 //FIXME must support debounce, I guess...
-export function useRecordClick({ refName, onOpen }) {
+export function useRecordClick({ refName, onOpen, excludedSelectors = [] }) {
+    const _excludedSelectors = [...EXCLUDED_TAGS, ...excludedSelectors];
     const ref = useRef(refName);
     const handleClick = (ev) => {
         if (ev.target.closest(".middle_clickable") !== ref.el) {
@@ -13,12 +14,10 @@ export function useRecordClick({ refName, onOpen }) {
             // keep the default browser behavior if the click on the element is not explicitly handled by the hook
             // case 1 when the hook must handle: <a> tag in an element middle clickable
             // case 2 when the hook must handle: <span> tag in a <button> element middle clickable
-            if (EXCLUDED_TAGS.find((tag) => ev.target.tagName === tag)) {
+            if (ev.target.matches(_excludedSelectors)) {
                 return;
             }
-            const excludedParent = EXCLUDED_TAGS.map((tag) => ev.target.closest(`${tag}`)).find(
-                (e) => e
-            );
+            const excludedParent = ev.target.closest(_excludedSelectors);
             if (excludedParent && !excludedParent.classList.contains("middle_clickable")) {
                 return;
             }
