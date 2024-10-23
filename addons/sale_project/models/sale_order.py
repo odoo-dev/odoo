@@ -268,6 +268,9 @@ class SaleOrder(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         created_records = super().create(vals_list)
+        if created_records['project_id']:
+            created_records['project_id']['allow_billable'] = True
+
         project = self.env['project.project'].browse(self.env.context.get('create_for_project_id'))
         if project:
             service_sol = next((sol for sol in created_records.order_line if sol.is_service), False)
