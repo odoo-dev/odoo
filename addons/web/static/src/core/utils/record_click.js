@@ -1,28 +1,38 @@
 import { useEffect, useRef } from "@odoo/owl";
 
-const EXCLUDED_TAGS = ["A", "IMG"];
-
+const EXCLUDED_TAGS = ["A", "BUTTON", "IMG"];
+//FIXME must support debounce, I guess...
 export function useRecordClick({ refName, onOpen }) {
     const ref = useRef(refName);
     const handleClick = (ev) => {
-        if (
-            !ev.target.classList.contains("middle_clickable") &&
-            EXCLUDED_TAGS.find((tag) => ev.target.closest(`${tag}`))
-        ) {
-            // keep the default browser behavior if the click on the element is not explicitly handled by the hook
-            // e.g. <a> tag in an element middle clickable
+        if (ev.target.closest(".middle_clickable") !== ref.el) {
+            // if the hook is used inside another element using the hook, we must only execute this callback
             return;
+        }
+        if (!ev.target.classList.contains("middle_clickable")) {
+            // keep the default browser behavior if the click on the element is not explicitly handled by the hook
+            // case 1 when the hook must handle: <a> tag in an element middle clickable
+            // case 2 when the hook must handle: <span> tag in a <button> element middle clickable
+            if (EXCLUDED_TAGS.find((tag) => ev.target.tagName === tag)) {
+                return;
+            }
+            const excludedParent = EXCLUDED_TAGS.map((tag) => ev.target.closest(`${tag}`)).find(
+                (e) => e
+            );
+            if (excludedParent && !excludedParent.classList.contains("middle_clickable")) {
+                return;
+            }
         }
         const ctrlKey = (ev.ctrlKey && ev.button === 0) || ev.button === 1;
         if ([0, 1].includes(ev.button)) {
             onOpen(ev, ctrlKey);
             ev.preventDefault();
+            ev.stopPropagation();
         }
     };
     useEffect(
         () => {
             if (ref.el) {
-                console.log(ref.el);
                 const el = ref.el;
                 el.classList.add("middle_clickable");
                 el.addEventListener("auxclick", handleClick, { capture: true });
