@@ -228,9 +228,11 @@ class ResourceCalendar(models.Model):
         # 38h / weeks -> 5 days
         # 19h / weeks (M/T/Wam) -> 3 days
         # 19h / weeks (Mam/Tam/Wam/Tam/Fam) -> 5 days
-        days = len(set(self.attendance_ids.filtered(
+        self.ensure_one()
+        if self.two_weeks_calendar:
+            return 5 * self.work_time_rate / 100
+        return len(set(self.attendance_ids.filtered(
             lambda a: a._is_work_period()).mapped('dayofweek')))
-        return days / 2 if self.two_weeks_calendar else days
 
     def switch_calendar_type(self):
         if not self.two_weeks_calendar:
