@@ -7,10 +7,6 @@ export function useRecordClick({ refName, onOpen, excludedSelectors = [] }) {
     const _excludedSelectors = [...EXCLUDED_TAGS, ...excludedSelectors];
     const ref = useRef(refName);
     const handleClick = (ev) => {
-        if (ev.target.closest(".middle_clickable") !== ref.el) {
-            // if the hook is used inside another element using the hook, we must only execute this callback
-            return;
-        }
         if (!ev.target.classList.contains("middle_clickable")) {
             // keep the default browser behavior if the click on the element is not explicitly handled by the hook
             // case 1 when the hook must handle: <a> tag in an element middle clickable
@@ -36,8 +32,8 @@ export function useRecordClick({ refName, onOpen, excludedSelectors = [] }) {
             if (ref.el) {
                 const el = ref.el;
                 el.classList.add("middle_clickable");
-                el.addEventListener("auxclick", handleClick, { capture: true });
-                el.addEventListener("click", handleClick, { capture: true });
+                el.addEventListener("auxclick", handleClick);
+                el.addEventListener("click", handleClick);
                 return () => {
                     el.removeEventListener("auxclick", handleClick);
                     el.removeEventListener("click", handleClick);

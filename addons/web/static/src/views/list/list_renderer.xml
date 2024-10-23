@@ -288,7 +288,7 @@
                     t-on-keydown="(ev) => this.onCellKeydown(ev, group, record)"
                     tabindex="-1"
                 >
-                    <button class="btn btn-link align-top text-end"
+                    <button class="btn btn-link align-top text-end middle_clickable"
                         name="Open in form view"
                         aria-label="Open in form view"
                         tabindex="-1"
