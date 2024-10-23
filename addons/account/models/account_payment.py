@@ -401,7 +401,7 @@ class AccountPayment(models.Model):
                 payment.state = 'draft'
             if payment.outstanding_account_id:
                 move = payment.move_id
-                lines = move.line_ids.filtered(lambda l: l.account_id.account_type in ('asset_receivable', 'liability_payable'))
+                lines = move.line_ids
                 amount_residual = sum(lines.mapped('amount_residual'))
                 if move and move.currency_id.is_zero(amount_residual):
                     payment.state = 'paid'
