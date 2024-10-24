@@ -332,10 +332,7 @@ class AssetsBundle(object):
         if not js_attachment:
             template_bundle = f"""
                 document.dispatchEvent(new Event('odoo:js_asset:{self.name}:loaded'));
-                if (!globalThis.odoo.js_assets_loaded) {{
-                    globalThis.odoo.js_assets_loaded = [];
-                }}
-                globalThis.odoo.js_assets_loaded.push("{self.name}");
+                odoo.loadedJsAssets.add("{self.name}");
             """
 
             if is_minified:
@@ -359,11 +356,12 @@ class AssetsBundle(object):
                         /* {self.name} */
                         {self.generate_xml_bundle()}
                     }});
+                    odoo.loadedJsAssets.delete("{self.name}");
                 }};
-                if (globalThis.odoo?.js_assets_loaded?.includes("{self.name}")) {{
+                if (odoo.loadedJsAssets.has("{self.name}")) {{
                     loadXmlTemplates();
                 }} else {{
-                    document.addEventListener("odoo:js_asset:{self.name}:loaded", loadXmlTemplates);
+                    document.addEventListener("odoo:js_asset:{self.name}:loaded", loadXmlTemplates, {{ once: true }});
                 }}
             }}
         """)
