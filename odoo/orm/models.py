@@ -207,18 +207,18 @@ class MetaModel(api.Meta):
 
         odoo_bases = [base for base in bases if isinstance(base, MetaModel)]
         inherit_models = list({base._name for base in odoo_bases if getattr(base, '_name', None)})
-        other_clases = [base for base in bases if base not in odoo_bases]
 
         if not bases:
             # BaseModel
             return super().__new__(meta, name, bases, attrs)
-        if name in ('AbstractModel', 'Model', 'TransientModel') and not inherit_models and '_inherit' not in attrs and '_name' not in attrs:
+        if '_name' in attrs and attrs['_name'] is None and not inherit_models and not attrs.get('_inherit'):
             # AbstractModel or Model or TransientModel
             return super().__new__(meta, name, bases, attrs)
 
+        other_clases = [base for base in bases if base not in odoo_bases]
         base_class = odoo_bases[0]
+        is_new_model = base_class in OdooBaseModels
         is_python_inheritance = bool(inherit_models)
-        is_new_model = base_class in (AbstractModel, Model, TransientModel)
 
         if attrs.get('_register', True):
             # determine '_module'
@@ -238,31 +238,31 @@ class MetaModel(api.Meta):
             model_name = attrs.get('_name')
 
             if '_inherit' in attrs:
-                if len(inherit_models):
+                if is_python_inheritance:
                     raise TypeError('Please use the pythonic inheritance and remove "_inherit" attribute.')
                 inherit_models.extend(attrs['_inherit'])
 
             # raises errors to standardize code
             if '_original_module' not in attrs:
                 if is_new_model and model_name in meta.models and is_python_inheritance:
-                    raise TypeError('Only the new models should contain the Odoo model type (AbstractModel, Model, TransientModel) before others Odoo models.')
-                if not is_new_model and inherit_models and name != base_class.__name__ and model_name != base_class._name:
-                    raise TypeError(f'The new Model {name!r} must contains the Odoo model type (AbstractModel, Model, TransientModel) before others Odoo models.')
+                    raise TypeError('Only the new models should contain the Odoo model type (AbstractModel, Model, TransientModel) with other classes and models.')
+                if ((is_new_model and base_class != bases[0]) or
+                    (not is_new_model and inherit_models and name != base_class.__name__ and model_name != base_class._name)):
+                    raise TypeError(f'The new Model {name!r} must contain the Odoo model type (AbstractModel, Model, TransientModel) before other classes and models.')
 
             # set the standardized values
             meta.models.add(model_name)
             attrs['_name'] = model_name
             attrs['_inherit'] = inherit_models
 
-            if base_class not in (AbstractModel, Model, TransientModel):
+            if not is_new_model:
                 base_class = base_class.__base__
 
         if inherit_models and other_clases:
             raise TypeError(f'Model {name!r} can only extend BaseModel classes.\n'
                             f'It is possible to declare AbstractModels instead of foreign classes {tuple(c.__name__ for c in other_clases)}.')
 
-        new_bases = tuple(other_clases + [base_class] if base_class else other_clases)
-        return super().__new__(meta, name, new_bases, attrs)
+        return super().__new__(meta, name, tuple(other_clases + [base_class]), attrs)
 
     def __init__(self, name, bases, attrs):
         super().__init__(name, bases, attrs)
@@ -7314,6 +7314,7 @@ class Model(AbstractModel):
     The system will later instantiate the class once per database (on
     which the class' module is installed).
     """
+    _name = None
     _auto = True                # automatically create database backend
     _register = False           # not visible in ORM registry, meant to be python-inherited only
     _abstract = False           # not abstract
@@ -7328,6 +7329,7 @@ class TransientModel(Model):
     create new records, and may only access the records they created. The
     superuser has unrestricted access to all TransientModel records.
     """
+    _name = None
     _auto = True                # automatically create database backend
     _register = False           # not visible in ORM registry, meant to be python-inherited only
     _abstract = False           # not abstract
@@ -7388,6 +7390,9 @@ class TransientModel(Model):
         self.sudo().browse(ids).unlink()
         if len(ids) >= GC_UNLINK_LIMIT:
             self.env.ref('base.autovacuum_job')._trigger()
+
+
+OdooBaseModels = (AbstractModel, Model, TransientModel)
 
 
 def itemgetter_tuple(items):

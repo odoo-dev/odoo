@@ -16,7 +16,7 @@ from werkzeug import urls
 
 from odoo import api, fields, models, tools, SUPERUSER_ID, _, Command
 from odoo.exceptions import RedirectWarning, UserError, ValidationError
-from odoo.addons import base
+from odoo.addons import base  # noqa: F401
 
 # Global variables used for the warning fields declared on the res.partner
 # in the following modules : sale, purchase, account, stock
@@ -139,11 +139,11 @@ class ResPartnerCategory(models.Model):
 
     name = fields.Char('Name', required=True, translate=True)
     color = fields.Integer(string='Color', default=_get_default_color, aggregator=False)
-    parent_id = fields.Many2one['ResPartnerCategory'](string='Category', index=True, ondelete='cascade')
-    child_ids = fields.One2many['ResPartnerCategory'](inverse_name='parent_id', string='Child Tags')
+    parent_id = fields.Many2one['base.ResPartnerCategory'](string='Category', index=True, ondelete='cascade')
+    child_ids = fields.One2many['base.ResPartnerCategory'](inverse_name='parent_id', string='Child Tags')
     active = fields.Boolean(default=True, help="The active field allows you to hide the category without removing it.")
     parent_path = fields.Char(index=True)
-    partner_ids = fields.Many2many['ResPartner'](column1='category_id', column2='partner_id', string='Partners', copy=False)
+    partner_ids = fields.Many2many['base.ResPartner'](column1='category_id', column2='partner_id', string='Partners', copy=False)
 
     @api.constrains('parent_id')
     def _check_parent_id(self):
@@ -211,10 +211,10 @@ class ResPartner(models.Model, FormatAddressMixin, FormatVatLabelMixin, AvatarMi
 
     name = fields.Char(index=True, default_export_compatible=True)
     complete_name = fields.Char(compute='_compute_complete_name', store=True, index=True)
-    title = fields.Many2one['ResPartnerTitle']()
-    parent_id = fields.Many2one['ResPartner'](string='Related Company', index=True)
+    title = fields.Many2one['base.ResPartnerTitle']()
+    parent_id = fields.Many2one['base.ResPartner'](string='Related Company', index=True)
     parent_name = fields.Char(related='parent_id.name', readonly=True, string='Parent name')
-    child_ids = fields.One2many['ResPartner'](inverse_name='parent_id', string='Contact', domain=[('active', '=', True)], context={'active_test': False})
+    child_ids = fields.One2many['base.ResPartner'](inverse_name='parent_id', string='Contact', domain=[('active', '=', True)], context={'active_test': False})
     ref = fields.Char(string='Reference', index=True)
     lang = fields.Selection(_lang_get, string='Language',
                             help="All the emails and documents sent to this contact will be translated in this language.")
@@ -232,15 +232,15 @@ class ResPartner(models.Model, FormatAddressMixin, FormatVatLabelMixin, AvatarMi
         readonly=False, store=True,
         help='The internal user in charge of this contact.')
     vat = fields.Char(string='Tax ID', index=True, help="The Tax Identification Number. Values here will be validated based on the country format. You can use '/' to indicate that the partner is not subject to tax.")
-    same_vat_partner_id = fields.Many2one['ResPartner'](string='Partner with same Tax ID', compute='_compute_same_vat_partner_id', store=False)
-    same_company_registry_partner_id = fields.Many2one['ResPartner'](string='Partner with same Company Registry', compute='_compute_same_vat_partner_id', store=False)
+    same_vat_partner_id = fields.Many2one['base.ResPartner'](string='Partner with same Tax ID', compute='_compute_same_vat_partner_id', store=False)
+    same_company_registry_partner_id = fields.Many2one['base.ResPartner'](string='Partner with same Company Registry', compute='_compute_same_vat_partner_id', store=False)
     company_registry = fields.Char(string="Company ID", compute='_compute_company_registry', store=True, readonly=False,
        help="The registry number of the company. Use it if it is different from the Tax ID. It must be unique across all partners of a same country")
     bank_ids = fields.One2many['base.ResPartnerBank'](inverse_name='partner_id', string='Banks')
     website = fields.Char('Website Link')
     comment = fields.Html(string='Notes')
 
-    category_id = fields.Many2many['ResPartnerCategory'](column1='partner_id',
+    category_id = fields.Many2many['base.ResPartnerCategory'](column1='partner_id',
                                     column2='category_id', string='Tags', default=_default_category)
     active = fields.Boolean(default=True)
     employee = fields.Boolean(help="Check this box if this contact is an Employee.")
@@ -271,7 +271,7 @@ class ResPartner(models.Model, FormatAddressMixin, FormatVatLabelMixin, AvatarMi
     is_company = fields.Boolean(string='Is a Company', default=False,
         help="Check if the contact is a company, otherwise it is a person")
     is_public = fields.Boolean(compute='_compute_is_public')
-    industry_id = fields.Many2one['ResPartnerIndustry'](string='Industry')
+    industry_id = fields.Many2one['base.ResPartnerIndustry'](string='Industry')
     # company_type is only an interface field, do not use it in business logic
     company_type = fields.Selection(string='Company Type',
         selection=[('person', 'Individual'), ('company', 'Company')],
@@ -286,7 +286,7 @@ class ResPartner(models.Model, FormatAddressMixin, FormatVatLabelMixin, AvatarMi
     contact_address = fields.Char(compute='_compute_contact_address', string='Complete Address')
 
     # technical field used for managing commercial fields
-    commercial_partner_id = fields.Many2one['ResPartner'](
+    commercial_partner_id = fields.Many2one['base.ResPartner'](
         string='Commercial Entity',
         compute='_compute_commercial_partner', store=True,
         recursive=True, index=True)
@@ -296,7 +296,7 @@ class ResPartner(models.Model, FormatAddressMixin, FormatVatLabelMixin, AvatarMi
     barcode = fields.Char(help="Use a barcode to identify this contact.", copy=False, company_dependent=True)
 
     # hack to allow using plain browse record in qweb views, and used in ir.qweb.field.contact
-    self = fields.Many2one['ResPartner'](compute='_compute_get_ids')
+    self = fields.Many2one['base.ResPartner'](compute='_compute_get_ids')
 
     _sql_constraints = [
         ('check_name', "CHECK( (type='contact' AND name IS NOT NULL) or (type!='contact') )", 'Contacts require a name'),

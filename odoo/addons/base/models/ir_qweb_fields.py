@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from odoo.addons import base
 import base64
 import binascii
 from datetime import time
