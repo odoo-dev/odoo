@@ -94,6 +94,8 @@ class BaseGeocoder(models.AbstractModel):
         except Exception as e:
             self._raise_query_error(e)
         geo = result[0]
+        if "geo_reverse" in kw:
+            return geo["display_name"]
         return float(geo['lat']), float(geo['lon'])
 
     @api.model
