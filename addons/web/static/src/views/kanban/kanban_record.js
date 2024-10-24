@@ -25,9 +25,6 @@ const { COLORS } = ColorList;
 
 const formatters = registry.category("formatters");
 
-// These classes determine whether a click on a record should open it.
-export const CANCEL_GLOBAL_CLICK = [".dropdown", ".oe_kanban_action", "[data-bs-toggle]"];
-
 /**
  * Returns the index of a color determined by a given record.
  */
@@ -187,6 +184,7 @@ export class KanbanRecord extends Component {
     static Compiler = KanbanCompiler;
     static KANBAN_CARD_ATTRIBUTE = KANBAN_CARD_ATTRIBUTE;
     static KANBAN_MENU_ATTRIBUTE = KANBAN_MENU_ATTRIBUTE;
+    static CANCEL_GLOBAL_CLICK = [".dropdown", ".oe_kanban_action", "[data-bs-toggle]"];
     static menuTemplate = "web.KanbanRecordMenu";
     static template = "web.KanbanRecord";
 
@@ -210,7 +208,7 @@ export class KanbanRecord extends Component {
             Object.assign(this.dataState.record, getFormattedRecord(record))
         );
         useRecordClick({
-            excludedSelectors: CANCEL_GLOBAL_CLICK,
+            excludedSelectors: this.constructor.CANCEL_GLOBAL_CLICK,
             onOpen: this.onOpenRecord.bind(this),
             refName: "root",
         });

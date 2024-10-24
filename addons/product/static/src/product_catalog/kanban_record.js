@@ -13,6 +13,7 @@ export class ProductCatalogKanbanRecord extends KanbanRecord {
     };
 
     setup() {
+        this.constructor.CANCEL_GLOBAL_CLICK.push(".o_product_catalog_cancel_global_click");
         super.setup();
         this.debouncedUpdateQuantity = useDebounced(this._updateQuantity, 500, {
             execBeforeUnmount: true,
@@ -44,10 +45,6 @@ export class ProductCatalogKanbanRecord extends KanbanRecord {
     }
 
     onOpenRecord(ev) {
-        // avoid a concurrent update when clicking on the buttons (that are inside the record)
-        if (ev.target.closest(".o_product_catalog_cancel_global_click")) {
-            return;
-        }
         if (this.productCatalogData.quantity === 0) {
             this.addProduct();
         } else {
