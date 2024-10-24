@@ -1312,12 +1312,20 @@ export class Rtc extends Record {
         const activeRtcSession = this.state.channel.activeRtcSession;
         if (addVideo) {
             if (videoType === "screen") {
+                if (activeRtcSession && activeRtcSession.hasVideo) {
+                    activeRtcSession.previousVideoType = activeRtcSession.mainVideoStreamType;
+                }
                 this.state.channel.activeRtcSession = session;
                 session.mainVideoStreamType = videoType;
                 return;
             }
             if (activeRtcSession && session.hasVideo && !session.isMainVideoStreamActive) {
-                session.mainVideoStreamType = videoType;
+                if (activeRtcSession.mainVideoStreamType !== "screen") {
+                    session.mainVideoStreamType = videoType;
+                    this.state.channel.activeRtcSession = session;
+                } else {
+                    session.previousVideoType = videoType;
+                }
             }
             return;
         }
@@ -1327,9 +1335,21 @@ export class Rtc extends Record {
         if (activeRtcSession.isMainVideoStreamActive) {
             if (videoType === session.mainVideoStreamType) {
                 if (videoType === "screen") {
-                    this.state.channel.activeRtcSession = undefined;
-                } else {
-                    session.mainVideoStreamType = "screen";
+                    const hadPreviousVideo =
+                        session.previousVideoType === "camera" && session.hasVideo;
+                    if (hadPreviousVideo) {
+                        session.mainVideoStreamType = "camera";
+                        session.previousVideoType = undefined;
+                        this.state.channel.activeRtcSession = session;
+                    } else {
+                        this.state.channel.activeRtcSession = undefined;
+                        session.mainVideoStreamType = undefined;
+                    }
+                } else if (videoType === "camera") {
+                    if (session.hasVideo && session.previousVideoType === "screen") {
+                        session.mainVideoStreamType = "screen";
+                        session.previousVideoType = undefined;
+                    }
                 }
             }
         }
