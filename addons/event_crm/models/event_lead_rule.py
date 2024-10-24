@@ -185,6 +185,9 @@ class EventLeadRule(models.Model):
 
         return self.env['crm.lead'].create(lead_vals_list)
 
+    def action_execute_rule(self):
+        pass
+
     def _filter_registrations(self, registrations):
         """ Keep registrations matching rule conditions. Those are
 
