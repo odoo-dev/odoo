@@ -99,21 +99,21 @@ export class OrderSummary extends Component {
             if (lastId != selectedLine.uuid) {
                 this._showDecreaseQuantityPopup();
             } else if (currentQuantity < parsedInput) {
-                this._setValue(buffer);
+                this._setValue(buffer, key);
             } else if (parsedInput < currentQuantity) {
                 this._showDecreaseQuantityPopup();
             }
             return;
         }
         const val = buffer === null ? "remove" : buffer;
-        this._setValue(val);
+        this._setValue(val, key);
         if (val == "remove") {
             this.numberBuffer.reset();
             this.pos.numpadMode = "quantity";
         }
     }
 
-    _setValue(val) {
+    _setValue(val, key = "Backspace") {
         const { numpadMode } = this.pos;
         let selectedLine = this.currentOrder.get_selected_orderline();
         if (selectedLine) {
@@ -124,6 +124,10 @@ export class OrderSummary extends Component {
                 if (val === "remove") {
                     this.currentOrder.removeOrderline(selectedLine);
                 } else {
+                    if (key === "-" && !selectedLine.refunded_orderline_id) {
+                        val = selectedLine.qty * -1;
+                        this.numberBuffer.set(val.toString());
+                    }
                     const result = selectedLine.set_quantity(
                         val,
                         Boolean(selectedLine.combo_line_ids?.length)
