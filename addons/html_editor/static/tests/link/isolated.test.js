@@ -91,7 +91,7 @@ test("should zwnbsp-pad simple text link", async () => {
             // set the selection via the parent
             setSelection({ anchorNode: p, anchorOffset: 1 });
             // insert the zwnbsp again
-            trigger(editor.resources["normalize_listeners"], editor.editable);
+            trigger(editor.resources["normalize_handlers"], editor.editable);
         },
         contentAfterEdit: '<p>a\ufeff[]<a href="#/">\ufeffbc\ufeff</a>\ufeffd</p>',
     });
@@ -106,7 +106,7 @@ test("should zwnbsp-pad simple text link", async () => {
             setSelection({ anchorNode: a, anchorOffset: 0 });
             await tick();
             // insert the zwnbsp again
-            trigger(editor.resources["normalize_listeners"], editor.editable);
+            trigger(editor.resources["normalize_handlers"], editor.editable);
         },
         contentAfterEdit:
             '<p>a\ufeff<a href="#/" class="o_link_in_selection">\ufeff[]bc\ufeff</a>\ufeffd</p>',
@@ -126,7 +126,7 @@ test("should zwnbsp-pad simple text link", async () => {
             setSelection({ anchorNode: a, anchorOffset: 1 });
             await tick();
             // insert the zwnbsp again
-            trigger(editor.resources["normalize_listeners"], editor.editable);
+            trigger(editor.resources["normalize_handlers"], editor.editable);
         },
         contentAfterEdit:
             '<p>a\ufeff<a href="#/" class="o_link_in_selection">\ufeffb[]c\ufeff</a>\ufeffd</p>',
@@ -142,7 +142,7 @@ test("should zwnbsp-pad simple text link", async () => {
             setSelection({ anchorNode: a, anchorOffset: 1 });
             await tick();
             // insert the zwnbsp again
-            trigger(editor.resources["normalize_listeners"], editor.editable);
+            trigger(editor.resources["normalize_handlers"], editor.editable);
         },
         contentAfterEdit:
             '<p>a\ufeff<a href="#/" class="o_link_in_selection">\ufeffbc[]\ufeff</a>\ufeffd</p>',
@@ -157,7 +157,7 @@ test("should zwnbsp-pad simple text link", async () => {
             setSelection({ anchorNode: p, anchorOffset: 2 });
             await tick();
             // insert the zwnbsp again
-            trigger(editor.resources["normalize_listeners"], editor.editable);
+            trigger(editor.resources["normalize_handlers"], editor.editable);
         },
         contentAfterEdit: '<p>a\ufeff<a href="#/">\ufeffbc\ufeff</a>\ufeff[]d</p>',
     });

@@ -66,7 +66,7 @@ test("should not normalize protected elements children (true)", async () => {
                 </div>
                 `),
         stepFunction: async (editor) =>
-            trigger(editor.resources["normalize_listeners"], editor.editable),
+            trigger(editor.resources["normalize_handlers"], editor.editable),
         contentAfterEdit: unformat(`
                 <div>
                     <p><i class="fa" contenteditable="false">\u200B</i></p>
@@ -107,7 +107,7 @@ test("should normalize unprotected elements children (false)", async () => {
                 </div>
                 `),
         stepFunction: async (editor) =>
-            trigger(editor.resources["normalize_listeners"], editor.editable),
+            trigger(editor.resources["normalize_handlers"], editor.editable),
 
         contentAfterEdit: unformat(`
                 <div data-oe-protected="true" contenteditable="false">

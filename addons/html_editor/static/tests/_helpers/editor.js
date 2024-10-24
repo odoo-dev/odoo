@@ -176,7 +176,7 @@ export async function testEditor(config) {
     }
     if (contentAfter) {
         const content = editor.getContent();
-        trigger(editor.resources["clean_for_save_listeners"], {
+        trigger(editor.resources["clean_for_save_handlers"], {
             root: el,
             preserveSelection: true,
         });

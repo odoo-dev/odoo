@@ -57,7 +57,7 @@ describe("Range collapsed", () => {
             );
 
             await insertText(editor, "a");
-            trigger(editor.resources["normalize_listeners"], el);
+            trigger(editor.resources["normalize_handlers"], el);
             expect(getContent(el)).toBe(`<ul class="o_checklist"><li><h1>a[]</h1></li></ul>`);
         });
 

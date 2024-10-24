@@ -162,8 +162,8 @@ export class Editor {
         for (const plugin of this.plugins) {
             plugin.setup();
         }
-        trigger(this.resources["normalize_listeners"], this.editable);
-        trigger(this.resources["start_edition_listeners"]);
+        trigger(this.resources["normalize_handlers"], this.editable);
+        trigger(this.resources["start_edition_handlers"]);
     }
 
     createResources() {
@@ -210,7 +210,7 @@ export class Editor {
 
     getElContent() {
         const el = this.editable.cloneNode(true);
-        trigger(this.resources["clean_for_save_listeners"], { root: el });
+        trigger(this.resources["clean_for_save_handlers"], { root: el });
         return el;
     }
 

@@ -197,8 +197,8 @@ describe("collaborative makeSavePoint", () => {
         mergePeersSteps(peerInfos);
         savepoint();
         mergePeersSteps(peerInfos);
-        trigger(peerInfos.c1.editor.resources["clean_listeners"], peerInfos.c1.editor.editable);
-        trigger(peerInfos.c2.editor.resources["clean_listeners"], peerInfos.c1.editor.editable);
+        trigger(peerInfos.c1.editor.resources["clean_handlers"], peerInfos.c1.editor.editable);
+        trigger(peerInfos.c2.editor.resources["clean_handlers"], peerInfos.c1.editor.editable);
         renderTextualSelection(peerInfos);
         expect(peerInfos.c1.editor.editable.innerHTML).toBe(`<p>[c1}{c1]<br></p><p>ab[c2}{c2]</p>`);
         expect(peerInfos.c2.editor.editable.innerHTML).toBe(`<p>[c1}{c1]<br></p><p>ab[c2}{c2]</p>`);
@@ -234,8 +234,8 @@ describe("history addExternalStep", () => {
         mergePeersSteps(peerInfos);
         peerInfos.c1.editor.shared.addStep();
         mergePeersSteps(peerInfos);
-        trigger(peerInfos.c1.editor.resources["clean_listeners"], peerInfos.c1.editor.editable);
-        trigger(peerInfos.c2.editor.resources["clean_listeners"], peerInfos.c2.editor.editable);
+        trigger(peerInfos.c1.editor.resources["clean_handlers"], peerInfos.c1.editor.editable);
+        trigger(peerInfos.c2.editor.resources["clean_handlers"], peerInfos.c2.editor.editable);
         // TODO @phoenix c1 editable should be `<p>iab[]</p>`, but its selection
         // was not adjusted properly when receiving the external step
         expect(getContent(peerInfos.c1.editor.editable)).toBe(`<p>ia[]b</p>`);
@@ -820,13 +820,13 @@ describe("Collaboration with embedded components", () => {
         addStep(e1);
         peerInfos.c2.collaborationPlugin.onExternalHistorySteps(peerInfos.c1.historyPlugin.steps);
         validateSameHistory(peerInfos);
-        trigger(e2.resources["clean_listeners"], e2.editable);
+        trigger(e2.resources["clean_handlers"], e2.editable);
         expect(getContent(e2.editable, { sortAttrs: true })).toBe(
             `<div contenteditable="false" data-embedded="counter" data-oe-protected="true"></div><p>[]<br></p>`
         );
         await animationFrame();
-        trigger(e1.resources["clean_listeners"], e1.editable);
-        trigger(e2.resources["clean_listeners"], e2.editable);
+        trigger(e1.resources["clean_handlers"], e1.editable);
+        trigger(e2.resources["clean_handlers"], e2.editable);
         expect(getContent(e1.editable, { sortAttrs: true })).toBe(
             unformat(`
                 <div contenteditable="false" data-embedded="counter" data-oe-protected="true">

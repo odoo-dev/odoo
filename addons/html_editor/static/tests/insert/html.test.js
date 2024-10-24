@@ -244,7 +244,7 @@ describe("collapsed selection", () => {
         const { el, editor } = await setupEditor(`<p>[]<br></p>`);
         editor.shared.domInsert(parseHTML(editor.document, `<div class="a">a</div>`));
         editor.shared.addStep();
-        trigger(editor.resources["clean_listeners"], editor.editable);
+        trigger(editor.resources["clean_handlers"], editor.editable);
         expect(getContent(el)).toBe(`<div class="a">a</div><p>[]<br></p>`);
     });
 
@@ -252,7 +252,7 @@ describe("collapsed selection", () => {
         const { el, editor } = await setupEditor(`<p>b[]</p>`);
         editor.shared.domInsert(parseHTML(editor.document, `<div class="a">a</div>`));
         editor.shared.addStep();
-        trigger(editor.resources["clean_listeners"], editor.editable);
+        trigger(editor.resources["clean_handlers"], editor.editable);
         expect(getContent(el)).toBe(`<p>b</p><div class="a">a</div><p>[]<br></p>`);
     });
 

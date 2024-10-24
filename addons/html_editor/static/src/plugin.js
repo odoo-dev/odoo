@@ -146,6 +146,14 @@ export class Plugin {
         return this._resources[resourceId] || [];
     }
 
+    dispatchTo(resourceId, ...args) {
+        this.getResource(resourceId).forEach((fn) => fn(...args));
+    }
+
+    delegateTo(resourceId, ...args) {
+        return this.getResource(resourceId).some((fn) => fn(...args));
+    }
+
     destroy() {
         for (const cleanup of this._cleanups) {
             cleanup();

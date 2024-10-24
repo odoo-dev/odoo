@@ -4,7 +4,6 @@ import { closestBlock, isBlock } from "../utils/blocks";
 import { unwrapContents } from "../utils/dom";
 import { ancestors, childNodes, closestElement } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
-import { delegate, trigger } from "@html_editor/utils/resource";
 
 /**
  * @typedef { import("./selection_plugin").EditorSelection } EditorSelection
@@ -220,7 +219,7 @@ export class ClipboardPlugin extends Plugin {
 
         this.shared.stageSelection();
 
-        trigger(this.getResource("before_paste"), selection);
+        this.dispatchTo("before_paste_handlers", selection);
         // refresh selection after potential changes from `before_paste` handlers
         selection = this.shared.getEditableSelection();
 
@@ -293,7 +292,7 @@ export class ClipboardPlugin extends Plugin {
      */
     handlePasteText(selection, clipboardData) {
         const text = clipboardData.getData("text/plain");
-        if (delegate(this.getResource("handle_paste_text"), selection, text)) {
+        if (this.delegateTo("paste_text_overrides", selection, text)) {
             return;
         } else {
             this.pasteText(selection, text);

@@ -32,7 +32,7 @@ describe("qweb picker", () => {
             `<div><t t-if="test" data-oe-t-inline="true" data-oe-t-group="0" data-oe-t-selectable="true">yes</t><t t-else="" data-oe-t-inline="true" data-oe-t-selectable="true" data-oe-t-group="0" data-oe-t-group-active="true">no</t></div>`
         );
 
-        trigger(editor.resources["clean_listeners"], el);
+        trigger(editor.resources["clean_handlers"], el);
         expect(getContent(el)).toBe(`<div><t t-if="test">yes</t><t t-else="">no</t></div>`);
     });
 
