@@ -205,20 +205,28 @@ class MetaModel(api.Meta):
         # this collects the fields defined on the class (via Field.__set_name__())
         attrs.setdefault('_field_definitions', [])
 
-        odoo_bases = [base for base in bases if isinstance(base, MetaModel)]
-        inherit_models = list({base._name for base in odoo_bases if getattr(base, '_name', None)})
+        if any(not isinstance(base, MetaModel) for base in bases):
+            raise TypeError('The Odoo models should only contain Odoo model without any other python classes.')
 
-        if not bases:
-            # BaseModel
-            return super().__new__(meta, name, bases, attrs)
-        if '_name' in attrs and attrs['_name'] is None and not inherit_models and not attrs.get('_inherit'):
-            # AbstractModel or Model or TransientModel
+        inherit_models = list({base._name for base in bases if base._name})
+        _inherit = attrs.get('_inherit')
+        if _inherit:
+            if bool(inherit_models):
+                raise TypeError('Please use only the pythonic inheritance and remove "_inherit" attribute.')
+            inherit_models.extend([_inherit] if isinstance(_inherit, str) else _inherit)
+
+        if '_name' in attrs and attrs['_name'] is None and not inherit_models:
+            # BaseModel, AbstractModel or Model or TransientModel
             return super().__new__(meta, name, bases, attrs)
 
-        other_clases = [base for base in bases if base not in odoo_bases]
-        base_class = odoo_bases[0]
-        is_new_model = base_class in OdooBaseModels
-        is_python_inheritance = bool(inherit_models)
+        model_name = attrs['_name'] if '_name' in attrs else class_name_to_model_name(name)
+        is_new_model = not any(name == base.__name__ or model_name == base._name for base in bases)
+
+        base_class = bases[0]
+        if bases[0] not in OdooBaseModels:
+            base_class = base_class.__base__
+            if is_new_model:
+                raise TypeError(f'The new Model {name!r} must contain the Odoo model type (AbstractModel, Model, TransientModel) before other inherited models.')
 
         if attrs.get('_register', True):
             # determine '_module'
@@ -228,41 +236,12 @@ class MetaModel(api.Meta):
                     f"Invalid import of {module}.{name}, it should start with 'odoo.addons'."
                 attrs['_module'] = module.split('.')[2]
 
-            _inherit = attrs.get('_inherit')
-            if _inherit and isinstance(_inherit, str):
-                attrs.setdefault('_name', _inherit)
-                attrs['_inherit'] = [_inherit]
-
-            if not attrs.get('_name'):
-                attrs['_name'] = class_name_to_model_name(name)
-            model_name = attrs.get('_name')
-
-            if '_inherit' in attrs:
-                if is_python_inheritance:
-                    raise TypeError('Please use the pythonic inheritance and remove "_inherit" attribute.')
-                inherit_models.extend(attrs['_inherit'])
-
-            # raises errors to standardize code
-            if '_original_module' not in attrs:
-                if is_new_model and model_name in meta.models and is_python_inheritance:
-                    raise TypeError('Only the new models should contain the Odoo model type (AbstractModel, Model, TransientModel) with other classes and models.')
-                if ((is_new_model and base_class != bases[0]) or
-                    (not is_new_model and inherit_models and name != base_class.__name__ and model_name != base_class._name)):
-                    raise TypeError(f'The new Model {name!r} must contain the Odoo model type (AbstractModel, Model, TransientModel) before other classes and models.')
-
             # set the standardized values
             meta.models.add(model_name)
             attrs['_name'] = model_name
             attrs['_inherit'] = inherit_models
 
-            if not is_new_model:
-                base_class = base_class.__base__
-
-        if inherit_models and other_clases:
-            raise TypeError(f'Model {name!r} can only extend BaseModel classes.\n'
-                            f'It is possible to declare AbstractModels instead of foreign classes {tuple(c.__name__ for c in other_clases)}.')
-
-        return super().__new__(meta, name, tuple(other_clases + [base_class]), attrs)
+        return super().__new__(meta, name, (base_class,), attrs)
 
     def __init__(self, name, bases, attrs):
         super().__init__(name, bases, attrs)

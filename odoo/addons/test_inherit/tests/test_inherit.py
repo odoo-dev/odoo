@@ -91,42 +91,19 @@ class test_inherits(common.TransactionCase):
     def test_50_define_model_with_mixin(self):
         class First:
             def foo(self):
-                return 10 + super().foo()
-
-        class Second:
-            def foo(self):
-                return 20
+                return
 
         class NewTestInheritModel1(models.AbstractModel):
-            def write(self, values):
-                return 30 + super().write(values)
             pass
 
-        class NewTestInheritModel2(models.AbstractModel, Second):
-            def foo(self):
-                return 30 + super().foo()
-
-            def write(self, values):
-                return self.foo() + super().write(values)
-            pass
-
-        class NewTestInheritModel3(models.AbstractModel, First, Second):
-            def foo(self):
-                return 30 + super().foo()
-
-            def write(self, values):
-                return self.foo() + super().write(values)
+        class NewTestInheritModel2(models.AbstractModel):
             pass
 
         # class NewTestInheritModel2(models.Extension, NewTestInheritModel2):
         #     pass
 
-        self.assertEqual(NewTestInheritModel1(None, [], []).write({}), 31)
-        self.assertEqual(NewTestInheritModel2(None, [], []).write({}), 51)
-        self.assertEqual(NewTestInheritModel3(None, [], []).write({}), 61)
-
-        with self.assertRaisesRegex(TypeError, r"The new Model 'NewTestInheritModelFail' must contain the Odoo model type \(AbstractModel, Model, TransientModel\)"):
-            class NewTestInheritModelFail(First, models.AbstractModel, Second):
+        with self.assertRaisesRegex(TypeError, r"The Odoo models should only contain Odoo model without any other python classes."):
+            class NewTestInheritModelFail(models.AbstractModel, First):
                 pass
 
         with self.assertRaisesRegex(TypeError, r"The new Model 'InheritOdooModelClass' must contain the Odoo model type \(AbstractModel, Model, TransientModel\)"):
@@ -136,27 +113,27 @@ class test_inherits(common.TransactionCase):
         class InheritOdooModelClass2(models.Model, NewTestInheritModel1, NewTestInheritModel2):
             pass
 
-        with self.assertRaisesRegex(TypeError, r"Only the new models should contain the Odoo model type"):
-            class NewTestInheritModel1(models.Model, NewTestInheritModel1):  # noqa: F811
-                pass
+        # with self.assertRaisesRegex(TypeError, r"Only the new models should contain the Odoo model type"):
+        #     class NewTestInheritModel1(models.Model, NewTestInheritModel1):  # noqa: F811
+        #         pass
 
         class NewTestInheritModel1(NewTestInheritModel1):  # noqa: F811
             pass
 
-        with self.assertRaisesRegex(TypeError, r"The new Model 'InheritOdooModelClass' must contain the Odoo model type \(AbstractModel, Model, TransientModel\)"):
+        with self.assertRaisesRegex(TypeError, r"The Odoo models should only contain Odoo model without any other python classes."):
             class InheritOdooModelClass(First, NewTestInheritModel1):
                 pass
 
-        with self.assertRaisesRegex(TypeError, r"Model 'Inherit2OdooModelClass' can only extend BaseModel classes."):
-            class Inherit2OdooModelClass(models.Model, First, NewTestInheritModel1):
+        with self.assertRaisesRegex(TypeError, r"The Odoo models should only contain Odoo model without any other python classes."):
+            class Inherit3OdooModelClass(models.Model, NewTestInheritModel1, First):
                 pass
 
-        with self.assertRaisesRegex(TypeError, r"Model 'Inherit3OdooModelClass' can only extend BaseModel classes."):
-            class Inherit3OdooModelClass(models.Model, NewTestInheritModel1, Second):
+        with self.assertRaisesRegex(TypeError, r"The Odoo models should only contain Odoo model without any other python classes."):
+            class Inherit4OdooModelClass(models.Model, First, TestInheritMother):
                 pass
 
-        with self.assertRaisesRegex(TypeError, r"Model 'Inherit4OdooModelClass' can only extend BaseModel classes."):
-            class Inherit4OdooModelClass(models.Model, First, TestInheritMother, Second):
+        with self.assertRaisesRegex(TypeError, r"The Odoo models should only contain Odoo model without any other python classes."):
+            class Inherit2OdooModelClass(First, models.Model, NewTestInheritModel1):
                 pass
 
     def test_60_inherit_with_python(self):
