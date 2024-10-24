@@ -5,9 +5,6 @@ options.registry.CarouselIntro = options.registry.Carousel.extend({
     /**
      * @override
      */
-
-    // SHSA- to check unused code ?
-
     async _computeWidgetState(methodName, params) {
         // Prevent the "Controllers" option from being "centered" when
         // arrows and indicators are displayed.
@@ -25,5 +22,12 @@ options.registry.CarouselIntro = options.registry.Carousel.extend({
             }
         }
         return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    cleanForSave() {
+        // Set Indicator to the first image on save
+        this._updateIndicator(0);
     },
 });

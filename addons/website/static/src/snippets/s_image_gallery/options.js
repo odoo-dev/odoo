@@ -355,8 +355,6 @@ options.registry.gallery = options.registry.GalleryLayout.extend({
         if (this.$target.hasClass('slideshow')) {
             this.$target.removeAttr('style');
         }
-        // Set Indicator to the first image on save
-        this._updateIndicator(0);
     },
 
     //--------------------------------------------------------------------------

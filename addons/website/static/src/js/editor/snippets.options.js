@@ -4458,16 +4458,6 @@ options.registry.SnippetMove.include({
     },
 });
 
-options.registry.CarouselIntro = options.registry.CarouselHandler.extend({
-    /**
-     * @override
-     */
-    cleanForSave() {
-        // Set Indicator to the first image on save
-        this._updateIndicator(0);
-    }
-});
-
 export default {
     UrlPickerUserValueWidget: UrlPickerUserValueWidget,
     FontFamilyPickerUserValueWidget: FontFamilyPickerUserValueWidget,
