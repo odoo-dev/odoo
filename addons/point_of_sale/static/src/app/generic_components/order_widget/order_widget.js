@@ -12,6 +12,7 @@ export class OrderWidget extends Component {
         tax: { type: String, optional: true },
         style: { type: String, optional: true },
         class: { type: String, optional: true },
+        generalCustomerNote: { type: String, optional: true },
         generalNote: { type: String, optional: true },
         screenName: { type: String, optional: true },
     };

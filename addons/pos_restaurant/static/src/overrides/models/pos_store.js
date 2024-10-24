@@ -78,10 +78,12 @@ patch(PosStore.prototype, {
 
             return acc;
         }, {});
-
         return [
             ...Object.values(categories),
-            ...("generalNote" in orderChanges ? [{ count: 1, name: _t("General Note") }] : []),
+            ...("generalCustomerNote" in orderChanges
+                ? [{ count: 1, name: _t("Customer Note") }]
+                : []),
+            ...("generalNote" in orderChanges ? [{ count: 1, name: _t("Kitchen Note") }] : []),
         ];
     },
     get selectedTable() {
