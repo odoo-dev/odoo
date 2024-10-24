@@ -920,7 +920,7 @@ function fontToImg(element) {
             });
         });
         if (content) {
-            const color = _getStylePropertyValue(font, "color").replace(/\s/g, "");
+            const color = _getStylePropertyValue(font, "color").replace(/\s/g, "") || '#000';
             let backgroundColoredElement = font;
             let bg, isTransparent;
             do {
