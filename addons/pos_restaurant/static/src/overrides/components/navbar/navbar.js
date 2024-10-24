@@ -1,7 +1,6 @@
 import { Navbar } from "@point_of_sale/app/navbar/navbar";
 import { patch } from "@web/core/utils/patch";
 import { _t } from "@web/core/l10n/translation";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import {
     getButtons,
     EMPTY,
@@ -61,11 +60,9 @@ patch(Navbar.prototype, {
                     return this.setFloatingOrder(floating_order);
                 }
                 if (!table && !floating_order) {
-                    this.dialog.add(AlertDialog, {
-                        title: _t("Error"),
-                        body: _t("No table or floating order found with this number"),
-                    });
-                    return;
+                    const newOrder = this.pos.createNewOrder();
+                    newOrder.floating_order_name = table_number;
+                    return this.setFloatingOrder(newOrder);
                 }
             },
         });
