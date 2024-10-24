@@ -4,6 +4,7 @@ import { Component, useState, onMounted, useRef } from "@odoo/owl";
 import { useAutofocus, useService, useChildRef } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
 import { cleanZWChars, deduceURLfromText } from "./utils";
+import { rpc } from "@web/core/network/rpc";
 
 export class AutoCompleteInLinkpopover extends AutoComplete {
     static props = {
@@ -21,6 +22,51 @@ export class AutoCompleteInLinkpopover extends AutoComplete {
             classList = this.props.inputClass;
         }
         return classList;
+    }
+
+    /**
+     *
+     * @param indices
+     * @return {boolean}
+     * @private
+     */
+    _isCategory(indices) {
+        const [sourceIndex, optionIndex] = indices;
+        return !!this.sources[sourceIndex]?.options[optionIndex]?.separator;
+    }
+
+    /**
+     * @override
+     */
+    onOptionMouseEnter(indices) {
+        if (!this._isCategory(indices)) {
+            return super.onOptionMouseEnter(...arguments);
+        }
+    }
+
+    /**
+     * @override
+     */
+    onOptionMouseLeave(indices) {
+        if (!this._isCategory(indices)) {
+            return super.onOptionMouseLeave(...arguments);
+        }
+    }
+    isActiveSourceOption(indices) {
+        if (!this._isCategory(indices)) {
+            return super.isActiveSourceOption(...arguments);
+        }
+    }
+    /**
+     * @override
+     */
+    selectOption(indices) {
+        if (!this._isCategory(indices)) {
+            const [sourceIndex, optionIndex] = indices;
+            const { value } = Object.getPrototypeOf(this.sources[sourceIndex].options[optionIndex]);
+            this.targetDropdown.value = value;
+            return super.selectOption(...arguments);
+        }
     }
 }
 
@@ -297,19 +343,57 @@ export class LinkPopover extends Component {
             (this.state.type && this.state.buttonSize ? " btn-" + this.state.buttonSize : "");
     }
     get sources() {
-        return [
-            {
-                optionTemplate: "website.AutoCompleteWithPagesItem",
-                options: async (term) => {
-                    return [];
-                },
-            },
-        ];
+        return [this.optionsSource];
     }
-    onSelect(option) {
-        this.state.url = option;
+    get optionsSource() {
+        return {
+            placeholder: _t("Loading..."),
+            options: this.loadOptionsSource.bind(this),
+            optionTemplate: "html_editor.AutoCompleteItem",
+        };
     }
-    onInput({ inputValue }) {
-        this.state.url = inputValue;
+    _mapItemToSuggestion(item) {
+        return {
+            ...item,
+            classList: item.separator ? "ui-autocomplete-category" : "ui-autocomplete-item",
+        };
+    }
+    async loadOptionsSource(term) {
+        if (term[0] === "#") {
+            const anchors = await this.props.loadAnchors(
+                term,
+                this.props.options && this.props.options.body
+            );
+            return anchors.map((anchor) =>
+                this._mapItemToSuggestion({ label: anchor, value: anchor })
+            );
+        } else if (term.startsWith("http") || term.length === 0) {
+            // avoid useless call to /website/get_suggested_links
+            return [];
+        }
+        try {
+            const res = await rpc("/website/get_suggested_links", {
+                needle: term,
+                limit: 15,
+            });
+            let choices = res.matching_pages;
+            res.others.forEach((other) => {
+                if (other.values.length) {
+                    choices = choices.concat(
+                        [{ separator: other.title, label: other.title }],
+                        other.values
+                    );
+                }
+            });
+            return choices.map(this._mapItemToSuggestion);
+        } catch {
+            return [];
+        }
+    }
+
+    onSelect(selectedSubjection, { input }) {
+        const { value } = Object.getPrototypeOf(selectedSubjection);
+        this.state.url = value;
+        input.value = value;
     }
 }

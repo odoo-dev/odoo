@@ -21,7 +21,6 @@
                                 value="state.url"
                                 input="urlRef"
                                 onSelect.bind="onSelect"
-                                onInput.bind="onInput"
                                 dropdown="true"
                                 autofocus="true"
                                 placeholder="'Type your URL'"
