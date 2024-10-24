@@ -706,7 +706,11 @@ class AccountMove(models.Model):
     def _compute_company_id(self):
         for move in self:
             if move.journal_id.company_id not in move.company_id.parent_ids:
-                move.company_id = (move.journal_id.company_id or self.env.company)._accessible_branches()[:1]
+                if move.journal_id.company_id and move.invoice_source_email:
+                    # mail coming from alias, forcing company to match the journal
+                    move.company_id = move.journal_id.company_id
+                else:
+                    move.company_id = (move.journal_id.company_id or self.env.company)._accessible_branches()[:1]
 
     @api.depends('move_type')
     def _compute_journal_id(self):

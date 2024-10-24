@@ -4,6 +4,8 @@ from odoo.tests import tagged
 
 from contextlib import contextmanager
 from unittest.mock import patch
+import base64
+import textwrap
 
 
 @tagged('post_install', '-at_install')
@@ -317,3 +319,54 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
         with self.with_success_decoder() as decoded_files:
             self._assert_extend_with_attachments({docx: 1}, new=True, from_alias=True)
             self.assertEqual(decoded_files, {docx.name})
+
+    def _get_email_for_journal_alias(self, attachment=b'My attachment', attach_content_type='application/octet-stream', message_id='some_msg_id'):
+        attachment = base64.b64encode(attachment).decode()
+        journal_with_alias = self.env['account.journal'].search(
+            [('company_id', '=', self.env.user.company_id.id), ('type', '=', 'purchase')],
+            limit=1,
+        )
+        alias = journal_with_alias.alias_id
+        return textwrap.dedent(f'''\
+            MIME-Version: 1.0
+            Date: Fri, 26 Nov 2021 16:27:45 +0100
+            Message-ID: {message_id}
+            Subject: Incoming bill
+            From:  Someone <someone@some.company.com>
+            To: {alias.display_name}
+            Content-Type: multipart/alternative; boundary="000000000000a47519057e029630"
+            --000000000000a47519057e029630
+            Content-Type: text/plain; charset=\"UTF-8\"
+            --000000000000a47519057e029630
+            Content-Type: {attach_content_type}
+            Content-Transfer-Encoding: base64
+            {attachment}
+            --000000000000a47519057e029630--
+        ''')
+
+    def test_multicompany_bill_creation(self):
+        """Test users from company 2 can send email to alias of company 1
+        """
+        company_2_user = self.env['res.users'].create({
+            'name': 'Internal User Company 2',
+            'login': 'someone@some.company.com',
+            'email': 'someone@some.company.com',
+            'company_id': self.company_data_2['company'].id,
+            'company_ids': [
+                (6, 0, self.company_data_2['company'].ids),
+            ],
+        })
+
+        mail = self._get_email_for_journal_alias()
+        invoice_email = self.env['account.move'].browse(self.env['mail.thread'].message_process('account.move', mail))
+        self.assertTrue(invoice_email)
+        self.assertFalse(invoice_email.message_main_attachment_id)
+
+        # Case 2: Preserve manually added attachments (not coming from emails)
+        invoice_manual = self.env['account.move'].create({'move_type': 'in_invoice', 'extract_state': 'not_enough_credit'})
+        test_attachment = self.env['ir.attachment'].create({
+            'name': "an attachment",
+            'datas': base64.b64encode(b'My attachment'),
+        })
+        invoice_manual.message_post(attachment_ids=[test_attachment.id])
+        self.assertTrue(invoice_manual.message_main_attachment_id)
