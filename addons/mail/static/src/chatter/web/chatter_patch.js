@@ -6,12 +6,13 @@ import { Chatter } from "@mail/chatter/web_portal/chatter";
 import { SuggestedRecipientsList } from "@mail/core/web/suggested_recipient_list";
 import { FollowerList } from "@mail/core/web/follower_list";
 import { isDragSourceExternalFile } from "@mail/utils/common/misc";
-import { SearchMessagesPanel } from "@mail/core/common/search_messages_panel";
 import { useAttachmentUploader } from "@mail/core/common/attachment_uploader_hook";
 import { useDropzone } from "@web/core/dropzone/dropzone_hook";
 import { useHover, useMessageHighlight } from "@mail/utils/common/hooks";
+import { SearchMessageInputBar } from "@mail/core/common/search_message_input_bar";
+import { SearchMessageResult } from "@mail/core/common/search_message_result";
 
-import { useEffect } from "@odoo/owl";
+import { useEffect, useState } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { browser } from "@web/core/browser/browser";
@@ -31,7 +32,8 @@ Object.assign(Chatter.components, {
     FileUploader,
     FollowerList,
     ScheduledMessage,
-    SearchMessagesPanel,
+    SearchMessageInputBar,
+    SearchMessageResult,
     SuggestedRecipientsList,
 });
 
@@ -74,6 +76,7 @@ patch(Chatter.prototype, {
         super.setup(...arguments);
         this.orm = useService("orm");
         this.mailPopoutService = useService("mail.popout");
+        this.store = useState(useService("mail.store"));
         Object.assign(this.state, {
             composerType: false,
             isAttachmentBoxOpened: this.props.isAttachmentBoxVisibleInitially,
@@ -81,6 +84,9 @@ patch(Chatter.prototype, {
             showActivities: true,
             showAttachmentLoading: false,
             showScheduledMessages: true,
+        });
+        this.newState = useState({
+            showSearchedMessages: this.showSearchedMessages,
         });
         this.attachmentUploader = useAttachmentUploader(
             this.store.Thread.insert({ model: this.props.threadModel, id: this.props.threadId })
@@ -153,6 +159,12 @@ patch(Chatter.prototype, {
             },
             () => [this.props.isChatterAside]
         );
+        useEffect(
+            () => {
+                this.newState.showSearchedMessages = this.showSearchedMessages;
+            },
+            () => [this.store.messageSearch?.messages]
+        );
     },
 
     /**
@@ -160,6 +172,14 @@ patch(Chatter.prototype, {
      */
     get activities() {
         return this.state.thread?.activities ?? [];
+    },
+
+    get showSearchedMessages() {
+        let ans = false;
+        if (this.store.messageSearch?.messages.length > 0) {
+            ans = true;
+        }
+        return ans;
     },
 
     get afterPostRequestList() {
