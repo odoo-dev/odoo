@@ -493,6 +493,22 @@ test("don't fetch pivot data if no formula use it", async function () {
     expect(getCellValue(model, "A1")).toBe(131);
 });
 
+test("An error is displayed if the pivot has invalid field", async function () {
+    const { model, pivotId } = await createSpreadsheetWithPivot();
+    const pivot = model.getters.getPivotCoreDefinition(pivotId);
+    model.dispatch("UPDATE_PIVOT", {
+        pivotId,
+        pivot: {
+            ...pivot,
+            columns: [{ fieldName: "unknown" }],
+        },
+    });
+    setCellContent(model, "A1", `=PIVOT.VALUE("1", "probability:avg")`);
+    await animationFrame();
+    expect(getCellValue(model, "A1")).toBe("#ERROR");
+    expect(getEvaluatedCell(model, "A1").message).toBe(`Field unknown does not exist`);
+});
+
 test("evaluates only once when two pivots are loading", async function () {
     const spreadsheetData = {
         sheets: [{ id: "sheet1" }],
