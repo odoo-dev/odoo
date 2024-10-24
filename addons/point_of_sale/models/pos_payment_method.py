@@ -46,6 +46,7 @@ class PosPaymentMethod(models.Model):
     open_session_ids = fields.Many2many('pos.session', string='Pos Sessions', compute='_compute_open_session_ids', help='Open PoS sessions that are using this payment method.')
     config_ids = fields.Many2many('pos.config', string='Point of Sale')
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
+    account_default_pos_receivable_account_id = fields.Char(compute="_compute_account_default_pos_receivable_account_id")
     use_payment_terminal = fields.Selection(selection=lambda self: self._get_payment_terminal_selection(), string='Use a Payment Terminal', help='Record payments with a terminal on this journal.')
     # used to hide use_payment_terminal when no payment interfaces are installed
     hide_use_payment_terminal = fields.Boolean(compute='_compute_hide_use_payment_terminal')
@@ -60,6 +61,10 @@ class PosPaymentMethod(models.Model):
         help='Type of QR-code to be generated for this payment method.',
     )
     hide_qr_code_method = fields.Boolean(compute='_compute_hide_qr_code_method')
+
+    @api.depends('company_id')
+    def _compute_account_default_pos_receivable_account_id(self):
+        self.account_default_pos_receivable_account_id = self.company_id.account_default_pos_receivable_account_id.code + ' ' + self.company_id.account_default_pos_receivable_account_id.name
 
     @api.model
     def _load_pos_data_domain(self, data):

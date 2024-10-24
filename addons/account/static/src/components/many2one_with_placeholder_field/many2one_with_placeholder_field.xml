@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="point_of_sale.Many2OneFieldWithPlaceholderField" t-inherit="web.CharField">
+        <xpath expr="//input" position="attributes">
+            <attribute name="t-att-placeholder">placeholder</attribute>
+        </xpath>
+    </t>
+</templates>
