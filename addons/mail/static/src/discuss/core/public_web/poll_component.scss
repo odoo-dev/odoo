@@ -1,0 +1,10 @@
+.o-discuss-PollComponent-showResults {
+    background: linear-gradient(to right, lighten($o-brand-primary, 20%), lighten($o-brand-primary, 20%));
+    background-repeat: no-repeat;
+    background-size: 100%!important;
+    transition: background-size 2s cubic-bezier(.215, .610, .355, 1);
+}
+
+.o-discuss-PollAnswer {
+    background-size: 0%;
+}

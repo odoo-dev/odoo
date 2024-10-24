@@ -6,5 +6,6 @@ patch(Message.prototype, {
     setup() {
         super.setup(...arguments);
         this.linkedSubChannel = Record.one("Thread", { inverse: "from_message_id" });
+        this.poll_id = Record.one("discuss.poll", { inverse: "message_id" });
     },
 });

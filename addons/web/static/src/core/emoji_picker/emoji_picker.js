@@ -24,12 +24,12 @@ import { isMobileOS } from "@web/core/browser/feature_detection";
 /**
  *
  * @param {import("@web/core/utils/hooks").Ref} [ref]
- * @param {Object} props
+ * @param {Object} [props]
  * @param {import("@web/core/popover/popover_service").PopoverServiceAddOptions} [options]
  * @param {function} [props.onSelect]
  * @param {function} [props.onClose]
  */
-export function useEmojiPicker(ref, props, options = {}) {
+export function useEmojiPicker(ref, props = {}, options = {}) {
     const targets = [];
     const state = useState({ isOpen: false });
     const newOptions = {

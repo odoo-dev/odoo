@@ -88,6 +88,7 @@
                             </FileUploader>
                             <t t-if="extended and ui.isSmall and props.composer.message" t-call="mail.Composer.sendButton"/>
                             <t t-if="!extended" t-call="mail.Composer.fullComposer"/>
+                            <button t-on-click="onClickCreatePoll" class="btn btn-link rounded-pill"><i class="fa fa-plus-circle"/></button>
                             <t t-if="hasSendButtonNonEditing" t-call="mail.Composer.sendButton"/>
                         </div>
                         <t t-if="extended" t-call="mail.Composer.fullComposer"/>
