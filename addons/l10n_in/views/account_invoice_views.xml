@@ -42,6 +42,7 @@
                         </span>
                     </span>
                 </div>
+                <field name="reversed_entry_id" invisible="country_code != 'IN' or move_type != 'out_refund'" domain="[('move_type', '=', 'out_invoice')]" readonly="state != 'draft'"/>
             </xpath>
             <xpath expr="//page[@id='other_tab']/group[@id='other_tab_group']" position="after">
                 <group string="Export India" invisible="l10n_in_gst_treatment not in ['overseas', 'deemed_export'] or move_type not in ['out_invoice', 'out_refund']">
@@ -66,6 +67,9 @@
             </xpath>
             <xpath expr="//field[@name='line_ids']/list//field[@name='name']" position="after">
                 <field name="l10n_in_hsn_code" optional="hide" column_invisible="parent.country_code != 'IN'"/>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']/list//field[@name='tax_tag_ids']" position="after">
+                <field name="l10n_in_gstr_section" optional="hide" widget="badge" column_invisible="parent.country_code != 'IN'"/>
             </xpath>
             <xpath expr="//header" position="inside">
                 <button name="%(l10n_in_withholding_entry_form_action)d" string="TDS Entry" type="action" class="btn btn-secondary float-end"
