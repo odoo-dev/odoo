@@ -44,7 +44,7 @@ class TestL10nInHSNSummary(TestTaxCommon):
     def _jsonify_tax(self, tax):
         # EXTENDS 'account.
         values = super()._jsonify_tax(tax)
-        values['l10n_in_tax_type'] = tax.l10n_in_tax_type
+        values['l10n_in_gst_tax_type'] = tax.l10n_in_gst_tax_type
         return values
 
     def _jsonify_document_line(self, document, index, line):
@@ -737,8 +737,8 @@ class TestL10nInHSNSummary(TestTaxCommon):
         })
 
         # Manual edition of the tax.
-        sgst_tax = self.gst_5.children_tax_ids.filtered(lambda tax: tax.l10n_in_tax_type == 'sgst')
-        cgst_tax = self.gst_5.children_tax_ids.filtered(lambda tax: tax.l10n_in_tax_type == 'cgst')
+        sgst_tax = self.gst_5.children_tax_ids.filtered(lambda tax: tax.l10n_in_gst_tax_type == 'sgst')
+        cgst_tax = self.gst_5.children_tax_ids.filtered(lambda tax: tax.l10n_in_gst_tax_type == 'cgst')
         tax_line_sgst = invoice.line_ids.filtered(lambda aml: aml.tax_line_id == sgst_tax)
         tax_line_cgst = invoice.line_ids.filtered(lambda aml: aml.tax_line_id == cgst_tax)
         payment_term = invoice.line_ids.filtered(lambda aml: aml.display_type == 'payment_term')
