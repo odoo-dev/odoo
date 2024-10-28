@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-
 from datetime import datetime, UTC
-from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
 from odoo import fields
@@ -107,7 +104,8 @@ class TestHrAttendance(HttpCase, TransactionCase):
         })
 
         # now = 2019/3/2 14:00 in the employee's timezone
-        with patch.object(fields.Datetime, 'now', lambda: tz_datetime(2019, 3, 2, 14, 0).astimezone(UTC).replace(tzinfo=None)):
+        employee_now = tz_datetime(2019, 3, 2, 14, 0).astimezone(UTC).replace(tzinfo=None)
+        with self.mock_datetime_and_now(employee_now):
             self.assertEqual(employee.hours_today, 5, "It should have counted 5 hours")
 
     def test_remove_check_in_value_from_attendance(self):
