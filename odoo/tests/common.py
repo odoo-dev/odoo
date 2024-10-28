@@ -3164,6 +3164,21 @@ class freeze_time:
         if isinstance(arg, type) and issubclass(arg, case.TestCase):
             arg.freeze_time = self
             return arg
+        if callable(arg):
+            # XXX freeze with cr when used as a method
+            # but tick does not work anymore...
+            if self.freezer.as_arg or self.freezer.as_kwarg:
+                raise ValueError("Patching not supported with args")
+
+            def frozen_method(self, *a, **kw):
+                if hasattr(self, 'mock_datetime_and_now') and self.env is not None:
+                    freeze = self.mock_datetime_and_now(datetime.now())
+                    _logger.info("freeze_time on callable also freezing self.env.cr")
+                else:
+                    freeze = contextlib.nullcontext()
+                with freeze:
+                    return arg(self, *a, **kw)
+            return self.freezer(frozen_method)
 
         return self.freezer(arg)
 

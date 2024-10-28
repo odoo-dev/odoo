@@ -102,6 +102,8 @@ class TestCursor(Cursor):
 
     def now(self) -> datetime:
         """ Return the transaction's timestamp ``datetime.now()``. """
+        if hasattr(datetime, '_date_to_freeze'):  # freezegun
+            return datetime.now()
         if self._now is None:
             self._now = datetime.now()
         return self._now

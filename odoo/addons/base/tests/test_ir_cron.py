@@ -78,9 +78,7 @@ class TestIrCron(TransactionCase, CronMixinCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        freezer = freezegun.freeze_time(cls.cr.now())
-        cls.frozen_datetime = freezer.start()
-        cls.addClassCleanup(freezer.stop)
+        cls.enterClassContext(cls.mock_datetime_and_now(cls.cr.now()))
 
         cls.cron = cls.env['ir.cron'].create(cls._get_cron_data(cls.env))
         cls.partner = cls.env['res.partner'].create(cls._get_partner_data(cls.env))
@@ -96,7 +94,6 @@ class TestIrCron(TransactionCase, CronMixinCase):
 
         # this ensures that cr.now() returns the frozen datetime, which is
         # useful for knowing remaining jobs after "some time"
-        self.patch(self.env.cr, 'now', self.frozen_datetime)
 
     def test_cron_direct_trigger(self):
         self.cron.code = textwrap.dedent(f"""\

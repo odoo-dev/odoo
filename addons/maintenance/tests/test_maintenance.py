@@ -177,7 +177,7 @@ class TestEquipmentPostInstall(TestEquipmentCommon):
         form.name = "brain"
         equipment = form.save()
 
-        before = fields.Datetime.now()
+        before = fields.Datetime.now(self.env.user)
         form = Form(self.env['maintenance.request'].with_user(self.manager))
         form.name = "improve efficiency"
         form.equipment_id = equipment
