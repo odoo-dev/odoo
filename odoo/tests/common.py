@@ -3164,6 +3164,15 @@ class freeze_time:
         if isinstance(arg, type) and issubclass(arg, case.TestCase):
             arg.freeze_time = self
             return arg
+        if callable(arg):
+            # XXX freeze with cr when used as a method
+            # but tick does not work anymore...
+
+            def frozen_method(self, *a, **kw):
+                freeze = self.mock_datetime_and_now(datetime.now()) if hasattr(self, 'mock_datetime_and_now') else contextlib.nullcontext()
+                with freeze:
+                    return arg(self, *a, **kw)
+            return self.freezer(frozen_method)
 
         return self.freezer(arg)
 

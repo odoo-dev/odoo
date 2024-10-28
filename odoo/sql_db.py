@@ -338,6 +338,8 @@ class Cursor(_CursorProtocol):
 
     def now(self) -> datetime:
         """ Return the transaction's timestamp ``NOW() AT TIME ZONE 'UTC'``. """
+        if hasattr(datetime, '_date_to_freeze'):  # freezegun
+            return datetime.now()
         if self._now is None:
             self.execute("SELECT (now() AT TIME ZONE 'UTC')")
             row = self.fetchone()
