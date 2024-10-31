@@ -19,6 +19,7 @@ export class ButtonGroup extends Component {
                 onClick: this.props.onClick,
                 onMouseenter: this.props.onMouseenter,
                 onMouseleave: this.props.onMouseleave,
+                cleanClass: this.props.cleanClass,
             },
         });
     }

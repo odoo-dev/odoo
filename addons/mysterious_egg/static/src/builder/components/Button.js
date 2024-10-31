@@ -1,4 +1,5 @@
 import { Component, useState } from "@odoo/owl";
+import { useBus } from "@web/core/utils/hooks";
 
 export class Button extends Component {
     static template = "mysterious_egg.Button";
@@ -16,5 +17,9 @@ export class Button extends Component {
         this.onClick = this.env.buttonMetadatas.onClick;
         this.onMouseenter = this.env.buttonMetadatas.onMouseenter;
         this.onMouseleave = this.env.buttonMetadatas.onMouseleave;
+        this.cleanClass = this.env.buttonMetadatas.cleanClass;
+        if (this.env.exclusiveClassOptionsBus) {
+            useBus(this.env.exclusiveClassOptionsBus, "CLEANUP", (ev) => this.cleanClass(this.props.id));
+        }
     }
 }

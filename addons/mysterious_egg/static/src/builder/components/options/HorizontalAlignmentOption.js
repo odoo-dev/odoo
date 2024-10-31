@@ -1,4 +1,4 @@
-import { Component, useState } from "@odoo/owl";
+import { Component, useState, useSubEnv, EventBus } from "@odoo/owl";
 import { defaultOptionComponents } from "../defaultComponents";
 
 const alignClasses = [
@@ -22,12 +22,14 @@ export class HorizontalAlignmentOption extends Component {
             this.setState(this.state);
         });
 
+        const exclusiveClassOptionsBus = new EventBus();
+
         const align = this.env.editor.shared.makePreviewableOperation((id) => {
-            const row = this.props.toolboxElement.querySelector(".row");
-            for (const alignClass of alignClasses) {
-                row.classList.remove(alignClass);
-            }
-            row.classList.add(id);
+            // Call the bus to remove all classes
+            exclusiveClassOptionsBus.trigger("CLEANUP");
+            // Add the correct one
+            const rowEl = this.getRowElement();
+            rowEl.classList.add(id);
         });
         this.verticalAlignementButtonProps = {
             activeState: this.state,
@@ -46,15 +48,28 @@ export class HorizontalAlignmentOption extends Component {
             onMouseleave: () => {
                 align.revert();
             },
+            cleanClass: (buttonId) => {
+                const rowEl = this.getRowElement();
+                rowEl.classList.remove(buttonId);
+            }
         };
+        useSubEnv({
+            exclusiveClassOptionsBus,
+        });
     }
+
+    getRowElement() {
+        return this.props.toolboxElement.querySelector(".row");
+    }
+
     setState(object) {
         return Object.assign(object, {
             verticalAlignement: this.getAlignement(),
         });
     }
     getAlignement() {
-        const row = this.props.toolboxElement.querySelector(".row");
+        const row = this.getRowElement();
+        // TODO: need to find a way to remove alignClasses
         for (const alignClass of alignClasses) {
             if (row.classList.contains(alignClass)) {
                 return alignClass;
