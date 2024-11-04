@@ -549,6 +549,9 @@ class Field(typing.Generic[T]):
             deps = getattr(func, '_depends', ())
             depends.extend(deps(model) if callable(deps) else deps)
             depends_context.extend(getattr(func, '_depends_context', ()))
+        if model._transient:
+            # all fields in transient models depend on the uid
+            depends_context.append('uid')
 
         return depends, depends_context
 
@@ -1606,6 +1609,10 @@ class Field(typing.Generic[T]):
     def compute_value(self, records: BaseModel) -> None:
         """ Invoke the compute method on ``records``; the results are in cache. """
         env = records.env
+        # stored fields should not depend on context, but we have some that do
+        if self.store and self not in records.pool.field_depends_context:
+            env = env.transaction.default_env
+            records = records.with_env(env)
         if self.compute_sudo:
             records = records.sudo()
         fields = records.pool.field_computed[self]

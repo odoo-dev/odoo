@@ -451,7 +451,13 @@ form: module.record_id""" % (xml_id,)
         data = dict(xml_id=xid, values=res, noupdate=self.noupdate)
         if foreign_record_to_create:
             model = model.with_context(foreign_record_to_create=foreign_record_to_create)
-        record = model._load_records([data], self.mode == 'update')
+        transaction = model.env.transaction
+        default_env = transaction.default_env
+        transaction.default_env = model.env
+        try:
+            record = model._load_records([data], self.mode == 'update')
+        finally:
+            transaction.default_env = default_env
         if rec_id:
             self.idref[rec_id] = record.id
         if config.get('import_partial'):
@@ -547,9 +553,12 @@ form: module.record_id""" % (xml_id,)
             if f is None:
                 continue
 
-            self.envs.append(self.get_env(el))
+            env = self.get_env(el)
+            self.envs.append(env)
             self._noupdate.append(nodeattr2bool(el, 'noupdate', self.noupdate))
             self._sequences.append(0 if nodeattr2bool(el, 'auto_sequence', False) else None)
+            default_env = env.transaction.default_env
+            env.transaction.default_env = env
             try:
                 f(rec)
             except ParseError:
@@ -570,6 +579,7 @@ form: module.record_id""" % (xml_id,)
                     etree.tostring(rec, encoding='unicode').rstrip()
                 )) from e
             finally:
+                env.transaction.default_env = default_env
                 self._noupdate.pop()
                 self.envs.pop()
                 self._sequences.pop()

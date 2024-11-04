@@ -625,6 +625,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         # create/write on 'foo' should only invoke the compute method
         log = []
         model = self.env['test_new_api.compute.inverse'].with_context(log=log)
+        model.env.transaction.default_env = model.env  # make default environment the one of the model
         record = model.create({'foo': 'Hi'})
         self.assertEqual(record.foo, 'Hi')
         self.assertEqual(record.bar, 'Hi')
@@ -652,6 +653,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         # Test compatibility multiple compute/inverse fields
         log = []
         model = self.env['test_new_api.multi_compute_inverse'].with_context(log=log)
+        model.env.transaction.default_env = model.env  # make default environment the one of the model
         record = model.create({
             'bar1': '1',
             'bar2': '2',
@@ -799,6 +801,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         """ test constraint method on normal field and field with inverse """
         log = []
         model = self.env['test_new_api.compute.inverse'].with_context(log=log, log_constraint=True)
+        self.env.transaction.default_env = model.env
 
         # create/write with normal field only
         log.clear()
