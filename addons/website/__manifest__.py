@@ -290,6 +290,9 @@
             'website/static/src/interactions/**/*',
             'website/static/src/snippets/s_table_of_content/000.js',
             'website/static/src/snippets/s_table_of_content/000.scss',
+            'website/static/src/snippets/s_website_form/000.js',
+            'website/static/src/xml/website_form.xml',
+            'google_recaptcha/static/src/js/recaptcha.js',
         ],
         'web.tests_assets': [
             'website/static/tests/website_service_mock.js',
