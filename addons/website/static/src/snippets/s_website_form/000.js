@@ -1,7 +1,8 @@
 import {ReCaptcha} from "@google_recaptcha/js/recaptcha";
 import { session } from "@web/session";
+import { registry } from "@web/core/registry";
+import { Interaction } from "@website/core/interaction";
 import { user } from "@web/core/user";
-import publicWidget from "@web/legacy/js/public/public_widget";
 import { delay } from "@web/core/utils/concurrency";
 import { debounce } from "@web/core/utils/timing";
 import { _t } from "@web/core/l10n/translation";
@@ -20,7 +21,7 @@ import { addLoadingEffect } from "@web/core/utils/ui";
 import { scrollTo } from "@web_editor/js/common/scrolling";
 const DEBOUNCE = 400;
 const { DateTime } = luxon;
-import { getParsedDataFor } from '@website/js/utils';
+import wUtils from '@website/js/utils';
 
 // TODO Editor behavior.
 /*
@@ -41,35 +42,37 @@ publicWidget.registry.EditModeWebsiteForm = publicWidget.Widget.extend({
                 }
             });
         }
-        return this._super(...arguments);
     },
 });
 */
 
-publicWidget.registry.s_website_form = publicWidget.Widget.extend({
-    selector: '.s_website_form form, form.s_website_form', // !compatibility
-    events: {
-        'click .s_website_form_send, .o_website_form_send': 'send', // !compatibility
-        'submit': 'send',
-        "change input[type=file]": "_onFileChange",
-        "click input.o_add_files_button": "_onAddFilesButtonClick",
-        "click .o_file_delete": "_onFileDeleteClick",
-    },
+export class Form extends Interaction {
+    static selector = ".s_website_form form, form.s_website_form"; // !compatibility
+    static dynamicContent = {
+        ".s_website_form_send, .o_website_form_send": { // !compatibility
+            "t-on-click": "send",
+        },
+        "root": {
+            "t-on-submit": "send",
+        },
+        "input[type=file]": {
+            "t-on-change": "changeFile",
+        },
+        "input.o_add_files_button": {
+            "t-on-click": "clickAddFilesButton",
+        },
+        ".s_website_form_field[data-type=binary]": {
+            "t-on-click": "clickFileDelete", // delegate on ".o_file_delete"
+        }
+    };
 
-    /**
-     * @constructor
-     */
-    init: function () {
-        this._super(...arguments);
+    setup() {
         this._recaptcha = new ReCaptcha();
         this.initialValues = new Map();
         this._visibilityFunctionByFieldName = new Map();
         this._visibilityFunctionByFieldEl = new Map();
-        this.__started = new Promise(resolve => this.__startResolve = resolve);
-        this.orm = this.bindService("orm");
-    },
-    willStart: async function () {
-        const res = this._super(...arguments);
+    }
+    async willStart() {
         if (!this.el.classList.contains('s_website_form_no_recaptcha')) {
             this._recaptchaLoaded = true;
             this._recaptcha.loadLibs();
@@ -77,15 +80,13 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
         // fetch user data (required by fill-with behavior)
         this.preFillValues = {};
         if (user.userId) {
-            this.preFillValues = (await this.orm.read(
+            this.preFillValues = (await this.services.orm.read(
                 "res.users",
                 [user.userId],
                 this._getUserPreFillFields()
             ))[0] || {};
         }
-        return res;
-    },
-    start: function () {
+
         // Reset the form first, as it is still filled when coming back
         // after a redirect.
         this.resetForm();
@@ -106,24 +107,28 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
         }
 
         this._onFieldInputDebounced = debounce(this._onFieldInput.bind(this), 400);
-        this.$el.on('input.s_website_form', '.s_website_form_field', this._onFieldInputDebounced);
+        for (const fieldEl of this.el.querySelectorAll(".s_website_form_field")) {
+            fieldEl.addEventListener("input", this._onFieldInputDebounced);
+        }
 
-        this.$allDates = this.$el.find('.s_website_form_datetime, .o_website_form_datetime, .s_website_form_date, .o_website_form_date');
+        this.dateFieldEls = this.el.querySelectorAll(".s_website_form_datetime, .o_website_form_datetime, .s_website_form_date, .o_website_form_date");
         this.disableDateTimePickers = [];
         if (!this.editableMode) {
-            for (const field of this.$allDates) {
-                const input = field.querySelector("input");
+            for (const fieldEl of this.dateFieldEls) {
+                const inputEl = fieldEl.querySelector("input");
                 const defaultValue = input.getAttribute("value");
                 this.disableDateTimePickers.push(this.call("datetime_picker", "create", {
-                    target: input,
-                    onChange: () => input.dispatchEvent(new Event("input", { bubbles: true })),
+                    target: inputEl,
+                    onChange: () => inputEl.dispatchEvent(new Event("input", { bubbles: true })),
                     pickerProps: {
-                        type: field.matches('.s_website_form_date, .o_website_form_date') ? 'date' : 'datetime',
+                        type: fieldEl.matches(".s_website_form_date, .o_website_form_date") ? "date" : "datetime",
                         value: defaultValue && DateTime.fromSeconds(parseInt(defaultValue)),
                     },
                 }).enable());
             }
-            this.$allDates.addClass('s_website_form_datepicker_initialized');
+            for (const fieldEl of this.dateFieldEls) {
+                fieldEl.classList.add("s_website_form_datepicker_initialized");
+            }
         }
 
         // Display form values from tag having data-for attribute
@@ -131,8 +136,10 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
         // Because, using t-att- inside form make it non-editable
         // Data-fill-with attribute is given during registry and is used by
         // to know which user data should be used to prfill fields.
-        let dataForValues = getParsedDataFor(this.el.id, document);
-        this.editTranslations = !!this._getContext(true).edit_translations;
+        let dataForValues = wUtils.getParsedDataFor(this.el.id, document);
+        // TODO Translation behavior.
+        this.editTranslations = false;
+        // this.editTranslations = !!this._getContext(true).edit_translations;
         // On the "edit_translations" mode, a <span/> with a translated term
         // will replace the attribute value, leading to some inconsistencies
         // (setting again the <span> on the attributes after the editor's
@@ -141,7 +148,7 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
         if (!this.editTranslations
                 && (dataForValues || Object.keys(this.preFillValues).length)) {
             dataForValues = dataForValues || {};
-            const fieldNames = this.$target.serializeArray().map(el => el.name);
+            const fieldNames = new FormData(this.el).keys();
             // All types of inputs do not have a value property (eg:hidden),
             // for these inputs any function that is supposed to put a value
             // property actually puts a HTML value attribute. Because of
@@ -203,16 +210,11 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
             filesZoneEl.classList.add("o_files_zone", "row", "gx-1");
             inputEl.parentNode.insertBefore(filesZoneEl, inputEl);
         });
+    }
 
-        return this._super(...arguments).then(() => this.__startResolve());
-    },
-
-    /**
-     * @override
-     */
-    destroy: function () {
-        this._super.apply(this, arguments);
-        this.$el.find('button').off('click');
+    destroy() {
+        // TODO Find out which event this is about.
+        // this.$el.find('button').off('click');
 
         // Empty inputs
         this.resetForm();
@@ -234,17 +236,24 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
         this.el.querySelectorAll('textarea').forEach(el => el.value = el.textContent);
 
         // Remove saving of the error colors
-        this.$el.find('.o_has_error').removeClass('o_has_error').find('.form-control, .form-select').removeClass('is-invalid');
+        for (const errorEl of this.el.querySelectorAll(".o_has_error")) {
+            errorEl.classList.remove("o_has_error");
+            for (const el of errorEl.querySelectorAll(".form-control, .form-select")) {
+                el.classList.remove("is-invalid");
+            }
+        }
 
         // Remove the status message
-        this.$el.find('#s_website_form_result, #o_website_form_result').empty(); // !compatibility
+        this.el.querySelector("#s_website_form_result, #o_website_form_result")?.replaceChildren(); // !compatibility
 
         // Remove the success message and display the form
-        this.$el.removeClass('d-none');
-        this.$el.parent().find('.s_website_form_end_message').addClass('d-none');
+        this.el.classList.remove("d-none");
+        this.el.parentElement.querySelector(".s_website_form_end_message")?.classList.add("d-none");
 
         // Reinitialize dates
-        this.$allDates.removeClass('s_website_form_datepicker_initialized');
+        for (const fieldEl of this.dateFieldEls) {
+            fieldEl.classList.remove("s_website_form_datepicker_initialized");
+        }
 
         // Restore disabled attribute
         for (const inputEl of this.inputEls) {
@@ -263,24 +272,23 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
             }
         }
 
-        this.$el.off('.s_website_form');
+        for (const fieldEl of this.el.querySelectorAll(".s_website_form_field")) {
+            fieldEl.removeEventListener("input", this._onFieldInputDebounced);
+        }
         for (const disableDateTimePicker of this.disableDateTimePickers) {
             disableDateTimePicker();
         }
-    },
+    }
 
-    send: async function (e) {
+    async send(e) {
         e.preventDefault(); // Prevent the default submit behavior
          // Prevent users from crazy clicking
-        const $button = this.$el.find('.s_website_form_send, .o_website_form_send');
-        $button.addClass('disabled') // !compatibility
-               .attr('disabled', 'disabled');
-        this.restoreBtnLoading = addLoadingEffect($button[0]);
-
-        var self = this;
-
-        self.$el.find('#s_website_form_result, #o_website_form_result').empty(); // !compatibility
-        if (!self.check_error_fields({})) {
+        const buttonEl = this.el.querySelector(".s_website_form_send, .o_website_form_send");
+        buttonEl.classList.add('disabled'); // !compatibility
+        buttonEl.setAttribute("disabled", "disabled");
+        this.restoreBtnLoading = addLoadingEffect(buttonEl);
+        this.el.querySelector("#s_website_form_result, #o_website_form_result").replaceChildren(); // !compatibility
+        if (!this.checkErrorFields({})) {
             if (this.fileInputError) {
                 const errorMessage = this.fileInputError.type === "number"
                     ? _t(
@@ -291,100 +299,106 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
                         "Please fill in the form correctly. The file “%(file name)s” is too large. (Maximum %(max)s MB)", 
                         { "file name": this.fileInputError.fileName, max:this.fileInputError.limit }
                     );
-                this.update_status("error", errorMessage);
+                this.updateStatus("error", errorMessage);
                 delete this.fileInputError;
             } else {
-                this.update_status("error", _t("Please fill in the form correctly."));
+                this.updateStatus("error", _t("Please fill in the form correctly."));
             }
             return false;
         }
 
         // Prepare form inputs
-        this.form_fields = this.$el.serializeArray();
-        $.each(this.$el.find('input[type=file]:not([disabled])'), (outer_index, input) => {
-            $.each($(input).prop('files'), function (index, file) {
+        this.formFields = [];
+        new FormData(this.el).forEach((value, key) => {
+            this.formFields.push({ name: key, value: value });
+        });
+        for (const inputEntry of this.el.querySelectorAll("input[type=file]:not([disabled])")) {
+            const [outerIndex, inputEl] = inputEntry;
+            for (const fileEntry of inputEl.files) {
+                const [index, file] = fileEntry;
                 // Index field name as ajax won't accept arrays of files
                 // when aggregating multiple files into a single field value
-                self.form_fields.push({
-                    name: input.name + '[' + outer_index + '][' + index + ']',
-                    value: file
+                this.formFields.push({
+                    name: `${input.name}[${outerIndex}][${index}]`,
+                    value: file,
                 });
-            });
-        });
+            }
+        }
 
         // Serialize form inputs into a single object
         // Aggregate multiple values into arrays
-        var form_values = {};
-        this.form_fields.forEach((input) => {
-            if (input.name in form_values) {
+        const formValues = {};
+        this.formFields.forEach((input) => {
+            if (input.name in formValues) {
                 // If a value already exists for this field,
                 // we are facing a x2many field, so we store
                 // the values in an array.
-                if (Array.isArray(form_values[input.name])) {
-                    form_values[input.name].push(input.value);
+                if (Array.isArray(formValues[input.name])) {
+                    formValues[input.name].push(input.value);
                 } else {
-                    form_values[input.name] = [form_values[input.name], input.value];
+                    formValues[input.name] = [formValues[input.name], input.value];
                 }
             } else {
                 if (input.value !== '') {
-                    form_values[input.name] = input.value;
+                    formValues[input.name] = input.value;
                 }
             }
         });
 
         // force server date format usage for existing fields
-        this.$el.find('.s_website_form_field:not(.s_website_form_custom)')
-        .find('.s_website_form_date, .s_website_form_datetime').each(function () {
-            const inputEl = this.querySelector('input');
-            const { value } = inputEl;
-            if (!value) {
-                return;
-            }
+        for (const fieldEl of this.el.querySelectorAll(".s_website_form_field:not(.s_website_form_custom)")) {
+            for (const dateEl of fieldEl.querySelectorAll(".s_website_form_date, .s_website_form_datetime")) {
+                const inputEl = dateEl.querySelector("input");
+                const { value } = inputEl;
+                if (!value) {
+                    return;
+                }
 
-            form_values[inputEl.getAttribute("name")] = this.matches(".s_website_form_date")
-                ? serializeDate(parseDate(value))
-                : serializeDateTime(parseDateTime(value));
-        });
+                formValues[inputEl.getAttribute("name")] = dateEl.matches(".s_website_form_date")
+                    ? serializeDate(parseDate(value))
+                    : serializeDateTime(parseDateTime(value));
+            }
+        }
 
         if (this._recaptchaLoaded) {
             const tokenObj = await this._recaptcha.getToken('website_form');
             if (tokenObj.token) {
-                form_values['recaptcha_token_response'] = tokenObj.token;
+                formValues['recaptcha_token_response'] = tokenObj.token;
             } else if (tokenObj.error) {
-                self.update_status('error', tokenObj.error);
+                this.updateStatus('error', tokenObj.error);
                 return false;
             }
         }
 
         if (odoo.csrf_token) {
-            form_values.csrf_token = odoo.csrf_token;
+            formValues.csrf_token = odoo.csrf_token;
         }
 
         const formData = new FormData();
-        for (const [key, value] of Object.entries(form_values)) {
+        for (const [key, value] of Object.entries(formValues)) {
             formData.append(key, value);
         }
 
         // Post form and handle result
-        post(this.$el.attr('action') + (this.$el.data('force_action') || this.$el.data('model_name')), formData)
-        .then(async function (result_data) {
+        post(this.el.getAttribute("action") + (this.el.dataset.force_action || this.el.dataset.model_name), formData)
+        .then(async (resultData) => {
             // Restore send button behavior
-            self.$el.find('.s_website_form_send, .o_website_form_send')
-                .removeAttr('disabled')
-                .removeClass('disabled'); // !compatibility
-            if (!result_data.id) {
+            const buttonEl = this.el.querySelector(".s_website_form_send, .o_website_form_send");
+            buttonEl.removeAttribute("disabled");
+            buttonEl.classList.remove("disabled"); // !compatibility
+            if (!resultData.id) {
                 // Failure, the server didn't return the created record ID
-                self.update_status('error', result_data.error ? result_data.error : false);
-                if (result_data.error_fields) {
+                this.updateStatus("error", resultData.error ? resultData.error : false);
+                if (resultData.error_fields) {
                     // If the server return a list of bad fields, show these fields for users
-                    self.check_error_fields(result_data.error_fields);
+                    this.checkErrorFields(resultData.error_fields);
                 }
             } else {
                 // Success, redirect or update status
-                let successMode = self.el.dataset.successMode;
-                let successPage = self.el.dataset.successPage;
+                let successMode = this.el.dataset.successMode;
+                let successPage = this.el.dataset.successPage;
                 if (!successMode) {
-                    successPage = self.$el.attr('data-success_page'); // Compatibility
+                    successPage = this.el.dataset.success_page; // !compatibility
                     successMode = successPage ? 'redirect' : 'nothing';
                 }
                 switch (successMode) {
@@ -432,7 +446,7 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
                             }
                             break;
                         }
-                        $(window.location).attr('href', successPage);
+                        window.location.href = successPage;
                         return;
                     }
                     case 'message': {
@@ -441,8 +455,8 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
                         // message)
                         await delay(DEBOUNCE);
 
-                        self.el.classList.add('d-none');
-                        self.el.parentElement.querySelector('.s_website_form_end_message').classList.remove('d-none');
+                        this.el.classList.add('d-none');
+                        this.el.parentElement.querySelector('.s_website_form_end_message').classList.remove('d-none');
                         break;
                     }
                     default: {
@@ -451,22 +465,22 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
                         // message)
                         await delay(DEBOUNCE);
 
-                        self.update_status('success');
+                        this.updateStatus('success');
                         break;
                     }
                 }
 
-                self.resetForm();
-                self.restoreBtnLoading();
+                this.resetForm();
+                this.restoreBtnLoading();
             }
         })
         .catch(error => {
-            this.update_status(
+            this.updateStatus(
                 'error',
                 error.status && error.status === 413 ? _t("Uploaded file is too large.") : "",
             );
         });
-    },
+    }
 
     /**
      * Resets a form.
@@ -483,28 +497,26 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
             inputEl.classList.remove("d-none");
             delete inputEl.fileList;
         });
-    },
+    }
 
-    check_error_fields: function (error_fields) {
-        var self = this;
-        var form_valid = true;
+    checkErrorFields(errorFields) {
+        let formValid = true;
         // Loop on all fields
-        this.$el.find('.form-field, .s_website_form_field').each(function (k, field) { // !compatibility
-            var $field = $(field);
+        for (const fieldEl of this.el.querySelectorAll(".form-field, .s_website_form_field")) { // !compatibility
             // FIXME that seems broken, "for" does not contain the field
             // but this is used to retrieve errors sent from the server...
             // need more investigation.
-            var field_name = $field.find('.col-form-label').attr('for');
+            const fieldName = fieldEl.querySelector(".col-form-label")?.getAttribute("for");
 
             // Validate inputs for this field
-            var inputs = $field.find('.s_website_form_input, .o_website_form_input').not('#editable_select'); // !compatibility
-            var invalid_inputs = inputs.toArray().filter(function (input, k, inputs) {
+            const inputEls = [...fieldEl.querySelectorAll(".s_website_form_input:not(#editable_select), .o_website_form_input:not(#editable_select)")]; // !compatibility
+            const invalidInputs = inputEls.filter((inputEl) => {
                 // Special check for multiple required checkbox for same
                 // field as it seems checkValidity forces every required
                 // checkbox to be checked, instead of looking at other
                 // checkboxes with the same name and only requiring one
                 // of them to be valid.
-                if (input.required && input.type === 'checkbox') {
+                if (inputEl.required && inputEl.type === 'checkbox') {
                     // Considering we are currently processing a single
                     // field, we can assume that all checkboxes in the
                     // inputs variable have the same name
@@ -512,7 +524,7 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
                     // filter neither on required, nor on checkbox and
                     // checking the validity of the group of checkbox is
                     // currently done for each checkbox of that group...
-                    var checkboxes = inputs.filter(input => input.required && input.type === 'checkbox');
+                    const checkboxes = inputEls.filter(el => el.required && el.type === 'checkbox');
                     return !checkboxes.some((checkbox) => checkbox.checkValidity());
 
                 // Special cases for dates and datetimes
@@ -522,17 +534,17 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
                 // was made)... need more investigation (if restored,
                 // consider checking the date inputs are not disabled before
                 // saying they are invalid (see checkValidity used here))
-                } else if ($(input).hasClass('s_website_form_date') || $(input).hasClass('o_website_form_date')) { // !compatibility
-                    const date = parseDate(input.value);
+                } else if (inputEl.matches(".s_website_form_date, .o_website_form_date")) { // !compatibility
+                    const date = parseDate(inputEl.value);
                     if (!date || !date.isValid) {
                         return true;
                     }
-                } else if ($(input).hasClass('s_website_form_datetime') || $(input).hasClass('o_website_form_datetime')) { // !compatibility
-                    const date = parseDateTime(input.value);
+                } else if (inputEl.matches(".s_website_form_datetime, .o_website_form_datetime")) { // !compatibility
+                    const date = parseDateTime(inputEl.value);
                     if (!date || !date.isValid) {
                         return true;
                     }
-                } else if (input.type === "file" && !self.isFileInputValid(input)) {
+                } else if (inputEl.type === "file" && !this.isFileInputValid(inputEl)) {
                     return true;
                 }
 
@@ -545,50 +557,53 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
                 // their purpose is to be able to enter additional data when
                 // some condition is fulfilled. If such a field is required,
                 // it is only required when visible for example.
-                return !input.checkValidity();
+                return !inputEl.checkValidity();
             });
 
             // Update field color if invalid or erroneous
-            const $controls = $field.find('.form-control, .form-select, .form-check-input');
-            $field.removeClass('o_has_error');
-            $controls.removeClass('is-invalid');
-            if (invalid_inputs.length || error_fields[field_name]) {
-                $field.addClass('o_has_error');
-                $controls.addClass('is-invalid');
-                if (typeof error_fields[field_name] === "string") {
-                    $field.popover({content: error_fields[field_name], trigger: 'hover', container: 'body', placement: 'top'});
-                    // update error message and show it.
-                    const popover = Popover.getInstance($field);
-                    popover._config.content = error_fields[field_name];
-                    $field.popover('show');
-                }
-                form_valid = false;
+            const controlEls = fieldEl.querySelectorAll(".form-control, .form-select, .form-check-input");
+            fieldEl.classList.remove("o_has_error");
+            for (const controlEl of controlEls) {
+                controlEl.classList.remove("is-invalid");
             }
-        });
-        return form_valid;
-    },
+            if (invalidInputs.length || errorFields[fieldName]) {
+                fieldEl.classList.add("o_has_error");
+                for (const controlEl of controlEls) {
+                    controlEl.classList.add("is-invalid");
+                }
+                if (typeof errorFields[fieldName] === "string") {
+                    // update error message and show it.
+                    const popover = Popover.getOrCreateInstance(fieldEl, {
+                        content: errorFields[fieldName],
+                        trigger: "hover",
+                        container: "body",
+                        placement: "top",
+                    });
+                    popover.show();
+                }
+                formValid = false;
+            }
+        }
+        return formValid;
+    }
 
-    update_status: function (status, message) {
+    updateStatus(status, message) {
         if (status !== 'success') { // Restore send button behavior if result is an error
-            this.$el.find('.s_website_form_send, .o_website_form_send')
-                .removeAttr('disabled')
-                .removeClass('disabled'); // !compatibility
+            const buttonEl = this.el.querySelector(".s_website_form_send, .o_website_form_send");
+            buttonEl.removeAttribute("disabled");
+            buttonEl.classList.remove("disabled"); // !compatibility
             this.restoreBtnLoading();
         }
-        var $result = this.$('#s_website_form_result, #o_website_form_result'); // !compatibility
+        const resultEl = this.el.querySelector('#s_website_form_result, #o_website_form_result'); // !compatibility
 
         if (status === 'error' && !message) {
             message = _t("An error has occured, the form has not been sent.");
         }
 
-        // Note: we still need to wait that the widget is properly started
-        // before any qweb rendering which depends on xml assets
-        // because the event handlers are binded before the call to
-        // willStart for public widgets...
-        this.__started.then(() => $result.replaceWith(renderToElement(`website.s_website_form_status_${status}`, {
+        resultEl.replaceWith(renderToElement(`website.s_website_form_status_${status}`, {
             message: message,
-        })));
-    },
+        }));
+    }
 
     /**
      * Checks if the file input is valid: if the number of files uploaded
@@ -621,7 +636,7 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
             }
         }
         return true;
-    },
+    }
 
     //----------------------------------------------------------------------
     // Private
@@ -634,12 +649,11 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
      */
     _getUserPreFillFields() {
         return ['name', 'phone', 'email', 'commercial_company_name'];
-    },
+    }
     /**
      * Compares the value with the comparable (and the between) with
      * comparator as a means to compare
      *
-     * @private
      * @param {string} comparator The way that $value and $comparable have
      *      to be compared
      * @param {string} [value] The value of the field
@@ -714,9 +728,8 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
             case 'equal or after':
                 return value >= comparable;
         }
-    },
+    }
     /**
-     * @private
      * @param {HTMLElement} fieldEl the field we want to have a function
      *      that calculates its visibility
      * @returns {function} the function to be executed when we want to
@@ -741,7 +754,7 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
                 : formData.get(dependencyName);
             return this._compareTo(comparator, currentValueOfDependency, visibilityCondition, between);
         };
-    },
+    }
     /**
      * Calculates the visibility for each field with conditional visibility
      */
@@ -761,7 +774,7 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
         if (anyFieldVisibilityUpdated) {
             this._updateFieldsVisibility();
         }
-    },
+    }
     /**
      * Changes the visibility of a field.
      *
@@ -776,11 +789,10 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
             // not sent on form submit.
             inputEl.disabled = !haveToBeVisible;
         }
-    },
+    }
     /**
      * Creates a block containing the file name and a cross to delete it.
      *
-     * @private
      * @param {Object} fileDetails the details of the file being uploaded
      * @param {HTMLElement} filesZoneEl the zone where the file blocks are
      *      displayed
@@ -789,12 +801,11 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
         const fileBlockEl = renderToElement("website.file_block", {fileName: fileDetails.name});
         fileBlockEl.fileDetails = fileDetails;
         filesZoneEl.append(fileBlockEl);
-    },
+    }
     /**
      * Creates the file upload button (= a button to replace the file input,
      * in order to modify its text content more easily).
      *
-     * @private
      * @param {HTMLElement} inputEl the file input
      */
     _createAddFilesButton(inputEl) {
@@ -805,7 +816,7 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
             ? _t("Add Files") : _t("Replace File");
         inputEl.parentNode.insertBefore(addFilesButtonEl, inputEl);
         inputEl.classList.add("d-none");
-    },
+    }
 
     //----------------------------------------------------------------------
     // Handlers
@@ -817,16 +828,15 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
      */
     _onFieldInput() {
         this._updateFieldsVisibility();
-    },
+    }
     /**
      * Called when files are uploaded: updates the button text content,
      * displays the file blocks (containing the files name and a cross to
      * delete them) and manages the files.
      *
-     * @private
      * @param {Event} ev
      */
-    _onFileChange(ev) {
+    changeFile(ev) {
         const fileInputEl = ev.currentTarget;
         const fieldEl = fileInputEl.closest(".s_website_form_field");
         const uploadedFiles = fileInputEl.files;
@@ -864,15 +874,17 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
         }
         // Update the input files.
         fileInputEl.files = fileInputEl.fileList.files;
-    },
+    }
     /**
      * Called when a file is deleted by clicking on the cross on the block
      * describing it.
      *
-     * @private
      * @param {Event} ev
      */
-    _onFileDeleteClick(ev) {
+    clickFileDelete(ev) {
+        if (!ev.target.closest(".o_file_delete")) {
+            return tralse;
+        }
         const fileBlockEl = ev.target.closest(".o_file_block");
         const fieldEl = fileBlockEl.closest(".s_website_form_field");
         const fileInputEl = fieldEl.querySelector("input[type=file]");
@@ -898,16 +910,17 @@ publicWidget.registry.s_website_form = publicWidget.Widget.extend({
             addFilesButtonEl.remove();
             this._updateFieldsVisibility();
         }
-    },
+    }
     /**
      * Detects when the fake input file button is clicked to simulate a
      * click on the real input.
      *
-     * @private
      * @param {MouseEvent} ev
      */
-    _onAddFilesButtonClick(ev) {
+    clickAddFilesButton(ev) {
         const fileInputEl = ev.target.parentNode.querySelector("input[type=file]");
         fileInputEl.click();
-    },
-});
+    }
+}
+
+registry.category("website.active_elements").add("website.form", Form);
