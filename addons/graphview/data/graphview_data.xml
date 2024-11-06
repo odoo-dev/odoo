@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="module_dependencies" model="graphview.graph">
+            <field name="name">Module Dependencies</field>
+            <field name="graph_view_template_name">graphview.module.dependencies</field>
+        </record>
+        <record id="ondelete_cascade" model="graphview.graph">
+            <field name="name">Ondelete Cascade</field>
+            <field name="graph_view_template_name">graphview.ondelete.cascade</field>
+        </record>
+    </data>
+</odoo>

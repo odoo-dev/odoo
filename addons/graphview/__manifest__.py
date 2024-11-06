@@ -8,16 +8,14 @@ This module provides a custom graph view using Cytoscape.js.
     """,
     'depends': ['base'],
     'data': [
+        'data/graphview_data.xml',
         'security/ir.model.access.csv',
-        'views/graph_views.xml',
-    ],
-    'demo': [
-        'demo/graph_demo.xml',
+        'views/graphview_views.xml',
     ],
     'assets': {
         'web.assets_backend': [
-            'graphview/static/src/js/graph_widget.js',
-            'graphview/static/src/xml/graph_widget.xml',
+            'graphview/static/src/js/graphview_widget.js',
+            'graphview/static/src/xml/graphview_widget.xml',
         ],
     },
     'author': 'cwg',

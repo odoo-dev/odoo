@@ -1,2 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_graphview_graph,access_graphview_graph,model_graphview_graph,base.group_user,1,1,1,1
+access_graphview_model_inheritance,access_graphview_model_inheritance,model_graphview_model_inheritance,base.group_user,1,1,1,1
+access_graphview_module_dependencies,access_graphview_module_dependencies,model_graphview_module_dependencies,base.group_user,1,1,1,1
+access_graphview_ondelete_cascade,access_graphview_ondelete_cascade,model_graphview_ondelete_cascade,base.group_user,1,1,1,1
