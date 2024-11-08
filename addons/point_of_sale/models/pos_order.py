@@ -612,6 +612,27 @@ class PosOrder(models.Model):
             'res_id': self.account_move.id,
         }
 
+    def action_view_multiple_invoice(self, invoices):
+        """Return the appropriate action for the created invoices (list view or form view)."""
+        action = self.env['ir.actions.actions']._for_xml_id('account.action_move_out_invoice_type')
+        if len(invoices) == 1:
+            form_view = [(self.env.ref('account.view_move_form').id, 'form')]
+            action['views'] = form_view
+            action['res_id'] = invoices.id
+        else:
+            action['domain'] = [('id', 'in', invoices.ids)]
+        return action
+
+    def action_create_invoices(self):
+        return {
+            'name': _('Create Invoice(s)'),
+            'view_mode': 'form',
+            'view_id': self.env.ref('point_of_sale.view_pos_make_invoice').id,
+            'res_model': 'pos.make.invoice',
+            'target': 'new',
+            'type': 'ir.actions.act_window',
+        }
+
     # the refunded order is the order from which the items were refunded in this order
     def action_view_refunded_order(self):
         return {
