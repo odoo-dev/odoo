@@ -288,6 +288,8 @@
         'web.assets_unit_tests_setup': [
             'website/static/src/core/**/*',
             'website/static/src/interactions/**/*',
+            'website/static/src/snippets/s_dynamic_snippet/000.js',
+            'website/static/src/snippets/s_dynamic_snippet/000.xml',
             'website/static/src/snippets/s_table_of_content/000.js',
             'website/static/src/snippets/s_table_of_content/000.scss',
             'website/static/src/snippets/s_website_form/000.js',
