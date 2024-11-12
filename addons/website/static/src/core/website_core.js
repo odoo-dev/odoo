@@ -68,11 +68,11 @@ class WebsiteCore {
         if (!this.active) {
             for (const [name, I] of activeElementRegistry.getEntries()) {
                 if (this.el.matches(I.selector)) {
-                    console.log("starting", name);
+                    //console.log("starting", name);
                     proms.push(this._startInteraction(this.el, I));
                 } else {
                     for (let el of this.el.querySelectorAll(I.selector)) {
-                        console.log("starting", name);
+                        //console.log("starting", name);
                         proms.push(this._startInteraction(el, I));
                     }
                 }

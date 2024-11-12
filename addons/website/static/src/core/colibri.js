@@ -193,7 +193,7 @@ export class ColibriApp {
 
         addLine("return update;");
         const fn = new Function("framework", "interaction", fnStr);
-        console.log(fn.toString());
+        //console.log(fn.toString());
         return fn;
     }
 

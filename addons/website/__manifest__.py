@@ -205,7 +205,6 @@
             'website/static/src/js/tours/tour_utils.js',
             'website/static/src/js/content/website_root.js',
             'website/static/src/js/content/compatibility.js',
-            'website/static/src/js/content/menu.js',
             'website/static/src/js/content/snippets.animation.js',
             'website/static/src/js/show_password.js',
             'website/static/src/js/website_controller_page_listing_layout.js',

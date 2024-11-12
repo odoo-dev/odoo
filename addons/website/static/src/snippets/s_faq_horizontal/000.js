@@ -1,4 +1,3 @@
-import {extraMenuUpdateCallbacks} from "@website/js/content/menu";
 import publicWidget from "@web/legacy/js/public/public_widget";
 
 const faqHorizontal = publicWidget.Widget.extend({
@@ -15,16 +14,11 @@ const faqHorizontal = publicWidget.Widget.extend({
 
         this._updateTitlesPosition();
         this._updateTitlesPositionBound = this._updateTitlesPosition.bind(this);
-        extraMenuUpdateCallbacks.push(this._updateTitlesPositionBound);
     },
     /**
      * @override
      */
     destroy() {
-        const indexCallback = extraMenuUpdateCallbacks.indexOf(this._updateTitlesPositionBound);
-        if (indexCallback >= 0) {
-            extraMenuUpdateCallbacks.splice(indexCallback, 1);
-        }
     },
 
     //--------------------------------------------------------------------------

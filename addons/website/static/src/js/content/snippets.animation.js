@@ -96,7 +96,7 @@ publicWidget.Widget.include({
  *
  * This uses a simple API: it can be started, stopped, played and paused.
  */
-var AnimationEffect = Class.extend(publicWidget.ParentedMixin, {
+export var AnimationEffect = Class.extend(publicWidget.ParentedMixin, {
     /**
      * @constructor
      * @param {Object} parent

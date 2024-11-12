@@ -1,7 +1,7 @@
 import { Interaction } from "@website/core/interaction";
 import { registry } from "@web/core/registry";
 
-class MegaMenuDropdown extends Interaction {
+class DropdownMegaMenu extends Interaction {
 
     static selector = "header#top";
     static dynamicContent = {
@@ -105,4 +105,4 @@ class MegaMenuDropdown extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website.mega_menu_dropdown", MegaMenuDropdown);
+registry.category("website.active_elements").add("website.dropdown_mega_menu", DropdownMegaMenu);

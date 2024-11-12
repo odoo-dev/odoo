@@ -3,7 +3,7 @@ import { expect, test } from "@odoo/hoot";
 import { startInteractions, setupInteractionWhiteList } from "../../core/helpers";
 import { pointerDown, hover } from "@odoo/hoot-dom";
 
-setupInteractionWhiteList("website.mega_menu_dropdown");
+setupInteractionWhiteList("website.dropdown_mega_menu");
 
 test("mega_menu_dropdown does nothing if there is no header#top", async () => {
     const { core } = await startInteractions(`
