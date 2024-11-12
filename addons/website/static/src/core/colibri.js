@@ -74,6 +74,12 @@ export class Colibri {
     }
 }
 
+const GLOBALS = {
+    _root: "root",
+    _body: "document.body",
+    _window: "window",
+    _document: "document",
+}
 export class ColibriApp {
     compiledFns = new Map();
     frame = null;
@@ -124,7 +130,7 @@ export class ColibriApp {
         // preprocess content
         for (let [sel, directive, value] of generateEntries(content)) {
             if (!(sel in selectors)) {
-                if (sel !== "_root" && sel !== "_body") {
+                if (!(sel in GLOBALS)) {
                     selectors[sel] = `nodes_${nextId++}`;
                 }
             }
@@ -145,8 +151,8 @@ export class ColibriApp {
         const addLine = (txt) =>
             (fnStr += new Array(indent + 2).join("  ") + txt);
         const applyToSelector = (sel, fn) => {
-            if (sel === "_root" || sel === "_body") {
-                const target = sel === "_root" ? "root" : "document.body";
+            if (sel in GLOBALS) {
+                const target = GLOBALS[sel];
                 addLine(`${fn(target)};\n`);
             } else {
                 addLine(`for (let node of ${selectors[sel]}) {\n`);
@@ -164,7 +170,7 @@ export class ColibriApp {
         // start function
         fnStr += "\n";
         for (let [sel, event, expr] of handlers) {
-            const nodes = sel === "_root" ? "[root]" : (sel === "_body" ? "[document.body]" : selectors[sel]);
+            const nodes = sel in GLOBALS ? `[${GLOBALS[sel]}]` : selectors[sel];
             addLine(`framework.addDomListener(${nodes}, \`${event}\`, interaction[\`${expr}\`]);`)
         }
 
