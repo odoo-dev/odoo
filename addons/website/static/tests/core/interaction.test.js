@@ -3,6 +3,7 @@ import { expect, test, describe } from "@odoo/hoot";
 import { startInteraction } from "./helpers";
 import { Interaction } from "@website/core/interaction";
 import { animationFrame, click, dblclick } from "@odoo/hoot-dom";
+import { Deferred } from "@odoo/hoot-mock";
 
 test("crashes if a dynamic content element does not start with t-", async () => {
     class Test extends Interaction {
@@ -207,6 +208,40 @@ describe("event handling", () => {
         expect(clicked).toBe(1);
     });
 
+    test("listener is added between willstart and start", async () => {
+
+        class Test extends Interaction {
+            static selector = ".test";
+            static dynamicContent = {
+                "span:t-on-click": "onClick",
+            };
+            setup() {
+                expect.step("setup");
+            }
+            async willStart() {
+                await click(this.el.querySelector("span"));
+                expect.step("willStart");
+            }
+            start() {
+                expect.step("start");
+            }
+            onClick() {
+                expect.step("click");
+            }
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `
+            <div class="test">
+                <span>coucou</span>
+            </div>`,
+        );
+        await click(el.querySelector("span"));
+
+        expect.verifySteps(["setup", "willStart", "start", "click"]);
+    });
+
     test("dom is updated after event is dispatched", async () => {
         class Test extends Interaction {
             static selector = ".test";
@@ -270,4 +305,44 @@ describe("lifecycle", () => {
         core.stopInteractions();
         expect.verifySteps(["destroy"]);
     });
+
+
+    test("willstart delayed, then destroy => start should not be called", async () => {
+        const def = new Deferred();
+
+        class Test extends Interaction {
+            static selector = ".test";
+            setup() {
+                expect.step("setup");
+            }
+            async willStart() {
+                expect.step("willStart");
+                return def;
+            }
+            start() {
+                expect.step("start");
+            }
+            destroy() {
+                expect.step("destroy");
+            }        
+        }
+
+        const { core } = await startInteraction(
+            Test,
+            `
+            <div class="test">
+                <span>coucou</span>
+            </div>`, {
+                doNotWaitStart: true
+            }
+        );
+        expect.verifySteps(["setup", "willStart"]);
+        // destroy the interaction
+        core.stopInteractions();
+        expect.verifySteps(["destroy"]);
+        def.resolve();
+        await animationFrame();
+        expect.verifySteps([]);
+    });
+
 });
