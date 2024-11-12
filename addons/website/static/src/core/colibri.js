@@ -57,6 +57,15 @@ export class Colibri {
         return this.markup;
     }
 
+    applyAttr(el, attr, value) {
+        if (attr === "class") {
+            for (let c of value.trim().split(" ")) {
+                el.classList.add(c);
+            }
+        } else {
+            el.setAttribute(attr, value);
+        }
+    }
 
     processContent(content) {
         const fn = this.app.compile(content);
@@ -183,7 +192,7 @@ export class ColibriApp {
             addLine(`const ${varName} = ${expr};\n`);
             applyToSelector(
                 sel,
-                (el) => `${el}.setAttribute(\`${attr}\`, ${varName});`,
+                (el) => `framework.applyAttr(${el}, \`${attr}\`, ${varName});`,
             );
         }
         for (let [sel, expr] of tOuts) {

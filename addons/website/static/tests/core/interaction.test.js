@@ -394,3 +394,50 @@ describe("lifecycle", () => {
     });
 
 });
+
+describe("dynamic attributes", () => {
+    test("can set an attribute", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            static dynamicContent = {
+                "_root:t-att-a": "'b'",
+            };
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<div class="test"><span>coucou</span></div>`,
+        );
+        expect(el.querySelector(".test").outerHTML).toBe(`<div class="test" a="b"><span>coucou</span></div>`);
+    });
+
+    test("t-att-class does not override existing classes", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            static dynamicContent = {
+                "_root:t-att-class": "'b'",
+            };
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<div><span class="a">coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(`<span class="a b">coucou</span>`);
+    });
+
+    test("t-att-class can add multiple classes", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            static dynamicContent = {
+                "_root:t-att-class": "'b c'",
+            };
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<div><span class="a">coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(`<span class="a b c">coucou</span>`);
+    });
+});
