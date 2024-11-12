@@ -99,6 +99,54 @@ describe("event handling", () => {
         expect(clicked).toBe(true);
     });
 
+    test("can add a listener on window element", async () => {
+        let clicked = false;
+        class Test extends Interaction {
+            static selector = ".test";
+            static dynamicContent = {
+                "_window:t-on-someevent": "doSomething",
+            };
+            doSomething() {
+                clicked = true;
+            }
+        }
+
+        await startInteraction(
+            Test,
+            `
+        <div class="test">
+            <span>coucou</span>
+        </div>`,
+        );
+        expect(clicked).toBe(false);
+        window.dispatchEvent(new Event("someevent"));
+        expect(clicked).toBe(true);
+    });
+
+    test("can add a listener on document ", async () => {
+        let clicked = false;
+        class Test extends Interaction {
+            static selector = ".test";
+            static dynamicContent = {
+                "_document:t-on-someevent": "doSomething",
+            };
+            doSomething() {
+                clicked = true;
+            }
+        }
+
+        await startInteraction(
+            Test,
+            `
+        <div class="test">
+            <span>coucou</span>
+        </div>`,
+        );
+        expect(clicked).toBe(false);
+        window.document.dispatchEvent(new Event("someevent"));
+        expect(clicked).toBe(true);
+    });
+
     test("can add a listener on a multiple elements", async () => {
         let clicked = 0;
         class Test extends Interaction {
