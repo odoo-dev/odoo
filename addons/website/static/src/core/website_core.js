@@ -35,6 +35,7 @@ class WebsiteCore {
         this.roots = [];
         this.colibriApp = new ColibriApp(this.env);
         this.owlApp = null;
+        this.proms = [];
     }
 
     async _mountComponent(el, C) {
@@ -68,18 +69,20 @@ class WebsiteCore {
         if (!this.active) {
             for (const [name, I] of activeElementRegistry.getEntries()) {
                 if (this.el.matches(I.selector)) {
-                    console.log("starting", name);
+                    // console.log("starting", name);
                     proms.push(this._startInteraction(this.el, I));
                 } else {
                     for (let el of this.el.querySelectorAll(I.selector)) {
-                        console.log("starting", name);
+                        // console.log("starting", name);
                         proms.push(this._startInteraction(el, I));
                     }
                 }
             }
             this.active = true;
         }
-        return Promise.all(proms)
+        const prom = Promise.all(proms);
+        this.proms.push(prom);
+        return prom;
     }
 
     _startInteraction(el, I) {
@@ -103,6 +106,16 @@ class WebsiteCore {
         this.roots = [];
         this.isActive = false;
     }
+
+    /**
+     * @returns { Promise } returns a promise that is resolved when all current
+     * interactions are started. Note that it does not take into account possible
+     * future interactions.
+     */
+    get isStarted() {
+        const proms = this.proms.slice();
+        return Promise.all(proms);
+    }
 }
 
 registry.category("services").add("website_core", {
@@ -117,7 +130,7 @@ registry.category("services").add("website_core", {
                 }
             }
         });
-        await websiteCore.startInteractions();
+        websiteCore.startInteractions();
         return websiteCore;
     },
 });

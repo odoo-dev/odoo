@@ -21,13 +21,13 @@ export function setupInteractionWhiteList(interactions) {
     activeInteractions = interactions;
 }
 
-export async function startInteraction(I, html) {
+export async function startInteraction(I, html, options) {
     clearRegistry(elementRegistry);
     elementRegistry.add(I.constructor.name, I);
-    return startInteractions(html);
+    return startInteractions(html, options);
 }
 
-export async function startInteractions(html) {
+export async function startInteractions(html, options = {}) {
     const fixture = getFixture();
     if (!html.includes("wrapwrap")) {
         html = `<div id="wrapwrap">${html}</div>`;
@@ -43,6 +43,10 @@ export async function startInteractions(html) {
     }
     const env = await makeMockEnv();
     const core = env.services.website_core;
+    if (!options.doNotWaitStart) {
+        await core.isStarted;
+    }
+
     return {
         el: fixture,
         core,
