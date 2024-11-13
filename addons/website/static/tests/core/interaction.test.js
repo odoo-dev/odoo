@@ -5,26 +5,6 @@ import { Interaction } from "@website/core/interaction";
 import { animationFrame, click, dblclick } from "@odoo/hoot-dom";
 import { Deferred } from "@odoo/hoot-mock";
 
-test("crashes if a dynamic content element does not start with t-", async () => {
-    class Test extends Interaction {
-        static selector = ".test";
-        static dynamicContent = {
-            "span:click": "doSomething",
-        };
-        doSomething() {}
-    }
-
-    let error = null;
-    try {
-        await startInteraction(Test, `<div class="test"></div>`);
-    } catch (e) {
-        error = e;
-    }
-    expect(error).not.toBe(null);
-    expect(error.message).toBe(
-        "Invalid directive: 'click' (should start with t-)",
-    );
-});
 
 describe("event handling", () => {
     test("can add a listener on a single element", async () => {
@@ -391,6 +371,70 @@ describe("lifecycle", () => {
         def.resolve();
         await animationFrame();
         expect.verifySteps([]);
+    });
+
+});
+
+describe("miscellaneous", () => {
+    test("crashes if a dynamic content element does not start with t-", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            static dynamicContent = {
+                "span:click": "doSomething",
+            };
+            doSomething() {}
+        }
+
+        let error = null;
+        try {
+            await startInteraction(Test, `<div class="test"></div>`);
+        } catch (e) {
+            error = e;
+        }
+        expect(error).not.toBe(null);
+        expect(error.message).toBe(
+            "Invalid directive: 'click' (should start with t-)",
+        );
+    });
+
+    test("can register a cleanup", async () => {
+
+        class Test extends Interaction {
+            static selector = ".test";
+            setup() {
+                this.registerCleanup(() => {
+                    expect.step("cleanup")
+                });
+            }
+            destroy() {
+                expect.step("destroy");
+            }
+        }
+        const { core } = await startInteraction(Test, `<div class="test"></div>`);
+
+        expect.verifySteps([]);
+        core.stopInteractions();
+        expect.verifySteps(["cleanup", "destroy"]);
+    });
+
+    test("cleanups are executed in reverse order", async () => {
+
+        class Test extends Interaction {
+            static selector = ".test";
+            setup() {
+                this.registerCleanup(() => {
+                    expect.step("cleanup1")
+                });
+                this.registerCleanup(() => {
+                    expect.step("cleanup2")
+                });
+            }
+        }
+        const { core } = await startInteraction(Test, `<div class="test"></div>`);
+
+        expect.verifySteps([]);
+        core.stopInteractions();
+        expect.verifySteps(["cleanup2", "cleanup1"]);
     });
 
 });

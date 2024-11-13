@@ -47,6 +47,10 @@ export class Interaction {
         this.__colibri__.addDomListener(nodes, event, fn, options);
     }
 
+    registerCleanup(fn) {
+        this.__colibri__.cleanups.push(fn);
+    }
+
     mountComponent() {
         // todo
     }
