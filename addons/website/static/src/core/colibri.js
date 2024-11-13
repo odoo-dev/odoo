@@ -11,6 +11,7 @@ export class Colibri {
         this.app = app;
         this.update = null;
         this.handlers = [];
+        this.cleanups = [];
         this.startProm = null;
         const interaction = new I(el, env, this);
         this.interaction = interaction;
@@ -75,6 +76,9 @@ export class Colibri {
     }
 
     destroy() {
+        for (let cleanup of this.cleanups.reverse()) {
+            cleanup();
+        }
         for (let [el, ev, fn, options] of this.handlers) {
             el.removeEventListener(ev, fn, options);
         }
