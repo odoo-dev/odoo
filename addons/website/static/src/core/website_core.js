@@ -87,7 +87,7 @@ class WebsiteCore {
 
     _startInteraction(el, I) {
         if (I.prototype instanceof Interaction) {
-            const interaction = this.colibriApp.attach(el, I);
+            const interaction = this.colibriApp.attachTo(el, I);
             this.interactions.push(interaction);
             return interaction.startProm;
         } else {

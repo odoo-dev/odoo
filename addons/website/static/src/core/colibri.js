@@ -98,24 +98,9 @@ export class ColibriApp {
         this.env = env;
     }
 
-    attach(el, I) {
+    attachTo(el, I) {
         const colibri = new Colibri(this, I, el, this.env);
         return colibri;
-        // const interaction = new I(el, this.env, this);
-        // // patch destroy to cleanup colibri stuff
-        // const destroy = interaction.destroy;
-        // interaction.destroy = function () {
-        //     if (!this.isDestroyed) {
-        //         for (let [el, ev, fn, options] of this.__colibri__.handlers) {
-        //             el.removeEventListener(ev, fn, options);
-        //         }
-        //         this.isDestroyed = true;
-        //         destroy.call(this);
-        //     }
-        // };
-        // interaction.setup();
-
-        // return interaction;
     }
 
 
@@ -208,7 +193,7 @@ export class ColibriApp {
 
         addLine("return update;");
         const fn = new Function("framework", "interaction", fnStr);
-        console.log(fn.toString());
+        // console.log(fn.toString());
         return fn;
     }
 
