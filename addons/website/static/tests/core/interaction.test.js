@@ -381,7 +381,7 @@ describe("lifecycle", () => {
             <div class="test">
                 <span>coucou</span>
             </div>`, {
-                doNotWaitStart: true
+                waitForStart: false
             }
         );
         expect.verifySteps(["setup", "willStart"]);
