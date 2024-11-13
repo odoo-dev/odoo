@@ -54,7 +54,7 @@ class ResPartner(models.Model):
             domain = expression.AND([domain, [("channel_ids", "not in", channel.id)]])
             if channel.group_public_id:
                 domain = expression.AND(
-                    [domain, [("user_ids.groups_id", "in", channel.group_public_id.id)]]
+                    [domain, [("user_ids.all_group_ids", "in", channel.group_public_id.id)]]
                 )
         query = self._search(domain, limit=limit)
         # bypass lack of support for case insensitive order in search()
@@ -91,7 +91,7 @@ class ResPartner(models.Model):
             extra_domain = expression.AND(
                 [
                     extra_domain,
-                    [("user_ids.groups_id", "in", channel.group_public_id.id)],
+                    [("user_ids.group_ids", "in", channel.group_public_id.id)],
                 ]
             )
         partners = self._search_mention_suggestions(domain, limit, extra_domain)
@@ -105,7 +105,7 @@ class ResPartner(models.Model):
         store.add(channel, {"group_public_id": channel.group_public_id.id if channel.group_public_id else None})
         for p in partners:
             store.add(p,{
-                "groups_id": [("ADD", next((group.id for group in p.user_ids.groups_id if group.id == channel.group_public_id.id), None))]
+                "group_ids": [("ADD", next((group.id for group in p.user_ids.group_ids if group.id == channel.group_public_id.id), None))]
             })
         return store.get_result()
 

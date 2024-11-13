@@ -972,7 +972,7 @@ class ResUsers(models.Model):
     @api.model
     def _get_invalidation_fields(self):
         return {
-            'groups_id', 'active', 'lang', 'tz', 'company_id', 'company_ids',
+            'group_ids', 'active', 'lang', 'tz', 'company_id', 'company_ids',
             *self._get_session_token_fields()
         }
 

@@ -18,7 +18,7 @@ defineLivechatModels();
 test("from the discuss app", async () => {
     const pyEnv = await startServer();
     pyEnv["res.users"].write([serverState.userId], {
-        groups_id: pyEnv["res.groups"]
+        group_ids: pyEnv["res.groups"]
             .search_read([["id", "=", serverState.groupLivechatId]])
             .map(({ id }) => id),
     });
@@ -58,7 +58,7 @@ test("from the discuss app", async () => {
 test("from the command palette", async () => {
     const pyEnv = await startServer();
     pyEnv["res.users"].write([serverState.userId], {
-        groups_id: pyEnv["res.groups"]
+        group_ids: pyEnv["res.groups"]
             .search_read([["id", "=", serverState.groupLivechatId]])
             .map(({ id }) => id),
     });
@@ -76,7 +76,7 @@ test("from the command palette", async () => {
 test("from chat window", async () => {
     const pyEnv = await startServer();
     pyEnv["res.users"].write([serverState.userId], {
-        groups_id: pyEnv["res.groups"]
+        group_ids: pyEnv["res.groups"]
             .search_read([["id", "=", serverState.groupLivechatId]])
             .map(({ id }) => id),
     });
@@ -107,7 +107,7 @@ test("from chat window", async () => {
 test("visitor leaving ends the livechat conversation", async () => {
     const pyEnv = await startServer();
     pyEnv["res.users"].write([serverState.userId], {
-        groups_id: pyEnv["res.groups"]
+        group_ids: pyEnv["res.groups"]
             .search_read([["id", "=", serverState.groupLivechatId]])
             .map(({ id }) => id),
     });

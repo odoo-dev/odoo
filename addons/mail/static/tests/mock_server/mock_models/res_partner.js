@@ -114,7 +114,7 @@ export class ResPartner extends webModels.ResPartner {
             ["partner_share", "=", false],
         ];
         if (channel.group_public_id) {
-            extraDomain.push(["groups_id", "in", channel.group_public_id]);
+            extraDomain.push(["group_ids", "in", channel.group_public_id]);
         }
         const baseDomain = search
             ? ["|", ["name", "ilike", searchLower], ["email", "ilike", searchLower]]
@@ -146,7 +146,7 @@ export class ResPartner extends webModels.ResPartner {
         for (const partnerId of partners) {
             const data = {
                 name: users[partnerId]?.name,
-                groups_id: users[partnerId]?.groups_id.includes(channel.group_public_id)
+                group_ids: users[partnerId]?.group_ids.includes(channel.group_public_id)
                     ? channel.group_public_id
                     : undefined,
             };
