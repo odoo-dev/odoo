@@ -484,4 +484,31 @@ describe("dynamic attributes", () => {
         );
         expect(el.querySelector("span").outerHTML).toBe(`<span class="a b c">coucou</span>`);
     });
+
+    test("t-att-class can add and remove a class", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            static dynamicContent = {
+                "_root:t-att-class": "this.flag ? 'a' : 'b'",
+                "_root:t-on-click": "toggle",
+            };
+            setup() {
+                this.flag = true;
+            }
+            toggle() {
+                this.flag = !this.flag;
+            }
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<div><span class="bla">coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(`<span class="bla a">coucou</span>`);
+        await click(el.querySelector("span"));
+        await animationFrame();
+        expect(el.querySelector("span").outerHTML).toBe(`<span class="bla b">coucou</span>`);
+
+    });
+
 });
