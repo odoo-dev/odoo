@@ -1132,8 +1132,6 @@ class SaleOrder(models.Model):
         if self.env.context.get('send_email'):
             self._send_order_confirmation_mail()
 
-        return True
-
     def _should_be_locked(self):
         self.ensure_one()
         # Public user can confirm SO, so we check the group on any record creator.
