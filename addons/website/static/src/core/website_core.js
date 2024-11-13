@@ -125,14 +125,16 @@ registry.category("services").add("website_core", {
     async start(env) {
         const websiteCore = new WebsiteCore(env);
         activeElementRegistry.addEventListener("UPDATE", async (ev) => {
-            if (this.isActive) {
+            if (websiteCore.isActive) {
                 const { operation, key: name, value: I } = ev.detail;
                 if (operation !== "delete") {
-                    this._startInteraction(name, I);
+                    websiteCore._startInteraction(name, I);
                 }
             }
         });
-        websiteCore.startInteractions();
+        websiteCore.proms.push(
+            env.isReady.then(() => websiteCore.startInteractions())
+        );
         return websiteCore;
     },
 });
