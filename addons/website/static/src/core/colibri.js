@@ -12,6 +12,7 @@ export class Colibri {
         this.update = null;
         this.handlers = [];
         this.cleanups = [];
+        this.classMap = new Map();
         this.startProm = null;
         const interaction = new I(el, env, this);
         this.interaction = interaction;
@@ -60,9 +61,21 @@ export class Colibri {
 
     applyAttr(el, attr, value) {
         if (attr === "class") {
-            for (let c of value.trim().split(" ")) {
-                el.classList.add(c);
+            const before = this.classMap.get(el) || new Set();
+            const after = new Set(value.trim().split(" "));
+            // add new class
+            for (let cl of after) {
+                if (!before.has(cl)) {
+                    el.classList.add(cl);
+                }
             }
+            // remove old class
+            for (let cl of before) {
+                if (!after.has(cl)) {
+                    el.classList.remove(cl);
+                }
+            }
+            this.classMap.set(el, after);
         } else {
             el.setAttribute(attr, value);
         }
@@ -82,6 +95,7 @@ export class Colibri {
         for (let [el, ev, fn, options] of this.handlers) {
             el.removeEventListener(ev, fn, options);
         }
+        this.classMap.clear();
         this.interaction.destroy();
         this.interaction.isDestroyed = true;
     }
@@ -196,6 +210,7 @@ export class ColibriApp {
         addLine("}\n");
 
         addLine("return update;");
+        // console.log(fnStr);
         const fn = new Function("framework", "interaction", fnStr);
         // console.log(fn.toString());
         return fn;
