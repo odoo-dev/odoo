@@ -65,9 +65,10 @@ export const assets = {
 export class AssetsLoadingError extends Error {}
 
 /**
- * Loads the given url inside a script tag.
+ * Loads the given url inside a script tag in targetDoc.
  *
  * @param {string} url the url of the script
+ * @param {Document} [targetDoc=document]
  * @returns {Promise<true>} resolved when the script has been loaded
  */
 assets.loadJS = async function loadJS(url, targetDoc = document) {
@@ -90,9 +91,12 @@ assets.loadJS = async function loadJS(url, targetDoc = document) {
 };
 
 /**
- * Loads the given url as a stylesheet.
+ * Loads the given url as a stylesheet in targetDoc.
  *
  * @param {string} url the url of the stylesheet
+ * @param {Object} options
+ * @param {Number} [options.retryCount=0]
+ * @param {Document} [options.targetDoc=document]
  * @returns {Promise<true>} resolved when the stylesheet has been loaded
  */
 assets.loadCSS = async function loadCSS(url, { retryCount = 0, targetDoc = document } = {}) {
@@ -177,19 +181,30 @@ assets.getBundle = async function getBundle(bundleName, targetDoc = document) {
 };
 
 /**
- * Loads the given js/css libraries and asset bundles. Note that no library or
+ * Loads the given js/css libraries and asset bundles in the targetDoc. Note that no library or
  * asset will be loaded if it was already done before.
  *
  * @param {string} bundleName
+ * @param {Object} options
+ * @param {Document} [options.targetDoc=document]
+ * @param {Boolean} [options.css=true] if true, we load css bundle
+ * @param {Boolean} [options.js=true] if true, we load js bundle
  * @returns {Promise[]}
  */
-assets.loadBundle = async function loadBundle(bundleName, targetDoc = document) {
+assets.loadBundle = async function loadBundle(
+    bundleName,
+    { targetDoc = document, css = true, js = true } = {}
+) {
     if (typeof bundleName === "string") {
         const desc = await assets.getBundle(bundleName);
-        return Promise.all([
-            ...(desc.cssLibs || []).map((url) => assets.loadCSS(url, { targetDoc })),
-            ...(desc.jsLibs || []).map((url) => assets.loadJS(url, targetDoc)),
-        ]);
+        const promises = [];
+        if (css && desc.cssLibs) {
+            promises.push(...desc.cssLibs.map((url) => assets.loadCSS(url, { targetDoc })));
+        }
+        if (js && desc.jsLibs) {
+            promises.push(...desc.jsLibs.map((url) => assets.loadJS(url, targetDoc)));
+        }
+        return Promise.all(promises);
     } else {
         throw new Error(
             `loadBundle(bundleName:string) accepts only bundleName argument as a string ! Not ${JSON.stringify(
@@ -208,8 +223,11 @@ export const loadCSS = function (url, targetDoc = document) {
 export const getBundle = function (bundleName) {
     return assets.getBundle(bundleName);
 };
-export const loadBundle = function (bundleName, targetDoc = document) {
-    return assets.loadBundle(bundleName, targetDoc);
+export const loadBundle = function (
+    bundleName,
+    { targetDoc = document, css = true, js = true } = {}
+) {
+    return assets.loadBundle(bundleName, { targetDoc, css, js });
 };
 
 /**
