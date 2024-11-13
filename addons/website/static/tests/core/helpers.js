@@ -27,7 +27,7 @@ export async function startInteraction(I, html, options) {
     return startInteractions(html, options);
 }
 
-export async function startInteractions(html, options = {}) {
+export async function startInteractions(html, options = { waitForStart: true}) {
     const fixture = getFixture();
     if (!html.includes("wrapwrap")) {
         html = `<div id="wrapwrap">${html}</div>`;
@@ -43,7 +43,7 @@ export async function startInteractions(html, options = {}) {
     }
     const env = await makeMockEnv();
     const core = env.services.website_core;
-    if (!options.doNotWaitStart) {
+    if (options.waitForStart) {
         await core.isStarted;
     }
 
