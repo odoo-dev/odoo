@@ -66,7 +66,7 @@ class WebsiteCore {
 
     startInteractions() {
         const proms = [];
-        if (!this.active) {
+        if (!this.isActive) {
             for (const [name, I] of activeElementRegistry.getEntries()) {
                 if (this.el.matches(I.selector)) {
                     // console.log("starting", name);
@@ -78,7 +78,7 @@ class WebsiteCore {
                     }
                 }
             }
-            this.active = true;
+            this.isActive = true;
         }
         const prom = Promise.all(proms);
         this.proms.push(prom);
@@ -96,15 +96,17 @@ class WebsiteCore {
     }
 
     stopInteractions() {
-        for (let interaction of this.interactions) {
-            interaction.destroy();
+        if (this.isActive) {
+            for (let interaction of this.interactions) {
+                interaction.destroy();
+            }
+            this.interactions = [];
+            for (let root of this.roots) {
+                root.destroy();
+            }
+            this.roots = [];
+            this.isActive = false;
         }
-        this.interactions = [];
-        for (let root of this.roots) {
-            root.destroy();
-        }
-        this.roots = [];
-        this.isActive = false;
     }
 
     /**

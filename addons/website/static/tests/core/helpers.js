@@ -1,4 +1,4 @@
-import { getFixture } from "@odoo/hoot";
+import { getFixture, after } from "@odoo/hoot";
 import {
     clearRegistry,
     makeMockEnv,
@@ -6,7 +6,6 @@ import {
 } from "@web/../tests/web_test_helpers";
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 import { registry } from "@web/core/registry";
-import { isInViewPort } from "@odoo/hoot-dom";
 
 defineMailModels();
 
@@ -46,6 +45,7 @@ export async function startInteractions(html, options = { waitForStart: true}) {
     if (options.waitForStart) {
         await core.isStarted;
     }
+    after(() => core.stopInteractions());
 
     return {
         el: fixture,
