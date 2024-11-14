@@ -1165,6 +1165,7 @@
                                         <field name="product_uom_id" column_invisible="True"/>
                                         <field name="price_unit" string="Price"/>
                                         <field name="discount" width="50px" string="Disc.%" optional="hide"/>
+                                        <field name="tax_ids_json"/>
                                         <field name="tax_ids" widget="many2many_tax_tags"
                                                domain="[('type_tax_use', '=?', parent.invoice_filter_type_domain), ('company_id', 'parent_of', parent.company_id), ('country_id', '=', parent.tax_country_id)]"
                                                context="{'append_type_to_tax_name': not parent.invoice_filter_type_domain, 'active_test': True}"
@@ -1327,6 +1328,8 @@
                                                optional="hide"
                                                invisible="display_type in ('line_section', 'line_note')"
                                                column_invisible="context.get('view_no_maturity')"/>
+                                        <field name="tax_ids_json"/>
+                                        <field name="display_type"/>
                                         <field name="amount_currency"
                                                groups="base.group_multi_currency"
                                                optional="hide"/>

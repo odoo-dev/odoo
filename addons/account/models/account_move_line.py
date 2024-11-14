@@ -438,6 +438,9 @@ class AccountMoveLine(models.Model):
         'Forbidden balance or account on non-accountable line',
     )
 
+    # tax_ids_json = fields.Json(string="Tax Ids", store=True, compute="_compute_tax_ids_json", copy=False)
+    tax_ids_json = fields.Json(string="Tax Ids", store=True, copy=False)
+
     # change index on partner_id to a multi-column index on (partner_id, ref), the new index will behave in the
     # same way when we search on partner_id, with the addition of being optimal when having a query that will
     # search on partner_id and ref at the same time (which is the case when we open the bank reconciliation widget)
@@ -448,6 +451,19 @@ class AccountMoveLine(models.Model):
     _journal_id_neg_amnt_residual_idx = models.Index("(journal_id) WHERE amount_residual < 0 AND parent_state = 'posted'")
     # covers the standard index on account_id
     _account_id_date_idx = models.Index("(account_id, date)")
+
+    @api.depends('tax_ids')
+    def _compute_tax_ids_json(self):
+        for record in self:
+            tax_json = []
+            if record.display_type == 'tax':
+                tax_json.append({
+                    'base_amount': 0.0,
+                    'tax_amount': 0.0,
+                    'tax_id': False,
+                    'tax_repartition_line_id': False,
+                    'tag_ids': record.tax_tag_ids.ids,
+                })
 
     @api.model
     def get_views(self, views, options=None):

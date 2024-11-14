@@ -3056,6 +3056,7 @@ class AccountMove(models.Model):
             self.env['account.move.line'].browse(to_delete).with_context(dynamic_unlink=True).unlink()
         if to_create:
             self.env['account.move.line'].create(to_create)
+        self._compute_aml_tax_details()
 
     @contextmanager
     def _sync_non_deductible_base_lines(self, container):
@@ -3242,13 +3243,48 @@ class AccountMove(models.Model):
         if to_delete:
             self.env['account.move.line'].browse(to_delete).with_context(dynamic_unlink=True).unlink()
         if to_create:
-            self.env['account.move.line'].with_context(clean_context(self.env.context)).create([
+            self.env['account.move.line'].create([
                 {**key, **values, 'display_type': line_type}
                 for key, values in to_create.items()
             ])
         if to_write:
             for line, values in to_write.items():
                 line.write(values)
+
+    def _compute_aml_tax_details(self):
+        for move in self:
+            group_by_repartition_key = {}
+            for line in move.line_ids:
+                if line.tax_repartition_line_id:
+                    group_by_repartition_key.setdefault(line.tax_repartition_line_id.id, 0.00)
+                    group_by_repartition_key[line.tax_repartition_line_id.id] += line.balance
+            line_data = {}
+            for line in move.line_ids:
+                if line.tax_ids:
+                    line_data[line.id] = {}
+                    all_taxes = line.tax_ids.compute_all(line.price_unit, quantity=line.quantity)
+                    for tax in all_taxes.get('taxes'):
+                        tax_amount = tax['amount']
+                        if group_by_repartition_key[tax['tax_repartition_line_id']] - tax_amount < 0:
+                            tax_amount = group_by_repartition_key[tax['tax_repartition_line_id']]
+                        line_data[line.id][tax['tax_repartition_line_id']] = {
+                            'base_amount': tax['base'],
+                            'tax_amount': tax_amount,
+                            'tax_id': tax['id'],
+                            'base_tag_ids': list(map(str, tax['tag_ids'])),
+                            'tax_repartition_line_id': tax['tax_repartition_line_id'],
+                        }
+                        group_by_repartition_key[tax['tax_repartition_line_id']] -= tax_amount
+            if group_by_repartition_key:
+                for rp_line in group_by_repartition_key:
+                    if group_by_repartition_key[rp_line] != 0.0:
+                        for line_id, tax_vals in line_data.items():
+                            if rp_line in tax_vals.keys():
+                                line_data[line_id][rp_line]['tax_amount'] += group_by_repartition_key[rp_line]
+                                group_by_repartition_key[rp_line] = 0.0
+            for line in move.line_ids:
+                if line_data.get(line.id):
+                    line.tax_ids_json = line_data.get(line.id)
 
     @contextmanager
     def _sync_invoice(self, container):

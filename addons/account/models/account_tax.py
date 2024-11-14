@@ -12,6 +12,7 @@ from collections import defaultdict
 from markupsafe import Markup
 
 import ast
+import json
 import copy
 import math
 import re
@@ -2399,6 +2400,7 @@ class AccountTax(models.Model):
 
         base_lines_to_update = []
         for base_line in base_lines:
+
             sign = base_line['sign']
             tax_tag_invert = base_line['tax_tag_invert']
             tax_details = base_line['tax_details']
@@ -2429,6 +2431,13 @@ class AccountTax(models.Model):
                 or not company.currency_id.is_zero(v['balance'])
             )
         }
+
+        for k, v in tax_lines_mapping.items():
+            tax_ids_json = {k['tax_repartition_line_id']: {
+                'base_amount': v['tax_base_amount'],
+                'tax_tag_ids': k['tax_tag_ids'][0][2],
+            }}
+            tax_lines_mapping[k]['tax_ids_json'] = tax_ids_json
 
         # Compute 'tax_lines_to_update' / 'tax_lines_to_delete' / 'tax_lines_to_add'.
         tax_lines_to_update = []
