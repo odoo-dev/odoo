@@ -1006,7 +1006,7 @@ class ChromeBrowser:
             return
 
         switches = {
-            '--headless': '',
+            '--headless': 'new',
             '--no-default-browser-check': '',
             '--no-first-run': '',
             '--disable-extensions': '',
