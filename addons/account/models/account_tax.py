@@ -2345,9 +2345,13 @@ class AccountTax(models.Model):
 
         base_lines_to_update = []
         for base_line in base_lines:
+
             sign = base_line['sign']
             tax_tag_invert = base_line['tax_tag_invert']
             tax_details = base_line['tax_details']
+            # print("\n Hello \n")
+            # print(base_line)
+            # print("\n")
             base_lines_to_update.append((
                 base_line,
                 {
@@ -2376,6 +2380,10 @@ class AccountTax(models.Model):
             )
         }
 
+        print("tax_lines_mapping ==================")
+        print(tax_lines_mapping)
+        print("\n\n\n")
+
         # Compute 'tax_lines_to_update' / 'tax_lines_to_delete' / 'tax_lines_to_add'.
         tax_lines_to_update = []
         tax_lines_to_delete = []
@@ -2387,6 +2395,16 @@ class AccountTax(models.Model):
             else:
                 tax_lines_to_delete.append(tax_line)
         tax_lines_to_add = [{**grouping_key, **values} for grouping_key, values in tax_lines_mapping.items()]
+
+        print("\n\ntax_lines_to_add\n")
+        print(tax_lines_to_add)
+        print("\n\ntax_lines_to_delete\n")
+        print(tax_lines_to_delete)
+        print("\n\ntax_lines_to_update\n")
+        print(tax_lines_to_update)
+        print("\n\nbase_lines_to_update\n")
+        print(base_lines_to_update)
+        print("\n\n\n")
 
         return {
             'tax_lines_to_add': tax_lines_to_add,
