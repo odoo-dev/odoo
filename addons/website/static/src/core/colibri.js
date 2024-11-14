@@ -92,9 +92,11 @@ export class Colibri {
         for (let cleanup of this.cleanups.reverse()) {
             cleanup();
         }
+        this.cleanups = [];
         for (let [el, ev, fn, options] of this.handlers) {
             el.removeEventListener(ev, fn, options);
         }
+        this.handlers = [];
         this.classMap.clear();
         this.interaction.destroy();
         this.interaction.isDestroyed = true;
