@@ -189,7 +189,7 @@ export class DynamicSnippet extends Interaction {
         // dataset attributes). Note: done here and not in dynamic carousel
         // extension, because: why not?
         // (TODO review + See interaction with "slider" public widget).
-        setTimeout(() => {
+        this.waitForTimeout(() => {
             templateAreaEl.querySelectorAll('.carousel').forEach(carouselEl => {
                 if (carouselEl.dataset.bsInterval === "0") {
                     delete carouselEl.dataset.bsRide;
