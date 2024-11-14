@@ -233,7 +233,9 @@ export class ColibriApp {
     flush() {
         for (let colibri of this.queue) {
             if (!colibri.interaction.isDestroyed) {
-                colibri.update();
+                // if update fn is not set => interaction is not yet started
+                // this is not a problem
+                colibri.update?.();
             }
         }
         this.queue.clear();
