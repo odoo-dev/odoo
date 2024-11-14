@@ -59,7 +59,7 @@ export class AnchorSlide extends Interaction {
             // own smooth scrolling.
             ev.preventDefault();
             Offcanvas.getInstance(offcanvasEl).hide();
-            offcanvasEl.addEventListener("hidden.bs.offcanvas",
+            this.addDomListener(offcanvasEl, "hidden.bs.offcanvas",
                 () => {
                     this.manageScroll(hash, anchorEl, scrollValue);
                 },

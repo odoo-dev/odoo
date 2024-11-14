@@ -71,10 +71,9 @@ export class TableOfContent extends Interaction {
         this.updateTableOfContentNavbarPositionBound = this.updateTableOfContentNavbarPosition.bind(this);
         // TODO Restore integration with menu.
         // extraMenuUpdateCallbacks.push(this.updateTableOfContentNavbarPositionBound);
-        this.scrollTarget.addEventListener("scroll", this.scrollBound);
+        this.addDomListener(this.scrollTarget, "scroll", this.scrollBound);
     }
     destroy() {
-        this.scrollTarget?.removeEventListener("scroll", this.scrollBound);
         // TODO Restore integration with menu.
         /*
         const indexCallback = extraMenuUpdateCallbacks.indexOf(this.updateTableOfContentNavbarPositionBound);
