@@ -29,3 +29,23 @@ test("wait for translation before starting interactions", async () => {
     await animationFrame();
     expect(started).toBe(true);
 });
+
+
+test("starting interactions twice should only actually do it once", async () => {
+    let n = 0;
+    class Test extends Interaction {
+        static selector = ".test";
+
+        setup() {
+            n++;
+        }
+    }
+
+    const { core } = await startInteraction(Test, `<div class="test"></div>`);
+
+    expect(n).toBe(1);
+    core.startInteractions();
+    await animationFrame();
+    expect(n).toBe(1);
+});
+

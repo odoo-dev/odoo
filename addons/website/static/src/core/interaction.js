@@ -38,6 +38,15 @@ export class Interaction {
         });
     }
 
+    waitForTimeout(fn, delay) {
+        setTimeout(() => {
+            if (!this.isDestroyed) {
+                fn();
+                this.updateDOM();
+            }
+        }, delay)
+    }
+
     updateDOM() {
         this.__colibri__.scheduleUpdate();
     }
