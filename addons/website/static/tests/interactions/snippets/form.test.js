@@ -1,6 +1,6 @@
 import { expect, test } from "@odoo/hoot";
 import { click, fill } from "@odoo/hoot-dom";
-import { advanceTime } from "@odoo/hoot-mock";
+import { advanceTime, Deferred } from "@odoo/hoot-mock";
 import {
     onRpc,
 } from "@web/../tests/web_test_helpers";
@@ -165,10 +165,14 @@ test("form checks conditions", async () => {
     checkError(false, false, false, true);
     // Submit => no error & RPC.
     let didRpc = false;
+    const rpcDone = new Deferred();
     onRpc("/website/form/mail.mail", async (args) => {
         didRpc = true;
+        rpcDone.resolve();
+        return {};
     });
     await click(submitEl);
+    await rpcDone;
     checkVisibility(true, true, true, true);
     checkError(false, false, false, false);
     expect(didRpc).toBe(true);
