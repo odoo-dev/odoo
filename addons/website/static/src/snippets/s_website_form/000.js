@@ -361,7 +361,7 @@ export class Form extends Interaction {
         }
 
         if (this._recaptchaLoaded) {
-            const tokenObj = await this._recaptcha.getToken('website_form');
+            const tokenObj = await this.waitFor(() => this._recaptcha.getToken("website_form"));
             if (tokenObj.token) {
                 formValues['recaptcha_token_response'] = tokenObj.token;
             } else if (tokenObj.error) {
@@ -438,10 +438,10 @@ export class Form extends Interaction {
                                     // popup.
                                     window.location.href = successPage;
                                 } else {
-                                    await scrollTo(successAnchorEl, {
+                                    await this.waitFor(() => scrollTo(successAnchorEl, {
                                         duration: 500,
                                         extraOffset: 0,
-                                    });
+                                    }));
                                 }
                             }
                             break;
@@ -463,7 +463,7 @@ export class Form extends Interaction {
                         // Prevent double-clicking on the send button and
                         // add a upload loading effect (delay before success
                         // message)
-                        await delay(DEBOUNCE);
+                        await this.waitFor(() => delay(DEBOUNCE));
 
                         this.updateStatus('success');
                         break;
