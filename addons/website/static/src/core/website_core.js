@@ -114,7 +114,7 @@ class WebsiteCore {
      * interactions are started. Note that it does not take into account possible
      * future interactions.
      */
-    get isStarted() {
+    get isReady() {
         const proms = this.proms.slice();
         return Promise.all(proms);
     }

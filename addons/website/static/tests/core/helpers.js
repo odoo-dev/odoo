@@ -43,7 +43,7 @@ export async function startInteractions(html, options = { waitForStart: true}) {
     const env = await makeMockEnv();
     const core = env.services.website_core;
     if (options.waitForStart) {
-        await core.isStarted;
+        await core.isReady;
     }
     after(() => core.stopInteractions());
 

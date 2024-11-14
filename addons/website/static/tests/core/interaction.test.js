@@ -373,6 +373,43 @@ describe("lifecycle", () => {
         expect.verifySteps([]);
     });
 
+    test("willstart delayed => update => willstart complete", async () => {
+        const def = new Deferred();
+        let interaction;
+
+        class Test extends Interaction {
+            static selector = ".test";
+            setup() {
+                interaction = this;
+            }
+            async willStart() {
+                expect.step("willStart");
+                return def;
+            }
+            start() {
+                expect.step("start");
+            }
+        }
+
+        const { core } = await startInteraction(
+            Test,
+            `
+            <div class="test">
+                <span>coucou</span>
+            </div>`, {
+                waitForStart: false
+            }
+        );
+        expect.verifySteps(["willStart"]);
+        // trigger an update
+        interaction.updateDOM();
+
+        await animationFrame();
+        expect.verifySteps([]);
+        def.resolve();
+        await animationFrame();
+        expect.verifySteps(["start"]);
+    });
 });
 
 describe("miscellaneous", () => {
