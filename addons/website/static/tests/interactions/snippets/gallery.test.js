@@ -2,7 +2,10 @@ import { expect, test } from "@odoo/hoot";
 import { animationFrame, click, press } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
-import { startInteractions, setupInteractionWhiteList } from "../../core/helpers";
+import {
+    startInteractions,
+    setupInteractionWhiteList,
+} from "../../core/helpers";
 
 setupInteractionWhiteList("website.gallery");
 
@@ -39,7 +42,7 @@ test("gallery does nothing if there is no non-slideshow s_image_gallery", async 
     expect(core.interactions.length).toBe(0);
 });
 
-async function checkLightbox({next, previous, close}) {
+async function checkLightbox({ next, previous, close }) {
     const { core, el } = await startInteractions(defaultGallery);
     expect(core.interactions.length).toBe(1);
     const imgEls = el.querySelectorAll("img");
@@ -54,7 +57,9 @@ async function checkLightbox({next, previous, close}) {
         await advanceTime(1000);
         let lightboxActiveImgEl = lightboxEl.querySelector(".active img");
         expect(lightboxActiveImgEl).not.toBe(null);
-        expect(imgEls[expectedIndex].src).toMatch(lightboxActiveImgEl.dataset.src);
+        expect(imgEls[expectedIndex].src).toMatch(
+            lightboxActiveImgEl.dataset.src,
+        );
     }
 
     await checkActiveImage(3);

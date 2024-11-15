@@ -4,18 +4,18 @@ import { scrollTo } from "@web_editor/js/common/scrolling";
 
 export class AnchorSlide extends Interaction {
     static selector = "a[href^='/'][href*='#'], a[href^='#']";
-    static dynamicContent = {
-        "_root": {
-            "t-on-click": "animateClick",
+    dynamicContent = {
+        _root: {
+            "t-on-click": this.animateClick,
         },
     };
-    
+
     /**
      * @param {DOMElement} el the element to scroll to.
      * @param {string} [scrollValue='true'] scroll value
      * @returns {Promise}
      */
-    scrollTo(el, scrollValue="true") {
+    scrollTo(el, scrollValue = "true") {
         return scrollTo(el, {
             duration: scrollValue === "true" ? 500 : 0,
             extraOffset: this.computeExtraOffset(),
@@ -30,8 +30,11 @@ export class AnchorSlide extends Interaction {
     /**
      */
     animateClick(ev) {
-        const ensureSlash = path => path.endsWith("/") ? path : path + "/";
-        if (ensureSlash(this.el.pathname) !== ensureSlash(window.location.pathname)) {
+        const ensureSlash = (path) => (path.endsWith("/") ? path : path + "/");
+        if (
+            ensureSlash(this.el.pathname) !==
+            ensureSlash(window.location.pathname)
+        ) {
             return;
         }
         // Avoid flicker at destination in case of ending "/" difference.
@@ -49,7 +52,7 @@ export class AnchorSlide extends Interaction {
         if (!anchorEl || !scrollValue) {
             return;
         }
-    
+
         const offcanvasEl = this.el.closest(".offcanvas.o_navbar_mobile");
         if (offcanvasEl && offcanvasEl.classList.contains("show")) {
             // Special case for anchors in offcanvas in mobile: we can't just
@@ -59,12 +62,14 @@ export class AnchorSlide extends Interaction {
             // own smooth scrolling.
             ev.preventDefault();
             Offcanvas.getInstance(offcanvasEl).hide();
-            this.addDomListener(offcanvasEl, "hidden.bs.offcanvas",
+            this.addDomListener(
+                offcanvasEl,
+                "hidden.bs.offcanvas",
                 () => {
                     this.manageScroll(hash, anchorEl, scrollValue);
                 },
                 // the listener must be automatically removed when invoked
-                { once: true }
+                { once: true },
             );
         } else {
             ev.preventDefault();
@@ -95,4 +100,6 @@ export class AnchorSlide extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website.anchor_slide", AnchorSlide);
+registry
+    .category("website.active_elements")
+    .add("website.anchor_slide", AnchorSlide);

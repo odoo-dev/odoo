@@ -11,6 +11,7 @@ export class Colibri {
         this.app = app;
         this.update = null;
         this.dynamicAttrs = [];
+        this.tOuts = [];
         this.handlers = [];
         this.cleanups = [];
         this.classMap = new Map();
@@ -18,17 +19,19 @@ export class Colibri {
         const interaction = new I(el, env, this);
         this.interaction = interaction;
         interaction.setup();
-        this.startProm = (interaction.willStart() || Promise.resolve()).then(() => {
-            if (interaction.isDestroyed) {
-                return;
-            }
-            const content = interaction.dynamicContent;
-            if (content) {
-                this.processContent(content);
-                this.update();
-            }
-            interaction.start();
-        });
+        this.startProm = (interaction.willStart() || Promise.resolve()).then(
+            () => {
+                if (interaction.isDestroyed) {
+                    return;
+                }
+                const content = interaction.dynamicContent;
+                if (content) {
+                    this.processContent(content);
+                    this.update();
+                }
+                interaction.start();
+            },
+        );
     }
 
     scheduleUpdate() {
@@ -36,13 +39,13 @@ export class Colibri {
     }
 
     addDomListener(nodes, event, fn, options) {
-        const handler = ev => {
+        const handler = (ev) => {
             fn.call(this.interaction, ev);
             this.scheduleUpdate();
-        }
+        };
         for (let node of nodes) {
             node.addEventListener(event, handler, options);
-            this.handlers.push([node, event, handler, options])
+            this.handlers.push([node, event, handler, options]);
         }
     }
 
@@ -93,10 +96,9 @@ export class Colibri {
             _body: document.body,
             _window: window,
             _document: document,
-        }
-        
-        
-        const getNodes = sel => {
+        };
+
+        const getNodes = (sel) => {
             if (sel in SPECIALS) {
                 return [SPECIALS[sel]];
             }
@@ -104,34 +106,40 @@ export class Colibri {
                 nodes[sel] = el.querySelectorAll(sel);
             }
             return nodes[sel];
-        }
+        };
 
         for (let [sel, directive, value] of generateEntries(content)) {
+            const nodes = getNodes(sel);
             if (directive.startsWith("t-on-")) {
                 const ev = directive.slice(5);
-                this.addDomListener(getNodes(sel), ev, value);
-            } else if (directive.startsWith('t-att-')) {
-                const nodes = getNodes(sel);
+                this.addDomListener(nodes, ev, value);
+            } else if (directive.startsWith("t-att-")) {
                 const attr = directive.slice(6);
                 this.dynamicAttrs.push([nodes, attr, value]);
+            } else if (directive === "t-out") {
+                this.tOuts.push([nodes, value]);
             } else {
-                const suffix = directive.startsWith("t-") ? "" : " (should start with t-)"
+                const suffix = directive.startsWith("t-")
+                    ? ""
+                    : " (should start with t-)";
                 throw new Error(`Invalid directive: '${directive}'${suffix}`);
             }
         }
 
         this.update = () => {
+            const interaction = this.interaction;
             for (let [nodes, attr, fn] of this.dynamicAttrs) {
                 for (let node of nodes) {
-                    const value = fn.call(this, node);
+                    const value = fn.call(interaction, node);
                     this.applyAttr(node, attr, value);
                 }
             }
-        }
-        // const fn = this.app.compile(content);
-        // const update = fn(this, this.interaction);
-        // this.update = update.bind(this.interaction);
-        // update.call(this.interaction);
+            for (let [nodes, fn] of this.tOuts) {
+                for (let node of nodes) {
+                    this.applyTOut(node, fn.call(interaction, node));
+                }
+            }
+        };
     }
 
     destroy() {
@@ -150,7 +158,6 @@ export class Colibri {
 }
 
 export class ColibriApp {
-    // compiledFns = new Map();
     frame = null;
     queue = new Set(); // interactions to update next frame
 
@@ -162,103 +169,6 @@ export class ColibriApp {
         const colibri = new Colibri(this, I, el, this.env);
         return colibri;
     }
-
-
-    // compile(content) {
-    //     let fn;
-    //     if (!this.compiledFns.has(content)) {
-    //         fn = this._compile(content);
-    //         this.compiledFns.set(content, fn);
-    //     } else {
-    //         fn = this.compiledFns.get(content);
-    //     }
-    //     return fn;
-    // }
-
-    // _compile(content) {
-    //     let nextId = 1;
-    //     let selectors = {}; // sel => variable name
-    //     let attrs = [],
-    //         handlers = [],
-    //         tOuts = [];
-    //     // preprocess content
-    //     for (let [sel, directive, value] of generateEntries(content)) {
-    //         if (!(sel in selectors)) {
-    //             if (!(sel in GLOBALS)) {
-    //                 selectors[sel] = `nodes_${nextId++}`;
-    //             }
-    //         }
-    //         if (directive.startsWith("t-att-")) {
-    //             attrs.push([sel, directive.slice(6), value]);
-    //         } else if (directive.startsWith("t-on-")) {
-    //             handlers.push([sel, directive.slice(5), value]);
-    //         } else if (directive === "t-out") {
-    //             tOuts.push([sel, value]);
-    //         } else {
-    //             const suffix = directive.startsWith("t-") ? "" : " (should start with t-)"
-    //             throw new Error(`Invalid directive: '${directive}'${suffix}`);
-    //         }
-    //     }
-    //     // generate function code
-    //     let fnStr = "    const root = interaction.el;\n";
-    //     let indent = 1;
-    //     const addLine = (txt) =>
-    //         (fnStr += new Array(indent + 2).join("  ") + txt);
-    //     const applyToSelector = (sel, fn) => {
-    //         if (sel in GLOBALS) {
-    //             const target = GLOBALS[sel];
-    //             addLine(`${fn(target)};\n`);
-    //         } else {
-    //             addLine(`for (let node of ${selectors[sel]}) {\n`);
-    //             addLine(`  ${fn("node")}\n`);
-    //             addLine("}\n");
-    //         }
-    //     };
-    //     // nodes
-    //     for (let sel in selectors) {
-    //         addLine(
-    //             `const ${selectors[sel]} = root.querySelectorAll(\`${sel}\`);\n`,
-    //         );
-    //     }
-
-    //     // start function
-    //     fnStr += "\n";
-    //     for (let [sel, event, expr] of handlers) {
-    //         const nodes = sel in GLOBALS ? `[${GLOBALS[sel]}]` : selectors[sel];
-    //         addLine(`framework.addDomListener(${nodes}, \`${event}\`, interaction[\`${expr}\`]);`)
-    //     }
-
-    //     // update function
-    //     fnStr += "\n";
-    //     addLine("function update() {\n");
-    //     indent++;
-    //     for (let [sel, attr, expr] of attrs) {
-    //         const varName = `value_${nextId++}`;
-    //         addLine(`const ${varName} = ${expr};\n`);
-    //         applyToSelector(
-    //             sel,
-    //             (el) => `framework.applyAttr(${el}, \`${attr}\`, ${varName});`,
-    //         );
-    //     }
-    //     for (let [sel, expr] of tOuts) {
-    //         const varName = `value_${nextId++}`;
-    //         addLine(`const ${varName} = ${expr};\n`);
-    //         applyToSelector(
-    //             sel,
-    //             (el) => `framework.applyTOut(${el}, ${varName});`,
-    //         );
-    //     }
-    //     indent--;
-    //     addLine("}\n");
-
-    //     addLine("return update;");
-    //     // console.log(fnStr);
-    //     const fn = new Function("framework", "interaction", fnStr);
-    //     // console.log(fn.toString());
-    //     return fn;
-    // }
-
-
 
     schedule(colibri) {
         this.queue.add(colibri);

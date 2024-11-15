@@ -10,16 +10,23 @@ import { Interaction } from "@website/core/interaction";
 
 class ShowPassword extends Interaction {
     static selector = "#showPass";
-    static dynamicContent = {
-        "_root:t-on-pointerdown": "showText",
+    dynamicContent = {
+        "_root:t-on-pointerdown": this.showText,
     };
 
     showText() {
-        const passwordEl = this.el.closest(".input-group").querySelector("#password");
+        const passwordEl = this.el
+            .closest(".input-group")
+            .querySelector("#password");
         passWordEl.setAttribute("type", "text");
-        this.addDomListener(document.body, "pointerup", () => {
-            passwordEl.setAttribute("type", "password");
-        }, {once: true});
+        this.addDomListener(
+            document.body,
+            "pointerup",
+            () => {
+                passwordEl.setAttribute("type", "password");
+            },
+            { once: true },
+        );
     }
 }
 

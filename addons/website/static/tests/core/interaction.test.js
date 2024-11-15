@@ -5,7 +5,6 @@ import { Interaction } from "@website/core/interaction";
 import { animationFrame, click, dblclick } from "@odoo/hoot-dom";
 import { Deferred } from "@odoo/hoot-mock";
 
-
 describe("event handling", () => {
     test("can add a listener on a single element", async () => {
         let clicked = false;
@@ -35,7 +34,7 @@ describe("event handling", () => {
         let clicked = false;
         class Test extends Interaction {
             static selector = ".test";
-            
+
             dynamicContent = {
                 "_root:t-on-click": this.doSomething,
             };
@@ -135,7 +134,7 @@ describe("event handling", () => {
         let clicked = 0;
         class Test extends Interaction {
             static selector = ".test";
-            
+
             dynamicContent = {
                 "span:t-on-click": this.doSomething,
             };
@@ -242,7 +241,6 @@ describe("event handling", () => {
     });
 
     test("listener is added between willstart and start", async () => {
-
         class Test extends Interaction {
             static selector = ".test";
             dynamicContent = {
@@ -308,6 +306,23 @@ describe("event handling", () => {
     });
 });
 
+describe("t-out", () => {
+    test("can do a simple t-out", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicContent = {
+                "span:t-out": () => "colibri",
+            };
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<div class="test"><span>coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(`<span>colibri</span>`);
+    });
+});
+
 describe("lifecycle", () => {
     test("lifecycle methods are called in order", async () => {
         class Test extends Interaction {
@@ -339,7 +354,6 @@ describe("lifecycle", () => {
         expect.verifySteps(["destroy"]);
     });
 
-
     test("willstart delayed, then destroy => start should not be called", async () => {
         const def = new Deferred();
 
@@ -357,7 +371,7 @@ describe("lifecycle", () => {
             }
             destroy() {
                 expect.step("destroy");
-            }        
+            }
         }
 
         const { core } = await startInteraction(
@@ -365,9 +379,10 @@ describe("lifecycle", () => {
             `
             <div class="test">
                 <span>coucou</span>
-            </div>`, {
-                waitForStart: false
-            }
+            </div>`,
+            {
+                waitForStart: false,
+            },
         );
         expect.verifySteps(["setup", "willStart"]);
         // destroy the interaction
@@ -401,9 +416,10 @@ describe("lifecycle", () => {
             `
             <div class="test">
                 <span>coucou</span>
-            </div>`, {
-                waitForStart: false
-            }
+            </div>`,
+            {
+                waitForStart: false,
+            },
         );
         expect.verifySteps(["willStart"]);
         // trigger an update
@@ -440,19 +456,21 @@ describe("miscellaneous", () => {
     });
 
     test("can register a cleanup", async () => {
-
         class Test extends Interaction {
             static selector = ".test";
             setup() {
                 this.registerCleanup(() => {
-                    expect.step("cleanup")
+                    expect.step("cleanup");
                 });
             }
             destroy() {
                 expect.step("destroy");
             }
         }
-        const { core } = await startInteraction(Test, `<div class="test"></div>`);
+        const { core } = await startInteraction(
+            Test,
+            `<div class="test"></div>`,
+        );
 
         expect.verifySteps([]);
         core.stopInteractions();
@@ -460,25 +478,26 @@ describe("miscellaneous", () => {
     });
 
     test("cleanups are executed in reverse order", async () => {
-
         class Test extends Interaction {
             static selector = ".test";
             setup() {
                 this.registerCleanup(() => {
-                    expect.step("cleanup1")
+                    expect.step("cleanup1");
                 });
                 this.registerCleanup(() => {
-                    expect.step("cleanup2")
+                    expect.step("cleanup2");
                 });
             }
         }
-        const { core } = await startInteraction(Test, `<div class="test"></div>`);
+        const { core } = await startInteraction(
+            Test,
+            `<div class="test"></div>`,
+        );
 
         expect.verifySteps([]);
         core.stopInteractions();
         expect.verifySteps(["cleanup2", "cleanup1"]);
     });
-
 });
 
 describe("dynamic attributes", () => {
@@ -486,7 +505,7 @@ describe("dynamic attributes", () => {
         class Test extends Interaction {
             static selector = ".test";
             dynamicContent = {
-                "_root:t-att-a": () => 'b',
+                "_root:t-att-a": () => "b",
             };
         }
 
@@ -494,14 +513,16 @@ describe("dynamic attributes", () => {
             Test,
             `<div class="test"><span>coucou</span></div>`,
         );
-        expect(el.querySelector(".test").outerHTML).toBe(`<div class="test" a="b"><span>coucou</span></div>`);
+        expect(el.querySelector(".test").outerHTML).toBe(
+            `<div class="test" a="b"><span>coucou</span></div>`,
+        );
     });
 
     test("t-att-class does not override existing classes", async () => {
         class Test extends Interaction {
             static selector = "span";
             dynamicContent = {
-                "_root:t-att-class": () => 'b',
+                "_root:t-att-class": () => "b",
             };
         }
 
@@ -509,14 +530,16 @@ describe("dynamic attributes", () => {
             Test,
             `<div><span class="a">coucou</span></div>`,
         );
-        expect(el.querySelector("span").outerHTML).toBe(`<span class="a b">coucou</span>`);
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span class="a b">coucou</span>`,
+        );
     });
 
     test("t-att-class can add multiple classes", async () => {
         class Test extends Interaction {
             static selector = "span";
             dynamicContent = {
-                "_root:t-att-class": () => 'b c',
+                "_root:t-att-class": () => "b c",
             };
         }
 
@@ -524,14 +547,16 @@ describe("dynamic attributes", () => {
             Test,
             `<div><span class="a">coucou</span></div>`,
         );
-        expect(el.querySelector("span").outerHTML).toBe(`<span class="a b c">coucou</span>`);
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span class="a b c">coucou</span>`,
+        );
     });
 
     test("t-att-class can add and remove a class", async () => {
         class Test extends Interaction {
             static selector = "span";
             dynamicContent = {
-                "_root:t-att-class": () => this.flag ? 'a' : 'b',
+                "_root:t-att-class": () => (this.flag ? "a" : "b"),
                 "_root:t-on-click": this.toggle,
             };
             setup() {
@@ -546,11 +571,13 @@ describe("dynamic attributes", () => {
             Test,
             `<div><span class="bla">coucou</span></div>`,
         );
-        expect(el.querySelector("span").outerHTML).toBe(`<span class="bla a">coucou</span>`);
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span class="bla a">coucou</span>`,
+        );
         await click(el.querySelector("span"));
         await animationFrame();
-        expect(el.querySelector("span").outerHTML).toBe(`<span class="bla b">coucou</span>`);
-
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span class="bla b">coucou</span>`,
+        );
     });
-
 });

@@ -12,9 +12,9 @@ const DEFAULT_NUMBER_OF_ELEMENTS_SM = 1;
 
 export class DynamicSnippet extends Interaction {
     static selector = ".s_dynamic_snippet";
-    static dynamicContent = {
+    dynamicContent = {
         "[data-url]": {
-            "t-on-click": "callToAction", // TODO Disable in edit mode.
+            "t-on-click": this.callToAction, // TODO Disable in edit mode.
         },
     };
     // TODO Support edit-mode enabled.

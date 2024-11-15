@@ -4,8 +4,8 @@ import { Interaction } from "@website/core/interaction";
 
 class PostLink extends Interaction {
     static selector = ".post_link";
-    static dynamicContent = {
-        "_root:t-on-click": "onClickPost",
+    dynamicContent = {
+        "_root:t-on-click": this.onClickPost,
     };
 
     setup() {

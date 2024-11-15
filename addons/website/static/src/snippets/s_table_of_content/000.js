@@ -49,7 +49,7 @@ const prev = (element, selector) => {
 
 export class TableOfContent extends Interaction {
     static selector="section .s_table_of_content_navbar_sticky";
-    static dynamicContent = {
+    dynamicContent = {
     };
     // TODO Support edit-mode enabled.
     static disabledInEditableMode = false;

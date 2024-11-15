@@ -1,9 +1,7 @@
 import { expect, test } from "@odoo/hoot";
 import { startInteractions, setupInteractionWhiteList } from "../core/helpers";
 import { onceAllImagesLoaded } from "@website/interactions/utils";
-import {
-    patchWithCleanup,
-} from "@web/../tests/web_test_helpers";
+import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { ImagesLazyLoading } from "@website/interactions/images_lazy_loading";
 
 setupInteractionWhiteList("website.images_lazy_loading");
@@ -33,23 +31,28 @@ test("images lazy loading removes height then restores it", async () => {
     `);
     expect(core.interactions.length).toBe(1);
     await onceAllImagesLoaded(el);
-    expect.verifySteps([{
-        when: "before load",
-        backup: undefined,
-        style: "100px",
-    }, {
-        when: "after load",
-        backup: "100px",
-        style: "1px",
-    }, {
-        when: "before reset",
-        backup: "100px",
-        style: "1px",
-    }, {
-        when: "after reset",
-        backup: undefined,
-        style: "100px",
-    }]);
+    expect.verifySteps([
+        {
+            when: "before load",
+            backup: undefined,
+            style: "100px",
+        },
+        {
+            when: "after load",
+            backup: "100px",
+            style: "1px",
+        },
+        {
+            when: "before reset",
+            backup: "100px",
+            style: "1px",
+        },
+        {
+            when: "after reset",
+            backup: undefined,
+            style: "100px",
+        },
+    ]);
     // Check final state.
     const imgEl = el.querySelector("img");
     expect(imgEl.dataset.lazyLoadingInitialMinHeight).toBe(undefined);

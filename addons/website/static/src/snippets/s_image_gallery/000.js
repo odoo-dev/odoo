@@ -6,9 +6,9 @@ import { renderToElement } from "@web/core/utils/render";
 
 export class GalleryWidget extends Interaction {
     static selector = ".s_image_gallery:not(.o_slideshow)";
-    static dynamicContent = {
+    dynamicContent = {
         "img": {
-            "t-on-click": "clickImg",
+            "t-on-click": this.clickImg,
         },
     };
 

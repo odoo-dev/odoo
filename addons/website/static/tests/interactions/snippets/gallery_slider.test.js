@@ -2,7 +2,10 @@ import { expect, test } from "@odoo/hoot";
 import { animationFrame, click } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
-import { startInteractions, setupInteractionWhiteList } from "../../core/helpers";
+import {
+    startInteractions,
+    setupInteractionWhiteList,
+} from "../../core/helpers";
 import { onceAllImagesLoaded } from "@website/interactions/utils";
 
 setupInteractionWhiteList("website.gallery_slider");

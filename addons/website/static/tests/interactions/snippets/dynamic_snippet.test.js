@@ -1,12 +1,13 @@
 import { expect, test } from "@odoo/hoot";
 import { animationFrame, click, scroll } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
-import {
-    onRpc,
-} from "@web/../tests/web_test_helpers";
+import { onRpc } from "@web/../tests/web_test_helpers";
 import { registry } from "@web/core/registry";
 import { Interaction } from "@website/core/interaction";
-import { startInteractions, setupInteractionWhiteList } from "../../core/helpers";
+import {
+    startInteractions,
+    setupInteractionWhiteList,
+} from "../../core/helpers";
 
 class TestItem extends Interaction {
     static selector = ".s_test_item";
@@ -24,19 +25,24 @@ test("dynamic snippet loads items and displays them through template", async () 
         for await (const chunk of args.body) {
             const json = JSON.parse(new TextDecoder().decode(chunk));
             expect(json.params.filter_id).toBe(1);
-            expect(json.params.template_key).toBe("website.dynamic_filter_template_test_item");
+            expect(json.params.template_key).toBe(
+                "website.dynamic_filter_template_test_item",
+            );
             expect(json.params.limit).toBe(16);
             expect(json.params.search_domain).toEqual([]);
         }
-        return [`
+        return [
+            `
             <div class="s_test_item" data-test-param="test">
                 Some test record
             </div>
-        `, `
+        `,
+            `
             <div class="s_test_item" data-test-param="test2">
                 Another test record
             </div>
-        `];
+        `,
+        ];
     });
     const { core, el } = await startInteractions(`
       <div id="wrapwrap">

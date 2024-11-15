@@ -1,7 +1,11 @@
 import { expect, test } from "@odoo/hoot";
 import { animationFrame, click, scroll } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
-import { isElementVerticallyInViewportOf, startInteractions, setupInteractionWhiteList } from "../../core/helpers";
+import {
+    isElementVerticallyInViewportOf,
+    startInteractions,
+    setupInteractionWhiteList,
+} from "../../core/helpers";
 
 setupInteractionWhiteList("website.table_of_content");
 

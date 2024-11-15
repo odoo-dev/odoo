@@ -13,14 +13,14 @@ import { useService } from "@web/core/utils/hooks";
 // -----------------------------------------------------------------------------
 class TogglableBackgroundSection extends Interaction {
     static selector = "section";
-    static dynamicContent = {
-        "_root": {
-            "t-att-style": "'background-color:' + this.bgColor",
-            "t-att-data-bg-color": "this.bgColor",
+    dynamicContent = {
+        _root: {
+            "t-att-style": () => "background-color:" + this.bgColor,
+            "t-att-data-bg-color": () => this.bgColor,
         },
         h2: {
-            "t-on-click": "toggleBackground",
-            "t-out": "this.bgColor",
+            "t-on-click": this.toggleBackground,
+            "t-out": () => this.bgColor,
         },
     };
 
@@ -45,8 +45,8 @@ registry
 // -----------------------------------------------------------------------------
 class FunNotificationThing extends Interaction {
     static selector = "#wrapwrap";
-    static dynamicContent = {
-        "b,strong:t-on-click": "onClick",
+    dynamicContent = {
+        "b,strong:t-on-click": this.onClick,
     };
 
     onClick(ev) {
