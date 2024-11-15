@@ -19,7 +19,7 @@ registry.category("website.active_elements").add("website.test_dynamic_carousel_
 
 setupInteractionWhiteList("website.dynamic_snippet_carousel", "website.test_dynamic_carousel_item");
 
-test("dynamic snippet carousel loads items and displays them through template", async () => {
+test.tags("desktop")("dynamic snippet carousel loads items and displays them through template", async () => {
     onRpc("/website/snippet/filters", async (args) => {
         for await (const chunk of args.body) {
             const json = JSON.parse(new TextDecoder().decode(chunk));
