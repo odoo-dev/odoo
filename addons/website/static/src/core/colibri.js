@@ -14,7 +14,6 @@ export class Colibri {
         this.tOuts = [];
         this.handlers = [];
         this.cleanups = [];
-        this.classMap = new Map();
         this.startProm = null;
         const interaction = new I(el, env, this);
         this.interaction = interaction;
@@ -66,35 +65,14 @@ export class Colibri {
 
     applyAttr(el, attr, value) {
         if (attr === "class") {
-            const before = this.classMap.get(el) || {};
-            // compute new class obj
-            let after;
-            if (typeof value === "string") {
-                after = {};
-                for (let cl of value.trim().split(" ")) {
-                    after[cl] = true;
-                }
-            } else {
-                // object syntax
-                after = { ...value }; // we clone it to avoid mutations problems
+            if (typeof value !== "object") {
+                throw new Error("t-att-class directive expects an object");
             }
-            for (let cl in after) {
-                if (after[cl]) {
-                    if (!before[cl]) {
-                        el.classList.add(cl);
-                    }
-                } else {
-                    el.classList.remove(cl);
+            for (let cl in value) {
+                for (let c of cl.trim().split(" ")) {
+                    el.classList.toggle(c, value[cl]);
                 }
             }
-            for (let cl in before) {
-                if (before[cl]) {
-                    if (!after[cl]) {
-                        el.classList.remove(cl);
-                    }
-                }
-            }
-            this.classMap.set(el, after);
         } else {
             el.setAttribute(attr, value);
         }
@@ -165,7 +143,6 @@ export class Colibri {
             el.removeEventListener(ev, fn, options);
         }
         this.handlers = [];
-        this.classMap.clear();
         this.interaction.destroy();
         this.interaction.isDestroyed = true;
     }
