@@ -10,6 +10,7 @@ export class Colibri {
     constructor(app, I, el, env) {
         this.app = app;
         this.update = null;
+        this.dynamicAttrs = [];
         this.handlers = [];
         this.cleanups = [];
         this.classMap = new Map();
@@ -21,9 +22,10 @@ export class Colibri {
             if (interaction.isDestroyed) {
                 return;
             }
-            const content = I.dynamicContent;
+            const content = interaction.dynamicContent;
             if (content) {
                 this.processContent(content);
+                this.update();
             }
             interaction.start();
         });
@@ -82,10 +84,54 @@ export class Colibri {
     }
 
     processContent(content) {
-        const fn = this.app.compile(content);
-        const update = fn(this, this.interaction);
-        this.update = update.bind(this.interaction);
-        update.call(this.interaction);
+        const interaction = this.interaction;
+
+        const el = interaction.el;
+        const nodes = {};
+        const SPECIALS = {
+            _root: el,
+            _body: document.body,
+            _window: window,
+            _document: document,
+        }
+        
+        
+        const getNodes = sel => {
+            if (sel in SPECIALS) {
+                return [SPECIALS[sel]];
+            }
+            if (!(sel in nodes)) {
+                nodes[sel] = el.querySelectorAll(sel);
+            }
+            return nodes[sel];
+        }
+
+        for (let [sel, directive, value] of generateEntries(content)) {
+            if (directive.startsWith("t-on-")) {
+                const ev = directive.slice(5);
+                this.addDomListener(getNodes(sel), ev, value);
+            } else if (directive.startsWith('t-att-')) {
+                const nodes = getNodes(sel);
+                const attr = directive.slice(6);
+                this.dynamicAttrs.push([nodes, attr, value]);
+            } else {
+                const suffix = directive.startsWith("t-") ? "" : " (should start with t-)"
+                throw new Error(`Invalid directive: '${directive}'${suffix}`);
+            }
+        }
+
+        this.update = () => {
+            for (let [nodes, attr, fn] of this.dynamicAttrs) {
+                for (let node of nodes) {
+                    const value = fn.call(this, node);
+                    this.applyAttr(node, attr, value);
+                }
+            }
+        }
+        // const fn = this.app.compile(content);
+        // const update = fn(this, this.interaction);
+        // this.update = update.bind(this.interaction);
+        // update.call(this.interaction);
     }
 
     destroy() {
@@ -103,14 +149,8 @@ export class Colibri {
     }
 }
 
-const GLOBALS = {
-    _root: "root",
-    _body: "document.body",
-    _window: "window",
-    _document: "document",
-}
 export class ColibriApp {
-    compiledFns = new Map();
+    // compiledFns = new Map();
     frame = null;
     queue = new Set(); // interactions to update next frame
 
@@ -124,99 +164,99 @@ export class ColibriApp {
     }
 
 
-    compile(content) {
-        let fn;
-        if (!this.compiledFns.has(content)) {
-            fn = this._compile(content);
-            this.compiledFns.set(content, fn);
-        } else {
-            fn = this.compiledFns.get(content);
-        }
-        return fn;
-    }
+    // compile(content) {
+    //     let fn;
+    //     if (!this.compiledFns.has(content)) {
+    //         fn = this._compile(content);
+    //         this.compiledFns.set(content, fn);
+    //     } else {
+    //         fn = this.compiledFns.get(content);
+    //     }
+    //     return fn;
+    // }
 
-    _compile(content) {
-        let nextId = 1;
-        let selectors = {}; // sel => variable name
-        let attrs = [],
-            handlers = [],
-            tOuts = [];
-        // preprocess content
-        for (let [sel, directive, value] of generateEntries(content)) {
-            if (!(sel in selectors)) {
-                if (!(sel in GLOBALS)) {
-                    selectors[sel] = `nodes_${nextId++}`;
-                }
-            }
-            if (directive.startsWith("t-att-")) {
-                attrs.push([sel, directive.slice(6), value]);
-            } else if (directive.startsWith("t-on-")) {
-                handlers.push([sel, directive.slice(5), value]);
-            } else if (directive === "t-out") {
-                tOuts.push([sel, value]);
-            } else {
-                const suffix = directive.startsWith("t-") ? "" : " (should start with t-)"
-                throw new Error(`Invalid directive: '${directive}'${suffix}`);
-            }
-        }
-        // generate function code
-        let fnStr = "    const root = interaction.el;\n";
-        let indent = 1;
-        const addLine = (txt) =>
-            (fnStr += new Array(indent + 2).join("  ") + txt);
-        const applyToSelector = (sel, fn) => {
-            if (sel in GLOBALS) {
-                const target = GLOBALS[sel];
-                addLine(`${fn(target)};\n`);
-            } else {
-                addLine(`for (let node of ${selectors[sel]}) {\n`);
-                addLine(`  ${fn("node")}\n`);
-                addLine("}\n");
-            }
-        };
-        // nodes
-        for (let sel in selectors) {
-            addLine(
-                `const ${selectors[sel]} = root.querySelectorAll(\`${sel}\`);\n`,
-            );
-        }
+    // _compile(content) {
+    //     let nextId = 1;
+    //     let selectors = {}; // sel => variable name
+    //     let attrs = [],
+    //         handlers = [],
+    //         tOuts = [];
+    //     // preprocess content
+    //     for (let [sel, directive, value] of generateEntries(content)) {
+    //         if (!(sel in selectors)) {
+    //             if (!(sel in GLOBALS)) {
+    //                 selectors[sel] = `nodes_${nextId++}`;
+    //             }
+    //         }
+    //         if (directive.startsWith("t-att-")) {
+    //             attrs.push([sel, directive.slice(6), value]);
+    //         } else if (directive.startsWith("t-on-")) {
+    //             handlers.push([sel, directive.slice(5), value]);
+    //         } else if (directive === "t-out") {
+    //             tOuts.push([sel, value]);
+    //         } else {
+    //             const suffix = directive.startsWith("t-") ? "" : " (should start with t-)"
+    //             throw new Error(`Invalid directive: '${directive}'${suffix}`);
+    //         }
+    //     }
+    //     // generate function code
+    //     let fnStr = "    const root = interaction.el;\n";
+    //     let indent = 1;
+    //     const addLine = (txt) =>
+    //         (fnStr += new Array(indent + 2).join("  ") + txt);
+    //     const applyToSelector = (sel, fn) => {
+    //         if (sel in GLOBALS) {
+    //             const target = GLOBALS[sel];
+    //             addLine(`${fn(target)};\n`);
+    //         } else {
+    //             addLine(`for (let node of ${selectors[sel]}) {\n`);
+    //             addLine(`  ${fn("node")}\n`);
+    //             addLine("}\n");
+    //         }
+    //     };
+    //     // nodes
+    //     for (let sel in selectors) {
+    //         addLine(
+    //             `const ${selectors[sel]} = root.querySelectorAll(\`${sel}\`);\n`,
+    //         );
+    //     }
 
-        // start function
-        fnStr += "\n";
-        for (let [sel, event, expr] of handlers) {
-            const nodes = sel in GLOBALS ? `[${GLOBALS[sel]}]` : selectors[sel];
-            addLine(`framework.addDomListener(${nodes}, \`${event}\`, interaction[\`${expr}\`]);`)
-        }
+    //     // start function
+    //     fnStr += "\n";
+    //     for (let [sel, event, expr] of handlers) {
+    //         const nodes = sel in GLOBALS ? `[${GLOBALS[sel]}]` : selectors[sel];
+    //         addLine(`framework.addDomListener(${nodes}, \`${event}\`, interaction[\`${expr}\`]);`)
+    //     }
 
-        // update function
-        fnStr += "\n";
-        addLine("function update() {\n");
-        indent++;
-        for (let [sel, attr, expr] of attrs) {
-            const varName = `value_${nextId++}`;
-            addLine(`const ${varName} = ${expr};\n`);
-            applyToSelector(
-                sel,
-                (el) => `framework.applyAttr(${el}, \`${attr}\`, ${varName});`,
-            );
-        }
-        for (let [sel, expr] of tOuts) {
-            const varName = `value_${nextId++}`;
-            addLine(`const ${varName} = ${expr};\n`);
-            applyToSelector(
-                sel,
-                (el) => `framework.applyTOut(${el}, ${varName});`,
-            );
-        }
-        indent--;
-        addLine("}\n");
+    //     // update function
+    //     fnStr += "\n";
+    //     addLine("function update() {\n");
+    //     indent++;
+    //     for (let [sel, attr, expr] of attrs) {
+    //         const varName = `value_${nextId++}`;
+    //         addLine(`const ${varName} = ${expr};\n`);
+    //         applyToSelector(
+    //             sel,
+    //             (el) => `framework.applyAttr(${el}, \`${attr}\`, ${varName});`,
+    //         );
+    //     }
+    //     for (let [sel, expr] of tOuts) {
+    //         const varName = `value_${nextId++}`;
+    //         addLine(`const ${varName} = ${expr};\n`);
+    //         applyToSelector(
+    //             sel,
+    //             (el) => `framework.applyTOut(${el}, ${varName});`,
+    //         );
+    //     }
+    //     indent--;
+    //     addLine("}\n");
 
-        addLine("return update;");
-        // console.log(fnStr);
-        const fn = new Function("framework", "interaction", fnStr);
-        // console.log(fn.toString());
-        return fn;
-    }
+    //     addLine("return update;");
+    //     // console.log(fnStr);
+    //     const fn = new Function("framework", "interaction", fnStr);
+    //     // console.log(fn.toString());
+    //     return fn;
+    // }
 
 
 
@@ -245,13 +285,13 @@ export class ColibriApp {
 function* generateEntries(content) {
     for (let key in content) {
         const value = content[key];
-        if (typeof value === "string") {
-            const [selector, directive] = key.split(":");
-            yield [selector, directive, value];
-        } else {
+        if (typeof value === "object") {
             for (let directive in value) {
                 yield [key, directive, value[directive]];
             }
+        } else {
+            const [selector, directive] = key.split(":");
+            yield [selector, directive, value];
         }
     }
 }

@@ -11,8 +11,8 @@ describe("event handling", () => {
         let clicked = false;
         class Test extends Interaction {
             static selector = ".test";
-            static dynamicContent = {
-                "span:t-on-click": "doSomething",
+            dynamicContent = {
+                "span:t-on-click": this.doSomething,
             };
             doSomething() {
                 clicked = true;
@@ -35,8 +35,9 @@ describe("event handling", () => {
         let clicked = false;
         class Test extends Interaction {
             static selector = ".test";
-            static dynamicContent = {
-                "_root:t-on-click": "doSomething",
+            
+            dynamicContent = {
+                "_root:t-on-click": this.doSomething,
             };
             doSomething() {
                 clicked = true;
@@ -59,8 +60,9 @@ describe("event handling", () => {
         let clicked = false;
         class Test extends Interaction {
             static selector = ".test";
-            static dynamicContent = {
-                "_body:t-on-click": "doSomething",
+
+            dynamicContent = {
+                "_body:t-on-click": this.doSomething,
             };
             doSomething() {
                 clicked = true;
@@ -83,8 +85,9 @@ describe("event handling", () => {
         let clicked = false;
         class Test extends Interaction {
             static selector = ".test";
-            static dynamicContent = {
-                "_window:t-on-someevent": "doSomething",
+
+            dynamicContent = {
+                "_window:t-on-someevent": this.doSomething,
             };
             doSomething() {
                 clicked = true;
@@ -107,8 +110,9 @@ describe("event handling", () => {
         let clicked = false;
         class Test extends Interaction {
             static selector = ".test";
-            static dynamicContent = {
-                "_document:t-on-someevent": "doSomething",
+
+            dynamicContent = {
+                "_document:t-on-someevent": this.doSomething,
             };
             doSomething() {
                 clicked = true;
@@ -131,8 +135,9 @@ describe("event handling", () => {
         let clicked = 0;
         class Test extends Interaction {
             static selector = ".test";
-            static dynamicContent = {
-                "span:t-on-click": "doSomething",
+            
+            dynamicContent = {
+                "span:t-on-click": this.doSomething,
             };
             doSomething() {
                 clicked++;
@@ -158,9 +163,9 @@ describe("event handling", () => {
         let clicked = 0;
         class Test extends Interaction {
             static selector = ".test";
-            static dynamicContent = {
-                "span:t-on-click": "doSomething",
-                "span:t-on-dblclick": "doSomething",
+            dynamicContent = {
+                "span:t-on-click": this.doSomething,
+                "span:t-on-dblclick": this.doSomething,
             };
             doSomething() {
                 clicked++;
@@ -185,8 +190,8 @@ describe("event handling", () => {
         let clicked = 0;
         class Test extends Interaction {
             static selector = ".test";
-            static dynamicContent = {
-                "span:t-on-click": "doSomething",
+            dynamicContent = {
+                "span:t-on-click": this.doSomething,
             };
             doSomething() {
                 clicked++;
@@ -240,8 +245,8 @@ describe("event handling", () => {
 
         class Test extends Interaction {
             static selector = ".test";
-            static dynamicContent = {
-                "span:t-on-click": "onClick",
+            dynamicContent = {
+                "span:t-on-click": this.onClick,
             };
             setup() {
                 expect.step("setup");
@@ -273,9 +278,9 @@ describe("event handling", () => {
     test("dom is updated after event is dispatched", async () => {
         class Test extends Interaction {
             static selector = ".test";
-            static dynamicContent = {
-                "span:t-on-click": "doSomething",
-                "span:t-att-data-count": "this.n",
+            dynamicContent = {
+                "span:t-on-click": this.doSomething,
+                "span:t-att-data-count": () => this.n,
             };
 
             setup() {
@@ -416,8 +421,8 @@ describe("miscellaneous", () => {
     test("crashes if a dynamic content element does not start with t-", async () => {
         class Test extends Interaction {
             static selector = ".test";
-            static dynamicContent = {
-                "span:click": "doSomething",
+            dynamicContent = {
+                "span:click": this.doSomething,
             };
             doSomething() {}
         }
@@ -480,8 +485,8 @@ describe("dynamic attributes", () => {
     test("can set an attribute", async () => {
         class Test extends Interaction {
             static selector = ".test";
-            static dynamicContent = {
-                "_root:t-att-a": "'b'",
+            dynamicContent = {
+                "_root:t-att-a": () => 'b',
             };
         }
 
@@ -495,8 +500,8 @@ describe("dynamic attributes", () => {
     test("t-att-class does not override existing classes", async () => {
         class Test extends Interaction {
             static selector = "span";
-            static dynamicContent = {
-                "_root:t-att-class": "'b'",
+            dynamicContent = {
+                "_root:t-att-class": () => 'b',
             };
         }
 
@@ -510,8 +515,8 @@ describe("dynamic attributes", () => {
     test("t-att-class can add multiple classes", async () => {
         class Test extends Interaction {
             static selector = "span";
-            static dynamicContent = {
-                "_root:t-att-class": "'b c'",
+            dynamicContent = {
+                "_root:t-att-class": () => 'b c',
             };
         }
 
@@ -525,9 +530,9 @@ describe("dynamic attributes", () => {
     test("t-att-class can add and remove a class", async () => {
         class Test extends Interaction {
             static selector = "span";
-            static dynamicContent = {
-                "_root:t-att-class": "this.flag ? 'a' : 'b'",
-                "_root:t-on-click": "toggle",
+            dynamicContent = {
+                "_root:t-att-class": () => this.flag ? 'a' : 'b',
+                "_root:t-on-click": this.toggle,
             };
             setup() {
                 this.flag = true;
