@@ -158,7 +158,7 @@ describe("event handling", () => {
         expect(clicked).toBe(2);
     });
 
-    test("can add multiple listeners on a element", async () => {
+    test.tags("desktop")("can add multiple listeners on a element", async () => {
         let clicked = 0;
         class Test extends Interaction {
             static selector = ".test";

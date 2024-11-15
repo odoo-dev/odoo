@@ -22,7 +22,7 @@ test("mega_menu_dropdown activate when there is a header#top", async () => {
     expect(core.interactions.length).toBe(1);
 });
 
-test("move from desktop to mobile (mousedown)", async () => {
+test.tags("desktop")("move from desktop to mobile (mousedown)", async () => {
     const { core, el } = await startInteractions(`
         <header id="top">
             <nav class="o_header_desktop">
@@ -46,7 +46,7 @@ test("move from desktop to mobile (mousedown)", async () => {
     expect(!!mobileNav.querySelector("div.o_mega_menu")).toBe(true);
 });
 
-test("move from mobile to desktop (mousedown)", async () => {
+test.tags("desktop")("move from mobile to desktop (mousedown)", async () => {
     const { core, el } = await startInteractions(`
         <header id="top">
             <nav class="o_header_desktop">
@@ -70,7 +70,7 @@ test("move from mobile to desktop (mousedown)", async () => {
     expect(!!mobileNav.querySelector("div.o_mega_menu")).toBe(false);
 });
 
-test("DO NOT move from desktop to mobile (hover)", async () => {
+test.tags("desktop")("DO NOT move from desktop to mobile (hover)", async () => {
     const { core, el } = await startInteractions(`
         <header id="top" class="o_hoverable_dropdown">
             <nav class="o_header_desktop">
@@ -94,7 +94,7 @@ test("DO NOT move from desktop to mobile (hover)", async () => {
     expect(!!mobileNav.querySelector("div.o_mega_menu")).toBe(false);
 });
 
-test("move from mobile to desktop (hover)", async () => {
+test.tags("desktop")("move from mobile to desktop (hover)", async () => {
     const { core, el } = await startInteractions(`
         <header id="top" class="o_hoverable_dropdown">
             <nav class="o_header_desktop">
