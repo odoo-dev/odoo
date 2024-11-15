@@ -1,10 +1,11 @@
 import { expect, test } from "@odoo/hoot";
 import { click, fill } from "@odoo/hoot-dom";
 import { advanceTime, Deferred } from "@odoo/hoot-mock";
+import { onRpc } from "@web/../tests/web_test_helpers";
 import {
-    onRpc,
-} from "@web/../tests/web_test_helpers";
-import { startInteractions, setupInteractionWhiteList } from "../../core/helpers";
+    startInteractions,
+    setupInteractionWhiteList,
+} from "../../core/helpers";
 
 setupInteractionWhiteList("website.form", "website.post_link");
 
@@ -94,7 +95,12 @@ test("form checks conditions", async () => {
     const questionEl = el.querySelector("textarea[name=description]");
     const submitEl = el.querySelector("a.s_website_form_send");
 
-    function checkVisibility(isNameVisible, isMailVisible, isSubjectVisible, isQuestionVisible) {
+    function checkVisibility(
+        isNameVisible,
+        isMailVisible,
+        isSubjectVisible,
+        isQuestionVisible,
+    ) {
         function checkSingle(isVisible, el) {
             const fieldEl = field(el);
             if (isVisible) {
@@ -108,7 +114,12 @@ test("form checks conditions", async () => {
         checkSingle(isSubjectVisible, subjectEl);
         checkSingle(isQuestionVisible, questionEl);
     }
-    function checkError(hasNameError, hasMailError, hasSubjectError, hasQuestionError) {
+    function checkError(
+        hasNameError,
+        hasMailError,
+        hasSubjectError,
+        hasQuestionError,
+    ) {
         function checkSingle(hasError, el) {
             const fieldEl = field(el);
             if (hasError) {

@@ -26,7 +26,10 @@ export async function startInteraction(I, html, options) {
     return startInteractions(html, options);
 }
 
-export async function startInteractions(html, options = { waitForStart: true}) {
+export async function startInteractions(
+    html,
+    options = { waitForStart: true },
+) {
     const fixture = getFixture();
     if (!html.includes("wrapwrap")) {
         html = `<div id="wrapwrap">${html}</div>`;

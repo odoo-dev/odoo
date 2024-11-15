@@ -8,8 +8,7 @@ import { onceAllImagesLoaded } from "@website/interactions/utils";
  */
 export class ImagesLazyLoading extends Interaction {
     static selector = "#wrapwrap";
-    static dynamicContent = {
-    };
+    dynamicContent = {};
 
     setup() {
         // For each image on the page, force a 1px min-height so that Chrome
@@ -36,7 +35,9 @@ export class ImagesLazyLoading extends Interaction {
         }
     }
     destroy() {
-        const imgEls = this.el.querySelectorAll("img[data-lazy-loading-initial-min-height]");
+        const imgEls = this.el.querySelectorAll(
+            "img[data-lazy-loading-initial-min-height]",
+        );
         for (const imgEl of imgEls) {
             this.restoreImage(imgEl);
         }
@@ -82,4 +83,6 @@ export class ImagesLazyLoading extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website.images_lazy_loading", ImagesLazyLoading);
+registry
+    .category("website.active_elements")
+    .add("website.images_lazy_loading", ImagesLazyLoading);

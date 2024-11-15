@@ -12,12 +12,11 @@ test("wait for translation before starting interactions", async () => {
 
         setup() {
             flag = true;
-            expect("localization" in this.services).toBe(true)
+            expect("localization" in this.services).toBe(true);
         }
     }
     await startInteraction(Test, `<div class="test"></div>`);
 });
-
 
 test("starting interactions twice should only actually do it once", async () => {
     let n = 0;
@@ -36,4 +35,3 @@ test("starting interactions twice should only actually do it once", async () => 
     await animationFrame();
     expect(n).toBe(1);
 });
-

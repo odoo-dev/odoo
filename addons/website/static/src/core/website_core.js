@@ -133,7 +133,7 @@ registry.category("services").add("website_core", {
             }
         });
         websiteCore.proms.push(
-            env.isReady.then(() => websiteCore.startInteractions())
+            env.isReady.then(() => websiteCore.startInteractions()),
         );
         return websiteCore;
     },

@@ -48,21 +48,21 @@ publicWidget.registry.EditModeWebsiteForm = publicWidget.Widget.extend({
 
 export class Form extends Interaction {
     static selector = ".s_website_form form, form.s_website_form"; // !compatibility
-    static dynamicContent = {
+    dynamicContent = {
         ".s_website_form_send, .o_website_form_send": { // !compatibility
-            "t-on-click": "send",
+            "t-on-click": this.send,
         },
         "_root": {
-            "t-on-submit": "send",
+            "t-on-submit": this.send,
         },
         "input[type=file]": {
-            "t-on-change": "changeFile",
+            "t-on-change": this.changeFile,
         },
         "input.o_add_files_button": {
-            "t-on-click": "clickAddFilesButton",
+            "t-on-click": this.clickAddFilesButton,
         },
         ".s_website_form_field[data-type=binary]": {
-            "t-on-click": "clickFileDelete", // delegate on ".o_file_delete"
+            "t-on-click": this.clickFileDelete, // delegate on ".o_file_delete"
         }
     };
 

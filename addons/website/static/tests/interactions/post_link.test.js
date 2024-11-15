@@ -1,7 +1,11 @@
 import { expect, test } from "@odoo/hoot";
 import { animationFrame, click } from "@odoo/hoot-dom";
 
-import { mockSendRequests, startInteractions, setupInteractionWhiteList } from "../core/helpers";
+import {
+    mockSendRequests,
+    startInteractions,
+    setupInteractionWhiteList,
+} from "../core/helpers";
 
 setupInteractionWhiteList("website.post_link");
 
@@ -10,8 +14,8 @@ test("post_link adds and removes class on setup/destroy", async () => {
       <div id="wrapwrap">
         <span data-post="/some/url" class="post_link">All</span>
       </div>`);
-      expect(core.interactions.length).toBe(1);
-      expect(core.interactions[0].interaction.constructor.name).toBe("PostLink");
+    expect(core.interactions.length).toBe(1);
+    expect(core.interactions[0].interaction.constructor.name).toBe("PostLink");
 
     const span = el.querySelector("span");
     expect(span).toHaveClass("o_post_link_js_loaded");

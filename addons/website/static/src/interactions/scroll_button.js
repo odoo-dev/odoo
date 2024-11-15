@@ -4,7 +4,7 @@ import { AnchorSlide } from "@website/interactions/anchor_slide";
 
 export class ScrollButton extends AnchorSlide {
     static selector = ".o_scroll_button";
-    
+
     animateClick(ev) {
         ev.preventDefault();
         // Scroll to the next visible element after the current one.
@@ -20,4 +20,6 @@ export class ScrollButton extends AnchorSlide {
     }
 }
 
-registry.category("website.active_elements").add("website.scroll_button", ScrollButton);
+registry
+    .category("website.active_elements")
+    .add("website.scroll_button", ScrollButton);
