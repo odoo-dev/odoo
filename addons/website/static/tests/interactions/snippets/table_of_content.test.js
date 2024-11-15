@@ -86,7 +86,7 @@ test("table of content does nothing if there is no s_table_of_content_navbar_sti
     expect(core.interactions.length).toBe(0);
 });
 
-test("table of content scrolls to targetted location", async () => {
+test.tags("desktop")("table of content scrolls to targetted location", async () => {
     const { core, el } = await startInteractions(`
         <div id="wrapwrap" style="overflow: scroll; max-height: 300px;">
             ${defaultToc}
@@ -112,7 +112,7 @@ test("table of content scrolls to targetted location", async () => {
     expect(isElementVerticallyInViewportOf(h2Els[1], wrapEl)).toBe(true);
 });
 
-test("table of content highlights reached header", async () => {
+test.tags("desktop")("table of content highlights reached header", async () => {
     const { core, el } = await startInteractions(`
         <div id="wrapwrap" style="overflow: scroll; max-height: 300px;">
             ${defaultToc}
