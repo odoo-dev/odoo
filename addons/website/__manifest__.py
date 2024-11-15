@@ -191,7 +191,7 @@
     'assets': {
         'web.assets_frontend': [
             'website/static/src/interactions/**/*',
-            'website/static/src/core/*',
+            'website/static/src/core/**/*',
             ('replace', 'web/static/src/legacy/js/public/public_root_instance.js', 'website/static/src/js/content/website_root_instance.js'),
             'website/static/src/libs/zoomodoo/zoomodoo.scss',
             'website/static/src/scss/website.scss',
