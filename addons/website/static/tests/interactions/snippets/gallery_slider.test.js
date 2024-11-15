@@ -7,6 +7,8 @@ import { onceAllImagesLoaded } from "@website/interactions/utils";
 
 setupInteractionWhiteList("website.gallery_slider");
 
+const SLIDE_DURATION = 1000;
+
 // TODO Obtain rendering from `website.s_images_gallery` template ?
 const defaultGallery = `
     <div id="wrapwrap">
@@ -149,13 +151,13 @@ test("gallery slider interaction on image gallery", async () => {
     expect(core.interactions.length).toBe(1);
     await animationFrame();
     await onceAllImagesLoaded(el);
-    await advanceTime(100);
+    await advanceTime(SLIDE_DURATION);
     const imgEl = el.querySelector(".carousel-item.active img");
     const goToEls = el.querySelectorAll("button[data-bs-slide-to]");
     await click(goToEls[2]);
     await animationFrame();
     await onceAllImagesLoaded(el);
-    await advanceTime(100);
+    await advanceTime(SLIDE_DURATION);
     const img2El = el.querySelector(".carousel-item.active img");
     expect(imgEl).not.toBe(img2El);
 });
@@ -164,20 +166,20 @@ test("gallery slider interaction on lightbox", async () => {
     const { core, el } = await startInteractions(defaultLightbox);
     expect(core.interactions.length).toBe(1);
     await onceAllImagesLoaded(el);
-    await advanceTime(100);
+    await advanceTime(SLIDE_DURATION);
     const imgEl = el.querySelector(".carousel-item.active img");
     const nextEl = el.querySelector(".carousel-control-next");
     const goToEls = el.querySelectorAll("button[data-bs-slide-to]");
     await click(nextEl);
     await animationFrame();
     await onceAllImagesLoaded(el);
-    await advanceTime(100);
+    await advanceTime(SLIDE_DURATION);
     const img2El = el.querySelector(".carousel-item.active img");
     expect(imgEl).not.toBe(img2El);
     await click(goToEls[2]);
     await animationFrame();
     await onceAllImagesLoaded(el);
-    await advanceTime(100);
+    await advanceTime(SLIDE_DURATION);
     const img3El = el.querySelector(".carousel-item.active img");
     expect(imgEl).not.toBe(img3El);
     expect(img2El).not.toBe(img3El);
@@ -187,7 +189,7 @@ test("gallery slider interaction on old lightbox", async () => {
     const { core, el } = await startInteractions(defaultOldLightbox);
     expect(core.interactions.length).toBe(1);
     await onceAllImagesLoaded(el);
-    await advanceTime(100);
+    await advanceTime(SLIDE_DURATION);
     // Fix parameters that are based on sizes.
     core.interactions[0].interaction.page = 0;
     core.interactions[0].interaction.nbPages = 6;
@@ -198,13 +200,13 @@ test("gallery slider interaction on old lightbox", async () => {
     await click(nextEl);
     await animationFrame();
     await onceAllImagesLoaded(el);
-    await advanceTime(100);
+    await advanceTime(SLIDE_DURATION);
     const img2El = el.querySelector(".carousel-item.active img");
     expect(imgEl).not.toBe(img2El);
     await click(goToEls[2]);
     await animationFrame();
     await onceAllImagesLoaded(el);
-    await advanceTime(100);
+    await advanceTime(SLIDE_DURATION);
     const img3El = el.querySelector(".carousel-item.active img");
     expect(imgEl).not.toBe(img3El);
     expect(img2El).not.toBe(img3El);
