@@ -66,18 +66,32 @@ export class Colibri {
 
     applyAttr(el, attr, value) {
         if (attr === "class") {
-            const before = this.classMap.get(el) || new Set();
-            const after = new Set(value.trim().split(" "));
-            // add new class
-            for (let cl of after) {
-                if (!before.has(cl)) {
-                    el.classList.add(cl);
+            const before = this.classMap.get(el) || {};
+            // compute new class obj
+            let after;
+            if (typeof value === "string") {
+                after = {};
+                for (let cl of value.trim().split(" ")) {
+                    after[cl] = true;
+                }
+            } else {
+                // object syntax
+                after = { ...value }; // we clone it to avoid mutations problems
+            }
+            for (let cl in after) {
+                if (after[cl]) {
+                    if (!before[cl]) {
+                        el.classList.add(cl);
+                    }
+                } else {
+                    el.classList.remove(cl);
                 }
             }
-            // remove old class
-            for (let cl of before) {
-                if (!after.has(cl)) {
-                    el.classList.remove(cl);
+            for (let cl in before) {
+                if (before[cl]) {
+                    if (!after[cl]) {
+                        el.classList.remove(cl);
+                    }
                 }
             }
             this.classMap.set(el, after);
