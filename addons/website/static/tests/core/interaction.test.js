@@ -618,4 +618,24 @@ describe("dynamic attributes", () => {
             `<span class="bla b">coucou</span>`,
         );
     });
+
+    test("t-att- receive the target as argument", async () => {
+        let target;
+        class Test extends Interaction {
+            static selector = "span";
+            dynamicContent = {
+                "_root:t-att-a": (_el) => { target = _el; return "b";},
+            };
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<div><span>coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span a="b">coucou</span>`,
+        );
+        expect(target).toBe(el.querySelector("span"));
+
+    });
 });
