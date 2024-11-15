@@ -522,7 +522,7 @@ describe("dynamic attributes", () => {
         class Test extends Interaction {
             static selector = "span";
             dynamicContent = {
-                "_root:t-att-class": () => "b",
+                "_root:t-att-class": () => ({ b: true }),
             };
         }
 
@@ -535,7 +535,7 @@ describe("dynamic attributes", () => {
         );
     });
 
-    test("t-att-class alternate syntax", async () => {
+    test("t-att-class, basic test", async () => {
         class Test extends Interaction {
             static selector = "span";
             dynamicContent = {
@@ -577,7 +577,7 @@ describe("dynamic attributes", () => {
         class Test extends Interaction {
             static selector = "span";
             dynamicContent = {
-                "_root:t-att-class": () => "b c",
+                "_root:t-att-class": () => ({"b c": true}),
             };
         }
 
@@ -594,7 +594,7 @@ describe("dynamic attributes", () => {
         class Test extends Interaction {
             static selector = "span";
             dynamicContent = {
-                "_root:t-att-class": () => (this.flag ? "a" : "b"),
+                "_root:t-att-class": () => ({a: this.flag, b: !this.flag}),
                 "_root:t-on-click": this.toggle,
             };
             setup() {
@@ -638,4 +638,33 @@ describe("dynamic attributes", () => {
         expect(target).toBe(el.querySelector("span"));
 
     });
+
+    test("t-att-class, another scenario", async () => {
+        const c = [{a: true}, {b: true}];
+        let interaction;
+        class Test extends Interaction {
+            static selector = "span";
+            dynamicContent = {
+                "_root:t-att-class": () => c.pop(),
+            };
+            setup() {
+                interaction = this;
+            }
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<div><span>coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span class="b">coucou</span>`,
+        );
+        interaction.updateDOM();
+        await animationFrame();
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span class="b a">coucou</span>`,
+        );
+
+    });
+
 });
