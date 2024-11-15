@@ -115,8 +115,12 @@ export class GallerySliderWidget extends Interaction {
         this.indicatorEl = this.carouselEl.querySelector(".carousel-indicators");
         this.prevEl = this.indicatorEl.querySelector("li.o_indicators_left");
         this.nextEl = this.indicatorEl.querySelector("li.o_indicators_right");
-        this.prevEl && (this.prevEl.style.visibility = ""); // force visibility as some databases have it hidden
-        this.nextEl && (this.nextEl.style.visibility = "");
+        if (this.prevEl) {
+            this.prevEl.style.visibility = ""; // force visibility as some databases have it hidden
+        }
+        if (this.nextEl) {
+            this.nextEl.style.visibility = "";
+        }
         this.liEls = this.indicatorEl.querySelectorAll("li[data-bs-slide-to]");
         let indicatorWidth = this.indicatorEl.getBoundingClientRect().width;
         if (indicatorWidth === 0) {
@@ -156,7 +160,6 @@ export class GallerySliderWidget extends Interaction {
                 liEl.classList.remove("active");
             }
             const selectedLiEl = [...this.liEls].find(el => el.dataset.bsSlideTo === `${index}`);
-            ev.preventDefault();
             selectedLiEl?.classList.add("active");
         }, 0);
     }
@@ -166,7 +169,6 @@ export class GallerySliderWidget extends Interaction {
         if (!dispatchedEl || dispatchedEl.parentElement !== this.indicatorEl) {
             return;
         }
-        ev.preventDefault();
         this.page += dispatchedEl.classList.contains("o_indicators_left") ? -1 : 1;
         this.page = Math.max(0, Math.min(this.nbPages - 1, this.page)); // should not be necessary
         Carousel.getOrCreateInstance(this.carouselEl).to(this.page * this.realNbPerPage);
