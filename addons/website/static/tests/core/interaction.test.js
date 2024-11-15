@@ -535,6 +535,44 @@ describe("dynamic attributes", () => {
         );
     });
 
+    test("t-att-class alternate syntax", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            dynamicContent = {
+                "_root:t-att-class": () => ({ a: true, b: this.val }),
+            };
+
+            setup() {
+                this.val = true;
+            }
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<div><span>coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span class="a b">coucou</span>`,
+        );
+    });
+
+    test("t-att-class can remove a class", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            dynamicContent = {
+                "_root:t-att-class": () => ({ a: false }),
+            };
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<div><span class="a">coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span class="">coucou</span>`,
+        );
+    });
+
     test("t-att-class can add multiple classes", async () => {
         class Test extends Interaction {
             static selector = "span";
