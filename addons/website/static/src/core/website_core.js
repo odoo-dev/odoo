@@ -52,9 +52,6 @@ class WebsiteCore {
             };
             this.owlApp = new App(null, appConfig);
         }
-        if (!this.active) {
-            return;
-        }
         const root = this.owlApp.createRoot(C, { props: null, env: this.env });
         this.roots.push(root);
         const compElem = document.createElement("owl-component");
