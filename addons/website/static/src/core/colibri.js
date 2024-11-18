@@ -27,6 +27,8 @@ export class Colibri {
                 if (content) {
                     this.processContent(content);
                     this.update();
+                } else if (I.dynamicContent) {
+                    throw new Error(`The dynamic content object should be defined on the instance, not on the class (${I.name})`);
                 }
                 interaction.start();
             },

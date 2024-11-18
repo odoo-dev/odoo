@@ -1,9 +1,9 @@
-import { expect, test, describe } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 
-import { startInteraction } from "./helpers";
-import { Interaction } from "@website/core/interaction";
 import { animationFrame, click, dblclick } from "@odoo/hoot-dom";
 import { Deferred } from "@odoo/hoot-mock";
+import { Interaction } from "@website/core/interaction";
+import { startInteraction } from "./helpers";
 
 describe("event handling", () => {
     test("can add a listener on a single element", async () => {
@@ -452,6 +452,25 @@ describe("miscellaneous", () => {
         expect(error).not.toBe(null);
         expect(error.message).toBe(
             "Invalid directive: 'click' (should start with t-)",
+        );
+    });
+
+    test("crash if dynamicContent is defined on class, not on instance", async () => {
+
+        class Test extends Interaction {
+            static selector = ".test";
+            static dynamicContent = {}
+        }
+
+        let error = null;
+        try {
+            await startInteraction(Test, `<div class="test"></div>`);
+        } catch (e) {
+            error = e;
+        }
+        expect(error).not.toBe(null);
+        expect(error.message).toBe(
+            "The dynamic content object should be defined on the instance, not on the class (Test)",
         );
     });
 
