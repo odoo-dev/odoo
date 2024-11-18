@@ -63,7 +63,14 @@ export class Form extends Interaction {
         },
         ".s_website_form_field[data-type=binary]": {
             "t-on-click": this.clickFileDelete, // delegate on ".o_file_delete"
-        }
+        },
+        ".s_website_form_field": {
+            "t-on-input": this.onFieldInput,
+            "t-att-class": (el) => ({ "d-none": !this.isFieldVisible(el) }),
+        },
+        ".s_website_form_field .s_website_form_input": {
+            "t-att-disabled": (el) => !this.isInputVisible(el) || undefined,
+        },
     };
 
     setup() {
@@ -93,8 +100,6 @@ export class Form extends Interaction {
                 this.getUserPreFillFields()
             ))[0] || {};
         }
-    }
-    start() {
         // Reset the form first, as it is still filled when coming back
         // after a redirect.
         this.resetForm();
@@ -113,12 +118,8 @@ export class Form extends Interaction {
         for (const [name, funcs] of visibilityFunctionsByFieldName.entries()) {
             this.visibilityFunctionByFieldName.set(name, () => funcs.some(func => func()));
         }
-
-        this.onFieldInputDebounced = debounce(this.onFieldInput.bind(this), 400);
-        for (const fieldEl of this.el.querySelectorAll(".s_website_form_field")) {
-            fieldEl.addEventListener("input", this.onFieldInputDebounced);
-        }
-
+    }
+    start() {
         this.dateFieldEls = this.el.querySelectorAll(".s_website_form_datetime, .o_website_form_datetime, .s_website_form_date, .o_website_form_date");
         if (!this.editableMode) {
             for (const fieldEl of this.dateFieldEls) {
@@ -153,7 +154,9 @@ export class Form extends Interaction {
         if (!this.editTranslations
                 && (dataForValues || Object.keys(this.preFillValues).length)) {
             dataForValues = dataForValues || {};
-            const fieldNames = new FormData(this.el).keys();
+            const fieldNames = [...this.el.querySelectorAll("[name]")].map(
+                (el) => el.name
+            );
             // All types of inputs do not have a value property (eg:hidden),
             // for these inputs any function that is supposed to put a value
             // property actually puts a HTML value attribute. Because of
@@ -193,7 +196,8 @@ export class Form extends Interaction {
                 }
             }
         }
-        this.updateFieldsVisibility();
+        // Visibility might need to be adapted according to pre-filled values.
+        this.updateContent();
 
         if (session.geoip_phone_code) {
             this.el.querySelectorAll('input[type="tel"]').forEach(telField => {
@@ -276,9 +280,6 @@ export class Form extends Interaction {
             }
         }
 
-        for (const fieldEl of this.el.querySelectorAll(".s_website_form_field")) {
-            fieldEl.removeEventListener("input", this.onFieldInputDebounced);
-        }
         for (const disableDateTimePicker of this.disableDateTimePickers) {
             disableDateTimePicker();
         }
@@ -758,40 +759,12 @@ export class Form extends Interaction {
             return this.compareTo(comparator, currentValueOfDependency, visibilityCondition, between);
         };
     }
-    /**
-     * Calculates the visibility for each field with conditional visibility
-     */
-    updateFieldsVisibility() {
-        let anyFieldVisibilityUpdated = false;
-        for (const [fieldEl, visibilityFunction] of this.visibilityFunctionByFieldEl.entries()) {
-            const wasVisible = !fieldEl.closest(".s_website_form_field")
-                .classList.contains("d-none");
-            const isVisible = !!visibilityFunction();
-            this.updateFieldVisibility(fieldEl, isVisible);
-            anyFieldVisibilityUpdated |= wasVisible !== isVisible;
-        }
-        // Recursive check needed in case of a field (C) that
-        // conditionally displays a prefilled field (B), which in turn
-        // triggers a conditional visibility on another field (A),
-        // registered before B.
-        if (anyFieldVisibilityUpdated) {
-            this.updateFieldsVisibility();
-        }
+    isFieldVisible(fieldEl) {
+        const isVisible = this.visibilityFunctionByFieldEl.get(fieldEl);
+        return isVisible ? !!isVisible() : true;
     }
-    /**
-     * Changes the visibility of a field.
-     *
-     * @param {HTMLElement} fieldEl
-     * @param {boolean} haveToBeVisible
-     */
-    updateFieldVisibility(fieldEl, haveToBeVisible) {
-        const fieldContainerEl = fieldEl.closest('.s_website_form_field');
-        fieldContainerEl.classList.toggle('d-none', !haveToBeVisible);
-        for (const inputEl of fieldContainerEl.querySelectorAll('.s_website_form_input')) {
-            // Hidden inputs should also be disabled so that their data are
-            // not sent on form submit.
-            inputEl.disabled = !haveToBeVisible;
-        }
+    isInputVisible(inputEl) {
+        return this.isFieldVisible(inputEl.closest(".s_website_form_field"));
     }
     /**
      * Creates a block containing the file name and a cross to delete it.
@@ -830,7 +803,7 @@ export class Form extends Interaction {
      * form (this method should be debounced in the start).
      */
     onFieldInput() {
-        this.updateFieldsVisibility();
+        // Implicitly updates DOM.
     }
     /**
      * Called when files are uploaded: updates the button text content,
@@ -911,7 +884,6 @@ export class Form extends Interaction {
         if (!newFileList.files.length) {
             fileInputEl.classList.remove("d-none");
             addFilesButtonEl.remove();
-            this.updateFieldsVisibility();
         }
     }
     /**

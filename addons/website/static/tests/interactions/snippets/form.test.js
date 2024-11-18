@@ -1,7 +1,7 @@
 import { expect, test } from "@odoo/hoot";
 import { click, fill } from "@odoo/hoot-dom";
 import { advanceTime, Deferred } from "@odoo/hoot-mock";
-import { onRpc } from "@web/../tests/web_test_helpers";
+import { MockServer, onRpc, patchWithCleanup, webModels } from "@web/../tests/web_test_helpers";
 import {
     startInteractions,
     setupInteractionWhiteList,
@@ -105,8 +105,10 @@ test("form checks conditions", async () => {
             const fieldEl = field(el);
             if (isVisible) {
                 expect(fieldEl).not.toHaveClass("d-none");
+                expect(el.disabled).not.toBe(undefined);
             } else {
                 expect(fieldEl).toHaveClass("d-none");
+                expect(el.disabled).toBe(true);
             }
         }
         checkSingle(isNameVisible, nameEl);
@@ -187,4 +189,71 @@ test("form checks conditions", async () => {
     checkVisibility(true, true, true, true);
     checkError(false, false, false, false);
     expect(didRpc).toBe(true);
+});
+
+test("form prefilled conditional", async () => {
+    patchWithCleanup(MockServer.prototype, {
+        callOrm(params) {
+            expect(params.model).toBe("res.users");
+            expect(params.method).toBe("read");
+            const result = super.callOrm(...arguments);
+            result[0].phone = "+1-555-5555";
+            return result;
+        }
+    });
+
+    // Phone number is only visible if name is filled.
+    const { core, el } = await startInteractions(`
+        <div id="wrapwrap">
+            <section class="s_website_form pt16 pb16" data-vcss="001" data-snippet="s_website_form" data-name="Form">
+                <div class="container-fluid">
+                    <form action="/website/form/" method="post" enctype="multipart/form-data" class="o_mark_required" data-mark="*" data-pre-fill="true" data-model_name="mail.mail" data-success-mode="redirect" data-success-page="/contactus-thank-you">
+                        <div class="s_website_form_rows row s_col_no_bgcolor">
+                            <div data-name="Field" class="s_website_form_field mb-3 col-12 s_website_form_custom s_website_form_required" data-type="char">
+                                <div class="row s_col_no_resize s_col_no_bgcolor">
+                                    <label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px" for="obij2aulqyau">
+                                        <span class="s_website_form_label_content">Your Name</span>
+                                        <span class="s_website_form_mark"> *</span>
+                                    </label>
+                                    <div class="col-sm">
+                                        <input class="form-control s_website_form_input" type="text" name="name" required="1" data-fill-with="name" id="obij2aulqyau"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-name="Field" class="s_website_form_field mb-3 col-12 s_website_form_custom s_website_form_field_hidden_if d-none" data-type="tel" 
+                                    data-visibility-dependency="name"
+                                    data-visibility-comparator="set"
+                            >
+                                <div class="row s_col_no_resize s_col_no_bgcolor">
+                                    <label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px" for="ozp7022vqhe">
+                                        <span class="s_website_form_label_content">Phone Number</span>
+                                    </label>
+                                    <div class="col-sm">
+                                        <input class="form-control s_website_form_input" type="tel" name="phone" data-fill-with="phone" id="ozp7022vqhe"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    `);
+    expect(core.interactions.length).toBe(1);
+    const formEl = el.querySelector("form");
+    const nameEl = el.querySelector("input[name=name]");
+    const phoneEl = el.querySelector("input[name=phone]");
+
+    function checkPhoneVisibility(isVisible) {
+        const fieldEl = field(el);
+        if (isVisible) {
+            expect(fieldEl).not.toHaveClass("d-none");
+        } else {
+            expect(fieldEl).toHaveClass("d-none");
+        }
+    }
+    expect(nameEl).not.toBe(undefined);
+    expect(nameEl.value).toBe("Mitchell Admin");
+    expect(phoneEl).not.toBe(undefined);
+    expect(phoneEl.value).toBe("+1-555-5555");
 });
