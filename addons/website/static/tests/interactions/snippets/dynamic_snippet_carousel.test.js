@@ -10,14 +10,15 @@ import { startInteractions, setupInteractionWhiteList } from "../../core/helpers
 
 class TestItem extends Interaction {
     static selector = ".s_test_item";
-
-    setup() {
-        this.el.dataset.started = `*${this.el.dataset.testParam}*`;
-    }
+    dynamicContent = {
+        "_root": {
+            "t-att-data-started": (el) => `*${el.dataset.testParam}*`,
+        },
+    };
 }
 registry.category("website.active_elements").add("website.test_dynamic_carousel_item", TestItem);
 
-setupInteractionWhiteList("website.dynamic_snippet_carousel", "website.test_dynamic_carousel_item");
+setupInteractionWhiteList(["website.dynamic_snippet_carousel", "website.test_dynamic_carousel_item"]);
 
 test.tags("desktop")("dynamic snippet carousel loads items and displays them through template", async () => {
     onRpc("/website/snippet/filters", async (args) => {
@@ -75,7 +76,7 @@ test.tags("desktop")("dynamic snippet carousel loads items and displays them thr
           </section>
       </div>
     `);
-    expect(core.interactions.length).toBe(1);
+    expect(core.interactions.length).toBe(6);
     const contentEl = el.querySelector(".dynamic_snippet_template");
     const carouselEl = el.querySelector(".carousel");
     // Neutralize carousel automatic sliding.
@@ -95,10 +96,13 @@ test.tags("desktop")("dynamic snippet carousel loads items and displays them thr
     await advanceTime(1000); // Slide duration.
     expect(itemEls[3].closest(".carousel-item")).not.toHaveClass("active");
     expect(itemEls[4].closest(".carousel-item")).toHaveClass("active");
-    // TODO Make sure element interactions are started.
-    // expect(itemEls[0].dataset.started).toBe("*test*");
-    // expect(itemEls[1].dataset.started).toBe("*test2*");
-    // expect(itemEls[2].dataset.started).toBe("*test3");
-    // expect(itemEls[3].dataset.started).toBe("*test4*");
-    // expect(itemEls[4].dataset.started).toBe("*test5*");
+    // Make sure element interactions are started.
+    expect(itemEls[0].dataset.started).toBe("*test*");
+    expect(itemEls[1].dataset.started).toBe("*test2*");
+    expect(itemEls[2].dataset.started).toBe("*test3*");
+    expect(itemEls[3].dataset.started).toBe("*test4*");
+    expect(itemEls[4].dataset.started).toBe("*test5*");
+    core.stopInteractions();
+    // Make sure element interactions are stopped.
+    expect(core.interactions.length).toBe(0);
 });

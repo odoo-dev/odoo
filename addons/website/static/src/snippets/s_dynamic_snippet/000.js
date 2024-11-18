@@ -48,19 +48,12 @@ export class DynamicSnippet extends Interaction {
         // TODO Editor behavior.
         // this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive();
         this.toggleVisibility(false);
-        this.clearContent();
+        // Clear content.
+        const templateAreaEl = this.el.querySelector(".dynamic_snippet_template");
+        // Nested interactions are stopped implicitly.
+        templateAreaEl.replaceChildren();
         // TODO Editor behavior.
         // this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerActive();
-    }
-    clearContent() {
-        const templateAreaEl = this.el.querySelector(".dynamic_snippet_template");
-        /*
-        this.stopInteraction(templateAreaEl); // TODO Support something like that.
-        this.trigger_up('widgets_stop_request', {
-            target: templateAreaEl,
-        });
-        */
-        templateAreaEl.replaceChildren();
     }
     /**
      * Method to be overridden in child components if additional configuration elements
@@ -147,23 +140,14 @@ export class DynamicSnippet extends Interaction {
             this.renderedContentEl = document.createTextNode("");
         }
         this.renderContent();
-        // TODO Support something like that
-        /*
-        this.trigger_up('widgets_start_request', {
-            target: this.el.children(),
-            options: {parent: this},
-            editableMode: this.editableMode,
-        });
-        */
+        // TODO What was this about ? Rendered content is already started.
+        // for (const childEl of this.el.children) {
+        //     this.services.website_core.startInteractions(childEl);
+        // }
     }
     renderContent() {
         const templateAreaEl = this.el.querySelector(".dynamic_snippet_template");
-        // TODO Support something like that
-        /*
-        this.trigger_up('widgets_stop_request', {
-            target: templateAreaEl,
-        });
-        */
+        this.services.website_core.stopInteractions(templateAreaEl);
         const mainPageUrl = this.getMainPageUrl();
         const allContentLink = this.el.querySelector(".s_dynamic_snippet_main_page_url");
         if (allContentLink && mainPageUrl) {
@@ -174,13 +158,7 @@ export class DynamicSnippet extends Interaction {
         // TODO this is probably not the only public widget which creates DOM
         // which should be attached to another public widget. Maybe a generic
         // method could be added to properly do this operation of DOM addition.
-        // TODO Support something like that
-        /*
-        this.trigger_up('widgets_start_request', {
-            target: templateAreaEl,
-            editableMode: this.editableMode,
-        });
-        */
+        this.services.website_core.startInteractions(templateAreaEl);
         // Same as above and probably should be done automatically for any
         // bootstrap behavior (apparently needed since BS 5.3): start potential
         // carousel in new content (according to their data-bs-ride and other

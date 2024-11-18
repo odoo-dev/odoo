@@ -2,6 +2,7 @@ import { registry } from "@web/core/registry";
 import { Interaction } from "@website/core/interaction";
 import { uniqueId } from "@web/core/utils/functions";
 import { renderToElement } from "@web/core/utils/render";
+import { isVisible } from "@html_editor/utils/dom_info";
 
 
 export class GalleryWidget extends Interaction {
@@ -71,21 +72,15 @@ export class GalleryWidget extends Interaction {
             for (const backdropEl of this.modalEl.querySelectorAll(".modal-backdrop")) {
                 backdropEl.remove(); // bootstrap leaves a modal-backdrop
             }
+            const slideshowEl = this.modalEl.querySelector(".modal-body.o_slideshow");
+            this.services.website_core.stopInteractions(slideshowEl);
             this.modalEl.removeEventListener("keydown", this.__onModalKeydown);
             this.modalEl.remove();
             this.modalEl = undefined;
         });
         this.modalEl.addEventListener("shown.bs.modal", () => {
-            // TODO Start gallery slider interaction. (cleanup was missing)
-            /*
-            this.stop = this.services.website_core.startInteraction(
-                this.modalEl.querySelector(".modal-body.o_slideshow"), { editableMode: false }
-            );
-            this.trigger_up("widgets_start_request", {
-                editableMode: false,
-                target: this.modalEl.querySelector(".modal-body.o_slideshow"),
-            });
-            */
+            const slideshowEl = this.modalEl.querySelector(".modal-body.o_slideshow");
+            this.services.website_core.startInteractions(slideshowEl);
             this.modalEl.addEventListener("keydown", this.__onModalKeydown);
         }, { once: true });
         document.body.append(this.modalEl);

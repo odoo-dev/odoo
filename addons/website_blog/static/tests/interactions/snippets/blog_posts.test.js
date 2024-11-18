@@ -10,16 +10,17 @@ import { startInteractions, setupInteractionWhiteList } from "@website/../tests/
 
 class TestItem extends Interaction {
     static selector = ".s_test_item";
-
-    setup() {
-        this.el.dataset.started = `*${this.el.dataset.testParam}*`;
-    }
+    dynamicContent = {
+        "_root": {
+            "t-att-data-started": (el) => `*${el.dataset.testParam}*`,
+        },
+    };
 }
 registry.category("website.active_elements").add("website_blog.test_blog_post_item", TestItem);
 
-setupInteractionWhiteList("website_blog.blog_posts", "website_blog.test_blog_post_item");
+setupInteractionWhiteList(["website_blog.blog_posts", "website_blog.test_blog_post_item"]);
 
-test("dynamic snippet loads items and displays them through template", async () => {
+test("dynamic snippet blog posts loads items and displays them through template", async () => {
     onRpc("/website/snippet/filters", async (args) => {
         for await (const chunk of args.body) {
             const json = JSON.parse(new TextDecoder().decode(chunk));
@@ -66,12 +67,15 @@ test("dynamic snippet loads items and displays them through template", async () 
           </section>
       </div>
     `);
-    expect(core.interactions.length).toBe(1);
+    expect(core.interactions.length).toBe(3);
     const contentEl = el.querySelector(".dynamic_snippet_template");
     const itemEls = contentEl.querySelectorAll(".s_test_item");
     expect(itemEls[0].dataset.testParam).toBe("test");
     expect(itemEls[1].dataset.testParam).toBe("test2");
-    // TODO Make sure element interactions are started.
-    // expect(itemEls[0].dataset.started).toBe("*test*");
-    // expect(itemEls[1].dataset.started).toBe("*test2*");
+    // Make sure element interactions are started.
+    expect(itemEls[0].dataset.started).toBe("*test*");
+    expect(itemEls[1].dataset.started).toBe("*test2*");
+    core.stopInteractions();
+    // Make sure element interactions are stopped.
+    expect(core.interactions.length).toBe(0);
 });
