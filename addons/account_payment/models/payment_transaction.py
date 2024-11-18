@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import SUPERUSER_ID, _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class PaymentTransaction(models.Model):
@@ -106,7 +107,12 @@ class PaymentTransaction(models.Model):
         super()._post_process()
         for tx in self.filtered(lambda t: t.state == 'done'):
             # Validate invoices automatically once the transaction is confirmed.
-            self.invoice_ids.filtered(lambda inv: inv.state == 'draft').action_post()
+            try:
+                with self.env.cr.savepoint():
+                    self.invoice_ids.filtered(lambda inv: inv.state == 'draft').action_post()
+            except UserError as e:
+                self.invoice_ids.message_post(body=e.args[0], author_id=self.partner_id.id)
+                self.env.cr.commit()
 
             # Create and post missing payments.
             # As there is nothing to reconcile for validation transactions, no payment is created
