@@ -113,7 +113,7 @@ class WebsiteCore {
 
     stopInteractions(el = this.el) {
         const interactions = [];
-        for (let interaction of this.interactions) {
+        for (let interaction of this.interactions.slice().reverse()) {
             if (el === interaction.el || el.contains(interaction.el)) {
                 interaction.destroy();
                 this.activeInteractions.delete(interaction.el, interaction.I);
@@ -123,7 +123,7 @@ class WebsiteCore {
         }
         this.interactions = interactions;
         const roots = [];
-        for (let root of this.roots) {
+        for (let root of this.roots.slice().reverse()) {
             if (el === root.el || el.contains(root.el)) {
                 root.destroy();
                 this.activeInteractions.delete(root.el, root.C);

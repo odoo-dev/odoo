@@ -45,6 +45,27 @@ test("starting interactions twice should only actually do it once", async () => 
     expect(n).toBe(1);
 });
 
+test("interactions are stopped in reverse order", async () => {
+    let n = 1;
+    class Test extends Interaction {
+        static selector = ".test";
+
+        setup() {
+            this.n = n++;
+            expect.step(`setup ${this.n}`);
+        }
+        destroy() {
+            expect.step(`destroy ${this.n}`);
+        }
+    }
+
+    const { core } = await startInteraction(Test, `<div class="test"></div><div class="test"></div>`);
+    expect.verifySteps(["setup 1", "setup 2"]);
+    core.stopInteractions();
+    expect.verifySteps(["destroy 2", "destroy 1"]);
+});
+
+
 
 test("can mount a component", async () => {
     class Test extends Component {
