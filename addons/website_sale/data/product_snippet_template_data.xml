@@ -461,4 +461,11 @@
             <field name="path">website_sale/static/src/snippets/s_dynamic_snippet_products/000.scss</field>
         </record>
 
+        <!-- TODO Remove once put back inside 000.js -->
+        <record id="website_sale.s_dynamic_snippet_products_000new_js" model="ir.asset">
+            <field name="name">Dynamic snippet products 000new JS</field>
+            <field name="bundle">web.assets_frontend</field>
+            <field name="path">website_sale/static/src/snippets/s_dynamic_snippet_products/000new.js</field>
+        </record>
+
 </odoo>
