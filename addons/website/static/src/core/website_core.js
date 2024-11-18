@@ -27,10 +27,9 @@ import { PairSet } from "./utils";
 
 const activeElementRegistry = registry.category("website.active_elements");
 
-
 class WebsiteCore {
-    constructor(env) {
-        this.el = document.querySelector("#wrapwrap");
+    constructor(el, env) {
+        this.el = el;
         this.isActive = false;
         // relation el <--> Interaction
         this.activeInteractions = new PairSet();
@@ -39,7 +38,19 @@ class WebsiteCore {
         this.roots = [];
         this.colibriApp = new ColibriApp(this.env);
         this.owlApp = null;
-        this.proms = [];
+        this.proms = [
+            env.isReady.then(() => {
+                this.startInteractions();
+                activeElementRegistry.addEventListener("UPDATE", async (ev) => {
+                    if (this.isActive) {
+                        const { operation } = ev.detail;
+                        if (operation !== "delete") {
+                            this.startInteractions();
+                        }
+                    }
+                });
+            }),
+        ];
     }
 
     async _mountComponent(el, C) {
@@ -57,7 +68,7 @@ class WebsiteCore {
             this.owlApp = new App(null, appConfig);
         }
         const root = this.owlApp.createRoot(C, { props: null, env: this.env });
-        this.roots.push(Object.assign(root, {el, C}));
+        this.roots.push(Object.assign(root, { el, C }));
         const compElem = document.createElement("owl-component");
         compElem.setAttribute("contenteditable", "false");
         compElem.dataset.oeProtected = "true";
@@ -117,10 +128,10 @@ class WebsiteCore {
                 root.destroy();
                 this.activeInteractions.delete(root.el, root.C);
             } else {
-                roots.push(root)
+                roots.push(root);
             }
         }
-        this.roots = roots;;
+        this.roots = roots;
         if (el === this.el) {
             this.isActive = false;
         }
@@ -140,18 +151,11 @@ class WebsiteCore {
 registry.category("services").add("website_core", {
     dependencies: ["localization"],
     async start(env) {
-        const websiteCore = new WebsiteCore(env);
-        activeElementRegistry.addEventListener("UPDATE", async (ev) => {
-            if (websiteCore.isActive) {
-                const { operation, key: name, value: I } = ev.detail;
-                if (operation !== "delete") {
-                    websiteCore._startInteraction(name, I);
-                }
-            }
-        });
-        websiteCore.proms.push(
-            env.isReady.then(() => websiteCore.startInteractions()),
-        );
-        return websiteCore;
+        const el = document.querySelector("#wrapwrap");
+        if (!el) {
+            // if this is an issue, maybe we should make the wrapwrap configurable
+            return null;
+        }
+        return new WebsiteCore(el, env);
     },
 });

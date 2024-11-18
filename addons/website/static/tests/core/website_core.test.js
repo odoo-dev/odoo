@@ -1,9 +1,17 @@
 import { expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 
+import { Component, xml } from "@odoo/owl";
+import { makeMockEnv } from "@web/../tests/web_test_helpers";
 import { Interaction } from "@website/core/interaction";
 import { startInteraction } from "./helpers";
-import { Component, xml } from "@odoo/owl";
+
+test("properly handles case where we have no match for wrapwrap", async () => {
+    const env = await makeMockEnv();
+    expect(env.services.website_core).toBe(null);
+
+});
+
 
 test("wait for translation before starting interactions", async () => {
     let flag = false;
