@@ -7,8 +7,6 @@ import {
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 import { registry } from "@web/core/registry";
 
-defineMailModels();
-
 let activeInteractions = null;
 let elementRegistry = registry.category("website.active_elements");
 let content = elementRegistry.content;
@@ -30,6 +28,7 @@ export async function startInteractions(
     html,
     options = { waitForStart: true },
 ) {
+    defineMailModels();
     const fixture = getFixture();
     if (!html.includes("wrapwrap")) {
         html = `<div id="wrapwrap">${html}</div>`;
