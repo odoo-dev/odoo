@@ -46,3 +46,62 @@ test("can mount a component", async () => {
     const {el} = await startInteraction(Test, `<div class="test"></div>`);
     expect(el.querySelector(".test").innerHTML).toBe(`<owl-component contenteditable="false" data-oe-protected="true">owl component</owl-component>`);
 });
+
+test("can start interaction in specific el", async () => {
+    let n = 0;
+    class Test extends Interaction {
+        static selector = ".test";
+        dynamicContent = {
+            "_root:t-att-a": () => "b",
+        }
+
+        setup() {
+            n++;
+        }
+    }
+
+    const { core, el } = await startInteraction(Test, `<p></p>`);
+
+    expect(n).toBe(0);
+    const p = el.querySelector("p");
+    p.innerHTML = `<div class="test">hello</div>`;
+    core.startInteractions(el);
+    await animationFrame();
+    expect(n).toBe(1);
+    expect(p.innerHTML).toBe(`<div class="test" a="b">hello</div>`);
+});
+
+test("can start and stop interaction in specific el", async () => {
+    let n = 0;
+    class Test extends Interaction {
+        static selector = ".test";
+
+        start() {
+            n++;
+            this.el.dataset.start = "true";
+        }
+        destroy() {
+            n--;
+            delete this.el.dataset.start;
+        }
+    }
+
+    const { core, el } = await startInteraction(Test, `
+        <p>
+            <span class="a test"></span>
+            <span class="b"></span>
+        </p>`);
+
+    expect(n).toBe(1);
+    const p = el.querySelector("p");
+    expect(p).toHaveInnerHTML(`<span class="a test" data-start="true"></span> <span class="b"></span>`)
+    
+    p.querySelector(".b").classList.add("test");
+    await core.startInteractions(p.querySelector(".b"));
+    expect(n).toBe(2);
+    expect(p).toHaveInnerHTML(`<span class="a test" data-start="true"></span> <span class="b test" data-start="true"></span>`)
+
+    core.stopInteractions(p.querySelector(".b"));
+    expect(n).toBe(1);
+    expect(p).toHaveInnerHTML(`<span class="a test" data-start="true"></span> <span class="b test"></span>`)
+});

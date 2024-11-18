@@ -3,6 +3,7 @@ import { _t } from "@web/core/l10n/translation";
 import { Interaction } from "./interaction";
 import { ColibriApp } from "./colibri";
 import { getTemplate } from "@web/core/templates";
+import { PairSet } from "./utils";
 
 /**
  * Website Core
@@ -26,10 +27,13 @@ import { getTemplate } from "@web/core/templates";
 
 const activeElementRegistry = registry.category("website.active_elements");
 
+
 class WebsiteCore {
     constructor(env) {
         this.el = document.querySelector("#wrapwrap");
         this.isActive = false;
+        // relation el <--> Interaction
+        this.activeInteractions = new PairSet();
         this.env = env;
         this.interactions = [];
         this.roots = [];
@@ -53,7 +57,7 @@ class WebsiteCore {
             this.owlApp = new App(null, appConfig);
         }
         const root = this.owlApp.createRoot(C, { props: null, env: this.env });
-        this.roots.push(root);
+        this.roots.push(Object.assign(root, {el, C}));
         const compElem = document.createElement("owl-component");
         compElem.setAttribute("contenteditable", "false");
         compElem.dataset.oeProtected = "true";
@@ -61,20 +65,20 @@ class WebsiteCore {
         return root.mount(compElem);
     }
 
-    startInteractions() {
+    startInteractions(el = this.el) {
         const proms = [];
-        if (!this.isActive) {
-            for (const [name, I] of activeElementRegistry.getEntries()) {
-                if (this.el.matches(I.selector)) {
+        for (const [name, I] of activeElementRegistry.getEntries()) {
+            if (el.matches(I.selector)) {
+                // console.log("starting", name);
+                this._startInteraction(el, I, proms);
+            } else {
+                for (let _el of el.querySelectorAll(I.selector)) {
                     // console.log("starting", name);
-                    proms.push(this._startInteraction(this.el, I));
-                } else {
-                    for (let el of this.el.querySelectorAll(I.selector)) {
-                        // console.log("starting", name);
-                        proms.push(this._startInteraction(el, I));
-                    }
+                    this._startInteraction(_el, I, proms);
                 }
             }
+        }
+        if (el === this.el) {
             this.isActive = true;
         }
         const prom = Promise.all(proms);
@@ -82,26 +86,42 @@ class WebsiteCore {
         return prom;
     }
 
-    _startInteraction(el, I) {
+    _startInteraction(el, I, proms) {
+        if (this.activeInteractions.has(el, I)) {
+            return;
+        }
+        this.activeInteractions.add(el, I);
         if (I.prototype instanceof Interaction) {
             const interaction = this.colibriApp.attachTo(el, I);
             this.interactions.push(interaction);
-            return interaction.startProm;
+            proms.push(interaction.startProm);
         } else {
-            return this._mountComponent(el, I);
+            proms.push(this._mountComponent(el, I));
         }
     }
 
-    stopInteractions() {
-        if (this.isActive) {
-            for (let interaction of this.interactions) {
+    stopInteractions(el = this.el) {
+        const interactions = [];
+        for (let interaction of this.interactions) {
+            if (el === interaction.el || el.contains(interaction.el)) {
                 interaction.destroy();
+                this.activeInteractions.delete(interaction.el, interaction.I);
+            } else {
+                interactions.push(interaction);
             }
-            this.interactions = [];
-            for (let root of this.roots) {
+        }
+        this.interactions = interactions;
+        const roots = [];
+        for (let root of this.roots) {
+            if (el === root.el || el.contains(root.el)) {
                 root.destroy();
+                this.activeInteractions.delete(root.el, root.C);
+            } else {
+                roots.push(root)
             }
-            this.roots = [];
+        }
+        this.roots = roots;;
+        if (el === this.el) {
             this.isActive = false;
         }
     }

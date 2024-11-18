@@ -9,6 +9,8 @@ let Markup = null;
 export class Colibri {
     constructor(app, I, el, env) {
         this.app = app;
+        this.el = el;
+        this.I = I;
         this.update = null;
         this.dynamicAttrs = [];
         this.tOuts = [];
