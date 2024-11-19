@@ -111,7 +111,12 @@ export class Colibri {
                 this.addListener(nodes, ev, value);
             } else if (directive.startsWith("t-att-")) {
                 const attr = directive.slice(6);
-                this.dynamicAttrs.push([nodes, attr, value]);
+                const initialValues = new Map();
+                for (let node of nodes) {
+                    const value = node.getAttribute(attr);
+                    initialValues.set(node, value);
+                }
+                this.dynamicAttrs.push([nodes, attr, value, initialValues]);
             } else if (directive === "t-out") {
                 this.tOuts.push([nodes, value]);
             } else {
@@ -140,6 +145,19 @@ export class Colibri {
     }
 
     destroy() {
+        // restore t-att to their initial values
+        for (let dynAttrs of this.dynamicAttrs) {
+            const [nodes, attr, _, initialValues] = dynAttrs;
+            for (let node of nodes) {
+                const initialValue = initialValues.get(node);
+                if (initialValue) {
+                    node.setAttribute(attr, initialValue);
+                } else {
+                    node.removeAttribute(attr);
+                }
+            }
+        }
+
         for (let cleanup of this.cleanups.reverse()) {
             cleanup();
         }

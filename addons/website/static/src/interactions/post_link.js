@@ -5,15 +5,11 @@ import { Interaction } from "@website/core/interaction";
 class PostLink extends Interaction {
     static selector = ".post_link";
     dynamicContent = {
-        "_root:t-on-click": this.onClickPost,
+        "_root": {
+            "t-on-click": this.onClickPost,
+            "t-att-class": () => ({"o_post_link_js_loaded": true})
+        }
     };
-
-    setup() {
-        this.el.classList.add("o_post_link_js_loaded");
-    }
-    destroy() {
-        this.el.classList.remove("o_post_link_js_loaded");
-    }
 
     onClickPost(ev) {
         ev.preventDefault();

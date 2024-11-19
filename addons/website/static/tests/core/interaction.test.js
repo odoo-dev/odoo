@@ -528,13 +528,18 @@ describe("dynamic attributes", () => {
             };
         }
 
-        const { el } = await startInteraction(
+        const { el, core } = await startInteraction(
             Test,
             `<div class="test"><span>coucou</span></div>`,
         );
         expect(el.querySelector(".test").outerHTML).toBe(
             `<div class="test" a="b"><span>coucou</span></div>`,
         );
+        core.stopInteractions();
+        expect(el.querySelector(".test").outerHTML).toBe(
+            `<div class="test"><span>coucou</span></div>`,
+        );
+
     });
 
     test("t-att-class does not override existing classes", async () => {
