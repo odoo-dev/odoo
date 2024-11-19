@@ -299,6 +299,7 @@
             'website/static/src/snippets/*/*.xml',
             'website/static/src/xml/website_form.xml',
             'google_recaptcha/static/src/js/recaptcha.js',
+            'website/static/src/snippets/s_countdown/000.js',
         ],
         'web.tests_assets': [
             'website/static/tests/website_service_mock.js',
