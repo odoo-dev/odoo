@@ -30,7 +30,6 @@ export class DynamicSnippet extends Interaction {
          */
         this.data = [];
         this.renderedContentEl = document.createTextNode("");
-        this.isDesplayedAsMobile = uiUtils.isSmall();
         this.uniqueId = uniqueId("s_dynamic_snippet_");
         this.templateKey = "website.s_dynamic_snippet.grid";
     }
@@ -38,7 +37,7 @@ export class DynamicSnippet extends Interaction {
         return this.fetchData();
     }
     start() {
-        this.setupSizeChangedManagement(true);
+        this.registerCleanup(listenSizeChange(this.render.bind(this)));
         // TODO Editor behavior.
         // this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive();
         this.render();
@@ -49,7 +48,6 @@ export class DynamicSnippet extends Interaction {
         // TODO Editor behavior.
         // this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive();
         this.toggleVisibility(false);
-        this.setupSizeChangedManagement(false);
         this.clearContent();
         // TODO Editor behavior.
         // this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerActive();
@@ -204,18 +202,6 @@ export class DynamicSnippet extends Interaction {
     }
     /**
      *
-     * @param {Boolean} enable
-     */
-    setupSizeChangedManagement(enable) {
-        if (enable === true) {
-            this.removeSizeListener = listenSizeChange(this.sizeChanged.bind(this));
-        } else if (this.removeSizeListener) {
-            this.removeSizeListener();
-            delete this.removeSizeListener;
-        }
-    }
-    /**
-     *
      * @param visible
      */
     toggleVisibility(visible) {
@@ -237,15 +223,6 @@ export class DynamicSnippet extends Interaction {
      */
     callToAction(ev) {
         window.location = ev.currentTarget.dataset.url;
-    }
-    /**
-     * Called when the size has reached a new bootstrap breakpoint.
-     */
-    sizeChanged() {
-        if (this.isDesplayedAsMobile !== uiUtils.isSmall()) {
-            this.isDesplayedAsMobile = uiUtils.isSmall();
-            this.render();
-        }
     }
 }
 
