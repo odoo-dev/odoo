@@ -78,7 +78,11 @@ export class Colibri {
                 }
             }
         } else {
-            el.setAttribute(attr, value);
+            if (value) {
+                el.setAttribute(attr, value);
+            } else {
+                el.removeAttribute(attr);
+            }
         }
     }
 

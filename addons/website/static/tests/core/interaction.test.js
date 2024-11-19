@@ -592,6 +592,23 @@ describe("dynamic attributes", () => {
         );
     });
 
+    test("t-att- can remove an attribute with undefined", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            dynamicContent = {
+                "_root:t-att-a": () => undefined,
+            };
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<span a="b">coucou</span>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span>coucou</span>`,
+        );
+    });
+
     test("t-att-class can add multiple classes", async () => {
         class Test extends Interaction {
             static selector = "span";
