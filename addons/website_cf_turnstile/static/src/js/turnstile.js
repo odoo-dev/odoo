@@ -57,10 +57,14 @@ publicWidget.registry.s_website_form.include({
         ) {
             this.uniq = uniqueId("turnstile_");
             this.el.classList.add(this.uniq);
-            addTurnstile(
+            const [turnstileEl, script1El, script2El] = addTurnstile(
                 "website_form",
                 `.${this.uniq} .s_website_form_send,.${this.uniq} .o_website_form_send`,
             );
+            const formSendEl = this.el.querySelector(".s_website_form_send, .o_website_form_send");
+            formSendEl.parentNode.insertBefore(turnstileEl, formSendEl.nextSibling);
+            formSendEl.parentNode.insertBefore(script1El, formSendEl.nextSibling);
+            formSendEl.parentNode.insertBefore(script2El, formSendEl.nextSibling);
         }
         const res = this._super(...arguments);
         return res;
