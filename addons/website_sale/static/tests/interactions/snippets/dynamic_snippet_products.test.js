@@ -20,7 +20,7 @@ registry.category("website.active_elements").add("website_sale.test_dynamic_caro
 
 setupInteractionWhiteList(["website_sale.dynamic_snippet_products", "website_sale.test_dynamic_carousel_products_item"]);
 
-test("dynamic snippet products loads items and displays them through template", async () => {
+test.tags("desktop")("dynamic snippet products loads items and displays them through template", async () => {
     document.querySelector("html").dataset.mainObject = "product.public.category(2,)";
     onRpc("/website/snippet/filters", async (args) => {
         for await (const chunk of args.body) {
