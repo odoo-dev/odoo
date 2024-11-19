@@ -14,6 +14,7 @@ export class GalleryWidget extends Interaction {
     };
 
     setup() {
+        this.modalEl = null;
         this.originalSources = [...this.el.querySelectorAll("img")].map(img => img.getAttribute("src"));
     }
 
@@ -44,8 +45,8 @@ export class GalleryWidget extends Interaction {
             return cloneEl;
         });
 
-        var size = 0.8;
-        var dimensions = {
+        const size = 0.8;
+        const dimensions = {
             min_width: Math.round(window.innerWidth * size * 0.9),
             min_height: Math.round(window.innerHeight * size),
             max_width: Math.round(window.innerWidth * size * 0.9),
@@ -140,12 +141,9 @@ export class GallerySliderWidget extends Interaction {
 
         this.update();
 
-        this.boundSlide = this.slide.bind(this);
-        this.boundClickIndicator = this.clickIndicator.bind(this);
-        this.boundUpdate = this.update.bind(this);
-        this.carouselEl.addEventListener("slide.bs.carousel", this.boundSlide);
-        this.indicatorEl.addEventListener("click", this.boundClickIndicator); // Delegate on "> li:not([data-bs-slide-to])"
-        this.carouselEl.addEventListener("slid.bs.carousel", this.boundUpdate);
+        this.addDomListener(this.carouselEl, "slide.bs.carousel", this.slide);
+        this.addDomListener(this.carouselEl, "slid.bs.carousel", this.update);
+        this.addDomListener(this.indicatorEl, "click", this.clickIndicator);// Delegate on "> li:not([data-bs-slide-to])"
     }
     slide(ev) {
         this.waitForTimeout(() => {
@@ -201,25 +199,15 @@ export class GallerySliderWidget extends Interaction {
         this.hide();
     }
     destroy() {
-        if (!this.indicatorEl) {
-            return;
-        }
         if (this.prevEl) {
             this.indicatorEl.prepend(this.prevEl);
         }
         if (this.nextEl) {
             this.indicatorEl.append(this.nextEl);
         }
-        this.carouselEl.removeEventListener("slide.bs.carousel", this.boundSlide);
-        this.indicatorEl.removeEventListener("click", this.boundClickIndicator);
-        this.carouselEl.removeEventListener("slid.bs.carousel", this.boundUpdate);
     }
 }
 
 registry.category("website.active_elements").add("website.gallery", GalleryWidget);
 registry.category("website.active_elements").add("website.gallery_slider", GallerySliderWidget);
 
-export default {
-    GalleryWidget: GalleryWidget,
-    GallerySliderWidget: GallerySliderWidget,
-};
