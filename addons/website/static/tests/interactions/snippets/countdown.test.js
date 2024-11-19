@@ -10,7 +10,7 @@ test("countdown interaction does not activate without .s_countdown", async () =>
 });
 
 test("countdown interaction activate with a .s_countdown", async () => {
-    const endTime = 1731670697529;
+    const endTime = 12345678900;
     const { core } = await startInteractions(`
         <div style="background-color: white;"> 
             <section class="s_countdown pt48 pb48"
@@ -42,7 +42,7 @@ test("countdown interaction activate with a .s_countdown", async () => {
 
 
 test("countdown interaction update the canvas for seconds correctly", async () => {
-    const endTime = 1731670697529;
+    const endTime = 12345678900;
     const { core, el } = await startInteractions(`
         <div style="background-color: white;"> 
             <section class="s_countdown pt48 pb48"

@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { isCSSColor } from '@web/core/utils/colors';
 import { renderToElement } from "@web/core/utils/render";
-import { getCSSVariableValue } from "@html_editor/utils/formatting"
+import { getCSSVariableValue, getHtmlStyle } from "@html_editor/utils/formatting";
 
 class Countdown extends Interaction {
     static selector = '.s_countdown';
@@ -58,11 +58,11 @@ class Countdown extends Interaction {
     }
 
     destroy() {
-        this.el.querySelector('.s_countdown_end_redirect_message').remove();
-        this.el.querySelector('.s_countdown_end_message').addClass('d-none');
-        this.el.querySelector('.s_countdown_text_wrapper').remove();
-        this.el.querySelector('.s_countdown_canvas_wrapper').removeClass('d-none');
-        this.el.querySelector('.s_countdown_canvas_flex').remove();
+        this.el.querySelector('.s_countdown_end_redirect_message')?.remove();
+        this.el.querySelector('.s_countdown_end_message')?.classList.add('d-none');
+        this.el.querySelector('.s_countdown_text_wrapper')?.remove();
+        this.el.querySelector('.s_countdown_canvas_wrapper')?.classList.remove('d-none');
+        this.el.querySelector('.s_countdown_canvas_flex')?.remove();
 
         clearInterval(this.setInterval);
     }
@@ -77,7 +77,7 @@ class Countdown extends Interaction {
         if (isCSSColor(color)) {
             return color;
         }
-        return getCSSVariableValue(color);
+        return getCSSVariableValue(color, getHtmlStyle(document)) || "";
     }
 
     /**
