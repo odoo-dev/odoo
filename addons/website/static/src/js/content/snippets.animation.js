@@ -760,65 +760,6 @@ registry.backgroundVideo = publicWidget.Widget.extend(MobileYoutubeAutoplayMixin
     },
 });
 
-registry.FullScreenHeight = publicWidget.Widget.extend({
-    selector: '.o_full_screen_height',
-    disabledInEditableMode: false,
-
-    /**
-     * @override
-     */
-    start() {
-        this.inModal = !!this.el.closest('.modal');
-
-        // TODO maybe review the way the public widgets work for non-visible-at-
-        // load snippets -> probably better to not do anything for them and
-        // start the widgets only once they become visible..?
-        if (this.$el.is(':not(:visible)') || this.$el.outerHeight() > this._computeIdealHeight()) {
-            // Only initialize if taller than the ideal height as some extra css
-            // rules may alter the full-screen-height class behavior in some
-            // cases (blog...).
-            this._adaptSize();
-            $(window).on('resize.FullScreenHeight', debounce(() => this._adaptSize(), 250));
-        }
-        return this._super(...arguments);
-    },
-    /**
-     * @override
-     */
-    destroy() {
-        this._super(...arguments);
-        $(window).off('.FullScreenHeight');
-        this.el.style.setProperty('min-height', '');
-    },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-    _adaptSize() {
-        const height = this._computeIdealHeight();
-        this.el.style.setProperty('min-height', `${height}px`, 'important');
-    },
-    /**
-     * @private
-     */
-    _computeIdealHeight() {
-        const windowHeight = $(window).outerHeight();
-        if (this.inModal) {
-            return windowHeight;
-        }
-
-        // Doing it that way allows to considerer fixed headers, hidden headers,
-        // connected users, ...
-        const firstContentEl = $('#wrapwrap > main > :first-child')[0]; // first child to consider the padding-top of main
-        const mainTopPos = firstContentEl.getBoundingClientRect().top + document.documentElement.scrollTop;
-        return (windowHeight - mainTopPos);
-    },
-});
-
 registry.WebsiteAnimate = publicWidget.Widget.extend({
     selector: '#wrapwrap',
     disabledInEditableMode: false,
