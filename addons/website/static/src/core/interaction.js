@@ -39,7 +39,7 @@ export class Interaction {
     }
 
     waitForTimeout(fn, delay) {
-        setTimeout(() => {
+        return setTimeout(() => {
             if (!this.isDestroyed) {
                 fn();
                 this.updateContent();
