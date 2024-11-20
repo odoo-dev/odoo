@@ -28,7 +28,7 @@ export class Colibri {
                 const content = interaction.dynamicContent;
                 if (content) {
                     this.processContent(content);
-                    this.update();
+                    this.updateContent();
                 } else if (I.dynamicContent) {
                     throw new Error(`The dynamic content object should be defined on the instance, not on the class (${I.name})`);
                 }
@@ -37,14 +37,10 @@ export class Colibri {
         );
     }
 
-    scheduleUpdate() {
-        this.app.schedule(this);
-    }
-
     addDomListener(nodes, event, fn, options) {
         const handler = (ev) => {
             fn.call(this.interaction, ev);
-            this.scheduleUpdate();
+            this.updateContent();
         };
         for (let node of nodes) {
             node.addEventListener(event, handler, options);
@@ -126,20 +122,21 @@ export class Colibri {
             }
         }
 
-        this.update = () => {
-            const interaction = this.interaction;
-            for (let [nodes, attr, fn] of this.dynamicAttrs) {
-                for (let node of nodes) {
-                    const value = fn.call(interaction, node);
-                    this.applyAttr(node, attr, value);
-                }
+    }
+
+    updateContent() {
+        const interaction = this.interaction;
+        for (let [nodes, attr, fn] of this.dynamicAttrs) {
+            for (let node of nodes) {
+                const value = fn.call(interaction, node);
+                this.applyAttr(node, attr, value);
             }
-            for (let [nodes, fn] of this.tOuts) {
-                for (let node of nodes) {
-                    this.applyTOut(node, fn.call(interaction, node));
-                }
+        }
+        for (let [nodes, fn] of this.tOuts) {
+            for (let node of nodes) {
+                this.applyTOut(node, fn.call(interaction, node));
             }
-        };
+        }
     }
 
     destroy() {
@@ -157,8 +154,6 @@ export class Colibri {
 }
 
 export class ColibriApp {
-    frame = null;
-    queue = new Set(); // interactions to update next frame
 
     constructor(env) {
         this.env = env;
@@ -169,26 +164,6 @@ export class ColibriApp {
         return colibri;
     }
 
-    schedule(colibri) {
-        this.queue.add(colibri);
-        if (!this.frame) {
-            this.frame = requestAnimationFrame(() => {
-                this.flush();
-                this.frame = null;
-            });
-        }
-    }
-
-    flush() {
-        for (let colibri of this.queue) {
-            if (!colibri.interaction.isDestroyed) {
-                // if update fn is not set => interaction is not yet started
-                // this is not a problem
-                colibri.update?.();
-            }
-        }
-        this.queue.clear();
-    }
 }
 
 function* generateEntries(content) {

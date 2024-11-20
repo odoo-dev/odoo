@@ -48,7 +48,7 @@ export class Interaction {
     }
 
     updateDOM() {
-        this.__colibri__.scheduleUpdate();
+        this.__colibri__.updateContent();
     }
 
     addDomListener(target, event, fn, options) {
