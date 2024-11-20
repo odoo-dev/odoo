@@ -191,6 +191,8 @@
     'assets': {
         'web.assets_frontend': [
             'website/static/src/interactions/**/*',
+            # Multi-range is an opt-in feature.
+            ('remove', 'website/static/src/interactions/multirange_input.js'),
             'website/static/src/core/**/*',
             ('replace', 'web/static/src/legacy/js/public/public_root_instance.js', 'website/static/src/js/content/website_root_instance.js'),
             'website/static/src/libs/zoomodoo/zoomodoo.scss',
@@ -286,6 +288,7 @@
             'website/static/tests/interactions/**/*',
         ],
         'web.assets_unit_tests_setup': [
+            'website/static/lib/multirange/*.js',
             'website/static/src/core/**/*',
             'website/static/src/interactions/**/*',
             'website/static/src/snippets/s_dynamic_snippet/000.js',
