@@ -193,6 +193,8 @@
             'website/static/src/interactions/**/*',
             # Multi-range is an opt-in feature.
             ('remove', 'website/static/src/interactions/multirange_input.js'),
+            # Activated on-demand by website.ripple_effect_js.
+            ('remove', 'website/static/src/interactions/ripple_effect.js'),
             'website/static/src/core/**/*',
             ('replace', 'web/static/src/legacy/js/public/public_root_instance.js', 'website/static/src/js/content/website_root_instance.js'),
             'website/static/src/libs/zoomodoo/zoomodoo.scss',
