@@ -212,13 +212,13 @@ describe("event handling", () => {
         expect(clicked).toBe(1);
     });
 
-    test("listener added with addDomListener is cleaned up", async () => {
+    test("listener added with addListener is cleaned up", async () => {
         let clicked = 0;
         class Test extends Interaction {
             static selector = ".test";
 
             setup() {
-                this.addDomListener("span", "click", this.doSomething);
+                this.addListener("span", "click", this.doSomething);
             }
             doSomething() {
                 clicked++;
@@ -423,7 +423,7 @@ describe("lifecycle", () => {
         );
         expect.verifySteps(["willStart"]);
         // trigger an update
-        interaction.updateDOM();
+        interaction.updateContent();
 
         await animationFrame();
         expect.verifySteps([]);
@@ -695,7 +695,7 @@ describe("dynamic attributes", () => {
         expect(el.querySelector("span").outerHTML).toBe(
             `<span class="b">coucou</span>`,
         );
-        interaction.updateDOM();
+        interaction.updateContent();
         await animationFrame();
         expect(el.querySelector("span").outerHTML).toBe(
             `<span class="b a">coucou</span>`,

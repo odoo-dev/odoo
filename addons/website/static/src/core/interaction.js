@@ -33,7 +33,7 @@ export class Interaction {
             const result = await fn();
             if (!this.isDestroyed) {
                 resolve(result);
-                this.updateDOM();
+                this.updateContent();
             }
         });
     }
@@ -42,21 +42,21 @@ export class Interaction {
         setTimeout(() => {
             if (!this.isDestroyed) {
                 fn();
-                this.updateDOM();
+                this.updateContent();
             }
         }, delay);
     }
 
-    updateDOM() {
+    updateContent() {
         this.__colibri__.updateContent();
     }
 
-    addDomListener(target, event, fn, options) {
+    addListener(target, event, fn, options) {
         const nodes =
             typeof target === "string"
                 ? this.el.querySelectorAll(target)
                 : [target];
-        this.__colibri__.addDomListener(nodes, event, fn, options);
+        this.__colibri__.addListener(nodes, event, fn, options);
     }
 
     registerCleanup(fn) {

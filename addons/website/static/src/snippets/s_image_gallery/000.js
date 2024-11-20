@@ -141,9 +141,9 @@ export class GallerySliderWidget extends Interaction {
 
         this.update();
 
-        this.addDomListener(this.carouselEl, "slide.bs.carousel", this.slide);
-        this.addDomListener(this.carouselEl, "slid.bs.carousel", this.update);
-        this.addDomListener(this.indicatorEl, "click", this.clickIndicator);// Delegate on "> li:not([data-bs-slide-to])"
+        this.addListener(this.carouselEl, "slide.bs.carousel", this.slide);
+        this.addListener(this.carouselEl, "slid.bs.carousel", this.update);
+        this.addListener(this.indicatorEl, "click", this.clickIndicator);// Delegate on "> li:not([data-bs-slide-to])"
     }
     slide(ev) {
         this.waitForTimeout(() => {
