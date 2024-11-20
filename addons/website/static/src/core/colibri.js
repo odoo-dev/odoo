@@ -192,8 +192,12 @@ export class Colibri {
         const interaction = this.interaction;
         for (const [nodes, attr, fn] of this.dynamicAttrs) {
             for (const node of nodes) {
-                const value = fn.call(interaction, node);
-                this.applyAttr(node, attr, value);
+                try {
+                    const value = fn.call(interaction, node);
+                    this.applyAttr(node, attr, value);
+                } catch (e) {
+                    throw Error(`Error during updateContent of ${attr} with function ${fn}`, { cause: e });
+                }
             }
         }
         for (const [nodes, fn] of this.tOuts) {
