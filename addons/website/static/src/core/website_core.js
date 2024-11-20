@@ -1,9 +1,9 @@
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { Interaction } from "./interaction";
-import { ColibriApp } from "./colibri";
 import { getTemplate } from "@web/core/templates";
 import { PairSet } from "./utils";
+import { Colibri } from "./colibri";
 
 /**
  * Website Core
@@ -36,7 +36,6 @@ class WebsiteCore {
         this.env = env;
         this.interactions = [];
         this.roots = [];
-        this.colibriApp = new ColibriApp(this.env);
         this.owlApp = null;
         this.proms = [
             env.isReady.then(() => {
@@ -103,7 +102,7 @@ class WebsiteCore {
         }
         this.activeInteractions.add(el, I);
         if (I.prototype instanceof Interaction) {
-            const interaction = this.colibriApp.attachTo(el, I);
+            const interaction = new Colibri(I, el, this.env);
             this.interactions.push(interaction);
             proms.push(interaction.startProm);
         } else {
