@@ -78,6 +78,7 @@ export class Form extends Interaction {
         // TODO Translation behavior.
         this.editTranslations = false;
         // this.editTranslations = !!this.getContext(true).edit_translations;
+        this.preFillValues = {};
     }
     async willStart() {
         if (!this.el.classList.contains('s_website_form_no_recaptcha')) {
@@ -85,7 +86,6 @@ export class Form extends Interaction {
             await this.recaptcha.loadLibs();
         }
         // fetch user data (required by fill-with behavior)
-        this.preFillValues = {};
         if (user.userId) {
             this.preFillValues = (await this.services.orm.read(
                 "res.users",
@@ -312,9 +312,9 @@ export class Form extends Interaction {
         }
 
         // Prepare form inputs
-        this.formFields = [];
+        const formFields = [];
         new FormData(this.el).forEach((value, key) => {
-            this.formFields.push({ name: key, value: value });
+            formFields.push({ name: key, value: value });
         });
         for (const inputEntry of this.el.querySelectorAll("input[type=file]:not([disabled])")) {
             const [outerIndex, inputEl] = inputEntry;
@@ -322,7 +322,7 @@ export class Form extends Interaction {
                 const [index, file] = fileEntry;
                 // Index field name as ajax won't accept arrays of files
                 // when aggregating multiple files into a single field value
-                this.formFields.push({
+                formFields.push({
                     name: `${input.name}[${outerIndex}][${index}]`,
                     value: file,
                 });
@@ -332,7 +332,7 @@ export class Form extends Interaction {
         // Serialize form inputs into a single object
         // Aggregate multiple values into arrays
         const formValues = {};
-        this.formFields.forEach((input) => {
+        formFields.forEach((input) => {
             if (input.name in formValues) {
                 // If a value already exists for this field,
                 // we are facing a x2many field, so we store
@@ -387,7 +387,6 @@ export class Form extends Interaction {
         post(this.el.getAttribute("action") + (this.el.dataset.force_action || this.el.dataset.model_name), formData)
         .then(async (resultData) => {
             // Restore send button behavior
-            const buttonEl = this.el.querySelector(".s_website_form_send, .o_website_form_send");
             buttonEl.removeAttribute("disabled");
             buttonEl.classList.remove("disabled"); // !compatibility
             if (!resultData.id) {
