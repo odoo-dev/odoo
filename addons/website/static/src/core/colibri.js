@@ -37,7 +37,7 @@ export class Colibri {
         );
     }
 
-    addDomListener(nodes, event, fn, options) {
+    addListener(nodes, event, fn, options) {
         const handler = (ev) => {
             fn.call(this.interaction, ev);
             this.updateContent();
@@ -108,7 +108,7 @@ export class Colibri {
             const nodes = getNodes(sel);
             if (directive.startsWith("t-on-")) {
                 const ev = directive.slice(5);
-                this.addDomListener(nodes, ev, value);
+                this.addListener(nodes, ev, value);
             } else if (directive.startsWith("t-att-")) {
                 const attr = directive.slice(6);
                 this.dynamicAttrs.push([nodes, attr, value]);
