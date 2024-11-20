@@ -300,7 +300,7 @@ describe("event handling", () => {
         const span = el.querySelector("span");
         expect(span.dataset.count).toBe("1");
         await click(span);
-        expect(span.dataset.count).toBe("1");
+        expect(span.dataset.count).toBe("2");
         await animationFrame();
         expect(span.dataset.count).toBe("2");
     });
