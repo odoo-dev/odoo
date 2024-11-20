@@ -7,8 +7,7 @@ let owl = null;
 let Markup = null;
 
 export class Colibri {
-    constructor(app, I, el, env) {
-        this.app = app;
+    constructor(I, el, env) {
         this.el = el;
         this.I = I;
         this.update = null;
@@ -169,19 +168,6 @@ export class Colibri {
         this.interaction.destroy();
         this.interaction.isDestroyed = true;
     }
-}
-
-export class ColibriApp {
-
-    constructor(env) {
-        this.env = env;
-    }
-
-    attachTo(el, I) {
-        const colibri = new Colibri(this, I, el, this.env);
-        return colibri;
-    }
-
 }
 
 function* generateEntries(content) {
