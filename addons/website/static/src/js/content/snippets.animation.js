@@ -1052,49 +1052,6 @@ registry.FullScreenHeight = publicWidget.Widget.extend({
     },
 });
 
-registry.FooterSlideout = publicWidget.Widget.extend({
-    selector: '#wrapwrap',
-    selectorHas: '.o_footer_slideout',
-    disabledInEditableMode: false,
-
-    /**
-     * @override
-     */
-    async start() {
-        const $main = this.$('> main');
-        const slideoutEffect = $main.outerHeight() >= $(window).outerHeight();
-        this.el.classList.toggle('o_footer_effect_enable', slideoutEffect);
-
-        // On safari, add a pixel div over the footer, after in the DOM, and add
-        // a background attachment on it as it fixes the glitches that appear
-        // when scrolling the page with a footer slide out.
-        // TODO check if the hack is still needed (might have been fixed when
-        // the scrollbar was restored to its natural position).
-        if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
-            this.__pixelEl = document.createElement('div');
-            this.__pixelEl.style.width = `1px`;
-            this.__pixelEl.style.height = `1px`;
-            this.__pixelEl.style.marginTop = `-1px`;
-            this.__pixelEl.style.backgroundColor = "transparent";
-            this.__pixelEl.style.backgroundAttachment = "fixed";
-            this.__pixelEl.style.backgroundImage = "url(/website/static/src/img/website_logo.svg)";
-            this.el.appendChild(this.__pixelEl);
-        }
-
-        return this._super(...arguments);
-    },
-    /**
-     * @override
-     */
-    destroy() {
-        this._super(...arguments);
-        this.el.classList.remove('o_footer_effect_enable');
-        if (this.__pixelEl) {
-            this.__pixelEl.remove();
-        }
-    },
-});
-
 registry.BottomFixedElement = publicWidget.Widget.extend({
     selector: '#wrapwrap',
 
