@@ -1,5 +1,6 @@
 import { expect, test } from "@odoo/hoot";
-import { animationFrame, hover } from "@odoo/hoot-dom";
+import { hover } from "@odoo/hoot-dom";
+import { advanceTime } from "@odoo/hoot-mock";
 import { makeMockEnv, onRoute, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { MockServer } from "@web/../tests/_framework/mock_server/mock_server";
 import { startInteractions, setupInteractionWhiteList } from "../core/helpers";
@@ -45,14 +46,12 @@ test("image shape hover effect changes image on enter & leave", async () => {
     const baseSrc = imgEl.getAttribute("src");
     expect(baseSrc).toBe("/web/image/384-8a55a748/s_banner_3.svg");
     await hover(imgEl);
-    await animationFrame();
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await advanceTime(1);
     const altSrc = imgEl.getAttribute("src");
     expect(altSrc).not.toBe(baseSrc);
     const notImageEl = el.querySelector(".not_image");
     await hover(notImageEl);
-    await animationFrame();
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await advanceTime(1);
     const restoredSrc = imgEl.getAttribute("src");
     expect(restoredSrc).not.toBe(baseSrc);
     expect(restoredSrc).not.toBe(altSrc);
