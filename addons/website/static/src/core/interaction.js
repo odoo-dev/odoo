@@ -59,6 +59,13 @@ export class Interaction {
         this.__colibri__.addListener(nodes, event, fn, options);
     }
 
+    insert(el, locationEl = this.el, position = "beforeend") {
+        locationEl.insertAdjacentElement(position, el);
+        this.registerCleanup(() => {
+            el.remove();
+        });
+    }
+
     registerCleanup(fn) {
         this.__colibri__.cleanups.push(fn);
     }
