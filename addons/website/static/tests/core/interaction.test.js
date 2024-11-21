@@ -130,6 +130,57 @@ describe("event handling", () => {
         expect(clicked).toBe(true);
     });
 
+    test("can add a listener on modal element, if any", async () => {
+        let clicked = false;
+        class Test extends Interaction {
+            static selector = ".test";
+
+            dynamicContent = {
+                "_modal:t-on-click": this.doSomething,
+            };
+            doSomething() {
+                clicked = true;
+            }
+        }
+
+        await startInteraction(
+            Test,
+            `
+            <div class="modal">
+                <div class="test">
+                    <span>coucou</span>
+                </div>
+            </div>`,
+        );
+        expect(clicked).toBe(false);
+        await click(document.querySelector(".modal"));
+        expect(clicked).toBe(true);
+    });
+
+    test("does not crash if no modal is found", async () => {
+        let clicked = false;
+        class Test extends Interaction {
+            static selector = ".test";
+
+            dynamicContent = {
+                "_modal:t-on-click": this.doSomething,
+            };
+            doSomething() {
+                clicked = true;
+            }
+        }
+
+        await startInteraction(
+            Test,
+            `
+                <div class="test">
+                    <span>coucou</span>
+                </div>`,
+        );
+        expect(clicked).toBe(false);
+    });
+
+
     test("can add a listener on a multiple elements", async () => {
         let clicked = 0;
         class Test extends Interaction {

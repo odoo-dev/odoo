@@ -96,7 +96,8 @@ export class Colibri {
 
         const getNodes = (sel) => {
             if (sel in SPECIALS) {
-                return [SPECIALS[sel]];
+                const elem = SPECIALS[sel];
+                return elem ? [elem] : [];
             }
             if (!(sel in nodes)) {
                 nodes[sel] = el.querySelectorAll(sel);
