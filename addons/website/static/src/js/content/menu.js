@@ -631,39 +631,6 @@ publicWidget.registry.FadeOutHeader = BaseDisappearingHeader.extend({
     },
 });
 
-publicWidget.registry.HeaderGeneral = publicWidget.Widget.extend({
-    selector: 'header#top',
-    disabledInEditableMode: false,
-    events: {
-        "show.bs.offcanvas #top_menu_collapse, #top_menu_collapse_mobile": "_onCollapseShow",
-        "hidden.bs.offcanvas #top_menu_collapse, #top_menu_collapse_mobile": "_onCollapseHidden",
-    },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-    _onCollapseShow() {
-        this.options.wysiwyg?.odooEditor.observerUnactive("addCollapseClass");
-        this.el.classList.add('o_top_menu_collapse_shown');
-        this.options.wysiwyg?.odooEditor.observerActive("addCollapseClass");
-    },
-    /**
-     * @private
-     */
-    _onCollapseHidden() {
-        this.options.wysiwyg?.odooEditor.observerUnactive("removeCollapseClass");
-        const mobileNavbarEl = this.el.querySelector("#top_menu_collapse_mobile");
-        if (!mobileNavbarEl.matches(".show, .showing")) {
-            this.el.classList.remove("o_top_menu_collapse_shown");
-        }
-        this.options.wysiwyg?.odooEditor.observerActive("removeCollapseClass");
-    },
-});
-
 export default {
     extraMenuUpdateCallbacks: extraMenuUpdateCallbacks,
 };
