@@ -89,6 +89,7 @@ export class Colibri {
         const SPECIALS = {
             _root: el,
             _body: document.body,
+            _modal: el.closest(".modal"),
             _window: window,
             _document: document,
         };
