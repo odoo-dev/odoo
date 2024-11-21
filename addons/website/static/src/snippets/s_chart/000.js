@@ -11,10 +11,6 @@ class Chart extends Interaction {
     setup() {
         this.chart = null;
         this.style = window.getComputedStyle(document.documentElement);
-        this.registerCleanup(() => {
-            this.chart?.destroy();
-            this.el.querySelectorAll('.chartjs-size-monitor').forEach(el => el.remove());
-        });
     }
 
     async willStart() {
@@ -116,11 +112,10 @@ class Chart extends Interaction {
         const canvas = this.el.querySelector('canvas');
         window.Chart.Tooltip.positioners.custom = (elements, eventPosition) => eventPosition;
         this.chart = new window.Chart(canvas, chartData);
-    }
-
-    destroy() {
-        this.chart?.destroy();
-        this.el.querySelectorAll('.chartjs-size-monitor').forEach(el => el.remove());
+        this.registerCleanup(() => {
+            this.chart.destroy();
+            this.el.querySelectorAll('.chartjs-size-monitor').forEach(el => el.remove());
+        });
     }
 
     /**
