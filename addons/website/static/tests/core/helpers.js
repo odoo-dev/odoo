@@ -36,7 +36,7 @@ export async function startInteractions(
     fixture.innerHTML = html;
     if (activeInteractions) {
         clearRegistry(elementRegistry);
-        for (let name of activeInteractions) {
+        for (const name of activeInteractions) {
             if (name in content) {
                 elementRegistry.add(name, content[name][1]);
             }

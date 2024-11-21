@@ -26,11 +26,11 @@ class FaqHorizontal extends Interaction {
         let position = 16; // Add 1rem equivalent in px to provide a visual gap by default
         const fixedElements = document.getElementsByClassName('o_top_fixed_element');
 
-        for (let el of fixedElements) {
+        for (const el of fixedElements) {
             position += el.offsetHeight;
         }
 
-        for (let title of this.titles) {
+        for (const title of this.titles) {
             title.style.top = `${position}px`;
             title.style.maxHeight = `calc(100vh - ${position + 40}px)`;
         }

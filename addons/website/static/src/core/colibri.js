@@ -41,7 +41,7 @@ export class Colibri {
             fn.call(this.interaction, ev);
             this.updateContent();
         };
-        for (let node of nodes) {
+        for (const node of nodes) {
             node.addEventListener(event, handler, options);
             this.handlers.push([node, event, handler, options]);
         }
@@ -67,8 +67,8 @@ export class Colibri {
             if (typeof value !== "object") {
                 throw new Error("t-att-class directive expects an object");
             }
-            for (let cl in value) {
-                for (let c of cl.trim().split(" ")) {
+            for (const cl in value) {
+                for (const c of cl.trim().split(" ")) {
                     el.classList.toggle(c, value[cl]);
                 }
             }
@@ -105,7 +105,7 @@ export class Colibri {
             return nodes[sel];
         };
 
-        for (let [sel, directive, value] of generateEntries(content)) {
+        for (const [sel, directive, value] of generateEntries(content)) {
             const nodes = getNodes(sel);
             if (directive.startsWith("t-on-")) {
                 const ev = directive.slice(5);
@@ -113,9 +113,9 @@ export class Colibri {
             } else if (directive.startsWith("t-att-")) {
                 const attr = directive.slice(6);
                 const initialValues = new Map();
-                for (let node of nodes) {
-                    const value = node.getAttribute(attr);
-                    initialValues.set(node, value);
+                for (const node of nodes) {
+                    const attrValue = node.getAttribute(attr);
+                    initialValues.set(node, attrValue);
                 }
                 this.dynamicAttrs.push([nodes, attr, value, initialValues]);
             } else if (directive === "t-out") {
@@ -132,14 +132,14 @@ export class Colibri {
 
     updateContent() {
         const interaction = this.interaction;
-        for (let [nodes, attr, fn] of this.dynamicAttrs) {
-            for (let node of nodes) {
+        for (const [nodes, attr, fn] of this.dynamicAttrs) {
+            for (const node of nodes) {
                 const value = fn.call(interaction, node);
                 this.applyAttr(node, attr, value);
             }
         }
-        for (let [nodes, fn] of this.tOuts) {
-            for (let node of nodes) {
+        for (const [nodes, fn] of this.tOuts) {
+            for (const node of nodes) {
                 this.applyTOut(node, fn.call(interaction, node));
             }
         }
@@ -147,9 +147,9 @@ export class Colibri {
 
     destroy() {
         // restore t-att to their initial values
-        for (let dynAttrs of this.dynamicAttrs) {
+        for (const dynAttrs of this.dynamicAttrs) {
             const [nodes, attr, _, initialValues] = dynAttrs;
-            for (let node of nodes) {
+            for (const node of nodes) {
                 const initialValue = initialValues.get(node);
                 if (initialValue) {
                     node.setAttribute(attr, initialValue);
@@ -159,11 +159,11 @@ export class Colibri {
             }
         }
 
-        for (let cleanup of this.cleanups.reverse()) {
+        for (const cleanup of this.cleanups.reverse()) {
             cleanup();
         }
         this.cleanups = [];
-        for (let [el, ev, fn, options] of this.handlers) {
+        for (const [el, ev, fn, options] of this.handlers) {
             el.removeEventListener(ev, fn, options);
         }
         this.handlers = [];
@@ -173,10 +173,10 @@ export class Colibri {
 }
 
 function* generateEntries(content) {
-    for (let key in content) {
+    for (const key in content) {
         const value = content[key];
         if (typeof value === "object") {
-            for (let directive in value) {
+            for (const directive in value) {
                 yield [key, directive, value[directive]];
             }
         } else {

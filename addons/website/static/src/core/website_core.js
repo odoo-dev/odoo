@@ -82,7 +82,7 @@ class WebsiteCore {
                 // console.log("starting", name);
                 this._startInteraction(el, I, proms);
             } else {
-                for (let _el of el.querySelectorAll(I.selector)) {
+                for (const _el of el.querySelectorAll(I.selector)) {
                     // console.log("starting", name);
                     this._startInteraction(_el, I, proms);
                 }
@@ -112,7 +112,7 @@ class WebsiteCore {
 
     stopInteractions(el = this.el) {
         const interactions = [];
-        for (let interaction of this.interactions.slice().reverse()) {
+        for (const interaction of this.interactions.slice().reverse()) {
             if (el === interaction.el || el.contains(interaction.el)) {
                 interaction.destroy();
                 this.activeInteractions.delete(interaction.el, interaction.I);
@@ -122,7 +122,7 @@ class WebsiteCore {
         }
         this.interactions = interactions;
         const roots = [];
-        for (let root of this.roots.slice().reverse()) {
+        for (const root of this.roots.slice().reverse()) {
             if (el === root.el || el.contains(root.el)) {
                 root.destroy();
                 this.activeInteractions.delete(root.el, root.C);
