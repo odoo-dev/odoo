@@ -15,7 +15,7 @@ class PostLink extends Interaction {
         ev.preventDefault();
         const url = this.el.dataset.post || this.el.href;
         let data = {};
-        for (let [key, value] of Object.entries(this.el.dataset)) {
+        for (const [key, value] of Object.entries(this.el.dataset)) {
             if (key.startsWith("post_")) {
                 data[key.slice(5)] = value;
             }
