@@ -774,34 +774,6 @@ publicWidget.registry.HeaderGeneral = publicWidget.Widget.extend({
     },
 });
 
-publicWidget.registry.SearchModal = publicWidget.Widget.extend({
-    selector: "#o_search_modal_block #o_search_modal",
-    disabledInEditableMode: false,
-    events: {
-        "show.bs.modal": "_onSearchModalShow",
-        "shown.bs.modal": "_onSearchModalShown",
-    },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-    _onSearchModalShow(ev) {
-        if (this.editableMode) {
-            ev.preventDefault();
-        }
-    },
-    /**
-     * @private
-     */
-    _onSearchModalShown(ev) {
-        this.el.querySelector(".search-query").focus();
-    },
-});
-
 export default {
     extraMenuUpdateCallbacks: extraMenuUpdateCallbacks,
 };
