@@ -1,3 +1,4 @@
+
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
@@ -293,10 +294,13 @@
             'website/static/lib/multirange/*.js',
             'website/static/src/core/**/*',
             'website/static/src/interactions/**/*',
+            'website/static/src/snippets/s_countdown/000.js',
+            'website/static/src/snippets/s_chart/000.js',
             'website/static/src/snippets/s_dynamic_snippet/000.js',
             'website/static/src/snippets/s_dynamic_snippet/000.xml',
             'website/static/src/snippets/s_dynamic_snippet_carousel/000.js',
             'website/static/src/snippets/s_dynamic_snippet_carousel/000.xml',
+            'website/static/src/snippets/s_embed_code/000.js',
             'website/static/src/snippets/s_image_gallery/000.js',
             'website/static/src/snippets/s_table_of_content/000.js',
             'website/static/src/snippets/s_table_of_content/000.scss',
@@ -304,8 +308,6 @@
             'website/static/src/snippets/*/*.xml',
             'website/static/src/xml/website_form.xml',
             'google_recaptcha/static/src/js/recaptcha.js',
-            'website/static/src/snippets/s_countdown/000.js',
-            'website/static/src/snippets/s_chart/000.js',
         ],
         'web.tests_assets': [
             'website/static/tests/website_service_mock.js',
