@@ -1,7 +1,7 @@
 import { registry } from "@web/core/registry";
 import { Interaction } from "@website/core/interaction";
 
-export class ImageShapeHoverEffet extends Interaction {
+export class ImageShapeHoverEffect extends Interaction {
     static selector = "img[data-hover-effect]";
     dynamicContent = {
         "_root": {
@@ -125,4 +125,4 @@ export class ImageShapeHoverEffet extends Interaction {
 
 registry
     .category("website.active_elements")
-    .add("website.image_shape_hover_effect", ImageShapeHoverEffet);
+    .add("website.image_shape_hover_effect", ImageShapeHoverEffect);
