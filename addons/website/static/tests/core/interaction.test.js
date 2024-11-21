@@ -760,3 +760,84 @@ describe("dynamic attributes", () => {
     });
 
 });
+
+describe("insert", () => {
+    test("can insert an element", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            setup() {
+                const el = document.createElement("inserted");
+                this.insert(el);
+            }
+        }
+
+        const { core, el } = await startInteraction(
+            Test,
+            `
+        <div class="test">
+            <span>coucou</span>
+        </div>`,
+        );
+        const testEl = el.querySelector(".test");
+        let insertedEl = testEl.querySelector("inserted");
+        expect(insertedEl).not.toBe(null);
+        expect(insertedEl).toBe(testEl.lastElementChild);
+        core.stopInteractions();
+        insertedEl = el.querySelector("inserted");
+        expect(insertedEl).toBe(null);
+    });
+
+    test("can insert an element before another one", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            setup() {
+                const spanEls = this.el.querySelectorAll("span");
+                const el = document.createElement("inserted");
+                this.insert(el, spanEls[1], "beforebegin");
+            }
+        }
+    
+        const { core, el } = await startInteraction(
+            Test,
+            `
+        <div class="test">
+            <span>first</span>
+            <span>last</span>
+        </div>`,
+        );
+        const testEl = el.querySelector(".test");
+        let insertedEl = testEl.querySelector("inserted");
+        expect(insertedEl).not.toBe(null);
+        expect(insertedEl).toBe(testEl.children[1]);
+        core.stopInteractions();
+        insertedEl = el.querySelector("inserted");
+        expect(insertedEl).toBe(null);
+    });
+
+    test("can insert an element after another one", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            setup() {
+                const spanEls = this.el.querySelectorAll("span");
+                const el = document.createElement("inserted");
+                this.insert(el, spanEls[0], "afterend");
+            }
+        }
+
+        const { core, el } = await startInteraction(
+            Test,
+            `
+        <div class="test">
+            <span>first</span>
+            <span>last</span>
+        </div>`,
+        );
+        const testEl = el.querySelector(".test");
+        let insertedEl = testEl.querySelector("inserted");
+        expect(insertedEl).not.toBe(null);
+        expect(insertedEl).toBe(testEl.children[1]);
+        core.stopInteractions();
+        insertedEl = el.querySelector("inserted");
+        expect(insertedEl).toBe(null);
+    });
+});
