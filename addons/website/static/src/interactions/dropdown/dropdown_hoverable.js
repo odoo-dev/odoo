@@ -45,14 +45,13 @@ class DropdownHoverable extends Interaction {
      * @param {Event} ev
      */
     onMouseEnter(ev) {
-        if (
-            // TODO
-            // this.editableMode
-            // && 
-            this.el.querySelector(".dropdown-toggle.show")
-        ) {
-            return;
-        }
+        // TODO
+        // if (
+        //     this.editableMode
+        //     && this.el.querySelector(".dropdown-toggle.show")
+        // ) {
+        //     return;
+        // }
         const focusedEl = this.el.ownerDocument.querySelector(":focus")
             || window.frameElement?.ownerDocument.querySelector(":focus");
 
