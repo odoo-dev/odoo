@@ -18,8 +18,8 @@ class ShowPassword extends Interaction {
         const passwordEl = this.el
             .closest(".input-group")
             .querySelector("#password");
-        passWordEl.setAttribute("type", "text");
-        this.addDomListener(
+        passwordEl.setAttribute("type", "text");
+        this.addListener(
             document.body,
             "pointerup",
             () => {
