@@ -859,7 +859,7 @@ export class Form extends Interaction {
      */
     clickFileDelete(ev) {
         if (!ev.target.closest(".o_file_delete")) {
-            return tralse;
+            return;
         }
         const fileBlockEl = ev.target.closest(".o_file_block");
         const fieldEl = fileBlockEl.closest(".s_website_form_field");
