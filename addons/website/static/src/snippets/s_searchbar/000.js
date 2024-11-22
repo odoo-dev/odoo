@@ -1,54 +1,49 @@
-import { rpc } from "@web/core/network/rpc";
-import { KeepLast } from "@web/core/utils/concurrency";
-import publicWidget from '@web/legacy/js/public/public_widget';
+import { Interaction } from "@website/core/interaction";
+import { registry } from "@web/core/registry";
 
 import { isBrowserSafari } from "@web/core/browser/feature_detection";
+import { rpc } from "@web/core/network/rpc";
+import { KeepLast } from "@web/core/utils/concurrency";
 import { renderToElement, renderToString } from "@web/core/utils/render";
-import { debounce } from '@web/core/utils/timing';
 
 import { markup } from "@odoo/owl";
 
-publicWidget.registry.searchBar = publicWidget.Widget.extend({
-    selector: '.o_searchbar_form',
-    events: {
-        'input .search-query': '_onInput',
-        'focusout': '_onFocusOut',
-        "mousedown .o_dropdown_menu .dropdown-item": "_onMousedown",
-        "mouseup .o_dropdown_menu .dropdown-item": "_onMouseup",
-        'keydown .search-query, .dropdown-item': '_onKeydown',
-        'search .search-query': '_onSearch',
-    },
-    autocompleteMinWidth: 300,
+class SearchbarForm extends Interaction {
+    static selector = ".o_searchbar_form";
+    dynamicContent = {
+        ".search-query": {
+            "t-on-input": this.onInput,
+            "t-on-search": this.onSearch,
+        },
+        ".search-query, .dropdown-item": {
+            "t-on-keydown": this.onKeyDown,
+        },
+        _root: {
+            "t-on-focusout": this.onFocusOut,
+            "t-on-mousedown": this.onMouseDown, // delegated to ".o_dropdown_menu .dropdown-item"
+            "t-on-mouseup": this.onMouseUp, // delegated to ".o_dropdown_menu .dropdown-item"
+        },
+    };
 
-    /**
-     * @constructor
-     */
-    init: function () {
-        this._super.apply(this, arguments);
-
+    setup() {
+        this.autocompleteMinWidth = 300;
         this.keepLast = new KeepLast();
 
-        this._onInput = debounce(this._onInput, 400);
-        this._onFocusOut = debounce(this._onFocusOut, 100);
-    },
-    /**
-     * @override
-     */
-    start: function () {
-        this.$input = this.$('.search-query');
+        this.input = this.el.querySelector('.search-query');
 
-        this.searchType = this.$input.data('searchType');
-        this.order = this.$('.o_search_order_by').val();
-        this.limit = parseInt(this.$input.data('limit'));
-        this.displayDescription = this.$input.data('displayDescription');
-        this.displayExtraLink = this.$input.data('displayExtraLink');
-        this.displayDetail = this.$input.data('displayDetail');
-        this.displayImage = this.$input.data('displayImage');
-        this.wasEmpty = !this.$input.val();
+        this.searchType = this.input.getAttribute('data-search-type');
+        this.order = this.el.querySelector('.o_search_order_by').value;
+        this.limit = parseInt(this.input.getAttribute('data-limit'));
+        this.displayDescription = this.input.getAttribute('data-display-description');
+        this.displayExtraLink = this.input.getAttribute('data-display-extra-link');
+        this.displayDetail = this.input.getAttribute('data-display-detail');
+        this.displayImage = this.input.getAttribute('data-display-image');
+        this.wasEmpty = !this.input.value;
+
         // Make it easy for customization to disable fuzzy matching on specific searchboxes
-        this.allowFuzzy = !this.$input.data('noFuzzy');
+        this.allowFuzzy = !this.input.getAttribute('data-no-fuzzy');
         if (this.limit) {
-            this.$input.attr('autocomplete', 'off');
+            this.input.setAttribute('autocomplete', 'off');
         }
 
         this.options = {
@@ -58,11 +53,14 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
             'displayDetail': this.displayDetail,
             'allowFuzzy': this.allowFuzzy,
         };
-        const form = this.$('.o_search_order_by').parents('form');
-        for (const field of form.find("input[type='hidden']")) {
+
+        this.form = this.el.querySelector('.o_search_order_by').closest('form');
+        for (const field of this.form.querySelectorAll("input[type='hidden']")) {
             this.options[field.name] = field.value;
         }
-        const action = form.attr('action') || window.location.pathname + window.location.search;
+
+        const action = this.form.getAttribute('action') || window.location.pathname + window.location.search;
+
         const [urlPath, urlParams] = action.split('?');
         if (urlParams) {
             for (const keyValue of urlParams.split('&')) {
@@ -73,55 +71,59 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
                 }
             }
         }
+
         const pathParts = urlPath.split('/');
         for (const index in pathParts) {
             const value = decodeURIComponent(pathParts[index]);
-            if (index > 0 && /-[0-9]+$/.test(value)) { // is sluggish
+            if (index > 0 && /-[0-9]+$/.test(value)) {
                 this.options[decodeURIComponent(pathParts[index - 1])] = value;
             }
         }
 
-        if (this.$input.data('noFuzzy')) {
-            $("<input type='hidden' name='noFuzzy' value='true'/>").appendTo(this.$input);
+        if (!this.allowFuzzy) {
+            const newInput = document.createElement("input");
+            newInput.setAttribute("type", "hidden");
+            newInput.setAttribute("name", "noFuzzy");
+            newInput.setAttribute("value", "true");
+            this.input.appendChild(newInput);
         }
-        return this._super.apply(this, arguments);
-    },
-    /**
-     * @override
-     */
+
+    }
+
     destroy() {
-        this._super(...arguments);
-        this._render(null);
-    },
+        this.render(null);
+    }
 
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
+    getFieldsNames() {
+        return [
+            'description',
+            'detail',
+            'detail_extra',
+            'detail_strike',
+            'extra_link',
+            'name',
+        ];
+    }
 
-    /**
-     * @private
-     */
-    _adaptToScrollingParent() {
+    adjustToScrollingParent() {
         const bcr = this.el.getBoundingClientRect();
-        this.$menu[0].style.setProperty('position', 'fixed', 'important');
-        this.$menu[0].style.setProperty('top', `${bcr.bottom}px`, 'important');
-        this.$menu[0].style.setProperty('left', `${bcr.left}px`, 'important');
-        this.$menu[0].style.setProperty('max-width', `${bcr.width}px`, 'important');
-        this.$menu[0].style.setProperty('max-height', `${document.body.clientHeight - bcr.bottom - 16}px`, 'important');
-    },
-    /**
-     * @private
-     */
-    async _fetch() {
+        this.menu.style.setProperty('position', 'fixed', 'important');
+        this.menu.style.setProperty('top', `${bcr.bottom}px`, 'important');
+        this.menu.style.setProperty('left', `${bcr.left}px`, 'important');
+        this.menu.style.setProperty('max-width', `${bcr.width}px`, 'important');
+        this.menu.style.setProperty('max-height', `${document.body.clientHeight - bcr.bottom - 16}px`, 'important');
+    }
+
+    async fetch() {
         const res = await rpc('/website/snippet/autocomplete', {
             'search_type': this.searchType,
-            'term': this.$input.val(),
+            'term': this.input.value,
             'order': this.order,
             'limit': this.limit,
-            'max_nb_chars': Math.round(Math.max(this.autocompleteMinWidth, parseInt(this.$el.width())) * 0.22),
+            'max_nb_chars': Math.round(Math.max(this.autocompleteMinWidth, parseInt(this.el.getBoundingClientRect().width)) * 0.22),
             'options': this.options,
         });
-        const fieldNames = this._getFieldsNames();
+        const fieldNames = this.getFieldsNames();
         res.results.forEach(record => {
             for (const fieldName of fieldNames) {
                 if (record[fieldName]) {
@@ -130,20 +132,19 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
             }
         });
         return res;
-    },
-    /**
-     * @private
-     */
-    _render: function (res) {
-        if (this._scrollingParentEl) {
-            this._scrollingParentEl.removeEventListener('scroll', this._menuScrollAndResizeHandler);
-            window.removeEventListener('resize', this._menuScrollAndResizeHandler);
-            delete this._scrollingParentEl;
-            delete this._menuScrollAndResizeHandler;
+    }
+
+    render(res) {
+        console.log("render");
+        if (this.scrollingParentEl) {
+            this.scrollingParentEl.removeEventListener('scroll', this.menuScrollAndResizeHandler);
+            window.removeEventListener('resize', this.menuScrollAndResizeHandler);
+            delete this.scrollingParentEl;
+            delete this.menuScrollAndResizeHandler;
         }
 
         let pageScrollHeight = null;
-        const $prevMenu = this.$menu;
+        const prevMenu = this.menu;
         if (res && this.limit) {
             const results = res['results'];
             let template = 'website.s_searchbar.autocomplete';
@@ -151,15 +152,15 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
             if (renderToString.app.getRawTemplate(candidate)) {
                 template = candidate;
             }
-            this.$menu = $(renderToElement(template, {
+            this.menu = renderToElement(template, {
                 results: results,
                 parts: res['parts'],
                 hasMoreResults: results.length < res['results_count'],
-                search: this.$input.val(),
+                search: this.input.value,
                 fuzzySearch: res['fuzzy_search'],
                 widget: this,
-            }));
-            this.$menu.css('min-width', this.autocompleteMinWidth);
+            });
+            this.menu.style.minWidth = this.autocompleteMinWidth;
 
             // Handle the case where the searchbar is in a mega menu by making
             // it position:fixed and forcing its size. Note: this could be the
@@ -172,115 +173,96 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
                 const navbarEl = this.el.closest('.navbar');
                 const navbarTogglerEl = navbarEl ? navbarEl.querySelector('.navbar-toggler') : null;
                 if (navbarTogglerEl && navbarTogglerEl.clientWidth < 1) {
-                    this._scrollingParentEl = megaMenuEl;
-                    this._menuScrollAndResizeHandler = () => this._adaptToScrollingParent();
-                    this._scrollingParentEl.addEventListener('scroll', this._menuScrollAndResizeHandler);
-                    window.addEventListener('resize', this._menuScrollAndResizeHandler);
+                    this.scrollingParentEl = megaMenuEl;
+                    this.menuScrollAndResizeHandler = () => this.adaptToScrollingParent();
+                    this.scrollingParentEl.addEventListener('scroll', this.menuScrollAndResizeHandler);
+                    window.addEventListener('resize', this.menuScrollAndResizeHandler);
 
-                    this._adaptToScrollingParent();
+                    this.adaptToScrollingParent();
                 }
             }
 
             pageScrollHeight = document.documentElement.scrollHeight;
-            this.$el.append(this.$menu);
+            this.el.appendChild(this.menu);
 
-            this.$el.find('button.extra_link').on('click', function (event) {
-                event.preventDefault();
-                window.location.href = event.currentTarget.dataset['target'];
+            this.el.querySelector('button.extra_link')?.addEventListener('click', function (ev) {
+                ev.preventDefault();
+                window.location.href = ev.currentTarget.dataset['target'];
             });
-            this.$el.find('.s_searchbar_fuzzy_submit').on('click', (event) => {
-                event.preventDefault();
-                this.$input.val(res['fuzzy_search']);
-                const form = this.$('.o_search_order_by').parents('form');
-                form.submit();
+            this.el.querySelector('.s_searchbar_fuzzy_submit')?.addEventListener('click', (ev) => {
+                ev.preventDefault();
+                this.input.value = res['fuzzy_search'];
+                this.form.submit();
             });
         }
 
-        this.$el.toggleClass('dropdown show', !!res);
-        if ($prevMenu) {
-            $prevMenu.remove();
+        this.form.classList.toggle('dropdown', !!res);
+        this.form.classList.toggle('show', !!res);
+        if (prevMenu) {
+            prevMenu.remove();
         }
         // Adjust the menu's position based on the scroll height.
         if (res && this.limit) {
             this.el.classList.remove("dropup");
-            delete this.$menu[0].dataset.bsPopper;
+            delete this.menu.dataset.bsPopper;
             if (document.documentElement.scrollHeight > pageScrollHeight) {
                 // If the menu overflows below the page, we reduce its height.
-                this.$menu[0].style.maxHeight = "40vh";
-                this.$menu[0].style.overflowY = "auto";
+                this.menu.style.maxHeight = "40vh";
+                this.menu.style.overflowY = "auto";
                 // We then recheck if the menu still overflows below the page.
                 if (document.documentElement.scrollHeight > pageScrollHeight) {
                     // If the menu still overflows below the page after its height
                     // has been reduced, we position it above the input.
                     this.el.classList.add("dropup");
-                    this.$menu[0].dataset.bsPopper = "";
+                    this.menu.dataset.bsPopper = "";
                 }
             }
         }
-    },
-    _getFieldsNames() {
-        return [
-            'description',
-            'detail',
-            'detail_extra',
-            'detail_strike',
-            'extra_link',
-            'name',
-        ];
-    },
+    }
 
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
+    onFocusOut() {
+        if (this.linkHasFocus || this.el.contains(document.activeElement)) {
+            return;
+        }
+        this.render();
+    }
 
-    /**
-     * @private
-     */
-    _onInput: function () {
+    onInput() {
         if (!this.limit) {
             return;
         }
-        if (this.searchType === 'all' && !this.$input.val().trim().length) {
-            this._render();
+        if (this.searchType === 'all' && !this.input.value.trim().length) {
+            this.render();
         } else {
-            this.keepLast.add(this._fetch()).then(this._render.bind(this));
+            this.keepLast.add(this.fetch()).then(this.render.bind(this));
         }
-    },
+    }
+
     /**
-     * @private
+     * @param {Event} ev
      */
-    _onFocusOut: function () {
-        if (!this.linkHasFocus && !this.$el.has(document.activeElement).length) {
-            this._render();
+    onSearch(ev) {
+        if (this.input.value) { // actual search
+            this.limit = 0; // prevent autocomplete
+        } else { // clear button clicked
+            this.render();
+            ev.preventDefault();
         }
-    },
-    _onMousedown(ev) {
-        // On Safari, links and buttons are not focusable by default. We need
-        // to get around that behavior to avoid _onFocusOut() from triggering
-        // _render(), as this would prevent the click from working.
-        if (isBrowserSafari) {
-            this.linkHasFocus = true;
-        }
-    },
-    _onMouseup(ev) {
-        // See comment in _onMousedown.
-        if (isBrowserSafari) {
-            this.linkHasFocus = false;
-        }
-    },
+    }
+
     /**
-     * @private
+     * @param {Event} ev
      */
-    _onKeydown: function (ev) {
+    onKeyDown(ev) {
         switch (ev.key) {
             case "Escape":
-                this._render();
+                this.render();
                 break;
             case "ArrowUp":
             case "ArrowDown":
                 ev.preventDefault();
-                if (this.$menu) {
-                    const focusableEls = [this.$input[0], ...this.$menu[0].children];
+                if (this.menu) {
+                    const focusableEls = [this.input, ...this.menu.querySelectorAll("a")];
                     const focusedEl = document.activeElement;
                     const currentIndex = focusableEls.indexOf(focusedEl) || 0;
                     const delta = ev.key === "ArrowUp" ? focusableEls.length - 1 : 1;
@@ -293,25 +275,36 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
                 this.limit = 0; // prevent autocomplete
                 break;
         }
-    },
-    /**
-     * @private
-     */
-    _onSearch: function (ev) {
-        if (this.$input[0].value) { // actual search
-            this.limit = 0; // prevent autocomplete
-        } else { // clear button clicked
-            this._render(); // remove existing suggestions
-            ev.preventDefault();
-            if (!this.wasEmpty) {
-                this.limit = 0; // prevent autocomplete
-                const form = this.$('.o_search_order_by').parents('form');
-                form.submit();
-            }
-        }
-    },
-});
+    }
 
-export default {
-    searchBar: publicWidget.registry.searchBar,
-};
+    /**
+     * @param {Event} ev
+     */
+    onMouseDown(ev) {
+        const target = ev.currentTarget.closest(".o_dropdown_menu .dropdown-item");
+        // On Safari, links and buttons are not focusable by default. We need
+        // to get around that behavior to avoid _onFocusOut() from triggering
+        // _render(), as this would prevent the click from working.
+        if (!target || !isBrowserSafari) {
+            return;
+        }
+        this.linkHasFocus = true;
+    }
+
+    /**
+     * @param {Event} ev
+     */
+    onMouseUp(ev) {
+        const target = ev.currentTarget.closest(".o_dropdown_menu .dropdown-item");
+        // See comment in onMouseDown.
+        if (!target || !isBrowserSafari) {
+            return;
+        }
+        this.linkHasFocus = false;
+    }
+
+}
+
+registry
+    .category("website.active_elements")
+    .add("website.searchbar_form", SearchbarForm);
