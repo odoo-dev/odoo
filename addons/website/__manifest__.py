@@ -192,6 +192,7 @@
     'assets': {
         'web.assets_frontend': [
             'website/static/src/interactions/**/*',
+            ('remove', 'website/static/src/interactions/**/*.edit.js'),
             # Multi-range is an opt-in feature.
             ('remove', 'website/static/src/interactions/multirange_input.js'),
             # Activated on-demand by website.ripple_effect_js.
