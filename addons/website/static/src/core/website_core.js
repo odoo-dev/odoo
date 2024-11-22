@@ -25,7 +25,6 @@ import { Colibri } from "./colibri";
  *
  */
 
-const activeElementRegistry = registry.category("website.active_elements");
 
 class WebsiteCore {
     constructor(el, env) {
@@ -37,19 +36,16 @@ class WebsiteCore {
         this.interactions = [];
         this.roots = [];
         this.owlApp = null;
-        this.proms = [
-            env.isReady.then(() => {
-                this.startInteractions();
-                activeElementRegistry.addEventListener("UPDATE", async (ev) => {
-                    if (this.isActive) {
-                        const { operation } = ev.detail;
-                        if (operation !== "delete") {
-                            this.startInteractions();
-                        }
-                    }
-                });
-            }),
-        ];
+        this.proms = [];
+        this.registry = null;
+    }
+
+    startFromRegistry(registryName) {
+        this.registry = registry.category(registryName);
+        const startProm = this.env.isReady.then(() => {
+            this.startInteractions();
+        });
+        this.proms.push(startProm);
     }
 
     async _mountComponent(el, C) {
@@ -77,7 +73,7 @@ class WebsiteCore {
 
     startInteractions(el = this.el) {
         const proms = [];
-        for (const [name, I] of activeElementRegistry.getEntries()) {
+        for (const [name, I] of this.registry.getEntries()) {
             if (el.matches(I.selector)) {
                 // console.log("starting", name);
                 this._startInteraction(el, I, proms);
@@ -155,6 +151,8 @@ registry.category("services").add("website_core", {
             // if this is an issue, maybe we should make the wrapwrap configurable
             return null;
         }
-        return new WebsiteCore(el, env);
+        const websiteCore = new WebsiteCore(el, env);
+        websiteCore.startFromRegistry("website.active_elements");
+        return websiteCore;
     },
 });

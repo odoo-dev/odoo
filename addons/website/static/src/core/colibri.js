@@ -60,7 +60,6 @@ export class Colibri {
         } else {
             el.textContent = value;
         }
-        return this.markup;
     }
 
     applyAttr(el, attr, value) {
