@@ -18,13 +18,10 @@ class SearchModal extends Interaction {
         // if (!this.editableMode) {
         //     return;
         // }
-        ev.preventDefault();
+        // ev.preventDefault();
     }
 
-    /**
-     * @param {Event} ev
-     */
-    onSearchModalShown(ev) {
+    onSearchModalShown() {
         this.el.querySelector(".search-query").focus();
     }
 }
