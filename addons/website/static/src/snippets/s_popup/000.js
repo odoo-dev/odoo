@@ -2,77 +2,17 @@ import publicWidget from "@web/legacy/js/public/public_widget";
 import { cookie } from "@web/core/browser/cookie";
 import { _t } from "@web/core/l10n/translation";
 import { renderToElement } from "@web/core/utils/render";
-import {throttleForAnimation} from "@web/core/utils/timing";
+import { throttleForAnimation } from "@web/core/utils/timing";
 import { isVisible } from "@web/core/utils/ui";
 import { utils as uiUtils, MEDIAS_BREAKPOINTS, SIZES } from "@web/core/ui/ui_service";
 import {setUtmsHtmlDataset} from '@website/js/content/inject_dom';
 import wUtils from "@website/js/utils";
 import { ObservingCookieWidgetMixin } from "@website/snippets/observing_cookie_mixin";
 
-// TODO In master, export this class too or merge it with PopupWidget
-const SharedPopupWidget = publicWidget.Widget.extend({
-    selector: '.s_popup',
-    disabledInEditableMode: false,
-    events: {
-        // A popup element is composed of a `.s_popup` parent containing the
-        // actual `.modal` BS modal. Our internal logic and events are hiding
-        // and showing this inner `.modal` modal element without considering its
-        // `.s_popup` parent. It means that when the `.modal` is hidden, its
-        // `.s_popup` parent is not touched and kept visible.
-        // It might look like it's not an issue as it would just be an empty
-        // element (its only child is hidden) but it leads to some issues as for
-        // instance on chrome this div will have a forced `height` due to its
-        // `contenteditable=true` attribute in edit mode. It will result in a
-        // ugly white bar.
-        // tl;dr: this is keeping those 2 elements visibility synchronized.
-        'show.bs.modal': '_onModalShow',
-        'hidden.bs.modal': '_onModalHidden',
-    },
-
-    /**
-     * @override
-     */
-    destroy() {
-        this._super(...arguments);
-
-        // Popup are always closed when entering edit mode (see PopupWidget),
-        // this allows to make sure the class is sync on the .s_popup parent
-        // after that moment too.
-        if (!this.editableMode) {
-            this.el.classList.add('d-none');
-        }
-    },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-    _onModalShow() {
-        this.el.classList.remove('d-none');
-    },
-    /**
-     * @private
-     */
-    _onModalHidden() {
-        if (this.el.querySelector('.s_popup_no_backdrop')) {
-            // We trigger a scroll event here to call the
-            // '_hideBottomFixedElements' method and re-display any bottom fixed
-            // elements that may have been hidden (e.g. the live chat button
-            // hidden when the cookies bar is open).
-            $().getScrollingTarget()[0].dispatchEvent(new Event('scroll'));
-        }
-
-        this.el.classList.add('d-none');
-    },
-});
-
-publicWidget.registry.SharedPopup = SharedPopupWidget;
-
+// TODO: remove PopupWidget, kept for compatibility with other widgets not yet
+// turned into interactions.
 const PopupWidget = publicWidget.Widget.extend(ObservingCookieWidgetMixin, {
-    selector: ".s_popup:not(#website_cookies_bar)",
+    // selector: ".s_popup:not(#website_cookies_bar)",
     events: {
         'click .js_close_popup': '_onCloseClick',
         'click .btn-primary': '_onBtnPrimaryClick',
