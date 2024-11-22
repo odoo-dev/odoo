@@ -324,7 +324,7 @@ export class Form extends Interaction {
                 // Index field name as ajax won't accept arrays of files
                 // when aggregating multiple files into a single field value
                 formFields.push({
-                    name: `${input.name}[${outerIndex}][${index}]`,
+                    name: `${inputEl.name}[${outerIndex}][${index}]`,
                     value: file,
                 });
             }

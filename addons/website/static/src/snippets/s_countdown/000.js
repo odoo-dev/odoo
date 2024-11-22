@@ -46,7 +46,7 @@ class Countdown extends Interaction {
         this.progressBarColor = this.ensureCSSColor(this.el.dataset.progressBarColor);
 
         this.onlyOneUnit = this.display === 'd';
-        this.width = parseInt(this.size);
+        this.width = this.size;
         if (this.layout === 'boxes') {
             this.width /= 1.75;
         }
@@ -208,7 +208,7 @@ class Countdown extends Interaction {
             if (!this.textWrapperEl) {
                 this.textWrapperEl = document.createElement('span');
                 this.textWrapperEl.classList.add('s_countdown_text_wrapper', 'd-none');
-                this.textWrapperEl.text = _t("Countdown ends in");
+                this.textWrapperEl.textContent = _t("Countdown ends in");
                 const spanEl = document.createElement('span');
                 spanEl.classList.add('s_countdown_text', 'ms-1');
                 this.textWrapperEl.appendChild(spanEl);
@@ -255,7 +255,7 @@ class Countdown extends Interaction {
     }
 
     /**
-     * @param {RenderingContext} ctx - Context of the canvas
+     * @param {CanvasRenderingContext2D} ctx - Context of the canvas
      */
     clearCanvas(ctx) {
         ctx.clearRect(0, 0, this.size, this.size);
@@ -293,7 +293,7 @@ class Countdown extends Interaction {
     }
 
     /**
-     * @param {RenderingContext} ctx - Context of the canvas
+     * @param {CanvasRenderingContext2D} ctx - Context of the canvas
      * @param {boolean} full - if true, the shape will be drawn up to the progressbar
      */
     drawBgShape(ctx, full = false) {
@@ -329,9 +329,9 @@ class Countdown extends Interaction {
     }
 
     /**
-     * @param {RenderingContext} ctx - Context of the canvas
-     * @param {string} nbUnit - how many unit should fill progress bar
-     * @param {string} totalUnit - number of unit to do a complete progress bar
+     * @param {CanvasRenderingContext2D} ctx - Context of the canvas
+     * @param {number} nbUnit - how many unit should fill progress bar
+     * @param {number} totalUnit - number of unit to do a complete progress bar
      * @param {boolean} useThinLine - if true, the progress bar will be thiner
      */
     drawProgressBar(ctx, nbUnit, totalUnit, useThinLine) {
@@ -365,7 +365,7 @@ class Countdown extends Interaction {
     }
 
     /**
-     * @param {RenderingContext} ctx - Context of the canvas
+     * @param {CanvasRenderingContext2D} ctx - Context of the canvas
      * @param {boolean} useThinLine
      */
     drawProgressBarBg(ctx, useThinLine) {
