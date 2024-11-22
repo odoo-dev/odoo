@@ -24,12 +24,13 @@ export class Colibri {
                 if (interaction.isDestroyed) {
                     return;
                 }
+                if (I.dynamicContent) {
+                    throw new Error(`The dynamic content object should be defined on the instance, not on the class (${I.name})`);
+                }
                 const content = interaction.dynamicContent;
                 if (content) {
                     this.processContent(content);
                     this.updateContent();
-                } else if (I.dynamicContent) {
-                    throw new Error(`The dynamic content object should be defined on the instance, not on the class (${I.name})`);
                 }
                 interaction.start();
             },
