@@ -440,6 +440,8 @@ var Animation = publicWidget.Widget.extend({
 
 var registry = publicWidget.registry;
 
+// TODO Let's keep this here for now: will have to move an edit mode related
+// location.
 // FIXME temporary hack: during edit mode, the carousel crashes sometimes when
 // we hover option during a carousel cycle. This patches Bootstrap to prevent
 // the crash.
@@ -451,129 +453,6 @@ window.SelectorEngine.find = function (...args) {
         return [document.createElement('div')];
     }
 };
-
-registry.slider = publicWidget.Widget.extend({
-    selector: '.carousel',
-    disabledInEditableMode: false,
-    edit_events: {
-        'content_changed': '_onContentChanged',
-    },
-
-    /**
-     * @override
-     */
-    start: function () {
-        this.$('img').on('load.slider', () => this._computeHeights());
-        this._computeHeights();
-        $(window).on('resize.slider', debounce(() => this._computeHeights(), 250));
-
-        // Initialize carousel and pause if in edit mode.
-        const options = this.editableMode ? {ride: false, pause: true} : undefined;
-        window.Carousel.getOrCreateInstance(this.el, options);
-
-        // Only for carousels having the `Carousel` and `CarouselItem` options
-        // (i.e. matching the `section > .carousel` selector).
-        if (this.editableMode && this.el.matches("section > .carousel")
-                && !this.options.wysiwyg.options.enableTranslation) {
-            this.controlEls = this.el.querySelectorAll(".carousel-control-prev, .carousel-control-next");
-            const indicatorEls = this.el.querySelectorAll(".carousel-indicators > *");
-            // Deactivate the carousel controls to handle the slides manually in
-            // edit mode (by the options).
-            this.options.wysiwyg.odooEditor.observerUnactive("disable_controls");
-            this.controlEls.forEach(controlEl => controlEl.removeAttribute("data-bs-slide"));
-            indicatorEls.forEach(indicatorEl => indicatorEl.removeAttribute("data-bs-slide-to"));
-            this.options.wysiwyg.odooEditor.observerActive("disable_controls");
-            // Redirect the clicks on the active slide, in order to start the
-            // carousel options.
-            this.__onControlClick = this._onControlClick.bind(this);
-            [...this.controlEls, ...indicatorEls].forEach(controlEl => {
-                controlEl.addEventListener("mousedown", this.__onControlClick);
-            });
-        }
-        return this._super.apply(this, arguments);
-    },
-    /**
-     * @override
-     */
-    destroy: function () {
-        this._super.apply(this, arguments);
-
-        window.Carousel.getOrCreateInstance(this.el).dispose();
-
-        this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive("destroy");
-        this.$(".carousel-item")
-            .toArray()
-            .forEach((el) => {
-                $(el).css("min-height", "");
-            });
-        this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerActive("destroy");
-
-        $(window).off('.slider');
-        this.$('img').off('.slider');
-
-        if (this.editableMode && this.el.matches("section > .carousel")
-                && !this.options.wysiwyg.options.enableTranslation) {
-            // Restore the carousel controls.
-            const indicatorEls = this.el.querySelectorAll(".carousel-indicators > *");
-            this.options.wysiwyg.odooEditor.observerUnactive("restore_controls");
-            this.controlEls.forEach(controlEl => {
-                const direction = controlEl.classList.contains("carousel-control-prev") ?
-                    "prev" : "next";
-                controlEl.setAttribute("data-bs-slide", direction);
-            });
-            indicatorEls.forEach((indicatorEl, i) => indicatorEl.setAttribute("data-bs-slide-to", i));
-            this.options.wysiwyg.odooEditor.observerActive("restore_controls");
-            [...this.controlEls, ...indicatorEls].forEach(controlEl => {
-                controlEl.removeEventListener("mousedown", this.__onControlClick);
-            });
-        }
-    },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-    _computeHeights: function () {
-        var maxHeight = 0;
-        var $items = this.$('.carousel-item');
-        this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive("_computeHeights");
-        $items.css('min-height', '');
-        $items.toArray().forEach((el) => {
-            var $item = $(el);
-            var isActive = $item.hasClass('active');
-            $item.addClass('active');
-            var height = $item.outerHeight();
-            if (height > maxHeight) {
-                maxHeight = height;
-            }
-            $item.toggleClass('active', isActive);
-        });
-        $items.css('min-height', maxHeight);
-        this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerActive("_computeHeights");
-    },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-    _onContentChanged: function (ev) {
-        this._computeHeights();
-    },
-    /**
-     * Redirects a carousel control click on the active slide.
-     *
-     * @private
-     */
-    _onControlClick() {
-        this.el.querySelector(".carousel-item.active").click();
-    },
-});
 
 const CAROUSEL_SLIDING_CLASS = "o_carousel_sliding";
 

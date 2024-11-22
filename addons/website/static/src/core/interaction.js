@@ -1,3 +1,5 @@
+import { debounce, throttleForAnimation } from "@web/core/utils/timing";
+
 /**
  * This is the base class to describe interactions. The Interaction class
  * provides a good integration with the web framework (env/services), a well
@@ -125,6 +127,34 @@ export class Interaction {
                 this.updateContent();
             }
         }, delay);
+    }
+
+    /**
+     * Debounces a function and makes sure it is cancelled upon destroy.
+     */
+    debounced(fn, delay) {
+        const result = debounce(() => {
+            fn.call(this);
+            this.updateContent();
+        }, delay);
+        this.registerCleanup(() => {
+            result.cancel();
+        });
+        return result;
+    }
+
+    /**
+     * Throttles a function and makes sure it is cancelled upon destroy.
+     */
+    throttled(fn, delay) {
+        const result = throttleForAnimation(() => {
+            fn.call(this);
+            this.updateContent();
+        }, delay);
+        this.registerCleanup(() => {
+            result.cancel();
+        });
+        return result;
     }
 
     /**
