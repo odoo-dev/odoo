@@ -30,7 +30,7 @@ const defaultGallery = `
                         </div>
                     </div>
                     <div class="o_carousel_controllers">
-                        <button class="carousel-control-prev o_not_editable" contenteditable="false" t-attf-data-bs-target="#slideshow_sample" data-bs-slide="prev" aria-label="Previous" title="Previous">
+                        <button class="carousel-control-prev o_not_editable" contenteditable="false" data-bs-target="#slideshow_sample" data-bs-slide="prev" aria-label="Previous" title="Previous">
                             <span class="carousel-control-prev-icon" aria-hidden="true"/>
                             <span class="visually-hidden">Previous</span>
                         </button>
@@ -39,7 +39,7 @@ const defaultGallery = `
                             <button type="button" style="background-image: url(/web/image/website.library_image_03)" data-bs-target="#slideshow_sample" data-bs-slide-to="1" aria-label="Carousel indicator"/>
                             <button type="button" style="background-image: url(/web/image/website.library_image_02)" data-bs-target="#slideshow_sample" data-bs-slide-to="2" aria-label="Carousel indicator"/>
                         </div>
-                        <button class="carousel-control-next o_not_editable" contenteditable="false" t-attf-data-bs-target="#slideshow_sample" data-bs-slide="next" aria-label="Next" title="Next">
+                        <button class="carousel-control-next o_not_editable" contenteditable="false" data-bs-target="#slideshow_sample" data-bs-slide="next" aria-label="Next" title="Next">
                             <span class="carousel-control-next-icon" aria-hidden="true"/>
                             <span class="visually-hidden">Next</span>
                         </button>
