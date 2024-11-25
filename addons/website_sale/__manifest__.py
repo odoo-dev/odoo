@@ -173,7 +173,7 @@
             'website_sale/static/tests/interactions/**/*',
         ],
         'web.assets_unit_tests_setup': [
-            'website_sale/static/src/snippets/s_dynamic_snippet_products/000new.js',
+            'website_sale/static/src/snippets/s_dynamic_snippet_products/000.js',
         ],
     },
     'license': 'LGPL-3',
