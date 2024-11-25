@@ -1,5 +1,6 @@
 import { debounce, throttleForAnimation } from "@web/core/utils/timing";
 import { SKIP_IMPLICIT_UPDATE } from "./colibri"
+import { EventBus } from "./utils";
 
 /**
  * This is the base class to describe interactions. The Interaction class
@@ -176,10 +177,10 @@ export class Interaction {
      * Add a listener to the target. Whenever the listener is executed, the
      * dynamic content will be applied. Also, the listener will automatically be
      * cleaned up when the interaction is destroyed
-     * 
-     * @param {HTMLElement | string} target an element or a selector
-     * @param {string} event 
-     * @param {Function} fn 
+     *
+     * @param {EventTarget | string} target an element, a bus or a selector
+     * @param {string} event
+     * @param {Function} fn
      * @param {Object} [options]
      */
     addListener(target, event, fn, options) {

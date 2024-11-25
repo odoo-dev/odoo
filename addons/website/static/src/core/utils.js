@@ -26,3 +26,9 @@ export class PairSet {
         }
     }
 }
+
+export class EventBus extends EventTarget {
+    trigger(name, payload) {
+        this.dispatchEvent(new CustomEvent(name, { detail: payload }));
+    }
+}

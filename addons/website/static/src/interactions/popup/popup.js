@@ -156,7 +156,7 @@ export class Popup extends Interaction {
         this.el.querySelectorAll(".media_iframe_video").forEach((mediaEl) => {
             // TODO still oeExpression to remove someday
             this.services.website_cookies.manageIframeSrc(
-                mediaEl,
+                mediaEl.querySelector("iframe"),
                 mediaEl.dataset.oeExpression || mediaEl.dataset.src
             );
         });
