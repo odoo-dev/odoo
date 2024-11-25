@@ -126,6 +126,7 @@ export class Colibri {
                 if (style === undefined) {
                     el.style.removeProperty(prop);
                 } else {
+                    style = String(style);
                     if (style.endsWith(" !important")) {
                         el.style.setProperty(prop, style.substring(0, style.length - 11), "important");
                     } else {

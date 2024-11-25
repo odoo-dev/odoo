@@ -1278,6 +1278,23 @@ describe("dynamic attributes", () => {
         );
     });
 
+    test("t-att-style survives non-string", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            dynamicContent = {
+                "_root:t-att-style": () => ({ opacity: 1 }),
+            };
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<div><span>coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span style="opacity: 1;">coucou</span>`,
+        );
+    });
+
 });
 
 describe("components", () => {

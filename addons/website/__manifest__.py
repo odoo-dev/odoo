@@ -295,6 +295,8 @@
             'website/static/lib/multirange/*.js',
             'website/static/src/core/**/*',
             'website/static/src/interactions/**/*',
+            # TODO Re-activate when testing edit mode
+            ('remove', 'website/static/src/interactions/**/*.edit.js'),
             'website/static/src/snippets/s_countdown/000.js',
             'website/static/src/snippets/s_chart/000.js',
             'website/static/src/snippets/s_dynamic_snippet/000.js',
