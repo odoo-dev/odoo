@@ -1,4 +1,5 @@
 import { debounce, throttleForAnimation } from "@web/core/utils/timing";
+import { SKIP_IMPLICIT_UPDATE } from "./colibri"
 
 /**
  * This is the base class to describe interactions. The Interaction class
@@ -133,28 +134,28 @@ export class Interaction {
      * Debounces a function and makes sure it is cancelled upon destroy.
      */
     debounced(fn, delay) {
-        const result = debounce(() => {
+        const debouncedFn = debounce(() => {
             fn.call(this);
             this.updateContent();
         }, delay);
         this.registerCleanup(() => {
-            result.cancel();
+            debouncedFn.cancel();
         });
-        return result;
+        return () => { debouncedFn(); return SKIP_IMPLICIT_UPDATE; };
     }
 
     /**
-     * Throttles a function and makes sure it is cancelled upon destroy.
+     * Throttles a function for animation and makes sure it is cancelled upon destroy.
      */
-    throttled(fn, delay) {
-        const result = throttleForAnimation(() => {
+    throttledForAnimation(fn) {
+        const throttledFn = throttleForAnimation(() => {
             fn.call(this);
             this.updateContent();
-        }, delay);
-        this.registerCleanup(() => {
-            result.cancel();
         });
-        return result;
+        this.registerCleanup(() => {
+            throttledFn.cancel();
+        });
+        return () => { throttledFn(); return SKIP_IMPLICIT_UPDATE; };
     }
 
     /**
