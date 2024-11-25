@@ -6,6 +6,9 @@
 let owl = null;
 let Markup = null;
 
+// Return this from event handlers to skip updateContent.
+export const SKIP_IMPLICIT_UPDATE = Symbol();
+
 export class Colibri {
     constructor(I, el, env) {
         this.el = el;
@@ -39,8 +42,9 @@ export class Colibri {
 
     addListener(nodes, event, fn, options) {
         const handler = (ev) => {
-            fn.call(this.interaction, ev);
-            this.updateContent();
+            if (SKIP_IMPLICIT_UPDATE !== fn.call(this.interaction, ev)) {
+                this.updateContent();
+            }
         };
         for (const node of nodes) {
             node.addEventListener(event, handler, options);

@@ -1,7 +1,9 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { beforeEach, describe, expect, test } from "@odoo/hoot";
 
 import { animationFrame, click, dblclick } from "@odoo/hoot-dom";
-import { Deferred } from "@odoo/hoot-mock";
+import { advanceTime, Deferred } from "@odoo/hoot-mock";
+import { patchWithCleanup } from "@web/../tests/web_test_helpers";
+import { Colibri } from "@website/core/colibri";
 import { Interaction } from "@website/core/interaction";
 import { startInteraction } from "./helpers";
 
@@ -839,5 +841,137 @@ describe("insert", () => {
         core.stopInteractions();
         insertedEl = el.querySelector("inserted");
         expect(insertedEl).toBe(null);
+    });
+});
+
+describe("debounced", () => {
+    beforeEach(async () => {
+        patchWithCleanup(Colibri.prototype, {
+            updateContent() {
+                expect.step("updateContent");
+                super.updateContent();
+            },
+        });
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicContent = {
+                "_root:t-on-click": this.debounced(this.doSomething, 500),
+            };
+            doSomething() {
+                expect.step("done");
+            }
+        }
+        const { core, el } = await startInteraction(
+            Test,
+            `
+        <div class="test">
+            <span>coucou</span>
+        </div>`,
+        );
+        this.core = core;
+        expect.verifySteps(["updateContent"]);
+        this.testEl = el.querySelector(".test");
+    }),
+
+    test("debounced event handler delays and groups calls", async () => {
+        await click(this.testEl);
+        expect.verifySteps([]);
+        await advanceTime(250);
+        expect.verifySteps([]);
+        await click(this.testEl);
+        expect.verifySteps([]);
+        await advanceTime(250);
+        expect.verifySteps([]);
+        await click(this.testEl);
+        expect.verifySteps([]);
+        await advanceTime(500);
+        expect.verifySteps(["done", "updateContent"]);
+    });
+
+    test("debounced event handler considers distant events as distinct", async () => {
+        await click(this.testEl);
+        expect.verifySteps([]);
+        await advanceTime(500);
+        expect.verifySteps(["done", "updateContent"]);
+        await click(this.testEl);
+        expect.verifySteps([]);
+        await advanceTime(500);
+        expect.verifySteps(["done", "updateContent"]);
+        });
+
+    test("debounced event handler cancels events on destroy", async () => {
+        await click(this.testEl);
+        expect.verifySteps([]);
+        this.core.stopInteractions();
+        expect.verifySteps([]);
+        await advanceTime(500);
+        expect.verifySteps([]);
+    });
+});
+
+describe("throttledForAnimation", () => {
+    beforeEach(async () => {
+        patchWithCleanup(Colibri.prototype, {
+            updateContent() {
+                expect.step("updateContent");
+                super.updateContent();
+            },
+        });
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicContent = {
+                "_root:t-on-click": this.throttledForAnimation(this.doSomething),
+            };
+            doSomething() {
+                expect.step("done");
+            }
+        }
+        const { core, el } = await startInteraction(
+            Test,
+            `
+        <div class="test">
+            <span>coucou</span>
+        </div>`,
+        );
+        this.core = core;
+        expect.verifySteps(["updateContent"]);
+        this.testEl = el.querySelector(".test");
+    }),
+
+    test("throttled event handler executes call right away", async () => {
+        await click(this.testEl);
+        expect.verifySteps(["done", "updateContent"]);
+    }),
+
+    test("throttled event handler delays further calls", async () => {
+        await click(this.testEl);
+        await click(this.testEl);
+        expect.verifySteps(["done", "updateContent"]);
+        await animationFrame();
+        expect.verifySteps(["done", "updateContent"]);
+        await animationFrame();
+        expect.verifySteps([]);
+    }),
+
+    test("throttled event handler delays and groups further calls", async () => {
+        await click(this.testEl);
+        await click(this.testEl);
+        await click(this.testEl);
+        expect.verifySteps(["done", "updateContent"]);
+        await animationFrame();
+        expect.verifySteps(["done", "updateContent"]);
+        await animationFrame();
+        expect.verifySteps([]);
+    }),
+
+    test("throttled event handler cancels delayed calls", async () => {
+        await click(this.testEl);
+        await click(this.testEl);
+        await click(this.testEl);
+        expect.verifySteps(["done", "updateContent"]);
+        this.core.stopInteractions();
+        expect.verifySteps([]);
+        await animationFrame();
+        expect.verifySteps([]);
     });
 });
