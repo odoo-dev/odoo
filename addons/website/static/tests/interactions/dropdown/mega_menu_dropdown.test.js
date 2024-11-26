@@ -4,116 +4,77 @@ import {
     startInteractions,
     setupInteractionWhiteList,
 } from "../../core/helpers";
-import { pointerDown, hover } from "@odoo/hoot-dom";
+
+import { hover, pointerDown } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.mega_menu_dropdown");
 
-test("mega_menu_dropdown does nothing if there is no header#top", async () => {
-    const { core } = await startInteractions(`
-      <div></div>
-    `);
-    expect(core.interactions.length).toBe(0);
-});
+const getTemplate = function (options = {}) {
+    const contentInDesktop = options.contentInDesktop || true;
+    const dropdownHoverable = options.dropdownHoverable || false;
+    return `
+    <header id="top">
+        <nav class="o_header_desktop" ${dropdownHoverable ? `class="o_hoverable_dropdown"` : ""}>
+            <div class="dropdown">
+                <a class="dropdown-toggle o_mega_menu_toggle"></a>
+                ${contentInDesktop ? `<div class="dropdown-menu o_mega_menu"></div>` : ""}
+            </div>
+        </nav>
+        <nav class="o_header_mobile">
+            <div class="dropdown">
+                <a class="dropdown-toggle o_mega_menu_toggle"></a>
+                ${contentInDesktop ? "" : `<div class="dropdown-menu o_mega_menu"></div>`}
+            </div>
+        </nav>
+    </header>
+    `
+}
 
-test("mega_menu_dropdown activate when there is a header#top", async () => {
-    const { core } = await startInteractions(`
-      <header id="top"></header>
-    `);
+test("mega_menu_dropdown is started when there is an element header#top", async () => {
+    const { core } = await startInteractions(getTemplate());
     expect(core.interactions.length).toBe(1);
 });
 
-test.tags("desktop")("move from desktop to mobile (mousedown)", async () => {
-    const { core, el } = await startInteractions(`
-        <header id="top">
-            <nav class="o_header_desktop">
-                <div class="dropdown">
-                    <a class="dropdown-toggle o_mega_menu_toggle"></a>
-                    <div class="dropdown-menu o_mega_menu"></div>
-                </div>
-            </nav>
-            <nav class="o_header_mobile">
-                <div class="dropdown">
-                    <a class="dropdown-toggle o_mega_menu_toggle"></a>
-                </div>
-            </nav>
-        </header>
-    `);
+test("[mousedown] moves content from desktop to mobile", async () => {
+    const { el } = await startInteractions(getTemplate({ contentInDesktop: true }));
     const desktopNav = el.querySelector("nav.o_header_desktop");
     const mobileNav = el.querySelector("nav.o_header_mobile");
-    const aNav = mobileNav.querySelector("a.o_mega_menu_toggle");
-    await pointerDown(aNav);
+
+    await pointerDown(mobileNav.querySelector("a.o_mega_menu_toggle"));
+
     expect(!!desktopNav.querySelector("div.o_mega_menu")).toBe(false);
     expect(!!mobileNav.querySelector("div.o_mega_menu")).toBe(true);
 });
 
-test.tags("desktop")("move from mobile to desktop (mousedown)", async () => {
-    const { core, el } = await startInteractions(`
-        <header id="top">
-            <nav class="o_header_desktop">
-                <div class="dropdown">
-                    <a class="dropdown-toggle o_mega_menu_toggle"></a>
-                </div>
-            </nav>
-            <nav class="o_header_mobile">
-                <div class="dropdown">
-                    <a class="dropdown-toggle o_mega_menu_toggle"></a>
-                    <div class="dropdown-menu o_mega_menu"></div>
-                </div>
-            </nav>
-        </header>
-    `);
+test("[mousedown] moves content from mobile to desktop", async () => {
+    const { el } = await startInteractions(getTemplate({ contentInDesktop: false }));
     const desktopNav = el.querySelector("nav.o_header_desktop");
     const mobileNav = el.querySelector("nav.o_header_mobile");
-    const aNav = desktopNav.querySelector("a.o_mega_menu_toggle");
-    await pointerDown(aNav);
+
+    await pointerDown(desktopNav.querySelector("a.o_mega_menu_toggle"));
+
     expect(!!desktopNav.querySelector("div.o_mega_menu")).toBe(true);
     expect(!!mobileNav.querySelector("div.o_mega_menu")).toBe(false);
 });
 
-test.tags("desktop")("DO NOT move from desktop to mobile (hover)", async () => {
-    const { core, el } = await startInteractions(`
-        <header id="top" class="o_hoverable_dropdown">
-            <nav class="o_header_desktop">
-                <div class="dropdown">
-                    <a class="dropdown-toggle o_mega_menu_toggle"></a>
-                    <div class="dropdown-menu o_mega_menu"></div>
-                </div>
-            </nav>
-            <nav class="o_header_mobile">
-                <div class="dropdown">
-                    <a class="dropdown-toggle o_mega_menu_toggle"></a>
-                </div>
-            </nav>
-        </header>
-    `);
+test("[hover] does not move content from desktop to mobile", async () => {
+    const { el } = await startInteractions(getTemplate({ contentInDesktop: true, dropdownHoverable: true }));
     const desktopNav = el.querySelector("nav.o_header_desktop");
     const mobileNav = el.querySelector("nav.o_header_mobile");
-    const aNav = mobileNav.querySelector("a.o_mega_menu_toggle");
-    await hover(aNav);
+
+    await hover(mobileNav.querySelector("a.o_mega_menu_toggle"));
+
     expect(!!desktopNav.querySelector("div.o_mega_menu")).toBe(true);
     expect(!!mobileNav.querySelector("div.o_mega_menu")).toBe(false);
 });
 
-test.tags("desktop")("move from mobile to desktop (hover)", async () => {
-    const { core, el } = await startInteractions(`
-        <header id="top" class="o_hoverable_dropdown">
-            <nav class="o_header_desktop">
-                <div class="dropdown">
-                    <a class="dropdown-toggle o_mega_menu_toggle"></a>
-                </div>
-            </nav>
-            <nav class="o_header_mobile">
-                <div class="dropdown">
-                    <a class="dropdown-toggle o_mega_menu_toggle"></a>
-                    <div class="dropdown-menu o_mega_menu"></div>
-                </div>
-            </nav>
-        </header>
-    `);
+test("[hover] moves content from mobile to desktop", async () => {
+    const { el } = await startInteractions(getTemplate({ contentInDesktop: false, dropdownHoverable: true }));
     const desktopNav = el.querySelector("nav.o_header_desktop");
     const mobileNav = el.querySelector("nav.o_header_mobile");
-    const aNav = desktopNav.querySelector("a.o_mega_menu_toggle");
-    await hover(aNav);
+
+    await hover(desktopNav.querySelector("a.o_mega_menu_toggle"));
+
     expect(!!desktopNav.querySelector("div.o_mega_menu")).toBe(true);
     expect(!!mobileNav.querySelector("div.o_mega_menu")).toBe(false);
 });

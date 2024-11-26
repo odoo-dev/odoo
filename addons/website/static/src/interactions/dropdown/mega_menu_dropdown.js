@@ -75,9 +75,9 @@ class MegaMenuDropdown extends Interaction {
         const megaMenuToggleEl = ev.currentTarget;
         // Hoverable menus are clicked in mobile view
         if (
-            this.el.classList.contains("o_hoverable_dropdown") &&
-            !megaMenuToggleEl.closest(".o_header_mobile") &&
-            ev.type !== "keyup"
+            this.el.classList.contains("o_hoverable_dropdown")
+            && !megaMenuToggleEl.closest(".o_header_mobile")
+            && ev.type !== "keyup"
         ) {
             return;
         }
@@ -91,8 +91,8 @@ class MegaMenuDropdown extends Interaction {
         const megaMenuToggleEl = ev.currentTarget;
         // Hoverable menus are clicked in mobile view
         if (
-            !this.el.classList.contains("o_hoverable_dropdown") ||
-            megaMenuToggleEl.closest(".o_header_mobile")
+            !this.el.classList.contains("o_hoverable_dropdown")
+            || megaMenuToggleEl.closest(".o_header_mobile")
         ) {
             return;
         }
