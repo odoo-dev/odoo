@@ -8,7 +8,7 @@ import { onceAllImagesLoaded } from "@website/interactions/utils";
 
 setupInteractionWhiteList("website.image_shape_hover_effect");
 
-test("image shape hover effect changes image on enter & leave", async () => {
+test.tags("desktop")("image shape hover effect changes image on enter & leave", async () => {
     patchWithCleanup(Image.prototype, {
         set onload(fn) {
             super.onload = fn;
