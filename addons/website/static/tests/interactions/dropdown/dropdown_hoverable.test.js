@@ -36,7 +36,7 @@ test("dropdown_hoverable activate when there is a header.o_hoverable_dropdown", 
     expect(core.interactions.length).toBe(1);
 });
 
-test("dropdown_hoverable enable display on hover only", async () => {
+test.tags("desktop")("dropdown_hoverable enable display on hover on desktop", async () => {
     const { core, el } = await startInteractions(`
         <header class="o_hoverable_dropdown" style="display: flex; height: 50px; background-color: #CCFFCC;">
             <div style="margin: 10px;">
