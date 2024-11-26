@@ -29,6 +29,8 @@ test("zoomed background shape test applies correction on zoom", async () => {
     `);
     expect(core.interactions.length).toBe(1);
     const shapeEl = el.querySelector(".o_we_shape");
-    expect(shapeEl.style.left).toBe("0.2px");
-    expect(shapeEl.style.right).toBe("0.2px");
+    // Adjustment depends on window size during test.
+    expect(shapeEl.style.left).toMatch(/\d+\.\d+px/);
+    expect(shapeEl.style.right).toMatch(/\d+\.\d+px/);
+    expect(shapeEl.style.left).toBe(shapeEl.style.right);
 });
