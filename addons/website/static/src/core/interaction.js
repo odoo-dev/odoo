@@ -109,7 +109,7 @@ export class Interaction {
      */
     waitFor(fn) {
         return new Promise(async (resolve) => {
-            const result = await fn();
+            const result = await fn.call(this);
             if (!this.isDestroyed) {
                 resolve(result);
                 this.updateContent();
@@ -124,7 +124,7 @@ export class Interaction {
     waitForTimeout(fn, delay) {
         return setTimeout(() => {
             if (!this.isDestroyed) {
-                fn();
+                fn.call(this);
                 this.updateContent();
             }
         }, delay);

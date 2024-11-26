@@ -571,6 +571,62 @@ describe("miscellaneous", () => {
         core.stopInteractions();
         expect.verifySteps(["cleanup2", "cleanup1"]);
     });
+
+    test("waitFor is autobound to this", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            setup() {
+                this.waitFor(this.fn);
+                this.waitFor(() => {
+                    setTimeout(() => {
+                        expect(this instanceof Interaction).toBe(true);
+                        expect.step("anonymous function");
+                    }, 50);
+                });
+            }
+            fn() {
+                setTimeout(() => {
+                    expect(this instanceof Interaction).toBe(true);
+                    expect.step("named function");
+                }, 100);
+            }
+        }
+        const { core } = await startInteraction(
+            Test,
+            `<div class="test"></div>`,
+        );
+        expect.verifySteps([]);
+        await advanceTime(50);
+        expect.verifySteps(["anonymous function"]);
+        await advanceTime(50);
+        expect.verifySteps(["named function"]);
+    });
+
+    test("waitForTimeout is autobound to this", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            setup() {
+                this.waitForTimeout(this.fn, 100);
+                this.waitForTimeout(() => {
+                    expect(this instanceof Interaction).toBe(true);
+                    expect.step("anonymous function");
+                }, 50);
+            }
+            fn() {
+                expect(this instanceof Interaction).toBe(true);
+                expect.step("named function");
+            }
+        }
+        const { core } = await startInteraction(
+            Test,
+            `<div class="test"></div>`,
+        );
+        expect.verifySteps([]);
+        await advanceTime(50);
+        expect.verifySteps(["anonymous function"]);
+        await advanceTime(50);
+        expect.verifySteps(["named function"]);
+    });
 });
 
 describe("dynamic attributes", () => {
