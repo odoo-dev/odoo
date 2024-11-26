@@ -6,6 +6,7 @@ import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { Colibri } from "@website/core/colibri";
 import { Interaction } from "@website/core/interaction";
 import { startInteraction } from "./helpers";
+import { Component, onWillDestroy, xml } from "@odoo/owl";
 
 describe("event handling", () => {
     test("can add a listener on a single element", async () => {
@@ -759,6 +760,70 @@ describe("dynamic attributes", () => {
             `<span class="b a">coucou</span>`,
         );
 
+    });
+
+});
+
+describe("components", () => {
+
+    test("can insert a component with t-component", async () => {
+        let isCDestroyed = false;
+        class C extends Component {
+            static template = xml`component`;
+
+            setup() {
+                onWillDestroy(() => isCDestroyed = true)
+            }
+        }
+
+        class Test extends Interaction {
+            static selector =".test";
+            dynamicContent = {
+                "_root:t-component": C,
+            };
+        }
+        const { core, el } = await startInteraction(
+            Test,
+            `<div class="test"></div>`,
+        );
+        expect(el.querySelector(".test").outerHTML).toBe(
+            `<div class="test"><owl-component contenteditable="false" data-oe-protected="true"></owl-component></div>`,
+        );
+        await animationFrame();
+        expect(el.querySelector(".test").outerHTML).toBe(
+            `<div class="test"><owl-component contenteditable="false" data-oe-protected="true">component</owl-component></div>`,
+        );
+        expect(isCDestroyed).toBe(false);
+        core.stopInteractions();
+        expect(isCDestroyed).toBe(true);
+        expect(el.querySelector(".test").outerHTML).toBe(
+            `<div class="test"></div>`,
+        );
+    });
+
+    test("can insert a component with mountComponent", async () => {
+        class C extends Component {
+            static template = xml`component`;
+        }
+
+        class Test extends Interaction {
+            static selector = ".test";
+
+            setup() {
+                this.mountComponent(this.el, C);
+            }
+        }
+        const { el } = await startInteraction(
+            Test,
+            `<div class="test"></div>`,
+        );
+        expect(el.querySelector(".test").outerHTML).toBe(
+            `<div class="test"><owl-component contenteditable="false" data-oe-protected="true"></owl-component></div>`,
+        );
+        await animationFrame();
+        expect(el.querySelector(".test").outerHTML).toBe(
+            `<div class="test"><owl-component contenteditable="false" data-oe-protected="true">component</owl-component></div>`,
+        );
     });
 
 });

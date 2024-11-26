@@ -202,7 +202,7 @@ export class Interaction {
         this.__colibri__.cleanups.push(fn);
     }
 
-    mountComponent() {
-        // todo
+    mountComponent(el, C) {
+        this.__colibri__.mountComponent([el], C);
     }
 }
