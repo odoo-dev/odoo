@@ -10,7 +10,7 @@ let Markup = null;
 export const SKIP_IMPLICIT_UPDATE = Symbol();
 
 export class Colibri {
-    constructor(I, el, env) {
+    constructor(core, I, el) {
         this.el = el;
         this.I = I;
         this.update = null;
@@ -19,7 +19,8 @@ export class Colibri {
         this.handlers = [];
         this.cleanups = [];
         this.startProm = null;
-        const interaction = new I(el, env, this);
+        this.core = core;
+        const interaction = new I(el, core.env, this);
         this.interaction = interaction;
         interaction.setup();
         this.startProm = (interaction.willStart() || Promise.resolve()).then(
@@ -49,6 +50,14 @@ export class Colibri {
         for (const node of nodes) {
             node.addEventListener(event, handler, options);
             this.handlers.push([node, event, handler, options]);
+        }
+    }
+
+    mountComponent(nodes, C) {
+        for (let node of nodes) {
+            const root = this.core.prepareRoot(node, C);
+            root.mount();
+            this.cleanups.push(() => root.destroy());
         }
     }
 
@@ -124,6 +133,8 @@ export class Colibri {
                 this.dynamicAttrs.push([nodes, attr, value, initialValues]);
             } else if (directive === "t-out") {
                 this.tOuts.push([nodes, value]);
+            } else if (directive === "t-component") {
+                this.mountComponent(nodes, value);
             } else {
                 const suffix = directive.startsWith("t-")
                     ? ""
@@ -173,6 +184,7 @@ export class Colibri {
         this.handlers = [];
         this.interaction.destroy();
         this.interaction.isDestroyed = true;
+        this.core = null;
     }
 }
 

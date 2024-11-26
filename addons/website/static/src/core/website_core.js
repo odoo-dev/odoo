@@ -48,7 +48,7 @@ class WebsiteCore {
         this.proms.push(startProm);
     }
 
-    async _mountComponent(el, C) {
+    prepareRoot(el, C) {
         if (!this.owlApp) {
             const { App } = odoo.loader.modules.get("@odoo/owl");
             const appConfig = {
@@ -63,12 +63,26 @@ class WebsiteCore {
             this.owlApp = new App(null, appConfig);
         }
         const root = this.owlApp.createRoot(C, { props: null, env: this.env });
-        this.roots.push(Object.assign(root, { el, C }));
         const compElem = document.createElement("owl-component");
         compElem.setAttribute("contenteditable", "false");
         compElem.dataset.oeProtected = "true";
         el.appendChild(compElem);
-        return root.mount(compElem);
+        return { 
+            C,
+            root,
+            el: compElem,
+            mount: () => root.mount(compElem),
+            destroy: () => {
+                root.destroy();
+                compElem.remove();
+            }
+         };
+    }
+    
+    async _mountComponent(el, C) {
+        const root = this.prepareRoot(el, C);
+        this.roots.push(root);
+        return root.mount();
     }
 
     startInteractions(el = this.el) {
@@ -98,7 +112,7 @@ class WebsiteCore {
         }
         this.activeInteractions.add(el, I);
         if (I.prototype instanceof Interaction) {
-            const interaction = new Colibri(I, el, this.env);
+            const interaction = new Colibri(this, I, el);
             this.interactions.push(interaction);
             proms.push(interaction.startProm);
         } else {

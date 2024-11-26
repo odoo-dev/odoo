@@ -72,8 +72,11 @@ test("can mount a component", async () => {
         static selector = ".test";
         static template = xml`owl component`;
     }
-    const {el} = await startInteraction(Test, `<div class="test"></div>`);
+    const {core, el} = await startInteraction(Test, `<div class="test"></div>`);
     expect(el.querySelector(".test").innerHTML).toBe(`<owl-component contenteditable="false" data-oe-protected="true">owl component</owl-component>`);
+    core.stopInteractions();
+    expect(el.querySelector(".test").outerHTML).toBe(`<div class="test"></div>`);
+
 });
 
 test("can start interaction in specific el", async () => {
