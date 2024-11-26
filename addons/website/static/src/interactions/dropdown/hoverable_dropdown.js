@@ -3,7 +3,7 @@ import { registry } from "@web/core/registry";
 
 import { SIZES, utils as uiUtils } from "@web/core/ui/ui_service";
 
-class DropdownHoverable extends Interaction {
+class HoverableDropdown extends Interaction {
     static selector = "header.o_hoverable_dropdown";
     dynamicContent = {
         ".dropdown": {
@@ -94,4 +94,4 @@ class DropdownHoverable extends Interaction {
 
 registry
     .category("website.active_elements")
-    .add("website.dropdown_hoverable", DropdownHoverable);
+    .add("website.hoverable_dropdown", HoverableDropdown);
