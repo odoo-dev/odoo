@@ -574,6 +574,30 @@ describe("miscellaneous", () => {
         expect.verifySteps(["cleanup", "destroy"]);
     });
 
+    test("registerCleanup automatically bind functions", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            setup() {
+                this.value = "value";
+                this.registerCleanup(this.sayValue);
+            }
+            destroy() {
+                expect.step("destroy");
+            }
+            sayValue() {
+                return expect.step(this.value);
+            }
+        }
+        const { core } = await startInteraction(
+            Test,
+            `<div class="test"></div>`,
+        );
+
+        expect.verifySteps([]);
+        core.stopInteractions();
+        expect.verifySteps(["value", "destroy"]);
+    });
+
     test("cleanups are executed in reverse order", async () => {
         class Test extends Interaction {
             static selector = ".test";
