@@ -85,6 +85,22 @@ export class Colibri {
                     el.classList.toggle(c, value[cl]);
                 }
             }
+        } else if (attr === "style") {
+            if (typeof value !== "object") {
+                throw new Error("t-att-style directive expects an object");
+            }
+            for (const prop in value) {
+                let style = value[prop];
+                if (style === undefined) {
+                    el.style.removeProperty(prop);
+                } else {
+                    if (style.endsWith(" !important")) {
+                        el.style.setProperty(prop, style.substring(0, style.length - 11), "important");
+                    } else {
+                        el.style.setProperty(prop, style);
+                    }
+                }
+            }
         } else {
             if (value) {
                 el.setAttribute(attr, value);
