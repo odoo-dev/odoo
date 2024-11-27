@@ -5,6 +5,7 @@ import { rpc } from "@web/core/network/rpc";
 import publicRootData from '@web/legacy/js/public/public_root';
 import "@website/libs/zoomodoo/zoomodoo";
 import { pick } from "@web/core/utils/objects";
+import { useBus } from '@web/core/utils/hooks';
 
 import { markup } from "@odoo/owl";
 
@@ -15,7 +16,6 @@ export const WebsiteRoot = publicRootData.PublicRoot.extend({
         'shown.bs.modal': '_onModalShown',
     }),
     custom_events: Object.assign({}, publicRootData.PublicRoot.prototype.custom_events || {}, {
-        'gmap_api_request': '_onGMapAPIRequest',
         'gmap_api_key_request': '_onGMapAPIKeyRequest',
         'ready_to_clean_for_save': '_onWidgetsStopRequest',
         'seo_object_request': '_onSeoObjectRequest',
@@ -35,6 +35,7 @@ export const WebsiteRoot = publicRootData.PublicRoot.extend({
      * @override
      */
     start: function () {
+        useBus(this.env.bus, "gmap_api_request", this._onGMapAPIRequest.bind(this));
         // Enable magnify on zommable img
         this.$('.zoomable img[data-zoom]').zoomOdoo();
 

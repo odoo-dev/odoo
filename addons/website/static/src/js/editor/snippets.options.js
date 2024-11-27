@@ -675,7 +675,7 @@ const GPSPicker = InputUserValueWidget.extend({
     async willStart() {
         await this._super(...arguments);
         this._gmapLoaded = await new Promise(resolve => {
-            this.trigger_up('gmap_api_request', {
+            this.env.bus.trigger("gmap_api_request", {
                 editableMode: true,
                 configureIfNecessary: true,
                 onSuccess: key => {
@@ -830,7 +830,7 @@ const GPSPicker = InputUserValueWidget.extend({
             _t("A Google Map error occurred. Make sure to read the key configuration popup carefully."),
             { type: 'danger', sticky: true }
         );
-        this.trigger_up('gmap_api_request', {
+        this.env.bus.trigger("gmap_api_request", {
             editableMode: true,
             reconfigure: true,
             onSuccess: () => {

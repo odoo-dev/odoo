@@ -9,6 +9,7 @@ import { Component, onMounted, onWillStart, useEffect, useRef, useState } from "
 import { throttleForAnimation } from "@web/core/utils/timing";
 import { applyTextHighlight, switchTextHighlight } from "@website/js/text_processing";
 import { registry } from "@web/core/registry";
+import { useBus } from '@web/core/utils/hooks';
 
 const snippetsEditorRegistry = registry.category("snippets_editor");
 snippetsEditorRegistry.add("no_parent_editor_snippets", ["s_popup", "o_mega_menu"]);
@@ -26,7 +27,6 @@ export class WebsiteSnippetsMenu extends weSnippetEditor.SnippetsMenu {
     static custom_events = Object.assign({}, weSnippetEditor.SnippetsMenu.custom_events, {
         'service_context_get': '_onServiceContextGet',
         'get_switchable_related_views': '_onGetSwitchableRelatedViews',
-        'gmap_api_request': '_onGMapAPIRequest',
         'gmap_api_key_request': '_onGMapAPIKeyRequest',
         'reload_bundles': '_onReloadBundles',
     });
@@ -79,6 +79,7 @@ export class WebsiteSnippetsMenu extends weSnippetEditor.SnippetsMenu {
      * @override
      */
     async start() {
+        useBus(this.env.bus, "gmap_api_request", this._onGMapAPIRequest.bind(this));
         if (this.$body[0].ownerDocument !== this.ownerDocument) {
             this.$body.on('click.snippets_menu', '*', this._onClick);
         }
