@@ -138,6 +138,9 @@ describe("event handling", () => {
         class Test extends Interaction {
             static selector = ".test";
 
+            dynamicSelectors = {
+                "_modal": () => this.el.closest(".modal"),
+            };
             dynamicContent = {
                 "_modal:t-on-click": this.doSomething,
             };
@@ -357,6 +360,27 @@ describe("event handling", () => {
         expect(span.dataset.count).toBe("2");
         await animationFrame();
         expect(span.dataset.count).toBe("2");
+    });
+});
+
+describe("special selectors", () => {
+    test("can register a special selector", async () => {
+
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicSelectors = {
+                "_myselector": () => this.el.querySelector(".my-selector")
+            };
+            dynamicContent = {
+                "_myselector:t-att-animal": () => "colibri",
+            };
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<div class="test"><span class="my-selector">coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(`<span class="my-selector" animal="colibri">coucou</span>`);
     });
 });
 

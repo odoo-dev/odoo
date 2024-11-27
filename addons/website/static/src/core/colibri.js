@@ -115,17 +115,12 @@ export class Colibri {
 
         const el = interaction.el;
         const nodes = {};
-        const SPECIALS = {
-            _root: el,
-            _body: document.body,
-            _modal: el.closest(".modal"),
-            _window: window,
-            _document: document,
-        };
+        const selectors = interaction.dynamicSelectors;
+
 
         const getNodes = (sel) => {
-            if (sel in SPECIALS) {
-                const elem = SPECIALS[sel];
+            if (sel in selectors) {
+                const elem = selectors[sel]();
                 return elem ? [elem] : [];
             }
             if (!(sel in nodes)) {

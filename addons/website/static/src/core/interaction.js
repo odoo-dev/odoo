@@ -23,6 +23,20 @@ export class Interaction {
     static selector = "";
 
     /**
+     * Note that a dynamic selector is allowed to return a falsy value, for ex
+     * the result of a querySelector. In that case, the directive will simply be
+     * ignored.
+     *
+     * @type {Object} 
+     */
+    dynamicSelectors = {
+        _root: () => this.el,
+        _body: () => document.body,
+        _window: () => window,
+        _document: () => document,
+    };
+
+    /**
      * The dynamic content of an interaction is an object describing the set of
      * "dynamic elements" managed by the framework: event handlers, dynamic
      * attributes, dynamic content, sub components.
@@ -34,7 +48,7 @@ export class Interaction {
      * }
      *
      * A selector is either a standard css selector, or a special keyword
-     * (_body, _root, _document, _window or _modal)
+     * (see dynamicSelectors: _body, _root, _document, _window)
      * 
      * Accepted directives includes: t-on-, t-att-, t-out and t-component
      * 
