@@ -87,7 +87,7 @@ export class Colibri {
             }
             for (const cl in value) {
                 for (const c of cl.trim().split(" ")) {
-                    el.classList.toggle(c, value[cl]);
+                    el.classList.toggle(c, value[cl] || false);
                 }
             }
         } else if (attr === "style") {
