@@ -199,7 +199,7 @@ export class Interaction {
      * @param {Function} fn 
      */
     registerCleanup(fn) {
-        this.__colibri__.cleanups.push(fn);
+        this.__colibri__.cleanups.push(fn.bind(this));
     }
 
     mountComponent() {
