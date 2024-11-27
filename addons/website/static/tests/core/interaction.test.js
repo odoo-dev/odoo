@@ -274,7 +274,7 @@ describe("event handling", () => {
         class Test extends Interaction {
             static selector = ".test";
 
-            setup() {
+            start() {
                 this.addListener("span", "click", this.doSomething);
             }
             doSomething() {
@@ -329,6 +329,34 @@ describe("event handling", () => {
 
         expect.verifySteps(["setup", "willStart", "start", "click"]);
     });
+
+    test("this.addListener crashes if interaction is not started", async () => {
+        let clicked = 0;
+        class Test extends Interaction {
+            static selector = ".test";
+
+            setup() {
+                this.addListener("span", "click", this.doSomething);
+            }
+            doSomething() {
+                clicked++;
+            }
+        }
+        let error = null;
+        try {
+            await startInteraction( Test,
+            `
+            <div class="test">
+                <span>coucou</span>
+            </div>`,
+            );
+        } catch (e) {
+            error = e;
+        }
+        expect(error).not.toBe(null);
+        expect(error.message).toInclude("this.addListener can only be called after the interaction is started");
+    });
+
 
     test("dom is updated after event is dispatched", async () => {
         class Test extends Interaction {

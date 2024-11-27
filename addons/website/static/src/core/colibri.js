@@ -12,6 +12,7 @@ export const SKIP_IMPLICIT_UPDATE = Symbol();
 export class Colibri {
     constructor(core, I, el) {
         this.el = el;
+        this.isStarted = false;
         this.I = I;
         this.update = null;
         this.dynamicAttrs = [];
@@ -28,6 +29,7 @@ export class Colibri {
                 if (interaction.isDestroyed) {
                     return;
                 }
+                this.isStarted = true;
                 if (I.dynamicContent) {
                     throw new Error(`The dynamic content object should be defined on the instance, not on the class (${I.name})`);
                 }
@@ -42,6 +44,9 @@ export class Colibri {
     }
 
     addListener(nodes, event, fn, options) {
+        if (!this.isStarted) {
+            throw new Error("this.addListener can only be called after the interaction is started. Maybe move the call in the start method.");
+        }
         const handler = (ev) => {
             if (SKIP_IMPLICIT_UPDATE !== fn.call(this.interaction, ev)) {
                 this.updateContent();
