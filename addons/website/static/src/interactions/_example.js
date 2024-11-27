@@ -15,7 +15,9 @@ class TogglableBackgroundSection extends Interaction {
     static selector = "section";
     dynamicContent = {
         _root: {
-            "t-att-style": () => "background-color:" + this.bgColor,
+            "t-att-style": () => ({
+                "background-color": this.bgColor
+            }),
             "t-att-data-bg-color": () => this.bgColor,
         },
         h2: {

@@ -13,7 +13,9 @@ export class CarouselSlider extends Interaction {
             "t-on-resize": this.debounced(this.computeMaxHeight, 250),
         },
         ".carousel-item": {
-            "t-att-style": () => `min-height: ${this.maxHeight};`,
+            "t-att-style": () => ({
+                "min-height": this.maxHeight,
+            }),
         },
     };
     carouselOptions = undefined;
