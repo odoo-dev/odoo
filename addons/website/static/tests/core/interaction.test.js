@@ -745,6 +745,27 @@ describe("dynamic attributes", () => {
         );
     });
 
+    test("t-att-class does not toggle on undefined", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            dynamicContent = {
+                "_root:t-att-class": () => ({ b: undefined }),
+            };
+        }
+
+        const { el, core } = await startInteraction(
+            Test,
+            `<div><span class="a b">coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span class="a">coucou</span>`,
+        );
+        core.interactions[0].interaction.updateContent();
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span class="a">coucou</span>`,
+        );
+    });
+
     test("t-att-class, basic test", async () => {
         class Test extends Interaction {
             static selector = "span";
