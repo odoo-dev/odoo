@@ -3,6 +3,9 @@ import { registry } from "@web/core/registry";
 
 class Parallax extends Interaction {
     static selector = ".parallax";
+    dynamicSelectors = Object.assign(this.dynamicSelectors, {
+        _modal: () => this.modalEl
+    });
     dynamicContent = {
         _document: {
             "t-on-scroll": this.onScroll,
