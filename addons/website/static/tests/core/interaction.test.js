@@ -762,6 +762,122 @@ describe("dynamic attributes", () => {
 
     });
 
+    test("t-att-style does not override existing styles", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            dynamicContent = {
+                "_root:t-att-style": () => ({ color: "red" }),
+            };
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<div><span style="background-color: blue">coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span style="background-color: blue; color: red;">coucou</span>`,
+        );
+    });
+
+    test("t-att-style, basic test", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            dynamicContent = {
+                "_root:t-att-style": () => ({ color: this.val }),
+            };
+
+            setup() {
+                this.val = "red";
+            }
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<div><span style="background-color: blue">coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span style="background-color: blue; color: red;">coucou</span>`,
+        );
+    });
+
+    test("t-att-style, apply important", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            dynamicContent = {
+                "_root:t-att-style": () => ({ color: "red !important" }),
+            };
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<div><span>coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span style="color: red !important;">coucou</span>`,
+        );
+    });
+
+    test("t-att-style can remove a style", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            dynamicContent = {
+                "_root:t-att-style": () => ({ color: undefined }),
+            };
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<div><span style="background-color: blue; color: red;">coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span style="background-color: blue;">coucou</span>`,
+        );
+    });
+
+    test("t-att-style can set multiple styles", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            dynamicContent = {
+                "_root:t-att-style": () => ({
+                    "background-color": "black",
+                    "color": "red",
+                }),
+            };
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `<div><span style="background-color: blue">coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span style="background-color: black; color: red;">coucou</span>`,
+        );
+    });
+
+    test("t-att-style can reset style", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            dynamicContent = {
+                "_root:t-att-style": () => ({
+                    "background-color": "black",
+                    "color": "red",
+                }),
+            };
+        }
+
+        const { core, el } = await startInteraction(
+            Test,
+            `<div><span style="background-color: blue">coucou</span></div>`,
+        );
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span style="background-color: black; color: red;">coucou</span>`,
+        );
+        core.stopInteractions();
+        expect(el.querySelector("span").outerHTML).toBe(
+            `<span style="background-color: blue">coucou</span>`,
+        );
+    });
+
 });
 
 describe("components", () => {
