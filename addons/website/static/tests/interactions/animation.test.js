@@ -1,6 +1,5 @@
 import { expect, test } from "@odoo/hoot";
 import { animationFrame, click, scroll } from "@odoo/hoot-dom";
-import { advanceTime } from "@odoo/hoot-mock";
 import {
     startInteractions,
     setupInteractionWhiteList,
@@ -59,4 +58,25 @@ test("on scroll animation changes based on scroll", async () => {
     const delay2 = animEl.style.animationDelay
     expect(delay2).not.toBe("");
     expect(delay2).not.toBe(delay1);
+});
+
+test("on appearance animation in modal starts once visible", async () => {
+    const { core, el } = await startInteractions(`
+        <div id="wrapwrap">
+            <div class="modal" style="display: none;" data-show-after="1000" data-display="afterDelay" data-bs-backdrop="false">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="o_anim_fade_in o_animate">Animated</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
+    expect(core.interactions.length).toBe(1);
+    const modalEl = el.querySelector(".modal");
+    const animEl = el.querySelector(".o_animate");
+    expect(animEl).not.toHaveClass("o_animating");
+    window.Modal.getOrCreateInstance(modalEl).show();
+    await animationFrame();
+    expect(animEl).toHaveClass("o_animating");
 });
