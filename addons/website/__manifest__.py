@@ -310,6 +310,7 @@
             'website/static/src/snippets/s_website_form/000.js',
             'website/static/src/snippets/*/*.xml',
             'website/static/src/xml/website_form.xml',
+            'website/static/src/xml/website.cookies_warning.xml',
             'google_recaptcha/static/src/js/recaptcha.js',
         ],
         'web.tests_assets': [
