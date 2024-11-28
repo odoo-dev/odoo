@@ -17,7 +17,6 @@ export class Colibri {
         this.update = null;
         this.dynamicAttrs = [];
         this.tOuts = [];
-        this.handlers = [];
         this.cleanups = [];
         this.startProm = null;
         this.core = core;
@@ -79,7 +78,7 @@ export class Colibri {
         };
         for (const node of nodes) {
             node.addEventListener(event, handler, options);
-            this.handlers.push([node, event, handler, options]);
+            this.cleanups.push(() => node.removeEventListener(event, handler, options));
         }
     }
 
@@ -219,10 +218,6 @@ export class Colibri {
             cleanup();
         }
         this.cleanups = [];
-        for (const [el, ev, fn, options] of this.handlers) {
-            el.removeEventListener(ev, fn, options);
-        }
-        this.handlers = [];
         this.interaction.destroy();
         this.interaction.isDestroyed = true;
         this.core = null;
