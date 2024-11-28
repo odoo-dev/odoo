@@ -47,6 +47,31 @@ export class Colibri {
         if (!this.isStarted) {
             throw new Error("this.addListener can only be called after the interaction is started. Maybe move the call in the start method.");
         }
+        const re = /^(?<event>.*)\.(?<suffix>prevent|stop|capture|noupdate)$/;
+        let groups = re.exec(event)?.groups;
+        while (groups) {
+            fn = {
+                prevent: (f) => ((ev) => {
+                    ev.preventDefault();
+                    return f(ev);
+                }),
+                stop: (f) => ((ev) => {
+                    ev.stopPropagation();
+                    return f(ev);
+                }),
+                capture: (f) => {
+                    options ||= {};
+                    options.capture = true;
+                    return f;
+                },
+                noupdate: (f) => ((ev) => {
+                    f(ev);
+                    return SKIP_IMPLICIT_UPDATE;
+                }),
+            }[groups.suffix](fn);
+            event = groups.event;
+            groups = re.exec(event)?.groups;
+        }
         const handler = (ev) => {
             if (SKIP_IMPLICIT_UPDATE !== fn.call(this.interaction, ev)) {
                 this.updateContent();
