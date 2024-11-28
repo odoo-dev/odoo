@@ -140,11 +140,14 @@ export class GallerySliderWidget extends Interaction {
         this.nbPages = Math.ceil(this.liEls.length / this.realNbPerPage);
 
         this.update();
+    }
 
+    start() {
         this.addListener(this.carouselEl, "slide.bs.carousel", this.slide);
         this.addListener(this.carouselEl, "slid.bs.carousel", this.update);
         this.addListener(this.indicatorEl, "click", this.clickIndicator);// Delegate on "> li:not([data-bs-slide-to])"
     }
+
     slide(ev) {
         this.waitForTimeout(() => {
             const itemEl = this.carouselEl.querySelector(".carousel-inner .carousel-item-prev, .carousel-inner .carousel-item-next");
