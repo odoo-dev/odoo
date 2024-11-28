@@ -3,7 +3,7 @@ import { registry } from "@web/core/registry";
 
 import { SIZES, utils as uiUtils } from "@web/core/ui/ui_service";
 
-class HoverableDropdown extends Interaction {
+export class HoverableDropdown extends Interaction {
     static selector = "header.o_hoverable_dropdown";
     dynamicContent = {
         ".dropdown": {
@@ -45,13 +45,6 @@ class HoverableDropdown extends Interaction {
      * @param {Event} ev
      */
     onMouseEnter(ev) {
-        // TODO
-        // if (
-        //     this.editableMode
-        //     && this.el.querySelector(".dropdown-toggle.show")
-        // ) {
-        //     return;
-        // }
         const focusedEl = this.el.ownerDocument.querySelector(":focus")
             || window.frameElement?.ownerDocument.querySelector(":focus");
 
@@ -75,10 +68,6 @@ class HoverableDropdown extends Interaction {
      * @param {Event} ev
      */
     onMouseLeave(ev) {
-        // TODO
-        // if (this.editableMode) {
-        //     return;
-        // }
         this.updateDropdownVisibility(ev, false);
     }
 
