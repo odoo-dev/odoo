@@ -1,6 +1,7 @@
 import { registry } from "@web/core/registry";
 import { Interaction } from "@website/core/interaction";
 import { getScrollingElement, isScrollableY } from "@web/core/utils/scrolling";
+import { isVisible } from "@web/core/utils/ui";
 
 export class Animation extends Interaction {
     static selector = ".o_animate";
@@ -90,7 +91,6 @@ export class Animation extends Interaction {
     }
 
     resetAnimation() {
-        console.log("reset");
         this.isResetting = true;
         this.isAnimated = false;
         this.isAnimating = false;
@@ -178,10 +178,10 @@ export class Animation extends Interaction {
         } else {
             if (visible && this.playState === "paused") {
                 el.classList.add("o_visible");
-                this.startAnimation(el);
+                this.startAnimation();
             } else if (!visible && el.classList.contains("o_animate_both_scroll") && this.playState === "running") {
                 el.classList.remove("o_visible");
-                this.resetAnimation(el);
+                this.resetAnimation();
             }
         }
     }
