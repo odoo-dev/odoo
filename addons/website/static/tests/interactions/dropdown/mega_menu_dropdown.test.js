@@ -14,7 +14,7 @@ const getTemplate = function (options = {}) {
     const dropdownHoverable = options.dropdownHoverable || false;
     return `
     <header id="top">
-        <nav class="o_header_desktop" ${dropdownHoverable ? `class="o_hoverable_dropdown"` : ""}>
+        <nav class="o_header_desktop ${dropdownHoverable ? "o_hoverable_dropdown" : ""}">
             <div class="dropdown">
                 <a class="dropdown-toggle o_mega_menu_toggle"></a>
                 ${contentInDesktop ? `<div class="dropdown-menu o_mega_menu"></div>` : ""}
@@ -35,7 +35,7 @@ test("mega_menu_dropdown is started when there is an element header#top", async 
     expect(core.interactions.length).toBe(1);
 });
 
-test("[mousedown] moves content from desktop to mobile", async () => {
+test.tags("desktop")("[mousedown] moves content from desktop to mobile", async () => {
     const { el } = await startInteractions(getTemplate({ contentInDesktop: true }));
     const desktopNav = el.querySelector("nav.o_header_desktop");
     const mobileNav = el.querySelector("nav.o_header_mobile");
@@ -46,7 +46,7 @@ test("[mousedown] moves content from desktop to mobile", async () => {
     expect(!!mobileNav.querySelector("div.o_mega_menu")).toBe(true);
 });
 
-test("[mousedown] moves content from mobile to desktop", async () => {
+test.tags("desktop")("[mousedown] moves content from mobile to desktop", async () => {
     const { el } = await startInteractions(getTemplate({ contentInDesktop: false }));
     const desktopNav = el.querySelector("nav.o_header_desktop");
     const mobileNav = el.querySelector("nav.o_header_mobile");
@@ -57,7 +57,7 @@ test("[mousedown] moves content from mobile to desktop", async () => {
     expect(!!mobileNav.querySelector("div.o_mega_menu")).toBe(false);
 });
 
-test("[hover] does not move content from desktop to mobile", async () => {
+test.tags("desktop")("[hover] does not move content from desktop to mobile", async () => {
     const { el } = await startInteractions(getTemplate({ contentInDesktop: true, dropdownHoverable: true }));
     const desktopNav = el.querySelector("nav.o_header_desktop");
     const mobileNav = el.querySelector("nav.o_header_mobile");
@@ -68,7 +68,7 @@ test("[hover] does not move content from desktop to mobile", async () => {
     expect(!!mobileNav.querySelector("div.o_mega_menu")).toBe(false);
 });
 
-test("[hover] moves content from mobile to desktop", async () => {
+test.tags("desktop")("[hover] moves content from mobile to desktop", async () => {
     const { el } = await startInteractions(getTemplate({ contentInDesktop: false, dropdownHoverable: true }));
     const desktopNav = el.querySelector("nav.o_header_desktop");
     const mobileNav = el.querySelector("nav.o_header_mobile");
