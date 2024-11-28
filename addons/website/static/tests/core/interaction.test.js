@@ -389,6 +389,172 @@ describe("event handling", () => {
         await animationFrame();
         expect(span.dataset.count).toBe("2");
     });
+
+    test("add a listener with the .stop qualifier", async () => {
+        let clicked = false;
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicContent = {
+                "span:t-on-click.stop": this.doSomething,
+            };
+            doSomething(ev) {
+                clicked = true;
+                expect(event.defaultPrevented).toBe(false);
+                expect(event.cancelBubble).toBe(true);
+            }
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `
+        <div class="test">
+            <span>coucou</span>
+        </div>`,
+        );
+        expect(clicked).toBe(false);
+        await click(el.querySelector("span"));
+        expect(clicked).toBe(true);
+    });
+
+    test("add a listener with the .prevent qualifier", async () => {
+        let clicked = false;
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicContent = {
+                "span:t-on-click.prevent": this.doSomething,
+            };
+            doSomething(ev) {
+                clicked = true;
+                expect(event.defaultPrevented).toBe(true);
+                expect(event.cancelBubble).toBe(false);
+            }
+        }
+    
+        const { el } = await startInteraction(
+            Test,
+            `
+        <div class="test">
+            <span>coucou</span>
+        </div>`,
+        );
+        expect(clicked).toBe(false);
+        await click(el.querySelector("span"));
+        expect(clicked).toBe(true);
+    });
+
+    test("add a listener with the .capture qualifier", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicContent = {
+                "strong:t-on-click": this.doStrong,
+                "span:t-on-click.capture": this.doSpan,
+            };
+            doStrong(ev) {
+                expect.step("strong");
+            }
+            doSpan(ev) {
+                expect.step("span");
+            }
+        }
+    
+        const { el } = await startInteraction(
+            Test,
+            `
+        <div class="test">
+            <span><strong>coucou</strong></span>
+        </div>`,
+        );
+        expect.verifySteps([]);
+        await click(el.querySelector("strong"));
+        expect.verifySteps(["span", "strong"]);
+    });
+
+    test("add a listener without the .capture qualifier", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicContent = {
+                "strong:t-on-click": this.doStrong,
+                "span:t-on-click": this.doSpan,
+            };
+            doStrong(ev) {
+                expect.step("strong");
+            }
+            doSpan(ev) {
+                expect.step("span");
+            }
+        }
+
+        const { el } = await startInteraction(
+            Test,
+            `
+        <div class="test">
+            <span><strong>coucou</strong></span>
+        </div>`,
+        );
+        expect.verifySteps([]);
+        await click(el.querySelector("strong"));
+        expect.verifySteps(["strong", "span"]);
+    });
+
+    test("add a listener with the .noupdate qualifier", async () => {
+        let clicked = false;
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicContent = {
+                "span:t-on-click.noupdate": this.doSomething,
+                "span:t-att-class": () => ({"a": clicked}),
+            };
+            doSomething(ev) {
+                clicked = true;
+                expect(event.defaultPrevented).toBe(false);
+                expect(event.cancelBubble).toBe(false);
+            }
+        }
+    
+        const { el, core } = await startInteraction(
+            Test,
+            `
+        <div class="test">
+            <span>coucou</span>
+        </div>`,
+        );
+        expect(clicked).toBe(false);
+        await click(el.querySelector("span"));
+        expect(clicked).toBe(true);
+        expect(el.querySelector("span")).not.toHaveClass("a");
+        core.interactions[0].interaction.updateContent();
+        expect(el.querySelector("span")).toHaveClass("a");
+    });
+
+    test("add a listener with several qualifiers", async () => {
+        let clicked = false;
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicContent = {
+                "span:t-on-click.noupdate.stop.prevent": this.doSomething,
+                "span:t-att-class": () => ({"a": clicked}),
+            };
+            doSomething(ev) {
+                clicked = true;
+                expect(event.defaultPrevented).toBe(true);
+                expect(event.cancelBubble).toBe(true);
+            }
+        }
+
+        const { el, core } = await startInteraction(
+            Test,
+            `
+        <div class="test">
+            <span>coucou</span>
+        </div>`,
+        );
+        expect(clicked).toBe(false);
+        await click(el.querySelector("span"));
+        expect(clicked).toBe(true);
+        expect(el.querySelector("span")).not.toHaveClass("a");
+        core.interactions[0].interaction.updateContent();
+        expect(el.querySelector("span")).toHaveClass("a");
+    });
 });
 
 describe("special selectors", () => {
