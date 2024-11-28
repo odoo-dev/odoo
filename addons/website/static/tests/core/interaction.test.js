@@ -167,6 +167,12 @@ describe("event handling", () => {
         let clicked = false;
         class Test extends Interaction {
             static selector = ".test";
+            dynamicSelectors = {
+                "_modal": () => {
+                    expect.step("check");
+                    return null;
+                },
+            }
 
             dynamicContent = {
                 "_modal:t-on-click": this.doSomething,
@@ -183,7 +189,34 @@ describe("event handling", () => {
                     <span>coucou</span>
                 </div>`,
         );
+        expect.verifySteps(["check"])
         expect(clicked).toBe(false);
+    });
+
+    test("crash if a function is not provided to addListener", async () => {
+        let inError = false;
+        class Test extends Interaction {
+            static selector = ".test";
+
+            start() {
+                try {
+                    this.addListener(this.el, "click", null);
+                } catch (e) {
+                    inError = true;
+                    expect(e.message).toBe("Invalid listener for event 'click' (received falsy value)");
+                }
+            }
+        }
+        const { el } = await startInteraction(
+            Test,
+            `
+                <div class="test">
+                    <span>coucou</span>
+                </div>`,
+        );
+
+        el.querySelector(".test").click();
+        expect(inError).toBe(true);
     });
 
 
@@ -295,6 +328,54 @@ describe("event handling", () => {
         core.stopInteractions();
         await click(el.querySelector("span"));
         expect(clicked).toBe(1);
+    });
+
+    test("side effects are cleaned up in reverse order", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicContent = {
+                "_root:t-on-click": () => expect.step("click1"),
+            };
+
+            setup() {
+                expect.step("setup");
+                this.el.click(); // we check that event handler is not bound yet
+                this.registerCleanup(() => expect.step("a"));
+                this.registerCleanup(() => {
+                    expect.step("b");
+                    this.el.click();
+                });
+            }
+            start() {
+                expect.step("start");
+                this.el.click(); // check that event handler is bound
+                this.registerCleanup(() => {
+                    expect.step("c");
+                    this.el.click();
+                });
+                this.addListener(this.el, "click", () => expect.step("click2"))
+                this.registerCleanup(() => {
+                    expect.step("d");
+                    this.el.click();
+                });
+            }
+            destroy() {
+                this.el.click(); // check that handlers have been cleaned
+            }
+        }
+
+        const { el, core } = await startInteraction(
+            Test,
+            `
+        <div class="test">
+            <span>coucou</span>
+        </div>`,
+        );
+        expect.verifySteps(["setup", "start", "click1"]);
+        core.stopInteractions();
+        expect.verifySteps(["d", "click1", "click2", "c", "click1", "b", "a"]);
+        el.click();
+        expect.verifySteps([]);
     });
 
     test("listener is added between willstart and start", async () => {

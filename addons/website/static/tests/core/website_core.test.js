@@ -45,6 +45,44 @@ test("starting interactions twice should only actually do it once", async () => 
     expect(n).toBe(1);
 });
 
+test("start interactions even if there is a crash", async () => {
+    class Boom extends Interaction {
+        static selector = ".test";
+
+        setup() {
+            expect.step("start boom");
+            throw new Error("boom")
+        }
+        destroy() {
+            expect.step("destroy boom");
+        }
+    }
+    class NotBoom extends Interaction {
+        static selector = ".test";
+
+        setup() {
+            expect.step("start notboom");
+        }
+        destroy() {
+            expect.step("destroy notboom");
+        }
+    }
+
+    const { core } = await startInteraction([Boom,NotBoom], `<div class="test"></div>`, { waitForStart: false});
+
+    let e = null;
+    try {
+        await core.isReady;
+    } catch (_e) {
+        e = _e;
+    }
+    expect(e.message).toBe("boom");
+
+    expect.verifySteps(["start boom", "start notboom"])
+    core.stopInteractions();
+    expect.verifySteps(["destroy notboom"])
+});
+
 test("interactions are stopped in reverse order", async () => {
     let n = 1;
     class Test extends Interaction {

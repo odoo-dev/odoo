@@ -112,9 +112,13 @@ class WebsiteCore {
         }
         this.activeInteractions.add(el, I);
         if (I.prototype instanceof Interaction) {
-            const interaction = new Colibri(this, I, el);
-            this.interactions.push(interaction);
-            proms.push(interaction.startProm);
+            try {
+                const interaction = new Colibri(this, I, el);
+                this.interactions.push(interaction);
+                proms.push(interaction.startProm);
+            } catch (e) {
+                this.proms.push(Promise.reject(e));
+            }
         } else {
             proms.push(this._mountComponent(el, I));
         }
