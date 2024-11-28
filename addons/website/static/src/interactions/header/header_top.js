@@ -36,3 +36,7 @@ class HeaderTop extends Interaction {
 registry
     .category("website.active_elements")
     .add("website.header_top", HeaderTop);
+
+registry
+    .category("website.edit_active_elements")
+    .add("website.header_top", HeaderTop);

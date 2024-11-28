@@ -9,8 +9,6 @@ export class ImageShapeHoverEffect extends Interaction {
             "t-on-mouseleave": this.mouseLeave,
         },
     };
-    // TODO Support edit mode.
-    static disabledInEditableMode = false;
 
     setup() {
         this.lastMouseEvent = Promise.resolve();
@@ -125,4 +123,8 @@ export class ImageShapeHoverEffect extends Interaction {
 
 registry
     .category("website.active_elements")
+    .add("website.image_shape_hover_effect", ImageShapeHoverEffect);
+
+registry
+    .category("website.edit_active_elements")
     .add("website.image_shape_hover_effect", ImageShapeHoverEffect);

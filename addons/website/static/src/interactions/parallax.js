@@ -92,3 +92,7 @@ class Parallax extends Interaction {
 registry
     .category("website.active_elements")
     .add("website.parallax", Parallax);
+
+registry
+    .category("website.edit_active_elements")
+    .add("website.parallax", Parallax);

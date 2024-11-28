@@ -30,9 +30,7 @@ export class ZoomedBackgroundShape extends Interaction {
             "t-on-resize": () => this.throttledShapeResize,
         },
     };
-    // TODO Handle edit mode.
-    static disabledInEditableMode = false;
-    
+
     setup() {
         this.throttledShapeResize = throttleForAnimation(() => this.resizeBackgroundShape());
     }
@@ -45,7 +43,7 @@ export class ZoomedBackgroundShape extends Interaction {
         this.updateShapePosition();
         this.throttledShapeResize.cancel();
     }
-    
+
     /**
      * Updates the left and right offset of the shape.
      *
@@ -55,7 +53,7 @@ export class ZoomedBackgroundShape extends Interaction {
         this.el.style.left = offset;
         this.el.style.right = offset;
     }
-    
+
     resizeBackgroundShape() {
         this.updateShapePosition();
         // Get the decimal part of the shape element width.
@@ -76,4 +74,8 @@ export class ZoomedBackgroundShape extends Interaction {
 
 registry
     .category("website.active_elements")
+    .add("website.zoomed_background_shape", ZoomedBackgroundShape);
+
+registry
+    .category("website.edit_active_elements")
     .add("website.zoomed_background_shape", ZoomedBackgroundShape);
