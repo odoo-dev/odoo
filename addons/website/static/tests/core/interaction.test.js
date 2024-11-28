@@ -167,6 +167,12 @@ describe("event handling", () => {
         let clicked = false;
         class Test extends Interaction {
             static selector = ".test";
+            dynamicSelectors = {
+                "_modal": () => {
+                    expect.step("check");
+                    return null;
+                },
+            }
 
             dynamicContent = {
                 "_modal:t-on-click": this.doSomething,
@@ -183,7 +189,34 @@ describe("event handling", () => {
                     <span>coucou</span>
                 </div>`,
         );
+        expect.verifySteps(["check"])
         expect(clicked).toBe(false);
+    });
+
+    test("crash if a function is not provided to addListener", async () => {
+        let inError = false;
+        class Test extends Interaction {
+            static selector = ".test";
+
+            start() {
+                try {
+                    this.addListener(this.el, "click", null);
+                } catch (e) {
+                    inError = true;
+                    expect(e.message).toBe("Invalid listener for event 'click' (received falsy value)");
+                }
+            }
+        }
+        const { el } = await startInteraction(
+            Test,
+            `
+                <div class="test">
+                    <span>coucou</span>
+                </div>`,
+        );
+
+        el.querySelector(".test").click();
+        expect(inError).toBe(true);
     });
 
 

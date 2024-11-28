@@ -20,7 +20,10 @@ export function setupInteractionWhiteList(interactions) {
 
 export async function startInteraction(I, html, options) {
     clearRegistry(elementRegistry);
-    elementRegistry.add(I.constructor.name, I);
+    for (let Interaction of (Array.isArray(I) ? I : [I])) {
+        elementRegistry.add(Interaction.name, Interaction);
+
+    }
     return startInteractions(html, options);
 }
 

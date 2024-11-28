@@ -43,6 +43,9 @@ export class Colibri {
     }
 
     addListener(nodes, event, fn, options) {
+        if (!fn) {
+            throw new Error(`Invalid listener for event '${event}' (received falsy value)`);
+        }
         if (!this.isStarted) {
             throw new Error("this.addListener can only be called after the interaction is started. Maybe move the call in the start method.");
         }
