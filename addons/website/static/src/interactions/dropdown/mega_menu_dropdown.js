@@ -121,3 +121,7 @@ class MegaMenuDropdown extends Interaction {
 registry
     .category("website.active_elements")
     .add("website.mega_menu_dropdown", MegaMenuDropdown);
+
+registry
+    .category("website.edit_active_elements")
+    .add("website.mega_menu_dropdown", MegaMenuDropdown);
