@@ -30,7 +30,7 @@ class TextHighlight extends Interaction {
                     }
                     const topTextEl = target.closest(".o_text_highlight");
                     for (const el of topTextEl ? [topTextEl]
-                        : target.querySelectorAll(":scope .o_text_highlight")
+                        : target.querySelectorAll(".o_text_highlight")
                     ) {
                         textHighlightEls.add(el);
                     }
@@ -74,7 +74,7 @@ class TextHighlight extends Interaction {
      * @param {HTMLElement} el
      */
     getTextHighlightItems(el = this.el) {
-        return el.querySelectorAll(":scope .o_text_highlight_item");
+        return el.querySelectorAll(".o_text_highlight_item");
     }
 
     /**
