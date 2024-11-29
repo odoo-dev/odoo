@@ -42,7 +42,7 @@ export class CookiesToggle extends Interaction {
             this.el.style.removeProperty("--cookies-bar-toggle-inset-block-end");
         } else {
             // Lazy-loaded images don't have a height yet. We need to await them
-            await this.waitFor(() => onceAllImagesLoaded(this.cookiesModalEl));
+            await this.waitFor(onceAllImagesLoaded(this.cookiesModalEl));
             const popupHeight = this.cookiesModalEl.querySelector(".modal-content").offsetHeight;
             const toggleMargin = 8;
             // Avoid having the toggle over another button, but if the cookies
