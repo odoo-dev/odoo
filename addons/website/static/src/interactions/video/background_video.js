@@ -129,3 +129,6 @@ registry
     .category("website.active_elements")
     .add("website.background_video", BackgroundVideo);
 
+registry
+    .category("website.edit_active_elements")
+    .add("website.background_video", BackgroundVideo);
