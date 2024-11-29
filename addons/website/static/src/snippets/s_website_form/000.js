@@ -442,7 +442,7 @@ export class Form extends Interaction {
                                     // popup.
                                     window.location.href = successPage;
                                 } else {
-                                    await this.waitFor(() => scrollTo(successAnchorEl, {
+                                    await this.waitFor(scrollTo(successAnchorEl, {
                                         duration: 500,
                                         extraOffset: 0,
                                     }));
@@ -467,7 +467,7 @@ export class Form extends Interaction {
                         // Prevent double-clicking on the send button and
                         // add a upload loading effect (delay before success
                         // message)
-                        await this.waitFor(() => delay(DEBOUNCE));
+                        await this.waitFor(delay(DEBOUNCE));
 
                         this.updateStatus('success');
                         break;
