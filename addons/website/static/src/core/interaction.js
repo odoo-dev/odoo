@@ -209,19 +209,22 @@ export class Interaction {
     /**
      * Add a listener to the target. Whenever the listener is executed, the
      * dynamic content will be applied. Also, the listener will automatically be
-     * cleaned up when the interaction is destroyed
+     * cleaned up when the interaction is destroyed.
+     * Returns a function to remove the listener(s).
      *
      * @param {EventTarget | string} target an element, a bus or a selector
      * @param {string} event
      * @param {Function} fn
      * @param {Object} [options]
+     * @returns {Function} removes the listeners
      */
     addListener(target, event, fn, options) {
         const nodes =
             typeof target === "string"
                 ? this.el.querySelectorAll(target)
                 : [target];
-        this.__colibri__.addListener(nodes, event, fn, options);
+        const removeListeners = this.__colibri__.addListener(nodes, event, fn, options);
+        return () => removeListeners.forEach(r => r());
     }
 
     /**

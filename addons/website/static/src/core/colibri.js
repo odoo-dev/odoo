@@ -82,10 +82,14 @@ export class Colibri {
                 this.updateContent();
             }
         };
+        const removeListeners = [];
         for (const node of nodes) {
             node.addEventListener(event, handler, options);
-            this.cleanups.push(() => node.removeEventListener(event, handler, options));
+            const removeListener = () => node.removeEventListener(event, handler, options);
+            this.cleanups.push(removeListener);
+            removeListeners.push(removeListener);
         }
+        return removeListeners;
     }
 
     mountComponent(nodes, C) {

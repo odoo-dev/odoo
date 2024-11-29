@@ -219,7 +219,6 @@ describe("event handling", () => {
         expect(inError).toBe(true);
     });
 
-
     test("can add a listener on a multiple elements", async () => {
         let clicked = 0;
         class Test extends Interaction {
@@ -328,6 +327,68 @@ describe("event handling", () => {
         core.stopInteractions();
         await click(el.querySelector("span"));
         expect(clicked).toBe(1);
+    });
+
+    test("single listener added with addListener can be removed", async () => {
+        let clicked = 0;
+        class Test extends Interaction {
+            static selector = ".test";
+
+            start() {
+                this.removeListener = this.addListener("span", "click", this.doSomething);
+            }
+            doSomething() {
+                clicked++;
+            }
+        }
+
+        const { el, core } = await startInteraction(
+            Test,
+            `
+        <div class="test">
+            <span>coucou</span>
+        </div>`,
+        );
+        expect(clicked).toBe(0);
+        await click(el.querySelector("span"));
+        expect(clicked).toBe(1);
+        core.interactions[0].interaction.removeListener();
+        await click(el.querySelector("span"));
+        expect(clicked).toBe(1);
+    });
+
+    test("multiple listeners added with addListener can be removed", async () => {
+        let clicked = 0;
+        class Test extends Interaction {
+            static selector = ".test";
+
+            start() {
+                this.removeListeners = this.addListener("span", "click", this.doSomething);
+            }
+            doSomething() {
+                clicked++;
+            }
+        }
+
+        const { el, core } = await startInteraction(
+            Test,
+            `
+        <div class="test">
+            <span>coucou</span>
+            <span>hello</span>
+        </div>`,
+        );
+        expect(clicked).toBe(0);
+        const spans = el.querySelectorAll("span");
+        for (let i = 0; i < spans.length; i++) {
+            await click(spans[i]);
+        }
+        expect(clicked).toBe(2);
+        core.interactions[0].interaction.removeListeners();
+        for (let i = 0; i < spans.length; i++) {
+            await click(spans[i]);
+        }
+        expect(clicked).toBe(2);
     });
 
     test("side effects are cleaned up in reverse order", async () => {
