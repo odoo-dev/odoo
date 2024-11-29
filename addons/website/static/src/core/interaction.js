@@ -173,7 +173,14 @@ export class Interaction {
         this.registerCleanup(() => {
             debouncedFn.cancel();
         });
-        return () => { debouncedFn(); return SKIP_IMPLICIT_UPDATE; };
+        return Object.assign(
+            {
+                [debouncedFn.name]: () => { debouncedFn(); return SKIP_IMPLICIT_UPDATE; },
+            }[debouncedFn.name],
+            {
+                cancel: debouncedFn.cancel,
+            },
+        );
     }
 
     /**
@@ -189,7 +196,14 @@ export class Interaction {
         this.registerCleanup(() => {
             throttledFn.cancel();
         });
-        return () => { throttledFn(); return SKIP_IMPLICIT_UPDATE; };
+        return Object.assign(
+            {
+                [throttledFn.name]: () => { throttledFn(); return SKIP_IMPLICIT_UPDATE; },
+            }[throttledFn.name],
+            {
+                cancel: throttledFn.cancel,
+            },
+        );
     }
 
     /**
