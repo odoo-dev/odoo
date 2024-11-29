@@ -911,42 +911,12 @@ describe("miscellaneous", () => {
         expect.verifySteps(["cleanup2", "cleanup1"]);
     });
 
-    test("waitFor is autobound to this", async () => {
-        class Test extends Interaction {
-            static selector = ".test";
-            setup() {
-                this.waitFor(this.fn);
-                this.waitFor(() => {
-                    setTimeout(() => {
-                        expect(this instanceof Interaction).toBe(true);
-                        expect.step("anonymous function");
-                    }, 50);
-                });
-            }
-            fn() {
-                setTimeout(() => {
-                    expect(this instanceof Interaction).toBe(true);
-                    expect.step("named function");
-                }, 100);
-            }
-        }
-        const { core } = await startInteraction(
-            Test,
-            `<div class="test"></div>`,
-        );
-        expect.verifySteps([]);
-        await advanceTime(50);
-        expect.verifySteps(["anonymous function"]);
-        await advanceTime(50);
-        expect.verifySteps(["named function"]);
-    });
-
     test("waitFor does not trigger update if interaction is not ready yet", async () => {
         class Test extends Interaction {
             static selector = ".test";
 
             async willStart() {
-                await this.waitFor(() => expect.step("waitfor"));
+                await this.waitFor(Promise.resolve(expect.step("waitfor")));
                 expect.step("willstart");
                 return new Promise(resolve => {
                     setTimeout(() => {

@@ -128,13 +128,13 @@ export class Interaction {
     }
 
     /**
-     * Safely execute a function returning a promise. The returned promise will
-     * only be resolved if the interaction has not been destroyed, and will also
-     * call updateContent after the calling code has acted.
+     * Wrap a promise into a promise that will only be resolved if the interaction
+     * has not been destroyed, and will also call updateContent after the calling
+     * code has acted.
      */
-    waitFor(fn) {
+    waitFor(promise) {
         return new Promise(async (resolve) => {
-            const result = await fn.call(this);
+            const result = await promise;
             if (!this.isDestroyed) {
                 resolve(result);
                 if (this.isReady) {
