@@ -510,7 +510,7 @@ describe("event handling", () => {
                 expect(event.cancelBubble).toBe(false);
             }
         }
-    
+
         const { el } = await startInteraction(
             Test,
             `
@@ -537,7 +537,7 @@ describe("event handling", () => {
                 expect.step("span");
             }
         }
-    
+
         const { el } = await startInteraction(
             Test,
             `
@@ -591,7 +591,7 @@ describe("event handling", () => {
                 expect(event.cancelBubble).toBe(false);
             }
         }
-    
+
         const { el, core } = await startInteraction(
             Test,
             `
@@ -1469,7 +1469,7 @@ describe("insert", () => {
                 this.insert(el, spanEls[1], "beforebegin");
             }
         }
-    
+
         const { core, el } = await startInteraction(
             Test,
             `
@@ -1526,8 +1526,11 @@ describe("debounced", () => {
         class Test extends Interaction {
             static selector = ".test";
             dynamicContent = {
-                "_root:t-on-click": this.debounced(this.doSomething, 500),
+                "_root:t-on-click": () => this.debouncedFn(),
             };
+            setup() {
+                this.debouncedFn = this.debounced(this.doSomething, 500);
+            }
             doSomething() {
                 expect.step("done");
             }
@@ -1575,6 +1578,17 @@ describe("debounced", () => {
         expect.verifySteps([]);
         this.core.stopInteractions();
         expect.verifySteps([]);
+        await advanceTime(500);
+        expect.verifySteps([]);
+    });
+
+    test("can cancel debounced event handler", async () => {
+        await click(this.testEl);
+        await advanceTime(500);
+        expect.verifySteps(["done", "updateContent"]);
+        await click(this.testEl);
+        await click(this.testEl);
+        this.core.interactions[0].interaction.debouncedFn.cancel();
         await advanceTime(500);
         expect.verifySteps([]);
     });
@@ -1662,8 +1676,11 @@ describe("throttledForAnimation", () => {
         class Test extends Interaction {
             static selector = ".test";
             dynamicContent = {
-                "_root:t-on-click": this.throttledForAnimation(this.doSomething),
+                "_root:t-on-click": () => this.throttle(),
             };
+            setup() {
+                this.throttle = this.throttledForAnimation(this.doSomething);
+            }
             doSomething() {
                 expect.step("done");
             }
@@ -1716,6 +1733,15 @@ describe("throttledForAnimation", () => {
         await animationFrame();
         expect.verifySteps([]);
     });
+
+    test("can cancel throttled event handler", async () => {
+        await click(this.testEl);
+        expect.verifySteps(["done", "updateContent"]);
+        await click(this.testEl);
+        await click(this.testEl);
+        this.core.interactions[0].interaction.throttle.cancel();
+        expect.verifySteps([]);
+    });
 });
 
 test("throttleForAnimation with long willstart", async () => {
@@ -1725,7 +1751,7 @@ test("throttleForAnimation with long willstart", async () => {
             super.updateContent();
         },
     });
-    
+
     class Test extends Interaction {
         static selector = ".test";
         dynamicContent = { "_root:t-att-a": () => "b" }
