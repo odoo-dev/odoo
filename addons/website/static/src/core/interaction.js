@@ -63,10 +63,21 @@ export class Interaction {
      */
     constructor(el, env, metadata) {
         this.__colibri__ = metadata;
-        this.isDestroyed = false;
         this.el = el;
         this.env = env;
         this.services = env.services;
+    }
+
+    /**
+     * Returns true if the interaction has been started (so, just before the
+     * start method is called)
+     */
+    get isReady() {
+        return this.__colibri__.isReady;
+    }
+
+    get isDestroyed() {
+        return this.__colibri__.isDestroyed;
     }
 
     // -------------------------------------------------------------------------
@@ -126,7 +137,9 @@ export class Interaction {
             const result = await fn.call(this);
             if (!this.isDestroyed) {
                 resolve(result);
-                this.updateContent();
+                if (this.isReady) {
+                    this.updateContent();
+                }
             }
         });
     }
@@ -139,7 +152,9 @@ export class Interaction {
         return setTimeout(() => {
             if (!this.isDestroyed) {
                 fn.call(this);
-                this.updateContent();
+                if (this.isReady) {
+                    this.updateContent();
+                }
             }
         }, delay);
     }
@@ -150,7 +165,9 @@ export class Interaction {
     debounced(fn, delay) {
         const debouncedFn = debounce(() => {
             fn.call(this);
-            this.updateContent();
+            if (this.isReady) {
+                this.updateContent();
+            }
         }, delay);
         this.registerCleanup(() => {
             debouncedFn.cancel();
@@ -164,7 +181,9 @@ export class Interaction {
     throttledForAnimation(fn) {
         const throttledFn = throttleForAnimation(() => {
             fn.call(this);
-            this.updateContent();
+            if (this.isReady) {
+                this.updateContent();
+            }
         });
         this.registerCleanup(() => {
             throttledFn.cancel();
@@ -196,13 +215,11 @@ export class Interaction {
      *
      * @param { HTMLElement } el
      * @param { HTMLElement } [locationEl] the target
-     * @param { string } [position]
+     * @param { "afterbegin" | "afterend" | "beforebegin" | "beforeend" } [position]
      */
     insert(el, locationEl = this.el, position = "beforeend") {
         locationEl.insertAdjacentElement(position, el);
-        this.registerCleanup(() => {
-            el.remove();
-        });
+        this.registerCleanup(() => el.remove());
     }
 
     /**
@@ -220,3 +237,4 @@ export class Interaction {
         this.__colibri__.mountComponent([el], C);
     }
 }
+

@@ -678,9 +678,12 @@ describe("t-out", () => {
 
 describe("lifecycle", () => {
     test("lifecycle methods are called in order", async () => {
+        let interaction = null;
+
         class Test extends Interaction {
             static selector = ".test";
             setup() {
+                interaction = this;
                 expect.step("setup");
             }
             willStart() {
@@ -705,6 +708,13 @@ describe("lifecycle", () => {
         expect.verifySteps(["setup", "willStart", "start"]);
         core.stopInteractions();
         expect.verifySteps(["destroy"]);
+        let e = null;
+        try {
+            interaction.updateContent();
+        } catch (_e) {
+            e = _e;
+        }
+        expect(e.message).toBe("Cannot update content of an interaction that is not ready or is destroyed")
     });
 
     test("willstart delayed, then destroy => start should not be called", async () => {
@@ -775,8 +785,14 @@ describe("lifecycle", () => {
             },
         );
         expect.verifySteps(["willStart"]);
-        // trigger an update
-        interaction.updateContent();
+        let e = null;
+        try {
+            // trigger an update
+            interaction.updateContent();
+        } catch (_e) {
+            e = _e;
+        }
+        expect(e.message).toBe("Cannot update content of an interaction that is not ready or is destroyed")
 
         await animationFrame();
         expect.verifySteps([]);
@@ -923,6 +939,63 @@ describe("miscellaneous", () => {
         expect.verifySteps(["anonymous function"]);
         await advanceTime(50);
         expect.verifySteps(["named function"]);
+    });
+
+    test("waitFor does not trigger update if interaction is not ready yet", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+
+            async willStart() {
+                await this.waitFor(() => expect.step("waitfor"));
+                expect.step("willstart");
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        expect.step("timeout");
+                        resolve();
+                    }, 100);
+                })
+            }
+            start() {
+                expect.step("start");
+            }
+        }
+        await startInteraction(
+            Test,
+            `<div class="test"></div>`,{ waitForStart: false}
+        );
+        expect.verifySteps(["waitfor", "willstart"]);
+        await advanceTime(150);
+        expect.verifySteps(["timeout", "start"]);
+    });
+
+
+    test("waitForTimeout does not trigger update if interaction is not ready yet", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+
+            async willStart() {
+                await this.waitForTimeout(() => expect.step("waitfortimeout"), 50);
+                expect.step("willstart");
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        expect.step("timeout");
+                        resolve();
+                    }, 100);
+                })
+            }
+            start() {
+                expect.step("start");
+            }
+        }
+        await startInteraction(
+            Test,
+            `<div class="test"></div>`,{ waitForStart: false}
+        );
+        expect.verifySteps(["willstart"]);
+        await advanceTime(75);
+        expect.verifySteps(["waitfortimeout"]);
+        await advanceTime(75);
+        expect.verifySteps(["timeout", "start"]);
     });
 
     test("waitForTimeout is autobound to this", async () => {
@@ -1507,6 +1580,77 @@ describe("debounced", () => {
     });
 });
 
+test("debounced with long willstart", async () => {
+    class Test extends Interaction {
+        static selector = ".test";
+
+        setup() {
+            const fn = this.debounced(() => expect.step("debounced"), 50);
+            fn();
+        }
+
+        async willStart() {
+            expect.step("willstart");
+            await new Promise(resolve => {
+                setTimeout(resolve, 100);
+            });
+        }
+        start() {
+          expect.step("start");
+        }
+
+        updateContent() {
+            expect.step("updatecontent");
+            super.updateContent();
+        }
+    }
+    await startInteraction(
+        Test,
+        `
+    <div class="test">
+    </div>`,
+    );
+    expect.verifySteps(["willstart", "debounced", "start"]);
+});
+
+test("debounced is not called if interaction is destroyed in the meantime", async () => {
+    class Test extends Interaction {
+        static selector = ".test";
+
+        setup() {
+            const fn = this.debounced(() => expect.step("debounced"), 50);
+            fn();
+        }
+
+        updateContent() {
+            expect.step("updatecontent");
+            super.updateContent();
+        }
+        async willStart() {
+            expect.step("willstart");
+            await new Promise(resolve => {
+                setTimeout(resolve, 100);
+            });
+        }
+        start() {
+          expect.step("start");
+        }
+        destroy() {
+            expect.step("destroy");
+        }
+
+    }
+    const { core } = await startInteraction(Test, `<div class="test"></div>`, { waitForStart: false });
+    expect.verifySteps(["willstart"]);
+    await advanceTime(25);
+    expect.verifySteps([]);
+    core.stopInteractions();
+    expect.verifySteps(["destroy"]);
+    await advanceTime(500);
+    expect.verifySteps([]);
+}),
+
+
 describe("throttledForAnimation", () => {
     beforeEach(async () => {
         patchWithCleanup(Colibri.prototype, {
@@ -1572,4 +1716,42 @@ describe("throttledForAnimation", () => {
         await animationFrame();
         expect.verifySteps([]);
     });
+});
+
+test("throttleForAnimation with long willstart", async () => {
+    patchWithCleanup(Colibri.prototype, {
+        updateContent() {
+            expect.step("updatecontent");
+            super.updateContent();
+        },
+    });
+    
+    class Test extends Interaction {
+        static selector = ".test";
+        dynamicContent = { "_root:t-att-a": () => "b" }
+
+        setup() {
+            const fn = this.throttledForAnimation(() => expect.step("throttle"));
+            fn();
+        }
+
+        async willStart() {
+            expect.step("willstart");
+            await new Promise(resolve => {
+                setTimeout(resolve, 100);
+            });
+        }
+        start() {
+          expect.step("start");
+        }
+    }
+    await startInteraction(
+        Test,
+        `<div class="test"></div>`,
+        { waitForStart: false }
+    );
+    expect.verifySteps(["throttle", "willstart"]);
+    await advanceTime(150);
+    expect.verifySteps(["updatecontent", "start"]);
+
 });
