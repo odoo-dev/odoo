@@ -366,7 +366,7 @@ export class Form extends Interaction {
         }
 
         if (this.recaptchaLoaded) {
-            const tokenObj = await this.waitFor(() => this.recaptcha.getToken("website_form"));
+            const tokenObj = await this.waitFor(this.recaptcha.getToken("website_form"));
             if (tokenObj.token) {
                 formValues['recaptcha_token_response'] = tokenObj.token;
             } else if (tokenObj.error) {
