@@ -14,6 +14,8 @@ export class Colibri {
         this.el = el;
         this.isStarted = false;
         this.I = I;
+        this.isReady = false;
+        this.isDestroyed = false;
         this.update = null;
         this.dynamicAttrs = [];
         this.tOuts = [];
@@ -25,13 +27,14 @@ export class Colibri {
         interaction.setup();
         this.startProm = (interaction.willStart() || Promise.resolve()).then(
             () => {
-                if (interaction.isDestroyed) {
+                if (this.isDestroyed) {
                     return;
                 }
                 this.isStarted = true;
                 if (I.dynamicContent) {
                     throw new Error(`The dynamic content object should be defined on the instance, not on the class (${I.name})`);
                 }
+                this.isReady = true;
                 const content = interaction.dynamicContent;
                 if (content) {
                     this.processContent(content);
@@ -190,6 +193,9 @@ export class Colibri {
     }
 
     updateContent() {
+        if (this.isDestroyed || !this.isReady) {
+            throw new Error("Cannot update content of an interaction that is not ready or is destroyed");
+        }
         const interaction = this.interaction;
         for (const [nodes, attr, fn] of this.dynamicAttrs) {
             for (const node of nodes) {
@@ -227,8 +233,8 @@ export class Colibri {
         }
         this.cleanups = [];
         this.interaction.destroy();
-        this.interaction.isDestroyed = true;
         this.core = null;
+        this.isDestroyed = true;
     }
 }
 
