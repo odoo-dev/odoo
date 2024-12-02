@@ -200,5 +200,13 @@
             <field eval="450.58" name="total_amount_currency"/>
             <field name="payment_mode">company_account</field>
         </record>
+
+        <record id="product.expense_hotel" model="product.product">
+            <field name="categ_id" ref="hr_expense.product_category_expenses"/>
+        </record>
+
+        <record id="product.expense_product" model="product.product">
+            <field name="categ_id" ref="hr_expense.product_category_expenses"/>
+        </record>
     </data>
 </odoo>
