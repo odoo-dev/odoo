@@ -102,17 +102,6 @@ def check_pg_name(name):
         raise ValidationError("Table name %r is too long" % name)
 
 
-def parse_field_expr(field_expr: str) -> tuple[str, str | None]:
-    if (property_index := field_expr.find(".")) >= 0:
-        property_name = field_expr[property_index + 1:]
-        field_expr = field_expr[:property_index]
-    else:
-        property_name = None
-    if not field_expr:
-        raise ValueError(f"Invalid field expression {field_expr!r}")
-    return field_expr, property_name
-
-
 def expand_ids(id0, ids):
     """ Return an iterator of unique ids from the concatenation of ``[id0]`` and
         ``ids``, and of the same kind (all real or all new).

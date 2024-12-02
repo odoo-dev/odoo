@@ -9,15 +9,16 @@ import uuid
 from collections import defaultdict
 from operator import attrgetter
 
-from odoo.exceptions import AccessError, MissingError, ValidationError
+from odoo.exceptions import AccessError, MissingError
 from odoo.tools import SQL, OrderedSet, is_list_of
 from odoo.tools.misc import has_list_types
 from odoo.tools.translate import _
 
 from .domains import Domain
+from .expression import FieldExpression
 from .fields import Field, _logger
 from .models import BaseModel
-from .utils import COLLECTION_TYPES, SQL_OPERATORS, parse_field_expr, regex_alphanumeric
+from .utils import COLLECTION_TYPES, SQL_OPERATORS, regex_alphanumeric
 
 if typing.TYPE_CHECKING:
     from odoo.tools import Query
@@ -586,10 +587,11 @@ class Properties(Field):
         return SQL("(%s -> %s)", field_sql, property_name)
 
     def condition_to_sql(self, field_expr: str, operator: str, value, model: BaseModel, alias: str, query: Query) -> SQL:
-        fname, property_name = parse_field_expr(field_expr)
+        field_expression = FieldExpression(field_expr)
+        property_name = field_expression.property_name
         if not property_name:
             raise ValueError(f"Missing property name for {self}")
-        raw_sql_field = model._field_to_sql(alias, fname, query)
+        raw_sql_field = model._field_to_sql(alias, field_expression.field_name, query)
         sql_left = model._field_to_sql(alias, field_expr, query)
 
         if operator in ('in', 'not in'):

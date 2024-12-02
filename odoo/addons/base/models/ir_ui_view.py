@@ -2096,6 +2096,7 @@ actual arch.
         correspond to actual sequences of fields on the given model.
         """
         for field_path in field_paths:
+            # TODO use FieldExpression
             names = field_path.split('.')
             Model = self.pool[model_name]
             if names[0] == 'parent':

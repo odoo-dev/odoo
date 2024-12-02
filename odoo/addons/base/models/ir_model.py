@@ -279,7 +279,7 @@ class IrModel(models.Model):
     def _check_order(self):
         for model in self:
             try:
-                model._check_qorder(model.order)  # regex check for the whole clause ('is it valid sql?')
+                model._order_to_sql(model.order, model._as_query(ordered=False))
             except UserError as e:
                 raise ValidationError(str(e))
             # add MAGIC_COLUMNS to 'stored_fields' in case 'model' has not been
@@ -639,7 +639,7 @@ class IrModelFields(models.Model):
 
     def _related_field(self):
         """ Return the ``ir.model.fields`` record corresponding to ``self.related``. """
-        names = self.related.split(".")
+        names = self.related.split(".")  # TODO use FieldExpression
         last = len(names) - 1
         model_name = self.model or self.model_id.model
         for index, name in enumerate(names):

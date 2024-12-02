@@ -1719,8 +1719,8 @@ class AccountMoveLine(models.Model):
         return vals_list
 
     def _field_to_sql(self, alias: str, field_expr: str, query: (Query | None) = None, flush: bool = True) -> SQL:
-        fname, property_name = fields.parse_field_expr(field_expr)
-        if fname != 'payment_date':
+        expression = fields.FieldExpression(field_expr)
+        if expression.field_name != 'payment_date':
             return super()._field_to_sql(alias, field_expr, query, flush)
         sql = SQL("""
             CASE
@@ -1731,8 +1731,8 @@ class AccountMoveLine(models.Model):
             discount_date=super()._field_to_sql(alias, "discount_date", query, flush),
             date_maturity=super()._field_to_sql(alias, "date_maturity", query, flush),
         )
-        if property_name:
-            sql = self._field[fname].property_to_sql(sql, property_name, self, alias, query)
+        if expression.property_name:
+            sql = expression.field(self).property_to_sql(sql, expression.property_name, self, alias, query)
         return sql
 
     def _search_panel_domain_image(self, field_name, domain, set_count=False, limit=False):

@@ -12,7 +12,7 @@ import datetime
 import pytz
 
 from odoo import api, models
-from odoo.fields import Command, Date
+from odoo.fields import Command, Date, FieldExpression
 from odoo.api import NewId
 from odoo.osv.expression import AND, OR, TRUE_DOMAIN, normalize_domain
 from odoo.models import READ_GROUP_DISPLAY_FORMAT, READ_GROUP_NUMBER_GRANULARITY, READ_GROUP_TIME_GRANULARITY, BaseModel
@@ -392,7 +392,7 @@ class Base(models.AbstractModel):
         if (
             len(groupby) == 1
             and self.env.context.get('read_group_expand')
-            and (field := self._fields[groupby[0].split('.')[0].split(':')[0]])
+            and (field := FieldExpression(groupby[0]).field(self))
             and field.group_expand
         ):
             return field
@@ -402,8 +402,8 @@ class Base(models.AbstractModel):
         """ Expand the result of _read_group for the webclient to show empty groups
         for some view types (e.g. empty column for kanban view). See `Field.group_expand` attribute.
         """
-        field_name = groupby_spec.split('.')[0].split(':')[0]
-        field = self._fields[field_name]
+        group_expr = FieldExpression(groupby_spec)
+        field = group_expr.field(self)
 
         # determine all groups that should be returned
         values = [group_value for group_value, *__ in groups if group_value]
@@ -526,13 +526,12 @@ class Base(models.AbstractModel):
         :rtype: list
         :return: list
         """
-        groupby_name = groupby[0]
-        field_name = groupby_name.split(':')[0].split(".")[0]
-        field = self._fields[field_name]
-        if field.type not in ('date', 'datetime') and not (field.type == 'properties' and ':' in groupby_name):
+        groupby_expr = FieldExpression(groupby[0])
+        field = groupby_expr.field(self)
+        granularity = groupby_expr.property_name
+        if field.type not in ('date', 'datetime') and not (field.type == 'properties' and granularity):
             return groups
 
-        granularity = groupby_name.split(':')[1]
         days_offset = 0
         if granularity == 'week':
             # _read_group week groups are dependent on the
@@ -648,8 +647,9 @@ class Base(models.AbstractModel):
     def _web_read_group_groupby_formatter(self, groupby_spec, values):
         """ Return a formatter method that returns value/label and the domain that the group
         value represent """
-        field_name = groupby_spec.split(':')[0].split('.')[0]
-        field = self._fields[field_name]
+        groupby_expr = FieldExpression(groupby_spec)
+        field = groupby_expr.field(self)
+        field_name = field.name
 
         if field.type == 'many2many':
 
@@ -674,7 +674,7 @@ class Base(models.AbstractModel):
             return formatter_many2one
 
         if field.type in ('date', 'datetime'):
-            granularity = groupby_spec.split(':')[1] if ':' in groupby_spec else 'month'
+            granularity = groupby_expr.property_name or 'month'
             if granularity in READ_GROUP_TIME_GRANULARITY:
                 locale = get_lang(self.env).code
                 fmt = DEFAULT_SERVER_DATETIME_FORMAT if field.type == 'datetime' else DEFAULT_SERVER_DATE_FORMAT
@@ -1528,7 +1528,8 @@ class Base(models.AbstractModel):
         for field_name in initial_values:
             field = self._fields.get(field_name)
             if field and field.inherited:
-                parent_name, field_name = field.related.split('.', 1)
+                field_expr = field.related_expression
+                parent_name, field_name = field_expr.field_name, field_expr.property_name
                 if parent := record[parent_name]:
                     parent._update_cache({field_name: record[field_name]})
 
@@ -1566,7 +1567,7 @@ class Base(models.AbstractModel):
                     # record accordingly; because we don't actually assign the
                     # modified field on the record, the modification on the
                     # parent record has to be done explicitly
-                    parent = record[field.related.split('.')[0]]
+                    parent = record[field.related_expression.field_name]
                     parent[field_name] = record[field_name]
 
         result = {'warnings': OrderedSet()}

@@ -17,6 +17,7 @@ from odoo.tools.constants import PREFETCH_MAX
 from odoo.tools.misc import SENTINEL, OrderedSet, Sentinel, unique
 
 from .domains import NEGATIVE_CONDITION_OPERATORS, Domain
+from .expression import FieldExpression
 from .utils import COLLECTION_TYPES, SQL_OPERATORS, SUPERUSER_ID, expand_ids
 
 if typing.TYPE_CHECKING:
@@ -525,6 +526,7 @@ class Field(typing.Generic[T]):
                         " allow it",
                         self, key
                     )
+            # XXX review all ".related" accesses that parse it
             if self.related:
                 self.setup_related(model)
             else:
@@ -591,18 +593,20 @@ class Field(typing.Generic[T]):
 
     def setup_related(self, model: BaseModel) -> None:
         """ Setup the attributes of a related field. """
-        assert isinstance(self.related, str), self.related
+        assert isinstance(self.related, str) and self.related
 
         # determine the chain of fields, and make sure they are all set up
         model_name = self.model_name
-        for name in self.related.split('.'):
-            field = model.pool[model_name]._fields.get(name)
+        env = model.env
+        related_expression = self.related_expression
+        for name in related_expression.path:
+            field = env[model_name]._fields.get(name)
             if field is None:
                 raise KeyError(
                     f"Field {name} referenced in related field definition {self} does not exist."
                 )
             if not field._setup_done:
-                field.setup(model.env[model_name])
+                field.setup(env[model_name])
             model_name = field.comodel_name
 
         # check type consistency
@@ -643,7 +647,7 @@ class Field(typing.Generic[T]):
             # add modules from delegate and target fields; the first one ensures
             # that inherited fields introduced via an abstract model (_inherits
             # being on the abstract model) are assigned an XML id
-            delegate_field = model._fields[self.related.split('.')[0]]
+            delegate_field = related_expression.field(model)
             self._modules = tuple({*self._modules, *delegate_field._modules, *field._modules})
 
         if self.store and self.translate:
@@ -652,10 +656,12 @@ class Field(typing.Generic[T]):
     def traverse_related(self, record: BaseModel) -> tuple[BaseModel, Field]:
         """ Traverse the fields of the related field `self` except for the last
         one, and return it as a pair `(last_record, last_field)`. """
-        for name in self.related.split('.')[:-1]:
+        path, expr = self.related_expression.traverse(record)
+        assert not expr.property_name
+        for field, comodel in path:
             # take the first record when traversing
-            corecord = record[name]
-            record = next(iter(corecord), corecord)
+            corecord = field.__get__(record)
+            record = next(iter(corecord), comodel)
         return record, self.related_field
 
     def _compute_related(self, records: BaseModel) -> None:
@@ -687,9 +693,12 @@ class Field(typing.Generic[T]):
         # computation.
         #
         values = list(records)
-        for name in self.related.split('.')[:-1]:
+        related_path, last_expr = self.related_expression.traverse(records)
+        comodel = records
+        for field, comodel in related_path:
             try:
-                values = [next(iter(val := value[name]), val) for value in values]
+                getter = field.__get__
+                values = [next(iter(val := getter(value)), val) for value in values]
             except AccessError as e:
                 description = records.env['ir.model']._get(records._name).name
                 env = records.env
@@ -700,8 +709,9 @@ class Field(typing.Generic[T]):
                     document_model=records._name,
                 ))
         # assign final values to records
+        getter = last_expr.getter(comodel)
         for record, value in zip(records, values):
-            record[self.name] = self._process_related(value[self.related_field.name], record.env)
+            record[self.name] = self._process_related(getter(value), record.env)
 
     def _process_related(self, value, env: Environment):
         """No transformation by default, but allows override."""
@@ -747,30 +757,25 @@ class Field(typing.Generic[T]):
         model = model.sudo(records.env.su or self.compute_sudo)
 
         # parse the path
-        path = self.related.split('.')
-        path_fields = []  # [(field, comodel | None)]
-        comodel = model
-        for fname in path:
-            field = comodel._fields[fname]
-            if field.relational:
-                comodel = model.env[field.comodel_name]
-            else:
-                comodel = None
-            path_fields.append((field, comodel))
+        path_fields, last_expr = self.related_expression.traverse(model)
+        comodel = path_fields[-1][1] if path_fields else model
+        field = last_expr.field(comodel)
 
         # if the value is a domain, resolve it using records' environment
         if isinstance(value, Domain):
-            field, comodel = path_fields[-1]
-            value = comodel.with_env(records.env)._search(value)
+            value = records.env[field.comodel_name]._search(value)
 
         # build the domain backwards with the any operator
-        field, comodel = path_fields[-1]
         domain = Domain(field.name, operator, value)
-        for field, comodel in reversed(path_fields[:-1]):
+        for field, comodel in reversed(path_fields):
             domain = Domain(field.name, 'any', comodel._search(domain))
             if can_be_null and field.type == 'many2one' and not field.required:
                 domain |= Domain(field.name, '=', False)
         return domain
+
+    @property
+    def related_expression(self):
+        return FieldExpression(self.related) if self.related else None
 
     # properties used by setup_related() to copy values from related field
     _related_comodel_name = property(attrgetter('comodel_name'))
@@ -1087,19 +1092,17 @@ class Field(typing.Generic[T]):
         # optimization for computing simple related fields like 'foo_id.bar'
         if (
             not column
-            and self.related and self.related.count('.') == 1
+            and self.related
+            and len(self.related_expression.path) == 1
             and self.related_field.store and not self.related_field.compute
             and not (self.related_field.type == 'binary' and self.related_field.attachment)
             and self.related_field.type not in ('one2many', 'many2many')
+            and (join_field := self.related_expression.field(model)).type == 'many2one'
+            and join_field.store and not join_field.compute
         ):
-            join_field = model._fields[self.related.split('.')[0]]
-            if (
-                join_field.type == 'many2one'
-                and join_field.store and not join_field.compute
-            ):
-                model.pool.post_init(self.update_db_related, model)
-                # discard the "classical" computation
-                return False
+            model.pool.post_init(self.update_db_related, model)
+            # discard the "classical" computation
+            return False
 
         return not column
 
@@ -1161,7 +1164,7 @@ class Field(typing.Generic[T]):
     def update_db_related(self, model: BaseModel) -> None:
         """ Compute a stored related field directly in SQL. """
         comodel = model.env[self.related_field.model_name]
-        join_field, comodel_field = self.related.split('.')
+        join_field, comodel_field = self.related_expression.path
         model.env.cr.execute(SQL(
             """ UPDATE %(model_table)s AS x
                 SET %(model_field)s = y.%(comodel_field)s
@@ -1512,7 +1515,7 @@ class Field(typing.Generic[T]):
             # values as record for the corresponding inherited fields
             def is_inherited_field(name):
                 field = record._fields[name]
-                return field.inherited and field.related.split('.')[0] == self.name
+                return field.inherited and field.related_expression.field_name == self.name
 
             parent = record.env[self.comodel_name].new({
                 name: value
@@ -1583,7 +1586,8 @@ class Field(typing.Generic[T]):
 
             if self.inherited:
                 # special case: also assign parent records if they are new
-                parents = new_records[self.related.split('.')[0]]
+                # XXX have a function for inherited on related_expression?
+                parents = new_records[self.related_expression.field_name]
                 parents.filtered(lambda r: not r.id)[self.name] = value
 
         if other_ids:

@@ -5,7 +5,7 @@ class TestFillTemporal(common.TransactionCase):
     """Test for fill temporal.
 
     This feature is mainly used in graph view. For more informations, read the
-    documentation of models's '_read_group_fill_temporal' method.
+    documentation of models's '_web_read_group_fill_temporal' method.
     """
     maxDiff = None
 

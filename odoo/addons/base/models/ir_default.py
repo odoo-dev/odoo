@@ -220,12 +220,11 @@ class IrDefault(models.Model):
         the condition
         return True/False/None(for unknown)
         """
-        field_name, _property_name = fields.parse_field_expr(field_expr)
         model = self.env[model_name]
-        field = model._fields[field_name]
+        field = fields.FieldExpression(field_expr).field(model)
         fallback = field.get_company_dependent_fallback(model)
         try:
-            record = model.new({field_name: field.convert_to_write(fallback, model)})
+            record = model.new({field.name: field.convert_to_write(fallback, model)})
             return bool(record.filtered_domain([(field_expr, operator, value)]))
         except ValueError:
             return None

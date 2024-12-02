@@ -525,7 +525,7 @@ class ResConfigSettings(models.TransientModel):
                     continue
                 # we write on a related field like
                 # qr_code = fields.Boolean(related='company_id.qr_code', readonly=False)
-                fname0, *fnames = field.related.split(".")
+                fname0, *fnames = field.related.split(".")  # TODO use FieldExpression
                 if fname0 not in vals:
                     continue
 

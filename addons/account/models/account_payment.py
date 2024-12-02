@@ -861,7 +861,8 @@ class AccountPayment(models.Model):
                 if move_vals := {
                     fname: value
                     for fname, value in vals.items()
-                    if self._fields[fname].related and (self._fields[fname].related or '').split('.')[0] == 'move_id'
+                    if (related_expr := self._fields[fname].related_expression)
+                    if related_expr.field_name == 'move_id'
                 }:
                     pay.move_id.write(move_vals)
         return payments

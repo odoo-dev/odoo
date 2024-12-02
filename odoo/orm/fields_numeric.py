@@ -233,8 +233,8 @@ class Monetary(Field[float]):
         if values and currency_field_name in values:
             dummy = record.new({currency_field_name: values[currency_field_name]})
             currency = dummy[currency_field_name]
-        elif values and currency_field.related and currency_field.related.split('.')[0] in values:
-            related_field_name = currency_field.related.split('.')[0]
+        elif values and (expression := currency_field.related_expression) and expression.field_name in values:
+            related_field_name = expression.field_name
             dummy = record.new({related_field_name: values[related_field_name]})
             currency = dummy[currency_field_name]
         else:

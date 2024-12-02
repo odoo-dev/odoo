@@ -62,6 +62,7 @@ from datetime import date, datetime, time, timedelta, timezone
 
 from odoo.exceptions import UserError
 from odoo.tools import SQL, OrderedSet, Query, classproperty, partition, str2bool
+from .expression import FieldExpression
 from .identifiers import NewId
 from .utils import COLLECTION_TYPES
 
@@ -761,19 +762,14 @@ class DomainCondition(Domain):
         """Cached Field instance for the expression."""
         field = self._field_instance  # type: ignore[arg-type]
         if field is None or field.model_name != model._name:
-            field, _ = self.__get_field(model)
+            try:
+                expression = FieldExpression(self.field_expr)
+                field = expression.field(model)
+            except ValueError:
+                self._raise("Invalid field %s.%s", model._name, self.field_expr)
+            # cache field value, with this hack to bypass immutability
+            object.__setattr__(self, '_field_instance', field)
         return field
-
-    def __get_field(self, model: BaseModel) -> tuple[Field, str]:
-        """Get the field or raise an exception"""
-        field_name, *props = self.field_expr.split('.', 1)
-        try:
-            field = model._fields[field_name]
-        except KeyError:
-            self._raise("Invalid field %s.%s", model._name, field_name)
-        # cache field value, with this hack to bypass immutability
-        object.__setattr__(self, '_field_instance', field)
-        return field, (props[0] if props else '')
 
     def _optimize(self, model: BaseModel, full: bool) -> Domain:
         """Optimization step.
@@ -789,10 +785,13 @@ class DomainCondition(Domain):
         - Check the output.
         """
         # optimize path
-        field, property_name = self.__get_field(model)
-        if property_name and field.relational:
-            sub_domain = DomainCondition(property_name, self.operator, self.value)
-            return DomainCondition(field.name, 'any', sub_domain)
+        field = self._field(model)
+        try:
+            if field.relational and (property_name := FieldExpression(self.field_expr).property_name):
+                sub_domain = DomainCondition(property_name, self.operator, self.value)
+                return DomainCondition(field.name, 'any', sub_domain)
+        except ValueError:
+            self._raise("Invalid field %s.%s", model._name, self.field_expr)
 
         # optimizations based on operator
         for opt in _OPTIMIZATIONS_BY_OPERATOR[self.operator]:
