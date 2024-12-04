@@ -71,6 +71,8 @@ Ask questions, get answers, no distractions
             'website_forum/static/src/js/tours/website_forum.js',
         ],
         'web.assets_frontend': [
+            'website_forum/static/src/interactions/**/*',
+            ('remove', 'website_forum/static/src/interactions/**/*.edit.js'),
             'website_forum/static/src/js/tours/website_forum.js',
             'website_forum/static/src/scss/website_forum.scss',
             'website_forum/static/src/js/website_forum.js',
@@ -78,6 +80,7 @@ Ask questions, get answers, no distractions
             'website_forum/static/src/xml/public_templates.xml',
             'website_forum/static/src/xml/website_forum_tags_wrapper.xml',
             'website_forum/static/src/components/flag_mark_as_offensive/**/*',
+            'website_forum/static/src/components/website_forum_tags_wrapper.js',
         ],
     },
     'license': 'LGPL-3',
