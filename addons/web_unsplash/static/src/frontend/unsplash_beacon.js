@@ -1,16 +1,14 @@
-import publicWidget from "@web/legacy/js/public/public_widget";
+import { Interaction } from "@website/core/interaction";
+import { registry } from "@web/core/registry";
+
 import { rpc } from "@web/core/network/rpc";
 
-publicWidget.registry.UnsplashBeacon = publicWidget.Widget.extend({
-    // /!\ To adapt the day the beacon makes sense for backend customizations
-    selector: '#wrapwrap',
+export class UnsplashBeacon extends Interaction {
+    static selector = "#wrapwrap";
 
-    /**
-     * @override
-     */
-    start: function () {
-        var unsplashImages = Array.from(this.$('img[src*="/unsplash/"]')).map((img) => {
-            // get image id from URL (`http://www.domain.com:1234/unsplash/xYdf5feoI/lion.jpg` -> `xYdf5feoI`)
+    start() {
+        var unsplashImages = Array.from(this.el.querySelector('img[src*="/unsplash/"]')).map((img) => {
+            // extract the image id from URL (`http://www.domain.com:1234/unsplash/xYdf5feoI/lion.jpg` -> `xYdf5feoI`)
             return img.src.split('/unsplash/')[1].split('/')[0];
         });
         if (unsplashImages.length) {
@@ -18,12 +16,15 @@ publicWidget.registry.UnsplashBeacon = publicWidget.Widget.extend({
                 if (!appID) {
                     return;
                 }
-                $.get('https://views.unsplash.com/v', {
+
+                fetch('https://views.unsplash.com/v', {
                     'photo_id': unsplashImages.join(','),
                     'app_id': appID,
-                });
+                })
             });
         }
-        return this._super.apply(this, arguments);
-    },
-});
+    }
+}
+registry
+    .category("public.interactions")
+    .add("web_unsplash.unsplash_beacon", UnsplashBeacon);
