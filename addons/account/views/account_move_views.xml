@@ -1080,7 +1080,7 @@
                                            options="{'no_create': True, 'no_open': True}"
                                            readonly="posted_before and name not in (False, '', '/')"/>
 
-                                    <span class="o_form_label mx-3 oe_edit_only"
+                                    <!-- <span class="o_form_label mx-3 oe_edit_only"
                                           groups="account.group_account_readonly"
                                           invisible="move_type == 'entry'">
                                         <span groups="base.group_multi_currency">in </span>
@@ -1102,12 +1102,27 @@
                                             <span>1 </span>
                                             <field name="company_currency_id" readonly="True" options="{'no_open': True}"/>
                                             <span> = </span>
-                                            <field name="invoice_currency_rate" digits="[12,6]" readonly="True"/>
+                                            <field name="invoice_currency_rate" digits="[12,6]" readonly="state != 'draft'" placeholder="System rate"/>
                                             <span> </span>
                                             <field name="currency_id" readonly="True" options="{'no_open': True}"/>
                                         </div>
-                                    </div>
+                                    </div> -->
                                 </div>
+                                <field name="currency_id"/>
+                                <field name="show_invoice_currency_rate_expected_vs_set_warning" invisible="True"/>
+                                <field name="expected_invoice_currency_rate" digits="[12,6]"/>
+                                <label for="invoice_currency_rate"/>
+                                <div
+                                    class="d-flex"
+                                >
+                                    <field name="invoice_currency_rate" digits="[12,6]" placeholder="System rate"/>
+                                    <div
+                                        class="fa fa-exclamation-triangle text-danger"
+                                        title="The currency rate set is far from the expected one"
+                                        invisible="not show_invoice_currency_rate_expected_vs_set_warning"
+                                    />
+                                </div>
+                                <field name="is_invoice_currency_rate_manually_modified"/>
                             </group>
                         </group>
                         <notebook>
