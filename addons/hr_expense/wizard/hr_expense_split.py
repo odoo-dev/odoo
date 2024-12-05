@@ -23,6 +23,9 @@ class HrExpenseSplit(models.TransientModel):
             result['analytic_distribution'] = deepcopy(expense.analytic_distribution) or {}
             result['employee_id'] = expense.employee_id
             result['currency_id'] = expense.currency_id
+            result['approval_state'] = expense.approval_state
+            result['approval_date'] = expense.approval_date
+            result['manager_id'] = expense.manager_id
         return result
 
     name = fields.Char(string='Description', required=True)
@@ -50,6 +53,22 @@ class HrExpenseSplit(models.TransientModel):
     product_has_cost = fields.Boolean(
         string="Is product with non zero cost selected",
         compute='_compute_from_product_id', store=True,
+    )
+    approval_state = fields.Selection(
+        selection=[
+            ('submitted', 'Submitted'),
+            ('approved', 'Approved'),
+            ('refused', 'Refused'),
+        ],
+        copy=False,
+        readonly=True,
+    )
+    approval_date = fields.Datetime(string="Approval Date", readonly=True)
+    manager_id = fields.Many2one(
+        comodel_name='res.users',
+        string="Manager",
+        readonly=True,
+        domain=lambda self: [('groups_id', 'in', self.env.ref('hr_expense.group_hr_expense_team_approver').id)],
     )
 
     @api.depends('total_amount_currency', 'tax_ids')
@@ -97,6 +116,9 @@ class HrExpenseSplit(models.TransientModel):
             'analytic_distribution': self.analytic_distribution,
             'employee_id': self.employee_id.id,
             'product_uom_id': self.product_id.uom_id.id,
+            'approval_state': self.approval_state,
+            'approval_date': self.approval_date,
+            'manager_id': self.manager_id.id,
         }
 
         account = self.product_id.product_tmpl_id._get_product_accounts()['expense']
