@@ -30,6 +30,7 @@ Coupon & promotion programs can be edited in the Catalog menu of the Website app
     'assets': {
         'web.assets_frontend': [
             'website_sale_loyalty/static/src/**/*',
+            'website_sale_loyalty/static/interactions/**/*',
         ],
         'web.assets_tests': [
             'website_sale_loyalty/static/tests/**/*',
