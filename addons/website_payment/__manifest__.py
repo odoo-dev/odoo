@@ -29,6 +29,11 @@ This is a bridge module that adds multi-website support for payment providers.
         ],
         'web.assets_frontend': [
             'website_payment/static/src/js/**/*',
+            'website_payment/static/src/interactions/**/*',
+            ('remove', 'website_payment/static/src/interactions/**/*.edit.js'),
+        ],
+        'website.assets_edit_frontend': [
+            'website_payment/static/src/**/*.edit.js',
         ],
         'web.assets_tests': [
             'website_payment/static/tests/tours/donation.js',
