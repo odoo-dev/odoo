@@ -1,10 +1,10 @@
-import websiteSaleAddress from "@website_sale/js/address";
+import portalAddress from "@portal/js/address";
 import { rpc } from "@web/core/network/rpc";
 
-websiteSaleAddress.include({
+portalAddress.include({
     events: Object.assign(
         {},
-        websiteSaleAddress.prototype.events,
+        portalAddress.prototype.events,
         {
             "change select[name='city_id']": "_onChangeCity",
         }
