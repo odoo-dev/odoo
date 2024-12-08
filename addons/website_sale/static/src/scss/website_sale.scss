@@ -482,13 +482,6 @@ $input-border-color: $gray-400;
     margin-top: $grid-gutter-width / 2;
 }
 
-.oe_cart {
-
-    > .oe_structure {
-        clear: both;
-    }
-}
-
 div#payment_method {
     div.list-group {
         margin-left: 40px;
@@ -893,20 +886,6 @@ a.no-decoration {
         .col-form-label:not(.label-optional)::after {
             content: " *";
             font-weight: normal;
-        }
-    }
-
-    .all_delivery, .all_billing {
-        @include media-breakpoint-down(md) {
-            overflow-x: auto;
-
-            > div {
-                width: auto;
-            }
-        }
-
-        .o_wsale_add_address {
-            min-height: 8rem;
         }
     }
 

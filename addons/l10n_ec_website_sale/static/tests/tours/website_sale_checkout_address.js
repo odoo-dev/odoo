@@ -49,7 +49,7 @@ registry.category("web_tour.tours").add("tour_new_billing_ec", {
         },
         {
             content: "Add new billing address",
-            trigger: `.all_billing a[href^="/shop/address?address_type=billing"]:contains(Add address)`,
+            trigger: `.o_portal_address_row a[href^="/shop/address?address_type=billing"]:contains(Add address)`,
             run: "click",
         },
         ...tourUtils.fillAdressForm(),

@@ -22,25 +22,6 @@ class PortalAccount(CustomerPortal):
             })
         return portal_layout_values
 
-    def _get_mandatory_fields(self):
-        # EXTENDS 'portal'
-        mandatory_fields = super()._get_mandatory_fields()
-
-        sending_method = request.params.get('invoice_sending_method')
-        if sending_method == 'peppol':
-            mandatory_fields += ['peppol_eas', 'peppol_endpoint', 'invoice_edi_format']
-
-        return mandatory_fields
-
-    def _get_optional_fields(self):
-        # EXTENDS 'portal'
-        optional_fields = super()._get_optional_fields()
-
-        sending_method = request.params.get('invoice_sending_method')
-        if sending_method and sending_method != 'peppol':
-            optional_fields += ['peppol_eas', 'peppol_endpoint']
-        return optional_fields
-
     def details_form_validate(self, data, partner_creation=False):
         # EXTENDS 'portal'
         error, error_message = super().details_form_validate(data, partner_creation=False)

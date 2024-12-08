@@ -9,6 +9,8 @@ from hashlib import md5
 from urllib import parse
 
 from odoo import api, fields, models
+from odoo.http import request
+
 from odoo.addons.account_peppol.tools.demo_utils import handle_demo
 from odoo.addons.account.models.company import PEPPOL_LIST
 
@@ -229,3 +231,22 @@ class ResPartner(models.Model):
                     return 'not_valid_format'
             else:
                 return 'not_valid'
+
+    def _get_portal_mandatory_fields(self):
+        # EXTENDS 'portal'
+        mandatory_fields = super()._get_portal_mandatory_fields()
+
+        sending_method = request.params.get('invoice_sending_method')
+        if sending_method == 'peppol':
+            mandatory_fields += ['peppol_eas', 'peppol_endpoint', 'invoice_edi_format']
+
+        return mandatory_fields
+
+    def _get_portal_optional_fields(self):
+        # EXTENDS 'portal'
+        optional_fields = super()._get_portal_optional_fields()
+
+        sending_method = request.params.get('invoice_sending_method')
+        if sending_method and sending_method != 'peppol':
+            optional_fields += ['peppol_eas', 'peppol_endpoint']
+        return optional_fields
