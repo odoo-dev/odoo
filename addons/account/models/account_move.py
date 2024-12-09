@@ -3271,7 +3271,7 @@ class AccountMove(models.Model):
                             'base_amount': tax['base'],
                             'tax_amount': tax_amount,
                             'tax_id': tax['id'],
-                            'base_tag_ids': list(map(str, tax['tag_ids'])),
+                            'base_tag_ids': list(map(int, tax['tag_ids'])),
                             'tax_repartition_line_id': tax['tax_repartition_line_id'],
                         }
                         group_by_repartition_key[tax['tax_repartition_line_id']] -= tax_amount

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="account.AccountTaxInfo" t-inherit="web.Many2ManyTagsField" t-inherit-mode="primary">
+        <xpath expr="//TagsList" position="before">
+            <span t-if="this.state.allTaxes.length !== 0" class="fa fa-expand text-info me-2" t-on-click="openTaxPopupComponent" title="View tax info"></span>
+        </xpath>
+    </t>
+</templates>

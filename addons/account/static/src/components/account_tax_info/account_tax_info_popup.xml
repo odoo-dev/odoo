@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="account.AccountTaxPopup">
+        <div class="d-inline-flex flex-wrap mw-100" t-ref="accountTax">
+            <div class="d-inline-flex w-100" tabindex="0">
+                <t t-call="account.AccountTaxbuttonPopup"/>
+            </div>
+        </div>
+    </t>
+    <t t-name="account.AccountTaxbuttonPopup">
+        <div class="o-dropdown--menu overflow-x-hidden" style="width:800px" t-if="state.showDropdown">
+            <div class="popover-header sticky-top">
+                <div class="d-flex">
+                    <div class="h5 mt-2 me-auto">
+                        Taxes
+                    </div>
+                    <div class="popupButtons">
+                        <span class="btn o_button" t-on-click.stop="() => this.closeAccountTaxPopup()" title="Close"><span class="fa fa-close"/></span>
+                    </div>
+                </div>
+            </div>
+            <div class="popover-body p-2 table-responsive">
+                <table class="o_list_table table table-sm table-hover mb-2 table-striped">
+                    <thead>
+                        <tr class="border-bottom mw-100">
+                            <th t-if="this.toShowTax" t-out="'Tax'"/>
+                            <th t-out="'Tax Base'"/>
+                            <th t-if="this.toShowAmount" t-out="'Tax Amount'"/>
+                            <th t-if="this.tagExists" t-out="'Tags'"/>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       <t t-foreach="props.allTaxes" t-as="tax" t-key="tax.tax_id">
+                            <tr class="mw-100">
+                                <td t-if="this.toShowTax" ><t t-out="tax.name"/></td>
+                                <td><t t-out="tax.base_amount"/></td>
+                                <td t-if="this.toShowAmount" ><t t-out="tax.tax_amount"/></td>
+                                <td>
+                                    <t t-foreach="tax.tag_names" t-as="tag" t-key="tag">
+                                        <div> <t t-out="tag"/></div>
+                                    </t>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </t>
+</templates>
