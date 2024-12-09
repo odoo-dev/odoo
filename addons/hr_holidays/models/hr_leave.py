@@ -410,7 +410,7 @@ class HrLeave(models.Model):
                   # When searching for resource leave intervals, we exclude the one that
                   # is related to the leave we're currently trying to compute for.
                   '|', ('holiday_id', '=', False), ('holiday_id', 'not in', employee_leaves.ids)]
-        domain = domain + additional_domain
+        domain = expression.AND([domain, additional_domain])
         # Precompute values in batch for performance purposes
         work_time_per_day_mapped = {
             (date_from, date_to, calendar): employees.with_context(

@@ -36,7 +36,7 @@ class HrLeaveEmployeeReport(models.Model):
                     id, leave_id, employee_id,
                     CASE WHEN date_from > month THEN date_from ELSE (month AT TIME ZONE '{self.env.user.tz}' AT TIME ZONE 'UTC')::timestamp END AS date_from,
                     CASE WHEN date_to < (month + INTERVAL '1 month' - INTERVAL '1 second') THEN date_to
-                    ELSE ((month + INTERVAL '1 month' - INTERVAL '1 second') AT TIME ZONE '{self.env.user.tz}' AT TIME ZONE 'UTC')::timestamp END AS date_to,
+                    ELSE ((month + INTERVAL '1 month' - INTERVAL '1 second') AT TIME ZONE '{self.env.user.tz}' AT TIME ZONE 'UTC')::timestamp END AS date_to
                 FROM (
                     SELECT
                         ROW_NUMBER() OVER(ORDER BY employee_id) AS id,
@@ -48,8 +48,9 @@ class HrLeaveEmployeeReport(models.Model):
                         DATE_TRUNC('month', date_to) + INTERVAL '1 month' - INTERVAL '1 second',
                         INTERVAL '1 month'
                     ) AS months_included_in_request
-                )
-            );
+                    WHERE hl.employee_company_id {f"IN {tuple(self.env.companies.ids)}" if len(self.env.companies.ids) > 1 else f"= {self.env.companies.id}"}
+                ) AS leave_data
+            ); 
         """)
 
     @api.depends('date_from', 'date_to')
@@ -59,6 +60,7 @@ class HrLeaveEmployeeReport(models.Model):
                 'date_from': leave.date_from,
                 'date_to': leave.date_to,
                 'employee_id': leave.leave_id.sudo().employee_id.id,
+                'holiday_status_id': leave.leave_id.sudo().holiday_status_id.id
             })
             leave.number_of_days = virtual_leave._get_durations(additional_domain = [('holiday_id', '!=', leave.leave_id.id)])[virtual_leave.id][0]
 
