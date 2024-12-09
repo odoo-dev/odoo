@@ -3265,16 +3265,17 @@ class AccountMove(models.Model):
                     all_taxes = line.tax_ids.compute_all(line.price_unit, quantity=line.quantity)
                     for tax in all_taxes.get('taxes'):
                         tax_amount = tax['amount']
-                        if group_by_repartition_key[tax['tax_repartition_line_id']] - tax_amount < 0:
-                            tax_amount = group_by_repartition_key[tax['tax_repartition_line_id']]
-                        line_data[line.id][tax['tax_repartition_line_id']] = {
-                            'base_amount': tax['base'],
-                            'tax_amount': tax_amount,
-                            'tax_id': tax['id'],
-                            'base_tag_ids': list(map(int, tax['tag_ids'])),
-                            'tax_repartition_line_id': tax['tax_repartition_line_id'],
-                        }
-                        group_by_repartition_key[tax['tax_repartition_line_id']] -= tax_amount
+                        if group_by_repartition_key.get(tax['tax_repartition_line_id']):
+                            if group_by_repartition_key[tax['tax_repartition_line_id']] - tax_amount < 0:
+                                tax_amount = group_by_repartition_key[tax['tax_repartition_line_id']]
+                            line_data[line.id][tax['tax_repartition_line_id']] = {
+                                'base_amount': tax['base'],
+                                'tax_amount': abs(tax_amount),
+                                'tax_id': tax['id'],
+                                'base_tag_ids': list(map(int, tax['tag_ids'])),
+                                'tax_repartition_line_id': tax['tax_repartition_line_id'],
+                            }
+                            group_by_repartition_key[tax['tax_repartition_line_id']] -= tax_amount
             if group_by_repartition_key:
                 for rp_line in group_by_repartition_key:
                     if group_by_repartition_key[rp_line] != 0.0:
@@ -3283,7 +3284,7 @@ class AccountMove(models.Model):
                                 line_data[line_id][rp_line]['tax_amount'] += group_by_repartition_key[rp_line]
                                 group_by_repartition_key[rp_line] = 0.0
             for line in move.line_ids:
-                if line_data.get(line.id):
+                if line_data.get(line.id) is not None:
                     line.tax_ids_json = line_data.get(line.id)
 
     @contextmanager
