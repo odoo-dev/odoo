@@ -563,8 +563,12 @@ export class HistoryPlugin extends Plugin {
             previousStepId: undefined,
         });
         this.stageSelection();
-        this.dispatchTo("step_added_handlers", { step: currentStep, stepCommonAncestor });
-        this.config.onChange?.();
+        this.dispatchTo("step_added_handlers", {
+            step: currentStep,
+            stepCommonAncestor,
+            isPreviewing: this.isPreviewing,
+        });
+        this.config.onChange?.({ isPreviewing: this.isPreviewing });
         return currentStep;
     }
     canUndo() {
@@ -937,15 +941,19 @@ export class HistoryPlugin extends Plugin {
             preview: (...args) => {
                 revertOperation();
                 revertOperation = this.makeSavePoint();
-                operation(...args);
+                this.isPreviewing = true;
+                return operation(...args);
             },
             commit: (...args) => {
                 revertOperation();
+                this.isPreviewing = false;
                 operation(...args);
                 this.addStep();
             },
             revert: () => {
                 revertOperation();
+                revertOperation = () => {};
+                this.isPreviewing = false;
             },
         };
     }
