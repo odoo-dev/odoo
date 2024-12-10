@@ -176,7 +176,8 @@
                            optional="hide"
                            options="{'product_field': 'product_id', 'account_field': 'account_id', 'force_applicability': 'optional'}"
                     />
-                    <field name="tax_ids" widget="many2many_tax_tags" optional="hide" readonly="1"/>
+                    <field name="tax_ids" widget="tax_ids_info" optional="hide" readonly="1"/>
+                    <field name="tax_ids" widget="many2many_tax_tags" optional="hide" readonly="1" column_invisible="true"/>
                     <field name="amount_currency" string="In Currency" groups="base.group_multi_currency" optional="hide" readonly="1" invisible="is_same_currency"/>
                     <field name="currency_id" groups="base.group_multi_currency" optional="hide" string="Currency" readonly="1" invisible="is_same_currency"/>
                     <field name="debit" sum="Total Debit" readonly="1"/>
