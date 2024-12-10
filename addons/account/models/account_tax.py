@@ -2434,8 +2434,9 @@ class AccountTax(models.Model):
 
         for k, v in tax_lines_mapping.items():
             tax_ids_json = {k['tax_repartition_line_id']: {
-                'base_amount': v['tax_base_amount'],
-                'tax_tag_ids': k['tax_tag_ids'][0][2],
+                "base_amount": v['tax_base_amount'],
+                "tax_tag_ids": k['tax_tag_ids'][0][2],
+                "tag_ids": k['tax_tag_ids'][0][2],
             }}
             tax_lines_mapping[k]['tax_ids_json'] = tax_ids_json
 

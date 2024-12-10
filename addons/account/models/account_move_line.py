@@ -3,6 +3,10 @@ from contextlib import contextmanager, ExitStack
 from datetime import date
 import logging
 import re
+import json
+
+import odoo.orm.domains as orm_domains
+
 
 from odoo import api, fields, models, Command, _
 from odoo.exceptions import ValidationError, UserError
@@ -227,6 +231,9 @@ class AccountMoveLine(models.Model):
         context={'active_test': False},
         tracking=True,
         help="Tags assigned to this line by the tax creating it, if any. It determines its impact on financial reports.",
+        compute='_compute_tax_tag_ids',
+        store=False,
+        search='_search_tax_tag_ids'
     )
     # Technical field. True if the balance of this move line needs to be
     # inverted when computing its total for each tag (for sales invoices, for # example)
@@ -438,7 +445,6 @@ class AccountMoveLine(models.Model):
         'Forbidden balance or account on non-accountable line',
     )
 
-    # tax_ids_json = fields.Json(string="Tax Ids", store=True, compute="_compute_tax_ids_json", copy=False)
     tax_ids_json = fields.Json(string="Tax Ids", store=True, copy=False)
 
     # change index on partner_id to a multi-column index on (partner_id, ref), the new index will behave in the
@@ -452,19 +458,6 @@ class AccountMoveLine(models.Model):
     # covers the standard index on account_id
     _account_id_date_idx = models.Index("(account_id, date)")
 
-    @api.depends('tax_ids')
-    def _compute_tax_ids_json(self):
-        for record in self:
-            tax_json = []
-            if record.display_type == 'tax':
-                tax_json.append({
-                    'base_amount': 0.0,
-                    'tax_amount': 0.0,
-                    'tax_id': False,
-                    'tax_repartition_line_id': False,
-                    'tag_ids': record.tax_tag_ids.ids,
-                })
-
     @api.model
     def get_views(self, views, options=None):
         res = super().get_views(views, options)
@@ -473,6 +466,70 @@ class AccountMoveLine(models.Model):
                 # We dont want any additionnal action in the "account.move.line.payment.list" view toolbar
                 toolbar['action'] = []
         return res
+
+    @api.depends('tax_ids_json')
+    def _compute_tax_tag_ids(self):
+        for record in self:
+            tag_ids = set()
+            if record.tax_ids_json:
+                tax_data = record.tax_ids_json
+                for tax_detail in tax_data.values():
+                    tag_ids.update(map(int, (tag for tag in tax_detail.get('tag_ids', []))))
+            record.tax_tag_ids = [(6, 0, list(tag_ids))]
+
+    def _search_tax_tag_ids(self, operator, value):
+
+        if operator not in ['in', '=', 'any', '!=']:
+            raise NotImplementedError(f"Operator '{operator}' not supported for tax_tag_ids search")
+
+        if not value or value == []:
+            return []
+
+        if isinstance(value, orm_domains.Domain):
+            tag_ids=self.env['account.account.tag'].search(value).ids
+            if tag_ids:
+                value = tag_ids
+            else:
+                return [('id', 'in', [])]
+
+        elif isinstance(value, tuple):
+            value = list(value)
+
+        if not isinstance(value, list):
+            value = [value]
+
+        value = [item for sublist in value for item in (sublist if isinstance(sublist, list) else [sublist])]
+
+        if operator == '=':
+            sql_condition = """
+                EXISTS (
+                    SELECT 1
+                    FROM jsonb_each(tax_ids_json) AS tax_details(key, value)
+                    WHERE value @> %s
+                )
+            """
+            query_value = json.dumps({"tag_ids": value})
+        elif operator == '!=':
+            sql_condition = """
+                NOT EXISTS (
+                    SELECT 1
+                    FROM jsonb_each(tax_ids_json) AS tax_details(key, value)
+                    WHERE value @> %s
+                )
+            """
+            query_value = json.dumps({"tag_ids": value})
+        elif operator in ['in', 'any']:
+            sql_condition = """
+                EXISTS (
+                    SELECT 1
+                    FROM jsonb_each(tax_ids_json) AS tax_details(key, value)
+                    CROSS JOIN jsonb_array_elements_text(value->'tag_ids') AS tag_ids
+                    WHERE tag_ids::int = ANY(%s)
+                )
+            """
+            query_value = value
+        a = [('id', 'in', SQL(f"(SELECT id FROM {self._table} WHERE {sql_condition})", query_value))]
+        return a
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS

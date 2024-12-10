@@ -2,7 +2,8 @@
 
 import ast
 import calendar
-from collections import Counter, defaultdict
+import json
+from collections import defaultdict
 from contextlib import ExitStack, contextmanager
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
@@ -3253,6 +3254,7 @@ class AccountMove(models.Model):
 
     def _compute_aml_tax_details(self):
         for move in self:
+            is_refund = move.move_type in ('out_refund', 'in_refund')
             group_by_repartition_key = {}
             for line in move.line_ids:
                 if line.tax_repartition_line_id:
@@ -3262,21 +3264,22 @@ class AccountMove(models.Model):
             for line in move.line_ids:
                 if line.tax_ids:
                     line_data[line.id] = {}
-                    all_taxes = line.tax_ids.compute_all(line.price_unit, quantity=line.quantity)
+                    all_taxes = line.tax_ids.compute_all(line.price_unit, quantity=line.quantity, is_refund=is_refund)
                     for tax in all_taxes.get('taxes'):
-                        tax_amount = tax['amount']
+                        tax_amount = abs(tax['amount'])
                         if group_by_repartition_key.get(tax['tax_repartition_line_id']):
-                            if group_by_repartition_key[tax['tax_repartition_line_id']] - tax_amount < 0:
+                            if group_by_repartition_key[tax['tax_repartition_line_id']] - tax_amount > 0:
                                 tax_amount = group_by_repartition_key[tax['tax_repartition_line_id']]
                             line_data[line.id][tax['tax_repartition_line_id']] = {
-                                'base_amount': tax['base'],
-                                'tax_amount': abs(tax_amount),
-                                'tax_id': tax['id'],
-                                'tax_tag_ids': list(map(int, tax['tag_ids'])),
+                                "base_amount": tax['base'],
+                                "tax_amount": tax_amount,
+                                "tax_id": tax['id'],
+                                "tax_tag_ids": list(map(int, tax['tag_ids'])),
                                 "base_tag_ids": list(map(int, all_taxes.get('base_tags'))),
-                                'tax_repartition_line_id': tax['tax_repartition_line_id'],
+                                "tax_repartition_line_id": tax['tax_repartition_line_id'],
+                                "tag_ids": all_taxes['base_tags'],
                             }
-                            group_by_repartition_key[tax['tax_repartition_line_id']] -= tax_amount
+                            group_by_repartition_key[tax['tax_repartition_line_id']] += tax_amount
             if group_by_repartition_key:
                 for rp_line in group_by_repartition_key:
                     if group_by_repartition_key[rp_line] != 0.0:
