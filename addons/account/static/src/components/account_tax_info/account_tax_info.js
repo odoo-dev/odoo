@@ -41,35 +41,45 @@ export class AccountTaxInfo extends Many2ManyTaxTagsField {
     }
 
     async processTaxData(taxInfo) {
-        if (Object.values(taxInfo)[0].tax_tag_ids) {
+        if (Object.values(taxInfo)[0].tax_tag_ids && !Object.values(taxInfo)[0].base_tag_ids) {
             const tagIds = [...new Set(Object.values(taxInfo).flatMap((tax) => tax.tax_tag_ids))];
 
             const taxTagDetails = await this.orm.read("account.account.tag", tagIds, ["name"]);
             const taxTagMap = Object.fromEntries(taxTagDetails.map((tag) => [tag.id, tag.name]));
             return Object.values(taxInfo).map((tax) => ({
                 ...tax,
-                tag_names: tax.tax_tag_ids.map((tagId) => taxTagMap[tagId] || ""),
+                tax_tag_names: tax.tax_tag_ids.map((tagId) => taxTagMap[tagId] || ""),
+                base_tag_names: [],
             }));
         }
         const taxIds = Object.values(taxInfo).map((tax) => tax.tax_id);
-        const tagIds = [
+        const taxTagIds = [
+            ...new Set(
+                Object.values(taxInfo).flatMap((tax) =>
+                    tax.tax_tag_ids.map((tagId) => parseInt(tagId))
+                )
+            ),
+        ];
+        const baseTagIds = [
             ...new Set(
                 Object.values(taxInfo).flatMap((tax) =>
                     tax.base_tag_ids.map((tagId) => parseInt(tagId))
                 )
             ),
         ];
-
         const taxDetails = await this.orm.read("account.tax", taxIds, ["name"]);
-        const tagDetails = await this.orm.read("account.account.tag", tagIds, ["name"]);
+        const taxTagDetails = await this.orm.read("account.account.tag", taxTagIds, ["name"]);
+        const baseTagDetails = await this.orm.read("account.account.tag", baseTagIds, ["name"]);
 
         const taxMap = Object.fromEntries(taxDetails.map((t) => [t.id, t.name]));
-        const tagMap = Object.fromEntries(tagDetails.map((tag) => [tag.id, tag.name]));
+        const taxTagMap = Object.fromEntries(taxTagDetails.map((tag) => [tag.id, tag.name]));
+        const baseTagMap = Object.fromEntries(baseTagDetails.map((tag) => [tag.id, tag.name]));
 
         return Object.values(taxInfo).map((tax) => ({
             ...tax,
             name: taxMap[tax.tax_id] || "",
-            tag_names: tax.base_tag_ids.map((tagId) => tagMap[tagId] || ""),
+            tax_tag_names: tax.tax_tag_ids.map((tagId) => taxTagMap[tagId] || ""),
+            base_tag_names: tax.base_tag_ids.map((tagId) => baseTagMap[tagId] || ""),
         }));
     }
 

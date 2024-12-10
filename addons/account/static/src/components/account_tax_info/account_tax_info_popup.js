@@ -14,7 +14,8 @@ export class AccountTaxPopup extends Component {
             showDropdown: true,
         });
         this.widgetRef = useRef("accountTax");
-        this.tagExists = this.checkTagExistence();
+        this.taxTagExists = this.checkTagExistence();
+        this.baseTagExists = this.checkBaseTagExistence();
         this.toShowTax = this.toShowTax();
         this.toShowAmount = this.toShowAmount();
         usePosition("accountTaxDropdown", () => this.widgetRef.el);
@@ -25,28 +26,22 @@ export class AccountTaxPopup extends Component {
     }
 
     checkTagExistence() {
-        if (Object.values(this.props.allTaxes)[0].tax_tag_ids) {
-            return Object.values(this.props.allTaxes).some(
-                (tax) => tax.tax_tag_ids && tax.tax_tag_ids.length > 0
-            );
-        }
+        return Object.values(this.props.allTaxes).some(
+            (tax) => tax.tax_tag_ids && tax.tax_tag_ids.length > 0
+        );
+    }
+
+    checkBaseTagExistence() {
         return Object.values(this.props.allTaxes).some(
             (tax) => tax.base_tag_ids && tax.base_tag_ids.length > 0
         );
     }
 
     toShowTax() {
-        if (Object.values(this.props.allTaxes)[0].tax_tag_ids) {
-            return Object.values(this.props.allTaxes).some((tax) => tax.name);
-        }
         return Object.values(this.props.allTaxes).some((tax) => tax.name);
     }
 
     toShowAmount() {
-        if (Object.values(this.props.allTaxes)[0].tax_tag_ids) {
-            return Object.values(this.props.allTaxes).some((tax) => tax.tax_amount);
-        }
         return Object.values(this.props.allTaxes).some((tax) => tax.tax_amount);
     }
-
 }
