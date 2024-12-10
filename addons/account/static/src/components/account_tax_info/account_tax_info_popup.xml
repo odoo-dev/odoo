@@ -26,7 +26,8 @@
                             <th t-if="this.toShowTax" t-out="'Tax'"/>
                             <th t-out="'Tax Base'"/>
                             <th t-if="this.toShowAmount" t-out="'Tax Amount'"/>
-                            <th t-if="this.tagExists" t-out="'Tags'"/>
+                            <th t-if="this.taxTagExists" t-out="'Tax Tags'"/>
+                            <th t-if="this.baseTagExists" t-out="'Base Tags'"/>
                         </tr>
                     </thead>
                     <tbody>
@@ -36,8 +37,13 @@
                                 <td><t t-out="tax.base_amount"/></td>
                                 <td t-if="this.toShowAmount" ><t t-out="tax.tax_amount"/></td>
                                 <td>
-                                    <t t-foreach="tax.tag_names" t-as="tag" t-key="tag">
+                                    <t t-foreach="tax.tax_tag_names" t-as="tag" t-key="tag">
                                         <div> <t t-out="tag"/></div>
+                                    </t>
+                                </td>
+                                <td t-if="this.baseTagExists">
+                                    <t t-foreach="tax.base_tag_names" t-as="tag" t-key="tag">
+                                        <div><t t-out="tag"/></div>
                                     </t>
                                 </td>
                             </tr>
