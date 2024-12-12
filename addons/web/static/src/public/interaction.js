@@ -192,8 +192,8 @@ export class Interaction {
      * Debounces a function and makes sure it is cancelled upon destroy.
      */
     debounced(fn, delay) {
-        const debouncedFn = debounce(() => {
-            fn.call(this);
+        const debouncedFn = debounce((...args) => {
+            fn.apply(this, args);
             if (this.isReady) {
                 this.updateContent();
             }
@@ -203,8 +203,8 @@ export class Interaction {
         });
         return Object.assign(
             {
-                [debouncedFn.name]: () => {
-                    debouncedFn();
+                [debouncedFn.name]: (...args) => {
+                    debouncedFn(...args);
                     return SKIP_IMPLICIT_UPDATE;
                 },
             }[debouncedFn.name],
@@ -259,7 +259,7 @@ export class Interaction {
      * cleaned up when the interaction is destroyed.
      * Returns a function to remove the listener(s).
      *
-     * @param {EventTarget|EventTarget[]|HTMLCollection} target one or more element(s) / bus
+     * @param {EventTarget|EventTarget[]|NodeList} target one or more element(s) / bus
      * @param {string} event
      * @param {Function} fn
      * @param {Object} [options]
