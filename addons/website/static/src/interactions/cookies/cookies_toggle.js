@@ -58,4 +58,4 @@ export class CookiesToggle extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website.cookies_toggle", CookiesToggle);
+registry.category("public.interactions").add("website.cookies_toggle", CookiesToggle);

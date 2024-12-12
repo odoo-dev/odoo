@@ -65,4 +65,4 @@ export class NoBackdropPopup extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website.no_backdrop_popup", NoBackdropPopup);
+registry.category("public.interactions").add("website.no_backdrop_popup", NoBackdropPopup);

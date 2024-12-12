@@ -127,5 +127,5 @@ export class ImageShapeHoverEffect extends Interaction {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.image_shape_hover_effect", ImageShapeHoverEffect);

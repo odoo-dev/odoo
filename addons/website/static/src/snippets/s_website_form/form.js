@@ -876,4 +876,4 @@ export class Form extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website.form", Form);
+registry.category("public.interactions").add("website.form", Form);

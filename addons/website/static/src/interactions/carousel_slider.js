@@ -44,5 +44,5 @@ export class CarouselSlider extends Interaction {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.carousel_slider", CarouselSlider);

@@ -19,6 +19,6 @@ class HelloWorldPopup extends Interaction {
 };
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.hello_world_popup", HelloWorldPopup);
 */

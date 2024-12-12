@@ -186,7 +186,7 @@ registry.category("services").add("public.interactions", {
             // if this is an issue, maybe we should make the wrapwrap configurable
             return null;
         }
-        const Interactions = registry.category("website.active_elements").getAll();
+        const Interactions = registry.category("public.interactions").getAll();
         const service = new InteractionService(el, env);
         service.activate(Interactions);
         return service;

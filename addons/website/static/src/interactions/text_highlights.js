@@ -130,5 +130,5 @@ class TextHighlight extends Interaction {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.text_highlight", TextHighlight);

@@ -202,4 +202,4 @@ export class DynamicSnippet extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website.dynamic_snippet", DynamicSnippet);
+registry.category("public.interactions").add("website.dynamic_snippet", DynamicSnippet);

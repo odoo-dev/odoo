@@ -46,5 +46,5 @@ export class WebsiteControllerPageListingLayout extends Interaction {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.website_controller_page_listing_layout", WebsiteControllerPageListingLayout);

@@ -35,4 +35,4 @@ export class CookiesWarning extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website.cookies_warning", CookiesWarning);
+registry.category("public.interactions").add("website.cookies_warning", CookiesWarning);

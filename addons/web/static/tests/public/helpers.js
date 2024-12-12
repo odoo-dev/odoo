@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 // import { buildEditableInteractions } from "@website/core/website_edit_service";
 
 let activeInteractions = null;
-const elementRegistry = registry.category("website.active_elements");
+const elementRegistry = registry.category("public.interactions");
 const content = elementRegistry.content;
 
 export function setupInteractionWhiteList(interactions) {

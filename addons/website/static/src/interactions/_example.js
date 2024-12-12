@@ -38,7 +38,7 @@ class TogglableBackgroundSection extends Interaction {
 
 /*
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.toggle_background", TogglableBackgroundSection);
 */
 
@@ -59,7 +59,7 @@ class FunNotificationThing extends Interaction {
 
 /*
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.fun_notification", FunNotificationThing);
 */
 
@@ -86,5 +86,5 @@ class Counter extends Component {
 }
 
 /*
-registry.category("website.active_elements").add("website.counter", Counter);
+registry.category("public.interactions").add("website.counter", Counter);
 */

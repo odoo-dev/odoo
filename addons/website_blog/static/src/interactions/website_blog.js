@@ -84,4 +84,4 @@ export class WebsiteBlog extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website_blog.website_blog", WebsiteBlog);
+registry.category("public.interactions").add("website_blog.website_blog", WebsiteBlog);

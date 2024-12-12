@@ -6,7 +6,7 @@ export class HeaderFixed extends BaseHeaderSpecial {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.header_fixed", HeaderFixed);
 
 registry

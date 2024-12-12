@@ -16,7 +16,7 @@ class TestItem extends Interaction {
         },
     };
 }
-registry.category("website.active_elements").add("website.test_dynamic_carousel_item", TestItem);
+registry.category("public.interactions").add("website.test_dynamic_carousel_item", TestItem);
 
 setupInteractionWhiteList(["website.dynamic_snippet_carousel", "website.test_dynamic_carousel_item"]);
 

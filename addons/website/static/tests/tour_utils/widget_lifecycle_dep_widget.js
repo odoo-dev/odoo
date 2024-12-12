@@ -42,6 +42,6 @@ odoo.loader.bus.addEventListener("module-started", (e) => {
     }
 
     registry
-        .category("website.active_elements")
+        .category("public.interactions")
         .add("website.countdown_patch", CountdownPatch);
 });

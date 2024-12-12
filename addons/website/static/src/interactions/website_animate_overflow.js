@@ -42,7 +42,7 @@ export class WebsiteAnimateOverflow extends Interaction {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.website_animate_overflow", WebsiteAnimateOverflow);
 
 registry
