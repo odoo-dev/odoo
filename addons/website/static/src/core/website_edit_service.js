@@ -61,7 +61,7 @@ registry.category("services").add("website_edit", {
                 publicInteractions.stopInteractions(target);
                 if (shouldActivateEditInteractions) {
                     if (!editableInteractions) {
-                        const builders = registry.category("website.editable_active_elements_builders").getAll();
+                        const builders = registry.category("public.interactions.edit").getAll();
                         editableInteractions = buildEditableInteractions(builders);
                     }
                     editMode = true;

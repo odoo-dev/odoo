@@ -16,7 +16,7 @@ const CarouselSliderEdit = I => class extends I {
 };
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.carousel_slider", {
         Interaction: CarouselSlider,
         mixin: CarouselSliderEdit

@@ -61,5 +61,5 @@ registry
     .add("website.facebook_page", FacebookPage);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.facebook_page", { Interaction: FacebookPage });

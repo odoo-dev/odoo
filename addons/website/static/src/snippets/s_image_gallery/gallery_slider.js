@@ -114,7 +114,7 @@ export class GallerySlider extends Interaction {
 registry.category("public.interactions").add("website.gallery_slider", GallerySlider);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.gallery_slider", {
         Interaction: GallerySlider,
     });

@@ -194,7 +194,7 @@ export class Animation extends Interaction {
 registry.category("public.interactions").add("website.animation", Animation);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.animation", {
         Interaction: Animation,
     });

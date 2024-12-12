@@ -123,7 +123,7 @@ registry
     .add("website.mega_menu_dropdown", MegaMenuDropdown);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.mega_menu_dropdown", {
         Interaction: MegaMenuDropdown,
     });

@@ -46,7 +46,7 @@ registry
     .add("website.website_animate_overflow", WebsiteAnimateOverflow);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.website_animate_overflow", {
         Interaction: WebsiteAnimateOverflow,
     });

@@ -10,7 +10,7 @@ registry
     .add("website.header_fixed", HeaderFixed);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.header_fixed", {
         Interaction: HeaderFixed,
     });

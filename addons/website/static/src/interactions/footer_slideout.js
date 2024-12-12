@@ -40,7 +40,7 @@ registry
     .add("website.footer_slideout", FooterSlideout);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.footer_slideout", {
         Interaction: FooterSlideout,
     });

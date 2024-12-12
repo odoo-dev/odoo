@@ -407,5 +407,5 @@ registry
     .add("website.countdown", Countdown);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.countdown", { Interaction: Countdown });

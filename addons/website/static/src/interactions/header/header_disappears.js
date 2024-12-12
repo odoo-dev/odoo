@@ -15,7 +15,7 @@ registry
     .add("website.header_disappears", HeaderDisappears);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.header_disappears", {
         Interaction: HeaderDisappears,
     });

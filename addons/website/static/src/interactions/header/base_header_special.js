@@ -112,7 +112,7 @@ export class BaseHeaderSpecial extends BaseHeader {
 }
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.base_header_special", {
         Interaction: BaseHeaderSpecial,
         isAbstract: true,

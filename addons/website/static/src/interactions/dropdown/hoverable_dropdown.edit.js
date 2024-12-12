@@ -20,7 +20,7 @@ const HoverableDropdownEdit = I => class extends I {
 };
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.hoverable_dropdown", {
         Interaction: HoverableDropdown,
         mixin: HoverableDropdownEdit
