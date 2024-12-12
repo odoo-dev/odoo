@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import _
-from odoo.exceptions import AccessError, MissingError, ValidationError
+from odoo.exceptions import AccessError, MissingError, ValidationError, UserError
 from odoo.fields import Command
 from odoo.http import request, route
 from odoo.tools import float_compare
@@ -18,6 +18,18 @@ class PaymentPortal(payment_portal.PaymentPortal):
         Perform final checks against the transaction & sale_order.
         Override me to apply payment unrelated checks & processing
         """
+        # if sale_order.company_id.account_fiscal_country_id.code == "IN" and sale_order.partner_id.l10n_in_gst_treatment in (
+        #     "regular",
+        #     "composition",
+        #     "overseas",
+        #     "special_economic_zone",
+        #     "deemed_export",):
+        #     invoice_journal = self.env['account.journal'].search([('type', '=', 'sale'), ('company_id', '=', sale_order.company_id.id)], limit=1)
+        #     for edi_format in invoice_journal.edi_format_ids:
+        #         if edi_format.code == 'in_einvoice_1_03':
+        #             errors = edi_format._l10n_in_validate_partner(sale_order.partner_invoice_id)
+        #             if errors:
+        #                 raise UserError(_("Invalid details:\n\n%s", '\n'.join(errors)))
         return
 
     @route('/shop/payment/transaction/<int:order_id>', type='jsonrpc', auth='public', website=True)
