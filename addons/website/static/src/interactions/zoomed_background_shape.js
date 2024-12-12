@@ -74,5 +74,5 @@ registry
     .add("website.zoomed_background_shape", ZoomedBackgroundShape);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.zoomed_background_shape", { Interaction: ZoomedBackgroundShape});

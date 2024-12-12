@@ -9,7 +9,7 @@ const BlogContentShareEdit = I => class extends I {
 };
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website_blog.blog_content_share", {
         Interaction: BlogContentShare,
         mixin: BlogContentShareEdit,

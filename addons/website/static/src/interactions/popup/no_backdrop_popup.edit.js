@@ -13,7 +13,7 @@ export const NoBackdropPopupEdit = (I) => class extends I {
 };
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.no_backdrop_popup", {
         Interaction: NoBackdropPopup,
         mixin: NoBackdropPopupEdit

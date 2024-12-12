@@ -103,7 +103,7 @@ export class DynamicSnippetProducts extends DynamicSnippetCarousel {
 registry.category("public.interactions").add("website_sale.dynamic_snippet_products", DynamicSnippetProducts);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website_sale.dynamic_snippet_products", {
         Interaction: DynamicSnippetProducts,
     });

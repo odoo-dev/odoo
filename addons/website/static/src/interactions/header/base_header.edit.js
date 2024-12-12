@@ -6,7 +6,7 @@ const BaseHeaderEdit = I => class extends I {
 };
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.base_header", {
         Interaction: BaseHeader,
         mixin: BaseHeaderEdit,

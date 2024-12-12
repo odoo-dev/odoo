@@ -83,5 +83,5 @@ registry
     .add("website.instagram_page", InstagramPage);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.instagram_page", { Interaction: InstagramPage });

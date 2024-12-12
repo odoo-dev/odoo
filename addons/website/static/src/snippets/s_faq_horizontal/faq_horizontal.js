@@ -31,5 +31,5 @@ registry
     .add("website.faq_horizontal", FaqHorizontal);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.faq_horizontal", { Interaction: FaqHorizontal });

@@ -28,5 +28,5 @@ registry
     .add("website.dynamic_snippet_carousel", DynamicSnippetCarousel);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.dynamic_snippet_carousel", { Interaction: DynamicSnippetCarousel });

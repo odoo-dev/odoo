@@ -8,7 +8,7 @@ export async function switchToEditMode(core) {
     core.stopInteractions();
     const unmatchedInteractions = activeInteractions ? new Set(activeInteractions) : new Set();
     const builders = registry
-        .category("website.editable_active_elements_builders")
+        .category("public.interactions.edit")
         .getEntries();
     for (const [key, builder] of builders) {
         if (activeInteractions && !activeInteractions.includes(key)) {

@@ -18,7 +18,7 @@ const ImageShapeHoverEffectEdit = I => class extends I {
 };
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.image_shape_hover_effect", {
         Interaction: ImageShapeHoverEffect,
         mixin: ImageShapeHoverEffectEdit,

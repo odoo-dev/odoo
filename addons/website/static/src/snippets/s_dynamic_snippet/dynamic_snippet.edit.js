@@ -9,7 +9,7 @@ const DynamicSnippetEdit = I => class extends I {
 };
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.dynamic_snippet", {
         Interaction: DynamicSnippet,
         mixin: DynamicSnippetEdit

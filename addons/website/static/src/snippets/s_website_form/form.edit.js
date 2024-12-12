@@ -25,7 +25,7 @@ export class FormDateFormatterEdit extends Interaction {
 }
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.form_date_formatter", {
         Interaction: FormDateFormatterEdit,
     });

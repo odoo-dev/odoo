@@ -33,7 +33,7 @@ export class Events extends DynamicSnippet {
 registry.category("public.interactions").add("website_event.events", Events);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website_event.events", {
         Interaction: Events,
     });

@@ -44,5 +44,5 @@ registry
     .add("website.shared_popup", SharedPopup);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.shared_popup", { Interaction: SharedPopup });

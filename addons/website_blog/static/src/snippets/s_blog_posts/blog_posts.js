@@ -28,7 +28,7 @@ export class DynamicSnippetBlogPosts extends DynamicSnippet {
 registry.category("public.interactions").add("website_blog.blog_posts", DynamicSnippetBlogPosts);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website_blog.blog_posts", {
         Interaction: DynamicSnippetBlogPosts,
     });

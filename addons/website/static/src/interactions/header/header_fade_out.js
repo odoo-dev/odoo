@@ -30,7 +30,7 @@ registry
     .add("website.header_fade_out", HeaderFadeOut);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.header_fade_out", {
         Interaction: HeaderFadeOut,
     });

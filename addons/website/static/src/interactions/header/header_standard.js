@@ -80,7 +80,7 @@ registry
     .add("website.header_standard", HeaderStandard);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.header_standard", {
         Interaction: HeaderStandard,
     });

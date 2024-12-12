@@ -10,7 +10,7 @@ const SearchModalEdit = I => class extends I {
 };
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.search_modal", {
         Interaction: SearchModal,
         mixin: SearchModalEdit,

@@ -7,7 +7,7 @@ const CarouselBootstrapUpgradeFixEdit = I => class extends I {
 };
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.carousel_bootstrap_upgrade_fix", {
         Interaction: CarouselBootstrapUpgradeFix,
         mixin: CarouselBootstrapUpgradeFixEdit

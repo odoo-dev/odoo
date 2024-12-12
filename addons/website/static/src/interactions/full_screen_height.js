@@ -44,7 +44,7 @@ registry
     .add("website.full_screen_height", FullScreenHeight);
 
 registry
-    .category("website.editable_active_elements_builders")
+    .category("public.interactions.edit")
     .add("website.full_screen_height", {
         Interaction: FullScreenHeight,
     });
