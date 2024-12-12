@@ -8,6 +8,8 @@ import { Interaction } from "@web/public/interaction";
 import { startInteraction } from "./helpers";
 import { Component, onWillDestroy, xml } from "@odoo/owl";
 
+describe.current.tags("interaction_dev");
+
 const TemplateBase = `
     <div>
         <span>coucou</span>

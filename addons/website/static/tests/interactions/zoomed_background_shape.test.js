@@ -1,7 +1,8 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { startInteractions, setupInteractionWhiteList } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.zoomed_background_shape");
+describe.current.tags("interaction_dev");
 
 test("zoomed background shape test is not needed without zoom", async () => {
     const { core, el } = await startInteractions(`

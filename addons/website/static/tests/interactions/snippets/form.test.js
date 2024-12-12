@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { click, fill } from "@odoo/hoot-dom";
 import { advanceTime, Deferred } from "@odoo/hoot-mock";
 import { MockServer, onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
@@ -8,6 +8,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.form", "website.post_link");
+describe.current.tags("interaction_dev");
 
 function field(inputEl) {
     return inputEl.closest(".s_website_form_field");
@@ -220,7 +221,7 @@ test("form prefilled conditional", async () => {
                                     </div>
                                 </div>
                             </div>
-                            <div data-name="Field" class="s_website_form_field mb-3 col-12 s_website_form_custom s_website_form_field_hidden_if d-none" data-type="tel" 
+                            <div data-name="Field" class="s_website_form_field mb-3 col-12 s_website_form_custom s_website_form_field_hidden_if d-none" data-type="tel"
                                     data-visibility-dependency="name"
                                     data-visibility-comparator="set"
                             >

@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { onRpc } from "@web/../tests/web_test_helpers";
 import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
@@ -18,6 +18,7 @@ class TestItem extends Interaction {
 registry.category("public.interactions").add("website.test_dynamic_item", TestItem);
 
 setupInteractionWhiteList(["website.dynamic_snippet", "website.test_dynamic_item"]);
+describe.current.tags("interaction_dev");
 
 test("dynamic snippet loads items and displays them through template", async () => {
     onRpc("/website/snippet/filters", async (args) => {

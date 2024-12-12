@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, click, scroll } from "@odoo/hoot-dom";
 import {
     startInteractions,
@@ -6,6 +6,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.animation");
+describe.current.tags("interaction_dev");
 
 test("on appearance animation starts once visible", async () => {
     const { core, el } = await startInteractions(`

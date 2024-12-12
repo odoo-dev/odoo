@@ -1,10 +1,11 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import {
     startInteractions,
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.carousel_slider");
+describe.current.tags("interaction_dev");
 
 test("carousel slider computes maximum height", async () => {
     const { core, el } = await startInteractions(`

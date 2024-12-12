@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { hover } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
@@ -7,6 +7,7 @@ import { startInteractions, setupInteractionWhiteList } from "@web/../tests/publ
 import { onceAllImagesLoaded } from "@website/utils/images";
 
 setupInteractionWhiteList("website.image_shape_hover_effect");
+describe.current.tags("interaction_dev");
 
 test.tags("desktop")("image shape hover effect changes image on enter & leave", async () => {
     patchWithCleanup(Image.prototype, {
@@ -19,7 +20,7 @@ test.tags("desktop")("image shape hover effect changes image on enter & leave", 
     });
     const { core, el } = await startInteractions(`
         <div id="wrapwrap">
-            <img class="img img-fluid mx-auto o_we_image_cropped o_animate_on_hover rounded-circle rounded" 
+            <img class="img img-fluid mx-auto o_we_image_cropped o_animate_on_hover rounded-circle rounded"
                 src="/web/image/384-8a55a748/s_banner_3.svg" alt=""
                 data-mimetype="image/svg+xml" data-original-id="276"
                 data-original-src="/website/static/src/img/snippets_demo/s_banner_3.jpg"

@@ -1,20 +1,21 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 
 import { startInteractions, setupInteractionWhiteList } from "@web/../tests/public/helpers";
 import { advanceTime } from "@odoo/hoot-mock";
 
 setupInteractionWhiteList("website.countdown");
+describe.current.tags("interaction_dev");
 
 const getTemplate = function (options = {}) {
     return `
-    <div style="background-color: white;"> 
+    <div style="background-color: white;">
         <section class="s_countdown pt48 pb48"
-        data-display="dhms" 
-        data-end-action="nothing" 
+        data-display="dhms"
+        data-end-action="nothing"
         data-size="175"
-        data-layout="circle" 
+        data-layout="circle"
         data-layout-background="none"
-        data-progress-bar-style="surrounded" 
+        data-progress-bar-style="surrounded"
         data-progress-bar-weight="thin"
         id="countdown-section"
         data-text-color="o-color-1"
@@ -22,7 +23,7 @@ const getTemplate = function (options = {}) {
         data-progress-bar-color="o-color-1"
         data-end-time="12345678900">
             <div class="container">
-                <div class="s_countdown_canvas_wrapper" 
+                <div class="s_countdown_canvas_wrapper"
                 style="
                     display: flex;
                     justify-content: center;

@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { click } from "@odoo/hoot-dom";
 import { Deferred } from "@odoo/hoot-mock";
 import { MockServer } from "@web/../tests/_framework/mock_server/mock_server";
@@ -8,6 +8,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.website_controller_page_listing_layout");
+describe.current.tags("interaction_dev");
 
 test("website controller page listing layout toggle to list mode", async () => {
     const deferred = new Deferred();

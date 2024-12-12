@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { hover, leave } from "@odoo/hoot-dom";
 
 import {
@@ -7,6 +7,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.hoverable_dropdown");
+describe.current.tags("interaction_dev");
 
 const getTemplate = function (options = {}) {
     return `

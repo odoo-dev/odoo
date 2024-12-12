@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, click } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 import {
@@ -19,6 +19,7 @@ class TestItem extends Interaction {
 registry.category("public.interactions").add("website_sale.test_dynamic_carousel_products_item", TestItem);
 
 setupInteractionWhiteList(["website_sale.dynamic_snippet_products", "website_sale.test_dynamic_carousel_products_item"]);
+describe.current.tags("interaction_dev");
 
 test.tags("desktop")("dynamic snippet products loads items and displays them through template", async () => {
     document.querySelector("html").dataset.mainObject = "product.public.category(2,)";

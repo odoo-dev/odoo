@@ -1,10 +1,11 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import {
     startInteractions,
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.full_screen_height");
+describe.current.tags("interaction_dev");
 
 test.tags("desktop")("full screen height is not set on visible section", async () => {
     const { core, el } = await startInteractions(`

@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 
 import {
     startInteractions,
@@ -14,6 +14,7 @@ import {
 } from "./helpers";
 
 setupInteractionWhiteList("website.header_fade_out");
+describe.current.tags("interaction_dev");
 
 test("header_fade_out is started when there is an element header.o_header_fade_out", async () => {
     const { core } = await startInteractions(getTemplateWithoutHideOnScroll("o_header_fade_out"));

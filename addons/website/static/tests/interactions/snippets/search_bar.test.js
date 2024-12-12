@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import {
     click,
     press,
@@ -8,6 +8,7 @@ import { onRpc } from "@web/../tests/web_test_helpers";
 import { startInteractions, setupInteractionWhiteList } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.search_bar");
+describe.current.tags("interaction_dev");
 
 const searchTemplate = `
     <form method="get" class="o_searchbar_form s_searchbar_input" action="/website/search" data-snippet="s_searchbar_input">
@@ -69,7 +70,7 @@ function supportAutocomplete() {
             "fuzzy_search": false
         };
     });
-}    
+}
 
 test("searchbar triggers a search when text is entered", async () => {
     supportAutocomplete();

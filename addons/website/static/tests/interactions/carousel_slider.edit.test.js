@@ -1,5 +1,5 @@
-import { expect, test } from "@odoo/hoot";
-import { animationFrame, manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
+import { describe, expect, test } from "@odoo/hoot";
+import { manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
 import {
     startInteractions,
     setupInteractionWhiteList,
@@ -7,6 +7,7 @@ import {
 import { switchToEditMode } from "../helpers";
 
 setupInteractionWhiteList("website.carousel_slider");
+describe.current.tags("interaction_dev");
 
 const carouselHtml = `
     <div id="slideshow_sample" class="carousel carousel-dark slide" data-bs-ride="ride" data-bs-interval="0">
