@@ -1731,6 +1731,25 @@ describe("blockedUntilDone", () => {
         await advanceTime(500);
         expect(el.querySelectorAll("span")).toHaveLength(1);
     });
+
+    test("blockedUntilDone automatically binds functions", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicContent = {
+                button: { "t-on-click": this.blockedUntilDone(this.sayValue) },
+            };
+            setup() {
+                this.value = "value";
+            }
+            sayValue() {
+                return Promise.resolve(expect.step(this.value));
+            }
+        }
+        await startInteraction(Test, TemplateTestDoubleButton);
+        expect.verifySteps([]);
+        await click("button");
+        expect.verifySteps(["value"]);
+    });
 });
 
 describe("debounced (1)", () => {
@@ -1864,6 +1883,22 @@ describe("debounced (2)", () => {
         expect.verifySteps(["destroy"]);
         await advanceTime(500);
         expect.verifySteps([]);
+    });
+
+    test("debounced forwards arguments", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicContent = {
+                "_root": { "t-on-click": this.debounced((ev) => expect.step(ev.type), 500) },
+            };
+        }
+        await startInteraction(Test, TemplateTest);
+        expect.verifySteps([]);
+        await click(".test");
+        await advanceTime(25);
+        expect.verifySteps([]);
+        await advanceTime(500);
+        expect.verifySteps(["click"]);
     });
 });
 
