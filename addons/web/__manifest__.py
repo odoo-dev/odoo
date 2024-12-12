@@ -234,7 +234,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/js/public/public_root.js',
             'web/static/src/legacy/js/public/public_root_instance.js',
             'web/static/src/legacy/js/public/public_widget.js',
-            'web/static/src/legacy/js/public/signin.js',
         ],
         'web.assets_frontend_lazy': [
             ('include', 'web.assets_frontend'),
