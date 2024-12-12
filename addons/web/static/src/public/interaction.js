@@ -34,9 +34,9 @@ export class Interaction {
      */
     dynamicSelectors = {
         _root: () => this.el,
-        _body: () => document.body,
+        _body: () => this.el.ownerDocument.body,
         _window: () => window,
-        _document: () => document,
+        _document: () => this.el.ownerDocument,
     };
 
     /**
