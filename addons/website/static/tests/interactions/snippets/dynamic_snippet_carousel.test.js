@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, click } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 import {
@@ -19,6 +19,7 @@ class TestItem extends Interaction {
 registry.category("public.interactions").add("website.test_dynamic_carousel_item", TestItem);
 
 setupInteractionWhiteList(["website.dynamic_snippet_carousel", "website.test_dynamic_carousel_item"]);
+describe.current.tags("interaction_dev");
 
 const Template = `
     <div id="wrapwrap">

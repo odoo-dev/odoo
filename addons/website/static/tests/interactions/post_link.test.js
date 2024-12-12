@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, click } from "@odoo/hoot-dom";
 
 import {
@@ -8,6 +8,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.post_link");
+describe.current.tags("interaction_dev");
 
 test("post_link adds and removes class on setup/destroy", async () => {
     const { core, el } = await startInteractions(`

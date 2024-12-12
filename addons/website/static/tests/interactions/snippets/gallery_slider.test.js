@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, click } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
@@ -9,6 +9,7 @@ import {
 import { onceAllImagesLoaded } from "@website/utils/images";
 
 setupInteractionWhiteList("website.gallery_slider");
+describe.current.tags("interaction_dev");
 
 const SLIDE_DURATION = 1000;
 

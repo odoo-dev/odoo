@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 
 import {
     startInteractions,
@@ -14,6 +14,7 @@ import {
 } from "./helpers";
 
 setupInteractionWhiteList("website.header_fixed");
+describe.current.tags("interaction_dev");
 
 test("header_fixed is started when there is an element header.o_header_fixed", async () => {
     const { core } = await startInteractions(getTemplateWithoutHideOnScroll("o_header_fixed"));

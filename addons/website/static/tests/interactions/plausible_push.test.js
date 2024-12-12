@@ -1,8 +1,9 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 
 import { startInteractions, setupInteractionWhiteList } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.plausible_push");
+describe.current.tags("interaction_dev");
 
 test("plausible push does nothing if there is no .js_plausible_push", async () => {
     const { core } = await startInteractions(`

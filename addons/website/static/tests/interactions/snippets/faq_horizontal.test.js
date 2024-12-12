@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 
 import {
     setupTest,
@@ -17,6 +17,7 @@ setupInteractionWhiteList([
     "website.header_fade_out",
     "website.faq_horizontal",
 ]);
+describe.current.tags("interaction_dev");
 
 const getTemplate = function (headerType, useHiddenOnScroll) {
     return `
@@ -98,7 +99,7 @@ test("faq_horizontal is update titles position with a o_header_standard", async 
     const wrapwrap = el.querySelector("#wrapwrap");
     const title = el.querySelector(".s_faq_horizontal_entry_title");
     await setupTest(core, wrapwrap);
-    // Since the header does not move in Hoot, we have to take into 
+    // Since the header does not move in Hoot, we have to take into
     // account the scroll in the test when checking where the bottom
     // of the header is (ie. when the header is shown and scroll != 0).
     expect(Math.round(parseFloat(title.style.top))).toBe(HEADER_SIZE + DEFAULT_OFFSET)
@@ -122,8 +123,8 @@ test("faq_horizontal is update titles position with a o_header_fixed", async () 
     const wrapwrap = el.querySelector("#wrapwrap");
     const title = el.querySelector(".s_faq_horizontal_entry_title");
     await setupTest(core, wrapwrap);
-    // Since the header does not move in Hoot, the first scroll we do 
-    // create a scroll offset we have to take into account when checking 
+    // Since the header does not move in Hoot, the first scroll we do
+    // create a scroll offset we have to take into account when checking
     // where the bottom of the header is (ie. when the header is shown
     // and scroll != 0).
     //
@@ -151,7 +152,7 @@ test("faq_horizontal is update titles position with a o_header_disappears", asyn
     const wrapwrap = el.querySelector("#wrapwrap");
     const title = el.querySelector(".s_faq_horizontal_entry_title");
     await setupTest(core, wrapwrap);
-    // Since the header does not move in Hoot, we have to take into 
+    // Since the header does not move in Hoot, we have to take into
     // account the scroll in the test when checking where the bottom
     // of the header is (ie. when the header is shown and scroll != 0).
     expect(Math.round(parseFloat(title.style.top))).toBe(HEADER_SIZE + DEFAULT_OFFSET);
@@ -171,7 +172,7 @@ test("faq_horizontal is update titles position with a o_header_fade_out", async 
     const wrapwrap = el.querySelector("#wrapwrap");
     const title = el.querySelector(".s_faq_horizontal_entry_title");
     await setupTest(core, wrapwrap);
-    // Since the header does not move in Hoot, we have to take into 
+    // Since the header does not move in Hoot, we have to take into
     // account the scroll in the test when checking where the bottom
     // of the header is (ie. when the header is shown and scroll != 0).
     expect(Math.round(parseFloat(title.style.top))).toBe(HEADER_SIZE + DEFAULT_OFFSET);

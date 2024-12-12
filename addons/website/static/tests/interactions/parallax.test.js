@@ -1,5 +1,4 @@
-import { expect, test } from "@odoo/hoot";
-
+import { describe, expect, test } from "@odoo/hoot";
 import {
     startInteractions,
     setupInteractionWhiteList,
@@ -8,6 +7,7 @@ import {
 import { scroll } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.parallax");
+describe.current.tags("interaction_dev");
 
 const getTemplate = function (options = {}) {
     const speed = options.speed || 0;

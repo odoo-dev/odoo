@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { advanceTime } from "@odoo/hoot-mock";
 import { escape } from "@web/core/utils/strings";
 
@@ -8,6 +8,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.chart");
+describe.current.tags("interaction_dev");
 
 const getTemplate = function (options = {}) {
     return `

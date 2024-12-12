@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, click, scroll } from "@odoo/hoot-dom";
 
 import {
@@ -19,6 +19,7 @@ setupInteractionWhiteList([
     "website.header_fade_out",
     "website.table_of_content",
 ]);
+describe.current.tags("interaction_dev");
 
 // TODO Maybe recover from `website.s_table_of_content`.
 const defaultToc = `
@@ -222,7 +223,7 @@ test.tags("desktop")("table_of_content update titles position with a o_header_st
     const wrapwrap = el.querySelector("#wrapwrap");
     const title = el.querySelector(".s_table_of_content_navbar");
     await setupTest(core, wrapwrap);
-    // Since the header does not move in Hoot, we have to take into 
+    // Since the header does not move in Hoot, we have to take into
     // account the scroll in the test when checking where the bottom
     // of the header is (ie. when the header is shown and scroll != 0).
     expect(Math.round(parseFloat(title.style.top))).toBe(HEADER_SIZE + DEFAULT_OFFSET)
@@ -246,8 +247,8 @@ test.tags("desktop")("table_of_content is update titles position with a o_header
     const wrapwrap = el.querySelector("#wrapwrap");
     const title = el.querySelector(".s_table_of_content_navbar");
     await setupTest(core, wrapwrap);
-    // Since the header does not move in Hoot, the first scroll we do 
-    // create a scroll offset we have to take into account when checking 
+    // Since the header does not move in Hoot, the first scroll we do
+    // create a scroll offset we have to take into account when checking
     // where the bottom of the header is (ie. when the header is shown
     // and scroll != 0).
     //
@@ -275,7 +276,7 @@ test.tags("desktop")("table_of_content is update titles position with a o_header
     const wrapwrap = el.querySelector("#wrapwrap");
     const title = el.querySelector(".s_table_of_content_navbar");
     await setupTest(core, wrapwrap);
-    // Since the header does not move in Hoot, we have to take into 
+    // Since the header does not move in Hoot, we have to take into
     // account the scroll in the test when checking where the bottom
     // of the header is (ie. when the header is shown and scroll != 0).
     expect(Math.round(parseFloat(title.style.top))).toBe(HEADER_SIZE + DEFAULT_OFFSET);
@@ -295,7 +296,7 @@ test.tags("desktop")("table_of_content is update titles position with a o_header
     const wrapwrap = el.querySelector("#wrapwrap");
     const title = el.querySelector(".s_table_of_content_navbar");
     await setupTest(core, wrapwrap);
-    // Since the header does not move in Hoot, we have to take into 
+    // Since the header does not move in Hoot, we have to take into
     // account the scroll in the test when checking where the bottom
     // of the header is (ie. when the header is shown and scroll != 0).
     expect(Math.round(parseFloat(title.style.top))).toBe(HEADER_SIZE + DEFAULT_OFFSET);

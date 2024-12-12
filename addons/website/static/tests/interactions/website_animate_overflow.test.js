@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
 import {
     startInteractions,
@@ -6,6 +6,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.website_animate_overflow");
+describe.current.tags("interaction_dev");
 
 test("website animate overflow adds class during animations", async () => {
     const { core, el } = await startInteractions(`

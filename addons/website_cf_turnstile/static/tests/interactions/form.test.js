@@ -1,8 +1,9 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { startInteractions, setupInteractionWhiteList } from "@web/../tests/public/helpers";
 import { session } from "@web/session";
 
 setupInteractionWhiteList("website.form");
+describe.current.tags("interaction_dev");
 
 test("turnstile captcha gets added to form snippets", async () => {
     session.turnstile_site_key = "test";

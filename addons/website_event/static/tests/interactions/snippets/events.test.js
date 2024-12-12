@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import {
     onRpc,
 } from "@web/../tests/web_test_helpers";
@@ -15,6 +15,7 @@ class TestItem extends Interaction {
     };
 }
 registry.category("public.interactions").add("website_event.test_events_item", TestItem);
+describe.current.tags("interaction_dev");
 
 setupInteractionWhiteList(["website_event.events", "website_event.test_events_item"]);
 

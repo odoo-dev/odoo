@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, click, press } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
@@ -8,6 +8,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.gallery");
+describe.current.tags("interaction_dev");
 
 // TODO Obtain rendering from `website.s_images_wall` template ?
 const defaultGallery = `

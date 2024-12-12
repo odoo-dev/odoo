@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 
 import {
     startInteractions,
@@ -8,6 +8,7 @@ import {
 import { scroll } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.bottom_fixed_element");
+describe.current.tags("interaction_dev");
 
 const scrollTo = async function (el, scrollTarget, bottomFixedElement) {
     // Simulate the scroll event

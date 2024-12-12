@@ -28,15 +28,15 @@ export class WebsiteControllerPageListingLayout extends Interaction {
     /**
      * @param {Event} ev
      */
-    onApplyLayoutChange(ev) {
+    async onApplyLayoutChange(ev) {
         const clickedValue = ev.target.value;
         this.isList = clickedValue === "list";
-        rpc("/website/save_session_layout_mode", {
+        await this.waitFor(rpc("/website/save_session_layout_mode", {
             layout_mode: this.isList ? "list" : "grid",
             view_id: document
                 .querySelector(".listing_layout_switcher")
                 .dataset.viewId,
-        });
+        }));
 
         const activeClasses = ev.target.parentElement.dataset.activeClasses.split(" ");
         ev.target.parentElement.querySelectorAll(".btn").forEach((btn) => {

@@ -1,10 +1,11 @@
-import { expect, test } from "@odoo/hoot";
-import {click } from "@odoo/hoot-dom";
+import { describe, expect, test } from "@odoo/hoot";
+import { click } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 import { browser } from "@web/core/browser/browser";
 import { startInteractions, setupInteractionWhiteList } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList(["website_blog.website_blog"]);
+describe.current.tags("interaction_dev");
 
 test("click on next blog updates URL", async () => {
     const { core, el } = await startInteractions(`

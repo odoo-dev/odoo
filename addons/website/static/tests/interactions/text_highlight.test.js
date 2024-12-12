@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-dom";
 
 import {
@@ -7,11 +7,12 @@ import {
 } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.text_highlight");
+describe.current.tags("interaction_dev");
 
 const getTemplate = function (options = {}) {
     return `
     <p>
-        Great stories have a <b>personality</b>. 
+        Great stories have a <b>personality</b>.
         <span class="o_text_highlight o_translate_inline o_text_highlight_circle_1" style="--text-highlight-width: 2px;">
             <span class="o_text_highlight_item">
                 Consider telling a great story that provides personality.

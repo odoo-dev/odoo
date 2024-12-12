@@ -1,7 +1,6 @@
 import { getFixture, after } from "@odoo/hoot";
 import { clearRegistry, makeMockEnv, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { registry } from "@web/core/registry";
-// import { buildEditableInteractions } from "@website/core/website_edit_service";
 
 let activeInteractions = null;
 const elementRegistry = registry.category("public.interactions");

@@ -16,6 +16,7 @@ import { defineStyle } from "@web/../tests/web_test_helpers";
 import { startInteractions, setupInteractionWhiteList } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.popup");
+describe.current.tags("interaction_dev");
 
 /**
  * Remove the CSS transitions because Bootstrap transitions don't work well with
@@ -159,7 +160,7 @@ describe("show popup", () => {
         expect(modal).toBeVisible();
     });
 
-    test("show popup when mouse leaves document", async () => {
+    test.tags`desktop`("show popup when mouse leaves document", async () => {
         const { core, el } = await startInteractions(getPopupTemplate({ display: "mouseExit" }));
         expect(core.interactions).toHaveLength(1);
         const modalEl = el.querySelector("#sPopup .modal");

@@ -1,12 +1,11 @@
-import { expect, test } from "@odoo/hoot";
-// import { animationFrame, click } from "@odoo/hoot-dom";
-// import { advanceTime } from "@odoo/hoot-mock";
+import { describe, expect, test } from "@odoo/hoot";
 import {
     startInteractions,
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.multirange_input");
+describe.current.tags("interaction_dev");
 
 test("multirange input lib gets initialised", async () => {
     document.querySelector("html").setAttribute("lang", "en_US");

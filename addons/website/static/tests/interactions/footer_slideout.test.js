@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { mockUserAgent } from "@odoo/hoot-mock";
 import {
     startInteractions,
@@ -6,6 +6,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.footer_slideout");
+describe.current.tags("interaction_dev");
 
 test("footer slideout does nothing if the effect is not enabled", async () => {
     const { core } = await startInteractions(`

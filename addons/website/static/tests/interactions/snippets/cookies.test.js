@@ -1,10 +1,11 @@
-import { expect, test } from "@odoo/hoot";
-import {click, queryOne, waitFor } from "@odoo/hoot-dom";
+import { describe, expect, test } from "@odoo/hoot";
+import { animationFrame, click, queryOne, tick, waitFor } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 import { cookie } from "@web/core/browser/cookie";
 import { startInteractions, setupInteractionWhiteList } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList(["website.cookies_bar", "website.cookies_approval", "website.cookies_warning"]);
+describe.current.tags("interaction_dev");
 
 const cookiesBarTemplate = `
     <div id="website_cookies_bar" class="s_popup o_snippet_invisible" data-name="Cookies Bar" data-vcss="001" data-invisible="1">
@@ -63,6 +64,7 @@ test("consent for optional cookies given if click on #cookies-consent-all", asyn
     expect(cookie.get("website_cookies_bar")).toBe(undefined);
     const cookiesBarEl = queryOne("#website_cookies_bar .modal");
     await waitFor(cookiesBarEl, { visible: true });
+    expect(cookiesBarEl).toBeVisible();
     await click("#cookies-consent-all");
     expect(cookiesBarEl).not.toBeVisible();
     expect(cookie.get("website_cookies_bar")).toBe('{"required": true, "optional": true}');

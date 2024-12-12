@@ -1,10 +1,11 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import {
     startInteractions,
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.embed_code");
+describe.current.tags("interaction_dev");
 
 /* TODO Requires a way to inject a script in a fixture.
 test("embed code executed only once", async () => {

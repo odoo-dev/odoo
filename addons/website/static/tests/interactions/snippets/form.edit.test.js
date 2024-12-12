@@ -1,10 +1,12 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { MockServer, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import {
     startInteractions,
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 import { switchToEditMode } from "../../helpers";
+
+describe.current.tags("interaction_dev");
 
 const formXml = `
     <div id="wrapwrap">
@@ -90,7 +92,6 @@ test("form is NOT prefilled in translate mode", async () => {
     setupInteractionWhiteList("website.form");
     setupUser();
     const { core, el } = await startInteractions(formXml, { waitForStart: true, translateMode: true });
-    await switchToEditMode(core);
     expect(core.interactions.length).toBe(1);
     const formEl = el.querySelector("form");
     const companyEl = formEl.querySelector("input[name=company]");

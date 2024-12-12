@@ -1,9 +1,10 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, click, tick } from "@odoo/hoot-dom";
 import { defineStyle } from "@web/../tests/web_test_helpers";
 import { setupInteractionWhiteList, startInteractions } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.popup");
+describe.current.tags("interaction_dev");
 
 test("click on primary button which is add to cart button doesn't close popup", async () => {
     defineStyle("* { transition: none !important; }");
