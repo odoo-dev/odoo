@@ -45,6 +45,7 @@
         ],
         'web.assets_tests': [
             'website_blog/static/tests/**/*',
+            ('remove', 'website_blog/static/tests/interactions/**/*'),
         ],
         'web.assets_unit_tests': [
             'website_blog/static/tests/interactions/**/*',
