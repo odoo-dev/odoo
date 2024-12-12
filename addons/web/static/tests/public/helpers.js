@@ -14,6 +14,8 @@ export function setupInteractionWhiteList(interactions) {
     activeInteractions = interactions;
 }
 
+setupInteractionWhiteList.getWhiteList = () => activeInteractions;
+
 export async function startInteraction(I, html, options) {
     clearRegistry(elementRegistry);
     for (const Interaction of Array.isArray(I) ? I : [I]) {
