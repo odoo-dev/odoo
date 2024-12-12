@@ -100,4 +100,4 @@ export class Gallery extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website.gallery", Gallery);
+registry.category("public.interactions").add("website.gallery", Gallery);

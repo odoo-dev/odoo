@@ -85,5 +85,5 @@ export class HoverableDropdown extends Interaction {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.hoverable_dropdown", HoverableDropdown);

@@ -79,7 +79,7 @@ export class InstagramPage extends Interaction {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.instagram_page", InstagramPage);
 
 registry

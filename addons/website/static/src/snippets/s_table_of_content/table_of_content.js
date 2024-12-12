@@ -235,7 +235,7 @@ patch(AnchorSlide.prototype, {
 });
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.table_of_content", TableOfContent);
 
 registry

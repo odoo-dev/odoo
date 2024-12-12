@@ -79,5 +79,5 @@ export class CarouselBootstrapUpgradeFix extends Interaction {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.carousel_bootstrap_upgrade_fix", CarouselBootstrapUpgradeFix);

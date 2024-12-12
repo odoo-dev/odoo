@@ -198,5 +198,5 @@ export class SearchBar extends Interaction {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.search_bar", SearchBar);

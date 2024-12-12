@@ -25,7 +25,7 @@ export class DynamicSnippetBlogPosts extends DynamicSnippet {
     }
 }
 
-registry.category("website.active_elements").add("website_blog.blog_posts", DynamicSnippetBlogPosts);
+registry.category("public.interactions").add("website_blog.blog_posts", DynamicSnippetBlogPosts);
 
 registry
     .category("website.editable_active_elements_builders")

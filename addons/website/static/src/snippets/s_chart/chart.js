@@ -130,7 +130,7 @@ class Chart extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website.chart", Chart);
+registry.category("public.interactions").add("website.chart", Chart);
 
 registry
     .category("website.editable_active_elements_builders")

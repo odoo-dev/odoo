@@ -156,5 +156,5 @@ export class BlogContentShare extends Interaction {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website_blog.blog_content_share", BlogContentShare);

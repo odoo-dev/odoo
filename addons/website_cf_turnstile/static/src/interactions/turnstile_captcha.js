@@ -37,4 +37,4 @@ export class TurnstileCaptcha extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website_cf_turnstile.turnstile_captcha", TurnstileCaptcha);
+registry.category("public.interactions").add("website_cf_turnstile.turnstile_captcha", TurnstileCaptcha);

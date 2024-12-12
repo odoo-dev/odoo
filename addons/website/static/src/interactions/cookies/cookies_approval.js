@@ -52,4 +52,4 @@ export class CookiesApproval extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website.cookies_approval", CookiesApproval);
+registry.category("public.interactions").add("website.cookies_approval", CookiesApproval);

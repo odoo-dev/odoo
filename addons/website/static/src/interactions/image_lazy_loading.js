@@ -47,5 +47,5 @@ export class ImageLazyLoading extends Interaction {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.image_lazy_loading", ImageLazyLoading);

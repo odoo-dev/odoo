@@ -15,7 +15,7 @@ class TestItem extends Interaction {
         },
     };
 }
-registry.category("website.active_elements").add("website.test_dynamic_item", TestItem);
+registry.category("public.interactions").add("website.test_dynamic_item", TestItem);
 
 setupInteractionWhiteList(["website.dynamic_snippet", "website.test_dynamic_item"]);
 

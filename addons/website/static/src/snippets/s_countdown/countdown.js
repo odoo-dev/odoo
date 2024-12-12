@@ -403,7 +403,7 @@ class Countdown extends Interaction {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.countdown", Countdown);
 
 registry

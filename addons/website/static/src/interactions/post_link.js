@@ -24,4 +24,4 @@ class PostLink extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website.post_link", PostLink);
+registry.category("public.interactions").add("website.post_link", PostLink);

@@ -76,7 +76,7 @@ export class HeaderStandard extends BaseHeader {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.header_standard", HeaderStandard);
 
 registry

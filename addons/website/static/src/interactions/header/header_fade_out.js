@@ -26,7 +26,7 @@ export class HeaderFadeOut extends BaseHeaderSpecial {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.header_fade_out", HeaderFadeOut);
 
 registry

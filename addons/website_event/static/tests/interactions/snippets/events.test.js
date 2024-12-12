@@ -14,7 +14,7 @@ class TestItem extends Interaction {
         },
     };
 }
-registry.category("website.active_elements").add("website_event.test_events_item", TestItem);
+registry.category("public.interactions").add("website_event.test_events_item", TestItem);
 
 setupInteractionWhiteList(["website_event.events", "website_event.test_events_item"]);
 

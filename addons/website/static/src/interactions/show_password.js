@@ -31,5 +31,5 @@ class ShowPassword extends Interaction {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.show_password", ShowPassword);

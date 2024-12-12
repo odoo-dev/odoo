@@ -119,4 +119,4 @@ export class CookiesBar extends Popup {
     }
 }
 
-registry.category("website.active_elements").add("website.cookies_bar", CookiesBar);
+registry.category("public.interactions").add("website.cookies_bar", CookiesBar);

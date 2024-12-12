@@ -11,7 +11,7 @@ export class HeaderDisappears extends BaseHeaderSpecial {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.header_disappears", HeaderDisappears);
 
 registry

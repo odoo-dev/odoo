@@ -234,4 +234,4 @@ export class Popup extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website.popup", Popup);
+registry.category("public.interactions").add("website.popup", Popup);

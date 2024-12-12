@@ -111,7 +111,7 @@ export class GallerySlider extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website.gallery_slider", GallerySlider);
+registry.category("public.interactions").add("website.gallery_slider", GallerySlider);
 
 registry
     .category("website.editable_active_elements_builders")

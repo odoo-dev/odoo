@@ -11,5 +11,5 @@ export class WebsiteMultirangeInput extends Interaction {
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.multirange_input", WebsiteMultirangeInput);

@@ -38,4 +38,4 @@ export class EmbedCode extends Interaction {
     }
 }
 
-registry.category("website.active_elements").add("website.embed_code", EmbedCode);
+registry.category("public.interactions").add("website.embed_code", EmbedCode);
