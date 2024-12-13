@@ -143,11 +143,20 @@ export const PublicRoot = publicWidget.Widget.extend({
 
         this._stopWidgets($from);
         if (!options?.starting) {
-            if (!this.websiteEdit) {
-                this.websiteEdit = this.bindService("website_edit");
-            }
             const target = $from ? $from[0] : undefined;
-            this.websiteEdit.update(target, options?.editableMode || false);
+            if (!this.websiteEdit) {
+                const { services } = Component.env;
+                if (services["website_edit"]) {
+                    this.websiteEdit = this.bindService("website_edit");
+                    this.websiteEdit.update(target, options?.editableMode || false);
+                } else {
+                    const publicInteractions = this.bindService("public.interactions");
+                    publicInteractions.stopInteractions(target);
+                    publicInteractions.startInteractions(target);
+                }
+            } else {
+                this.websiteEdit.update(target, options?.editableMode || false);
+            }
         }
 
         var defs = Object.values(this._getPublicWidgetsRegistry(options)).map((PublicWidget) => {
