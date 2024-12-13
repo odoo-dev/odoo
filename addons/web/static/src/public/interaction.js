@@ -266,7 +266,7 @@ export class Interaction {
      * @returns {Function} removes the listeners
      */
     addListener(target, event, fn, options) {
-        const nodes = target instanceof EventTarget ? [target] : target;
+        const nodes = target[Symbol.iterator] ? target : [target];
         const [ev, handler, opts] = this.__colibri__.addListener(nodes, event, fn, options);
         return () => nodes.forEach((node) => node.removeEventListener(ev, handler, opts));
     }
