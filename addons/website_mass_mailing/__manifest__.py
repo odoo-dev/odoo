@@ -30,7 +30,7 @@ On a simple click, your visitors can subscribe to mailing lists managed in the E
             'website_mass_mailing/static/src/snippets/s_popup/options.js',
         ],
         'web.assets_tests': [
-            'website_mass_mailing/static/tests/**/*',
+            'website_mass_mailing/static/tests/tours/**/*',
         ],
         'web.assets_unit_tests': [
             'website_mass_mailing/static/tests/interactions/**/*',
