@@ -124,6 +124,37 @@ describe("adding listeners", () => {
         await click("span");
         expect.verifySteps(["setup", "willStart", "start", "click"]);
     });
+
+    test("listener is added on iframe single element", async () => {
+        class Test extends Interaction {
+            static selector = "iframe";
+            start() {
+                const spanEl = this.el.contentDocument.createElement("span");
+                spanEl.textContent = "abc";
+                this.el.contentDocument.body.appendChild(spanEl);
+                this.addListener(spanEl, "click", () => expect.step("click"));
+                spanEl.click();
+            }
+        }
+        await startInteraction(Test, `<iframe src="about:blank"/>`);
+        expect.verifySteps(["click"]);
+    });
+
+    test("listener is added on iframe elements", async () => {
+        class Test extends Interaction {
+            static selector = "iframe";
+            start() {
+                const spanEl = this.el.contentDocument.createElement("span");
+                spanEl.textContent = "abc";
+                this.el.contentDocument.body.appendChild(spanEl);
+                const spanEls = this.el.contentDocument.querySelectorAll("span");
+                this.addListener(spanEls, "click", () => expect.step("click"));
+                spanEl.click();
+            }
+        }
+        await startInteraction(Test, `<iframe src="about:blank"/>`);
+        expect.verifySteps(["click"]);
+    });
 });
 
 describe("using selectors", () => {
