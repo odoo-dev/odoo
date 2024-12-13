@@ -166,7 +166,7 @@
             'website_sale/static/src/js/components/wysiwyg_adapter/wysiwyg_adapter.js',
         ],
         'web.assets_tests': [
-            'website_sale/static/tests/**/*',
+            'website_sale/static/tests/tours/**/*',
             'website_sale/static/src/js/tours/product_configurator_tour_utils.js',
         ],
         'web.assets_unit_tests': [

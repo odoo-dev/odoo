@@ -44,8 +44,7 @@
             'website_blog/static/src/js/wysiwyg_adapter.js',
         ],
         'web.assets_tests': [
-            'website_blog/static/tests/**/*',
-            ('remove', 'website_blog/static/tests/interactions/**/*'),
+            'website_blog/static/tests/tours/**/*',
         ],
         'web.assets_unit_tests': [
             'website_blog/static/tests/interactions/**/*',

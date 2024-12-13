@@ -53,7 +53,7 @@
             'website_event/static/src/js/tours/**/*',
         ],
         'web.assets_tests': [
-            'website_event/static/tests/**/*',
+            'website_event/static/tests/tours/**/*',
         ],
         'web.assets_unit_tests': [
             'website_event/static/tests/interactions/**/*',
