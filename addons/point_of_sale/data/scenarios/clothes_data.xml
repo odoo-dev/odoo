@@ -30,6 +30,7 @@
             <field name="list_price">20.00</field>
             <field name="standard_price">18.0</field>
             <field name="description_sale">Casual t-shirt 100% cotton. Various colors and sizes available.</field>
+            <field name="default_code">CLOTHES_0001</field>
             <field name="type">consu</field>
             <field name="weight">0.01</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
@@ -121,6 +122,7 @@
             <field name="list_price">15.00</field>
             <field name="standard_price">12.0</field>
             <field name="description_sale">Casual slim t-shirt 100% cotton. Various sizes available</field>
+            <field name="default_code">CLOTHES_0002</field>
             <field name="type">consu</field>
             <field name="weight">0.01</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
@@ -150,6 +152,7 @@
             <field name="list_price">25.00</field>
             <field name="standard_price">22.5</field>
             <field name="description_sale">Casual slim t-shirt 100% cotton with white embroidery. Various sizes available</field>
+            <field name="default_code">CLOTHES_0003</field>
             <field name="type">consu</field>
             <field name="weight">0.01</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
@@ -179,6 +182,7 @@
             <field name="list_price">80.00</field>
             <field name="standard_price">72.0</field>
             <field name="description_sale">5-pocket jeans in cotton denim with a slight stretch for good comfort.</field>
+            <field name="default_code">CLOTHES_0004</field>
             <field name="type">consu</field>
             <field name="weight">0.01</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
@@ -208,6 +212,7 @@
             <field name="list_price">70.00</field>
             <field name="standard_price">62.0</field>
             <field name="description_sale">5-pocket jeans in cotton denim..</field>
+            <field name="default_code">CLOTHES_0005</field>
             <field name="type">consu</field>
             <field name="weight">0.01</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
@@ -237,6 +242,7 @@
             <field name="list_price">15.00</field>
             <field name="standard_price">10.0</field>
             <field name="description_sale">Versatile cotton hoodie with an adjustable drawstring hood and front zipper closure.</field>
+            <field name="default_code">CLOTHES_0006</field>
             <field name="type">consu</field>
             <field name="weight">0.01</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
@@ -251,6 +257,7 @@
             <field name="list_price">50.00</field>
             <field name="standard_price">45.0</field>
             <field name="description_sale">Lightweight bomber jacket in linen with a ribbed stand-up collar and zip down the front.</field>
+            <field name="default_code">CLOTHES_0007</field>
             <field name="type">consu</field>
             <field name="weight">0.01</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
@@ -265,6 +272,7 @@
             <field name="list_price">25.00</field>
             <field name="standard_price">22.5</field>
             <field name="description_sale">Poncho in a soft, crochet-look knit with a round, gently draped neckline.</field>
+            <field name="default_code">CLOTHES_0008</field>
             <field name="type">consu</field>
             <field name="weight">0.01</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
@@ -279,6 +287,7 @@
             <field name="list_price">60.40</field>
             <field name="standard_price">54.36</field>
             <field name="description_sale">Trainers in cotton canvas with a padded top edge, tongue and lacing at the front.</field>
+            <field name="default_code">CLOTHES_0009</field>
             <field name="type">consu</field>
             <field name="weight">0.01</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
@@ -395,6 +404,7 @@
             <field name="list_price">35.00</field>
             <field name="standard_price">31.5</field>
             <field name="description_sale">Casual denim shorts, comfortable and stylish for everyday wear.</field>
+            <field name="default_code">CLOTHES_0010</field>
             <field name="type">consu</field>
             <field name="weight">0.01</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
@@ -410,6 +420,7 @@
             <field name="list_price">25.00</field>
             <field name="standard_price">22.50</field>
             <field name="description_sale">Classic leather belt, a must-have accessory for any wardrobe.</field>
+            <field name="default_code">CLOTHES_0011</field>
             <field name="type">consu</field>
             <field name="weight">0.01</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
@@ -425,6 +436,7 @@
             <field name="list_price">50.00</field>
             <field name="standard_price">45.0</field>
             <field name="description_sale">Cozy sweater, perfect for colder weather. Available in various colors.</field>
+            <field name="default_code">CLOTHES_0012</field>
             <field name="type">consu</field>
             <field name="weight">0.01</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
@@ -440,6 +452,7 @@
             <field name="list_price">120.00</field>
             <field name="standard_price">108.0</field>
             <field name="description_sale">Stylish leather jacket, durable and fashionable for all occasions.</field>
+            <field name="default_code">CLOTHES_0013</field>
             <field name="type">consu</field>
             <field name="weight">0.01</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
@@ -455,6 +468,7 @@
             <field name="list_price">20.00</field>
             <field name="standard_price">18.0</field>
             <field name="description_sale">Summer hat, ideal for beach days and sunny weather.</field>
+            <field name="default_code">CLOTHES_0014</field>
             <field name="type">consu</field>
             <field name="weight">0.01</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
@@ -470,6 +484,7 @@
             <field name="list_price">65.00</field>
             <field name="standard_price">58.5</field>
             <field name="description_sale">Vintage jean jacket, a timeless piece for any casual outfit.</field>
+            <field name="default_code">CLOTHES_0015</field>
             <field name="type">consu</field>
             <field name="weight">0.01</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
@@ -485,6 +500,7 @@
             <field name="list_price">80.00</field>
             <field name="standard_price">72.0</field>
             <field name="description_sale">Athletic sport shoes, designed for comfort and performance.</field>
+            <field name="default_code">CLOTHES_0016</field>
             <field name="type">consu</field>
             <field name="weight">0.01</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
