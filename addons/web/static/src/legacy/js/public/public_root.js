@@ -49,7 +49,6 @@ export const PublicRoot = publicWidget.Widget.extend({
         this._super.apply(this, arguments);
         this.env = env;
         this.publicWidgets = [];
-        this.websiteEdit = null;
     },
     /**
      * @override
@@ -114,6 +113,17 @@ export const PublicRoot = publicWidget.Widget.extend({
         return publicWidget.registry;
     },
     /**
+     * Restarts interactions from the specified targetEl, or from #wrapwrap.
+     *
+     * @private
+     * @param {HTMLElement} targetEl
+     */
+    _restartInteractions(targetEl) {
+        const publicInteractions = this.bindService("public.interactions");
+        publicInteractions.stopInteractions(targetEl);
+        publicInteractions.startInteractions(targetEl);
+    },
+    /**
      * Creates an PublicWidget instance for each DOM element which matches the
      * `selector` key of one of the registered widgets
      * (@see PublicWidget.selector).
@@ -143,20 +153,8 @@ export const PublicRoot = publicWidget.Widget.extend({
 
         this._stopWidgets($from);
         if (!options?.starting) {
-            const target = $from ? $from[0] : undefined;
-            if (!this.websiteEdit) {
-                const { services } = Component.env;
-                if (services["website_edit"]) {
-                    this.websiteEdit = this.bindService("website_edit");
-                    this.websiteEdit.update(target, options?.editableMode || false);
-                } else {
-                    const publicInteractions = this.bindService("public.interactions");
-                    publicInteractions.stopInteractions(target);
-                    publicInteractions.startInteractions(target);
-                }
-            } else {
-                this.websiteEdit.update(target, options?.editableMode || false);
-            }
+            const targetEl = $from ? $from[0] : undefined;
+            this._restartInteractions(targetEl);
         }
 
         var defs = Object.values(this._getPublicWidgetsRegistry(options)).map((PublicWidget) => {
