@@ -286,6 +286,10 @@ export const PublicRoot = publicWidget.Widget.extend({
      */
     _onWidgetsStopRequest: function (ev) {
         this._stopWidgets(ev.data.$target);
+        // also stops interactions
+        const targetEl = ev.data.$target ? ev.data.$target[0] : undefined;
+        const publicInteractions = this.bindService("public.interactions");
+        publicInteractions.stopInteractions(targetEl);
     },
     /**
      * @todo review
