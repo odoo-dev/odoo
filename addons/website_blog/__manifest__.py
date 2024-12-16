@@ -55,10 +55,6 @@
             ('remove', 'website_blog/static/src/interactions/**/*.edit.js'),
             'website_blog/static/src/snippets/**/*.js',
             ('remove', 'website_blog/static/src/snippets/**/options.js'),
-            # TODO Re-activate when testing edit mode
-            ('remove', 'website_blog/static/src/snippets/**/*.edit.js'),
-            # TODO Remove when all 000 have been adapted
-            ('remove', 'website_blog/static/src/snippets/**/000.js'),
         ],
         'web.assets_frontend': [
             'website_blog/static/src/interactions/**/*',
