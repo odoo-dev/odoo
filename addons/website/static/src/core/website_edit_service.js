@@ -80,17 +80,12 @@ registry.category("services").add("website_edit", {
 // Patch PublicRoot.
 
 PublicRoot.include({
+    // This file is lazy loaded, init will not be called when entering edit.
     /**
      * @override
      */
-    init(parent, options) {
-        this._super.apply(this, arguments);
-        this.websiteEdit = this.bindService("website_edit");
-    },
-    /**
-     * @override
-     */
-    _restartInteractions(targetEl) {
-        this.websiteEdit.update(targetEl, options?.editableMode || false);
+    _restartInteractions(targetEl, options) {
+        const websiteEdit = this.bindService("website_edit");
+        websiteEdit.update(targetEl, options?.editableMode || false);
     },
 });

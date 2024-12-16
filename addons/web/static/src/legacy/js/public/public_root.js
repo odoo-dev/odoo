@@ -117,8 +117,9 @@ export const PublicRoot = publicWidget.Widget.extend({
      *
      * @private
      * @param {HTMLElement} targetEl
+     * @param {Object} [options]
      */
-    _restartInteractions(targetEl) {
+    _restartInteractions(targetEl, options) {
         const publicInteractions = this.bindService("public.interactions");
         publicInteractions.stopInteractions(targetEl);
         publicInteractions.startInteractions(targetEl);
@@ -154,7 +155,7 @@ export const PublicRoot = publicWidget.Widget.extend({
         this._stopWidgets($from);
         if (!options?.starting) {
             const targetEl = $from ? $from[0] : undefined;
-            this._restartInteractions(targetEl);
+            this._restartInteractions(targetEl, options);
         }
 
         var defs = Object.values(this._getPublicWidgetsRegistry(options)).map((PublicWidget) => {
