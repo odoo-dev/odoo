@@ -301,6 +301,10 @@
             'website/static/tests/interactions/**/*',
         ],
         'web.assets_unit_tests_setup': [
+            'web/static/src/legacy/js/core/class.js',
+            'web/static/src/legacy/js/public/lazyloader.js',
+            'web/static/src/legacy/js/public/public_widget.js',
+            'web/static/src/legacy/js/public/public_root.js',
             'website/static/lib/multirange/*.js',
             'website/static/src/core/**/*',
             'website/static/src/utils/**/*',
