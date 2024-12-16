@@ -46,9 +46,9 @@ export class Interaction {
      *
      * Its syntax looks like the following:
      * dynamicContent = {
-     *      ".some-selector:t-on-click": (ev) => this.onClick(ev),
-     *      ".some-other-selector:t-att-class": () => ({ "some-class": true}),
-     *      "_root:t-component": () => [Component, { someProp: "value" }],
+     *      ".some-selector" { "t-on-click": (ev) => this.onClick(ev) },
+     *      ".some-other-selector": { "t-att-class": () => ({ "some-class": true}) },
+     *      "_root": { "t-component": () => [Component, { someProp: "value" }] },
      * }
      *
      * A selector is either a standard css selector, or a special keyword
@@ -266,7 +266,8 @@ export class Interaction {
      * @returns {Function} removes the listeners
      */
     addListener(target, event, fn, options) {
-        const nodes = target instanceof EventTarget ? [target] : target;
+        const evTarget = (this.el.contentWindow || window).EventTarget;
+        const nodes = target instanceof evTarget ? [target] : target;
         const [ev, handler, opts] = this.__colibri__.addListener(nodes, event, fn, options);
         return () => nodes.forEach((node) => node.removeEventListener(ev, handler, opts));
     }
