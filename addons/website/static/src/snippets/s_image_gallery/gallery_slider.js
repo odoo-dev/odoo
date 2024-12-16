@@ -54,11 +54,14 @@ export class GallerySlider extends Interaction {
     }
 
     slide(ev) {
-        if (!this.liEls) {
+        if (!this.carouselEl || !this.liEls) {
             return;
         }
         this.waitForTimeout(() => {
             const itemEl = this.carouselEl.querySelector(".carousel-inner .carousel-item-prev, .carousel-inner .carousel-item-next");
+            if (!itemEl) {
+                return;
+            }
             const index = [...itemEl.parentElement.children].indexOf(itemEl);
             for (const liEl of this.liEls) {
                 liEl.classList.remove("active");
