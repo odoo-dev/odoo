@@ -72,7 +72,6 @@ Ask questions, get answers, no distractions
         ],
         'web.assets_frontend': [
             'website_forum/static/src/interactions/**/*',
-            ('remove', 'website_forum/static/src/interactions/**/*.edit.js'),
             'website_forum/static/src/js/tours/website_forum.js',
             'website_forum/static/src/scss/website_forum.scss',
             'website_forum/static/src/js/website_forum.js',
