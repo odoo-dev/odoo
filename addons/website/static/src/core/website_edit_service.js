@@ -1,4 +1,5 @@
 import { registry } from "@web/core/registry";
+import { PublicRoot } from '@web/legacy/js/public/public_root';
 
 export function buildEditableInteractions(builders) {
     const result = [];
@@ -72,5 +73,24 @@ registry.category("services").add("website_edit", {
 
             }
         };
+    },
+});
+
+
+// Patch PublicRoot.
+
+PublicRoot.include({
+    /**
+     * @override
+     */
+    init(parent, options) {
+        this._super.apply(this, arguments);
+        this.websiteEdit = this.bindService("website_edit");
+    },
+    /**
+     * @override
+     */
+    _restartInteractions(targetEl) {
+        this.websiteEdit.update(targetEl, options?.editableMode || false);
     },
 });
