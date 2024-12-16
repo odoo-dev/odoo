@@ -8,47 +8,55 @@ export class GallerySlider extends Interaction {
 
     setup() {
         this.carouselEl = this.el.classList.contains("carousel") ? this.el : this.el.querySelector(".carousel");
-        this.indicatorEl = this.carouselEl.querySelector(".carousel-indicators");
-        this.prevEl = this.indicatorEl.querySelector("li.o_indicators_left");
-        this.nextEl = this.indicatorEl.querySelector("li.o_indicators_right");
-        if (this.prevEl) {
-            this.prevEl.style.visibility = ""; // force visibility as some databases have it hidden
-        }
-        if (this.nextEl) {
-            this.nextEl.style.visibility = "";
-        }
-        this.liEls = this.indicatorEl.querySelectorAll("li[data-bs-slide-to]");
-        let indicatorWidth = this.indicatorEl.getBoundingClientRect().width;
-        if (indicatorWidth === 0) {
-            // An ancestor may be hidden so we try to find it and make it
-            // visible just to take the correct width.
-            let indicatorParentEl = this.indicatorEl.parentElement;
-            while (indicatorParentEl) {
-                if (!isVisible(indicatorParentEl)) {
-                    if (!indicatorParentEl.style.display) {
-                        indicatorParentEl.style.display = "block";
-                        indicatorWidth = this.indicatorEl.getBoundingClientRect().width;
-                        indicatorParentEl.style.display = "";
-                    }
-                    break;
-                }
-                indicatorParentEl = indicatorParentEl.parentElement;
+        this.indicatorEl = this.carouselEl?.querySelector(".carousel-indicators");
+        if (this.indicatorEl) {
+            this.prevEl = this.indicatorEl.querySelector("li.o_indicators_left");
+            this.nextEl = this.indicatorEl.querySelector("li.o_indicators_right");
+            if (this.prevEl) {
+                this.prevEl.style.visibility = ""; // force visibility as some databases have it hidden
             }
+            if (this.nextEl) {
+                this.nextEl.style.visibility = "";
+            }
+            this.liEls = this.indicatorEl.querySelectorAll("li[data-bs-slide-to]");
+            let indicatorWidth = this.indicatorEl.getBoundingClientRect().width;
+            if (indicatorWidth === 0) {
+                // An ancestor may be hidden so we try to find it and make it
+                // visible just to take the correct width.
+                let indicatorParentEl = this.indicatorEl.parentElement;
+                while (indicatorParentEl) {
+                    if (!isVisible(indicatorParentEl)) {
+                        if (!indicatorParentEl.style.display) {
+                            indicatorParentEl.style.display = "block";
+                            indicatorWidth = this.indicatorEl.getBoundingClientRect().width;
+                            indicatorParentEl.style.display = "";
+                        }
+                        break;
+                    }
+                    indicatorParentEl = indicatorParentEl.parentElement;
+                }
+            }
+            this.nbPerPage = Math.floor(indicatorWidth / (this.liEls.length > 0 ? this.liEls[0].getBoundingClientRect().width : undefined)) - 3; // - navigator - 1 to leave some space
+            this.realNbPerPage = this.nbPerPage || 1;
+            this.nbPages = Math.ceil(this.liEls.length / this.realNbPerPage);
         }
-        this.nbPerPage = Math.floor(indicatorWidth / (this.liEls.length > 0 ? this.liEls[0].getBoundingClientRect().width : undefined)) - 3; // - navigator - 1 to leave some space
-        this.realNbPerPage = this.nbPerPage || 1;
-        this.nbPages = Math.ceil(this.liEls.length / this.realNbPerPage);
-
         this.update();
     }
 
     start() {
-        this.addListener(this.carouselEl, "slide.bs.carousel", this.slide);
-        this.addListener(this.carouselEl, "slid.bs.carousel", this.update);
-        this.addListener(this.indicatorEl, "click", this.clickIndicator);// Delegate on "> li:not([data-bs-slide-to])"
+        if (this.carouselEl) {
+            this.addListener(this.carouselEl, "slide.bs.carousel", this.slide);
+            this.addListener(this.carouselEl, "slid.bs.carousel", this.update);
+        }
+        if (this.indicatorEl) {
+            this.addListener(this.indicatorEl, "click", this.clickIndicator);// Delegate on "> li:not([data-bs-slide-to])"
+        }
     }
 
     slide(ev) {
+        if (!this.liEls) {
+            return;
+        }
         this.waitForTimeout(() => {
             const itemEl = this.carouselEl.querySelector(".carousel-inner .carousel-item-prev, .carousel-inner .carousel-item-next");
             const index = [...itemEl.parentElement.children].indexOf(itemEl);
@@ -75,7 +83,7 @@ export class GallerySlider extends Interaction {
         }
     }
     hide() {
-        for (let i = 0; i < this.liEls.length; i++) {
+        for (let i = 0; i < this.liEls?.length; i++) {
             this.liEls[i].classList.toggle("d-none", i < this.page * this.nbPerPage || i >= (this.page + 1) * this.nbPerPage);
         }
         if (this.prevEl) {
@@ -96,9 +104,11 @@ export class GallerySlider extends Interaction {
         }
     }
     update() {
-        const active = [...this.liEls].filter((el) => el.classList.contains("active"));
-        const index = active.length ? [...this.liEls].indexOf(active) : 0;
-        this.page = Math.floor(index / this.realNbPerPage);
+        if (this.liEls) {
+            const active = [...this.liEls].filter((el) => el.classList.contains("active"));
+            const index = active.length ? [...this.liEls].indexOf(active) : 0;
+            this.page = Math.floor(index / this.realNbPerPage);
+        }
         this.hide();
     }
     destroy() {
