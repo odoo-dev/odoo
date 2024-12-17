@@ -3145,13 +3145,13 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
 
         with self.assertQueries(["""
             SELECT "test_new_api_prefetch"."id",
-                   "test_new_api_prefetch"."name"->>%s,
-                   "test_new_api_prefetch"."description"->>%s,
-                   "test_new_api_prefetch"."html_description"->>%s,
                    "test_new_api_prefetch"."create_uid",
                    "test_new_api_prefetch"."create_date",
                    "test_new_api_prefetch"."write_uid",
-                   "test_new_api_prefetch"."write_date"
+                   "test_new_api_prefetch"."write_date",
+                   "test_new_api_prefetch"."name"->>%s,
+                   "test_new_api_prefetch"."description"->>%s,
+                   "test_new_api_prefetch"."html_description"->>%s
             FROM "test_new_api_prefetch"
             WHERE "test_new_api_prefetch"."id" IN %s
         """]):
@@ -5175,11 +5175,11 @@ class TestModifiedPerformance(TransactionCase):
         self.modified_line_a_child.price
         with self.assertQueries(["""
             SELECT "test_new_api_modified_line"."id",
+                   "test_new_api_modified_line"."create_uid",
+                   "test_new_api_modified_line"."create_date",
                    "test_new_api_modified_line"."modified_id",
                    "test_new_api_modified_line"."quantity",
-                   "test_new_api_modified_line"."parent_id",
-                   "test_new_api_modified_line"."create_uid",
-                   "test_new_api_modified_line"."create_date"
+                   "test_new_api_modified_line"."parent_id"
             FROM "test_new_api_modified_line"
             WHERE "test_new_api_modified_line"."id" IN %s
         """, """

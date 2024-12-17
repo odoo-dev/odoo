@@ -148,7 +148,7 @@ class TestCompanyCheck(common.TransactionCase):
         ):
             child.parent_id = self.parent_b
 
-        spy.assert_called_once_with(child, ['parent_id', 'write_uid', 'write_date'])
+        spy.assert_called_once_with(child, ['write_uid', 'write_date', 'parent_id'])
 
     def test_company_environment(self):
         """ Check the company context on the environment is verified. """

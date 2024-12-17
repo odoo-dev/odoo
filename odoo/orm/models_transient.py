@@ -4,7 +4,7 @@ from odoo.tools import SQL, config, lazy_classproperty
 from odoo.tools.constants import GC_UNLINK_LIMIT
 
 from . import decorators as api
-from .models import Model
+from .models_simple import Model
 
 
 class TransientModel(Model):

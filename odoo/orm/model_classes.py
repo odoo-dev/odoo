@@ -7,8 +7,7 @@ import typing
 
 from collections import defaultdict
 
-from . import models
-from . import fields  # must be imported after models
+from . import fields, models, models_simple
 from .utils import check_pg_name
 from odoo.exceptions import ValidationError
 from odoo.tools import (
@@ -537,9 +536,9 @@ def _add_manual_models(env: Environment):
                 [table_name]
             )
             columns = {colinfo[0] for colinfo in env.cr.fetchall()}
-            attrs['_log_access'] = set(models.LOG_ACCESS_COLUMNS) <= columns
+            attrs['_log_access'] = set(models_simple.LOG_ACCESS_COLUMNS) <= columns
 
-        model_def = type('CustomDefinitionModel', (models.Model,), attrs)
+        model_def = type('CustomDefinitionModel', (models_simple.Model,), attrs)
         add_to_registry(env.registry, model_def)
 
 
