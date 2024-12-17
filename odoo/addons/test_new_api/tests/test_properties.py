@@ -350,6 +350,10 @@ class PropertiesCase(TestPropertiesMixin):
                 WHERE "test_new_api_message"."id" IN %s
             ''',
             ''' SELECT "test_new_api_message"."id",
+                       "test_new_api_message"."create_uid",
+                       "test_new_api_message"."create_date",
+                       "test_new_api_message"."write_uid",
+                       "test_new_api_message"."write_date",
                        "test_new_api_message"."discussion",
                        "test_new_api_message"."body",
                        "test_new_api_message"."author",
@@ -357,25 +361,21 @@ class PropertiesCase(TestPropertiesMixin):
                        "test_new_api_message"."important",
                        "test_new_api_message"."label"->>%s,
                        "test_new_api_message"."priority",
-                       "test_new_api_message"."active",
-                       "test_new_api_message"."create_uid",
-                       "test_new_api_message"."create_date",
-                       "test_new_api_message"."write_uid",
-                       "test_new_api_message"."write_date"
+                       "test_new_api_message"."active"
                 FROM "test_new_api_message"
                 WHERE "test_new_api_message"."id" IN %s
             ''',
             # read the definition on the definition record
             ''' SELECT "test_new_api_discussion"."id",
+                       "test_new_api_discussion"."create_uid",
+                       "test_new_api_discussion"."create_date",
+                       "test_new_api_discussion"."write_uid",
+                       "test_new_api_discussion"."write_date",
                        "test_new_api_discussion"."name",
                        "test_new_api_discussion"."moderator",
                        "test_new_api_discussion"."message_concat",
                        "test_new_api_discussion"."history",
-                       "test_new_api_discussion"."attributes_definition",
-                       "test_new_api_discussion"."create_uid",
-                       "test_new_api_discussion"."create_date",
-                       "test_new_api_discussion"."write_uid",
-                       "test_new_api_discussion"."write_date"
+                       "test_new_api_discussion"."attributes_definition"
                 FROM "test_new_api_discussion"
                 WHERE "test_new_api_discussion"."id" IN %s
             ''',
@@ -385,11 +385,11 @@ class PropertiesCase(TestPropertiesMixin):
                 WHERE "test_new_api_partner"."id" IN %s
             ''',
             ''' SELECT "test_new_api_partner"."id",
-                       "test_new_api_partner"."name",
                        "test_new_api_partner"."create_uid",
                        "test_new_api_partner"."create_date",
                        "test_new_api_partner"."write_uid",
-                       "test_new_api_partner"."write_date"
+                       "test_new_api_partner"."write_date",
+                       "test_new_api_partner"."name"
                 FROM "test_new_api_partner"
                 WHERE "test_new_api_partner"."id" IN %s
             ''',

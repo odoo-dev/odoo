@@ -4,10 +4,10 @@ from odoo.tools import SQL, config, lazy_classproperty
 from odoo.tools.constants import GC_UNLINK_LIMIT
 
 from . import decorators as api
-from .models import Model
+from .models_simple import LogAccessMixin, Model
 
 
-class TransientModel(Model):
+class TransientModel(LogAccessMixin, Model):
     """ Model super-class for transient records, meant to be temporarily
     persistent, and regularly vacuum-cleaned.
 

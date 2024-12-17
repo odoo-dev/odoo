@@ -41,7 +41,6 @@ class MailComposeMessage(models.TransientModel):
     _name = 'mail.compose.message'
     _inherit = ['mail.composer.mixin']
     _description = 'Email composition wizard'
-    _log_access = True
     _batch_size = 50
 
     @api.model

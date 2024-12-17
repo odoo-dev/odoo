@@ -592,15 +592,15 @@ class TestPerformance(SavepointCaseWithUserDemo):
         # fetching 'name' prefetches all fields on all records
         queries = [
             ''' SELECT "test_performance_base"."id",
+                       "test_performance_base"."create_uid",
+                       "test_performance_base"."create_date",
+                       "test_performance_base"."write_uid",
+                       "test_performance_base"."write_date",
                        "test_performance_base"."name",
                        "test_performance_base"."value",
                        "test_performance_base"."value_pc",
                        "test_performance_base"."partner_id",
-                       "test_performance_base"."total",
-                       "test_performance_base"."create_uid",
-                       "test_performance_base"."create_date",
-                       "test_performance_base"."write_uid",
-                       "test_performance_base"."write_date"
+                       "test_performance_base"."total"
                 FROM "test_performance_base"
                 WHERE "test_performance_base"."id" IN %s
             ''',

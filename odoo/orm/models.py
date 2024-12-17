@@ -74,7 +74,6 @@ from .utils import (
     OriginIds, check_object_name, parse_field_expr,
     COLLECTION_TYPES, SQL_OPERATORS,
     READ_GROUP_ALL_TIME_GRANULARITY, READ_GROUP_TIME_GRANULARITY, READ_GROUP_NUMBER_GRANULARITY,
-    SUPERUSER_ID,
 )
 
 if typing.TYPE_CHECKING:
@@ -244,6 +243,27 @@ class MetaModel(type):
 
             assert attrs.get('_name')
 
+            # when _log_access is set, then inherit from LogAccessMixin
+            # XXX move to model_classes.py
+            log_access = attrs.get('_log_access', attrs.get('_auto'))
+            if log_access is None:
+                from .models_simple import Model  # noqa: PLC0415
+                if Model not in bases:
+                    log_access = False
+                elif not _inherit:
+                    log_access = True
+                elif Model in bases:
+                    names = set(attrs['_inherit'])
+                    log_access = all(
+                        cls._abstract
+                        for cls_list in meta.module_to_models.values()
+                        for cls in cls_list
+                        if cls._name in names
+                    )
+            if log_access:
+                from .models_simple import LogAccessMixin # noqa: PLC0415
+                bases = (LogAccessMixin, *bases)
+
         return super().__new__(meta, name, bases, attrs)
 
     def __init__(self, name, bases, attrs):
@@ -260,35 +280,10 @@ class MetaModel(type):
             self.module_to_models[self._module].append(self)
 
         if not self._abstract and self._name not in self._inherit:
-            # this class defines a model: add magic fields
-            def add(name, field):
-                setattr(self, name, field)
-                field.__set_name__(self, name)
-
-            def add_default(name, field):
-                if name not in attrs:
-                    setattr(self, name, field)
-                    field.__set_name__(self, name)
-
             # make sure `id` field is still a `fields.Id`
             if not isinstance(self.id, Id):
                 raise TypeError(f"Field {self.id} is not an instance of fields.Id")
 
-            if attrs.get('_log_access', self._auto):
-                from .fields_relational import Many2one  # noqa: PLC0415
-                add_default('create_uid', Many2one(
-                    'res.users', string='Created by', readonly=True))
-                add_default('create_date', Datetime(
-                    string='Created on', readonly=True))
-                add_default('write_uid', Many2one(
-                    'res.users', string='Last Updated by', readonly=True))
-                add_default('write_date', Datetime(
-                    string='Last Updated on', readonly=True))
-
-
-# special columns automatically created by the ORM
-LOG_ACCESS_COLUMNS = ['create_uid', 'create_date', 'write_uid', 'write_date']
-MAGIC_COLUMNS = ['id'] + LOG_ACCESS_COLUMNS
 
 # valid SQL aggregation functions
 READ_GROUP_AGGREGATE = {
@@ -3621,11 +3616,7 @@ class BaseModel(metaclass=MetaModel):
         """
 
         IrModelData = self.env['ir.model.data'].sudo()
-        if self._log_access:
-            res = self.read(LOG_ACCESS_COLUMNS)
-        else:
-            res = [{'id': x} for x in self.ids]
-
+        res = [{'id': x} for x in self.ids]
 
         xml_data = defaultdict(list)
         imds = IrModelData.search_read(
@@ -4006,7 +3997,7 @@ class BaseModel(metaclass=MetaModel):
         return True
 
     def write(self, vals: ValuesType) -> typing.Literal[True]:
-        """ Uppdate all records in ``self`` with the provided values.
+        """ Update all records in ``self`` with the provided values.
 
         :param vals: fields to update and the value to set on them
         :raise AccessError: if user is not allowed to modify the specified records/fields
@@ -4058,16 +4049,7 @@ class BaseModel(metaclass=MetaModel):
         env = self.env
 
         bad_names = {'id', 'parent_path'}
-        if self._log_access:
-            # the superuser can set log_access fields while loading registry
-            if not (self.env.uid == SUPERUSER_ID and not self.pool.ready):
-                bad_names.update(LOG_ACCESS_COLUMNS)
-
-        # set magic fields
         vals = {key: val for key, val in vals.items() if key not in bad_names}
-        if self._log_access:
-            vals.setdefault('write_uid', self.env.uid)
-            vals.setdefault('write_date', self.env.cr.now())
 
         field_values = []                           # [(field, value)]
         determine_inverses = defaultdict(list)      # {inverse: fields}
@@ -4204,11 +4186,6 @@ class BaseModel(metaclass=MetaModel):
 
         # determine records that require updating parent_path
         parent_records = self._parent_store_update_prepare(vals_list)
-
-        if self._log_access:
-            # set magic fields (already done by write(), but not for computed fields)
-            log_vals = {'write_uid': self.env.uid, 'write_date': self.env.cr.now()}
-            vals_list = [(log_vals | vals) for vals in vals_list]
 
         # determine SQL updates, grouped by set of updated fields:
         # {(col1, col2, col3): [(id, val1, val2, val3)]}
@@ -4445,11 +4422,6 @@ class BaseModel(metaclass=MetaModel):
         :returns: new list of completed create values
         """
         bad_names = ['id', 'parent_path']
-        if self._log_access:
-            # the superuser can set log_access fields while loading registry
-            if not (self.env.uid == SUPERUSER_ID and not self.pool.ready):
-                bad_names.extend(LOG_ACCESS_COLUMNS)
-
         # also discard precomputed readonly fields (to force their computation)
         bad_names.extend(
             fname
@@ -4465,11 +4437,6 @@ class BaseModel(metaclass=MetaModel):
             # add magic fields
             for fname in bad_names:
                 vals.pop(fname, None)
-            if self._log_access:
-                vals.setdefault('create_uid', self.env.uid)
-                vals.setdefault('create_date', self.env.cr.now())
-                vals.setdefault('write_uid', self.env.uid)
-                vals.setdefault('write_date', self.env.cr.now())
 
             result_vals_list.append(vals)
 
@@ -4565,7 +4532,7 @@ class BaseModel(metaclass=MetaModel):
         # (using bin_size=False to put binary values in the right place)
         records = self.browse(ids)
         inverses_update = defaultdict(list)     # {(field, value): ids}
-        common_set_vals = set(LOG_ACCESS_COLUMNS + ['id', 'parent_path'])
+        common_set_vals = {'id', 'parent_path'}
         for data, record in zip(data_list, records.with_context(bin_size=False)):
             data['record'] = record
             # DLE P104: test_inherit.py, test_50_search_one2many
@@ -5114,8 +5081,8 @@ class BaseModel(metaclass=MetaModel):
             self = self.with_context(__copy_data_seen=defaultdict(set))
 
         # build a black list of fields that should not be copied
-        blacklist = set(MAGIC_COLUMNS + ['parent_path'])
-        whitelist = set(name for name, field in self._fields.items() if not field.inherited)
+        blacklist = {'id', 'parent_path'}
+        whitelist = {name for name, field in self._fields.items() if not field.inherited}
 
         def blacklist_given_fields(model):
             # blacklist the fields that are given by inheritance
@@ -6820,25 +6787,6 @@ class RecordCache(Mapping[str, typing.Any]):
     def __len__(self):
         """ Return the number of fields with a cached value. """
         return sum(1 for name in self)
-
-
-AbstractModel = BaseModel
-
-
-class Model(AbstractModel):
-    """ Main super-class for regular database-persisted Odoo models.
-
-    Odoo models are created by inheriting from this class::
-
-        class ResUsers(Model):
-            ...
-
-    The system will later instantiate the class once per database (on
-    which the class' module is installed).
-    """
-    _auto: bool = True          # automatically create database backend
-    _register: bool = False     # not visible in ORM registry, meant to be python-inherited only
-    _abstract: typing.Literal[False] = False  # not abstract
 
 
 def itemgetter_tuple(items):
