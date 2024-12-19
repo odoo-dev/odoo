@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+payment_method_paymob_public,payment.method.paymob.all,model_payment_method_paymob,base.group_public,1,0,0,0
+payment_method_paymob_portal,payment.method.paymob.all,model_payment_method_paymob,base.group_portal,1,0,0,0
+payment_method_paymob_employee,payment.method.paymob.all,model_payment_method_paymob,base.group_user,1,0,0,0
+payment_method_paymob_system,payment.method.paymob.system,model_payment_method_paymob,base.group_system,1,1,1,1
