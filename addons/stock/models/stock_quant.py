@@ -231,6 +231,8 @@ class StockQuant(models.Model):
         for quant in self:
             if quant.quantity == quant.inventory_quantity_auto_apply:
                 continue
+            if quant.tracking != 'none' and not quant.lot_id:
+                raise UserError(_('You need to provide a Lot/Serial Number for the product %s.', quant.product_id.display_name))
             quant.inventory_quantity = quant.inventory_quantity_auto_apply
             quant_to_inventory |= quant
         quant_to_inventory.action_apply_inventory()
