@@ -7,14 +7,14 @@ export class Animation extends Interaction {
     static selector = ".o_animate";
     dynamicSelectors = {
         ...this.dynamicSelectors,
-        _wrapwrap: () => this.wrapwrapEl,
+        _windowUnlessDropdown: () => this.windowUnlessDropdown,
         _scrollingTarget: () => this.scrollingTarget,
     };
     dynamicContent = {
         _window: {
             "t-on-resize": this.scrollWebsiteAnimate,
         },
-        _wrapwrap: {
+        _windowUnlessDropdown: {
             "t-on-shown.bs.modal": this.scrollWebsiteAnimate,
             "t-on-slid.bs.carousel": this.scrollWebsiteAnimate,
             "t-on-shown.bs.tab": this.scrollWebsiteAnimate,
@@ -52,6 +52,7 @@ export class Animation extends Interaction {
 
     setup() {
         this.wrapwrapEl = document.querySelector("#wrapwrap");
+        this.windowUnlessDropdown = this.el.closest(".dropdown") ? [] : window;
         this.scrollingElement = this.findScrollingElement();
         this.scrollingTarget = isScrollableY(this.scrollingElement) ? this.scrollingElement : this.scrollingElement.ownerDocument.defaultView;
         this.isAnimating = false;
@@ -64,12 +65,17 @@ export class Animation extends Interaction {
     }
 
     start() {
+        if (this.el.closest(".dropdown")) {
+            return;
+        }
         // By default, elements are hidden by the css of o_animate.
         // Render elements and trigger the animation then pause it in state 0.
-        if (!this.el.closest(".dropdown") && !this.isAnimateOnScroll) {
+        if (!this.isAnimateOnScroll) {
             this.resetAnimation();
             this.updateContent();
         }
+        this.scrollWebsiteAnimate();
+        this.updateContent();
     }
 
     findScrollingElement() {
