@@ -50,7 +50,7 @@
             'purchase/static/src/**/*.xml',
         ],
         'web.assets_frontend': [
-            'purchase/static/src/js/purchase_datetimepicker.js',
+            'purchase/static/src/interactions/*',
             'purchase/static/src/js/purchase_portal_sidebar.js',
         ],
     },
