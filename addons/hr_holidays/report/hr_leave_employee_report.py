@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from dateutil.relativedelta import relativedelta
+
+from pytz import timezone, utc
 
 from odoo import api, fields, models, tools
 
@@ -8,12 +9,13 @@ class HrLeaveEmployeeReport(models.Model):
     _name = 'hr.leave.employee.report'
     _description = 'Time Off Per Employee Summary / Report'
     _auto = False
-    _order = "date_from DESC, employee_id"
 
     employee_id = fields.Many2one('hr.employee', string="Employee", readonly=True)
     leave_id = fields.Many2one('hr.leave', string="Time Off Request", readonly=True)
-    date_from = fields.Datetime('Start Date', readonly=True)
-    date_to = fields.Datetime('End Date', readonly=True)
+    month_aligned_date_from = fields.Datetime('Start Date', readonly=True)
+    month_aligned_date_to = fields.Datetime('End Date', readonly=True)
+    working_schedule_aligned_date_from = fields.Datetime('Test Date From', compute='_compute_working_schedule_aligned_dates', readonly=True)
+    working_schedule_aligned_date_to = fields.Datetime('Test Date To', compute='_compute_working_schedule_aligned_dates', readonly=True)
     number_of_days = fields.Float(compute='_compute_number_of_days', readonly=True)
 
     def init(self):
@@ -34,9 +36,9 @@ class HrLeaveEmployeeReport(models.Model):
             CREATE or REPLACE view hr_leave_employee_report as (
                 SELECT
                     id, leave_id, employee_id,
-                    CASE WHEN date_from > month THEN date_from ELSE (month AT TIME ZONE '{self.env.user.tz}' AT TIME ZONE 'UTC')::timestamp END AS date_from,
+                    CASE WHEN date_from > month THEN date_from ELSE (month AT TIME ZONE '{self.env.user.tz}' AT TIME ZONE 'UTC')::timestamp END AS month_aligned_date_from,
                     CASE WHEN date_to < (month + INTERVAL '1 month' - INTERVAL '1 second') THEN date_to
-                    ELSE ((month + INTERVAL '1 month' - INTERVAL '1 second') AT TIME ZONE '{self.env.user.tz}' AT TIME ZONE 'UTC')::timestamp END AS date_to
+                    ELSE ((month + INTERVAL '1 month' - INTERVAL '1 second') AT TIME ZONE '{self.env.user.tz}' AT TIME ZONE 'UTC')::timestamp END AS month_aligned_date_to
                 FROM (
                     SELECT
                         ROW_NUMBER() OVER(ORDER BY employee_id) AS id,
@@ -53,12 +55,21 @@ class HrLeaveEmployeeReport(models.Model):
             ); 
         """)
 
-    @api.depends('date_from', 'date_to')
+    @api.depends('month_aligned_date_from', 'month_aligned_date_to', 'leave_id', 'leave_id.resource_calendar_id')
+    def _compute_working_schedule_aligned_dates(self):
+        for leave in self:
+            start_date = leave.month_aligned_date_from.replace(tzinfo=utc)
+            end_date = leave.month_aligned_date_to.replace(tzinfo=utc)
+            work_intervals = leave.leave_id.sudo().resource_calendar_id._work_intervals_batch(start_date, end_date, compute_leaves=False)[False].items()
+            leave.working_schedule_aligned_date_from = work_intervals[0][0].astimezone(utc).replace(tzinfo=None)
+            leave.working_schedule_aligned_date_to = work_intervals[-1][1].astimezone(utc).replace(tzinfo=None)
+
+    @api.depends('month_aligned_date_from', 'month_aligned_date_to', 'leave_id', 'leave_id.holidays_status_id')
     def _compute_number_of_days(self):
         for leave in self:
             virtual_leave = self.env['hr.leave'].new({
-                'date_from': leave.date_from,
-                'date_to': leave.date_to,
+                'date_from': leave.month_aligned_date_from,
+                'date_to': leave.month_aligned_date_to,
                 'employee_id': leave.leave_id.sudo().employee_id.id,
                 'holiday_status_id': leave.leave_id.sudo().holiday_status_id.id
             })
