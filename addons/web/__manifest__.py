@@ -448,7 +448,6 @@ This module provides the core of the Odoo Web Client.
 
             'web/static/src/public/**/*.js',
             ('remove', 'web/static/src/public/database_manager.js'),
-            ('remove', 'web/static/src/public/datetime_picker_widget.js'), # remove this remove when it has been converted
             ('remove', 'web/static/src/public/error_notifications.js'),
             'web/static/src/public/public_component_service.js',
             'web/static/src/webclient/clickbot/clickbot.js',
