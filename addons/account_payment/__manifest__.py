@@ -31,8 +31,7 @@
     'assets': {
         'web.assets_frontend': [
             'account_payment/static/src/js/payment_form.js',
-            'account_payment/static/src/js/portal_invoice_page_payment.js',
-            'account_payment/static/src/js/portal_my_invoices_payment.js',
+            'account_payment/static/src/interactions/*',
         ],
     },
     'post_init_hook': 'post_init_hook',
