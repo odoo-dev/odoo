@@ -256,7 +256,7 @@
         'web.assets_tests': [
             'website/static/tests/tour_utils/focus_blur_snippets_options.js',
             'website/static/tests/tour_utils/website_preview_test.js',
-            'website/static/tests/tour_utils/widget_lifecycle_dep_widget.js',
+            'website/static/tests/tour_utils/lifecycle_dep_interaction.js',
             'website/static/tests/tours/**/*',
         ],
         'web.assets_backend': [
