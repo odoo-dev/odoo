@@ -8,7 +8,7 @@ export class WebsiteEventExhibitorConnect extends Interaction {
     static selector = ".o_wesponsor_connect_button";
     dynamicContent = {
         _root: {
-            "t-on-click.stop.prevent": () => this.debounced(this.onClick, 500),
+            "t-on-click.stop.prevent": this.debounced(this.onClick, 500),
         },
     };
 
