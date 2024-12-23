@@ -133,6 +133,7 @@ export class SearchBar extends Interaction {
         }
         this.hasDropdown = !!res;
         prevMenuEl?.remove();
+        this.updateContent();
     }
 
     getFieldsNames() {
