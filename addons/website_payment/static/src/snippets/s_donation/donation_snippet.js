@@ -111,7 +111,7 @@ export class DonationSnippet extends Interaction {
                 }
                 if (errorMessage) {
                     const pEl = document.createElement("p");
-                    pEl.classList.add("alert alert-danger");
+                    pEl.classList.add("alert", "alert-danger");
                     pEl.innerText = errorMessage;
                     this.insert(pEl, ev.currentTarget, "beforebegin");
                     return;
