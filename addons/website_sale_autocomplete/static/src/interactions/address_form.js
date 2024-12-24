@@ -9,7 +9,7 @@ class AddressForm extends Interaction {
     static selector = ".oe_cart .checkout_autoformat";
     static selectorHas = "input[name='street'][data-autocomplete-enabled='1']";
     dynamicContent = {
-        "input[name='street']": { "t-on-input": (ev) => this.debounced(this.onInputStreet(ev.currentTarget), 200) },
+        "input[name='street']": { "t-on-input.withTarget": this.debounced(this.onInputStreet, 200) },
         ".js_autocomplete_result": { "t-on-click": this.onClickAutocompleteResult },
     };
 
@@ -30,7 +30,7 @@ class AddressForm extends Interaction {
         });
     }
 
-    async onInputStreet(inputEl) {
+    async onInputStreet(ev, inputEl) {
         const inputContainerEl = inputEl.parentNode;
         if (inputEl.value.length >= 5) {
             this.keepLast.add(
