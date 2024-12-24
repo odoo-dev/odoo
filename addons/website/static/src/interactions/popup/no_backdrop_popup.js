@@ -6,7 +6,7 @@ export class NoBackdropPopup extends Interaction {
     static selector = ".s_popup_no_backdrop";
     dynamicContent = {
         "_root": {
-            "t-on-shown.bs.modal": this.addModalNoBackdropEvents,
+            "t-on-show.bs.modal": this.addModalNoBackdropEvents,
             "t-on-hide.bs.modal": this.removeModalNoBackdropEvents,
         }
     };
