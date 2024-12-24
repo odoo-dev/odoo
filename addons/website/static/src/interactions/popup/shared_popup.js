@@ -18,6 +18,7 @@ export class SharedPopup extends Interaction {
         // tl;dr: this is keeping those 2 elements visibility synchronized.
         "_root": {
             "t-on-show.bs.modal": () => this.popupShown = true,
+            "t-on-shown.bs.modal": () => this.popupShown = true,
             "t-on-hidden.bs.modal": this.onModalHidden,
             "t-att-class": () => ({ "d-none": !this.popupShown }),
         },
