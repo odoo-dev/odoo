@@ -2,7 +2,7 @@ import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, click } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 import {
-    isElementInViewport,
+    isElementVerticallyInViewportOf,
     startInteractions,
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
@@ -27,14 +27,15 @@ test("anchor slide scrolls to targetted location", async () => {
             <div id="target">Target</div>
         </div>
     `);
-    const targetEl = el.querySelector("div#target");
+    const scrollEl = el.querySelector("#wrapwrap");
+    const targetEl = scrollEl.querySelector("div#target");
     expect(core.interactions.length).toBe(1);
-    expect(isElementInViewport(targetEl)).toBe(false);
-    await click("a[href]");
-    expect(isElementInViewport(targetEl)).toBe(false);
+    expect(isElementVerticallyInViewportOf(targetEl, scrollEl)).toBe(false);
+    click("a[href]"); // Intentionally not awaited
+    expect(isElementVerticallyInViewportOf(targetEl, scrollEl)).toBe(false);
     await animationFrame();
     await advanceTime(500); // Duration defined in AnchorSlide.
-    expect(isElementInViewport(targetEl)).toBe(true);
+    expect(isElementVerticallyInViewportOf(targetEl, scrollEl)).toBe(true);
 });
 
 test("without anchor slide instantly reach the targetted location", async () => {
@@ -45,14 +46,15 @@ test("without anchor slide instantly reach the targetted location", async () => 
             <div id="target">Target</div>
         </div>
     `);
-    const targetEl = el.querySelector("div#target");
+    const scrollEl = el.querySelector("#wrapwrap");
+    const targetEl = scrollEl.querySelector("div#target");
     expect(core.interactions.length).toBe(1);
     core.stopInteractions();
     expect(core.interactions.length).toBe(0);
-    expect(isElementInViewport(targetEl)).toBe(false);
-    await click("a[href]");
+    expect(isElementVerticallyInViewportOf(targetEl, scrollEl)).toBe(false);
+    click("a[href]"); // Intentionally not awaited
     await animationFrame();
-    expect(isElementInViewport(targetEl)).toBe(true);
+    expect(isElementVerticallyInViewportOf(targetEl, scrollEl)).toBe(true);
 });
 
 test("anchor slide scrolls to targetted location - with non-ASCII7 characters", async () => {
@@ -63,12 +65,13 @@ test("anchor slide scrolls to targetted location - with non-ASCII7 characters", 
             <div class="target" id="ok%C3%A9%25"}">Target</div>
         </div>
     `);
-    const targetEl = el.querySelector("div.target");
+    const scrollEl = el.querySelector("#wrapwrap");
+    const targetEl = scrollEl.querySelector("div.target");
     expect(core.interactions.length).toBe(1);
-    expect(isElementInViewport(targetEl)).toBe(false);
-    await click("a[href]");
-    expect(isElementInViewport(targetEl)).toBe(false);
+    expect(isElementVerticallyInViewportOf(targetEl, scrollEl)).toBe(false);
+    click("a[href]"); // Intentionally not awaited
+    expect(isElementVerticallyInViewportOf(targetEl, scrollEl)).toBe(false);
     await animationFrame();
     await advanceTime(500); // Duration defined in AnchorSlide.
-    expect(isElementInViewport(targetEl)).toBe(true);
+    expect(isElementVerticallyInViewportOf(targetEl, scrollEl)).toBe(true);
 });
