@@ -304,6 +304,7 @@
         'web.assets_unit_tests_setup': [
             'web/static/src/legacy/js/core/class.js',
             'web/static/src/legacy/js/public/lazyloader.js',
+            'web/static/src/legacy/js/public/minimal_dom.js',
             'web/static/src/legacy/js/public/public_widget.js',
             'web/static/src/legacy/js/public/public_root.js',
             'website/static/lib/multirange/*.js',
