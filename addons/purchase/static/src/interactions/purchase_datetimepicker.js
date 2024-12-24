@@ -7,12 +7,10 @@ export class PurchaseDatetimePicker extends Interaction {
     static selector = ".o-purchase-datetimepicker";
 
     start() {
-        this.disableDateTimePicker = this.call("datetime_picker", "create", {
+        this.disableDateTimePicker = this.services.datetime_picker.create({
             target: this.el,
             onChange: (newDate) => {
-                const accessToken = this.el.dataset.accessToken;
-                const orderId = this.el.dataset.orderId;
-                const lineId = this.el.dataset.lineId;
+                const { accessToken, orderId, lineId } = this.el.dataset;
                 this.waitFor(rpc(`/my/purchase/${orderId}/update?access_token=${accessToken}`, {
                     [lineId]: newDate.toISODate(),
                 }));
