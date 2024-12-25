@@ -2,7 +2,7 @@ import { rpc } from "@web/core/network/rpc";
 import { debounce } from "@web/core/utils/timing";
 import publicWidget from "@web/legacy/js/public/public_widget";
 
-publicWidget.registry.portalAddress = publicWidget.Widget.extend({
+publicWidget.registry.customerAddress = publicWidget.Widget.extend({
     // /portal/address
     selector: '.o_customer_address_fill',
     events: {
@@ -222,4 +222,4 @@ publicWidget.registry.portalAddress = publicWidget.Widget.extend({
 
 });
 
-export default publicWidget.registry.portalAddress;
+export default publicWidget.registry.customerAddress;

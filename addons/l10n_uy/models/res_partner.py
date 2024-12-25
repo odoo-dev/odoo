@@ -23,6 +23,9 @@ class ResPartner(models.Model):
                 raise ValidationError(self._l10n_uy_build_vat_error_message(partner))
         return super(ResPartner, self - ci_nie_types).check_vat()
 
+    def _is_latam_country(self):
+        return super()._is_latam_country() or self.env.company.country_code == 'UY'
+
     @api.model
     def _l10n_uy_build_vat_error_message(self, partner):
         """ Similar to _build_vat_error_message but using latam doc type name instead of vat_label

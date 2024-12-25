@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <template id="partner_address_info" name="Peruvian partner address">
+        <div id="div_city_id" class="col-lg-6 mb-3"
+            t-att-style="(country and country.code != 'PE') and 'display:none;'">
+            <label class="col-form-label" for="city_id">City</label>
+            <select id="city_id" name="city_id" class="form-select" data-init="1">
+                <option value="">City...</option>
+                <t t-foreach="state_cities" t-as="city">
+                    <option t-att-value="city.id"
+                        t-att-selected="city.id == partner_sudo.city_id.id">
+                        <t t-out="city.name" />
+                    </option>
+                </t>
+            </select>
+        </div>
+
+        <!-- show district -->
+        <div id="div_district" class="col-lg-6 mb-3"
+            t-att-style="((country and country.code != 'PE') or not city) and 'display:none;'">
+            <label class="col-form-label" for="l10n_pe_district">District</label>
+            <select id="l10n_pe_district" name="l10n_pe_district" class="form-select" data-init="1">
+                <option value="">District...</option>
+                <t t-foreach="city_districts" t-as="district">
+                    <option t-att-value="district.id"
+                        t-att-selected="district.id == partner_sudo.l10n_pe_district.id">
+                        <t t-out="district.name" />
+                    </option>
+                </t>
+            </select>
+        </div>
+
+    </template>
+
+    <template id="address" inherit_id="portal.address_details">
+        <div id="div_state" position="after">
+            <t t-if="res_company.country_id.code == 'PE'">
+                <t t-call="l10n_pe.partner_address_info" />
+            </t>
+        </div>
+    </template>
+
+</odoo>

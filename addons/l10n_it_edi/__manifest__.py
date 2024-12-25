@@ -22,6 +22,7 @@ E-invoice implementation
         'data/account.account.tag.csv',
         'views/res_config_settings_views.xml',
         'views/l10n_it_view.xml',
+        'views/portal_address_templates.xml',
         'views/report_invoice.xml',
     ],
     'demo': [

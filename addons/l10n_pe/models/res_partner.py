@@ -20,11 +20,8 @@ class ResPartner(models.Model):
         if self.city_id and self.l10n_pe_district.city_id and self.l10n_pe_district.city_id != self.city_id:
             self.l10n_pe_district = False
 
-    def _display_b2b_fields(self, country_code):
-        return (
-            country_code == 'PE'
-            or super()._display_b2b_fields(country_code)
-        )
+    def _is_latam_country(self):
+        return super()._is_latam_country() or self.env.company.country_code == 'PE'
 
     @api.model
     def _formatting_address_fields(self):
