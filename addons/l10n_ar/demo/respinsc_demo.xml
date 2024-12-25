@@ -37,6 +37,11 @@
         <value name="install_demo" eval="True"/>
     </function>
 
+    <function model="payment.provider" name="copy">
+        <value eval="[ref('payment.payment_provider_transfer')]"/>
+        <value eval="{'company_id': ref('base.company_ri'), 'state': 'enabled'}"/>
+    </function>
+
     <!-- Products created before the company don't get the default tax set, by default, 
     although the tests are expecting it... Hence we force it -->
     <function model="product.template" name="_force_default_tax">

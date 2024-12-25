@@ -62,6 +62,7 @@ Create electronic sales invoices with Avatax.
         'security/ir.model.access.csv',
         'views/res_partner_views.xml',
         'data/account_tax_report_data.xml',
+        'data/ir_model_fields.xml',
         'data/res_country_data.xml',
         'data/res.city.csv',
         'data/l10n_br.zip.range.csv',
@@ -70,6 +71,7 @@ Create electronic sales invoices with Avatax.
         'views/account_view.xml',
         'views/account_fiscal_position_views.xml',
         'views/ir_ui_menu_brazil.xml',
+        'views/portal_address_templates.xml',
         'views/res_company_views.xml',
         'views/account_journal_views.xml',
         'views/res_bank_views.xml',
@@ -77,5 +79,10 @@ Create electronic sales invoices with Avatax.
     'demo': [
         'demo/demo_company.xml',
     ],
+    'assets': {
+        'web.assets_frontend': [
+            'l10n_br/static/src/**/*',
+        ],
+    },
     'license': 'LGPL-3',
 }
