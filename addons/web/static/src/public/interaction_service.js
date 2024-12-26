@@ -108,7 +108,9 @@ class InteractionService {
             let targets;
             try {
                 const isMatch = el.matches(I.selector);
-                targets = isMatch ? [el] : el.querySelectorAll(I.selector);
+                targets = isMatch
+                    ? [el, ...el.querySelectorAll(I.selector)]
+                    : el.querySelectorAll(I.selector);
                 if (I.selectorHas) {
                     targets = [...targets].filter((el) => !!el.querySelector(I.selectorHas));
                 }
