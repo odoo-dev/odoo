@@ -58,7 +58,7 @@ export const PublicRoot = publicWidget.Widget.extend({
             patch(interactionsService.constructor.prototype, {
                 startInteractions(el) {
                     super.startInteractions(el);
-                    if (!this.startFromEventHandler) {
+                    if (!publicRoot.startFromEventHandler) {
                         // this.editMode is assigned by website_edit_service
                         publicRoot._startWidgets($(el || this.el), { fromInteractionPatch: true, editableMode: this.editMode })
                     }
@@ -66,7 +66,7 @@ export const PublicRoot = publicWidget.Widget.extend({
                 stopInteractions(el) {
                     super.stopInteractions(el);
                     // Call to interactions is only from the event handler.
-                    if (!this.stopFromEventHandler) {
+                    if (!publicRoot.stopFromEventHandler) {
                         publicRoot._stopWidgets($(el || this.el));
                     }
                 },
@@ -212,7 +212,18 @@ export const PublicRoot = publicWidget.Widget.extend({
             });
             return Promise.all(proms);
         });
-        return Promise.all(defs);
+        return Promise.all(defs).then(() => {
+            // TODO Find a better way.
+            // Also start interactions that might be needed within started widgets.
+            const targetEl = $from ? $from[0] : undefined;
+            const publicInteractions = this.bindService("public.interactions");
+            this.startFromEventHandler = true;
+            try {
+                publicInteractions.startInteractions(targetEl);
+            } finally {
+                this.startFromEventHandler = false;
+            }
+        });
     },
     /**
      * Destroys all registered widget instances. Website would need this before
