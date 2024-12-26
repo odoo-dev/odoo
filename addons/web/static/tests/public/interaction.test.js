@@ -981,6 +981,48 @@ describe("waitFor...", () => {
             await click(".test");
             expect.verifySteps(["waitfor", "clicked", "updatecontent"]);
         });
+
+        test("waitFor also waits for chained then", async () => {
+            class Test extends Interaction {
+                static selector = ".test";
+                dynamicContent = {
+                    _root: {
+                        "t-on-click": this.onClick,
+                        "t-att-class": () => ({ end: this.end }),
+                    },
+                };
+                async first() {
+                    expect.step("first");
+                    return "first is done";
+                }
+                async second(param) {
+                    expect.step(`endOfChain after ${param}`);
+                    this.end = true;
+                    return "second is done";
+                }
+                onClick() {
+                    this.waitFor(new Promise((resolve) => resolve(this.first()))).then(
+                        this.second.bind(this)
+                    );
+                    expect.step("clicked");
+                }
+                updateContent() {
+                    expect.step("updatecontent");
+                    super.updateContent();
+                }
+            }
+            await startInteraction(Test, TemplateTest);
+            expect.verifySteps([]);
+            await click(".test");
+            expect(".test").toHaveClass("end");
+            expect.verifySteps([
+                "first",
+                "clicked",
+                "updatecontent",
+                "endOfChain after first is done",
+                "updatecontent",
+            ]);
+        });
     });
 
     describe("waitForTimeout", () => {

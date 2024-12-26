@@ -158,18 +158,24 @@ export class Interaction {
      * code has acted.
      */
     waitFor(promise) {
+        let promResolve;
         const prom = new Promise((resolve) => {
-            promise.then((result) => {
-                if (!this.isDestroyed) {
-                    resolve(result);
-                    prom.then(() => {
-                        if (this.isReady) {
-                            this.updateContent();
-                        }
-                    });
-                }
-            });
+            promResolve = resolve;
         });
+        const promThen = prom.then.bind(prom);
+        const nestedPromise = promise.then((result) => {
+            if (!this.isDestroyed) {
+                promResolve(result);
+                promThen(() => {
+                    if (this.isReady) {
+                        this.updateContent();
+                    }
+                });
+                return result;
+            }
+        });
+        prom.then = (nextFn) =>
+            nestedPromise.then(async (...args) => await this.waitFor(nextFn(...args)));
         return prom;
     }
 
