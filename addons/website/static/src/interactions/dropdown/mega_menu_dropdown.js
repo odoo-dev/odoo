@@ -106,10 +106,10 @@ class MegaMenuDropdown extends Interaction {
      * @param {Event} ev
      */
     onTriggerExtraMenu(ev) {
-        if (!ev.currentTarget.closest(".o_extra_menu_items")) {
+        if (!ev.target.closest(".o_extra_menu_items")) {
             return;
         }
-        const megaMenuToggleEls = ev.currentTarget
+        const megaMenuToggleEls = ev.target
             .closest(".o_extra_menu_items")
             .querySelectorAll(".o_mega_menu_toggle");
         megaMenuToggleEls.forEach((megaMenuToggleEl) =>
