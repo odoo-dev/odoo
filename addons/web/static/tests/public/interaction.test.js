@@ -553,7 +553,7 @@ describe("handling crashes", () => {
         class Test extends Interaction {
             static selector = ".test";
             dynamicContent = {
-                span: { click: () => {} },
+                span: { click: () => { } },
             };
         }
         let error = null;
@@ -2039,7 +2039,7 @@ describe("throttled_for_animation (1)", () => {
                 _root: { "t-on-click": () => this.throttle() },
             };
             setup() {
-                this.throttle = this.throttledForAnimation(this.doSomething);
+                this.throttle = this.throttled(this.doSomething);
             }
             doSomething() {
                 expect.step("done");
@@ -2106,7 +2106,7 @@ describe("throttled_for_animation (2)", () => {
             static selector = ".test";
             dynamicContent = { _root: { "t-att-a": () => "b" } };
             setup() {
-                const fn = this.throttledForAnimation(() => expect.step("throttle"));
+                const fn = this.throttled(() => expect.step("throttle"));
                 fn();
             }
             async willStart() {
@@ -2129,7 +2129,7 @@ describe("throttled_for_animation (2)", () => {
         class Test extends Interaction {
             static selector = ".test";
             dynamicContent = {
-                _root: { "t-on-click": this.throttledForAnimation((ev) => expect.step(ev.type)) },
+                _root: { "t-on-click": this.throttled((ev) => expect.step(ev.type)) },
             };
         }
         await startInteraction(Test, TemplateTest);
@@ -2143,7 +2143,7 @@ describe("throttled_for_animation (2)", () => {
             static selector = ".test";
             dynamicContent = {
                 _root: {
-                    "t-on-click": this.throttledForAnimation((ev) => {
+                    "t-on-click": this.throttled((ev) => {
                         expect(ev.currentTarget.tagName).toBe("DIV");
                         expect.step(ev.type);
                     }),
@@ -2161,7 +2161,7 @@ describe("throttled_for_animation (2)", () => {
             static selector = ".test";
             dynamicContent = {
                 _root: {
-                    "t-on-click.withTarget": this.throttledForAnimation((ev, el) => {
+                    "t-on-click.withTarget": this.throttled((ev, el) => {
                         expect(el.tagName).toBe("DIV");
                         expect.step(ev.type);
                     }),

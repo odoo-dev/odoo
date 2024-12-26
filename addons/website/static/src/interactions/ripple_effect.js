@@ -1,10 +1,10 @@
-import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
 
 export class RippleEffect extends Interaction {
     static selector = ".btn, .dropdown-toggle, .dropdown-item";
     dynamicContent = {
-        "_root": {
+        _root: {
             "t-on-click": this.onClick,
             "t-att-class": () => ({
                 "o_js_ripple_effect": this.isActive,
@@ -18,9 +18,6 @@ export class RippleEffect extends Interaction {
         this.rippleEl = null;
         this.timeoutID = null;
     }
-    destroy() {
-        this.rippleEl?.remove();
-    }
 
     /**
      * @param {MouseEvent} ev
@@ -30,7 +27,7 @@ export class RippleEffect extends Interaction {
             this.rippleEl = document.createElement("span");
             this.rippleEl.classList.add("o_ripple_item");
             this.rippleEl.style.animationDuration = `${this.duration}ms`;
-            this.el.appendChild(this.rippleEl);
+            this.insert(this.rippleEl, this.el);
         }
 
         clearTimeout(this.timeoutID);
@@ -52,9 +49,7 @@ export class RippleEffect extends Interaction {
         this.rippleEl.style.left = `${ev.pageX - offsetX - diameter / 2}px`;
 
         this.isActive = true;
-        this.timeoutID = this.waitForTimeout(() => {
-            this.isActive = false;
-        }, this.duration);
+        this.timeoutID = this.waitForTimeout(() => this.isActive = false, this.duration);
     }
 }
 

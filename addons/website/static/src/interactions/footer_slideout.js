@@ -1,10 +1,9 @@
-import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
 
 export class FooterSlideout extends Interaction {
     static selector = "#wrapwrap";
     static selectorHas = ".o_footer_slideout";
-
     dynamicContent = {
         "_root": {
             "t-att-class": () => ({
@@ -14,8 +13,7 @@ export class FooterSlideout extends Interaction {
     };
 
     setup() {
-        const mainEl = this.el.querySelector(":scope > main");
-        this.slideoutEffect = mainEl.offsetHeight >= window.innerHeight;
+        this.slideoutEffect = this.el.querySelector(":scope > main").offsetHeight >= window.innerHeight;
     }
 
     start() {

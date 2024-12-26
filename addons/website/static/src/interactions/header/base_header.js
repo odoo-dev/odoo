@@ -1,10 +1,7 @@
 import { Interaction } from "@web/public/interaction";
-import { compensateScrollbar } from "@web/core/utils/scrolling";
-import { SIZES, utils as uiUtils } from "@web/core/ui/ui_service";
 
-const isSmall = function () {
-    return uiUtils.getSize() < SIZES.LG
-}
+import { SIZES, utils as uiUtils } from "@web/core/ui/ui_service";
+import { compensateScrollbar } from "@web/core/utils/scrolling";
 
 export class BaseHeader extends Interaction {
     dynamicContent = {
@@ -38,7 +35,7 @@ export class BaseHeader extends Interaction {
             "t-on-show.bs.collapse": this.disableScroll,
             "t-on-hide.bs.collapse": this.enableScroll,
         },
-    }
+    };
 
     //--------------------------------------------------------------
     // Life Cycle
@@ -58,6 +55,7 @@ export class BaseHeader extends Interaction {
         this.isScrolled = false;
         this.forcedScroll = 0;
 
+        this.isSmall = uiUtils.getSize() < SIZES.LG;
         this.isOverlay = !!this.el.closest(".o_header_overlay, .o_header_overlay_theme");
 
         this.mainEl = this.el.parentElement.querySelector("main");
@@ -79,7 +77,7 @@ export class BaseHeader extends Interaction {
     //--------------------------------------------------------------
 
     disableScroll() {
-        if (isSmall()) {
+        if (this.isSmall) {
             this.bodyNoScroll = true;
         }
     }
@@ -89,11 +87,9 @@ export class BaseHeader extends Interaction {
     }
 
     onResize() {
+        this.isSmall = uiUtils.getSize() < SIZES.LG;
         this.adjustScrollbar();
-        if (
-            document.body.classList.contains('overflow-hidden')
-            && !isSmall()
-        ) {
+        if (document.body.classList.contains('overflow-hidden') && !this.isSmall) {
             const offCanvasEls = this.el.querySelectorAll(".offcanvas.show");
             for (const offCanvasEl of offCanvasEls) {
                 Offcanvas.getOrCreateInstance(offCanvasEl).hide();
@@ -185,7 +181,7 @@ export class BaseHeader extends Interaction {
     //--------------------------------------------------------------
 
     getHeaderHeight() {
-        if (isSmall()) {
+        if (this.isSmall) {
             // Ensure we don't consider the hiddenOnScroll element on mobile
             return this.el.getBoundingClientRect().height;
         }

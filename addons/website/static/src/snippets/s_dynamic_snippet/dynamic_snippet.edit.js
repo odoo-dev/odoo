@@ -1,11 +1,12 @@
-import { registry } from "@web/core/registry";
 import { DynamicSnippet } from "./dynamic_snippet";
+import { registry } from "@web/core/registry";
 
 const DynamicSnippetEdit = I => class extends I {
-    /**
-     * @override
-     */
-    callToAction(ev) {}
+    setup() {
+        super.setup();
+        this.isEditMode = true;
+    }
+    callToAction() { }
 };
 
 registry

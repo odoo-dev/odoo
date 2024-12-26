@@ -1,15 +1,11 @@
-import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
 
 export class CarouselSlider extends Interaction {
     static selector = ".carousel";
     dynamicContent = {
-        "img": {
-            "t-on-load": this.computeMaxHeight,
-        },
-        _window: {
-            "t-on-resize": this.debounced(this.computeMaxHeight, 250),
-        },
+        _window: { "t-on-resize": this.debounced(this.computeMaxHeight, 250) },
+        "img": { "t-on-load": this.computeMaxHeight },
         ".carousel-item": {
             "t-att-style": () => ({
                 "min-height": this.maxHeight,

@@ -5,16 +5,18 @@
 // existing ones. For example, doing this will greet any visitor with a 'Hello,
 // world !' message in a popup:
 //
+
 /*
-import { ConfirmationDialog } from '@web/core/confirmation_dialog/confirmation_dialog';
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
+import { ConfirmationDialog } from '@web/core/confirmation_dialog/confirmation_dialog';
+
 class HelloWorldPopup extends Interaction {
-    static selector = "#wrapwrap"
+    static selector = "#wrapwrap";
 
     start() {
-        this.services.dialog.add(ConfirmationDialog, { body: "hello world"})
+        this.services.dialog.add(ConfirmationDialog, { body: "hello world" });
     }
 };
 

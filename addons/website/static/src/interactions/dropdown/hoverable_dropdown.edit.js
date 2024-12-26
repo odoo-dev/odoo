@@ -4,19 +4,21 @@ import { registry } from "@web/core/registry";
 const HoverableDropdownEdit = I => class extends I {
     /**
      * @param {Event} ev
+     * @param {HTMLElement} targetEl
      */
-    onMouseEnter(ev) {
+    onMouseEnter(ev, targetEl) {
         if (this.el.querySelector(".dropdown-toggle.show")) {
             return;
         } else {
-            super.onMouseEnter(ev);
+            super.onMouseEnter(ev, targetEl);
         }
     }
-    
+
     /**
      * @param {Event} ev
+     * @param {HTMLElement} targelEl
      */
-    onMouseLeave(ev) { }
+    onMouseLeave(ev, targelEl) { }
 };
 
 registry

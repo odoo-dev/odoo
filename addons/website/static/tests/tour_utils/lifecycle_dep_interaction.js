@@ -24,7 +24,9 @@ odoo.loader.bus.addEventListener("module-started", (e) => {
         static selector = ".s_countdown";
         dynamicContent = {
             "_root": {
-                "t-att-class": () => ({ "interaction_started": true }),
+                "t-att-class": () => ({
+                    "interaction_started": true
+                }),
             },
         };
 

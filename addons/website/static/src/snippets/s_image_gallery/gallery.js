@@ -1,14 +1,14 @@
-import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
+
 import { uniqueId } from "@web/core/utils/functions";
 import { renderToElement } from "@web/core/utils/render";
-
 
 export class Gallery extends Interaction {
     static selector = ".s_image_gallery:not(.o_slideshow)";
     dynamicContent = {
         "img": {
-            "t-on-click": this.clickImg,
+            "t-on-click": this.onClickImg,
         },
     };
 
@@ -27,7 +27,7 @@ export class Gallery extends Interaction {
      *
      * @param {Event} ev
      */
-    clickImg(ev) {
+    onClickImg(ev) {
         const clickedEl = ev.currentTarget;
         if (this.modalEl || clickedEl.matches("a > img")) {
             return;
@@ -55,9 +55,10 @@ export class Gallery extends Interaction {
         };
 
         const milliseconds = this.el.dataset.interval || false;
-        const lightboxTemplate = this.el.dataset.vcss === "002" ?
-            "website.gallery.s_image_gallery_mirror.lightbox" :
-            "website.gallery.slideshow.lightbox";
+        const lightboxTemplate = this.el.dataset.vcss === "002"
+            ? "website.gallery.s_image_gallery_mirror.lightbox"
+            : "website.gallery.slideshow.lightbox";
+
         this.modalEl = renderToElement(lightboxTemplate, {
             images: imageEls,
             index: currentImageIndex,
@@ -66,7 +67,9 @@ export class Gallery extends Interaction {
             ride: !milliseconds ? "false" : "carousel",
             id: uniqueId("slideshow_"),
         });
-        this.__onModalKeydown = this._onModalKeydown.bind(this);
+
+        this.onModalKeydownBound = this.onModalKeydown.bind(this);
+
         this.modalEl.addEventListener("hidden.bs.modal", () => {
             this.modalEl.classList.add("d-none");
             for (const backdropEl of this.modalEl.querySelectorAll(".modal-backdrop")) {
@@ -74,30 +77,34 @@ export class Gallery extends Interaction {
             }
             const slideshowEl = this.modalEl.querySelector(".modal-body.o_slideshow");
             this.services["public.interactions"].stopInteractions(slideshowEl);
-            this.modalEl.removeEventListener("keydown", this.__onModalKeydown);
+            this.modalEl.removeEventListener("keydown", this.onModalKeydownBound);
             this.modalEl.remove();
             this.modalEl = undefined;
         });
+
         this.modalEl.addEventListener("shown.bs.modal", () => {
             const slideshowEl = this.modalEl.querySelector(".modal-body.o_slideshow");
             this.services["public.interactions"].startInteractions(slideshowEl);
-            this.modalEl.addEventListener("keydown", this.__onModalKeydown);
+            this.modalEl.addEventListener("keydown", this.onModalKeydownBound);
         }, { once: true });
-        document.body.append(this.modalEl);
-        const modalBS = new Modal(this.modalEl, {keyboard: true, backdrop: true});
+
+        this.insert(this.modalEl, document.body);
+        const modalBS = new Modal(this.modalEl, { keyboard: true, backdrop: true });
         modalBS.show();
     }
-    _onModalKeydown(ev) {
+
+    onModalKeydown(ev) {
         if (ev.key === "ArrowLeft" || ev.key === "ArrowRight") {
             const side = ev.key === "ArrowLeft" ? "prev" : "next";
             this.modalEl.querySelector(`.carousel-control-${side}`).click();
         }
         if (ev.key === "Escape") {
-            // If the user is connected as an editor, prevent the backend header
-            // from collapsing.
+            // If the user is connected as an editor, prevent the backend header from collapsing.
             ev.stopPropagation();
         }
     }
 }
 
-registry.category("public.interactions").add("website.gallery", Gallery);
+registry
+    .category("public.interactions")
+    .add("website.gallery", Gallery);

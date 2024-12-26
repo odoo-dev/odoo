@@ -1,18 +1,12 @@
-import { registry } from "@web/core/registry";
 import { CarouselSlider } from "@website/interactions/carousel_slider";
+import { registry } from "@web/core/registry";
 
 const CarouselSliderEdit = I => class extends I {
     dynamicContent = Object.assign(this.dynamicContent, {
-        _root: {
-            "t-on-content_changed": this.onContentChanged,
-        },
+        _root: { "t-on-content_changed": () => this.computeMaxHeight() },
     });
     // Pause carousel in edit mode.
-    carouselOptions = {ride: false, pause: true};
-
-    onContentChanged() {
-        this.computeMaxHeight();
-    }
+    carouselOptions = { ride: false, pause: true };
 };
 
 registry

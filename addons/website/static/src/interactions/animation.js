@@ -1,5 +1,6 @@
-import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
+
 import { getScrollingElement, isScrollableY } from "@web/core/utils/scrolling";
 import { isVisible } from "@web/core/utils/ui";
 
@@ -7,13 +8,11 @@ export class Animation extends Interaction {
     static selector = ".o_animate";
     dynamicSelectors = {
         ...this.dynamicSelectors,
-        _windowUnlessDropdown: () => this.windowUnlessDropdown,
         _scrollingTarget: () => this.scrollingTarget,
+        _windowUnlessDropdown: () => this.windowUnlessDropdown,
     };
     dynamicContent = {
-        _window: {
-            "t-on-resize": this.scrollWebsiteAnimate,
-        },
+        _window: { "t-on-resize": this.scrollWebsiteAnimate },
         _windowUnlessDropdown: {
             "t-on-shown.bs.modal": this.scrollWebsiteAnimate,
             "t-on-slid.bs.carousel": this.scrollWebsiteAnimate,
@@ -24,7 +23,7 @@ export class Animation extends Interaction {
             // Setting capture to true allows to take advantage of event
             // bubbling for events that otherwise don’t support it. (e.g. useful
             // when scrolling a modal)
-            "t-on-scroll.capture": this.throttledForAnimation(this.scrollWebsiteAnimate),
+            "t-on-scroll.capture": this.throttled(this.scrollWebsiteAnimate),
         },
         _root: {
             "t-att-class": (el) => ({
@@ -201,7 +200,9 @@ export class Animation extends Interaction {
     }
 }
 
-registry.category("public.interactions").add("website.animation", Animation);
+registry
+    .category("public.interactions")
+    .add("website.animation", Animation);
 
 registry
     .category("public.interactions.edit")

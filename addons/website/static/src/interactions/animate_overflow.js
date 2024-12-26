@@ -2,7 +2,7 @@ import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
 import { getScrollingElement } from "@web/core/utils/scrolling";
 
-export class WebsiteAnimateOverflow extends Interaction {
+export class AnimateOverflow extends Interaction {
     static selector = "#wrapwrap";
     dynamicSelectors = {
         ...this.dynamicSelectors,
@@ -43,10 +43,10 @@ export class WebsiteAnimateOverflow extends Interaction {
 
 registry
     .category("public.interactions")
-    .add("website.website_animate_overflow", WebsiteAnimateOverflow);
+    .add("website.animate_overflow", AnimateOverflow);
 
 registry
     .category("public.interactions.edit")
-    .add("website.website_animate_overflow", {
-        Interaction: WebsiteAnimateOverflow,
+    .add("website.animate_overflow", {
+        Interaction: AnimateOverflow,
     });

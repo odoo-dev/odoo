@@ -1,7 +1,5 @@
-import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
-
-const CAROUSEL_SLIDING_CLASS = "o_carousel_sliding";
+import { registry } from "@web/core/registry";
 
 /**
  * This class is used to fix carousel auto-slide behavior in Odoo 17.4 and up.
@@ -27,7 +25,7 @@ export class CarouselBootstrapUpgradeFix extends Interaction {
             "t-on-slide.bs.carousel": () => this.sliding = true,
             "t-on-slid.bs.carousel": () => this.sliding = false,
             "t-att-class": () => ({
-                [CAROUSEL_SLIDING_CLASS]: this.sliding,
+                "o_carousel_sliding": this.sliding,
             }),
         },
     };
@@ -60,9 +58,9 @@ export class CarouselBootstrapUpgradeFix extends Interaction {
     async willStart() {
         if (this.hasInterval || this.el.dataset.bsRide) {
             // Wait for carousel to finish sliding.
-            if (this.el.classList.contains(CAROUSEL_SLIDING_CLASS)) {
+            if (this.el.classList.contains("o_carousel_sliding")) {
                 await new Promise(resolve => {
-                    this.el.addEventListener("slid.bs.carousel", () => resolve(), {once: true});
+                    this.el.addEventListener("slid.bs.carousel", () => resolve(), { once: true });
                 });
             }
             window.Carousel.getInstance(this.el)?.dispose();

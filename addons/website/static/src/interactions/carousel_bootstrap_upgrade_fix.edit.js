@@ -1,9 +1,9 @@
-import { registry } from "@web/core/registry";
 import { CarouselBootstrapUpgradeFix } from "@website/interactions/carousel_bootstrap_upgrade_fix";
+import { registry } from "@web/core/registry";
 
 const CarouselBootstrapUpgradeFixEdit = I => class extends I {
     // Suspend ride in edit mode.
-    carouselOptions = {ride: false, pause: true};
+    carouselOptions = { ride: false, pause: true };
 };
 
 registry

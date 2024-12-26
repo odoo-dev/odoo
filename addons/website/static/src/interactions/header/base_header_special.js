@@ -1,12 +1,12 @@
-import { registry } from "@web/core/registry";
 import { BaseHeader } from "@website/interactions/header/base_header";
+import { registry } from "@web/core/registry";
 
 export class BaseHeaderSpecial extends BaseHeader {
     dynamicSelectors = {
         ...this.dynamicSelectors,
         _dropdown: () => this.hideEl?.querySelector(".dropdown-toggle"),
         _searchbar: () => this.searchbarEl,
-    }
+    };
     dynamicContent = {
         ...this.dynamicContent,
         _dropdown: {
@@ -15,7 +15,7 @@ export class BaseHeaderSpecial extends BaseHeader {
         _searchbar: {
             "t-on-input": this.onSearchbarInput,
         },
-    }
+    };
 
     setup() {
         super.setup();

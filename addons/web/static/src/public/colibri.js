@@ -47,22 +47,22 @@ export class Colibri {
                 "this.addListener can only be called after the interaction is started. Maybe move the call in the start method."
             );
         }
-        const re = /^(?<event>.*)\.(?<suffix>prevent|stop|capture|noupdate|withTarget)$/;
+        const re = /^(?<event>.*)\.(?<suffix>prevent|stop|capture|noUpdate|withTarget)$/;
         let groups = re.exec(event)?.groups;
         while (groups) {
             fn = {
                 prevent:
                     (f) =>
-                    (ev, ...args) => {
-                        ev.preventDefault();
-                        return f.call(this.interaction, ev, ...args);
-                    },
+                        (ev, ...args) => {
+                            ev.preventDefault();
+                            return f.call(this.interaction, ev, ...args);
+                        },
                 stop:
                     (f) =>
-                    (ev, ...args) => {
-                        ev.stopPropagation();
-                        return f.call(this.interaction, ev, ...args);
-                    },
+                        (ev, ...args) => {
+                            ev.stopPropagation();
+                            return f.call(this.interaction, ev, ...args);
+                        },
                 capture: (f) => {
                     options ||= {};
                     options.capture = true;
@@ -70,16 +70,16 @@ export class Colibri {
                 },
                 noupdate:
                     (f) =>
-                    (...args) => {
-                        f.call(this.interaction, ...args);
-                        return SKIP_IMPLICIT_UPDATE;
-                    },
+                        (...args) => {
+                            f.call(this.interaction, ...args);
+                            return SKIP_IMPLICIT_UPDATE;
+                        },
                 withTarget:
                     (f) =>
-                    (ev, ...args) => {
-                        const currentTarget = ev.currentTarget;
-                        return f.call(this.interaction, ev, currentTarget, ...args);
-                    },
+                        (ev, ...args) => {
+                            const currentTarget = ev.currentTarget;
+                            return f.call(this.interaction, ev, currentTarget, ...args);
+                        },
             }[groups.suffix](fn);
             event = groups.event;
             groups = re.exec(event)?.groups;
@@ -87,10 +87,10 @@ export class Colibri {
         const handler = fn.isHandler
             ? fn
             : (...args) => {
-                  if (SKIP_IMPLICIT_UPDATE !== fn.call(this.interaction, ...args)) {
-                      this.updateContent();
-                  }
-              };
+                if (SKIP_IMPLICIT_UPDATE !== fn.call(this.interaction, ...args)) {
+                    this.updateContent();
+                }
+            };
         handler.isHandler = true;
         for (const node of nodes) {
             node.addEventListener(event, handler, options);

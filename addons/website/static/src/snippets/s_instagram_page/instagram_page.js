@@ -14,7 +14,7 @@ export class InstagramPage extends Interaction {
         _window: {
             "t-on-message": this.onMessage,
         },
-    }
+    };
 
     setup() {
         this.iframeEl = document.createElement("iframe");
@@ -30,9 +30,7 @@ export class InstagramPage extends Interaction {
         this.iframeEl.height = 0.659 * iframeWidth + (iframeWidth < 432 ? 156 : 203);
 
         // TODO : Check if the next lines can be replace by `this.insert(this.iframeEl, this.el.querySelector(".o_instagram_container"));`
-
         this.el.querySelector(".o_instagram_container").appendChild(this.iframeEl);
-        // TODO : ...observerUnactive() / ...observerActive()
         this.registerCleanup(() => { this.iframeEl.remove(); });
     }
 
@@ -71,9 +69,7 @@ export class InstagramPage extends Interaction {
         // Here we get the exact height of the iframe.
         // Instagram can return a height of 0 before the real height.
         if (height) {
-            // this.options.wysiwyg?.odooEditor.observerUnactive();
             this.iframeEl.height = height;
-            // this.options.wysiwyg?.odooEditor.observerActive();
         }
     }
 }
@@ -84,4 +80,6 @@ registry
 
 registry
     .category("public.interactions.edit")
-    .add("website.instagram_page", { Interaction: InstagramPage });
+    .add("website.instagram_page", {
+        Interaction: InstagramPage
+    });
