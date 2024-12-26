@@ -26,7 +26,7 @@ export class ZoomedBackgroundShape extends Interaction {
     static selector = ".o_we_shape";
     dynamicContent = {
         _window: {
-            "t-on-resize": this.throttledForAnimation(this.resizeBackgroundShape),
+            "t-on-resize": this.throttled(this.resizeBackgroundShape),
         },
     };
 
@@ -75,4 +75,4 @@ registry
 
 registry
     .category("public.interactions.edit")
-    .add("website.zoomed_background_shape", { Interaction: ZoomedBackgroundShape});
+    .add("website.zoomed_background_shape", { Interaction: ZoomedBackgroundShape });

@@ -553,7 +553,7 @@ describe("handling crashes", () => {
         class Test extends Interaction {
             static selector = ".test";
             dynamicContent = {
-                span: { click: () => {} },
+                span: { click: () => { } },
             };
         }
         let error = null;
@@ -1746,15 +1746,15 @@ describe("insert", () => {
     });
 });
 
-describe("blockedUntilDone", () => {
-    test("blockedUntilDone disable any further execution while already executing", async () => {
+describe("locked", () => {
+    test("locked disable any further execution while already executing", async () => {
         let started = 0;
         let finished = 0;
         class Test extends Interaction {
             static selector = ".test";
             dynamicContent = {
                 button: {
-                    "t-on-click": this.blockedUntilDone(this.onClickLong),
+                    "t-on-click": this.locked(this.onClickLong),
                 },
             };
             async onClickLong() {
@@ -1775,12 +1775,12 @@ describe("blockedUntilDone", () => {
         expect(finished).toBe(1);
     });
 
-    test("blockedUntilDone doesn't add a loading icon if not required", async () => {
+    test("locked doesn't add a loading icon if not required", async () => {
         class Test extends Interaction {
             static selector = ".test";
             dynamicContent = {
                 button: {
-                    "t-on-click": this.blockedUntilDone(this.onClickLong),
+                    "t-on-click": this.locked(this.onClickLong),
                 },
             };
             async onClickLong() {
@@ -1794,12 +1794,12 @@ describe("blockedUntilDone", () => {
         expect(el.querySelectorAll("span")).toHaveLength(0);
     });
 
-    test("blockedUntilDone add a loading icon when the execution takes more than 400ms", async () => {
+    test("locked add a loading icon when the execution takes more than 400ms", async () => {
         class Test extends Interaction {
             static selector = ".test";
             dynamicContent = {
                 button: {
-                    "t-on-click": this.blockedUntilDone(this.onClickLong, true),
+                    "t-on-click": this.locked(this.onClickLong, true),
                 },
             };
             async onClickLong() {
@@ -1813,11 +1813,11 @@ describe("blockedUntilDone", () => {
         expect(el.querySelectorAll("span")).toHaveLength(1);
     });
 
-    test("blockedUntilDone automatically binds functions", async () => {
+    test("locked automatically binds functions", async () => {
         class Test extends Interaction {
             static selector = ".test";
             dynamicContent = {
-                button: { "t-on-click": this.blockedUntilDone(this.sayValue) },
+                button: { "t-on-click": this.locked(this.sayValue) },
             };
             setup() {
                 this.value = "value";
@@ -2039,7 +2039,7 @@ describe("throttled_for_animation (1)", () => {
                 _root: { "t-on-click": () => this.throttle() },
             };
             setup() {
-                this.throttle = this.throttledForAnimation(this.doSomething);
+                this.throttle = this.throttled(this.doSomething);
             }
             doSomething() {
                 expect.step("done");
@@ -2106,7 +2106,7 @@ describe("throttled_for_animation (2)", () => {
             static selector = ".test";
             dynamicContent = { _root: { "t-att-a": () => "b" } };
             setup() {
-                const fn = this.throttledForAnimation(() => expect.step("throttle"));
+                const fn = this.throttled(() => expect.step("throttle"));
                 fn();
             }
             async willStart() {
@@ -2129,7 +2129,7 @@ describe("throttled_for_animation (2)", () => {
         class Test extends Interaction {
             static selector = ".test";
             dynamicContent = {
-                _root: { "t-on-click": this.throttledForAnimation((ev) => expect.step(ev.type)) },
+                _root: { "t-on-click": this.throttled((ev) => expect.step(ev.type)) },
             };
         }
         await startInteraction(Test, TemplateTest);
@@ -2143,7 +2143,7 @@ describe("throttled_for_animation (2)", () => {
             static selector = ".test";
             dynamicContent = {
                 _root: {
-                    "t-on-click": this.throttledForAnimation((ev) => {
+                    "t-on-click": this.throttled((ev) => {
                         expect(ev.currentTarget.tagName).toBe("DIV");
                         expect.step(ev.type);
                     }),
@@ -2161,7 +2161,7 @@ describe("throttled_for_animation (2)", () => {
             static selector = ".test";
             dynamicContent = {
                 _root: {
-                    "t-on-click.withTarget": this.throttledForAnimation((ev, el) => {
+                    "t-on-click.withTarget": this.throttled((ev, el) => {
                         expect(el.tagName).toBe("DIV");
                         expect.step(ev.type);
                     }),

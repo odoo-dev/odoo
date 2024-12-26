@@ -11,12 +11,12 @@ export class CRMPartnerAssign extends Interaction {
     static selectorHas = ".interested_partner_assign_form, .desinterested_partner_assign_form, .opp-stage-button, .new_opp_form";
 
     dynamicContent = {
-        ".interested_partner_assign_confirm": { "t-on-click.prevent.stop": this.blockedUntilDone(this.onInterestedPartnerConfirm) },
-        ".desinterested_partner_assign_confirm": { "t-on-click.prevent.stop": this.blockedUntilDone(this.onDesinterestedPartnerConfirm) },
-        ".opp-stage-button": { "t-on-click": this.blockedUntilDone(this.onOppStageButtonClick) },
-        ".edit_contact_confirm": { "t-on-click.prevent.stop": this.blockedUntilDone(this.editContact) },
-        ".new_opp_confirm": { "t-on-click.prevent.stop": this.blockedUntilDone(this.createOpportunity) },
-        ".edit_opp_confirm": { "t-on-click.prevent.stop": this.blockedUntilDone(this.editOpportunity) },
+        ".interested_partner_assign_confirm": { "t-on-click.prevent.stop": this.locked(this.onInterestedPartnerConfirm) },
+        ".desinterested_partner_assign_confirm": { "t-on-click.prevent.stop": this.locked(this.onDesinterestedPartnerConfirm) },
+        ".opp-stage-button": { "t-on-click": this.locked(this.onOppStageButtonClick) },
+        ".edit_contact_confirm": { "t-on-click.prevent.stop": this.locked(this.editContact) },
+        ".new_opp_confirm": { "t-on-click.prevent.stop": this.locked(this.createOpportunity) },
+        ".edit_opp_confirm": { "t-on-click.prevent.stop": this.locked(this.editOpportunity) },
         ".edit_opp_form .next_activity": { "t-on-change": this.onChangeNextActivity },
         ".edit_opp_form .activity_date_deadline": { "t-att-value": () => formatDate(this.dateNextActivity) },
         "#new-opp-dialog .contact_name": { "t-on-change": (ev) => this.contactName = ev.currentTarget.value.trim() },

@@ -24,7 +24,7 @@ export class Animation extends Interaction {
             // Setting capture to true allows to take advantage of event
             // bubbling for events that otherwise don’t support it. (e.g. useful
             // when scrolling a modal)
-            "t-on-scroll.capture": this.throttledForAnimation(this.scrollWebsiteAnimate),
+            "t-on-scroll.capture": this.throttled(this.scrollWebsiteAnimate),
         },
         _root: {
             "t-att-class": (el) => ({

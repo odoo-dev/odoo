@@ -113,28 +113,28 @@ export class Interaction {
      * initialize everything needed by the interaction. The el element is
      * available and can be used. Services are ready and available as well.
      */
-    setup() {}
+    setup() { }
 
     /**
      * If the interaction needs some asynchronous work to be ready, it should
      * be done here. The website framework will wait for this method to complete
      * before applying the dynamic content (event handlers, ...)
      */
-    async willStart() {}
+    async willStart() { }
 
     /**
      * The start function when we need to execute some code after the interaction
      * is ready. It is the equivalent to the "mounted" owl lifecycle hook. At
      * this point, event handlers have been attached.
      */
-    start() {}
+    start() { }
 
     /**
      * All side effects done should be cleaned up here. Note that like all
      * other lifecycle methods, it is not necessary to call the super.destroy
      * method (unless you inherit from a concrete subclass)
      */
-    destroy() {}
+    destroy() { }
 
     // -------------------------------------------------------------------------
     // helpers
@@ -229,22 +229,9 @@ export class Interaction {
     }
 
     /**
-     * Make sure the function is not started again before it is completed.
-     * If required, add a loading animation on button if the execution takes
-     * more than 400ms.
-     */
-    blockedUntilDone(fn, useLoadingAnimation = false) {
-        if (useLoadingAnimation) {
-            return makeButtonHandler(fn);
-        } else {
-            return makeAsyncHandler(fn);
-        }
-    }
-
-    /**
      * Throttles a function for animation and makes sure it is cancelled upon destroy.
      */
-    throttledForAnimation(fn) {
+    throttled(fn) {
         const throttledFn = throttleForAnimation((...args) => {
             fn.apply(this, args);
             if (this.isReady) {
@@ -265,6 +252,19 @@ export class Interaction {
                 cancel: throttledFn.cancel,
             }
         );
+    }
+
+    /**
+     * Make sure the function is not started again before it is completed.
+     * If required, add a loading animation on button if the execution takes
+     * more than 400ms.
+     */
+    locked(fn, useLoadingAnimation = false) {
+        if (useLoadingAnimation) {
+            return makeButtonHandler(fn);
+        } else {
+            return makeAsyncHandler(fn);
+        }
     }
 
     /**

@@ -12,7 +12,7 @@ export class NoBackdropPopup extends Interaction {
     };
 
     setup() {
-        this.throttledUpdateScrollbar = this.throttledForAnimation(this.updateScrollbar);
+        this.throttledUpdateScrollbar = this.throttled(this.updateScrollbar);
         this.removeResizeListener = null;
         this.resizeObserver = null;
     }
