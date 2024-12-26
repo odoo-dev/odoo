@@ -153,7 +153,10 @@ export class SearchBar extends Interaction {
         if (this.searchType === "all" && !this.inputEl.value.trim().length) {
             this.render();
         } else {
-            this.keepLast.add(this.waitFor(this.fetch())).then(this.render.bind(this));
+            this.keepLast.add(this.waitFor(this.fetch())).then((res) => {
+                this.render(res);
+                this.updateContent();
+            });
         }
     }
 
