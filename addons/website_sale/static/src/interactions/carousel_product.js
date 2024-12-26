@@ -12,7 +12,7 @@ export class CarouselProduct extends Interaction {
             }),
         },
         _window: {
-            "t-on-resize.noupdate": this.throttledForAnimation(this.onSlideCarouselProduct),
+            "t-on-resize.noupdate": this.throttled(this.onSlideCarouselProduct),
         },
         ".carousel-indicators": {
             "t-att-style": () => ({
@@ -70,7 +70,7 @@ export class CarouselProduct extends Interaction {
         const indicatorSize = isVertical ? indicatorRect.height : indicatorRect.width;
         const indicatorPosition = isVertical ? indicatorRect.top - indicatorsDivRect.top - parseFloat(indicatorStyle.marginTop) : indicatorRect.left - indicatorsDivRect.left - parseFloat(indicatorStyle.marginLeft);
         const scrollSize = isVertical ? indicatorsDivEl.scrollHeight : indicatorsDivEl.scrollWidth;
-        let indicatorsPositionDiff = (indicatorPosition + (indicatorSize/2)) - (indicatorsDivSize/2);
+        let indicatorsPositionDiff = (indicatorPosition + (indicatorSize / 2)) - (indicatorsDivSize / 2);
         indicatorsPositionDiff = Math.min(indicatorsPositionDiff, scrollSize - indicatorsDivSize);
         this.updateJustifyContent();
         this.updateContent();
