@@ -13,7 +13,7 @@ export class TOTPDisable extends Interaction {
 
     async onClick() {
         await this.waitFor(handleCheckIdentity(
-            this.services.orm.call("res.users", "action_totp_disable", [user.userId]),
+            this.waitFor(this.services.orm.call("res.users", "action_totp_disable", [user.userId])),
             this.services.orm,
             this.services.dialog,
         ));

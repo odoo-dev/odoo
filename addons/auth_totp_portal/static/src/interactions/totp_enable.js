@@ -133,7 +133,7 @@ class TOTPEnable extends Interaction {
 
     async onClick(e) {
         const data = await this.waitFor(handleCheckIdentity(
-            this.services.orm.call("res.users", "action_totp_enable_wizard", [user.userId]),
+            this.waitFor(this.services.orm.call("res.users", "action_totp_enable_wizard", [user.userId])),
             this.services.orm,
             this.services.dialog,
         ));
@@ -169,7 +169,7 @@ class TOTPEnable extends Interaction {
                 try {
                     await this.services.orm.write(model, [record.id], { code: inputEl.value });
                     await handleCheckIdentity(
-                        this.services.orm.call(model, "enable", [record.id]),
+                        this.waitFor(this.services.orm.call(model, "enable", [record.id])),
                         this.services.orm,
                         this.services.dialog
                     );
