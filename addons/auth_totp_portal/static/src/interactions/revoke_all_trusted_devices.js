@@ -13,7 +13,7 @@ export class RevokeAllTrustedDevices extends Interaction {
 
     async onClick() {
         await this.waitFor(handleCheckIdentity(
-            this.services.orm.call("res.users", "revoke_all_devices", [user.userId]),
+            this.waitFor(this.services.orm.call("res.users", "revoke_all_devices", [user.userId])),
             this.services.orm,
             this.services.dialog,
         ));
