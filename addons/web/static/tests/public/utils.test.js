@@ -151,4 +151,21 @@ describe("patch dynamic content", () => {
         parent.somewhere["t-on-click"]();
         expect.verifySteps(["base", "patch"]);
     });
+
+    test("patch t-on-... does not require knowledge about there being a super", () => {
+        const parent = {
+            // No t-on-click here.
+        };
+        const patch = {
+            somewhere: {
+                "t-on-click": (el, oldFn) => {
+                    oldFn();
+                    expect.step("patch");
+                },
+            },
+        };
+        patchDynamicContent(parent, patch);
+        parent.somewhere["t-on-click"]();
+        expect.verifySteps(["patch"]);
+    });
 });
