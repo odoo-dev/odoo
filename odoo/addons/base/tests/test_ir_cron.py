@@ -129,6 +129,16 @@ class TestIrCron(TransactionCase, CronMixinCase):
         self.assertEqual(list(action_params), ['code', 'message', 'data'])
         self.assertEqual(list(action_params['data']), ['name', 'message', 'arguments', 'timestamp', 'context', 'debug'])
 
+    def test_cron_stats(self):
+        cron = self.cron
+        cron._update_stats(None)
+        self.assertEqual(cron.stat_total_count, 0)
+        with self.enter_registry_test_mode():
+            cron.method_direct_trigger()
+        self.assertEqual(cron.stat_total_count, 1)
+        cron.reset_stats()
+        self.assertEqual(cron.stat_total_count, 0)
+
     def test_cron_no_job_ready(self):
         self.cron.nextcall = fields.Datetime.now() + timedelta(days=1)
         self.cron.flush_recordset()
