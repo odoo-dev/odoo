@@ -1,6 +1,7 @@
-import { registry } from "@web/core/registry";
-import { isScrollableY } from "@web/core/utils/scrolling";
 import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
+
+import { isScrollableY } from "@web/core/utils/scrolling";
 
 export class NoBackdropPopup extends Interaction {
     static selector = ".s_popup_no_backdrop";
@@ -65,4 +66,6 @@ export class NoBackdropPopup extends Interaction {
     }
 }
 
-registry.category("public.interactions").add("website.no_backdrop_popup", NoBackdropPopup);
+registry
+    .category("public.interactions")
+    .add("website.no_backdrop_popup", NoBackdropPopup);

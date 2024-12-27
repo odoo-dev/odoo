@@ -1,5 +1,5 @@
-import { registry } from "@web/core/registry";
 import { NoBackdropPopup } from "./no_backdrop_popup";
+import { registry } from "@web/core/registry";
 
 export const NoBackdropPopupEdit = (I) => class extends I {
     start() {
@@ -16,5 +16,5 @@ registry
     .category("public.interactions.edit")
     .add("website.no_backdrop_popup", {
         Interaction: NoBackdropPopup,
-        mixin: NoBackdropPopupEdit
+        mixin: NoBackdropPopupEdit,
     });
