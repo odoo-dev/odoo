@@ -1,5 +1,5 @@
-import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
 
 export class CarouselSlider extends Interaction {
     static selector = ".carousel";
@@ -12,7 +12,7 @@ export class CarouselSlider extends Interaction {
         },
         ".carousel-item": {
             "t-att-style": () => ({
-                "min-height": this.maxHeight,
+                "min-height": `${this.maxHeight}px`,
             }),
         },
     };
@@ -24,6 +24,7 @@ export class CarouselSlider extends Interaction {
 
     start() {
         this.computeMaxHeight();
+        this.updateContent();
         const carouselBS = window.Carousel.getOrCreateInstance(this.el, this.carouselOptions);
         this.registerCleanup(() => carouselBS.dispose());
     }
@@ -33,8 +34,7 @@ export class CarouselSlider extends Interaction {
         for (const itemEl of this.el.querySelectorAll(".carousel-item")) {
             const isActive = itemEl.classList.contains("active");
             itemEl.classList.add("active");
-            const rect = itemEl.getBoundingClientRect();
-            const height = rect.height;
+            const height = itemEl.getBoundingClientRect().height;
             if (height > this.maxHeight || this.maxHeight === undefined) {
                 this.maxHeight = height;
             }

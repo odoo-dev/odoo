@@ -1,15 +1,17 @@
-import { describe, expect, test } from "@odoo/hoot";
-import { click } from "@odoo/hoot-dom";
-import { advanceTime } from "@odoo/hoot-mock";
 import {
     startInteractions,
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
+import { describe, expect, test } from "@odoo/hoot";
+
+import { switchToEditMode } from "../../helpers";
+
 setupInteractionWhiteList("website.carousel_bootstrap_upgrade_fix");
+
 describe.current.tags("interaction_dev");
 
-test("carousel bootstrap upgrade fix is tagged while sliding", async () => {
+test("[EDIT] carousel_bootstrap_upgrade_fix prevents ride", async () => {
     const { core, el } = await startInteractions(`
         <section class="s_image_gallery o_slideshow pt24 pb24 s_image_gallery_controllers_outside s_image_gallery_controllers_outside_arrows_right s_image_gallery_indicators_dots s_image_gallery_arrows_default" data-snippet="s_image_gallery" data-vcss="002" data-columns="3">
             <div class="o_container_small overflow-hidden">
@@ -44,16 +46,11 @@ test("carousel bootstrap upgrade fix is tagged while sliding", async () => {
             </div>
         </section>
     `);
-    expect(core.interactions.length).toBe(1);
+    expect(core.interactions).toHaveLength(1);
+    await switchToEditMode(core);
     const carouselEl = el.querySelector(".carousel");
+    const carouselBS = window.Carousel.getInstance(carouselEl);
+    expect(carouselBS._config.ride).toBe(false);
+    expect(carouselBS._config.pause).toBe(true);
     expect(carouselEl.dataset.bsRide).toBe("carousel");
-    expect(carouselEl.dataset.bsInterval).toBe("5000");
-    expect(carouselEl).not.toHaveClass("o_carousel_sliding");
-    const nextEl = carouselEl.querySelector(".carousel-control-next");
-    await click(nextEl);
-    expect(carouselEl).toHaveClass("o_carousel_sliding");
-    await advanceTime(750);
-    expect(carouselEl).not.toHaveClass("o_carousel_sliding");
-    core.stopInteractions();
-    expect(core.interactions.length).toBe(0);
 });

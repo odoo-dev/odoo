@@ -1,5 +1,5 @@
-import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
 
 export class CarouselSectionSliderEdit extends Interaction {
     static selector = "section > .carousel";
@@ -19,9 +19,7 @@ export class CarouselSectionSliderEdit extends Interaction {
         if (!editTranslations) {
             // Restore the carousel controls.
             const indicatorEls = this.el.querySelectorAll(".carousel-indicators > *");
-            // this.options.wysiwyg.odooEditor.observerUnactive("restore_controls");
             indicatorEls.forEach((indicatorEl, i) => indicatorEl.setAttribute("data-bs-slide-to", i));
-            // this.options.wysiwyg.odooEditor.observerActive("restore_controls");
         }
     }
 
