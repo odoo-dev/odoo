@@ -553,7 +553,7 @@ describe("handling crashes", () => {
         class Test extends Interaction {
             static selector = ".test";
             dynamicContent = {
-                span: { click: () => { } },
+                span: { click: () => {} },
             };
         }
         let error = null;
@@ -1675,7 +1675,7 @@ describe("insert", () => {
             static selector = ".test";
             setup() {
                 const node = document.createElement("inserted");
-                this.insert(node, this.el); // "beforeend"
+                this.insert(node, this.el);
             }
         }
 
@@ -1743,6 +1743,49 @@ describe("insert", () => {
         core.stopInteractions();
         insertedEl = el.querySelector("inserted");
         expect(insertedEl).toBe(null);
+    });
+});
+
+describe("renderAt", () => {
+    test("can render a template inside an element", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicContent = {
+                "[data-which]": {
+                    "t-on-click": (ev) => expect.step(ev.target.dataset.which),
+                },
+            };
+            setup() {
+                this.renderAt(
+                    "web.TestSubInteraction1",
+                    {
+                        first: "one",
+                        second: "two",
+                    },
+                    this.el
+                );
+            }
+        }
+        class Test2 extends Interaction {
+            static selector = "[data-which]";
+            dynamicContent = {
+                _root: {
+                    "t-att-x": () => "x",
+                },
+            };
+        }
+
+        const { core, el } = await startInteraction([Test, Test2], TemplateTest);
+        expect(core.interactions).toHaveLength(3); // 1*Test + 2*Test2
+        const testEl = el.querySelector(".test");
+        const subEls = testEl.querySelectorAll("[data-which][x=x]");
+        await click(subEls[1]);
+        await click(subEls[0]);
+        expect.verifySteps(["two", "one"]);
+        core.stopInteractions();
+        expect(testEl.querySelectorAll("[data-which]")).toHaveLength(0);
+        await click(subEls[0]);
+        expect.verifySteps([]);
     });
 });
 
