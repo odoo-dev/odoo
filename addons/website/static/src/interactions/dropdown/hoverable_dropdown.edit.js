@@ -4,24 +4,22 @@ import { registry } from "@web/core/registry";
 const HoverableDropdownEdit = I => class extends I {
     /**
      * @param {Event} ev
+     * @param {HTMLElement} targetEl
      */
-    onMouseEnter(ev) {
+    onMouseEnter(ev, targetEl) {
         if (this.el.querySelector(".dropdown-toggle.show")) {
             return;
         } else {
-            super.onMouseEnter(ev);
+            super.onMouseEnter(ev, targetEl);
         }
     }
-    
-    /**
-     * @param {Event} ev
-     */
-    onMouseLeave(ev) { }
+
+    onMouseLeave() { }
 };
 
 registry
     .category("public.interactions.edit")
     .add("website.hoverable_dropdown", {
         Interaction: HoverableDropdown,
-        mixin: HoverableDropdownEdit
+        mixin: HoverableDropdownEdit,
     });
