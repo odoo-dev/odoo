@@ -55,7 +55,7 @@ export class CookiesBar extends Popup {
         this.bsModal.toggle();
         // As we're using Bootstrap's events, the Popup class prevents the modal
         // from being shown after hiding it: override that behavior.
-        this._popupAlreadyShown = false;
+        this.popupAlreadyShown = false;
         cookie.delete(this.el.id);
     }
 
@@ -94,7 +94,7 @@ export class CookiesBar extends Popup {
      */
     onShowCookiesBar() {
         const currCookie = cookie.get(this.el.id);
-        if (currCookie && JSON.parse(currCookie).optional || !this._popupAlreadyShown) {
+        if (currCookie && JSON.parse(currCookie).optional || !this.popupAlreadyShown) {
             return;
         }
         this.bsModal.show();

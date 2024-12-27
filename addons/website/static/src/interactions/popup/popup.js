@@ -1,9 +1,10 @@
+import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
+
 import { browser } from "@web/core/browser/browser";
 import { cookie } from "@web/core/browser/cookie";
-import { registry } from "@web/core/registry";
 import { utils as uiUtils, SIZES } from "@web/core/ui/ui_service";
 import { getTabableElements } from "@web/core/utils/ui";
-import { Interaction } from "@web/public/interaction";
 
 export class Popup extends Interaction {
     static selector = ".s_popup:not(#website_cookies_bar)";
@@ -29,9 +30,7 @@ export class Popup extends Interaction {
         this.modalEl = this.el.querySelector(".modal");
         /** @type {import("bootstrap").Modal} */
         this.bsModal = window.Modal.getOrCreateInstance(this.modalEl);
-        this.registerCleanup(() => {
-            this.bsModal.dispose();
-        });
+        this.registerCleanup(() => { this.bsModal.dispose() });
 
         this.modalShownOnClickEl = this.el.querySelector(".modal[data-display='onClick']");
         if (this.modalShownOnClickEl) {
@@ -43,7 +42,7 @@ export class Popup extends Interaction {
             return;
         }
 
-        this._popupAlreadyShown = !!cookie.get(this.el.id);
+        this.popupAlreadyShown = !!cookie.get(this.el.id);
     }
 
     start() {
@@ -61,7 +60,7 @@ export class Popup extends Interaction {
                 : el.classList.contains("o_snippet_desktop_invisible");
             return (visibilitySelectors && el.matches(visibilitySelectors)) || deviceInvisible;
         });
-        if (!this._popupAlreadyShown && !emptyPopup) {
+        if (!this.popupAlreadyShown && !emptyPopup) {
             this.bindPopup();
         }
     }
@@ -93,7 +92,7 @@ export class Popup extends Interaction {
     }
 
     showPopup() {
-        if (this._popupAlreadyShown || !this.canShowPopup()) {
+        if (this.popupAlreadyShown || !this.canShowPopup()) {
             return;
         }
         this.bsModal.show();
@@ -156,9 +155,7 @@ export class Popup extends Interaction {
         }
         // The focus should stay free for no backdrop popups.
         if (this.el.querySelector(".s_popup_no_backdrop")) {
-            this.addListener(this.el, "hide.bs.modal", () => {
-                previouslyFocusedEl.focus();
-            }, { once: true });
+            this.addListener(this.el, "hide.bs.modal", () => previouslyFocusedEl.focus(), { once: true });
             return;
         }
         const onKeydown = (ev) => {
@@ -203,11 +200,9 @@ export class Popup extends Interaction {
     onHideModal() {
         const nbDays = this.modalEl.dataset.consentsDuration;
         cookie.set(this.el.id, this.cookieValue, nbDays * 24 * 60 * 60, "required");
-        this._popupAlreadyShown = !this.modalShownOnClickEl;
+        this.popupAlreadyShown = !this.modalShownOnClickEl;
 
-        this.el.querySelectorAll(".media_iframe_video iframe").forEach((iframeEl) => {
-            iframeEl.src = "";
-        });
+        this.el.querySelectorAll(".media_iframe_video iframe").forEach(iframeEl => iframeEl.src = "");
     }
 
     onShowModal() {
