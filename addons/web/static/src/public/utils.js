@@ -124,7 +124,10 @@ export function patchDynamicContentEntry(dynamicContent, selector, t, replacemen
     const forSelector = dynamicContent[selector];
     if (replacement === undefined) {
         delete forSelector[t];
-    } else if (typeof replacement === "function" && forSelector[t] && t !== "t-component") {
+    } else if (typeof replacement === "function" && t !== "t-component") {
+        if (!forSelector[t]) {
+            forSelector[t] = () => {};
+        }
         const oldFn = forSelector[t];
         if (["t-att-class", "t-att-style"].includes(t)) {
             forSelector[t] = (el, oldResult) => {
@@ -157,7 +160,7 @@ export function patchDynamicContentEntry(dynamicContent, selector, t, replacemen
  *             "test": this.condition && old.test,
  *         }),
  *         "t-on-click": (el, oldFn) => {
- *             oldFn?.(el);
+ *             oldFn.(el);
  *             this.doMoreStuff();
  *         },
  *     },
