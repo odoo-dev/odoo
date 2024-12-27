@@ -5,7 +5,7 @@ export class SignUpForm extends Interaction {
     static selector = ".oe_signup_form";
     dynamicContent = {
         _root: { "t-on-submit": this.onSubmit },
-        ".oe_login_buttons > button[type='submit']": { "t-att-disabled": this.submitElStatus },
+        ".oe_login_buttons > button[type='submit']": { "t-att-disabled": () => this.submitElStatus },
     };
 
     setup() {
@@ -17,7 +17,7 @@ export class SignUpForm extends Interaction {
         if (!this.submitElStatus) {
             this.submitElStatus = "disabled";
             const refreshEl = document.createElement("i");
-            refreshEl.classList.add("fa fa-refresh fa-spin");
+            refreshEl.classList.add("fa", "fa-refresh", "fa-spin");
             this.insert(refreshEl, submitEl, "beforebegin");
         }
     }
