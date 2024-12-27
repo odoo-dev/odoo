@@ -160,7 +160,7 @@ export function patchDynamicContentEntry(dynamicContent, selector, t, replacemen
  *             "test": this.condition && old.test,
  *         }),
  *         "t-on-click": (el, oldFn) => {
- *             oldFn.(el);
+ *             oldFn(el);
  *             this.doMoreStuff();
  *         },
  *     },
