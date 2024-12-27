@@ -212,18 +212,7 @@ export const PublicRoot = publicWidget.Widget.extend({
             });
             return Promise.all(proms);
         });
-        return Promise.all(defs).then(() => {
-            // TODO Find a better way.
-            // Also start interactions that might be needed within started widgets.
-            const targetEl = $from ? $from[0] : undefined;
-            const publicInteractions = this.bindService("public.interactions");
-            this.startFromEventHandler = true;
-            try {
-                publicInteractions.startInteractions(targetEl);
-            } finally {
-                this.startFromEventHandler = false;
-            }
-        });
+        return Promise.all(defs);
     },
     /**
      * Destroys all registered widget instances. Website would need this before
