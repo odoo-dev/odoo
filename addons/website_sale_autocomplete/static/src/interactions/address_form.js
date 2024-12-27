@@ -42,6 +42,7 @@ class AddressForm extends Interaction {
                     inputContainerEl.appendChild(renderToElement("website_sale_autocomplete.AutocompleteDropDown", {
                         results: response.results,
                     }));
+                    this.refreshListeners();
                     if (response.session_id) {
                         this.sessionId = response.session_id;
                     }
