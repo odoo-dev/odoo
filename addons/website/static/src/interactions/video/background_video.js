@@ -3,16 +3,15 @@ import { registry } from "@web/core/registry";
 
 import { uniqueId } from "@web/core/utils/functions";
 import { renderToElement } from "@web/core/utils/render";
-
 import { setupAutoplay, triggerAutoplay } from "@website/utils/videos";
 
-class BackgroundVideo extends Interaction {
+export class BackgroundVideo extends Interaction {
     static selector = ".o_background_video";
     dynamicSelectors = {
         ...this.dynamicSelectors,
         _dropdown: () => this.el.closest(".dropdown-menu").parentElement,
         _modal: () => this.el.closest("modal"),
-    }
+    };
     dynamicContent = {
         _document: {
             "t-on-optionalCookiesAccepted": () => this.iframeEl.src = this.videoSrc,
@@ -32,7 +31,7 @@ class BackgroundVideo extends Interaction {
                 "d-none": this.hideVideoContainer,
             }),
         },
-    }
+    };
 
     setup() {
         this.hideVideoContainer = false;
@@ -94,7 +93,7 @@ class BackgroundVideo extends Interaction {
             // an horizontal scrollbar may appear.
             this.adjustIframe();
         });
-        this.insert(this.bgVideoContainer, this.el, "afterbegin")
+        this.insert(this.bgVideoContainer, this.el, "afterbegin");
         oldContainer.remove();
 
         this.adjustIframe();
