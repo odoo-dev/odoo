@@ -170,13 +170,13 @@ class TestIrCron(TransactionCase, CronMixinCase):
 
     def test_cron_ready_jobs_order(self):
         cron_avg = self.cron.copy()
-        cron_avg.priority = 5  # average priority
+        cron_avg.stat_mean_duration = 5  # average priority
 
         cron_high = self.cron.copy()
-        cron_high.priority = 0  # highest priority
+        cron_high.stat_mean_duration = 0  # highest priority
 
         cron_low = self.cron.copy()
-        cron_low.priority = 10  # lowest priority
+        cron_low.stat_mean_duration = 10  # lowest priority
 
         crons = cron_high | cron_avg | cron_low  # order is important
         crons.write({'nextcall': fields.Datetime.now()})
