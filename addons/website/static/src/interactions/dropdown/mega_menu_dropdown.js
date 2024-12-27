@@ -1,13 +1,13 @@
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
-class MegaMenuDropdown extends Interaction {
+export class MegaMenuDropdown extends Interaction {
     static selector = "header#top";
     dynamicContent = {
         ".o_mega_menu_toggle": {
-            "t-on-mouseenter": this.onHoverMegaMenu,
-            "t-on-mousedown": this.onTriggerMegaMenu,
-            "t-on-keyup": this.onTriggerMegaMenu,
+            "t-on-mouseenter.withTarget": this.onHoverMegaMenu,
+            "t-on-mousedown.withTarget": this.onTriggerMegaMenu,
+            "t-on-keyup.withTarget": this.onTriggerMegaMenu,
         },
         _root: {
             "t-on-mousedown": this.onTriggerExtraMenu, // delegated to ".o_extra_menu_items"
@@ -18,9 +18,7 @@ class MegaMenuDropdown extends Interaction {
     setup() {
         this.mobileMegaMenuToggleEls = [];
         this.desktopMegaMenuToggleEls = [];
-        const megaMenuToggleEls = this.el.querySelectorAll(
-            ".o_mega_menu_toggle",
-        );
+        const megaMenuToggleEls = this.el.querySelectorAll(".o_mega_menu_toggle");
         for (const megaMenuToggleEl of megaMenuToggleEls) {
             if (megaMenuToggleEl.closest(".o_header_mobile")) {
                 this.mobileMegaMenuToggleEls.push(megaMenuToggleEl);
@@ -35,16 +33,13 @@ class MegaMenuDropdown extends Interaction {
      * a mega menu (i.e. it is in the other navbar), brings the corresponding
      * mega menu into it.
      *
-     * @param {Element} megaMenuToggleEl
+     * @param {HTMLElement} megaMenuToggleEl
      */
     moveMegaMenu(megaMenuToggleEl) {
-        const hasMegaMenu =
-            !!megaMenuToggleEl.parentElement.querySelector(".o_mega_menu");
+        const hasMegaMenu = !!megaMenuToggleEl.parentElement.querySelector(".o_mega_menu");
         if (hasMegaMenu) {
             return;
         }
-        // TODO Editor behavior
-        // this.options.wysiwyg?.odooEditor.observerUnactive("moveMegaMenu");
         const isMobileNavbar = !!megaMenuToggleEl.closest(".o_header_mobile");
         const currentNavbarToggleEls = isMobileNavbar
             ? this.mobileMegaMenuToggleEls
@@ -52,51 +47,46 @@ class MegaMenuDropdown extends Interaction {
         const otherNavbarToggleEls = isMobileNavbar
             ? this.desktopMegaMenuToggleEls
             : this.mobileMegaMenuToggleEls;
-        const megaMenuToggleIndex =
-            currentNavbarToggleEls.indexOf(megaMenuToggleEl);
-        const previousMegaMenuToggleEl =
-            otherNavbarToggleEls[megaMenuToggleIndex];
-        const megaMenuEl =
-            previousMegaMenuToggleEl.parentElement.querySelector(
-                ".o_mega_menu",
-            );
+
+        const megaMenuToggleIndex = currentNavbarToggleEls.indexOf(megaMenuToggleEl);
+        const previousMegaMenuToggleEl = otherNavbarToggleEls[megaMenuToggleIndex];
+        const megaMenuEl = previousMegaMenuToggleEl.parentElement.querySelector(".o_mega_menu");
+
         // Hiding the dropdown where the mega menu comes from before moving it,
         // so everything is in a consistent state.
         Dropdown.getOrCreateInstance(previousMegaMenuToggleEl).hide();
         megaMenuToggleEl.insertAdjacentElement("afterend", megaMenuEl);
-        // TODO Editor behavior
-        // this.options.wysiwyg?.odooEditor.observerActive("moveMegaMenu");
     }
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} targetEl
      */
-    onTriggerMegaMenu(ev) {
-        const megaMenuToggleEl = ev.currentTarget;
+    onTriggerMegaMenu(ev, targetEl) {
         // Hoverable menus are clicked in mobile view
         if (
             this.el.classList.contains("o_hoverable_dropdown")
-            && !megaMenuToggleEl.closest(".o_header_mobile")
+            && !targetEl.closest(".o_header_mobile")
             && ev.type !== "keyup"
         ) {
             return;
         }
-        this.moveMegaMenu(megaMenuToggleEl);
+        this.moveMegaMenu(targetEl);
     }
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} targetEl
      */
-    onHoverMegaMenu(ev) {
-        const megaMenuToggleEl = ev.currentTarget;
+    onHoverMegaMenu(ev, targetEl) {
         // Hoverable menus are clicked in mobile view
         if (
             !this.el.classList.contains("o_hoverable_dropdown")
-            || megaMenuToggleEl.closest(".o_header_mobile")
+            || targetEl.closest(".o_header_mobile")
         ) {
             return;
         }
-        this.moveMegaMenu(megaMenuToggleEl);
+        this.moveMegaMenu(targetEl);
     }
 
     /**
@@ -112,9 +102,7 @@ class MegaMenuDropdown extends Interaction {
         const megaMenuToggleEls = ev.target
             .closest(".o_extra_menu_items")
             .querySelectorAll(".o_mega_menu_toggle");
-        megaMenuToggleEls.forEach((megaMenuToggleEl) =>
-            this.moveMegaMenu(megaMenuToggleEl),
-        );
+        megaMenuToggleEls.forEach(el => this.moveMegaMenu(el));
     }
 }
 
