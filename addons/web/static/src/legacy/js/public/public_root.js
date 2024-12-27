@@ -177,8 +177,13 @@ export const PublicRoot = publicWidget.Widget.extend({
 
         this._stopWidgets($from);
         if (!options?.starting && !options?.fromInteractionPatch) {
-            const targetEl = $from ? $from[0] : undefined;
-            this._restartInteractions(targetEl, options);
+            if ($from) {
+                for (const fromEl of $from) {
+                    this._restartInteractions(fromEl, options);
+                }
+            } else {
+                this._restartInteractions(undefined, options);
+            }
         }
 
         var defs = Object.values(this._getPublicWidgetsRegistry(options)).map((PublicWidget) => {
