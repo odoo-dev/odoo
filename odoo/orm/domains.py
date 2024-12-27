@@ -1590,7 +1590,10 @@ def _optimize_boolean_in_all(condition, model):
 def _value_to_date(value, env, iso_only=False):
     # check datetime first, because it's a subclass of date
     if isinstance(value, datetime):
-        return value.date()
+        if value.time() == time.min:
+            _logger.warning("datetime given for date")  # XXX
+            return value.date()
+        raise ValueError(f'Failed to cast {value!r} into a date (ambiguous value)')
     if isinstance(value, date) or value is False:
         return value
     if isinstance(value, str):
@@ -1618,7 +1621,12 @@ def _optimize_type_date(condition, model):
         or "." in condition.field_expr
     ):
         return condition
+
     value = _value_to_date(condition.value, model.env, iso_only=True)
+    if isinstance(value, OrderedSet):
+        value.discard(None)
+    elif value is None:
+        return Domain(operator in NEGATIVE_CONDITION_OPERATORS)
     if value is False and operator[0] in ('<', '>'):
         # comparison to False results in an empty domain
         return _FALSE_DOMAIN
