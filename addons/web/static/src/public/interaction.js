@@ -1,3 +1,4 @@
+import { renderToFragment } from "@web/core/utils/render";
 import { debounce, throttleForAnimation } from "@web/core/utils/timing";
 import { SKIP_IMPLICIT_UPDATE } from "./colibri";
 import { makeAsyncHandler, makeButtonHandler } from "./utils";
@@ -113,28 +114,28 @@ export class Interaction {
      * initialize everything needed by the interaction. The el element is
      * available and can be used. Services are ready and available as well.
      */
-    setup() { }
+    setup() {}
 
     /**
      * If the interaction needs some asynchronous work to be ready, it should
      * be done here. The website framework will wait for this method to complete
      * before applying the dynamic content (event handlers, ...)
      */
-    async willStart() { }
+    async willStart() {}
 
     /**
      * The start function when we need to execute some code after the interaction
      * is ready. It is the equivalent to the "mounted" owl lifecycle hook. At
      * this point, event handlers have been attached.
      */
-    start() { }
+    start() {}
 
     /**
      * All side effects done should be cleaned up here. Note that like all
      * other lifecycle methods, it is not necessary to call the super.destroy
      * method (unless you inherit from a concrete subclass)
      */
-    destroy() { }
+    destroy() {}
 
     // -------------------------------------------------------------------------
     // helpers
@@ -290,8 +291,8 @@ export class Interaction {
     }
 
     /**
-     * Insert an node at a specific location. The inserted node will be removed
-     * when the interaction is destroyed.
+     * Insert and activate an element at a specific location.
+     * The inserted element will be removed when the interaction is destroyed.
      *
      * @param { HTMLElement } el
      * @param { HTMLElement } [locationEl] the target
@@ -300,6 +301,16 @@ export class Interaction {
     insert(el, locationEl = this.el, position = "beforeend") {
         locationEl.insertAdjacentElement(position, el);
         this.registerCleanup(() => el.remove());
+        this.services["public.interactions"].startInteractions(el);
+        this.refreshListeners();
+    }
+
+    renderAt(template, renderContext, locationEl, position) {
+        const fragment = renderToFragment(template, renderContext);
+        for (const el of [...fragment.children]) {
+            this.insert(el, locationEl, position);
+        }
+        return fragment;
     }
 
     /**
