@@ -1,8 +1,9 @@
-import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
+
 import { rpc } from "@web/core/network/rpc";
 
-export class WebsiteControllerPageListingLayout extends Interaction {
+export class ListingLayout extends Interaction {
     static selector = ".o_website_listing_layout";
     dynamicContent = {
         ".listing_layout_switcher input": {
@@ -47,4 +48,4 @@ export class WebsiteControllerPageListingLayout extends Interaction {
 
 registry
     .category("public.interactions")
-    .add("website.website_controller_page_listing_layout", WebsiteControllerPageListingLayout);
+    .add("website.listing_layout", ListingLayout);

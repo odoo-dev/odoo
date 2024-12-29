@@ -1,22 +1,24 @@
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
-class Parallax extends Interaction {
+export class Parallax extends Interaction {
     static selector = ".parallax";
     dynamicSelectors = Object.assign(this.dynamicSelectors, {
-        _modal: () => this.modalEl
+        _modal: () => this.el.closest(".modal"),
+        _bg: () => this.el.querySelector(":scope > .s_parallax_bg"),
     });
     dynamicContent = {
-        _document: {
-            "t-on-scroll": this.onScroll,
+        _document: { "t-on-scroll": this.onScroll },
+        _window: { "t-on-resize": this.onResize },
+        _modal: { "t-on-shown.bs.modal": this.onResize },
+        _bg: {
+            "t-att-style": () => ({
+                "top": this.styleTop,
+                "bottom": this.styleBottom,
+                "transform": this.styleTransform,
+            }),
         },
-        _window: {
-            "t-on-resize": this.onResize,
-        },
-        _modal: {
-            "t-on-shown.bs.modal": this.onModalShown,
-        }
-    }
+    };
 
     setup() {
         this.speed = 0;
@@ -26,28 +28,17 @@ class Parallax extends Interaction {
         this.minScrollPos = 0;
         this.maxScrollPos = 0;
 
-        this.modalEl = this.el.closest(".modal");
-        this.bgEl = this.el.querySelector(":scope > .s_parallax_bg");
+        this.styleTop = undefined;
+        this.styleBottom = undefined;
+        this.styleTransform = undefined;
     }
 
     start() {
-        this.rebuild();
+        this.onResize();
+        this.updateContent();
     }
 
-    destroy() {
-        this.updateBgCSS({ top: "", bottom: "", transform: "" });
-    }
-
-    onModalShown() {
-        this.rebuild();
-        this.modalEl.dispatchEvent(new Event("scroll"));
-    }
-
-    updateBgCSS(options) {
-        Object.assign(this.bgEl.style, options);
-    }
-
-    rebuild() {
+    onResize() {
         this.speed = parseFloat(this.el.getAttribute("data-scroll-background-ratio")) || 0;
         if (this.speed === 0 || this.speed === 1) {
             return;
@@ -63,12 +54,9 @@ class Parallax extends Interaction {
 
         this.ratio = this.speed * (this.viewportHeight / 10);
 
-        this.updateBgCSS({ top: -Math.abs(this.ratio) + "px", bottom: -Math.abs(this.ratio) + "px" })
+        this.styleTop = -Math.abs(this.ratio) + "px";
+        this.styleBottom = -Math.abs(this.ratio) + "px";
         this.onScroll();
-    }
-
-    onResize() {
-        this.rebuild();
     }
 
     onScroll() {
@@ -84,7 +72,7 @@ class Parallax extends Interaction {
         const offset = 1 - 2 * this.minScrollPos * r;
         const movement = - Math.round(this.ratio * (r * currentPosition + offset));
 
-        this.updateBgCSS({ transform: "translateY(" + movement + "px)" });
+        this.styleTransform = "translateY(" + movement + "px)";
     }
 }
 
