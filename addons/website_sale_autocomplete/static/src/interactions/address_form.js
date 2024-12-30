@@ -3,7 +3,6 @@ import { registry } from "@web/core/registry";
 
 import { rpc } from "@web/core/network/rpc";
 import { KeepLast } from "@web/core/utils/concurrency";
-import { renderToElement } from "@web/core/utils/render";
 
 class AddressForm extends Interaction {
     static selector = ".oe_cart .checkout_autoformat";
@@ -39,10 +38,9 @@ class AddressForm extends Interaction {
                     session_id: this.sessionId || null,
                 }).then((response) => {
                     inputContainerEl.querySelector(".dropdown-menu")?.remove();
-                    inputContainerEl.appendChild(renderToElement("website_sale_autocomplete.AutocompleteDropDown", {
+                    this.renderAt("website_sale_autocomplete.AutocompleteDropDown", {
                         results: response.results,
-                    }));
-                    this.refreshListeners();
+                    }, inputContainerEl);
                     if (response.session_id) {
                         this.sessionId = response.session_id;
                     }

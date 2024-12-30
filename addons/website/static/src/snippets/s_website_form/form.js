@@ -5,7 +5,6 @@ import { Interaction } from "@web/public/interaction";
 import { user } from "@web/core/user";
 import { delay } from "@web/core/utils/concurrency";
 import { _t } from "@web/core/l10n/translation";
-import { renderToElement } from "@web/core/utils/render";
 import { post } from "@web/core/network/http_service";
 import { localization } from "@web/core/l10n/localization";
 import {
@@ -582,9 +581,10 @@ export class Form extends Interaction {
             message = _t("An error has occured, the form has not been sent.");
         }
 
-        resultEl.replaceWith(renderToElement(`website.s_website_form_status_${status}`, {
+        this.renderAt(`website.s_website_form_status_${status}`, {
             message: message,
-        }));
+        }, resultEl, "afterend");
+        resultEl.remove();
     }
 
     /**
@@ -752,9 +752,7 @@ export class Form extends Interaction {
      *      displayed
      */
     createFileBlock(fileDetails, filesZoneEl) {
-        const fileBlockEl = renderToElement("website.file_block", {fileName: fileDetails.name});
-        fileBlockEl.fileDetails = fileDetails;
-        filesZoneEl.append(fileBlockEl);
+        this.renderAt("website.file_block", {fileName: fileDetails.name}, filesZoneEl, "beforeend", (el) => el.children[0].fileDetails = fileDetails);
     }
     /**
      * Creates the file upload button (= a button to replace the file input,

@@ -6,8 +6,6 @@ import { rpc } from "@web/core/network/rpc";
 import { post } from "@web/core/network/http_service";
 import { redirect } from "@web/core/utils/urls";
 
-import { renderToElement, renderToFragment } from "@web/core/utils/render";
-
 export class BoothRegistration extends Interaction {
     static selector = ".o_wbooth_registration";
     dynamicContent = {
@@ -75,10 +73,11 @@ export class BoothRegistration extends Interaction {
 
     updateBoothsList() {
         const boothsElem = this.el.querySelector('.o_wbooth_booths');
-        boothsElem.replaceChildren(renderToFragment('event_booth_checkbox_list', {
+        this.renderAt("event_booth_checkbox_list", {
             'event_booth_ids': this.boothCache[this.activeBoothCategoryId],
             'selected_booth_ids': this.isFirstRender ? this.selectedBoothIds : [],
-        }));
+        }, boothsElem, "afterend");
+        boothsElem.remove();
         this.isFirstRender = false;
     }
 
@@ -188,13 +187,12 @@ export class BoothRegistration extends Interaction {
             if (jsonResponse.success) {
                 this.el.querySelector('.o_wevent_booth_order_progress').remove();
                 const boothCategoryId = this.el.querySelector('input[name=booth_category_id]').value;
-                const boothRegistrationCompleteFormEl = renderToElement("event_booth_registration_complete", {
+                this.renderAt("event_booth_registration_complete", {
                     booth_category_id: boothCategoryId,
                     event_id: this.eventId,
                     event_name: jsonResponse.event_name,
                     contact: jsonResponse.contact,
-                });
-                this.insert(boothRegistrationCompleteFormEl, formEl, "afterend");
+                }, formEl, "afterend");
                 formEl.remove();
             } else if (jsonResponse.redirect) {
                 redirect(jsonResponse.redirect);
