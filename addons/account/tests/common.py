@@ -336,10 +336,11 @@ class AccountTestInvoicingCommon(ProductCommon):
                     *journal_company_domain,
                     ('type', '=', 'bank')
                 ], limit=1),
-            'default_journal_cash': cls.env['account.journal'].search([
-                    *journal_company_domain,
-                    ('type', '=', 'cash')
-                ], limit=1),
+            'default_journal_cash': cls.env['account.journal'].create({
+                'type': 'cash',
+                'name': 'Cash',
+                'company_id': company.id,
+            }),
             'default_journal_credit': cls.env['account.journal'].create({
                 'name': 'Credit Journal',
                 'type': 'credit',
@@ -1274,18 +1275,6 @@ class TestAccountMergeCommon(AccountTestInvoicingCommon):
             ]
         })
 
-        # Many2many (note that merging the accounts will technically
-        # break the check_company constraint on journal.account_control_ids,
-        # but we still test this as this is the easiest way to test that
-        # M2M fields are merged correctly.)
-        journal = self.env['account.journal'].create({
-            'name': f'For account {account.id}',
-            'code': f'T{account.id}',
-            'type': 'general',
-            'company_id': account.company_ids.id,
-            'account_control_ids': [Command.set(account.ids)],
-        })
-
         # Company-dependent Many2one.
         # We must set (and check) the 'property_account_receivable_id' on the right company.
         partner = self.env['res.partner'].with_company(account.company_ids).create({
@@ -1301,9 +1290,23 @@ class TestAccountMergeCommon(AccountTestInvoicingCommon):
             'company_id': account.company_ids.id,
         })
 
-        return {
+        res = {
             move.line_ids[0]: 'account_id',
-            journal: 'account_control_ids',
             partner: 'property_account_receivable_id',
             attachment: 'res_id',
         }
+
+        # Many2many (the relationship can only be found
+        # in `account.transfer.model` model of account_auto_transfer module
+        # therefore, instance is created only if the model exists)
+        if 'account.transfer.model' in self.env:
+            transfer_model = self.env['account.transfer.model'].create({
+                'name': 'Test Transfer',
+                'date_start': '2019-06-01',
+                'frequency': 'month',
+                'journal_id': self.env['account.journal'].search([('company_id', '=', account.company_ids.id)], limit=1).id,
+                'account_ids': [Command.set(account.ids)],
+            })
+            res[transfer_model] = 'account_ids'
+
+        return res

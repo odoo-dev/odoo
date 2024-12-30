@@ -1,0 +1,6 @@
+.quick-create-card {
+    cursor: pointer;
+    &:hover {
+        background: linear-gradient(to right, rgba($o-brand-secondary, 0.1), rgba($o-brand-primary, 0.1));
+    }
+}

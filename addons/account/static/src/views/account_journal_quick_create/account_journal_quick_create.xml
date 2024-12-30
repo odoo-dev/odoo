@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="account.AccountJournalQuickCreateCard">
+        <div class="col-md-6 mb-3">
+            <div class="card h-100 quick-create-card" t-on-click="props.onClick">
+                <div class="card-body">
+                    <i t-att-class="'text-primary fa fa-fw ' + props.icon"/>
+                    <h5 class="card-title" t-esc="props.title"/>
+                    <p class="card-text" t-esc="props.text"/>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="account.AccountJournalQuickCreate">
+        <div class="container mt-4">
+            <div class="row">
+                <AccountJournalQuickCreateCard
+                    icon="'fa-university'"
+                    title.translate="Bank"
+                    text.translate="Connect bank accounts a payment gateways (Paypal, Stripe, ...etc)"
+                    onClick.bind="() => this.openAccountWizard('bank')"
+                />
+                <AccountJournalQuickCreateCard
+                    icon="'fa-credit-card'"
+                    title.translate="Card"
+                    text.translate="Connect credit and debit cards"
+                    onClick.bind="() => this.openAccountWizard('credit_card')"
+                />
+            </div>
+            <div class="row">
+                <AccountJournalQuickCreateCard
+                    icon="'fa-money'"
+                    title.translate="Cash"
+                    text.translate="Cash movements"
+                    onClick.bind="() => this.createJournal('cash')"
+                />
+                <AccountJournalQuickCreateCard
+                    icon="'fa-ellipsis-h'"
+                    title.translate="Miscellaneous Journal"
+                    text.translate="Payroll, depreciation, closing entries, deferred revenues, ...etc"
+                    onClick.bind="() => this.createJournal('general')"
+                />
+            </div>
+            <div class="row">
+                <AccountJournalQuickCreateCard
+                    icon="'fa-handshake-o'"
+                    title.translate="Sales Journal"
+                    text.translate="Create a separate journal for specific sales activities"
+                    onClick.bind="() => this.createJournal('sale')"
+                />
+                <AccountJournalQuickCreateCard
+                    icon="'fa-shopping-basket'"
+                    title.translate="Purchases Journal"
+                    text.translate="Create a separate journal to organize vendor bills"
+                    onClick.bind="() => this.createJournal('purchase')"
+                />
+            </div>
+        </div>
+    </t>
+</templates>
