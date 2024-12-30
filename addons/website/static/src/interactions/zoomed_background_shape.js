@@ -1,5 +1,5 @@
-import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
 
 /**
  * @todo while this solution mitigates the issue, it is not fixing it entirely
@@ -28,28 +28,26 @@ export class ZoomedBackgroundShape extends Interaction {
         _window: {
             "t-on-resize": this.throttled(this.resizeBackgroundShape),
         },
+        _root: {
+            "t-att-style": () => ({
+                "left": this.offset,
+                "right": this.offset,
+            }),
+        },
     };
+
+    setup() {
+        this.offset = undefined;
+    }
 
     start() {
         this.resizeBackgroundShape();
-    }
-
-    destroy() {
-        this.updateShapePosition();
-    }
-
-    /**
-     * Updates the left and right offset of the shape.
-     *
-     * @param {string} offset
-     */
-    updateShapePosition(offset = '') {
-        this.el.style.left = offset;
-        this.el.style.right = offset;
+        this.updateContent();
     }
 
     resizeBackgroundShape() {
-        this.updateShapePosition();
+        this.offset = undefined;
+        this.updateContent();
         // Get the decimal part of the shape element width.
         let decimalPart = this.el.getBoundingClientRect().width % 1;
         // Round to two decimal places.
@@ -59,12 +57,13 @@ export class ZoomedBackgroundShape extends Interaction {
         decimalPart = decimalPart == 1 ? 0 : decimalPart;
         // If there is a decimal part. (e.g. Chrome + browser zoom enabled)
         if (decimalPart > 0) {
+            console.log(decimalPart);
+            console.log((decimalPart < 0.5 ? decimalPart : decimalPart - 1));
             // Compensate for the gap by giving an integer width value to the
             // shape by changing its "right" and "left" positions.
-            let offset = (decimalPart < 0.5 ? decimalPart : decimalPart - 1) / 2;
+            this.offset = `${(decimalPart < 0.5 ? decimalPart : decimalPart - 1) / 2}px`;
             // This never causes the horizontal scrollbar to appear because it
             // only appears if the overflow to the right exceeds 0.333px.
-            this.updateShapePosition(offset + 'px');
         }
     }
 }
@@ -75,4 +74,6 @@ registry
 
 registry
     .category("public.interactions.edit")
-    .add("website.zoomed_background_shape", { Interaction: ZoomedBackgroundShape });
+    .add("website.zoomed_background_shape", {
+        Interaction: ZoomedBackgroundShape,
+    });
