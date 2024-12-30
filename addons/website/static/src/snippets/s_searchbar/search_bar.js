@@ -1,18 +1,17 @@
-import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
-import { rpc } from "@web/core/network/rpc";
-import { KeepLast } from "@web/core/utils/concurrency";
-import { getTemplate } from "@web/core/templates";
+import { registry } from "@web/core/registry";
+
 import { markup } from "@odoo/owl";
+import { rpc } from "@web/core/network/rpc";
+import { getTemplate } from "@web/core/templates";
+import { KeepLast } from "@web/core/utils/concurrency";
 
 export class SearchBar extends Interaction {
     static selector = ".o_searchbar_form";
     dynamicContent = {
         _root: {
             "t-on-focusout": this.debounced(this.onFocusOut, 100),
-            "t-on-safarihack": (ev) => {
-                this.linkHasFocus = ev.detail.linkHasFocus;
-            },
+            "t-on-safarihack": (ev) => this.linkHasFocus = ev.detail.linkHasFocus,
             "t-att-class": () => ({
                 "dropdown": this.hasDropdown,
                 "show": this.hasDropdown,
@@ -32,6 +31,7 @@ export class SearchBar extends Interaction {
         this.menuEl = null;
         this.searchType = this.inputEl.dataset.searchType;
         const orderByEl = this.el.querySelector(".o_search_order_by");
+        const form = orderByEl.closest("form");
         this.order = orderByEl.value;
         this.limit = parseInt(this.inputEl.dataset.limit) || 5;
         this.wasEmpty = !this.inputEl.value;
@@ -48,7 +48,6 @@ export class SearchBar extends Interaction {
             // Make it easy for customization to disable fuzzy matching on specific searchboxes
             "allowFuzzy": !dataset.noFuzzy,
         };
-        const form = orderByEl.closest("form");
         for (const fieldEl of form.querySelectorAll("input[type='hidden']")) {
             this.options[fieldEl.name] = fieldEl.value;
         }
@@ -193,11 +192,6 @@ export class SearchBar extends Interaction {
         } else { // clear button clicked
             this.render(); // remove existing suggestions
             ev.preventDefault();
-            if (!this.wasEmpty) {
-                this.limit = 0; // prevent autocomplete
-                const formEl = this.el.querySelector(".o_search_order_by").closest("form");
-                formEl.submit();
-            }
         }
     }
 }

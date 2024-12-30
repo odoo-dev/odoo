@@ -38,5 +38,5 @@ registry
 registry
     .category("public.interactions.edit")
     .add("website.faq_horizontal", {
-        Interaction: FaqHorizontal
+        Interaction: FaqHorizontal,
     });
