@@ -19,19 +19,16 @@
                         password="True"
                         required="code == 'paymob' and state != 'disabled'"
                     />
+                    <field name="paymob_account_country_id" invisible="code != 'paymob'"/>
                 </group>
             </group>
-            <group name="payment_form" position='inside'>
+            <!-- <group name="payment_form" position='inside'>
                 <field
                     name="paymob_integration_ids"
                     widget="many2many_tags"
-                    required="code == 'paymob' and state != 'disabled'"
                     invisible="code != 'paymob'"
                 />
-            </group>
-            <label for="available_currency_ids" position="before">
-                <field name="paymob_account_country_id" invisible="code != 'paymob'"/>
-            </label>
+            </group> -->
         </field>
     </record>
 

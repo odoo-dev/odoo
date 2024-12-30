@@ -33,6 +33,18 @@ DEFAULT_PAYMENT_METHOD_CODES = {
     'card',
 }
 
+# Paymob deals with integer values for the amount
+# Error message from Paymob:
+# The amount parameter should be provided as an integer representing the decimal units
+# of the currency. Example: Pass 100 for EGP 1 / AED 1 / PKR 1 / SAR 1, Pass 1000 for OMR 1."]}
+CURRENCY_DECIMAL_MAPPING = {
+    'AED': 100,
+    'EGP': 100,
+    'OMR': 1000,
+    'PKR': 100,
+    'SAR': 100,
+}
+
 PAYMENT_STATUS_MAPPING = {
     'pending': (
         'PENDING',

@@ -33,6 +33,43 @@ class PaymobController(http.Controller):
         :param dict data: The notification data (only `id`) and the transaction reference (`ref`)
                           embedded in the return URL
         """
+        # x={'acq_response_code': '00',
+        # 'amount_cents': '10002785',
+        # 'bill_balanced': 'false',
+        # 'captured_amount': '0',
+        # 'created_at': '2025-01-03T19:55:30.318287+05:00',
+        # 'currency': 'PKR',
+        # 'data.message': 'Approved',
+        # 'discount_details': '[]',
+        # 'error_occured': 'false',
+        # 'has_parent_transaction': 'false',
+        # 'hmac': 'a14aebfe25d62e58343cf6ed90e376518ac4a33ff3b93409beaf66363527c809b6c802f0f2642a749438804a9e33ac03aaf000d3cfad1b2a75f3ea602472e8c1',
+        # 'id': '20279777',
+        # 'integration_id': '191469',
+        # 'is_3d_secure': 'true',
+        # 'is_auth': 'false',
+        # 'is_bill': 'false',
+        # 'is_capture': 'false',
+        # 'is_refund': 'false',
+        # 'is_refunded': 'false',
+        # 'is_settled': 'false',
+        # 'is_standalone_payment': 'true',
+        # 'is_void': 'false',
+        # 'is_voided': 'false',
+        # 'merchant_commission': '0',
+        # 'merchant_order_id': 'S00038#1',
+        # 'order': '25793766',
+        # 'owner': '176511',
+        # 'pending': 'false',
+        # 'profile_id': '167115',
+        # 'refunded_amount_cents': '0',
+        # 'source_data.card_num': '512345xxxxxx2346',
+        # 'source_data.pan': '2346',
+        # 'source_data.sub_type': 'MasterCard',
+        # 'source_data.type': 'card',
+        # 'success': 'true',
+        # 'txn_response_code': 'APPROVED',
+        # 'updated_at': '2025-01-03T19:55:48.105607+05:00'}
         _logger.info("handling redirection from Paymob with data:\n%s", pprint.pformat(data))
         request.env['payment.transaction'].sudo()._handle_notification_data('paymob', data)
         return request.redirect('/payment/status')

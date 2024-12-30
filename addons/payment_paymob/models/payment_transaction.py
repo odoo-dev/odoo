@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import json
 import logging
 import pprint
 
@@ -34,22 +35,24 @@ class PaymentTransaction(models.Model):
         if self.provider_code != 'paymob':
             return res
 
-        payload = self._paymob_prepare_payment_request_payload()
-        _logger.info("sending '/v1/intention' request for link creation:\n%s",
-                     pprint.pformat(payload))
-        payment_data = self.provider_id._paymob_make_request('/v1/intention', data=payload)
+        if not self.paymob_client_secret:
+            payload = self._paymob_prepare_payment_request_payload()
+            _logger.info("sending '/v1/intention/' request for link creation:\n%s",
+                        pprint.pformat(payload))
+            payment_data = self.provider_id._paymob_make_request('/v1/intention/', data=payload)
 
-        # The provider reference is set now to allow fetching the payment status after redirection
-        self.provider_reference = payment_data.get('id')
-        self.paymob_client_secret = payment_data.get('client_secret')
+            # The provider reference is set now to allow fetching the payment status after redirection
+            self.provider_reference = payment_data.get('id')
+            self.paymob_client_secret = payment_data.get('client_secret')
 
         paymob_url = self.provider_id._paymob_get_api_url()
         api_url = f'''{paymob_url}/unifiedcheckout/?publicKey={
-            public_key}&clientSecret={self.paymob_client_secret}'''
+            payment_utils.get_normalized_field(self.provider_id.paymob_public_key)
+            }&clientSecret={self.paymob_client_secret}'''
 
-        return {
-            'api_url': api_url,
-        }
+        parsed_url = urls.url_parse(api_url)
+        url_params = urls.url_decode(parsed_url.query)
+        return {'api_url': api_url, 'url_params': url_params}
 
     def _paymob_prepare_payment_request_payload(self):
         """ Create the payload for the payment request based on the transaction values.
@@ -64,10 +67,10 @@ class PaymentTransaction(models.Model):
         partner_first_name, partner_last_name = payment_utils.split_partner_name(self.partner_name)
 
         return {
-            'special_reference': self.reference,
-            'amount': self.amount,
+            'special_reference': self.reference + f"#{self.id}",
+            'amount': self.amount * const.CURRENCY_DECIMAL_MAPPING[self.currency_id.name],
             'currency': self.currency_id.name,
-            'payment_methods':  self.provider_id.paymob_integration_ids.mapped('name'),
+            'payment_methods': self.provider_id.payment_method_ids.code,
             'notification_url': webhook_url,
             'redirection_url': redirect_url,
             'billing_data': {
@@ -76,7 +79,6 @@ class PaymentTransaction(models.Model):
                 'email': self.partner_email,
                 'street': self.partner_address,
                 'state': self.partner_state_id.name,
-                # 'city': self.partner_city,
                 'phone_number': self.partner_phone,
                 'country': self.partner_country_id.code,
             },

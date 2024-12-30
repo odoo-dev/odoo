@@ -19,10 +19,5 @@
     ],
     'post_init_hook': 'post_init_hook',
     'uninstall_hook': 'uninstall_hook',
-    'assets': {
-        'web.assets_frontend': [
-            'payment_paymob/static/src/**/*',
-        ],
-    },
     'license': 'LGPL-3',
 }
