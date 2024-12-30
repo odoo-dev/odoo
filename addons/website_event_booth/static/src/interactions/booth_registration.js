@@ -56,7 +56,7 @@ export class BoothRegistration extends Interaction {
         if (data && data.unavailable_booths.length) {
             const boothIdEls = this.el.querySelectorAll("input[name='event_booth_ids']");
             for (const boothIdEl of boothIdEls) {
-                if (result.unavailable_booths.includes(parseInt(boothIdEl.value))) {
+                if (data.unavailable_booths.includes(parseInt(boothIdEl.value))) {
                     boothIdEl.closest(".form-check").classList.add("text-danger");
                 }
             }
@@ -73,11 +73,11 @@ export class BoothRegistration extends Interaction {
 
     updateBoothsList() {
         const boothsElem = this.el.querySelector('.o_wbooth_booths');
+        boothsElem.replaceChildren();
         this.renderAt("event_booth_checkbox_list", {
             'event_booth_ids': this.boothCache[this.activeBoothCategoryId],
             'selected_booth_ids': this.isFirstRender ? this.selectedBoothIds : [],
-        }, boothsElem, "afterend");
-        boothsElem.remove();
+        }, boothsElem);
         this.isFirstRender = false;
     }
 
