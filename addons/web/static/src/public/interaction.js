@@ -308,7 +308,11 @@ export class Interaction {
     renderAt(template, renderContext, locationEl, position, callback) {
         const fragment = renderToFragment(template, renderContext);
         callback?.(fragment);
-        for (const el of [...fragment.children]) {
+        let els = [...fragment.children];
+        if (["beforeend", "beforebegin"].includes(position)) {
+            els = els.reverse();
+        }
+        for (const el of els) {
             this.insert(el, locationEl, position);
         }
         return fragment;
