@@ -1,7 +1,6 @@
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
-import { renderToElement } from "@web/core/utils/render";
 import { rpc } from "@web/core/network/rpc";
 
 export class WebsiteEventCreateMeetingRoom extends Interaction {
@@ -14,13 +13,12 @@ export class WebsiteEventCreateMeetingRoom extends Interaction {
         if (!this.createModalEl) {
             const langs = await this.waitFor(rpc("/event/active_langs"));
             if (langs) {
-                this.createModalEl = renderToElement("event_meet_create_room_modal", {
+                this.createModalEl = this.renderAt("event_meet_create_room_modal", {
                     csrf_token: odoo.csrf_token,
                     eventId: this.el.dataset.eventId,
                     defaultLangCode: this.el.dataset.defaultLangCode,
                     langs: langs,
-                });
-                this.insert(this.createModalEl, this.el, "afterend");
+                }, this.el, "afterend").children[0];
             }
         }
         if (this.createModalEl) {

@@ -2,7 +2,6 @@ import { browser } from "@web/core/browser/browser";
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { utils as uiUtils } from "@web/core/ui/ui_service";
-import { renderToElement } from "@web/core/utils/render";
 import { Interaction } from "@web/public/interaction";
 
 /**
@@ -95,8 +94,7 @@ class ChatRoom extends Interaction {
             await this.waitFor(this.joinJitsiRoom(parentNode));
         } else {
             // create a modal and append the Jitsi iframe in it
-            const jitsiModalEl = renderToElement("chat_room_modal", {});
-            this.insert(jitsiModalEl, document.body);
+            const jitsiModalEl = this.renderAt("chat_room_modal", {}, document.body).children[0];
             const bsJitsiModal = window.Modal.getOrCreateInstance(jitsiModalEl)
             bsJitsiModal.show();
             this.registerCleanup(() => bsJitsiModal.dispose());

@@ -3,7 +3,6 @@ import { registry } from "@web/core/registry";
 
 import { _t } from "@web/core/l10n/translation";
 import { isCSSColor } from "@web/core/utils/colors";
-import { renderToElement } from "@web/core/utils/render";
 import { getCSSVariableValue, getHtmlStyle } from "@html_editor/utils/formatting";
 
 class Countdown extends Interaction {
@@ -94,10 +93,9 @@ class Countdown extends Interaction {
             } else {
                 if (!this.el.querySelector(".s_countdown_end_redirect_message").length) {
                     const container = this.el.querySelector("> .container, > .container-fluid, > .o_container_small");
-
-                    this.insert(renderToElement("website.s_countdown.end_redirect_message", {
+                    this.renderAt("website.s_countdown.end_redirect_message", {
                         redirectUrl: redirectUrl,
-                    }), container);
+                    }, container);
                 }
             }
         } else if (this.endAction === "message" || this.endAction === "message_no_countdown") {

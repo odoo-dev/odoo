@@ -3,7 +3,6 @@ import { Interaction } from "@web/public/interaction";
 import { rpc } from "@web/core/network/rpc";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { getTemplate } from "@web/core/templates";
-import { renderToElement } from "@web/core/utils/render";
 import { markup } from "@odoo/owl";
 
 export class SearchBar extends Interaction {
@@ -120,16 +119,14 @@ export class SearchBar extends Interaction {
             if (getTemplate(candidate)) {
                 template = candidate;
             }
-            this.menuEl = renderToElement(template, {
+            this.menuEl = this.renderAt(template, {
                 results: results,
                 parts: res["parts"],
                 hasMoreResults: results.length < res["results_count"],
                 search: this.inputEl.value,
                 fuzzySearch: res["fuzzy_search"],
                 widget: this,
-            });
-            this.insert(this.menuEl, this.el);
-            this.services["public.interactions"].startInteractions(this.menuEl);
+            }, this.el).children[0];
         }
         this.hasDropdown = !!res;
         prevMenuEl?.remove();

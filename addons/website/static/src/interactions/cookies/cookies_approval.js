@@ -1,6 +1,5 @@
 import { registry } from "@web/core/registry";
 import { MEDIAS_BREAKPOINTS, SIZES } from "@web/core/ui/ui_service";
-import { renderToElement } from "@web/core/utils/render";
 import { Interaction } from "@web/public/interaction";
 
 export class CookiesApproval extends Interaction {
@@ -32,15 +31,13 @@ export class CookiesApproval extends Interaction {
     }
 
     addOptionalCookiesWarning() {
-        const optionalCookiesWarningEl = renderToElement("website.cookiesWarning", {
+        this.renderAt("website.cookiesWarning", {
             extraStyle: this.iframeEl.parentElement.classList.contains("media_iframe_video")
                 ? `aspect-ratio: 16/9; max-width: ${MEDIAS_BREAKPOINTS[SIZES.SM].maxWidth}px;`
                 : "",
             extraClasses: getComputedStyle(this.iframeEl.parentElement).position === "absolute"
                 ? "" : "my-3",
-        });
-        this.insert(optionalCookiesWarningEl, this.iframeEl, "afterend");
-        this.services["public.interactions"].startInteractions(optionalCookiesWarningEl);
+        }, this.iframeEl, "afterend");
     }
 
     onOptionalCookiesAccepted() {

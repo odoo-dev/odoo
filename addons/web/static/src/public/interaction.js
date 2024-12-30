@@ -305,8 +305,9 @@ export class Interaction {
         this.refreshListeners();
     }
 
-    renderAt(template, renderContext, locationEl, position) {
+    renderAt(template, renderContext, locationEl, position, callback) {
         const fragment = renderToFragment(template, renderContext);
+        callback?.(fragment);
         for (const el of [...fragment.children]) {
             this.insert(el, locationEl, position);
         }
