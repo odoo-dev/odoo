@@ -120,7 +120,7 @@ class PaymentTransaction(models.Model):
         super()._reconcile_after_done()
 
         # Validate invoices automatically once the transaction is confirmed
-        self.invoice_ids.filtered(lambda inv: inv.state == 'draft').action_post()
+        self.invoice_ids.filtered(lambda inv: inv.state == 'draft').with_context(skip_raise_edi_check_move_configuration=True).action_post()
 
         # Create and post missing payments for transactions requiring reconciliation
         for tx in self.filtered(lambda t: t.operation != 'validation' and not t.payment_id):
@@ -173,7 +173,7 @@ class PaymentTransaction(models.Model):
         else:
             invoices = self.invoice_ids
         if invoices:
-            invoices.filtered(lambda inv: inv.state == 'draft').action_post()
+            invoices.filtered(lambda inv: inv.state == 'draft').with_context(skip_raise_edi_check_move_configuration=True).action_post()
 
             (payment.line_ids + invoices.line_ids).filtered(
                 lambda line: line.account_id == payment.destination_account_id

@@ -253,7 +253,8 @@ class AccountMove(models.Model):
 
                 if move_applicability:
                     errors = edi_format._check_move_configuration(move)
-                    if errors:
+
+                    if errors and not self._context.get('skip_raise_edi_check_move_configuration'):
                         raise UserError(_("Invalid invoice configuration:\n\n%s", '\n'.join(errors)))
 
                     existing_edi_document = move.edi_document_ids.filtered(lambda x: x.edi_format_id == edi_format)
@@ -261,12 +262,16 @@ class AccountMove(models.Model):
                         existing_edi_document.sudo().write({
                             'state': 'to_send',
                             'attachment_id': False,
+                            'error':  errors and _("Invalid invoice configuration:\n\n%s", '\n'.join(errors)) or False,
+                            'blocking_level': 'error' if errors else False,
                         })
                     else:
                         edi_document_vals_list.append({
                             'edi_format_id': edi_format.id,
                             'move_id': move.id,
                             'state': 'to_send',
+                            'error':  errors and _("Invalid invoice configuration:\n\n%s", '\n'.join(errors)) or False,
+                            'blocking_level': 'error' if errors else False,
                         })
 
         self.env['account.edi.document'].create(edi_document_vals_list)
