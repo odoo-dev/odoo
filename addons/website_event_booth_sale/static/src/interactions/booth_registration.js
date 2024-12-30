@@ -15,6 +15,7 @@ patch(BoothRegistration.prototype, {
     },
     onChangeBooth(targetEl) {
         super.onChangeBooth(targetEl);
+        const boothCount = this.countSelectedBooths();
         const boothTotalPriceEl = this.el.querySelector(".o_wbooth_booth_total_price");
         boothTotalPriceEl?.classList.toggle("d-none", !boothCount || !this.categoryPrice);
         this.updatePrice(boothCount);
