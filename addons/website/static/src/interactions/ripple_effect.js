@@ -19,10 +19,6 @@ export class RippleEffect extends Interaction {
         this.timeoutID = null;
     }
 
-    destroy() {
-        this.rippleEl?.remove();
-    }
-
     /**
      * @param {MouseEvent} ev
      */

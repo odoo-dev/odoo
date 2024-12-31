@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 const DynamicSnippetEdit = I => class extends I {
     setup() {
         super.setup();
-        this.isEditMode = true;
+        this.withSample = true;
     }
     callToAction() { }
 };

@@ -60,33 +60,33 @@ export class MegaMenuDropdown extends Interaction {
 
     /**
      * @param {Event} ev
-     * @param {HTMLElement} targetEl
+     * @param {HTMLElement} currentTargetEl
      */
-    onTriggerMegaMenu(ev, targetEl) {
+    onTriggerMegaMenu(ev, currentTargetEl) {
         // Hoverable menus are clicked in mobile view
         if (
             this.el.classList.contains("o_hoverable_dropdown")
-            && !targetEl.closest(".o_header_mobile")
+            && !currentTargetEl.closest(".o_header_mobile")
             && ev.type !== "keyup"
         ) {
             return;
         }
-        this.moveMegaMenu(targetEl);
+        this.moveMegaMenu(currentTargetEl);
     }
 
     /**
      * @param {Event} ev
-     * @param {HTMLElement} targetEl
+     * @param {HTMLElement} currentTargetEl
      */
-    onHoverMegaMenu(ev, targetEl) {
+    onHoverMegaMenu(ev, currentTargetEl) {
         // Hoverable menus are clicked in mobile view
         if (
             !this.el.classList.contains("o_hoverable_dropdown")
-            || targetEl.closest(".o_header_mobile")
+            || currentTargetEl.closest(".o_header_mobile")
         ) {
             return;
         }
-        this.moveMegaMenu(targetEl);
+        this.moveMegaMenu(currentTargetEl);
     }
 
     /**

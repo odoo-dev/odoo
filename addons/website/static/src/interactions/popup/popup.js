@@ -202,7 +202,10 @@ export class Popup extends Interaction {
         cookie.set(this.el.id, this.cookieValue, nbDays * 24 * 60 * 60, "required");
         this.popupAlreadyShown = !this.modalShownOnClickEl;
 
-        this.el.querySelectorAll(".media_iframe_video iframe").forEach(iframeEl => iframeEl.src = "");
+        const iframeEls = this.el.querySelectorAll(".media_iframe_video iframe");
+        for (const iframeEl of iframeEls) {
+            iframeEl.src = "";
+        }
     }
 
     onShowModal() {

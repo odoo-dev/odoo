@@ -54,7 +54,7 @@ export class Form extends Interaction {
 
     setup() {
         this.isHidden = false;
-        this.datapickerInitialized = false;
+        this.datapickersInitialized = false;
         this.recaptcha = new ReCaptcha();
         this.initialValues = new Map();
         this.disabledStates = new Map();
