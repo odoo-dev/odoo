@@ -18,14 +18,14 @@ export class MailGroup extends Interaction {
             }),
         },
         ".o_mg_subscribe_btn": {
-            "t-on-click.prevent": this.onClickSubscribe,
+            "t-on-click.prevent": this.onToggleSubscribe,
             "t-att-class": () => ({
                 "btn-primary": !this.isMember,
                 "btn-outline-primary": this.isMember,
             }),
             "t-out": () => this.isMember ? _t('Unsubscribe') : _t('Subscribe'),
         },
-    }
+    };
 
     setup() {
         this.inError = false;
@@ -36,18 +36,16 @@ export class MailGroup extends Interaction {
         this.forceUnsubscribe = searchParams.has('unsubscribe');
     }
 
-    async onClickSubscribe() {
+    async onToggleSubscribe() {
         const email = this.el.querySelector(".o_mg_subscribe_email").value;
 
         if (!email.match(/.+@.+/)) {
             this.inError = true;
             return false;
         }
-
         this.inError = false;
 
         const action = (this.isMember || this.forceUnsubscribe) ? 'unsubscribe' : 'subscribe';
-
         const response = await this.waitFor(rpc('/group/' + action, {
             'group_id': this.mailgroupId,
             'email': email,

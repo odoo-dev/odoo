@@ -9,8 +9,12 @@ export class Follow extends Interaction {
     static selector = "#wrapwrap";
     static selectorHas = ".js_follow";
     dynamicContent = {
-        ".js_follow > .d-none": { "t-att-class": () => ({ "d-none": false }) },
-        ".js_follow_btn, .js_unfollow_btn": { "t-on-click.prevent": this.onClick },
+        ".js_follow > .d-none": {
+            "t-att-class": () => ({ "d-none": false }),
+        },
+        ".js_follow_btn, .js_unfollow_btn": {
+            "t-on-click.prevent.withTarget": this.onClick,
+        },
     };
 
     setup() {
@@ -92,9 +96,10 @@ export class Follow extends Interaction {
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
      */
-    async onClick(ev) {
-        const jsFollowEl = ev.currentTarget.closest(".js_follow");
+    async onClick(ev, currentTargetEl) {
+        const jsFollowEl = currentTargetEl.closest(".js_follow");
         let email = jsFollowEl.querySelector(".js_follow_email");
 
         if (email && !/.+@.+/.test(email.value)) {

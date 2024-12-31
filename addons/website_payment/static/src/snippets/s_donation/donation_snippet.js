@@ -13,10 +13,10 @@ export class DonationSnippet extends Interaction {
     static selector = ".s_donation";
     dynamicContent = {
         ".s_donation_btn": {
-            "t-on-click": this.onClickPrefilled,
+            "t-on-click.withTarget": this.onClickPrefilled,
             "t-att-class": (el) => ({ "active": el === this.activeButtonEl }),
         },
-        ".s_donation_donate_btn": { "t-on-click": this.onClickDonate },
+        ".s_donation_donate_btn": { "t-on-click.withTarget": this.onClickDonate },
         "#s_donation_range_slider": { "t-on-input": this.onInputRangeSlider },
     };
 
@@ -76,9 +76,10 @@ export class DonationSnippet extends Interaction {
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
      */
-    onClickPrefilled(ev) {
-        this.activeButtonEl = ev.currentTarget;
+    onClickPrefilled(ev, currentTargetEl) {
+        this.activeButtonEl = currentTargetEl;
         if (this.rangeSliderEl) {
             this.rangeSliderEl.value = this.activeButtonEl.dataset.donationValue;
             this.setBubble();
@@ -87,8 +88,9 @@ export class DonationSnippet extends Interaction {
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
      */
-    onClickDonate(ev) {
+    onClickDonate(ev, currentTargetEl) {
         this.el.querySelector('.alert-danger')?.remove();
         const donationButtonEls = this.el.querySelectorAll('.s_donation_btn');
         let amount = this.activeButtonEl ? parseFloat(this.activeButtonEl.dataset.donationValue) : 0;
@@ -113,7 +115,7 @@ export class DonationSnippet extends Interaction {
                     const pEl = document.createElement("p");
                     pEl.classList.add("alert", "alert-danger");
                     pEl.innerText = errorMessage;
-                    this.insert(pEl, ev.currentTarget, "beforebegin");
+                    this.insert(pEl, currentTargetEl, "beforebegin");
                     return;
                 }
             }
@@ -145,7 +147,6 @@ export class DonationSnippet extends Interaction {
         this.activeButtonEl = null;
         this.setBubble();
     }
-
 }
 
 registry

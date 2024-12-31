@@ -1,8 +1,9 @@
-import { _t } from "@web/core/l10n/translation";
-import { rpc } from "@web/core/network/rpc";
 import { MailGroup } from "@mail_group/interactions/mail_group";
 import { patch } from "@web/core/utils/patch";
 import { patchDynamicContent } from "@web/public/utils";
+
+import { _t } from "@web/core/l10n/translation";
+import { rpc } from "@web/core/network/rpc";
 
 patch(MailGroup.prototype, {
     setup() {

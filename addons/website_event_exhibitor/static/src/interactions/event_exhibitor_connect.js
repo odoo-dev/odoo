@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 import { redirect } from "@web/core/utils/urls";
 import { ExhibitorConnectClosedDialog } from "../components/exhibitor_connect_closed_dialog/exhibitor_connect_closed_dialog";
 
-export class WebsiteEventExhibitorConnect extends Interaction {
+export class ExhibitorConnect extends Interaction {
     static selector = ".o_wesponsor_connect_button";
     dynamicContent = {
         _root: {
@@ -35,4 +35,4 @@ export class WebsiteEventExhibitorConnect extends Interaction {
 
 registry
     .category("public.interactions")
-    .add("website_event_exhibitor.website_event_exhibitor_connect", WebsiteEventExhibitorConnect);
+    .add("website_event_exhibitor.exhibitor_connect", ExhibitorConnect);

@@ -1,11 +1,12 @@
+import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
+
 import { markup } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { cookie } from "@web/core/browser/cookie";;
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
-import { registry } from "@web/core/registry";
-import { Interaction } from "@web/public/interaction";
 import { session } from "@web/session";
 import { scrollTo, closestScrollable } from "@web_editor/js/common/scrolling";
 import { loadWysiwygFromTextarea } from "@web_editor/js/frontend/loadWysiwygFromTextarea";
@@ -15,28 +16,48 @@ import { WebsiteForumTagsWrapper } from "../components/website_forum_tags_wrappe
 export class WebsiteForum extends Interaction {
     static selector = ".website_forum";
     dynamicContent = {
-        ".karma_required": { "t-on-click": this.onKarmaRequiredClick },
-        ".o_js_forum_tag_follow": { "t-on-click": this.onTagFollowClick },
-        ".o_wforum_flag:not(.karma_required)": { "t-on-click": this.onFlagAlertClick },
-        ".o_wforum_flag_validator": { "t-on-click": this.onFlagValidatorClick },
-        ".o_wforum_flag_mark_as_offensive": { "t-on-click": this.onFlagMarkAsOffensiveClick },
+        ".karma_required": {
+            "t-on-click.withTarget": this.onClickKarmaRequired,
+        },
+        ".o_js_forum_tag_follow": {
+            "t-on-click.withTarget": this.onClickTagFollow,
+        },
+        ".o_wforum_flag:not(.karma_required)": {
+            "t-on-click.prevent.withTarget": this.onClickFlag,
+        },
+        ".o_wforum_flag_validator": {
+            "t-on-click.prevent.withTarget": this.onClickFlagValidator,
+        },
+        ".o_wforum_flag_mark_as_offensive": {
+            "t-on-click.prevent.withTarget": this.onClickFlagMarkAsOffensive,
+        },
         ".vote_up:not(.karma_required), .vote_down:not(.karma_required)": {
-            "t-on-click": this.onVotePostClick,
+            "t-on-click.prevent.withTarget": this.onClickVotePost,
         },
         ".o_wforum_validation_queue a[href*='/validate']": {
-            "t-on-click": this.onValidationQueueClick,
+            "t-on-click.prevent.withTarget": this.onClickValidationQueue,
         },
         ".o_wforum_validate_toggler:not(.karma_required)": {
-            "t-on-click": this.onAcceptAnswerClick,
+            "t-on-click.prevent.withTarget": this.onClickToggleValidate,
         },
-        ".o_wforum_favourite_toggle": { "t-on-click": this.onFavoriteQuestionClick },
-        ".comment_delete:not(.karma_required)": { "t-on-click": this.onDeleteCommentClick },
-        ".js_close_intro": { "t-on-click": this.onCloseIntroClick },
-        ".answer_collapse": { "t-on-click": this.onExpandAnswerClick },
+        ".o_wforum_favourite_toggle": {
+            "t-on-click.prevent.withTarget": this.onClickToggleFavourite,
+        },
+        ".comment_delete:not(.karma_required)": {
+            "t-on-click.prevent.withTarget": this.onClickDeleteComment,
+        },
+        ".js_close_intro": {
+            "t-on-click.prevent": this.onClickCloseIntro,
+        },
+        ".answer_collapse": {
+            "t-on-click.withTarget": this.onClickExpandAnswer,
+        },
         ".js_wforum_submit_form:has(.o_wforum_submit_post:not(.karma_required))": {
-            "t-on-submit": this.onSubmitForm,
+            "t-on-submit.withTarget": this.onSubmitForm,
         },
-        "#post_reply": { "t-on-shown.bs.collapse": this.onCollapseShown },
+        "#post_reply": {
+            "t-on-shown.bs.collapse.withTarget": this.onCollapseShown,
+        },
         // Not sure this is still needed.
         // float-start class messes up the post layout OPW 769721
         "span[data-oe-model='forum.post'][data-oe-field='content'] img.float-start": {
@@ -57,16 +78,12 @@ export class WebsiteForum extends Interaction {
         // Initialize forum's tooltips
         this.el.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
             const bsTooltip = window.Tooltip.getOrCreateInstance(el);
-            this.registerCleanup(() => {
-                bsTooltip.dispose();
-            });
+            this.registerCleanup(() => bsTooltip.dispose());
         });
 
         this.el.querySelectorAll('[data-bs-toggle="popover"]').forEach((el) => {
             const bsPopover = window.Popover.getOrCreateInstance(el);
-            this.registerCleanup(() => {
-                bsPopover.dispose();
-            });
+            this.registerCleanup(() => bsPopover.dispose());
         });
 
         const selectMenuWrapperEl = document.querySelector("div.js_select_menu_wrapper");
@@ -113,7 +130,7 @@ export class WebsiteForum extends Interaction {
             };
             options.allowCommandLink = hasFullEdit;
             options.allowCommandImage = hasFullEdit;
-            loadWysiwygFromTextarea(this, textareaEl, options).then((wysiwyg) => {
+            loadWysiwygFromTextarea(this, textareaEl, options).then(() => {
                 // float-start class messes up the post layout OPW 769721
                 formEl.querySelectorAll(".note-editable img.float-start").forEach((el) => {
                     el.classList.remove("float-start");
@@ -129,17 +146,14 @@ export class WebsiteForum extends Interaction {
                 html: true,
                 customClass: "o_wforum_bio_popover_container shadow-sm",
             });
-            this.registerCleanup(() => {
-                bsPopover.dispose();
-            });
+            this.registerCleanup(() => bsPopover.dispose());
         });
 
-        this.el.querySelectorAll(
-            ".o_wforum_question, .o_wforum_answer, .o_wforum_post_comment, .o_wforum_last_activity"
-        ).forEach((post) => {
-            post.querySelector(".o_wforum_relative_datetime").textContent =
-                luxon.DateTime.fromSQL(post.dataset.lastActivity, {zone: "utc"}).toRelative();
-        });
+        this.el.querySelectorAll(".o_wforum_question, .o_wforum_answer, .o_wforum_post_comment, .o_wforum_last_activity")
+            .forEach((post) => {
+                post.querySelector(".o_wforum_relative_datetime").textContent =
+                    luxon.DateTime.fromSQL(post.dataset.lastActivity, { zone: "utc" }).toRelative();
+            });
     }
 
     /**
@@ -171,12 +185,12 @@ export class WebsiteForum extends Interaction {
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
      */
-    onSubmitForm(ev) {
+    onSubmitForm(ev, currentTargetEl) {
         let validForm = true;
-        const formEl = ev.currentTarget;
-        const titleEl = formEl.querySelector("input[name=post_name]");
-        const textareaEl = formEl.querySelector("textarea[name=content]");
+        const titleEl = currentTargetEl.querySelector("input[name=post_name]");
+        const textareaEl = currentTargetEl.querySelector("textarea[name=content]");
 
         if (titleEl?.required) {
             titleEl.classList.toggle("is-invalid", !!titleEl.value);
@@ -186,7 +200,7 @@ export class WebsiteForum extends Interaction {
         // Because the textarea is hidden, we add the red or green border to its
         // container.
         if (textareaEl?.required) {
-            const textareaContainerEl = formEl.querySelector(".o_wysiwyg_textarea_wrapper");
+            const textareaContainerEl = currentTargetEl.querySelector(".o_wysiwyg_textarea_wrapper");
             const hasContent = !!textareaContainerEl.innerText.trim() || !!textareaContainerEl.querySelector("img");
             ["border", "border-danger", "rounded-top"].forEach((cls) => {
                 textareaContainerEl.classList.toggle(cls, hasContent);
@@ -196,15 +210,15 @@ export class WebsiteForum extends Interaction {
 
         if (validForm) {
             // Stores social share data to display modal on next page.
-            if (formEl.querySelector(".oe_social_share_call")) {
+            if (currentTargetEl.querySelector(".oe_social_share_call")) {
                 sessionStorage.setItem("social_share", JSON.stringify({
-                    targetType: formEl.querySelector(".o_wforum_submit_post").dataset.socialTargetType,
+                    targetType: currentTargetEl.querySelector(".o_wforum_submit_post").dataset.socialTargetType,
                 }));
             }
         } else {
             ev.preventDefault();
             this.waitForTimeout(() => {
-                formEl.querySelectorAll('button[type="submit"], a.a-submit').forEach((btnEl) => {
+                currentTargetEl.querySelectorAll('button[type="submit"], a.a-submit').forEach((btnEl) => {
                     btnEl.querySelector("i").remove();
                     btnEl.disabled = false;
                 });
@@ -214,24 +228,25 @@ export class WebsiteForum extends Interaction {
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
      */
-    onExpandAnswerClick(ev) {
-        const expandableWindow = ev.currentTarget;
+    onClickExpandAnswer(ev, currentTargetEl) {
         if (ev.target.matches(".o_wforum_expand_toggle")) {
-            expandableWindow.classList.toggle("o_expand")
-            expandableWindow.classList.toggle("min-vh-100");
-            expandableWindow.classList.toggle("w-lg-50");
-        } else if (ev.target.matches(".o_wforum_discard_btn")){
-            expandableWindow.classList.remove("o_expand", "min-vh-100");
-            expandableWindow.classList.add("w-lg-50");
+            currentTargetEl.classList.toggle("o_expand")
+            currentTargetEl.classList.toggle("min-vh-100");
+            currentTargetEl.classList.toggle("w-lg-50");
+        } else if (ev.target.matches(".o_wforum_discard_btn")) {
+            currentTargetEl.classList.remove("o_expand", "min-vh-100");
+            currentTargetEl.classList.add("w-lg-50");
         }
     }
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
      */
-    onKarmaRequiredClick(ev) {
-        const karma = parseInt(ev.currentTarget.dataset.karma);
+    onClickKarmaRequired(ev, currentTargetEl) {
+        const karma = parseInt(currentTargetEl.dataset.karma);
         if (!karma) {
             return;
         }
@@ -257,26 +272,26 @@ export class WebsiteForum extends Interaction {
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
      */
-    onTagFollowClick(ev) {
+    onClickTagFollow(ev, currentTargetEl) {
         if (ev.target.closest("button")) {
-            ev.currentTarget.querySelector(".o_js_forum_tag_link").classList.toggle("text-muted");
+            currentTargetEl.querySelector(".o_js_forum_tag_link").classList.toggle("text-muted");
         }
     }
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
      */
-    async onFlagAlertClick(ev) {
-        ev.preventDefault();
+    async onClickFlag(ev, currentTargetEl) {
         if (this.warnIfPublicUser()) {
             return;
         }
-        const elem = ev.currentTarget;
         const data = await this.waitFor(rpc(
-            elem.dataset.href
-            || (elem.getAttribute("href") !== "#" && elem.getAttribute("href"))
-            || elem.closest("form").getAttribute("action")
+            currentTargetEl.dataset.href
+            || (currentTargetEl.getAttribute("href") !== "#" && currentTargetEl.getAttribute("href"))
+            || currentTargetEl.closest("form").getAttribute("action")
         ));
         if (data.error) {
             const message = data.error === "post_already_flagged"
@@ -286,20 +301,20 @@ export class WebsiteForum extends Interaction {
                     : data.error;
             this.displayAccessDeniedNotification(message);
         } else if (data.success) {
-            const child = elem.firstElementChild;
+            const child = currentTargetEl.firstElementChild;
             if (data.success === "post_flagged_moderator") {
                 const countFlaggedPosts = this.el.querySelector("#count_posts_queue_flagged");
-                elem.innerText = _t(" Flagged");
-                elem.prepend(child);
+                currentTargetEl.innerText = _t(" Flagged");
+                currentTargetEl.prepend(child);
                 if (countFlaggedPosts) {
                     countFlaggedPosts.classList.remove("bg-light", "d-none");
                     countFlaggedPosts.classList.add("text-bg-danger");
                     countFlaggedPosts.innerText = parseInt(countFlaggedPosts.innerText, 10) + 1;
                 }
             } else if (data.success === "post_flagged_non_moderator") {
-                elem.innerText = _t(" Flagged");
-                elem.prepend(child);
-                const forumAnswerEl = elem.closest(".o_wforum_answer");
+                currentTargetEl.innerText = _t(" Flagged");
+                currentTargetEl.prepend(child);
+                const forumAnswerEl = currentTargetEl.closest(".o_wforum_answer");
                 if (forumAnswerEl) {
                     forumAnswerEl.style.height = getComputedStyle(forumAnswerEl).height;
                     forumAnswerEl.classList.add("overflow-hidden");
@@ -312,21 +327,20 @@ export class WebsiteForum extends Interaction {
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
      */
-    async onVotePostClick(ev) {
-        ev.preventDefault();
+    async onClickVotePost(ev, currentTargetEl) {
         if (this.warnIfPublicUser()) {
             return;
         }
-        const btnEl = ev.currentTarget;
-        const data = await this.waitFor(rpc(btnEl.dataset.href));
+        const data = await this.waitFor(rpc(currentTargetEl.dataset.href));
         if (data.error) {
             const message = data.error === "own_post"
                 ? _t("Sorry, you cannot vote for your own posts")
                 : data.error;
             this.displayAccessDeniedNotification(message);
         } else {
-            const containerEl = btnEl.closest(".vote");
+            const containerEl = currentTargetEl.closest(".vote");
             const voteUpEl = containerEl.querySelector(".vote_up");
             const voteDownEl = containerEl.querySelector(".vote_down");
             const voteCountEl = containerEl.querySelector(".vote_count");
@@ -368,20 +382,19 @@ export class WebsiteForum extends Interaction {
     /**
      * Call the route to moderate/validate the post, then hide the validated post
      * and decrement the count in the appropriate queue badge of the sidebar on success.
-     *
+     * 
      * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
      */
-    async onValidationQueueClick(ev) {
-        ev.preventDefault();
-        const approvalLink = ev.currentTarget;
-        const postBeingValidated = approvalLink.closest(".post_to_validate");
+    async onClickValidationQueue(ev, currentTargetEl) {
+        const postBeingValidated = currentTargetEl.closest(".post_to_validate");
         if (!postBeingValidated) {
             return;
         }
         postBeingValidated.classList.add("d-none");
         let ok;
         try {
-            ok = (await this.waitFor(fetch(approvalLink.href))).ok;
+            ok = (await this.waitFor(fetch(currentTargetEl.href))).ok;
         } catch {
             // Calling the endpoint like this returns an HTML page. As we can't
             // extract the error message from that, we disregard it and simply
@@ -406,15 +419,14 @@ export class WebsiteForum extends Interaction {
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
      */
-    async onAcceptAnswerClick(ev) {
-        ev.preventDefault();
+    async onClickToggleValidate(ev, currentTargetEl) {
         if (this.warnIfPublicUser()) {
             return;
         }
-        const link = ev.currentTarget;
-        const target = link.dataset.target;
-        const data = await this.waitFor(rpc(link.dataset.href));
+        const target = currentTargetEl.dataset.target;
+        const data = await this.waitFor(rpc(currentTargetEl.dataset.href));
         if (data.error) {
             const message = data.error === "own_post"
                 ? _t("Sorry, you cannot select your own posts as best answer")
@@ -449,24 +461,23 @@ export class WebsiteForum extends Interaction {
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
      */
-    async onFavoriteQuestionClick(ev) {
-        ev.preventDefault();
-        const link = ev.currentTarget;
-        const data = await this.waitFor(rpc(link.dataset.href));
-        link.classList.toggle("opacity-50", !data);
-        link.classList.toggle("opacity-100-hover", !data);
-        const link_icon = link.querySelector(".fa");
-        link_icon.classList.toggle("fa-star-o", !data);
-        link_icon.classList.toggle("o_wforum_gold", data)
-        link_icon.classList.toggle("fa-star", data)
+    async onClickToggleFavourite(ev, currentTargetEl) {
+        const data = await this.waitFor(rpc(currentTargetEl.dataset.href));
+        currentTargetEl.classList.toggle("opacity-50", !data);
+        currentTargetEl.classList.toggle("opacity-100-hover", !data);
+        const currentTargetEl_icon = currentTargetEl.querySelector(".fa");
+        currentTargetEl_icon.classList.toggle("fa-star-o", !data);
+        currentTargetEl_icon.classList.toggle("o_wforum_gold", data)
+        currentTargetEl_icon.classList.toggle("fa-star", data)
     }
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
      */
-    onDeleteCommentClick(ev) {
-        ev.preventDefault();
+    onClickDeleteComment(ev, currentTargetEl) {
         if (this.warnIfPublicUser()) {
             return;
         }
@@ -474,9 +485,8 @@ export class WebsiteForum extends Interaction {
             body: _t("Are you sure you want to delete this comment?"),
             confirmLabel: _t("Delete"),
             confirm: () => {
-                const deleteBtn = ev.currentTarget;
-                rpc(deleteBtn.closest("form").attributes.action.value).then(() => {
-                    deleteBtn.closest(".o_wforum_post_comment").remove();
+                rpc(currentTargetEl.closest("form").attributes.action.value).then(() => {
+                    currentTargetEl.closest(".o_wforum_post_comment").remove();
                 }).catch((error) => {
                     this.services.notification.add(error.data.message, {
                         title: _t("Karma Error"),
@@ -485,15 +495,11 @@ export class WebsiteForum extends Interaction {
                     });
                 });
             },
-            cancel: () => {},
+            cancel: () => { },
         });
     }
 
-    /**
-     * @param {Event} ev
-     */
-    onCloseIntroClick(ev) {
-        ev.preventDefault();
+    onClickCloseIntro() {
         cookie.set("forum_welcome_message", false, 24 * 60 * 60 * 365, "optional");
         const forumIntroEl = this.el.querySelector(".forum_intro");
         forumIntroEl.style.height = getComputedStyle(forumIntroEl).height;
@@ -505,15 +511,14 @@ export class WebsiteForum extends Interaction {
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
      */
-    async onFlagValidatorClick(ev) {
-        ev.preventDefault();
-        const currentTarget = ev.currentTarget;
-        await this.waitFor(this.services.orm.call("forum.post", currentTarget.dataset.action, [
-            parseInt(currentTarget.dataset.postId),
+    async onClickFlagValidator(ev, currentTargetEl) {
+        await this.waitFor(this.services.orm.call("forum.post", currentTargetEl.dataset.action, [
+            parseInt(currentTargetEl.dataset.postId),
         ]));
-        currentTarget.closest(".o_wforum_flag_alert")?.classList.toggle("d-none");
-        const flaggedButton = currentTarget.parentElement.firstElementChild,
+        currentTargetEl.closest(".o_wforum_flag_alert")?.classList.toggle("d-none");
+        const flaggedButton = currentTargetEl.parentElement.firstElementChild,
             child = flaggedButton.firstElementChild,
             countFlaggedPosts = this.el.querySelector("#count_posts_queue_flagged"),
             count = parseInt(countFlaggedPosts.innerText, 10) - 1;
@@ -528,22 +533,26 @@ export class WebsiteForum extends Interaction {
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
      */
-    async onFlagMarkAsOffensiveClick(ev) {
-        ev.preventDefault();
-        const template = await this.waitFor(rpc(ev.currentTarget.dataset.action));
+    async onClickFlagMarkAsOffensive(ev, currentTargetEl) {
+        const template = await this.waitFor(rpc(currentTargetEl.dataset.action));
         this.services.dialog.add(FlagMarkAsOffensiveDialog, {
             title: _t("Offensive Post"),
             body: markup(template),
         });
     }
 
-    onCollapseShown(ev) {
-        const scrollingElement = closestScrollable(ev.currentTarget.parentNode);
-        scrollTo(ev.currentTarget, {
-            forcedOffset: scrollingElement.clientHeight - ev.currentTarget.clientHeight,
-        });
+    /**
+     * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
+     */
+    onCollapseShown(ev, currentTargetEl) {
+        const scrollingElement = closestScrollable(currentTargetEl.parentNode);
+        scrollTo(currentTargetEl, { forcedOffset: scrollingElement.clientHeight - currentTargetEl.clientHeight });
     }
 }
 
-registry.category("public.interactions").add("website_forum.website_forum", WebsiteForum);
+registry
+    .category("public.interactions")
+    .add("website_forum.website_forum", WebsiteForum);

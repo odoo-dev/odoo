@@ -1,7 +1,7 @@
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
-class PortalInvoicePagePayment extends Interaction {
+export class PortalInvoicePagePayment extends Interaction {
     static selector = "#portal_pay";
 
     setup() {

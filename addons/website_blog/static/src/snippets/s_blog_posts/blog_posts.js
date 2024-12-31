@@ -1,12 +1,10 @@
-import { registry } from "@web/core/registry";
 import { DynamicSnippet } from "@website/snippets/s_dynamic_snippet/dynamic_snippet";
+import { registry } from "@web/core/registry";
 
-export class DynamicSnippetBlogPosts extends DynamicSnippet {
+export class BlogPosts extends DynamicSnippet {
     static selector = ".s_dynamic_snippet_blog_posts";
 
     /**
-     * Method to be overridden in child components in order to provide a search
-     * domain if needed.
      * @override
      */
     getSearchDomain() {
@@ -17,6 +15,7 @@ export class DynamicSnippetBlogPosts extends DynamicSnippet {
         }
         return searchDomain;
     }
+
     /**
      * @override
      */
@@ -25,10 +24,12 @@ export class DynamicSnippetBlogPosts extends DynamicSnippet {
     }
 }
 
-registry.category("public.interactions").add("website_blog.blog_posts", DynamicSnippetBlogPosts);
+registry
+    .category("public.interactions")
+    .add("website_blog.blog_posts", BlogPosts);
 
 registry
     .category("public.interactions.edit")
     .add("website_blog.blog_posts", {
-        Interaction: DynamicSnippetBlogPosts,
+        Interaction: BlogPosts,
     });

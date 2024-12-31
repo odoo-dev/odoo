@@ -1,5 +1,6 @@
-import { registry } from "@web/core/registry";
 import { DynamicSnippet } from "@website/snippets/s_dynamic_snippet/dynamic_snippet";
+import { registry } from "@web/core/registry";
+
 import { groupBy } from "@web/core/utils/arrays";
 
 export class Events extends DynamicSnippet {
@@ -22,6 +23,7 @@ export class Events extends DynamicSnippet {
         }
         return searchDomain;
     }
+
     /**
      * @override
      */
@@ -30,7 +32,9 @@ export class Events extends DynamicSnippet {
     }
 }
 
-registry.category("public.interactions").add("website_event.events", Events);
+registry
+    .category("public.interactions")
+    .add("website_event.events", Events);
 
 registry
     .category("public.interactions.edit")

@@ -7,13 +7,13 @@ export class SaleUpdateLineButton extends Interaction {
     static selector = ".o_portal_sale_sidebar";
     dynamicContent = {
         "a.js_update_line_json": {
-            "t-on-click.prevent": (ev) => this.onClickOptionQuantityButton(ev.currentTarget),
+            "t-on-click.prevent.withTarget": this.onClickOptionQuantityButton,
         },
         "a.js_add_optional_products": {
-            "t-on-click.prevent": (ev) => this.onClickAddOptionalProduct(ev.currentTarget),
+            "t-on-click.prevent.withTarget": this.onClickAddOptionalProduct,
         },
         ".js_quantity": {
-            "t-on-change.prevent": (ev) => this.onChangeOptionQuantity(ev.currentTarget),
+            "t-on-change.prevent.withTarget": this.onChangeOptionQuantity,
         },
     };
 
@@ -33,29 +33,29 @@ export class SaleUpdateLineButton extends Interaction {
         window.location.reload();
     }
 
-    async onChangeOptionQuantity(targetEl) {
-        const quantity = parseInt(targetEl.value);
+    async onChangeOptionQuantity(ev, currentTargetEl) {
+        const quantity = parseInt(currentTargetEl.value);
         const data = await this.waitFor(this.callUpdateLineRoute(this.orderDetail.orderId, {
             'access_token': this.orderDetail.token,
             'input_quantity': quantity >= 0 ? quantity : false,
-            'line_id': targetEl.dataset.lineId,
+            'line_id': currentTargetEl.dataset.lineId,
         }));
         this.refreshOrderUI(data);
     }
 
-    async onClickOptionQuantityButton(targetEl) {
+    async onClickOptionQuantityButton(ev, currentTargetEl) {
         const data = await this.waitFor(this.callUpdateLineRoute(this.orderDetail.orderId, {
             'access_token': this.orderDetail.token,
-            'line_id': targetEl.dataset.lineId,
-            'remove': targetEl.dataset.remove,
-            'unlink': targetEl.dataset.unlink,
+            'line_id': currentTargetEl.dataset.lineId,
+            'remove': currentTargetEl.dataset.remove,
+            'unlink': currentTargetEl.dataset.unlink,
         }));
         this.refreshOrderUI(data);
     }
 
-    async onClickAddOptionalProduct(targetEl) {
-        targetEl.style.setProperty('pointer-events', 'none');
-        const data = await this.waitFor(this.callAddOptionRoute(this.orderDetail.orderId, targetEl.dataset.optionId, {
+    async onClickAddOptionalProduct(ev, currentTargetEl) {
+        currentTargetEl.style.setProperty('pointer-events', 'none');
+        const data = await this.waitFor(this.callAddOptionRoute(this.orderDetail.orderId, currentTargetEl.dataset.optionId, {
             'access_token': this.orderDetail.token,
         }));
         this.refreshOrderUI(data);

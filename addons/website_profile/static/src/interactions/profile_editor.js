@@ -4,12 +4,12 @@ import { registry } from "@web/core/registry";
 
 import { loadWysiwygFromTextarea } from "@web_editor/js/frontend/loadWysiwygFromTextarea";
 
-export class WebsiteProfileEditor extends Interaction {
+export class ProfileEditor extends Interaction {
     static selector = ".o_wprofile_editor_form";
     dynamicContent = {
-        ".o_forum_file_upload": { "t-on-change": this.onUploadFile },
-        ".o_forum_profile_pic_edit": { "t-on-click.prevent": this.onClickEditProfilePic },
-        ".o_forum_profile_pic_clear": { "t-on-click": this.onClickClearProfilePic },
+        ".o_forum_file_upload": { "t-on-change.withTarget": this.onUploadFile },
+        ".o_forum_profile_pic_edit": { "t-on-click.prevent.withTarget": this.onClickEditProfilePic },
+        ".o_forum_profile_pic_clear": { "t-on-click.withTarget": this.onClickClearProfilePic },
         ".o_forum_profile_bio_edit": {
             "t-on-click.prevent": () => this.isEditingBio = true,
             "t-att-class": () => ({ "d-none": this.editingBio }),
@@ -47,12 +47,20 @@ export class WebsiteProfileEditor extends Interaction {
         await loadWysiwygFromTextarea(this, this.textareaEl, this.options);
     }
 
-    onClickEditProfilePic(ev) {
-        ev.currentTarget.closest("form").querySelector(".o_forum_file_upload").click();
+    /**
+     * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
+     */
+    onClickEditProfilePic(ev, currentTargetEl) {
+        currentTargetEl.closest("form").querySelector(".o_forum_file_upload").click();
     }
 
-    onClickClearProfilePic(ev) {
-        const formEl = ev.currentTarget.closest("form");
+    /**
+     * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
+     */
+    onClickClearProfilePic(ev, currentTargetEl) {
+        const formEl = currentTargetEl.closest("form");
         formEl.querySelector(".o_wforum_avatar_img").src = "/web/static/img/placeholder.png";
         const inputElement = document.createElement("input");
         inputElement.setAttribute("name", "clear_image");
@@ -61,13 +69,17 @@ export class WebsiteProfileEditor extends Interaction {
         this.insert(inputElement, formEl);
     }
 
-    onUploadFile(ev) {
-        if (!ev.currentTarget.files.length) {
+    /**
+     * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
+     */
+    onUploadFile(ev, currentTargetEl) {
+        if (!currentTargetEl.files.length) {
             return;
         }
-        const formEl = ev.currentTarget.closest("form");
+        const formEl = currentTargetEl.closest("form");
         const reader = new window.FileReader();
-        reader.readAsDataURL(ev.currentTarget.files[0]);
+        reader.readAsDataURL(currentTargetEl.files[0]);
         this.addListener(reader, "load", (ev) => formEl.querySelector(".o_wforum_avatar_img").src = ev.target.result);
         formEl.querySelector("#forum_clear_image")?.remove();
     }
@@ -76,4 +88,4 @@ export class WebsiteProfileEditor extends Interaction {
 
 registry
     .category("public.interactions")
-    .add("website_profile.website_profile_editor", WebsiteProfileEditor);
+    .add("website_profile.profile_editor", ProfileEditor);

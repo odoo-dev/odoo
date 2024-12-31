@@ -1,6 +1,6 @@
 import { MailGroup } from "@mail_group/interactions/mail_group";
-import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
 
 // TODO should probably have a better way to handle this, maybe the invisible
 // block system could be extended to handle this kind of things. Here we only

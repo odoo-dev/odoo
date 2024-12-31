@@ -1,7 +1,7 @@
-import { WebsiteProfileEditor } from "./website_profile_editor";
+import { ProfileEditor } from "./profile_editor";
 import { registry } from "@web/core/registry";
 
-const WebsiteProfileEditorEdit = I => class extends I {
+const ProfileEditorEdit = I => class extends I {
     setup() { }
     async willStart() { }
 };
@@ -9,6 +9,6 @@ const WebsiteProfileEditorEdit = I => class extends I {
 registry
     .category("public.interactions.edit")
     .add("website_profile.website_profile_editor", {
-        Interaction: WebsiteProfileEditor,
-        mixin: WebsiteProfileEditorEdit,
+        Interaction: ProfileEditor,
+        mixin: ProfileEditorEdit,
     });

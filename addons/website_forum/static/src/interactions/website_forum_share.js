@@ -1,7 +1,7 @@
-import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
 
-class WebsiteForumShare extends Interaction {
+export class WebsiteForumShare extends Interaction {
     static selector = ".website_forum";
 
     start() {
@@ -27,4 +27,6 @@ class WebsiteForumShare extends Interaction {
     }
 }
 
-registry.category("public.interactions").add("website_forum.website_forum_share", WebsiteForumShare);
+registry
+    .category("public.interactions")
+    .add("website_forum.website_forum_share", WebsiteForumShare);

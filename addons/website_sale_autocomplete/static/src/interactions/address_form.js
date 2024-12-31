@@ -4,12 +4,12 @@ import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
 import { KeepLast } from "@web/core/utils/concurrency";
 
-class AddressForm extends Interaction {
+export class AddressForm extends Interaction {
     static selector = ".oe_cart .checkout_autoformat";
     static selectorHas = "input[name='street'][data-autocomplete-enabled='1']";
     dynamicContent = {
         "input[name='street']": { "t-on-input.withTarget": this.debounced(this.onInputStreet, 200) },
-        ".js_autocomplete_result": { "t-on-click": this.onClickAutocompleteResult },
+        ".js_autocomplete_result": { "t-on-click.withTarget": this.onClickAutocompleteResult },
     };
 
     setup() {
@@ -51,8 +51,8 @@ class AddressForm extends Interaction {
         }
     }
 
-    async onClickAutocompleteResult(ev) {
-        const dropdownEl = ev.currentTarget.parentNode;
+    async onClickAutocompleteResult(ev, currentTargetEl) {
+        const dropdownEl = currentTargetEl.parentNode;
         dropdownEl.innerText = "";
         dropdownEl.classList.add("d-flex", "justify-content-center", "align-items-center");
 
@@ -61,8 +61,8 @@ class AddressForm extends Interaction {
         dropdownEl.appendChild(spinnerEl);
 
         const address = await this.waitFor(rpc("/autocomplete/address_full", {
-            address: ev.currentTarget.innerText,
-            google_place_id: ev.currentTarget.dataset.googlePlaceId,
+            address: currentTargetEl.innerText,
+            google_place_id: currentTargetEl.dataset.googlePlaceId,
             session_id: this.sessionId || null,
         }));
 
