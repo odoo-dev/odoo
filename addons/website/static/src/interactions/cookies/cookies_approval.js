@@ -37,9 +37,7 @@ export class CookiesApproval extends Interaction {
             extraClasses: getComputedStyle(this.iframeEl.parentElement).position === "absolute"
                 ? ""
                 : "my-3",
-        });
-        this.insert(optionalCookiesWarningEl, this.iframeEl, "afterend");
-        this.services["public.interactions"].startInteractions(optionalCookiesWarningEl);
+        }, this.iframeEl, "afterend");
     }
 
     onOptionalCookiesAccepted() {

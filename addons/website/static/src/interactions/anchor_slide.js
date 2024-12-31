@@ -27,7 +27,7 @@ export class AnchorSlide extends Interaction {
         return 0;
     }
 
-    animateClick() {
+    animateClick(ev) {
         const ensureSlash = (path) => (path.endsWith("/") ? path : path + "/");
         if (ensureSlash(this.el.pathname) !== ensureSlash(window.location.pathname)) {
             return;

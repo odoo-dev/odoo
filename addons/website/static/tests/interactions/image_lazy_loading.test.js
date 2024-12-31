@@ -28,7 +28,6 @@ test("images lazy loading removes height then restores it", async () => {
         </div>
     `, { waitForStart: false });
     expect(core.interactions).toHaveLength(1);
-    const img = el.querySelector("img");
     expect("img").toHaveAttribute("src", "/web/image/website.library_image_08");
     expect("img").toHaveAttribute("loading", "lazy");
     expect("img").toHaveStyle({ "min-height": "1px" });

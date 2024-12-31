@@ -2,7 +2,6 @@ import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
 import { rpc } from "@web/core/network/rpc";
-import { renderToElement } from "@web/core/utils/render";
 
 export class CreateMeetingRoom extends Interaction {
     static selector = ".o_wevent_create_room_button";
