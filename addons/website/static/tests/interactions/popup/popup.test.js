@@ -99,6 +99,7 @@ describe("close popup", () => {
         expect(cookie.get("sPopup")).not.toBe("true");
         await tick();
         await animationFrame();
+        await advanceTime(100);
         expect(modal).toBeVisible();
         await tick();
         await click(".js_close_popup");
@@ -111,6 +112,7 @@ describe("close popup", () => {
         expect(core.interactions).toHaveLength(1);
         await tick();
         await animationFrame();
+        await advanceTime(100);
         expect(modal).toBeVisible();
         // Focus the modal so that the escape is dispatched on the right element.
         await pointerDown(modal);
@@ -124,6 +126,7 @@ describe("close popup", () => {
         expect(core.interactions).toHaveLength(1);
         await tick();
         await animationFrame();
+        await advanceTime(100);
         expect(modal).toBeVisible();
         await tick();
         await click(".btn-primary");
@@ -189,6 +192,7 @@ describe("trap focus", () => {
         await pointerDown(el.ownerDocument.body);
         await tick();
         await animationFrame();
+        await advanceTime(100);
         expect("#modal").toBeVisible();
         await tick();
         expect(".btn-primary").toBeFocused();
@@ -212,6 +216,7 @@ describe("trap focus", () => {
         expect("#showLink").toBeFocused();
         await tick();
         await animationFrame();
+        await advanceTime(100);
         expect("#modal").toBeVisible();
         await tick();
         expect(".btn-primary").toBeFocused();
@@ -236,6 +241,7 @@ describe("trap focus", () => {
         expect(modal).toBeVisible();
         await tick();
         await animationFrame();
+        await advanceTime(100);
         expect(".btn-primary").toBeFocused();
         await press("Tab");
         expect("#focus").toBeFocused();
@@ -260,6 +266,7 @@ describe("trap focus", () => {
         expect("#link1").toBeFocused();
         await tick();
         await animationFrame();
+        await advanceTime(100);
         expect("#modal").toBeVisible();
         await tick();
         expect(".btn-primary").toBeFocused();
@@ -276,6 +283,7 @@ describe("trap focus", () => {
         expect(core.interactions).toHaveLength(1);
         await tick();
         await animationFrame();
+        await advanceTime(100);
         expect("#modal").toBeVisible();
         await tick();
         expect(".btn-primary").toBeFocused();
