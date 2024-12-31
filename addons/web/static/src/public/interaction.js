@@ -300,7 +300,11 @@ export class Interaction {
      */
     insert(el, locationEl = this.el, position = "beforeend") {
         locationEl.insertAdjacentElement(position, el);
-        this.registerCleanup(() => el.remove());
+        this.registerCleanup(() => {
+            this.services["public.interactions"].stopInteractions(el);
+            el.remove();
+            this.refreshListeners();
+        });
         this.services["public.interactions"].startInteractions(el);
         this.refreshListeners();
     }
