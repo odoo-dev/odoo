@@ -1787,6 +1787,66 @@ describe("renderAt", () => {
         await click(subEls[0]);
         expect.verifySteps([]);
     });
+
+    function checkOrder(position) {
+        test(`order is preserved when inserting ${position} of an element`, async () => {
+            class Test extends Interaction {
+                static selector = ".test";
+                dynamicContent = {
+                    "[data-which]": {
+                        "t-on-click": (ev) => expect.step(ev.target.dataset.which),
+                    },
+                };
+                setup() {
+                    const els = this.renderAt(
+                        "web.TestSubInteraction1",
+                        {
+                            first: "one",
+                            second: "two",
+                        },
+                        this.el.querySelector("span"),
+                        position,
+                        (els) => {
+                            expect(els).toHaveLength(2);
+                            for (const el of els) {
+                                expect.step(`callback on ${el.dataset.which}`);
+                            }
+                        }
+                    );
+                    expect(els).toHaveLength(2);
+                    for (const el of els) {
+                        expect.step(`result has ${el.dataset.which}`);
+                    }
+                }
+            }
+
+            const { core, el } = await startInteraction([Test], TemplateTest);
+            expect(core.interactions).toHaveLength(1);
+            const testEl = el.querySelector(".test");
+            const subEls = testEl.querySelectorAll("[data-which]");
+            expect(subEls).toHaveLength(2);
+            expect(subEls[0].dataset.which).toBe("one");
+            expect(subEls[1].dataset.which).toBe("two");
+            await click(subEls[1]);
+            await click(subEls[0]);
+            expect.verifySteps([
+                "callback on one",
+                "callback on two",
+                "result has one",
+                "result has two",
+                "two",
+                "one",
+            ]);
+            core.stopInteractions();
+            expect(testEl.querySelectorAll("[data-which]")).toHaveLength(0);
+            await click(subEls[0]);
+            expect.verifySteps([]);
+        });
+    }
+    checkOrder("beforebegin");
+    checkOrder("afterbegin");
+    checkOrder("beforeend");
+    checkOrder("afterend");
 });
 
 describe("locked", () => {
