@@ -7,7 +7,8 @@ import { _t } from "@web/core/l10n/translation";
 import { post } from "@web/core/network/http_service";
 import { user } from "@web/core/user";
 import { delay } from "@web/core/utils/concurrency";
-
+import { session } from "@web/session";
+import { addLoadingEffect } from "@web/core/utils/ui";
 import {
     formatDate,
     formatDateTime,
@@ -16,6 +17,7 @@ import {
     serializeDate,
     serializeDateTime,
 } from "@web/core/l10n/dates";
+import { scrollTo } from "@web_editor/js/common/scrolling";
 import wUtils from "@website/js/utils";
 
 const { DateTime } = luxon;

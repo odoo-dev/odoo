@@ -12,10 +12,6 @@ setupInteractionWhiteList("website.hoverable_dropdown");
 
 describe.current.tags("interaction_dev");
 
-const dropdownTemplate = `
-    
-`;
-
 test.tags("desktop")("[EDIT] onMouseLeave doesn't work in edit mode", async () => {
     const { core } = await startInteractions(`
         <header class="o_hoverable_dropdown" style="display: flex; height: 50px; background-color: #CCFFCC;">
@@ -41,7 +37,7 @@ test.tags("desktop")("[EDIT] onMouseLeave doesn't work in edit mode", async () =
 });
 
 test.tags("desktop")("[EDIT] onMouseEnter doesn't work in edit mode if another dropdown is opened", async () => {
-    const { core, el } = await startInteractions(`
+    const { core } = await startInteractions(`
         <header class="o_hoverable_dropdown" style="display: flex; height: 50px; background-color: #CCFFCC;">
             <div id="D1" class="dropdown" style="margin: auto;">
                 <a class="dropdown-toggle">Dropdown 1</a>

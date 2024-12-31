@@ -4,7 +4,6 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-import { animationFrame } from "@odoo/hoot-dom";
 
 import { setupTest, customScroll } from "../header/helpers";
 

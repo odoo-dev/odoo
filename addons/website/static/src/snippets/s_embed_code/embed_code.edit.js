@@ -1,6 +1,8 @@
 import { EmbedCode } from "./embed_code";
 import { registry } from "@web/core/registry";
 
+import { _t } from "@web/core/l10n/translation";
+
 const EmbedCodeEdit = I => class extends I {
     start() {
         if (this.embedCodeEl.offsetHeight === 0) {
