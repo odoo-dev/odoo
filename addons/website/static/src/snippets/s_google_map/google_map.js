@@ -1,14 +1,18 @@
 /* GLOBAL VARIABLE : google */
 
-import { Interaction } from "@website/core/interaction";
+import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
 export class GoogleMap extends Interaction {
     static selector = ".s_google_map";
     dynamicContent = {
         _window: {
-            "t-on-resize": () => { if (this.gps) { map.setCenter(this.gps) } },
-        }
+            "t-on-resize": () => {
+                if (this.gps) {
+                    this.map.setCenter(this.gps);
+                }
+            },
+        },
     }
 
     mapColors = {
@@ -21,23 +25,21 @@ export class GoogleMap extends Interaction {
         cupertinoMap: [{ "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#a2daf2" }] }, { "featureType": "landscape.man_made", "elementType": "geometry", "stylers": [{ "color": "#f7f1df" }] }, { "featureType": "landscape.natural", "elementType": "geometry", "stylers": [{ "color": "#d0e3b4" }] }, { "featureType": "landscape.natural.terrain", "elementType": "geometry", "stylers": [{ "visibility": "off" }] }, { "featureType": "poi.park", "elementType": "geometry", "stylers": [{ "color": "#bde6ab" }] }, { "featureType": "poi", "elementType": "labels", "stylers": [{ "visibility": "off" }] }, { "featureType": "poi.medical", "elementType": "geometry", "stylers": [{ "color": "#fbd3da" }] }, { "featureType": "poi.business", "stylers": [{ "visibility": "off" }] }, { "featureType": "road", "elementType": "geometry.stroke", "stylers": [{ "visibility": "off" }] }, { "featureType": "road", "elementType": "labels", "stylers": [{ "visibility": "off" }] }, { "featureType": "road.highway", "elementType": "geometry.fill", "stylers": [{ "color": "#ffe15f" }] }, { "featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [{ "color": "#efd151" }] }, { "featureType": "road.arterial", "elementType": "geometry.fill", "stylers": [{ "color": "#ffffff" }] }, { "featureType": "road.local", "elementType": "geometry.fill", "stylers": [{ "color": "black" }] }, { "featureType": "transit.station.airport", "elementType": "geometry.fill", "stylers": [{ "color": "#cfb2db" }] }],
         carMap: [{ "featureType": "administrative", "stylers": [{ "visibility": "off" }] }, { "featureType": "poi", "stylers": [{ "visibility": "simplified" }] }, { "featureType": "road", "stylers": [{ "visibility": "simplified" }] }, { "featureType": "water", "stylers": [{ "visibility": "simplified" }] }, { "featureType": "transit", "stylers": [{ "visibility": "simplified" }] }, { "featureType": "landscape", "stylers": [{ "visibility": "simplified" }] }, { "featureType": "road.highway", "stylers": [{ "visibility": "off" }] }, { "featureType": "road.local", "stylers": [{ "visibility": "on" }] }, { "featureType": "road.highway", "elementType": "geometry", "stylers": [{ "visibility": "on" }] }, { "featureType": "water", "stylers": [{ "color": "#84afa3" }, { "lightness": 52 }] }, { "stylers": [{ "saturation": -77 }] }, { "featureType": "road" }],
         bwMap: [{ stylers: [{ hue: "#00ffe6" }, { saturation: -100 }] }, { featureType: "road", elementType: "geometry", stylers: [{ lightness: 100 }, { visibility: "simplified" }] }, { featureType: "road", elementType: "labels", stylers: [{ visibility: "off" }] }],
-    }
+    };
 
     setup() {
         this.canStart = false;
+        this.canSpecifyKey = false;
+        this.map = undefined;
+        this.gps = undefined;
     }
 
     async willStart() {
         if (typeof google !== 'object' || typeof google.maps !== 'object') {
-            await new Promise(resolve => {
-                this.trigger_up('gmap_api_request', {
-                    editableMode: false,
-                    onSuccess: () => resolve(),
-                });
-            });
+            await this.services.website_map.loadGMapAPI(this.canSpecifyKey);
             return;
         }
-        this.canStart = true
+        this.canStart = true;
     }
 
     start() {
@@ -60,12 +62,12 @@ export class GoogleMap extends Interaction {
             scrollwheel: false,
             mapTypeControlOptions: {
                 mapTypeIds: [google.maps.MapTypeId.ROADMAP, 'map_style']
-            }
+            },
         };
 
         // Render Map
         const mapC = this.el.querySelector('.map_container');
-        const map = new google.maps.Map(mapC.get(0), myOptions);
+        const map = new google.maps.Map(mapC, myOptions);
 
         // Update GPS position
         const p = this.el.dataset.mapGps.substring(1).slice(0, -1).split(',');
@@ -94,9 +96,10 @@ export class GoogleMap extends Interaction {
             map.mapTypes.set('map_style', new google.maps.StyledMapType(mapColor, { name: "Styled Map" }));
             map.setMapTypeId('map_style');
         }
+        this.map = map;
     }
 }
 
 registry
-    .category("website.active_elements")
+    .category("public.interactions")
     .add("website.google_map", GoogleMap);
