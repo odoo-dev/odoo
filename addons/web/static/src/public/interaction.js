@@ -305,17 +305,28 @@ export class Interaction {
         this.refreshListeners();
     }
 
+    /**
+     * Renders, insert and activate an element at a specific location.
+     * The inserted element will be removed when the interaction is destroyed.
+     *
+     * @param { string } template
+     * @param { Object } renderContext
+     * @param { HTMLElement } [locationEl] the target
+     * @param { "afterbegin" | "afterend" | "beforebegin" | "beforeend" } [position]
+     * @param { Function } callback called with rendered elements before insertion
+     * @returns { HTMLElement[] } rendered elements
+     */
     renderAt(template, renderContext, locationEl, position, callback) {
         const fragment = renderToFragment(template, renderContext);
-        callback?.(fragment);
-        let els = [...fragment.children];
+        const els = [...fragment.children];
+        callback?.(els);
         if (["beforeend", "beforebegin"].includes(position)) {
-            els = els.reverse();
+            els.reverse();
         }
         for (const el of els) {
             this.insert(el, locationEl, position);
         }
-        return fragment;
+        return [...fragment.children];
     }
 
     /**

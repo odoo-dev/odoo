@@ -14,8 +14,8 @@ class WebsiteForumShare extends Interaction {
                 this.renderAt("website.social_modal", {
                     target_type: socialData.targetType,
                     state: questionEl.dataset.state,
-                }, document.body, "beforeend", (el) => {
-                    this.addListener(el.children[0], "hidden.bs.modal", () => el.children[0].remove());
+                }, document.body, "beforeend", (els) => {
+                    this.addListener(els[0], "hidden.bs.modal", () => els[0].remove());
                 });
                 const bsModal = window.Modal.getOrCreateInstance(document.querySelector("#oe_social_share_modal"));
                 bsModal.show();

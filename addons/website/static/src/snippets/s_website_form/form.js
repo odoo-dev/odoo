@@ -752,7 +752,7 @@ export class Form extends Interaction {
      *      displayed
      */
     createFileBlock(fileDetails, filesZoneEl) {
-        this.renderAt("website.file_block", {fileName: fileDetails.name}, filesZoneEl, "beforeend", (el) => el.children[0].fileDetails = fileDetails);
+        this.renderAt("website.file_block", {fileName: fileDetails.name}, filesZoneEl, "beforeend", (els) => els[0].fileDetails = fileDetails);
     }
     /**
      * Creates the file upload button (= a button to replace the file input,
