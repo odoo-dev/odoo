@@ -316,12 +316,12 @@ export class Interaction {
      * @param { Function } callback called with rendered elements before insertion
      * @returns { HTMLElement[] } rendered elements
      */
-    renderAt(template, renderContext, locationEl, position, callback) {
+    renderAt(template, renderContext, locationEl, position = "beforeend", callback) {
         const fragment = renderToFragment(template, renderContext);
         const result = [...fragment.children];
         const els = [...fragment.children];
         callback?.(els);
-        if (["beforeend", "beforebegin"].includes(position)) {
+        if (["afterend", "afterbegin"].includes(position)) {
             els.reverse();
         }
         for (const el of els) {
