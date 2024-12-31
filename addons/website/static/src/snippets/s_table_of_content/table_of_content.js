@@ -7,11 +7,11 @@ import { isVisible } from "@web/core/utils/ui";
 import { AnchorSlide } from "@website/interactions/anchor_slide";
 
 const getSelector = element => {
-    const hrefAttr = element.getAttribute("href").trim();
+    let hrefAttr = element.getAttribute("href");
     if (!hrefAttr?.startsWith("#")) {
         return null;
     }
-    return hrefAttr !== "#" ? hrefAttr : null;
+    return hrefAttr !== "#" ? hrefAttr.trim() : null;
 };
 
 const parents = (element, selector) => {
@@ -157,26 +157,33 @@ export class TableOfContent extends Interaction {
         if (link.classList.contains("dropdown-item")) {
             link.closest(".dropdown").querySelector(".dropdown-toggle").classList.add("active");
         } else {
-            parents(link, ".nav, .list-group").forEach(listGroup => {
+            const listGroupEls = parents(link, ".nav, .list-group");
+            for (const listGroupEl of listGroupEls) {
                 // Set triggered links parents as active
                 // With both <ul> and <nav> markup a parent is the previous sibling of any nav ancestor
-                prev(listGroup, ".nav-link, .list-group-item").forEach(item => item.classList.add("active")); // Handle special case when .nav-link is inside .nav-item
-                prev(listGroup, ".nav-item").forEach(navItem => {
-                    [...navItem.children]
-                        .filter(child => child.matches(".nav-link"))
-                        .forEach(item => item.classList.add("active"));
-                });
-            });
+                const itemEls = prev(listGroupEl, ".nav-link, .list-group-item");
+                for (const itemEl of itemEls) {
+                    itemEl.classList.add("active")
+                }
+                // Handle special case when .nav-link is inside .nav-item
+                const navItemEls = prev(listGroupEl, ".nav-item");
+                for (const navItemEl of navItemEls) {
+                    for (const childEl of navItemEl.children) {
+                        if (childEl.matches(".nav-link")) {
+                            childEl.classList.add("active")
+                        }
+                    }
+                }
+            }
         }
     }
 
     clear() {
-        [...this.tocElement.querySelectorAll(".nav-link, .list-group-item, .dropdown-item")]
-            .forEach(node => node.classList.remove("active"));
+        const itemEls = this.tocElement.querySelectorAll(".nav-link, .list-group-item, .dropdown-item");
+        for (const itemEl of itemEls) {
+            itemEl.classList.remove("active");
+        }
     }
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
 
     process() {
         const scrollTop = this.scrollElement.scrollTop + this.offset;

@@ -20,7 +20,7 @@ export class CookiesBar extends Popup {
         ...this.dynamicContent,
         _cookiesbus: {
             "t-on-cookiesBar.show": this.onShowCookiesBar,
-            "t-on-cookiesBar.toggle": this.onToggleCookieBar,
+            "t-on-cookiesBar.toggle": this.onToggleCookiesBar,
         },
         "#cookies-consent-essential, #cookies-consent-all": { "t-on-click": this.onAcceptClick },
         // Override to avoid side effects on hide.
@@ -35,7 +35,7 @@ export class CookiesBar extends Popup {
     showPopup() {
         super.showPopup();
         if (this.toggleEl) {
-            this.onToggleCookieBar();
+            this.onToggleCookiesBar();
         }
     }
 
@@ -51,7 +51,7 @@ export class CookiesBar extends Popup {
         }
     }
 
-    onToggleCookieBar() {
+    onToggleCookiesBar() {
         this.bsModal.toggle();
         // As we're using Bootstrap's events, the Popup class prevents the modal
         // from being shown after hiding it: override that behavior.

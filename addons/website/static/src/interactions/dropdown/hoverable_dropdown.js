@@ -49,15 +49,15 @@ export class HoverableDropdown extends Interaction {
 
     /**
      * @param {Event} ev
-     * @param {HTMLElement} targetEl
+     * @param {HTMLElement} currentTargetEl
      */
-    onMouseEnter(ev, targetEl) {
+    onMouseEnter(ev, currentTargetEl) {
         const focusedEl = this.el.ownerDocument.querySelector(":focus")
             || window.frameElement?.ownerDocument.querySelector(":focus");
 
         // The user must click on the dropdown if he is on mobile (no way to
         // hover) or if the dropdown is the (or in the) extra menu ('+').
-        this.updateDropdownVisibility(targetEl, true);
+        this.updateDropdownVisibility(currentTargetEl, true);
 
         // Keep the focus on the previously focused element if any, otherwise do
         // not focus the dropdown on hover.
@@ -73,7 +73,7 @@ export class HoverableDropdown extends Interaction {
 
     /**
      * @param {Event} ev
-     * @param {HTMLElement} targetEl
+     * @param {HTMLElement} currentTargetEl
      */
     onMouseLeave(ev, targelEl) {
         this.updateDropdownVisibility(targelEl, false);

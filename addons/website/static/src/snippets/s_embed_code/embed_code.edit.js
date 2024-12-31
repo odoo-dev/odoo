@@ -12,6 +12,7 @@ const EmbedCodeEdit = I => class extends I {
             this.embedCodeEl.appendChild(placeholderEl);
         }
     }
+    destroy() { }
 };
 
 registry

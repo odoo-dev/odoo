@@ -37,7 +37,7 @@ export class DynamicSnippet extends Interaction {
         this.uniqueId = uniqueId("s_dynamic_snippet_");
         this.templateKey = "website.s_dynamic_snippet.grid";
         this.isVisible = true;
-        this.isEditMode = false;
+        this.withSample = false;
     }
 
     async willStart() {
@@ -91,7 +91,7 @@ export class DynamicSnippet extends Interaction {
                     "template_key": nodeData.templateKey,
                     "limit": parseInt(nodeData.numberOfRecords),
                     "search_domain": this.getSearchDomain(),
-                    "with_sample": this.isEditMode,
+                    "with_sample": this.withSample,
                 },
                     this.getRpcParameters(),
                     JSON.parse(this.el.dataset?.customTemplateData || "{}")
@@ -138,7 +138,7 @@ export class DynamicSnippet extends Interaction {
     }
 
     render() {
-        if (this.data.length > 0 || this.isEditMode) {
+        if (this.data.length > 0 || this.withSample) {
             this.isVisible = true;
             this.prepareContent();
         } else {
@@ -179,7 +179,7 @@ export class DynamicSnippet extends Interaction {
                     delete carouselEl.dataset.bsInterval;
                 }
                 window.Carousel.getInstance(carouselEl)?.dispose();
-                if (!this.isEditMode) {
+                if (!this.withSample) {
                     window.Carousel.getOrCreateInstance(carouselEl);
                 }
             });

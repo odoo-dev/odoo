@@ -56,7 +56,7 @@ test("bottom_fixed_element is started when there is an element #wrapwrap", async
     expect(core.interactions).toHaveLength(1);
 });
 
-test("show button fixed element when over no button (0 button present)", async () => {
+test("show button fixed element when over no button (0 button)", async () => {
     const { el } = await startInteractions(getTemplate({ withButtonCenter: false, withButtonLeft: false }));
     el.style.overflowY = "scroll";
     const bottomFixedElement = el.querySelector(".o_bottom_fixed_element");
@@ -66,7 +66,7 @@ test("show button fixed element when over no button (0 button present)", async (
     expect(bottomFixedElement).not.toHaveClass("o_bottom_fixed_element_hidden");
 });
 
-test("show button fixed element when over no button (1 button present)", async () => {
+test("show button fixed element when over no button (1 button)", async () => {
     const { el } = await startInteractions(getTemplate({ withButtonCenter: false, withButtonLeft: true }));
     el.style.overflowY = "scroll";
     const bottomFixedElement = el.querySelector(".o_bottom_fixed_element");
@@ -76,7 +76,7 @@ test("show button fixed element when over no button (1 button present)", async (
     expect(bottomFixedElement).not.toHaveClass("o_bottom_fixed_element_hidden");
 });
 
-test("hide button fixed element when over one button (1 button present)", async () => {
+test("hide button fixed element when over one button (1 button)", async () => {
     const { el } = await startInteractions(getTemplate({ withButtonCenter: true, withButtonLeft: false }));
     el.style.overflowY = "scroll";
     const bottomFixedElement = el.querySelector(".o_bottom_fixed_element");
@@ -86,7 +86,7 @@ test("hide button fixed element when over one button (1 button present)", async 
     expect(bottomFixedElement).toHaveClass("o_bottom_fixed_element_hidden");
 });
 
-test("hide button fixed element when over one button (2 buttons presents)", async () => {
+test("hide button fixed element when over one button (2 buttons)", async () => {
     const { el } = await startInteractions(getTemplate({ withButtonCenter: true, withButtonLeft: true }));
     el.style.overflowY = "scroll";
     const bottomFixedElement = el.querySelector(".o_bottom_fixed_element");

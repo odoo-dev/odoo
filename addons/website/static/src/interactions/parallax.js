@@ -9,8 +9,8 @@ export class Parallax extends Interaction {
     });
     dynamicContent = {
         _document: { "t-on-scroll": this.onScroll },
-        _window: { "t-on-resize": this.onResize },
-        _modal: { "t-on-shown.bs.modal": this.onResize },
+        _window: { "t-on-resize": this.updateBackgroundHeight },
+        _modal: { "t-on-shown.bs.modal": this.updateBackgroundHeight },
         _bg: {
             "t-att-style": () => ({
                 "top": this.styleTop,
@@ -34,11 +34,11 @@ export class Parallax extends Interaction {
     }
 
     start() {
-        this.onResize();
+        this.updateBackgroundHeight();
         this.updateContent();
     }
 
-    onResize() {
+    updateBackgroundHeight() {
         this.speed = parseFloat(this.el.getAttribute("data-scroll-background-ratio")) || 0;
         if (this.speed === 0 || this.speed === 1) {
             return;

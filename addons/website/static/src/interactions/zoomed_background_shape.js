@@ -38,10 +38,10 @@ export class ZoomedBackgroundShape extends Interaction {
 
     setup() {
         this.offset = undefined;
+        this.resizeBackgroundShape();
     }
 
     start() {
-        this.resizeBackgroundShape();
         this.updateContent();
     }
 
@@ -57,8 +57,6 @@ export class ZoomedBackgroundShape extends Interaction {
         decimalPart = decimalPart == 1 ? 0 : decimalPart;
         // If there is a decimal part. (e.g. Chrome + browser zoom enabled)
         if (decimalPart > 0) {
-            console.log(decimalPart);
-            console.log((decimalPart < 0.5 ? decimalPart : decimalPart - 1));
             // Compensate for the gap by giving an integer width value to the
             // shape by changing its "right" and "left" positions.
             this.offset = `${(decimalPart < 0.5 ? decimalPart : decimalPart - 1) / 2}px`;

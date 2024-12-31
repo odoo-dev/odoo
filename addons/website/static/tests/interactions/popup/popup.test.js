@@ -28,7 +28,7 @@ describe.current.tags("interaction_dev");
  * Remove the CSS transitions because Bootstrap transitions don't work with Hoot.
  */
 function removeTransitions() {
-    defineStyle(`
+    defineStyle(/* css */ `
         * {
             transition: none !important;
         }
