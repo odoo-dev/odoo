@@ -20,7 +20,7 @@ test("images lazy loading removes height then restores it", async () => {
             await new Promise(resolve => setTimeout(resolve, 100));
         }
     });
-    const { core, el } = await startInteractions(`
+    const { core } = await startInteractions(`
         <div>Fake surrounding
             <div id="wrapwrap">
                 <img src="/web/image/website.library_image_08" loading="lazy" style="min-height: 100px;"/>
