@@ -38,10 +38,12 @@ export class ZoomedBackgroundShape extends Interaction {
 
     setup() {
         this.offset = undefined;
-        this.resizeBackgroundShape();
     }
 
     start() {
+        // This cannot be move in the setup because updateContent
+        // is not available yet (interaction not ready)
+        this.resizeBackgroundShape();
         this.updateContent();
     }
 
