@@ -94,7 +94,7 @@ class ChatRoom extends Interaction {
             await this.waitFor(this.joinJitsiRoom(parentNode));
         } else {
             // create a modal and append the Jitsi iframe in it
-            const jitsiModalEl = this.renderAt("chat_room_modal", {}, document.body).children[0];
+            const jitsiModalEl = this.renderAt("chat_room_modal", {}, document.body)[0];
             const bsJitsiModal = window.Modal.getOrCreateInstance(jitsiModalEl)
             bsJitsiModal.show();
             this.registerCleanup(() => bsJitsiModal.dispose());

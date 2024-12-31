@@ -18,7 +18,7 @@ export class WebsiteEventCreateMeetingRoom extends Interaction {
                     eventId: this.el.dataset.eventId,
                     defaultLangCode: this.el.dataset.defaultLangCode,
                     langs: langs,
-                }, this.el, "afterend").children[0];
+                }, this.el, "afterend")[0];
             }
         }
         if (this.createModalEl) {
