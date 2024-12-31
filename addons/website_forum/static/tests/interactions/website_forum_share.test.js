@@ -74,6 +74,7 @@ describe("target types", () => {
         expect(core.interactions).toHaveLength(2);
         await tick();
         await animationFrame();
+        await advanceTime(100);
         expect(el.ownerDocument.body.querySelector(".modal")).toBeVisible();
         expect(el.ownerDocument.body.querySelector(".modal p")).toHaveText(/^Share this content to increase your chances/);
     });
