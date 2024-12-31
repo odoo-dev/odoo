@@ -318,6 +318,7 @@ export class Interaction {
      */
     renderAt(template, renderContext, locationEl, position, callback) {
         const fragment = renderToFragment(template, renderContext);
+        const result = [...fragment.children];
         const els = [...fragment.children];
         callback?.(els);
         if (["beforeend", "beforebegin"].includes(position)) {
@@ -326,7 +327,7 @@ export class Interaction {
         for (const el of els) {
             this.insert(el, locationEl, position);
         }
-        return [...fragment.children];
+        return result;
     }
 
     /**
