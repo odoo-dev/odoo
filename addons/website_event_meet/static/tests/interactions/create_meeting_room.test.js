@@ -1,18 +1,18 @@
-import { describe, expect, test } from "@odoo/hoot";
-import { click } from "@odoo/hoot-dom";
-
-import { onRpc } from "@web/../tests/web_test_helpers";
-
 import {
     startInteractions,
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-setupInteractionWhiteList("website_event_meet.website_event_create_meeting_room");
+import { describe, expect, test } from "@odoo/hoot";
+import { click } from "@odoo/hoot-dom";
+
+import { onRpc } from "@web/../tests/web_test_helpers";
+
+setupInteractionWhiteList("website_event_meet.create_meeting_room");
+
 describe.current.tags("interaction_dev");
 
-const getTemplate = function (options = {}) {
-    return `
+const meetingRoomTemplate = `
     <div class="o_wemeet_container container h-100">
         <div class="row h-100 mb-5">
             <div class="col-12 col-lg-8 col-xl-9 pe-xxl-5">
@@ -229,10 +229,10 @@ const getTemplate = function (options = {}) {
             </div>
         </div>
     </div>
-`}
+`;
 
 test("website_event_create_meeting_room is started when there is an element .o_wevent_create_room_button", async () => {
-    const { core } = await startInteractions(getTemplate());
+    const { core } = await startInteractions(meetingRoomTemplate);
     expect(core.interactions.length).toBe(1);
 });
 
@@ -245,7 +245,7 @@ test("[click] website_event_create_meeting_room open a modal to create a room", 
             ]
         ];
     });
-    const { el } = await startInteractions(getTemplate());
+    const { el } = await startInteractions(meetingRoomTemplate);
     expect(!!el.querySelector(".o_wevent_create_meeting_room_modal")).toBe(false)
     await click(".o_wevent_create_room_button");
     expect(!!el.querySelector(".o_wevent_create_meeting_room_modal")).toBe(true)
