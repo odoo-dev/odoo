@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from "@odoo/hoot";
 import { animationFrame, tick } from "@odoo/hoot-dom";
+import { advanceTime } from "@odoo/hoot-mock";
 import { startInteractions, setupInteractionWhiteList } from "@web/../tests/public/helpers";
 import { defineStyle } from "@web/../tests/web_test_helpers";
 
@@ -39,6 +40,7 @@ describe("target types", () => {
         expect(core.interactions).toHaveLength(2);
         await tick();
         await animationFrame();
+        await advanceTime(100);
         expect(el.ownerDocument.body.querySelector(".modal")).toBeVisible();
         expect(el.ownerDocument.body.querySelector(".modal p")).toHaveText(/^By sharing you answer, you will get additional/);
     });
@@ -55,6 +57,7 @@ describe("target types", () => {
         expect(core.interactions).toHaveLength(2);
         await tick();
         await animationFrame();
+        await advanceTime(100);
         expect(el.ownerDocument.body.querySelector(".modal")).toBeVisible();
         expect(el.ownerDocument.body.querySelector(".modal p")).toHaveText(/^On average,/);
     });
@@ -89,6 +92,7 @@ describe("forum share state", () => {
         expect(core.interactions).toHaveLength(1);
         await tick();
         await animationFrame();
+        await advanceTime(100);
         expect(el.ownerDocument.body.querySelector(".modal")).toBeVisible();
         expect(el.ownerDocument.body.querySelector(".modal .s_share")).toBe(null);
     });
@@ -105,6 +109,7 @@ describe("forum share state", () => {
         expect(core.interactions).toHaveLength(2);
         await tick();
         await animationFrame();
+        await advanceTime(100);
         expect(el.ownerDocument.body.querySelector(".modal")).toBeVisible();
         expect(el.ownerDocument.body.querySelector(".modal .s_share")).toBeVisible();
     });
