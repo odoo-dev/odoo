@@ -125,13 +125,13 @@ function fixupViewBody(oldNode, record) {
     return [node, qrcode, code]
 }
 
-class TOTPEnable extends Interaction {
+export class TOTPEnable extends Interaction {
     static selector = "#auth_totp_portal_enable";
     dynamicContent = {
         _root: { "t-on-click.prevent": this.onClick },
     };
 
-    async onClick(e) {
+    async onClick() {
         const data = await this.waitFor(handleCheckIdentity(
             this.waitFor(this.services.orm.call("res.users", "action_totp_enable_wizard", [user.userId])),
             this.services.orm,

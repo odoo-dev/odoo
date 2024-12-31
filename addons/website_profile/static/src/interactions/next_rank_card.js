@@ -1,7 +1,7 @@
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
-class WebsiteProfileNextRankCard extends Interaction {
+export class NextRankCard extends Interaction {
     static selector = ".o_wprofile_progress_circle";
 
     setup() {
@@ -12,4 +12,4 @@ class WebsiteProfileNextRankCard extends Interaction {
 
 registry
     .category("public.interactions")
-    .add("website_profile.website_profile_next_rank_card", WebsiteProfileNextRankCard);
+    .add("website_profile.next_rank_card", NextRankCard);

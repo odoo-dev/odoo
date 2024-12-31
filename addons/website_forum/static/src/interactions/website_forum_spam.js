@@ -1,10 +1,11 @@
-import { browser } from "@web/core/browser/browser";
-import { registry } from "@web/core/registry";
-import { KeepLast } from "@web/core/utils/concurrency";
 import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
+
+import { browser } from "@web/core/browser/browser";
+import { KeepLast } from "@web/core/utils/concurrency";
 import { cloneContentEls } from "@website/js/utils";
 
-class WebsiteForumSpam extends Interaction {
+export class WebsiteForumSpam extends Interaction {
     static selector = ".o_wforum_moderation_queue";
     dynamicContent = {
         ".o_wforum_select_all_spam": { "t-on-click": this.onSelectAllSpamClick },
@@ -67,4 +68,6 @@ class WebsiteForumSpam extends Interaction {
     }
 }
 
-registry.category("public.interactions").add("website_forum.website_forum_spam", WebsiteForumSpam);
+registry
+    .category("public.interactions")
+    .add("website_forum.website_forum_spam", WebsiteForumSpam);

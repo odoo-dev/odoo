@@ -7,11 +7,11 @@ import { PortalLoyaltyCardDialog } from '../js/portal/loyalty_card_dialog/loyalt
 export class LoyaltyCard extends Interaction {
     static selector = ".o_loyalty_container";
     dynamicContent = {
-        ".o_loyalty_card": { "t-on-click": (ev) => this.onClickLoyaltyCard(ev.currentTarget.dataset.card_id) },
+        ".o_loyalty_card": { "t-on-click.withTarget": this.onClickLoyaltyCard },
     };
 
-    async onClickLoyaltyCard(cardId) {
-        const data = await this.waitFor(rpc(`/my/loyalty_card/${cardId}/values`));
+    async onClickLoyaltyCard(ev, currentTargetEl) {
+        const data = await this.waitFor(rpc(`/my/loyalty_card/${currentTargetEl.dataset.card_id}/values`));
         this.services.dialog.add(PortalLoyaltyCardDialog, data);
     }
 }

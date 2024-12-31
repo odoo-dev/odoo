@@ -1,17 +1,17 @@
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
-import { user } from "@web/core/user";
-import { _t } from "@web/core/l10n/translation";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { _t } from "@web/core/l10n/translation";
+import { user } from "@web/core/user";
 
-export class WebsiteEventMeetingRoom extends Interaction {
+export class MeetingRoom extends Interaction {
     static selector = ".o_wevent_meeting_room_card";
     dynamicContent = {
         '.o_wevent_meeting_room_delete': { "t-on-click.prevent.stop": this.onClickDelete },
         '.o_wevent_meeting_room_duplicate': { "t-on-click.prevent.stop": this.onClickDuplicate },
-        '.o_wevent_meeting_room_is_pinned': { "t-on-click.prevent.stop": this.onClickIsPinned },
-    }
+        '.o_wevent_meeting_room_is_pinned': { "t-on-click.prevent.stop.withTarget": this.onTogglePinned },
+    };
 
     setup() {
         this.meetingRoomId = parseInt(this.el.dataset["meetingRoomId"]);
@@ -25,7 +25,7 @@ export class WebsiteEventMeetingRoom extends Interaction {
                     "event.meeting.room",
                     [this.meetingRoomId],
                     { is_published: false },
-                    { context: user.context } // this.services.user.context
+                    { context: user.context }, // this.services.user.context
                 ));
 
                 // remove the element so we do not need to refresh the page
@@ -47,22 +47,20 @@ export class WebsiteEventMeetingRoom extends Interaction {
         });
     }
 
-    async onClickIsPinned(ev) {
-        const target = ev.currentTarget
-        const pinnedButtonClass = "o_wevent_meeting_room_pinned";
-        const isPinned = ev.currentTarget.classList.contains(pinnedButtonClass);
+    async onTogglePinned(ev, currentTargetEl) {
+        const wasPinned = currentTargetEl.classList.contains("o_wevent_meeting_room_pinned");
 
         await this.waitFor(this.services.orm.write(
             "event.meeting.room",
             [this.meetingRoomId],
-            { is_pinned: !isPinned },
-            { context: user.context }
+            { is_pinned: !wasPinned },
+            { context: user.context },
         ));
 
-        target.classList.toggle(pinnedButtonClass, !isPinned);
+        currentTargetEl.classList.toggle("o_wevent_meeting_room_pinned", !wasPinned);
     }
 }
 
 registry
     .category("public.interactions")
-    .add("website_event_meet.website_event_meeting_room", WebsiteEventMeetingRoom);
+    .add("website_event_meet.meeting_room", MeetingRoom);

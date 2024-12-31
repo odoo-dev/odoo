@@ -1,8 +1,9 @@
+import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
+
 import { browser } from "@web/core/browser/browser";
 import { rpc } from "@web/core/network/rpc";
-import { registry } from "@web/core/registry";
 import { utils as uiUtils } from "@web/core/ui/ui_service";
-import { Interaction } from "@web/public/interaction";
 
 /**
  * @typedef jitsiRoom
@@ -20,7 +21,7 @@ import { Interaction } from "@web/public/interaction";
  * @property {object} _participants
  */
 
-class ChatRoom extends Interaction {
+export class ChatRoom extends Interaction {
     static selector = ".o_wjitsi_room_widget";
     dynamicContent = {
         ".o_wjitsi_room_link": { "t-on-click": this.onChatRoomClick },
@@ -236,13 +237,13 @@ class ChatRoom extends Interaction {
       * @returns {jitsiRoom} the newly created Jitsi room
       */
     async createJitsiRoom(roomName, parentNode) {
-      await this.waitFor(this.loadJitsi());
+        await this.waitFor(this.loadJitsi());
         const options = {
             roomName: roomName,
             width: "100%",
             height: "100%",
             parentNode: parentNode,
-            configOverwrite: {disableDeepLinking: true},
+            configOverwrite: { disableDeepLinking: true },
         };
         return new window.JitsiMeetExternalAPI(this.jitsiServer, options);
     }
@@ -251,16 +252,18 @@ class ChatRoom extends Interaction {
       * Load the Jitsi external library if necessary.
       */
     async loadJitsi() {
-      if (!window.JitsiMeetExternalAPI) {
-        const scriptEl = document.createElement("script");
-        scriptEl.setAttribute("src", `https://${this.jitsiServer}/external_api.js`);
-        this.insert(scriptEl, document.head);
-        let waitForScriptLoad;
-        const prom = new Promise(resolve => waitForScriptLoad = () => resolve());
-        this.addListener(scriptEl, "load", waitForScriptLoad);
-        await this.waitFor(prom);
-      }
+        if (!window.JitsiMeetExternalAPI) {
+            const scriptEl = document.createElement("script");
+            scriptEl.setAttribute("src", `https://${this.jitsiServer}/external_api.js`);
+            this.insert(scriptEl, document.head);
+            let waitForScriptLoad;
+            const prom = new Promise(resolve => waitForScriptLoad = () => resolve());
+            this.addListener(scriptEl, "load", waitForScriptLoad);
+            await this.waitFor(prom);
+        }
     }
 }
 
-registry.category("public.interactions").add("website_jitsi.chat_room", ChatRoom);
+registry
+    .category("public.interactions")
+    .add("website_jitsi.chat_room", ChatRoom);

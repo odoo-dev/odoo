@@ -1,28 +1,19 @@
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
-export class WebsitePaymentDonation extends Interaction {
+export class DonationForm extends Interaction {
     static selector = ".o_donation_payment_form";
     dynamicContent = {
-        ".o_amount_input": { "t-on-focus": this.onFocusAmountInput },
-        "#donation_comment_checkbox": { "t-on-change": this.onChangeDonationComment },
+        ".o_amount_input": { "t-on-focus": () => this.el.querySelector("#other_amount")?.setAttribute("checked", true) },
+        "#donation_comment_checkbox": { "t-on-change.withTarget": this.onChangeDonationComment },
     };
 
     /**
      * @param {Event} ev
+     * @param {HTMLElement} currentTargetEl
      */
-    onFocusAmountInput(ev) {
-        const otherAmount = this.el.querySelector("#other_amount");
-        if (otherAmount) {
-            otherAmount.checked = true;
-        }
-    }
-
-    /**
-     * @param {Event} ev
-     */
-    onChangeDonationComment(ev) {
-        const checked = ev.currentTarget.checked;
+    onChangeDonationComment(ev, currentTargetEl) {
+        const checked = currentTargetEl.checked;
         const donationCommentEl = this.el.querySelector('#donation_comment');
         donationCommentEl.classList.toggle('d-none', !checked);
         if (!checked) {
@@ -33,4 +24,4 @@ export class WebsitePaymentDonation extends Interaction {
 
 registry
     .category("public.interactions")
-    .add("website_payment.website_payment_donation", WebsitePaymentDonation);
+    .add("website_payment.donation_form", DonationForm);

@@ -2,14 +2,15 @@ import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
 import { rpc } from "@web/core/network/rpc";
+import { renderToElement } from "@web/core/utils/render";
 
-export class WebsiteEventCreateMeetingRoom extends Interaction {
+export class CreateMeetingRoom extends Interaction {
     static selector = ".o_wevent_create_room_button";
     dynamicContent = {
-        "_root": { "t-on-click": this.onClick }
-    }
+        _root: { "t-on-click": this.onClickCreate }
+    };
 
-    async onClick() {
+    async onClickCreate() {
         if (!this.createModalEl) {
             const langs = await this.waitFor(rpc("/event/active_langs"));
             if (langs) {
@@ -29,4 +30,4 @@ export class WebsiteEventCreateMeetingRoom extends Interaction {
 
 registry
     .category("public.interactions")
-    .add("website_event_meet.website_event_create_meeting_room", WebsiteEventCreateMeetingRoom);
+    .add("website_event_meet.create_meeting_room", CreateMeetingRoom);

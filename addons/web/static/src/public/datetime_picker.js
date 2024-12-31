@@ -8,7 +8,7 @@ import {
     parseDateTime,
 } from "@web/core/l10n/dates";
 
-class DatetimePicker extends Interaction {
+export class DatetimePicker extends Interaction {
     static selector = "[data-widget='datetime-picker']";
 
     setup() {
@@ -38,4 +38,6 @@ class DatetimePicker extends Interaction {
     }
 }
 
-registry.category("public.interactions").add("web.datetime_picker", DatetimePicker);
+registry
+    .category("public.interactions")
+    .add("web.datetime_picker", DatetimePicker);

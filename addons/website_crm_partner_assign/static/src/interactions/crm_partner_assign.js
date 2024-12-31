@@ -1,19 +1,18 @@
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
-import { _t } from "@web/core/l10n/translation";
 import { parseDate, formatDate, serializeDate } from "@web/core/l10n/dates";
+import { _t } from "@web/core/l10n/translation";
 
 const { DateTime } = luxon;
 
 export class CRMPartnerAssign extends Interaction {
     static selector = "#wrapwrap";
     static selectorHas = ".interested_partner_assign_form, .desinterested_partner_assign_form, .opp-stage-button, .new_opp_form";
-
     dynamicContent = {
         ".interested_partner_assign_confirm": { "t-on-click.prevent.stop": this.locked(this.onInterestedPartnerConfirm) },
         ".desinterested_partner_assign_confirm": { "t-on-click.prevent.stop": this.locked(this.onDesinterestedPartnerConfirm) },
-        ".opp-stage-button": { "t-on-click": this.locked(this.onOppStageButtonClick) },
+        ".opp-stage-button": { "t-on-click.withTarget": this.locked(this.onOppStageButtonClick) },
         ".edit_contact_confirm": { "t-on-click.prevent.stop": this.locked(this.editContact) },
         ".new_opp_confirm": { "t-on-click.prevent.stop": this.locked(this.createOpportunity) },
         ".edit_opp_confirm": { "t-on-click.prevent.stop": this.locked(this.editOpportunity) },
@@ -32,7 +31,6 @@ export class CRMPartnerAssign extends Interaction {
                 "display": this.confirmationFailed ? "block" : undefined,
             }),
         },
-
     };
 
     async confirmInterestedPartner() {
@@ -130,8 +128,8 @@ export class CRMPartnerAssign extends Interaction {
         }
     }
 
-    async onOppStageButtonClick(ev) {
-        await this.changeOppStage(parseInt(ev.currentTarget.getAttribute("opp")), parseInt(ev.currentTarget.getAttribute("data")));
+    async onOppStageButtonClick(ev, currentTargetEl) {
+        await this.changeOppStage(parseInt(currentTargetEl.getAttribute("opp")), parseInt(currentTargetEl.getAttribute("data")));
     }
 
     onChangeNextActivity() {

@@ -11,7 +11,7 @@ export class HrRecruitmentForm extends Interaction {
         "#recruitment1": { "t-on-focusout": (ev) => this.checkRedundant(ev.currentTarget, "name", "#warning-message") },
         "#recruitment2": { "t-on-focusout": (ev) => this.checkRedundant(ev.currentTarget, "email", "#warning-message") },
         "#recruitment3": { "t-on-focusout": (ev) => this.checkRedundant(ev.currentTarget, "phone", "#warning-message") },
-        "#recruitment4": { "t-on-focusout": this.onFocusOutLinkedin },
+        "#recruitment4": { "t-on-focusout.withTarget": this.onFocusOutLinkedin },
     };
 
     /**
@@ -69,19 +69,18 @@ export class HrRecruitmentForm extends Interaction {
         }
     }
 
-    onFocusOutLinkedin(ev) {
-        const targetEl = ev.currentTarget;
-        const linkedin = targetEl.value;
+    onFocusOutLinkedin(ev, currentTargetEl) {
+        const linkedin = currentTargetEl.value;
         const field = "linkedin";
         const messageContainerId = "#linkedin-message";
         const linkedin_regex = /^(https?:\/\/)?([\w\.]*)linkedin\.com\/in\/(.*?)(\/.*)?$/;
         if (!linkedin_regex.test(linkedin) && linkedin !== "") {
             const message = _t("The profile that you gave us doesn't seems like a linkedin profile")
-            this.showWarningMessage(targetEl, messageContainerId, message);
-            this.checkRedundant(targetEl, field, messageContainerId, true);
+            this.showWarningMessage(currentTargetEl, messageContainerId, message);
+            this.checkRedundant(currentTargetEl, field, messageContainerId, true);
         } else {
-            this.hideWarningMessage(targetEl, messageContainerId);
-            this.checkRedundant(targetEl, field, messageContainerId, false);
+            this.hideWarningMessage(currentTargetEl, messageContainerId);
+            this.checkRedundant(currentTargetEl, field, messageContainerId, false);
         }
     }
 }

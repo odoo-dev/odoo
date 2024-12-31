@@ -3,7 +3,7 @@ import { registry } from "@web/core/registry";
 
 import { rpc } from "@web/core/network/rpc";
 
-class MailGroupMessage extends Interaction {
+export class MailGroupMessage extends Interaction {
     static selector = ".o_mg_message";
     dynamicContent = {
         ".o_mg_link_hide": {

@@ -1,12 +1,12 @@
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
-import { _t } from "@web/core/l10n/translation";
 import { deserializeDateTime } from "@web/core/l10n/dates";
+import { _t } from "@web/core/l10n/translation";
 
 const { DateTime } = luxon;
 
-class PortalMyInvoicesPaymentList extends Interaction {
+export class PortalMyInvoicesPaymentList extends Interaction {
     static selector = ".o_portal_my_doc_table";
 
     start() {

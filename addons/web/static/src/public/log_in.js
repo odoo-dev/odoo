@@ -1,8 +1,9 @@
-import { addLoadingEffect } from "@web/core/utils/ui";
 import { Interaction } from "./interaction";
 import { registry } from "@web/core/registry";
 
-class Signin extends Interaction {
+import { addLoadingEffect } from "@web/core/utils/ui";
+
+export class LogIn extends Interaction {
     static selector = ".oe_login_form";
     dynamicContent = {
         _root: {
@@ -33,4 +34,6 @@ class Signin extends Interaction {
     }
 }
 
-registry.category("public.interactions").add("public.signin", Signin);
+registry
+    .category("public.interactions")
+    .add("public.log_in", LogIn);

@@ -1,20 +1,21 @@
+import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
+
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
-import { registry } from "@web/core/registry";
 import { scrollTo } from "@web_editor/js/common/scrolling";
-import { Interaction } from "@web/public/interaction";
 
 export class WebsiteBlog extends Interaction {
     static selector = ".website_blog";
     dynamicContent = {
         "#o_wblog_next_container": {
-            "t-on-click": this.onNextBlogClick,
+            "t-on-click.prevent": this.onNextBlogClick,
         },
         "#o_wblog_post_content_jump": {
-            "t-on-click": this.onContentAnchorClick,
+            "t-on-click.prevent": this.onContentAnchorClick,
         },
         ".o_twitter, .o_facebook, .o_linkedin, .o_google, .o_twitter_complete, .o_facebook_complete, .o_linkedin_complete, .o_google_complete": {
-            "t-on-click": this.onShareArticle,
+            "t-on-click.prevent": this.onShareArticle,
         },
     };
 
@@ -22,7 +23,6 @@ export class WebsiteBlog extends Interaction {
      * @param {Event} ev
      */
     async onNextBlogClick(ev) {
-        ev.preventDefault();
         const nextInfo = ev.currentTarget.querySelector("#o_wblog_next_post_info").dataset;
         const recordCoverContainerEl = ev.currentTarget.querySelector(".o_record_cover_container");
         const classes = nextInfo.size.split(" ");
@@ -33,29 +33,23 @@ export class WebsiteBlog extends Interaction {
         const placeholder = document.createElement("div");
         placeholder.style.minHeight = "100vh";
         this.insert(placeholder, this.el.querySelector("#o_wblog_next_container"), "beforeend");
-        await this.forumScrollAction(ev.currentTarget, 300, () => {
-            browser.location.href = nextInfo.url;
-        });
+        await this.forumScrollAction(ev.currentTarget, 300, () => browser.location.href = nextInfo.url);
     }
 
     /**
      * @param {Event} ev
      */
     async onContentAnchorClick(ev) {
-        ev.preventDefault();
         ev.stopImmediatePropagation();
         const currentTargetEl = document.querySelector(ev.currentTarget.hash);
 
-        await this.forumScrollAction(currentTargetEl, 500, () => {
-            browser.location.hash = "blog_content";
-        });
+        await this.forumScrollAction(currentTargetEl, 500, () => browser.location.hash = "blog_content");
     }
 
     /**
      * @param {Event} ev
      */
     onShareArticle(ev) {
-        ev.preventDefault();
         let url = "";
         const blogPostTitle = document.querySelector("#o_wblog_post_name").textContent || "";
         const articleURL = browser.location.href;
@@ -84,4 +78,6 @@ export class WebsiteBlog extends Interaction {
     }
 }
 
-registry.category("public.interactions").add("website_blog.website_blog", WebsiteBlog);
+registry
+    .category("public.interactions")
+    .add("website_blog.website_blog", WebsiteBlog);

@@ -3,11 +3,11 @@ import { registry } from "@web/core/registry";
 
 import { rpc } from "@web/core/network/rpc";
 
-class TestError extends Interaction {
+export class TestError extends Interaction {
     static selector = ".rpc_error";
     dynamicContent = {
         "a": {
-            "t-on-click.prevent": (ev) => rpc(ev.currentTarget.getAttribute("href")),
+            "t-on-click.prevent.withTarget": (ev, currentTargetEl) => rpc(currentTargetEl.getAttribute("href")),
         },
     }
 }

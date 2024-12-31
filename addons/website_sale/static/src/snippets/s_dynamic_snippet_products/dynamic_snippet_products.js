@@ -1,5 +1,5 @@
-import { registry } from "@web/core/registry";
 import { DynamicSnippetCarousel } from "@website/snippets/s_dynamic_snippet_carousel/dynamic_snippet_carousel";
+import { registry } from "@web/core/registry";
 
 export class DynamicSnippetProducts extends DynamicSnippetCarousel {
     static selector = ".s_dynamic_snippet_products";
@@ -37,9 +37,7 @@ export class DynamicSnippetProducts extends DynamicSnippetCarousel {
         }
         return searchDomain;
     }
-    /**
-     * Gets the tag search domain
-     */
+
     getTagSearchDomain() {
         const searchDomain = [];
         let productTagIds = this.el.dataset.productTagIds;
@@ -49,9 +47,8 @@ export class DynamicSnippetProducts extends DynamicSnippetCarousel {
         }
         return searchDomain;
     }
+
     /**
-     * Method to be overridden in child components in order to provide a search
-     * domain if needed.
      * @override
      */
     getSearchDomain() {
@@ -72,8 +69,8 @@ export class DynamicSnippetProducts extends DynamicSnippetCarousel {
                 }
                 nameDomain.push(...[
                     "|", "|", ["name", "ilike", productName],
-                              ["default_code", "=", productName],
-                              ["barcode", "=", productName],
+                    ["default_code", "=", productName],
+                    ["barcode", "=", productName],
                 ]);
             }
             searchDomain.push(...nameDomain);
@@ -83,6 +80,7 @@ export class DynamicSnippetProducts extends DynamicSnippetCarousel {
         }
         return searchDomain;
     }
+
     /**
      * @override
      */
@@ -92,6 +90,7 @@ export class DynamicSnippetProducts extends DynamicSnippetCarousel {
             productTemplateId: productTemplateIdEl ? productTemplateIdEl.value : undefined,
         });
     }
+
     /**
      * @override
      */
@@ -100,7 +99,9 @@ export class DynamicSnippetProducts extends DynamicSnippetCarousel {
     }
 }
 
-registry.category("public.interactions").add("website_sale.dynamic_snippet_products", DynamicSnippetProducts);
+registry
+    .category("public.interactions")
+    .add("website_sale.dynamic_snippet_products", DynamicSnippetProducts);
 
 registry
     .category("public.interactions.edit")
