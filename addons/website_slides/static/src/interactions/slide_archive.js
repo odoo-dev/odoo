@@ -25,7 +25,7 @@ export class SlideArchive extends Interaction {
                  */
                 const isArchived = await this.waitFor(rpc("/slides/slide/archive", { slide_id: slideId, }));
                 if (isArchived) {
-                    slideArchiveEl.closest(".o_wslides_slides_list_slide")?.remove();
+                    this.el.closest(".o_wslides_slides_list_slide")?.remove();
                     const categories = document.querySelectorAll(".o_wslides_slide_list_category");
                     for (const category in categories) {
                         const categoryHeaderEl = category.querySelector(".o_wslides_slide_list_category_header");

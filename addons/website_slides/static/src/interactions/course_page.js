@@ -82,7 +82,7 @@ export class CoursePage extends Interaction {
         }
         const data = await this.waitFor(rpc(
             `/slides/slide/${completed ? 'set_completed' : 'set_uncompleted'}`,
-            { slide_id: slide.id },
+            { slide_id: slideData.id },
         ));
         this.toggleCompletionButton(slideData, completed);
         this.updateProgressbar(data.channel_completion);
