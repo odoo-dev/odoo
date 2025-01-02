@@ -14,7 +14,7 @@ export class EnrollEmail extends Interaction {
     };
 
     openDialog(ev, currentTargetEl) {
-        const alert = currentTargetEl.closest(".alert");
+        const alertEl = currentTargetEl.closest(".alert");
         const channelId = parseInt(currentTargetEl.dataset.channelId);
         this.services.dialog.add(ConfirmationDialog, {
             title: _t("Request Access."),
@@ -29,10 +29,16 @@ export class EnrollEmail extends Interaction {
                     )
                 );
                 const message = done ? _t("Request sent!") : error || _t("Unknown error, try again.");
-                alert.outerHTML = `
-                    <div class="alert alert-${done ? "success" : "danger"}" role="alert">
-                        <strong>${escape(message)}</strong>
-                    </div>`;
+
+                const newAlertEl = document.createElement("div");
+                newAlertEl.classList.add("alert", done ? "alert-success" : "alert-danger");
+                newAlertEl.role = "alert";
+                const strongEl = document.createElement("strong");
+                strongEl.innerText = escape(message);
+                newAlertEl.appendChild(strongEl);
+
+                this.insert(newAlertEl, alertEl, "afterend");
+                alertEl.remove();
             },
             cancelLabel: _t("Cancel"),
             cancel: () => { },

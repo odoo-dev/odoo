@@ -7,7 +7,7 @@ export class SlideUpload extends Interaction {
     static selector = ".o_wslides_js_slide_upload";
     dynamicContent = {
         _root: {
-            "t-on-click.prevent.withTarget": this.openDialog,
+            "t-on-click.prevent": this.openDialog,
         },
     };
 
