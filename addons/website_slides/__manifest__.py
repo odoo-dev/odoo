@@ -90,7 +90,6 @@ Featuring
             'website_slides/static/src/js/slides_course_slides_list.js',
             'website_slides/static/src/js/slides_course_fullscreen_player.js',
             'website_slides/static/src/js/slides_course_join.js',
-            'website_slides/static/src/js/slides_course_prerequisite.js',
             'website_slides/static/src/js/slides_course_quiz.js',
             'website_slides/static/src/js/slides_course_quiz_question_form.js',
             'website_slides/static/src/js/portal_rating_composer.js',

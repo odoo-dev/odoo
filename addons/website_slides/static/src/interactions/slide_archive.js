@@ -28,15 +28,15 @@ export class SlideArchive extends Interaction {
                     slideArchiveEl.closest(".o_wslides_slides_list_slide")?.remove();
                     const categories = document.querySelectorAll(".o_wslides_slide_list_category");
                     for (const category in categories) {
-                        var categoryHeader = category.querySelector(".o_wslides_slide_list_category_header");
-                        var categorySlideCount = category.querySelector(".o_wslides_slides_list_slide:not(.o_not_editable)").length;
-                        var emptyFlagContainer = categoryHeader.querySelector(".o_wslides_slides_list_drag");
-                        var emptyFlag = emptyFlagContainer.querySelector("small").length === 0;
-                        if (categorySlideCount === 0 && emptyFlag) {
+                        const categoryHeaderEl = category.querySelector(".o_wslides_slide_list_category_header");
+                        const categorySlideCountEl = category.querySelector(".o_wslides_slides_list_slide:not(.o_not_editable)").length;
+                        const emptyFlagContainerEl = categoryHeaderEl.querySelector(".o_wslides_slides_list_drag");
+                        const emptyFlag = emptyFlagContainerEl.querySelector("small").length === 0;
+                        if (categorySlideCountEl === 0 && emptyFlag) {
                             const smallEl = document.createElement("small");
                             smallEl.classList.add("ms-1 text-muted fw-bold");
                             smallEl.innerText = _t("(empty)");
-                            this.insert(smallEl, emptyFlagContainer);
+                            this.insert(smallEl, emptyFlagContainerEl);
                         }
                     }
                 }
