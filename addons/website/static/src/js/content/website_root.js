@@ -1,12 +1,6 @@
-import { loadJS } from "@web/core/assets";
-import { _t } from "@web/core/l10n/translation";
-import { user } from "@web/core/user";
-import { rpc } from "@web/core/network/rpc";
 import publicRootData from '@web/legacy/js/public/public_root';
 import "@website/libs/zoomodoo/zoomodoo";
 import { pick } from "@web/core/utils/objects";
-
-import { markup } from "@odoo/owl";
 
 export const WebsiteRoot = publicRootData.PublicRoot.extend({
     events: Object.assign({}, publicRootData.PublicRoot.prototype.events || {}, {

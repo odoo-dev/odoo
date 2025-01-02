@@ -3,6 +3,7 @@ import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { user } from "@web/core/user";
+import { markup } from "@odoo/owl";
 
 registry.category("services").add("website_map", {
     dependencies: ["public.interactions", "notification"],
@@ -36,7 +37,7 @@ registry.category("services").add("website_map", {
                 if (refetch || !gmapAPILoading) {
                     gmapAPILoading = new Promise(async resolve => {
                         const key = await this.getGMapAPIKey(refetch);
-    
+
                         window.odoo_gmap_api_post_load = (async function odoo_gmap_api_post_load() {
                             for (const el of document.querySelectorAll("section.s_google_map")) {
                                 publicInteractions.stopInteractions(el);
@@ -44,7 +45,7 @@ registry.category("services").add("website_map", {
                             }
                             resolve(key);
                         }).bind(this);
-    
+
                         if (!key) {
                             if (!editableMode && user.isAdmin) {
                                 const message = _t("Cannot load google map.");

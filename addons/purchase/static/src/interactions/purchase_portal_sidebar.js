@@ -33,8 +33,8 @@ export class PurchasePortalSidebar extends PortalSidebar {
     }
 
     generateMenu() {
-        const lastLI = false;
-        const lastUL = null;
+        let lastLI = false;
+        let lastUL = null;
         const bsSidenavEl = this.el.querySelector(".bs-sidenav");
 
         const quoteEls = document.querySelectorAll("#quote_content [id^=quote_header_], #quote_content [id^=quote_]");
