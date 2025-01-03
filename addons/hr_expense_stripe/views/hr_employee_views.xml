@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <record id="view_employee_form_form_inherit_hr_expense_stripe" model="ir.ui.view">
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="model">hr.employee</field>
+            <field name="name">hr.employee.inherit.hr_expense_stripe</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='expense_manager_id']" position="after">
+                    <field name="can_use_stripe_cards"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

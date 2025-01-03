@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hr_expense_stripe_credit_card_form" model="ir.ui.view">
+        <field name="name">hr.expense.stripe.credit.card.view.form</field>
+        <field name="model">hr.expense.stripe.credit.card</field>
+        <field name="arch" type="xml">
+            <form string="Expenses Stripe Credit Card">
+                <header>
+                    <button string="Activate" class="btn-primary" name="action_activate" type="object" invisible="state != 'inactive'"/>
+                    <!-- Statusbar -->
+                    <field name="state" widget="statusbar" statusbar_visible="inactive,active" invisible="state == 'canceled'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="inactive,active,canceled" invisible="state != 'canceled'"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"></div>
+                    <group>
+                        <group>
+                            <field name="stripe_id" invisible="True"/>
+                            <field name="cardholder_id" can_create="False" readonly="stripe_id"/>
+                            <field name="cardholder_phone" required="True"/>
+                            <field name="cardholder_first_name" required="True"/>
+                            <field name="cardholder_last_name" required="True"/>
+                        </group>
+                        <group>
+                            <field name="type" invisible="True"/>
+                            <field name="company_id" groups="base.group_multi_company" readonly="stripe_id"/>
+                            <field name="journal_id" readonly="stripe_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Spending Policy">
+                            <group>
+                                <field name="spending_policy_category_ids" widget="many2many_tags"/>
+                                <field name="spending_policy_limit"/>
+                            </group>
+                        </page>
+                        <page string="Card Details" invisible="not last_4">
+                            <group>
+                                <field name="card_number_public" placeholder="**** **** **** ****"/>
+                                <field name="expiration"/>
+                                <field name="cvv_public"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="o_attachment_preview o_center_attachment"/>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hr_expense_stripe_credit_card_list" model="ir.ui.view">
+        <field name="name">hr.expense.stripe.credit.card.view.list</field>
+        <field name="model">hr.expense.stripe.credit.card</field>
+        <field name="arch" type="xml">
+            <list string="Credit Cards">
+                <field name="cardholder_id" widget="many2one_avatar_employee"/>
+                <field name="card_number_public"/>
+                <field name="journal_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="state" widget="badge" decoration-info="state == 'inactive'" decoration-success="state == 'active'"
+                       decoration-danger="state == 'canceled'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="hr_expense_stripe_credit_card" model="ir.actions.act_window">
+        <field name="name">Cards</field>
+        <field name="path">expense-cards</field>
+        <field name="res_model">hr.expense.stripe.credit.card</field>
+        <field name="view_mode">list,kanban,form</field>
+    </record>
+
+    <menuitem id="menu_hr_expense_stripe_credit_card" name="Cards" parent="hr_expense.menu_hr_expense_configuration"
+              action="hr_expense_stripe_credit_card" groups="hr_expense.group_hr_expense_manager" sequence="10"/>
+</odoo>

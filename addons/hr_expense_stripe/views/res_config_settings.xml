@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="res_config_settings_view_form" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.inherit.hr.expense.stripe</field>
+            <field name="model">res.config.settings</field>
+            <field name="priority" eval="85"/>
+            <field name="inherit_id" ref="hr_expense.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//block[@name='expenses_stripe_issuing_container']" position="inside">
+                    <setting string="Live Publishable key">
+                        <field name="stripe_publishable_live_key"/>
+                    </setting>
+                    <setting string="Live Secret key">
+                        <field name="stripe_secret_live_key"/>
+                    </setting>
+                    <setting string="Test Publishable key">
+                        <field name="stripe_publishable_test_key"/>
+                    </setting>
+                    <setting string="Test Secret key">
+                        <field name="stripe_secret_test_key"/>
+                    </setting>
+                    <setting string="Test mode">
+                        <field name="stripe_mode"/>
+                    </setting>
+                    <setting string="Stripe Journal" invisible="not module_hr_expense_stripe"
+                             help="Journal where stripe transactions are recorded">
+                        <field name="stripe_journal_id"/>
+                    </setting>
+                    <setting string="Account" invisible="not module_hr_expense_stripe or stripe_issuing_activated"
+                             help="Link your stripe issuing account to manage company credit cards for your employees through Odoo">
+                            <button name="action_connect_to_stripe" type="object" string="Connect to Stripe"/>
+                    </setting>
+                    <setting string="Import Stripe Data" invisible="not module_hr_expense_stripe or not stripe_issuing_activated"
+                             help="Fetch data from your stripe account and try to import them.
+                              It is not recommended to import data in test mode on a production database">
+                            <button name="action_import_from_stripe" type="object" string="Import"/>
+                    </setting>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
