@@ -312,7 +312,6 @@
             'website/static/src/utils/**/*',
             'website/static/src/interactions/**/*',
             'website/static/src/snippets/**/*.js',
-            ('remove', 'website/static/src/snippets/**/000.js'),
             ('remove', 'website/static/src/snippets/**/options.js'),
             'website/static/src/snippets/**/*.xml',
             'website/static/src/xml/**/*.xml',
