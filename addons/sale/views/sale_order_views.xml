@@ -626,6 +626,7 @@
                                     context="{
                                         'default_lst_price': price_unit,
                                         'default_uom_id': product_uom_id,
+                                        'is_sale': True
                                     }"
                                     optional="hide"
                                     domain="[('sale_ok', '=', True)]"
@@ -637,6 +638,7 @@
                                     context="{
                                         'default_list_price': price_unit,
                                         'default_uom_id': product_uom_id,
+                                        'is_sale': True
                                     }"
                                     optional="show"
                                     domain="[('sale_ok', '=', True)]"
