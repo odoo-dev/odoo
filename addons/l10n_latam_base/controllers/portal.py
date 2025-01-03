@@ -7,47 +7,12 @@ from odoo.addons.portal.controllers.portal import CustomerPortal
 
 class L10nLatamBaseCustomerPortal(CustomerPortal):
 
-    def _prepare_portal_layout_values(self):
+    def _prepare_address_form_values(self, partner_sudo, **kwargs):
         # EXTEND 'portal'
-        portal_layout_values = super()._prepare_portal_layout_values()
-        if self.env['res.partner']._is_latam_country():
-            partner = request.env.user.partner_id
-            portal_layout_values.update({
-                'identification': partner.l10n_latam_identification_type_id,
-                'identification_types': request.env['l10n_latam.identification.type'].search(
-                    ['|', ('country_id', '=', False), ('country_id.code', '=', request.env.company.country_code)],
-                ),
-                'is_latam_country': True,
-            })
-
-        return portal_layout_values
-
-    def details_form_validate(self, data, partner_creation=False):
-        # EXTEND 'portal'
-        error, error_message = super().details_form_validate(data, partner_creation)
-
-        # sanitize identification values to make sure it's correctly written on the partner
-        if self.env['res.partner']._is_latam_country():
-            if data.get('l10n_latam_identification_type_id'):
-                data['l10n_latam_identification_type_id'] = int(data['l10n_latam_identification_type_id'])
-
-        return error, error_message
-
-    def _get_mandatory_billing_address_fields(self, country_sudo):
-        """ Extend mandatory fields to add new identification and responsibility fields when company is argentina. """
-        mandatory_fields = super()._get_mandatory_billing_address_fields(country_sudo)
-        if self.env['res.partner']._is_latam_country():
-            mandatory_fields |= {
-                'l10n_latam_identification_type_id',
-                'vat',
-            }
-        return mandatory_fields
-
-    def _prepare_address_form_values(self, partner_sudo, address_type, **kwargs):
         rendering_values = super()._prepare_address_form_values(
-            partner_sudo, address_type, **kwargs
+            partner_sudo, **kwargs
         )
-        if self.env['res.partner']._is_latam_country() and (self._is_used_as_billing_address(address_type, **kwargs)):
+        if self.env['res.partner']._is_latam_country() and rendering_values['use_delivery_as_billing']:
             can_edit_vat = rendering_values['can_edit_vat']
             LatamIdentificationType = request.env['l10n_latam.identification.type'].sudo()
             rendering_values.update({
@@ -58,6 +23,16 @@ class L10nLatamBaseCustomerPortal(CustomerPortal):
                 'is_latam_country': True,
             })
         return rendering_values
+
+    def _get_mandatory_billing_address_fields(self, country_sudo):
+        """ Extend mandatory fields to add new identification and responsibility fields when company is argentina. """
+        mandatory_fields = super()._get_mandatory_billing_address_fields(country_sudo)
+        if self.env['res.partner']._is_latam_country():
+            mandatory_fields |= {
+                'l10n_latam_identification_type_id',
+                'vat',
+            }
+        return mandatory_fields
 
     def _get_vat_validation_fields(self):
         fnames = super()._get_vat_validation_fields()

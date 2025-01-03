@@ -184,37 +184,22 @@ class PortalAccount(CustomerPortal):
     # My Home
     # ------------------------------------------------------------
 
-    def details_form_validate(self, data, partner_creation=False):
-        error, error_message = super(PortalAccount, self).details_form_validate(data)
-        # prevent VAT/name change if invoices exist
-        partner = request.env['res.users'].browse(request.uid).partner_id
-        # Skip this test if we're creating a new partner as we won't ever block him from filling values.
-        if not partner_creation and not partner.can_edit_vat():
-            if 'vat' in data and (data['vat'] or False) != (partner.vat or False):
-                error['vat'] = 'error'
-                error_message.append(_('Changing VAT number is not allowed once invoices have been issued for your account. Please contact us directly for this operation.'))
-            if 'name' in data and (data['name'] or False) != (partner.name or False):
-                error['name'] = 'error'
-                error_message.append(_('Changing your name is not allowed once invoices have been issued for your account. Please contact us directly for this operation.'))
-            if 'company_name' in data and (data['company_name'] or False) != (partner.company_name or False):
-                error['company_name'] = 'error'
-                error_message.append(_('Changing your company name is not allowed once invoices have been issued for your account. Please contact us directly for this operation.'))
-        return error, error_message
-
-    def extra_details_form_validate(self, data, additional_required_fields, error, error_message):
+    def _validate_extra_form_details(self, addtional_form_values, additional_required_fields):
         """ Ensure that all additional required fields have a value in the data """
+        missing_fields = {}
+        error_messages = []
         for field in additional_required_fields:
-            if field.name not in data or not data[field.name]:
-                error[field.name] = 'error'
-                error_message.append(_('The field %s must be filled.', field.field_description.lower()))
-        return error, error_message
+            if field.name not in addtional_form_values or not addtional_form_values[field.name]:
+                missing_fields.add(field.name)
+                error_messages.append(_('The field %s must be filled.', field.field_description.lower()))
+        return missing_fields, error_messages
 
-    def _prepare_portal_layout_values(self):
+    def _prepare_address_form_values(self, *args, **kwargs):
         # EXTENDS 'portal'
-        portal_layout_values = super()._prepare_portal_layout_values()
+        address_form_values = super()._prepare_address_form_values(*args, **kwargs)
         partner = request.env.user.partner_id
-        portal_layout_values.update({
+        address_form_values.update({
             'invoice_sending_methods': {'email': _('by Email')},
             'invoice_edi_formats': dict(partner._fields['invoice_edi_format'].selection),
         })
-        return portal_layout_values
+        return address_form_values

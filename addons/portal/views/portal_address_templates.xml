@@ -371,9 +371,10 @@
         </div>
     </template>
 
-    <template id="portal.address" name="Address Management">
+    <template id="portal.portal_my_details">
         <t t-set="no_footer" t-value="1"/>
         <t t-call="portal.portal_layout">
+            <t t-set="additional_title">Contact Details</t>
             <div class="o_customer_address_fill">
                 <div class="row">
                     <div name="address_div" class="oe_clear_stucture col-12 col-lg-8">
@@ -399,5 +400,14 @@
                 </div>
             </div>
         </t>
+    </template>
+
+    <template id="portal.address"  name="Address Management" inherit_id="portal.portal_my_details" primary="True">
+        <t t-set="additional_title" position="after">
+            <t t-set="additional_title">Address Management</t>
+        </t>
+        <div id="errors" position="before">
+            <t t-call="portal.address_name"/>
+        </div>
     </template>
 </odoo>

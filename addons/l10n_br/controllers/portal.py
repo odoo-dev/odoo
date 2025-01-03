@@ -10,6 +10,18 @@ class L10nBRCustomerPortal(L10nLatamBaseCustomerPortal):
     def _is_brazilean_fiscal_country(self):
         return request.env.company.account_fiscal_country_id.code == 'BR'
 
+    def _prepare_address_form_values(self, partner_sudo, **kwargs):
+        rendering_values = super()._prepare_address_form_values(
+            partner_sudo, **kwargs
+        )
+        if self._is_brazilean_fiscal_country() and rendering_values['use_delivery_as_billing']:
+            rendering_values.update({
+                'city_sudo': partner_sudo.city_id,
+                'cities_sudo': request.env['res.city'].sudo().search([('country_id.code', '=', 'BR')]),
+                'vat_label': _lt('Number'),
+            })
+        return rendering_values
+
     def _get_mandatory_address_fields(self, country_sudo):
         # EXTEND 'portal'
         mandatory_fields = super()._get_mandatory_address_fields(country_sudo)
@@ -20,15 +32,3 @@ class L10nBRCustomerPortal(L10nLatamBaseCustomerPortal):
             mandatory_fields -= {'street', 'city'}  # Brazil uses the base_extended_address fields added above
 
         return mandatory_fields
-
-    def _prepare_address_form_values(self, partner_sudo, address_type, **kwargs):
-        rendering_values = super()._prepare_address_form_values(
-            partner_sudo, address_type, **kwargs
-        )
-        if self._is_used_as_billing_address(address_type, **kwargs) and self._is_brazilean_fiscal_country():
-            rendering_values.update({
-                'city_sudo': partner_sudo.city_id,
-                'cities_sudo': request.env['res.city'].sudo().search([('country_id.code', '=', 'BR')]),
-                'vat_label': _lt('Number'),
-            })
-        return rendering_values

@@ -181,44 +181,20 @@ class CustomerPortal(Controller):
     @route(['/my/account'], type='http', auth='user', website=True)
     def account(self, redirect=None, **post):
         values = self._prepare_portal_layout_values()
-        partner = request.env.user.partner_id
+        partner_sudo = request.env.user.partner_id
         values.update({
             'error': {},
             'error_message': [],
         })
 
-        if post and request.httprequest.method == 'POST':
-            if not partner.can_edit_vat():
-                post['country_id'] = str(partner.country_id.id)
-
-            error, error_message = self.details_form_validate(post)
-            values.update({'error': error, 'error_message': error_message})
-            values.update(post)
-            if not error:
-                values = {key: post[key] for key in request.env['res.partner']._get_portal_mandatory_fields()}
-                values.update({key: post[key] for key in request.env['res.partner']._get_portal_optional_fields() if key in post})
-                for field in set(['country_id', 'state_id']) & set(values.keys()):
-                    try:
-                        values[field] = int(values[field])
-                    except:
-                        values[field] = False
-                values.update({'zip': values.pop('zipcode', '')})
-                self.on_account_update(values, partner)
-                partner.sudo().write(values)
-                if redirect:
-                    return request.redirect(redirect)
-                return request.redirect('/my/home')
-
-        countries = request.env['res.country'].sudo().search([])
-        states = request.env['res.country.state'].sudo().search([])
-
         values.update({
-            'partner': partner,
-            'countries': countries,
-            'states': states,
-            'has_check_vat': hasattr(request.env['res.partner'], 'check_vat'),
-            'partner_can_edit_vat': partner.can_edit_vat(),
-            'redirect': redirect,
+            'partner_sudo': partner_sudo,
+            # Main contact can always be used as both
+            **self._prepare_address_form_values(partner_sudo, use_delivery_as_billing=True),
+            'use_delivery_as_billing': True,
+            'show_vat': True, # Always display vat for my/account page
+            'callback': redirect or '/my',
+            'discard_url': '/my',
             'page_name': 'my_details',
         })
 
@@ -365,13 +341,13 @@ class CustomerPortal(Controller):
             raise Forbidden()
 
         address_form_values = {
-            **self._prepare_address_form_values(partner_sudo, address_type, **query_params),
+            **self._prepare_address_form_values(partner_sudo, address_type=address_type, **query_params),
             'page_name': 'address_form',
         }
         return request.render('portal.address', address_form_values)
 
     def _prepare_address_form_values(
-        self, partner_sudo, address_type, callback='', **kwargs
+        self, partner_sudo, address_type='billing', callback='', use_delivery_as_billing=False, **kwargs
     ):
         """ Prepare and return the values to use to render the address form.
 
@@ -381,9 +357,9 @@ class CustomerPortal(Controller):
         :return: The address page values.
         :rtype: dict
         """
-        is_billing = self._is_used_as_billing_address(address_type, **kwargs)
+        is_used_as_billing = address_type == 'billing' or use_delivery_as_billing
         can_edit_vat = (
-            is_billing and (not partner_sudo or partner_sudo.can_edit_vat())
+            is_used_as_billing and (not partner_sudo or partner_sudo.can_edit_vat())
         )
         current_parnter = partner_sudo._get_current_partner(**kwargs)
         is_anonymous_customer = current_parnter._is_anonymous_customer()
@@ -402,6 +378,7 @@ class CustomerPortal(Controller):
             'country': country_sudo,
             'countries': request.env['res.country'].sudo().search([]),
             'is_anonymous_customer': is_anonymous_customer,
+            'use_delivery_as_billing': is_used_as_billing,
             'state_id': state_id,
             'country_states': country_sudo.state_ids,
             'zip_before_city': (
@@ -409,7 +386,7 @@ class CustomerPortal(Controller):
                 and address_fields.index('zip') < address_fields.index('city')
             ),
             'show_vat': (
-                (is_billing)
+                (is_used_as_billing)
                 and (
                     is_anonymous_customer  # Allow inputting VAT on the new main address.
                     or (
@@ -421,16 +398,6 @@ class CustomerPortal(Controller):
             'vat_label': request.env._("VAT"),
             'discard_url': '/my/addresses',
         }
-
-    def _is_used_as_billing_address(self, address_type, **kwargs):
-        """ Hook to check if address is billing or not depending on address_type and kwargs.
-
-        :param str address_type: The type of the address: 'billing' or 'delivery'.
-        :param dict kwargs: Additional arguments to decide is used as billing or not.
-        :return: Whether address type is billing or not.
-        :rtype: bool
-        """
-        return address_type == 'billing'
 
     def _get_default_country(self, is_anonymous_customer=False):
         """ Get country of current user country as default. """
@@ -880,55 +847,6 @@ class CustomerPortal(Controller):
         return attachment_sudo.unlink()
 
     # Bussiness Methods
-
-    def details_form_validate(self, data, partner_creation=False):
-        error = dict()
-        error_message = []
-
-        request.update_context(portal_form_country_id=data['country_id'])
-        # Validation
-        for field_name in request.env['res.partner']._get_portal_mandatory_fields():
-            if not data.get(field_name):
-                error[field_name] = 'missing'
-                if field_name == 'zipcode':
-                    error['zip'] = 'missing'
-
-        # email validation
-        if data.get('email') and not tools.single_email_re.match(data.get('email')):
-            error["email"] = 'error'
-            error_message.append(_('Invalid Email! Please enter a valid email address.'))
-
-        # vat validation
-        partner = request.env.user.partner_id
-        if data.get("vat") and partner and partner.vat != data.get("vat"):
-            # Check the VAT if it is the public user too.
-            if partner_creation or partner.can_edit_vat():
-                if hasattr(partner, "check_vat"):
-                    if data.get("country_id"):
-                        data["vat"] = request.env["res.partner"].fix_eu_vat_number(int(data.get("country_id")), data.get("vat"))
-                    partner_dummy = partner.new({
-                        'vat': data['vat'],
-                        'country_id': (int(data['country_id'])
-                                       if data.get('country_id') else False),
-                    })
-                    try:
-                        partner_dummy.check_vat()
-                    except ValidationError as e:
-                        error["vat"] = 'error'
-                        error_message.append(e.args[0])
-            else:
-                error_message.append(_('Changing VAT number is not allowed once document(s) have been issued for your account. Please contact us directly for this operation.'))
-
-        # error message for empty required fields
-        if [err for err in error.values() if err == 'missing']:
-            error_message.append(_('Some required fields are empty.'))
-
-        unknown = [k for k in data if k not in request.env['res.partner']._get_frontend_writable_fields()]
-        if unknown:
-            error['common'] = 'Unknown field'
-            error_message.append("Unknown field '%s'" % ','.join(unknown))
-
-        return error, error_message
 
     def _document_check_access(self, model_name, document_id, access_token=None):
         """Check if current user is allowed to access the specified record.

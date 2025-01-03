@@ -10,27 +10,18 @@ class L10nARCustomerPortal(CustomerPortal):
     def _is_argentine_company(self):
         return request.env.company.country_code == 'AR'
 
-    def _prepare_portal_layout_values(self):
+    def _prepare_address_form_values(self, partner_sudo, **kwargs):
         # EXTEND 'portal'
-        portal_layout_values = super()._prepare_portal_layout_values()
-        if self._is_argentine_company():
+        rendering_values = super()._prepare_address_form_values(
+            partner_sudo, **kwargs
+        )
+        if self._is_argentine_company() and rendering_values['use_delivery_as_billing']:
             partner = request.env.user.partner_id
-            portal_layout_values.update({
+            rendering_values.update({
                 'responsibility': partner.l10n_ar_afip_responsibility_type_id,
                 'responsibility_types': request.env['l10n_ar.afip.responsibility.type'].search([]),
             })
-
-        return portal_layout_values
-
-    def details_form_validate(self, data, partner_creation=False):
-        # EXTEND 'portal'
-        error, error_message = super().details_form_validate(data, partner_creation)
-
-        # sanitize identification values to make sure it's correctly written on the partner
-        if self._is_argentine_company() and data.get('l10n_ar_afip_responsibility_type_id'):
-            data['l10n_ar_afip_responsibility_type_id'] = int(data['l10n_ar_afip_responsibility_type_id'])
-
-        return error, error_message
+        return rendering_values
 
     def _get_mandatory_billing_address_fields(self, country_sudo):
         """ Extend mandatory fields to add new identification and responsibility fields when company is argentina. """
@@ -40,18 +31,6 @@ class L10nARCustomerPortal(CustomerPortal):
                 'l10n_ar_afip_responsibility_type_id',
             }
         return mandatory_fields
-
-    def _prepare_address_form_values(self, partner_sudo, address_type, **kwargs):
-        rendering_values = super()._prepare_address_form_values(
-            partner_sudo, address_type, **kwargs
-        )
-        if self._is_argentine_company() and (self._is_used_as_billing_address(address_type, **kwargs)):
-            can_edit_vat = rendering_values['can_edit_vat']
-            rendering_values.update({
-                'responsibility_types': request.env['l10n_ar.afip.responsibility.type'].search([]),
-            })
-        return rendering_values
-
 
     def _validate_address_values(self, address_values, partner_sudo, address_type, *args, **kwargs):
         """ We extend the method to add a new validation. If AFIP Resposibility is:

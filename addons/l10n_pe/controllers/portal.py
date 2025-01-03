@@ -33,9 +33,9 @@ class L10nPECustomerPortal(CustomerPortal):
             mandatory_fields.remove('city')
         return mandatory_fields
 
-    def _prepare_address_form_values(self, partner_sudo, address_type, **kwargs):
+    def _prepare_address_form_values(self, partner_sudo, **kwargs):
         rendering_values = super()._prepare_address_form_values(
-            partner_sudo, address_type, **kwargs
+            partner_sudo, **kwargs
         )
         if not self._is_peru_company():
             return rendering_values

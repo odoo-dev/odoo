@@ -1,10 +1,9 @@
-import publicWidget from "@web/legacy/js/public/public_widget";
+import customerAddress from "@portal/js/address";
 
-publicWidget.registry.portalDetails = publicWidget.Widget.extend({
-    selector: '.o_portal_details',
-    events: {
+customerAddress.include({
+    events: Object.assign({}, customerAddress.prototype.events, {
         'change select[name="invoice_sending_method"]': '_onSendingMethodChange',
-    },
+    }),
 
     start() {
         this._showPeppolConfig();

@@ -852,14 +852,14 @@ class WebsiteSale(payment_portal.PaymentPortal):
         # Render the address form.
         address_form_values = self._prepare_address_form_values(
             partner_sudo,
-            address_type,
+            address_type=address_type,
             order_sudo=order_sudo,
             use_delivery_as_billing=use_delivery_as_billing,
             **query_params
         )
         return request.render('website_sale.address', address_form_values)
 
-    def _prepare_address_form_values(self, *args, order_sudo=False, use_delivery_as_billing=False, **kwargs):
+    def _prepare_address_form_values(self, *args, order_sudo=False, **kwargs):
         """ Prepare and return the values to use to render the address form.
 
         :param sale.order order_sudo: The current cart.
@@ -870,7 +870,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         :rtype: dict
         """
         rendering_values = super()._prepare_address_form_values(
-            *args, order_sudo=False, use_delivery_as_billing=use_delivery_as_billing, **kwargs
+            *args, order_sudo=False, **kwargs
         )
         if not order_sudo: # Return portal address values if not order
             return rendering_values
@@ -879,15 +879,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
             **rendering_values,
             'website_sale_order': order_sudo,
             'only_services': order_sudo.only_services,
-            'use_delivery_as_billing': use_delivery_as_billing,
             'discard_url': rendering_values['is_anonymous_customer'] and '/shop/cart' or '/shop/checkout',
         }
-
-    def _is_used_as_billing_address(self, address_type, use_delivery_as_billing=False, **kwargs):
-        """ Override `portal` to check use as billing is checked in checkout page. """
-        return super()._is_used_as_billing_address(
-            address_type, use_delivery_as_billing=use_delivery_as_billing, **kwargs
-        ) or use_delivery_as_billing
 
     def _get_default_country(self, is_anonymous_customer=False):
         """ Override `portal` to check country of customer if customer is not login via
