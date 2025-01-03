@@ -4,9 +4,9 @@ import { registry } from "@web/core/registry";
 import { SlideShareDialog } from '../js/public/components/slide_share_dialog/slide_share_dialog';
 
 export class Share extends Interaction {
-    static selector = "#wrapwrap";
+    static selector = ".o_wslides_share";
     dynamicContent = {
-        ".o_wslides_share": { "t-on-click.prevent.stop.withTarget": this.onClick },
+        _root: { "t-on-click.prevent.stop.withTarget": this.onClick },
     }
 
     getDocumentMaxPage() {
