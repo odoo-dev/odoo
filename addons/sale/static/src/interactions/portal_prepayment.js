@@ -5,8 +5,8 @@ export class PortalPrepayment extends Interaction {
     static selector = ".o_portal_sale_sidebar";
     dynamicSelectors = {
         ...this.dynamicSelectors,
-        _amountPrepaymentButton: this.amountPrepaymentButton,
-        _amountTotalButton: this.amountPrepaymentButton,
+        _amountPrepaymentButton: () => this.amountPrepaymentButton,
+        _amountTotalButton: () => this.amountPrepaymentButton,
     };
     dynamicContent = {
         _amountPrepaymentButton: {
