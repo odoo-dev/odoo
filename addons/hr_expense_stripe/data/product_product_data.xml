@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="hr_expense.expense_product_meal" model="product.product">
+            <field name="mcc_code_ids" eval="[
+                Command.link(ref('hr_expense_stripe.caterers')),
+                Command.link(ref('hr_expense_stripe.eating_places_restaurants')),
+                Command.link(ref('hr_expense_stripe.drinking_places')),
+                Command.link(ref('hr_expense_stripe.fast_food_restaurants')),
+                Command.link(ref('hr_expense_stripe.grocery_stores_supermarkets')),
+                Command.link(ref('hr_expense_stripe.candy_nut_and_confectionery_stores')),
+                Command.link(ref('hr_expense_stripe.dairy_products_stores')),
+                Command.link(ref('hr_expense_stripe.bakeries')),
+                Command.link(ref('hr_expense_stripe.miscellaneous_food_stores')),
+            ]"/>
+        </record>
+        <record id="hr_expense.expense_product_travel_accommodation" model="product.product">
+            <field name="mcc_code_ids" eval="[
+                Command.link(ref('hr_expense_stripe.railroads')),
+                Command.link(ref('hr_expense_stripe.commuter_transport_and_ferries')),
+                Command.link(ref('hr_expense_stripe.passenger_railways')),
+                Command.link(ref('hr_expense_stripe.ambulance_services')),
+                Command.link(ref('hr_expense_stripe.taxicabs_limousines')),
+                Command.link(ref('hr_expense_stripe.bus_lines')),
+                Command.link(ref('hr_expense_stripe.cruise_lines')),
+                Command.link(ref('hr_expense_stripe.boat_rentals_and_leases')),
+                Command.link(ref('hr_expense_stripe.marinas_service_and_supplies')),
+                Command.link(ref('hr_expense_stripe.airlines_air_carriers')),
+                Command.link(ref('hr_expense_stripe.airports_flying_fields')),
+                Command.link(ref('hr_expense_stripe.travel_agencies_tour_operators')),
+                Command.link(ref('hr_expense_stripe.t_ui_travel_germany')),
+                Command.link(ref('hr_expense_stripe.tolls_bridge_fees')),
+                Command.link(ref('hr_expense_stripe.transportation_services')),
+                Command.link(ref('hr_expense_stripe.service_stations')),
+                Command.link(ref('hr_expense_stripe.duty_free_stores')),
+            ]"/>
+        </record>
+        <record id="hr_expense.expense_product_mileage" model="product.product">
+            <field name="mcc_code_ids" eval="[
+                Command.link(ref('hr_expense_stripe.automated_fuel_dispensers')),
+            ]"/>
+        </record>
+        <record id="hr_expense.expense_product_communication" model="product.product">
+            <field name="mcc_code_ids" eval="[
+                Command.link(ref('hr_expense_stripe.telecommunication_equipment_and_telephone_sales')),
+                Command.link(ref('hr_expense_stripe.telecommunication_services')),
+                Command.link(ref('hr_expense_stripe.computer_network_services')),
+                Command.link(ref('hr_expense_stripe.telegraph_services')),
+                Command.link(ref('hr_expense_stripe.wires_money_orders')),
+                Command.link(ref('hr_expense_stripe.cable_satellite_and_other_pay_television_and_radio')),
+            ]"/>
+        </record>
+    </data>
+</odoo>

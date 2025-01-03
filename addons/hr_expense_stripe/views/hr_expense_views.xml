@@ -1,0 +1,17 @@
+<odoo>
+    <data>
+        <record id="hr_expense_view_form_inherits_stripe" model="ir.ui.view">
+            <field name="inherit_id" ref="hr_expense.hr_expense_view_form"/>
+            <field name="name">hr.expense.form.inherit.stripe</field>
+            <field name="model">hr.expense</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='manager_id']" position="before">
+                    <field name="card_id" readonly="True"/>
+                </xpath>
+                <xpath expr="//field[@name='payment_mode']" position="attributes">
+                    <attribute name="readonly">state != 'draft' or card_id</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
