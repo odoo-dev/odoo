@@ -1,4 +1,4 @@
-import { PortalSidebar } from "@portal/src/interaction";
+import { PortalSidebar } from "@portal/src/interactions";
 import { registry } from "@web/core/registry";
 
 import { scrollTo } from "@web/core/utils/scrolling";

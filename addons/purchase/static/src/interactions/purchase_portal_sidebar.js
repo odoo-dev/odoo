@@ -1,4 +1,4 @@
-import { PortalSidebar } from "@portal/src/interaction";
+import { PortalSidebar } from "@portal/src/interactions";
 import { registry } from "@web/core/registry";
 
 import { uniqueId } from "@web/core/utils/functions";
@@ -37,18 +37,22 @@ export class PurchasePortalSidebar extends PortalSidebar {
         let lastUL = null;
         const bsSidenavEl = this.el.querySelector(".bs-sidenav");
 
-        const quoteEls = document.querySelectorAll("#quote_content [id^=quote_header_], #quote_content [id^=quote_]");
+        const quoteEls = document.querySelectorAll(
+            "#quote_content [id^=quote_header_], #quote_content [id^=quote_]"
+        );
         for (const quoteEl of quoteEls) {
             quoteEl.removeAttribute("id");
-        };
+        }
         this.spyWatched.removeAttribute("id");
 
-        const quoteHeaderEls = this.spyWatched.querySelectorAll("#quote_content h2, #quote_content h3");
+        const quoteHeaderEls = this.spyWatched.querySelectorAll(
+            "#quote_content h2, #quote_content h3"
+        );
         for (const quoteHeaderEl of quoteHeaderEls) {
             let id = null;
             let text = null;
             switch (quoteHeaderEl.tagName.toLowerCase()) {
-                case "h2":
+                case "h2": {
                     id = this.setElementId("quote_header_", quoteHeaderEl);
                     text = this.extractText(quoteHeaderEl);
                     if (!text) {
@@ -69,7 +73,8 @@ export class PurchasePortalSidebar extends PortalSidebar {
                     lastLI = liEl;
                     lastUL = false;
                     break;
-                case "h3":
+                }
+                case "h3": {
                     id = this.setElementId("quote_", quoteHeaderEl);
                     text = this.extractText(quoteHeaderEl);
                     if (!text) {
@@ -97,6 +102,7 @@ export class PurchasePortalSidebar extends PortalSidebar {
                         this.insert(liEl, lastUL);
                     }
                     break;
+                }
             }
             quoteHeaderEl.setAttribute("data-anchor", true);
         }
