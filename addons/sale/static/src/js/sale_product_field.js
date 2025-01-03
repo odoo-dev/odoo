@@ -1,10 +1,12 @@
 import {
+    ProductLabelSectionAndNoteAutocomplete,
+    ProductLabelSectionAndNoteFieldAutocomplete,
     ProductLabelSectionAndNoteField,
     productLabelSectionAndNoteField,
 } from "@account/components/product_label_section_and_note_field/product_label_section_and_note_field";
 import { useEffect } from '@odoo/owl';
 import { WarningDialog } from "@web/core/errors/error_dialogs";
-import { serializeDateTime } from "@web/core/l10n/dates";
+import { serializeDateTime, formatDuration } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { x2ManyCommands } from "@web/core/orm_service";
@@ -47,12 +49,53 @@ async function applyProduct(record, product) {
     });
 };
 
+export class SaleProductLabelSectionAutocomplete extends ProductLabelSectionAndNoteAutocomplete {
+    static template = "sale.SaleProductLabelSectionAutocomplete";
+    setup() {
+        super.setup();
+        this.prioritized_product = [];
+        this.ormcall().then((prioritized_product) => {
+            this.prioritized_product = prioritized_product;
+        })
+    }
+
+    async ormcall() {
+        if (this.env.model.root.data.partner_id) {
+            return await this.env.model.orm.call('product.template', 'get_prioritized_product_and_time', [{}, 'sale'], {context: {partner_id: this.env.model.root.data.partner_id[0]}});
+        }
+        return []
+    }
+
+    getLastInvoiceDate() {
+        const product_data = this.prioritized_product.filter(key => key.product_tmpl_id == this.option.value)
+        if (product_data.length > 0) {
+            const duration = (new Date() - new Date(product_data[0].invoice_date)) / 1000
+            if ((duration / (24 * 3600)) > 1) {
+                return formatDuration(duration, false);
+            }
+            return '0d'
+        }
+        return ''
+    }
+}
+
+export class SaleProductLabelSectionFieldAutocomplete extends ProductLabelSectionAndNoteFieldAutocomplete {
+    static components = {
+        ...ProductLabelSectionAndNoteFieldAutocomplete.components,
+        AutoComplete: SaleProductLabelSectionAutocomplete,
+    };
+}
 
 export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
     static template = "sale.SaleProductField";
     static props = {
         ...ProductLabelSectionAndNoteField.props,
         readonlyField: { type: Boolean, optional: true },
+    };
+
+    static components = {
+        ...ProductLabelSectionAndNoteField.components,
+        Many2XAutocomplete: SaleProductLabelSectionFieldAutocomplete,
     };
 
     setup() {

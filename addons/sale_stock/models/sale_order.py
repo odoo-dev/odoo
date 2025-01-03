@@ -283,3 +283,11 @@ class SaleOrder(models.Model):
             return self.env['ir.qweb']._render('sale_stock.exception_on_so', values)
 
         self.env['stock.picking']._log_activity(_render_note_exception_quantity_so, documents)
+
+    def _get_product_catalog_order_data(self, products, **kwargs):
+        res = super()._get_product_catalog_order_data(products, **kwargs)
+        for product in products:
+            res[product.id]['is_storable'] = product.is_storable
+            res[product.id]['virtual_available'] = product.virtual_available
+            res[product.id]['qty_available'] = product.qty_available
+        return res

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="sale_stock.ProductCatalogSaleOrderLineStock"
+       t-inherit="sale.ProductCatalogSaleOrderLine"
+       t-inherit-mode="primary">
+        <t>
+            <t t-if="is_sale_catalog">
+                <t t-portal="`#product-${props.productId}-for`"  t-if="forcasted_qty">
+                    (<span t-att-class="{'text-success': forcasted_qty &gt; 0, 'text-danger': forcasted_qty &lt; 0}"><t t-if="forcasted_qty > 0">+</t><t t-out="forcasted_qty"/></span>)
+                </t>
+            </t>
+            <t t-else=""/>
+        </t>
+    </t>
+</templates>
