@@ -33,7 +33,7 @@ export class SalePortalSidebar extends PortalSidebar {
      */
     setElementId(prefix, el) {
         const id = uniqueId(prefix);
-        el.setAttribute("id", id);
+        el?.setAttribute("id", id);
         return id;
     }
 
