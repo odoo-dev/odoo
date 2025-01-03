@@ -188,6 +188,7 @@ Featuring
         ],
         'web.assets_unit_tests_setup': [
             'website_slides/static/src/interactions/**/*',
+            'website_slides/static/src/js/public/**/*',
         ],
     },
     'license': 'LGPL-3',
