@@ -3917,6 +3917,8 @@ class BaseModel(metaclass=MetaModel):
 
         # auditing: deletions are infrequent and leave no trace in the database
         _unlink.info('User #%s deleted %s records with IDs: %r', self._uid, self._name, self.ids)
+        # invalidate the cache regardless of the model because of potential cascade
+        self.env.cr.cache.pop('exists', None)
 
         return True
 
@@ -5150,14 +5152,13 @@ class BaseModel(metaclass=MetaModel):
 
         By convention, new records are returned as existing.
         """
-        new_ids, ids = partition(lambda i: isinstance(i, NewId), self._ids)
-        if not ids:
-            return self
-        query = Query(self.env, self._table, self._table_sql)
-        query.add_where(SQL("%s IN %s", SQL.identifier(self._table, 'id'), tuple(ids)))
-        self.env.cr.execute(query.select())
-        valid_ids = set([r[0] for r in self._cr.fetchall()] + new_ids)
-        return self.browse(i for i in self._ids if i in valid_ids)
+        exists_cache = self.env.cr.cache.setdefault('exists', {}).setdefault(self._name, {})
+        unknown_ids = [_id for _id in self.ids if _id not in exists_cache]
+        if unknown_ids:
+            existing_ids = set(self._where_calc([('id', 'in', unknown_ids)], active_test=False))
+            for _id in unknown_ids:
+                exists_cache[_id] = _id in existing_ids
+        return self.browse(_id for _id in self._ids if isinstance(_id, NewId) or exists_cache.get(_id))
 
     def _has_cycle(self, field_name=None) -> bool:
         """
