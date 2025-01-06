@@ -1,10 +1,10 @@
-import { PortalSidebar } from "@portal/interactions/portal_sidebar";
+import { Sidebar } from "@portal/interactions/portal_sidebar";
 import { registry } from "@web/core/registry";
 
 import { uniqueId } from "@web/core/utils/functions";
 
-export class SalePortalSidebar extends PortalSidebar {
-    static selector = ".o_portal_sale_sidebar";
+export class PurchaseSidebar extends Sidebar {
+    static selector = ".o_portal_purchase_sidebar";
 
     setup() {
         super.setup();
@@ -18,11 +18,6 @@ export class SalePortalSidebar extends PortalSidebar {
         this.setElementId(spyWatcheElement);
         // Nav Menu ScrollSpy
         this.generateMenu();
-        // After signature, automatically open the popup for payment
-        const searchParams = new URLSearchParams(window.location.search.substring(1));
-        if (searchParams.get("allow_payment") === "yes") {
-            this.el.querySelector("#o_sale_portal_paynow")?.click();
-        }
     }
 
     /**
@@ -33,7 +28,7 @@ export class SalePortalSidebar extends PortalSidebar {
      */
     setElementId(prefix, el) {
         const id = uniqueId(prefix);
-        el?.setAttribute("id", id);
+        el.setAttribute("id", id);
         return id;
     }
 
@@ -42,18 +37,22 @@ export class SalePortalSidebar extends PortalSidebar {
         let lastUL = null;
         const bsSidenavEl = this.el.querySelector(".bs-sidenav");
 
-        const quoteEls = document.querySelectorAll("#quote_content [id^=quote_header_], #quote_content [id^=quote_]");
+        const quoteEls = document.querySelectorAll(
+            "#quote_content [id^=quote_header_], #quote_content [id^=quote_]"
+        );
         for (const quoteEl of quoteEls) {
             quoteEl.removeAttribute("id");
-        };
+        }
         this.spyWatched.removeAttribute("id");
 
-        const quoteHeaderEls = this.spyWatched.querySelectorAll("#quote_content h2, #quote_content h3");
+        const quoteHeaderEls = this.spyWatched.querySelectorAll(
+            "#quote_content h2, #quote_content h3"
+        );
         for (const quoteHeaderEl of quoteHeaderEls) {
             let id = null;
             let text = null;
             switch (quoteHeaderEl.tagName.toLowerCase()) {
-                case "h2":
+                case "h2": {
                     id = this.setElementId("quote_header_", quoteHeaderEl);
                     text = this.extractText(quoteHeaderEl);
                     if (!text) {
@@ -62,6 +61,7 @@ export class SalePortalSidebar extends PortalSidebar {
                     const linkEl = document.createElement("a");
                     linkEl.classList.add("nav-link", "p-0");
                     linkEl.href = `#${id}`;
+                    linkEl.style.maxWidth = "200px";
                     linkEl.innerText = text;
 
                     const liEl = document.createElement("li");
@@ -73,7 +73,8 @@ export class SalePortalSidebar extends PortalSidebar {
                     lastLI = liEl;
                     lastUL = false;
                     break;
-                case "h3":
+                }
+                case "h3": {
                     id = this.setElementId("quote_", quoteHeaderEl);
                     text = this.extractText(quoteHeaderEl);
                     if (!text) {
@@ -91,6 +92,7 @@ export class SalePortalSidebar extends PortalSidebar {
                         const linkEl = document.createElement("a");
                         linkEl.classList.add("nav-link", "p-0");
                         linkEl.href = `#${id}`;
+                        linkEl.style.maxWidth = "200px";
                         linkEl.innerText = text;
 
                         const liEl = document.createElement("li");
@@ -100,6 +102,7 @@ export class SalePortalSidebar extends PortalSidebar {
                         this.insert(liEl, lastUL);
                     }
                     break;
+                }
             }
             quoteHeaderEl.setAttribute("data-anchor", true);
         }
@@ -108,4 +111,4 @@ export class SalePortalSidebar extends PortalSidebar {
 
 registry
     .category("public.interactions")
-    .add("sale.sale_portal_sidebar", SalePortalSidebar);
+    .add("purchase.purchase_portal_sidebar", PurchaseSidebar);
