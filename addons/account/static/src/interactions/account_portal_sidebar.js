@@ -12,11 +12,11 @@ export class AccountPortalSidebar extends PortalSidebar {
 
     setup() {
         super.setup();
-        this.invoiceHTMLEl = this.el.querySelector("iframe#invoice_html");
     }
 
     start() {
         super.start();
+        this.invoiceHTMLEl = document.querySelector("iframe");
         const iframeDoc = this.invoiceHTMLEl.contentDocument || this.invoiceHTMLEl.contentWindow.document;
         if (iframeDoc.readyState === 'complete') {
             this.updateIframeSize();
@@ -38,8 +38,8 @@ export class AccountPortalSidebar extends PortalSidebar {
         if (!isAnchor) {
             return;
         }
-        const targetEl = document.querySelector(`#${window.location.hash}`);
-        if (!targetEl.length) {
+        const targetEl = document.querySelector(`${window.location.hash}`);
+        if (!targetEl) {
             return;
         }
         scrollTo(targetEl, { behavior: "instant" });

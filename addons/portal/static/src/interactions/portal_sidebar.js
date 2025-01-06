@@ -26,11 +26,11 @@ export class PortalSidebar extends Interaction {
             const today = DateTime.now().startOf("day");
             const diff = dateTime.diff(today).as("days");
             if (diff === 0) {
-                this.el.innerText = _t('Due today');
+                timeagoEl.innerText = _t('Due today');
             } else if (diff > 0) {
-                this.el.innerText = _t('Due in %s days', Math.abs(diff).toFixed());
+                timeagoEl.innerText = _t('Due in %s days', Math.abs(diff).toFixed());
             } else {
-                this.el.innerText = _t('%s days overdue', Math.abs(diff).toFixed());
+                timeagoEl.innerText = _t('%s days overdue', Math.abs(diff).toFixed());
             }
         }
     }
