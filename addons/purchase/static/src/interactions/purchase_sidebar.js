@@ -1,9 +1,9 @@
-import { PortalSidebar } from "@portal/interactions/portal_sidebar";
+import { Sidebar } from "@portal/interactions/portal_sidebar";
 import { registry } from "@web/core/registry";
 
 import { uniqueId } from "@web/core/utils/functions";
 
-export class PurchasePortalSidebar extends PortalSidebar {
+export class PurchaseSidebar extends Sidebar {
     static selector = ".o_portal_purchase_sidebar";
 
     setup() {
@@ -111,4 +111,4 @@ export class PurchasePortalSidebar extends PortalSidebar {
 
 registry
     .category("public.interactions")
-    .add("purchase.purchase_portal_sidebar", PurchasePortalSidebar);
+    .add("purchase.purchase_sidebar", PurchaseSidebar);
