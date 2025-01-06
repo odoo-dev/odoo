@@ -14,4 +14,3 @@ export class PortalInvoicePagePayment extends Interaction {
 registry
     .category("public.interactions")
     .add("account_payment.portal_invoice_page_payment", PortalInvoicePagePayment);
-
