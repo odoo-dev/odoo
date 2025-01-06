@@ -7,7 +7,7 @@ import {
 import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, click, scroll } from "@odoo/hoot-dom";
 
-import { setupTest, customScroll } from "../header/helpers";
+import { setupTest, simpleScroll, doubleScroll } from "./helpers";
 
 setupInteractionWhiteList([
     "website.header_standard",
@@ -87,7 +87,6 @@ const tableTemplate = `
     </section>
 `;
 
-
 const getTemplate = function (headerType) {
     return `
     <header class="${headerType}" style="background-color:#CCFFCC">
@@ -99,13 +98,23 @@ const getTemplate = function (headerType) {
     `
 }
 
-const HEADER_SIZE = 50
-const DEFAULT_OFFSET = 20
+const HEADER_SIZE = 50;
+const DEFAULT_OFFSET = 20;
 
 const SCROLLS = [0, 40, 250, 400, 250, 40, 0];
 const SCROLLS_SPECIAL = [0, 40, 400, 40, 0];
 
-test.tags("desktop")("table_of_content scrolls to targetted location (desktop)", async () => {
+// This function only works if the elements are displayed
+const checkVisibility = function (aEls, h2Els, wrapEl) {
+    return (
+        isElementVerticallyInViewportOf(aEls[0], wrapEl),
+        isElementVerticallyInViewportOf(aEls[1], wrapEl),
+        isElementVerticallyInViewportOf(h2Els[0], wrapEl),
+        isElementVerticallyInViewportOf(h2Els[1], wrapEl)
+    );
+}
+
+test.tags("desktop")("table_of_content is correctly started (desktop)", async () => {
     const { core, el } = await startInteractions(`
         <div id="wrapwrap" style="overflow: scroll; max-height: 300px;">
             ${tableTemplate}
@@ -115,106 +124,86 @@ test.tags("desktop")("table_of_content scrolls to targetted location (desktop)",
     const wrapEl = el.querySelector("#wrapwrap");
     const aEls = el.querySelectorAll("a[href]");
     const h2Els = el.querySelectorAll("h2[id]");
-    // Only works if the elements are displayed
     expect(aEls[0]).toHaveClass("active");
     expect(aEls[1]).not.toHaveClass("active");
-    expect(isElementVerticallyInViewportOf(aEls[0], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(aEls[1], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(h2Els[0], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(h2Els[1], wrapEl)).toBe(false);
+    expect(checkVisibility(aEls, h2Els, wrapEl)).toBe((true, true, true, false));
+});
+
+test.tags("mobile")("table_of_content is correctly started (mobile)", async () => {
+    const { core, el } = await startInteractions(`
+        <div id="wrapwrap" style="overflow: scroll; max-height: 300px;">
+            ${tableTemplate}
+        </div>
+    `);
+    expect(core.interactions.length).toBe(1);
+    const wrapEl = el.querySelector("#wrapwrap");
+    const aEls = el.querySelectorAll("a[href]");
+    const h2Els = el.querySelectorAll("h2[id]");
+    // We do not check the active class in mobile
+    expect(checkVisibility(aEls, h2Els, wrapEl)).toBe((true, true, true, false));
+});
+
+test.tags("desktop")("table_of_content scrolls to targetted location (desktop)", async () => {
+    const { el } = await startInteractions(`
+        <div id="wrapwrap" style="overflow: scroll; max-height: 300px;">
+            ${tableTemplate}
+        </div>
+    `);
+    const wrapEl = el.querySelector("#wrapwrap");
+    const aEls = el.querySelectorAll("a[href]");
+    const h2Els = el.querySelectorAll("h2[id]");
     await click(aEls[1]);
     await animationFrame();
-    // Only works if the elements are displayed
     expect(aEls[0]).not.toHaveClass("active");
     expect(aEls[1]).toHaveClass("active");
-    expect(isElementVerticallyInViewportOf(aEls[0], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(aEls[1], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(h2Els[0], wrapEl)).toBe(false);
-    expect(isElementVerticallyInViewportOf(h2Els[1], wrapEl)).toBe(true);
+    expect(checkVisibility(aEls, h2Els, wrapEl)).toBe((true, true, false, true));
 });
 
 test.tags("mobile")("table_of_content scrolls to targetted location (mobile)", async () => {
-    const { core, el } = await startInteractions(`
+    const { el } = await startInteractions(`
         <div id="wrapwrap" style="overflow: scroll; max-height: 300px;">
             ${tableTemplate}
         </div>
     `);
-    expect(core.interactions.length).toBe(1);
     const wrapEl = el.querySelector("#wrapwrap");
     const aEls = el.querySelectorAll("a[href]");
     const h2Els = el.querySelectorAll("h2[id]");
-    // Only works if the elements are displayed
-    expect(isElementVerticallyInViewportOf(aEls[0], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(aEls[1], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(h2Els[0], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(h2Els[1], wrapEl)).toBe(false);
     await click(aEls[1]);
     await animationFrame();
-    // Only works if the elements are displayed
-    expect(isElementVerticallyInViewportOf(aEls[0], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(aEls[1], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(h2Els[0], wrapEl)).toBe(false);
-    expect(isElementVerticallyInViewportOf(h2Els[1], wrapEl)).toBe(true);
+    // We do not check the active class in mobile
+    expect(checkVisibility(aEls, h2Els, wrapEl)).toBe((true, true, false, true));
 });
 
 test.tags("desktop")("table_of_content highlights reached header (desktop)", async () => {
-    const { core, el } = await startInteractions(`
+    const { el } = await startInteractions(`
         <div id="wrapwrap" style="overflow: scroll; max-height: 300px;">
             ${tableTemplate}
         </div>
     `);
-    expect(core.interactions.length).toBe(1);
     const wrapEl = el.querySelector("#wrapwrap");
     const aEls = el.querySelectorAll("a[href]");
     const h2Els = el.querySelectorAll("h2[id]");
-    // Only works if the elements are displayed
-    expect(aEls[0]).toHaveClass("active");
-    expect(aEls[1]).not.toHaveClass("active");
-    expect(isElementVerticallyInViewportOf(aEls[0], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(aEls[1], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(h2Els[0], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(h2Els[1], wrapEl)).toBe(false);
     await scroll(wrapEl, { top: h2Els[1].getBoundingClientRect().top });
     await animationFrame();
-    // Only works if the elements are displayed
     expect(aEls[0]).not.toHaveClass("active");
     expect(aEls[1]).toHaveClass("active");
-    expect(isElementVerticallyInViewportOf(aEls[0], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(aEls[1], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(h2Els[0], wrapEl)).toBe(false);
-    expect(isElementVerticallyInViewportOf(h2Els[1], wrapEl)).toBe(true);
+    expect(checkVisibility(aEls, h2Els, wrapEl)).toBe((true, true, false, true));
 });
 
 test.tags("mobile")("table_of_content highlights reached header (mobile)", async () => {
-    const { core, el } = await startInteractions(`
+    const { el } = await startInteractions(`
         <div id="wrapwrap" style="overflow: scroll; max-height: 300px;">
             ${tableTemplate}
         </div>
     `);
-    expect(core.interactions.length).toBe(1);
     const wrapEl = el.querySelector("#wrapwrap");
     const aEls = el.querySelectorAll("a[href]");
     const h2Els = el.querySelectorAll("h2[id]");
-    // Only works if the elements are displayed
-    expect(isElementVerticallyInViewportOf(aEls[0], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(aEls[1], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(h2Els[0], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(h2Els[1], wrapEl)).toBe(false);
     await scroll(wrapEl, { top: h2Els[1].getBoundingClientRect().top });
     await animationFrame();
-    // Only works if the elements are displayed
-    expect(isElementVerticallyInViewportOf(aEls[0], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(aEls[1], wrapEl)).toBe(true);
-    expect(isElementVerticallyInViewportOf(h2Els[0], wrapEl)).toBe(false);
-    expect(isElementVerticallyInViewportOf(h2Els[1], wrapEl)).toBe(true);
+    // We do not check the active class in mobile
+    expect(checkVisibility(aEls, h2Els, wrapEl)).toBe((true, true, false, true));
 });
-
-// Since the header does not move in Hoot, we have to take into
-// account the scroll in the test when checking where the bottom
-// of the header is (ie. when the header is shown and scroll != 0).
-const expectedTopStandard = (scroll) => {
-    return scroll > HEADER_SIZE && scroll < 300 ? DEFAULT_OFFSET : HEADER_SIZE + DEFAULT_OFFSET - scroll;
-};
 
 test.tags("desktop")("table_of_content updates titles position with a o_header_standard", async () => {
     const { el, core } = await startInteractions(getTemplate("o_header_standard"));
@@ -222,42 +211,32 @@ test.tags("desktop")("table_of_content updates titles position with a o_header_s
     const wrapwrap = el.querySelector("#wrapwrap");
     const title = el.querySelector(".s_table_of_content_navbar");
     await setupTest(core, wrapwrap);
-    for (let i = 1; i < SCROLLS.length; i++) {
-        await customScroll(wrapwrap, SCROLLS[i - 1], SCROLLS[i]);
-        expect(Math.round(parseFloat(title.style.top) - wrapwrap.getBoundingClientRect().top)).toBe(expectedTopStandard(SCROLLS[i]));
+    for (let i = 0; i < SCROLLS.length; i++) {
+        const target = SCROLLS[i];
+        await simpleScroll(wrapwrap, target);
+        const calculatedTop = Math.round(parseFloat(title.style.top));
+        const isHeaderVisible = target < HEADER_SIZE || target > 300;
+        // We compensate the scroll since the header does not move in Hoot. 
+        const correctedTop = isHeaderVisible ? calculatedTop + target : calculatedTop;
+        expect(correctedTop).toBe(isHeaderVisible ? HEADER_SIZE + DEFAULT_OFFSET : DEFAULT_OFFSET);
     }
 });
-
-// Since the header does not move in Hoot, the first scroll we do
-// create a scroll offset we have to take into account when checking
-// where the bottom of the header is (ie. when the header is shown
-// and scroll != 0).
-//
-// TODO Investigate where this issue comes from (might be like to
-// the fact the state "atTop" is updated and there is a transform
-// applied to the header).
-const expectedTopFixed = (scroll, offset) => {
-    return scroll == 0 ? HEADER_SIZE + DEFAULT_OFFSET : HEADER_SIZE + DEFAULT_OFFSET - offset;
-};
 
 test.tags("desktop")("table_of_content updates titles position with a o_header_fixed", async () => {
     const { el, core } = await startInteractions(getTemplate("o_header_fixed"));
     expect(core.interactions).toHaveLength(2);
+    // We force the header to never be consider "atTop", so that its
+    // position is properly computed.
+    core.interactions[0].interaction.topGap = -1;
     const wrapwrap = el.querySelector("#wrapwrap");
     const title = el.querySelector(".s_table_of_content_navbar");
     await setupTest(core, wrapwrap);
-    for (let i = 1; i < SCROLLS_SPECIAL.length; i++) {
-        await customScroll(wrapwrap, SCROLLS_SPECIAL[i - 1], SCROLLS_SPECIAL[i]);
-        expect(Math.round(parseFloat(title.style.top) - wrapwrap.getBoundingClientRect().top)).toBe(expectedTopFixed(SCROLLS_SPECIAL[i], SCROLLS_SPECIAL[1]));
+    for (let i = 0; i < SCROLLS_SPECIAL.length; i++) {
+        await simpleScroll(wrapwrap, SCROLLS[i]);
+        // There is no need to compensate the scroll here
+        expect(Math.round(parseFloat(title.style.top))).toBe(HEADER_SIZE + DEFAULT_OFFSET);
     }
 });
-
-// Since the header does not move in Hoot, we have to take into
-// account the scroll in the test when checking where the bottom
-// of the header is (ie. when the header is shown and scroll != 0).
-const expectedTopDisappears = (scroll) => {
-    return scroll > 200 ? DEFAULT_OFFSET : HEADER_SIZE + DEFAULT_OFFSET - scroll;
-};
 
 test.tags("desktop")("table_of_content updates titles position with a o_header_disappears", async () => {
     const { el, core } = await startInteractions(getTemplate("o_header_disappears"));
@@ -266,17 +245,16 @@ test.tags("desktop")("table_of_content updates titles position with a o_header_d
     const title = el.querySelector(".s_table_of_content_navbar");
     await setupTest(core, wrapwrap);
     for (let i = 1; i < SCROLLS_SPECIAL.length; i++) {
-        await customScroll(wrapwrap, SCROLLS_SPECIAL[i - 1], SCROLLS_SPECIAL[i]);
-        expect(Math.round(parseFloat(title.style.top) - wrapwrap.getBoundingClientRect().top)).toBe(expectedTopDisappears(SCROLLS_SPECIAL[i]));
+        const target = SCROLLS_SPECIAL[i];
+        const source = SCROLLS_SPECIAL[i - 1];
+        await doubleScroll(wrapwrap, target, source);
+        const calculatedTop = Math.round(parseFloat(title.style.top));
+        const isHeaderVisible = target < 300;
+        // We compensate the scroll since the header does not move in Hoot. 
+        const correctedTop = isHeaderVisible ? calculatedTop + target : calculatedTop;
+        expect(correctedTop).toBe(isHeaderVisible ? HEADER_SIZE + DEFAULT_OFFSET : DEFAULT_OFFSET);
     }
 });
-
-// Since the header does not move in Hoot, we have to take into
-// account the scroll in the test when checking where the bottom
-// of the header is (ie. when the header is shown and scroll != 0).
-const expectedTopFadeOut = (scroll) => {
-    return scroll > 200 ? DEFAULT_OFFSET : HEADER_SIZE + DEFAULT_OFFSET - scroll;
-};
 
 test.tags("desktop")("table_of_content updates titles position with a o_header_fade_out", async () => {
     const { el, core } = await startInteractions(getTemplate("o_header_fade_out"));
@@ -285,7 +263,13 @@ test.tags("desktop")("table_of_content updates titles position with a o_header_f
     const title = el.querySelector(".s_table_of_content_navbar");
     await setupTest(core, wrapwrap);
     for (let i = 1; i < SCROLLS_SPECIAL.length; i++) {
-        await customScroll(wrapwrap, SCROLLS_SPECIAL[i - 1], SCROLLS_SPECIAL[i]);
-        expect(Math.round(parseFloat(title.style.top) - wrapwrap.getBoundingClientRect().top)).toBe(expectedTopFadeOut(SCROLLS_SPECIAL[i]));
+        const target = SCROLLS_SPECIAL[i];
+        const source = SCROLLS_SPECIAL[i - 1];
+        await doubleScroll(wrapwrap, target, source);
+        const calculatedTop = Math.round(parseFloat(title.style.top));
+        const isHeaderVisible = target < 300;
+        // We compensate the scroll since the header does not move in Hoot. 
+        const correctedTop = isHeaderVisible ? calculatedTop + target : calculatedTop;
+        expect(correctedTop).toBe(isHeaderVisible ? HEADER_SIZE + DEFAULT_OFFSET : DEFAULT_OFFSET);
     }
 });
