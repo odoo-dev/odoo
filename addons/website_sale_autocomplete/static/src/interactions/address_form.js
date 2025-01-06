@@ -1,16 +1,15 @@
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
-import { rpc } from "@web/core/network/rpc";
+import { googlePlacesSession } from "@google_address_autocomplete/google_places_session";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { googlePlacesSession } from "@google_address_autocomplete/google_places_session";
-
 
 export class AddressForm extends Interaction {
     static selector = ".oe_cart .checkout_autoformat";
     static selectorHas = "input[name='street'][data-autocomplete-enabled='1']";
     dynamicContent = {
-        "input[name='street']": { "t-on-input.withTarget": this.debounced(this.onInputStreet, 200) },
+        "input[name='street']": { "t-on-input.withTarget": this.debounced(this.onStreetInput, 200) },
         ".js_autocomplete_result": { "t-on-click.withTarget": this.onClickAutocompleteResult },
     };
 
@@ -21,15 +20,14 @@ export class AddressForm extends Interaction {
         this.countrySelect = this.el.querySelector("select[name='country_id']");
         this.stateSelect = this.el.querySelector("select[name='state_id']");
         this.keepLast = new KeepLast();
-        this.sessionId = this.generateUUID();
     }
 
-    async onInputStreet(ev, inputEl) {
+    async onStreetInput(ev, inputEl) {
         const inputContainerEl = inputEl.parentNode;
         if (inputEl.value.length >= 5) {
             this.keepLast.add(
                 googlePlacesSession.getAddressPropositions({
-                    partial_address: ev.currentTarget.value
+                    partial_address: inputEl.value,
                 }).then((response) => {
                     inputContainerEl.querySelector(".dropdown-menu")?.remove();
                     this.renderAt("website_sale_autocomplete.AutocompleteDropDown", {
@@ -54,7 +52,6 @@ export class AddressForm extends Interaction {
         const address = await this.waitFor(googlePlacesSession.getAddressDetails({
             address: currentTargetEl.innerText,
             google_place_id: currentTargetEl.dataset.googlePlaceId,
-            session_id: this.sessionId || null,
         }));
 
         if (address.formatted_street_number) {
