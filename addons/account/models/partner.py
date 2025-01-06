@@ -837,6 +837,12 @@ class ResPartner(models.Model):
         """
         return ""
 
+    def _get_portal_optional_fields(self):
+        # EXTENDS 'portal
+        optional_fields = super()._get_portal_optional_fields()
+        optional_fields.extend(('invoice_sending_method', 'invoice_edi_format'))
+        return optional_fields
+
     @api.model
     def get_partner_localisation_fields_required_to_invoice(self, country_id):
         """ Returns the list of fields that needs to be filled when creating an invoice for the selected country.

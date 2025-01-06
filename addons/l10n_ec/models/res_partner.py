@@ -96,6 +96,12 @@ class ResPartner(models.Model):
                         partner.l10n_ec_vat_validation = _("The VAT %s seems to be invalid as the tenth digit doesn't comply with the validation algorithm "
                                                            "(SRI has stated that this validation is not required anymore for some VAT numbers)", partner.vat)
 
+    def _display_b2b_fields(self, country_code):
+        return (
+            country_code == 'EC'
+            or super()._display_b2b_fields(country_code)
+        )
+
     def _l10n_ec_get_identification_type(self):
         """Maps Odoo identification types to Ecuadorian ones.
         Useful for document type domains, electronic documents, ats, others.

@@ -195,8 +195,8 @@ class CustomerPortal(Controller):
             values.update({'error': error, 'error_message': error_message})
             values.update(post)
             if not error:
-                values = {key: post[key] for key in self._get_mandatory_fields()}
-                values.update({key: post[key] for key in self._get_optional_fields() if key in post})
+                values = {key: post[key] for key in request.env['res.partner']._get_portal_mandatory_fields()}
+                values.update({key: post[key] for key in request.env['res.partner']._get_portal_optional_fields() if key in post})
                 for field in set(['country_id', 'state_id']) & set(values.keys()):
                     try:
                         values[field] = int(values[field])
@@ -336,7 +336,7 @@ class CustomerPortal(Controller):
         :return: The set of common mandatory address field names.
         :rtype: set
         """
-        field_names = set(self._get_mandatory_fields())
+        field_names = set(self.env['res.partner']._get_portal_mandatory_fields())
         if country_sudo.state_required:
             field_names.add('state_id')
         if country_sudo.zip_required:
@@ -412,7 +412,7 @@ class CustomerPortal(Controller):
                 and (
                     is_anonymous_customer  # Allow inputting VAT on the new main address.
                     or (
-                        partner_sudo == self.env.user.partner_id
+                        partner_sudo == request.env.user.partner_id
                         and (can_edit_vat or partner_sudo.vat)
                     )  # On the main partner only, if the VAT was set.
                 )
@@ -424,8 +424,8 @@ class CustomerPortal(Controller):
         """ Hook to check if address is billing or not depending on address_type and kwargs.
 
         :param str address_type: The type of the address: 'billing' or 'delivery'.
-        :param *kwargs: Additional arguments to decide is used as billing or not.
-        :return: Wheather address type is billing or not.
+        :param dict kwargs: Additional arguments to decide is used as billing or not.
+        :return: Whether address type is billing or not.
         :rtype: bool
         """
         return address_type == 'billing'
@@ -491,7 +491,7 @@ class CustomerPortal(Controller):
         address_values, extra_form_data = self._parse_form_data(form_data)
 
         is_anonymous_customer = partner_sudo._is_anonymous_customer()
-        is_main_address = is_anonymous_customer or self.env.user.partner_id.id == partner_sudo.id
+        is_main_address = is_anonymous_customer or request.env.user.partner_id.id == partner_sudo.id
         # Validate the address values and highlights the problems in the form, if any.
         invalid_fields, missing_fields, error_messages = self._validate_address_values(
             address_values,
@@ -541,9 +541,7 @@ class CustomerPortal(Controller):
 
         ResPartner = request.env['res.partner']
         partner_fields = ResPartner._fields
-        authorized_partner_fields = set(
-            request.env['ir.model']._get('res.partner')._get_form_writable_fields().keys()
-        )
+        authorized_partner_fields = request.env['res.partner']._get_frontend_writable_fields()
         for key, value in form_data.items():
             if isinstance(value, str):
                 value = value.strip()
@@ -708,7 +706,7 @@ class CustomerPortal(Controller):
         :return: None
         """
         address_values['lang'] = request.lang.code
-        partner = self.env['res.partner']._get_current_partner(**kwargs)
+        partner = request.env['res.partner']._get_current_partner(**kwargs)
         address_values['company_id'] = partner.company_id.id
         commercial_partner = partner.commercial_partner_id
         if partner._is_anonymous_customer():
@@ -743,14 +741,14 @@ class CustomerPortal(Controller):
         pass
 
     @route(
-        ['/portal/country_info/<model("res.country"):country>'],
+        '/portal/address/country_info/<model("res.country"):country>',
         type='jsonrpc',
         auth="public",
         methods=['POST'],
         website=True,
         readonly=True,
     )
-    def shop_country_info(self, country, address_type, **kw):
+    def portal_address_country_info(self, country, address_type, **kw):
         address_fields = country.get_address_fields()
         if address_type == 'billing':
             required_fields = self._get_mandatory_billing_address_fields(country)
@@ -767,36 +765,22 @@ class CustomerPortal(Controller):
             'required_fields': list(required_fields),
         }
 
-    @route('/address/set_as_default', type='jsonrpc', auth='user', website=True)
-    def address_set_as_default(self, address_id, address_type, **kw):
-        partner_sudo = self.env['res.partner'].sudo()
+    @route('/portal/address/set_default', type='jsonrpc', auth='user', website=True)
+    def portal_address_set_as_default(self, address_id, address_type, **kw):
+        partner_sudo = self.env.user.partner_id.sudo()
         address_sudo = partner_sudo.browse(int(address_id))
-        # To-do: check with VFE if it is better to pass invoice as address_type from card instead
-        # each time check if billing then invoice means renaming of address_type in all the places
         if address_type == 'billing':
             address_type = 'invoice'
         if not address_sudo._can_edited_by_current_customer():
             raise Forbidden()
-        related_addresses = partner_sudo.search([
-            ('id', 'child_of', address_sudo.commercial_partner_id.ids),
-            '|',
-            ('type', 'in', [address_type, 'other']),
-            ('id', '=', address_sudo.commercial_partner_id.id),
-        ])
         if address_type == 'invoice':
-            related_addresses.filtered(
-                'is_default_invoice_address'
-            ).is_default_invoice_address = False
-            address_sudo.is_default_invoice_address = True
+            partner_sudo.default_billing_address_id = address_sudo.id
         else:
-            related_addresses.filtered(
-                'is_default_delivery_address'
-            ).is_default_delivery_address = False
-            address_sudo.is_default_delivery_address = True
+            partner_sudo.default_shipping_partner_id = address_sudo.id
 
     @route('/address/archive', type='jsonrpc', auth='user', website=True)
-    def address_archive(self, address_id, **kw):
-        address_sudo = self.env['res.partner'].sudo().browse(int(address_id))
+    def address_archive(self, partner_id, **kw):
+        address_sudo = request.env['res.partner'].sudo().browse(int(partner_id))
         if not address_sudo._can_edited_by_current_customer():
             raise Forbidden()
         address_sudo.action_archive()
@@ -899,7 +883,7 @@ class CustomerPortal(Controller):
 
         request.update_context(portal_form_country_id=data['country_id'])
         # Validation
-        for field_name in self._get_mandatory_fields():
+        for field_name in request.env['res.partner']._get_portal_mandatory_fields():
             if not data.get(field_name):
                 error[field_name] = 'missing'
                 if field_name == 'zipcode':
@@ -935,20 +919,12 @@ class CustomerPortal(Controller):
         if [err for err in error.values() if err == 'missing']:
             error_message.append(_('Some required fields are empty.'))
 
-        unknown = [k for k in data if k not in self._get_mandatory_fields() + self._get_optional_fields()]
+        unknown = [k for k in data if k not in request.env['res.partner']._get_frontend_writable_fields()]
         if unknown:
             error['common'] = 'Unknown field'
             error_message.append("Unknown field '%s'" % ','.join(unknown))
 
         return error, error_message
-
-    def _get_mandatory_fields(self):
-        """ This method is there so that we can override the mandatory fields """
-        return ["name", "phone", "email", "street", "city", "country_id"]
-
-    def _get_optional_fields(self):
-        """ This method is there so that we can override the optional fields """
-        return ["street2", "zipcode", "state_id", "vat", "company_name"]
 
     def _document_check_access(self, model_name, document_id, access_token=None):
         """Check if current user is allowed to access the specified record.

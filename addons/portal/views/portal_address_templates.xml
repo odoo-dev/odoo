@@ -10,7 +10,7 @@
                 <t t-set="address_type" t-value="'billing'"/>
                 <t
                     t-set="selected_address"
-                    t-value="billing_addresses.filtered('is_default_invoice_address')"
+                    t-value="partner_sudo.default_billing_address_id"
                 />
             </t>
             <h5 class="mt-4">Shipping address</h5>
@@ -19,7 +19,7 @@
                 <t t-set="address_type" t-value="'delivery'"/>
                 <t
                     t-set="selected_address"
-                    t-value="delivery_addresses.filtered('is_default_delivery_address')"
+                    t-value="partner_sudo.default_shipping_partner_id"
                 />
             </t>
         </t>
@@ -353,53 +353,51 @@
     <template id="portal.address" name="Address Management">
         <t t-set="no_footer" t-value="1"/>
         <t t-call="portal.portal_layout">
-            <div id="wrap">
-                <div class="o_customer_address_fill container py-2">
-                    <div name="address_div" class="row">
-                        <div class="oe_cart col-12 col-lg-8">
-                            <div>
-                                <t t-if="not is_anonymous_customer">
-                                    <t t-if="address_type == 'billing'">
-                                        <h3 class="mb-3">Billing address</h3>
-                                    </t>
-                                    <t t-elif="address_type == 'delivery'">
-                                        <h3 class="mb-3">Delivery address</h3>
-                                    </t>
-                                    <t t-else="">
-                                        <h3 class="mb-3">Your Address</h3>
-                                    </t>
+            <div class="o_customer_address_fill">
+                <div class="row">
+                    <div name="address_div" class="oe_clear_stucture col-12 col-lg-8">
+                        <div>
+                            <t t-if="not is_anonymous_customer">
+                                <t t-if="address_type == 'billing'">
+                                    <h3 class="mb-3">Billing address</h3>
                                 </t>
-                                <div id="errors"/> <!-- for js -->
-                                <form
-                                    t-att-action="'/portal/address/submit'"
-                                    method="post"
-                                    name="address_form"
-                                    class="address_autoformat"
-                                    t-att-data-company-country-code="res_company.country_id.code"
-                                    t-att-data-submit-url="'/portal/address/submit'"
-                                >
-                                    <div name="address_details" class="row">
-                                        <t t-call="portal.address_details"/>
-                                    </div>
-                                    <input
-                                        type="hidden"
-                                        name="csrf_token"
-                                        t-att-value="request.csrf_token()"
-                                        t-nocache="The csrf token must always be up to date."
-                                    />
-                                    <input type="hidden" name="address_type" t-att-value="address_type"/>
-                                    <input type="hidden" name="use_delivery_as_billing" t-att-value="use_delivery_as_billing"/>
-                                    <input type="hidden" name="parent_id" t-att-value="parent_id"/>
-                                    <t t-if="partner_id">
-                                        <input type="hidden" name="partner_id" t-att-value="partner_id"/>
-                                    </t>
-                                    <t t-if="callback">
-                                        <input type="hidden" name="callback" t-att-value="callback"/>
-                                    </t>
-                                    <!-- Example -->
-                                    <t t-call="portal.address_example"/>
-                                </form>
-                            </div>
+                                <t t-elif="address_type == 'delivery'">
+                                    <h3 class="mb-3">Delivery address</h3>
+                                </t>
+                                <t t-else="">
+                                    <h3 class="mb-3">Your Address</h3>
+                                </t>
+                            </t>
+                            <div id="errors"/> <!-- for js -->
+                            <form
+                                t-att-action="'/portal/address/submit'"
+                                method="post"
+                                name="address_form"
+                                class="address_autoformat"
+                                t-att-data-company-country-code="res_company.country_id.code"
+                                t-att-data-submit-url="'/portal/address/submit'"
+                            >
+                                <div name="address_details" class="row">
+                                    <t t-call="portal.address_details"/>
+                                </div>
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    t-att-value="request.csrf_token()"
+                                    t-nocache="The csrf token must always be up to date."
+                                />
+                                <input type="hidden" name="address_type" t-att-value="address_type"/>
+                                <input type="hidden" name="use_delivery_as_billing" t-att-value="use_delivery_as_billing"/>
+                                <input type="hidden" name="parent_id" t-att-value="parent_id"/>
+                                <t t-if="partner_id">
+                                    <input type="hidden" name="partner_id" t-att-value="partner_id"/>
+                                </t>
+                                <t t-if="callback">
+                                    <input type="hidden" name="callback" t-att-value="callback"/>
+                                </t>
+                                <!-- Example -->
+                                <t t-call="portal.address_example"/>
+                            </form>
                         </div>
                     </div>
                 </div>

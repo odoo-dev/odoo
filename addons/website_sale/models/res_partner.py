@@ -4,7 +4,6 @@ from odoo import _, api, fields, models
 from odoo.http import request
 
 from odoo.addons.website.models import ir_http
-from odoo.addons.website_sale import const
 
 
 class ResPartner(models.Model):
@@ -56,6 +55,14 @@ class ResPartner(models.Model):
             return order_sudo.partner_id
         return super()._get_current_partner(order_sudo=order_sudo, **kwargs)
 
+    def _get_frontend_writable_fields(self):
+        frontend_writable_fields = super()._get_frontend_writable_fields()
+        frontend_writable_fields.update(
+            self.env['ir.model']._get('res.partner')._get_form_writable_fields().keys()
+        )
+
+        return frontend_writable_fields
+
     def _is_anonymous_customer(self):
         """ Override `portal` to check if customer is anonymous or not by comparing
         customer with website public user partner if same then customer is anonymous.
@@ -65,12 +72,12 @@ class ResPartner(models.Model):
         """
         return (
             super()._is_anonymous_customer()
+            or not self and self.env.user._is_public()
             or self == request.website.user_id.sudo().partner_id
         )
 
-    def _display_b2b_fields(self, country_code):
-        """ This method is to check whether address form should display b2b fields. """
+    def _display_b2b_fields(self):
         return (
-            request.website.is_view_active('website_sale.address_b2b')
-            or country_code in const.DISPLAY_B2B_FIELDS_COUNTRY_CODE
+            super()._display_b2b_fields()
+            or request.website.is_view_active('website_sale.address_b2b')
         )

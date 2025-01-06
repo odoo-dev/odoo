@@ -67,6 +67,12 @@ class ResPartner(models.Model):
     def _commercial_fields(self):
         return super()._commercial_fields() + ['l10n_ar_afip_responsibility_type_id']
 
+    def _display_b2b_fields(self, country_code):
+        return (
+            country_code == 'AR'
+            or super()._display_b2b_fields(country_code)
+        )
+
     def ensure_vat(self):
         """ This method is a helper that returns the VAT number is this one is defined if not raise an UserError.
 

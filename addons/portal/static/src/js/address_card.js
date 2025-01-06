@@ -26,7 +26,7 @@ publicWidget.registry.addressCard = publicWidget.Widget.extend({
         ev.preventDefault();
         const selectedCard = ev.target.closest('.card');
         const { addressType, partnerId } = this._getCardData(selectedCard);
-        await rpc('/address/set_as_default', {
+        await rpc('/portal/address/set_default', {
             address_type: addressType,
             address_id: partnerId,
         });

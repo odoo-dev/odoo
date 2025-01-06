@@ -2337,7 +2337,7 @@
         <!-- Display/Hide b2b fields based on conuntry and settings for shop address -->
         <t name="o_b2b_fields" position="attributes">
             <attribute name="t-if">
-                partner_sudo._display_b2b_fields(country_code)
+                partner_sudo._display_b2b_fields()
             </attribute>
         </t>
         <!-- Hide use same address from shop address form -->
@@ -2368,12 +2368,8 @@
                 </p>
             </div>
         </div>
-        <div name="address_div" position="before">
-            <div class="row">
-                <div class="col-12">
-                    <t t-call="website_sale.wizard_checkout"/>
-                </div>
-            </div>
+        <div name="address_div" position="attributes">
+            <attribute name="class" remove="col-12 col-lg-8" separator=" "/>
         </div>
         <form name="address_form" position="attributes">
             <attribute name="t-att-action">'/shop/address/submit'</attribute>
@@ -2411,9 +2407,6 @@
         <t t-call="portal.address_details" position="attributes">
             <attribute name="t-call">website_sale.address_details</attribute>
         </t>
-        <input name="address_type" position="after">
-            <input type="hidden" name="is_shop_page" t-att-value="True"/>
-        </input>
     </template>
 
     <!-- Deactivatable through the website editor. -->
@@ -2637,7 +2630,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div t-attf-class="oe_cart col-12 col-lg-7">
+                        <div t-attf-class="oe_clear_stucture oe_cart col-12 col-lg-7">
                             <t t-out="0"/>
                         </div>
                     </div>

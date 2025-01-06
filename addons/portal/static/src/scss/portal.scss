@@ -469,6 +469,13 @@ img, .media_iframe_video, .o_image {
     }
 }
 
+.oe_clear_stucture {
+
+    > .oe_structure {
+        clear: both;
+    }
+}
+
 // Copyright
 .o_footer_copyright {
     .o_footer_copyright_name {

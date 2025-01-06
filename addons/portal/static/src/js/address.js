@@ -71,7 +71,7 @@ publicWidget.registry.customerAddress = publicWidget.Widget.extend({
         }
 
         const data = await rpc(
-            `/portal/country_info/${parseInt(countryId)}`,
+            `/portal/address/country_info/${parseInt(countryId)}`,
             {address_type: this.addressType},
         );
 

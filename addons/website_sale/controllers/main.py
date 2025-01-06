@@ -869,7 +869,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         :rtype: dict
         """
         rendering_values = super()._prepare_address_form_values(
-            *args, use_delivery_as_billing=use_delivery_as_billing, **kwargs
+            *args, order_sudo=False, use_delivery_as_billing=use_delivery_as_billing, **kwargs
         )
         if not order_sudo: # Return portal address values if not order
             return rendering_values
@@ -950,7 +950,12 @@ class WebsiteSale(payment_portal.PaymentPortal):
             **form_data
         )
 
-        is_anonymous_customer = request.env.user._is_public()
+        feedback_dict = json.loads(json_feedback)
+        # Return if error updating partner.
+        if feedback_dict.get('invalid_fields'):
+            return json_feedback
+
+        is_anonymous_customer = order_sudo.partner_id._is_anonymous_customer()
         is_main_address = is_anonymous_customer or order_sudo.partner_id.id == partner_sudo.id
         partner_fnames = set()
         if is_main_address:  # Main address updated.
