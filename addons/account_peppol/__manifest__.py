@@ -39,6 +39,7 @@
             'account_peppol/static/src/components/**/*',
         ],
         'web.assets_frontend': [
+            'account_peppol/static/src/interactions/**/*',
             'account_peppol/static/src/js/*',
         ],
     }
