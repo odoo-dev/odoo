@@ -5,7 +5,7 @@ import {
 
 import { describe, expect, test } from "@odoo/hoot";
 
-import { setupTest, customScroll } from "../header/helpers";
+import { setupTest, simpleScroll, doubleScroll } from "./helpers";
 
 setupInteractionWhiteList([
     "website.header_standard",
@@ -92,55 +92,38 @@ test("faq_horizontal is started when there is an element .s_faq_horizontal", asy
     expect(core.interactions).toHaveLength(1);
 });
 
-// Since the header does not move in Hoot, we have to take into
-// account the scroll in the test when checking where the bottom
-// of the header is (ie. when the header is shown and scroll != 0).
-const expectedTopStandard = (scroll) => {
-    return scroll > HEADER_SIZE && scroll < 300 ? DEFAULT_OFFSET : HEADER_SIZE + DEFAULT_OFFSET - scroll;
-};
-
 test.tags("desktop")("faq_horizontal updates titles position with a o_header_standard", async () => {
     const { el, core } = await startInteractions(getTemplate("o_header_standard"));
     expect(core.interactions).toHaveLength(2);
     const wrapwrap = el.querySelector("#wrapwrap");
     const title = el.querySelector(".s_faq_horizontal_entry_title");
     await setupTest(core, wrapwrap);
-    for (let i = 1; i < SCROLLS.length; i++) {
-        await customScroll(wrapwrap, SCROLLS[i - 1], SCROLLS[i]);
-        expect(Math.round(parseFloat(title.style.top) - wrapwrap.getBoundingClientRect().top)).toBe(expectedTopStandard(SCROLLS[i]));
+    for (let i = 0; i < SCROLLS.length; i++) {
+        const target = SCROLLS[i];
+        await simpleScroll(wrapwrap, target);
+        const calculatedTop = Math.round(parseFloat(title.style.top));
+        const isHeaderVisible = target < HEADER_SIZE || target > 300;
+        // We compensate the scroll since the header does not move in Hoot. 
+        const correctedTop = isHeaderVisible ? calculatedTop + target : calculatedTop;
+        expect(correctedTop).toBe(isHeaderVisible ? HEADER_SIZE + DEFAULT_OFFSET : DEFAULT_OFFSET);
     }
 });
-
-// Since the header does not move in Hoot, the first scroll we do
-// create a scroll offset we have to take into account when checking
-// where the bottom of the header is (ie. when the header is shown
-// and scroll != 0).
-//
-// TODO Investigate where this issue comes from (might be like to
-// the fact the state "atTop" is updated and there is a transform
-// applied to the header).
-const expectedTopFixed = (scroll, offset) => {
-    return scroll == 0 ? HEADER_SIZE + DEFAULT_OFFSET : HEADER_SIZE + DEFAULT_OFFSET - offset;
-};
 
 test.tags("desktop")("faq_horizontal updates titles position with a o_header_fixed", async () => {
     const { el, core } = await startInteractions(getTemplate("o_header_fixed"));
     expect(core.interactions).toHaveLength(2);
+    // We force the header to never be consider "atTop", so that its
+    // position is properly computed.
+    core.interactions[0].interaction.topGap = -1;
     const wrapwrap = el.querySelector("#wrapwrap");
     const title = el.querySelector(".s_faq_horizontal_entry_title");
     await setupTest(core, wrapwrap);
-    for (let i = 1; i < SCROLLS_SPECIAL.length; i++) {
-        await customScroll(wrapwrap, SCROLLS_SPECIAL[i - 1], SCROLLS_SPECIAL[i]);
-        expect(Math.round(parseFloat(title.style.top) - wrapwrap.getBoundingClientRect().top)).toBe(expectedTopFixed(SCROLLS_SPECIAL[i], SCROLLS_SPECIAL[1]));
+    for (let i = 0; i < SCROLLS_SPECIAL.length; i++) {
+        await simpleScroll(wrapwrap, SCROLLS[i]);
+        // There is no need to compensate the scroll here
+        expect(Math.round(parseFloat(title.style.top))).toBe(HEADER_SIZE + DEFAULT_OFFSET);
     }
 });
-
-// Since the header does not move in Hoot, we have to take into
-// account the scroll in the test when checking where the bottom
-// of the header is (ie. when the header is shown and scroll != 0).
-const expectedTopDisappears = (scroll) => {
-    return scroll > 200 ? DEFAULT_OFFSET : HEADER_SIZE + DEFAULT_OFFSET - scroll;
-};
 
 test.tags("desktop")("faq_horizontal updates titles position with a o_header_disappears", async () => {
     const { el, core } = await startInteractions(getTemplate("o_header_disappears"));
@@ -149,17 +132,16 @@ test.tags("desktop")("faq_horizontal updates titles position with a o_header_dis
     const title = el.querySelector(".s_faq_horizontal_entry_title");
     await setupTest(core, wrapwrap);
     for (let i = 1; i < SCROLLS_SPECIAL.length; i++) {
-        await customScroll(wrapwrap, SCROLLS_SPECIAL[i - 1], SCROLLS_SPECIAL[i]);
-        expect(Math.round(parseFloat(title.style.top) - wrapwrap.getBoundingClientRect().top)).toBe(expectedTopDisappears(SCROLLS_SPECIAL[i]));
+        const target = SCROLLS_SPECIAL[i];
+        const source = SCROLLS_SPECIAL[i - 1];
+        await doubleScroll(wrapwrap, target, source);
+        const calculatedTop = Math.round(parseFloat(title.style.top));
+        const isHeaderVisible = target < 300;
+        // We compensate the scroll since the header does not move in Hoot. 
+        const correctedTop = isHeaderVisible ? calculatedTop + target : calculatedTop;
+        expect(correctedTop).toBe(isHeaderVisible ? HEADER_SIZE + DEFAULT_OFFSET : DEFAULT_OFFSET);
     }
 });
-
-// Since the header does not move in Hoot, we have to take into
-// account the scroll in the test when checking where the bottom
-// of the header is (ie. when the header is shown and scroll != 0).
-const expectedTopFadeOut = (scroll) => {
-    return scroll > 200 ? DEFAULT_OFFSET : HEADER_SIZE + DEFAULT_OFFSET - scroll;
-};
 
 test.tags("desktop")("faq_horizontal updates titles position with a o_header_fade_out", async () => {
     const { el, core } = await startInteractions(getTemplate("o_header_fade_out"));
@@ -168,7 +150,13 @@ test.tags("desktop")("faq_horizontal updates titles position with a o_header_fad
     const title = el.querySelector(".s_faq_horizontal_entry_title");
     await setupTest(core, wrapwrap);
     for (let i = 1; i < SCROLLS_SPECIAL.length; i++) {
-        await customScroll(wrapwrap, SCROLLS_SPECIAL[i - 1], SCROLLS_SPECIAL[i]);
-        expect(Math.round(parseFloat(title.style.top) - wrapwrap.getBoundingClientRect().top)).toBe(expectedTopFadeOut(SCROLLS_SPECIAL[i]));
+        const target = SCROLLS_SPECIAL[i];
+        const source = SCROLLS_SPECIAL[i - 1];
+        await doubleScroll(wrapwrap, target, source);
+        const calculatedTop = Math.round(parseFloat(title.style.top));
+        const isHeaderVisible = target < 300;
+        // We compensate the scroll since the header does not move in Hoot.
+        const correctedTop = isHeaderVisible ? calculatedTop + target : calculatedTop;
+        expect(correctedTop).toBe(isHeaderVisible ? HEADER_SIZE + DEFAULT_OFFSET : DEFAULT_OFFSET);
     }
 });
