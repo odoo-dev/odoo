@@ -9,15 +9,6 @@ class CustomerPortalEcuador(CustomerPortal):
     def _is_ecuador_company(self):
         return request.env.company.country_code == 'EC'
 
-    def _get_mandatory_fields(self):
-        # EXTEND 'portal'
-        mandatory_fields = super()._get_mandatory_fields()
-
-        if self._is_ecuador_company():
-            mandatory_fields.extend(('l10n_latam_identification_type_id', 'vat'))
-
-        return mandatory_fields
-
     def _prepare_portal_layout_values(self):
         # EXTEND 'portal'
         portal_layout_values = super()._prepare_portal_layout_values()

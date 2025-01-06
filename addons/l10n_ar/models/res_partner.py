@@ -67,10 +67,10 @@ class ResPartner(models.Model):
     def _commercial_fields(self):
         return super()._commercial_fields() + ['l10n_ar_afip_responsibility_type_id']
 
-    def _display_b2b_fields(self, country_code):
+    def _display_b2b_fields(self):
         return (
-            country_code == 'AR'
-            or super()._display_b2b_fields(country_code)
+            self.env.company.country_code == 'AR'
+            or super()._display_b2b_fields()
         )
 
     def ensure_vat(self):
@@ -84,6 +84,16 @@ class ResPartner(models.Model):
         if not self.l10n_ar_vat:
             raise UserError(_('No VAT configured for partner [%i] %s', self.id, self.name))
         return self.l10n_ar_vat
+
+    def _get_portal_optional_fields(self):
+        # EXTEND 'portal'
+        optional_fields = super()._get_portal_optional_fields()
+        if self.env.company.country_code == 'AR':
+            optional_fields.extend(
+                ('l10n_latam_identification_type_id', 'l10n_ar_afip_responsibility_type_id', 'vat')
+            )
+
+        return optional_fields
 
     def _get_validation_module(self):
         self.ensure_one()

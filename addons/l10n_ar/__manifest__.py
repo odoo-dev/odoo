@@ -80,7 +80,6 @@ Master Data:
         'data/l10n_latam_identification_type_data.xml',
         'data/l10n_ar_afip_responsibility_type_data.xml',
         'data/account_chart_template_data2.xml',
-        'data/ir_model_fields.xml',
         'data/uom_uom_data.xml',
         'data/l10n_latam.document.type.csv',
         'data/l10n_latam.document.type.xml',

@@ -96,10 +96,10 @@ class ResPartner(models.Model):
                         partner.l10n_ec_vat_validation = _("The VAT %s seems to be invalid as the tenth digit doesn't comply with the validation algorithm "
                                                            "(SRI has stated that this validation is not required anymore for some VAT numbers)", partner.vat)
 
-    def _display_b2b_fields(self, country_code):
+    def _display_b2b_fields(self):
         return (
-            country_code == 'EC'
-            or super()._display_b2b_fields(country_code)
+            self.env.company.country_code == 'EC'
+            or super()._display_b2b_fields()
         )
 
     def _l10n_ec_get_identification_type(self):
@@ -129,3 +129,12 @@ class ResPartner(models.Model):
 
         if self.l10n_latam_identification_type_id.country_id.code != 'EC':
             return 'foreign'
+
+    def _get_portal_mandatory_fields(self):
+        # EXTEND 'portal'
+        mandatory_fields = super()._get_portal_mandatory_fields()
+
+        if self.env.company.country_code == 'EC':
+            mandatory_fields.extend(('l10n_latam_identification_type_id', 'vat'))
+
+        return mandatory_fields

@@ -20,10 +20,10 @@ class ResPartner(models.Model):
         if self.city_id and self.l10n_pe_district.city_id and self.l10n_pe_district.city_id != self.city_id:
             self.l10n_pe_district = False
 
-    def _display_b2b_fields(self, country_code):
+    def _display_b2b_fields(self):
         return (
-            country_code == 'PE'
-            or super()._display_b2b_fields(country_code)
+            self.env.company.country_code == 'PE'
+            or super()._display_b2b_fields()
         )
 
     @api.model

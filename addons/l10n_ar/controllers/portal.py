@@ -10,16 +10,6 @@ class L10nARCustomerPortal(CustomerPortal):
     def _is_argentine_company(self):
         return request.env.company.country_code == 'AR'
 
-    def _get_optional_fields(self):
-        # EXTEND 'portal'
-        optional_fields = super()._get_optional_fields()
-        if self._is_argentine_company():
-            optional_fields.extend(
-                ('l10n_latam_identification_type_id', 'l10n_ar_afip_responsibility_type_id', 'vat')
-            )
-
-        return optional_fields
-
     def _prepare_portal_layout_values(self):
         # EXTEND 'portal'
         portal_layout_values = super()._prepare_portal_layout_values()
@@ -64,7 +54,7 @@ class L10nARCustomerPortal(CustomerPortal):
         rendering_values = super()._prepare_address_form_values(
             partner_sudo, address_type, **kwargs
         )
-        if (self._is_used_as_billing_address(address_type, **kwargs)) and self._is_argentine_company():
+        if self._is_argentine_company() and (self._is_used_as_billing_address(address_type, **kwargs)):
             can_edit_vat = rendering_values['can_edit_vat']
             LatamIdentificationType = request.env['l10n_latam.identification.type'].sudo()
             rendering_values.update({
@@ -105,9 +95,11 @@ class L10nARCustomerPortal(CustomerPortal):
             afip_resp = request.env['l10n_ar.afip.responsibility.type'].browse(
                 address_values.get('l10n_ar_afip_responsibility_type_id')
             )
+
             id_type = request.env['l10n_latam.identification.type'].browse(
                 address_values.get('l10n_latam_identification_type_id')
             )
+
             if not id_type or not afip_resp:
                 # Those two values were not provided and are not required, skip the validation
                 return invalid_fields, missing_fields, error_messages
