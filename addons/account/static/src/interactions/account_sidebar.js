@@ -1,9 +1,9 @@
-import { PortalSidebar } from "@portal/interactions/portal_sidebar";
+import { Sidebar } from "@portal/interactions/portal_sidebar";
 import { registry } from "@web/core/registry";
 
 import { scrollTo } from "@web/core/utils/scrolling";
 
-export class AccountPortalSidebar extends PortalSidebar {
+export class AccountSidebar extends Sidebar {
     static selector = ".o_portal_invoice_sidebar";
     dynamicContent = {
         _window: { "t-on-resize": this.updateIframeSize },
@@ -55,4 +55,4 @@ export class AccountPortalSidebar extends PortalSidebar {
 
 registry
     .category("public.interactions")
-    .add("account.account_portal_sidebar", AccountPortalSidebar);
+    .add("account.account_sidebar", AccountSidebar);

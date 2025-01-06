@@ -5,7 +5,7 @@ import { deserializeDateTime } from "@web/core/l10n/dates";
 
 const { DateTime } = luxon;
 
-export class PortalSidebar extends Interaction {
+export class Sidebar extends Interaction {
 
     setup() {
         this.printContent = undefined;

@@ -1,9 +1,9 @@
-import { PortalSidebar } from "@portal/interactions/portal_sidebar";
+import { Sidebar } from "@portal/interactions/portal_sidebar";
 import { registry } from "@web/core/registry";
 
 import { uniqueId } from "@web/core/utils/functions";
 
-export class SalePortalSidebar extends PortalSidebar {
+export class SaleSidebar extends Sidebar {
     static selector = ".o_portal_sale_sidebar";
 
     setup() {
@@ -108,4 +108,4 @@ export class SalePortalSidebar extends PortalSidebar {
 
 registry
     .category("public.interactions")
-    .add("sale.sale_portal_sidebar", SalePortalSidebar);
+    .add("sale.sale_sidebar", SaleSidebar);
