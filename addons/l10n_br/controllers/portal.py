@@ -3,49 +3,19 @@
 from odoo import _lt
 from odoo.http import request
 
-from odoo.addons.account.controllers.portal import CustomerPortal
+from odoo.addons.l10n_latam_base.controllers.portal import L10nLatamBaseCustomerPortal
 
-class CustomerPortalBr(CustomerPortal):
+class L10nBRCustomerPortal(L10nLatamBaseCustomerPortal):
 
     def _is_brazilean_fiscal_country(self):
-        return request.env.company.account_fiscal_country_id.code == 'BR'
+        return self.env.company.account_fiscal_country_id.code == 'BR'
 
-    def _is_brazilean_country(self):
-        return request.env.company.country_code == 'BR'
-
-    def details_form_validate(self, data, partner_creation=False):
-        error, error_message = super().details_form_validate(data, partner_creation)
-
-        # This is needed so that the field is correctly write on the partner
-        if data.get('l10n_latam_identification_type_id') and self._is_brazilean_country():
-            data['l10n_latam_identification_type_id'] = int(data['l10n_latam_identification_type_id'])
-        return error, error_message
-
-    def _prepare_portal_layout_values(self):
-        portal_layout_values = super()._prepare_portal_layout_values()
-        if self._is_brazilean_fiscal_country():
-            portal_layout_values['identification_types'] = request.env['l10n_latam.identification.type'].search(
-                ['|', ('country_id', '=', False), ('country_id.code', '=', 'BR')]
-            )
-        return portal_layout_values
-
-    def _get_mandatory_delivery_address_fields(self, country_sudo):
-        mandatory_fields = super()._get_mandatory_delivery_address_fields(country_sudo)
+    def _get_mandatory_address_fields(self, country_sudo):
+        # EXTEND 'portal'
+        mandatory_fields = super()._get_mandatory_address_fields(country_sudo)
         if (country_sudo.code == 'BR' and self._is_brazilean_fiscal_country()):
             mandatory_fields |= {
-                'vat', 'l10n_latam_identification_type_id', 'street_name', 'street2', 'street_number', 'zip', 'city_id', 'state_id', 'country_id'
-            }
-            mandatory_fields -= {'street', 'city'}  # Brazil uses the base_extended_address fields added above
-
-        return mandatory_fields
-
-    def _get_mandatory_billing_address_fields(self, country_sudo):
-        """ Extend mandatory fields to add the vat in case the company and the customer are from brazil. """
-        mandatory_fields = super()._get_mandatory_billing_address_fields(country_sudo)
-
-        if (country_sudo.code == 'BR' and self._is_brazilean_fiscal_country()):
-            mandatory_fields |= {
-                'vat', 'l10n_latam_identification_type_id', 'street_name', 'street2', 'street_number', 'zip', 'city_id', 'state_id', 'country_id'
+                'vat', 'l10n_latam_identification_type_id', 'street_name', 'street2', 'street_number', 'city_id'
             }
             mandatory_fields -= {'street', 'city'}  # Brazil uses the base_extended_address fields added above
 
@@ -56,14 +26,9 @@ class CustomerPortalBr(CustomerPortal):
             partner_sudo, address_type, **kwargs
         )
         if self._is_used_as_billing_address(address_type, **kwargs) and self._is_brazilean_fiscal_country():
-            can_edit_vat = rendering_values['can_edit_vat']
-            LatamIdentificationType = request.env['l10n_latam.identification.type'].sudo()
             rendering_values.update({
-                'identification_types': LatamIdentificationType.search([
-                    '|', ('country_id', '=', False), ('country_id.code', '=', 'BR'),
-                ]) if can_edit_vat else LatamIdentificationType,
+                'city_sudo': partner_sudo.city_id,
+                'cities_sudo': request.env['res.city'].sudo().search([('country_id.code', '=', 'BR')]),
+                'vat_label': _lt('Number'),
             })
-            rendering_values['city_sudo'] = partner_sudo.city_id
-            rendering_values['cities_sudo'] = request.env['res.city'].sudo().search([('country_id.code', '=', 'BR')])
-            rendering_values['vat_label'] = _lt('Number')
         return rendering_values

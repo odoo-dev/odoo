@@ -18,7 +18,7 @@ class L10nPECustomerPortal(CustomerPortal):
         mandatory_fields.add('vat')
         if country_sudo.code == 'PE':
             mandatory_fields |= {
-                'state_id', 'city_id', 'l10n_pe_district', 'l10n_latam_identification_type_id',
+                'state_id', 'city_id', 'l10n_pe_district',
             }
             mandatory_fields.remove('city')
         return mandatory_fields
@@ -40,16 +40,6 @@ class L10nPECustomerPortal(CustomerPortal):
         if not self._is_peru_company():
             return rendering_values
 
-        if kwargs.get('use_delivery_as_billing') and address_type == 'delivery' or address_type == 'billing':
-            can_edit_vat = rendering_values['can_edit_vat']
-            LatamIdentificationType = request.env['l10n_latam.identification.type'].sudo()
-            rendering_values.update({
-                'identification_types': LatamIdentificationType.search([
-                    '|', ('country_id', '=', False), ('country_id.code', '=', 'PE')
-                ]) if can_edit_vat else LatamIdentificationType,
-                'vat_label': request.env._("Identification Number"),
-            })
-
         state = request.env['res.country.state'].browse(rendering_values['state_id'])
         city = partner_sudo.city_id
         ResCity = request.env['res.city'].sudo()
@@ -61,13 +51,6 @@ class L10nPECustomerPortal(CustomerPortal):
             'city_districts': District.search([('city_id', '=', city.id)]) if city else District,
         })
         return rendering_values
-
-    def _get_vat_validation_fields(self):
-        fnames = super()._get_vat_validation_fields()
-        if request.env.company.account_fiscal_country_id.code == 'PE':
-            fnames.add('l10n_latam_identification_type_id')
-            fnames.add('name')
-        return fnames
 
     @route(
         '/portal/state_infos/<model("res.country.state"):state>',

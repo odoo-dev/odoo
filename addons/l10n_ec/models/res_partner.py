@@ -130,11 +130,5 @@ class ResPartner(models.Model):
         if self.l10n_latam_identification_type_id.country_id.code != 'EC':
             return 'foreign'
 
-    def _get_portal_mandatory_fields(self):
-        # EXTEND 'portal'
-        mandatory_fields = super()._get_portal_mandatory_fields()
-
-        if self.env.company.country_code == 'EC':
-            mandatory_fields.extend(('l10n_latam_identification_type_id', 'vat'))
-
-        return mandatory_fields
+    def _is_latam_country(self):
+        return super()._is_latam_country() or self.env.company.country_code == 'EC'

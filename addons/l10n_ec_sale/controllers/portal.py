@@ -1,10 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.l10n_ec.controllers.portal import CustomerPortalEcuador
-from odoo.http import request
+from odoo.addons.l10n_latam_base.controllers.portal import L10nLatamBaseCustomerPortal
 
 
-class CustomerPortalEcuadorSale(CustomerPortalEcuador):
+class CustomerPortalEcuadorSale(L10nLatamBaseCustomerPortal):
 
     def _get_payment_values(self, order, **kwargs):
         payment_form_values = super()._get_payment_values(order, **kwargs)

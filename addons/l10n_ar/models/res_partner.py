@@ -69,7 +69,7 @@ class ResPartner(models.Model):
 
     def _display_b2b_fields(self):
         return (
-            self.env.company.country_code == 'AR'
+            self._is_argentine_company()
             or super()._display_b2b_fields()
         )
 
@@ -88,12 +88,18 @@ class ResPartner(models.Model):
     def _get_portal_optional_fields(self):
         # EXTEND 'portal'
         optional_fields = super()._get_portal_optional_fields()
-        if self.env.company.country_code == 'AR':
+        if self._is_argentine_company():
             optional_fields.extend(
-                ('l10n_latam_identification_type_id', 'l10n_ar_afip_responsibility_type_id', 'vat')
+                ('l10n_ar_afip_responsibility_type_id')
             )
 
         return optional_fields
+
+    def _is_latam_country(self):
+        return super()._is_latam_country() or self._is_argentine_company()
+
+    def _is_argentine_company(self):
+        return self.env.company.country_code == 'AR'
 
     def _get_validation_module(self):
         self.ensure_one()

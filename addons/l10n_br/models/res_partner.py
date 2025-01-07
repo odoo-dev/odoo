@@ -15,7 +15,7 @@ class ResPartner(models.Model):
         mandatory_fields = super()._get_portal_mandatory_fields()
 
         if request.params.get('country_id'):
-            country = request.env['res.country'].browse(int(request.params['country_id']))
+            country = self.env['res.country'].browse(int(request.params['country_id']))
             if  self.env.company.country_code == 'BR' and country.code == 'BR' and 'vat' not in mandatory_fields:
                 mandatory_fields += ['vat']
             # Needed because the user could put brazil and then change to another country, we don't
@@ -28,6 +28,9 @@ class ResPartner(models.Model):
     def _get_portal_optional_fields(self):
         """Extend optional fields to add the identification type to avoid having the unknown field error"""
         optional_fields = super()._get_portal_optional_fields()
-        if self.env.company.country_code == 'BR' and 'l10n_latam_identification_type_id' not in optional_fields:
-            optional_fields += ['l10n_latam_identification_type_id']
+        if self.env.company.country_code == 'BR':
+            optional_fields.extend({'street_number', 'street_name', 'city_id'})
         return optional_fields
+
+    def _is_latam_country(self):
+        return super()._is_latam_country() or self.env.company.account_fiscal_country_id.code == 'BR'

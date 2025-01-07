@@ -26,6 +26,9 @@ class ResPartner(models.Model):
             or super()._display_b2b_fields()
         )
 
+    def _is_latam_country(self):
+        return super()._is_latam_country() or self.env.company.country_code == 'PE'
+
     @api.model
     def _formatting_address_fields(self):
         """Returns the list of address fields usable to format addresses."""
