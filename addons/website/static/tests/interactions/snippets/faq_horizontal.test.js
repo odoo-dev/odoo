@@ -98,8 +98,7 @@ test.tags("desktop")("faq_horizontal updates titles position with a o_header_sta
     const wrapwrap = el.querySelector("#wrapwrap");
     const title = el.querySelector(".s_faq_horizontal_entry_title");
     await setupTest(core, wrapwrap);
-    for (let i = 0; i < SCROLLS.length; i++) {
-        const target = SCROLLS[i];
+    for (const target of SCROLLS) {
         await simpleScroll(wrapwrap, target);
         const calculatedTop = Math.round(parseFloat(title.style.top));
         const isHeaderVisible = target < HEADER_SIZE || target > 300;
@@ -118,8 +117,8 @@ test.tags("desktop")("faq_horizontal updates titles position with a o_header_fix
     const wrapwrap = el.querySelector("#wrapwrap");
     const title = el.querySelector(".s_faq_horizontal_entry_title");
     await setupTest(core, wrapwrap);
-    for (let i = 0; i < SCROLLS_SPECIAL.length; i++) {
-        await simpleScroll(wrapwrap, SCROLLS[i]);
+    for (const target of SCROLLS_SPECIAL) {
+        await simpleScroll(wrapwrap, target);
         // There is no need to compensate the scroll here
         expect(Math.round(parseFloat(title.style.top))).toBe(HEADER_SIZE + DEFAULT_OFFSET);
     }

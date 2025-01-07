@@ -3,7 +3,6 @@ import { registry } from "@web/core/registry";
 
 import { googlePlacesSession } from "@google_address_autocomplete/google_places_session";
 import { KeepLast } from "@web/core/utils/concurrency";
-import { googlePlacesSession } from "@google_address_autocomplete/google_places_session";
 
 export class AddressForm extends Interaction {
     static selector = ".oe_cart .checkout_autoformat";

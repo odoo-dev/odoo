@@ -12,6 +12,7 @@ export class AccountSidebar extends Sidebar {
 
     setup() {
         super.setup();
+        this.invoiceHTMLEl = undefined;
     }
 
     start() {
