@@ -74,13 +74,13 @@ describe("patch dynamic content", () => {
             },
         };
         patchDynamicContent(parent, patch);
-        expect(parent).toEqual({
-            somewhere: {
-                ...parent.somewhere,
-                ...patch.somewhere,
-            },
-            elsewhere: patch.elsewhere,
-        });
+        expect(Object.keys(parent)).toEqual(["somewhere", "elsewhere"]);
+        expect(Object.keys(parent.somewhere)).toEqual([
+            "t-att-doNotTouch",
+            "t-att-class",
+            "t-att-xyz",
+        ]);
+        expect(Object.keys(parent.elsewhere)).toEqual(["t-att-class", "t-att-abc"]);
     });
 
     test("patch removes undefined values", () => {
