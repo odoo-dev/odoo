@@ -55,7 +55,7 @@ export class BuilderOptionsPlugin extends Plugin {
         }
 
         const previousElementToIdMap = new Map(this.lastContainers.map((c) => [c.element, c.id]));
-        this.lastContainers = [...elementToOptions]
+        const newContainers = [...elementToOptions]
             .sort(([a], [b]) => (b.contains(a) ? 1 : -1))
             .map(([element, options]) => ({
                 id: previousElementToIdMap.get(element) || uniqueId(),
@@ -63,6 +63,16 @@ export class BuilderOptionsPlugin extends Plugin {
                 options,
                 isRemovable: isRemovable(element),
             }));
+
+        // Do not update the containers if they did not change.
+        if (newContainers.length === this.lastContainers.length) {
+            const previousIds = this.lastContainers.map((c) => c.id);
+            if (newContainers.every((c) => previousIds.includes(c.id))) {
+                return;
+            }
+        }
+
+        this.lastContainers = newContainers;
         this.dispatchTo("change_current_options_containers_listeners", this.lastContainers);
     }
 
