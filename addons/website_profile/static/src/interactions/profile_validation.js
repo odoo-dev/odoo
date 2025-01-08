@@ -19,7 +19,6 @@ export class ProfileValidation extends Interaction {
         const data = await this.waitFor(rpc('/profile/send_validation_email', {
             redirect_url: currentTargetEl.dataset["redirect_url"],
         }));
-        console.log(data);
         if (data) {
             redirect(currentTargetEl.dataset["redirect_url"]);
         }
