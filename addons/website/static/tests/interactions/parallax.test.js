@@ -28,6 +28,8 @@ const simulateScrolls = async function (el, parallaxBg, sectionTop) {
     for (const target of [0, 1000, 1200]) {
         await scroll(el, { y: target });
         document.dispatchEvent(new Event("scroll"));
+        await scroll(el, { y: target + 1 });
+        document.dispatchEvent(new Event("scroll"));
         const spacing = parallaxBg.getBoundingClientRect().bottom - sectionTop.getBoundingClientRect().bottom;
         spacings.push(spacing);
     }
