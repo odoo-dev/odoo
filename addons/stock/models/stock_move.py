@@ -164,7 +164,8 @@ class StockMove(models.Model):
         index='btree_not_null')
     route_ids = fields.Many2many(
         'stock.route', 'stock_route_move', 'move_id', 'route_id', 'Destination route', help="Preferred route")
-    warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse', help="the warehouse to consider for the route selection on the next procurement (if any).")
+    warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse',
+        help="the warehouse to consider for the route selection on the next procurement (if any).")
     has_tracking = fields.Selection(related='product_id.tracking', string='Product with Tracking')
     quantity = fields.Float(
         'Quantity', compute='_compute_quantity', digits='Product Unit', inverse='_set_quantity', store=True)
@@ -207,6 +208,10 @@ class StockMove(models.Model):
     def _compute_product_uom(self):
         for move in self:
             move.product_uom = move.product_id.uom_id.id
+
+    # def _compute_warehouse_id(self):
+    #     for move in self:
+    #         if move.picking_id and 
 
     @api.depends('picking_id', 'picking_id.location_dest_id')
     def _compute_location_dest_id(self):

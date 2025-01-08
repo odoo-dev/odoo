@@ -13,74 +13,37 @@
                 </tr>
             </thead>
             <tbody>
-                <tr t-if="onHandCondition">
-                    <td>Inventory On Hand</td>
-                    <td/>
-                    <td t-if="props.docs.multiple_product"/>
-                    <td class="text-end">0</td>
-                    <td/>
-                    <td/>
-                    <td/>
-                    <td/>
-                </tr>
-                <tr t-foreach="props.docs.lines" t-as="line" t-key="line_index" t-attf-class="#{line.is_matched and 'table-info'}">
-                    <td t-attf-class="#{line.is_late and 'table-danger'}">
-                        <a t-if="line.document_in"
-                            href="#"
-                            t-on-click.prevent="() => this.props.openView(line.document_in._name, 'form', line.document_in.id)"
-                            t-out="line.document_in.name"
-                            class="fw-bold"/>
+                <t t-if="props.docs.multiple_warehouses">
+                    <t t-foreach="props.docs.warehouses" t-as="warehouse" t-key="warehouse.id">
+                        <tr class="bg-secondary">
+                            <td colspan="6">
+                                <span
+                                    t-on-click="() => this.toggleFolded(warehouse.id)" style="margin-right: 5px"
+                                    t-att-title="'Toggle Warehouse'" t-attf-aria-label="Toggle Warehouse">
+                                    <i t-attf-class="fa fa-fw fa-caret-{{ this.isFolded(warehouse.id) ? 'right' : 'down' }}" role="img"/>
+                                </span>
+                                <t t-out="warehouse.name"/>
+                            </td>
+                        </tr>
 
-                        <t t-elif="line.reservation">
-                            <a t-out="line.reservation.name" href="#" class="fw-bold"
-                               t-on-click.prevent="() => this.props.openView(line.reservation._name, 'form', line.reservation.id)"
-                                /> reserved
-                            <button t-if="displayReserve(line)"
-                                class="btn btn-sm btn-primary o_report_replenish_unreserve"
-                                name="unreserve_link"
-                                t-on-click="() => this._unreserve(line.move_out.id)">
-                                Unreserve
-                            </button>
-                        </t>
-                        <t t-elif="line.in_transit">
-                            <t t-if="line.move_out">
-                                <span>Stock In Transit</span>
-                            </t>
-                            <t t-else="">
-                                <span>Free Stock in Transit</span>
+                        <t t-if="!this.isFolded(warehouse.id)">
+                            <t t-foreach="warehouse.lines" t-as="line" t-key="line_index">
+                                <t t-call="stock.ForecastedLine">
+                                    <t t-set="line" t-value="line"/>
+                                </t>
                             </t>
                         </t>
-                        <t t-elif="line.replenishment_filled">
-                            <t t-if="line.document_out">Inventory On Hand
-                                <button t-if="displayReserve(line)"
-                                    class="btn btn-sm btn-primary"
-                                    name="reserve_link"
-                                    t-on-click="() => this._reserve(line.move_out.id)">
-                                    Reserve
-                                </button>
-                            </t>
-                            <t t-else="">Free Stock</t>
+                    </t>
+                </t>
+                <t t-else="">
+                    <t t-foreach="props.docs.lines" t-as="line" t-key="line_index">
+                        <t t-call="stock.ForecastedLine">
+                            <t t-set="line" t-value="line"/>
                         </t>
-                        <span t-else="" class="text-muted">Not Available</span>
-                    </td>
-                    <td t-out="line.receipt_date or ''"
-                        t-attf-class="#{line.is_late and 'table-danger'}"/>
-                    <td t-if="props.docs.multiple_product" t-out="line.product.display_name"/>
-                    <td class="text-end"><t t-if="! line.replenishment_filled">- </t><t t-out="_formatFloat(line.quantity)"/></td>
-                    <td t-attf-class="#{! line.replenishment_filled and 'table-danger'}" name="usedby_cell">
-                        <button t-if="line.move_out and line.move_out.picking_id"
-                            t-attf-class="o_priority o_priority_star me-1 fa fa-star#{line.move_out.picking_id.priority=='1' ? '' : '-o'}"
-                            t-on-click="() => this._onClickChangePriority('stock.picking', line.move_out.picking_id)"
-                            name="change_priority_link"/>
-                        <a t-if="line.document_out"
-                            href="#"
-                            t-on-click.prevent="() => this.props.openView(line.document_out._name, 'form', line.document_out.id)"
-                            t-out="line.document_out.name"
-                            class="fw-bold"/>
-                    </td>
-                    <td t-out="line.delivery_date or ''"
-                        t-attf-class="#{! line.replenishment_filled and 'table-danger'}"/>
-                </tr>
+                    </t>
+                </t>
+            </tbody>
+            <thead>
                 <tr t-if="this.props.docs.qty_to_order">
                     <td>To Order</td>
                     <td t-out="this.props.docs.lead_days_date"/>
@@ -91,8 +54,6 @@
                     <td t-out="this.props.docs.visibility_days_date"/>
                     <td t-out="_formatFloat(this.props.docs.qty_to_order_with_visibility_days)" class="text-end"/>
                 </tr>
-            </tbody>
-            <thead>
                 <tr class="o_forecasted_row bg-200">
                     <td colspan="2">Forecasted Inventory</td>
                     <td t-out="_formatFloat(this.props.docs.virtual_available)" class="text-end"/>
@@ -115,5 +76,76 @@
                 </tr>
             </thead>
         </table>
+    </t>
+
+    <t t-name="stock.ForecastedLine">
+        <tr t-if="onHandCondition">
+            <td>Inventory On Hand</td>
+            <td/>
+            <td t-if="props.docs.multiple_product"/>
+            <td class="text-end">0</td>
+            <td/>
+            <td/>
+            <td/>
+            <td/>
+        </tr>
+        <tr t-attf-class="#{line.is_matched and 'table-info'}">
+            <td t-attf-class="#{line.is_late and 'table-danger'}">
+                <a t-if="line.document_in"
+                    href="#"
+                    t-on-click.prevent="() => this.props.openView(line.document_in._name, 'form', line.document_in.id)"
+                    t-out="line.document_in.name"
+                    class="fw-bold"/>
+
+                <t t-elif="line.reservation">
+                    <a t-out="line.reservation.name" href="#" class="fw-bold"
+                       t-on-click.prevent="() => this.props.openView(line.reservation._name, 'form', line.reservation.id)"
+                        /> reserved
+                    <button t-if="displayReserve(line)"
+                        class="btn btn-sm btn-primary o_report_replenish_unreserve"
+                        name="unreserve_link"
+                        t-on-click="() => this._unreserve(line.move_out.id)">
+                        Unreserve
+                    </button>
+                </t>
+                <t t-elif="line.in_transit">
+                    <t t-if="line.move_out">
+                        <span>Stock In Transit</span>
+                    </t>
+                    <t t-else="">
+                        <span>Free Stock in Transit</span>
+                    </t>
+                </t>
+                <t t-elif="line.replenishment_filled">
+                    <t t-if="line.document_out">Inventory On Hand
+                        <button t-if="displayReserve(line)"
+                            class="btn btn-sm btn-primary"
+                            name="reserve_link"
+                            t-on-click="() => this._reserve(line.move_out.id)">
+                            Reserve
+                        </button>
+                    </t>
+                    <t t-else="">Free Stock</t>
+                </t>
+                <span t-else="" class="text-muted">Not Available</span>
+            </td>
+            <td t-out="line.receipt_date or ''"
+                t-attf-class="#{line.is_late and 'table-danger'}"/>
+            <td t-if="props.docs.multiple_product" t-out="line.product.display_name"/>
+            <td class="text-end"><t t-if="! line.replenishment_filled">- </t><t t-out="_formatFloat(line.quantity)"/></td>
+            <td t-attf-class="#{! line.replenishment_filled and 'table-danger'}" name="usedby_cell">
+                <button t-if="line.move_out and line.move_out.picking_id"
+                    t-attf-class="o_priority o_priority_star me-1 fa fa-star#{line.move_out.picking_id.priority=='1' ? '' : '-o'}"
+                    t-on-click="() => this._onClickChangePriority('stock.picking', line.move_out.picking_id)"
+                    name="change_priority_link"/>
+                <a t-if="line.document_out"
+                    href="#"
+                    t-on-click.prevent="() => this.props.openView(line.document_out._name, 'form', line.document_out.id)"
+                    t-out="line.document_out.name"
+                    class="fw-bold"/>
+            </td>
+            <td t-out="line.delivery_date or ''"
+                t-attf-class="#{! line.replenishment_filled and 'table-danger'}"/>
+        </tr>
     </t>
 </templates>

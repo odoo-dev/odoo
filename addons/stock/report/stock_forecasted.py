@@ -83,11 +83,7 @@ class StockForecasted_Product_Product(models.AbstractModel):
                 'multiple_product' : len(products) > 1,
             })
 
-        res['uom'] = products[:1].uom_id.display_name
-        res['quantity_on_hand'] = sum(products.mapped('qty_available'))
-        res['virtual_available'] = sum(products.mapped('virtual_available'))
-        res['incoming_qty'] = sum(products.mapped('incoming_qty'))
-        res['outgoing_qty'] = sum(products.mapped('outgoing_qty'))
+        res.update(self._get_product_quantities(products))
 
         in_domain, out_domain = self._move_draft_domain(product_template_ids, product_ids, wh_location_ids)
         [in_sum] = self.env['stock.move']._read_group(in_domain, aggregates=['product_qty:sum'])[0]
@@ -105,6 +101,15 @@ class StockForecasted_Product_Product(models.AbstractModel):
         })
         return res
 
+    def _get_product_quantities(self, products):
+        return {
+            'uom': products[:1].uom_id.display_name,
+            'quantity_on_hand': sum(products.with_context(**self.env.context).mapped('qty_available')),
+            'virtual_available': sum(products.with_context(**self.env.context).mapped('virtual_available')),
+            'incoming_qty': sum(products.with_context(**self.env.context).mapped('incoming_qty')),
+            'outgoing_qty': sum(products.with_context(**self.env.context).mapped('outgoing_qty')),
+        }
+
     def _get_reservation_data(self, move):
         return {
             '_name': move.picking_id._name,
@@ -115,18 +120,49 @@ class StockForecasted_Product_Product(models.AbstractModel):
     def _get_report_data(self, product_template_ids=False, product_ids=False):
         assert product_template_ids or product_ids
         res = {}
+        context = dict(self.env.context)
 
-        warehouse = self.env['stock.warehouse'].browse(self.env.context.get('warehouse_id', False)) or self.env['stock.warehouse'].search([['active', '=', True]])[0]
-        wh_location_ids = [loc['id'] for loc in self.env['stock.location'].search_read(
-            [('id', 'child_of', warehouse.view_location_id.id)],
-            ['id'],
-        )]
-        # any quantities in this location will be considered free stock, others are free stock in transit
-        wh_stock_location = warehouse.lot_stock_id
+        warehouse = self.env['stock.warehouse']
+        warehouse_id = self.env.context.get('warehouse_id')
+        if isinstance(warehouse_id, int):
+            if warehouse_id == 0:
+                # Fetch all active warehouses
+                warehouse = self.env['stock.warehouse'].search([['active', '=', True]])
+                context['warehouse_id'] = warehouse.ids
+            else:
+                warehouse = self.env['stock.warehouse'].browse(warehouse_id)
+        else:
+            warehouse = self.env['stock.warehouse'].search([['active', '=', True]], limit=1)
 
+        res.update({'multiple_warehouses': len(warehouse) > 1})
+
+        wh_location_domain = [('id', 'child_of', warehouse.view_location_id.ids)]
+        wh_location_groups = dict(self.env['stock.location']._read_group(
+            wh_location_domain, groupby=['warehouse_id'], aggregates=['id:array_agg']
+        ))
+        wh_location_ids = [id_ for ids in wh_location_groups.values() for id_ in ids]
+        self.env.context = context
         res.update(self._get_report_header(product_template_ids, product_ids, wh_location_ids))
 
-        res['lines'] = self._get_report_lines(product_template_ids, product_ids, wh_location_ids, wh_stock_location)
+        res.update({'warehouses': []})
+        if len(warehouse) > 1:
+            for warehouse_id in warehouse:
+                context['warehouse_id'] = warehouse_id.id
+                self.env.context = context
+                # any quantities in this location will be considered free stock, others are free stock in transit
+                wh_stock_location = warehouse_id.lot_stock_id
+                products = self.env['product.product'].browse(product_ids) if product_ids else self.env['product.template'].browse(product_template_ids).product_variant_ids
+                res['warehouses'].append({
+                    'id': warehouse_id.id,
+                    'name': warehouse_id.name,
+                    'lines': self._get_report_lines(
+                        product_template_ids, product_ids, wh_location_groups[warehouse_id], wh_stock_location
+                    ),
+                    **self._get_product_quantities(products)
+                })
+        else:
+            wh_stock_location = warehouse.lot_stock_id
+            res['lines'] = self._get_report_lines(product_template_ids, product_ids, wh_location_ids, wh_stock_location)
         return res
 
     def _prepare_report_line(self, quantity, move_out=None, move_in=None, replenishment_filled=True, product=False, reserved_move=False, in_transit=False, read=True):
