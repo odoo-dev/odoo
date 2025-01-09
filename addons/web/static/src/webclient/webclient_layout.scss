@@ -10,6 +10,18 @@
     display: flex;
     flex-flow: column nowrap;
     overflow: hidden;
+    overscroll-behavior-y: auto;
+
+    > .o_pull_to_refresh {
+      position: fixed;
+      top: -50px;
+      width: 100%;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: $o-control-panel-z-index + 1;
+    }
 
     > .o_action_manager {
       direction: ltr; //Define direction attribute here so when rtlcss preprocessor run, it converts it to rtl

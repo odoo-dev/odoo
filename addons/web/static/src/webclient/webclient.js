@@ -46,12 +46,55 @@ export class WebClient extends Component {
         });
         onMounted(() => {
             this.loadRouterState();
+            //if (this.env.isAndroidApp || this.env.isDisplayStandalone) {
+            if (this.env.isSmall) {
+                this.activatePullToRefresh();
+            }
             // the chat window and dialog services listen to 'web_client_ready' event in
             // order to initialize themselves:
             this.env.bus.trigger("WEB_CLIENT_READY");
         });
         useExternalListener(window, "click", this.onGlobalClick, { capture: true });
         onWillStart(this.registerServiceWorker);
+    }
+
+    async activatePullToRefresh() {
+        const pullToRefresh = document.querySelector(".o_pull_to_refresh");
+        let touchstartY;
+        var touchDiff;
+        var refreshAnimation = false;
+        const hiddenOffset = -50;
+        const heightAnimationEl = 75;
+        const ratio = 5;
+        const heightCompensation = ratio * heightAnimationEl;
+
+        document.addEventListener("touchstart", (e) => {
+            const selector = [".o_form_view_container", ".o_view_controller"].join(",");
+            const scrollableElements = [...document.querySelectorAll(selector)];
+            refreshAnimation = scrollableElements.every((el) => el.scrollTop === 0);
+            if (refreshAnimation) {
+                touchstartY = e.touches[0].clientY;
+            }
+        });
+        document.addEventListener("touchmove", (e) => {
+            if (refreshAnimation) {
+                const touchY = e.touches[0].clientY;
+                touchDiff = touchY - touchstartY;
+                if (touchDiff <= heightCompensation) {
+                    var topPx = hiddenOffset + touchDiff / ratio;
+                    pullToRefresh.style.top = topPx + "px";
+                    pullToRefresh.style.opacity = touchDiff / heightCompensation;
+                }
+            }
+        });
+        document.addEventListener("touchend", (e) => {
+            if (touchDiff > heightCompensation) {
+                location.reload();
+            } else {
+                pullToRefresh.style.top = -50 + "px";
+                refreshAnimation = false;
+            }
+        });
     }
 
     async loadRouterState() {

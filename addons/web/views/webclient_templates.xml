@@ -30,6 +30,9 @@
         <t t-out="head or ''"/>
     </head>
     <body t-att-class="body_classname">
+        <div class="o_pull_to_refresh">
+            <div class="spinner-border"></div>
+        </div>
         <t t-out="0"/>
     </body>
 </html>
