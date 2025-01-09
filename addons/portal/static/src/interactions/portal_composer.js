@@ -48,7 +48,7 @@ export class PortalComposer extends Interaction {
     }
 
     setup() {
-        this.options = this.env.portalComposerOptions || prepareOptions({});
+        this.options = this.env.portalComposerOptions || PortalComposer.prepareOptions({});
         this.attachments = [];
         this.attachmentButtonEl = this.el.querySelector(".o_portal_chatter_attachment_btn");
         this.fileInputEl = this.el.querySelector(".o_portal_chatter_file_input");
