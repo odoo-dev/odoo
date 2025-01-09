@@ -28,6 +28,8 @@ export class BaseHeaderSpecial extends BaseHeader {
 
         this.searchbarEl = this.hideEl?.querySelector(":not(.modal-content) > .o_searchbar_form");
         this.dropdownClickedEl = null;
+
+        this.navPaddingTop = parseInt(window.getComputedStyle(this.el.querySelector(":scope > nav")).getPropertyValue("padding-top"));
     }
 
     onDropdownShow(ev) {
@@ -73,7 +75,7 @@ export class BaseHeaderSpecial extends BaseHeader {
             this.toggleCSSAffixed(false);
         }
 
-        this.el.style.setProperty("transition", (this.hideEl && scroll < this.hideElHeight) && this.transitionActive ? "none" : "");
+        this.el.style.setProperty("transition", (this.hideEl && scroll < this.hideElHeight + this.navPaddingTop) && this.transitionActive ? "none" : "");
 
         if (this.isVisible && this.hideEl) {
             this.forcedScroll = Math.min(scroll, this.hideElHeight);
