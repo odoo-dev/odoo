@@ -26,7 +26,7 @@ export class SaleUpdateLineButton extends Interaction {
     }
 
     callAddOptionRoute(orderId, optionId, params) {
-        return rpc("/my/orders/" + orderId + "/add_option" + optionId, params);
+        return rpc("/my/orders/" + orderId + "/add_option/" + optionId, params);
     }
 
     refreshOrderUI(data) {
