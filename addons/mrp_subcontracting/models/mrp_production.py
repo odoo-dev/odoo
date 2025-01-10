@@ -180,7 +180,8 @@ class MrpProduction(models.Model):
         for production in self:
             if production.product_tracking != 'none' and not self.lot_producing_id:
                 raise UserError(_('You must enter a serial number for %s', production.product_id.name))
-            for sml in production.move_raw_ids.move_line_ids:
-                if sml.tracking != 'none' and not sml.lot_id:
-                    raise UserError(_('You must enter a serial number for each line of %s', sml.product_id.display_name))
+            if production.picking_type_id.use_existing_lots or production.picking_type_id.use_create_lots:
+                for sml in production.move_raw_ids.move_line_ids:
+                    if sml.tracking != 'none' and not sml.lot_id:
+                        raise UserError(_('You must enter a serial number for each line of %s', sml.product_id.display_name))
         return True

@@ -15,23 +15,6 @@ class StockPicking(models.Model):
     move_line_ids_without_package = fields.One2many(
         domain=['&', '|', ('location_dest_id.usage', '!=', 'production'), ('move_id.picking_code', '!=', 'outgoing'),
                      '|', ('package_level_id', '=', False), ('picking_type_entire_packs', '=', False)])
-    display_action_record_components = fields.Selection(
-        [('hide', 'Hide'), ('facultative', 'Facultative'), ('mandatory', 'Mandatory')],
-        compute='_compute_display_action_record_components')
-
-    @api.depends('state', 'move_ids')
-    def _compute_display_action_record_components(self):
-        self.display_action_record_components = 'hide'
-        for picking in self:
-            # Hide if not encoding state or it is not a subcontracting picking
-            if picking.state in ('draft', 'cancel', 'done') or not picking._is_subcontract():
-                continue
-            subcontracted_moves = picking.move_ids.filtered(lambda m: m.is_subcontract)
-            if subcontracted_moves._subcontrating_should_be_record():
-                picking.display_action_record_components = 'mandatory'
-                continue
-            if subcontracted_moves._subcontrating_can_be_record():
-                picking.display_action_record_components = 'facultative'
 
     @api.depends('picking_type_id', 'partner_id')
     def _compute_location_id(self):

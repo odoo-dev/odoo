@@ -145,6 +145,8 @@ class StockMove(models.Model):
                     'date_start': move.date,
                     'date_finished': move.date,
                 })
+        if self.env.context.get('record_subcontract_components') and self._get_subcontract_production():
+            return self._get_subcontract_production().subcontracting_record_component()
         return res
 
     @api.model_create_multi
@@ -157,9 +159,6 @@ class StockMove(models.Model):
         """ Open the produce wizard in order to register tracked components for
         subcontracted product. Otherwise use standard behavior.
         """
-        self.ensure_one()
-        if self.state != 'done' and (self._subcontrating_should_be_record() or self._subcontrating_can_be_record()):
-            return self._action_record_components()
         action = super(StockMove, self).action_show_details()
         if self.is_subcontract and all(p._has_been_recorded() for p in self._get_subcontract_production()):
             action['views'] = [(self.env.ref('stock.view_stock_move_operations').id, 'form')]
@@ -169,6 +168,8 @@ class StockMove(models.Model):
             })
         elif self.env.user._is_portal():
             action['views'] = [(self.env.ref('mrp_subcontracting.mrp_subcontracting_view_stock_move_operations').id, 'form')]
+        elif self.is_subcontract:
+            action['context']['record_subcontract_components'] = True
         return action
 
     def action_show_subcontract_details(self):
