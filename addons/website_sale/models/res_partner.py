@@ -72,7 +72,6 @@ class ResPartner(models.Model):
         """
         return (
             super()._is_anonymous_customer()
-            or not self and self.env.user._is_public()
             or self == request.website.user_id.sudo().partner_id
         )
 

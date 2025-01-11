@@ -385,11 +385,12 @@ class CustomerPortal(Controller):
         can_edit_vat = (
             is_billing and (not partner_sudo or partner_sudo.can_edit_vat())
         )
-        is_anonymous_customer = partner_sudo._is_anonymous_customer()
-        country_sudo = partner_sudo.country_id
+        current_parnter = partner_sudo._get_current_partner(**kwargs)
+        is_anonymous_customer = current_parnter._is_anonymous_customer()
+        country_sudo = current_parnter.country_id
         if not country_sudo:
             country_sudo = self._get_default_country(is_anonymous_customer)
-        state_id = partner_sudo.state_id.id
+        state_id = current_parnter.state_id.id
         address_fields = country_sudo and country_sudo.get_address_fields() or ['city', 'zip']
 
         return {
@@ -490,7 +491,8 @@ class CustomerPortal(Controller):
         # Parse form data into address values, and extract incompatible data as extra form data.
         address_values, extra_form_data = self._parse_form_data(form_data)
 
-        is_anonymous_customer = partner_sudo._is_anonymous_customer()
+        current_parnter = partner_sudo._get_current_partner(**form_data)
+        is_anonymous_customer = current_parnter._is_anonymous_customer()
         is_main_address = is_anonymous_customer or request.env.user.partner_id.id == partner_sudo.id
         # Validate the address values and highlights the problems in the form, if any.
         invalid_fields, missing_fields, error_messages = self._validate_address_values(
