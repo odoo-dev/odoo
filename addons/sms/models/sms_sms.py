@@ -14,6 +14,7 @@ _logger = logging.getLogger(__name__)
 class SmsSms(models.Model):
     _name = 'sms.sms'
     _description = 'Outgoing SMS'
+    _inherit = ['ir.async.job']
     _rec_name = 'number'
     _order = 'id DESC'
 
@@ -35,8 +36,10 @@ class SmsSms(models.Model):
     BOUNCE_DELIVERY_ERRORS = {'sms_invalid_destination', 'sms_not_allowed', 'sms_rejected'}
     DELIVERY_ERRORS = {'sms_expired', 'sms_not_delivered', *BOUNCE_DELIVERY_ERRORS}
 
-    uuid = fields.Char('UUID', copy=False, readonly=True, default=lambda self: uuid4().hex,
-                       help='Alternate way to identify a SMS record, used for delivery reports')
+    uuid = fields.Char(
+        default=lambda self: uuid4().hex,
+        required=True,
+        help='Alternate way to identify a SMS record, used for delivery reports')
     number = fields.Char('Number')
     body = fields.Text()
     partner_id = fields.Many2one('res.partner', 'Customer')
@@ -69,10 +72,17 @@ class SmsSms(models.Model):
         help='Will automatically be deleted, while notifications will not be deleted in any case.'
     )
 
-    _uuid_unique = models.Constraint(
-        'unique(uuid)',
-        'UUID must be unique',
-    )
+    job_state = fields.Selection(compute='_compute_job_state', inverse='inverse_job_state', search='_search_job_state')
+    _async_job_batch_size = 500  # XXX from config
+
+    @api.depends('state')
+    def _compute_job_state(self):
+        self.filtered(lambda job: job.state == 'canceled' or job.to_delete).job_state = 'cancel'
+        self.filtered(lambda job: job.state == 'outgoing' and not job.to_delete).job_state = 'queued'
+        self.filtered(lambda job: job.state in ('processing', 'pending', 'sent')).job_state = 'done'
+        self.filtered(lambda job: job.state == 'error').job_state = 'error'
+
+    # XXX other job computes, search, inverse
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -137,6 +147,9 @@ class SmsSms(models.Model):
                 'type': notification_type,
             }
         }
+
+    def _process_async_job(self):
+        self._send()
 
     @api.model
     def _process_queue(self, ids=None):

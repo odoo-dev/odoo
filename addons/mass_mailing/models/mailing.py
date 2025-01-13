@@ -44,7 +44,8 @@ class MailingMailing(models.Model):
     _inherit = ['mail.thread',
                 'mail.activity.mixin',
                 'mail.render.mixin',
-                'utm.source.mixin'
+                'utm.source.mixin',
+                'ir.async.job',
     ]
     _order = 'calendar_date DESC'
     _rec_name = "subject"
@@ -238,6 +239,9 @@ class MailingMailing(models.Model):
         'CHECK(ab_testing_pc >= 0 AND ab_testing_pc <= 100)',
         'The A/B Testing Percentage needs to be between 0 and 100%',
     )
+
+    job_state = fields.Selection(compute='_compute_job_state', inverse='inverse_job_state', search='_search_job_state')
+    job_error = fields.Selection(compute='_compute_job_error', inverse='inverse_job_error')
 
     @api.constrains('mailing_model_id', 'mailing_filter_id')
     def _check_mailing_filter_model(self):

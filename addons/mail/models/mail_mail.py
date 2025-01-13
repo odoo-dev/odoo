@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import ast
+import contextlib
 import datetime
 import json
 import logging
@@ -15,6 +15,7 @@ from dateutil.parser import parse
 
 from odoo import _, api, fields, models, modules, SUPERUSER_ID, tools
 from odoo.addons.base.models.ir_mail_server import MailDeliveryException
+from odoo.fields import Domain
 from odoo.modules.registry import Registry
 
 _logger = logging.getLogger(__name__)
@@ -26,6 +27,7 @@ class MailMail(models.Model):
         facilities to queue and send new email messages.  """
     _name = 'mail.mail'
     _description = 'Outgoing Mails'
+    _inherit = ['ir.async.job']
     _inherits = {'mail.message': 'mail_message_id'}
     _order = 'id desc'
     _rec_name = 'subject'
@@ -94,6 +96,44 @@ class MailMail(models.Model):
     scheduled_date = fields.Datetime('Scheduled Send Date',
         help="If set, the queue manager will send the email after the date. If not set, the email will be send as soon as possible. Unless a timezone is specified, it is considered as being in UTC timezone.")
     fetchmail_server_id = fields.Many2one('fetchmail.server', "Inbound Mail Server", readonly=True)
+
+    job_state = fields.Selection(compute='_compute_job_state', inverse='_inverse_job_state', search='_search_job_state')
+    job_error = fields.Text(related='failure_reason')
+    _async_job_ref = ''  # XXX cron name
+
+    @api.depends('state')
+    def _compute_job_state(self):
+        queued = self.filtered(lambda m: m.state == 'outgoing')
+        queued.job_state = 'queued'
+        failed = self.filtered(lambda m: m.state == 'exception')
+        failed.job_state = 'fail'
+        cancelled = self.filtered(lambda m: m.state in ('cancel', 'received'))
+        cancelled.job_state = 'cancel'
+        (self - queued - failed - cancelled).job_state = 'done'
+
+    def _inverse_job_state(self):
+        for mail in self:
+            if mail.job_state == 'done':
+                mail.state = 'sent'
+            elif mail.job_state == 'cancel':
+                mail.state = 'cancel'
+            elif mail.job_state == 'fail':
+                mail.state = 'exception'
+
+    def _search_job_state(self, operator, value):
+        if operator != 'in':
+            raise NotImplementedError
+        states = []
+        values = set(value)
+        if 'done' in values:
+            states.append('sent')
+        if 'cancel' in values:
+            states.append('cancel')
+        if 'fail' in values:
+            states.append('exception')
+        if 'queued' in values:
+            states.append('outgoing')
+        return [('state', 'in', states)]
 
     def _compute_body_content(self):
         for mail in self:
@@ -184,6 +224,33 @@ class MailMail(models.Model):
     def cancel(self):
         return self.write({'state': 'cancel'})
 
+    def _job_precondition(self):
+        return Domain('state', '=', 'outgoing') & (
+            Domain('scheduled_date', '=', False)
+            | Domain('scheduled_date', '<=', fields.Datetime.now())
+        )
+
+    def _process_async_job(self, resources):
+        self.ensure_one()
+        for mail_server_id, alias_domain_id, smtp_from, batch_ids in self._split_by_mail_configuration():
+            smtp_session = resources[mail_server_id, smtp_from]  # XXX connection can be aborted
+            mail_server = self.env['ir.mail_server'].browse(mail_server_id)
+            self.browse(batch_ids)._send(
+                auto_commit=False,
+                raise_exception=False,
+                smtp_session=smtp_session,
+                alias_domain_id=alias_domain_id,
+                mail_server=mail_server,
+            )
+            if not modules.module.current_test:
+                _logger.info(
+                    'Sent batch %s emails via mail server ID #%s',
+                    len(batch_ids), mail_server_id)
+
+    @contextlib.contextmanager
+    def _job_resources(self):
+        return SMTPConnections(self)
+
     @api.model
     def process_email_queue(self, ids=None, batch_size=1000):
         """Send immediately queued messages, committing after each
@@ -202,15 +269,9 @@ class MailMail(models.Model):
                              messages to send (by default all 'outgoing'
                              'scheduled' messages are sent).
         """
-        domain = [
-            '&',
-                ('state', '=', 'outgoing'),
-                '|',
-                   ('scheduled_date', '=', False),
-                   ('scheduled_date', '<=', datetime.datetime.utcnow()),
-        ]
+        domain = self._job_precondition()
         if 'filters' in self._context:
-            domain.extend(self._context['filters'])
+            domain &= Domain(self._context['filters'])
         batch_size = int(self.env['ir.config_parameter'].sudo().get_param('mail.mail.queue.batch.size', batch_size)) or batch_size
         send_ids = self.search(domain, limit=batch_size if not ids else batch_size * 10).ids
         if not ids:
@@ -562,17 +623,7 @@ class MailMail(models.Model):
         if modules.module.current_test:
             self.send()
             return
-
-        email_ids = self.ids
-        dbname = self.env.cr.dbname
-        _context = self.env.context
-
-        @self.env.cr.postcommit.add
-        def send_emails_with_new_cursor():
-            db_registry = Registry(dbname)
-            with db_registry.cursor() as cr:
-                env = api.Environment(cr, SUPERUSER_ID, _context)
-                env['mail.mail'].browse(email_ids).send()
+        self.future().post_commit(self.env)
 
     def send(self, auto_commit=False, raise_exception=False, post_send_callback=None):
         """ Sends the selected emails immediately, ignoring their current
@@ -826,3 +877,27 @@ class MailMail(models.Model):
         if post_send_callback:
             post_send_callback(self.ids)
         return True
+
+
+class SMTPConnections:
+
+    def __init__(self, mails):
+        self.mails = mails
+        self.connections = {}
+
+    def __enter__(self):
+        for mail_server_id, alias_domain_id, smtp_from, batch_ids in self.mails._split_by_mail_configuration():
+            try:
+                smtp_session = self.env['ir.mail_server'].connect(mail_server_id=mail_server_id, smtp_from=smtp_from)
+            except Exception as exc:
+                batch = self.browse(batch_ids)
+                batch.write({'state': 'exception', 'failure_reason': tools.exception_to_unicode(exc)})
+                batch._postprocess_sent_message(success_pids=[], failure_type="mail_smtp")
+            else:
+                self.connections[mail_server_id, smtp_from] = smtp_session
+        return self
+
+    def __exit__(self, a, b, c):  # XXX
+        for smtp_session in self.connections.values():
+            smtp_session.quit()
+        self.connections.clear()
