@@ -96,7 +96,7 @@ class TestMailingABTesting(TestMailingABTestingCommon):
 
     @users('user_marketing')
     def test_mailing_ab_testing_campaign(self):
-        schedule_datetime = datetime.now() + timedelta(days=30)
+        schedule_datetime = datetime.now().replace(microsecond=0) + timedelta(days=30)
         ab_mailing = self.env['mailing.mailing'].create({
             'subject': 'A/B Testing V1',
             'contact_list_ids': self.mailing_list.ids,
