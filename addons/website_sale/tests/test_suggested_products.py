@@ -168,7 +168,7 @@ class TestSuggestedProducts(WebsiteSaleCommon, CronMixinCase):
 
     def test_cron_only_updates_outdated_products(self):
         """Test that cron only updates products not updated within the last 12 hours."""
-        now = self.env.cr.now()
+        now = self.env.cr.now().replace(microsecond=0)
         recent_date = now - relativedelta(hours=6)
         old_date = now - relativedelta(hours=13)
         self.template_desk.suggested_products_last_update = recent_date

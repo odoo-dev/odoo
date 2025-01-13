@@ -1054,7 +1054,7 @@ class TestVariantsImages(ProductVariantsCommon):
         """
         # Pretend setup happened in an older transaction by updating on the SQL layer and making sure it gets reloaded
         # Using _write() instead of write() because write() only allows updating log access fields at boot time
-        before = self.cr.now() - timedelta(milliseconds=1)
+        before = self.cr.now() - timedelta(minutes=1)
         self.template._write({
             'create_date': before,
             'write_date': before,

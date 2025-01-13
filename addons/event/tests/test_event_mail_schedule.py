@@ -111,7 +111,7 @@ class TestMailSchedule(EventMailCommon):
         test_event = self.test_event
 
         # event data
-        self.assertEqual(test_event.create_date, self.reference_now)
+        self.assertEqual(test_event.create_date, self.reference_now.replace(microsecond=0))
         self.assertEqual(test_event.date_begin, self.event_date_begin, 'Expressed in current user TZ')
         self.assertEqual(test_event.date_end, self.event_date_end, 'Expressed in current user TZ')
         self.assertEqual(test_event.date_tz, 'Europe/Brussels')
@@ -153,7 +153,7 @@ class TestMailSchedule(EventMailCommon):
     def test_event_mail_schedule(self):
         """ Test mail scheduling for events """
         test_event = self.test_event.with_env(self.env)
-        now = self.reference_now
+        now = self.reference_now.replace(microsecond=0)
         schedulers = self.env['event.mail'].search([('event_id', '=', test_event.id)])
         after_sub_scheduler = schedulers.filtered(lambda s: s.interval_type == 'after_sub' and s.interval_unit == 'now')
         after_sub_scheduler_2 = schedulers.filtered(lambda s: s.interval_type == 'after_sub' and s.interval_unit == 'hours')
@@ -833,7 +833,7 @@ class TestMailScheduleInternals(EventMailCommon):
                 "date_end": end,
                 "name": "Test Scheduled Date",
             })
-        self.assertEqual(event.create_date, self.reference_now)
+        self.assertEqual(event.create_date, self.reference_now.replace(microsecond=0))
         self.assertFalse(event.event_mail_ids)
 
         for i_type, i_unit, i_nbr, exp in [
@@ -889,7 +889,7 @@ class TestMailScheduleInternals(EventMailCommon):
                 "date_end": end,
                 "name": "Test Scheduled Date",
             })
-        self.assertEqual(event.create_date, self.reference_now)
+        self.assertEqual(event.create_date, self.reference_now.replace(microsecond=0))
 
         EventMail = type(self.env['event.mail'])
         exec_origin = EventMail._execute_event_based

@@ -6334,7 +6334,7 @@ class AccountMove(models.Model):
             ('partner_id', '=', self.partner_id.id),
             ('state', '=', 'posted'),
             ('move_type', 'in', self.get_purchase_types(include_receipts=True)),
-        ], order="create_date DESC", limit=10)
+        ], order="create_date DESC, id DESC", limit=10)
         nb_unmodified_bills = 1  # +1 for current bill that hasn't been modified either
         for move in prev_bills_same_partner:
             if move.is_manually_modified:

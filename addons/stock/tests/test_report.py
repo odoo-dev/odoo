@@ -1188,8 +1188,10 @@ class TestReports(TestReportsCommon):
         delivery1 = delivery_form.save()
         delivery1.action_confirm()
 
+        now = self.env.cr.now().replace(microsecond=0)
+
         # Creation of one receipt with date 'today + 1' and smaller qty than the delivery
-        scheduled_date1 = datetime.now() + timedelta(days=1)
+        scheduled_date1 = now + timedelta(days=1)
         receipt_form = Form(self.env['stock.picking'])
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
@@ -1202,7 +1204,7 @@ class TestReports(TestReportsCommon):
         self.assertEqual(delivery1.move_ids.forecast_availability, -50.0)
 
         # Creation of an identical receipt which should lead to a positive forecast availability
-        scheduled_date2 = datetime.now() + timedelta(days=3)
+        scheduled_date2 = now + timedelta(days=3)
         receipt_form = Form(self.env['stock.picking'])
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
@@ -1228,7 +1230,7 @@ class TestReports(TestReportsCommon):
 
         delivery2 = delivery1.copy()
         delivery2_form = Form(delivery2)
-        delivery2_form.scheduled_date = datetime.now() + timedelta(days=1)
+        delivery2_form.scheduled_date = now + timedelta(days=1)
         delivery2 = delivery2_form.save()
         delivery2.action_confirm()
         delivery2.move_ids.quantity = delivery1.move_ids.quantity

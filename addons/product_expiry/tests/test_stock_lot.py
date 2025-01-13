@@ -45,7 +45,7 @@ class TestStockLot(TestStockCommon):
         self.lot1_productAAA = self.LotObj.create({
             'name': 'Lot 1 ProductAAA',
             'product_id': self.productAAA.id,
-            'alert_date': fields.Date.to_string(datetime.today() - relativedelta(days=15)),
+            'alert_date': fields.Date.today() - relativedelta(days=15),
         })
 
         picking_in = self.PickingObj.create({
@@ -251,7 +251,7 @@ class TestStockLot(TestStockCommon):
                 lot.alert_date, delta=delta)
 
         # Keeps track of the current datetime and set a delta for the compares.
-        today_date = datetime.today()
+        today_date = fields.Datetime.now()
         time_gap = timedelta(seconds=10)
         # Creates a new lot number and saves it...
         lot_form = Form(self.LotObj)
@@ -297,7 +297,7 @@ class TestStockLot(TestStockCommon):
             'name': 'Apple\'s Joe',
             'company_id': self.company.id,
         })
-        expiration_date = datetime.today() + timedelta(days=30)
+        expiration_date = fields.Datetime.now() + timedelta(days=30)
         time_gap = timedelta(seconds=10)
 
         # Receives a tracked production using expiration date.
@@ -345,7 +345,7 @@ class TestStockLot(TestStockCommon):
         self.apple_product.expiration_time = False
         self.apple_product.removal_time = False
 
-        expiration_date = datetime.today() + timedelta(days=30)
+        expiration_date = fields.Datetime.now() + timedelta(days=30)
         time_gap = timedelta(seconds=10)
 
         # Receives a tracked production using expiration date.
@@ -401,7 +401,7 @@ class TestStockLot(TestStockCommon):
         lot_form.product_id = self.apple_product
         expired_lot_1 = lot_form.save()
         lot_form = Form(expired_lot_1)  # Edits the lot to make it expired.
-        lot_form.expiration_date = datetime.today() - timedelta(days=10)
+        lot_form.expiration_date = fields.Datetime.now() - timedelta(days=10)
         expired_lot_1 = lot_form.save()
 
         # Case #1: make a delivery with no expired lot.
@@ -513,7 +513,7 @@ class TestStockLot(TestStockCommon):
             'lot_id': apple_lot.id,
         })
         # Try to write on quant with inventory mode
-        new_date = datetime.today() + timedelta(days=15)
+        new_date = fields.Datetime.now() + timedelta(days=15)
         quant.with_user(self.demo_user).with_context(inventory_mode=True).write({'removal_date': new_date})
         self.assertEqual(quant.removal_date, new_date)
 
@@ -576,7 +576,7 @@ class TestStockLot(TestStockCommon):
         })
 
         delta = timedelta(seconds=10)
-        expiration_date = datetime.today() + timedelta(days=expiration_time)
+        expiration_date = fields.Datetime.now() + timedelta(days=expiration_time)
         err_msg = "The time on the product is set to 0, it means that the corresponding date should be the same as the expiration one"
         self.assertAlmostEqual(lot.expiration_date, expiration_date, delta=delta)
         self.assertAlmostEqual(lot.use_date, expiration_date, delta=delta, msg=err_msg)
@@ -672,7 +672,7 @@ class TestStockLot(TestStockCommon):
         })
 
         delta = timedelta(seconds=10)
-        new_date = datetime.today() + timedelta(days=42)
+        new_date = fields.Datetime.now() + timedelta(days=42)
         expiration_date = new_date + timedelta(days=self.apple_product.expiration_time)
 
         picking_form = Form(self.env['stock.picking'])
@@ -698,12 +698,12 @@ class TestStockLot(TestStockCommon):
         apple_lot2 = self.LotObj.create({
             'name': 'LOT-00002',
             'product_id': self.apple_product.id,
-            'expiration_date': datetime.today() - timedelta(days=10),
+            'expiration_date': fields.Datetime.now() - timedelta(days=10),
         })
         apple_lot3 = self.LotObj.create({
             'name': 'LOT-00003',
             'product_id': self.apple_product.id,
-            'alert_date': datetime.today() - timedelta(days=10),
+            'alert_date': fields.Datetime.now() - timedelta(days=10),
         })
         self.assertEqual(apple_lot1.with_context(formatted_display_name=True).display_name, "LOT-00001")
         self.assertEqual(apple_lot2.with_context(formatted_display_name=True).display_name, "LOT-00002\t--Expired--")
@@ -749,7 +749,7 @@ class TestStockLot(TestStockCommon):
         Without triggering the compute method for the expiration when saving modifications.
         """
         delta = timedelta(seconds=10)
-        today = datetime.today()
+        today = fields.Datetime.now()
         receipt = self.env['stock.picking'].create({
             'location_id': self.supplier_location.id,
             'location_dest_id': self.stock_location.id,
@@ -848,7 +848,7 @@ class TestStockLot(TestStockCommon):
 
         receipt.move_line_ids.write({
             'lot_name': 'new-expired-lot',
-            'removal_date': datetime.today() - timedelta(days=1),
+            'removal_date': fields.Datetime.now() - timedelta(days=1),
             'quantity': 1,
         })
         receipt.move_ids.picked = True

@@ -263,7 +263,7 @@ class Datetime(BaseDate[datetime]):
             if isinstance(value, datetime):
                 if value.tzinfo:
                     raise ValueError("Datetime field expects a naive datetime: %s" % value)
-                return value
+                return value.replace(microsecond=0)
             return datetime.combine(value, time.min)
 
         # TODO: fix data files

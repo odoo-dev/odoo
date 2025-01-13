@@ -518,7 +518,7 @@ class TestLeadConvertBatch(crm_common.TestLeadConvertMassCommon):
     @users('user_sales_manager')
     def test_lead_convert_batch_internals(self):
         """ Test internals of convert wizard, working in batch mode """
-        date = self.env.cr.now()
+        date = self.env.cr.now().replace(microsecond=0)
 
         lead_w_partner = self.lead_w_partner
         lead_w_contact = self.lead_w_contact
