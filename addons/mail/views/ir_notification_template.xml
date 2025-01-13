@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="ir_notification">
+            <ul>
+                <t t-foreach="records" t-as="record">
+                    <li t-out="record.display_name"/>
+                </t>
+            </ul>
+        </template>
+    </data>
+</odoo>

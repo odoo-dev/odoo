@@ -4387,7 +4387,6 @@ class MailThread(models.AbstractModel):
         :param updated_values: see ``_message_auto_subscribe``
         :param default_subtype_ids: coming from ``_get_auto_subscription_subtypes``
         """
-        fnames = []
         field = self._fields.get('user_id')
         user_id = updated_values.get('user_id')
         if field and user_id and field.comodel_name == 'res.users' and getattr(field, 'tracking', False):
@@ -4450,7 +4449,7 @@ class MailThread(models.AbstractModel):
         for new partner to subscribe, with subtypes and eventual notification
         to perform. See that method for more details.
 
-        :param updated_values: values modifying the record trigerring auto subscription
+        :param updated_values: values modifying the record triggering auto subscription
         """
         if not self:
             return True
@@ -4466,9 +4465,9 @@ class MailThread(models.AbstractModel):
         for res_model, fnames in relation.items():
             for field in (fname for fname in fnames if updated_values.get(fname)):
                 updated_relation.setdefault(res_model, set()).add(field)
-        udpated_fields = [fname for fnames in updated_relation.values() for fname in fnames if updated_values.get(fname)]
+        updated_fields = [fname for fnames in updated_relation.values() for fname in fnames if updated_values.get(fname)]
 
-        if udpated_fields:
+        if updated_fields:
             # fetch "parent" subscription data (aka: subtypes on project to propagate on task)
             doc_data = [(model, [updated_values[fname] for fname in fnames]) for model, fnames in updated_relation.items()]
             res = self.env['mail.followers']._get_subscription_data(doc_data, None, include_pshare=True, include_active=True)
@@ -4483,23 +4482,25 @@ class MailThread(models.AbstractModel):
                     else:
                         new_partner_subtypes[partner_id] = set(sids)
 
-        notify_data = dict()
+        ir_notification_values = []
         res = self._message_auto_subscribe_followers(updated_values, def_ids)
         for partner_id, sids, template in res:
             new_partner_subtypes.setdefault(partner_id, sids)
             if template:
-                partner = self.env['res.partner'].browse(partner_id)
-                lang = partner.lang if partner else None
-                notify_data.setdefault((template, lang), list()).append(partner_id)
+                ir_notification_values.append({
+                    'res_model': self._name,
+                    'res_id': self.id,
+                    'email_layout_xmlid': template,
+                    'partner_id': partner_id
+                })
 
         self.env['mail.followers']._insert_followers(
             self._name, self.ids,
             list(new_partner_subtypes), subtypes=new_partner_subtypes,
             check_existing=True, existing_policy=followers_existing_policy)
 
-        # notify people from auto subscription, for example like assignation
-        for (template, lang), pids in notify_data.items():
-            self.with_context(lang=lang)._message_auto_subscribe_notify(pids, template)
+        if ir_notification_values:
+            self.env['ir.notification'].create(ir_notification_values)
 
         return True
 

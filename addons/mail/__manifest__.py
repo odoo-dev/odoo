@@ -61,6 +61,7 @@ For more specific needs, you may also assign custom-defined actions
     'website': 'https://www.odoo.com/app/discuss',
     'depends': ['base', 'base_setup', 'bus', 'web_tour', 'html_editor'],
     'data': [
+        'views/ir_notification_template.xml',
         'data/mail_groups.xml',
         'wizard/mail_activity_schedule_views.xml',
         'wizard/mail_blacklist_remove_views.xml',
