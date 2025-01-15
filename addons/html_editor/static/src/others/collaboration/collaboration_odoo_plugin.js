@@ -217,6 +217,7 @@ export class CollaborationOdooPlugin extends Plugin {
                 payload.res_id === resId
             ) {
                 if (payload.notificationName === "html_field_write") {
+                    // todo: what if there is many write that happens when someone had his connection offline
                     this.onServerLastIdUpdate(payload.notificationPayload.last_step_id);
                 } else if (this.remoteType === "peerToPeer" && this.ptpJoined) {
                     await this.remoteLoading;
