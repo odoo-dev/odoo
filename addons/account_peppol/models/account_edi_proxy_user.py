@@ -3,8 +3,9 @@
 
 import logging
 
-from odoo import _, fields, models, modules, tools
+from odoo import _, api, fields, models, modules, tools
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
+from odoo.addons.account_peppol.exceptions import get_ebms_message, get_exception_message
 from odoo.addons.account_peppol.tools.demo_utils import handle_demo
 from odoo.exceptions import UserError
 from odoo.tools import split_every
@@ -23,6 +24,33 @@ class AccountEdiProxyClientUser(models.Model):
     # HELPER METHODS
     # -------------------------------------------------------------------------
 
+    @api.model
+    def _get_peppol_error_message(self, error_vals):
+        """
+        Helper to process the error dictionary returned from the IAP response.
+        It will only get the code (or EBMS code) and map it to the correct translated message.
+        :param dict error_vals: the dictionary of encoded error json generated from the `_json` method in `peppol_proxy`
+        :return: the translated error message
+        :rtype: str
+        """
+        default_error_message = _('Unknown Peppol Error: %s', error_vals)
+
+        if (ebms_code := error_vals.get('ebms_code')) and ebms_code != 4:
+            # Error with ebMS code is originally from PeppolInboundError
+            # In most case, ebMS message will be better and more specific, except for when the code is 4 (general "Other" message)
+            error_message = get_ebms_message(ebms_code, default_error_message)
+        else:
+            error_message = get_exception_message(error_vals['code'], default_error_message)
+
+        if (msg_args_count := error_message.count("%s")) and msg_args_count == len(error_vals['args']):
+            error_message = error_message % tuple(error_vals['args'])
+
+        return _(
+            source="Peppol Error [code=%(error_code)s]: %(error_subject)s\n%(error_message)s",
+            error_code=error_vals['code'],
+            error_subject=error_vals['subject'],
+            error_message=error_message,
+        )
 
     def _make_request(self, url, params=False):
         if self.proxy_type == 'peppol':
@@ -49,6 +77,11 @@ class AccountEdiProxyClientUser(models.Model):
                 if not tools.config['test_enable'] and not modules.module.current_test:
                     self.env.cr.commit()
             raise AccountEdiProxyError(e.code, e.message)
+
+        if error_vals := result.get('error'):
+            error_message = self._get_peppol_error_message(error_vals)
+            raise UserError(error_message)
+
         return result
 
     def _get_proxy_urls(self):
@@ -205,18 +238,17 @@ class AccountEdiProxyClientUser(models.Model):
                         break
 
                     move = message_uuids[uuid]
-                    if content.get('error'):
-                        # "Peppol request not ready" error:
-                        # thrown when the IAP is still processing the message
-                        if content['error'].get('code') == 702:
+                    if error_vals := content.get('error'):
+                        if error_vals['code'] == 702:
+                            # "Peppol request not ready" error:
+                            # thrown when the IAP is still processing the message
                             continue
-
                         move.peppol_move_state = 'error'
-                        move._message_log(body=_("Peppol error: %s", content['error'].get('data', {}).get('message') or content['error']['message']))
-                        continue
-
-                    move.peppol_move_state = content['state']
-                    move._message_log(body=_('Peppol status update: %s', content['state']))
+                        error_message = self._get_peppol_error_message(error_vals)
+                        move._message_log(body=error_message)
+                    else:
+                        move.peppol_move_state = content['state']
+                        move._message_log(body=_('Peppol status update: %s', content['state']))
 
                 edi_user._make_request(
                     f"{edi_user._get_server_url()}/api/peppol/1/ack",
