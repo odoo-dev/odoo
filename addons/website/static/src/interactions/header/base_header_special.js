@@ -26,8 +26,23 @@ export class BaseHeaderSpecial extends BaseHeader {
         this.scrollOffset = 200;
         this.scrollingDownward = true;
 
-        this.searchbarEl = this.hideEl?.querySelector(":not(.modal-content) > .o_searchbar_form");
         this.dropdownClickedEl = null;
+
+        if (this.hideEl) {
+            this.searchbarEl = this.hideEl.querySelector(":not(.modal-content) > .o_searchbar_form");
+            this.isHideElTop = this.hideEl.matches(":first-child");
+            if (!this.isHideElTop) {
+                // If the hideEl is not the top element, we need to set the 
+                // z-index in order to hide it behind the top element (showEl).
+                // The z-index property is not active with position: static, 
+                // which is the default value.
+                const showEl = this.hideEl.previousElementSibling;
+                showEl.style.position = "relative";
+                showEl.style.setProperty("z-index", 1);
+                this.hideEl.style.position = "relative";
+                this.hideEl.style.setProperty("z-index", 0);
+            }
+        }
     }
 
     onDropdownShow(ev) {
@@ -73,11 +88,22 @@ export class BaseHeaderSpecial extends BaseHeader {
             this.toggleCSSAffixed(false);
         }
 
-        this.el.style.setProperty("transition", (this.hideEl && scroll < this.hideElHeight) && this.transitionActive ? "none" : "");
-
-        if (this.isVisible && this.hideEl) {
-            this.forcedScroll = Math.min(scroll, this.hideElHeight);
-            this.el.style.transform = this.atTop ? "" : `translate(0, -${this.forcedScroll + this.topGap}px)`;
+        if (this.hideEl && this.isVisible) {
+            // We check if we are hiding the scrollingElement to deactivate the 
+            // transition and avoid the translate animation. Otherwise, we need 
+            // to reactivate it for transformShow / transformHide.
+            this.isHiding = scroll < this.hideEl.getBoundingClientRect().height;
+            this.hiddenQuantity = Math.min(scroll, this.hideEl.getBoundingClientRect().height);
+            if (this.isHideElTop) {
+                // If the hideEl is at the top, we move the whole header element.
+                this.forcedScroll = this.hiddenQuantity;
+                this.transformShow();
+            } else {
+                // If the hideEl is at the bottom, we only move the hideEl and
+                // it will be hidden behind the other part of the header.
+                this.hideEl.style.marginTop = `-${this.hiddenQuantity}px`;
+                this.adaptToHeaderChange();
+            }
         }
 
         if (!this.cssAffixed && this.dropdownClickedEl) {
@@ -95,11 +121,13 @@ export class BaseHeaderSpecial extends BaseHeader {
             this.scrollingDownward = scrollingDownward;
 
             if (scrollingDownward) {
-                if (this.isVisible && (this.position - this.checkpoint) > (this.scrollOffset + this.topGap)) {
+                const movement = (this.position - this.checkpoint);
+                if (this.isVisible && movement > (this.scrollOffset + this.topGap)) {
                     this.transformHide();
                 }
             } else {
-                if (!this.isVisible && (this.checkpoint - this.position) > ((this.scrollOffset + this.topGap) / 2)) {
+                const movement = (this.checkpoint - this.position);
+                if (!this.isVisible && movement > ((this.scrollOffset + this.topGap) / 2)) {
                     this.transformShow();
                 }
             }

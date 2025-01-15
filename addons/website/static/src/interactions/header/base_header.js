@@ -24,6 +24,9 @@ export class BaseHeader extends Interaction {
                 "o_header_is_scrolled": this.isScrolled,
                 "o_header_no_transition": !this.transitionActive,
             }),
+            "t-att-style": () => ({
+                "transition": this.isHiding ? "none" : "",
+            })
         },
         ".offcanvas": {
             "t-on-show.bs.offcanvas": this.disableScroll,
@@ -66,7 +69,8 @@ export class BaseHeader extends Interaction {
         const navBreakpoint = navbarEl ? Object.keys(SIZES).find((size) =>
             navbarEl.classList.contains(`navbar-expand-${size.toLowerCase()}`)
         ) : "LG";
-        this.breakpointSize = SIZES[navBreakpoint];    }
+        this.breakpointSize = SIZES[navBreakpoint];
+    }
 
     start() {
         this.services.website_menus.triggerCallbacks();
@@ -78,7 +82,7 @@ export class BaseHeader extends Interaction {
     isSmall() {
         return uiUtils.getSize() < this.breakpointSize;
     }
-    
+
     //--------------------------------------------------------------
     // Event Handlers
     //--------------------------------------------------------------
@@ -138,7 +142,8 @@ export class BaseHeader extends Interaction {
             // fired but we cannot rely on it, so we use a timeout as fallback.
             if (addCount !== 0) {
                 clearTimeout(this.changeLoopTimer);
-                this.changeLoopTimer = this.waitForTimeout(() => this.adaptToHeaderChangeLoop(- this.transitionCount), 500);
+                this.changeLoopTimer = this.waitForTimeout(
+                    () => this.adaptToHeaderChangeLoop(- this.transitionCount), 500);
             }
         } else {
             // When we detected all transitionend events, we need to stop the
@@ -190,15 +195,10 @@ export class BaseHeader extends Interaction {
     //--------------------------------------------------------------
 
     getHeaderHeight() {
-        if (this.isSmall()) {
-            // Ensure we don't consider the hiddenOnScroll element on mobile
-            return this.el.getBoundingClientRect().height;
-        }
-        if (this.hideEl?.classList.contains("hidden")) {
+        if (this.hideEl && !this.isHideElTop && !this.isSmall()) {
             // Ensure the header height stays the same on desktop
-            return this.hideElHeight + this.el.getBoundingClientRect().height;
+            return this.hiddenQuantity + this.el.getBoundingClientRect().height;
         }
-        this.hideElHeight = this.hideEl?.getBoundingClientRect().height || this.hideElHeight;
         return this.el.getBoundingClientRect().height;
     }
 
