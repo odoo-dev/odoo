@@ -727,12 +727,20 @@ class HrExpense(models.Model):
         is_all_approver = self.env.user.has_groups('hr_expense.group_hr_expense_user,hr_expense.group_hr_expense_manager') or self.env.su
 
         valid_company_ids = set(self.env.companies.ids)
+        child_employee_ids = set()
+        if is_team_approver:  # We don't need to search if the user has not the required rights
+            child_employee_ids = set(self.env['hr.employee'].sudo().search([
+                ('id', 'in', self.employee_id.ids),
+                ('id', 'child_of', self.env.user.employee_ids.ids),
+                ('id', 'not in', self.env.user.employee_ids.ids),
+            ]).ids)
+
         for expense in self:
             if expense.company_id.id not in valid_company_ids:
                 expense.can_reset = False
             elif is_all_approver:
                 expense.can_reset = True
-            elif is_team_approver or expense.employee_id.parent_id.user_id.id == self.env.user.id:
+            elif is_team_approver and expense.employee_id.id in child_employee_ids:
                 expense.can_reset = True
             elif self.state in {'draft', 'submitted'} and expense.employee_id.user_id == self.env.user:
                 expense.can_reset = True
@@ -749,14 +757,14 @@ class HrExpense(models.Model):
         valid_company_ids = set(self.env.companies.ids)
         for expense in self:
             reason = False
-            expense_employee = expense.employee_id
             if expense.company_id.id not in valid_company_ids:
                 reason = _("%(expense_name)s: Your are not a Manager or HR Officer of this expense's company", expense_name=expense.name)
 
-            elif not is_team_approver and expense_employee.parent_id.user_id.id != self.env.user.id:
+            elif not is_team_approver:
                 reason = _("%(expense_name)s: You are not a Manager or HR Officer", expense_name=expense.name)
 
             elif not is_hr_admin:
+                expense_employee = expense.employee_id
                 current_managers = (
                         expense_employee.expense_manager_id
                        | expense_employee.parent_id.user_id
