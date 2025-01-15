@@ -1,4 +1,4 @@
-from odoo import api, fields, models
+from odoo import api, fields, models, tools
 
 
 #----------------------------------------------------------
@@ -14,10 +14,36 @@ class ResGroups(models.Model):
     visible = fields.Boolean(related='category_id.visible', readonly=True)
     color = fields.Integer(string='Color Index')
 
+    @api.model
+    @tools.ormcache()
+    def _get_view_group_hierarchy(self):
+        return [
+            {
+                'id': section.id,
+                'name': section.name,
+                'categories': [
+                    {
+                        'id': category.id,
+                        'name': category.name,
+                        'description': category.description,
+                        'groups': [[group.id, group.name] for group in category.group_ids]
+                    } for category in section.child_ids.sorted(lambda c: c.sequence) if category.group_ids
+                ]
+            } for section in self.env['ir.module.category'].search([('parent_id', '=', False), ('child_ids.group_ids', '!=', False)], order="sequence")
+        ]
 
-# pylint: disable=E0102
+
 class ResUsers(models.Model):  # noqa: F811
     _inherit = 'res.users'
+
+    # For "classic" administrators
+
+    view_group_hierarchy = fields.Json(string='Technical field for user group setting', compute='_compute_view_group_hierarchy')
+
+    def _compute_view_group_hierarchy(self):
+        self.view_group_hierarchy = self.env['res.groups']._get_view_group_hierarchy()
+
+    # For "technical" administrators
 
     view_disjoint_group_ids = fields.Many2many('res.groups', compute='_compute_view_implied_group_ids', string="Disjoint groups")
     view_all_disjoint_group_ids = fields.Many2many('res.groups', compute='_compute_view_implied_group_ids', string="All disjoint groups")

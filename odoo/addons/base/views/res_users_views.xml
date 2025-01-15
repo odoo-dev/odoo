@@ -246,6 +246,15 @@
                                     <field string="Allowed Companies" name="company_ids" widget="many2many_tags" options="{'no_create': True, 'color_field': 'color'}"/>
                                     <field string="Default Company" name="company_id" context="{'user_preference': 0}"/>
                                 </group>
+                                <group>
+                                    <field name="group_ids" widget="res_user_group_ids" nolabel="1" colspan="2"/>
+                                </group>
+                            </page>
+                            <page name="technical_access_rights" string="Technical Access Rights" groups="base.group_no_one">
+                                <group string="Multi Companies" invisible="companies_count &lt;= 1">
+                                    <field string="Allowed Companies" name="company_ids" widget="many2many_tags" options="{'no_create': True, 'color_field': 'color'}"/>
+                                    <field string="Default Company" name="company_id" context="{'user_preference': 0}"/>
+                                </group>
                                 <group string="Groups">
                                     <group>
                                         <label for="group_ids" string="Selected groups"/>

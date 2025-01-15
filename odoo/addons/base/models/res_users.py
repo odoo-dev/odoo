@@ -135,8 +135,11 @@ class ResGroups(models.Model):
     _description = "Access Groups"
     _rec_name = 'full_name'
     _allow_sudo_commands = False
+    _order = 'sequence,id'
 
     name = fields.Char(required=True, translate=True)
+    sequence = fields.Integer(string='Sequence')
+
     user_ids = fields.Many2many('res.users', 'res_groups_users_rel', 'gid', 'uid', help='Users with this group specifically')
     all_user_ids = fields.Many2many('res.users', compute='_compute_all_user_ids', compute_sudo=True, search='_search_all_user_ids', string='Users and implied users')
 
