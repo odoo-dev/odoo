@@ -19,16 +19,27 @@
                         password="True"
                         required="code == 'paymob' and state != 'disabled'"
                     />
+                    <field
+                        name="paymob_hmac_key"
+                        string="HMAC Key"
+                        password="True"
+                        required="code == 'paymob' and state != 'disabled'"
+                    />
                     <field name="paymob_account_country_id" invisible="code != 'paymob'"/>
+                    <div colspan="2" class="alert alert-warning" invisible="code != 'paymob'">
+                        Currency will be updated to match the country of the paymob account.
+                    </div>
                 </group>
             </group>
-            <!-- <group name="payment_form" position='inside'>
+            <group name="payment_form" position='inside'>
+            <div colspan="2">
                 <field
-                    name="paymob_integration_ids"
-                    widget="many2many_tags"
-                    invisible="code != 'paymob'"
+                    class="alert alert-warning"
+                    name="paymob_integration_message"
+                    invisible="code != 'paymob' or state=='disabled' or  not payment_method_ids"
                 />
-            </group> -->
+            </div>
+            </group>
         </field>
     </record>
 

@@ -30,8 +30,9 @@ class PaymentProvider(models.Model):
         help="The country of the Paymob account",
         comodel_name='res.country',
         compute='_compute_paymob_account_country',
-        inverse='_inverse_paymob_account_country',
-        domain=f'[("code", "in", {list(const.COUNTRY_CURRENCY_MAPPING.keys())})]',
+        store=True,
+        readonly=False,
+        domain=f'[("code", "in", {list(const.PAYMOB_CONFIG.keys())})]',
     )
     paymob_public_key = fields.Char(string="Paymob Public Key", required_if_provider='paymob')
     paymob_secret_key = fields.Char(
@@ -39,6 +40,8 @@ class PaymentProvider(models.Model):
         required_if_provider='paymob',
         groups='base.group_system',
     )
+    paymob_hmac_key = fields.Char(string="Paymob HMAC Key", required_if_provider='paymob')
+    paymob_integration_message = fields.Char(compute="_compute_paymob_integration_message")
 
     # paymob_integration_ids = fields.Many2many(
     #     string="Integration IDs",
@@ -60,10 +63,20 @@ class PaymentProvider(models.Model):
     @api.depends('available_currency_ids')
     def _compute_paymob_account_country(self):
         for provider in self.filtered(lambda p: p.code == 'paymob'):
-            provider.paymob_account_country_id = self.env['res.country'].search(
-                [('code', '=', provider._get_country_from_currency())], limit=1)
+            if len(provider.available_currency_ids) == 1:
+                provider.paymob_account_country_id = self.env['res.country'].search(
+                    [('code', '=', provider._get_country_from_currency())], limit=1)
 
-    def _inverse_paymob_account_country(self):
+    def _compute_paymob_integration_message(self):
+        for provider in self:
+            payment_method_codes = '", "'.join(provider.payment_method_ids.mapped('code'))
+            provider.paymob_integration_message = _(
+                f"""To match the payment methods insalled in odoo, you need to rename your payment
+                methods in "Payment Integrations" on the Paymob portal to "{payment_method_codes}".
+                """)
+
+    @api.onchange('paymob_account_country_id')
+    def _onchange_paymob_account_country(self):
         for provider in self.filtered(lambda p: p.code == 'paymob'):
             provider.available_currency_ids = self.env['res.currency'].with_context(
                 active_test=False,
@@ -98,6 +111,13 @@ class PaymentProvider(models.Model):
                     "Invalid API request at %s with data:\n%s", url, pprint.pformat(payload)
                 )
                 msg = response.text
+                if "This field may not be blank" in msg:
+                    missing_fields = ", ".join(json.loads(msg).get('billing_data', {}).keys())
+
+                    raise ValidationError(
+                        "Paymob: " + _("The following fields must be filled: %s", missing_fields)
+                    )
+
                 raise ValidationError(
                     "Paymob: " + _("The communication with the API failed. Details: %s", msg)
                 )
@@ -107,17 +127,19 @@ class PaymentProvider(models.Model):
         return response.json()
 
     # === BUSINESS METHODS - GETTERS === #
+
     def _get_country_from_currency(self):
-        country_code = [
-            country for country, currency
-            in const.COUNTRY_CURRENCY_MAPPING.items()
-            if currency == self.available_currency_ids.name
-        ]
-        if country_code:
-            return country_code[0]
+        if self.available_currency_ids.name:
+            return const.PAYMOB_CONFIG[self.available_currency_ids.name]['country_code']
 
     def _get_paymob_account_currency(self):
-        return const.COUNTRY_CURRENCY_MAPPING[self.paymob_account_country_id.code]
+        currency = [
+            currency for currency, currency_config
+            in const.PAYMOB_CONFIG.items()
+            if currency_config['country_code'] == self.paymob_account_country_id.code
+        ]
+        if currency:
+            return currency[0]
 
     def _get_supported_currencies(self):
         """ Override of `payment` to return the supported currencies. """
@@ -129,7 +151,7 @@ class PaymentProvider(models.Model):
                 )
             else:
                 supported_currencies = supported_currencies.filtered(
-                    lambda c: c.name in const.SUPPORTED_CURRENCIES
+                    lambda c: c.name in const.PAYMOB_CONFIG
                 )
         return supported_currencies[0]
 
@@ -142,7 +164,8 @@ class PaymentProvider(models.Model):
         :rtype: str
         """
         self.ensure_one()
-        url = f"https://{const.COUNTRY_API_MAPPING[self.paymob_account_country_id.code]}.paymob.com"
+        api_prefix = const.PAYMOB_CONFIG[self.available_currency_ids.name]['api_prefix']
+        url = f"https://{api_prefix}.paymob.com"
         return url
 
     def _get_default_payment_method_codes(self):
@@ -167,7 +190,6 @@ class PaymentProvider(models.Model):
             'currency_code': currency and currency.name,
         }
         return json.dumps(inline_form_values)
-
 
 # class PaymobPaymentMethod(models.Model):
 #     _name = 'payment.method.paymob'

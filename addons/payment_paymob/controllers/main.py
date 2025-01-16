@@ -1,11 +1,17 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import hashlib
+import hmac
+import json
 import logging
 import pprint
+
+from werkzeug.exceptions import Forbidden
 
 from odoo import http
 from odoo.exceptions import ValidationError
 from odoo.http import request
+from odoo.addons.payment_paymob import const
 
 
 _logger = logging.getLogger(__name__)
@@ -16,7 +22,7 @@ class PaymobController(http.Controller):
     _webhook_url = '/payment/paymob/webhook'
 
     @http.route(
-        _return_url, type='http', auth='public', methods=['GET', 'POST'], csrf=False,
+        _return_url, type='http', auth='public', methods=['GET'], csrf=False,
         save_session=False
     )
     def paymob_return_from_checkout(self, **data):
@@ -33,44 +39,8 @@ class PaymobController(http.Controller):
         :param dict data: The notification data (only `id`) and the transaction reference (`ref`)
                           embedded in the return URL
         """
-        # x={'acq_response_code': '00',
-        # 'amount_cents': '10002785',
-        # 'bill_balanced': 'false',
-        # 'captured_amount': '0',
-        # 'created_at': '2025-01-03T19:55:30.318287+05:00',
-        # 'currency': 'PKR',
-        # 'data.message': 'Approved',
-        # 'discount_details': '[]',
-        # 'error_occured': 'false',
-        # 'has_parent_transaction': 'false',
-        # 'hmac': 'a14aebfe25d62e58343cf6ed90e376518ac4a33ff3b93409beaf66363527c809b6c802f0f2642a749438804a9e33ac03aaf000d3cfad1b2a75f3ea602472e8c1',
-        # 'id': '20279777',
-        # 'integration_id': '191469',
-        # 'is_3d_secure': 'true',
-        # 'is_auth': 'false',
-        # 'is_bill': 'false',
-        # 'is_capture': 'false',
-        # 'is_refund': 'false',
-        # 'is_refunded': 'false',
-        # 'is_settled': 'false',
-        # 'is_standalone_payment': 'true',
-        # 'is_void': 'false',
-        # 'is_voided': 'false',
-        # 'merchant_commission': '0',
-        # 'merchant_order_id': 'S00038#1',
-        # 'order': '25793766',
-        # 'owner': '176511',
-        # 'pending': 'false',
-        # 'profile_id': '167115',
-        # 'refunded_amount_cents': '0',
-        # 'source_data.card_num': '512345xxxxxx2346',
-        # 'source_data.pan': '2346',
-        # 'source_data.sub_type': 'MasterCard',
-        # 'source_data.type': 'card',
-        # 'success': 'true',
-        # 'txn_response_code': 'APPROVED',
-        # 'updated_at': '2025-01-03T19:55:48.105607+05:00'}
         _logger.info("handling redirection from Paymob with data:\n%s", pprint.pformat(data))
+        self._verify_notification_signature(data)
         request.env['payment.transaction'].sudo()._handle_notification_data('paymob', data)
         return request.redirect('/payment/status')
 
@@ -83,9 +53,95 @@ class PaymobController(http.Controller):
         :return: An empty string to acknowledge the notification
         :rtype: str
         """
-        _logger.info("notification received from Paymob with data:\n%s", pprint.pformat(data))
+        notification_data = request.httprequest.json.get('obj')
+        _logger.info("notification received from Paymob with data:\n%s",
+                     pprint.pformat(notification_data))
         try:
-            request.env['payment.transaction'].sudo()._handle_notification_data('paymob', data)
+            if notification_data:
+                normalized_data = self._normalize_response(notification_data, data.get('hmac'))
+                self._verify_notification_signature(normalized_data)
+                request.env['payment.transaction'].sudo()._handle_notification_data(
+                    'paymob', normalized_data)
         except ValidationError:  # Acknowledge the notification to avoid getting spammed
             _logger.exception("unable to handle the notification data; skipping to acknowledge")
         return ''  # Acknowledge the notification
+
+    def _verify_notification_signature(self, notification_data):
+        """ Check that the received signature matches the expected one.
+
+        :param dict notification_data: The notification payload containing the received signature
+
+        :return: None
+        :raise: :class:`werkzeug.exceptions.Forbidden` if the signatures don't match
+        """
+        try:
+            # Check the integrity of the notification
+            tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_notification_data(
+                'paymob', notification_data
+            )
+        except ValidationError:
+            # Warn rather than log the traceback to avoid noise when a POS payment notification
+            # is received and the corresponding `payment.transaction` record is not found.
+            _logger.warning("unable to find the transaction; skipping to acknowledge")
+        else:
+            # Retrieve the received signature from the payload
+            received_signature = notification_data.get('hmac', '')
+            if not received_signature:
+                _logger.warning("received notification with missing signature")
+                raise Forbidden()
+
+            # Compare the received signature with the expected signature computed from the payload
+            hmac_key = tx_sudo.provider_id.paymob_hmac_key
+            expected_signature = self._compute_signature(notification_data, hmac_key)
+            if not hmac.compare_digest(received_signature, expected_signature):
+                _logger.warning("received notification with invalid signature")
+                raise Forbidden()
+
+    def _compute_signature(self, payload, hmac_key):
+        """ Compute the signature from the payload.
+
+        See https://developers.paymob.com/pak/manage-callback/hmac-calculation
+
+        :param dict payload: The notification payload
+        :param str hmac_key: The HMAC key of the provider handling the transaction
+        :return: The computed signature
+        :rtype: str
+        """
+        # Concatenate relevant fields used to check for signature and if not found add "false"
+        signing_string = ''.join(
+            [payload.get(field, 'false') for field in const.PAYMOB_SIGNATURE_FIELDS]
+        ).encode('utf-8')
+
+        # Calculate the signature using the hmac_key with SHA-512
+        signed_hmac = hmac.new(hmac_key.encode("utf-8"), signing_string, hashlib.sha512)
+        # Calculate the signature by encoding the result with base16
+        return signed_hmac.hexdigest()
+
+    def _normalize_response(self, notification_data, hmac):
+        """
+        Webhook data returns a dict with parsed values, however redirect response returns a string
+        for all values and json-formatted booleans (i.e. 'false' for False).
+
+        :param dict notification_data: The notification data received
+        :param str hmac: The HMAC signature returned in the params
+        :return: The normalized response
+        :rtype: str
+        """
+        response = {
+            field: json.dumps(notification_data.get(field))
+            if isinstance(notification_data.get(field), bool)
+            else str(notification_data.get(field, 'false'))
+            for field in const.PAYMOB_SIGNATURE_FIELDS
+        }
+        order_data = notification_data.get('order', {})
+        response.update(
+            {
+                'data.message': notification_data.get('data').get('message'),
+                'hmac': hmac,
+                'order': str(order_data.get('id')),
+                'merchant_order_id': order_data.get('merchant_order_id'),
+                'source_data.pan': notification_data.get('source_data').get('pan'),
+                'source_data.sub_type': notification_data.get('source_data').get('sub_type'),
+                'source_data.type': notification_data.get('source_data').get('type'),
+            })
+        return response
