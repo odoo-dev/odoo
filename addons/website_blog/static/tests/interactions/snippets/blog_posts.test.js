@@ -5,6 +5,7 @@ import {
 import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
 import { startInteractions, setupInteractionWhiteList } from "@web/../tests/public/helpers";
+import { queryAll } from "@odoo/hoot-dom";
 
 class TestItem extends Interaction {
     static selector = ".s_test_item";
@@ -36,7 +37,7 @@ test("dynamic snippet blog posts loads items and displays them through template"
             </div>
         `];
     });
-    const { core, el } = await startInteractions(`
+    const { core } = await startInteractions(`
       <div id="wrapwrap">
           <section data-snippet="s_blog_posts" class="s_blog_posts s_dynamic_snippet_blog_posts s_blog_post_big_picture s_blog_posts_effect_marley s_blog_posts_post_picture_size_default s_dynamic s_dynamic_empty pt32 pb32 o_colored_level"
                   data-custom-template-data="{&quot;blog_posts_post_author_active&quot;:true, &quot;blog_posts_post_teaser_active&quot;:true, &quot;blog_posts_post_date_active&quot;:true}"
@@ -64,15 +65,14 @@ test("dynamic snippet blog posts loads items and displays them through template"
           </section>
       </div>
     `);
-    expect(core.interactions.length).toBe(3);
-    const contentEl = el.querySelector(".dynamic_snippet_template");
-    const itemEls = contentEl.querySelectorAll(".s_test_item");
-    expect(itemEls[0].dataset.testParam).toBe("test");
-    expect(itemEls[1].dataset.testParam).toBe("test2");
+    expect(core.interactions).toHaveLength(3);
+    const itemEls = queryAll(".dynamic_snippet_template .s_test_item");
+    expect(itemEls[0]).toHaveAttribute("data-test-param", "test");
+    expect(itemEls[1]).toHaveAttribute("data-test-param", "test2");
     // Make sure element interactions are started.
-    expect(itemEls[0].dataset.started).toBe("*test*");
-    expect(itemEls[1].dataset.started).toBe("*test2*");
+    expect(itemEls[0]).toHaveAttribute("data-started", "*test*");
+    expect(itemEls[1]).toHaveAttribute("data-started", "*test2*");
     core.stopInteractions();
     // Make sure element interactions are stopped.
-    expect(core.interactions.length).toBe(0);
+    expect(core.interactions).toHaveLength(0);
 });

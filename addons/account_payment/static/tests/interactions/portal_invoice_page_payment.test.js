@@ -4,7 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-import { advanceTime } from "@odoo/hoot-dom";
+import { advanceTime, queryOne } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("account_payment.portal_invoice_page_payment");
 
@@ -16,7 +16,7 @@ test("portal_invoice_page_payment is not started without #portal_pay", async () 
 });
 
 test("portal_invoice_page_payment is started with #portal_pay", async () => {
-    const { core, el } = await startInteractions(`
+    const { core } = await startInteractions(`
     <div id="wrapwrap" class="o_portal">
         <header style="height: 50px;"></header>
         <main>
@@ -164,8 +164,7 @@ test("portal_invoice_page_payment is started with #portal_pay", async () => {
         <footer style="height: 50px;"></footer>
     </div>`);
     expect(core.interactions).toHaveLength(1);
-    const modalEl = el.querySelector("#pay_with");
-    expect(modalEl).not.toBe(undefined);
+    expect(queryOne("#pay_with")).toBeInstanceOf(HTMLElement);
     await advanceTime(400);
-    expect(modalEl).not.toHaveStyle({ "display": "none" });
+    expect("#pay_with").not.toHaveStyle({ "display": "none" });
 });

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
 
-import { animationFrame, click, dblclick, queryAll } from "@odoo/hoot-dom";
+import { animationFrame, click, dblclick, queryAll, queryFirst, queryOne } from "@odoo/hoot-dom";
 import { advanceTime, Deferred } from "@odoo/hoot-mock";
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { Colibri } from "@web/public/colibri";
@@ -64,9 +64,9 @@ describe("adding listeners", () => {
                 span: { "t-on-click": () => clicked++ },
             };
         }
-        const { el } = await startInteraction(Test, TemplateTestDoubleSpan);
+        await startInteraction(Test, TemplateTestDoubleSpan);
         expect(clicked).toBe(0);
-        const spans = el.querySelectorAll("span");
+        const spans = queryAll("span");
         await click(spans[0]);
         await click(spans[1]);
         expect(clicked).toBe(2);
@@ -411,9 +411,9 @@ describe("removing listeners", () => {
                 );
             }
         }
-        const { el, core } = await startInteraction(Test, TemplateTestDoubleSpan);
+        const { core } = await startInteraction(Test, TemplateTestDoubleSpan);
         expect(clicked).toBe(0);
-        const spans = el.querySelectorAll("span");
+        const spans = queryAll("span");
         await click(spans[0]);
         await click(spans[1]);
         expect(clicked).toBe(2);
@@ -483,21 +483,18 @@ describe("removing listeners", () => {
 
 describe("handling crashes", () => {
     test("crash if a function is not provided to addListener", async () => {
-        let inError = false;
         class Test extends Interaction {
             static selector = ".test";
             start() {
-                try {
-                    this.addListener(this.el, "click", null);
-                } catch (e) {
-                    inError = true;
-                    expect(e.message).toBe("Invalid listener for event 'click' (not a function)");
-                }
+                expect(() => this.addListener(this.el, "click", null))
+                    .toThrow(
+                        "Invalid listener for event 'click' (not a function)"
+                    );
             }
         }
         await startInteraction(Test, TemplateTest);
         await click(".test");
-        expect(inError).toBe(true);
+        // The only expect is in start so that if it isn't called, the test crashes.
     });
 
     test("this.addListener crashes if interaction is not started", async () => {
@@ -508,33 +505,23 @@ describe("handling crashes", () => {
                 this.addListener(this.el.querySelector("span"), "click", () => clicked++);
             }
         }
-        let error = null;
-        try {
-            await startInteraction(Test, TemplateTest);
-        } catch (e) {
-            error = e;
-        }
-        expect(error).not.toBe(null);
-        expect(error.message).toInclude(
-            "this.addListener can only be called after the interaction is started"
-        );
+        await expect(startInteraction(Test, TemplateTest))
+            .rejects
+            .toThrow("this.addListener can only be called after the interaction is started");
     });
 
     test("cannot update content while updating content", async () => {
         let update = false;
         let interaction = null;
-        let error = null;
         class Test extends Interaction {
             static selector = ".test";
             dynamicContent = {
                 span: {
                     "t-att-a": () => {
                         if (update) {
-                            try {
-                                this.updateContent();
-                            } catch (e) {
-                                error = e;
-                            }
+                            expect(() => interaction.updateContent()).toThrow(
+                                "Updatecontent should not be called while interaction is updating"
+                            );
                         }
                         return "a";
                     },
@@ -547,10 +534,7 @@ describe("handling crashes", () => {
         await startInteraction(Test, TemplateTest);
         update = true;
         interaction.updateContent();
-        expect(error).not.toBe(null);
-        expect(error.message).toInclude(
-            "Updatecontent should not be called while interaction is updating"
-        );
+        // The only expect is in t-att-a so that if it isn't called, the test crashes.
     });
 
     test("dom is updated after event is dispatched", async () => {
@@ -566,13 +550,13 @@ describe("handling crashes", () => {
                 this.clickCount = 1;
             }
         }
-        const { el } = await startInteraction(Test, TemplateTest);
-        const span = el.querySelector("span");
-        expect(span.dataset.count).toBe("1");
-        await click("span");
-        expect(span.dataset.count).toBe("2");
+        await startInteraction(Test, TemplateTest);
+        const span = queryOne("span");
+        expect(span).toHaveAttribute("data-count", "1");
+        await click(span);
+        expect(span).toHaveAttribute("data-count", "2");
         await animationFrame();
-        expect(span.dataset.count).toBe("2");
+        expect(span).toHaveAttribute("data-count", "2");
     });
 
     test("crashes if a dynamic content element does not start with t-", async () => {
@@ -582,14 +566,9 @@ describe("handling crashes", () => {
                 span: { click: () => { } },
             };
         }
-        let error = null;
-        try {
-            await startInteraction(Test, TemplateTest);
-        } catch (e) {
-            error = e;
-        }
-        expect(error).not.toBe(null);
-        expect(error.message).toBe("Invalid directive: 'click' (should start with t-)");
+        await expect(startInteraction(Test, TemplateTest))
+            .rejects
+            .toThrow("Invalid directive: 'click' (should start with t-)");
     });
 
     test("crash if dynamicContent is defined on class, not on instance", async () => {
@@ -597,32 +576,18 @@ describe("handling crashes", () => {
             static selector = ".test";
             static dynamicContent = {};
         }
-        let error = null;
-        try {
-            await startInteraction(Test, TemplateTest);
-        } catch (e) {
-            error = e;
-        }
-        expect(error).not.toBe(null);
-        expect(error.message).toBe(
-            "The dynamic content object should be defined on the instance, not on the class (Test)"
-        );
+        await expect(startInteraction(Test, TemplateTest))
+            .rejects
+            .toThrow("The dynamic content object should be defined on the instance, not on the class (Test)");
     });
 
     test("crash if selector is defined on instance, not on class", async () => {
-        let error = null;
         class Test extends Interaction {
             selector = ".test";
         }
-        try {
-            await startInteraction(Test, TemplateTest);
-        } catch (e) {
-            error = e;
-        }
-        expect(error).not.toBe(null);
-        expect(error.message).toBe(
-            "The selector should be defined as a static property on the class Test, not on the instance"
-        );
+        await expect(startInteraction(Test, TemplateTest))
+            .rejects
+            .toThrow("The selector should be defined as a static property on the class Test, not on the instance");
     });
 });
 
@@ -844,13 +809,7 @@ describe("lifecycle", () => {
         expect.verifySteps(["setup", "willStart", "start"]);
         core.stopInteractions();
         expect.verifySteps(["destroy"]);
-        let e = null;
-        try {
-            interaction.updateContent();
-        } catch (_e) {
-            e = _e;
-        }
-        expect(e.message).toBe(
+        expect(() => interaction.updateContent()).toThrow(
             "Cannot update content of an interaction that is not ready or is destroyed"
         );
     });
@@ -900,13 +859,7 @@ describe("lifecycle", () => {
         }
         await startInteraction(Test, TemplateTest, { waitForStart: false });
         expect.verifySteps(["willStart"]);
-        let e = null;
-        try {
-            interaction.updateContent();
-        } catch (_e) {
-            e = _e;
-        }
-        expect(e.message).toBe(
+        expect(() => interaction.updateContent()).toThrow(
             "Cannot update content of an interaction that is not ready or is destroyed"
         );
 
@@ -1257,13 +1210,14 @@ describe("t-att-class", () => {
             };
         }
 
-        const { core, el } = await startInteraction(Test, getTemplateWithAttribute("class='a'"));
-        expect("span").toHaveClass(["a", "b"]);
-        el.querySelector("span").classList.add("c");
-        expect("span").toHaveClass(["a", "b", "c"]);
+        const { core } = await startInteraction(Test, getTemplateWithAttribute("class='a'"));
+        const span = queryOne("span");
+        expect(span).toHaveClass(["a", "b"]);
+        span.classList.add("c");
+        expect(span).toHaveClass(["a", "b", "c"]);
         core.stopInteractions();
-        expect("span").toHaveClass(["a", "c"]);
-        expect("span").not.toHaveClass("b");
+        expect(span).toHaveClass(["a", "c"]);
+        expect(span).not.toHaveClass("b");
     });
 });
 
@@ -1315,20 +1269,21 @@ describe("t-att-style", () => {
             };
         }
 
-        const { core, el } = await startInteraction(
+        const { core } = await startInteraction(
             Test,
             getTemplateWithAttribute("style='background-color: blue'")
         );
-        expect("span").toHaveStyle({ "background-color": "rgb(0, 0, 0)", color: "rgb(255, 0, 0)" });
-        el.querySelector("span").style.setProperty("width", "50%");
-        expect("span").toHaveStyle({
+        const span = queryOne("span");
+        expect(span).toHaveStyle({ "background-color": "rgb(0, 0, 0)", color: "rgb(255, 0, 0)" });
+        span.style.setProperty("width", "50%");
+        expect(span).toHaveStyle({
             "background-color": "rgb(0, 0, 0)",
             color: "rgb(255, 0, 0)",
             width: "50%",
         });
         core.stopInteractions();
-        expect("span").toHaveStyle({ "background-color": "rgb(0, 0, 255)", width: "50%" });
-        expect("span").not.toHaveStyle({ color: "rgb(255, 0, 0)" });
+        expect(span).toHaveStyle({ "background-color": "rgb(0, 0, 255)", width: "50%" });
+        expect(span).not.toHaveStyle({ color: "rgb(255, 0, 0)" });
     });
 
     test("t-att-style restores priority on reset", async () => {
@@ -1344,19 +1299,20 @@ describe("t-att-style", () => {
             };
         }
 
-        const { core, el } = await startInteraction(
+        const { core } = await startInteraction(
             Test,
             `<div><span style="background-color: blue !important">coucou</span></div>`
         );
-        expect(el.querySelector("span").outerHTML).toBe(
+        const span = queryOne("span");
+        expect(span).toHaveOuterHTML(
             `<span style="background-color: black; color: red;">coucou</span>`
         );
-        el.querySelector("span").style.setProperty("width", "50%", "important");
-        expect(el.querySelector("span").outerHTML).toBe(
+        span.style.setProperty("width", "50%", "important");
+        expect(span).toHaveOuterHTML(
             `<span style="background-color: black; color: red; width: 50% !important;">coucou</span>`
         );
         core.stopInteractions();
-        expect(el.querySelector("span").outerHTML).toBe(
+        expect(span).toHaveOuterHTML(
             `<span style="background-color: blue !important; width: 50% !important;">coucou</span>`
         );
     });
@@ -1447,12 +1403,8 @@ describe("t-att-style", () => {
                 _root: { "t-att-style": () => ({ color: "red !important" }) },
             };
         }
-        const { el } = await startInteraction(Test, TemplateBase);
-        expect(el.querySelector("span").outerHTML).toBe(
-            `<span style="color: red !important;">coucou</span>`
-        );
-        // await startInteraction(Test, TemplateBlueBackground);
-        // expect("span").toHaveStyle({ backgroundColor: "rgb(0, 0, 255)", color: "rgb(255, 0, 0) !important" });
+        await startInteraction(Test, TemplateBase);
+        expect("span").toHaveOuterHTML(`<span style="color: red !important;">coucou</span>`);
     });
 });
 
@@ -1529,9 +1481,9 @@ describe("t-att and t-out", () => {
                 },
             };
         }
-        const { el } = await startInteraction(Test, TemplateBase);
+        await startInteraction(Test, TemplateBase);
         expect("span").toHaveAttribute("a", "b");
-        expect(target).toBe(el.querySelector("span"));
+        expect(target).toBe(queryOne("span"));
     });
 
     test("t-att-... restores all values on stop", async () => {
@@ -1541,7 +1493,7 @@ describe("t-att and t-out", () => {
                 span: { "t-att-data-animal": () => undefined },
             };
         }
-        const { core, el } = await startInteraction(
+        const { core } = await startInteraction(
             Test,
             `
             <div>
@@ -1550,12 +1502,11 @@ describe("t-att and t-out", () => {
             </div>
         `
         );
-        const spanEls = el.querySelectorAll("span");
-        expect(spanEls[0].dataset.animal).toBe(undefined);
-        expect(spanEls[1].dataset.animal).toBe(undefined);
+        expect("span:first").not.toHaveAttribute("data-animal");
+        expect("span:last").not.toHaveAttribute("data-animal");
         core.stopInteractions();
-        expect(spanEls[0].dataset.animal).toBe("colibri");
-        expect(spanEls[1].dataset.animal).toBe("owlet");
+        expect("span:first").toHaveAttribute("data-animal", "colibri");
+        expect("span:last").toHaveAttribute("data-animal", "owlet");
     });
 
     test("t-att-... restores all values on stop even if swapped", async () => {
@@ -1565,7 +1516,7 @@ describe("t-att and t-out", () => {
                 span: { "t-att-data-animal": () => undefined },
             };
         }
-        const { core, el } = await startInteraction(
+        const { core } = await startInteraction(
             Test,
             `
             <div>
@@ -1574,13 +1525,13 @@ describe("t-att and t-out", () => {
             </div>
         `
         );
-        const spanEls = el.querySelectorAll("span");
-        expect(spanEls[0].dataset.animal).toBe(undefined);
-        expect(spanEls[1].dataset.animal).toBe(undefined);
-        spanEls[0].parentElement.appendChild(spanEls[0]); // swap
+        expect("span:first").not.toHaveAttribute("data-animal");
+        expect("span:last").not.toHaveAttribute("data-animal");
+        const firstSpan = queryOne("span:first");
+        firstSpan.parentElement.appendChild(firstSpan); // swap
         core.stopInteractions();
-        expect(spanEls[0].dataset.animal).toBe("colibri");
-        expect(spanEls[1].dataset.animal).toBe("owlet");
+        expect("span:last").toHaveAttribute("data-animal", "colibri");
+        expect("span:first").toHaveAttribute("data-animal", "owlet");
     });
 
     test("can do a simple t-out", async () => {
@@ -1590,8 +1541,8 @@ describe("t-att and t-out", () => {
                 span: { "t-out": () => "colibri" },
             };
         }
-        const { el } = await startInteraction(Test, TemplateTest);
-        expect(el.querySelector("span").outerHTML).toBe(`<span>colibri</span>`);
+        await startInteraction(Test, TemplateTest);
+        expect("span").toHaveText("colibri");
     });
 });
 
@@ -1613,18 +1564,18 @@ describe("components", () => {
                 _root: { "t-component": C },
             };
         }
-        const { core, el } = await startInteraction(Test, `<div class="test"></div>`);
-        expect(el.querySelector(".test").outerHTML).toBe(
+        const { core } = await startInteraction(Test, `<div class="test"></div>`);
+        expect(".test").toHaveOuterHTML(
             `<div class="test"><owl-component contenteditable="false" data-oe-protected="true"></owl-component></div>`
         );
         await animationFrame();
-        expect(el.querySelector(".test").outerHTML).toBe(
+        expect(".test").toHaveOuterHTML(
             `<div class="test"><owl-component contenteditable="false" data-oe-protected="true">component</owl-component></div>`
         );
         expect(isCDestroyed).toBe(false);
         core.stopInteractions();
         expect(isCDestroyed).toBe(true);
-        expect(el.querySelector(".test").outerHTML).toBe(`<div class="test"></div>`);
+        expect(".test").toHaveOuterHTML(`<div class="test"></div>`);
     });
 
     test("can insert a component with props with t-component", async () => {
@@ -1646,18 +1597,18 @@ describe("components", () => {
                 _root: { "t-component": () => [C, { prop: "hello" }] },
             };
         }
-        const { core, el } = await startInteraction(Test, `<div class="test"></div>`);
-        expect(el.querySelector(".test").outerHTML).toBe(
+        const { core } = await startInteraction(Test, `<div class="test"></div>`);
+        expect(".test").toHaveOuterHTML(
             `<div class="test"><owl-component contenteditable="false" data-oe-protected="true"></owl-component></div>`
         );
         await animationFrame();
-        expect(el.querySelector(".test").outerHTML).toBe(
+        expect(".test").toHaveOuterHTML(
             `<div class="test"><owl-component contenteditable="false" data-oe-protected="true"><p>component<span>hello</span></p></owl-component></div>`
         );
         expect(isCDestroyed).toBe(false);
         core.stopInteractions();
         expect(isCDestroyed).toBe(true);
-        expect(el.querySelector(".test").outerHTML).toBe(`<div class="test"></div>`);
+        expect(".test").toHaveOuterHTML(`<div class="test"></div>`);
     });
 
     test("can insert a component with mountComponent", async () => {
@@ -1673,12 +1624,12 @@ describe("components", () => {
                 this.mountComponent(this.el, C);
             }
         }
-        const { el } = await startInteraction(Test, `<div class="test"></div>`);
-        expect(el.querySelector(".test").outerHTML).toBe(
+        await startInteraction(Test, `<div class="test"></div>`);
+        expect(".test").toHaveOuterHTML(
             `<div class="test"><owl-component contenteditable="false" data-oe-protected="true"></owl-component></div>`
         );
         await animationFrame();
-        expect(el.querySelector(".test").outerHTML).toBe(
+        expect(".test").toHaveOuterHTML(
             `<div class="test"><owl-component contenteditable="false" data-oe-protected="true">component</owl-component></div>`
         );
     });
@@ -1698,12 +1649,12 @@ describe("components", () => {
                 this.mountComponent(this.el, C, { prop: "with prop" });
             }
         }
-        const { el } = await startInteraction(Test, `<div class="test"></div>`);
-        expect(el.querySelector(".test").outerHTML).toBe(
+        await startInteraction(Test, `<div class="test"></div>`);
+        expect(".test").toHaveOuterHTML(
             `<div class="test"><owl-component contenteditable="false" data-oe-protected="true"></owl-component></div>`
         );
         await animationFrame();
-        expect(el.querySelector(".test").outerHTML).toBe(
+        expect(".test").toHaveOuterHTML(
             `<div class="test"><owl-component contenteditable="false" data-oe-protected="true"><p>component<span>with prop</span></p></owl-component></div>`
         );
     });
@@ -1719,14 +1670,10 @@ describe("insert", () => {
             }
         }
 
-        const { core, el } = await startInteraction(Test, TemplateTest);
-        const testEl = el.querySelector(".test");
-        let insertedEl = testEl.querySelector("inserted");
-        expect(insertedEl).not.toBe(null);
-        expect(insertedEl).toBe(testEl.lastElementChild);
+        const { core } = await startInteraction(Test, TemplateTest);
+        expect(queryOne(".test inserted:last-child")).toBeInstanceOf(HTMLElement);
         core.stopInteractions();
-        insertedEl = el.querySelector("inserted");
-        expect(insertedEl).toBe(null);
+        expect(queryFirst("inserted")).toBe(null);
     });
 
     test("can insert an element before another nested", async () => {
@@ -1737,14 +1684,10 @@ describe("insert", () => {
                 this.insert(node, this.el, "afterbegin");
             }
         }
-        const { core, el } = await startInteraction(Test, TemplateTest);
-        const testEl = el.querySelector(".test");
-        let insertedEl = testEl.querySelector("inserted");
-        expect(insertedEl).not.toBe(null);
-        expect(insertedEl).toBe(testEl.firstElementChild);
+        const { core } = await startInteraction(Test, TemplateTest);
+        expect(queryOne(".test inserted:first-child")).toBeInstanceOf(HTMLElement);
         core.stopInteractions();
-        insertedEl = el.querySelector("inserted");
-        expect(insertedEl).toBe(null);
+        expect(queryFirst("inserted")).toBe(null);
     });
 
     test("can insert an element before another one", async () => {
@@ -1756,14 +1699,10 @@ describe("insert", () => {
                 this.insert(node, span, "beforebegin");
             }
         }
-        const { core, el } = await startInteraction(Test, TemplateTest);
-        const testEl = el.querySelector(".test");
-        let insertedEl = testEl.querySelector("inserted");
-        expect(insertedEl).not.toBe(null);
-        expect(insertedEl).toBe(testEl.children[0]);
+        const { core } = await startInteraction(Test, TemplateTest);
+        expect(queryOne(".test inserted + span")).toBeInstanceOf(HTMLElement);
         core.stopInteractions();
-        insertedEl = el.querySelector("inserted");
-        expect(insertedEl).toBe(null);
+        expect(queryFirst("inserted")).toBe(null);
     });
 
     test("can insert an element after another one", async () => {
@@ -1775,14 +1714,10 @@ describe("insert", () => {
                 this.insert(node, span, "afterend");
             }
         }
-        const { core, el } = await startInteraction(Test, TemplateTest);
-        const testEl = el.querySelector(".test");
-        let insertedEl = testEl.querySelector("inserted");
-        expect(insertedEl).not.toBe(null);
-        expect(insertedEl).toBe(testEl.children[1]);
+        const { core } = await startInteraction(Test, TemplateTest);
+        expect(queryOne(".test span + inserted")).toBeInstanceOf(HTMLElement);
         core.stopInteractions();
-        insertedEl = el.querySelector("inserted");
-        expect(insertedEl).toBe(null);
+        expect(queryFirst("inserted")).toBe(null);
     });
 });
 
@@ -1815,15 +1750,14 @@ describe("renderAt", () => {
             };
         }
 
-        const { core, el } = await startInteraction([Test, Test2], TemplateTest);
+        const { core } = await startInteraction([Test, Test2], TemplateTest);
         expect(core.interactions).toHaveLength(3); // 1*Test + 2*Test2
-        const testEl = el.querySelector(".test");
-        const subEls = testEl.querySelectorAll("[data-which][x=x]");
+        const subEls = queryAll(".test [data-which][x=x]");
         await click(subEls[1]);
         await click(subEls[0]);
         expect.verifySteps(["two", "one"]);
         core.stopInteractions();
-        expect(testEl.querySelectorAll("[data-which]")).toHaveLength(0);
+        expect(queryFirst(".test [data-which]")).toBe(null);
         await click(subEls[0]);
         expect.verifySteps([]);
     });
@@ -1860,13 +1794,12 @@ describe("renderAt", () => {
                 }
             }
 
-            const { core, el } = await startInteraction([Test], TemplateTest);
+            const { core } = await startInteraction([Test], TemplateTest);
             expect(core.interactions).toHaveLength(1);
-            const testEl = el.querySelector(".test");
-            const subEls = testEl.querySelectorAll("[data-which]");
+            const subEls = queryAll(".test [data-which]");
             expect(subEls).toHaveLength(2);
-            expect(subEls[0].dataset.which).toBe("one");
-            expect(subEls[1].dataset.which).toBe("two");
+            expect(subEls[0]).toHaveAttribute("data-which", "one");
+            expect(subEls[1]).toHaveAttribute("data-which", "two");
             await click(subEls[1]);
             await click(subEls[0]);
             expect.verifySteps([
@@ -1878,7 +1811,7 @@ describe("renderAt", () => {
                 "one",
             ]);
             core.stopInteractions();
-            expect(testEl.querySelectorAll("[data-which]")).toHaveLength(0);
+            expect(queryFirst(".test [data-which]")).toBe(null);
             await click(subEls[0]);
             expect.verifySteps([]);
         });
@@ -1906,9 +1839,8 @@ describe("locked", () => {
                 finished++;
             }
         }
-        const { el } = await startInteraction(Test, TemplateTestDoubleButton);
-        const buttonEls = el.querySelectorAll("button");
-        for (const buttonEl of buttonEls) {
+        await startInteraction(Test, TemplateTestDoubleButton);
+        for (const buttonEl of queryAll("button")) {
             await click(buttonEl);
         }
         expect(started).toBe(1);
@@ -1930,11 +1862,11 @@ describe("locked", () => {
                 await new Promise((resolve) => setTimeout(resolve, 5000));
             }
         }
-        const { el } = await startInteraction(Test, TemplateTestDoubleButton);
-        expect(el.querySelectorAll("span")).toHaveLength(0);
+        await startInteraction(Test, TemplateTestDoubleButton);
+        expect(queryFirst("span")).toBe(null);
         await click("button");
         await advanceTime(500);
-        expect(el.querySelectorAll("span")).toHaveLength(0);
+        expect(queryFirst("span")).toBe(null);
     });
 
     test("locked add a loading icon when the execution takes more than 400ms", async () => {
@@ -1949,11 +1881,11 @@ describe("locked", () => {
                 await new Promise((resolve) => setTimeout(resolve, 5000));
             }
         }
-        const { el } = await startInteraction(Test, TemplateTestDoubleButton);
-        expect(el.querySelectorAll("span")).toHaveLength(0);
+        await startInteraction(Test, TemplateTestDoubleButton);
+        expect(queryFirst("span")).toBe(null);
         await click("button");
         await advanceTime(500);
-        expect(el.querySelectorAll("span")).toHaveLength(1);
+        expect(queryFirst("span")).not.toBe(null);
     });
 
     test("locked automatically binds functions", async () => {
@@ -1996,10 +1928,10 @@ describe("debounced (1)", () => {
                 expect.step("done");
             }
         }
-        const { core, el } = await startInteraction(Test, TemplateTest);
+        const { core } = await startInteraction(Test, TemplateTest);
         this.core = core;
         expect.verifySteps(["updateContent"]);
-        this.testEl = el.querySelector(".test");
+        this.testEl = queryOne(".test");
     });
 
     test("debounced event handler delays and groups calls", async () => {
@@ -2216,10 +2148,10 @@ describe("throttled_for_animation (1)", () => {
                 expect.step("done");
             }
         }
-        const { core, el } = await startInteraction(Test, TemplateTest);
+        const { core } = await startInteraction(Test, TemplateTest);
         this.core = core;
         expect.verifySteps(["updateContent"]);
-        this.testEl = el.querySelector(".test");
+        this.testEl = queryOne(".test");
     }),
         test("throttled event handler executes call right away", async () => {
             await click(this.testEl);

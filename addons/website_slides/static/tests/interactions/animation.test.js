@@ -1,4 +1,5 @@
 import { describe, expect, test } from "@odoo/hoot";
+import { queryOne } from "@odoo/hoot-dom";
 import {
     startInteractions,
     setupInteractionWhiteList,
@@ -8,7 +9,7 @@ setupInteractionWhiteList("website.animation");
 describe.current.tags("interaction_dev");
 
 test("on scroll animation changes based on scroll", async () => {
-    const { core, el } = await startInteractions(`
+    const { core } = await startInteractions(`
         <div id="wrapwrap" style="overflow: scroll; max-height: 100%;">
             <div style="min-height: 2000px;">Tall stuff</div>
             <div class="o_wslide_fs_article_content">
@@ -19,7 +20,7 @@ test("on scroll animation changes based on scroll", async () => {
             <div style="min-height: 2000px;">Tall stuff</div>
         </div>
     `);
-    expect(core.interactions.length).toBe(1);
-    const scrollEl = el.querySelector(".o_wslide_fs_article_content");
+    expect(core.interactions).toHaveLength(1);
+    const scrollEl = queryOne(".o_wslide_fs_article_content");
     expect(core.interactions[0].interaction.scrollingElement).toBe(scrollEl);
 });

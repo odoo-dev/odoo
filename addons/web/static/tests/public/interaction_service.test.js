@@ -69,15 +69,7 @@ test("start interactions even if there is a crash", async () => {
     const { core } = await startInteraction([Boom, NotBoom], `<div class="test"></div>`, {
         waitForStart: false,
     });
-
-    let e = null;
-    try {
-        await core.isReady;
-    } catch (_e) {
-        e = _e;
-    }
-    expect(e.message).toBe("boom");
-
+    await expect(core.isReady).rejects.toThrow("boom");
     expect.verifySteps(["start boom", "start notboom"]);
     core.stopInteractions();
     expect.verifySteps(["destroy notboom"]);
@@ -106,16 +98,9 @@ test("start interactions even if there is a crash when evaluating selector", asy
         waitForStart: false,
     });
 
-    let e = null;
-    try {
-        await core.isReady;
-    } catch (_e) {
-        e = _e;
-    }
-    expect(e.message).toBe(
+    await expect(core.isReady).rejects.toThrow(
         "Could not start interaction Boom (invalid selector: 'div:invalid(coucou)')"
     );
-
     expect.verifySteps(["start notboom"]);
 });
 
@@ -147,16 +132,9 @@ test("start interactions even if there is a crash when evaluating selectorHas", 
         }
     );
 
-    let e = null;
-    try {
-        await core.isReady;
-    } catch (_e) {
-        e = _e;
-    }
-    expect(e.message).toBe(
+    await expect(core.isReady).rejects.toThrow(
         "Could not start interaction Boom (invalid selector: '.test' or selectorHas: 'div:invalid(coucou)')"
     );
-
     expect.verifySteps(["start notboom"]);
 });
 
@@ -207,26 +185,16 @@ test("recover from error as much as possible when applying dynamiccontent", asyn
         }
     }
 
-    const { el } = await startInteraction(Test, `<div class="test"></div>`);
-
-    expect(el.querySelector(".test").outerHTML).toBe(`<div class="test" a="a" b="b" c="c"></div>`);
+    await startInteraction(Test, `<div class="test"></div>`);
+    expect(".test").toHaveOuterHTML(`<div class="test" a="a" b="b" c="c"></div>`);
 
     a = "aa";
     b = "boom";
     c = "cc";
-    let error;
-    try {
-        interaction.updateContent();
-    } catch (e) {
-        error = e;
-    }
-    expect(error.message).toBe(
+    expect(() => interaction.updateContent()).toThrow(
         "An error occured while updating dynamic attribute 'b' (in interaction 'Test')"
     );
-
-    expect(el.querySelector(".test").outerHTML).toBe(
-        `<div class="test" a="aa" b="b" c="cc"></div>`
-    );
+    expect(".test").toHaveOuterHTML(`<div class="test" a="aa" b="b" c="cc"></div>`);
 });
 
 test("interactions are stopped in reverse order", async () => {
@@ -258,12 +226,12 @@ test("can mount a component", async () => {
         static template = xml`owl component`;
         static props = {};
     }
-    const { core, el } = await startInteraction(Test, `<div class="test"></div>`);
-    expect(el.querySelector(".test").innerHTML).toBe(
+    const { core } = await startInteraction(Test, `<div class="test"></div>`);
+    expect(".test").toHaveInnerHTML(
         `<owl-component contenteditable="false" data-oe-protected="true">owl component</owl-component>`
     );
     core.stopInteractions();
-    expect(el.querySelector(".test").outerHTML).toBe(`<div class="test"></div>`);
+    expect(".test").toHaveOuterHTML(`<div class="test"></div>`);
 });
 
 test("can start interaction in specific el", async () => {
@@ -279,15 +247,15 @@ test("can start interaction in specific el", async () => {
         }
     }
 
-    const { core, el } = await startInteraction(Test, `<p></p>`);
+    const { core } = await startInteraction(Test, `<p></p>`);
 
     expect(n).toBe(0);
-    const p = el.querySelector("p");
+    const p = queryOne("p");
     p.innerHTML = `<div class="test">hello</div>`;
-    core.startInteractions(el);
+    core.startInteractions(queryOne(".test"));
     await animationFrame();
     expect(n).toBe(1);
-    expect(p.innerHTML).toBe(`<div class="test" a="b">hello</div>`);
+    expect(p).toHaveInnerHTML(`<div class="test" a="b">hello</div>`);
 });
 
 test("can start and stop interaction in specific el", async () => {
@@ -305,7 +273,7 @@ test("can start and stop interaction in specific el", async () => {
         }
     }
 
-    const { core, el } = await startInteraction(
+    const { core } = await startInteraction(
         Test,
         `
         <p>
@@ -315,19 +283,19 @@ test("can start and stop interaction in specific el", async () => {
     );
 
     expect(n).toBe(1);
-    const p = el.querySelector("p");
+    const p = queryOne("p");
     expect(p).toHaveInnerHTML(
         `<span class="a test" data-start="true"></span> <span class="b"></span>`
     );
-
-    p.querySelector(".b").classList.add("test");
-    await core.startInteractions(p.querySelector(".b"));
+    const b = queryOne("p .b");
+    b.classList.add("test");
+    await core.startInteractions(b);
     expect(n).toBe(2);
     expect(p).toHaveInnerHTML(
         `<span class="a test" data-start="true"></span> <span class="b test" data-start="true"></span>`
     );
 
-    core.stopInteractions(p.querySelector(".b"));
+    core.stopInteractions(b);
     expect(n).toBe(1);
     expect(p).toHaveInnerHTML(
         `<span class="a test" data-start="true"></span> <span class="b test"></span>`

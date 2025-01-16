@@ -4,7 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-import { click } from "@odoo/hoot-dom";
+import { click, queryFirst } from "@odoo/hoot-dom";
 
 import { onRpc } from "@web/../tests/web_test_helpers";
 
@@ -233,10 +233,10 @@ const meetingRoomTemplate = `
 
 test("website_event_create_meeting_room is started when there is an element .o_wevent_create_room_button", async () => {
     const { core } = await startInteractions(meetingRoomTemplate);
-    expect(core.interactions.length).toBe(1);
+    expect(core.interactions).toHaveLength(1);
 });
 
-test("[click] website_event_create_meeting_room open a modal to create a room", async () => {
+test("[click] website_event_create_meeting_room opens a modal to create a room", async () => {
     onRpc("/event/active_langs", async () => {
         return [
             [
@@ -245,8 +245,8 @@ test("[click] website_event_create_meeting_room open a modal to create a room", 
             ]
         ];
     });
-    const { el } = await startInteractions(meetingRoomTemplate);
-    expect(!!el.querySelector(".o_wevent_create_meeting_room_modal")).toBe(false)
+    await startInteractions(meetingRoomTemplate);
+    expect(queryFirst(".o_wevent_create_meeting_room_modal")).toBe(null);
     await click(".o_wevent_create_room_button");
-    expect(!!el.querySelector(".o_wevent_create_meeting_room_modal")).toBe(true)
+    expect(queryFirst(".o_wevent_create_meeting_room_modal")).not.toBe(null);
 });

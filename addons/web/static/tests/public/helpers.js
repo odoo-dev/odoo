@@ -65,7 +65,6 @@ export async function startInteractions(
     });
 
     return {
-        el: fixture,
         core,
     };
 }

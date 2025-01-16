@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { animationFrame, click } from "@odoo/hoot-dom";
+import { animationFrame, click, queryAll, queryOne } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 import {
     onRpc,
@@ -22,7 +22,7 @@ setupInteractionWhiteList(["website_sale.dynamic_snippet_products", "website_sal
 describe.current.tags("interaction_dev");
 
 test.tags("desktop")("dynamic snippet products loads items and displays them through template", async () => {
-    document.querySelector("html").dataset.mainObject = "product.public.category(2,)";
+    document.documentElement.dataset.mainObject = "product.public.category(2,)";
     onRpc("/website/snippet/filters", async (args) => {
         const json = JSON.parse(new TextDecoder().decode(await args.arrayBuffer()));
         expect(json.params.filter_id).toBe(3);
@@ -55,7 +55,7 @@ test.tags("desktop")("dynamic snippet products loads items and displays them thr
             </div>
         `];
     });
-    const { core, el } = await startInteractions(`
+    const { core } = await startInteractions(`
       <div id="wrapwrap">
           <section data-snippet="s_dynamic_snippet_products" class="s_dynamic_snippet_products s_dynamic s_dynamic_empty pt32 pb32 o_colored_level s_product_product_borderless_1"
                   data-name="Products"
@@ -83,33 +83,30 @@ test.tags("desktop")("dynamic snippet products loads items and displays them thr
           </section>
       </div>
     `);
-    expect(core.interactions.length).toBe(6);
-    const contentEl = el.querySelector(".dynamic_snippet_template");
-    const carouselEl = contentEl.querySelector(".carousel");
+    expect(core.interactions).toHaveLength(6);
     // Neutralize carousel automatic sliding.
-    carouselEl.dataset.bsRide = "false";
-    const itemEls = carouselEl.querySelectorAll(".s_test_item");
-    expect(itemEls[0].dataset.testParam).toBe("test");
-    expect(itemEls[1].dataset.testParam).toBe("test2");
-    expect(itemEls[2].dataset.testParam).toBe("test3");
-    expect(itemEls[3].dataset.testParam).toBe("test4");
-    expect(itemEls[4].dataset.testParam).toBe("test5");
+    queryOne(".dynamic_snippet_template .carousel").dataset.bsRide = "false";
+    const itemEls = queryAll(".s_test_item");
+    expect(itemEls[0]).toHaveAttribute("data-test-param", "test");
+    expect(itemEls[1]).toHaveAttribute("data-test-param", "test2");
+    expect(itemEls[2]).toHaveAttribute("data-test-param", "test3");
+    expect(itemEls[3]).toHaveAttribute("data-test-param", "test4");
+    expect(itemEls[4]).toHaveAttribute("data-test-param", "test5");
     expect(itemEls[3].closest(".carousel-item")).toHaveClass("active");
     expect(itemEls[4].closest(".carousel-item")).not.toHaveClass("active");
     await animationFrame();
-    const nextEl = el.querySelector(".carousel-control-next .oi");
-    await click(nextEl);
+    await click(".carousel-control-next .oi");
     await animationFrame();
     await advanceTime(1000); // Slide duration.
     expect(itemEls[3].closest(".carousel-item")).not.toHaveClass("active");
     expect(itemEls[4].closest(".carousel-item")).toHaveClass("active");
     // Make sure element interactions are started.
-    expect(itemEls[0].dataset.started).toBe("*test*");
-    expect(itemEls[1].dataset.started).toBe("*test2*");
-    expect(itemEls[2].dataset.started).toBe("*test3*");
-    expect(itemEls[3].dataset.started).toBe("*test4*");
-    expect(itemEls[4].dataset.started).toBe("*test5*");
+    expect(itemEls[0]).toHaveAttribute("data-started", "*test*");
+    expect(itemEls[1]).toHaveAttribute("data-started", "*test2*");
+    expect(itemEls[2]).toHaveAttribute("data-started", "*test3*");
+    expect(itemEls[3]).toHaveAttribute("data-started", "*test4*");
+    expect(itemEls[4]).toHaveAttribute("data-started", "*test5*");
     core.stopInteractions();
     // Make sure element interactions are stopped.
-    expect(core.interactions.length).toBe(0);
+    expect(core.interactions).toHaveLength(0);
 });

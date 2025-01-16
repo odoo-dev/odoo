@@ -4,7 +4,6 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-// import { click } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website_event_meet.meeting_room");
 
@@ -231,22 +230,22 @@ const meetingRoomTemplate = `
 
 test("website_event_meeting_room is started when there is an element .o_wevent_meeting_room_card", async () => {
     const { core } = await startInteractions(meetingRoomTemplate);
-    expect(core.interactions.length).toBe(3);
+    expect(core.interactions).toHaveLength(3);
 });
 
-test("[click] website_event_meeting_room enable to pin / unpin a room", async () => {
+test.todo("[click] website_event_meeting_room enable to pin / unpin a room", async () => {
     await startInteractions(meetingRoomTemplate);
     // await click(".o_wevent_meeting_room_is_pinned");
     expect(true).toBe(true);
 });
 
-test("[click] website_event_meeting_room enable to delete a room", async () => {
+test.todo("[click] website_event_meeting_room enable to delete a room", async () => {
     await startInteractions(meetingRoomTemplate);
     // await click(".o_wevent_meeting_room_delete");
     expect(true).toBe(true);
 });
 
-test("[click] website_event_meeting_room enable to duplicate a room", async () => {
+test.todo("[click] website_event_meeting_room enable to duplicate a room", async () => {
     await startInteractions(meetingRoomTemplate);
     // await click(".o_wevent_meeting_room_duplicate");
     expect(true).toBe(true);
