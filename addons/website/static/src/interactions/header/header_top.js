@@ -6,7 +6,7 @@ export class HeaderTop extends Interaction {
     dynamicContent = {
         "#top_menu_collapse, #top_menu_collapse_mobile": {
             "t-on-show.bs.offcanvas": () => this.showCollapse = true,
-            "t-on-hidden.bs.offcanvas": () => this.showCollapse &&= this.mobileNavbarEl.classList.matches(".show, .showing"),
+            "t-on-hidden.bs.offcanvas": () => this.showCollapse &&= this.mobileNavbarEl.matches(".show, .showing"),
             "t-att-class": () => ({
                 "o_top_menu_collapse_shown": this.showCollapse,
             }),

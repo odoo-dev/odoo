@@ -39,7 +39,7 @@ const behaviorWithout = [{
     classList: "o_header_affixed o_header_fade_out o_header_is_scrolled",
 }];
 
-test.tags("desktop")("[scroll] Template without o_header_hide_on_scroll", async () => {
+test("[scroll] Template without o_header_hide_on_scroll", async () => {
     const { core, el } = await startInteractions(getTemplateWithoutHideOnScroll("o_header_fade_out"));
     const wrapwrap = el.querySelector("#wrapwrap");
     const header = el.querySelector("header");
@@ -86,7 +86,7 @@ const behaviorWith = [{
     classList: "o_header_affixed o_header_fade_out o_header_is_scrolled",
 }];
 
-test("[scroll] Template with o_header_hide_on_scroll", async () => {
+test.tags("desktop")("[scroll] Template with o_header_hide_on_scroll", async () => {
     const { core, el } = await startInteractions(getTemplateWithHideOnScroll("o_header_fade_out"));
     const wrapwrap = el.querySelector("#wrapwrap");
     const header = el.querySelector("header");

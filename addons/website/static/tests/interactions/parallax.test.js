@@ -4,7 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-import { scroll } from "@odoo/hoot-dom";
+import { manuallyDispatchProgrammaticEvent, scroll } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.parallax");
 
@@ -27,9 +27,9 @@ const simulateScrolls = async function (el, parallaxBg, sectionTop) {
     const spacings = [];
     for (const target of [0, 1000, 1200]) {
         await scroll(el, { y: target });
-        document.dispatchEvent(new Event("scroll"));
+        await manuallyDispatchProgrammaticEvent(document, "scroll");
         await scroll(el, { y: target + 1 });
-        document.dispatchEvent(new Event("scroll"));
+        await manuallyDispatchProgrammaticEvent(document, "scroll");
         const spacing = parallaxBg.getBoundingClientRect().bottom - sectionTop.getBoundingClientRect().bottom;
         spacings.push(spacing);
     }

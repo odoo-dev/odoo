@@ -1,4 +1,4 @@
-import { animationFrame, advanceTime, scroll } from "@odoo/hoot-dom";
+import { animationFrame, advanceTime,manuallyDispatchProgrammaticEvent, scroll } from "@odoo/hoot-dom";
 
 const endTransition = async function () {
     await animationFrame();
@@ -18,7 +18,7 @@ export const setupTest = async function (core, wrapwrap) {
 
 export const simpleScroll = async function (wrapwrapEl, target) {
     await scroll(wrapwrapEl, target);
-    document.dispatchEvent(new Event("scroll"));
+    await manuallyDispatchProgrammaticEvent(document, "scroll");
     await endTransition();
 }
 
@@ -26,8 +26,8 @@ export const simpleScroll = async function (wrapwrapEl, target) {
 // onScroll handlers. (cf. Headers)
 export const doubleScroll = async function (wrapwrapEl, target, source) {
     await scroll(wrapwrapEl, { y: source + (target > source ? 1 : -1) })
-    document.dispatchEvent(new Event("scroll"));
+    await manuallyDispatchProgrammaticEvent(document, "scroll");
     await scroll(wrapwrapEl, { y: target });
-    document.dispatchEvent(new Event("scroll"));
+    await manuallyDispatchProgrammaticEvent(document, "scroll");
     await endTransition();
 }
