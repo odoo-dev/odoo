@@ -91,3 +91,7 @@ class Session(http.Controller):
     def logout(self, redirect='/odoo'):
         request.session.logout(keep_db=True)
         return request.redirect(redirect, 303)
+
+    @http.route('/web/session/lazy_session_info', type='jsonrpc', auth='public')
+    def get_lazy_session_info(self):
+        return request.env["ir.http"].lazy_session_info()
