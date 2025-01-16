@@ -73,7 +73,7 @@ export class Colibri {
                     options.once = true;
                     return f;
                 },
-                noupdate:
+                noUpdate:
                     (f) =>
                     (...args) => {
                         f.call(this.interaction, ...args);
