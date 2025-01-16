@@ -86,7 +86,7 @@ const behaviorWith = [{
     classList: "o_header_affixed o_header_disappears o_header_is_scrolled",
 }];
 
-test("[scroll] Template with o_header_hide_on_scroll", async () => {
+test.tags("desktop")("[scroll] Template with o_header_hide_on_scroll", async () => {
     const { core, el } = await startInteractions(getTemplateWithHideOnScroll("o_header_disappears"));
     const wrapwrap = el.querySelector("#wrapwrap");
     const header = el.querySelector("header");

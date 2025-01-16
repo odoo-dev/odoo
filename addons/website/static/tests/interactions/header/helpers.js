@@ -35,7 +35,7 @@ export const customScroll = async function (scrollingElement, start, end) {
 export const checkHeader = function (header, main, core, expectedStatus) {
     const message = `Interaction visibility should be ${expectedStatus.visibility}`;
     expect(core.interactions[0].interaction.isVisible).toBe(expectedStatus.visibility, { message });
-    expect(main.style.paddingTop).toBe(`${Math.round(parseFloat(expectedStatus.paddingTop))}px`);
+    expect(`${main.style.paddingTop ? Math.round(parseFloat(main.style.paddingTop)) : 0}px`).toBe(expectedStatus.paddingTop);
     expect(header).toHaveStyle({ transform: expectedStatus.transform });
     const headerClasses = [...header.classList].sort().join(" ");
     expect(headerClasses).toEqual(expectedStatus.classList);

@@ -68,7 +68,7 @@ const behaviorWith = [{
     classList: "o_header_affixed o_header_fixed o_header_is_scrolled o_top_fixed_element",
 }];
 
-test("[scroll] Template with o_header_hide_on_scroll", async () => {
+test.tags("desktop")("[scroll] Template with o_header_hide_on_scroll", async () => {
     const { core, el } = await startInteractions(getTemplateWithHideOnScroll("o_header_fixed"));
     const wrapwrap = el.querySelector("#wrapwrap");
     const header = el.querySelector("header");
