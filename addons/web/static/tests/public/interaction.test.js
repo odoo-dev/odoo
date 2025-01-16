@@ -579,7 +579,7 @@ describe("handling crashes", () => {
         class Test extends Interaction {
             static selector = ".test";
             dynamicContent = {
-                span: { click: () => {} },
+                span: { click: () => { } },
             };
         }
         let error = null;
@@ -723,13 +723,13 @@ describe("using qualifiers", () => {
         expect.verifySteps(["span"]);
     });
 
-    test("add a listener with the .noupdate qualifier", async () => {
+    test("add a listener with the .noUpdate qualifier", async () => {
         let clicked = false;
         class Test extends Interaction {
             static selector = ".test";
             dynamicContent = {
                 span: {
-                    "t-on-click.noupdate": this.doSomething,
+                    "t-on-click.noUpdate": this.doSomething,
                     "t-att-class": () => ({ a: clicked }),
                 },
             };
@@ -780,7 +780,7 @@ describe("using qualifiers", () => {
             static selector = ".test";
             dynamicContent = {
                 span: {
-                    "t-on-click.noupdate.stop.prevent": this.doSomething,
+                    "t-on-click.noUpdate.stop.prevent": this.doSomething,
                     "t-att-class": () => ({ a: clicked }),
                 },
             };
@@ -805,7 +805,7 @@ describe("using qualifiers", () => {
             static selector = ".test";
             dynamicContent = {
                 span: {
-                    "t-on-click.noupdate.stop.prevent": this.doSomething,
+                    "t-on-click.noUpdate.stop.prevent": this.doSomething,
                 },
             };
             doSomething(ev) {

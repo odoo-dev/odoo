@@ -15,7 +15,7 @@ export class AnimateOverflow extends Interaction {
             }),
         },
         _root: {
-            "t-on-updatecontent.noupdate": (ev) => {
+            "t-on-updatecontent.noUpdate": (ev) => {
                 if (ev.target.classList.contains("o_animate")) {
                     this.updateContent();
                 }

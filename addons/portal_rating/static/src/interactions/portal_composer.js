@@ -29,7 +29,7 @@ patch(PortalComposer, {
             "default_message_id": false,
             "default_rating_value": 4.0,
             "force_submit_url": false,
-            "reloadRatingPopupComposer": (data) => {},
+            "reloadRatingPopupComposer": (data) => { },
         }, options);
     },
 });
@@ -121,7 +121,7 @@ patch(PortalComposer.prototype, {
     async onSubmitButtonClick(ev) {
         const result = await super.onSubmitButtonClick(...arguments);
         const modalEl = this.el.closest("#ratingpopupcomposer");
-        this.addListener(modalEl, "hidden.bs.modal.noupdate", () => {
+        this.addListener(modalEl, "hidden.bs.modal.noUpdate", () => {
             this.options.reloadRatingPopupComposer(result);
         });
         window.Modal.getOrCreateInstance(modalEl).hide();
