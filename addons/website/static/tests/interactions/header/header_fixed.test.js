@@ -58,12 +58,12 @@ const behaviorWith = [{
     classList: "o_header_fixed o_top_fixed_element",
 }, {
     visibility: true,
-    paddingTop: "38.9915px",
+    paddingTop: "39px",
     transform: "matrix(1, 0, 0, 1, 0, 0)",
     classList: "o_header_affixed o_header_fixed o_header_is_scrolled o_top_fixed_element",
 }, {
     visibility: true,
-    paddingTop: "38.9915px",
+    paddingTop: "39px",
     transform: "matrix(1, 0, 0, 1, 0, 0)",
     classList: "o_header_affixed o_header_fixed o_header_is_scrolled o_top_fixed_element",
 }];
