@@ -26,23 +26,8 @@ export class BaseHeaderSpecial extends BaseHeader {
         this.scrollOffset = 200;
         this.scrollingDownward = true;
 
+        this.searchbarEl = this.hideEl?.querySelector(":not(.modal-content) > .o_searchbar_form");
         this.dropdownClickedEl = null;
-
-        if (this.hideEl) {
-            this.searchbarEl = this.hideEl.querySelector(":not(.modal-content) > .o_searchbar_form");
-            this.isHideElTop = this.hideEl.matches(":first-child");
-            if (!this.isHideElTop) {
-                // If the hideEl is not the top element, we need to set the 
-                // z-index in order to hide it behind the top element (showEl).
-                // The z-index property is not active with position: static, 
-                // which is the default value.
-                const showEl = this.hideEl.previousElementSibling;
-                showEl.style.position = "relative";
-                showEl.style.setProperty("z-index", 1);
-                this.hideEl.style.position = "relative";
-                this.hideEl.style.setProperty("z-index", 0);
-            }
-        }
     }
 
     onDropdownShow(ev) {
@@ -88,20 +73,38 @@ export class BaseHeaderSpecial extends BaseHeader {
             this.toggleCSSAffixed(false);
         }
 
-        if (this.hideEl && this.isVisible) {
-            // We check if we are hiding the scrollingElement to deactivate the 
-            // transition and avoid the translate animation. Otherwise, we need 
-            // to reactivate it for transformShow / transformHide.
-            this.isHiding = scroll < this.hideEl.getBoundingClientRect().height;
-            this.hiddenQuantity = Math.min(scroll, this.hideEl.getBoundingClientRect().height);
-            if (this.isHideElTop) {
-                // If the hideEl is at the top, we move the whole header element.
-                this.forcedScroll = this.hiddenQuantity;
-                this.transformShow();
+        if (this.hideEl) {
+            let elHeight = 0;
+            if (this.cssAffixed && this.searchbarEl?.matches(".show")) {
+                // Close the dropdown of the search bar if it's open when
+                // scrolling. Otherwise, the calculated height of the
+                // 'hideEl' element will be incorrect because it will
+                // include the dropdown height.
+                this.searchbarEl.querySelector("input").blur();
+                elHeight = this.hideEl.offsetHeight;
             } else {
-                // If the hideEl is at the bottom, we only move the hideEl and
-                // it will be hidden behind the other part of the header.
-                this.hideEl.style.marginTop = `-${this.hiddenQuantity}px`;
+                elHeight = this.hideEl.scrollHeight;
+            }
+            const scrollDelta = window.matchMedia(`(prefers-reduced-motion: reduce)`).matches ?
+                scroll : Math.floor(scroll / 4);
+            elHeight = Math.max(0, elHeight - scrollDelta);
+            this.hideEl.classList.toggle("hidden", elHeight === 0);
+            if (elHeight === 0) {
+                this.hideEl.removeAttribute("style");
+            } else {
+                // When the page hasn't been scrolled yet, we don't set overflow
+                // to hidden. Without this, the dropdowns would be invisible.
+                // (e.g., "user menu" dropdown).
+                this.hideEl.style.overflow = this.cssAffixed ? "hidden" : "";
+                this.hideEl.style.height = this.cssAffixed ? `${elHeight}px` : "";
+                let elPadding = parseInt(getComputedStyle(this.hideEl).paddingBlock);
+                if (elHeight < elPadding * 2) {
+                    const heightDifference = elPadding * 2 - elHeight;
+                    elPadding = Math.max(0, elPadding - Math.floor(heightDifference / 2));
+                    this.hideEl.style.setProperty("padding-block", `${elPadding}px`, "important");
+                } else {
+                    this.hideEl.style.paddingBlock = "";
+                }
                 this.adaptToHeaderChange();
             }
         }

@@ -24,9 +24,6 @@ export class BaseHeader extends Interaction {
                 "o_header_is_scrolled": this.isScrolled,
                 "o_header_no_transition": !this.transitionActive,
             }),
-            "t-att-style": () => ({
-                "transition": this.isHiding ? "none" : "",
-            })
         },
         ".offcanvas": {
             "t-on-show.bs.offcanvas": this.disableScroll,
@@ -195,10 +192,15 @@ export class BaseHeader extends Interaction {
     //--------------------------------------------------------------
 
     getHeaderHeight() {
-        if (this.hideEl && !this.isHideElTop && !this.isSmall()) {
-            // Ensure the header height stays the same on desktop
-            return this.hiddenQuantity + this.el.getBoundingClientRect().height;
+        if (this.isSmall()) {
+            // Ensure we don't consider the hiddenOnScroll element on mobile
+            return this.el.getBoundingClientRect().height;
         }
+        if (this.hideEl?.classList.contains("hidden")) {
+            // Ensure the header height stays the same on desktop
+            return this.hideElHeight + this.el.getBoundingClientRect().height;
+        }
+        this.hideElHeight = this.hideEl?.getBoundingClientRect().height || this.hideElHeight;
         return this.el.getBoundingClientRect().height;
     }
 
