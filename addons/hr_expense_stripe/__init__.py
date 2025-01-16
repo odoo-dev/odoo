@@ -1,4 +1,5 @@
 from . import models
+from . import controllers
 
 
 def _post_init_hook_create_stripe_journal(env):
