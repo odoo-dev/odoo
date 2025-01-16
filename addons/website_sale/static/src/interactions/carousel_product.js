@@ -7,13 +7,13 @@ export class CarouselProduct extends Interaction {
     static selector = "#o-carousel-product";
     dynamicContent = {
         _root: {
-            "t-on-slide.bs.carousel.noupdate": this.onSlideCarouselProduct,
+            "t-on-slide.bs.carousel.noUpdate": this.onSlideCarouselProduct,
             "t-att-style": () => ({
                 "top": this.top,
             }),
         },
         _window: {
-            "t-on-resize.noupdate": this.throttled(this.onSlideCarouselProduct),
+            "t-on-resize.noUpdate": this.throttled(this.onSlideCarouselProduct),
         },
         ".carousel-indicators": {
             "t-att-style": () => ({
