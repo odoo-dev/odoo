@@ -3,8 +3,8 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
-import { manuallyDispatchProgrammaticEvent, scroll } from "@odoo/hoot-dom";
+import { describe, expect, getFixture, test } from "@odoo/hoot";
+import { manuallyDispatchProgrammaticEvent, queryOne, queryRect, scroll } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.bottom_fixed_element");
 
@@ -16,19 +16,19 @@ const scrollTo = async function (el, scrollTarget, bottomFixedElement) {
     // Replace the bottomFixedElement at the bottom of the page
     bottomFixedElement.style.position = "absolute";
     bottomFixedElement.style.top = scrollTarget + "px";
-    bottomFixedElement.style.left = `calc(50% - ${bottomFixedElement.getBoundingClientRect().width / 2}px)`;
+    bottomFixedElement.style.left = `calc(50% - ${queryRect(bottomFixedElement).width / 2}px)`;
     // Dispatch the scroll event
     await manuallyDispatchProgrammaticEvent(document, "scroll");
 }
 
 const scrollToMiddle = async function (el, bottomFixedElement) {
     // 2550 = headerHeight + mainHeight + footerHeight
-    await scrollTo(el, 2550 / 2 - bottomFixedElement.getBoundingClientRect().height, bottomFixedElement)
+    await scrollTo(el, 2550 / 2 - queryRect(bottomFixedElement).height, bottomFixedElement)
 }
 
 const scrollToBottom = async function (el, bottomFixedElement) {
     // 2550 = headerHeight + mainHeight + footerHeight
-    await scrollTo(el, 2550 - bottomFixedElement.getBoundingClientRect().height, bottomFixedElement)
+    await scrollTo(el, 2550 - queryRect(bottomFixedElement).height, bottomFixedElement)
 }
 
 const getTemplate = function (options = {}) {
@@ -57,41 +57,45 @@ test("bottom_fixed_element is started when there is an element #wrapwrap", async
 });
 
 test("show button fixed element when over no button (0 button)", async () => {
-    const { el } = await startInteractions(getTemplate({ withButtonCenter: false, withButtonLeft: false }));
-    el.style.overflowY = "scroll";
-    const bottomFixedElement = el.querySelector(".o_bottom_fixed_element");
-    await scrollToMiddle(el, bottomFixedElement);
+    await startInteractions(getTemplate({ withButtonCenter: false, withButtonLeft: false }));
+    const fixture = getFixture();
+    fixture.style.overflowY = "scroll";
+    const bottomFixedElement = queryOne(".o_bottom_fixed_element");
+    await scrollToMiddle(fixture, bottomFixedElement);
     expect(bottomFixedElement).not.toHaveClass("o_bottom_fixed_element_hidden");
-    await scrollToBottom(el, bottomFixedElement);
+    await scrollToBottom(fixture, bottomFixedElement);
     expect(bottomFixedElement).not.toHaveClass("o_bottom_fixed_element_hidden");
 });
 
 test("show button fixed element when over no button (1 button)", async () => {
-    const { el } = await startInteractions(getTemplate({ withButtonCenter: false, withButtonLeft: true }));
-    el.style.overflowY = "scroll";
-    const bottomFixedElement = el.querySelector(".o_bottom_fixed_element");
-    await scrollToMiddle(el, bottomFixedElement);
+    await startInteractions(getTemplate({ withButtonCenter: false, withButtonLeft: true }));
+    const fixture = getFixture();
+    fixture.style.overflowY = "scroll";
+    const bottomFixedElement = queryOne(".o_bottom_fixed_element");
+    await scrollToMiddle(fixture, bottomFixedElement);
     expect(bottomFixedElement).not.toHaveClass("o_bottom_fixed_element_hidden");
-    await scrollToBottom(el, bottomFixedElement);
+    await scrollToBottom(fixture, bottomFixedElement);
     expect(bottomFixedElement).not.toHaveClass("o_bottom_fixed_element_hidden");
 });
 
 test("hide button fixed element when over one button (1 button)", async () => {
-    const { el } = await startInteractions(getTemplate({ withButtonCenter: true, withButtonLeft: false }));
-    el.style.overflowY = "scroll";
-    const bottomFixedElement = el.querySelector(".o_bottom_fixed_element");
-    await scrollToMiddle(el, bottomFixedElement);
+    await startInteractions(getTemplate({ withButtonCenter: true, withButtonLeft: false }));
+    const fixture = getFixture();
+    fixture.style.overflowY = "scroll";
+    const bottomFixedElement = queryOne(".o_bottom_fixed_element");
+    await scrollToMiddle(fixture, bottomFixedElement);
     expect(bottomFixedElement).not.toHaveClass("o_bottom_fixed_element_hidden");
-    await scrollToBottom(el, bottomFixedElement);
+    await scrollToBottom(fixture, bottomFixedElement);
     expect(bottomFixedElement).toHaveClass("o_bottom_fixed_element_hidden");
 });
 
 test("hide button fixed element when over one button (2 buttons)", async () => {
-    const { el } = await startInteractions(getTemplate({ withButtonCenter: true, withButtonLeft: true }));
-    el.style.overflowY = "scroll";
-    const bottomFixedElement = el.querySelector(".o_bottom_fixed_element");
-    await scrollToMiddle(el, bottomFixedElement);
+    await startInteractions(getTemplate({ withButtonCenter: true, withButtonLeft: true }));
+    const fixture = getFixture();
+    fixture.style.overflowY = "scroll";
+    const bottomFixedElement = queryOne(".o_bottom_fixed_element");
+    await scrollToMiddle(fixture, bottomFixedElement);
     expect(bottomFixedElement).not.toHaveClass("o_bottom_fixed_element_hidden");
-    await scrollToBottom(el, bottomFixedElement);
+    await scrollToBottom(fixture, bottomFixedElement);
     expect(bottomFixedElement).toHaveClass("o_bottom_fixed_element_hidden");
 });

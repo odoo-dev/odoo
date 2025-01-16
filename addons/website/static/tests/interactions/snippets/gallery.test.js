@@ -4,7 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-import { animationFrame, click, press } from "@odoo/hoot-dom";
+import { animationFrame, click, press, queryAll } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
 setupInteractionWhiteList("website.gallery");
@@ -45,23 +45,21 @@ test("gallery does nothing if there is no non-slideshow s_image_gallery", async 
 });
 
 async function checkLightbox({ next, previous, close }) {
-    const { core, el } = await startInteractions(defaultGallery);
+    const { core } = await startInteractions(defaultGallery);
     expect(core.interactions).toHaveLength(1);
-    const imgEls = el.querySelectorAll("img");
+    const imgEls = queryAll("img");
     await click(imgEls[3]);
     await animationFrame();
     await advanceTime(1000);
-    const lightboxEl = el.ownerDocument.querySelector(".s_gallery_lightbox");
+    const lightboxEl = document.querySelector(".s_gallery_lightbox");
     expect(lightboxEl).not.toBe(null);
 
     async function checkActiveImage(expectedIndex) {
         await animationFrame();
         await advanceTime(1000);
-        let lightboxActiveImgEl = lightboxEl.querySelector(".active img");
+        const lightboxActiveImgEl = lightboxEl.querySelector(".active img");
         expect(lightboxActiveImgEl).not.toBe(null);
-        expect(imgEls[expectedIndex].src).toMatch(
-            lightboxActiveImgEl.dataset.src,
-        );
+        expect(imgEls[expectedIndex]).toHaveAttribute("src", lightboxActiveImgEl.dataset.src);
     }
 
     await checkActiveImage(3);
@@ -78,7 +76,7 @@ async function checkLightbox({ next, previous, close }) {
     await close(lightboxEl);
     await animationFrame();
     await advanceTime(1000);
-    expect(el.ownerDocument.querySelector(".s_gallery_lightbox")).toBe(null);
+    expect(document.querySelector(".s_gallery_lightbox")).toBe(null);
 }
 
 test("gallery interaction opens lightbox on click, then use keyboard", async () => {

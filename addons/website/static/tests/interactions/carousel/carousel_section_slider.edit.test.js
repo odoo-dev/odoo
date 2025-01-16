@@ -6,13 +6,14 @@ import {
 import { describe, expect, test } from "@odoo/hoot";
 
 import { switchToEditMode } from "../../helpers";
+import { queryAll } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.carousel_section_slider");
 
 describe.current.tags("interaction_dev");
 
 test("carousel_section_slider resets slide to attributes", async () => {
-    const { core, el } = await startInteractions(`
+    const { core } = await startInteractions(`
         <section>
             <div id="slideshow_sample" class="carousel carousel-dark slide" data-bs-ride="ride" data-bs-interval="0">
                 <div class="carousel-inner">
@@ -47,22 +48,22 @@ test("carousel_section_slider resets slide to attributes", async () => {
     await switchToEditMode(core);
 
     expect(core.interactions).toHaveLength(1);
-    const controlEls = el.querySelectorAll(".carousel-control-prev, .carousel-control-next");
-    const indicatorEls = el.querySelectorAll(".carousel-indicators > *");
+    const controlEls = queryAll(".carousel-control-prev, .carousel-control-next");
+    const indicatorEls = queryAll(".carousel-indicators > *");
     for (const controlEl of controlEls) {
-        expect(controlEl.dataset.bsSlide).toBe(undefined);
+        expect(controlEl).not.toHaveAttribute("data-bs-slide");
     }
     for (const indicatorEl of indicatorEls) {
-        expect(indicatorEl.dataset.bsSlideTo).toBe(undefined);
+        expect(indicatorEl).not.toHaveAttribute("data-bs-slide-to");
     }
 
     core.stopInteractions();
 
     expect(core.interactions).toHaveLength(0);
     for (const controlEl of controlEls) {
-        expect(controlEl.dataset.bsSlide).not.toBe(undefined);
+        expect(controlEl).toHaveAttribute("data-bs-slide");
     }
     for (const indicatorEl of indicatorEls) {
-        expect(indicatorEl.dataset.bsSlideTo).not.toBe(undefined);
+        expect(indicatorEl).toHaveAttribute("data-bs-slide-to");
     }
 });

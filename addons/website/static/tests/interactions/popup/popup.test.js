@@ -12,6 +12,7 @@ import {
     manuallyDispatchProgrammaticEvent,
     pointerDown,
     press,
+    queryOne,
     tick,
 } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
@@ -170,12 +171,12 @@ describe("show popup", () => {
     });
 
     test.tags("desktop")("show popup when mouse leaves document", async () => {
-        const { core, el } = await startInteractions(getPopupTemplate({ display: "mouseExit" }));
+        const { core } = await startInteractions(getPopupTemplate({ display: "mouseExit" }));
         expect(core.interactions).toHaveLength(1);
-        const modalEl = el.querySelector("#sPopup .modal");
+        const modalEl = queryOne("#sPopup .modal");
         expect(modalEl).not.toBeVisible();
         await hover(modalEl.ownerDocument.body);
-        await leave(modalEl.ownerDocument.body);
+        await leave();
         expect(modalEl).toBeVisible();
     });
 });
@@ -184,12 +185,12 @@ describe("trap focus", () => {
     beforeEach(removeTransitions);
 
     test("focus is trapped when popup opens", async () => {
-        const { core, el } = await startInteractions(`
+        const { core } = await startInteractions(`
             <a href="#">Link</a>
             ${getPopupTemplate({ modalId: "modal", focusableElements: true })}
         `);
         expect(core.interactions).toHaveLength(1);
-        await pointerDown(el.ownerDocument.body);
+        await pointerDown(document.body);
         await tick();
         await animationFrame();
         await advanceTime(100);
@@ -205,13 +206,13 @@ describe("trap focus", () => {
     });
 
     test("reset focus on the previous active element when popup is closed", async () => {
-        const { core, el } = await startInteractions(`
+        const { core } = await startInteractions(`
             <a id="showLink" href="#">Link</a>
             ${getPopupTemplate({ modalId: "modal" })}
         `);
         expect(core.interactions).toHaveLength(1);
-        await pointerDown(el.ownerDocument.body);
-        expect(el.ownerDocument.body).toBeFocused(); // Just making sure.
+        await pointerDown(document.body);
+        expect(document.body).toBeFocused(); // Just making sure.
         await press("Tab");
         expect("#showLink").toBeFocused();
         await tick();
@@ -226,14 +227,14 @@ describe("trap focus", () => {
     });
 
     test("trap & reset focus when popup opens on click", async () => {
-        const { core, el } = await startInteractions(`
+        const { core } = await startInteractions(`
             <a href="#modal">Show popup</a>
             ${getPopupTemplate({ display: "onClick", modalId: "modal", focusableElements: true })}
         `);
         const modal = "#sPopup #modal[data-display='onClick']";
         expect(core.interactions).toHaveLength(1);
-        await pointerDown(el.ownerDocument.body);
-        expect(el.ownerDocument.body).toBeFocused(); // Just making sure.
+        await pointerDown(document.body);
+        expect(document.body).toBeFocused(); // Just making sure.
         await press("Tab");
         expect("[href='#modal']").toBeFocused();
         await press("Enter");
@@ -255,13 +256,13 @@ describe("trap focus", () => {
     });
 
     test("intercept & reset focus with no backdrop popup", async () => {
-        const { core, el } = await startInteractions(`
+        const { core } = await startInteractions(`
             <a id="link1" href="#">Link</a>
             ${getPopupTemplate({ modalId: "modal", backdrop: false })}
         `);
         expect(core.interactions).toHaveLength(1);
-        await pointerDown(el.ownerDocument.body);
-        expect(el.ownerDocument.body).toBeFocused(); // Just making sure.
+        await pointerDown(document.body);
+        expect(document.body).toBeFocused(); // Just making sure.
         await press("Tab");
         expect("#link1").toBeFocused();
         await tick();

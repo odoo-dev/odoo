@@ -4,7 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-import { click } from "@odoo/hoot-dom";
+import { click, queryOne } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
 setupInteractionWhiteList("website.carousel_bootstrap_upgrade_fix");
@@ -12,7 +12,7 @@ setupInteractionWhiteList("website.carousel_bootstrap_upgrade_fix");
 describe.current.tags("interaction_dev");
 
 test("carousel_bootstrap_upgrade_fix is tagged while sliding", async () => {
-    const { core, el } = await startInteractions(`
+    const { core } = await startInteractions(`
         <section class="s_image_gallery o_slideshow pt24 pb24 s_image_gallery_controllers_outside s_image_gallery_controllers_outside_arrows_right s_image_gallery_indicators_dots s_image_gallery_arrows_default" data-snippet="s_image_gallery" data-vcss="002" data-columns="3">
             <div class="o_container_small overflow-hidden">
                 <div id="slideshow_sample" class="carousel carousel-dark slide" data-bs-interval="5000">
@@ -48,9 +48,9 @@ test("carousel_bootstrap_upgrade_fix is tagged while sliding", async () => {
     `);
     expect(core.interactions).toHaveLength(1);
 
-    const carouselEl = el.querySelector(".carousel");
-    expect(carouselEl.dataset.bsRide).toBe("carousel");
-    expect(carouselEl.dataset.bsInterval).toBe("5000");
+    const carouselEl = queryOne(".carousel");
+    expect(carouselEl).toHaveAttribute("data-bs-ride", "carousel");
+    expect(carouselEl).toHaveAttribute("data-bs-interval", "5000");
     expect(carouselEl).not.toHaveClass("o_carousel_sliding");
 
     await click(carouselEl.querySelector(".carousel-control-next"));

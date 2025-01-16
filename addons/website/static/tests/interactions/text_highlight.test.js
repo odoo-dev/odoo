@@ -4,7 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-import { animationFrame } from "@odoo/hoot-dom";
+import { animationFrame, queryAll, queryFirst } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.text_highlight");
 
@@ -31,20 +31,20 @@ test("text_highlight is started when there is an element #wrapwrap", async () =>
 });
 
 test("[resize] update the number of highlight items when necessary", async () => {
-    const { el } = await startInteractions(highlightTemplate);
-    el.querySelector("div").style.width = "1000px";
+    await startInteractions(highlightTemplate);
+    queryFirst("div").style.width = "1000px";
 
     // Ensure the update is finished
     await animationFrame();
     await animationFrame();
-    const numberOfItems1 = el.querySelectorAll(".o_text_highlight_item").length;
+    const numberOfItems1 = queryAll(".o_text_highlight_item").length;
 
-    el.querySelector("div").style.width = "200px";
+    queryFirst("div").style.width = "200px";
 
     // Ensure the update is finished
     await animationFrame();
     await animationFrame();
-    const numberOfItems2 = el.querySelectorAll(".o_text_highlight_item").length;
+    const numberOfItems2 = queryAll(".o_text_highlight_item").length;
 
-    expect(numberOfItems1 < numberOfItems2).toBe(true);
+    expect(numberOfItems1).toBeLessThan(numberOfItems2);
 });

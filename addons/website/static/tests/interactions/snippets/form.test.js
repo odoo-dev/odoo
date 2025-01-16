@@ -4,7 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-import { click, fill } from "@odoo/hoot-dom";
+import { click, fill, queryOne } from "@odoo/hoot-dom";
 import { advanceTime, Deferred } from "@odoo/hoot-mock";
 
 import { MockServer, onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
@@ -13,9 +13,13 @@ setupInteractionWhiteList(["website.form", "website.post_link"]);
 
 describe.current.tags("interaction_dev");
 
-function field(inputEl) {
-    return inputEl.closest(".s_website_form_field");
-}
+function checkField(inputEl, isVisible, hasError) {
+    const fieldEl = inputEl.closest(".s_website_form_field");
+    isVisible ? expect(fieldEl).not.toHaveClass("d-none") : expect(fieldEl).toHaveClass("d-none");
+    isVisible ? expect(inputEl).toBeEnabled() : expect(inputEl).not.toBeEnabled();
+    hasError ? expect(inputEl).toHaveClass("is-invalid") : expect(inputEl).not.toHaveClass("is-invalid");
+    hasError ? expect(fieldEl).toHaveClass("o_has_error") : expect(fieldEl).not.toHaveClass("o_has_error");
+};
 
 const formTemplate = `
     <div id="wrapwrap">
@@ -92,193 +96,153 @@ const formTemplate = `
 // TODO Split in distinct tests.
 
 test("form checks fields", async () => {
-    const { core, el } = await startInteractions(formTemplate);
+    const { core } = await startInteractions(formTemplate);
     expect(core.interactions).toHaveLength(1);
-    const formEl = el.querySelector("form");
-    const nameEl = formEl.querySelector("input[name=name]");
-    const mailEl = formEl.querySelector("input[name=email_from]");
-    const subjectEl = formEl.querySelector("input[name=subject]");
-    const questionEl = formEl.querySelector("textarea[name=description]");
-    const submitEl = formEl.querySelector("a.s_website_form_send");
-    expect(nameEl).not.toBe(undefined);
-    expect(nameEl.value).toBe("Mitchell Admin");
-    expect(mailEl).not.toBe(undefined);
-    expect(mailEl.value).toBe("");
-    expect(subjectEl).not.toBe(undefined);
-    expect(questionEl).not.toBe(undefined);
-    expect(submitEl).not.toBe(undefined);
+    expect(queryOne("form input[name=name]")).toHaveValue("Mitchell Admin");
+    expect(queryOne("form input[name=email_from]")).toHaveValue("");
+    expect(queryOne("form input[name=subject]")).not.toBe(undefined);
+    expect(queryOne("form textarea[name=description]")).not.toBe(undefined);
+    expect(queryOne("form a.s_website_form_send")).not.toBe(undefined);
 });
 
 test("(name) form checks conditions", async () => {
-    const { el } = await startInteractions(formTemplate);
-    const nameEl = el.querySelector("input[name=name]");
+    await startInteractions(formTemplate);
+    const nameEl = queryOne("input[name=name]");
 
-    const checkField = (isVisible, hasError) => {
-        const fieldEl = field(nameEl);
-        isVisible ? expect(fieldEl).not.toHaveClass("d-none") : expect(fieldEl).toHaveClass("d-none");
-        isVisible ? expect(nameEl.disabled).not.toBe(undefined) : expect(nameEl.disabled).toBe(true);
-        hasError ? expect(nameEl).toHaveClass("is-invalid") : expect(nameEl).not.toHaveClass("is-invalid");
-        hasError ? expect(fieldEl).toHaveClass("o_has_error") : expect(fieldEl).not.toHaveClass("o_has_error");
-    };
-
-    checkField(true, false);
+    checkField(nameEl, true, false);
     // Submit
     await click("a.s_website_form_send");
-    checkField(true, false);
+    checkField(nameEl, true, false);
     // Fill mail
     await click("input[name=email_from]");
     await fill("a@b.com");
     await advanceTime(400); // Debounce delay.
-    checkField(true, false);
+    checkField(nameEl, true, false);
     // Submit
     await click("a.s_website_form_send");
-    checkField(true, false);
+    checkField(nameEl, true, false);
     // Fill subject
     await click("input[name=subject]");
     await fill("Subject");
     await advanceTime(400); // Debounce delay.
-    checkField(true, false);
+    checkField(nameEl, true, false);
     // Submit
     await click("a.s_website_form_send");
-    checkField(true, false);
+    checkField(nameEl, true, false);
     // Fill question
     await click("textarea[name=description]");
     await fill("Question");
     await advanceTime(400); // Debounce delay.
-    checkField(true, false);
+    checkField(nameEl, true, false);
     // Submit
     onRpc("/website/form/mail.mail", async () => { return {} });
     await click("a.s_website_form_send");
-    checkField(true, false);
+    checkField(nameEl, true, false);
 });
 
 test("(mail) form checks conditions", async () => {
-    const { el } = await startInteractions(formTemplate);
-    const mailEl = el.querySelector("input[name=email_from]");
+    await startInteractions(formTemplate);
+    const mailEl = queryOne("input[name=email_from]");
 
-    const checkField = (isVisible, hasError) => {
-        const fieldEl = field(mailEl);
-        isVisible ? expect(fieldEl).not.toHaveClass("d-none") : expect(fieldEl).toHaveClass("d-none");
-        isVisible ? expect(mailEl.disabled).not.toBe(undefined) : expect(mailEl.disabled).toBe(true);
-        hasError ? expect(mailEl).toHaveClass("is-invalid") : expect(mailEl).not.toHaveClass("is-invalid");
-        hasError ? expect(fieldEl).toHaveClass("o_has_error") : expect(fieldEl).not.toHaveClass("o_has_error");
-    };
-
-    checkField(true, false);
+    checkField(mailEl, true, false);
     // Submit
     await click("a.s_website_form_send");
-    checkField(true, true);
+    checkField(mailEl, true, true);
     // Fill mail
     await click("input[name=email_from]");
     await fill("a@b.com");
     await advanceTime(400); // Debounce delay.
-    checkField(true, true);
+    checkField(mailEl, true, true);
     // Submit
     await click("a.s_website_form_send");
-    checkField(true, false);
+    checkField(mailEl, true, false);
     // Fill subject
     await click("input[name=subject]");
     await fill("Subject");
     await advanceTime(400); // Debounce delay.
-    checkField(true, false);
+    checkField(mailEl, true, false);
     // Submit
     await click("a.s_website_form_send");
-    checkField(true, false);
+    checkField(mailEl, true, false);
     // Fill question
     await click("textarea[name=description]");
     await fill("Question");
     await advanceTime(400); // Debounce delay.
-    checkField(true, false);
+    checkField(mailEl, true, false);
     // Submit
     onRpc("/website/form/mail.mail", async () => { return {} });
     await click("a.s_website_form_send");
-    checkField(true, false);
+    checkField(mailEl, true, false);
 });
 
 test("(subject) form checks conditions", async () => {
-    const { el } = await startInteractions(formTemplate);
-    const subjectEl = el.querySelector("input[name=subject]");
+    await startInteractions(formTemplate);
+    const subjectEl = queryOne("input[name=subject]");
 
-    const checkField = (isVisible, hasError) => {
-        const fieldEl = field(subjectEl);
-        isVisible ? expect(fieldEl).not.toHaveClass("d-none") : expect(fieldEl).toHaveClass("d-none");
-        isVisible ? expect(subjectEl.disabled).not.toBe(undefined) : expect(subjectEl.disabled).toBe(true);
-        hasError ? expect(subjectEl).toHaveClass("is-invalid") : expect(subjectEl).not.toHaveClass("is-invalid");
-        hasError ? expect(fieldEl).toHaveClass("o_has_error") : expect(fieldEl).not.toHaveClass("o_has_error");
-    };
-
-    checkField(false, false);
+    checkField(subjectEl, false, false);
     // Submit
     await click("a.s_website_form_send");
-    checkField(false, false);
+    checkField(subjectEl, false, false);
     // Fill mail
     await click("input[name=email_from]");
     await fill("a@b.com");
     await advanceTime(400); // Debounce delay.
-    checkField(true, false);
+    checkField(subjectEl, true, false);
     // Submit
     await click("a.s_website_form_send");
-    checkField(true, true);
+    checkField(subjectEl, true, true);
     // Fill subject
     await click("input[name=subject]");
     await fill("Subject");
     await advanceTime(400); // Debounce delay.
-    checkField(true, true);
+    checkField(subjectEl, true, true);
     // Submit
     await click("a.s_website_form_send");
-    checkField(true, false);
+    checkField(subjectEl, true, false);
     // Fill question
     await click("textarea[name=description]");
     await fill("Question");
     await advanceTime(400); // Debounce delay.
-    checkField(true, false);
+    checkField(subjectEl, true, false);
     // Submit
     onRpc("/website/form/mail.mail", async () => { return {} });
     await click("a.s_website_form_send");
-    checkField(true, false);
+    checkField(subjectEl, true, false);
 });
 
 test("(question) form checks conditions", async () => {
-    const { el } = await startInteractions(formTemplate);
-    const questionEl = el.querySelector("textarea[name=description]");
+    await startInteractions(formTemplate);
+    const questionEl = queryOne("textarea[name=description]");
 
-    const checkField = (isVisible, hasError) => {
-        const fieldEl = field(questionEl);
-        isVisible ? expect(fieldEl).not.toHaveClass("d-none") : expect(fieldEl).toHaveClass("d-none");
-        isVisible ? expect(questionEl.disabled).not.toBe(undefined) : expect(questionEl.disabled).toBe(true);
-        hasError ? expect(questionEl).toHaveClass("is-invalid") : expect(questionEl).not.toHaveClass("is-invalid");
-        hasError ? expect(fieldEl).toHaveClass("o_has_error") : expect(fieldEl).not.toHaveClass("o_has_error");
-    };
-
-    checkField(false, false);
+    checkField(questionEl, false, false);
     // Submit
     await click("a.s_website_form_send");
-    checkField(false, false);
+    checkField(questionEl, false, false);
     // Fill mail
     await click("input[name=email_from]");
     await fill("a@b.com");
     await advanceTime(400); // Debounce delay.
-    checkField(false, false);
+    checkField(questionEl, false, false);
     // Submit
     await click("a.s_website_form_send");
-    checkField(false, false);
+    checkField(questionEl, false, false);
     // Fill subject
     await click("input[name=subject]");
     await fill("Subject");
     await advanceTime(400); // Debounce delay.
-    checkField(true, false);
+    checkField(questionEl, true, false);
     // Submit
     await click("a.s_website_form_send");
-    checkField(true, true);
+    checkField(questionEl, true, true);
     // Fill question
     await click("textarea[name=description]");
     await fill("Question");
     await advanceTime(400); // Debounce delay.
-    checkField(true, true);
+    checkField(questionEl, true, true);
     // Submit
     onRpc("/website/form/mail.mail", async () => { return {} });
     await click("a.s_website_form_send");
-    checkField(true, false);
+    checkField(questionEl, true, false);
 });
 
 test("(rpc) form checks conditions", async () => {
@@ -323,7 +287,7 @@ test("form prefilled conditional", async () => {
     });
 
     // Phone number is only visible if name is filled.
-    const { core, el } = await startInteractions(`
+    const { core } = await startInteractions(`
         <div id="wrapwrap">
             <section class="s_website_form pt16 pb16" data-vcss="001" data-snippet="s_website_form" data-name="Form">
                 <div class="container-fluid">
@@ -359,13 +323,7 @@ test("form prefilled conditional", async () => {
             </section>
         </div>
     `);
-    expect(core.interactions.length).toBe(1);
-    const formEl = el.querySelector("form");
-    const nameEl = formEl.querySelector("input[name=name]");
-    const phoneEl = formEl.querySelector("input[name=phone]");
-
-    expect(nameEl).not.toBe(undefined);
-    expect(nameEl.value).toBe("Mitchell Admin");
-    expect(phoneEl).not.toBe(undefined);
-    expect(phoneEl.value).toBe("+1-555-5555");
+    expect(core.interactions).toHaveLength(1);
+    expect(queryOne("form input[name=name]")).toHaveValue("Mitchell Admin");
+    expect(queryOne("form input[name=phone]")).toHaveValue("+1-555-5555");
 });

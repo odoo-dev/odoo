@@ -1,24 +1,8 @@
 import { expect } from "@odoo/hoot";
-import { animationFrame, manuallyDispatchProgrammaticEvent, scroll } from "@odoo/hoot-dom";
-import { advanceTime } from "@odoo/hoot-mock";
+import { manuallyDispatchProgrammaticEvent, scroll } from "@odoo/hoot-dom";
+import { endTransition } from "@website/../tests/interactions/snippets/helpers";
 
-const endTransition = async function () {
-    // Ensure we finish the transition
-    await animationFrame();
-    // Ensure the class "o_transitioning" is removed
-    await advanceTime(500);
-}
-
-export const setupTest = async function (core, wrapwrap) {
-    wrapwrap.style.height = "800px";
-    wrapwrap.style.width = "100%";
-    wrapwrap.style.overflow = "scroll";
-    core.interactions[0].interaction.scrollingElement = wrapwrap;
-    const specialStyle = document.createElement("style");
-    specialStyle.innerText = `.hidden {display: none !important;}`
-    wrapwrap.closest("html").querySelector("head").appendChild(specialStyle);
-    await endTransition();
-}
+export { setupTest } from "@website/../tests/interactions/snippets/helpers";
 
 export const customScroll = async function (scrollingElement, start, end) {
     const step = (end - start) / Math.abs(end - start);

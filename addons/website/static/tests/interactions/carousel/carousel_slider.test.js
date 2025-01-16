@@ -4,13 +4,14 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
+import { queryAll } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.carousel_slider");
 
 describe.current.tags("interaction_dev");
 
 test("carousel_slider updates min height of carousel items", async () => {
-    const { core, el } = await startInteractions(`
+    const { core } = await startInteractions(`
         <section>
             <div id="slideshow_sample" class="carousel carousel-dark slide" data-bs-ride="false" data-bs-interval="0">
                 <div class="carousel-inner">
@@ -42,7 +43,7 @@ test("carousel_slider updates min height of carousel items", async () => {
             </div>
         </section>
     `);
-    const itemEls = el.querySelectorAll(".carousel-item");
+    const itemEls = queryAll(".carousel-item");
     const maxHeight = itemEls[0].style.minHeight;
 
     expect(core.interactions).toHaveLength(1);

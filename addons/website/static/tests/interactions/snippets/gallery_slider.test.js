@@ -3,8 +3,8 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
-import { animationFrame, click } from "@odoo/hoot-dom";
+import { describe, expect, getFixture, test } from "@odoo/hoot";
+import { animationFrame, click, queryOne } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
 import { onceAllImagesLoaded } from "@website/utils/images";
@@ -154,68 +154,63 @@ test("gallery_slider does nothing if there is no o_slideshow s_image_gallery", a
 });
 
 test("gallery_slider interaction on image gallery", async () => {
-    const { core, el } = await startInteractions(defaultGallery);
+    const { core } = await startInteractions(defaultGallery);
     expect(core.interactions).toHaveLength(1);
     await animationFrame();
-    await onceAllImagesLoaded(el);
+    await onceAllImagesLoaded(getFixture());
     await advanceTime(SLIDE_DURATION);
-    const imgEl = el.querySelector(".carousel-item.active img");
-    const goToEls = el.querySelectorAll("button[data-bs-slide-to]");
-    await click(goToEls[2]);
+    const imgEl = queryOne(".carousel-item.active img");
+    await click("button[data-bs-slide-to]:eq(2)");
     await animationFrame();
-    await onceAllImagesLoaded(el);
+    await onceAllImagesLoaded(getFixture());
     await advanceTime(SLIDE_DURATION);
-    const img2El = el.querySelector(".carousel-item.active img");
+    const img2El = queryOne(".carousel-item.active img");
     expect(imgEl).not.toBe(img2El);
 });
 
 test("gallery_slider interaction on lightbox", async () => {
-    const { core, el } = await startInteractions(defaultLightbox);
+    const { core } = await startInteractions(defaultLightbox);
     expect(core.interactions).toHaveLength(1);
-    await onceAllImagesLoaded(el);
+    await onceAllImagesLoaded(getFixture());
     await advanceTime(SLIDE_DURATION);
-    const imgEl = el.querySelector(".carousel-item.active img");
-    const nextEl = el.querySelector(".carousel-control-next");
-    const goToEls = el.querySelectorAll("button[data-bs-slide-to]");
-    await click(nextEl);
+    const imgEl = queryOne(".carousel-item.active img");
+    await click(".carousel-control-next");
     await animationFrame();
-    await onceAllImagesLoaded(el);
+    await onceAllImagesLoaded(getFixture());
     await advanceTime(SLIDE_DURATION);
-    const img2El = el.querySelector(".carousel-item.active img");
+    const img2El = queryOne(".carousel-item.active img");
     expect(imgEl).not.toBe(img2El);
-    await click(goToEls[2]);
+    await click("button[data-bs-slide-to]:eq(2)");
     await animationFrame();
-    await onceAllImagesLoaded(el);
+    await onceAllImagesLoaded(getFixture());
     await advanceTime(SLIDE_DURATION);
-    const img3El = el.querySelector(".carousel-item.active img");
+    const img3El = queryOne(".carousel-item.active img");
     expect(imgEl).not.toBe(img3El);
     expect(img2El).not.toBe(img3El);
 });
 
 test("gallery_slider interaction on old lightbox", async () => {
-    const { core, el } = await startInteractions(defaultOldLightbox);
+    const { core } = await startInteractions(defaultOldLightbox);
     expect(core.interactions).toHaveLength(1);
     const interaction = core.interactions[0].interaction;
-    await onceAllImagesLoaded(el);
+    await onceAllImagesLoaded(getFixture());
     await advanceTime(SLIDE_DURATION);
     // Fix parameters that are based on sizes.
     interaction.page = 0;
     interaction.nbPages = 6;
     interaction.realNbPerPage = 1;
-    const imgEl = el.querySelector(".carousel-item.active img");
-    const nextEl = el.querySelector(".o_indicators_right");
-    const goToEls = el.querySelectorAll("li[data-bs-slide-to]");
-    await click(nextEl);
+    const imgEl = queryOne(".carousel-item.active img");
+    await click(".o_indicators_right");
     await animationFrame();
-    await onceAllImagesLoaded(el);
+    await onceAllImagesLoaded(getFixture());
     await advanceTime(SLIDE_DURATION);
-    const img2El = el.querySelector(".carousel-item.active img");
+    const img2El = queryOne(".carousel-item.active img");
     expect(imgEl).not.toBe(img2El);
-    await click(goToEls[2]);
+    await click("li[data-bs-slide-to]:eq(2)");
     await animationFrame();
-    await onceAllImagesLoaded(el);
+    await onceAllImagesLoaded(getFixture());
     await advanceTime(SLIDE_DURATION);
-    const img3El = el.querySelector(".carousel-item.active img");
+    const img3El = queryOne(".carousel-item.active img");
     expect(imgEl).not.toBe(img3El);
     expect(img2El).not.toBe(img3El);
 });

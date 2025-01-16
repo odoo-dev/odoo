@@ -4,11 +4,10 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-import { hover } from "@odoo/hoot-dom";
+import { hover, queryOne } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
-import { patchWithCleanup } from "@web/../tests/web_test_helpers";
-import { MockServer } from "@web/../tests/_framework/mock_server/mock_server";
+import { onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { onceAllImagesLoaded } from "@website/utils/images";
 
 setupInteractionWhiteList("website.image_shape_hover_effect");
@@ -22,7 +21,7 @@ test.tags("desktop")("image_shape_hover_effect changes image on enter & leave", 
             setTimeout(() => super.onload());
         }
     });
-    const { core, el } = await startInteractions(`
+    const { core } = await startInteractions(`
         <div id="wrapwrap">
             <img class="img img-fluid mx-auto o_we_image_cropped o_animate_on_hover rounded-circle rounded"
                 src="/web/image/384-8a55a748/s_banner_3.svg" alt=""
@@ -41,22 +40,20 @@ test.tags("desktop")("image_shape_hover_effect changes image on enter & leave", 
             <div class="not_image">Not the image</div>
         </div>
     `);
-    MockServer.current.onRoute(["/web/image/384-8a55a748/s_banner_3.svg"], () => {
+    onRpc("/web/image/384-8a55a748/s_banner_3.svg", () => {
         return `<svg viewBox="0 0 300 100" width="500px"><g id="hoverEffects"><animate values="a=1;b=2"><rect width="100%" fill="red" height="100%" /></animate></g></svg>`;
     }, { pure: true });
     expect(core.interactions).toHaveLength(1);
-    await onceAllImagesLoaded(el);
-    const imgEl = el.querySelector("img");
+    await onceAllImagesLoaded(queryOne("#wrapwrap"));
+    const imgEl = queryOne("img");
     const baseSrc = imgEl.getAttribute("src");
-    expect(baseSrc).toBe("/web/image/384-8a55a748/s_banner_3.svg");
+    expect(imgEl).toHaveAttribute("src", "/web/image/384-8a55a748/s_banner_3.svg");
     await hover(imgEl);
     await advanceTime(1);
     const altSrc = imgEl.getAttribute("src");
-    expect(altSrc).not.toBe(baseSrc);
-    const notImageEl = el.querySelector(".not_image");
-    await hover(notImageEl);
+    expect(imgEl).not.toHaveAttribute("src", baseSrc);
+    await hover(".not_image");
     await advanceTime(1);
-    const restoredSrc = imgEl.getAttribute("src");
-    expect(restoredSrc).not.toBe(baseSrc);
-    expect(restoredSrc).not.toBe(altSrc);
+    expect(imgEl).not.toHaveAttribute("src", baseSrc);
+    expect(imgEl).not.toHaveAttribute("src", altSrc);
 });

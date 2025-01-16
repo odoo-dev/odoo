@@ -4,7 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-
+import { queryOne } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 import { escape } from "@web/core/utils/strings";
 import { patch } from "@web/core/utils/patch";
@@ -22,7 +22,7 @@ patch(Chart.prototype, {
 });
 
 test("chart is started when there is an element .s_chart", async () => {
-    const { core, el } = await startInteractions(`
+    const { core } = await startInteractions(`
         <div class="s_chart" data-type="bar" data-legend-position="top" data-tooltip-display="true" data-stacked="false" data-border-width="2"
             data-data="${escape(`{
                 "labels": ["First", "Second", "Third", "Fourth", "Fifth"],
@@ -39,10 +39,10 @@ test("chart is started when there is an element .s_chart", async () => {
         <canvas/>
     </div>
     `);
-    expect(core.interactions.length).toBe(1);
+    expect(core.interactions).toHaveLength(1);
     await advanceTime(0);
-    const canvas = el.querySelector('canvas');
-    const data = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+    const canvas = queryOne("canvas");
+    const data = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height).data;
     const dataLength = data.length;
     let isCanvasBlank = true;
     for (let i = 0; i < dataLength; i++) {

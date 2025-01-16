@@ -4,6 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
+import { queryOne } from "@odoo/hoot-dom";
 
 import {
     setupTest,
@@ -40,10 +41,10 @@ const behaviorWithout = [{
 }];
 
 test("[scroll] Template without o_header_hide_on_scroll", async () => {
-    const { core, el } = await startInteractions(getTemplateWithoutHideOnScroll("o_header_standard"));
-    const wrapwrap = el.querySelector("#wrapwrap");
-    const header = el.querySelector("header");
-    const main = el.querySelector("main");
+    const { core } = await startInteractions(getTemplateWithoutHideOnScroll("o_header_standard"));
+    const wrapwrap = queryOne("#wrapwrap");
+    const header = queryOne("header");
+    const main = queryOne("main");
     await setupTest(core, wrapwrap);
     checkHeader(header, main, core, behaviorWithout[0]);
     await customScroll(wrapwrap, 0, 40);
@@ -86,10 +87,10 @@ const behaviorWithDesktop = [{
 }];
 
 test.tags("desktop")("[scroll] Template with o_header_hide_on_scroll (desktop)", async () => {
-    const { core, el } = await startInteractions(getTemplateWithHideOnScroll("o_header_standard"));
-    const wrapwrap = el.querySelector("#wrapwrap");
-    const header = el.querySelector("header");
-    const main = el.querySelector("main");
+    const { core } = await startInteractions(getTemplateWithHideOnScroll("o_header_standard"));
+    const wrapwrap = queryOne("#wrapwrap");
+    const header = queryOne("header");
+    const main = queryOne("main");
     await setupTest(core, wrapwrap);
     checkHeader(header, main, core, behaviorWithDesktop[0]);
     await customScroll(wrapwrap, 0, 40);
@@ -132,10 +133,10 @@ const behaviorWithMobile = [{
 }];
 
 test.tags("mobile")("[scroll] Template with o_header_hide_on_scroll (mobile)", async () => {
-    const { core, el } = await startInteractions(getTemplateWithHideOnScroll("o_header_standard"));
-    const wrapwrap = el.querySelector("#wrapwrap");
-    const header = el.querySelector("header");
-    const main = el.querySelector("main");
+    const { core } = await startInteractions(getTemplateWithHideOnScroll("o_header_standard"));
+    const wrapwrap = queryOne("#wrapwrap");
+    const header = queryOne("header");
+    const main = queryOne("main");
     await setupTest(core, wrapwrap);
     checkHeader(header, main, core, behaviorWithMobile[0]);
     await customScroll(wrapwrap, 0, 20);

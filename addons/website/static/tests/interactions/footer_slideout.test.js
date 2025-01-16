@@ -4,7 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-import { queryOne, queryAll } from "@odoo/hoot-dom";
+import { queryAll, queryFirst } from "@odoo/hoot-dom";
 import { mockUserAgent } from "@odoo/hoot-mock";
 
 setupInteractionWhiteList("website.footer_slideout");
@@ -44,8 +44,8 @@ test("footer_slideout adds a class and a pixel if the effect is enabled on safar
     expect(core.interactions).toHaveLength(1);
     expect("#wrapwrap").toHaveClass("o_footer_effect_enable");
     expect(queryAll("#wrapwrap > div")).toHaveLength(1);
-    expect(queryOne("#wrapwrap > div").style.width).toBe("1px");
+    expect("#wrapwrap > div").toHaveStyle({ "width": "1px" });
     core.stopInteractions();
     expect(core.interactions).toHaveLength(0);
-    expect(queryAll("#wrapwrap > div")).toHaveLength(0);
+    expect(queryFirst("#wrapwrap > div")).toBe(null);
 });

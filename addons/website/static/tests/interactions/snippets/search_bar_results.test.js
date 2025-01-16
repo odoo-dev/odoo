@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { press } from "@odoo/hoot-dom";
+import { press, queryAll, queryOne } from "@odoo/hoot-dom";
 import { startInteractions, setupInteractionWhiteList } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.search_bar_results");
@@ -39,39 +39,31 @@ const searchTemplate = `
 `;
 
 test("searchbar selects next result on cursor down", async () => {
-    const { el } = await startInteractions(searchTemplate);
-    const formEl = el.querySelector("form");
-    const resultEls = formEl.querySelectorAll("a:has(.o_search_result_item)");
+    await startInteractions(searchTemplate);
+    const resultEls = queryAll("form a:has(.o_search_result_item)");
     resultEls[0].focus();
     await press("down");
     expect(document.activeElement).toBe(resultEls[1]);
 });
 
 test("searchbar selects input on cursor down on last result", async () => {
-    const { el } = await startInteractions(searchTemplate);
-    const formEl = el.querySelector("form");
-    const inputEl = formEl.querySelector("input[type=search]");
-    const resultEls = formEl.querySelectorAll("a:has(.o_search_result_item)");
-    resultEls[1].focus();
+    await startInteractions(searchTemplate);
+    queryOne("form a:has(.o_search_result_item):eq(1)").focus();
     await press("down");
-    expect(document.activeElement).toBe(inputEl);
+    expect(document.activeElement).toBe(queryOne("form input[type=search]"));
 });
 
 test("searchbar selects previous result on cursor up", async () => {
-    const { el } = await startInteractions(searchTemplate);
-    const formEl = el.querySelector("form");
-    const resultEls = formEl.querySelectorAll("a:has(.o_search_result_item)");
+    await startInteractions(searchTemplate);
+    const resultEls = queryAll("form a:has(.o_search_result_item)");
     resultEls[1].focus();
     await press("up");
     expect(document.activeElement).toBe(resultEls[0]);
 });
 
 test("searchbar selects input on cursor up on first result", async () => {
-    const { el } = await startInteractions(searchTemplate);
-    const formEl = el.querySelector("form");
-    const inputEl = formEl.querySelector("input[type=search]");
-    const resultEls = formEl.querySelectorAll("a:has(.o_search_result_item)");
-    resultEls[0].focus();
+    await startInteractions(searchTemplate);
+    queryOne("form a:has(.o_search_result_item):first").focus();
     await press("up");
-    expect(document.activeElement).toBe(inputEl);
+    expect(document.activeElement).toBe(queryOne("form input[type=search]"));
 });

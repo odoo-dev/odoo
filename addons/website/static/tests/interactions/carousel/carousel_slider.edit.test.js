@@ -4,7 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-import { manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
+import { manuallyDispatchProgrammaticEvent, queryFirst, queryOne } from "@odoo/hoot-dom";
 
 import { switchToEditMode } from "../../helpers";
 
@@ -13,7 +13,7 @@ setupInteractionWhiteList("website.carousel_slider");
 describe.current.tags("interaction_dev");
 
 test("[EDIT] carousel_slider prevents ride", async () => {
-    const { core, el } = await startInteractions(`
+    const { core } = await startInteractions(`
         <section>
             <div id="slideshow_sample" class="carousel carousel-dark slide" data-bs-ride="ride" data-bs-interval="0">
                 <div class="carousel-inner">
@@ -48,7 +48,7 @@ test("[EDIT] carousel_slider prevents ride", async () => {
     await switchToEditMode(core);
 
     expect(core.interactions).toHaveLength(1);
-    const carouselEl = el.querySelector(".carousel");
+    const carouselEl = queryOne(".carousel");
     const carouselBS = window.Carousel.getInstance(carouselEl);
     expect(carouselBS._config.ride).toBe(false);
     expect(carouselBS._config.pause).toBe(true);
@@ -56,11 +56,11 @@ test("[EDIT] carousel_slider prevents ride", async () => {
     core.stopInteractions();
 
     expect(core.interactions).toHaveLength(0);
-    expect(carouselEl.dataset.bsRide).toBe("ride");
+    expect(carouselEl).toHaveAttribute("data-bs-ride", "ride");
 });
 
 test("[EDIT] carousel_slider updates min height on content_changed", async () => {
-    const { core, el } = await startInteractions(`
+    const { core } = await startInteractions(`
         <div id="slideshow_sample" class="carousel carousel-dark slide" data-bs-ride="ride" data-bs-interval="0">
             <div class="carousel-inner">
                 <div class="carousel-item active">
@@ -93,8 +93,8 @@ test("[EDIT] carousel_slider updates min height on content_changed", async () =>
     await switchToEditMode(core);
 
     expect(core.interactions).toHaveLength(1);
-    const carouselEl = el.querySelector(".carousel");
-    const itemEl = carouselEl.querySelector(".carousel-item");
+    const carouselEl = queryOne(".carousel");
+    const itemEl = queryFirst(".carousel-item");
     const maxHeight = itemEl.style.minHeight;
     itemEl.style.minHeight = "";
     expect(itemEl).not.toHaveStyle({ minHeight: maxHeight });

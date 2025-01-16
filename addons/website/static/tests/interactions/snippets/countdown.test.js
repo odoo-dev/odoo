@@ -4,6 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
+import { queryAll, queryOne } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
 setupInteractionWhiteList("website.countdown");
@@ -60,9 +61,9 @@ test("countdown is started when there is an element .s_countdown", async () => {
  * We compare the canvases twice to prevent the issue.
  */
 test("[time] countdown display is updated correctly when time pass", async () => {
-    const { el } = await startInteractions(getTemplate());
+    await startInteractions(getTemplate());
 
-    const canvasEls = el.querySelectorAll('canvas');
+    const canvasEls = queryAll('canvas');
     const canvasHours = canvasEls[1];
     const canvasSeconds = canvasEls[3];
     const canvasHoursCtx = canvasHours.getContext('2d');
@@ -104,14 +105,13 @@ test("[time] countdown display is updated correctly when time pass", async () =>
 });
 
 test("countdown is stopped correctly", async () => {
-    const { core, el } = await startInteractions(getTemplate());
-    const wrapEl = el.querySelector(".s_countdown_canvas_wrapper");
+    const { core } = await startInteractions(getTemplate());
     await advanceTime(0);
-    expect(wrapEl.querySelectorAll(".s_countdown_canvas_flex")).toHaveLength(4);
+    expect(queryAll(".s_countdown_canvas_flex")).toHaveLength(4);
     core.stopInteractions();
-    expect(!!wrapEl).toBe(true);
-    expect(wrapEl.querySelectorAll(".s_countdown_canvas_flex")).toHaveLength(0);
-    expect(wrapEl.querySelectorAll(".s_countdown_end_message")).toHaveLength(0);
-    expect(wrapEl.querySelectorAll(".s_countdown_text_wrapper")).toHaveLength(0);
-    expect(wrapEl.querySelectorAll(".s_countdown_end_redirect_message")).toHaveLength(0);
+    expect(queryOne(".s_countdown_canvas_wrapper")).not.toBe(null);
+    expect(queryAll(".s_countdown_canvas_flex")).toHaveLength(0);
+    expect(queryAll(".s_countdown_end_message")).toHaveLength(0);
+    expect(queryAll(".s_countdown_text_wrapper")).toHaveLength(0);
+    expect(queryAll(".s_countdown_end_redirect_message")).toHaveLength(0);
 });

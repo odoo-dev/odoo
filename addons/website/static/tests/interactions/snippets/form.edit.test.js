@@ -1,9 +1,10 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { MockServer, patchWithCleanup } from "@web/../tests/web_test_helpers";
+import { queryOne } from "@odoo/hoot-dom";
 import {
     startInteractions,
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
+import { MockServer, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { switchToEditMode } from "../../helpers";
 
 describe.current.tags("interaction_dev");
@@ -66,34 +67,27 @@ function setupUser() {
 
 test("form formats date in edit mode", async () => {
     setupInteractionWhiteList("website.form_date_formatter");
-    const { core, el } = await startInteractions(formXml, { waitForStart: true, editMode: true });
+    const { core } = await startInteractions(formXml, { waitForStart: true, editMode: true });
     await switchToEditMode(core);
-    expect(core.interactions.length).toBe(1);
-    const formEl = el.querySelector("form");
-    const dateEl = formEl.querySelector("input[name=When]");
-    expect(dateEl.value).toBe("01/01/2025 10:00:00");
+    expect(core.interactions).toHaveLength(1);
+    expect("form input[name=When]").toHaveValue("01/01/2025 10:00:00");
     // Verify that non-edit code did not run.
-    const dateField = dateEl.closest(".s_website_form_datetime");
-    expect(dateField).not.toHaveClass("s_website_form_datepicker_initialized");
+    expect(".s_website_form_datetime").not.toHaveClass("s_website_form_datepicker_initialized");
 });
 
 test("form is NOT prefilled in edit mode", async () => {
     setupInteractionWhiteList("website.form_date_formatter");
     setupUser();
-    const { core, el } = await startInteractions(formXml, { waitForStart: true, editMode: true });
+    const { core } = await startInteractions(formXml, { waitForStart: true, editMode: true });
     await switchToEditMode(core)
-    expect(core.interactions.length).toBe(1);
-    const formEl = el.querySelector("form");
-    const companyEl = formEl.querySelector("input[name=company]");
-    expect(companyEl.value).toBe("");
+    expect(core.interactions).toHaveLength(1);
+    expect("form input[name=company]").toHaveValue("");
 });
 
 test("form is NOT prefilled in translate mode", async () => {
     setupInteractionWhiteList("website.form");
     setupUser();
-    const { core, el } = await startInteractions(formXml, { waitForStart: true, translateMode: true });
-    expect(core.interactions.length).toBe(1);
-    const formEl = el.querySelector("form");
-    const companyEl = formEl.querySelector("input[name=company]");
-    expect(companyEl.value).toBe("");
+    const { core } = await startInteractions(formXml, { waitForStart: true, translateMode: true });
+    expect(core.interactions).toHaveLength(1);
+    expect("form input[name=company]").toHaveValue("");
 });

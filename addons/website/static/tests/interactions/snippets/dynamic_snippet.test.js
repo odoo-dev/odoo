@@ -4,6 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
+import { queryAll } from "@odoo/hoot-dom";
 
 import { onRpc } from "@web/../tests/web_test_helpers";
 
@@ -37,7 +38,7 @@ test("dynamic snippet loads items and displays them through template", async () 
             `<div class="s_test_dynamic_item" data-test-param="test2">Another test record</div>`,
         ];
     });
-    const { core, el } = await startInteractions(`
+    const { core } = await startInteractions(`
         <div id="wrapwrap">
             <section data-snippet="s_dynamic_snippet" class="s_dynamic_snippet s_dynamic s_dynamic_empty pt32 pb32 o_colored_level" data-custom-template-data="{}" data-name="Dynamic Snippet"
                     data-filter-id="1"
@@ -62,12 +63,12 @@ test("dynamic snippet loads items and displays them through template", async () 
         </div>
     `);
     expect(core.interactions).toHaveLength(3);
-    const itemEls = el.querySelectorAll(".dynamic_snippet_template .s_test_dynamic_item");
-    expect(itemEls[0].dataset.testParam).toBe("test");
-    expect(itemEls[1].dataset.testParam).toBe("test2");
+    const itemEls = queryAll(".dynamic_snippet_template .s_test_dynamic_item");
+    expect(itemEls[0]).toHaveAttribute("data-test-param", "test");
+    expect(itemEls[1]).toHaveAttribute("data-test-param", "test2");
     // Make sure element interactions are started.
-    expect(itemEls[0].dataset.started).toBe("*test*");
-    expect(itemEls[1].dataset.started).toBe("*test2*");
+    expect(itemEls[0]).toHaveAttribute("data-started", "*test*");
+    expect(itemEls[1]).toHaveAttribute("data-started", "*test2*");
     core.stopInteractions();
     // Make sure element interactions are stopped.
     expect(core.interactions).toHaveLength(0);

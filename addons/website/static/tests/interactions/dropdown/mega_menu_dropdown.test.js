@@ -4,7 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-import { hover, pointerDown } from "@odoo/hoot-dom";
+import { hover, pointerDown, queryFirst } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.mega_menu_dropdown");
 
@@ -37,45 +37,33 @@ test("mega_menu_dropdown is started when there is an element header#top", async 
 });
 
 test.tags("desktop")("[mousedown] moves content from desktop to mobile", async () => {
-    const { el } = await startInteractions(getTemplate({ contentInDesktop: true }));
-    const desktopNav = el.querySelector("nav.o_header_desktop");
-    const mobileNav = el.querySelector("nav.o_header_mobile");
+    await startInteractions(getTemplate({ contentInDesktop: true }));
 
-    await pointerDown(mobileNav.querySelector("a.o_mega_menu_toggle"));
-
-    expect(!!desktopNav.querySelector("div.o_mega_menu")).toBe(false);
-    expect(!!mobileNav.querySelector("div.o_mega_menu")).toBe(true);
+    await pointerDown("nav.o_header_mobile a.o_mega_menu_toggle");
+    expect(queryFirst("nav.o_header_desktop div.o_mega_menu")).toBe(null);
+    expect(queryFirst("nav.o_header_mobile div.o_mega_menu")).not.toBe(null);
 });
 
 test.tags("desktop")("[mousedown] moves content from mobile to desktop", async () => {
-    const { el } = await startInteractions(getTemplate({ contentInDesktop: false }));
-    const desktopNav = el.querySelector("nav.o_header_desktop");
-    const mobileNav = el.querySelector("nav.o_header_mobile");
+    await startInteractions(getTemplate({ contentInDesktop: false }));
 
-    await pointerDown(desktopNav.querySelector("a.o_mega_menu_toggle"));
-
-    expect(!!desktopNav.querySelector("div.o_mega_menu")).toBe(true);
-    expect(!!mobileNav.querySelector("div.o_mega_menu")).toBe(false);
+    await pointerDown("nav.o_header_desktop a.o_mega_menu_toggle");
+    expect(queryFirst("nav.o_header_desktop div.o_mega_menu")).not.toBe(null);
+    expect(queryFirst("nav.o_header_mobile div.o_mega_menu")).toBe(null);
 });
 
 test.tags("desktop")("[hover] does not move content from desktop to mobile", async () => {
-    const { el } = await startInteractions(getTemplate({ contentInDesktop: true, dropdownHoverable: true }));
-    const desktopNav = el.querySelector("nav.o_header_desktop");
-    const mobileNav = el.querySelector("nav.o_header_mobile");
+    await startInteractions(getTemplate({ contentInDesktop: true, dropdownHoverable: true }));
 
-    await hover(mobileNav.querySelector("a.o_mega_menu_toggle"));
-
-    expect(!!desktopNav.querySelector("div.o_mega_menu")).toBe(true);
-    expect(!!mobileNav.querySelector("div.o_mega_menu")).toBe(false);
+    await hover("nav.o_header_mobile a.o_mega_menu_toggle");
+    expect(queryFirst("nav.o_header_desktop div.o_mega_menu")).not.toBe(null);
+    expect(queryFirst("nav.o_header_mobile div.o_mega_menu")).toBe(null);
 });
 
 test.tags("desktop")("[hover] moves content from mobile to desktop", async () => {
-    const { el } = await startInteractions(getTemplate({ contentInDesktop: false, dropdownHoverable: true }));
-    const desktopNav = el.querySelector("nav.o_header_desktop");
-    const mobileNav = el.querySelector("nav.o_header_mobile");
+    await startInteractions(getTemplate({ contentInDesktop: false, dropdownHoverable: true }));
 
-    await hover(desktopNav.querySelector("a.o_mega_menu_toggle"));
-
-    expect(!!desktopNav.querySelector("div.o_mega_menu")).toBe(true);
-    expect(!!mobileNav.querySelector("div.o_mega_menu")).toBe(false);
+    await hover("nav.o_header_desktop a.o_mega_menu_toggle");
+    expect(queryFirst("nav.o_header_desktop div.o_mega_menu")).not.toBe(null);
+    expect(queryFirst("nav.o_header_mobile div.o_mega_menu")).toBe(null);
 });

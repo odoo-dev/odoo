@@ -4,7 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-import { pointerDown, pointerUp } from "@odoo/hoot-dom";
+import { pointerDown, pointerUp, queryOne } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.show_password");
 
@@ -25,8 +25,8 @@ test("show_password is started when there is a #showPass", async () => {
 });
 
 test("input type changes on pointerdown", async () => {
-    const { el } = await startInteractions(template);
-    const showEl = el.querySelector("#showPass");
+    await startInteractions(template);
+    const showEl = queryOne("#showPass");
     expect("input").toHaveAttribute("type", "password");
     await pointerDown(showEl);
     expect("input").toHaveAttribute("type", "text");

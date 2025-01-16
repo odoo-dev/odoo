@@ -4,6 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
+import { queryFirst, queryOne } from "@odoo/hoot-dom";
 
 import { setupTest, simpleScroll, doubleScroll } from "./helpers";
 
@@ -93,29 +94,29 @@ test("faq_horizontal is started when there is an element .s_faq_horizontal", asy
 });
 
 test.tags("desktop")("faq_horizontal updates titles position with a o_header_standard", async () => {
-    const { el, core } = await startInteractions(getTemplate("o_header_standard"));
+    const { core } = await startInteractions(getTemplate("o_header_standard"));
     expect(core.interactions).toHaveLength(2);
-    const wrapwrap = el.querySelector("#wrapwrap");
-    const title = el.querySelector(".s_faq_horizontal_entry_title");
+    const wrapwrap = queryOne("#wrapwrap");
+    const title = queryFirst(".s_faq_horizontal_entry_title");
     await setupTest(core, wrapwrap);
     for (const target of SCROLLS) {
         await simpleScroll(wrapwrap, target);
         const calculatedTop = Math.round(parseFloat(title.style.top));
         const isHeaderVisible = target < HEADER_SIZE || target > 300;
-        // We compensate the scroll since the header does not move in Hoot. 
+        // We compensate the scroll since the header does not move in Hoot.
         const correctedTop = isHeaderVisible ? calculatedTop + target : calculatedTop;
         expect(correctedTop).toBe(isHeaderVisible ? HEADER_SIZE + DEFAULT_OFFSET : DEFAULT_OFFSET);
     }
 });
 
 test.tags("desktop")("faq_horizontal updates titles position with a o_header_fixed", async () => {
-    const { el, core } = await startInteractions(getTemplate("o_header_fixed"));
+    const { core } = await startInteractions(getTemplate("o_header_fixed"));
     expect(core.interactions).toHaveLength(2);
     // We force the header to never be consider "atTop", so that its
     // position is properly computed.
     core.interactions[0].interaction.topGap = -1;
-    const wrapwrap = el.querySelector("#wrapwrap");
-    const title = el.querySelector(".s_faq_horizontal_entry_title");
+    const wrapwrap = queryOne("#wrapwrap");
+    const title = queryFirst(".s_faq_horizontal_entry_title");
     await setupTest(core, wrapwrap);
     for (const target of SCROLLS_SPECIAL) {
         await simpleScroll(wrapwrap, target);
@@ -125,10 +126,10 @@ test.tags("desktop")("faq_horizontal updates titles position with a o_header_fix
 });
 
 test.tags("desktop")("faq_horizontal updates titles position with a o_header_disappears", async () => {
-    const { el, core } = await startInteractions(getTemplate("o_header_disappears"));
+    const { core } = await startInteractions(getTemplate("o_header_disappears"));
     expect(core.interactions).toHaveLength(2);
-    const wrapwrap = el.querySelector("#wrapwrap");
-    const title = el.querySelector(".s_faq_horizontal_entry_title");
+    const wrapwrap = queryOne("#wrapwrap");
+    const title = queryFirst(".s_faq_horizontal_entry_title");
     await setupTest(core, wrapwrap);
     for (let i = 1; i < SCROLLS_SPECIAL.length; i++) {
         const target = SCROLLS_SPECIAL[i];
@@ -136,17 +137,17 @@ test.tags("desktop")("faq_horizontal updates titles position with a o_header_dis
         await doubleScroll(wrapwrap, target, source);
         const calculatedTop = Math.round(parseFloat(title.style.top));
         const isHeaderVisible = target < 300;
-        // We compensate the scroll since the header does not move in Hoot. 
+        // We compensate the scroll since the header does not move in Hoot.
         const correctedTop = isHeaderVisible ? calculatedTop + target : calculatedTop;
         expect(correctedTop).toBe(isHeaderVisible ? HEADER_SIZE + DEFAULT_OFFSET : DEFAULT_OFFSET);
     }
 });
 
 test.tags("desktop")("faq_horizontal updates titles position with a o_header_fade_out", async () => {
-    const { el, core } = await startInteractions(getTemplate("o_header_fade_out"));
+    const { core } = await startInteractions(getTemplate("o_header_fade_out"));
     expect(core.interactions).toHaveLength(2);
-    const wrapwrap = el.querySelector("#wrapwrap");
-    const title = el.querySelector(".s_faq_horizontal_entry_title");
+    const wrapwrap = queryOne("#wrapwrap");
+    const title = queryFirst(".s_faq_horizontal_entry_title");
     await setupTest(core, wrapwrap);
     for (let i = 1; i < SCROLLS_SPECIAL.length; i++) {
         const target = SCROLLS_SPECIAL[i];
