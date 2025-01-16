@@ -1,5 +1,5 @@
 import { expect } from "@odoo/hoot";
-import { animationFrame, scroll } from "@odoo/hoot-dom";
+import { animationFrame, manuallyDispatchProgrammaticEvent, scroll } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
 const endTransition = async function () {
@@ -26,9 +26,9 @@ export const customScroll = async function (scrollingElement, start, end) {
     // Otherwise, we would teleport and not update the
     // values correctly.
     await scroll(scrollingElement, { y: start + step })
-    document.dispatchEvent(new Event("scroll"));
+    await manuallyDispatchProgrammaticEvent(document, "scroll");
     await scroll(scrollingElement, { y: end });
-    document.dispatchEvent(new Event("scroll"));
+    await manuallyDispatchProgrammaticEvent(document, "scroll");
     await endTransition();
 }
 

@@ -4,7 +4,7 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-import { scroll } from "@odoo/hoot-dom";
+import { manuallyDispatchProgrammaticEvent, scroll } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.bottom_fixed_element");
 
@@ -18,7 +18,7 @@ const scrollTo = async function (el, scrollTarget, bottomFixedElement) {
     bottomFixedElement.style.top = scrollTarget + "px";
     bottomFixedElement.style.left = `calc(50% - ${bottomFixedElement.getBoundingClientRect().width / 2}px)`;
     // Dispatch the scroll event
-    document.dispatchEvent(new Event("scroll"));
+    await manuallyDispatchProgrammaticEvent(document, "scroll");
 }
 
 const scrollToMiddle = async function (el, bottomFixedElement) {
