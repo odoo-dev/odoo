@@ -149,9 +149,9 @@ export class PaymentRazorpay extends PaymentInterface {
                 transaction_id: line?.transaction_id,
             };
             const response = await this._checkPaymentStatus(line);
-            if (response?.settlementStatus === "SETTLED") {
+            if (response?.settlementStatus === "SETTLED" && response?.status === "AUTHORIZED") {
                 data.refund_type = "refund";
-            } else {
+            } else if (response?.settlementStatus === "PENDING") {
                 const refundedOrder = order.lines[0].refunded_orderline_id.order_id;
                 const refundedPaymentLine = refundedOrder.payment_ids.find(
                     (pi) => pi.transaction_id === line.transaction_id
@@ -168,10 +168,26 @@ export class PaymentRazorpay extends PaymentInterface {
                     }
                 }
                 data.refund_type = "void";
+            } else if (response?.settlementStatus === "SETTLED" && response?.status === "VOIDED") {
+                this._showError(
+                    _t(
+                        "Related transaction has already been voided. Please try using another payment method."
+                    )
+                );
+                return false;
+            } else if (
+                response?.settlementStatus === "SETTLED" &&
+                response?.status === "AUTHORIZED_REFUNDED"
+            ) {
+                this._showError(
+                    _t(
+                        "Related transaction has already been Refunded. Please try using another payment method."
+                    )
+                );
+                return false;
+            } else {
+                return false;
             }
-            response?.settlementStatus === "SETTLED"
-                ? (data.refund_type = "refund")
-                : (data.refund_type = "void");
             return this._callRazorpay(data, "razorpay_make_refund_request").then((data) =>
                 this._razorpayHandleRefundResponse(data)
             );

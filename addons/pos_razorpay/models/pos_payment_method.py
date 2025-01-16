@@ -92,6 +92,18 @@ class PosPaymentMethod(models.Model):
                     'p2pRequestId': response.get('p2pRequestId'),
                     'settlementStatus': response.get('settlementStatus'),
                 }
+            elif payment_status == 'VOIDED' and payment_messageCode == 'P2P_DEVICE_TXN_DONE':
+                return {
+                    'status': payment_status,
+                    'error': _('Razorpay POS transaction voided'),
+                    'settlementStatus': response.get('settlementStatus'),
+                }
+            elif payment_status == 'AUTHORIZED_REFUNDED' and payment_messageCode == 'P2P_DEVICE_TXN_DONE':
+                return {
+                    'status': payment_status,
+                    'error': _('Razorpay POS transaction refunded'),
+                    'settlementStatus': response.get('settlementStatus'),
+                }
             elif payment_status == 'FAILED' or payment_messageCode == 'P2P_DEVICE_CANCELED':
                 return {'error': str(response.get('message', _('Razorpay POS transaction failed'))),
                         'payment_messageCode': payment_messageCode}
