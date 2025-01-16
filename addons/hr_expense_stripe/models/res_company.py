@@ -23,6 +23,21 @@ class ResCompany(models.Model):
         copy=False,
     )
 
+    stripe_issuing_activated = fields.Boolean()
+
+    stripe_publishable_live_key = fields.Char()
+    stripe_secret_live_key = fields.Char()
+    stripe_publishable_test_key = fields.Char()
+    stripe_secret_test_key = fields.Char()
+    stripe_mode = fields.Selection(
+        selection=[
+            ('test', 'Test'),
+            ('live', 'Live'),
+        ],
+        string="Stripe mode",
+        default='live',
+    )
+
     @api.depends('country_id')
     def _compute_stripe_currency(self):
         for company in self:
@@ -32,7 +47,6 @@ class ResCompany(models.Model):
             else:
                 company_currency_code = STRIPE_VALID_JOURNAL_CURRENCIES.get(company_country.code.upper())
             company.stripe_currency_id = self.env['res.currency'].search([('name', '=', company_currency_code)], limit=1).id
-
 
     def _connect_to_stripe(self):
         if not self.stripe_journal_id:

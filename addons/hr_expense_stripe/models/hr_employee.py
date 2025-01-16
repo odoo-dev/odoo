@@ -23,9 +23,8 @@ class HrEmployee(models.Model):
 
     @api.depends('can_use_stripe_cards')
     def _compute_requires_stripe_sync(self):
-        stripe_activated = self.env['ir.config_parameter'].get_param('hr_expense_stripe.stripe_issuing_activated', False)
-        for record in self:
-            record.requires_stripe_sync = stripe_activated and record.can_use_stripe_cards
+        for employee in self:
+            employee.requires_stripe_sync = employee.company_id.stripe_issuing_activated and employee.can_use_stripe_cards
 
     @api.model
     def _stripe_get_endpoint(self, extra_url=''):

@@ -22,7 +22,7 @@ class HrExpense(models.Model):
             limit=1,
         ) or self.env['product.product'].create(expense_product_vals)
 
-        employee = self.env['hr.employee'].search([('stripe_id', '=', issuing_auth_dict['cardholder'])])
+        employee = self.env['hr.employee'].sudo().search([('stripe_id', '=', issuing_auth_dict['cardholder'])])
         if not employee:
             raise ValidationError("No corresponding employee found.")
 

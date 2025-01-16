@@ -23,14 +23,15 @@ class StripeIssuing(models.AbstractModel):
         Used to activate the synchronization to stripe of a model that may or may not require it.
         In order to disable sending stripe data if conditions or models do not require it
         """
-        stripe_activated = self.env['ir.config_parameter'].get_param('hr_expense_stripe.stripe_issuing_activated', False)
         for record in self:
-            record.requires_stripe_sync = stripe_activated
+            record.requires_stripe_sync = record.company_id.stripe_issuing_activated
 
     @api.model
     def _get_stripe_mode(self):
         """ Helper to get the mode in which the database is set, it should always be live unless a test database is created"""
-        return self.env['ir.config_parameter'].sudo().get_param('hr_expense_stripe.stripe_mode', 'live')
+        self.ensure_one()
+
+        return self.company_id.stripe_mode
 
     @api.model
     def _get_publishable_key(self):
@@ -40,8 +41,10 @@ class StripeIssuing(models.AbstractModel):
         :return: The publishable key
         :rtype: str
         """
+        self.ensure_one()
+
         mode = self._get_stripe_mode()
-        return self.env['ir.config_parameter'].sudo().get_param(f'hr_expense_stripe.stripe_publishable_{mode}_key', get_publishable_key())
+        return self[f'stripe_publishable_{mode}_key'] or get_publishable_key()
 
     @api.model
     def _get_secret_key(self):
@@ -51,8 +54,10 @@ class StripeIssuing(models.AbstractModel):
         :return: The secret key
         :rtype: str
         """
+        self.ensure_one()
+
         mode = self._get_stripe_mode()
-        return self.env['ir.config_parameter'].sudo().get_param(f'hr_expense_stripe.stripe_secret_{mode}_key', get_secret_key())
+        return self[f'stripe_secret_{mode}_key'] or get_secret_key()
 
     @api.model
     def _stripe_get_endpoint(self, extra_url=''):

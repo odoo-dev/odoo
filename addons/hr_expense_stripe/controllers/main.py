@@ -1,4 +1,3 @@
-# import json
 import logging
 
 from odoo.exceptions import ValidationError
@@ -16,7 +15,6 @@ class StripeIssuingController(Controller):
     @route(_webhook_url, type='http', methods=['POST'], auth='public', csrf=False)
     def stripe_issuing_webhook(self):
         event = request.get_json_data()
-        # _logger.info("processing request:%s\n", json.dumps(event, indent=4))
         try:
             if event['type'] == 'issuing_authorization.created':
                 request.env['hr.expense'].sudo()._create_expense_from_stripe_issuing_authorization(event['data']['object'])

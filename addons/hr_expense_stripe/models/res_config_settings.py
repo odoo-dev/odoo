@@ -12,20 +12,31 @@ class ResConfigSettings(models.TransientModel):
         readonly=False,
         check_company=True,
     )
-    stripe_issuing_activated = fields.Boolean(config_parameter='hr_expense_stripe.stripe_issuing_activated')
+    stripe_issuing_activated = fields.Boolean(
+        related='company_id.stripe_issuing_activated',
+        readonly=False,
+    )
 
-    stripe_publishable_live_key = fields.Char(config_parameter='hr_expense_stripe.stripe_publishable_live_key')
-    stripe_secret_live_key = fields.Char(config_parameter='hr_expense_stripe.stripe_secret_live_key')
-    stripe_publishable_test_key = fields.Char(config_parameter='hr_expense_stripe.stripe_publishable_test_key')
-    stripe_secret_test_key = fields.Char(config_parameter='hr_expense_stripe.stripe_secret_test_key')
+    stripe_publishable_live_key = fields.Char(
+        related='company_id.stripe_publishable_live_key',
+        readonly=False,
+    )
+    stripe_secret_live_key = fields.Char(
+        related='company_id.stripe_secret_live_key',
+        readonly=False,
+    )
+    stripe_publishable_test_key = fields.Char(
+        related='company_id.stripe_publishable_test_key',
+        readonly=False,
+    )
+    stripe_secret_test_key = fields.Char(
+        related='company_id.stripe_secret_test_key',
+        readonly=False,
+    )
+
     stripe_mode = fields.Selection(
-        selection=[
-            ('test', 'Test'),
-            ('live', 'Live'),
-        ],
-        string="Stripe mode",
-        config_parameter='hr_expense_stripe.stripe_mode',
-        default='live'
+        related='company_id.stripe_mode',
+        readonly=False,
     )
 
     def action_connect_to_stripe(self):
@@ -33,9 +44,7 @@ class ResConfigSettings(models.TransientModel):
         self.env['stripe.issuing']._stripe_make_request(endpoint='balance', method='GET')
         self.env['stripe.issuing']._stripe_make_request(endpoint='balance', method='GET')
 
-        self.env['ir.config_parameter'].create([
-            {'key': 'hr_expense_stripe.stripe_issuing_activated', 'value': True},
-        ])
+        self.company_id.stripe_issuing_activated = True
 
     def action_import_from_stripe(self):
         if not self.stripe_issuing_activated:
