@@ -22,6 +22,9 @@ export class RecaptchaForm extends Interaction {
 
     async onSubmit(ev) {
         const submitEl = this.el.querySelector("button[type='submit']");
+        if (!submitEl.classList.contains("disabled")) {
+            addLoadingEffect(submitEl);
+        }
         if (!this.el.querySelector("input[name='recaptcha_token_response']")) {
             ev.preventDefault();
             if (!submitEl.classList.contains("disabled")) {
