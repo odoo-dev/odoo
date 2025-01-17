@@ -1,5 +1,4 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { queryOne } from "@odoo/hoot-dom";
 import {
     startInteractions,
     setupInteractionWhiteList,
