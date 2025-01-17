@@ -1662,9 +1662,9 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         warehouse = self.company_data.get('default_warehouse')
         warehouse.delivery_steps = 'pick_ship'
         rule = warehouse.delivery_route_id.rule_ids.filtered(lambda r: r.procure_method == 'make_to_stock')[0]
-        rule.group_propagation_option = 'fixed'
-        fixedGroup = self.env['procurement.group'].create({})
-        rule.group_id = fixedGroup
+        # rule.group_propagation_option = 'fixed'
+        # fixedGroup = self.env['procurement.group'].create({})
+        # rule.group_id = fixedGroup
         self.env['stock.quant']._update_available_quantity(self.test_product_delivery, warehouse.lot_stock_id, 4)
         # create a SO with 3 products
         so1 = self._get_new_sale_order(product=self.test_product_delivery, amount=3)

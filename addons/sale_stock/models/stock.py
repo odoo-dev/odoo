@@ -71,12 +71,6 @@ class StockMoveLine(models.Model):
         return 'customer' in {self.location_id.usage, self.location_dest_id.usage}
 
 
-class ProcurementGroup(models.Model):
-    _inherit = 'procurement.group'
-
-    sale_id = fields.Many2one('sale.order', 'Sale Order')
-
-
 class StockRule(models.Model):
     _inherit = 'stock.rule'
 
@@ -89,27 +83,12 @@ class StockRule(models.Model):
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
-    sale_id = fields.Many2one('sale.order', compute="_compute_sale_id", inverse="_set_sale_id", string="Sales Order", store=True, index='btree_not_null')
+    sale_id = fields.Many2one('sale.order', compute="_compute_sale_id", string="Sales Order", store=True, index='btree_not_null')
 
-    @api.depends('group_id')
+    @api.depends('origin')
     def _compute_sale_id(self):
         for picking in self:
-            picking.sale_id = picking.group_id.sale_id
-
-    def _set_sale_id(self):
-        if self.group_id:
-            self.group_id.sale_id = self.sale_id
-        else:
-            if self.sale_id:
-                vals = {
-                    'sale_id': self.sale_id.id,
-                    'name': self.sale_id.name,
-                }
-            else:
-                vals = {}
-
-            pg = self.env['procurement.group'].create(vals)
-            self.group_id = pg
+            picking.sale_id = self.env['sale.order'].search([('name', '=', picking.origin)])
 
     def _auto_init(self):
         """
