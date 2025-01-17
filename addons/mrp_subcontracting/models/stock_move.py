@@ -145,8 +145,8 @@ class StockMove(models.Model):
                     'date_start': move.date,
                     'date_finished': move.date,
                 })
-        if self.env.context.get('record_subcontract_components') and self._get_subcontract_production():
-            return self._get_subcontract_production().subcontracting_record_component()
+        # if self.env.context.get('record_subcontract_components') and self._get_subcontract_production():
+        #     return self._get_subcontract_production().subcontracting_record_component()
         return res
 
     @api.model_create_multi
@@ -168,8 +168,8 @@ class StockMove(models.Model):
             })
         elif self.env.user._is_portal():
             action['views'] = [(self.env.ref('mrp_subcontracting.mrp_subcontracting_view_stock_move_operations').id, 'form')]
-        elif self.is_subcontract:
-            action['context']['record_subcontract_components'] = True
+        # elif self.is_subcontract:
+        #     action['context']['record_subcontract_components'] = True
         return action
 
     def action_show_subcontract_details(self):
