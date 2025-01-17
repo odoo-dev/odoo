@@ -458,7 +458,6 @@ class StockWarehouse(models.Model):
                     'company_id': self.company_id.id,
                     'action': 'pull',
                     'auto': 'manual',
-                    'propagate_carrier': True,
                     'route_id': self._find_or_create_global_route('stock.route_warehouse0_mto', _('Replenish on Order (MTO)')).id
                 },
                 'update_values': {
@@ -573,7 +572,6 @@ class StockWarehouse(models.Model):
                 },
                 'rules_values': {
                     'active': True,
-                    'propagate_carrier': True
                 }
             },
         }
@@ -731,7 +729,7 @@ class StockWarehouse(models.Model):
                     values={'route_id': inter_wh_route.id})
             pull_rules_list += self._get_supply_pull_rules_values(
                 [self.Routing(transit_location, self.lot_stock_id, self.in_type_id, 'pull')],
-                values={'route_id': inter_wh_route.id, 'propagate_warehouse_id': supplier_wh.id})
+                values={'route_id': inter_wh_route.id})
             for pull_rule_vals in pull_rules_list:
                 Rule.create(pull_rule_vals)
 

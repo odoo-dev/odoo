@@ -4,7 +4,7 @@
         <record id="digest_tip_stock_0" model="digest.tip">
             <field name="name">Tip: Speed up inventory operations with barcodes</field>
             <field name="sequence">1000</field>
-            <field name="group_id" ref="stock.group_stock_user" />
+<!--            <field name="group_id" ref="stock.group_stock_user" />-->
             <field name="tip_description" type="html">
 <div>
     <p class="tip_title">Tip: Speed up inventory operations with barcodes</p>
@@ -25,7 +25,7 @@
         <record id="digest_tip_stock_1" model="digest.tip">
             <field name="name">Tip: Monitor Lot details</field>
             <field name="sequence">4000</field>
-            <field name="group_id" ref="stock.group_stock_user"/>
+<!--            <field name="group_id" ref="stock.group_stock_user"/>-->
             <field name="tip_description" type="html">
 <div>
     <p class="tip_title">Tip: Monitor Lot details</p>
