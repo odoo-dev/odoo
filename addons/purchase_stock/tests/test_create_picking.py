@@ -538,7 +538,7 @@ class TestCreatePicking(common.TestProductCommon):
                     'action': 'pull_push',
                     'group_id': procurement_group,
                 }
-            return self.env['procurement.group'].run([self.env['procurement.group'].Procurement(
+            return self.env['stock.rule'].run([self.env['stock.rule'].Procurement(
                 product, product_qty, self.uom_unit, vendor.property_stock_customer,
                 product.name, '/', self.env.company, values)
             ])
@@ -566,13 +566,12 @@ class TestCreatePicking(common.TestProductCommon):
             'supplier_taxes_id': [(6, 0, [])],
         })
 
-        procurement_group = self.env['procurement.group'].create({
-            'move_type': 'direct',
-            'partner_id': vendor.id
-        })
+        # procurement_group = self.env['procurement.group'].create({
+        #     'move_type': 'direct',
+        #     'partner_id': vendor.id
+        # })
         # Create initial procurement that will generate the initial move and its picking.
         create_run_procurement(product, 50, {
-            'group_id': procurement_group,
             'warehouse_id': picking_type_out.warehouse_id,
             'partner_id': vendor
         })

@@ -25,7 +25,6 @@ class PurchaseOrder(models.Model):
         help="This will determine operation type of incoming shipment")
     default_location_dest_id_usage = fields.Selection(related='picking_type_id.default_location_dest_id.usage', string='Destination Location Type',
         help="Technical field used to display the Drop Ship Address", readonly=True)
-    group_id = fields.Many2one('procurement.group', string="Procurement Group", copy=False)
     is_shipped = fields.Boolean(compute="_compute_is_shipped")
     effective_date = fields.Datetime("Arrival", compute='_compute_effective_date', store=True, copy=False,
         help="Completion date of the first receipt order.")
@@ -156,8 +155,6 @@ class PurchaseOrder(models.Model):
                     moves_to_cancel_ids.update(move_dest_ids.ids)
                 else:
                     moves_to_recompute_ids.update(move_dest_ids.ids)
-            if order_line.group_id:
-                order_line.group_id.purchase_line_ids = [Command.unlink(order_line.id)]
 
         if moves_to_cancel_ids:
             moves_to_cancel = self.env['stock.move'].browse(moves_to_cancel_ids)
@@ -291,8 +288,6 @@ class PurchaseOrder(models.Model):
         }
 
     def _prepare_picking(self):
-        if not self.group_id:
-            self.group_id = self.group_id.create(self._prepare_group_vals())
         if not self.partner_id.property_stock_supplier.id:
             raise UserError(_("You must set a Vendor Location for this partner %s", self.partner_id.name))
         return {
