@@ -131,6 +131,9 @@ export class BaseHeader extends Interaction {
         this.adjustMainPadding();
     }
 
+    /**
+     * @param {number} [addCount=0]
+     */
     adaptToHeaderChangeLoop(addCount = 0) {
         this.adaptToHeaderChange();
         this.transitionCount = Math.max(0, this.transitionCount + addCount);
@@ -210,6 +213,9 @@ export class BaseHeader extends Interaction {
         return this.el.getBoundingClientRect().height;
     }
 
+    /**
+     * @param {boolean} useAffixed
+     */
     toggleCSSAffixed(useAffixed) {
         this.cssAffixed = useAffixed;
         this.adaptToHeaderChange();
