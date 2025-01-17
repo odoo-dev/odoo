@@ -189,6 +189,8 @@ export class DynamicSnippet extends Interaction {
 
     /**
      * Navigates to the call to action url.
+     * 
+     * @param {Event} ev
      */
     callToAction(ev) {
         window.location = ev.currentTarget.dataset.url;
