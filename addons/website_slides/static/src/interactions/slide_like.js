@@ -36,9 +36,9 @@ export class SlideLike extends Interaction {
             upvote: voteType === 'like',
         }))
         if (!data.error) {
-            const likeButtonEl = document.querySelector('span.o_wslides_js_slide_like_up');
+            const likeButtonEl = this.el.querySelector('span.o_wslides_js_slide_like_up');
             const likesIcon = likeButtonEl.querySelector('i.fa');
-            const dislikeButtonEl = document.querySelector('span.o_wslides_js_slide_like_down');
+            const dislikeButtonEl = this.el.querySelector('span.o_wslides_js_slide_like_down');
             const dislikesIcon = dislikeButtonEl.querySelector('i.fa');
 
             // update 'thumbs-up' button with latest state
