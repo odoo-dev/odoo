@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+l10n_ph_edi.access_eis_document,access_eis_document,l10n_ph_edi.model_eis_document,base.group_user,1,1,1,1
+l10n_ph_edi.access_eis_document_line,access_eis_document_line,l10n_ph_edi.model_eis_document_line,base.group_user,1,1,1,1
