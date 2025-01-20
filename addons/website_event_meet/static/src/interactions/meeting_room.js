@@ -1,6 +1,7 @@
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
+import { browser } from "@web/core/browser/browser";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
@@ -31,7 +32,7 @@ export class MeetingRoom extends Interaction {
                 // remove the element so we do not need to refresh the page
                 this.el.remove();
             },
-        })
+        });
     }
 
     onDuplicateRoomClick() {
@@ -42,7 +43,7 @@ export class MeetingRoom extends Interaction {
                     context: user.context,
                 }));
 
-                window.location.reload();
+                browser.location.reload();
             },
         });
     }

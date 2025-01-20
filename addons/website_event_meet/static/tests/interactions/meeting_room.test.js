@@ -4,10 +4,35 @@ import {
 } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
+import { click, queryOne } from "@odoo/hoot-dom";
+import {
+    contains,
+    defineModels,
+    fields,
+    models,
+    mountWithCleanup,
+    onRpc,
+} from "@web/../tests/web_test_helpers";
+import { MainComponentsContainer } from "@web/core/main_components_container";
 
 setupInteractionWhiteList("website_event_meet.meeting_room");
 
 describe.current.tags("interaction_dev");
+
+class EventMeetingRoom extends models.Model {
+    is_published = fields.Boolean();
+    is_pinned = fields.Boolean();
+
+    _records = [
+        {
+            id: 3,
+            is_published: true,
+            is_pinned: false,
+        },
+    ];
+}
+
+defineModels([EventMeetingRoom]);
 
 const meetingRoomTemplate = `
     <div class="o_wemeet_container container h-100">
@@ -233,20 +258,56 @@ test("website_event_meeting_room is started when there is an element .o_wevent_m
     expect(core.interactions).toHaveLength(3);
 });
 
-test.todo("[click] website_event_meeting_room enable to pin / unpin a room", async () => {
+test("[click] website_event_meeting_room enable to pin / unpin a room", async () => {
+    onRpc("/web/dataset/call_kw/event.meeting.room/write", async (request) => {
+        const { params } = await request.json();
+        expect.step("rpc");
+        expect(params.args[0]).toEqual([3]); // model id
+        expect(params.args[1]).toEqual({ is_pinned: false });
+        return true;
+    });
     await startInteractions(meetingRoomTemplate);
-    // await click(".o_wevent_meeting_room_is_pinned");
-    expect(true).toBe(true);
+    const pinnedButtonEl = queryOne(".o_wevent_meeting_room_is_pinned:first");
+    expect(pinnedButtonEl).toHaveClass("o_wevent_meeting_room_pinned");
+    await click(pinnedButtonEl);
+    expect.verifySteps(["rpc"]);
+    expect(pinnedButtonEl).not.toHaveClass("o_wevent_meeting_room_pinned");
 });
 
-test.todo("[click] website_event_meeting_room enable to delete a room", async () => {
+test("[click] website_event_meeting_room enable to delete a room", async () => {
+    onRpc("/web/dataset/call_kw/event.meeting.room/write", async (request) => {
+        const { params } = await request.json();
+        expect.step("rpc");
+        expect(params.args[0]).toEqual([3]); // model id
+        expect(params.args[1]).toEqual({ is_published: false });
+        return;
+    });
     await startInteractions(meetingRoomTemplate);
-    // await click(".o_wevent_meeting_room_delete");
-    expect(true).toBe(true);
+    await mountWithCleanup(MainComponentsContainer);
+
+    const deleteButtonEl = queryOne(".o_wevent_meeting_room_delete:first");
+    const dropdownEl = deleteButtonEl.parentElement.previousElementSibling;
+    await click(dropdownEl);
+    await click(deleteButtonEl);
+    await contains(".modal:last:contains(Are you sure you want to close this room?) .modal-footer .btn-primary").click();
+    expect.verifySteps(["rpc"]);
+    expect(deleteButtonEl.closest(".o_wevent_meeting_room_card")).not.toBeVisible();
 });
 
-test.todo("[click] website_event_meeting_room enable to duplicate a room", async () => {
+test("[click] website_event_meeting_room enable to duplicate a room", async () => {
+    onRpc("/web/dataset/call_kw/event.meeting.room/copy", async (request) => {
+        const { params } = await request.json();
+        expect.step("rpc");
+        expect(params.args).toEqual([3]); // model id
+        return;
+    });
     await startInteractions(meetingRoomTemplate);
-    // await click(".o_wevent_meeting_room_duplicate");
-    expect(true).toBe(true);
+    await mountWithCleanup(MainComponentsContainer);
+
+    const duplicateButtonEl = queryOne(".o_wevent_meeting_room_duplicate:first");
+    const dropdownEl = duplicateButtonEl.parentElement.previousElementSibling;
+    await click(dropdownEl);
+    await click(duplicateButtonEl);
+    await contains(".modal:last:contains(Are you sure you want to duplicate this room?) .modal-footer .btn-primary").click();
+    expect.verifySteps(["rpc"]);
 });
