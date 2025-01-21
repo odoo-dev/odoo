@@ -6,9 +6,7 @@ import { addLoadingEffect } from "@web/core/utils/ui";
 export class Login extends Interaction {
     static selector = ".oe_login_form";
     dynamicContent = {
-        _root: {
-            "t-on-submit": this.onSubmit,
-        },
+        _root: { "t-on-submit": this.onSubmit },
     };
 
     /**
@@ -23,8 +21,8 @@ export class Login extends Interaction {
      */
     onSubmit(ev) {
         if (!ev.defaultPrevented) {
-            const btnEl = ev.currentTarget.querySelector("button[type='submit']");
-            const removeLoadingEffect = addLoadingEffect(btnEl);
+            const submitEl = ev.currentTarget.querySelector("button[type='submit']");
+            const removeLoadingEffect = addLoadingEffect(submitEl);
             const oldPreventDefault = ev.preventDefault.bind(ev);
             ev.preventDefault = () => {
                 removeLoadingEffect();
