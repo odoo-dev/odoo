@@ -226,8 +226,7 @@ export class ColorPlugin extends Plugin {
                 .filter(Boolean)
         );
 
-        const getFonts = (selectedNodes) => {
-            return selectedNodes.flatMap((node) => {
+        const getFonts = (selectedNodes) => selectedNodes.flatMap((node) => {
                 let font = closestElement(node, "font") || closestElement(node, "span");
                 const children = font && descendants(font);
                 if (
@@ -284,7 +283,6 @@ export class ColorPlugin extends Plugin {
                 }
                 return font;
             });
-        };
 
         for (const fieldNode of selectedFieldNodes) {
             this.colorElement(fieldNode, color, mode);
@@ -337,11 +335,12 @@ export class ColorPlugin extends Plugin {
      * @param {'color'|'backgroundColor'} mode 'color' or 'backgroundColor'
      */
     colorElement(element, color, mode) {
-        const newClassName = element.className
+        const oldClassName = element.getAttribute("class") || "";
+        const newClassName = oldClassName
             .replace(mode === "color" ? TEXT_CLASSES_REGEX : BG_CLASSES_REGEX, "")
             .replace(/\btext-gradient\b/g, "") // cannot be combined with setting a background
             .replace(/\s+/, " ");
-        element.className !== newClassName && (element.className = newClassName);
+        oldClassName !== newClassName && element.setAttribute("class", newClassName);
         element.style["background-image"] = "";
         if (mode === "backgroundColor") {
             element.style["background"] = "";
