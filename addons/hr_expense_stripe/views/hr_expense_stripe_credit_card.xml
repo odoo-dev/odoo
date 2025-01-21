@@ -25,6 +25,7 @@
                             <field name="card_type" invisible="True"/>
                             <field name="company_id" groups="base.group_multi_company" readonly="stripe_id"/>
                             <field name="journal_id" readonly="stripe_id"/>
+                            <field name="merchant_category_code_ids" widget="many2many_tags"/>
                         </group>
                     </group>
                     <notebook>

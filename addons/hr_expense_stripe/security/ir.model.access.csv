@@ -1,2 +1,3 @@
 id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
 hr_expense_stripe_credit_card_admin,hr_expense_stripe_credit_card_admin,model_hr_expense_stripe_credit_card,hr.group_hr_manager,1,1,1,1
+merchant_category_code_admin,merchant_category_code_admin,model_merchant_category_code,hr.group_hr_manager,1,1,1,1

@@ -11,10 +11,12 @@
     'website': 'https://www.odoo.com/app/expenses',
     'depends': ['hr_expense'],
     'data': [
+        'data/merchant_category_code.xml',
         'security/ir.model.access.csv',
         'views/hr_expense_stripe_credit_card.xml',
         'views/hr_employee_views.xml',
-        'views/res_config_settings.xml'
+        'views/res_config_settings.xml',
+        'views/merchant_category_code_views.xml',
     ],
     'post_init_hook': '_post_init_hook_create_stripe_journal',
     'installable': True,

@@ -73,7 +73,6 @@ class HrExpenseStripeCreditCard(models.Model):
     cardholder_last_name = fields.Char(related='cardholder_id.private_last_name', string='Cardholder Last Name', readonly=False)
     country_code = fields.Char(comodel_name='res.country', related='company_id.country_code')
 
-
     # Stripe object additional fields
     cancellation_reason = fields.Selection(
         string="Cancellation Reason",
@@ -84,6 +83,8 @@ class HrExpenseStripeCreditCard(models.Model):
         ],
         readonly=True,
     )
+
+    merchant_category_code_ids = fields.Many2many('merchant.category.code', string="Authorized Merchant Category Codes")
 
     @api.constrains('expiration')
     def _check_expiration(self):

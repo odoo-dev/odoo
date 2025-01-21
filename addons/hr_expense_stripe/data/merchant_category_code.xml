@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+
+        <record id="merchant_category_code_agricultural_services" model="merchant.category.code">
+            <field name="name">Agricultural services</field>
+            <field name="code_min">0001</field>
+            <field name="code_max">1499</field>
+        </record>
+
+        <record id="merchant_category_code_contracted_services" model="merchant.category.code">
+            <field name="name">Contracted services</field>
+            <field name="code_min">1500</field>
+            <field name="code_max">2999</field>
+        </record>
+
+        <record id="merchant_category_code_transportation_services" model="merchant.category.code">
+            <field name="name">Transportation services</field>
+            <field name="code_min">4000</field>
+            <field name="code_max">4799</field>
+        </record>
+
+        <record id="merchant_category_code_utility_services" model="merchant.category.code">
+            <field name="name">Utility services</field>
+            <field name="code_min">4800</field>
+            <field name="code_max">4999</field>
+        </record>
+
+        <record id="merchant_category_code_retail_outlet_services" model="merchant.category.code">
+            <field name="name">Retail outlet services</field>
+            <field name="code_min">5000</field>
+            <field name="code_max">5599</field>
+        </record>
+
+        <record id="merchant_category_code_clothing_shops" model="merchant.category.code">
+            <field name="name">Clothing shops</field>
+            <field name="code_min">5600</field>
+            <field name="code_max">5699</field>
+        </record>
+
+        <record id="merchant_category_code_miscellaneous_shops" model="merchant.category.code">
+            <field name="name">Miscellaneous shops</field>
+            <field name="code_min">5700</field>
+            <field name="code_max">7299</field>
+        </record>
+
+        <record id="merchant_category_code_business_services" model="merchant.category.code">
+            <field name="name">Business services</field>
+            <field name="code_min">7300</field>
+            <field name="code_max">7999</field>
+        </record>
+
+        <record id="merchant_category_code_professional_services" model="merchant.category.code">
+            <field name="name">Professional services and membership organisations</field>
+            <field name="code_min">8000</field>
+            <field name="code_max">8999</field>
+        </record>
+
+        <record id="merchant_category_code_government_services" model="merchant.category.code">
+            <field name="name">Government services</field>
+            <field name="code_min">9000</field>
+            <field name="code_max">9999</field>
+        </record>
+
+    </data>
+</odoo>
