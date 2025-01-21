@@ -21,8 +21,8 @@ export class PosOrder extends Base {
         if (!this.session_id && (!this.finalized || typeof this.id !== "number")) {
             this.update({ session_id: this.session });
         }
-
         // Data present in python model
+        this.nb_print = vals.nb_print || 0;
         this.date_order = vals.date_order || serializeDateTime(luxon.DateTime.now());
         this.to_invoice = vals.to_invoice || false;
         this.shipping_date = vals.shipping_date || false;
