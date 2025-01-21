@@ -1,5 +1,5 @@
 // Frontend general
-html, body, #wrapwrap {
+html, body {
     width: 100%;
     height: 100%;
 }
@@ -17,6 +17,8 @@ html, body, #wrapwrap {
     > main {
         flex: 1 0 auto;
     }
+    width: 100wh;
+    min-height: 100vh;
 }
 .modal-open #wrapwrap {
     overflow: hidden;
@@ -31,9 +33,9 @@ html, body, #wrapwrap {
         height: 100%;
         overflow: auto !important;
     }
-    // #wrapwrap {
-    //     overflow: auto;
-    // }
+    #wrapwrap {
+        overflow: hidden;
+    }
 }
 
 @media screen and (min-width: 768px) {
