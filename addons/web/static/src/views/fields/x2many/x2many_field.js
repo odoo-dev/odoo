@@ -56,6 +56,7 @@ export class X2ManyField extends Component {
             this.controls = (controls.length && controls) || [];
             if (this.controls.length === 0) {
                 this.kanbanAddLabel = this.props.addLabel || _t("Add %s", this.field.string);
+                console.warn(`>>>>> ${this.field.string}`);
             }
         }
         const subViewActiveActions = activeActions;
