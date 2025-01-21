@@ -225,7 +225,6 @@
             'website/static/src/xml/website.background.video.xml',
             'website/static/src/xml/website.cookies_warning.xml',
             'website/static/src/js/text_processing.js',
-            'website/static/src/snippets/observing_cookie_mixin.js',
         ],
         'web.assets_frontend_minimal': [
             'website/static/src/utils/misc.js',

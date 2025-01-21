@@ -27,8 +27,8 @@ export class MediaVideo extends Interaction {
             iframeEl = this.generateIframe();
         }
 
-        if (!iframeEl?.getAttribute('src')) {
-            const promise = setupAutoplay(iframeEl.getAttribute('src'), this.el.dataset.needCookiesApproval);
+        if (!iframeEl.getAttribute('src')) {
+            const promise = setupAutoplay(iframeEl.getAttribute('src'), !!this.el.dataset.needCookiesApproval);
             if (promise) {
                 this.waitFor(promise).then(() => triggerAutoplay(iframeEl));
             }
@@ -47,8 +47,8 @@ export class MediaVideo extends Interaction {
         const div2 = document.createElement("div");
         div2.classList.add("media_iframe_video_size");
         div2.innerHTML = "&nbsp;";
-        this.el.appendChild(div1);
-        this.el.appendChild(div2);
+        this.insert(div1);
+        this.insert(div2);
 
         // Rebuild the iframe. Depending on version / compatibility / instance,
         // the src is saved in the 'data-src' attribute or the
@@ -79,7 +79,7 @@ export class MediaVideo extends Interaction {
         iframeEl.frameborder = "0";
         iframeEl.allowFullscreen = "allowfullscreen";
         iframeEl.ariaLabel = _t("Media video");
-        this.el.appendChild(iframeEl);
+        this.insert(iframeEl);
         this.services.website_cookies.manageIframeSrc(this.el, src);
         return iframeEl;
     }
