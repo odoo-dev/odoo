@@ -36,11 +36,20 @@ class BusPresence(models.Model):
         return presences
 
     def write(self, values):
+        print("getting a write", values)
         status_by_user = {presence._get_identity_field_name(): presence.status for presence in self}
+        print("status_by_user", status_by_user)
+        print("the ones before:")
+        for u in self:
+            print(u.id, u[u._get_identity_field_name()], u.status)
         result = super().write(values)
         updated = self.filtered(lambda p: status_by_user[p._get_identity_field_name()] != p.status)
+        print("the updated ones:")
+        for u in updated:
+            print(u.id, u[u._get_identity_field_name()], u.status)
         updated._invalidate_im_status()
         updated._send_presence()
+        # self.flush_recordset(["status"])
         return result
 
     def unlink(self):
@@ -52,6 +61,8 @@ class BusPresence(models.Model):
         """ Updates the last_poll and last_presence of the current user
             :param inactivity_period: duration in milliseconds
         """
+        # self._update_presence(inactivity_period=inactivity_period, identity_field=identity_field, identity_value=identity_value)
+        # return
         # This method is called in method _poll() and cursor is closed right
         # after; see bus/controllers/main.py.
         try:
@@ -62,6 +73,7 @@ class BusPresence(models.Model):
                 # commit on success
                 self.env.cr.commit()
         except PG_CONCURRENCY_EXCEPTIONS_TO_RETRY:
+            print("$#$$$$$$$$$$GOT A PG_CONCURRENCY_EXCEPTIONS_TO_RETRY")
             # ignore concurrency error
             return self.env.cr.rollback()
 
@@ -79,7 +91,11 @@ class BusPresence(models.Model):
 
     @api.model
     def _update_presence(self, inactivity_period, identity_field, identity_value):
+        print("I AM", self.env.user or self.env["mail.guest"]._get_guest_from_context())
+        print("SOMEONE WRITING")
+        print("identity info:", identity_field, identity_value)
         presence = self.search([(identity_field, "=", identity_value)])
+        print("presence before:", presence.status)
         values = {
             "last_poll": fields.Datetime.now(),
             "last_presence": fields.Datetime.now() - timedelta(milliseconds=inactivity_period),
@@ -90,6 +106,9 @@ class BusPresence(models.Model):
             presence = self.create(values)
         else:
             presence.write(values)
+        print("the presence in question:", presence.id)
+        print("property of:", presence[presence._get_identity_field_name()])
+        print("presence after:", presence.status)
 
     def _invalidate_im_status(self):
         self.user_id.invalidate_recordset(["im_status"])
@@ -100,7 +119,9 @@ class BusPresence(models.Model):
 
         :param im_status: 'online', 'away' or 'offline'
         """
+        print("sending the presence")
         for presence in self:
+            print(presence.id, presence.status)
             identity_data = presence._get_identity_data()
             target = presence._get_bus_target()
             target = bus_target or (target and (target, "presence"))

@@ -230,6 +230,7 @@ class BaseCursor(_CursorProtocol):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        # print("+++++ got an exit", traceback)
         try:
             if exc_type is None:
                 self.commit()

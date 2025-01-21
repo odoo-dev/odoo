@@ -98,9 +98,15 @@ class IrWebsocket(models.AbstractModel):
 
     def _on_websocket_closed(self, cookies):
         super()._on_websocket_closed(cookies)
+        print("now on mail")
         if self.env.user and not self.env.user._is_public():
+            print("but I have user and I am not public")
             return
         token = cookies.get(self.env["mail.guest"]._cookie_name, "")
         if guest := self.env["mail.guest"]._get_guest_from_token(token):
             # sudo - bus.presence: guests can write their own presence
+            print("found a guest, setting it offline", guest)
             self.env["bus.presence"].sudo().search([("guest_id", "=", guest.id)]).status = "offline"
+            print("proof:", self.env["bus.presence"].sudo().search([("guest_id", "=", guest.id)]).status)
+        else:
+            print("websocket termination, but no guest found")

@@ -129,7 +129,9 @@ class IrWebsocket(models.AbstractModel):
             )
 
     def _on_websocket_closed(self, cookies):
+        print("###_on_websocket_closed")
         if self.env.user and not self.env.user._is_public():
+            print("found a user, setting offline")
             self.env["bus.presence"].search([("user_id", "=", self.env.uid)]).status = "offline"
 
     @classmethod

@@ -581,6 +581,8 @@ class Websocket:
         dispatch.unsubscribe(self)
         self._trigger_lifecycle_event(LifecycleEvent.CLOSE)
         with acquire_cursor(self._db) as cr:
+            print("Acquiring cursor: ", cr, self._session.uid, self._session.context)
+            print("The whole session:", self._session)
             env = api.Environment(cr, self._session.uid, self._session.context)
             env["ir.websocket"]._on_websocket_closed(self._cookies)
 
@@ -607,6 +609,7 @@ class Websocket:
         exception and call `self.disconnect` in order to close the
         connection cleanly.
         """
+        print("####GOT A TRANSPORT ERROR")
         code, reason = CloseCode.SERVER_ERROR, str(exc)
         if isinstance(exc, (ConnectionClosed, OSError)):
             code = CloseCode.ABNORMAL_CLOSURE

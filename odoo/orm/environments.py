@@ -520,7 +520,10 @@ class Transaction:
     def flush(self):
         """ Flush pending computations and updates in the transaction. """
         if self.default_env is not None:
+            print("+++ doing the flushing")
             self.default_env.flush_all()
+        else:
+            print("$$$$$$ FAILED, NO FLUSHING")
 
     def clear(self):
         """ Clear the caches and pending computations and updates in the transactions. """
