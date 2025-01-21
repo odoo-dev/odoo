@@ -77,10 +77,18 @@ $-mini-nav-size: 40px;
 }
 
 // LAYOUTING
-body {
-    // Set frontend direction that will be flipped with
-    // rtlcss for right-to-left text direction.
-    direction: ltr;
+@media screen and (max-width: 767px) {
+    html, body {
+        max-height: 100vh;
+        max-height: 100svh;
+        overflow: auto !important;
+    }
+    body{
+        direction: ltr;
+    }
+    #wrapwrap {
+        overflow: hidden;
+    }
 }
 
 // LOGIN FORM
