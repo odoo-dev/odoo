@@ -28,11 +28,12 @@ html, body, #wrapwrap {
 //       is moving the scroll to the body when printing the page.
 @media screen and (max-width: 767px) {
     html, body {
-        overflow: auto;
+        height: 100%;
+        overflow: auto !important;
     }
-    #wrapwrap {
-        overflow: hidden;
-    }
+    // #wrapwrap {
+    //     overflow: auto;
+    // }
 }
 
 @media screen and (min-width: 768px) {
