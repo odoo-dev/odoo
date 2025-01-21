@@ -15,15 +15,11 @@
 
 /** TODO: Introduce a position parameter to the plugin registry in order to load them in a specific order */
 import * as spreadsheet from "@odoo/o-spreadsheet";
-const { corePluginRegistry, coreViewsPluginRegistry, featurePluginRegistry } = spreadsheet.registries;
+const { corePluginRegistry, coreViewsPluginRegistry } = spreadsheet.registries;
 
-import {
-  GlobalFiltersCorePlugin,
-  GlobalFiltersUIPlugin,
-  GlobalFiltersCoreViewPlugin,
-} from "@spreadsheet/global_filters/index";
-import { PivotOdooCorePlugin, PivotCoreViewGlobalFilterPlugin, PivotUIGlobalFilterPlugin } from "@spreadsheet/pivot/index"; // list depends on filter for its getters
-import { ListCorePlugin, ListCoreViewPlugin, ListUIPlugin } from "@spreadsheet/list/index"; // pivot depends on filter for its getters
+import { GlobalFiltersCorePlugin, GlobalFiltersUIPlugin } from "@spreadsheet/global_filters/index";
+import { PivotOdooCorePlugin, PivotUIGlobalFilterPlugin } from "@spreadsheet/pivot/index"; // list depends on filter for its getters
+import { ListCorePlugin, ListUIPlugin } from "@spreadsheet/list/index"; // pivot depends on filter for its getters
 import {
     ChartOdooMenuPlugin,
     OdooChartCorePlugin,
@@ -39,12 +35,8 @@ corePluginRegistry.add("OdooListCorePlugin", ListCorePlugin);
 corePluginRegistry.add("odooChartCorePlugin", OdooChartCorePlugin);
 corePluginRegistry.add("chartOdooMenuPlugin", ChartOdooMenuPlugin);
 
-coreViewsPluginRegistry.add("OdooGlobalFiltersCoreViewPlugin", GlobalFiltersCoreViewPlugin);
-coreViewsPluginRegistry.add("OdooPivotGlobalFiltersCoreViewPlugin", PivotCoreViewGlobalFilterPlugin);
-coreViewsPluginRegistry.add("OdooListCoreViewPlugin", ListCoreViewPlugin);
+coreViewsPluginRegistry.add("OdooGlobalFiltersUIPlugin", GlobalFiltersUIPlugin);
+coreViewsPluginRegistry.add("OdooPivotGlobalFilterUIPlugin", PivotUIGlobalFilterPlugin);
+coreViewsPluginRegistry.add("OdooListUIPlugin", ListUIPlugin);
 coreViewsPluginRegistry.add("odooChartUIPlugin", OdooChartUIPlugin);
-
-featurePluginRegistry.add("OdooPivotGlobalFilterUIPlugin", PivotUIGlobalFilterPlugin);
-featurePluginRegistry.add("OdooGlobalFiltersUIPlugin", GlobalFiltersUIPlugin);
-featurePluginRegistry.add("odooPivotUIPlugin", PivotOdooUIPlugin);
-featurePluginRegistry.add("odooListUIPlugin", ListUIPlugin);
+coreViewsPluginRegistry.add("odooPivotUIPlugin", PivotOdooUIPlugin);
