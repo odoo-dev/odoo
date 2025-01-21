@@ -383,15 +383,3 @@ class HrCandidate(models.Model):
             'search_view_id': self.env.ref('hr_recruitment.ir_attachment_view_search_inherit_hr_recruitment').ids,
             'domain': [('res_model', '=', 'hr.candidate'), ('res_id', 'in', self.ids)],
         }
-
-    def action_send_email(self):
-        return {
-            'name': _('Send Email'),
-            'type': 'ir.actions.act_window',
-            'target': 'new',
-            'view_mode': 'form',
-            'res_model': 'candidate.send.mail',
-            'context': {
-                'default_candidate_ids': self.ids,
-            }
-        }
