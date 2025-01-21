@@ -28,18 +28,23 @@ export function setupAutoplay(src, needCookiesApproval = false) {
         loadJS('https://www.youtube.com/iframe_api');
         return promise;
     }
-    return null;
+    return Promise.resolve();
 }
 
 /**
  * @param {HTMLIframeElement} iframeEl - the iframe containing the video player
  */
 export function triggerAutoplay(iframeEl) {
+    const isYoutubeVideo = iframeEl.src.indexOf('youtube') >= 0;
+    const isMobileEnv = uiUtils.getSize() <= SIZES.LG && hasTouch();
+
     // YouTube does not allow to auto-play video in mobile devices, so we
     // have to play the video manually.
-    new window.YT.Player(iframeEl, {
-        events: {
-            onReady: ev => ev.target.playVideo(),
-        }
-    });
+    if (isYoutubeVideo && isMobileEnv && iframeEl.closest("[data-need-cookies-approval]")) {
+        new window.YT.Player(iframeEl, {
+            events: {
+                onReady: ev => ev.target.playVideo(),
+            }
+        });
+    }
 }

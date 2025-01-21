@@ -41,7 +41,7 @@ export class CookiesApproval extends Interaction {
 
     onOptionalCookiesAccepted() {
         delete this.el.dataset.needCookiesApproval;
-        if (this.iframeEl.dataset.nocookieSrc) {
+        if (this.iframeEl?.dataset.nocookieSrc) {
             this.iframeEl.src = this.iframeEl.dataset.nocookieSrc;
             delete this.iframeEl.dataset.nocookieSrc;
         }
