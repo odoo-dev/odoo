@@ -55,6 +55,7 @@ export const WebsiteRoot = publicRootData.PublicRoot.extend(KeyboardNavigationMi
 
         // Enable magnify on zommable img
         this.$('.zoomable img[data-zoom]').zoomOdoo();
+        window.scrollTo(0, 1);
 
         return this._super.apply(this, arguments);
     },
