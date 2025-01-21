@@ -1187,6 +1187,23 @@ header {
                     }
                 }
             }
+            // Add styles for mobile view to hide toolbar on scroll
+            @media only screen and (max-width: 767px) {
+                position: relative;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+
+                > header {
+                    position: sticky;
+                    top: 0;
+                    z-index: $zindex-fixed;
+                    transition: top 0.3s;
+
+                    &.hidden {
+                        top: -100px; // Adjust this value as needed to hide the header
+                    }
+                }
+            }
         }
     }
 } @else if o-website-value('header-template') == 'boxed' {

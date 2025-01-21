@@ -55,26 +55,10 @@ export const WebsiteRoot = publicRootData.PublicRoot.extend(KeyboardNavigationMi
 
         // Enable magnify on zommable img
         this.$('.zoomable img[data-zoom]').zoomOdoo();
-        // document.addEventListener('DOMContentLoaded', function() {
-        //     let lastScrollTop = 0;
-        //     const wrapwrap = document.getElementById('wrapwrap');
-        
-        //     window.addEventListener('scroll', function() {
-        //         let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
-        //         if (scrollTop > lastScrollTop) {
-        //             // Scrolling down
-        //             document.body.style.overflow = 'auto';
-        //             wrapwrap.style.overflow = 'hidden';
-        //         } else {
-        //             // Scrolling up
-        //             document.body.style.overflow = 'hidden';
-        //             wrapwrap.style.overflow = 'auto';
-        //         }
-        
-        //         lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
-        //     }, false);
-        // });
+        window.onresize = function() {
+            document.body.height = window.innerHeight;
+        };
+        window.onresize();
 
         return this._super.apply(this, arguments);
     },

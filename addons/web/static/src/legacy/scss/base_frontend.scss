@@ -1,5 +1,5 @@
 // Frontend general
-html, body {
+html, body{
     width: 100%;
     height: 100%;
 }
@@ -17,8 +17,6 @@ html, body {
     > main {
         flex: 1 0 auto;
     }
-    width: 100wh;
-    min-height: 100vh;
 }
 .modal-open #wrapwrap {
     overflow: hidden;
@@ -30,7 +28,7 @@ html, body {
 //       is moving the scroll to the body when printing the page.
 @media screen and (max-width: 767px) {
     html, body {
-        height: 100%;
+        // height: 100%;
         overflow: auto !important;
     }
     #wrapwrap {
@@ -43,6 +41,8 @@ html, body {
         overflow: hidden;
     }
     #wrapwrap {
+        width: 100%;
+        height: 100%;
         overflow: auto;
     }
 }

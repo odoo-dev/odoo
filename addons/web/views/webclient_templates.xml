@@ -296,7 +296,9 @@
     <template id="web.webclient_bootstrap">
         <t t-call="web.layout">
             <t t-set="head_web">
-                <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <meta name="apple-mobile-web-app-capable" content="yes"/>
+                <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
                 <!-- Chrome, Firefox OS and Opera -->
                 <meta name="theme-color" content="#875A7B"/>
                 <link rel="icon" sizes="192x192" href="/web/static/img/mobile-icons/android-192x192.png"/>
