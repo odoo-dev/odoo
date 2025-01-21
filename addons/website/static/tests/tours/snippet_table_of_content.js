@@ -11,6 +11,16 @@ const scrollToHeading = function (position) {
         },
     };
 };
+
+const scrollToTableOfContent = function (position) {
+    return {
+        content: `Scroll to TOC item number ${position}`,
+        trigger: `iframe .s_table_of_content:eq(${position})`,
+        run: function () {
+            this.$anchor[0].scrollIntoView(true);
+        },
+    };
+};
 const checkTOCNavBar = function (tocPosition, activeHeaderPosition) {
     return {
         content: `Check that the header ${activeHeaderPosition} is active for TOC ${tocPosition}`,
@@ -29,6 +39,7 @@ wTourUtils.registerWebsitePreviewTour('snippet_table_of_content', {
     // To make sure that the public widgets of the two previous ones started.
     wTourUtils.dragNDrop({id: 's_banner', name: 'Banner'}),
     ...wTourUtils.clickOnSave(),
+    scrollToTableOfContent(0),
     checkTOCNavBar(0, 0),
     checkTOCNavBar(1, 0),
     scrollToHeading(1),
