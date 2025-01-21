@@ -10,10 +10,17 @@ const prom = createPublicRoot(WebsiteRoot).then(async rootInstance => {
     // restricted editor user.
     if (window.frameElement && window.frameElement.dataset.loadWysiwyg === 'true') {
 
-        await Promise.all([
-            loadBundle("website.assets_all_wysiwyg"),
-            loadBundle("website.assets_edit_frontend")
-        ]);
+        try {
+            await Promise.all([
+                loadBundle("website.assets_all_wysiwyg"),
+                loadBundle("website.assets_edit_frontend")
+            ]);
+        } catch {
+            // if we have a bundle error here, it probably means that a network
+            // request has been canceled because we are unloading iframes all
+            // the time. This can be ignored safely.
+            return new Promise(() => {});
+        }
         window.dispatchEvent(new CustomEvent('PUBLIC-ROOT-READY', {detail: {rootInstance}}));
     }
     return rootInstance;
