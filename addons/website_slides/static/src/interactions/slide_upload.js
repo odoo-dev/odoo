@@ -26,8 +26,8 @@ export class SlideUpload extends Interaction {
     openDialog() {
         const data = this.el.dataset;
         this.services.dialog.add(SlideUploadDialog, {
-            categoryId: data.categoryId,
-            channelId: data.channelId,
+            categoryId: parseInt(data.categoryId),
+            channelId: parseInt(data.channelId),
             canPublish: data.canPublish === "True",
             canUpload: data.canUpload === "True",
             modulesToInstall: data.modulesToInstall || [],
