@@ -140,6 +140,13 @@ class SaleOrder(models.Model):
                     if project == sol.project_id and (project_template := sol.product_template_id.project_template_id):
                         project.sudo().company_id = project_template.sudo().company_id
                         break
+            if order.project_id:
+                    if not order.project_id.reinvoiced_sale_order_id:
+                        order.project_id.reinvoiced_sale_order_id = order.id
+                    if order.order_line:
+                        service_line = order.order_line.filtered('is_service')[:1]
+                        if service_line:
+                            order.project_id.sale_line_id = service_line.id
         return super()._action_confirm()
 
     def action_view_task(self):
