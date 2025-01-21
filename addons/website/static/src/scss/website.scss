@@ -1194,7 +1194,7 @@ header {
                 -webkit-overflow-scrolling: touch;
 
                 > header {
-                    position: sticky;
+                    position: relative;
                     top: 0;
                     z-index: $zindex-fixed;
                     transition: top 0.3s;
