@@ -58332,6 +58332,7 @@ class CoreViewPlugin extends BasePlugin {
     constructor({ getters, stateObserver }) {
         super(stateObserver);
         this.getters = getters;
+        this.dispatch = dispatch;
     }
 }
 
@@ -74601,6 +74602,7 @@ class Model extends EventBus {
     setupCoreViewPluginConfig() {
         return {
             getters: this.getters,
+            dispatch: this.dispatchFromCorePlugin,
             stateObserver: this.state,
             selection: this.selection,
             moveClient: this.session.move.bind(this.session),
