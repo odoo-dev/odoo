@@ -87,7 +87,7 @@ export class SearchBarResults extends Interaction {
         }
     }
 
-    onMousedown(ev) {
+    onMousedown() {
         // On Safari, links and buttons are not focusable by default. We need
         // to get around that behavior to avoid onFocusOut() from triggering
         // render(), as this would prevent the click from working.
@@ -96,13 +96,16 @@ export class SearchBarResults extends Interaction {
         }
     }
 
-    onMouseup(ev) {
+    onMouseup() {
         // See comment in onMousedown.
         if (isBrowserSafari) {
             this.searchBarEl.dispatchEvent(new CustomEvent('safarihack', { detail: { linkHasFocus: false } }));
         }
     }
 
+    /**
+     * @param {MouseEvent} ev
+     */
     onKeydown(ev) {
         switch (ev.key) {
             case "ArrowUp":
