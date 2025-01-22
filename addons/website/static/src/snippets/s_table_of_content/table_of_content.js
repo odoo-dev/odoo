@@ -98,18 +98,19 @@ export class TableOfContent extends Interaction {
             return;
         }
 
-        let position = 20;
+        let position = this.isHorizontal ? 0 : 20;
         for (const el of this.el.ownerDocument.querySelectorAll(".o_top_fixed_element")) {
             position += el.getBoundingClientRect().bottom;
         }
-        position += this.isHorizontal ? this.el.getBoundingClientRect().height : 0;
+
         this.position = position;
+        position += (this.isHorizontal ? this.el.offsetHeight : 0);
 
         if (this.previousPosition !== position) {
             this.offset = position + 100;
             this.refresh();
             this.process();
-            this.previousPosition = this.offset;
+            this.previousPosition = position;
         }
         this.updateContent();
     }
