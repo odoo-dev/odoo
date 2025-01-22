@@ -12,7 +12,7 @@ export class MailGroupMessage extends Interaction {
         },
         ".o_mg_link_show": {
             "t-on-click.prevent.stop": () => this.isShown = true,
-            "t-att-class": () => ({ "d-none": !this.isShown }),
+            "t-att-class": () => ({ "d-none": this.isShown }),
         },
         ".o_mg_link_content": { "t-att-class": () => ({ "d-none": this.isShown }) },
         "button.o_mg_read_more": { "t-on-click": this.onReadMoreClick },
