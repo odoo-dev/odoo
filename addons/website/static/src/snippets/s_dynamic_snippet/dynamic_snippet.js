@@ -41,7 +41,7 @@ export class DynamicSnippet extends Interaction {
     }
 
     async willStart() {
-        return this.fetchData();
+        await this.fetchData();
     }
 
     start() {
