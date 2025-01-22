@@ -22,12 +22,12 @@ export class RecaptchaForm extends Interaction {
 
     async onSubmit(ev) {
         const submitEl = this.el.querySelector("button[type='submit']");
-        if (!submitEl.classList.contains("disabled")) {
+        if (!submitEl.disabled) {
             addLoadingEffect(submitEl);
         }
         if (!this.el.querySelector("input[name='recaptcha_token_response']")) {
             ev.preventDefault();
-            if (!submitEl.classList.contains("disabled")) {
+            if (!submitEl.disabled) {
                 addLoadingEffect(submitEl);
             }
             const action = this.el.dataset.captcha || "generic";
