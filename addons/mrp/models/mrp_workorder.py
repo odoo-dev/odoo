@@ -18,6 +18,9 @@ class MrpWorkorder(models.Model):
     def _default_sequence(self):
         return self.operation_id.sequence or 100
 
+    # def _default_product_uom_id(self):
+        # return self.production_id.product_uom_id or self.operation_id.bom_id.product_uom_id
+
     def _read_group_workcenter_id(self, workcenters, domain):
         workcenter_ids = self.env.context.get('default_workcenter_id')
         if not workcenter_ids:
@@ -37,7 +40,7 @@ class MrpWorkorder(models.Model):
         string='Workcenter Status', related='workcenter_id.working_state') # technical: used in views only
     product_id = fields.Many2one(related='production_id.product_id')
     product_tracking = fields.Selection(related="product_id.tracking")
-    product_uom_id = fields.Many2one('uom.uom', 'Unit', required=True, readonly=True)
+    product_uom_id = fields.Many2one('uom.uom', 'Unit', required=True, readonly=True)  # , default=_default_product_uom_id)
     production_id = fields.Many2one('mrp.production', 'Manufacturing Order', required=True, check_company=True, readonly=True, index='btree')
     production_availability = fields.Selection(
         string='Stock Availability', readonly=True,
@@ -61,14 +64,13 @@ class MrpWorkorder(models.Model):
     is_produced = fields.Boolean(string="Has Been Produced",
         compute='_compute_is_produced')
     state = fields.Selection([
-        ('pending', 'Waiting for another WO'),
-        ('waiting', 'Waiting for components'),
-        ('ready', 'Ready'),
+        ('blocked', 'Blocked'),
+        ('ready', 'To Do'),
         ('progress', 'In Progress'),
         ('done', 'Finished'),
         ('cancel', 'Cancelled')], string='Status',
         compute='_compute_state', store=True,
-        default='pending', copy=False, readonly=True, recursive=True, index=True)
+        default='blocked', copy=False, recursive=True, index=True)
     leave_id = fields.Many2one(
         'resource.calendar.leaves',
         help='Slot into workcenter calendar once planned',
@@ -150,19 +152,52 @@ class MrpWorkorder(models.Model):
                                      domain="[('allow_workorder_dependencies', '=', True), ('id', '!=', id), ('production_id', '=', production_id)]",
                                      copy=False)
 
-    @api.depends('production_availability', 'blocked_by_workorder_ids.state', 'qty_ready', 'product_uom_id')
+    @api.depends('qty_ready', 'blocked_by_workorder_ids.state')
     def _compute_state(self):
         for workorder in self:
-            if not workorder.product_uom_id or workorder.state not in ('pending', 'waiting', 'ready'):
+            if not workorder.product_uom_id or workorder.state not in ('blocked', 'ready'):
                 continue
-            blocked = any(w.state not in ('done', 'cancel') for w in workorder.blocked_by_workorder_ids)
             has_qty_ready = float_compare(workorder.qty_ready, 0, precision_rounding=workorder.product_uom_id.rounding) > 0
-            if blocked and not has_qty_ready:
-                workorder.state = 'pending'
-            elif workorder.production_availability == 'assigned' or (has_qty_ready and workorder.blocked_by_workorder_ids):
-                workorder.state = 'ready'
+            if not workorder.blocked_by_workorder_ids or has_qty_ready or all(wo.state in ('cancel', 'done') for wo in workorder.blocked_by_workorder_ids):
+                workorder.write({'state': 'ready'})
             else:
-                workorder.state = 'waiting'
+                workorder.write({'state': 'blocked'})
+
+    def set_state(self, state):
+        ids_to_update = []
+        for wo in self:
+            if wo.state == state or 'done' in (wo.state, wo.production_state):
+                continue
+            if wo.state == 'progress':
+                wo.button_pending()
+            elif wo.state in ('done', 'cancel') and state == 'progress':
+                wo.write('ready')  # Middle step to solve further conflict
+            ids_to_update.append(wo.id)
+        
+        wo_to_update = self.browse(ids_to_update).group_workorders_by_dependency_level()
+        for wo in wo_to_update:
+            if state == 'cancel':
+                wo.action_cancel()
+            elif state == 'done':
+                wo.action_mark_as_done()
+            elif state == 'progress':
+                wo.button_start()
+            else:
+                wo.write({'state': state})
+
+    def group_workorders_by_dependency_level(self):
+        ordered_workorders = []
+        ordered_workorders.append(self.filtered(lambda wo: not wo.blocked_by_workorder_ids))
+        known_ids = ordered_workorders[-1].ids
+
+        while any(wo.needed_by_workorder_ids and wo.needed_by_workorder_ids in self for wo in ordered_workorders[-1]):
+            next_level_workorders = ordered_workorders[-1].mapped('needed_by_workorder_ids').filtered(
+                lambda wo: wo in self and all(blocking_wo.id in known_ids or blocking_wo.id not in self.ids for blocking_wo in wo.blocked_by_workorder_ids)
+            )
+            if next_level_workorders:
+                ordered_workorders.append(next_level_workorders)
+                known_ids += next_level_workorders.ids
+        return ordered_workorders
 
     @api.depends('production_id.date_start', 'date_start')
     def _compute_production_date(self):
@@ -179,13 +214,13 @@ class MrpWorkorder(models.Model):
                 wo.show_json_popover = False
                 wo.json_popover = False
                 continue
-            if wo.state in ('pending', 'waiting', 'ready'):
+            if wo.state in ('blocked', 'ready'):
                 previous_wos = wo.blocked_by_workorder_ids
                 previous_starts = previous_wos.filtered('date_start').mapped('date_start')
                 previous_finished = previous_wos.filtered('date_finished').mapped('date_finished')
                 prev_start = min(previous_starts) if previous_starts else False
                 prev_finished = max(previous_finished) if previous_finished else False
-                if wo.state == 'pending' and prev_start and not (prev_start > wo.date_start):
+                if wo.state == 'blocked' and prev_start and not (prev_start > wo.date_start):
                     infos.append({
                         'color': 'text-primary',
                         'msg': _("Waiting the previous work order, planned from %(start)s to %(end)s",
@@ -230,10 +265,10 @@ class MrpWorkorder(models.Model):
                 workorder.production_id.qty_producing = workorder.qty_producing
                 workorder.production_id._set_qty_producing(False)
 
-    @api.depends('blocked_by_workorder_ids')
+    @api.depends('blocked_by_workorder_ids.qty_produced')
     def _compute_qty_ready(self):
         for workorder in self:
-            if workorder.production_state not in ('confirmed', 'progress') or workorder.state in ('cancel', 'done'):
+            if workorder.state in ('cancel', 'done'):
                 workorder.qty_ready = 0
                 continue
             if not workorder.blocked_by_workorder_ids:
@@ -353,7 +388,7 @@ class MrpWorkorder(models.Model):
             delta_duration = new_order_duration - old_order_duration
 
             if delta_duration > 0:
-                if order.state not in ('progress', 'done'):
+                if order.state not in ('progress', 'done', 'cancel'):
                     order.state = 'progress'
                 enddate = datetime.now()
                 date_start = enddate - timedelta(seconds=_float_duration_to_second(delta_duration))
@@ -555,7 +590,7 @@ class MrpWorkorder(models.Model):
             if workorder.date_finished and workorder.date_finished > date_start:
                 date_start = workorder.date_finished
         # Plan only suitable workorders
-        if self.state not in ['pending', 'waiting', 'ready']:
+        if self.state not in ['blocked', 'ready']:
             return
         if self.leave_id:
             if replan:
@@ -720,19 +755,19 @@ class MrpWorkorder(models.Model):
     def action_cancel(self):
         self.leave_id.unlink()
         self.end_all()
-        return self.write({'state': 'cancel'})
+        return self.filtered(lambda wo: wo.state != 'cancel').write({'state': 'cancel'})
 
     def action_replan(self):
         """Replan a work order.
 
-        It actually replans every  "ready" or "pending"
+        It actually replans every  "ready" or "blocked"
         work orders of the linked manufacturing orders.
         """
         for production in self.production_id:
             production._plan_workorders(replan=True)
         return True
 
-    def button_done(self):
+    def button_done(self):  # TODO CHECKME : only used in test, really usefull or can be replaced by action_mark_as_done ?
         if any(x.state in ('done', 'cancel') for x in self):
             raise UserError(_('A Manufacturing Order is already done or cancelled.'))
         self.end_all()
@@ -818,8 +853,8 @@ class MrpWorkorder(models.Model):
             FROM mrp_workorder wo1, mrp_workorder wo2
             WHERE
                 wo1.id IN %s
-                AND wo1.state IN ('pending', 'waiting', 'ready')
-                AND wo2.state IN ('pending', 'waiting', 'ready')
+                AND wo1.state IN ('blocked', 'ready')
+                AND wo2.state IN ('blocked', 'ready')
                 AND wo1.id != wo2.id
                 AND wo1.workcenter_id = wo2.workcenter_id
                 AND (DATE_TRUNC('second', wo2.date_start), DATE_TRUNC('second', wo2.date_finished))
