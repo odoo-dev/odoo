@@ -6,6 +6,7 @@
         </QuantityButtons>
         <QuantityButtons position="after">
             <t t-call="website_sale.not_for_sale"/>
+            <t t-call="website_sale.product_packagings"/>
         </QuantityButtons>
         <button name="sale_product_configurator_add_button" position="attributes">
             <attribute name="t-if">this.props.can_be_sold</attribute>
@@ -55,5 +56,17 @@
             t-if="this.props.strikethrough_price"
             t-out="formattedStrikethroughPrice"
         />
+    </t>
+
+    <t t-name="website_sale.product_packagings" t-if="this.props.uom_ids and this.props.uom_ids.length > 1">
+        <div class="o_wsale_packaging mt-2" groups="uom.group_uom">
+            <select id="uom_selector" name="uom_id" class="form-select">
+                <t t-foreach="this.props.uom_ids" t-as="uom" t-key="uom.id">
+                    <option t-att-value="uom.id" t-att-selected="uom.id == this.props.uom_selected_ids">
+                        <t t-esc="uom.name" />
+                    </option>
+                </t>
+            </select>
+        </div>
     </t>
 </templates>

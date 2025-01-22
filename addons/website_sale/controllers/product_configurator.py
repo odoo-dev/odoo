@@ -142,6 +142,10 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
             ) if 'price_info' not in basic_product_information else None
             if strikethrough_price:
                 basic_product_information['strikethrough_price'] = strikethrough_price
+            basic_product_information['uom_ids'] = [
+                {'id': uom.id, 'name': uom.name}
+                for uom in product_or_template.uom_ids
+            ]
         return basic_product_information
 
     def _get_ptav_price_extra(self, ptav, currency, date, product_or_template):

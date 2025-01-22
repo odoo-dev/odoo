@@ -172,6 +172,7 @@ class Cart(PaymentPortal):
         product_template_id,
         product_id,
         quantity=None,
+        uom_ids=None,
         product_custom_attribute_values=None,
         no_variant_attribute_value_ids=None,
         linked_products=None,
@@ -205,6 +206,7 @@ class Cart(PaymentPortal):
             product_id=product_id,
             line_id=False if kwargs.get('is_combo') else None,  # Always create new line for combo.
             add_qty=quantity,
+            uom_ids=uom_ids,
             product_custom_attribute_values=product_custom_attribute_values,
             no_variant_attribute_value_ids=no_variant_attribute_value_ids,
             **kwargs

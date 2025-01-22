@@ -505,6 +505,7 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
                 'input[type="hidden"][name="product_template_id"]',
             ).value),
             ...(quantity ? {quantity: quantity} : {}),
+            uom_selected_ids: parseInt(form.querySelector('#uom_selector')?.value),
             ptavs: this._getSelectedPTAV(form),
             productCustomAttributeValues: this._getCustomPTAVValues(form),
             noVariantAttributeValues: this._getSelectedNoVariantPTAV(form),

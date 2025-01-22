@@ -19,6 +19,7 @@ export class ProductConfiguratorDialog extends Component {
             }
         },
         quantity: Number,
+        uom_selected_ids: { type: Number, optional: true },
         productUOMId: { type: Number, optional: true },
         companyId: { type: Number, optional: true },
         pricelistId: { type: Number, optional: true },
@@ -98,6 +99,7 @@ export class ProductConfiguratorDialog extends Component {
         return rpc(this.getValuesUrl, {
             product_template_id: this.props.productTemplateId,
             quantity: this.props.quantity,
+            uom_selected_ids: this.props.uom_selected_ids,
             currency_id: this.currency.id,
             so_date: this.props.soDate,
             product_uom_id: this.props.productUOMId,

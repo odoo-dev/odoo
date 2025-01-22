@@ -114,6 +114,7 @@ export class CartService {
             productCustomAttributeValues = [],
             noVariantAttributeValues = [],
             isCombo = false,
+            uom_selected_ids,
             ...rest
         },
         {
@@ -200,6 +201,7 @@ export class CartService {
             return this._openProductConfigurator(
                 productTemplateId,
                 quantity,
+                uom_selected_ids,
                 ptavs.concat(noVariantAttributeValues),
                 productCustomAttributeValues,
                 {
@@ -214,6 +216,7 @@ export class CartService {
             productTemplateId,
             productId,
             quantity,
+            uom_selected_ids,
             productCustomAttributeValues,
             noVariantAttributeValues,
             shouldRedirectToCart: isBuyNow && redirectToCart,
@@ -305,6 +308,7 @@ export class CartService {
     async _openProductConfigurator(
         productTemplateId,
         quantity,
+        uom_selected_ids,
         combination,
         productCustomAttributeValues,
         options,
@@ -319,6 +323,7 @@ export class CartService {
                     value: customPtav.custom_value,
                 })),
                 quantity: quantity,
+                uom_selected_ids: uom_selected_ids,
                 soDate: serializeDateTime(DateTime.now()),
                 edit: false,
                 isFrontend: true,
@@ -330,6 +335,7 @@ export class CartService {
                         productTemplateId: product.product_template_id,
                         productId: product.product_id,
                         quantity: product.quantity,
+                        uom_selected_ids: product.uom_selected_ids,
                         productCustomAttributeValues: product.product_custom_attribute_values,
                         noVariantAttributeValues: product.no_variant_attribute_value_ids,
                         linked_products: optionalProducts.map(this._serializeProduct),
@@ -356,6 +362,7 @@ export class CartService {
             product_template_id: product.product_tmpl_id,
             parent_product_template_id: product.parent_product_tmpl_id,
             quantity: product.quantity,
+            uom_selected_ids: product.uom_selected_ids,
         }
 
         if (!product.attribute_lines) {
@@ -434,6 +441,7 @@ export class CartService {
         productTemplateId,
         productId,
         quantity,
+        uom_selected_ids,
         productCustomAttributeValues=[],
         noVariantAttributeValues=[],
         shouldRedirectToCart=false,
@@ -443,6 +451,7 @@ export class CartService {
             product_template_id: productTemplateId,
             product_id: productId,
             quantity: quantity,
+            uom_selected_ids: uom_selected_ids,
             product_custom_attribute_values: productCustomAttributeValues,
             no_variant_attribute_value_ids: noVariantAttributeValues,
             ...rest
