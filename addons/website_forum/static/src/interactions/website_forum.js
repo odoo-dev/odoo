@@ -373,7 +373,7 @@ export class WebsiteForum extends Interaction {
                     voteUpEl.classList.add("karma_required");
                 }
             }
-            voteCountEl.innerHTML = data["vote_count"];
+            voteCountEl.textContent = parseInt(data["vote_count"]);
             voteCountEl.classList.add("o_forum_vote_animate");
             this.refreshListeners();
         }
@@ -382,7 +382,7 @@ export class WebsiteForum extends Interaction {
     /**
      * Call the route to moderate/validate the post, then hide the validated post
      * and decrement the count in the appropriate queue badge of the sidebar on success.
-     * 
+     *
      * @param {MouseEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
