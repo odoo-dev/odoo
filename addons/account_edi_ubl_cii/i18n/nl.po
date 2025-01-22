@@ -124,16 +124,6 @@ msgid "BIS3 DE (XRechnung)"
 msgstr "BIS3 DE (XRechnung)"
 
 #. module: account_edi_ubl_cii
-#: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__0208
-msgid "Belgium CBE - 0208"
-msgstr "België KBO - 0208"
-
-#. module: account_edi_ubl_cii
-#: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9925
-msgid "Belgium VAT - 9925"
-msgstr "België BTW - 9925"
-
-#. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9924
 msgid "Bosnia and Herzegovina VAT - 9924"
 msgstr "Bosnië en Herzegovina BTW - 9924"
@@ -187,6 +177,11 @@ msgid ""
 msgstr ""
 "Algemene functies voor EDI-documenten: genereer de gegevens, de beperkingen,"
 " enz"
+
+#. module: account_edi_ubl_cii
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__0208
+msgid "Company Number"
+msgstr "Ondernemingsnummer"
 
 #. module: account_edi_ubl_cii
 #. odoo-python
@@ -906,6 +901,11 @@ msgstr ""
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9932
 msgid "United Kingdom VAT - 9932"
 msgstr "Verenigd Koninkrijk BTW - 9932"
+
+#. module: account_edi_ubl_cii
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9925
+msgid "VAT number"
+msgstr "BTW-nummer"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9953

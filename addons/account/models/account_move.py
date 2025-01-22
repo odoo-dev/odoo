@@ -5161,6 +5161,10 @@ class AccountMove(models.Model):
             },
         }
 
+    def action_print_pdf(self):
+        self.ensure_one()
+        return self.env.ref('account.account_invoices').report_action(self.id)
+
     def action_invoice_sent(self):
         """ Open a window to compose an email, with the edi invoice template
             message loaded by default

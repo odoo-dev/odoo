@@ -5,11 +5,14 @@
         <field name="inherit_id" ref="account.view_partner_property_form"/>
         <field name="arch" type="xml">
             <xpath expr="//group[@id='invoice_send_settings']" position="inside">
-                <label for="peppol_eas" string="Peppol Address"/>
-                <div id="peppol_address" class="row">
-                    <field name="peppol_eas" placeholder="EAS" style="width:50%;"/>
-                    <field name="peppol_endpoint" placeholder="Endpoint" style="width:50%;"/>
-                </div>
+                <field name="available_peppol_eas" invisible="1"/>
+                <field name="peppol_eas"
+                       nolabel="1"
+                       class="o_field_peppol_eas_selection"
+                       widget="filterable_selection"
+                       options="{'whitelist_fname': 'available_peppol_eas'}"/>
+                <field name="peppol_endpoint" nolabel="1" placeholder="Your endpoint"/>
+                <div id="peppol_address" invisible="1"/>  <!-- TODO remove in master -->
             </xpath>
         </field>
     </record>

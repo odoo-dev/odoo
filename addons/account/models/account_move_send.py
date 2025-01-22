@@ -100,13 +100,6 @@ class AccountMoveSend(models.AbstractModel):
         - action the action to run when the link is clicked
         """
         alerts = {}
-        if partners_without_mail := moves.filtered(lambda m: 'email' in moves_data[m]['sending_methods'] and not m.partner_id.email).partner_id:
-            alerts['account_missing_email'] = {
-                'level': 'danger' if len(moves) == 1 else 'warning',
-                'message': _("Partner(s) should have an email address."),
-                'action_text': _("View Partner(s)"),
-                'action': partners_without_mail._get_records_action(name=_("Check Partner(s) Email(s)")),
-            }
         if moves.invoice_pdf_report_id:
             alerts['account_pdf_exist'] = {
                 'level': 'info',
@@ -326,9 +319,6 @@ class AccountMoveSend(models.AbstractModel):
     @api.model
     def _is_applicable_to_move(self, method, move):
         """ TO OVERRIDE - """
-        if method == 'email':
-            return bool(move.partner_id.email)
-
         return True
 
     @api.model

@@ -163,11 +163,6 @@ msgid "0204 - Leitweg-ID"
 msgstr ""
 
 #. module: account_edi_ubl_cii
-#: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__0208
-msgid "0208 - Numero d'entreprise / ondernemingsnummer / Unternehmensnummer"
-msgstr ""
-
-#. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__0209
 msgid "0209 - GS1 identification keys"
 msgstr ""
@@ -265,11 +260,6 @@ msgstr ""
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9924
 msgid "9924 - Bosnia and Herzegovina VAT number"
-msgstr ""
-
-#. module: account_edi_ubl_cii
-#: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9925
-msgid "9925 - Belgium VAT number"
 msgstr ""
 
 #. module: account_edi_ubl_cii
@@ -494,6 +484,11 @@ msgstr ""
 #: model:ir.model,name:account_edi_ubl_cii.model_account_edi_common
 msgid "Common functions for EDI documents: generate the data, the constraints, etc"
 msgstr ""
+
+#. module: account_edi_ubl_cii
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__0208
+msgid "Company Number"
+msgstr "Numéro d'entreprise"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model,name:account_edi_ubl_cii.model_res_company
@@ -799,6 +794,11 @@ msgstr ""
 #: model:ir.model.fields,help:account_edi_ubl_cii.field_res_users__peppol_endpoint
 msgid "Unique identifier used by the Peppol BIS Billing 3.0 and its derivatives, also known as 'Endpoint ID'."
 msgstr ""
+
+#. module: account_edi_ubl_cii
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9925
+msgid "VAT number"
+msgstr "Numéro TVA"
 
 #. module: account_edi_ubl_cii
 #. odoo-python

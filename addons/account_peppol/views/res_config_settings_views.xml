@@ -82,7 +82,7 @@
                                         name="button_peppol_register_sender_as_receiver"
                                         type="object"
                                         class="btn-primary me-1"
-                                        invisible="account_peppol_proxy_state != 'sender'"/>
+                                        invisible="not account_peppol_can_be_receiver"/>
                                 <button string="Update"
                                         name="button_peppol_update_user_data"
                                         type="object"
