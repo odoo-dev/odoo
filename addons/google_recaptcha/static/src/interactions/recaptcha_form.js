@@ -20,6 +20,9 @@ export class RecaptchaForm extends Interaction {
         await this.recaptcha.loadLibs();
     }
 
+    /**
+     * @param {MouseEvent} ev
+     */
     async onSubmit(ev) {
         const submitEl = this.el.querySelector("button[type='submit']");
         if (!submitEl.disabled) {
