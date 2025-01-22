@@ -42,10 +42,12 @@ class TestCloudStorageAttachmentController(HttpCaseWithUserDemo, TestCloudStorag
                         "ir.attachment": [
                             {
                                 "access_token": False,
+                                "added_to_drive": False,
                                 "checksum": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
                                 "create_date": odoo.fields.Datetime.to_string(
                                     attachment.create_date
                                 ),
+                                "file_size": 0,
                                 "id": attachment.id,
                                 "mimetype": "text/x-python",
                                 "name": "__init__.py",

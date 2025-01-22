@@ -1185,8 +1185,8 @@ test("allow attachment delete on authored message", async () => {
     });
     await start();
     await openDiscuss(channelId);
-    await click(".o-mail-AttachmentImage [title='Actions']");
-    await click(".dropdown-item", { text: "Remove" });
+    await contains(".o-mail-AttachmentImage");
+    await click("button[title='Remove']");
     await contains(".modal-dialog .modal-body", { text: 'Do you really want to delete "BLAH"?' });
     await click(".modal-footer .btn-primary");
     await contains(".o-mail-AttachmentCard", { count: 0 });
@@ -1256,8 +1256,8 @@ test("allow attachment image download on message", async () => {
     });
     await start();
     await openDiscuss(channelId);
-    await click(".o-mail-AttachmentImage [title='Actions']");
-    await contains(".dropdown-item", { text: "Download" });
+    await contains(".o-mail-AttachmentImage");
+    await contains("button[title='Download']");
 });
 
 test("Can download all files of a message", async () => {
@@ -1326,15 +1326,15 @@ test("Can remove files of message individually", async () => {
     await start();
     await openDiscuss(channelId);
     await contains(
-        ":nth-child(1 of .o-mail-Message) :nth-child(1 of .o-mail-AttachmentCard) [title='Remove']"
+        ":nth-child(1 of .o-mail-Message) :nth-child(1 of .o-mail-AttachmentContainer) [title='Remove']"
     );
     await contains(
-        ":nth-child(1 of .o-mail-Message) :nth-child(2 of .o-mail-AttachmentCard) [title='Remove']"
+        ":nth-child(1 of .o-mail-Message) :nth-child(2 of .o-mail-AttachmentContainer) [title='Remove']"
     );
-    await contains(":nth-child(2 of .o-mail-Message) .o-mail-AttachmentCard [title='Remove']", {
+    await contains(":nth-child(2 of .o-mail-Message) .o-mail-AttachmentContainer [title='Remove']", {
         count: 0,
     });
-    await contains(":nth-child(3 of .o-mail-Message) .o-mail-AttachmentCard [title='Remove']");
+    await contains(":nth-child(3 of .o-mail-Message) .o-mail-AttachmentContainer [title='Remove']");
 });
 
 test("avatar card from author should be opened after clicking on their avatar", async () => {
@@ -1518,7 +1518,7 @@ test("delete all attachments of a message with some text content should still ke
     await start();
     await openDiscuss(channelId);
     await contains(".o-mail-Message");
-    await click(".o-mail-AttachmentCard button[title='Remove']");
+    await click(".o-mail-AttachmentContainer button[title='Remove']");
     await click(".modal button", { text: "Ok" });
     await contains(".o-mail-Message");
 });
@@ -1770,9 +1770,9 @@ test("Message should display attachments in order", async () => {
     });
     await start();
     await openDiscuss(channelId);
-    await contains(":nth-child(1 of .o-mail-AttachmentCard)", { text: "A.txt" });
-    await contains(":nth-child(2 of .o-mail-AttachmentCard)", { text: "B.txt" });
-    await contains(":nth-child(3 of .o-mail-AttachmentCard)", { text: "C.txt" });
+    await contains(":nth-child(1 of .o-mail-AttachmentContainer)", { text: "A.txt" });
+    await contains(":nth-child(2 of .o-mail-AttachmentContainer)", { text: "B.txt" });
+    await contains(":nth-child(3 of .o-mail-AttachmentContainer)", { text: "C.txt" });
 });
 
 test("Can edit a message only containing an attachment", async () => {
