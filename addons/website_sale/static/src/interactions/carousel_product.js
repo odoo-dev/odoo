@@ -29,6 +29,7 @@ export class CarouselProduct extends Interaction {
         this.top = undefined;
         this.indicatorJustify = "start";
     }
+
     start() {
         this.updateCarouselPosition();
         this.registerCleanup(this.services.website_menus.registerCallback(this.updateCarouselPosition.bind(this)));
@@ -80,6 +81,7 @@ export class CarouselProduct extends Interaction {
         const translate3D = indicatorsPositionDiff > 0 ? "translate3d(" + indicatorsPositionX + "px," + indicatorsPositionY + "px,0)" : "";
         indicatorsDivEl.style.setProperty("transform", translate3D);
     }
+
     updateJustifyContent() {
         this.indicatorJustify = "start";
         if (uiUtils.getSize() <= SIZES.MD) {
@@ -95,8 +97,9 @@ export class CarouselProduct extends Interaction {
             }
         }
     }
+
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      */
     onMouseWheel(ev) {
         const bsCarousel = window.Carousel.getOrCreateInstance(this.el);

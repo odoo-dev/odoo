@@ -21,18 +21,31 @@ export class SaleUpdateLineButton extends Interaction {
         this.orderDetail = this.el.querySelector("table#sales_order_table").dataset;
     }
 
+    /**
+     * @param {number} orderId
+     * @param {Object} params
+     */
     callUpdateLineRoute(orderId, params) {
         return rpc("/my/orders/" + orderId + "/update_line_dict", params);
     }
 
+    /**
+     * @param {number} orderId
+     * @param {number} optionId
+     * @param {Object} params
+     */
     callAddOptionRoute(orderId, optionId, params) {
         return rpc("/my/orders/" + orderId + "/add_option/" + optionId, params);
     }
 
-    refreshOrderUI(data) {
+    refreshOrderUI() {
         window.location.reload();
     }
 
+    /**
+     * @param {MouseEvent} ev
+     * @param {HTMLElement} currentTargetEl
+     */
     async onQuantityChange(ev, currentTargetEl) {
         const quantity = parseInt(currentTargetEl.value);
         const data = await this.waitFor(this.callUpdateLineRoute(this.orderDetail.orderId, {
@@ -43,6 +56,10 @@ export class SaleUpdateLineButton extends Interaction {
         this.refreshOrderUI(data);
     }
 
+    /**
+     * @param {MouseEvent} ev
+     * @param {HTMLElement} currentTargetEl
+     */
     async onUpdateLineClick(ev, currentTargetEl) {
         const data = await this.waitFor(this.callUpdateLineRoute(this.orderDetail.orderId, {
             "access_token": this.orderDetail.token,
@@ -53,6 +70,10 @@ export class SaleUpdateLineButton extends Interaction {
         this.refreshOrderUI(data);
     }
 
+    /**
+     * @param {MouseEvent} ev
+     * @param {HTMLElement} currentTargetEl
+     */
     async onAddOptionalProductClick(ev, currentTargetEl) {
         currentTargetEl.style.setProperty("pointer-events", "none");
         const data = await this.waitFor(this.callAddOptionRoute(this.orderDetail.orderId, currentTargetEl.dataset.optionId, {

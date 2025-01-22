@@ -48,6 +48,7 @@ export class AccountSidebar extends Sidebar {
 
     /**
      * @param {MouseEvent} ev
+     * @param {HTMLElement} currentTargetEl
      */
     onInvoicePrintClick(ev, currentTargetEl) {
         this.printIframeContent(currentTargetEl.getAttribute("href"));

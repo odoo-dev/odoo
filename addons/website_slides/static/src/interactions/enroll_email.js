@@ -13,6 +13,10 @@ export class EnrollEmail extends Interaction {
         },
     };
 
+    /**
+     * @param {MouseEvent} ev
+     * @param {HTMLElement} currentTargetEl
+     */
     openDialog(ev, currentTargetEl) {
         const alertEl = currentTargetEl.closest(".alert");
         const channelId = parseInt(currentTargetEl.dataset.channelId);

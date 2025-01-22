@@ -95,7 +95,7 @@ export class Follow extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
     async onToggleFollowClick(ev, currentTargetEl) {

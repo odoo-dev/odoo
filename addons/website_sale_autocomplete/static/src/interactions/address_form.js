@@ -21,6 +21,10 @@ export class AddressForm extends Interaction {
         this.keepLast = new KeepLast();
     }
 
+    /**
+     * @param {MouseEvent} ev
+     * @param {HTMLElement} currentTargetEl
+     */
     async onStreetInput(ev, inputEl) {
         const inputContainerEl = inputEl.parentNode;
         if (inputEl.value.length >= 5) {
@@ -39,6 +43,10 @@ export class AddressForm extends Interaction {
         }
     }
 
+    /**
+     * @param {MouseEvent} ev
+     * @param {HTMLElement} currentTargetEl
+     */
     async onClickAutocompleteResult(ev, currentTargetEl) {
         const dropdownEl = currentTargetEl.parentNode;
         dropdownEl.innerText = "";

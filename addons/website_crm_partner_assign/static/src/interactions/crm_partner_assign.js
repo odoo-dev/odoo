@@ -59,6 +59,10 @@ export class CRMPartnerAssign extends Interaction {
         window.location.href = "/my/leads";
     }
 
+    /**
+     * @param {number} leadID
+     * @param {number} stageID
+     */
     async changeOppStage(leadID, stageID) {
         await this.services.orm.write("crm.lead", [leadID], { stage_id: stageID }, {
             context: Object.assign({ website_partner_assign: 1 }),

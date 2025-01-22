@@ -48,6 +48,10 @@ export class MeetingRoom extends Interaction {
         });
     }
 
+    /**
+     * @param {MouseEvent} ev
+     * @param {HTMLElement} currentTargetEl
+     */
     async onTogglePinnedClick(ev, currentTargetEl) {
         const wasPinned = currentTargetEl.classList.contains("o_wevent_meeting_room_pinned");
 

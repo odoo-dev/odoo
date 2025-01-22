@@ -104,6 +104,9 @@ export class RatingPopupComposer extends Interaction {
         this.reloadRatingPopupComposer();
     }
 
+    /**
+     * @param {Object} data
+     */
     updateOptions(data) {
         const defaultOptions = {
             default_message:

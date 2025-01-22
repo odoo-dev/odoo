@@ -12,7 +12,7 @@ export class ProfileValidation extends Interaction {
     };
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
     async onSendMailClick(ev, currentTargetEl) {

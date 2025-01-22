@@ -7,6 +7,10 @@ export class BoothSponsorDetails extends Interaction {
         "input[id='contact_details']": { "t-on-click.withTarget": this.onClickContactDetails },
     }
 
+    /**
+     * @param {MouseEvent} ev
+     * @param {HTMLElement} currentTargetEl
+     */
     onClickContactDetails(ev, currentTargetEl) {
         this.useContactDetails = currentTargetEl.checked;
 

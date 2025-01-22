@@ -10,7 +10,7 @@ export class GiftCardCopy extends Interaction {
     };
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      */
     onClick(ev) {
         const textValue = ev.target.dataset.clipboardText;

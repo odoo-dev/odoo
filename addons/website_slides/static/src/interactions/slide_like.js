@@ -30,6 +30,10 @@ export class SlideLike extends Interaction {
         this.registerCleanup(() => bsPopover.dispose());
     }
 
+    /**
+     * @param {number} slideId
+     * @param {string} voteType
+     */
     async onClick(slideId, voteType) {
         const data = await this.waitFor(rpc('/slides/slide/like', {
             slide_id: slideId,

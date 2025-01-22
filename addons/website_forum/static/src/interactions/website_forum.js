@@ -184,7 +184,7 @@ export class WebsiteForum extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {SubmitEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
     onFormSubmit(ev, currentTargetEl) {
@@ -227,7 +227,7 @@ export class WebsiteForum extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
     onExpandAnswerClick(ev, currentTargetEl) {
@@ -242,7 +242,7 @@ export class WebsiteForum extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
     onKarmaRequiredClick(ev, currentTargetEl) {
@@ -271,7 +271,7 @@ export class WebsiteForum extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
     onTagFollowClick(ev, currentTargetEl) {
@@ -281,7 +281,7 @@ export class WebsiteForum extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
     async onFlagClick(ev, currentTargetEl) {
@@ -326,7 +326,7 @@ export class WebsiteForum extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
     async onVotePostClick(ev, currentTargetEl) {
@@ -383,7 +383,7 @@ export class WebsiteForum extends Interaction {
      * Call the route to moderate/validate the post, then hide the validated post
      * and decrement the count in the appropriate queue badge of the sidebar on success.
      * 
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
     async onValidationQueueClick(ev, currentTargetEl) {
@@ -418,7 +418,7 @@ export class WebsiteForum extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
     async onToggleValidateClick(ev, currentTargetEl) {
@@ -460,7 +460,7 @@ export class WebsiteForum extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
     async onToggleFavouriteClick(ev, currentTargetEl) {
@@ -474,7 +474,7 @@ export class WebsiteForum extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {EvenMouseEventt} ev
      * @param {HTMLElement} currentTargetEl
      */
     onDeleteCommentClick(ev, currentTargetEl) {
@@ -510,7 +510,7 @@ export class WebsiteForum extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
     async onFlagValidatorClick(ev, currentTargetEl) {
@@ -532,7 +532,7 @@ export class WebsiteForum extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
     async onFlagMarkAsOffensiveClick(ev, currentTargetEl) {

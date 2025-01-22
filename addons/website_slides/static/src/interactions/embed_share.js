@@ -11,6 +11,10 @@ export class EmbedShare extends Interaction {
         ".o_embed_clipboard_button": { "t-on-click.prevent.withTarget": this.onClick },
     }
 
+    /**
+     * @param {MouseEvent} ev
+     * @param {HTMLElement} currentTargetEl
+     */
     async onClick(ev, currentTargetEl) {
         const tooltip = usePopover(Tooltip, { title: "Copied!", trigger: "manual", placement: "bottom" });
         const embedEl = document.querySelector("#wslides_share_embed_id_" + currentTargetEl.id.split("id_")[1]);
