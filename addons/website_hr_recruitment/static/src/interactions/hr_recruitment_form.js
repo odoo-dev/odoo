@@ -47,6 +47,12 @@ export class HrRecruitmentForm extends Interaction {
         messageContainerEl.classList.add("d-none");
     }
 
+    /**
+     * @param {HTMLElement} targetEl
+     * @param {string} field
+     * @param {HTMLElement} messageContainerEl
+     * @param {boolean} [keepPreviousWarningMessage=false]
+     */
     async checkRedundant(targetEl, field, messageContainerEl, keepPreviousWarningMessage = false) {
         const value = targetEl.value;
         if (!value) {

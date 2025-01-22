@@ -99,7 +99,7 @@ export class CoursePage extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      */
     onClickComplete(ev) {
         const slideData = ev.currentTarget.closest('.o_wslides_sidebar_done_button').dataset;

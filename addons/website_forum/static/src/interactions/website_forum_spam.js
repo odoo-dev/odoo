@@ -26,7 +26,7 @@ export class WebsiteForumSpam extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {InputEvent} ev
      */
     async onSpamSearchInput(ev) {
         const toSearch = ev.target.value;

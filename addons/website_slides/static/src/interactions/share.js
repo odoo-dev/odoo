@@ -15,6 +15,10 @@ export class Share extends Interaction {
         return parseInt(iframeDocument.querySelector("#page_count").innerText);
     }
 
+    /**
+     * @param {MouseEvent} ev
+     * @param {HTMLElement} currentTargetEl
+     */
     onClick(ev, currentTargetEl) {
         const data = currentTargetEl.dataset;
         this.services.dialog.add(SlideShareDialog, {

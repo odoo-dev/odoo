@@ -16,7 +16,6 @@ export class Login extends Interaction {
      * loading effect is removed if preventDefault() is called in a following
      * customization.
      *
-     * @private
      * @param {Event} ev
      */
     onSubmit(ev) {

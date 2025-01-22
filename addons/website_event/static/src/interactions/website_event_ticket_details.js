@@ -35,7 +35,7 @@ export class TicketDetails extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      */
     async onSubmitClick(ev) {
         const formEl = ev.currentTarget.closest("form");

@@ -15,12 +15,12 @@ export class WebsiteBlog extends Interaction {
             "t-on-click.prevent.withTarget": this.onContentAnchorClick,
         },
         ".o_twitter, .o_facebook, .o_linkedin, .o_google, .o_twitter_complete, .o_facebook_complete, .o_linkedin_complete, .o_google_complete": {
-            "t-on-click.prevent.withTarget": this.onShareArticle,
+            "t-on-click.prevent.withTarget": this.onShareArticleClick,
         },
     };
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      */
     async onNextBlogClick(ev) {
         const nextInfo = ev.currentTarget.querySelector("#o_wblog_next_post_info").dataset;
@@ -37,7 +37,7 @@ export class WebsiteBlog extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
     async onContentAnchorClick(ev, currentTargetEl) {
@@ -48,10 +48,10 @@ export class WebsiteBlog extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
-    onShareArticle(ev, currentTargetEl) {
+    onShareArticleClick(ev, currentTargetEl) {
         let url = "";
         const blogPostTitle = document.querySelector("#o_wblog_post_name").textContent || "";
         const articleURL = browser.location.href;

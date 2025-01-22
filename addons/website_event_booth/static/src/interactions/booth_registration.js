@@ -185,7 +185,7 @@ export class BoothRegistration extends Interaction {
     }
 
     /**
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      * @param {HTMLElement} currentTargetEl
      */
     async onConfirmClick(ev, currentTargetEl) {

@@ -31,6 +31,9 @@ export class MailGroupMessage extends Interaction {
         readMore.addEventListener("click", () => quoted.classList.toggle("visible"));
     }
 
+    /**
+     * @param {MouseEvent} ev
+     */
     async onReadMoreClick(ev) {
         const data = await this.waitFor(rpc(ev.target.getAttribute("href"), {
             last_displayed_id: ev.target.dataset.listDisplayedId,
