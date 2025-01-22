@@ -3,7 +3,7 @@
 import { createPublicRoot } from "@web/legacy/js/public/public_root";
 import lazyloader from "@web/legacy/js/public/lazyloader";
 import { WebsiteRoot } from "./website_root";
-import { loadBundle } from "@web/core/assets";
+import { AssetsLoadingError, loadBundle } from "@web/core/assets";
 
 const prom = createPublicRoot(WebsiteRoot).then(async rootInstance => {
     // This data attribute is set by the WebsitePreview client action for a
@@ -15,11 +15,18 @@ const prom = createPublicRoot(WebsiteRoot).then(async rootInstance => {
                 loadBundle("website.assets_all_wysiwyg"),
                 loadBundle("website.assets_edit_frontend")
             ]);
-        } catch {
-            // if we have a bundle error here, it probably means that a network
-            // request has been canceled because we are unloading iframes all
-            // the time. This can be ignored safely.
-            return new Promise(() => {});
+        } catch (e){
+            if (e instanceof AssetsLoadingError && e.cause instanceof TypeError) {
+                // an AssetsLoadingError caused by a TypeError means that the
+                // fetch request has been cancelled by the browser. It can occur
+                // when the user changes page, or navigate away from the website
+                // client action, so the iframe is unloaded. In this case, we
+                // don't care abour reporting the error, it is actually a normal
+                // situation.
+                return new Promise(() => {});
+            } else {
+                throw e;
+            }
         }
         window.dispatchEvent(new CustomEvent('PUBLIC-ROOT-READY', {detail: {rootInstance}}));
     }
