@@ -2,6 +2,7 @@ import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
 
 import { isBrowserSafari } from "@web/core/browser/feature_detection";
+import { browser } from "@web/core/browser/browser";
 
 export class SearchBarResults extends Interaction {
     static selector = ".o_searchbar_form .o_dropdown_menu";
@@ -39,7 +40,7 @@ export class SearchBarResults extends Interaction {
             "t-on-keydown": this.onKeydown,
         },
         "button.extra_link": {
-            "t-on-click.prevent": (event) => window.location.href = event.currentTarget.dataset.target,
+            "t-on-click.prevent": this.onExtraLinkClick,
         },
         ".s_searchbar_fuzzy_submit": {
             "t-on-click.prevent": (event) => {
@@ -120,6 +121,17 @@ export class SearchBarResults extends Interaction {
                 nextFocusedEl.focus();
                 break;
         }
+    }
+
+    /**
+     * @param {PointerEvent} ev
+     */
+    onExtraLinkClick(ev) {
+        const url = new URL(ev.currentTarget.dataset.target, browser.location.href);
+        if (!/https?:/.test(url.protocol)) {
+            return;
+        }
+        browser.location.href = url;
     }
 }
 
