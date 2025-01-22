@@ -10,7 +10,6 @@ import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { Deferred, Mutex } from "@web/core/utils/concurrency";
 import { debounce } from "@web/core/utils/timing";
-import { session } from "@web/session";
 import { browser } from "@web/core/browser/browser";
 
 /**
@@ -634,7 +633,7 @@ export class Store extends BaseStore {
 Store.register();
 
 export const storeService = {
-    dependencies: ["bus_service", "im_status", "ui"],
+    dependencies: ["bus_service", "im_status", "lazySession", "ui"],
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {import("services").ServiceFactories} services
@@ -642,7 +641,9 @@ export const storeService = {
      */
     start(env, services) {
         const store = makeStore(env);
-        store.insert(session.storeData);
+        services.lazySession.getValue("storeData").then((storeData) => {
+            store.insert(storeData);
+        });
         /**
          * Add defaults for `self` and `settings` because in livechat there could be no user and no
          * guest yet (both undefined at init), but some parts of the code that loosely depend on
