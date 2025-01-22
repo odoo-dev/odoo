@@ -26,7 +26,7 @@
                          colspan="2"
                          role="alert"
                          invisible="country_code != 'BE' or not is_peppol_edi_format or peppol_eas in (False, '0208')">
-                         The recommended EAS code for Belgium is 0208. The Endpoint should be the Company Registry number.
+                         The recommended identification for Belgium is BCE. The Endpoint should be the Company Registry number.
                     </div>
                     <div class="alert alert-warning"
                          colspan="2"
@@ -35,15 +35,13 @@
                          To generate complete electronic invoices, also set a country for this partner.
                     </div>
                 </xpath>
-                <xpath expr="//div[@id='peppol_address']" position="after">
+                <xpath expr="//field[@name='peppol_endpoint']" position="after">
                     <field name="is_peppol_edi_format" invisible="1"/>
                     <field name="peppol_verification_state" invisible="1" force_save="1"/>
                     <label for="peppol_verification_state"
-                           groups="base.group_no_one"
-                           invisible="not is_peppol_edi_format or not peppol_endpoint"/>
+                           groups="base.group_no_one"/>
                     <div class="row"
-                         groups="base.group_no_one"
-                         invisible="not is_peppol_edi_format or not peppol_endpoint">
+                         groups="base.group_no_one">
                         <div class="col-6">
                             <field name="peppol_verification_state" readonly="1"/>
                         </div>

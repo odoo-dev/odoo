@@ -80,6 +80,11 @@ msgid "Account Move Send Wizard"
 msgstr ""
 
 #. module: account_peppol
+#: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__account_peppol_can_be_receiver
+msgid "Account Peppol Can Be Receiver"
+msgstr ""
+
+#. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_account_journal__is_peppol_journal
 msgid "Account used for Peppol"
 msgstr ""
@@ -117,11 +122,6 @@ msgid "Activate Peppol (Test)"
 msgstr ""
 
 #. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
-msgid "Allow incoming invoices"
-msgstr ""
-
-#. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "Allow reception"
 msgstr ""
@@ -129,6 +129,11 @@ msgstr ""
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "Allow sending and receiving invoices through the PEPPOL network"
+msgstr ""
+
+#. module: account_peppol
+#: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__available_peppol_eas
+msgid "Available Peppol Eas"
 msgstr ""
 
 #. module: account_peppol
@@ -141,6 +146,16 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_peppol.field_res_partner__available_peppol_sending_methods
 #: model:ir.model.fields,field_description:account_peppol.field_res_users__available_peppol_sending_methods
 msgid "Available Peppol Sending Methods"
+msgstr ""
+
+#. module: account_peppol
+#: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__bank_account_exists
+msgid "Bank Account Exists"
+msgstr ""
+
+#. module: account_peppol
+#: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__bank_account_id
+msgid "Bank account"
 msgstr ""
 
 #. module: account_peppol
@@ -854,6 +869,11 @@ msgid "The Peppol service that is used is likely to be %s."
 msgstr ""
 
 #. module: account_peppol
+#: model:ir.model.fields,help:account_peppol.field_peppol_registration__bank_account_id
+msgid "The bank account used for customer invoices."
+msgstr ""
+
+#. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/models/account_move_send.py:0
 msgid "The document has been sent to the Peppol Access Point for processing"
@@ -893,8 +913,8 @@ msgstr ""
 #: code:addons/account_peppol/wizard/peppol_registration.py:0
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_partner_form_account_peppol
 msgid ""
-"The recommended EAS code for Belgium is 0208. The Endpoint should be the "
-"Company Registry number."
+"The recommended identification for Belgium is BCE. The Endpoint should be "
+"the Company Registry number."
 msgstr ""
 
 #. module: account_peppol
@@ -1024,6 +1044,11 @@ msgstr ""
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "Your Peppol ID"
+msgstr ""
+
+#. module: account_peppol
+#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
+msgid "Your bank account"
 msgstr ""
 
 #. module: account_peppol

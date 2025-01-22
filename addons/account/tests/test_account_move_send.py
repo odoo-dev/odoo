@@ -599,25 +599,6 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
         ])
         self.assertFalse(invoice_attachments)
 
-    def test_invoice_single_email_missing(self):
-        invoice = self.init_invoice("out_invoice", amounts=[1000], post=True)
-
-        self.partner_a.invoice_sending_method = 'email'
-        self.partner_a.email = None
-        wizard = self.create_send_and_print(invoice)
-        self.assertFalse(wizard.sending_methods)  # preferred method is overriden since it makes no sense
-        wizard.sending_methods = ['email']  # user selects email anyway
-        self.assertTrue('account_missing_email' in wizard.alerts and wizard.alerts['account_missing_email']['level'] == 'danger')
-        with self.assertRaisesRegex(UserError, "email"):
-            wizard.action_send_and_print()
-
-        self.partner_a.email = "turlututu@tsointsoin"
-        wizard = self.create_send_and_print(invoice)
-        self.assertFalse(wizard.alerts)
-        self.assertTrue('email' in wizard.sending_methods)
-        wizard.action_send_and_print()
-        self.assertTrue(self._get_mail_message(invoice))
-
     def test_invoice_multi(self):
         invoice1 = self.init_invoice("out_invoice", partner=self.partner_a, amounts=[1000], post=True)
         invoice2 = self.init_invoice("out_invoice", partner=self.partner_b, amounts=[1000], post=True)
@@ -702,8 +683,6 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
         self.partner_a.email = None
         self.assertTrue(bool(self.partner_b.email))
         wizard = self.create_send_and_print(invoice1 + invoice2)
-        self.assertTrue('account_missing_email' in wizard.alerts)
-        self.assertEqual(wizard.alerts['account_missing_email']['level'], 'warning')
         wizard.action_send_and_print()
         self.env.ref('account.ir_cron_account_move_send').method_direct_trigger()
         # invoices are generated, but only partner_b got an email, without raising any errors

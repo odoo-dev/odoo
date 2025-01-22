@@ -121,33 +121,14 @@ registry.category("web_tour.tours").add('account_tour', {
     },
     {
         isActive: ["auto"],
-        content: "Check sending method: 'email'",
-        trigger: "input[id='email']",
-        run: "click",
-    },
-    {
-        isActive: ["auto"],
-        trigger: "div[name=account_missing_email] a",
-        content: _t("Complete the partner data with email."),
-        run: "click",
-    },
-    {
-        isActive: ["auto"],
         trigger: ".o_field_widget[name=email] input, input[name=email]",
         content: markup(_t("Write here <b>your own email address</b> to test the flow.")),
         run: "edit customer@example.com",
     },
-    ...stepUtils.saveForm(),
     {
         isActive: ["auto"],
-        trigger: '.breadcrumb .o_back_button',
-        content: _t('Go back'),
-        run: "click",
-    },
-    {
-        isActive: ["auto"],
-        trigger: "button[name=action_invoice_sent]:contains(send)",
-        content: _t("Send the invoice and check what the customer will receive."),
+        trigger: ".o_form_button_save",
+        content: _t("Validate."),
         run: "click",
     },
     {

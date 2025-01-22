@@ -741,6 +741,9 @@
                                 context="{'dont_redirect_to_payments': True, 'display_account_trust': True}"
                                 string="Pay" data-hotkey="g"
                                 groups="account.group_account_invoice"/>
+                        <button name="action_print_pdf"
+                                type="object"
+                                string="Print"/>
                         <!-- Preview (only customer invoices) -->
                         <button name="preview_invoice" type="object" string="Preview" data-hotkey="o"
                                 title="Preview invoice"
@@ -1038,7 +1041,7 @@
                                        context="{'default_partner_id': bank_partner_id, 'display_account_trust': True}"
                                        domain="[('partner_id', '=', bank_partner_id)]"
                                        invisible="move_type not in ('in_invoice', 'in_refund', 'in_receipt')"
-                                       readonly="state != 'draft'"/>
+                                       readonly="is_move_sent"/>
 
                                 <!-- Invoice payment terms (only invoices) + due date (only invoices / receipts) -->
                                 <div class="o_td_label" invisible="move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')">
@@ -1413,7 +1416,7 @@
                                         <field name="partner_bank_id"
                                                context="{'default_partner_id': bank_partner_id, 'display_account_trust': True}"
                                                domain="[('partner_id.ref_company_ids', 'parent_of', company_id)]"
-                                               readonly="state != 'draft'"/>
+                                               readonly="is_move_sent"/>
                                         <field name="payment_reference"
                                             invisible="move_type not in ('out_invoice', 'out_refund')"
                                             readonly="inalterable_hash"

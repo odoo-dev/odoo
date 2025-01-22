@@ -2,6 +2,7 @@ import json
 from contextlib import contextmanager
 from requests import Session, PreparedRequest, Response
 from psycopg2 import IntegrityError
+from unittest.mock import patch
 
 from odoo.exceptions import ValidationError, UserError
 from odoo.tests.common import tagged, TransactionCase, freeze_time
@@ -109,27 +110,12 @@ class TestPeppolParticipant(TransactionCase):
             wizard.button_register_peppol_participant()
 
     def test_create_participant_already_exists(self):
-        # creating a receiver participant that already exists on Peppol network should not be possible
+        # creating participant that already exists on Peppol network will register him as a sender
         vals = self._get_participant_vals()
         vals['peppol_eas'] = '0208'
         wizard = self.env['peppol.registration'].create(vals)
-        with self.assertRaises(UserError):
-            wizard.button_register_peppol_participant()
-
-    def test_create_success_sender(self):
-        # should be possible to apply with all data
-        # the account_peppol_proxy_state should correctly change to sender
-        # then the account_peppol_proxy_state should not change
-        # after running the cron checking participant status
-        company = self.env.company
-        wizard = self.env['peppol.registration'].create({'smp_registration': False, **self._get_participant_vals()})
         wizard.button_register_peppol_participant()
-        # since we did not select receiver registration, we're now just a sender
-        self.assertEqual(company.account_peppol_proxy_state, 'sender')
-        # running the cron should not do anything for the company
-        with self._set_context({'participant_state': 'sender'}):
-            self.env['account_edi_proxy_client.user']._cron_peppol_get_participant_status()
-        self.assertEqual(company.account_peppol_proxy_state, 'sender')
+        self.assertEqual(self.env.company.account_peppol_proxy_state, 'sender')
 
     def test_create_success_receiver(self):
         # should be possible to apply with all data
@@ -147,12 +133,21 @@ class TestPeppolParticipant(TransactionCase):
         # and then come back to settings and register as a receiver
         # first step: use the peppol wizard to register only as a sender
         company = self.env.company
-        wizard = self.env['peppol.registration'].create({'smp_registration': False, **self._get_participant_vals()})
-        wizard.button_register_peppol_participant()
+        def _check_company_on_peppol_raise(self, company, edi_identification):
+            raise UserError("Participant is not on Peppol")
+
+        with patch('odoo.addons.account_peppol.models.account_edi_proxy_user.Account_Edi_Proxy_ClientUser._check_company_on_peppol', _check_company_on_peppol_raise):
+            wizard = self.env['peppol.registration'].create(self._get_participant_vals())
+            wizard.button_register_peppol_participant()
         self.assertEqual(company.account_peppol_proxy_state, 'sender')
         # second step: open settings and register as a receiver
-        settings = self.env['res.config.settings'].create({})
-        settings.button_peppol_register_sender_as_receiver()
+
+        def _check_company_on_peppol(self, company, edi_identification):
+            pass
+        with patch('odoo.addons.account_peppol.models.account_edi_proxy_user.Account_Edi_Proxy_ClientUser._check_company_on_peppol', _check_company_on_peppol):
+            settings = self.env['res.config.settings'].create({})
+            self.assertTrue(settings.account_peppol_can_be_receiver)
+            settings.button_peppol_register_sender_as_receiver()
         self.assertIn(company.account_peppol_proxy_state, ('smp_registration', 'receiver'))
         self.env['account_edi_proxy_client.user']._cron_peppol_get_participant_status()
         self.assertEqual(company.account_peppol_proxy_state, 'receiver')

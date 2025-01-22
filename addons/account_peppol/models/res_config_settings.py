@@ -23,6 +23,7 @@ class ResConfigSettings(models.TransientModel):
     account_peppol_phone_number = fields.Char(related='company_id.account_peppol_phone_number', readonly=False)
     account_peppol_proxy_state = fields.Selection(related='company_id.account_peppol_proxy_state', readonly=False)
     account_peppol_purchase_journal_id = fields.Many2one(related='company_id.peppol_purchase_journal_id', readonly=False)
+    account_peppol_can_be_receiver = fields.Boolean(compute='_compute_account_peppol_can_be_receiver')
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -33,6 +34,19 @@ class ResConfigSettings(models.TransientModel):
         for config in self:
             config.account_peppol_edi_user = config.company_id.account_edi_proxy_client_ids.filtered(
                 lambda u: u.proxy_type == 'peppol')
+
+    @api.depends('company_id.account_peppol_proxy_state')
+    def _compute_account_peppol_can_be_receiver(self):
+        for config in self:
+            if (eas := config.company_id.peppol_eas) and (endpoint := config.company_id.peppol_endpoint):
+                try:
+                    self.env['account_edi_proxy_client.user']._check_company_on_peppol(config.company_id, f'{eas}:{endpoint}')
+                    is_on_peppol = False
+                except UserError:
+                    is_on_peppol = True
+                config.account_peppol_can_be_receiver = config.company_id.account_peppol_proxy_state == 'sender' and not is_on_peppol
+            else:
+                config.account_peppol_can_be_receiver = False
 
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS
