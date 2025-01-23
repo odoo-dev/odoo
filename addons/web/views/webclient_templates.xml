@@ -29,8 +29,10 @@
         </script>
         <t t-out="head or ''"/>
     </head>
-    <body t-att-class="body_classname">
-        <t t-out="0"/>
+    <body>
+        <div t-attf-class="h-100 w-100 position-fixed {{body_classname}}">
+            <t t-out="0"/>
+        </div>
     </body>
 </html>
     </template>
