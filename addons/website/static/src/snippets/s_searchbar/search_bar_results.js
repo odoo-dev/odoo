@@ -3,6 +3,7 @@ import { Interaction } from "@web/public/interaction";
 
 import { isBrowserSafari } from "@web/core/browser/feature_detection";
 import { browser } from "@web/core/browser/browser";
+import { verifyHttpsUrl } from "@website/utils/misc";
 
 export class SearchBarResults extends Interaction {
     static selector = ".o_searchbar_form .o_dropdown_menu";
@@ -131,11 +132,7 @@ export class SearchBarResults extends Interaction {
      * @param {PointerEvent} ev
      */
     onExtraLinkClick(ev) {
-        const url = new URL(ev.currentTarget.dataset.target, browser.location.href);
-        if (!/https?:/.test(url.protocol)) {
-            return;
-        }
-        browser.location.href = url;
+        browser.location.href = verifyHttpsUrl(ev.currentTarget.dataset.target);
     }
 }
 
