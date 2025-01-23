@@ -8,6 +8,7 @@ import { IrModel } from "./_framework/mock_server/mock_models/ir_model";
 import { IrModelAccess } from "./_framework/mock_server/mock_models/ir_model_access";
 import { IrModelFields } from "./_framework/mock_server/mock_models/ir_model_fields";
 import { IrRule } from "./_framework/mock_server/mock_models/ir_rule";
+import { IrHttp } from "./_framework/mock_server/mock_models/ir_http";
 import { IrUiView } from "./_framework/mock_server/mock_models/ir_ui_view";
 import { ResCompany } from "./_framework/mock_server/mock_models/res_company";
 import { ResCountry } from "./_framework/mock_server/mock_models/res_country";
@@ -171,6 +172,7 @@ export const webModels = {
     IrModel,
     IrModelAccess,
     IrModelFields,
+    IrHttp,
     IrRule,
     IrUiView,
     ResCompany,
