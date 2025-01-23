@@ -40,6 +40,7 @@ class ResUsers(models.Model):  # noqa: F811
 
     view_group_hierarchy = fields.Json(string='Technical field for user group setting', compute='_compute_view_group_hierarchy')
 
+    @api.onchange('email')
     def _compute_view_group_hierarchy(self):
         self.view_group_hierarchy = self.env['res.groups']._get_view_group_hierarchy()
 
