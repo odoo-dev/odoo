@@ -9,24 +9,28 @@ export class SearchBarResults extends Interaction {
     dynamicSelectors = {
         ...this.dynamicSelectors,
         _scrollingParent: () => this.scrollingParentEl,
+        _searchbar: () => this.searchBarEl,
     };
     dynamicContent = {
         _root: {
             "t-att-style": () => {
-                const bcr = this.el.closest(".o_searchbar_form").getBoundingClientRect();
+                const bcr = this.searchBarEl.getBoundingClientRect();
                 return {
                     "position": "absolute !important",
                     "max-width": `${bcr.width}px !important`,
-                    "max-height": `${document.body.clientHeight - bcr.bottom - 16}px !important`,
+                    "max-height": `max(40vh, ${document.body.clientHeight - bcr.bottom - 16}px) !important`,
                     "min-width": this.autocompleteMinWidth,
                 };
             },
             "t-att-class": () => ({
-                "dropdown": true,
                 "show": true,
+            }),
+            "t-att-data-bs-popper": () => this.isDropup ? " " : undefined,
+        },
+        _searchbar: {
+            "t-att-class": () => ({
                 "dropup": this.isDropup,
             }),
-            "t-att-data-bs-popper": () => this.isDropup ? "" : undefined,
         },
         _window: {
             "t-on-resize": () => { }, // Re-apply _root:t-att-style.
@@ -74,13 +78,13 @@ export class SearchBarResults extends Interaction {
 
         // Adjust the menu's position based on the scroll height.
         this.isDropup = false;
-        const pageScrollHeight = document.documentElement.scrollHeight;
-        if (document.documentElement.scrollHeight > pageScrollHeight) {
+        this.dropdownSticksOut = false;
+        if (this.el.getBoundingClientRect().bottom > document.documentElement.offsetHeight) {
+            this.dropdownSticksOut = true;
             // If the menu overflows below the page, we reduce its height.
-            this.el.style.maxHeight = "40vh";
             this.el.style.overflowY = "auto";
             // We then recheck if the menu still overflows below the page.
-            if (document.documentElement.scrollHeight > pageScrollHeight) {
+            if (this.el.getBoundingClientRect().bottom > document.documentElement.offsetHeight) {
                 // If the menu still overflows below the page after its height
                 // has been reduced, we position it above the input.
                 this.isDropup = true;
