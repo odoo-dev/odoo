@@ -116,6 +116,12 @@ export class BaseHeader extends Interaction {
         }
     }
 
+    onScroll() {
+        this.el.querySelectorAll(".dropdown-toggle.show").forEach(dropdownToggleEl => {
+            Dropdown.getOrCreateInstance(dropdownToggleEl).hide();
+        });
+    }
+
     //--------------------------------------------------------------
     // Animation Handlers
     //--------------------------------------------------------------

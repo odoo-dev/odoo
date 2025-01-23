@@ -57,6 +57,8 @@ export class BaseHeaderSpecial extends BaseHeader {
     }
 
     onScroll() {
+        super.onScroll();
+
         const scroll = this.scrollingElement.scrollTop;
 
         this.atTop = (scroll <= this.topGap);
@@ -78,12 +80,6 @@ export class BaseHeaderSpecial extends BaseHeader {
 
         if (this.hideEl) {
             let elHeight = 0;
-            if (this.cssAffixed) {
-                const dropdownToggleEls = this.hideEl.querySelectorAll(".dropdown-toggle.show");
-                for (const dropdownToggleEl of dropdownToggleEls) {
-                    Dropdown.getOrCreateInstance(dropdownToggleEl).hide();
-                }
-            }
             if (this.cssAffixed && this.searchbarEl?.matches(".show")) {
                 // Close the dropdown of the search bar if it's open when
                 // scrolling. Otherwise, the calculated height of the
