@@ -27,7 +27,7 @@ export class BoothRegistration extends Interaction {
             }),
         },
         "button.o_wbooth_registration_submit": {
-            "t-att-disabled": () => this.isSelectionEmpty ? true : undefined,
+            "t-att-disabled": () => this.isSelectionEmpty,
         },
     };
 
