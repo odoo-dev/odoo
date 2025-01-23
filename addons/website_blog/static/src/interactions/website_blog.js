@@ -4,6 +4,7 @@ import { registry } from "@web/core/registry";
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { scrollTo } from "@web_editor/js/common/scrolling";
+import { verifyHttpsUrl } from "@website/utils/misc";
 
 export class WebsiteBlog extends Interaction {
     static selector = ".website_blog";
@@ -33,7 +34,8 @@ export class WebsiteBlog extends Interaction {
         const placeholder = document.createElement("div");
         placeholder.style.minHeight = "100vh";
         this.insert(placeholder, this.el.querySelector("#o_wblog_next_container"), "beforeend");
-        await this.forumScrollAction(ev.currentTarget, 300, () => browser.location.href = nextInfo.url);
+        const nextUrl = verifyHttpsUrl(nextInfo.url);
+        await this.forumScrollAction(ev.currentTarget, 300, () => browser.location.href = nextUrl);
     }
 
     /**
