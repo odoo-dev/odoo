@@ -31,7 +31,7 @@ export class Quiz extends Interaction {
             }),
         },
         "input[type=radio]": {
-            "t-att-disabled": () => this.track.completed || undefined,
+            "t-att-disabled": () => this.track.completed,
         },
     };
 
