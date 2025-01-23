@@ -8,6 +8,7 @@ from . import account_root
 from . import account_journal
 from . import account_lock_exception
 from . import account_tax
+from . import account_tax_rate
 from . import account_reconcile_model
 from . import account_payment_term
 from . import account_move

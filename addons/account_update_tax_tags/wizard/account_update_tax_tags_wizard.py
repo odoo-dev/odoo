@@ -1,6 +1,8 @@
 from datetime import timedelta
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.tools import SQL
 
 
 class AccountUpdateTaxTagsWizard(models.TransientModel):
@@ -47,7 +49,8 @@ class AccountUpdateTaxTagsWizard(models.TransientModel):
         :return: list of impacted account.move.line ids
         """
         self.env.flush_all()
-        self.env.cr.execute("""
+        self.env.cr.execute(SQL(
+            """
             -- 1.a) Handle base line: relation aml <-> tag, if no relation, tag is NULL
             WITH base_aml_id_rep_tag_to_insert AS (
                 SELECT aml.id AS aml_id, rep_tags.account_account_tag_id AS tag_id
@@ -113,9 +116,16 @@ class AccountUpdateTaxTagsWizard(models.TransientModel):
                             )
                         )
                     )
-                -- LEFT to allow keeping all aml even those without relation. The NULL will symbolize no relation
-                LEFT JOIN account_account_tag_account_tax_repartition_line_rel rep_tags
-                ON rep_tags.account_tax_repartition_line_id = tax_to_rep_line.id
+                LEFT JOIN LATERAL (
+                    SELECT id
+                      FROM account_historical_tax_tags
+                     WHERE start_date <= aml.date
+                       AND repartition_line_id = tax_to_rep_line.id
+                  ORDER BY start_date DESC
+                     LIMIT 1
+                ) historical_tax_tags ON TRUE
+                LEFT JOIN account_account_tag_account_historical_tax_tags_rel rep_tags
+                ON rep_tags.account_historical_tax_tags_id = historical_tax_tags.id
             ),
 
             -- 1.b) Handle tax line: relation aml <-> tag, if no relation, tag is NULL
@@ -123,8 +133,16 @@ class AccountUpdateTaxTagsWizard(models.TransientModel):
                 SELECT aml.id AS aml_id, rep_tags.account_account_tag_id AS tag_id
                 FROM account_move_line aml
                 JOIN account_tax_repartition_line rep_ln ON rep_ln.id = aml.tax_repartition_line_id
-                LEFT JOIN account_account_tag_account_tax_repartition_line_rel rep_tags
-                ON rep_tags.account_tax_repartition_line_id = aml.tax_repartition_line_id
+                LEFT JOIN LATERAL (
+                    SELECT id
+                      FROM account_historical_tax_tags
+                     WHERE start_date <= aml.date
+                       AND repartition_line_id = rep_ln.id
+                  ORDER BY start_date DESC
+                     LIMIT 1
+                ) historical_tax_tags ON TRUE
+                LEFT JOIN account_account_tag_account_historical_tax_tags_rel rep_tags
+                ON rep_tags.account_historical_tax_tags_id = historical_tax_tags.id
                 WHERE aml.company_id = %(company_id)s AND aml.date >= %(date_from)s
             ),
 
@@ -162,10 +180,10 @@ class AccountUpdateTaxTagsWizard(models.TransientModel):
 
             SELECT ARRAY_AGG(impacted_aml.aml_id)
               FROM impacted_aml
-        """, params={
-            'date_from': date_from,
-            'company_id': company_id,
-        })
+            """,
+            date_from=date_from,
+            company_id=company_id,
+        ))
         self.env.invalidate_all()
         return self.env.cr.fetchone()[0]
 

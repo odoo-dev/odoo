@@ -38,7 +38,6 @@ class AccountMoveLine(models.Model):
         :param fallback:            Fallback on an approximated mapping if the mapping failed.
         :return:                    query as an SQL object
         """
-        #pylint: disable=sql-injection        
         group_taxes = self.env['account.tax'].search([('amount_type', '=', 'group')])
 
         group_taxes_query_list = []
@@ -165,6 +164,14 @@ class AccountMoveLine(models.Model):
                     tax_rep.id = account_move_line.tax_repartition_line_id
                 JOIN account_tax tax ON
                     tax.id = account_move_line.tax_line_id
+                LEFT JOIN LATERAL (
+                    SELECT amount
+                    FROM account_tax_rate
+                    WHERE tax_id = tax.id
+                    AND start_date <= account_move_line.date
+                    ORDER BY start_date DESC
+                    LIMIT 1
+                ) last_tax_rate ON TRUE
                 JOIN account_move_line_account_tax_rel tax_rel ON
                     tax_rel.account_tax_id = COALESCE(account_move_line.group_tax_id, account_move_line.tax_line_id)
                 JOIN account_move move ON
@@ -176,7 +183,7 @@ class AccountMoveLine(models.Model):
                     AND (
                         move.move_type != 'entry'
                         OR
-                        sign(account_move_line.balance) = sign(base_line.balance * tax.amount * tax_rep.factor_percent)
+                        sign(account_move_line.balance) = sign(base_line.balance * last_tax_rate.amount * tax_rep.factor_percent)
                     )
                     AND COALESCE(base_line.partner_id, 0) = COALESCE(account_move_line.partner_id, 0)
                     AND base_line.currency_id = account_move_line.currency_id

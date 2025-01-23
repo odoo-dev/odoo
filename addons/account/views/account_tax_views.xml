@@ -50,6 +50,19 @@
                            invisible="repartition_type == 'base'"/>
                     <field name="company_id" column_invisible="True"/>
                     <field name="tag_ids_domain" column_invisible="True"/>
+                    <button name="open_historical_rate" type="object" icon="fa-external-link-square" title="Historical Tags" groups="base.group_no_one"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="historical_tags_tree" model="ir.ui.view">
+            <field name="name">account.historical.tax.tags.list</field>
+            <field name="model">account.historical.tax.tags</field>
+            <field name="arch" type="xml">
+                <list editable="top" create="1" delete="1">
+                    <field name="repartition_line_id" column_invisible="1"/>
+                    <field name="start_date"/>
+                    <field name="tag_ids" widget="many2many_tags"/>
                 </list>
             </field>
         </record>
@@ -193,6 +206,15 @@
                                     <field name="hide_tax_exigibility" invisible="1"/>
                                     <field name="tax_exigibility" widget="radio" invisible="amount_type == 'group' or not hide_tax_exigibility" groups="account.group_account_readonly"/>
                                     <field name="cash_basis_transition_account_id" options="{'no_create': True}" invisible="tax_exigibility == 'on_invoice'" required="tax_exigibility == 'on_payment'" groups="account.group_account_readonly"/>
+                                </group>
+                                <group string="Historical Rates" groups="base.group_no_one">
+                                    <p class="text-muted" colspan="2">If the invoice label should contain the rate, use <code>{{ amount }}</code> to inject it</p>
+                                    <field name="historical_rate_ids" nolabel="1" colspan="2">
+                                        <list editable="top">
+                                            <field name="start_date"/>
+                                            <field name="amount"/>
+                                        </list>
+                                    </field>
                                 </group>
                             </group>
                         </page>

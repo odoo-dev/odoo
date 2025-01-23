@@ -3,9 +3,9 @@ from odoo import api, fields, models, _, Command
 from odoo.osv import expression
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Domain
-from odoo.tools import frozendict, groupby, html2plaintext, is_html_empty, split_every
+from odoo.tools import frozendict, groupby, html2plaintext, is_html_empty, split_every, SQL, Query
 from odoo.tools.float_utils import float_repr, float_round, float_compare
-from odoo.tools.misc import clean_context, formatLang
+from odoo.tools.misc import clean_context, get_lang
 from odoo.tools.translate import html_translate
 
 from collections import defaultdict
@@ -122,7 +122,19 @@ class AccountTax(models.Model):
         string='Children Taxes')
     sequence = fields.Integer(required=True, default=1,
         help="The sequence field is used to define order in which the tax lines are applied.")
-    amount = fields.Float(required=True, digits=(16, 4), default=0.0, tracking=True)
+    amount = fields.Float(
+        compute='_compute_amount',
+        inverse='_inverse_amount',
+        search='_search_amount',
+        digits=(16, 4),
+        tracking=True,
+        copy=True,  # TODO should we copy only the last amount or the whole history?
+    )
+    historical_rate_ids = fields.One2many(
+        comodel_name='account.tax.rate',
+        inverse_name='tax_id',
+        string="Historical Tax Rates",
+    )
     description = fields.Html(string='Description', translate=html_translate)
     invoice_label = fields.Char(string='Label on Invoices', translate=True)
     price_include = fields.Boolean(
@@ -235,6 +247,48 @@ class AccountTax(models.Model):
             if record.tax_group_id.country_id and record.tax_group_id.country_id != record.country_id:
                 raise ValidationError(_("The tax group must have the same country_id as the tax using it."))
 
+    @api.depends('historical_rate_ids.amount', 'historical_rate_ids.start_date')
+    @api.depends_context('date')
+    def _compute_amount(self):
+        date = self.env.context.get('date') or fields.Date.context_today(self)
+        for tax in self:
+            tax.amount = tax.historical_rate_ids and tax.historical_rate_ids._for_date(date).amount or 0
+
+    def _inverse_amount(self):
+        date = self.env.context.get('date') or fields.Date.context_today(self)
+        for tax in self:
+            if not tax.historical_rate_ids:
+                self.env['account.tax.rate'].create({
+                    'tax_id': tax.id,
+                    'amount': tax.amount,
+                })
+            tax.historical_rate_ids._for_date(date).amount = tax.amount
+
+    def _search_amount(self, operator, value):
+        return [('historical_rate_ids.amount', operator, value)]
+
+    def _field_to_sql(self, alias: str, field_expr: str, query: (Query | None) = None, flush: bool = True) -> SQL:
+        if field_expr == 'amount':
+            date = self.env.context.get('date') or fields.Date.context_today(self)
+            if tax_date := self.env.context.get('sql_tax_date'):
+                date = SQL("COALESCE(%s, %s)", tax_date, date)
+            rate_alias = f"{alias}_rate"
+            query.add_join(
+                kind="LEFT JOIN LATERAL",
+                alias=rate_alias,
+                table=SQL(f"""
+                    (SELECT amount
+                       FROM account_tax_rate
+                      WHERE tax_id = {alias}.id
+                        AND start_date <= %(date)s
+                   ORDER BY start_date DESC
+                      LIMIT 1)
+                """, date=date),
+                condition=SQL("TRUE"),
+            )
+            return SQL(f"{rate_alias}.amount")
+        return super()._field_to_sql(alias, field_expr, query, flush)
+
     @api.depends('company_id')
     def _compute_country_id(self):
         for tax in self:
@@ -345,7 +399,7 @@ class AccountTax(models.Model):
                     repartition_line_info[(repartition_line.document_type, sequence)] = {
                         _('Factor Percent'): repartition_line.factor_percent,
                         _('Account'): repartition_line.account_id.display_name or _('None'),
-                        _('Tax Grids'): repartition_line.tag_ids.mapped('name') or _('None'),
+                        _('Tax Grids'): repartition_line.tag_ids.mapped('name') or _('None'),  # TODO how to manage logging?
                         _('Use in tax closing'): _('True') if repartition_line.use_in_tax_closing else _('False'),
                     }
                 repartition_lines_str = str(repartition_line_info)
@@ -644,6 +698,14 @@ class AccountTax(models.Model):
     def onchange_price_include(self):
         if self.price_include:
             self.include_base_amount = True
+
+    def _format_amount(self, string):
+        if not string:
+            return ''
+        return string.replace(
+            '{{ amount }}',
+            self.env['res.lang'].browse(get_lang(self.env).id).format('%g', self.amount, grouping=True)
+        )
 
     # -------------------------------------------------------------------------
     # HELPERS IN BOTH PYTHON/JAVASCRIPT (account_tax.js / account_tax.py)
@@ -1254,6 +1316,9 @@ class AccountTax(models.Model):
             # This is the rate to be applied when generating the tax details (see '_add_tax_details_in_base_line').
             'rate': load('rate', 1.0),
 
+            # The date to be used for getting the right tax rates and tags.
+            'date': load('date', fields.Date.context_today(self)),
+
             # ===== Accounting stuff =====
 
             # The sign of the business object regarding its accounting balance.
@@ -1338,7 +1403,7 @@ class AccountTax(models.Model):
         :param rounding_method: The rounding method to be used. If not specified, it will be taken from the company.
         """
         price_unit_after_discount = base_line['price_unit'] * (1 - (base_line['discount'] / 100.0))
-        taxes_computation = base_line['tax_ids']._get_tax_details(
+        taxes_computation = base_line['tax_ids'].with_context(date=base_line['date'])._get_tax_details(
             price_unit=price_unit_after_discount,
             quantity=base_line['quantity'],
             precision_rounding=base_line['currency_id'].rounding,
@@ -1769,12 +1834,13 @@ class AccountTax(models.Model):
             countries.add(False)
             base_line['tax_tag_ids'] |= product.sudo().account_tag_ids
 
+        date = base_line['date']
         for tax_data in taxes_data:
             tax = tax_data['tax']
 
             # Tags on the base line.
             if not tax_data['is_reverse_charge'] and (include_caba_tags or tax.tax_exigibility == 'on_invoice'):
-                base_line['tax_tag_ids'] |= tax[repartition_lines_field].filtered(lambda x: x.repartition_type == 'base').tag_ids
+                base_line['tax_tag_ids'] |= tax[repartition_lines_field].filtered(lambda x: x.repartition_type == 'base').with_context(date=date).tag_ids
 
             # Compute repartition lines amounts.
             if tax_data['is_reverse_charge']:
@@ -1842,7 +1908,7 @@ class AccountTax(models.Model):
                 tax_rep_data['taxes'] = self.env['account.tax']
                 tax_rep_data['tax_tags'] = self.env['account.account.tag']
                 if include_caba_tags or tax.tax_exigibility == 'on_invoice':
-                    tax_rep_data['tax_tags'] = tax_rep.tag_ids
+                    tax_rep_data['tax_tags'] = tax_rep.with_context(date=date).tag_ids
                 if tax.include_base_amount:
                     tax_rep_data['taxes'] |= subsequent_taxes
                     tax_rep_data['tax_tags'] |= subsequent_tags
@@ -1859,7 +1925,7 @@ class AccountTax(models.Model):
             if tax.is_base_affected:
                 subsequent_taxes |= tax
                 if include_caba_tags or tax.tax_exigibility == 'on_invoice':
-                    subsequent_tags |= tax[repartition_lines_field].filtered(lambda x: x.repartition_type == 'base').tag_ids
+                    subsequent_tags |= tax[repartition_lines_field].filtered(lambda x: x.repartition_type == 'base').with_context(date=date).tag_ids
 
     @api.model
     def _add_accounting_data_in_base_lines_tax_details(self, base_lines, company, include_caba_tags=False):
@@ -2420,7 +2486,7 @@ class AccountTax(models.Model):
             .filtered(lambda x: x.repartition_type == repartition_type and x.document_type == document_type)\
             .mapped('tag_ids')
 
-    def compute_all(self, price_unit, currency=None, quantity=1.0, product=None, partner=None, is_refund=False, handle_price_include=True, include_caba_tags=False, rounding_method=None):
+    def compute_all(self, price_unit, currency=None, quantity=1.0, product=None, partner=None, is_refund=False, handle_price_include=True, include_caba_tags=False, rounding_method=None, date=None):
         """Compute all information required to apply taxes (in self + their children in case of a tax group).
         We consider the sequence of the parent for group of taxes.
             Eg. considering letters as taxes and alphabetic order as sequence :
@@ -2476,6 +2542,7 @@ class AccountTax(models.Model):
             special_mode = False
         base_line = self._prepare_base_line_for_taxes_computation(
             None,
+            date=date or fields.Date.context_today(self),
             partner_id=partner,
             currency_id=currency,
             product_id=product,
@@ -2719,7 +2786,20 @@ class AccountTaxRepartitionLine(models.Model):
         domain="[('deprecated', '=', False), ('account_type', 'not in', ('asset_receivable', 'liability_payable', 'off_balance'))]",
         check_company=True,
         help="Account on which to post the tax amount")
-    tag_ids = fields.Many2many(string="Tax Grids", comodel_name='account.account.tag', domain=[('applicability', '=', 'taxes')], copy=True, ondelete='restrict')
+    tag_ids = fields.Many2many(
+        string="Tax Grids",
+        comodel_name='account.account.tag',
+        domain=[('applicability', '=', 'taxes')],
+        compute='_compute_tag_ids',
+        inverse='_inverse_tag_ids',
+        search='_search_tag_ids',
+        copy=True,
+        ondelete='restrict',
+    )
+    historical_tag_ids = fields.One2many(
+        comodel_name='account.historical.tax.tags',
+        inverse_name='repartition_line_id',
+    )
     tax_id = fields.Many2one(comodel_name='account.tax', ondelete='cascade', check_company=True)
     company_id = fields.Many2one(string="Company", comodel_name='res.company', related="tax_id.company_id", store=True, help="The company this distribution line belongs to.")
     sequence = fields.Integer(string="Sequence", default=1,
@@ -2751,6 +2831,26 @@ class AccountTaxRepartitionLine(models.Model):
         for record in self:
             record.factor = record.factor_percent / 100.0
 
+    @api.depends('historical_tag_ids.tag_ids', 'historical_tag_ids.start_date')
+    @api.depends_context('date')
+    def _compute_tag_ids(self):
+        date = self.env.context.get('date') or fields.Date.context_today(self)
+        for repartition_line in self:
+            repartition_line.tag_ids = repartition_line.historical_tag_ids._for_date(date).tag_ids if repartition_line.historical_tag_ids else False
+
+    def _inverse_tag_ids(self):
+        date = self.env.context.get('date') or fields.Date.context_today(self)
+        for repartition_line in self:
+            if not repartition_line.historical_tag_ids:
+                self.env['account.historical.tax.tags'].create({
+                    'repartition_line_id': repartition_line.id,
+                    'tag_ids': repartition_line.tag_ids,
+                })
+            repartition_line.historical_tag_ids._for_date(date).tag_ids = repartition_line.tag_ids
+
+    def _search_tag_ids(self, operator, value):
+        return [('historical_tag_ids.tag_ids', operator, value)]
+
     @api.onchange('repartition_type')
     def _onchange_repartition_type(self):
         if self.repartition_type == 'base':
@@ -2766,3 +2866,13 @@ class AccountTaxRepartitionLine(models.Model):
             return self.tax_id.cash_basis_transition_account_id
         else:
             return self.account_id
+
+    def open_historical_rate(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Historical Tax Tags'),
+            'view_mode': 'list',
+            'res_model': 'account.historical.tax.tags',
+            'domain': [('repartition_line_id', '=', self.id)],
+            'context': {'default_repartition_line_id': self.id},
+        }

@@ -10,7 +10,7 @@ class AccountMoveLine(models.Model):
         invoice = self.move_id
         included_taxes = self.tax_ids.filtered('tax_group_id.l10n_ar_vat_afip_code') if self.move_id._l10n_ar_include_vat() else False
         if not included_taxes:
-            price_unit = self.tax_ids.compute_all(
+            price_unit = self.tax_ids.with_context(date=self.date).compute_all(
                 self.price_unit,
                 currency=invoice.currency_id,
                 product=self.product_id,

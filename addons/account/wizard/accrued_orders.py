@@ -181,6 +181,7 @@ class AccountAccruedOrdersWizard(models.TransientModel):
                             # As included taxes are not taken into account in the price_unit, we need to compute the price_subtotal
                             price_subtotal = order_line.tax_ids.compute_all(
                                 order_line.price_unit,
+                                date=self.date,
                                 currency=order_line.order_id.currency_id,
                                 quantity=order_line.qty_to_invoice,
                                 product=order_line.product_id,

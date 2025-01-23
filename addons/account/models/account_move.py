@@ -1436,6 +1436,7 @@ class AccountMove(models.Model):
             rate=rate,
             sign=sign,
             special_mode=False if is_invoice else 'total_excluded',
+            date=product_line.date,
         )
 
     def _prepare_epd_base_line_for_taxes_computation(self, epd_line):
@@ -1566,7 +1567,7 @@ class AccountMove(models.Model):
             AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
         return base_lines, tax_lines
 
-    @api.depends_context('lang')
+    @api.depends_context('lang', 'date')
     @api.depends(
         'invoice_line_ids.currency_rate',
         'invoice_line_ids.tax_base_amount',
@@ -2837,6 +2838,10 @@ class AccountMove(models.Model):
             }
             for move in container['records']
         }
+        tax_rate_lists_before = {
+            move: move.line_ids.tax_ids.with_context(date=move.date).mapped('amount')
+            for move in container['records']
+        }
         yield
 
         to_delete = []
@@ -2849,6 +2854,7 @@ class AccountMove(models.Model):
             base_lines = get_base_lines(move)
             move_tax_lines_values_before = tax_lines_values_before.get(move, {})
             move_base_lines_values_before = base_lines_values_before.get(move, {})
+            tax_rate_list = tax_rate_lists_before.get(move, [])  # TODO recompute taxes if the tax rates have changed
             if (
                 move.is_invoice(include_receipts=True)
                 and (
@@ -3739,7 +3745,10 @@ class AccountMove(models.Model):
             price_untaxed = self.currency_id.round(
                 remaining_amount / (((1.0 - discount_percentage / 100.0) * (taxes.amount / 100.0)) + 1.0))
         else:
-            tax_results = taxes.with_context(force_price_include=True).compute_all(remaining_amount)
+            tax_results = taxes.with_context(force_price_include=True).compute_all(
+                price_unit=remaining_amount,
+                date=self.date,
+            )
             price_untaxed = tax_results['total_excluded'] - sum(
                 tax_data['amount']
                 for tax_data in tax_results['taxes']
