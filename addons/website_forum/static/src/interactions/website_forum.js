@@ -12,6 +12,7 @@ import { scrollTo, closestScrollable } from "@web_editor/js/common/scrolling";
 import { loadWysiwygFromTextarea } from "@web_editor/js/frontend/loadWysiwygFromTextarea";
 import { FlagMarkAsOffensiveDialog } from "../components/flag_mark_as_offensive/flag_mark_as_offensive";
 import { WebsiteForumTagsWrapper } from "../components/website_forum_tags_wrapper";
+import { escape } from "@web/core/utils/strings";
 
 export class WebsiteForum extends Interaction {
     static selector = ".website_forum";
@@ -258,11 +259,11 @@ export class WebsiteForum extends Interaction {
         const additionalInfoWithForumID = forumId
             ? markup(`<br/>
                 <a class="alert-link" href="/forum/${forumId}/faq">
-                    ${_t("Read the guidelines to know how to gain karma.")}
+                    ${escape(_t("Read the guidelines to know how to gain karma."))}
                 </a>`)
             : "";
         const translatedText = _t("karma is required to perform this action. ");
-        const message = markup(`${karma} ${translatedText}${additionalInfoWithForumID}`);
+        const message = markup(`${karma} ${escape(translatedText)}${additionalInfoWithForumID}`);
         this.services.notification.add(message, {
             type: "warning",
             sticky: false,
@@ -536,6 +537,9 @@ export class WebsiteForum extends Interaction {
      * @param {HTMLElement} currentTargetEl
      */
     async onFlagMarkAsOffensiveClick(ev, currentTargetEl) {
+        if (!/^\/forum\/.+?\/ask_for_mark_as_offensive$/.test(currentTargetEl.dataset.action)) {
+            return;
+        }
         const template = await this.waitFor(rpc(currentTargetEl.dataset.action));
         this.services.dialog.add(FlagMarkAsOffensiveDialog, {
             title: _t("Offensive Post"),
