@@ -1673,7 +1673,7 @@ class DynamicList extends DataPoint {
             this.editedRecord = null;
             const dialogProps = {
                 confirm: async () => {
-                    const resIds = validSelection.map((r) => r.resId);
+                    const resIds = [...new Set(validSelection.map((r) => r.resId))];
                     try {
                         const context = this.context;
                         await this.model.orm.write(this.resModel, resIds, changes, { context });
@@ -2113,7 +2113,7 @@ export class DynamicRecordList extends DynamicList {
         }
 
         if (this.isDomainSelected) {
-            records.forEach((r) => r.selected = true);
+            records.forEach((r) => (r.selected = true));
         }
 
         return records;
