@@ -205,12 +205,12 @@
                 <xpath expr="//header/button" position="before">
                     <button string="Update Quantity" type="object"
                         name="action_update_quantity_on_hand"
-                        invisible="not is_storable"/>
+                        invisible="not is_storable or not active"/>
                     <button string="Replenish" type="action"
                         name="%(action_product_replenish)d"
                         context="{'default_product_id': id}"
                         groups="stock.group_stock_user"
-                        invisible="type != 'consu'"/>
+                        invisible="type != 'consu' or not active"/>
                 </xpath>
                 <div name="button_box" position="inside">
                     <button string="Putaway Rules" type="object"
@@ -254,12 +254,12 @@
                     <xpath expr="//header/button" position="before">
                         <button string="Update Quantity" type="object"
                             name="action_update_quantity_on_hand"
-                            invisible="not is_storable"/>
+                            invisible="not is_storable or not active"/>
                         <button string="Replenish" type="action"
                             name="%(action_product_replenish)d"
                             context="{'default_product_id': id}"
                             groups="stock.group_stock_user"
-                            invisible="type != 'consu'"/>
+                            invisible="type != 'consu' or not active"/>
                     </xpath>
                     <div name="button_box" position="inside">
                         <t groups="stock.group_stock_user">
@@ -377,12 +377,12 @@
                     <xpath expr="//header/button" position="before">
                         <button string="Update Quantity" type="object"
                             name="action_update_quantity_on_hand"
-                            invisible="not is_storable"/>
+                            invisible="not is_storable or not active"/>
                         <button string="Replenish" type="action"
                             name="%(action_product_replenish)d"
                             context="{'default_product_tmpl_id': id}"
                             groups="stock.group_stock_user"
-                            invisible="type != 'consu'"/>
+                            invisible="type != 'consu' or not active"/>
                     </xpath>
                     <button name="action_open_documents" position="before">
                         <t groups="stock.group_stock_user">
@@ -604,6 +604,17 @@
             parent="menu_stock_inventory_control" sequence="2" groups="product.group_product_variant"/>
         <menuitem id="menu_product_stock" name="Stock" action="stock.action_product_stock_view"
         parent="stock.menu_warehouse_report" sequence="5"/>
+
+        <record id="action_stock_product_archive_and_copy" model="ir.actions.server">
+            <field name="name">Archive and create a new copy</field>
+            <field name="model_id" ref="model_product_template"/>
+            <field name="state">code</field>
+            <field name="code">
+                action = env['product.template']\
+                    .browse(env.context.get('active_id'))\
+                    .action_archive_and_create_a_new_copy()
+            </field>
+        </record>
 
     </data>
 </odoo>

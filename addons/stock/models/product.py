@@ -7,7 +7,7 @@ from collections import defaultdict
 from dateutil.relativedelta import relativedelta
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, RedirectWarning
 from odoo.osv import expression
 from odoo.tools import float_is_zero, check_barcode_encoding
 from odoo.tools.float_utils import float_round
@@ -777,11 +777,23 @@ class ProductTemplate(models.Model):
             virtual_available = 0
             incoming_qty = 0
             outgoing_qty = 0
-            for p in template.product_variant_ids._origin:
-                qty_available += variants_available[p.id]["qty_available"]
-                virtual_available += variants_available[p.id]["virtual_available"]
-                incoming_qty += variants_available[p.id]["incoming_qty"]
-                outgoing_qty += variants_available[p.id]["outgoing_qty"]
+            if template.product_variant_ids:
+                for p in template.product_variant_ids._origin:
+                    qty_available += variants_available[p.id]["qty_available"]
+                    virtual_available += variants_available[p.id]["virtual_available"]
+                    incoming_qty += variants_available[p.id]["incoming_qty"]
+                    outgoing_qty += variants_available[p.id]["outgoing_qty"]
+            # This template is archived and does not have any active variants. Calculating the total quantities of its archived variants.
+            else:
+                inactive_variants = self.env['product.product'].with_context(active_test=False).search_read(
+                    [('product_tmpl_id', '=', template.ids)],
+                    ['qty_available', 'virtual_available', 'incoming_qty', 'outgoing_qty']
+                )
+                for variant in inactive_variants:
+                    qty_available += variant["qty_available"]
+                    virtual_available += variant["virtual_available"]
+                    incoming_qty += variant["incoming_qty"]
+                    outgoing_qty += variant["outgoing_qty"]
             prod_available[template.id] = {
                 "qty_available": qty_available,
                 "virtual_available": virtual_available,
@@ -932,7 +944,9 @@ class ProductTemplate(models.Model):
                 ('state', '=', 'done'),
             ], limit=1)
             if existing_done_move_lines:
-                raise UserError(_("You can not change the inventory tracking of a product that was already used."))
+                msg = _("To ensure traceability, you can't change the product type/tracking method of a product that has already been used.")
+                action = self.env.ref('stock.action_stock_product_archive_and_copy')
+                raise RedirectWarning(msg, action.id, _('Archive and create a new copy'), additional_context={'active_id': self.id, 'archive_and_copy': True})
             existing_reserved_move_lines = self.env['stock.move.line'].sudo().search([
                 ('product_id', 'in', self.with_context(active_test=False).mapped('product_variant_ids').ids),
                 ('state', 'in', ['partially_available', 'assigned']),
@@ -942,6 +956,20 @@ class ProductTemplate(models.Model):
         if 'is_storable' in vals and not vals['is_storable'] and any(p.is_storable and not float_is_zero(p.qty_available, precision_rounding=p.uom_id.rounding) for p in self):
             raise UserError(_("Available quantity should be set to zero before changing inventory tracking"))
         return super().write(vals)
+
+
+    def action_archive_and_create_a_new_copy(self):
+        self.ensure_one()
+        new_product = self.copy()
+        self.write({'active': False})
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'product.template',
+            'view_mode': 'form',
+            'context': {'from_action_archive': True},
+            'res_id': new_product.id,
+            'target': 'current',
+        }
 
     def copy(self, default=None):
         new_products = super().copy(default=default)

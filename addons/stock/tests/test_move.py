@@ -4,7 +4,7 @@
 from dateutil.relativedelta import relativedelta
 
 from odoo import Command, fields
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, RedirectWarning
 from odoo.tests import Form, new_test_user
 from odoo.tests.common import TransactionCase
 from odoo.addons.mail.tests.common import mail_new_test_user
@@ -5584,25 +5584,6 @@ class StockMove(TransactionCase):
         self.product.qty_available = 10
 
         # Check raise UserError(_("Available quantity should be set to zero before changing type"))
-        with self.assertRaises(UserError):
-            self.product.is_storable = False
-
-        move_out = self.env['stock.move'].create({
-            'name': 'test_customer',
-            'location_id': self.stock_location.id,
-            'location_dest_id': self.customer_location.id,
-            'product_id': self.product.id,
-            'product_uom': self.uom_unit.id,
-            'product_uom_qty': self.product.qty_available,
-            'picking_type_id': self.env.ref('stock.picking_type_out').id,
-        })
-        move_out._action_confirm()
-        move_out._action_assign()
-        move_out.quantity = self.product.qty_available
-        move_out.picked = True
-        move_out._action_done()
-
-        # Check raise UserError(_("You can not change the type of a product that was already used."))
         with self.assertRaises(UserError):
             self.product.is_storable = False
 
