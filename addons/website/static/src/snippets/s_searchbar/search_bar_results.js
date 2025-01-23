@@ -25,7 +25,7 @@ export class SearchBarResults extends Interaction {
             "t-att-class": () => ({
                 "show": true,
             }),
-            "t-att-data-bs-popper": () => this.isDropup ? " " : undefined,
+            "t-att-data-bs-popper": () => this.isDropup ? "" : undefined,
         },
         _searchbar: {
             "t-att-class": () => ({
