@@ -1431,6 +1431,41 @@ describe("t-att and t-out", () => {
         expect("span").not.toHaveAttribute("a");
     });
 
+    test("t-att-... with boolean true adds a boolean attribute", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            dynamicContent = {
+                _root: { "t-att-disabled": () => true },
+            };
+        }
+        await startInteraction(Test, TemplateTest);
+        expect("span").toHaveAttribute("disabled", "disabled");
+    });
+
+    // Falsy value
+    test("t-att-... with empty string adds an empty string", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            dynamicContent = {
+                _root: { "t-att-disabled": () => "" },
+            };
+        }
+        await startInteraction(Test, TemplateTest);
+        expect("span").toHaveAttribute("disabled", "");
+    });
+
+    // Falsy value
+    test("t-att-... with number 0 adds a '0' string", async () => {
+        class Test extends Interaction {
+            static selector = "span";
+            dynamicContent = {
+                _root: { "t-att-a": () => 0 },
+            };
+        }
+        await startInteraction(Test, TemplateTest);
+        expect("span").toHaveAttribute("a", "0");
+    });
+
     test("t-att-... reset at stop", async () => {
         class Test extends Interaction {
             static selector = "span";

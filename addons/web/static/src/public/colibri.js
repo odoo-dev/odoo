@@ -195,10 +195,13 @@ export class Colibri {
                 }
             }
         } else {
-            if (value) {
-                el.setAttribute(attr, value);
-            } else {
+            if ([false, undefined, null].includes(value)) {
                 el.removeAttribute(attr);
+            } else {
+                if (value === true) {
+                    value = attr;
+                }
+                el.setAttribute(attr, value);
             }
         }
     }

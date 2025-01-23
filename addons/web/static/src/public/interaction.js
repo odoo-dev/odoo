@@ -76,9 +76,12 @@ export class Interaction {
      *
      * Accepted directives include: t-on-, t-att-, t-out and t-component
      *
-     * A falsy value on an attribute, class or style property will remove it.
-     * For boolean attributes, you should use the complete value
-     * (e.g.: { "t-att-checked": () => "checked" }).
+     * A falsy value on a class or style property will remove it.
+     * On others attributes:
+     * - `false`, `undefined` or `null` remove it
+     * - other falsy values (`""`, `0`) are applied as such (`required=""`)
+     * - boolean `true` is applied as the attribute's name
+     *   (e.g. `{ "t-att-required": () => true }` applies `required="required"`)
      *
      * Note that this is not owl! It is similar, to make it easy to learn, but
      * it is different, the syntax and semantics are somewhat different.
