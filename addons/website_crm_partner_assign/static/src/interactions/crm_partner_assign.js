@@ -103,7 +103,7 @@ export class CRMPartnerAssign extends Interaction {
             const parentEl = this.el.querySelector("#new-opp-dialog");
             this.insert(alertEl, parentEl, "afterbegin");
         } else {
-            window.location = "/my/opportunity/" + response.id;
+            window.location = `/my/opportunity/${parseInt(response.id)}`;
         }
     }
 

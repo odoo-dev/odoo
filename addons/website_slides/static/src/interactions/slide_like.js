@@ -1,7 +1,7 @@
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
-import { sprintf } from '@web/core/utils/strings';
+import { escape, sprintf } from '@web/core/utils/strings';
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 
@@ -62,15 +62,15 @@ export class SlideLike extends Interaction {
                     _t('Please <a href="/web/login?redirect=%(url)s">login</a> to vote for this lesson');
                 this.showAlert(sprintf(message, { url: encodeURIComponent(document.URL) }));
             } else if (data.error === 'slide_access') {
-                this.showAlert(_t('You don\'t have access to this lesson'));
+                this.showAlert(escape(_t('You don\'t have access to this lesson')));
             } else if (data.error === 'channel_membership_required') {
-                this.showAlert(_t('You must be member of this course to vote'));
+                this.showAlert(escape(_t('You must be member of this course to vote')));
             } else if (data.error === 'channel_comment_disabled') {
-                this.showAlert(_t('Votes and comments are disabled for this course'));
+                this.showAlert(escape(_t('Votes and comments are disabled for this course')));
             } else if (data.error === 'channel_karma_required') {
-                this.showAlert(_t('You don\'t have enough karma to vote'));
+                this.showAlert(escape(_t('You don\'t have enough karma to vote')));
             } else {
-                this.showAlert(_t('Unknown error'));
+                this.showAlert(escape(_t('Unknown error')));
             }
         }
     }
