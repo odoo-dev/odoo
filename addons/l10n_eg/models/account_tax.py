@@ -65,3 +65,12 @@ class AccountTax(models.Model):
             ('t20_of04', 'T20 - OF04 - Other fees (amount)')
         ],
         string='ETA Code (Egypt)', default=False)
+
+    def _get_l10n_eg_eta_code_types(self):
+        """
+            Helper method to return the taxType, subType from the ETA Tax Code
+            :return: The ETA Tax Code `Type` and `Sub Type`
+            :rtype: tuple(taxType, subType)
+        """
+        self.ensure_one()
+        return tuple(map(str.upper, self.l10n_eg_eta_code.split('_')))

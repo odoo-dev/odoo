@@ -55,18 +55,17 @@ class AccountEdiFormat(models.Model):
                 'blocking_level': 'warning'
             }
         if not request_response.ok:
-            try:
+            if hasattr(request_data, 'json'):
                 response_data = request_response.json()
-            except JSONDecodeError as ex:
-                return {
-                    'error': str(ex),
-                    'blocking_level': 'error'
-                }
-            if response_data and response_data.get('error'):
-                return {
-                    'error': response_data.get('error'),
-                    'blocking_level': 'error'
-                }
+                if isinstance(response_data, dict) and response_data.get('error'):
+                    return {
+                        'error': response_data['error'] or _('Unknown error'),
+                        'blocking_level': 'error',
+                    }
+            return {
+                'error': _('Error %(status_code)s: %(reason)s', status_code=request_response.status_code, reason=request_response.reason),
+                'blocking_level': 'error',
+            }
         return {'response': request_response}
 
     @api.model
@@ -190,7 +189,7 @@ class AccountEdiFormat(models.Model):
         access_data = self._l10n_eg_eta_get_access_token(invoice)
         if access_data.get('error'):
             return access_data
-        request_url = f'/api/v1.0/documents/{url_quote(invoice.l10n_eg_uuid)}/pdf'
+        request_url = f'{url_quote(invoice.l10n_eg_uuid)}/pdf'
         request_data = {'body': None, 'header': {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % access_data.get('access_token')}}
         response_data = self._l10n_eg_eta_connect_to_server(request_data, request_url, 'GET', production_enviroment=invoice.company_id.l10n_eg_production_env)
         if response_data.get('error'):
@@ -358,8 +357,8 @@ class AccountEdiFormat(models.Model):
         if issuer:
             address['address']['branchID'] = invoice.journal_id.l10n_eg_branch_identifier or ''
         individual_type = self._l10n_eg_get_partner_tax_type(partner, issuer)
-        address['type'] = individual_type or ''
         if invoice.amount_total >= invoice.company_id.l10n_eg_invoicing_threshold or individual_type != 'P':
+            address['type'] = individual_type or ''
             address['id'] = partner.vat or ''
         return address
 
@@ -417,7 +416,7 @@ class AccountEdiFormat(models.Model):
             return {
                 invoice: {
                     'error':  _("An error occured in created the ETA invoice, please retry signing"),
-                    'blocking_level': 'error'
+                    'blocking_level': 'info',
                 }
             }
         invoice_json = json.loads(invoice.l10n_eg_eta_json_doc_id.raw)['request']
@@ -425,7 +424,7 @@ class AccountEdiFormat(models.Model):
             return {
                 invoice: {
                     'error':  _("Please make sure the invoice is signed"),
-                    'blocking_level': 'error'
+                    'blocking_level': 'info',
                 }
             }
         return {invoice: self._l10n_eg_edi_post_invoice_web_service(invoice)}
