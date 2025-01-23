@@ -27,7 +27,7 @@ export class FullScreenHeight extends Interaction {
     }
 
     computeIdealHeight() {
-        const windowHeight = window.outerHeight;
+        const windowHeight = window.innerHeight;
         if (this.inModal) {
             return windowHeight;
         }
