@@ -84,38 +84,40 @@ class StockMove(models.Model):
 
     def _auto_record_components(self, qty):
         self.ensure_one()
-        subcontracted_productions = self._get_subcontract_production()
-        production = subcontracted_productions.filtered(lambda p: not p._has_been_recorded())[-1:]
-        if not production:
-            # If new quantity is over the already recorded quantity and we have no open production, then create a new one for the missing quantity.
-            production = subcontracted_productions[-1:]
-            production = production.sudo().with_context(allow_more=True)._split_productions({production: [production.qty_producing, qty]})[-1:]
-        qty = self.product_uom._compute_quantity(qty, production.product_uom_id)
+        for ml in self.move_line_ids:
+            ml_subcontracted_productions = self._get_subcontract_production().filtered(lambda p: p.lot_producing_id == ml.lot_id)
+            production = ml_subcontracted_productions.filtered(lambda p: not p._has_been_recorded())[-1:]
+            if not production:
+                # If new quantity is over the already recorded quantity and we have no open production, then create a new one for the missing quantity.
+                production = ml_subcontracted_productions[-1:] or self._get_subcontract_production()[-1:]
+                production = production.sudo().with_context(allow_more=True)._split_productions({production: [production.qty_producing, ml.quantity]})[-1:]
+            product_qty = ml.quantity_product_uom
+            production.lot_producing_id = ml.lot_id
 
-        if production.product_tracking == 'serial':
-            qty = float_round(qty, precision_digits=0, rounding_method='UP')  # Makes no sense to have partial quantities for serial number
-            if float_compare(qty, production.product_qty, precision_rounding=production.product_uom_id.rounding) < 0:
-                remaining_qty = production.product_qty - qty
-                productions = production.sudo()._split_productions({production: ([1] * int(qty)) + [remaining_qty]})[:-1]
+            if production.product_tracking == 'serial':
+                product_qty = float_round(product_qty, precision_digits=0, rounding_method='UP')  # Makes no sense to have partial quantities for serial number
+                if float_compare(product_qty, production.product_qty, precision_rounding=production.product_uom_id.rounding) < 0:
+                    remaining_qty = production.product_qty - product_qty
+                    productions = production.sudo()._split_productions({production: ([1] * int(product_qty)) + [remaining_qty]})[:-1]
+                else:
+                    productions = production.sudo().with_context(allow_more=True)._split_productions({production: ([1] * int(product_qty))})[:-1]
+
+                for production in productions:
+                    production.qty_producing = 1
+                    if not production.lot_producing_id:
+                        production.action_generate_serial()
+                    production.with_context(cancel_backorder=False).subcontracting_record_component()
             else:
-                productions = production.sudo().with_context(allow_more=True)._split_productions({production: ([1] * int(qty))})
-
-            for production in productions:
-                production.qty_producing = 1
-                if not production.lot_producing_id:
+                production.qty_producing = product_qty
+                if float_compare(production.qty_producing, production.product_qty, precision_rounding=production.product_uom_id.rounding) > 0:
+                    self.env['change.production.qty'].with_context(skip_activity=True).create([{
+                        'mo_id': production.id,
+                        'product_qty': product_qty
+                    }]).change_prod_qty()
+                if production.product_tracking == 'lot' and not production.lot_producing_id:
                     production.action_generate_serial()
+                production._set_qty_producing()
                 production.with_context(cancel_backorder=False).subcontracting_record_component()
-        else:
-            production.qty_producing = qty
-            if float_compare(production.qty_producing, production.product_qty, precision_rounding=production.product_uom_id.rounding) > 0:
-                self.env['change.production.qty'].with_context(skip_activity=True).create({
-                    'mo_id': production.id,
-                    'product_qty': qty
-                }).change_prod_qty()
-            if production.product_tracking == 'lot' and not production.lot_producing_id:
-                production.action_generate_serial()
-            production._set_qty_producing()
-            production.with_context(cancel_backorder=False).subcontracting_record_component()
 
     def copy_data(self, default=None):
         default = dict(default or {})
