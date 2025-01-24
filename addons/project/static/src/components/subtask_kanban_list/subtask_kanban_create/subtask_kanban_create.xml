@@ -10,6 +10,7 @@
             t-on-click="_onClick"
             t-on-blur="_onBlur"
             t-on-change="_onNameChanged"
+            t-on-keydown="_onKeydown"
             t-att-disabled="props.isReadonly"/>
         <button t-on-click="_onSaveClick" class="ms-auto fw-bold btn btn-link py-0 px-2">
             SAVE

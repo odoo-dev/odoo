@@ -32,7 +32,7 @@
                             onBlur.bind="_onBlur" />
                     </t>
                     <t t-else="">
-                        <i class="fa fa-plus my-2"/> New
+                        <i class="fa fa-plus my-2"/> Add sub-task
                     </t>
                 </div>
             </div>

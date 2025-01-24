@@ -28,16 +28,38 @@ export class SubtaskKanbanList extends Component {
             open: false,
             name: "",
         });
+        this.state = useState({
+            subtasks: [],
+            isLoad:true,
+            prevSubtaskCount: 0,
+        });
     }
 
     get list() {
         return this.props.record.data.child_ids;
     }
 
+    get hasNewSubtask() {
+        const currentCount = this.list.records.length;
+        if (currentCount !== this.state.prevSubtaskCount) {
+            this.state.prevSubtaskCount = currentCount;
+            this.state.isLoad = true;
+            this.filterSubtasks();
+        }
+        return this.state.subtasks;
+    }
+
+    filterSubtasks() {
+        if (this.state.isLoad ) {
+            this.state.subtasks = this.list.records.filter(
+                (subtask) => !["1_done", "1_canceled"].includes(subtask.data.state)
+            ).sort((a, b) => a.resId - b.resId);
+            this.state.isLoad = false;
+        }
+    }
+
     get closedList() {
-        return this.list.records.filter((child) => {
-            return !["1_done", "1_canceled"].includes(child.data.state);
-        });
+        return this.hasNewSubtask;
     }
 
     get fieldInfo() {
