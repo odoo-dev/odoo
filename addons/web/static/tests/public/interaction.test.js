@@ -10,7 +10,6 @@ import { patch } from "@web/core/utils/patch";
 import { startInteraction } from "./helpers";
 import { Component, onWillDestroy, xml } from "@odoo/owl";
 
-describe.current.tags("interaction_dev");
 
 const TemplateBase = `
     <div>

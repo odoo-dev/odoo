@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryOne } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 
@@ -7,7 +7,6 @@ import { makeMockEnv } from "@web/../tests/web_test_helpers";
 import { Interaction } from "@web/public/interaction";
 import { startInteraction } from "./helpers";
 
-describe.current.tags("interaction_dev");
 
 test("properly handles case where we have no match for wrapwrap", async () => {
     const env = await makeMockEnv();
