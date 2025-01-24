@@ -100,6 +100,10 @@ export class PosStore extends WithLazyGetterTrap {
         this.unwatched = markRaw({});
         this.pushOrderMutex = new Mutex();
 
+        const isProductCreation = await user.hasGroup("product.group_product_manager");
+        const isPOSManager = await user.hasGroup("point_of_sale.group_pos_manager");
+        this.allowProductCreateEdit = isPOSManager ? true : isProductCreation;
+
         // Object mapping the order's name (which contains the uuid) to it's server_id after
         // validation (order paid then sent to the backend).
         this.validated_orders_name_server_id_map = {};
@@ -1822,7 +1826,7 @@ export class PosStore extends WithLazyGetterTrap {
         );
     }
     async allowProductCreation() {
-        return await user.hasGroup("base.group_system");
+        return this.allowProductCreateEdit;
     }
     orderDetailsProps(order) {
         return {
