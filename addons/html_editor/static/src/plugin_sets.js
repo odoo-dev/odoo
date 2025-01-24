@@ -50,6 +50,7 @@ import { TabulationPlugin } from "./main/tabulation_plugin";
 import { TextDirectionPlugin } from "./main/text_direction_plugin";
 import { ToolbarPlugin } from "./main/toolbar/toolbar_plugin";
 import { YoutubePlugin } from "./main/youtube_plugin";
+import { ZeroHeightBlockPlugin } from "./main/zero_height_block_plugin";
 import { CollaborationOdooPlugin } from "./others/collaboration/collaboration_odoo_plugin";
 import { CollaborationPlugin } from "./others/collaboration/collaboration_plugin";
 import { CollaborationSelectionAvatarPlugin } from "./others/collaboration/collaboration_selection_avatar_plugin";
@@ -155,6 +156,7 @@ export const MAIN_PLUGINS = [
     InlineCodePlugin,
     TableResizePlugin,
     FilePlugin,
+    ZeroHeightBlockPlugin,
 ];
 
 export const COLLABORATION_PLUGINS = [

@@ -99,6 +99,7 @@ export class TablePlugin extends Plugin {
         unsplittable_node_predicates: (node) =>
             node.nodeName === "TABLE" || tableInnerComponents.has(node.nodeName),
         fully_selected_node_predicates: (node) => !!closestElement(node, ".o_selected_td"),
+        eligible_for_zhb_predicates: (block) => block.tagName === "TABLE",
         traversed_nodes_processors: this.adjustTraversedNodes.bind(this),
     };
 
