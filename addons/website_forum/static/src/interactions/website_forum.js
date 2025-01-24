@@ -7,12 +7,12 @@ import { cookie } from "@web/core/browser/cookie";;
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
+import { escape } from "@web/core/utils/strings";
 import { session } from "@web/session";
 import { scrollTo, closestScrollable } from "@web_editor/js/common/scrolling";
 import { loadWysiwygFromTextarea } from "@web_editor/js/frontend/loadWysiwygFromTextarea";
 import { FlagMarkAsOffensiveDialog } from "../components/flag_mark_as_offensive/flag_mark_as_offensive";
 import { WebsiteForumTagsWrapper } from "../components/website_forum_tags_wrapper";
-import { escape } from "@web/core/utils/strings";
 
 export class WebsiteForum extends Interaction {
     static selector = ".website_forum";
@@ -166,7 +166,7 @@ export class WebsiteForum extends Interaction {
     warnIfPublicUser() {
         if (session.is_website_user) {
             this.displayAccessDeniedNotification(
-                markup(_t("Oh no! Please <a href='%s'>sign in</a> to perform this action", "/web/login"))
+                markup(`<a href='/web/login'>` + escape(_t("Oh no! Please sign in to perform this action") + "</a>"))
             );
             return true;
         }
