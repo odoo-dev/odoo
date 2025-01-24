@@ -1,7 +1,7 @@
 import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("test_user_group_settings", {
-    url: "/odoo/settings?debug=assets,tests",
+    url: "/odoo/settings?debug=tests,assets",
     steps: () => [
 
         {
@@ -58,10 +58,6 @@ registry.category("web_tour.tours").add("test_user_group_settings", {
             trigger: 'a[data-menu-xmlid="base.menu_action_res_users"]',
             content: "open users & companies menu",
             run: "click",
-        },
-        {
-            trigger: ".o_action_manager > .o_list_view",
-            content: "wait for the Users list view to be displayed",
         },
         {
             trigger: '.o_data_row:first-child .o_field_cell[name="name"]',
