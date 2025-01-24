@@ -3,12 +3,10 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { advanceTime, queryOne } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("account_payment.portal_invoice_page_payment");
-
-describe.current.tags("interaction_dev");
 
 test("portal_invoice_page_payment is not started without #portal_pay", async () => {
     const { core } = await startInteractions("");

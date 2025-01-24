@@ -1,11 +1,10 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { advanceTime, click, edit, fill, queryAll, tick } from "@odoo/hoot-dom";
 import { Deferred } from "@odoo/hoot-mock";
 import { startInteractions, setupInteractionWhiteList } from "@web/../tests/public/helpers";
 import { onRpc } from "@web/../tests/web_test_helpers";
 
 setupInteractionWhiteList("website_forum.website_forum_spam");
-describe.current.tags("interaction_dev");
 
 const template = (options = {}) => `
  <div id="wrap" class="o_wforum_wrapper o_wforum_moderation_queue">

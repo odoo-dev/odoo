@@ -5,7 +5,6 @@ import { startInteractions, setupInteractionWhiteList } from "@web/../tests/publ
 import { defineStyle } from "@web/../tests/web_test_helpers";
 
 setupInteractionWhiteList(["website_forum.website_forum_share", "website.share"]);
-describe.current.tags("interaction_dev");
 
 
 beforeEach(() => defineStyle(/* css */`* { transition: none !important; }`));

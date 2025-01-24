@@ -1,11 +1,9 @@
 import { setupInteractionWhiteList, startInteractions } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryOne } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("public.login");
-
-describe.current.tags("interaction_dev");
 
 test("add and remove loading effect", async () => {
     const { core } = await startInteractions(`

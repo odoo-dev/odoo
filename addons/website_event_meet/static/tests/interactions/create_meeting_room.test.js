@@ -3,14 +3,12 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { click, queryFirst } from "@odoo/hoot-dom";
 
 import { onRpc } from "@web/../tests/web_test_helpers";
 
 setupInteractionWhiteList("website_event_meet.create_meeting_room");
-
-describe.current.tags("interaction_dev");
 
 const meetingRoomTemplate = `
     <div class="o_wemeet_container container h-100">

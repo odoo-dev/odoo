@@ -3,7 +3,7 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { click, queryOne } from "@odoo/hoot-dom";
 import {
     contains,
@@ -17,7 +17,6 @@ import { MainComponentsContainer } from "@web/core/main_components_container";
 
 setupInteractionWhiteList("website_event_meet.meeting_room");
 
-describe.current.tags("interaction_dev");
 
 class EventMeetingRoom extends models.Model {
     is_published = fields.Boolean();

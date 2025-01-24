@@ -1,8 +1,6 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryAll } from "@odoo/hoot-dom";
-import {
-    onRpc,
-} from "@web/../tests/web_test_helpers";
+import { onRpc } from "@web/../tests/web_test_helpers";
 import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
 import { startInteractions, setupInteractionWhiteList } from "@web/../tests/public/helpers";
@@ -16,7 +14,6 @@ class TestItem extends Interaction {
     };
 }
 registry.category("public.interactions").add("website_event.test_events_item", TestItem);
-describe.current.tags("interaction_dev");
 
 setupInteractionWhiteList(["website_event.events", "website_event.test_events_item"]);
 

@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryAll } from "@odoo/hoot-dom";
 import { startInteractions, setupInteractionWhiteList } from "@web/../tests/public/helpers";
 import { session } from "@web/session";
@@ -7,7 +7,6 @@ import { patchTurnStile } from "@website_cf_turnstile/../tests/helpers";
 patchTurnStile();
 
 setupInteractionWhiteList("website.form");
-describe.current.tags("interaction_dev");
 
 test("turnstile captcha gets added to form snippets", async () => {
     session.turnstile_site_key = "test";

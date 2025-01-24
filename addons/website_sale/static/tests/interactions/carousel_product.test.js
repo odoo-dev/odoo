@@ -1,10 +1,9 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { animationFrame, click, queryOne } from "@odoo/hoot-dom";
 import { defineStyle } from "@web/../tests/web_test_helpers";
 import { setupInteractionWhiteList, startInteractions } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList(["website_sale.carousel_product"]);
-describe.current.tags("interaction_dev");
 
 test("scroll miniatures", async () => {
     defineStyle(/* css */`li { min-width: 64px !important; }`);

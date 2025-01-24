@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryOne } from "@odoo/hoot-dom";
 import {
     startInteractions,
@@ -6,7 +6,6 @@ import {
 } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.animation");
-describe.current.tags("interaction_dev");
 
 test("on scroll animation changes based on scroll", async () => {
     const { core } = await startInteractions(`

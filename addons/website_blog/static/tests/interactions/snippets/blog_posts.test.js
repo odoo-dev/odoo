@@ -1,7 +1,5 @@
-import { describe, expect, test } from "@odoo/hoot";
-import {
-    onRpc,
-} from "@web/../tests/web_test_helpers";
+import { expect, test } from "@odoo/hoot";
+import { onRpc } from "@web/../tests/web_test_helpers";
 import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
 import { startInteractions, setupInteractionWhiteList } from "@web/../tests/public/helpers";
@@ -18,7 +16,6 @@ class TestItem extends Interaction {
 registry.category("public.interactions").add("website_blog.test_blog_post_item", TestItem);
 
 setupInteractionWhiteList(["website_blog.blog_posts", "website_blog.test_blog_post_item"]);
-describe.current.tags("interaction_dev");
 
 test("dynamic snippet blog posts loads items and displays them through template", async () => {
     onRpc("/website/snippet/filters", async (args) => {
