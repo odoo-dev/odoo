@@ -8,9 +8,6 @@
             <field name="inherit_id" ref="hr_expense.res_config_settings_view_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//block[@name='expenses_stripe_issuing_container']" position="inside">
-                   <setting string="Activate stripe issuing">
-                        <field name="stripe_issuing_activated"/>
-                    </setting>
                     <setting string="Live Publishable key">
                         <field name="stripe_publishable_live_key"/>
                     </setting>
@@ -34,10 +31,9 @@
                              help="Link your stripe issuing account to manage company credit cards for your employees through Odoo">
                             <button name="action_connect_to_stripe" type="object" string="Connect to Stripe"/>
                     </setting>
-                    <setting string="Import Stripe Data" invisible="not module_hr_expense_stripe or not stripe_issuing_activated"
-                             help="Fetch data from your stripe account and try to import them.
-                              It is not recommended to import data in test mode on a production database">
-                            <button name="action_import_from_stripe" type="object" string="Import"/>
+                    <setting string="Create Webhook" invisible="not module_hr_expense_stripe or not stripe_issuing_activated"
+                             help="Create the webhook to allow Stripe to send us data">
+                            <button name="action_stripe_create_webhook" type="object" string="Create Webhook"/>
                     </setting>
                 </xpath>
             </field>

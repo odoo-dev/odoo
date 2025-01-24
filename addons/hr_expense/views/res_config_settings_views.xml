@@ -56,7 +56,7 @@
                         <block title="Stripe Issuing" name="expenses_stripe_issuing_container">
                             <setting string="Activate Stripe Issuing" company_dependent="1"
                                      help="Link your stripe issuing account to manage company credit cards for your employees through Odoo">
-                                <field name="module_hr_expense_stripe" widget="upgrade_boolean"/>
+                                <field name="module_hr_expense_stripe" widget="boolean"/>
                             </setting>
                         </block>
                     </app>

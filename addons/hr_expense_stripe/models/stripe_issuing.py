@@ -2,8 +2,8 @@ import logging
 
 from odoo import _, api, fields, models
 
-from odoo.addons.hr_expense_stripe.utils import get_publishable_key, get_secret_key, API_VERSION, stripe_make_request
-from odoo.exceptions import UserError, ValidationError
+from odoo.addons.hr_expense_stripe.utils import get_publishable_key, get_secret_key, stripe_make_request
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -27,9 +27,9 @@ class StripeIssuing(models.AbstractModel):
     @api.model
     def _get_stripe_mode(self):
         """ Helper to get the mode in which the database is set, it should always be live unless a test database is created"""
-        self.ensure_one()
+        company = self.company_id or self.env.company
 
-        return self.company_id.stripe_mode
+        return company.stripe_mode
 
     @api.model
     def _get_publishable_key(self):
@@ -39,10 +39,9 @@ class StripeIssuing(models.AbstractModel):
         :return: The publishable key
         :rtype: str
         """
-        self.ensure_one()
-
+        company = self.company_id or self.env.company
         mode = self._get_stripe_mode()
-        return self.company_id[f'stripe_publishable_{mode}_key'] or get_publishable_key()
+        return company[f'stripe_publishable_{mode}_key'] or get_publishable_key()
 
     @api.model
     def _get_secret_key(self):
@@ -52,10 +51,9 @@ class StripeIssuing(models.AbstractModel):
         :return: The secret key
         :rtype: str
         """
-        self.ensure_one()
-
+        company = self.company_id or self.env.company
         mode = self._get_stripe_mode()
-        return self.company_id[f'stripe_secret_{mode}_key'] or get_secret_key()
+        return company[f'stripe_secret_{mode}_key'] or get_secret_key()
 
     @api.model
     def _stripe_get_endpoint(self, extra_url=''):
@@ -78,7 +76,7 @@ class StripeIssuing(models.AbstractModel):
         :return: {odoo_field: stripe_field} matching pairs
         :rtype: dict
         """
-        return {'id': 'metadata[odoo_id]'}
+        return {}
 
     @api.model
     def _stripe_required_fields(self):
@@ -111,7 +109,7 @@ class StripeIssuing(models.AbstractModel):
         Hook to extend, used to format the record fields into a payload dictionary understandable by stripe
         :param bool create: In some cases, some fields are only required at the creation and cannot be updated later.
         """
-        return {'metadata[odoo_id]': self.id}
+        return {}
 
     @api.model
     def _stripe_send_data(self):
@@ -170,7 +168,7 @@ class StripeIssuing(models.AbstractModel):
         :return: {odoo_field: odoo_value} or an empty dict if the data is invalid (test data for example)
         rtype: dict[str, any]
         """
-        stripe_id = stripe_data.pop('id')
+        stripe_id = stripe_data.pop('id') if 'id' in stripe_data else ''
         return {'stripe_id': stripe_id, 'company_id': self.env.company.id}
 
     def _stripe_search_object(self, filters=None):
@@ -250,39 +248,3 @@ class StripeIssuing(models.AbstractModel):
         for record in self.filtered('stripe_id'):
             record._stripe_make_request(self._stripe_get_endpoint(record.stripe_id), method='POST', payload={'status': 'inactive'})
         return super().unlink()
-
-    @api.model
-    def _fetch_stripe(self):
-        """ Populate an odoo model from stripe data """
-        self.check_access('create')
-        self.check_access('write')
-        check_active = self.env.context.get('stripe_active_test', True)
-        payload = {'limit': 100}
-        if check_active:
-            payload['status'] = 'active'
-
-        response = self._stripe_make_request(self._stripe_get_endpoint(), method='GET', payload=payload)
-        has_more = response.get('data', [])
-        while has_more:
-            has_more = response.get('has_more', False)
-            raw_fetched_data = response.get('data', [])
-            payload.update({'starting_after': raw_fetched_data[-1]['id']})
-
-            fetched_data = {row['id']: row for row in raw_fetched_data}
-            stripe_ids_in_process = set(fetched_data.keys())
-            existing_records = self.env[self._name].search([('stripe_id', 'in', tuple(stripe_ids_in_process))])
-            non_existing_record_ids = stripe_ids_in_process - set(existing_records)
-
-            if existing_records:
-                existing_records._update_from_stripe(fetched_data)
-
-            if non_existing_record_ids:
-                create_vals = [
-                    {'stripe_id': non_existing_record_id, **fetched_data[non_existing_record_id]}
-                    for non_existing_record_id in non_existing_record_ids
-                ]
-                self.env[self._name]._create_from_stripe(create_vals)
-
-            # Continue to browse if necessary
-            if has_more:
-                response = self._stripe_make_request(self._stripe_get_endpoint(), method='GET', payload=payload)

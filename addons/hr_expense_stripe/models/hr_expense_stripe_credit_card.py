@@ -49,6 +49,7 @@ class HrExpenseStripeCreditCard(models.Model):
         default='inactive',
         required=True,
         copy=False,
+        tracking=True,
     )
     card_type = fields.Selection(  # Stripe types
         string="Type of card",
@@ -59,8 +60,8 @@ class HrExpenseStripeCreditCard(models.Model):
         default='virtual',
     )
     last_4 = fields.Char(string='Last 4 digits', copy=False)
-    card_number_public = fields.Char(string='Card Number', compute='_compute_card_number_public', copy=False, size=20)  # TODO JUAL JS for security?
-    cvv_public = fields.Char(string='CVV', default='***', store=False, copy=False, size=3)  # TODO JUAL JS for security?
+    card_number_public = fields.Char(string='Card Number', compute='_compute_card_number_public', copy=False, size=20)
+    cvv_public = fields.Char(string='CVV', default='***', store=False, copy=False, size=3)
     expiration = fields.Char(string='Expiration Date', readonly=True, size=5, copy=False)
     spending_policy_category_ids = fields.Many2many(comodel_name='product.product', domain=[('can_be_expensed', '=', True)])
     spending_policy_limit = fields.Json(string='Spending Policy Limit', default=_default_spending_policy_limit, store=True)
@@ -72,7 +73,6 @@ class HrExpenseStripeCreditCard(models.Model):
     cardholder_first_name = fields.Char(related='cardholder_id.private_first_name', string='Cardholder First Name', readonly=False)
     cardholder_last_name = fields.Char(related='cardholder_id.private_last_name', string='Cardholder Last Name', readonly=False)
     country_code = fields.Char(comodel_name='res.country', related='company_id.country_code')
-
 
     # Stripe object additional fields
     cancellation_reason = fields.Selection(
@@ -96,18 +96,6 @@ class HrExpenseStripeCreditCard(models.Model):
             card.card_number_public = f'**** **** **** {card.last_4 or "****"}'
 
     @api.model
-    def _stripe_get_endpoint(self, extra_url=''):
-        # EXTENDS stripe.issuing
-        if isinstance(extra_url, str):
-            extra_url = [extra_url]
-        return super()._stripe_get_endpoint(('cards', *extra_url))
-
-    @api.model
-    def _stripe_get_synchronized_fields(self):
-        # EXTENDS stripe.issuing
-        return {**super()._stripe_get_synchronized_fields(), 'state': 'status'}
-
-    @api.model
     def _convert_stripe_data_to_odoo_vals(self, stripe_data):
         # EXTENDS stripe.issuing
         res = super()._convert_stripe_data_to_odoo_vals(stripe_data)
@@ -128,63 +116,29 @@ class HrExpenseStripeCreditCard(models.Model):
         })
         return res
 
-    def _stripe_build_object(self, create=False):
-        # EXTENDS stripe.issuing
-        self.ensure_one()
-        stripe_object = super()._stripe_build_object(create)
-
-        if create:
-            cardholder_id = self.cardholder_id._stripe_fetch_id()
-            if cardholder_id:
-                if not self.cardholder_id.can_use_stripe_cards:
-                    self.cardholder_id.can_use_stripe_cards = True
-            else:
-                self.cardholder_id.can_use_stripe_cards = True
-                self.cardholder_id._stripe_send_data()
-            stripe_object.update({
-                'currency': (self.currency_id.name or 'EUR').lower(),
-                'type': self.card_type,
-                'cardholder': self.cardholder_id.stripe_id,
-            })
-        stripe_object = {key: value for key, value in stripe_object.items() if value not in {False, None}}
-        self._validate_stripe_object_requirements(stripe_object)
-        return stripe_object
-
-    def _stripe_send_data(self):
-        stripe_data_per_card_id = super()._stripe_send_data()
-        for card in self:
-            stripe_data = stripe_data_per_card_id[card.id]
-            new_values = {}
-            if not card.last_4:  # Placeholder value
-                new_values['last_4'] = stripe_data.get('last4')
-            if stripe_data.get('exp_month') and stripe_data.get('exp_year'):
-                new_values['expiration'] = f'{stripe_data["exp_month"]:0>2}/{str(stripe_data["exp_year"])[2:]}'
-            card.write({field: value for field, value in new_values.items() if value is not None})
-
-    def _stripe_search_filters(self):
-        # EXTENDS stripe.issuing
-        return {**super()._stripe_search_filters(), 'type': self.card_type, 'last4': self.last_4}
-
     def _create_from_stripe(self, vals):
         # OVERRIDDE stripe.issuing
         create_vals = []
         for record_data in vals:
-            if record_data['livemode'] == (self._get_stripe_mode() == 'live'):
-                cardholder_data = record_data['cardholder']
-                cardholder = self.env['hr.employee'].search(
-                    [
-                        '|', ('stripe_id', '=', cardholder_data['id']),
-                             '&', ('stripe_id', '=', False),
-                                  '|', ('email', '=', cardholder_data['email']), ('work_email', '=', cardholder_data['email']),
-                    ], limit=1
-                )
-                if not cardholder:
-                    cardholder = self.env['hr.employee']._create_from_stripe([{cardholder_data['id']: cardholder_data}])
-                if cardholder:  # Not created if invalid
-                    create_data = self._convert_stripe_data_to_odoo_vals(record_data)
-                    create_data['cardholder_id'] = cardholder.id
-                    if create_data:  # Skip impossible imports
-                        create_vals.append(create_data)
+            if record_data['livemode'] != (self._get_stripe_mode() == 'live'):
+                raise ValidationError(_(
+                    "The stripe data received is not in the same mode as the company. Are you sending test data to a live company?"
+                ))
+            cardholder_data = record_data['cardholder']
+            cardholder = self.env['hr.employee'].search(
+                [
+                    '|', ('stripe_id', '=', cardholder_data['id']),
+                         '&', ('stripe_id', '=', False),
+                              '|', ('email', '=', cardholder_data['email']), ('work_email', '=', cardholder_data['email']),
+                ], limit=1
+            )
+            if not cardholder:
+                cardholder = self.env['hr.employee']._create_from_stripe([{cardholder_data['id']: cardholder_data}])
+            if cardholder:  # Not created if invalid
+                create_data = self._convert_stripe_data_to_odoo_vals(record_data)
+                create_data['cardholder_id'] = cardholder.id
+                if create_data:  # Skip impossible imports
+                    create_vals.append(create_data)
         new_records = self.create(create_vals)
         return new_records
 
@@ -192,35 +146,34 @@ class HrExpenseStripeCreditCard(models.Model):
         # OVERRIDE stripe.issuing
         for record in self:
             record_data_raw = vals.get(record.stripe_id, {})
-            if record_data_raw:
-                record_data = self._convert_stripe_data_to_odoo_vals(record_data_raw)
-            else:
-                continue
-            if record_data_raw['livemode'] == (self._get_stripe_mode() == 'live'):
-                cardholder = self.env['hr.employee'].search(
-                    [
-                        ('company_id', '=', self.env.company.id),
-                        '|', ('stripe_id', '=', record_data_raw['cardholder']['id']),
-                             '&',('stripe_id', '=', False), ('email', '=', record_data_raw['cardholder']['email']),
-                    ], limit=1
-                )
-                if not cardholder:
-                    continue  # Else it isn't a valid cardholder so we don't care about them
-                if not cardholder.stripe_id:
-                    cardholder.can_use_stripe_cards = True
-                    cardholder._stripe_send_data()
-                record_data['cardholder_id'] = cardholder.id
-                record.write(record_data)
+            if not record_data_raw:
+                raise ValidationError(_("The stripe data received is invalid"))
+
+            if record_data_raw['livemode'] != (self._get_stripe_mode() == 'live'):
+                raise ValidationError(_(
+                    "The stripe data received is not in the same mode as the company. Are you sending test data to a live company?"
+                ))
+            record_data = self._convert_stripe_data_to_odoo_vals(record_data_raw)
+            cardholder = self.env['hr.employee'].search(
+                [
+                    ('company_id', '=', self.env.company.id),
+                    '|', ('stripe_id', '=', record_data_raw['cardholder']['id']),
+                         '&',('stripe_id', '=', False), ('work_email', '=', record_data_raw['cardholder']['email']),
+                ], limit=1
+            )
+            if not cardholder:
+                raise ValidationError(_("The stripe data received is invalid, cannot find the cardholder in the employees"))
+            if not cardholder.stripe_id:
+                cardholder.can_use_stripe_cards = True
+                cardholder.stripe_id = record_data_raw['cardholder']['id']
+            record_data['cardholder_id'] = cardholder.id
+            record.write(record_data)
 
     @api.constrains('company_id')
     def _check_company_id(self):
         for card in self:
             if not card.requires_stripe_sync:
                 raise ValidationError(_("The Stripe issuing account isn't properly set, please connect you to Stripe in the config"))
-
-    def action_activate(self):
-        for record in self:
-            record.state = 'active'
 
     def _can_pay_amount(self, amount, merchant_data):
         self.ensure_one()

@@ -17,7 +17,7 @@ STRIPE_VALID_JOURNAL_CURRENCIES = {
     'GB': 'GBP',
 }
 
-WEBHOOK_HANDLED = {
+HANDLED_WEBHOOK_EVENTS = {
     'issuing_authorization.request',
     'issuing_transaction.created',
     'issuing_card.created',

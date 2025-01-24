@@ -1,14 +1,16 @@
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
+
 
 class HrEmployee(models.Model):
     _name = 'hr.employee'
     _inherit = ['hr.employee', 'stripe.issuing']
 
-    private_first_name = fields.Char(string='First Name', compute='_compute_from_name', store=True)
-    private_last_name = fields.Char(string='Last Name', compute='_compute_from_name', store=True)
-    can_use_stripe_cards = fields.Boolean(string="Can use stripe credit cards", copy=False, index='btree_not_null')
-    stripe_credit_card_ids = fields.One2many(comodel_name='hr.expense.stripe.credit.card', inverse_name='cardholder_id')
+    stripe_id = fields.Char(string='Stripe ID', readonly=True, copy=False, index='trigram', groups="hr.group_hr_user")
+    private_first_name = fields.Char(string='First Name', compute='_compute_from_name', store=True, groups="hr.group_hr_user")
+    private_last_name = fields.Char(string='Last Name', compute='_compute_from_name', store=True, groups="hr.group_hr_user")
+    can_use_stripe_cards = fields.Boolean(string="Can use stripe credit cards", copy=False, index='btree_not_null', groups="hr.group_hr_user")
+    stripe_credit_card_ids = fields.One2many(comodel_name='hr.expense.stripe.credit.card', inverse_name='cardholder_id', groups="hr.group_hr_user")
 
     _can_use_stripe_cards = models.Constraint(
         definition='CHECK(can_use_stripe_cards != TRUE OR (can_use_stripe_cards = TRUE AND user_id IS NOT NULL))',
@@ -39,6 +41,7 @@ class HrEmployee(models.Model):
     def _stripe_get_synchronized_fields(self):
         return {
             **super()._stripe_get_synchronized_fields(),
+            'id': 'metadata[odoo_id]',
             'active': 'status',
             'mobile_phone': 'phone_number',
             'private_first_name': 'individual[first_name]',
@@ -90,17 +93,23 @@ class HrEmployee(models.Model):
         # Doesn't create a record from stripe but tries to match it without the stripe_id
         cardholder_ids = []
         for record_data in vals:
-            if record_data['livemode'] == (self._get_stripe_mode() == 'live'):
-                stripe_id = record_data['stripe_id']
-                cardholder = self.env['hr.employee'].search(
-                    [('stripe_id', '=', False), ('email', '=', record_data['email'])],
-                    limit=1,
-                )
-                if not cardholder:
-                    continue
-                if cardholder:
-                    cardholder_ids.append(cardholder.id)
-                    cardholder.write({'stripe_id': stripe_id, 'can_use_stripe_cards': True})
+            if record_data['livemode'] != (self._get_stripe_mode() == 'live'):
+                raise ValidationError(_(
+                    "The stripe data received is not in the same mode as the company. Are you sending test data to a live company?"
+                ))
+            stripe_id = record_data['stripe_id']
+            cardholder = self.env['hr.employee'].search(
+                ['|', ('stripe_id', '=', stripe_id), '&', ('stripe_id', '=', False), ('email', '=', record_data['email'])],
+                limit=1,
+            )
+            if not cardholder:
+                continue
+            if cardholder:
+                cardholder_ids.append(cardholder.id)
+                new_vals = {'stripe_id': stripe_id, 'can_use_stripe_cards': True}
+                if not cardholder.mobile_phone:
+                    new_vals['mobile_phone'] = record_data['phone_number']
+                cardholder.write(new_vals)
         return self.env['hr.employee'].browse(cardholder_ids)
 
     def _stripe_build_object(self, create=False):
@@ -123,6 +132,7 @@ class HrEmployee(models.Model):
             'individual[first_name]': self.private_first_name,
             'individual[last_name]': self.private_last_name,
             'status': 'active' if self.active else 'inactive',
+            'metadata[odoo_id]': self.id,
         })
 
         stripe_object = {key: value for key, value in stripe_object.items() if value not in {False, None}}

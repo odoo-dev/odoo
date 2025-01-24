@@ -1,5 +1,6 @@
 from odoo import _, fields, models
-from odoo.exceptions import UserError
+from odoo.addons.hr_expense_stripe.utils import stripe_make_request
+from odoo.exceptions import UserError, ValidationError
 
 
 class ResConfigSettings(models.TransientModel):
@@ -41,13 +42,31 @@ class ResConfigSettings(models.TransientModel):
 
     def action_connect_to_stripe(self):
         self.company_id._connect_to_stripe()
-        self.env['stripe.issuing']._stripe_make_request(endpoint='balance', method='GET')
-        self.env['stripe.issuing']._stripe_make_request(endpoint='balance', method='GET')
+        try:
+            if self.company_id.stripe_mode == 'test':
+                secret_key = self.company_id.stripe_secret_test_key
+            else:
+                secret_key = self.company_id.stripe_secret_live_key
 
-        self.company_id.stripe_issuing_activated = True
+            stripe_make_request(api_key=secret_key, endpoint='balance', method='GET')
+            self.stripe_issuing_activated = True
+            message = _("Connection to Stripe successful.")
+            notification_type = 'info'
 
-    def action_import_from_stripe(self):
-        if not self.stripe_issuing_activated:
-            raise UserError(_("Stripe issuing is not connected."))
-        for model, check_active in (('hr.employee', True), ('hr.expense.stripe.credit.card', False)):
-            self.env[model].with_context(stripe_check_active=check_active)._fetch_stripe()
+        except ValidationError as error:
+            message = error.args[0]
+            notification_type = 'error'
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'message': message,
+                'sticky': False,
+                'type': notification_type,
+                'next': {'type': 'ir.actions.act_window_close'},  # Refresh the form to show the key
+            }
+        }
+
+    def action_stripe_create_webhook(self):
+        return self.company_id._create_webhook()

@@ -6,7 +6,6 @@
         <field name="arch" type="xml">
             <form string="Expenses Stripe Credit Card">
                 <header>
-                    <button string="Activate" class="btn-primary" name="action_activate" type="object" invisible="state != 'inactive'"/>
                     <!-- Statusbar -->
                     <field name="state" widget="statusbar" statusbar_visible="inactive,active" invisible="state == 'canceled'"/>
                     <field name="state" widget="statusbar" statusbar_visible="inactive,active,canceled" invisible="state != 'canceled'"/>
