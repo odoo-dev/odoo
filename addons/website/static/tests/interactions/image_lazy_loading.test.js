@@ -3,7 +3,7 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { advanceTime } from "@odoo/hoot-mock";
 
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
@@ -11,7 +11,6 @@ import { ImageLazyLoading } from "@website/interactions/image_lazy_loading";
 
 setupInteractionWhiteList("website.image_lazy_loading");
 
-describe.current.tags("interaction_dev");
 
 test("images lazy loading removes height then restores it", async () => {
     patchWithCleanup(ImageLazyLoading.prototype, {

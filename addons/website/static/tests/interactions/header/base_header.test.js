@@ -3,7 +3,7 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 
 import {
     getTemplateWithoutHideOnScroll,
@@ -11,7 +11,6 @@ import {
 
 setupInteractionWhiteList("website.header_standard");
 
-describe.current.tags("interaction_dev");
 
 test("header_standard is started when there is an element header.o_header_standard", async () => {
     const { core } = await startInteractions(getTemplateWithoutHideOnScroll("o_header_standard"));

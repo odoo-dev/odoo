@@ -3,12 +3,11 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { animationFrame, queryAll, queryFirst } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.text_highlight");
 
-describe.current.tags("interaction_dev");
 
 const highlightTemplate = `
     <p>

@@ -3,14 +3,13 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { hover, leave } from "@odoo/hoot-dom";
 
 import { switchToEditMode } from "../../helpers";
 
 setupInteractionWhiteList("website.hoverable_dropdown");
 
-describe.current.tags("interaction_dev");
 
 test.tags("desktop")("[EDIT] onMouseLeave doesn't work in edit mode", async () => {
     const { core } = await startInteractions(`

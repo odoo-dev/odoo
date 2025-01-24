@@ -3,7 +3,7 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, getFixture, test } from "@odoo/hoot";
+import { expect, getFixture, test } from "@odoo/hoot";
 import { animationFrame, click, queryOne } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
@@ -11,7 +11,6 @@ import { onceAllImagesLoaded } from "@website/utils/images";
 
 setupInteractionWhiteList("website.gallery_slider");
 
-describe.current.tags("interaction_dev");
 
 const SLIDE_DURATION = 1000;
 

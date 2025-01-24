@@ -3,12 +3,11 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, getFixture, test } from "@odoo/hoot";
+import { expect, getFixture, test } from "@odoo/hoot";
 import { manuallyDispatchProgrammaticEvent, queryOne, queryRect, scroll } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.parallax");
 
-describe.current.tags("interaction_dev");
 
 const getTemplate = function (options = {}) {
     const speed = options.speed || 0;

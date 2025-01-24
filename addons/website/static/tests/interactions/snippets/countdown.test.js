@@ -3,13 +3,12 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryAll, queryOne } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
 setupInteractionWhiteList("website.countdown");
 
-describe.current.tags("interaction_dev");
 
 const getTemplate = function (options = {}) {
     return `

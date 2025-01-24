@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import {
     startInteractions,
     setupInteractionWhiteList,
@@ -6,7 +6,6 @@ import {
 import { MockServer, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { switchToEditMode } from "../../helpers";
 
-describe.current.tags("interaction_dev");
 
 const formXml = `
     <div id="wrapwrap">

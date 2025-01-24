@@ -3,12 +3,11 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, getFixture, test } from "@odoo/hoot";
+import { expect, getFixture, test } from "@odoo/hoot";
 import { manuallyDispatchProgrammaticEvent, queryOne, queryRect, scroll } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.bottom_fixed_element");
 
-describe.current.tags("interaction_dev");
 
 const scrollTo = async function (el, scrollTarget, bottomFixedElement) {
     // Simulate the scroll event

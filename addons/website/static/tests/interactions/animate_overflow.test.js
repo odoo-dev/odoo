@@ -3,12 +3,11 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { manuallyDispatchProgrammaticEvent, queryOne } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.animate_overflow");
 
-describe.current.tags("interaction_dev");
 
 test("animate_overflow adds class during animations", async () => {
     const { core } = await startInteractions(`

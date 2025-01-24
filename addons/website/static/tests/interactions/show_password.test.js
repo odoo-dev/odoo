@@ -3,12 +3,11 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { pointerDown, pointerUp, queryOne } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.show_password");
 
-describe.current.tags("interaction_dev");
 
 const template = `
     <div class="input-group">

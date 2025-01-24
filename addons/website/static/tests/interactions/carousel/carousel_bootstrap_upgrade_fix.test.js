@@ -3,13 +3,12 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { click, queryOne } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
 setupInteractionWhiteList("website.carousel_bootstrap_upgrade_fix");
 
-describe.current.tags("interaction_dev");
 
 test("carousel_bootstrap_upgrade_fix is tagged while sliding", async () => {
     const { core } = await startInteractions(`

@@ -3,13 +3,12 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { animationFrame, click, press, queryAll } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
 setupInteractionWhiteList("website.gallery");
 
-describe.current.tags("interaction_dev");
 
 // TODO Obtain rendering from `website.s_images_wall` template ?
 const defaultGallery = `

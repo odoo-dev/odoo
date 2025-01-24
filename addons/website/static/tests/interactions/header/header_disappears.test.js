@@ -3,7 +3,7 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryOne } from "@odoo/hoot-dom";
 
 import {
@@ -16,7 +16,6 @@ import {
 
 setupInteractionWhiteList("website.header_disappears");
 
-describe.current.tags("interaction_dev");
 
 test("header_disappears is started when there is an element header.o_header_disappears", async () => {
     const { core } = await startInteractions(getTemplateWithoutHideOnScroll("o_header_disappears"));

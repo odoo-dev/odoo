@@ -3,7 +3,7 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryFirst, queryOne } from "@odoo/hoot-dom";
 
 import { setupTest, simpleScroll, doubleScroll } from "./helpers";
@@ -16,7 +16,6 @@ setupInteractionWhiteList([
     "website.faq_horizontal",
 ]);
 
-describe.current.tags("interaction_dev");
 
 const getTemplate = function (headerType) {
     return `

@@ -4,7 +4,7 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { animationFrame, click, queryAll, queryOne, scroll } from "@odoo/hoot-dom";
 
 import { setupTest, simpleScroll, doubleScroll } from "./helpers";
@@ -17,7 +17,6 @@ setupInteractionWhiteList([
     "website.table_of_content",
 ]);
 
-describe.current.tags("interaction_dev");
 
 // TODO Maybe recover from `website.s_table_of_content`.
 const tableTemplate = `

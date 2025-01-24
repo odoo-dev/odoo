@@ -3,12 +3,11 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryAll } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.multirange_input");
 
-describe.current.tags("interaction_dev");
 
 test("multirange_input lib gets initialised", async () => {
     document.querySelector("html").setAttribute("lang", "en_US");

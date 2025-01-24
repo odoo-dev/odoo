@@ -3,7 +3,7 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryOne } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 import { escape } from "@web/core/utils/strings";
@@ -12,7 +12,6 @@ import { Chart } from "@website/snippets/s_chart/chart";
 
 setupInteractionWhiteList("website.chart");
 
-describe.current.tags("interaction_dev");
 
 patch(Chart.prototype, {
     setup() {

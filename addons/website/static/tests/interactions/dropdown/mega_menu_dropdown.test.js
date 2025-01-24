@@ -3,12 +3,11 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { hover, pointerDown, queryFirst } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.mega_menu_dropdown");
 
-describe.current.tags("interaction_dev");
 
 const getTemplate = function (options = {}) {
     const contentInDesktop = options.contentInDesktop || true;

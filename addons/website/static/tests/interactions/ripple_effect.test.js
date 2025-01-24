@@ -3,13 +3,12 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { click, queryFirst } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
 setupInteractionWhiteList("website.ripple_effect");
 
-describe.current.tags("interaction_dev");
 
 test("ripple_effect introduces an element on click", async () => {
     const { core } = await startInteractions(`

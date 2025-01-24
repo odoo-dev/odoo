@@ -3,7 +3,7 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { animationFrame, click, queryAll, queryOne } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
@@ -26,7 +26,6 @@ registry
 
 setupInteractionWhiteList(["website.dynamic_snippet_carousel", "website.test_dynamic_carousel_item"]);
 
-describe.current.tags("interaction_dev");
 
 const testTemplate = `
     <div id="wrapwrap">

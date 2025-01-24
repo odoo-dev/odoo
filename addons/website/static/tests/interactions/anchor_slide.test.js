@@ -4,13 +4,12 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { animationFrame, click, queryOne } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
 setupInteractionWhiteList("website.anchor_slide");
 
-describe.current.tags("interaction_dev");
 
 test("anchor_slide does nothing if there is no href", async () => {
     const { core } = await startInteractions(`

@@ -3,7 +3,7 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryAll } from "@odoo/hoot-dom";
 
 import { onRpc } from "@web/../tests/web_test_helpers";
@@ -24,7 +24,6 @@ registry
 
 setupInteractionWhiteList(["website.dynamic_snippet", "website.test_dynamic_item"]);
 
-describe.current.tags("interaction_dev");
 
 test("dynamic snippet loads items and displays them through template", async () => {
     onRpc("/website/snippet/filters", async (args) => {

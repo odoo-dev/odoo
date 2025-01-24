@@ -3,12 +3,11 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { animationFrame, click, queryOne, scroll } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.animation");
 
-describe.current.tags("interaction_dev");
 
 test("onAppearance animation starts once visible", async () => {
     const { core } = await startInteractions(`

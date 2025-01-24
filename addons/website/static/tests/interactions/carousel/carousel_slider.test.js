@@ -3,12 +3,11 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryAll } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.carousel_slider");
 
-describe.current.tags("interaction_dev");
 
 test("carousel_slider updates min height of carousel items", async () => {
     const { core } = await startInteractions(`

@@ -4,13 +4,12 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { animationFrame, click, queryAll } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
 setupInteractionWhiteList("website.scroll_button");
 
-describe.current.tags("interaction_dev");
 
 test("scroll button does nothing if there is o_scroll_button", async () => {
     const { core } = await startInteractions(`<div id="wrapwrap"></div>`);

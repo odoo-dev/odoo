@@ -3,12 +3,11 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryOne } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.zoomed_background_shape");
 
-describe.current.tags("interaction_dev");
 
 test("zoomed_background_shape is not needed without zoom", async () => {
     const { core } = await startInteractions(`

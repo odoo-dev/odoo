@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 
 import {
     startInteractions,
@@ -6,7 +6,6 @@ import {
 } from "@web/../tests/public/helpers";
 
 setupInteractionWhiteList("website.header_top");
-describe.current.tags("interaction_dev");
 
 const headerTemplate = `<header id="top"></header>`;
 

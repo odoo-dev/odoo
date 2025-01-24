@@ -3,7 +3,7 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { hover, queryOne } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
@@ -12,7 +12,6 @@ import { onceAllImagesLoaded } from "@website/utils/images";
 
 setupInteractionWhiteList("website.image_shape_hover_effect");
 
-describe.current.tags("interaction_dev");
 
 test.tags("desktop")("image_shape_hover_effect changes image on enter & leave", async () => {
     patchWithCleanup(Image.prototype, {

@@ -3,12 +3,11 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { hover, leave } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.hoverable_dropdown");
 
-describe.current.tags("interaction_dev");
 
 const dropdownTemplate = `
     <header class="o_hoverable_dropdown" style="display: flex; height: 50px; background-color: #CCFFCC;">

@@ -3,14 +3,13 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { manuallyDispatchProgrammaticEvent, queryFirst, queryOne } from "@odoo/hoot-dom";
 
 import { switchToEditMode } from "../../helpers";
 
 setupInteractionWhiteList("website.carousel_slider");
 
-describe.current.tags("interaction_dev");
 
 test("[EDIT] carousel_slider prevents ride", async () => {
     const { core } = await startInteractions(`

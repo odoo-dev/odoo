@@ -3,7 +3,7 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { click, fill, queryOne } from "@odoo/hoot-dom";
 import { advanceTime, Deferred } from "@odoo/hoot-mock";
 
@@ -11,7 +11,6 @@ import { MockServer, onRpc, patchWithCleanup } from "@web/../tests/web_test_help
 
 setupInteractionWhiteList(["website.form", "website.post_link"]);
 
-describe.current.tags("interaction_dev");
 
 function checkField(inputEl, isVisible, hasError) {
     const fieldEl = inputEl.closest(".s_website_form_field");

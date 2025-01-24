@@ -3,7 +3,7 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { click, press, queryAll, queryOne } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 
@@ -11,7 +11,6 @@ import { onRpc } from "@web/../tests/web_test_helpers";
 
 setupInteractionWhiteList("website.search_bar");
 
-describe.current.tags("interaction_dev");
 
 const searchTemplate = `
     <form method="get" class="o_searchbar_form s_searchbar_input" action="/website/search" data-snippet="s_searchbar_input">

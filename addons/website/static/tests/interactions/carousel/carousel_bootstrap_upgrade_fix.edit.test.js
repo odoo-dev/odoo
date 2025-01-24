@@ -3,14 +3,13 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryOne } from "@odoo/hoot-dom";
 
 import { switchToEditMode } from "../../helpers";
 
 setupInteractionWhiteList("website.carousel_bootstrap_upgrade_fix");
 
-describe.current.tags("interaction_dev");
 
 test("[EDIT] carousel_bootstrap_upgrade_fix prevents ride", async () => {
     const { core } = await startInteractions(`

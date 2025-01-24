@@ -23,7 +23,6 @@ import { defineStyle } from "@web/../tests/web_test_helpers";
 
 setupInteractionWhiteList("website.popup");
 
-describe.current.tags("interaction_dev");
 
 /**
  * Remove the CSS transitions because Bootstrap transitions don't work with Hoot.

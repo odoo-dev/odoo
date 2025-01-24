@@ -3,14 +3,13 @@ import {
     setupInteractionWhiteList,
 } from "@web/../tests/public/helpers";
 
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 
 import { switchToEditMode } from "../../helpers";
 import { queryAll } from "@odoo/hoot-dom";
 
 setupInteractionWhiteList("website.carousel_section_slider");
 
-describe.current.tags("interaction_dev");
 
 test("carousel_section_slider resets slide to attributes", async () => {
     const { core } = await startInteractions(`
