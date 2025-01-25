@@ -6,7 +6,6 @@ from configparser import ConfigParser
 from os import pardir
 from os.path import isfile, join as opj
 
-import odoo
 from odoo import models, tools
 
 

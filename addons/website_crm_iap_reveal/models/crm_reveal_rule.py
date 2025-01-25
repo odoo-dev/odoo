@@ -7,7 +7,6 @@ import logging
 import re
 from dateutil.relativedelta import relativedelta
 
-import odoo
 from odoo import api, fields, models, tools, _
 from odoo.addons.iap.tools import iap_tools
 from odoo.addons.crm.models import crm_stage

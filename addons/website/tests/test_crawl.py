@@ -7,14 +7,13 @@ import time
 import lxml.html
 from werkzeug import urls
 
-import odoo
-
+from odoo.tests import tagged
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo
 
 _logger = logging.getLogger(__name__)
 
 
-@odoo.tests.common.tagged('post_install', '-at_install', 'crawl')
+@tagged('post_install', '-at_install', 'crawl')
 class Crawler(HttpCaseWithUserDemo):
     """ Test suite crawling an Odoo CMS instance and checking that all
     internal links lead to a 200 response.

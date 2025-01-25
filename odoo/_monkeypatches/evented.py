@@ -4,7 +4,7 @@ Running mode flags (gevent, prefork)
 This should be imported as early as possible.
 It will initialize the `odoo.evented` variable.
 """
-import odoo
+import odoo  # to set evented
 import sys
 
 odoo.evented = False

@@ -6,7 +6,7 @@ from contextlib import contextmanager
 import psycopg2
 import psycopg2.errors
 
-import odoo
+from odoo import api
 from odoo.exceptions import UserError
 from odoo.modules.registry import Registry
 from odoo.tests import common
@@ -23,7 +23,7 @@ def environment():
     """
     registry = Registry(common.get_db_name())
     with registry.cursor() as cr:
-        yield odoo.api.Environment(cr, ADMIN_USER_ID, {})
+        yield api.Environment(cr, ADMIN_USER_ID, {})
 
 
 def drop_sequence(code):

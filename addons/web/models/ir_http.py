@@ -4,8 +4,7 @@ import hashlib
 import json
 import warnings
 
-import odoo
-from odoo import api, models, fields
+from odoo import api, models, fields, http, service
 from odoo.http import request, DEFAULT_MAX_CONTENT_LENGTH
 from odoo.tools import config
 from odoo.tools.misc import str2bool
@@ -78,7 +77,7 @@ class IrHttp(models.AbstractModel):
     def session_info(self):
         user = self.env.user
         session_uid = request.session.uid
-        version_info = odoo.service.common.exp_version()
+        version_info = service.common.exp_version()
 
         if session_uid:
             user_context = dict(self.env['res.users'].context_get())
@@ -92,7 +91,7 @@ class IrHttp(models.AbstractModel):
             'web.max_file_upload_size',
             default=DEFAULT_MAX_CONTENT_LENGTH,
         ))
-        mods = odoo.tools.config['server_wide_modules']
+        mods = config['server_wide_modules']
         if request.db:
             mods = list(request.registry._init_modules) + mods
         is_internal_user = user._is_internal()
@@ -195,7 +194,7 @@ class IrHttp(models.AbstractModel):
         if request.session.debug:
             session_info['bundle_params']['debug'] = request.session.debug
         if session_uid:
-            version_info = odoo.service.common.exp_version()
+            version_info = service.common.exp_version()
             session_info.update({
                 'server_version': version_info.get('server_version'),
                 'server_version_info': version_info.get('server_version_info')

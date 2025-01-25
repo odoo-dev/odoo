@@ -5,7 +5,6 @@ import json
 
 from werkzeug.urls import url_encode
 
-import odoo
 import odoo.tests
 from odoo import http
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo

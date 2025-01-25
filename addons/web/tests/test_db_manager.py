@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
@@ -10,7 +9,7 @@ from unittest.mock import patch
 
 import requests
 
-import odoo
+from odoo import http, service
 from odoo.modules.registry import Registry
 from odoo.tests.common import BaseCase, HttpCase, tagged
 from odoo.tools import config
@@ -63,7 +62,7 @@ class TestDatabaseOperations(BaseCase):
         )
 
     def list_dbs_filtered(self):
-        return set(db for db in odoo.service.db.list_dbs(True) if re.match(config['dbfilter'], db))
+        return set(db for db in service.db.list_dbs(True) if re.match(config['dbfilter'], db))
 
     def url(self, path):
         return HttpCase.base_url() + path
@@ -81,7 +80,7 @@ class TestDatabaseOperations(BaseCase):
 
     def test_database_creation(self):
         # check verify_admin_password patch
-        self.assertTrue(odoo.tools.config.verify_admin_password(self.password))
+        self.assertTrue(config.verify_admin_password(self.password))
 
         # create a database
         test_db_name = self.db_name + '-test-database-creation'
@@ -148,7 +147,7 @@ class TestDatabaseOperations(BaseCase):
 
         # upload the backup under a new name (create a duplicate)
         with self.subTest(DEFAULT_MAX_CONTENT_LENGTH=None), \
-             patch.object(odoo.http, 'DEFAULT_MAX_CONTENT_LENGTH', None):
+             patch.object(http, 'DEFAULT_MAX_CONTENT_LENGTH', None):
             backup_file.seek(0)
             self.session.post(
                 self.url('/web/database/restore'),
@@ -169,7 +168,7 @@ class TestDatabaseOperations(BaseCase):
         # too large under the default size limit, the default size limit
         # shouldn't apply to /web/database URLs
         with self.subTest(DEFAULT_MAX_CONTENT_LENGTH=1024), \
-             patch.object(odoo.http, 'DEFAULT_MAX_CONTENT_LENGTH', 1024):
+             patch.object(http, 'DEFAULT_MAX_CONTENT_LENGTH', 1024):
             backup_file.seek(0)
             self.session.post(
                 self.url('/web/database/restore'),
@@ -214,10 +213,10 @@ class TestDatabaseOperations(BaseCase):
         close_db.assert_called_once_with(test_db_name)
 
         # simulate that some customers were connected to that dropped db
-        session_store = odoo.http.root.session_store
+        session_store = http.root.session_store
         session = session_store.new()
-        session.update(odoo.http.get_default_session(), db=test_db_name)
-        session.context['lang'] = odoo.http.DEFAULT_LANG
+        session.update(http.get_default_session(), db=test_db_name)
+        session.context['lang'] = http.DEFAULT_LANG
         self.session.cookies['session_id'] = session.sid
 
         # make it possible to inject the registry back

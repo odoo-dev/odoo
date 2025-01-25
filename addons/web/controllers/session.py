@@ -8,7 +8,6 @@ from contextlib import ExitStack
 
 from werkzeug.urls import url_encode
 
-import odoo
 import odoo.modules.registry
 from odoo import http
 from odoo.modules import module

@@ -198,7 +198,7 @@ try:
 except ImportError:
     from .tools._vendor.send_file import send_file as _send_file
 
-import odoo
+from . import api, service
 from .exceptions import UserError, AccessError, AccessDenied
 from .modules import module as module_manager
 from .modules.registry import Registry
@@ -333,7 +333,7 @@ def db_list(force=False, host=None):
     :rtype: List[str]
     """
     try:
-        dbs = odoo.service.db.list_dbs(force)
+        dbs = service.db.list_dbs(force)
     except psycopg2.OperationalError:
         return []
     return db_filter(dbs, host)
@@ -389,9 +389,9 @@ def dispatch_rpc(service_name, method, params):
     :rtype: Any
     """
     rpc_dispatchers = {
-        'common': odoo.service.common.dispatch,
-        'db': odoo.service.db.dispatch,
-        'object': odoo.service.model.dispatch,
+        'common': service.common.dispatch,
+        'db': service.db.dispatch,
+        'object': service.model.dispatch,
     }
 
     with borrow_request():
@@ -1709,6 +1709,7 @@ class Request:
         nothing.
         """
         if self.session.get('profile_session') and self.db:
+            import odoo  # for evented
             if self.session['profile_expiration'] < str(datetime.now()):
                 # avoid having session profiling for too long if user forgets to disable profiling
                 self.session['profile_session'] = None
@@ -1934,7 +1935,7 @@ class Request:
         try:
             self.registry, cr_readonly = self._open_registry()
             threading.current_thread().dbname = self.registry.db_name
-            self.env = odoo.api.Environment(cr_readonly, self.session.uid, self.session.context)
+            self.env = api.Environment(cr_readonly, self.session.uid, self.session.context)
             try:
                 rule, args = self.registry['ir.http']._match(self.httprequest.path)
             except NotFound as not_found_exc:
@@ -2312,6 +2313,7 @@ class Application:
         Map module names to their absolute ``static`` path on the file
         system.
         """
+        import odoo.addons
         mod2path = {}
         for addons_path in odoo.addons.__path__:
             for module in os.listdir(addons_path):
@@ -2368,7 +2370,7 @@ class Application:
 
     @lazy_property
     def session_store(self):
-        path = odoo.tools.config.session_dir
+        path = config.session_dir
         _logger.debug('HTTP sessions stored in: %s', path)
         return FilesystemSessionStore(path, session_class=Session, renew_missing=True)
 
@@ -2430,7 +2432,7 @@ class Application:
             del current_thread.uid
         thread_local.rpc_model_method = ''
 
-        if odoo.tools.config['proxy_mode'] and environ.get("HTTP_X_FORWARDED_HOST"):
+        if config['proxy_mode'] and environ.get("HTTP_X_FORWARDED_HOST"):
             # The ProxyFix middleware has a side effect of updating the
             # environ, see https://github.com/pallets/werkzeug/pull/2184
             def fake_app(environ, start_response):

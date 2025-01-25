@@ -2,8 +2,6 @@
 
 from unittest.mock import patch
 
-import odoo
-
 from odoo import SUPERUSER_ID, fields
 from odoo.tests import HttpCase, tagged
 
@@ -31,7 +29,7 @@ class TestWebsiteSaleMail(HttpCase):
         })
 
         # we override unlink because we don't want the email to be auto deleted
-        MailMail = odoo.addons.mail.models.mail_mail.MailMail
+        from odoo.addons.mail.models.mail_mail import MailMail
         # as we check some link content, avoid mobile doing its link management
         self.env['ir.config_parameter'].sudo().set_param('mail_mobile.disable_redirect_firebase_dynamic_link', True)
 
@@ -59,7 +57,7 @@ class TestWebsiteSaleMails(MailCommon, WebsiteSaleCommon):
 
     def test_salesman_assignation(self):
         self.website.salesperson_id = self.user_admin
-        MailThread = odoo.addons.mail.models.mail_thread.MailThread
+        from odoo.addons.mail.models.mail_thread import MailThread
         base_method = MailThread._message_create
         superuser = self.env['res.users'].browse(SUPERUSER_ID)
 

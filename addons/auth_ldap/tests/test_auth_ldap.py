@@ -2,7 +2,7 @@ import re
 import requests
 from unittest.mock import patch
 
-import odoo
+from odoo import http
 from odoo.modules.registry import Registry, DummyRLock
 from odoo.tests.common import BaseCase, tagged, get_db_name
 
@@ -72,7 +72,7 @@ class TestAuthLDAP(BaseCase):
             )
             res.raise_for_status()
 
-        session = odoo.http.root.session_store.get(res.cookies["session_id"])
+        session = http.root.session_store.get(res.cookies["session_id"])
         self.assertEqual(
             session.sid, res.cookies["session_id"], "A session must exist at this point")
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import time
@@ -6,7 +5,6 @@ from datetime import datetime, timedelta
 from freezegun import freeze_time
 from unittest.mock import patch
 
-import odoo
 from odoo import fields, Command
 from odoo.tests import Form
 from odoo.tests.common import TransactionCase, tagged
@@ -359,8 +357,10 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
             'property_valuation': 'real_time',
         })
 
-        old_action_post = odoo.addons.account.models.account_move.AccountMove.action_post
-        old_create = odoo.models.BaseModel.create
+        from odoo.addons.account.models.account_move import AccountMove
+        from odoo.models import BaseModel
+        old_action_post = AccountMove.action_post
+        old_create = BaseModel.create
 
         def new_action_post(self):
             """ Force the creation of tracking values. """

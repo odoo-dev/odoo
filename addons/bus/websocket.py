@@ -25,7 +25,7 @@ from werkzeug.local import LocalStack
 from werkzeug.datastructures import ImmutableMultiDict, MultiDict
 from werkzeug.exceptions import BadRequest, HTTPException, ServiceUnavailable
 
-import odoo
+import odoo  # for evented
 from odoo import api, modules
 from .models.bus import dispatch
 from odoo.http import root, Request, Response, SessionExpiredException, get_default_session

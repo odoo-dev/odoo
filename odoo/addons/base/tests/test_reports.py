@@ -5,7 +5,6 @@ import logging
 from base64 import b64decode
 from unittest import skipIf
 
-import odoo
 import odoo.tests
 
 try:

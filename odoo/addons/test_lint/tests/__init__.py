@@ -9,7 +9,7 @@ from . import test_l10n
 from . import test_manifests
 from . import test_markers
 from . import test_onchange_domains
-from . import test_orm_import
+from . import test_import
 from . import test_override_signatures
 from . import test_routes
 from . import test_i18n

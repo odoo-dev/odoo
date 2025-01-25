@@ -1,14 +1,12 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import odoo
 
 from odoo import Command
 from odoo.addons.point_of_sale.tests.common import TestPoSCommon
-from odoo.tests import Form
+from odoo.tests import Form, tagged
 
 
-@odoo.tests.tagged('post_install', '-at_install')
+@tagged('post_install', '-at_install')
 class TestConfigureShops(TestPoSCommon):
     """ Shops are now configured from the general settings.
         This test suite ensures that changes made in the general settings

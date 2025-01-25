@@ -2,10 +2,10 @@
 
 from unittest.mock import patch
 
-import odoo
 from odoo import Command
 from odoo.tests import tagged
 from odoo.tests.common import HttpCase
+import odoo.addons.mail
 
 
 @tagged('post_install', '-at_install')

@@ -538,9 +538,9 @@ class configmanager:
 
             odoo.tools.config.parse_config(sys.argv[1:])
         """
-        from odoo import modules, netsvc  # noqa: PLC0415
         opt = self._parse_config(args)
         if setup_logging is not False:
+            from odoo import netsvc
             netsvc.init_logger()
             # warn after having done setup, so it has a chance to show up
             # (mostly once this warning is bumped to DeprecationWarning proper)
@@ -554,7 +554,8 @@ class configmanager:
                 )
         self._warn_deprecated_options()
         self._flush_log_and_warn_entries()
-        modules.module.initialize_sys_path()
+        from odoo.modules.module import initialize_sys_path
+        initialize_sys_path()
         return opt
 
     def _parse_config(self, args=None):

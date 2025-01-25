@@ -10,6 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(__file__,'../../../')))
 
 from odoo import api
 from odoo.tools import config, topological_sort, unique
+from odoo.modules.module import initialize_sys_path
 from odoo.modules.registry import Registry
 from odoo.netsvc import init_logger
 from odoo.tests import standalone_tests
@@ -125,7 +126,7 @@ class StandaloneAction(argparse.Action):
 def test_cycle(args):
     """ Test full install/uninstall/reinstall cycle for all modules """
     with Registry(args.database).cursor() as cr:
-        env = odoo.api.Environment(cr, odoo.api.SUPERUSER_ID, {})
+        env = api.Environment(cr, odoo.api.SUPERUSER_ID, {})
 
         def valid(module):
             return not (
@@ -160,7 +161,7 @@ def test_uninstall(args):
     """ Tries to uninstall/reinstall one ore more modules"""
     for module_name in args.uninstall.split(','):
         with Registry(args.database).cursor() as cr:
-            env = odoo.api.Environment(cr, odoo.api.SUPERUSER_ID, {})
+            env = api.Environment(cr, odoo.api.SUPERUSER_ID, {})
             module = env['ir.module.module'].search([('name', '=', module_name)])
             module_id, module_state = module.id, module.state
 
@@ -193,7 +194,7 @@ def test_standalone(args):
     start_time = time.time()
     for index, func in enumerate(funcs, start=1):
         with Registry(args.database).cursor() as cr:
-            env = odoo.api.Environment(cr, odoo.api.SUPERUSER_ID, {})
+            env = api.Environment(cr, odoo.api.SUPERUSER_ID, {})
             _logger.info("Executing standalone script: %s (%d / %d)",
                          func.__name__, index, len(funcs))
             try:
@@ -212,7 +213,7 @@ if __name__ == '__main__':
         config['addons_path'] = args.addons_path + config['addons_path']
         if args.data_dir:
             config['data_dir'] = args.data_dir
-        odoo.modules.module.initialize_sys_path()
+        initialize_sys_path()
 
     init_logger()
     logging.config.dictConfig({

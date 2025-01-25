@@ -6,8 +6,7 @@ from datetime import date, datetime
 from functools import wraps
 from markupsafe import Markup
 
-import odoo
-from odoo import models
+from odoo import fields, models
 from odoo.http import request
 from odoo.tools import groupby
 from odoo.addons.bus.websocket import wsrequest
@@ -36,7 +35,7 @@ def add_guest_to_context(func):
 
     return wrapper
 
-def get_twilio_credentials(env) -> (str, str):
+def get_twilio_credentials(env) -> tuple[str, str]:
     """
     To be overridable if we need to obtain credentials from another source.
     :return: tuple(account_sid: str, auth_token: str)
@@ -206,9 +205,9 @@ class Store:
             if isinstance(val, Store.Relation):
                 val._add_to_store(self, target, key)
             elif isinstance(val, datetime):
-                target[key] = odoo.fields.Datetime.to_string(val)
+                target[key] = fields.Datetime.to_string(val)
             elif isinstance(val, date):
-                target[key] = odoo.fields.Date.to_string(val)
+                target[key] = fields.Date.to_string(val)
             elif isinstance(val, Markup):
                 target[key] = ["markup", val]
             else:

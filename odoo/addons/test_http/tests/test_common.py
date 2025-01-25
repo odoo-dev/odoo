@@ -6,8 +6,7 @@ from unittest.mock import patch
 from werkzeug.datastructures import ResponseCacheControl
 from werkzeug.http import parse_cache_control_header
 
-import odoo
-from odoo.http import Session
+from odoo import http
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo
 from odoo.tools import config, lazy_property
 from odoo.addons.test_http.utils import MemoryGeoipResolver, MemorySessionStore
@@ -20,20 +19,20 @@ class TestHttpBase(HttpCaseWithUserDemo):
     def setUpClass(cls):
         super().setUpClass()
         geoip_resolver = MemoryGeoipResolver()
-        session_store = MemorySessionStore(session_class=Session)
+        session_store = MemorySessionStore(session_class=http.Session)
 
-        lazy_property.reset_all(odoo.http.root)
-        cls.addClassCleanup(lazy_property.reset_all, odoo.http.root)
+        lazy_property.reset_all(http.root)
+        cls.addClassCleanup(lazy_property.reset_all, http.root)
         cls.classPatch(config, 'options', config.options.new_child({
             'server_wide_modules': ['base', 'web', 'rpc', 'test_http']
         }))
-        cls.classPatch(odoo.http.Application, 'session_store', session_store)
-        cls.classPatch(odoo.http.Application, 'geoip_city_db', geoip_resolver)
-        cls.classPatch(odoo.http.Application, 'geoip_country_db', geoip_resolver)
+        cls.classPatch(http.Application, 'session_store', session_store)
+        cls.classPatch(http.Application, 'geoip_city_db', geoip_resolver)
+        cls.classPatch(http.Application, 'geoip_country_db', geoip_resolver)
 
     def setUp(self):
         super().setUp()
-        odoo.http.root.session_store.store.clear()
+        http.root.session_store.store.clear()
 
     def db_url_open(self, url, *args, allow_redirects=False, **kwargs):
         return self.url_open(url, *args, allow_redirects=allow_redirects, **kwargs)

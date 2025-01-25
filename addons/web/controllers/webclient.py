@@ -10,7 +10,6 @@ import werkzeug.utils
 import werkzeug.wrappers
 import werkzeug.wsgi
 
-import odoo
 import odoo.modules.registry
 from odoo import http
 from odoo.modules import get_manifest

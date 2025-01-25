@@ -3,7 +3,6 @@ import collections
 import datetime
 import time
 
-import odoo
 import odoo.tools
 from odoo.addons.base.tests.common import SavepointCaseWithUserDemo
 from odoo.exceptions import AccessDenied, AccessError

@@ -7,7 +7,6 @@ from psycopg2 import IntegrityError, ProgrammingError
 import requests
 from unittest.mock import patch
 
-import odoo
 from odoo.exceptions import UserError, ValidationError, AccessError
 from odoo.tools import mute_logger
 from odoo.tests import common, tagged

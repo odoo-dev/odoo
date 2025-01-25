@@ -3,15 +3,15 @@
 from freezegun import freeze_time
 from unittest.mock import patch
 
-import odoo
 
-from odoo import Command
+from odoo import http, Command
 from odoo.addons.test_http.utils import (
     TEST_IP,
     USER_AGENT_android_chrome,
     USER_AGENT_linux_chrome,
     USER_AGENT_linux_firefox
 )
+from odoo.tools import config
 from .test_common import TestHttpBase
 
 
@@ -44,7 +44,7 @@ class TestDevice(TestHttpBase):
                 'X-Forwarded-Proto': 'https'
             }
         with freeze_time(time), \
-            patch.dict(odoo.tools.config.options, {'proxy_mode': bool(ip)}):
+            patch.dict(config.options, {'proxy_mode': bool(ip)}):
             res = self.url_open(url=endpoint, headers=headers)
         return res
 
@@ -275,7 +275,7 @@ class TestDevice(TestHttpBase):
     def test_detection_no_trace_mechanism(self):
         session = self.authenticate(self.user_admin.login, self.user_admin.login)
         session['_trace_disable'] = True
-        odoo.http.root.session_store.save(session)
+        http.root.session_store.save(session)
         res = self.hit('2024-01-01 08:00:00', '/test_http/greeting-public?readonly=0')
         self.assertEqual(res.status_code, 200)
         devices, logs = self.get_devices_logs(self.user_admin)

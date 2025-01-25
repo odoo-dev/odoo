@@ -2,15 +2,14 @@ import unittest
 from os import name as os_name
 from unittest.mock import call, patch
 
-import odoo
 from odoo.tests import TransactionCase
-from odoo.tools import file_path, file_open, file_open_temporary_directory
+from odoo.tools import config, file_path, file_open, file_open_temporary_directory
 from odoo.tools.config import configmanager
 
 
 EMPTY_CONFIG_PATH = file_path('base/tests/config/empty.conf')
-PROJECT_PATH = odoo.tools.config.root_path.removesuffix('/odoo')
-DEFAULT_DATADIR = odoo.tools.config._default_options['data_dir']
+PROJECT_PATH = config.root_path.removesuffix('/odoo')
+DEFAULT_DATADIR = config._default_options['data_dir']
 
 
 class TestConfigManager(TransactionCase):

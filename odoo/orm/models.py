@@ -934,6 +934,7 @@ class BaseModel(metaclass=MetaModel):
                 if field_name in (None, 'id', '.id'):
                     break
 
+                from odoo.fields import One2many
                 if isinstance(model_fields.get(field_name), One2many):
                     comodel = model_fields[field_name].comodel_name
                     creatable_models.add(comodel)

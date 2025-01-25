@@ -1,11 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import odoo
-
+from odoo.tests import tagged
 from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCommon
 from odoo import Command
 
-@odoo.tests.tagged('post_install_l10n', 'post_install', '-at_install')
+
+@tagged('post_install_l10n', 'post_install', '-at_install')
 class TestPoSSaleL10NBe(TestPointOfSaleHttpCommon):
 
     @classmethod
@@ -97,7 +97,7 @@ class TestPoSSaleL10NBe(TestPointOfSaleHttpCommon):
         self.start_tour("/pos/ui?config_id=%d" % b_pos_config.id, 'test_pos_branch_company_access', login="pos_user")
 
 
-@odoo.tests.tagged('post_install_l10n', 'post_install', '-at_install')
+@tagged('post_install_l10n', 'post_install', '-at_install')
 class TestPoSSaleL10NBeNormalCompany(TestPointOfSaleHttpCommon):
     def test_settle_order_can_invoice(self):
         """This test makes sure that you can invoice a settled order when l10n_be is installed"""

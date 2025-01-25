@@ -2,13 +2,12 @@
 
 from odoo import Command
 
-import odoo
 from odoo.addons.point_of_sale.tests.common import TestPoSCommon
-from odoo.tests import Form
+from odoo.tests import Form, tagged
 from odoo.exceptions import UserError
 
 
-@odoo.tests.tagged('post_install', '-at_install')
+@tagged('post_install', '-at_install')
 class TestPoSProductsWithTax(TestPoSCommon):
     """ Test normal configuration PoS selling products with tax
     """

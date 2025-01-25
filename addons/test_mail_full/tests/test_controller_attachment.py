@@ -1,8 +1,8 @@
-import odoo
+from odoo.tests import tagged
 from odoo.addons.mail.tests.common_controllers import MailControllerAttachmentCommon
 
 
-@odoo.tests.tagged("-at_install", "post_install", "mail_controller")
+@tagged("-at_install", "post_install", "mail_controller")
 class TestPortalAttachmentController(MailControllerAttachmentCommon):
 
     def test_attachment_upload_portal(self):

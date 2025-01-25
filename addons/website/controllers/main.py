@@ -19,8 +19,6 @@ from textwrap import shorten
 from werkzeug.exceptions import NotFound
 from xml.etree import ElementTree as ET
 
-import odoo
-
 from odoo import http, models, fields, _
 from odoo.exceptions import AccessError, UserError
 from odoo.http import request, SessionExpiredException
@@ -331,10 +329,11 @@ class Website(Home):
         Module = request.env['ir.module.module'].sudo()
         apps = Module.search([('state', '=', 'installed'), ('application', '=', True)])
         l10n = Module.search([('state', '=', 'installed'), ('name', '=like', 'l10n_%')])
+        from odoo import service
         values = {
             'apps': apps,
             'l10n': l10n,
-            'version': odoo.service.common.exp_version()
+            'version': service.common.exp_version()
         }
         return request.render('website.website_info', values)
 

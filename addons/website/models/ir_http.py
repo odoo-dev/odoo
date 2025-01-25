@@ -11,7 +11,6 @@ import werkzeug
 import werkzeug.routing
 import werkzeug.utils
 
-import odoo
 from odoo import api, models, tools
 from odoo import SUPERUSER_ID
 from odoo.exceptions import AccessError
@@ -295,7 +294,7 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _get_translation_frontend_modules_name(cls):
         mods = super()._get_translation_frontend_modules_name()
-        installed = request.registry._init_modules.union(odoo.tools.config['server_wide_modules'])
+        installed = request.registry._init_modules.union(tools.config['server_wide_modules'])
         return mods + [mod for mod in installed if mod.startswith('website')]
 
     @classmethod

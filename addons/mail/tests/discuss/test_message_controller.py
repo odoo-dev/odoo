@@ -2,7 +2,6 @@
 
 import json
 
-import odoo
 from odoo.tests import tagged, users
 from odoo.tools import mute_logger
 from odoo.addons.base.tests.common import HttpCase, HttpCaseWithUserDemo
@@ -11,7 +10,7 @@ from odoo.http import STATIC_CACHE_LONG
 from odoo import Command, fields
 
 
-@odoo.tests.tagged("-at_install", "post_install", "mail_controller")
+@tagged("-at_install", "post_install", "mail_controller")
 class TestMessageController(HttpCaseWithUserDemo):
     @classmethod
     def setUpClass(cls):

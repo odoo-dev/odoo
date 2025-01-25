@@ -2,14 +2,13 @@
 from datetime import timedelta
 from unittest.mock import patch
 
-import odoo
 from odoo import Command, fields
-from odoo.tests.common import users
+from odoo.tests.common import users, tagged
 from odoo.addons.mail.tests.common import MailCommon
 from odoo.addons.im_livechat.tests.common import TestGetOperatorCommon
 
 
-@odoo.tests.tagged("-at_install", "post_install")
+@tagged("-at_install", "post_install")
 class TestGetOperator(MailCommon, TestGetOperatorCommon):
     def _create_chat(self, livechat, operator, in_call=False):
         channel = self.env["discuss.channel"].create(

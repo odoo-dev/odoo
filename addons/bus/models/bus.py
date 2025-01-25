@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import contextlib
 import datetime
 import json
@@ -10,8 +9,7 @@ import threading
 import time
 from psycopg2 import InterfaceError
 
-import odoo
-from odoo import api, fields, models
+from odoo import api, fields, models, sql_db
 from odoo.service.server import CommonServer
 from odoo.tools import json_default, SQL
 from odoo.tools.constants import GC_UNLINK_LIMIT
@@ -148,7 +146,7 @@ class BusBus(models.Model):
                         "The imbus notification payload was too large, it's been split into %d payloads.",
                         len(payloads),
                     )
-                with odoo.sql_db.db_connect("postgres").cursor() as cr:
+                with sql_db.db_connect("postgres").cursor() as cr:
                     for payload in payloads:
                         cr.execute(
                             SQL(
@@ -229,7 +227,7 @@ class ImDispatch(threading.Thread):
     def loop(self):
         """ Dispatch postgres notifications to the relevant websockets """
         _logger.info("Bus.loop listen imbus on db postgres")
-        with odoo.sql_db.db_connect('postgres').cursor() as cr, \
+        with sql_db.db_connect('postgres').cursor() as cr, \
              selectors.DefaultSelector() as sel:
             cr.execute("listen imbus")
             cr.commit()

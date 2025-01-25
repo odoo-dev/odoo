@@ -5,7 +5,6 @@ from urllib.parse import urljoin, urlsplit
 
 import requests
 
-import odoo
 from odoo.modules.registry import Registry
 from odoo.sql_db import close_db, db_connect
 from odoo.tests import HOST, BaseCase, Like, get_db_name, tagged

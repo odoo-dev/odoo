@@ -28,8 +28,7 @@ from psycopg2.pool import PoolError
 from psycopg2.sql import Composable
 from werkzeug import urls
 
-import odoo
-
+import odoo  # for evented
 from . import tools
 from .release import MIN_PG_VERSION
 from .tools import SQL

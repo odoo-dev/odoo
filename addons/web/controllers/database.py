@@ -8,7 +8,6 @@ import tempfile
 
 from lxml import html
 
-import odoo
 import odoo.modules.registry
 from odoo import http
 from odoo.http import content_disposition, dispatch_rpc, request, Response

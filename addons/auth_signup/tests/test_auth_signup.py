@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from contextlib import contextmanager
 from unittest.mock import patch
 
-import odoo
 from odoo import http
 from odoo.addons.base.tests.common import HttpCaseWithUserPortal, HttpCaseWithUserDemo
 from odoo.exceptions import AccessError, UserError
@@ -55,7 +53,8 @@ class TestAuthSignupFlow(HttpCaseWithUserPortal, HttpCaseWithUserDemo):
         }
 
         # Override unlink to not delete the email if the send works.
-        with patch.object(odoo.addons.mail.models.mail_mail.MailMail, 'unlink', lambda self: None), self.patch_captcha_signup():
+        from odoo.addons.mail.models.mail_mail import MailMail
+        with patch.object(MailMail, 'unlink', lambda self: None), self.patch_captchat_signup():
             # Call the controller
             url_free_signup = self._get_free_signup_url()
             response = self.url_open(url_free_signup, data=payload)

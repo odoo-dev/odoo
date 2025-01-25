@@ -9,7 +9,6 @@ from urllib.parse import urlencode
 from unittest.mock import patch
 from tempfile import TemporaryDirectory
 
-import odoo
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo
 from odoo.http import SESSION_LIFETIME
 from odoo.tools import config, lazy_property, mute_logger

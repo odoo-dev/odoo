@@ -3,7 +3,6 @@
 import logging
 import time
 
-import odoo
 import odoo.tests
 
 from odoo.tests.common import HttpCase

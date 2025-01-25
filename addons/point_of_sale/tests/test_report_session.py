@@ -1,9 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-import odoo
 
+from odoo.tests import tagged
 from odoo.addons.point_of_sale.tests.common import TestPoSCommon
 
-@odoo.tests.tagged('post_install', '-at_install')
+
+@tagged('post_install', '-at_install')
 class TestReportSession(TestPoSCommon):
 
     def setUp(self):

@@ -26,13 +26,13 @@ try:
 except ImportError:
     slugify_lib = None
 
-import odoo
 from odoo import api, http, models, tools
 from odoo.api import SUPERUSER_ID
-from odoo.exceptions import AccessDenied
+from odoo.exceptions import AccessDenied, AccessError, MissingError
 from odoo.http import request, Response, ROUTING_KEYS, SAFE_HTTP_METHODS
 from odoo.modules.registry import Registry
 from odoo.service import security
+from odoo.tools import config
 from odoo.tools.json import json_default
 from odoo.tools.misc import get_lang, submap
 from odoo.tools.translate import code_translations
@@ -321,12 +321,12 @@ class IrHttp(models.AbstractModel):
             try:
                 # explicitly crash now, instead of crashing later
                 args[key].check_access('read')
-            except (odoo.exceptions.AccessError, odoo.exceptions.MissingError) as e:
+            except (AccessError, MissingError) as e:
                 # custom behavior in case a record is not accessible / has been removed
                 if handle_error := rule.endpoint.routing.get('handle_params_access_error'):
                     if response := handle_error(e):
                         werkzeug.exceptions.abort(response)
-                if isinstance(e, odoo.exceptions.MissingError):
+                if isinstance(e, MissingError):
                     raise werkzeug.exceptions.NotFound() from e
                 raise
 
@@ -372,7 +372,7 @@ class IrHttp(models.AbstractModel):
     def routing_map(self, key=None):
         _logger.info("Generating routing map for key %s", str(key))
         registry = Registry(threading.current_thread().dbname)
-        installed = registry._init_modules.union(odoo.tools.config['server_wide_modules'])
+        installed = registry._init_modules.union(config['server_wide_modules'])
         mods = sorted(installed)
         # Note : when routing map is generated, we put it on the class `cls`
         # to make it available for all instance. Since `env` create an new instance

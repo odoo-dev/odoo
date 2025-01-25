@@ -10,7 +10,6 @@ import werkzeug.urls
 import urllib.parse
 from werkzeug.exceptions import HTTPException, NotFound
 
-import odoo
 from odoo import api, models, exceptions, tools, http
 from odoo.addons.base.models import ir_http
 from odoo.addons.base.models.ir_http import RequestUID
@@ -510,7 +509,7 @@ class IrHttp(models.AbstractModel):
             if request.httprequest.method in ('GET', 'HEAD'):
                 try:
                     _, path = rule.build(args)
-                except odoo.exceptions.MissingError:
+                except MissingError:
                     raise werkzeug.exceptions.NotFound()
                 assert path is not None
                 generated_path = werkzeug.urls.url_unquote_plus(path)

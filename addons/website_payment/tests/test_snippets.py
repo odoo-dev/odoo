@@ -1,12 +1,8 @@
-import odoo
-import odoo.tests
-import logging
-
-_logger = logging.getLogger(__name__)
+from odoo.tests import HttpCase, tagged
 
 
-@odoo.tests.common.tagged('post_install', '-at_install')
-class TestSnippets(odoo.tests.HttpCase):
+@tagged('post_install', '-at_install')
+class TestSnippets(HttpCase):
 
     def test_01_donation(self):
         payment_demo = self.env['ir.module.module']._get('payment_demo')

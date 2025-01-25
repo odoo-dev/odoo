@@ -1,20 +1,15 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import time
 from freezegun import freeze_time
-from datetime import datetime
 
-import odoo
-from odoo import fields, tools
-from odoo.fields import Command
-from odoo.tools import float_compare, mute_logger, test_reports
-from odoo.tests import Form
+from odoo import fields
 from odoo.addons.point_of_sale.tests.common import TestPointOfSaleCommon
 from odoo.addons.point_of_sale.tests.common_setup_methods import setup_product_combo_items
+from odoo.fields import Command
+from odoo.tests import Form, tagged
 
 
-@odoo.tests.tagged('post_install', '-at_install')
+@tagged('post_install', '-at_install')
 class TestPointOfSaleFlow(TestPointOfSaleCommon):
 
     @classmethod

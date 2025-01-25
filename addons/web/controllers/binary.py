@@ -14,7 +14,6 @@ try:
 except ImportError:
     from odoo.tools._vendor.send_file import send_file
 
-import odoo
 import odoo.modules.registry
 from odoo import SUPERUSER_ID, _, http, api
 from odoo.addons.base.models.assetsbundle import ANY_UNIQUE

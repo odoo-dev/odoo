@@ -4,7 +4,6 @@ from glob import glob
 from logging import getLogger
 from werkzeug import urls
 
-import odoo
 import odoo.modules.module  # get_manifest, don't from-import it
 from odoo import api, fields, models, tools
 from odoo.tools import misc
