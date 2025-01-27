@@ -49,7 +49,7 @@
                 <filter string="Unread Messages" name="message_needaction" domain="[('message_needaction','=',True)]" groups="mail.group_mail_notification_type_inbox"/>
                 <separator/>
                 <filter string="My Team" name="my_team" domain="['|', ('employee_id.leave_manager_id', '=', uid), ('employee_id.user_id', '=', uid)]" help="Time off of people you are manager of"/>
-                <filter string="My Department" name="my_team_leaves" domain="[('employee_id.parent_id.user_id', '=', uid)]" groups="hr_holidays.group_hr_holidays_manager" help="Time Off of Your Team Member"/>
+                <filter string="My Department" name="my_team_leaves" domain="[('employee_id.is_subordinate', '=', True)]" groups="hr_holidays.group_hr_holidays_manager" help="Time Off of Your Team Member"/>
                 <separator />
                 <filter name="refused_allocations" string="Refused" domain="[('state', '=', 'refuse')]" />
                 <separator/>
@@ -92,7 +92,7 @@
                 <field name="can_approve" invisible="1"/>
                 <field name="validation_type" invisible="1"/>
                 <!--
-                The following two lines are required so that the two fields are sent as part of the `vals_list` 
+                The following two lines are required so that the two fields are sent as part of the `vals_list`
                 to the create method when the allocation is created. Otherwise, carried_over_days_expiration_date
                 wouldn't be set and the days won't expire on that date.
                 -->

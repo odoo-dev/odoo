@@ -396,7 +396,7 @@
                     <field name="date"/>
                     <field name="employee_id"/>
                     <filter string="My Expenses" name="my_expenses" domain="[('employee_id.user_id', '=', uid)]"/>
-                    <filter string="My Team" name="my_team_expenses" domain="[('employee_id.parent_id.user_id', '=', uid)]"
+                    <filter string="My Team" name="my_team_expenses" domain="[('employee_id.is_subordinate', '=', True)]"
                             groups="hr_expense.group_hr_expense_team_approver" help="Expenses of Your Team Member"/>
                     <separator />
                     <filter string="To Report" name="no_report" domain="[('sheet_id', '=', False)]"/>
@@ -1033,7 +1033,7 @@
                     <field string="Journal" name="journal_id"/>
                     <filter string="My Reports" name="my_reports" domain="[('employee_id.user_id', '=', uid)]"/>
                     <filter string="My Team" name="my_team_reports"
-                            domain="[('employee_id.parent_id.user_id', '=', uid)]"
+                            domain="[('employee_id.is_subordinate', '=', True)]"
                             groups="hr_expense.group_hr_expense_manager" help="Expenses of Your Team Member"/>
                     <separator invisible="1"/>
                     <filter string="Not Refused" name="not_refused_reports"
