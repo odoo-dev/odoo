@@ -13,6 +13,7 @@ declare module "models" {
     import { Notification as NotificationClass } from "@mail/core/common/notification_model";
     import { Persona as PersonaClass } from "@mail/core/common/persona_model";
     import { ResGroups as ResGroupsClass } from "@mail/core/common/res_groups_model";
+    import { ResPartner } from "@mail/core/common/res_partner_model";
     import { Settings as SettingsClass } from "@mail/core/common/settings_model";
     import { Store as StoreClass } from "@mail/core/common/store_service";
     import { Thread as ThreadClass } from "@mail/core/common/thread_model";
@@ -54,6 +55,7 @@ declare module "models" {
         "Persona": Persona,
         "res.country": Country,
         "res.groups": ResGroups,
+        "res.partner": ResPartner,
         "Settings": Settings,
         "Store": Store,
         "Thread": Thread,

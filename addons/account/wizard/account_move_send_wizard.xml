@@ -36,7 +36,6 @@
 
                         <label for="mail_partner_ids" string="Recipients"/>
                         <div>
-                            <widget name="mail_composer_recipient_list" thread_model_field="model" thread_id_field="res_ids"/>
                             <field name="mail_partner_ids"
                                    widget="many2many_tags"
                                    placeholder="Add contacts to notify..."

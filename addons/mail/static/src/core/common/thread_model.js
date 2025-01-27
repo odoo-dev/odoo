@@ -200,18 +200,16 @@ export class Thread extends Record {
     });
     status = "new";
     /**
-     * Stored scoll position of thread from top in ASC order.
+     * Stored scroll position of thread from top in ASC order.
      *
      * @type {number|'bottom'}
      */
     scrollTop = "bottom";
     transientMessages = Record.many("mail.message");
+    additionalRecipients = Record.many("res.partner");
     suggestedRecipients = Record.attr([], {
         onUpdate() {
             for (const recipient of this.suggestedRecipients) {
-                if (recipient.checked === undefined) {
-                    recipient.checked = true;
-                }
                 recipient.persona = recipient.partner_id
                     ? { type: "partner", id: recipient.partner_id }
                     : false;

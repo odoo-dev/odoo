@@ -475,13 +475,16 @@ export class Store extends BaseStore {
         const recipientEmails = [];
         if (!isNote) {
             const recipientIds = thread.suggestedRecipients
-                .filter((recipient) => recipient.persona && recipient.checked)
+                .filter((recipient) => recipient.persona)
                 .map((recipient) => recipient.persona.id);
             thread.suggestedRecipients
-                .filter((recipient) => recipient.checked && !recipient.persona)
+                .filter((recipient) => !recipient.persona)
                 .forEach((recipient) => {
                     recipientEmails.push(recipient.email);
                 });
+            thread.additionalRecipients.forEach((partner) => {
+                recipientEmails.push(partner.email);
+            });
             partner_ids.push(...recipientIds);
         }
         postData = {

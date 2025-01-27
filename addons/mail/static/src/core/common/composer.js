@@ -500,9 +500,9 @@ export class Composer extends Component {
 
     async onClickFullComposer(ev) {
         if (this.props.type !== "note") {
-            // auto-create partners of checked suggested partners
+            // auto-create partners of suggested partners
             const newPartners = this.thread.suggestedRecipients.filter(
-                (recipient) => recipient.checked && !recipient.persona
+                (recipient) => !recipient.persona
             );
             if (newPartners.length !== 0) {
                 const recipientEmails = [];
@@ -532,20 +532,26 @@ export class Composer extends Component {
             mentionedPartners: this.props.composer.mentionedPartners,
         });
         const signature = this.store.self.signature;
-        const default_body =
+        const defaultBody =
             (await prettifyMessageContent(body, validMentions)) +
             (this.props.composer.emailAddSignature && signature ? "<br>" + signature : "");
+
+        const defaultPartnerIds = [];
+        if (this.props.type !== "note") {
+            for (const recipient of this.thread.suggestedRecipients) {
+                defaultPartnerIds.push(recipient.partner_id);
+            }
+            for (const recipient of this.thread.additionalRecipients) {
+                defaultPartnerIds.push(recipient.id);
+            }
+        }
+
         const context = {
             default_attachment_ids: attachmentIds,
-            default_body,
+            default_body: defaultBody,
             default_email_add_signature: false,
             default_model: this.thread.model,
-            default_partner_ids:
-                this.props.type === "note"
-                    ? []
-                    : this.thread.suggestedRecipients
-                          .filter((recipient) => recipient.checked)
-                          .map((recipient) => recipient.persona.id),
+            default_partner_ids: defaultPartnerIds,
             default_res_ids: [this.thread.id],
             default_subtype_xmlid: this.props.type === "note" ? "mail.mt_note" : "mail.mt_comment",
             // Changed in 18.2+: finally get rid of autofollow, following should be done manually
@@ -686,6 +692,7 @@ export class Composer extends Component {
         this.suggestion?.clearCannedResponses();
         this.props.messageToReplyTo?.cancel();
         this.props.composer.emailAddSignature = true;
+        this.props.composer.thread.additionalRecipients = [];
     }
 
     async editMessage() {
