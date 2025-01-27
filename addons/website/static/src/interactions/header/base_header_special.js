@@ -79,12 +79,13 @@ export class BaseHeaderSpecial extends BaseHeader {
 
         if (this.hideEl) {
             let elHeight = 0;
-            if (this.cssAffixed && this.searchbarEl?.matches(".show")) {
-                // Close the dropdown of the search bar if it's open when
-                // scrolling. Otherwise, the calculated height of the
-                // 'hideEl' element will be incorrect because it will
-                // include the dropdown height.
-                this.searchbarEl.querySelector("input").blur();
+            if (this.cssAffixed) {
+                // Close the dropdowns if they are open when scrolling. 
+                // Otherwise, the calculated height of the 'hideEl' element will
+                // be incorrect because it will include the dropdown height.
+                this.hideEl.querySelectorAll(".dropdown-toggle.show").forEach(dropdownToggleEl => {
+                    Dropdown.getOrCreateInstance(dropdownToggleEl).hide();
+                });
                 elHeight = this.hideEl.offsetHeight;
             } else {
                 elHeight = this.hideEl.scrollHeight;
