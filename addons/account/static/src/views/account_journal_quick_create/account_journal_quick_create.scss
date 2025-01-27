@@ -1,6 +1,29 @@
 .quick-create-card {
-    cursor: pointer;
+    .card-body {
+        background: linear-gradient(to right, $card-bg, rgba($card-bg, .95));
+    }
+
     &:hover {
-        background: linear-gradient(to right, rgba($o-brand-secondary, 0.1), rgba($o-brand-primary, 0.1));
+        background: $o-action;
+    }
+
+    .o_tile {
+        background: url('/account/static/src/img/tile.svg') center no-repeat;
+        background-size: contain;
+        aspect-ratio: 1 / 1;
+        inset: 0;
+
+        img {
+            inset: 0;
+            transform: rotateY(45deg) rotateZ(22deg) rotateX(20deg) translate(-7%, 5%);
+        }
+
+        &.o_tile_back {
+            background-position: right center;
+
+            img {
+                transform: rotateY(45deg) rotateZ(22deg) rotateX(20deg) translate(50%, -25%);
+            }
+        }
     }
 }

@@ -5,7 +5,7 @@ import { user } from "@web/core/user";
 
 class AccountJournalQuickCreateCard extends Component {
     static template = "account.AccountJournalQuickCreateCard";
-    static props = ["icon", "title", "text", "onClick"];
+    static props = ["image", "title", "text", "onClick"];
 }
 
 export class AccountJournalQuickCreate extends Component {

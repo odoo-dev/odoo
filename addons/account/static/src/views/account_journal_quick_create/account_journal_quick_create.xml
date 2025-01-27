@@ -1,56 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
     <t t-name="account.AccountJournalQuickCreateCard">
-        <div class="col-md-6 mb-3">
-            <div class="card h-100 quick-create-card" t-on-click="props.onClick">
-                <div class="card-body">
-                    <i t-att-class="'text-primary fa fa-fw ' + props.icon"/>
-                    <h5 class="card-title" t-esc="props.title"/>
-                    <p class="card-text" t-esc="props.text"/>
+        <div class="col">
+            <div class="card h-100 shadow-sm cursor-pointer transition-base quick-create-card" t-on-click="props.onClick">
+                <div class="card-body d-flex justify-content-between align-items-start gap-3">
+                    <div>
+                        <h4 class="card-title" t-esc="props.title"/>
+                        <p class="card-text" t-esc="props.text"/>
+                    </div>
+                    <div t-if="!props.image" class="position-relative flex-shrink-0 w-25 ratio ratio-1x1">
+                        <t t-if="props.title === 'Bank'">
+                            <div class="o_tile w-75 h-auto mt-auto z-1">
+                                <!-- TODO: Replace with dynamic bank logo -->
+                                <img class="position-absolute w-50 m-auto object-fit-contain" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSF5k4DRa2BNoE7ZhidVOwr6qmNfhHUos1AVg&amp;s"/>
+                            </div>
+                            <div class="o_tile o_tile_back end-0 w-75 h-auto ms-auto">
+                                <!-- TODO: Replace with dynamic bank logo -->
+                                <img class="position-absolute w-50 m-auto object-fit-contain" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTvIMiq7VV0gsMkqAIzGfqUD_N9yHYDyKKnUQ&amp;amp;s"/>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="o_tile w-75 h-auto mt-auto z-1">
+                                <img class="position-absolute w-50 m-auto object-fit-contain" src="/account/static/src/img/logo_visa.svg"/>
+                            </div>
+                            <div class="o_tile o_tile_back end-0 w-75 h-auto ms-auto">
+                                <img class="position-absolute w-50 m-auto object-fit-contain" src="/account/static/src/img/logo_mastercard.svg"/>
+                            </div>
+                        </t>
+                    </div>
+                    <img t-else="" t-att-src="props.image" class="flex-shrink-0 w-25" t-att-alt="props.title"/>
                 </div>
             </div>
         </div>
     </t>
 
     <t t-name="account.AccountJournalQuickCreate">
-        <div class="container mt-4">
-            <div class="row">
+        <div class="container py-4">
+            <div class="row row-cols-1 row-cols-md-2 row-gap-2 row-gap-md-4">
                 <AccountJournalQuickCreateCard
-                    icon="'fa-university'"
                     title.translate="Bank"
                     text.translate="Connect bank accounts a payment gateways (Paypal, Stripe, ...etc)"
                     onClick.bind="() => this.openAccountWizard('bank')"
                 />
                 <AccountJournalQuickCreateCard
-                    icon="'fa-credit-card'"
                     title.translate="Card"
                     text.translate="Connect credit and debit cards"
                     onClick.bind="() => this.openAccountWizard('credit_card')"
                 />
-            </div>
-            <div class="row">
                 <AccountJournalQuickCreateCard
-                    icon="'fa-money'"
+                    image="'/account/static/src/img/cash.svg'"
                     title.translate="Cash"
                     text.translate="Cash movements"
                     onClick.bind="() => this.createJournal('cash')"
                 />
                 <AccountJournalQuickCreateCard
-                    icon="'fa-ellipsis-h'"
+                    image="'/account/static/src/img/misc.svg'"
                     title.translate="Miscellaneous Journal"
                     text.translate="Payroll, depreciation, closing entries, deferred revenues, ...etc"
                     onClick.bind="() => this.createJournal('general')"
                 />
-            </div>
-            <div class="row">
                 <AccountJournalQuickCreateCard
-                    icon="'fa-handshake-o'"
+                    image="'/account/static/src/img/sales.svg'"
                     title.translate="Sales Journal"
                     text.translate="Create a separate journal for specific sales activities"
                     onClick.bind="() => this.createJournal('sale')"
                 />
                 <AccountJournalQuickCreateCard
-                    icon="'fa-shopping-basket'"
+                    image="'/account/static/src/img/purchases.svg'"
                     title.translate="Purchases Journal"
                     text.translate="Create a separate journal to organize vendor bills"
                     onClick.bind="() => this.createJournal('purchase')"
