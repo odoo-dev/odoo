@@ -26,14 +26,7 @@
         transform: translateY(-50%);
         border-top-right-radius: $border-radius-lg;
         border-bottom-right-radius: $border-radius-lg;
-    }
-
-    &.skip-change::before {
-        background-color: $o-warning;
-    }
-
-    &.has-change::before {
-        background-color: $o-success;
+        background-color: $o-enterprise-color;
     }
 
     .info-list {
