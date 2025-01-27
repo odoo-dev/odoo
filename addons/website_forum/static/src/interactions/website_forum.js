@@ -166,7 +166,7 @@ export class WebsiteForum extends Interaction {
     warnIfPublicUser() {
         if (session.is_website_user) {
             this.displayAccessDeniedNotification(
-                markup(`<a href='/web/login'>` + escape(_t("Oh no! Please sign in to perform this action") + "</a>"))
+                markup(`<a href='/web/login'>` + escape(_t("Oh no! Please sign in to perform this action")) + "</a>")
             );
             return true;
         }
