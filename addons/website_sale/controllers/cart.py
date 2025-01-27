@@ -109,6 +109,7 @@ class Cart(PaymentPortal):
         line_id,
         product_id,
         quantity,
+        uom_selected_ids,
     ):
         if not line_id:
             return  # Ensures this method is only used from the cart page.
@@ -120,6 +121,7 @@ class Cart(PaymentPortal):
             product_id=product_id,
             add_qty=None,  # Needed to ensure the removal feature of the line.
             set_qty=quantity,
+            uom_selected_ids=uom_selected_ids,
         )
 
         # If the line is a combo product line, and it already has combo items, we need to update
@@ -172,7 +174,7 @@ class Cart(PaymentPortal):
         product_template_id,
         product_id,
         quantity=None,
-        uom_ids=None,
+        uom_selected_ids=None,
         product_custom_attribute_values=None,
         no_variant_attribute_value_ids=None,
         linked_products=None,
@@ -206,7 +208,7 @@ class Cart(PaymentPortal):
             product_id=product_id,
             line_id=False if kwargs.get('is_combo') else None,  # Always create new line for combo.
             add_qty=quantity,
-            uom_ids=uom_ids,
+            uom_selected_ids=uom_selected_ids,
             product_custom_attribute_values=product_custom_attribute_values,
             no_variant_attribute_value_ids=no_variant_attribute_value_ids,
             **kwargs

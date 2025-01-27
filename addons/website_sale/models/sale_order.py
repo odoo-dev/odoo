@@ -289,7 +289,7 @@ class SaleOrder(models.Model):
             self.pricelist_id = pricelist_id
             self._recompute_prices()
 
-    def _cart_update(self, product_id, line_id=None, add_qty=0, set_qty=0, **kwargs):
+    def _cart_update(self, product_id, line_id=None, add_qty=0, set_qty=0, uom_selected_ids=[], **kwargs):
         """ Add or set product quantity, add_qty can be negative """
         self.ensure_one()
         self = self.with_company(self.company_id)
@@ -341,6 +341,9 @@ class SaleOrder(models.Model):
             # the requested quantity update.
             warning = ''
 
+        if uom_selected_ids:
+            uom_selected_ids = int(uom_selected_ids)
+
         order_line = self._cart_update_order_line(product_id, quantity, order_line, **kwargs)
 
         if (
@@ -366,6 +369,7 @@ class SaleOrder(models.Model):
         return {
             'line_id': order_line.id,
             'quantity': quantity,
+            'uom_selected_ids': uom_selected_ids,
             'option_ids': list(set(order_line.linked_line_ids.filtered(
                 lambda sol: sol.order_id == order_line.order_id).ids)
             ),
