@@ -88,3 +88,6 @@ class TestUi(AccountTestInvoicingHttpCommon):
         product.supplier_taxes_id = new_tax
 
         self.start_tour("/odoo", 'account_tax_group', login="admin")
+
+    def test_search_read_method(self):
+        self.start_tour("/odoo", 'search_read_tour', login="admin")
