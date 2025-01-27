@@ -201,6 +201,8 @@ actual arch.
          """)
     model_id = fields.Many2one("ir.model", string="Model of the view", compute='_compute_model_id', inverse='_inverse_compute_model_id')
 
+    invalid_xpaths_from_arch = fields.Json(compute='_compute_invalid_xpaths_from_arch')
+
     @api.depends('arch_db', 'arch_fs', 'arch_updated')
     @api.depends_context('read_arch_from_file', 'lang', 'edit_translations', 'check_translations')
     def _compute_arch(self):
@@ -313,6 +315,27 @@ actual arch.
     def _inverse_compute_model_id(self):
         for record in self:
             record.model = record.model_id.model
+
+    @api.depends('arch', 'inherit_id')
+    def _compute_invalid_xpaths_from_arch(self):
+        for view in self:
+            if view.inherit_id:
+                source = view._get_combined_arch()
+                invalid_xpaths = []
+                for spec in etree.fromstring(view.arch).iterchildren(tag=etree.Element):
+                    try:
+                        source = apply_inheritance_specs(source, spec)
+                    except ValueError as e:
+                        if spec.tag == "xpath":
+                            invalid_xpaths.append([
+                                spec.attrib.get("expr"),
+                                spec.sourceline,
+                            ])
+                        else:
+                            raise e
+                view.invalid_xpaths_from_arch = invalid_xpaths
+            else:
+                view.invalid_xpaths_from_arch = False
 
     def _compute_xml_id(self):
         xml_ids = collections.defaultdict(list)
