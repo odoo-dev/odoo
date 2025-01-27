@@ -153,6 +153,15 @@ class MailThread(models.AbstractModel):
         help="Number of messages with delivery error")
     message_attachment_count = fields.Integer('Attachment Count', compute='_compute_message_attachment_count', groups="base.group_user")
 
+    # Recipients
+    suggested_recipients = fields.Many2many(
+        'res.partner',
+        compute='_compute_suggested_recipients')
+
+    def _compute_suggested_recipients(self):
+        for record in self:
+            record.suggested_recipients = False
+
     @api.depends('message_follower_ids')
     def _compute_message_partner_ids(self):
         for thread in self:

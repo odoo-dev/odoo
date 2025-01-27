@@ -100,6 +100,12 @@ class CrmLead(models.Model):
     _check_company_auto = True
     _track_duration_field = 'stage_id'
 
+    # Default recipient for the chatter.
+    @api.depends('partner_id')
+    def _compute_suggested_recipients(self):
+        for lead in self:
+            lead.suggested_recipients = lead.partner_id
+
     # Description
     name = fields.Char(
         'Opportunity', index='trigram', required=True,
