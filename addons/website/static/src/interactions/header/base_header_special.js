@@ -4,12 +4,11 @@ import { registry } from "@web/core/registry";
 export class BaseHeaderSpecial extends BaseHeader {
     dynamicSelectors = {
         ...this.dynamicSelectors,
-        _dropdown: () => this.hideEl?.querySelector(".dropdown-toggle"),
         _searchbar: () => this.searchbarEl,
     };
     dynamicContent = {
         ...this.dynamicContent,
-        _dropdown: {
+        ".o_header_hide_on_scroll .dropdown-toggle": {
             "t-on-show.bs.dropdown": this.onDropdownShow,
         },
         _searchbar: {

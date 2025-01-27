@@ -67,6 +67,9 @@ export class BaseHeader extends Interaction {
             navbarEl.classList.contains(`navbar-expand-${size.toLowerCase()}`)
         ) : "LG";
         this.breakpointSize = SIZES[navBreakpoint];
+
+        this.hasScrolled = false;
+        this.closeDropdowns = false;
     }
 
     start() {
@@ -117,9 +120,24 @@ export class BaseHeader extends Interaction {
     }
 
     onScroll() {
-        this.el.querySelectorAll(".dropdown-toggle.show").forEach(dropdownToggleEl => {
-            Dropdown.getOrCreateInstance(dropdownToggleEl).hide();
-        });
+        const scroll = this.scrollingElement.scrollTop;
+
+        // Disable css transition if refresh with scrollTop > 0
+        if (!this.hasScrolled) {
+            this.hasScrolled = true;
+            if (scroll > 0) {
+                this.el.classList.add("o_header_no_transition");
+            }
+        } else {
+            this.el.classList.remove("o_header_no_transition");
+            this.closeDropdowns = true;
+        }
+
+        if (this.closeDropdowns) {
+            this.el.querySelectorAll(".dropdown-toggle.show").forEach(dropdownToggleEl => {
+                Dropdown.getOrCreateInstance(dropdownToggleEl).hide();
+            });
+        }
     }
 
     //--------------------------------------------------------------
