@@ -92,7 +92,7 @@
                     <filter name="group_employee" string="Employee" context="{'group_by':'employee_id'}"/>
                     <filter name="group_type" string="Type" context="{'group_by':'holiday_status_id'}"/>
                     <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
-                    <filter name="group_company" string="Company" context="{'group_by':'employee_company_id'}" groups="base.group_multi_company"/>
+                    <filter name="group_company" string="Company" context="{'group_by':'employee_company_id'}" invisible="not companies.multi_company"/>
                     <separator/>
                     <filter name="group_date_from" string="Start Date" context="{'group_by':'date_from'}"/>
                 </group>
@@ -413,7 +413,7 @@
             </xpath>
             <xpath expr="//field[@name='holiday_status_id']" position="before">
                 <field name="employee_id" groups="hr_holidays.group_hr_holidays_user" readonly="state in ['cancel', 'refuse', 'validate', 'validate1']" widget="many2one_avatar_employee"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="company_id" invisible="not companies.multi_company"/>
                 <field name="department_id" groups="hr_holidays.group_hr_holidays_user" readonly="1"/>
             </xpath>
             <field name="name" position="replace"/>
@@ -479,7 +479,7 @@
                     icon="fa-thumbs-up"
                     invisible="not can_approve or state != 'confirm'"
                     groups="hr_holidays.group_hr_holidays_responsible"/>
-                <field name="company_id" optional="hidden" groups="base.group_multi_company"/>
+                <field name="company_id" optional="hidden" invisible="not companies.multi_company"/>
                 <button string="Validate" name="action_validate" type="object"
                     icon="fa-check"
                     invisible="not can_approve or state != 'validate1'"

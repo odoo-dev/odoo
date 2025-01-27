@@ -14,7 +14,7 @@
                         <div>
                             From <field name="code_prefix_start" class="oe_inline"/> to <field name="code_prefix_end" class="oe_inline"/>
                         </div>
-                        <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                        <field name="company_id" options="{'no_create': True}" invisible="not companies.multi_company"/>
                     </group>
                 </sheet>
                 </form>
@@ -41,7 +41,7 @@
                     <field name="code_prefix_start"/>
                     <field name="code_prefix_end"/>
                     <field name="name"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" column_invisible="not companies.multi_company"/>
                 </list>
             </field>
         </record>

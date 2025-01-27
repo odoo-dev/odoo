@@ -23,7 +23,7 @@
                 <field name="state" decoration-info="state in ('draft', 'open')"
                        decoration-success="state == 'done'"
                        decoration-muted="state == 'cancel'" widget="badge"/>
-                <field name="company_id" groups="base.group_multi_company" optional="hide" readonly="state != 'draft'"/>
+                <field name="company_id" invisible="not companies.multi_company" optional="hide" readonly="state != 'draft'"/>
                 <field name="message_needaction" column_invisible="True"/>
                 <button name="action_confirm" string="Registered" type="object" icon="fa-check"
                         invisible="not active or state != 'draft'"/>

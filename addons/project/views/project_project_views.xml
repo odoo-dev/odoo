@@ -70,7 +70,7 @@
                             <field name="label_tasks" string="Name of the Tasks" placeholder="e.g. Tasks"/>
                             <field name="partner_id" widget="res_partner_many2one"/>
                             <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
-                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
+                            <field name="company_id" invisible="not companies.multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
                         </group>
                         <group>
                             <field name="active" invisible="1"/>
@@ -195,7 +195,7 @@
                         <filter string="Stage" name="groupby_stage" context="{'group_by': 'stage_id'}" groups="project.group_project_stages"/>
                         <filter string="Status" name="status" context="{'group_by': 'last_update_status'}"/>
                         <filter string="Tags" name="tags" context="{'group_by': 'tag_ids'}"/>
-                        <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                        <filter string="Company" name="company" context="{'group_by': 'company_id'}" invisible="not companies.multi_company"/>
                     </group>
                 </search>
             </field>
@@ -216,7 +216,7 @@
                     <field name="is_favorite" string="Favorite" nolabel="1" widget="project_is_favorite" optional="hide"/>
                     <field name="name" class="fw-bold"/>
                     <field name="partner_id" optional="show" string="Customer"/>
-                    <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="company_id" optional="show" invisible="not companies.multi_company" options="{'no_create': True, 'no_open': True}"/>
                     <field name="company_id" column_invisible="True"/>
                     <field name="date_start" string="Planned Date" widget="daterange" options="{'end_date_field': 'date', 'always_range': '1'}" optional="hide"/>
                     <field name="date" column_invisible="True" />

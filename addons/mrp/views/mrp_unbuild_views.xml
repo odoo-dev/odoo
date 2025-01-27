@@ -105,7 +105,7 @@
                                 <field name="location_dest_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations" readonly="state == 'done'"/>
                                 <field name="has_tracking" invisible="1"/>
                                 <field name="lot_id" invisible="has_tracking == 'none'" readonly="mo_id or state == 'done'" required="has_tracking != 'none'" groups="stock.group_production_lot" force_save="1"/>
-                                <field name="company_id" groups="base.group_multi_company" readonly="state == 'done'"/>
+                                <field name="company_id" invisible="not companies.multi_company" readonly="state == 'done'"/>
                             </group>
                         </group>
                     </sheet>
@@ -140,7 +140,7 @@
                                 <field name="location_dest_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations" readonly="state == 'done'"/>
                                 <field name="has_tracking" invisible="1"/>
                                 <field name="lot_id" readonly="1" invisible="has_tracking == 'none'" required="has_tracking != 'none'" groups="stock.group_production_lot"/>
-                                <field name="company_id" groups="base.group_multi_company" readonly="1"/>
+                                <field name="company_id" invisible="not companies.multi_company" readonly="1"/>
                             </group>
                         </group>
                     </sheet>
@@ -167,7 +167,7 @@
                     <field name="product_uom_id" groups="uom.group_uom" widget="many2one_uom" readonly="state == 'done'"/>
                     <field name="location_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations" readonly="state == 'done'"/>
                     <field name="activity_exception_decoration" widget="activity_exception"/>
-                    <field name="company_id" groups="base.group_multi_company" readonly="state == 'done'"/>
+                    <field name="company_id" column_invisible="not companies.multi_company" readonly="state == 'done'"/>
                     <field name="state" widget='badge' decoration-success="state == 'done'" decoration-info="state == 'draft'"/>
                 </list>
             </field>

@@ -13,7 +13,7 @@
                 </control>
                 <field name="currency_id" column_invisible="True"/>
                 <field name="partner_id" readonly="state != 'draft'"/>
-                <field name="company_id" groups="base.group_multi_company" optional="hidden"/>
+                <field name="company_id" column_invisible="not companies.multi_company" optional="hidden"/>
                 <field name="protocol_number_part1" readonly="state != 'draft'"/>
                 <field name="protocol_number_part2" readonly="state != 'draft'"/>
                 <field name="issue_date" readonly="state != 'draft'"/>
@@ -72,7 +72,7 @@
                     <group name="main_group">
                         <group name="left_column">
                             <field name="partner_id" readonly="state != 'draft'"/>
-                            <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
+                            <field name="company_id" invisible="not companies.multi_company" readonly="state != 'draft'"/>
                             <label for="protocol_number_part1" string="Protocol Number"/>
                             <div name="protocol_div" class="d-flex">
                                 <field name="protocol_number_part1" readonly="state != 'draft'"/>

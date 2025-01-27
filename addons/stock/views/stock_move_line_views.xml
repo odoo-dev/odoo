@@ -17,7 +17,7 @@
                 <field name="location_id"/>
                 <field name="location_dest_id"/>
                 <field name="picking_partner_id" optional="hide"/>
-                <field name="company_id" optional="hide" groups="base.group_multi_company" force_save="1"/>
+                <field name="company_id" optional="hide" column_invisible="not companies.multi_company" force_save="1"/>
                 <field name="quantity" string="Quantity"
                     decoration-danger="(location_usage in ('internal','transit')) and (location_dest_usage not in ('internal','transit'))"
                     decoration-success="(location_usage not in ('internal','transit')) and (location_dest_usage in ('internal','transit'))"/>
@@ -48,7 +48,7 @@
                 <field name="package_id" groups="stock.group_tracking_lot"/>
                 <field name="quantity" string="Quantity" optional="show"/>
                 <field name="product_uom_id" options="{'no_open': True, 'no_create': True}" widget="many2one_uom" optional="show" groups="uom.group_uom"/>
-                <field name="company_id" groups="base.group_multi_company" force_save="1" optional="hide"/>
+                <field name="company_id" column_invisible="not companies.multi_company" force_save="1" optional="hide"/>
                 <field name="state" widget='badge' optional="show"
                        decoration-danger="state=='cancel'"
                        decoration-info="state== 'assigned'"

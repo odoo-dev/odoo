@@ -2804,7 +2804,7 @@ class TestViews(ViewCase):
                 <form string="View attachment">
                     <field name="company_id" invisible="not name" groups="base.group_erp_manager"/>
                     <field name="company_id" invisible="not name" groups="base.group_system"/>
-                    <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                    <field name="company_id" invisible="not name" invisible="not companies.multi_company"/>
                     <field name="company_id" invisible="not name" groups="base.group_user"/>
                 </form>
             """, field='name', demo=True)
@@ -2826,7 +2826,7 @@ class TestViews(ViewCase):
         validate("""
                 <form string="View attachment">
                     <group groups="base.group_erp_manager">
-                        <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                        <field name="company_id" invisible="not name" invisible="not companies.multi_company"/>
                         <field name="company_id" invisible="not name" groups="base.group_user"/>
                     </group>
                 </form>
@@ -2834,7 +2834,7 @@ class TestViews(ViewCase):
         validate("""
                 <form string="View attachment">
                     <group groups="base.group_erp_manager" invisible="not display_name">
-                        <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                        <field name="company_id" invisible="not name" invisible="not companies.multi_company"/>
                         <field name="company_id" invisible="not name" groups="base.group_user"/>
                     </group>
                 </form>
@@ -2842,7 +2842,7 @@ class TestViews(ViewCase):
         validate("""
                 <form string="View attachment">
                     <group groups="base.group_erp_manager" invisible="not display_name">
-                        <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                        <field name="company_id" invisible="not name" invisible="not companies.multi_company"/>
                         <field name="company_id" invisible="not name" groups="base.group_user"/>
                     </group>
                 </form>
@@ -2850,7 +2850,7 @@ class TestViews(ViewCase):
         validate("""
                 <form string="View attachment">
                     <group groups="base.group_user" invisible="not display_name">
-                        <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                        <field name="company_id" invisible="not name" invisible="not companies.multi_company"/>
                         <field name="company_id" invisible="not name" groups="base.group_erp_manager"/>
                     </group>
                 </form>
@@ -2858,7 +2858,7 @@ class TestViews(ViewCase):
         validate("""
                 <form string="View attachment">
                     <group groups="base.group_user" invisible="not display_name">
-                        <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                        <field name="company_id" invisible="not name" invisible="not companies.multi_company"/>
                         <field name="company_id" invisible="not name" groups="base.group_erp_manager"/>
                     </group>
                 </form>
@@ -2868,10 +2868,10 @@ class TestViews(ViewCase):
         validate("""
                 <form string="View attachment">
                     <field name="name" groups="base.group_user"/>
-                    <field name="name" groups="base.group_multi_company"/>
+                    <field name="name" invisible="not companies.multi_company"/>
 
                     <group groups="base.group_erp_manager" invisible="not name">
-                        <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                        <field name="company_id" invisible="not name" invisible="not companies.multi_company"/>
                         <field name="company_id" invisible="not name" groups="base.group_user"/>
                     </group>
                 </form>
@@ -2913,7 +2913,7 @@ class TestViews(ViewCase):
             'arch': """
                 <form>
                     <field name="active"/>
-                    <field name="name" groups="base.group_multi_company" invisible="active"/>
+                    <field name="name" invisible="not companies.multi_company" invisible="active"/>
                 </form>
             """,
         })
@@ -5172,7 +5172,7 @@ class ViewModifiers(ViewCase):
             <form string="View">
                 <field name="name" groups="base.test_group"/>
                 <field name="inherit_id" groups="base.test_group" %(attrs)s/>
-                <field name="inherit_id" groups="base.group_multi_company" %(attrs)s/>
+                <field name="inherit_id" invisible="not companies.multi_company" %(attrs)s/>
             </form>
         """, add_field_with_groups="'base.group_multi_company'")
 
@@ -5226,7 +5226,7 @@ class ViewModifiers(ViewCase):
                 <field name="name" groups="base.group_erp_manager"/>
                 <field name="inherit_children_ids">
                     <list editable="bottom">
-                        <field name="inherit_id" groups="base.group_multi_company" %(attrs)s/>
+                        <field name="inherit_id" invisible="not companies.multi_company" %(attrs)s/>
                     </list>
                 </field>
             </form>
@@ -5236,7 +5236,7 @@ class ViewModifiers(ViewCase):
         validate("""
             <form string="View">
                 <field name="name" groups="base.test_group"/>
-                <field name="inherit_id" groups="base.group_multi_company" %(attrs)s/>
+                <field name="inherit_id" invisible="not companies.multi_company" %(attrs)s/>
             </form>
         """, add_field_with_groups="'base.group_multi_company'")
 
@@ -5245,7 +5245,7 @@ class ViewModifiers(ViewCase):
                 <field name="name" groups="base.test_group"/>
                 <field name="inherit_children_ids">
                     <list editable="bottom">
-                        <field name="inherit_id" groups="base.group_multi_company" %(attrs)s/>
+                        <field name="inherit_id" invisible="not companies.multi_company" %(attrs)s/>
                     </list>
                 </field>
             </form>
@@ -5306,7 +5306,7 @@ class ViewModifiers(ViewCase):
                 <group groups="base.test_group">
                     <field name="name"/>
                 </group>
-                <group groups="base.group_multi_company">
+                <group invisible="not companies.multi_company">
                     <field name="inherit_id" %(attrs)s/>
                 </group>
             </form>
@@ -5337,7 +5337,7 @@ class ViewModifiers(ViewCase):
         validate("""
             <form string="View">
                 <field name="name" groups="base.test_group"/>
-                <field name="inherit_children_ids" groups="base.group_multi_company">
+                <field name="inherit_children_ids" invisible="not companies.multi_company">
                     <list editable="bottom">
                         <field name="inherit_id" %(attrs)s/>
                     </list>
@@ -5422,10 +5422,10 @@ class ViewModifiers(ViewCase):
         # restricted group opposing the desired visibility.
         validate("""
             <form string="View">
-                <group groups="base.group_multi_company">
+                <group invisible="not companies.multi_company">
                     <field name="name" groups="!base.test_group"/>
                 </group>
-                <group groups="base.group_multi_company">
+                <group invisible="not companies.multi_company">
                     <field name="inherit_id" %(attrs)s/>
                 </group>
             </form>
@@ -5435,7 +5435,7 @@ class ViewModifiers(ViewCase):
         # restricted (negative) group opposing the desired visibility.
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_multi_company"/>
+                <field name="name" invisible="not companies.multi_company"/>
                 <field name="inherit_id" groups="!base.group_multi_company" %(attrs)s/>
             </form>
         """, add_field_with_groups="~'base.group_multi_company'")
@@ -5444,10 +5444,10 @@ class ViewModifiers(ViewCase):
         validate("""
             <form string="View">
                 <field name="name" groups="!base.group_multi_company"/>
-                <field name="name" groups="base.group_multi_company"/>
+                <field name="name" invisible="not companies.multi_company"/>
                 <field name="name" groups="!base.group_portal"/>
                 <field name="name" groups="base.group_portal"/>
-                <field name="inherit_id" %(attrs)s groups="base.group_multi_company"/>
+                <field name="inherit_id" %(attrs)s invisible="not companies.multi_company"/>
                 <field name="inherit_id" %(attrs)s groups="!base.group_multi_company"/>
                 <field name="inherit_id" %(attrs)s groups="base.group_portal"/>
                 <field name="inherit_id" %(attrs)s groups="!base.group_portal"/>
@@ -5460,17 +5460,17 @@ class ViewModifiers(ViewCase):
             <form string="View">
                 <field name="name" groups="!base.test_group"/>
                 <field name="name" groups="base.test_group"/>
-                <field name="inherit_id" %(attrs)s groups="base.group_multi_company"/>
+                <field name="inherit_id" %(attrs)s invisible="not companies.multi_company"/>
             </form>
         """, add_field_with_groups=False)
 
         # No missing combination because '!base.test_group' | 'base.test_group' => *
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_multi_company"/>
+                <field name="name" invisible="not companies.multi_company"/>
                 <field name="name" groups="!base.test_group"/>
                 <field name="name" groups="base.test_group"/>
-                <field name="inherit_id" %(attrs)s groups="base.group_multi_company"/>
+                <field name="inherit_id" %(attrs)s invisible="not companies.multi_company"/>
                 <field name="inherit_id" %(attrs)s groups="base.test_group"/>
                 <field name="inherit_id" %(attrs)s groups="!base.test_group"/>
                 <field name="inherit_id" %(attrs)s groups="base.group_public"/>

@@ -65,8 +65,7 @@
                 <field name="active" column_invisible="True"/>
                 <field name="warehouse_id" groups="stock.group_stock_multi_warehouses"/>
                 <field name="sequence_id" groups="base.group_no_one"/>
-                <field name="company_id" groups="base.group_multi_company"/>
-                <field name="company_id" groups="!base.group_multi_company" column_invisible="True"/>
+                <field name="company_id" column_invisible="not companies.multi_company"/>
             </list>
         </field>
     </record>
@@ -101,7 +100,7 @@
                                     <field name="auto_show_reception_report" invisible="code not in ['incoming', 'internal']" groups="stock.group_reception_report"/>
                                 </group>
                                 <group>
-                                    <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                                    <field name="company_id" invisible="not companies.multi_company" options="{'no_create': True}"/>
                                     <field invisible="code not in ['incoming', 'outgoing', 'internal']" name="return_picking_type_id" string="Returns Type"/>
                                     <field name="create_backorder"/>
                                     <field name="move_type" help="Unless previously specified by the source document, this will be the default picking policy for this operation type." invisible="code != 'internal'"/>

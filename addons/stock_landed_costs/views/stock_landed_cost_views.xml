@@ -42,7 +42,7 @@
                             <group>
                                 <label for="account_journal_id" string="Journal"/>
                                 <field name="account_journal_id" nolabel="1" readonly="state == 'done'"/>
-                                <field name="company_id" groups="base.group_multi_company"/>
+                                <field name="company_id" invisible="not companies.multi_company"/>
                                 <field name="account_move_id" invisible="not account_move_id"/>
                                 <field name="vendor_bill_id"/>
                             </group>
@@ -126,7 +126,7 @@
                 <list string="Landed Costs" decoration-info="state == 'draft'" decoration-muted="state == 'cancel'">
                     <field name="name" decoration-bf="1"/>
                     <field name="date" readonly="state == 'done'"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" column_invisible="not companies.multi_company"/>
                     <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state == 'draft'"/>
                     <field name="activity_exception_decoration" widget="activity_exception"/>
                 </list>
@@ -144,7 +144,7 @@
                     <field name="currency_id" column_invisible="True"/>
                     <field name="amount_total" widget="monetary"/>
                     <field name="state"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" column_invisible="not companies.multi_company"/>
                 </list>
             </field>
         </record>

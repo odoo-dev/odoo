@@ -49,7 +49,7 @@
                     <field name="payment_method_line_id" optional="hide" groups="account.group_account_readonly"
                            readonly="not is_editable"/>
                     <field name="manager_id" optional="hide" readonly="not is_editable"/>
-                    <field name="company_id" optional="show" groups="base.group_multi_company" readonly="True"/>
+                    <field name="company_id" optional="show" invisible="not companies.multi_company" readonly="True"/>
                     <field name="price_unit" string="Unit Price" optional="hide" widget="monetary"
                            options="{'currency_field': 'company_currency_id', 'field_digits': True}" readonly="True"/>
                     <field name="quantity" optional="hide" readonly="not is_editable or not product_has_cost"/>
@@ -270,7 +270,7 @@
                         </group>
                         <group>
                             <field name="date" readonly="not is_editable" class="w-50"/>
-                            <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
+                            <field name="company_id" invisible="not companies.multi_company" readonly="state != 'draft'"/>
                             <field name="manager_id" widget="many2one_avatar_user" readonly="state != 'draft'" placeholder="Auto-validation"/>
                             <field name="department_id" invisible="1" readonly="not is_editable"
                                    context="{'default_company_id': company_id}"/>
@@ -425,7 +425,7 @@
                     <!-- Search -->
                     <field name="name" filter_domain="[('name', '=like', self)]" string="Expense"/>
                     <field name="department_id" filter_domain="[('department_id.name', '=like', self)]"/>
-                    <field name="company_id" filter_domain="[('company_id.name', '=like', self)]" groups="base.group_multi_company"/>
+                    <field name="company_id" filter_domain="[('company_id.name', '=like', self)]" invisible="not companies.multi_company"/>
                     <field name="employee_id" filter_domain="[('employee_id.name', '=like', self)]"/>
 
                     <!-- Filters -->
@@ -464,7 +464,7 @@
                         <filter string="Expense Date" name="expensesmonth" domain="[]" context="{'group_by': 'date'}"
                                 help="Expense Date"/>
                         <filter string="Company" name="company" domain="[]" context="{'group_by': 'company_id'}"
-                                groups="base.group_multi_company"/>
+                                invisible="not companies.multi_company"/>
                         <filter string="Department" name="department" domain="[]" context="{'group_by': 'department_id'}"/>
                     </group>
                 </search>
@@ -532,7 +532,7 @@
                     <searchpanel>
                         <field name="state" expand="1" select="multi" icon="fa-check-square-o" enable_counters="1"/>
                         <field name="employee_id"  limit="20" hierarchize="0" select="one" icon="fa-users"/>
-                        <field name="company_id" expand="1" icon="fa-building" groups="base.group_multi_company"/>
+                        <field name="company_id" expand="1" icon="fa-building" invisible="not companies.multi_company"/>
                     </searchpanel>
                 </xpath>
             </field>

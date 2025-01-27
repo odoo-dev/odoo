@@ -75,7 +75,7 @@
                             <div class="o_kanban_card_header_title d-flex flex-column">
                                 <field name="name" class="fw-bold fs-4"/>
                                 <field name="user_id" class="text-muted"/>
-                                <div class="small" groups="base.group_multi_company">
+                                <div class="small" invisible="not companies.multi_company">
                                     <i class="fa fa-building-o" role="img" aria-label="Company" title="Company"></i> <field name="company_id"/>
                                 </div>
                                 <div t-if="record.alias_email.value" class="small o_job_alias">
@@ -196,7 +196,7 @@
                 </div>
             </xpath>
             <xpath expr="//field[@name='contract_type_id']" position="after">
-                <field name="company_id" groups="base.group_multi_company" placeholder="Visible to all"/>
+                <field name="company_id" invisible="not companies.multi_company" placeholder="Visible to all"/>
                 <field
                     name="date_from"
                     widget="daterange"
@@ -278,7 +278,7 @@
         <field name="arch" type="xml">
             <xpath expr="//filter[@name='my_favorite_jobs']" position="after">
                 <searchpanel>
-                    <field name="company_id" groups="base.group_multi_company" icon="fa-building" enable_counters="1"/>
+                    <field name="company_id" invisible="not companies.multi_company" icon="fa-building" enable_counters="1"/>
                     <field name="department_id" icon="fa-users" enable_counters="1"/>
                 </searchpanel>
                 <filter string="My Job Positions" name="my_positions" domain="[('user_id', '=', uid)]"/>
@@ -299,7 +299,7 @@
                 <field name="expected_employees" optional="hide"/>
                 <field name="no_of_hired_employee" optional="hide"/>
                 <field name="message_needaction" column_invisible="True"/>
-                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="company_id" invisible="not companies.multi_company" optional="hide"/>
                 <field name="company_id" column_invisible="True"/>
                 <field name="alias_name" column_invisible="True"/>
                 <field name="alias_id" invisible="not alias_name" optional="hide"/>

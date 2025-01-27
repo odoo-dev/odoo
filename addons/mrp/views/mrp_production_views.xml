@@ -74,7 +74,7 @@
                     <field name="product_uom_id" readonly="1" options="{'no_open':True,'no_create':True}" groups="uom.group_uom" widget="many2one_uom" optional="show"/>
                     <field name="duration_expected" invisible="duration_expected == 0" groups="mrp.group_mrp_routings" widget="float_time" sum="Total expected duration" optional="hide"/>
                     <field name="duration" invisible="duration == 0" groups="mrp.group_mrp_routings" widget="float_time" sum="Total real duration" optional="hide"/>
-                    <field name="company_id" readonly="1" groups="base.group_multi_company" optional="show"/>
+                    <field name="company_id" readonly="1" invisible="not companies.multi_company" optional="show"/>
                     <field name="state"
                            decoration-success="state in ('done', 'to_close')"
                            decoration-warning="state == 'progress'"
@@ -546,7 +546,7 @@
                                         invisible="state in ('done', 'cancel') or not date_deadline"
                                         decoration-danger="is_delayed"
                                         decoration-bf="is_delayed"/>
-                                    <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" readonly="state != 'draft'" force_save="1"/>
+                                    <field name="company_id" invisible="not companies.multi_company" options="{'no_create': True}" readonly="state != 'draft'" force_save="1"/>
 
                                 </group>
                             </group>

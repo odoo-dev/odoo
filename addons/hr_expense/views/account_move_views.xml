@@ -32,8 +32,7 @@
                     <field name="payment_reference" optional="hide"/>
                     <field name="ref" optional="hide"/>
                     <field name="activity_ids" widget="list_activity" optional="hide"/>
-                    <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" optional="hide"/>
-                    <field name="company_id" groups="!base.group_multi_company" column_invisible="True"/>
+                    <field name="company_id" invisible="not companies.multi_company" options="{'no_create': True}" optional="hide"/>
                     <field name="amount_untaxed_in_currency_signed" string="Tax Excluded" sum="Total" optional="show"/>
                     <field name="amount_tax_signed" string="Tax" sum="Total" optional="hide"/>
                     <field name="amount_total_in_currency_signed" string="Total" sum="Total" optional="show" decoration-bf="1" decoration-warning="abnormal_amount_warning" groups="base.group_multi_currency"/>

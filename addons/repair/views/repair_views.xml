@@ -47,7 +47,7 @@
                 <field name="is_returned" optional="hide"/>
                 <field name="sale_order_id" optional="show"/>
                 <field name="location_id" optional="hide"/>
-                <field name="company_id" groups="base.group_multi_company" readonly="1" optional="show"/>
+                <field name="company_id" invisible="not companies.multi_company" readonly="1" optional="show"/>
                 <field name="state" optional="show" widget='badge'
                     decoration-success="state == 'done'"
                     decoration-info="state == 'confirmed'"
@@ -122,7 +122,7 @@
                         <group>
                             <field name="schedule_date" readonly="state in ['done', 'cancel']"/>
                             <field name="user_id" domain="[('share', '=', False)]"/>
-                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                            <field name="company_id" invisible="not companies.multi_company" options="{'no_create': True}"/>
                             <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
                             <field name="parts_availability_state" invisible="True"/>
                             <field name="parts_availability"
@@ -268,7 +268,7 @@
                     <filter string="Customer" name="partner" domain="[]" context="{'group_by': 'partner_id'}"/>
                     <filter string="Product" name="product" domain="[]" context="{'group_by': 'product_id'}"/>
                     <filter string="Status" name="status" domain="[]" context="{'group_by': 'state'}"/>
-                    <filter string="Company" name="company" domain="[]" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                    <filter string="Company" name="company" domain="[]" context="{'group_by': 'company_id'}" invisible="not companies.multi_company"/>
                     <filter string="Properties" name="group_by_repair_properties" context="{'group_by': 'repair_properties'}"/>
                 </group>
             </search>

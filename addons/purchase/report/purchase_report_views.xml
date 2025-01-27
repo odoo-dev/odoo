@@ -34,7 +34,7 @@
                     <field name="product_id" optional="show"/>
                     <field name="category_id" optional="show"/>
                     <field name="user_id" optional="show" widget="many2one_avatar_user"/>
-                    <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                    <field name="company_id" optional="show" column_invisible="not companies.multi_company"/>
                     <field name="qty_ordered" optional="hide" sum="Sum of Qty Ordered"/>
                     <field name="qty_received" optional="hide" sum="Sum of Qty Received"/>
                     <field name="qty_billed" optional="hide" sum="Sum of Qty Billed"/>
@@ -60,7 +60,7 @@
                 <field name="product_id"/>
                 <group expand="0" string="Extended Filters">
                     <field name="user_id"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" invisible="not companies.multi_company"/>
                     <field name="date_order"/>
                     <field name="date_approve"/>
                     <field name="category_id" filter_domain="[('category_id', 'child_of', self)]"/>
@@ -72,7 +72,7 @@
                     <filter string="Product" name="group_product_id" context="{'group_by':'product_id'}"/>
                     <filter string="Product Category" name="group_category_id" context="{'group_by':'category_id'}"/>
                     <filter string="Status" name="status" context="{'group_by':'state'}"/>
-                    <filter string="Company" name="company" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
+                    <filter string="Company" name="company" context="{'group_by':'company_id'}" invisible="not companies.multi_company"/>
                     <separator/>
                     <filter string="Order Date" name="order_month" context="{'group_by': 'date_order:month'}"/>
                     <filter string="Confirmation Date" name="group_date_approve_month" context="{'group_by': 'date_approve:month'}"/>

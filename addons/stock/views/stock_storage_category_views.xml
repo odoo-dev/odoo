@@ -21,7 +21,7 @@
                                 <field name="max_weight" class="oe_inline"/>
                                 <field name="weight_uom_name" class="oe_inline"/>
                             </div>
-                            <field name="company_id" groups="base.group_multi_company" placeholder="Visible to all"/>
+                            <field name="company_id" invisible="not companies.multi_company" placeholder="Visible to all"/>
                         </group>
                     </group>
                     <notebook>
@@ -58,7 +58,7 @@
                 <field name="name"/>
                 <field name="max_weight" string="Max Weight"/>
                 <field name="allow_new_product"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="company_id" column_invisible="not companies.multi_company"/>
             </list>
         </field>
     </record>

@@ -18,7 +18,7 @@
                     <field name="date" readonly="state in ['cancel', 'in_process']"/>
                     <field name="name"/>
                     <field name="journal_id"/>
-                    <field name="company_id" optional="hide" groups="base.group_multi_company"/>
+                    <field name="company_id" optional="hide" column_invisible="not companies.multi_company"/>
                     <field name="payment_method_line_id" context="{'hide_payment_journal_id': 1}"/>
                     <field name="partner_id" string="Customer"/>
                     <field name="amount_signed" string="Amount in Currency" optional="hide" groups="!base.group_multi_currency"/>
@@ -110,14 +110,14 @@
                     <separator/>
                     <filter string="Payment Date" name="date" date="date"/>
                     <separator/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" invisible="not companies.multi_company"/>
                     <filter string="Partner" name="partner" domain="[]" context="{'group_by': 'partner_id'}"/>
                     <filter string="Journal" name="journal" domain="[]" context="{'group_by': 'journal_id'}"/>
                     <filter string="Payment Method Line" name="paymentmethodline" domain="[]" context="{'group_by': 'payment_method_line_id'}"/>
                     <filter string="Status" name="state" domain="[]" context="{'group_by': 'state'}"/>
                     <filter string="Payment Date" name="groupby_date" domain="[]" context="{'group_by': 'date'}"/>
                     <filter string="Currency" name="currency" domain="[]" context="{'group_by': 'currency_id'}" groups="base.group_multi_currency"/>
-                    <filter string="Company" name="company" domain="[]" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                    <filter string="Company" name="company" domain="[]" context="{'group_by': 'company_id'}" invisible="not companies.multi_company"/>
                     <separator/>
                     <filter invisible="1" string="Late Activities" name="activities_overdue"
                         domain="[('my_activity_date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"

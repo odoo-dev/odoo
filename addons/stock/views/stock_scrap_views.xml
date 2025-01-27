@@ -70,7 +70,7 @@
                                 <field name="origin"/>
                                 <field name="date_done" invisible="state == 'draft'"/>
                                 <field name="picking_id" invisible="not picking_id" readonly="state == 'done'"/>
-                                <field name="company_id" groups="base.group_multi_company" readonly="state == 'done'"/>
+                                <field name="company_id" invisible="not companies.multi_company" readonly="state == 'done'"/>
                             </group>
                         </group>
                     </sheet>
@@ -118,7 +118,7 @@
                     <field name="product_uom_id" groups="uom.group_uom" widget="many2one_uom" readonly="state == 'done'"/>
                     <field name="location_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations" readonly="state == 'done'"/>
                     <field name="scrap_location_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations" readonly="state == 'done'"/>
-                    <field name="company_id" readonly="1" groups="base.group_multi_company"/>
+                    <field name="company_id" readonly="1" column_invisible="not companies.multi_company"/>
                     <field name="state" widget="badge" decoration-success="state == 'done'" decoration-muted="state == 'draft'"/>
                 </list>
             </field>

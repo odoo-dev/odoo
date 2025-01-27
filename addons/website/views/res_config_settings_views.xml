@@ -51,7 +51,7 @@
                                     <label class="col-lg-3" string="Website Name" for="website_name"/>
                                     <field name="website_name" required="website_id"/>
                                 </div>
-                                <div class="row mt8" groups="base.group_multi_company">
+                                <div class="row mt8" invisible="not companies.multi_company">
                                     <label class="col-lg-3" string="Company" for="website_company_id"/>
                                     <field name="website_company_id" required="website_id" title="The company this website belongs to"/>
                                 </div>

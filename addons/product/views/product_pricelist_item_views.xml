@@ -10,7 +10,7 @@
                 <filter name="Variant Rule" domain="[('applied_on', '=', '0_product_variant')]" groups="product.group_product_variant"/>
                 <separator/>
                 <field name="pricelist_id"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="company_id" invisible="not companies.multi_company"/>
                 <field name="currency_id" groups="base.group_multi_currency"/>
                 <filter string="Active" name="visible" domain="[('pricelist_id.active', '=', True)]"/>
                 <group expand="0" string="Group By">
@@ -42,7 +42,7 @@
           <field name="min_quantity" colspan="4"/>
           <field name="date_start" optional="hide"/>
           <field name="date_end" optional="hide"/>
-          <field name="company_id" groups="base.group_multi_company" optional="show"/>
+          <field name="company_id" column_invisible="not companies.multi_company" optional="show"/>
         </list>
       </field>
     </record>
@@ -85,7 +85,7 @@
                 <field name="date_start" optional="show"/>
                 <field name="date_end" optional="show"/>
                 <field name="applied_on" column_invisible="True"/>
-                <field name="company_id" groups="base.group_multi_company" optional="hide" options="{'no_create':1, 'no_open': 1}"/>
+                <field name="company_id" invisible="not companies.multi_company" optional="hide" options="{'no_create':1, 'no_open': 1}"/>
             </list>
         </field>
     </record>
@@ -208,7 +208,7 @@
                         <group name="pricelist_rule_related">
                             <field name="pricelist_id" invisible="1"/>
                             <field name="currency_id" groups="base.group_multi_currency"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="company_id" invisible="not companies.multi_company"/>
                         </group>
                     </group>
                 </sheet>

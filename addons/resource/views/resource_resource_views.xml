@@ -11,7 +11,7 @@
                <field name="resource_type"/>
                <field name="user_id"/>
                <field name="calendar_id"/>
-               <field name="company_id" groups="base.group_multi_company"/>
+               <field name="company_id" invisible="not companies.multi_company"/>
                <filter string="Human" name="human" domain="[('resource_type','=', 'user')]"/>
                <filter string="Material" name="material" domain="[('resource_type','=', 'material')]"/>
                <separator />
@@ -19,7 +19,7 @@
                <group expand="0" string="Group By">
                     <filter string="User" name="user" domain="[]" context="{'group_by':'user_id'}"/>
                     <filter string="Type" name="type" domain="[]" context="{'group_by':'resource_type'}"/>
-                    <filter string="Company" name="company" domain="[]" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
+                    <filter string="Company" name="company" domain="[]" context="{'group_by':'company_id'}" invisible="not companies.multi_company"/>
                     <filter string="Working Time" name="working_period" domain="[]" context="{'group_by':'calendar_id'}"/>
                 </group>
            </search>
@@ -42,7 +42,7 @@
                         <field name="resource_type" />
                     </group>
                     <group name="resource_details">
-                        <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company" placeholder="Visible to all"/>
+                        <field name="company_id" options="{'no_create': True}" invisible="not companies.multi_company" placeholder="Visible to all"/>
                         <field name="calendar_id" placeholder="Fully Flexible"/>
                         <field name="tz"/>
                         <field name="time_efficiency"/>
@@ -61,7 +61,7 @@
                 <field name="company_id" column_invisible="True"/>
                 <field name="name" />
                 <field name="user_id" />
-                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" optional="show"/>
+                <field name="company_id" column_invisible="not companies.multi_company" options="{'no_create': True}" optional="show"/>
                 <field name="calendar_id" optional="show" />
                 <field name="tz" optional="hide" />
                 <field name="resource_type" optional="show" />

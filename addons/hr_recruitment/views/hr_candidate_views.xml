@@ -76,7 +76,7 @@
                             <field name="categ_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                             <field name="employee_id" invisible="1"/>
                             <field name="emp_is_active" invisible="1"/>
-                            <field name="company_id" groups="base.group_multi_company" placeholder="Visible to all"/>
+                            <field name="company_id" invisible="not companies.multi_company" placeholder="Visible to all"/>
                         </group>
                     </group>
                     <field name="candidate_properties" columns="2"/>
@@ -105,7 +105,7 @@
                 <field name="refused_applications_count" optional="hide"/>
                 <field name="accepted_applications_count" optional="hide"/>
                 <field name="partner_id" invisible="1"/>
-                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="company_id" column_invisible="not companies.multi_company" optional="hide"/>
             </list>
         </field>
     </record>

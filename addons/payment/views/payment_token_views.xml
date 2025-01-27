@@ -24,7 +24,7 @@
                         <group name="technical_information">
                             <field name="provider_id"/>
                             <field name="provider_ref"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="company_id" invisible="not companies.multi_company"/>
                         </group>
                     </group>
                 </sheet>
@@ -42,7 +42,7 @@
                 <field name="payment_method_id"/>
                 <field name="provider_id"/>
                 <field name="provider_ref"/>
-                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                <field name="company_id" column_invisible="not companies.multi_company" optional="show"/>
             </list>
         </field>
     </record>
@@ -58,7 +58,7 @@
                 <group expand="1" string="Group By">
                     <filter string="Provider" name="provider_id" context="{'group_by': 'provider_id'}"/>
                     <filter string="Partner" name="partner_id" context="{'group_by': 'partner_id'}"/>
-                    <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                    <filter string="Company" name="company" context="{'group_by': 'company_id'}" invisible="not companies.multi_company"/>
                 </group>
             </search>
         </field>

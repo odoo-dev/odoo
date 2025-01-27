@@ -56,7 +56,7 @@
                 <field name="date_start" optional="show"/>
                 <field name="cost" optional="show" sum="Sum of Cost"/>
                 <field name="cost_type" optional="show"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="company_id" column_invisible="not companies.multi_company"/>
             </list>
         </field>
     </record>
@@ -72,7 +72,7 @@
                             <field name="vehicle_id"/>
                             <field name="driver_id"/>
                             <field name="fuel_type"/>
-                            <field name="company_id" groups="base.group_multi_company" placeholder="Visible to all"/>
+                            <field name="company_id" invisible="not companies.multi_company" placeholder="Visible to all"/>
                         </group>
                         <group>
                             <field name="date_start"/>

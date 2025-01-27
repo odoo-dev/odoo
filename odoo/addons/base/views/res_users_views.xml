@@ -174,7 +174,7 @@
                             </h2>
                         </div>
                         <group name="phone_numbers">
-                            <field name="company_id" context="{'user_preference': 0}" groups="base.group_multi_company"/>
+                            <field name="company_id" context="{'user_preference': 0}" invisible="not companies.multi_company"/>
                             <label for="group_ids" string="Access Rights"
                                     invisible="id &gt; 0" groups="base.group_no_one"/>
                             <div invisible="id &gt; 0" groups="base.group_no_one">
@@ -336,7 +336,7 @@
                     <field name="login" readonly="1"/>
                     <field name="lang"/>
                     <field name="login_date" readonly="1"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" column_invisible="not companies.multi_company"/>
                 </list>
             </field>
         </record>
@@ -381,7 +381,7 @@
             <field name="arch" type="xml">
                 <search string="Users">
                     <field name="name" filter_domain="['|', '|', ('name','ilike',self), ('login','ilike',self), ('email','ilike',self)]" string="User"/>
-                    <field name="company_ids" string="Company" groups="base.group_multi_company"/>
+                    <field name="company_ids" string="Company" invisible="not companies.multi_company"/>
                     <field name="share"/>
                     <filter name="filter_no_share" string="Internal Users" domain="[('share', '=', False)]"/>
                     <filter name="filter_share" string="Portal Users" domain="[('share', '=', True)]"/>
@@ -522,8 +522,7 @@
                                 <field name="signature" readonly="0" options="{'codeview': true}"/>
                             </group>
                             <group name="status" string="Status" invisible="1">
-                                <field name="company_id" options="{'no_create': True}" readonly="0"
-                                    groups="base.group_multi_company"/>
+                                <field name="company_id" options="{'no_create': True}" readonly="0" invisible="not companies.multi_company"/>
                             </group>
                             <group name="preference_contact"></group>
                         </page>

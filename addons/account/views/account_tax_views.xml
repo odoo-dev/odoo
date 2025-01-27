@@ -13,7 +13,7 @@
                     <field name="type_tax_use"/>
                     <field name="tax_scope"/>
                     <field name="invoice_label"/>
-                    <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                    <field name="company_id" options="{'no_create': True}" column_invisible="not companies.multi_company"/>
                     <field name="country_id" optional="hide"/>
                     <field name="active" widget="boolean_toggle"/>
                 </list>
@@ -96,7 +96,7 @@
                 <search string="Search Taxes">
                     <field name="name_searchable" string="Name"/>
                     <field name="description"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" invisible="not companies.multi_company"/>
                     <filter string="Sale" name="sale" domain="[('type_tax_use','=','sale')]" />
                     <filter string="Purchase" name="purchase" domain="[('type_tax_use','=','purchase')]" />
                     <separator/>
@@ -106,7 +106,7 @@
                     <filter name="active" string="Active" domain="[('active','=',True)]" help="Show active taxes"/>
                     <filter name="inactive" string="Inactive" domain="[('active','=',False)]" help="Show inactive taxes"/>
                     <group string="Group By">
-                        <filter string="Company" name="company" domain="[]" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
+                        <filter string="Company" name="company" domain="[]" context="{'group_by':'company_id'}" invisible="not companies.multi_company"/>
                         <filter string="Tax Type" name="taxapp" domain="[]" context="{'group_by':'type_tax_use'}"/>
                         <filter string="Tax Scope" name="taxapp" domain="[]" context="{'group_by':'tax_scope'}"/>
                     </group>
@@ -120,7 +120,7 @@
             <field name="arch" type="xml">
                 <search string="Search Taxes">
                     <field name="name" filter_domain="['|', '|', ('name', 'ilike', self), ('description', 'ilike', self), ('invoice_label', 'ilike', self)]" string="Tax"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" invisible="not companies.multi_company"/>
                 </search>
             </field>
         </record>
@@ -176,7 +176,7 @@
                                     <field name="description"/>
                                     <field name="tax_group_id" invisible="amount_type == 'group'" required="amount_type != 'group'"/>
                                     <field name="analytic" invisible="amount_type == 'group'" groups="analytic.group_analytic_accounting" />
-                                    <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                                    <field name="company_id" options="{'no_create': True}" invisible="not companies.multi_company"/>
                                     <field name="country_id" required="True"/>
                                     <field name="invoice_legal_notes"/>
                                 </group>
@@ -240,7 +240,7 @@
                     <field name="name"/>
                     <field name="country_id"/>
                     <field name="company_id" column_invisible="True"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" column_invisible="not companies.multi_company"/>
                     <field name="country_code" column_invisible="True"/>
 
                     <field name="tax_payable_account_id"/>
@@ -263,7 +263,7 @@
                             <group>
                                 <field name="name"/>
                                 <field name="country_id"/>
-                                <field name="company_id" groups="base.group_multi_company"/>
+                                <field name="company_id" invisible="not companies.multi_company"/>
                                 <field name="sequence"/>
                                 <field name="pos_receipt_label" string="Label on PoS Receipts" groups="base.group_no_one"/>
                             </group>

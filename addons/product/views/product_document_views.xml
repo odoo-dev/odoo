@@ -29,7 +29,7 @@
                     <group string="Attached To" groups="base.group_no_one">
                         <field name="res_name"/>
                         <field name="company_id"
-                               groups="base.group_multi_company"
+                              invisible="not companies.multi_company"
                                options="{'no_create': True}"
                                class="oe_inline"
                                placeholder="Visible to all"/>
@@ -98,7 +98,7 @@
                 <field name="res_model" column_invisible="True"/>
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
-                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                <field name="company_id" column_invisible="not companies.multi_company" optional="show"/>
             </list>
         </field>
     </record>

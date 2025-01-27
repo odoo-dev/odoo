@@ -8,7 +8,7 @@
                 <field name="name" string="Title"/>
                 <field name="periodicity"/>
                 <field name="next_run_date" groups="base.group_no_one"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="company_id" column_invisible="not companies.multi_company"/>
                 <field name="state" groups="base.group_no_one" widget="badge" decoration-success="state == 'activated'"/>
             </list>
         </field>

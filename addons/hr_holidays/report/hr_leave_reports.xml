@@ -24,7 +24,7 @@
                 <group expand="0" string="Group By">
                     <filter name="group_employee" string="Employee" context="{'group_by':'employee_id'}"/>
                     <filter name="group_type" string="Type" context="{'group_by':'holiday_status_id'}"/>
-                    <filter name="group_company" string="Company" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
+                    <filter name="group_company" string="Company" context="{'group_by':'company_id'}" invisible="not companies.multi_company"/>
                     <separator/>
                     <filter name="group_date_from" string="Start Date" context="{'group_by':'date_from'}"/>
                 </group>

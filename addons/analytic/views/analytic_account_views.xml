@@ -33,7 +33,7 @@
                             </group>
                             <group>
                                 <field name="plan_id" options="{'no_quick_create': True}"/>
-                                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company" placeholder="Visible to all"/>
+                                <field name="company_id" options="{'no_create': True}" invisible="not companies.multi_company" placeholder="Visible to all"/>
                                 <field name="currency_id" options="{'no_create': True}" groups="base.group_multi_currency"/>
                             </group>
                         </group>
@@ -57,7 +57,7 @@
                     <field name="partner_id"/>
                     <field name="plan_id"/>
                     <field name="active" column_invisible="True"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" column_invisible="not companies.multi_company"/>
                     <field name="debit" sum="Debit" column_invisible="True"/>
                     <field name="credit" sum="Credit" column_invisible="True"/>
                     <field name="balance" sum="Balance"/>

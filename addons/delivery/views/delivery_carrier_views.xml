@@ -9,7 +9,7 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="delivery_type"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="company_id" column_invisible="not companies.multi_company"/>
                 <field name="country_ids" widget="many2many_tags" optional="hide"/>
                 <field name="max_weight" optional="show"/>
                 <field name="max_volume" optional="hide"/>
@@ -97,7 +97,7 @@
                                 <button string="Install more Providers" name="install_more_provider" type="object" class="oe_link oe_edit_only"/>
                             </div>
                             <field name="integration_level" widget="radio" invisible="delivery_type == 'fixed' or delivery_type == 'base_on_rule'"/>
-                            <field name="company_id" groups="base.group_multi_company" placeholder="Visible to all"/>
+                            <field name="company_id" invisible="not companies.multi_company" placeholder="Visible to all"/>
                         </group>
                         <group name="delivery_details">
                             <field name="currency_id" invisible="1"/>

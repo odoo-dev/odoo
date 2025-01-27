@@ -365,7 +365,7 @@
                             <group>
                                 <group name="other_info">
                                     <field name="user_id" domain="[('share', '=', False)]" widget="many2one_avatar_user"/>
-                                    <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" readonly="state in ['cancel', 'done', 'purchase']"/>
+                                    <field name="company_id" invisible="not companies.multi_company" options="{'no_create': True}" readonly="state in ['cancel', 'done', 'purchase']"/>
                                     <field name="origin"/>
                                 </group>
                                 <group name="invoice_info">
@@ -522,7 +522,7 @@
                     <field name="date_approve" column_invisible="context.get('quotation_only', False)" optional="show"/>
                     <field name="partner_id" readonly="1"/>
                     <field name="company_id" readonly="1" options="{'no_create': True}"
-                        groups="base.group_multi_company" optional="show"/>
+                       column_invisible="not companies.multi_company" optional="show"/>
                     <field name="user_id" optional="show"/>
                     <field name="origin" optional="hide"/>
                     <field name="amount_untaxed" sum="Total Untaxed amount" string="Untaxed" widget="monetary" optional="hide"/>
@@ -558,8 +558,7 @@
                     <field name="date_approve" column_invisible="context.get('quotation_only', False)" optional="show"/>
                     <field name="partner_id" readonly="1"/>
                     <field name="company_id" readonly="1" options="{'no_create': True}"
-                        groups="base.group_multi_company" optional="show"/>
-                    <field name="company_id" groups="!base.group_multi_company" column_invisible="True" readonly="state in ['cancel', 'done', 'purchase']"/>
+                       invisible="not companies.multi_company" optional="show"/>
                     <field name="date_planned" column_invisible="context.get('quotation_only', False)" optional="show"/>
                     <field name="user_id" optional="show" widget="many2one_avatar_user"/>
                     <field name="date_order"
@@ -600,8 +599,7 @@
                     <field name="name" string="Reference" readonly="1" decoration-bf="1" decoration-info="state in ('draft','sent')"/>
                     <field name="date_approve" column_invisible="context.get('quotation_only', False)" optional="show"/>
                     <field name="partner_id" readonly="state in ['cancel', 'done', 'purchase']"/>
-                    <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" optional="show" readonly="state in ['cancel', 'done', 'purchase']"/>
-                    <field name="company_id" groups="!base.group_multi_company" column_invisible="True" readonly="state in ['cancel', 'done', 'purchase']"/>
+                    <field name="company_id" invisible="not companies.multi_company" options="{'no_create': True}" optional="show" readonly="state in ['cancel', 'done', 'purchase']"/>
                     <field name="user_id" widget="many2one_avatar_user" optional="show"/>
                     <field name="date_order" column_invisible="not context.get('quotation_only', False)" readonly="state in ['cancel', 'done', 'purchase']" optional="show"/>
                     <field name="activity_ids" widget="list_activity" optional="show"/>
@@ -737,7 +735,7 @@
                                 <field name="tax_ids" widget="many2many_tax_tags"
                                     domain="[('type_tax_use', '=', 'purchase')]"/>
                                 <field name="date_planned" readonly="1"/>
-                                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                                <field name="company_id" invisible="not companies.multi_company" options="{'no_create': True}"/>
                                 <field name="analytic_distribution" widget="analytic_distribution"
                                        groups="analytic.group_analytic_accounting"
                                        options="{'product_field': 'product_id', 'business_domain': 'purchase_order'}"/>
@@ -788,7 +786,7 @@
                 <field name="order_id" widget="many2one"/>
                 <field name="date_approve"/>
                 <field name="partner_id" string="Vendor"/>
-                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                <field name="company_id" optional="show" column_invisible="not companies.multi_company"/>
                 <field name="product_uom_qty" string="Quantity"/>
                 <field name="price_unit" widget="monetary"/>
                 <field name="price_subtotal" widget="monetary" string="Total Untaxed"/>

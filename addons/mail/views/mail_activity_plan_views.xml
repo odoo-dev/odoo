@@ -22,7 +22,7 @@
                     <field name="name"/>
                     <field name="res_model_id" optional="hide"/>
                     <field name="steps_count"/>
-                    <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                    <field name="company_id" column_invisible="not companies.multi_company" optional="hide"/>
                 </list>
             </field>
         </record>
@@ -60,7 +60,7 @@
                             <group>
                                 <field name="res_model"/>
                             </group>
-                            <group name="company_id" groups="base.group_multi_company">
+                            <group name="company_id" invisible="not companies.multi_company">
                                 <field name="company_id" domain="[('id', '=', allowed_company_ids)]" placeholder="Visible to all"/>
                             </group>
                         </group>

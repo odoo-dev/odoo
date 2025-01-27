@@ -24,7 +24,7 @@
                     widget="many2many_tags"
                     placeholder="All countries"/>
                 <field name="currency_id" groups="base.group_multi_currency"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="company_id" column_invisible="not companies.multi_company"/>
             </list>
         </field>
     </record>
@@ -63,7 +63,7 @@
                         <group name="pricelist_settings">
                             <field name="currency_id" groups="base.group_multi_currency"/>
                             <field name="active" invisible="1"/>
-                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
+                            <field name="company_id" invisible="not companies.multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
                         </group>
                         <group>
                             <field name="country_group_ids" widget="many2many_tags"/>

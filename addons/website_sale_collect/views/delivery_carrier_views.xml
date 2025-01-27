@@ -20,7 +20,7 @@
                             <field name="opening_hours"/>
                             <field name="lot_stock_id" groups="stock.group_stock_multi_locations"/>
                             <field name="partner_id"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="company_id" column_invisible="not companies.multi_company"/>
                         </list>
                     </field>
                 </page>

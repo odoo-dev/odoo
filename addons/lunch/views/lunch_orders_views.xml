@@ -44,7 +44,7 @@
                 <field name="currency_id" column_invisible="True"/>
                 <field name='price' sum="Total" string="Price" widget="monetary"/>
                 <field name='state' widget="badge" decoration-warning="state == 'new'" decoration-success="state == 'confirmed'" decoration-info="state == 'sent'" decoration-danger="state == 'ordered'"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="company_id" invisible="not companies.multi_company"/>
                 <field name="display_reorder_button" column_invisible="True"/>
                 <field name="notified" column_invisible="True"/>
                 <button name="action_reorder" string="Re-order" type="object" icon="fa-history" invisible="not display_reorder_button or not display_add_button" groups="lunch.group_lunch_user"/>

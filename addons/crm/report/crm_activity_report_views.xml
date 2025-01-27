@@ -32,7 +32,7 @@
                     <field name="author_id" widget="many2one_avatar"/>
                     <field name="mail_activity_type_id"/>
                     <field name="body" optional="hide"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" column_invisible="not companies.multi_company"/>
                     <field name="tag_ids" string="Lead Tags" optional="show" widget="many2many_tags" options="{'color_field': 'color'}"/>
                 </list>
             </field>
@@ -72,7 +72,7 @@
                         <filter string="Salesperson" name="group_by_user_id" context="{'group_by': 'user_id'}"/>
                         <filter string="Sales Team" name="saleschannel" context="{'group_by': 'team_id'}"/>
                         <filter string="Stage" name="stage" context="{'group_by': 'stage_id'}"/>
-                        <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                        <filter string="Company" name="company" context="{'group_by': 'company_id'}" invisible="not companies.multi_company"/>
                         <filter string="Creation Date" name="group_by_lead_date_creation" context="{'group_by': 'lead_create_date'}"/>
                         <filter string="Expected Closing" name="group_by_date_deadline" context="{'group_by': 'date_deadline'}"/>
                         <filter string="Closed Date" name="group_by_date_closed" context="{'group_by': 'date_closed'}"/>

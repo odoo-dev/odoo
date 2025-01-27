@@ -261,7 +261,7 @@
                         <list editable="bottom">
                             <field name="company_id" column_invisible="True"/>
                             <field name="name" string="Operation" readonly="state in ['cancel', 'done']"/>
-                            <field name="company_id" optional="hide" groups="base.group_multi_company"/>
+                            <field name="company_id" optional="hide" column_invisible="not companies.multi_company"/>
                             <field name="workcenter_id" readonly="state in ['cancel', 'done', 'progress']"/>
                             <field name="date_start" readonly="1"/>
                             <field name="date_finished" readonly="1"/>

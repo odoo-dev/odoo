@@ -45,7 +45,7 @@
                         decoration-danger="(location_usage in ('internal','transit')) and (location_dest_usage not in ('internal','transit'))"
                         decoration-success="(location_usage not in ('internal','transit')) and (location_dest_usage in ('internal','transit'))"/>
                     <field name="product_uom" options="{'no_open': True, 'no_create': True}" groups="uom.group_uom" widget="many2one_uom"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" invisible="not companies.multi_company"/>
                     <field name="state" widget='badge' optional="show"
                            decoration-danger="state=='cancel'"
                            decoration-info="state== 'assigned'"
@@ -281,7 +281,7 @@
                                 <field name="reference"/>
                                 <field name="location_id" options="{'no_create': True}"/>
                                 <field name="location_dest_id" options="{'no_create': True}"/>
-                                <field name="company_id" groups="base.group_multi_company"/>
+                                <field name="company_id" invisible="not companies.multi_company"/>
                             </group>
                             <group name="main_grp_col2">
                                 <field name="product_id" readonly="state == 'done'"/>

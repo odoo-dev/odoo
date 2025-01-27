@@ -42,7 +42,7 @@
                     <t t-name="JournalTop">
                         <span class="d-flex d-flew-row align-items-baseline">
                             <a class="fs-4 fw-bold" type="object" name="open_action"><field name="name"/></a>
-                            <t t-if="dashboard.show_company" groups="base.group_multi_company" >
+                            <t t-if="dashboard.show_company" invisible="not companies.multi_company" >
                                 <span class="small fw-bold ms-1"> - <field name="company_id"/></span>
                             </t>
                         </span>

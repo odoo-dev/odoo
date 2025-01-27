@@ -10,7 +10,7 @@
                     <field name="name" />
                     <field class="o_homework_icon_types d-flex flex-wrap" name="location_type"
                            widget="hr_homeworking_radio_image" options="{'horizontal': true}"/>
-                    <field name="company_id" groups="base.group_multi_company" />
+                    <field name="company_id" column_invisible="not companies.multi_company" />
                 </list>
             </field>
         </record>
@@ -29,8 +29,7 @@
                                        widget="hr_homeworking_radio_image" options="{'horizontal': true}"/>
                             </group>
                             <group>
-                                <field name="company_id" groups="base.group_multi_company" />
-                                <field name="company_id" groups="!base.group_multi_company" invisible="1" />
+                                <field name="company_id" invisible="not companies.multi_company" />
                             </group>
                         </group>
                     </sheet>

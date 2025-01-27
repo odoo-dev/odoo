@@ -170,7 +170,7 @@
                                 <field name="task_id" widget="task_with_hours" options="{'no_create_edit': True}"
                                     context="{'default_project_id': project_id, 'search_default_my_tasks': True, 'search_default_open_tasks': True}"
                                     readonly="readonly_timesheet"/>
-                                <field name="company_id" groups="base.group_multi_company" invisible="1"/>
+                                <field name="company_id" invisible="1"/>
                             </group>
                             <group>
                                 <field name="date" readonly="readonly_timesheet"/>

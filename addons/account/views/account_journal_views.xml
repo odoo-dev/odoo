@@ -17,8 +17,7 @@
                     <field name="default_account_id" optional="show"/>
                     <field name="autocheck_on_post" optional="hide"/>
                     <field name="active" optional="hide"/>
-                    <field name="company_id" groups="base.group_multi_company" optional="hide"/>
-                    <field name="company_id" groups="!base.group_multi_company" column_invisible="True"/>
+                    <field name="company_id" column_invisible="not companies.multi_company" optional="hide"/>
                 </list>
             </field>
         </record>
@@ -52,10 +51,9 @@
                             <group>
                                 <field name="active" invisible="1"/>
                                 <field name="type"/>
-                                <field name="code" placeholder="e.g. INV"/>
                             </group>
                             <group>
-                                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                                <field name="company_id" options="{'no_create': True}" invisible="not companies.multi_company"/>
                                 <field name="country_code" invisible="1"/>
                             </group>
                         </group>
@@ -255,7 +253,7 @@
                     <field name="sequence"  widget="handle"/>
                     <field name="name" placeholder="e.g. GAAP, IFRS, ..."/>
                     <field name="excluded_journal_ids" widget="many2many_tags" options="{'no_create': True}"/>
-                    <field name="company_id" groups="base.group_multi_company" placeholder="Visible to all" options="{'no_create': True}"/>
+                    <field name="company_id" column_invisible="not companies.multi_company" placeholder="Visible to all" options="{'no_create': True}"/>
                 </list>
             </field>
         </record>
@@ -272,7 +270,7 @@
                             <field name="name" placeholder="e.g. GAAP, IFRS, ..."/>
                             <field name="excluded_journal_ids" widget="many2many_tags" options="{'no_create': True}"/>
                             <field name="sequence" groups="base.group_no_one"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="company_id" invisible="not companies.multi_company"/>
                         </group>
                     </sheet>
                 </form>

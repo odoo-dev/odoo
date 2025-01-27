@@ -14,7 +14,7 @@
                       <group>
                         <field name="code"/>
                         <field name="active" widget="boolean_toggle"/>
-                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="company_id" invisible="not companies.multi_company"/>
                       </group>
                     </group>
                     <notebook>
@@ -78,7 +78,7 @@
                     <field name="name"/>
                     <field name="prefix"/>
                     <field name="padding"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" column_invisible="not companies.multi_company"/>
                     <field name="number_next_actual" string="Next Number"/>
                     <field name="number_increment"/>
                     <field name="implementation"/>
@@ -92,7 +92,7 @@
                 <search string="Sequences">
                     <field name="name" string="Sequence"/>
                     <field name="code"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" column_invisible="not companies.multi_company"/>
                     <separator/>
                     <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
                 </search>

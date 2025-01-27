@@ -80,7 +80,7 @@
                                 </li>
                             </ul>
                             </p>
-                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}" invisible="context.get('parent_production_id')" placeholder="Visible to all"/>
+                            <field name="company_id" options="{'no_create': True, 'no_open': True}" invisible="not companies.multi_company or context.get('parent_production_id')" placeholder="Visible to all"/>
                         </group>
                     </group>
                     <notebook>
@@ -183,7 +183,7 @@
                     <field name="code" optional="show"/>
                     <field name="type"/>
                     <field name="product_id" groups="product.group_product_variant" optional="hide"/>
-                    <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                    <field name="company_id" column_invisible="not companies.multi_company" optional="show"/>
                     <field name="product_qty" optional="hide"/>
                     <field name="product_uom_id" groups="uom.group_uom" optional="hide" widget="many2one_uom"/>
                 </list>

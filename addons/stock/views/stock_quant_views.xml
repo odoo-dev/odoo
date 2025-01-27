@@ -56,7 +56,7 @@
                     <filter string='Owner' name="owner" context="{'group_by': 'owner_id'}" groups="stock.group_tracking_owner"/>
                     <filter string='Lot/Serial Number' name="Lot_Serial_number" context="{'group_by': 'lot_id'}" groups="stock.group_production_lot"/>
                     <filter string='Package' name="package" domain="[]" context="{'group_by': 'package_id'}" groups="stock.group_tracking_lot"/>
-                    <filter string='Company' name="company" domain="[]" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                    <filter string='Company' name="company" domain="[]" context="{'group_by': 'company_id'}" invisible="not companies.multi_company"/>
                </group>
             </search>
         </field>
@@ -81,7 +81,7 @@
                                 context="{'default_product_id': product_id}"/>
                             <field name="package_id" readonly="0" groups="stock.group_tracking_lot"/>
                             <field name="owner_id" readonly="0" groups="stock.group_tracking_owner" options="{'no_create': True}"/>
-                            <field name='company_id' groups="base.group_multi_company"/>
+                            <field name='company_id' invisible="not companies.multi_company"/>
                         </group>
                         <group>
                             <label for="quantity" string="Quantity On Hand"/>
@@ -132,7 +132,7 @@
                        readonly="context.get('single_product', False) or id" force_save="1"
                        options="{'no_create': True}" widget="many2one"/>
                 <field name="product_categ_id" optional="hide"/>
-                <field name='company_id' groups="base.group_multi_company" optional="hidden"/>
+                <field name='company_id' invisible="not companies.multi_company" optional="hidden"/>
                 <field name="package_id" groups="stock.group_tracking_lot"
                        readonly="id"/>
                 <field name="lot_id" groups="stock.group_production_lot"
@@ -169,7 +169,7 @@
                 <field name="quantity" string="On Hand"/>
                 <field name="available_quantity" string="Available"/>
                 <field name="product_uom_id" groups="uom.group_uom" widget="many2one_uom"/>
-                <field name="company_id" groups="base.group_multi_company" optional="hidden"/>
+                <field name="company_id" column_invisible="not companies.multi_company" optional="hidden"/>
             </list>
         </field>
     </record>
@@ -280,7 +280,7 @@
                     <group>
                         <group>
                             <field name="package_type_id"/>
-                            <field name='company_id' groups="base.group_multi_company"/>
+                            <field name='company_id' invisible="not companies.multi_company"/>
                             <field name='owner_id' groups="stock.group_tracking_owner"/>
                             <field name="location_id" options="{'no_create': True}"/>
                         </group>
@@ -323,7 +323,7 @@
                 <field name="display_name"/>
                 <field name="package_type_id"/>
                 <field name="location_id" options="{'no_create': True}"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="company_id" column_invisible="not companies.multi_company"/>
             </list>
         </field>
     </record>
@@ -453,7 +453,7 @@ in this location. That leads to a negative stock.
                 <field name="inventory_diff_quantity" string="Difference"  invisible="not inventory_quantity_set" decoration-muted="inventory_diff_quantity == 0" decoration-danger="inventory_diff_quantity &lt; 0" decoration-success="inventory_diff_quantity &gt; 0" decoration-bf="inventory_diff_quantity != 0"/>
                 <field name="inventory_date" optional="show"/>
                 <field name="user_id" string="User" optional="show"/>
-                <field name='company_id' groups="base.group_multi_company" optional="hide"/>
+                <field name='company_id' invisible="not companies.multi_company" optional="hide"/>
                 <field name="lot_properties" optional="hide"/>
                 <button name="action_inventory_history" type="object" class="btn btn-link text-info" icon="fa-history" string="History"/>
                 <button name="action_apply_inventory" type="object" string="Apply" class="btn btn-link" icon="fa-save" invisible="not inventory_quantity_set"/>

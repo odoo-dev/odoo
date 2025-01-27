@@ -128,7 +128,7 @@
                         <field name="campaign_id"/>
                         <field name="medium_id"/>
                         <field name="source_id"/>
-                        <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                        <field name="company_id" options="{'no_create': True}" invisible="not companies.multi_company"/>
                         <newline/>
                         <field name="create_date"/>
                         <field name="date_open"/>
@@ -140,7 +140,7 @@
                         <filter string="Sales Team" name="saleschannel" context="{'group_by':'team_id'}"/>
                         <filter string="City" name="city" context="{'group_by':'city'}" />
                         <filter string="Country" name="country" context="{'group_by':'country_id'}" />
-                        <filter string="Company" name="company" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
+                        <filter string="Company" name="company" context="{'group_by':'company_id'}" invisible="not companies.multi_company"/>
                         <filter string="Stage" name="stage" context="{'group_by':'stage_id'}"/>
                         <filter string="Campaign" name="compaign" domain="[]" context="{'group_by':'campaign_id'}"/>
                         <filter string="Medium" name="medium" domain="[]" context="{'group_by':'medium_id'}"/>

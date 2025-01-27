@@ -6,7 +6,7 @@
             <list create="false" import="false">
                 <field name="date_closing_start"/>
                 <field name="date_closing_stop"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="company_id" column_invisible="not companies.multi_company"/>
                 <field name="currency_id" column_invisible="True"/>
                 <field name="frequency"/>
                 <field name="sequence_number" groups="base.group_no_one"/>
@@ -41,7 +41,7 @@
                             <field name="last_order_hash" groups="account.group_account_readonly"/>
                         </group>
                         <group>
-                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="company_id" invisible="not companies.multi_company"/>
                             <field name="currency_id" invisible="1"/>
                         </group>
                     </group>

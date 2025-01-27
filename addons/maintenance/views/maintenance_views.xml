@@ -130,7 +130,7 @@
                             </div>
                             <field name="priority" widget="priority"/>
                             <field name="email_cc" string="Email cc" groups="base.group_no_one"/>
-                            <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                            <field name="company_id" options="{'no_create': True}" invisible="not companies.multi_company"/>
                         </group>
                     </group>
                     <notebook>
@@ -201,7 +201,7 @@
                 <field name="user_id"/>
                 <field name="category_id" readonly="1" groups="maintenance.group_equipment_manager"/>
                 <field name="stage_id"/>
-                <field name="company_id" readonly="1" groups="base.group_multi_company"/>
+                <field name="company_id" readonly="1" column_invisible="not companies.multi_company"/>
                 <field name="activity_exception_decoration" widget="activity_exception"/>
             </list>
         </field>
@@ -387,7 +387,7 @@
                         <group>
                             <field name="active" invisible="1"/>
                             <field name="category_id" options="{&quot;no_open&quot;: True}" context="{'default_company_id':company_id}"/>
-                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
+                            <field name="company_id" invisible="not companies.multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
                             <field name="owner_user_id" string="Owner"/>
                         </group>
                         <group>
@@ -495,7 +495,7 @@
                 <field name="technician_user_id"/>
                 <field name="category_id"/>
                 <field name="partner_id" column_invisible="True"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="company_id" column_invisible="not companies.multi_company"/>
                 <field name="activity_exception_decoration" widget="activity_exception"/>
             </list>
         </field>
@@ -604,7 +604,7 @@
                 </div>
                 <group>
                     <field name="technician_user_id" class="oe_inline" domain="[('share', '=', False)]"/>
-                    <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"
+                    <field name="company_id" invisible="not companies.multi_company" options="{'no_create': True}"
                            class="oe_inline" placeholder="Visible to all"/>
                 </group>
                 <group name="group_alias">
@@ -634,7 +634,7 @@
             <list string="Assign To User">
                 <field name="name" string="Name"/>
                 <field name="technician_user_id"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="company_id" column_invisible="not companies.multi_company"/>
             </list>
         </field>
     </record>
@@ -755,7 +755,7 @@
                         <field name="member_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create': True}" domain="[('share', '=', False)]"/>
                     </group>
                     <group>
-                        <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
+                        <field name="company_id" invisible="not companies.multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
                     </group>
                 </group>
                 </sheet>
@@ -770,7 +770,7 @@
             <list string="Maintenance Team" editable="bottom">
                 <field name="name"/>
                 <field name="member_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create': True}" domain="[('share', '=', False)]"/>
-                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
+                <field name="company_id" invisible="not companies.multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
             </list>
         </field>
     </record>

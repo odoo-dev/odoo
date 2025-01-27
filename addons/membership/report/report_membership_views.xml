@@ -23,7 +23,7 @@
                         <filter string="Current Membership State" name="membership_state"
                             context="{'group_by':'membership_state'}"/>
                         <filter string="Company" name="company"
-                            context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
+                            context="{'group_by':'company_id'}" invisible="not companies.multi_company"/>
                         <filter string="Month" name="start_date"
                             context="{'group_by':'start_date:month'}"/>
                     </group>
@@ -68,7 +68,7 @@
                 <field name="start_date" optional="hide"/>
                 <field name="date_to" optional="hide"/>
                 <field name="user_id" optional="show" widget="many2one_avatar_user"/>
-                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                <field name="company_id" optional="show" column_invisible="not companies.multi_company"/>
                 <field name="num_invoiced" optional="show" sum="Sum of # Invoiced"/>
                 <field name="num_paid" optional="show" sum="Sum of # Paid"/>
                 <field name="quantity" optional="show" sum="Sum of Quantity"/>

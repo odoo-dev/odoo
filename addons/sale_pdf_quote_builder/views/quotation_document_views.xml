@@ -45,7 +45,7 @@
                         <field
                             name="company_id"
                             placeholder="Visible to all"
-                            groups="base.group_multi_company"
+                            invisible="not companies.multi_company"
                             options="{'no_create': True}"
                             class="oe_inline"
                         />
@@ -124,7 +124,7 @@
                 <field name="document_type"/>
                 <field name="quotation_template_ids" widget="many2many_tags"/>
                 <field name="add_by_default" widget="boolean_toggle" optional="show"/>
-                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                <field name="company_id" invisible="not companies.multi_company" optional="show"/>
             </list>
         </field>
     </record>

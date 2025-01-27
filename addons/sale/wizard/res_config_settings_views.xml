@@ -80,7 +80,7 @@
                                 <div class="d-inline-block">days</div>
                                 <span class="fa fa-lg fa-building-o p-2"
                                       title="Values set here are company-specific."
-                                      groups="base.group_multi_company"/>
+                                     invisible="not companies.multi_company"/>
                             </div>
                             <div class="text-muted">
                                 Default period during which the quote is valid and can still be accepted by the customer. The default can be changed per order or template.

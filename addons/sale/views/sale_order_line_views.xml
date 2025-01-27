@@ -58,7 +58,7 @@
                                 readonly="product_uom_readonly"
                                 required="not display_type"/>
                             <field name="product_uom_id" groups="!uom.group_uom" invisible="1"/>
-                            <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                            <field name="company_id" options="{'no_create': True}" invisible="not companies.multi_company"/>
                             <field name="order_partner_id" invisible="1"/>
                             <field name="display_type" invisible="1"/>
                             <field name="product_updatable" invisible="1"/>

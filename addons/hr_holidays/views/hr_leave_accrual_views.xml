@@ -153,7 +153,7 @@
                         <group>
                             <field name="is_based_on_worked_time" readonly="accrued_gain_time == 'start'"/>
                             <field name="transition_mode" widget="radio" invisible="not show_transition_mode"/>
-                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
+                            <field name="company_id" invisible="not companies.multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
                         </group>
                     </group>
                     <span class="opacity-50" invisible="1">
@@ -275,7 +275,7 @@
         <field name="arch" type="xml">
             <search string="Group By">
                 <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
-                <filter string="Company" name='company_id' context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
+                <filter string="Company" name='company_id' context="{'group_by':'company_id'}" invisible="not companies.multi_company"/>
             </search>
         </field>
     </record>

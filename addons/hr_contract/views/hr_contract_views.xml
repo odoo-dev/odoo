@@ -190,7 +190,7 @@
                                 </div>
                             </h1>
                             <h2>
-                                <field name="company_id" groups="base.group_multi_company" invisible="1"/>
+                                <field name="company_id" invisible="1"/>
                             </h2>
                         </div>
                         <div id="template_warning" class="alert alert-warning" role="alert" invisible="employee_id">
@@ -283,7 +283,7 @@
                     <field name="structure_type_id" optional="hidden"/>
                     <field name="kanban_state" widget="state_selection" nolabel="1"/>
                     <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'close'" decoration-success="state == 'open'"/>
-                    <field name="company_id" groups="base.group_multi_company" readonly="1" optional="hidden"/>
+                    <field name="company_id" invisible="not companies.multi_company" readonly="1" optional="hidden"/>
                 </list>
             </field>
         </record>

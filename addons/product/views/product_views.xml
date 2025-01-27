@@ -153,7 +153,7 @@
                                     </div>
                                     <field name="categ_id" string="Category"/>
                                     <field name="company_id"
-                                        groups="base.group_multi_company"
+                                       invisible="not companies.multi_company"
                                         options="{'no_create': True}"
                                         placeholder="Visible to all"/>
                                     <field name="currency_id" invisible="1"/>
@@ -424,7 +424,7 @@
                     <field name="barcode" optional="hide" readonly="1"/>
                     <field name="name" readonly="1"/>
                     <field name="product_template_variant_value_ids" widget="many2many_tags" groups="product.group_product_variant" readonly="1"/>
-                    <field name="company_id" groups="base.group_multi_company" optional="hide" readonly="1"/>
+                    <field name="company_id" column_invisible="not companies.multi_company" optional="hide" readonly="1"/>
                     <field name="lst_price" optional="show" string="Sales Price"/>
                     <field name="standard_price" optional="show"/>
                     <field name="categ_id" optional="hide"/>

@@ -19,7 +19,7 @@
                             <field name="company_ids" widget="many2many_tags"
                                    string="Used In"
                                    readonly="True"
-                                   groups="base.group_multi_company"
+                                   invisible="not companies.multi_company"
                                    placeholder="Visible to all"/>
                         </group>
                         <group>
@@ -48,7 +48,7 @@
                 <field name="default_from"/>
                 <field name="company_ids" optional="hide"
                        widget="many2many_tags"
-                       groups="base.group_multi_company"/>
+                      invisible="not companies.multi_company"/>
             </list>
         </field>
     </record>
@@ -61,11 +61,11 @@
                 <field name="name"/>
                 <field name="bounce_alias"/>
                 <field name="catchall_alias"/>
-                <field name="company_ids" groups="base.group_multi_company"/>
+                <field name="company_ids" column_invisible="not companies.multi_company"/>
                 <group expand="0" string="Group By">
                     <filter string="Company" name="group_by_company_ids"
                         domain="[]" context="{'group_by': 'company_ids'}"
-                        groups="base.group_multi_company"/>
+                       invisible="not companies.multi_company"/>
                 </group>
             </search>
         </field>

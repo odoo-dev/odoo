@@ -12,7 +12,7 @@
                     </div>
                     <group id="certificate_input">
                         <field name="name" placeholder="e.g. New Certificate"/>
-                        <field name="company_id" groups="base.group_multi_company" readonly="1"/>
+                        <field name="company_id" invisible="not companies.multi_company" readonly="1"/>
                         <field name="content" widget="binary"/>
                         <field name="pkcs12_password" password="True" />
                         <field name="subject_common_name" invisible="not pem_certificate"/>
@@ -40,7 +40,7 @@
                 <field name="name" string="Certificate"/>
                 <field name="subject_common_name" string="Subject Name"/>
                 <field name="is_valid" string="Validity"/>
-                <field name="company_id" groups="base.group_multi_company" readonly="1" optional="hide"/>
+                <field name="company_id" column_invisible="not companies.multi_company" readonly="1" optional="hide"/>
             </list>
         </field>
     </record>

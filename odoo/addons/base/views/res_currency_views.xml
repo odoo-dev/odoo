@@ -17,7 +17,7 @@
             <field name="arch" type="xml">
                 <list string="Currency Rates" editable="bottom">
                     <field name="name"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" column_invisible="not companies.multi_company"/>
                     <field name="company_rate" digits="[12,12]"/>
                     <field name="inverse_company_rate" digits="[12,12]"/>
                     <field name="rate" digits="[12,12]" optional="hide"/>
@@ -41,7 +41,7 @@
                             </group>
                             <group>
                                 <field name="currency_id"/>
-                                <field name="company_id" groups="base.group_multi_company"/>
+                                <field name="company_id" invisible="not companies.multi_company"/>
                             </group>
                         </group>
                     </sheet>
@@ -166,7 +166,7 @@
                                 <field name="rate_ids" widget="one2many">
                                     <list string="Rates"  editable="top" limit="25">
                                         <field name="name"/>
-                                        <field name="company_id" groups="base.group_multi_company" placeholder="Visible to all"/>
+                                        <field name="company_id" invisible="not companies.multi_company" placeholder="Visible to all"/>
                                         <field name="company_rate" digits="[12,12]"/>
                                         <field name="inverse_company_rate" digits="[12,12]"/>
                                         <field name="rate" digits="[12,12]" optional="hide"/>

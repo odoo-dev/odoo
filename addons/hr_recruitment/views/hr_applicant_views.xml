@@ -31,7 +31,7 @@
                 <field name="availability" optional="hide"/>
                 <field name="department_id" readonly="1" column_invisible="context.get('invisible_department', True)" optional="hide"/>
                 <field name="company_id" column_invisible="True"/>
-                <field name="company_id" groups="base.group_multi_company" readonly="1" optional="hide"/>
+                <field name="company_id" invisible="not companies.multi_company" readonly="1" optional="hide"/>
             </list>
         </field>
     </record>
@@ -144,7 +144,7 @@
                             </group>
                             <group string="Job">
                                 <field name="department_id"/>
-                                <field name="company_id" groups="base.group_multi_company" options='{"no_open":True}' placeholder="Visible to all"/>
+                                <field name="company_id" invisible="not companies.multi_company" options='{"no_open":True}' placeholder="Visible to all"/>
                             </group>
                         </group>
                         <group>
@@ -222,7 +222,7 @@
                 <field string="Email" name="email_from" filter_domain="[('email_from', 'ilike', self)]"/>
                 <field name="job_id"/>
                 <field name="department_id" operator="child_of"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="company_id" invisible="not companies.multi_company"/>
                 <field name="user_id"/>
                 <field name="stage_id" domain="[]"/>
                 <field name="categ_ids"/>
@@ -269,7 +269,7 @@
                     <filter string="Hiring Date" name="hired_date" context="{'group_by': 'date_closed'}"/>
                     <filter string="Last Stage Update" name="last_stage_update" context="{'group_by': 'date_last_stage_update'}"/>
                     <filter string="Refuse Reason" name="refuse_reason_id" domain="[]" context="{'group_by': 'refuse_reason_id'}"/>
-                    <filter string="Company" name="company" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
+                    <filter string="Company" name="company" context="{'group_by':'company_id'}" invisible="not companies.multi_company"/>
                     <filter string="Properties" name="group_by_applicant_properties" context="{'group_by': 'applicant_properties'}"/>
                 </group>
            </search>
@@ -523,13 +523,13 @@
                 <group expand="0" string="Extended Filters">
                     <field name="priority"/>
                     <field name="stage_id"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" invisible="not companies.multi_company"/>
                     <field name="create_date"/>
                     <field name="date_closed"/>
                 </group>
                 <group expand="1" string="Group By">
                     <filter string="Responsible" name='User' context="{'group_by':'user_id'}"/>
-                    <filter string="Company" name="company" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
+                    <filter string="Company" name="company" context="{'group_by':'company_id'}" invisible="not companies.multi_company"/>
                     <filter string="Jobs" name="job" context="{'group_by':'job_id'}"/>
                     <filter string="Department" name="department" context="{'group_by':'department_id'}"/>
                     <filter string="Tags" name="group_by_categ_ids" context="{'group_by':'categ_ids'}"/>

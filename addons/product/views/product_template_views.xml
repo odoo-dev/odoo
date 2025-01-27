@@ -16,7 +16,7 @@
                 <field name="product_tag_ids" widget="many2many_tags" optional="hide"/>
                 <field name="barcode" optional="hide" readonly="product_variant_count != 1"/>
                 <field name="company_id" options="{'no_create': True}"
-                    groups="base.group_multi_company" optional="hide"/>
+                   column_invisible="not companies.multi_company" optional="hide"/>
                 <field name="list_price" string="Sales Price" widget='monetary' options="{'currency_field': 'currency_id'}" optional="show" decoration-muted="not sale_ok"/>
                 <field name="standard_price" widget='monetary' options="{'currency_field': 'cost_currency_id'}" optional="show" readonly="1"/>
                 <field name="categ_id" optional="hide"/>

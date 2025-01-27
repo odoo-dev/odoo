@@ -42,7 +42,7 @@
                 <field name="name"/>
                 <field name="category_id"/>
                 <field name="supplier_id"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="company_id" column_invisible="not companies.multi_company"/>
                 <field name="description"/>
                 <field name="price" widget="monetary"/>
             </list>
@@ -87,7 +87,7 @@
                         </group>
                         <group>
                             <field name="new_until"/>
-                            <field name="company_id" groups="base.group_multi_company" placeholder="Visible to all"/>
+                            <field name="company_id" invisible="not companies.multi_company" placeholder="Visible to all"/>
                         </group>
                         <label for="description"/>
                         <field name='description'/>
@@ -187,7 +187,7 @@
         <field name="arch" type="xml">
             <list string="Products List">
                 <field name='name' string="Product Category"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="company_id" column_invisible="not companies.multi_company"/>
             </list>
         </field>
     </record>
@@ -213,8 +213,8 @@
                             <field name="name"/>
                         </h1>
                     </div>
-                    <label for="company_id" groups="base.group_multi_company"/>
-                    <field name="company_id" groups="base.group_multi_company" placeholder="Visible to all"/>
+                    <label for="company_id" invisible="not companies.multi_company"/>
+                    <field name="company_id" invisible="not companies.multi_company" placeholder="Visible to all"/>
                 </sheet>
             </form>
         </field>
@@ -238,7 +238,7 @@
                                 <field string="Products" name="product_count" widget="statinfo"/>
                             </button>
                             <field name="name" class="fw-bold"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="company_id" invisible="not companies.multi_company"/>
                         </main>
                     </t>
                 </templates>

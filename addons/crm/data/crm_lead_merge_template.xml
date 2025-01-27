@@ -77,7 +77,7 @@
                 <div t-if="lead.team_id">
                     Sales Team: <span t-field="lead.team_id"/>
                 </div>
-                <div name="company" groups="base.group_multi_company">
+                <div name="company" invisible="not companies.multi_company">
                     Company: <span t-field="lead.company_id"/>
                 </div>
                 <div>

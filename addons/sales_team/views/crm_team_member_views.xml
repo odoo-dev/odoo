@@ -122,8 +122,7 @@
                     <group name="member_partner_info">
                         <group>
                             <field name="email" invisible="not user_id"/>
-                            <field name="company_id" invisible="not user_id"
-                                groups="base.group_multi_company"/>
+                            <field name="company_id" invisible="not user_id or not companies.multi_company"/>
                         </group>
                         <group>
                             <field name="phone" invisible="not user_id"/>

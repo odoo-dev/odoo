@@ -12,7 +12,7 @@
                     </div>
                     <group id="key_input">
                         <field name="name"/>
-                        <field name="company_id" groups="base.group_multi_company" readonly="1"/>
+                        <field name="company_id" invisible="not companies.multi_company" readonly="1"/>
                         <field name="content" widget="binary"/>
                         <field name="password" password="True" />
                     </group>
@@ -27,7 +27,7 @@
         <field name="arch" type="xml">
             <list string="key list">
                 <field name="name" string="Key"/>
-                <field name="company_id" groups="base.group_multi_company" readonly="1" optional="hide"/>
+                <field name="company_id" column_invisible="not companies.multi_company" readonly="1" optional="hide"/>
             </list>
         </field>
     </record>

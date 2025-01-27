@@ -28,7 +28,7 @@
                             <group>
                                 <field name="description" />
                                 <field name="account_move_id" groups="account.group_account_invoice" invisible="not account_move_id" />
-                                <field name="company_id" groups="base.group_multi_company" />
+                                <field name="company_id" invisible="not companies.multi_company" />
                                 <field name="stock_valuation_layer_id" invisible="not stock_valuation_layer_id" />
                             </group>
                         </page>
@@ -57,7 +57,7 @@
                 <button name="action_open_journal_entry" groups="account.group_account_user" type="object" title="Journal Entry" icon="fa-book" invisible="not account_move_id"/>
                 <field name="product_id" />
                 <field name="lot_id" optional="hide"/>
-                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="company_id" invisible="not companies.multi_company" optional="hide"/>
                 <field name="quantity" string="Quantity" optional="show" sum="Total Moved Quantity"/>
                 <field name="remaining_qty" type="measure" optional="hide" sum="Total Remaining Quantity"/>
                 <field name="unit_cost" optional="hide"/>
@@ -143,7 +143,7 @@
                 <field name="categ_id" />
                 <field name="product_tmpl_id" />
                 <field name="warehouse_id" groups="stock.group_stock_multi_warehouses"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="company_id" invisible="not companies.multi_company"/>
                 <separator/>
                 <filter string="Incoming" name="incoming" domain="[('stock_move_id.location_id.usage', 'not in', ('internal', 'transit')), ('stock_move_id.location_dest_id.usage', 'in', ('internal', 'transit'))]"/>
                 <filter string="Outgoing" name="outgoing" domain="[('stock_move_id.location_id.usage', 'in', ('internal', 'transit')), ('stock_move_id.location_dest_id.usage', 'not in', ('internal', 'transit'))]"/>
@@ -154,7 +154,7 @@
                     <filter string='Lot/Serial Number' name="group_by_lot_id" context="{'group_by': 'lot_id'}"/>
                     <filter string='Product Category' name="group_by_categ_id" context="{'group_by': 'categ_id'}"/>
                     <filter string='Date' name="group_by_created_date" context="{'group_by': 'create_date'}"/>
-                    <filter string='Company' name="group_by_company_id" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                    <filter string='Company' name="group_by_company_id" context="{'group_by': 'company_id'}" invisible="not companies.multi_company"/>
                 </group>
             </search>
         </field>

@@ -74,7 +74,7 @@
                             <field name="date_end" widget="date" readonly="state not in ('draft', 'confirmed')"/>
                         </div>
                         <field name="reference" placeholder="e.g. PO0025"/>
-                        <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" readonly="state != 'draft'"/>
+                        <field name="company_id" invisible="not companies.multi_company" options="{'no_create': True}" readonly="state != 'draft'"/>
                     </group>
                 </group>
                 <notebook>
@@ -103,7 +103,7 @@
                                     <field name="analytic_distribution" widget="analytic_distribution"
                                            groups="analytic.group_analytic_accounting"
                                            options="{'product_field': 'product_id', 'business_domain': 'purchase_order'}"/>
-                                    <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                                    <field name="company_id" invisible="not companies.multi_company" options="{'no_create': True}"/>
                                 </group>
                             </form>
                         </field>
@@ -126,7 +126,7 @@
                 <field name="vendor_id" optional="show"/>
                 <field name="requisition_type" optional="show"/>
                 <field name="user_id" optional="show" widget='many2one_avatar_user'/>
-                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" optional="show"/>
+                <field name="company_id" column_invisible="not companies.multi_company" options="{'no_create': True}" optional="show"/>
                 <field name="date_start" optional="show"/>
                 <field name="date_end" optional="show" widget='remaining_days' decoration-danger="date_end and date_end&lt;current_date" invisible="state in ('done', 'cancel')"/>
                 <field name="reference" optional="show"/>
