@@ -74,6 +74,8 @@ export class Message extends Record {
     });
     /** @type {number|string} */
     id;
+    incoming_email_cc;
+    incoming_email_to;
     /** @type {boolean} */
     is_discussion;
     /** @type {boolean} */

@@ -39,13 +39,12 @@ export class Notification extends Record {
             if (!this.mail_message_id?.isSelfAuthored) {
                 return;
             }
-            const failure = Object.values(this.store.Failure.records).find((f) => {
-                return (
+            const failure = Object.values(this.store.Failure.records).find(
+                (f) =>
                     f.resModel === thread?.model &&
                     f.type === this.notification_type &&
                     (f.resModel !== "discuss.channel" || f.resIds.has(thread?.id))
-                );
-            });
+            );
             return this.isFailure
                 ? {
                       id: failure ? failure.id : this.store.Failure.nextId.value++,
@@ -86,7 +85,13 @@ export class Notification extends Record {
             case "exception":
                 return "fa fa-exclamation";
             case "ready":
-                return "fa fa-send-o";
+                return `fa ${
+                    this.mail_message_id.recipients.some(
+                        (recipient) => recipient.id === this.persona.id
+                    )
+                        ? "fa-send-o"
+                        : "fa-user-o"
+                }`;
             case "canceled":
                 return "fa fa-trash-o";
         }
