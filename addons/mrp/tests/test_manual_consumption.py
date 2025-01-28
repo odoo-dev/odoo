@@ -87,7 +87,7 @@ class TestManualConsumption(TestMrpCommon):
         action = mo.button_mark_done()
         backorder = Form(self.env['mrp.production.backorder'].with_context(**action['context']))
         backorder.save().action_backorder()
-        backorder_mo = mo.procurement_group_id.mrp_production_ids[-1]
+        backorder_mo = mo.backorder_ids[-1]
 
         self.assertTrue(backorder_mo.move_raw_ids.filtered(lambda m: m.product_id == c1).manual_consumption)
         self.assertFalse(backorder_mo.move_raw_ids.filtered(lambda m: m.product_id == c2).manual_consumption)
@@ -105,12 +105,12 @@ class TestManualConsumption(TestMrpCommon):
         wizard = Form.from_action(self.env, action)
         wizard.counter = 3
         action = wizard.save().action_split()
-        for production in mo.procurement_group_id.mrp_production_ids:
+        for production in mo.backorder_ids:
             self.assertTrue(production.move_raw_ids.filtered(lambda m: m.product_id == p1).manual_consumption)
             self.assertFalse(production.move_raw_ids.filtered(lambda m: m.product_id == p2).manual_consumption)
 
         # Merge them back
-        action = mo.procurement_group_id.mrp_production_ids.action_merge()
+        action = mo.backorder_ids.action_merge()
         mo = self.env[action['res_model']].browse(action['res_id'])
         self.assertTrue(mo.move_raw_ids.filtered(lambda m: m.product_id == p1).manual_consumption)
         self.assertFalse(mo.move_raw_ids.filtered(lambda m: m.product_id == p2).manual_consumption)
@@ -221,7 +221,7 @@ class TestManualConsumption(TestMrpCommon):
         action = consumption.action_set_qty()
         backorder_form = Form(self.env['mrp.production.backorder'].with_context(**action['context']))
         backorder_form.save().action_backorder()
-        backorder = mo.procurement_group_id.mrp_production_ids - mo
+        backorder = mo.backorder_ids - mo
 
         # Check that backorders move have the same manual consumption values as BoM
         move_auto, move_manual = get_moves(backorder)

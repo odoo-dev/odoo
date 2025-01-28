@@ -121,28 +121,12 @@ class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
     has_kits = fields.Boolean(compute='_compute_has_kits')
-    production_count = fields.Integer(
-        "Count of MO generated",
-        compute='_compute_mrp_production_ids',
-        groups='mrp.group_mrp_user')
-
-    production_ids = fields.Many2many(
-        'mrp.production',
-        compute='_compute_mrp_production_ids',
-        groups='mrp.group_mrp_user')
+    production_id = fields.Many2one('mrp.production', groups='mrp.group_mrp_user')
 
     @api.depends('move_ids')
     def _compute_has_kits(self):
         for picking in self:
             picking.has_kits = any(picking.move_ids.mapped('bom_line_id'))
-
-    @api.depends('group_id')
-    def _compute_mrp_production_ids(self):
-        for picking in self:
-            production_ids = picking.group_id.mrp_production_ids | picking.move_ids.move_dest_ids.raw_material_production_id
-            # Filter out unwanted MO types
-            picking.production_ids = production_ids.filtered(lambda p: p.picking_type_id.active)
-            picking.production_count = len(picking.production_ids)
 
     def action_detailed_operations(self):
         action = super().action_detailed_operations()
@@ -151,19 +135,13 @@ class StockPicking(models.Model):
 
     def action_view_mrp_production(self):
         self.ensure_one()
-        action = {
+        return {
             'name': _("Manufacturing Orders"),
             'res_model': 'mrp.production',
             'type': 'ir.actions.act_window',
-            'domain': [('id', 'in', self.production_ids.ids)],
-            'view_mode': 'list,form',
+            'view_mode': 'form',
+            'res_id': self.production_id.id,
         }
-        if self.production_count == 1:
-            action.update({
-                'view_mode': 'form',
-                'res_id': self.production_ids.id,
-            })
-        return action
 
     def _less_quantities_than_expected_add_documents(self, moves, documents):
         documents = super(StockPicking, self)._less_quantities_than_expected_add_documents(moves, documents)

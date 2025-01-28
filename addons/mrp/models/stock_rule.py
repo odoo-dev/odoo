@@ -95,22 +95,7 @@ class StockRule(models.Model):
                 warehouse_id.sam_loc_id and warehouse_id.sam_loc_id.parent_path in rule.location_src_id.parent_path
             ):
                 if float_compare(procurement.product_qty, 0, precision_rounding=procurement.product_uom.rounding) < 0:
-                    procurement.values['group_id'] = procurement.values['group_id'].stock_move_ids.filtered(
-                        lambda m: m.state not in ['done', 'cancel']).move_orig_ids.group_id[:1]
                     continue
-                manu_type_id = manu_rule[0].picking_type_id
-                if manu_type_id:
-                    name = manu_type_id.sequence_id.next_by_id()
-                else:
-                    name = self.env['ir.sequence'].next_by_code('mrp.production') or _('New')
-                # Create now the procurement group that will be assigned to the new MO
-                # This ensure that the outgoing move PostProduction -> Stock is linked to its MO
-                # rather than the original record (MO or SO)
-                group = procurement.values.get('group_id')
-                if group:
-                    procurement.values['group_id'] = group.copy({'name': name})
-                else:
-                    procurement.values['group_id'] = self.env["procurement.group"].create({'name': name})
         return super()._run_pull(procurements)
 
     def _get_custom_move_fields(self):
@@ -129,9 +114,10 @@ class StockRule(models.Model):
         return self.env['mrp.bom']._bom_find(product_id, picking_type=False, bom_type='normal', company_id=company_id.id)[product_id]
 
     def _make_mo_get_domain(self, procurement, bom):
-        gpo = self.group_propagation_option
-        group = (gpo == 'fixed' and self.group_id) or \
-                (gpo == 'propagate' and 'group_id' in procurement.values and procurement.values['group_id']) or False
+        # TODO SND: MOVE TO STOCK_PICKING_BATCH ???
+        # gpo = rule.group_propagation_option
+        # group = (gpo == 'fixed' and rule.group_id) or \
+        #         (gpo == 'propagate' and 'group_id' in procurement.values and procurement.values['group_id']) or False
         domain = (
             ('bom_id', '=', bom.id),
             ('product_id', '=', procurement.product_id.id),
@@ -149,8 +135,8 @@ class StockRule(models.Model):
             domain += ('|',
                        '&', ('state', '=', 'draft'), ('date_deadline', '<=', procurement_date),
                        '&', ('state', '=', 'confirmed'), ('date_start', '<=', procurement_date))
-        if group:
-            domain += (('procurement_group_id', '=', group.id),)
+        # if group:
+        #     domain += (('procurement_group_id', '=', group.id),)
         return domain
 
     def _prepare_mo_vals(self, product_id, product_qty, product_uom, location_dest_id, name, origin, company_id, values, bom):
@@ -170,7 +156,6 @@ class StockRule(models.Model):
             'bom_id': bom.id,
             'date_deadline': date_deadline,
             'date_start': date_planned,
-            'procurement_group_id': False,
             'propagate_cancel': self.propagate_cancel,
             'orderpoint_id': values.get('orderpoint_id', False) and values.get('orderpoint_id').id,
             'picking_type_id': picking_type.id or values['warehouse_id'].manu_type_id.id,
@@ -180,11 +165,10 @@ class StockRule(models.Model):
         }
         # Use the procurement group created in _run_pull mrp override
         # Preserve the origin from the original stock move, if available
-        if location_dest_id.warehouse_id.manufacture_steps == 'pbm_sam' and values.get('move_dest_ids') and values.get('group_id') and values['move_dest_ids'][0].origin != values['group_id'].name:
+        if location_dest_id.warehouse_id.manufacture_steps == 'pbm_sam' and values.get('move_dest_ids') and values['move_dest_ids'][0].origin != origin:
             origin = values['move_dest_ids'][0].origin
             mo_values.update({
-                'name': values['group_id'].name,
-                'procurement_group_id': values['group_id'].id,
+                'name': name,
                 'origin': origin,
             })
         if self.location_dest_from_rule:
@@ -242,12 +226,6 @@ class StockRule(models.Model):
         new_move_vals['production_id'] = False
         return new_move_vals
 
-
-class ProcurementGroup(models.Model):
-    _inherit = 'procurement.group'
-
-    mrp_production_ids = fields.One2many('mrp.production', 'procurement_group_id')
-
     @api.model
     def run(self, procurements, raise_user_error=True):
         """ If 'run' is called on a kit, this override is made in order to call
@@ -273,15 +251,15 @@ class ProcurementGroup(models.Model):
                     # recreate dict of values since each child has its own bom_line_id
                     values = dict(procurement.values, bom_line_id=bom_line.id)
                     component_qty, procurement_uom = bom_line_uom._adjust_uom_quantities(bom_line_data['qty'], quant_uom)
-                    procurements_without_kit.append(self.env['procurement.group'].Procurement(
+                    procurements_without_kit.append(self.env['stock.rule'].Procurement(
                         bom_line.product_id, component_qty, procurement_uom,
                         procurement.location_id, procurement.name,
                         procurement.origin, procurement.company_id, values))
             else:
                 procurements_without_kit.append(procurement)
-        return super(ProcurementGroup, self).run(procurements_without_kit, raise_user_error=raise_user_error)
+        return super().run(procurements_without_kit, raise_user_error=raise_user_error)
 
     def _get_moves_to_assign_domain(self, company_id):
-        domain = super(ProcurementGroup, self)._get_moves_to_assign_domain(company_id)
+        domain = super()._get_moves_to_assign_domain(company_id)
         domain = expression.AND([domain, [('production_id', '=', False)]])
         return domain

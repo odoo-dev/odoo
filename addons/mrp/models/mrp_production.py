@@ -55,6 +55,13 @@ class MrpProduction(models.Model):
         PROCUREMENT_PRIORITIES, string='Priority', default='0',
         help="Components will be reserved first for the MO with the highest priorities.")
     backorder_sequence = fields.Integer("Backorder Sequence", default=0, copy=False, help="Backorder sequence, if equals to 0 means there is not related backorder")
+    backorder_id = fields.Many2one(
+        'mrp.production', 'Back Order of',
+        copy=False, index='btree_not_null', readonly=True,
+        check_company=True,
+        help="If this Manufacturing Order was split, then this field links to the shipment which contains the already processed part.")
+    backorder_ids = fields.One2many('mrp.production', 'backorder_id', 'Back Orders')
+    all_production_ids = fields.Many2many('mrp.production', compute='_compute_all_production_ids')
     origin = fields.Char(
         'Source', copy=False,
         help="Reference of the document that generated this production order request.")
@@ -208,9 +215,6 @@ class MrpProduction(models.Model):
         index=True, required=True)
 
     qty_produced = fields.Float(compute="_get_produced_qty", string="Quantity Produced")
-    procurement_group_id = fields.Many2one(
-        'procurement.group', 'Procurement Group',
-        copy=False)
     product_description_variants = fields.Char('Custom Description')
     orderpoint_id = fields.Many2one('stock.warehouse.orderpoint', 'Orderpoint', copy=False, index='btree_not_null')
     propagate_cancel = fields.Boolean(
@@ -281,22 +285,29 @@ class MrpProduction(models.Model):
         'The quantity to produce must be positive!',
     )
 
-    @api.depends('procurement_group_id.stock_move_ids.created_production_id.procurement_group_id.mrp_production_ids',
-                 'procurement_group_id.stock_move_ids.move_orig_ids.created_production_id.procurement_group_id.mrp_production_ids')
+    @api.depends('all_move_raw_ids', 'all_move_raw_ids.created_production_id')
     def _compute_mrp_production_child_count(self):
         for production in self:
             production.mrp_production_child_count = len(production._get_children())
 
-    @api.depends('procurement_group_id.mrp_production_ids.move_dest_ids.group_id.mrp_production_ids',
-                 'procurement_group_id.stock_move_ids.move_dest_ids.group_id.mrp_production_ids')
+    @api.depends('origin')
     def _compute_mrp_production_source_count(self):
         for production in self:
             production.mrp_production_source_count = len(production._get_sources())
 
-    @api.depends('procurement_group_id.mrp_production_ids')
+    @api.depends('backorder_ids')
     def _compute_mrp_production_backorder(self):
         for production in self:
-            production.mrp_production_backorder_count = len(production.procurement_group_id.mrp_production_ids)
+            production.mrp_production_backorder_count = len(production.all_production_ids)
+
+    @api.depends('backorder_id', 'backorder_ids', 'backorder_id.backorder_ids')
+    def _compute_all_production_ids(self):
+        for production in self:
+            if production.backorder_id:
+                production.all_production_ids = production.backorder_id | production.backorder_id.backorder_ids
+            else:
+                production.all_production_ids = production | production.backorder_ids
+
 
     @api.depends('company_id', 'bom_id')
     def _compute_picking_type_id(self):
@@ -490,11 +501,11 @@ class MrpProduction(models.Model):
                 ]
             })
 
-    @api.depends('procurement_group_id', 'procurement_group_id.stock_move_ids.group_id')
+    @api.depends('origin', 'all_move_raw_ids', 'all_move_raw_ids.created_production_id')
     def _compute_picking_ids(self):
         for order in self:
             order.picking_ids = self.env['stock.picking'].search([
-                ('group_id', '=', order.procurement_group_id.id), ('group_id', '!=', False),
+                ('origin', 'in', order.origin.split(', ')), ('origin', '!=', False),
             ])
             order.picking_ids |= order.move_raw_ids.move_orig_ids.picking_id
             order.delivery_count = len(order.picking_ids)
@@ -955,9 +966,6 @@ class MrpProduction(models.Model):
                     picking_type_id = self._get_default_picking_type_id(vals.get('company_id', self.env.company.id))
                     vals['picking_type_id'] = picking_type_id
                 vals['name'] = self.env['stock.picking.type'].browse(picking_type_id).sequence_id.next_by_id()
-            if not vals.get('procurement_group_id'):
-                procurement_group_vals = self._prepare_procurement_group_vals(vals)
-                vals['procurement_group_id'] = self.env["procurement.group"].create(procurement_group_vals).id
         res = super().create(vals_list)
         # Make sure that the date passed in vals_list are taken into account and not modified by a compute
         for rec, vals in zip(res, vals_list):
@@ -1118,7 +1126,7 @@ class MrpProduction(models.Model):
         ], limit=1).id
 
     def _get_move_finished_values(self, product_id, product_uom_qty, product_uom, operation_id=False, byproduct_id=False, cost_share=0):
-        group_orders = self.procurement_group_id.mrp_production_ids
+        group_orders = self._get_children()
         move_dest_ids = self.move_dest_ids
         if len(group_orders) > 1:
             move_dest_ids |= group_orders[0].move_finished_ids.filtered(lambda m: m.product_id == self.product_id).move_dest_ids
@@ -1138,7 +1146,6 @@ class MrpProduction(models.Model):
             'production_id': self.id,
             'warehouse_id': self.location_dest_id.warehouse_id.id,
             'origin': self.product_id.partner_ref,
-            'group_id': self.procurement_group_id.id,
             'propagate_cancel': self.propagate_cancel,
             'move_dest_ids': [(4, x.id) for x in self.move_dest_ids if not byproduct_id],
             'cost_share': cost_share,
@@ -1228,7 +1235,6 @@ class MrpProduction(models.Model):
             'origin': self._get_origin(),
             'state': 'draft',
             'warehouse_id': source_location.warehouse_id.id,
-            'group_id': self.procurement_group_id.id,
             'propagate_cancel': self.propagate_cancel,
             'manual_consumption': self.env['stock.move']._determine_is_manual_consumption(bom_line),
         }
@@ -1340,17 +1346,18 @@ class MrpProduction(models.Model):
 
     def _get_children(self):
         self.ensure_one()
-        procurement_moves = self.procurement_group_id.stock_move_ids
-        child_moves = procurement_moves.move_orig_ids
-        return ((procurement_moves | child_moves).created_production_id.procurement_group_id.mrp_production_ids\
-                | child_moves.production_id)\
-                .filtered(lambda p: p.origin != self.origin) - self
+        # procurement_moves = self.procurement_group_id.stock_move_ids
+        # child_moves = procurement_moves.move_orig_ids
+        # return ((procurement_moves | child_moves).created_production_id.procurement_group_id.mrp_production_ids\
+        #         | child_moves.production_id)\
+        #         .filtered(lambda p: p.origin != self.origin) - self
+        return self.all_move_raw_ids.created_production_id
 
     def _get_sources(self):
         self.ensure_one()
-        dest_moves = self.procurement_group_id.mrp_production_ids.move_dest_ids
-        parent_moves = self.procurement_group_id.stock_move_ids.move_dest_ids
-        return (dest_moves | parent_moves).group_id.mrp_production_ids.filtered(lambda p: p.origin != self.origin) - self
+        if self.origin:
+            return self.env['mrp.production'].search([('name', 'in', self.origin.split(', '))])
+        return self.env['mrp.production']
 
     def set_qty_producing(self):
         # This method is used to call `_set_lot_producing` when the onchange doesn't apply.
@@ -1402,12 +1409,11 @@ class MrpProduction(models.Model):
         return action
 
     def action_view_mrp_production_backorders(self):
-        backorder_ids = self.procurement_group_id.mrp_production_ids.ids
         return {
             'res_model': 'mrp.production',
             'type': 'ir.actions.act_window',
             'name': _("Backorder MO's"),
-            'domain': [('id', 'in', backorder_ids)],
+            'domain': [('id', 'in', self.backorder_ids)],
             'view_mode': 'list,form',
         }
 
@@ -1769,11 +1775,7 @@ class MrpProduction(models.Model):
 
     def _get_backorder_mo_vals(self):
         self.ensure_one()
-        if not self.procurement_group_id:
-            # in the rare case that the procurement group has been removed somehow, create a new one
-            self.procurement_group_id = self.env["procurement.group"].create({'name': self.name})
         return {
-            'procurement_group_id': self.procurement_group_id.id,
             'move_raw_ids': None,
             'move_finished_ids': None,
             'lot_producing_id': False,
@@ -1832,7 +1834,7 @@ class MrpProduction(models.Model):
             backorder_qtys = amounts[production][1:]
             production.with_context(skip_compute_move_raw_ids=True).product_qty = amounts[production][0]
 
-            next_seq = max(production.procurement_group_id.mrp_production_ids.mapped("backorder_sequence"), default=1)
+            next_seq = max(production.all_production_ids.mapped("backorder_sequence"), default=1)
 
             for qty_to_backorder in backorder_qtys:
                 next_seq += 1
@@ -1840,7 +1842,8 @@ class MrpProduction(models.Model):
                     backorder_vals,
                     product_qty=qty_to_backorder,
                     name=production._get_name_backorder(production.name, next_seq),
-                    backorder_sequence=next_seq
+                    backorder_sequence=next_seq,
+                    backorder_id=production.id,
                 ))
 
         backorders = self.env['mrp.production'].with_context(skip_confirm=True).create(backorder_vals_list)
@@ -2369,8 +2372,6 @@ class MrpProduction(models.Model):
             move.move_dest_ids = [Command.set(dests[move.byproduct_id.id])]
 
         self.move_dest_ids.created_production_id = production.id
-
-        self.procurement_group_id.stock_move_ids.group_id = production.procurement_group_id
 
         if 'confirmed' in self.mapped('state'):
             production.move_raw_ids._adjust_procure_method()

@@ -367,7 +367,6 @@ class StockMove(models.Model):
                     defaults['additional'] = True
                 defaults['product_uom_qty'] = 0.0
             elif production_id.state == 'draft':
-                defaults['group_id'] = production_id.procurement_group_id.id
                 defaults['reference'] = production_id.name
         return defaults
 
@@ -393,7 +392,6 @@ class StockMove(models.Model):
                     mo_id_to_mo[mo_id] = mo
                 values['name'] = mo.name
                 values['origin'] = mo._get_origin()
-                values['group_id'] = mo.procurement_group_id.id
                 values['propagate_cancel'] = mo.propagate_cancel
                 if values.get('raw_material_production_id', False):
                     product = product_id_to_product[values['product_id']]
@@ -464,13 +462,13 @@ class StockMove(models.Model):
                 procurement_qty = max(procurement_qty, possible_reduceable_qty)
                 values = move._prepare_procurement_values()
                 origin = move._prepare_procurement_origin()
-                procurements.append(self.env['procurement.group'].Procurement(
+                procurements.append(self.env['stock.rule'].Procurement(
                     move.product_id, procurement_qty, move.product_uom,
                     move.location_id, move.name, origin, move.company_id, values))
 
         to_assign._action_assign()
         if procurements:
-            self.env['procurement.group'].run(procurements)
+            self.env['stock.rule'].run(procurements)
 
     def _action_assign(self, force_qty=False):
         res = super(StockMove, self)._action_assign(force_qty=force_qty)
