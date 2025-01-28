@@ -186,7 +186,7 @@ export class DiscussCommandPalette {
         while ((channels.length || personas.length) && i < remaining) {
             const p = personas.shift();
             const c = channels.shift();
-            if (p) {
+            if (p && this.store.self.type !== "guest") {
                 elligiblePersonas.push(p);
                 i++;
             }
