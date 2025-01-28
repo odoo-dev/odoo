@@ -13,6 +13,7 @@ from lxml import etree
 from lxml.builder import E
 from psycopg2 import IntegrityError
 from psycopg2.extras import Json
+from unittest.mock import patch
 
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import common, tagged
@@ -373,6 +374,91 @@ class TestViewInheritance(ViewCase):
     def test_no_arch(self):
         self.d1._check_xml()
 
+    def test_invalid_xpath_from_arch(self):
+        """ Check ir.ui.view's invalid_xpaths_from_arch field is computed correctly."""
+
+        def _no_op(*args, **kwargs):
+            pass
+
+        # Bypass to create a view with invalid xpaths.
+        patcher_raise_view_error = patch(
+            'odoo.addons.base.models.ir_ui_view.IrUiView._raise_view_error',
+            side_effect=_no_op
+        )
+
+        self.mock_raise_view_error = patcher_raise_view_error.start()
+        self.addCleanup(patcher_raise_view_error.stop)
+
+        base_view_arch = """
+            <form string="View">
+                <div name="div1">
+                    <field name="id"/>
+                </div>
+                <div name="div2">
+                </div>
+                <field name="display_name"/>
+                <field name="arch"/>
+            </form>
+        """
+
+        valid_exprs = [
+            ("//form/div[1]/field[@name='id']", "attributes", "<attribute name='string'>ID</attribute>"),
+            ("//form/div[@name='div2']", "attributes", "<attribute name='string'>Div2</attribute>"),
+            ("//form/field[@name='display_name']", "attributes", "<attribute name='string'>Display Name</attribute>"),
+            ("//form/field[@name='arch']", "replace", "<field name='arch'/>"),
+        ]
+
+        invalid_exprs = [
+            ("//form/div[1]/div[1]", "attributes", "<attribute name='string'>Invalid Div</attribute>"),
+            ("//form/div[1]/field[@name='invalid_name']", "attributes", "<attribute name='string'>Invalid Div</attribute>"),
+            ("//div[@name='div3']", "attributes", "<attribute name='string'>Invalid Div</attribute>"),
+            ("//field[@name='nonexistent_field']", "inside", "<field name='display_name'/>"),
+            ("//div[@name='div4']", "replace", """
+                <div name="div_replaced">
+                    <field name="model"/>
+                </div>
+            """),
+            ("//field[@name='another_nonexistent_field']", "before", "<field name='display_name'/>"),
+        ]
+
+        def generate_xpath_element(expr, position, operation):
+            return f"""
+                <xpath expr="{expr}" position="{position}">
+                    {operation}
+                </xpath>
+            """
+
+        xpath_elements = ""
+        for expr, position, operation in valid_exprs + invalid_exprs:
+            xpath_elements += generate_xpath_element(expr, position, operation)
+
+        child_view_arch = f"""
+            <data>
+                {xpath_elements}
+            </data>
+        """
+
+        base_view = self.makeView('invalid_xpath_base_view', arch=base_view_arch)
+        child_view = self.makeView('invalid_xpath_child_view', base_view.id, child_view_arch)
+
+        invalid_xpaths_detected = child_view.invalid_xpaths_from_arch
+
+        detected_exprs = [xpath[0] for xpath in invalid_xpaths_detected]
+
+        expected_invalid_exprs = [expr for expr, _, _ in invalid_exprs]
+
+        for expr in expected_invalid_exprs:
+            self.assertIn(
+                expr,
+                detected_exprs,
+                msg=f"Expected invalid XPath '{expr}' was not detected."
+            )
+
+        self.assertEqual(
+            len(detected_exprs),
+            len(expected_invalid_exprs),
+            msg="Unexpected number of invalid XPaths detected."
+        )
 
 class TestApplyInheritanceSpecs(ViewCase):
     """ Applies a sequence of inheritance specification nodes to a base
