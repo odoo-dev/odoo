@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="project_task_view_form" model="ir.ui.view">
+        <field name="name">project.task.form.inherit.esg.project</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <field name="tag_ids" position="after">
+                <field name="generated_emissions" invisible="not is_esg"/>
+                <field name="reduced_emissions" invisible="not is_esg"/>
+                <field name="net_emissions" invisible="not is_esg"/>
+            </field>
+        </field>
+    </record>
+</odoo>

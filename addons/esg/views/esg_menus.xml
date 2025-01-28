@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ir_actions_esg_dashboard_action" model="ir.actions.client">
+        <field name="name">Dashboard</field>
+        <field name="path">dashboard</field>
+        <field name="tag">action_esg_dashboard</field>
+    </record>
+
+    <menuitem
+        id="esg_main_menu"
+        name="ESG"
+        sequence="1"
+        web_icon=""
+    >
+        <menuitem
+            id="menu_esg_dashboard"
+            name="Dashboard"
+            sequence="10"
+            action="ir_actions_esg_dashboard_action"
+        />
+        <menuitem
+            id="menu_esg_collect"
+            name="Collect"
+            sequence="20"
+        />
+        <menuitem
+            id="menu_esg_measure"
+            name="Measure"
+            sequence="30"
+        >
+            <menuitem
+                id="menu_esg_environment"
+                name="Environment"
+                sequence="10"
+            >
+                <menuitem
+                    id="menu_esg_environment_dashboard"
+                    name="Dashboard"
+                    sequence="10"
+                />
+                <menuitem
+                    id="menu_esg_carbon_analytics"
+                    name="Carbon Analytics"
+                    sequence="20"
+                />
+                <menuitem
+                    id="menu_esg_carbon_footprint"
+                    name="Carbon Footprint"
+                    sequence="30"
+                />
+            </menuitem>
+            <menuitem
+                id="menu_esg_social"
+                name="Social"
+                sequence="20"
+            >
+                <menuitem
+                    id="menu_esg_parity"
+                    name="Parity"
+                    sequence="10"
+                />
+            </menuitem>
+        </menuitem>
+        <menuitem
+            id="menu_esg_configuration"
+            name="Configuration"
+            sequence="40"
+        >
+            <menuitem
+                id="menu_esg_settings"
+                name="Settings"
+                sequence="10"
+            />
+            <menuitem
+                id="menu_esg_carbon_emissions"
+                name="Carbon Emissions"
+                sequence="20"
+            >
+                <menuitem
+                    id="menu_esg_gasses"
+                    name="Gases"
+                    sequence="30"
+                />
+                <menuitem
+                    id="menu_esg_type_of_emissions"
+                    name="Type of Emissions"
+                    sequence="40"
+                    action="action_view_emission_source"
+                />
+                <menuitem
+                    id="menu_esg_emission_factors"
+                    name="Emission Factors"
+                    sequence="50"
+                />
+                <menuitem
+                    id="menu_esg_source_databases"
+                    name="Source Databases"
+                    sequence="60"
+                />
+            </menuitem>
+        </menuitem>
+    </menuitem>
+</odoo>

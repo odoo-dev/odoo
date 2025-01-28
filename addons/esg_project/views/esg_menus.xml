@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem
+        id="menu_esg_act"
+        name="Act"
+        sequence="35"
+        parent="esg.esg_main_menu"
+    >
+        <menuitem
+            id="menu_esg_initiatives"
+            name="Initiatives"
+            sequence="10"
+            action="esg_initiatives_server_action"
+        />
+    </menuitem>
+</odoo>
