@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="report_user_label" model="ir.actions.report">
+        <field name="name">User Labels</field>
+        <field name="model">res.users</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">hr.report_userlabel</field>
+        <field name="report_file">hr.report_userlabel</field>
+        <field name="binding_model_id" ref="base.model_res_users"/>
+        <field name="binding_type">report</field>
+        <field name="groups_id" eval="[(4, ref('hr.group_hr_user'))]"/>
+    </record>
+
+    <template id="report_userlabel">
+        <t t-call="web.basic_layout">
+            <div class="page">
+                <t t-foreach="docs" t-as="user">
+                    <div class="col-6 mb92">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th class="col-4 danger"/>
+                                    <th class="active"/>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><div t-if="user.barcode" t-field="user.barcode" t-options="{'widget': 'barcode', 'symbology': 'EAN13', 'width': 300, 'height': 50, 'img_style': 'width:100%;height:35%;'}"/></td>
+                                    <td><strong t-field="user.name"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -38,7 +38,6 @@
         'views/account_statement_view.xml',
         'views/digest_views.xml',
         'views/res_partner_view.xml',
-        'views/report_userlabel.xml',
         'views/report_saledetails.xml',
         'views/point_of_sale_dashboard.xml',
         'views/report_invoice.xml',

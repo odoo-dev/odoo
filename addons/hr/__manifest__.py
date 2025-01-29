@@ -32,6 +32,7 @@
         'views/hr_employee_category_views.xml',
         'views/hr_employee_public_views.xml',
         'report/hr_employee_badge.xml',
+        'report/hr_employee_userlabel.xml',
         'views/hr_employee_views.xml',
         'views/hr_department_views.xml',
         'views/hr_work_location_views.xml',
