@@ -336,6 +336,12 @@ class AccountReportLine(models.Model):
         compute='_compute_user_groupby', store=True, readonly=False, precompute=True,
         help="Comma-separated list of fields from account.move.line (Journal Item). When set, this line will generate sublines grouped by those keys.",
     )
+    groupby_field_ids = fields.One2many(
+        string="Group By Fields",
+        comodel_name='account.report.groupby',
+        inverse_name='report_line_id',
+    )
+
     sequence = fields.Integer(string="Sequence")
     code = fields.Char(string="Code", help="Unique identifier for this line.")
     foldable = fields.Boolean(string="Foldable", help="By default, we always unfold the lines that can be. If this is checked, the line won't be unfolded by default, and a folding button will be displayed.")
@@ -528,6 +534,47 @@ class AccountReportLine(models.Model):
         called if the parent model is deleted.
         """
         self.expression_ids.unlink()
+
+    def _manage_groupby_vals(self, groupby_commands):
+        existing_group_by = {fname: sequence for sequence, fname in enumerate(self.user_groupby.split(','), start=1)}
+        for command in groupby_commands:
+            match command:
+                case Command.CREATE, _, {'field_id': field_id, 'sequence': sequence}:
+                    fname = self.env['ir.model.fields'].browse(field_id).name
+                    existing_group_by[fname] = sequence
+                case Command.UPDATE, _id, {'field_id': field_id, 'sequence': sequence}:
+                    old_fname = self.env['ir.model.fields'].browse(_id // 10000000).name
+                    existing_group_by.pop(old_fname)
+                    fname = self.env['ir.model.fields'].browse(field_id).name
+                    existing_group_by[fname] = sequence
+                case Command.UPDATE, _id, {'field_id': field_id}:
+                    old_fname = self.env['ir.model.fields'].browse(_id // 10000000).name
+                    fname = self.env['ir.model.fields'].browse(field_id).name
+                    existing_group_by[fname] = existing_group_by.pop(old_fname)
+                case Command.UPDATE, _id, {'sequence': sequence}:
+                    fname = self.env['ir.model.fields'].browse(_id // 10000000).name
+                    existing_group_by[fname] = sequence
+                case Command.DELETE, _id, *_:
+                    fname = self.env['ir.model.fields'].browse(_id // 10000000).name
+                    existing_group_by.pop(fname)
+                case _:
+                    assert False, f"Command not supported: {command}"
+        self.user_groupby = ','.join(fname for fname, sequence in sorted(existing_group_by.items(), key=lambda e: e[1]))
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        groupby_commands_list = [vals.pop('groupby_field_ids', None) for vals in vals_list]
+        report_lines = super().create(vals_list)
+        for report_line, groupby_commands in zip(report_lines, groupby_commands_list):
+            if groupby_commands:
+                report_line._manage_groupby_vals(groupby_commands)
+        return report_lines
+
+    def write(self, vals):
+        if groupby_commands := vals.pop('groupby_field_ids', None):
+            for line in self:
+                line._manage_groupby_vals(groupby_commands)
+        return super().write(vals)
 
 
 class AccountReportExpression(models.Model):
@@ -901,3 +948,44 @@ class AccountReportExternalValue(models.Model):
         for record in self:
             if record.foreign_vat_fiscal_position_id and record.foreign_vat_fiscal_position_id.country_id != record.report_country_id:
                 raise ValidationError(_("The country set on the foreign VAT fiscal position must match the one set on the report."))
+
+
+class AccountReportGroupBy(models.Model):
+    _name = 'account.report.groupby'
+    _description = "Accounting Report Group By"
+    _auto = False
+    _table_query = """
+                SELECT field.id::bigint * 10000000 + report_line.id * 100 + groupby.sequence AS id,
+                       report_line.id AS report_line_id,
+                       groupby.sequence AS sequence,
+                       field.id AS field_id
+                  FROM account_report_line report_line
+    CROSS JOIN LATERAL (
+                           SELECT ROW_NUMBER() OVER (ORDER BY 1), fname
+                             FROM string_to_table(report_line.user_groupby, ',') AS s2t(fname)
+                       ) AS groupby(sequence, fname)
+                  JOIN ir_model_fields field ON field.name = TRIM(groupby.fname)
+                                            AND field.model = 'account.move.line'
+    """
+
+    report_line_id = fields.Many2one('account.report.line', required=True)
+    sequence = fields.Integer(string="Sequence")
+    field_id = fields.Many2one(
+        string="Field",
+        comodel_name='ir.model.fields',
+        required=True,
+        ondelete="cascade",
+        domain=[
+            ('model', '=', 'account.move.line'),
+            '|', ('store', '=', True), ('related', '=', True),
+            ('ttype', 'in', (
+                'boolean',
+                'date',
+                'many2one',
+                'many2one_reference',
+                'integer',
+                'float',
+                'char',
+            ))
+        ],
+    )
