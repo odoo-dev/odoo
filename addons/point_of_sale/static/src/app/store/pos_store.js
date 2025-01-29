@@ -168,17 +168,24 @@ export class PosStore extends Reactive {
         return !this.cashier ? "LoginScreen" : "ProductScreen";
     }
 
+    isModalOpen() {
+        return document.querySelector(".modal-open");
+    }
+
     get idleTimeout() {
+        // const isModalOpen = () => document.querySelector(".modal-open");
         return [
             {
                 timeout: 300000, // 5 minutes
                 action: () =>
+                    !this.isModalOpen() &&
                     this.mainScreen.component.name !== "PaymentScreen" &&
                     this.showScreen("SaverScreen"),
             },
             {
                 timeout: 120000, // 2 minutes
                 action: () =>
+                    !this.isModalOpen() &&
                     this.mainScreen.component.name === "LoginScreen" &&
                     this.showScreen("SaverScreen"),
             },

@@ -25,7 +25,7 @@ export class LoginScreen extends Component {
     }
     cashierLogIn() {
         const selectedScreen =
-            this.pos.previousScreen && this.pos.previousScreen !== "LoginScreen"
+        this.pos.previousScreen && !["LoginScreen", "SaverScreen"].includes(this.pos.previousScreen)
                 ? this.pos.previousScreen
                 : this.pos.firstScreen;
         this.pos.showScreen(selectedScreen);

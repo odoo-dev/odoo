@@ -19,15 +19,15 @@ patch(PosStore.prototype, {
                 timeout: 180000, // 3 minutes
                 action: () =>
                     this.config.module_pos_restaurant &&
-                    this.mainScreen.component.name !== "PaymentScreen" &&
+                    !this.isModalOpen() &&
+                    !["LoginScreen", "PaymentScreen"].includes(this.mainScreen.component.name) &&
                     this.showScreen("FloorScreen"),
             },
         ];
     },
     get firstScreen() {
         const screen = super.firstScreen;
-
-        if (!this.config.module_pos_restaurant) {
+        if (!this.config.module_pos_restaurant || document.querySelector(".modal-open")) {
             return screen;
         }
 
