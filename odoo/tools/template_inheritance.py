@@ -45,8 +45,10 @@ def add_stripped_items_before(node, spec, extract):
         if child.get('position') == 'move':
             tail = child.tail
             child = extract(child)
-            child.tail = tail
-        node.addprevious(child)
+            if child is not None:
+                child.tail = tail
+        if child is not None:
+            node.addprevious(child)
 
 
 def add_text_before(node, text):
@@ -104,7 +106,7 @@ def locate_node(arch, spec):
     return None
 
 
-def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_locate=lambda s: True):
+def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_locate=lambda s: True, error_callback=None):
     """ Apply an inheriting view (a descendant of the base view)
 
     Apply to a source architecture all the spec nodes (i.e. nodes
@@ -117,7 +119,8 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
     :param pre_locate: function that is executed before locating a node.
                         This function receives an arch as argument.
                         This is required by studio to properly handle group_ids.
-    :return: a modified source where the specs are applied
+    :param callable error_callback: Function to call with invalid specs instead of raising ValueError
+    :return: A modified source where the specs are applied
     :rtype: Element
     """
     # Queue of specification nodes (i.e. nodes describing where and
@@ -139,9 +142,24 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
             remove_element(to_extract)
             return to_extract
         else:
-            raise ValueError(
-                _lt("Element “%s” cannot be located in parent view", etree.tostring(spec, encoding='unicode'))
-            )
+            if error_callback:
+                invalid_attrib = None
+                if spec.tag == "xpath":
+                    invalid_attrib = "expr"
+                elif spec.tag == "field":
+                    invalid_attrib = "name"
+                spec_dict = {
+                    "tag": spec.tag,
+                    "attrib": dict(spec.attrib),
+                    "sourceline": spec.sourceline,
+                    "invalid_attrib": invalid_attrib
+                }
+                error_callback(spec_dict)
+                return None  # Continue processing
+            else:
+                raise ValueError(
+                    f"Element “{etree.tostring(spec, encoding='unicode')}” cannot be located in parent view"
+                )
 
     while len(specs):
         spec = specs.pop(0)
@@ -180,25 +198,14 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
                             comment.tail = text
                             source.insert(0, comment)
                     else:
-                        # TODO ideally the notion of 'inherit_branding' should
-                        # not exist in this function. Given the current state of
-                        # the code, it is however necessary to know where nodes
-                        # were removed when distributing branding. As a stable
-                        # fix, this solution was chosen: the location is marked
-                        # with a "ProcessingInstruction" which will not impact
-                        # the "Element" structure of the resulting tree.
-                        # Exception: if we happen to replace a node that already
-                        # has xpath branding (root level nodes), do not mark the
-                        # location of the removal as it will mess up the branding
-                        # of siblings elements coming from other views, after the
-                        # branding is distributed (and those processing instructions
-                        # removed).
                         if inherit_branding and not node.get('data-oe-xpath'):
                             node.addprevious(etree.ProcessingInstruction('apply-inheritance-specs-node-removal', node.tag))
 
                         for child in spec:
                             if child.get('position') == 'move':
-                                child = extract(child)
+                                extracted_child = extract(child)
+                                if extracted_child is not None:
+                                    child = extracted_child
                             node.addprevious(child)
                         node.getparent().remove(node)
                 elif mode == "inner":
@@ -212,9 +219,19 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
                     node.text = spec.text
 
                 else:
-                    raise ValueError(_lt("Invalid mode attribute: “%s”", mode))
+                    if error_callback:
+                        spec_dict = {
+                            "tag": spec.tag,
+                            "attrib": dict(spec.attrib),
+                            "sourceline": spec.sourceline,
+                            "invalid_attrib": "mode"
+                        }
+                        error_callback(spec_dict)
+                        continue  # Continue processing
+                    else:
+                        raise ValueError(f"Invalid mode attribute: “{mode}”")
             elif pos == 'attributes':
-                for child in spec.getiterator('attribute'):
+                for child in spec.iter('attribute'):
                     # The element should only have attributes:
                     # - name (mandatory),
                     # - add, remove, separator
@@ -309,19 +326,42 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
                 remove_element(sentinel)
             elif pos == 'before':
                 add_stripped_items_before(node, spec, extract)
-
             else:
-                raise ValueError(_lt("Invalid position attribute: '%s'", pos))
-
+                if error_callback:
+                    spec_dict = {
+                        "tag": spec.tag,
+                        "attrib": dict(spec.attrib),
+                        "sourceline": spec.sourceline,
+                        "invalid_attrib": "position"
+                    }
+                    error_callback(spec_dict)
+                    continue  # Continue processing
+                else:
+                    raise ValueError(f"Invalid position attribute: '{pos}'")
         else:
             attrs = ''.join([
-                ' %s="%s"' % (attr, html_escape(spec.get(attr)))
+                f' {attr}="{html_escape(spec.get(attr))}"'
                 for attr in spec.attrib
                 if attr != 'position'
             ])
-            tag = "<%s%s>" % (spec.tag, attrs)
-            raise ValueError(
-                _lt("Element '%s' cannot be located in parent view", tag)
-            )
+            tag = f"<{spec.tag}{attrs}>"
+            if error_callback:
+                invalid_attrib = None
+                if spec.tag == "xpath":
+                    invalid_attrib = "expr"
+                elif spec.tag == "field":
+                    invalid_attrib = "name"
+                spec_dict = {
+                    "tag": spec.tag,
+                    "attrib": dict(spec.attrib),
+                    "sourceline": spec.sourceline,
+                    "invalid_attrib": invalid_attrib
+                }
+                error_callback(spec_dict)
+                continue  # Continue processing
+            else:
+                raise ValueError(
+                    f"Element '{tag}' cannot be located in parent view"
+                )
 
     return source

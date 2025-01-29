@@ -318,21 +318,23 @@ actual arch.
 
     @api.depends('arch', 'inherit_id')
     def _compute_invalid_xpaths_from_arch(self):
+        def collect_invalid_specs(invalid_specs_list):
+            def callback(spec_dict):
+                invalid_specs_list.append(spec_dict)
+            return callback
         for view in self:
             if view.inherit_id:
+                was_view_active = view.active
+                view.active = False
                 source = view._get_combined_arch()
+                view.active = was_view_active
                 invalid_xpaths = []
-                for spec in etree.fromstring(view.arch).iterchildren(tag=etree.Element):
-                    try:
-                        source = apply_inheritance_specs(source, spec)
-                    except ValueError as e:
-                        if spec.tag == "xpath":
-                            invalid_xpaths.append([
-                                spec.attrib.get("expr"),
-                                spec.sourceline,
-                            ])
-                        else:
-                            raise e
+                error_callback = collect_invalid_specs(invalid_xpaths)
+                apply_inheritance_specs(
+                    source,
+                    etree.fromstring(view.arch),
+                    error_callback=error_callback
+                )
                 view.invalid_xpaths_from_arch = invalid_xpaths
             else:
                 view.invalid_xpaths_from_arch = False
