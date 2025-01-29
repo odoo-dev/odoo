@@ -4,15 +4,15 @@ from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
 
-class EmissionSource(models.Model):
-    _name = 'emission.source'
+class EsgEmissionSource(models.Model):
+    _name = 'esg.emission.source'
     _description = 'Emission Source'
     _order = 'level desc,sequence,name'
 
     sequence = fields.Integer(default=10)
     name = fields.Char(required=True)
-    parent_id = fields.Many2one('emission.source')
-    child_ids = fields.One2many('emission.source', 'parent_id')
+    parent_id = fields.Many2one('esg.emission.source')
+    child_ids = fields.One2many('esg.emission.source', 'parent_id')
     scope = fields.Selection(selection=[
             ('direct', 'Direct'),
             ('indirect', 'Indirect'),

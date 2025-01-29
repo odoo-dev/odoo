@@ -1,3 +1,8 @@
 id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
-access_emission_source_model,access_emission_source_model,model_emission_source,base.group_user,1,1,1,1
+access_esg_emission_source_model,access_esg_emission_source_model,model_esg_emission_source,base.group_user,1,1,1,1
 access_esg_gas,esg.gas,model_esg_gas,base.group_user,1,1,1,1
+access_esg_activity_type_model,access_esg_activity_type_model,model_esg_activity_type,base.group_user,1,1,1,1
+access_esg_assignation_model,access_esg_assignation_model,model_esg_assignation,base.group_user,1,1,1,1
+access_esg_emission_factor_model,access_esg_emission_factor_model,model_esg_emission_factor,base.group_user,1,1,1,1
+access_esg_emission_source_model,access_esg_emission_source_model,model_esg_emission_source,base.group_user,1,1,1,1
+access_esg_gas_emission_model,access_esg_gas_emission_model,model_esg_gas_emission,base.group_user,1,1,1,1

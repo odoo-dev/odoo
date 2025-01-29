@@ -16,3 +16,4 @@ class EsgGas(models.Model):
         ("pfc", "Perfluorocarbons (PFCs)"),
         ("sf6", "Sulfur Hexafluoride (SF6)"),
     ], required=True)
+    factor = fields.Float()

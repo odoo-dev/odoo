@@ -5,10 +5,10 @@
     'version': '1.0',
     'summary': "Calculate and report a company's Environmental, Social, and Governance (ESG) impact.",
     'depends': [
-        'base_setup',
-        'mail',
+        'account',
     ],
     'data': [
+        'data/esg_data.xml',
         'security/ir.model.access.csv',
         'data/esg_data.xml',
         'views/emission_source_views.xml',

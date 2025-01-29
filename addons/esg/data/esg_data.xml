@@ -45,4 +45,39 @@
         <field name="global_warming_potential">23900</field>
         <field name="category">sf6</field>
     </record>
+
+    <record id="esg_activity_type_0" model="esg.activity.type">
+        <field name="color">1</field>
+        <field name="name">Energy Consumption</field>
+    </record>
+
+    <record id="esg_activity_type_1" model="esg.activity.type">
+        <field name="color">2</field>
+        <field name="name">Transportation and Logistics</field>
+    </record>
+
+    <record id="esg_activity_type_2" model="esg.activity.type">
+        <field name="color">3</field>
+        <field name="name">Material Production</field>
+    </record>
+
+    <record id="esg_activity_type_3" model="esg.activity.type">
+        <field name="color">4</field>
+        <field name="name">Waste Management</field>
+    </record>
+
+    <record id="esg_activity_type_4" model="esg.activity.type">
+        <field name="color">5</field>
+        <field name="name">Product Usage and Disposal</field>
+    </record>
+
+    <record id="esg_activity_type_5" model="esg.activity.type">
+        <field name="color">6</field>
+        <field name="name">Employee Commuting</field>
+    </record>
+
+    <record id="esg_activity_type_6" model="esg.activity.type">
+        <field name="color">7</field>
+        <field name="name">Business Travel</field>
+    </record>
 </odoo>
