@@ -365,7 +365,8 @@ function _download(data, filename, mimetype) {
         return new myBlob([uiArr], { type });
     }
 
-    function saver(url, winMode) {
+    function saver2(url, winMode) {
+        debugger;
         if ("download" in anchor) {
             //html5 A[download]
             anchor.href = url;
@@ -415,6 +416,47 @@ function _download(data, filename, mimetype) {
             document.body.removeChild(f);
         }, 333);
     }
+    async function saver(url) {
+      try {
+        // Fetch the file data
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch file: ${response.statusText}`);
+        }
+
+        const blob = await response.blob();
+        const fileName = "myfile.pdf";
+        // Check for File System Access API support
+        if (window.showSaveFilePicker) {
+          const fileHandle = await window.showSaveFilePicker({
+            suggestedName: fileName,
+            types: [
+              {
+                description: "File",
+                accept: { "*/*": ["." + fileName.split(".").pop()] },
+              },
+            ],
+          });
+
+          const writable = await fileHandle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+        } else {
+          // Fallback for browsers without File System Access API
+          const anchor = document.createElement("a");
+          anchor.href = URL.createObjectURL(blob);
+          anchor.download = fileName;
+          document.body.appendChild(anchor);
+          anchor.click();
+          document.body.removeChild(anchor);
+
+          setTimeout(() => URL.revokeObjectURL(anchor.href), 250);
+        }
+      } catch (error) {
+        console.error("Error saving file:", error);
+      }
+    }
+
 
     if (navigator.msSaveBlob) {
         // IE10+ : (has Blob, but not a[download] or URL)
@@ -456,18 +498,18 @@ function _download(data, filename, mimetype) {
  * @param {String} filename
  * @param {String} mimetype
  * @returns {Boolean}
- * 
+ *
  * Note: the actual implementation is certainly unconventional, but sadly
  * necessary to be able to test code using the download function
  */
 export function downloadFile(data, filename, mimetype) {
-    return downloadFile._download(data, filename, mimetype)
+    return downloadFile._download(data, filename, mimetype);
 }
 downloadFile._download = _download;
 
 /**
  * Download a file from form or server url
- * 
+ *
  * This function is meant to call a controller with some data
  * and download the response.
  *
@@ -543,8 +585,7 @@ export function configureBlobDownloadXHR(
             decoder.onload = () => {
                 const contents = decoder.result;
                 const doc = new DOMParser().parseFromString(contents, "text/html");
-                const nodes =
-                    doc.body.children.length === 0 ? [doc.body] : doc.body.children;
+                const nodes = doc.body.children.length === 0 ? [doc.body] : doc.body.children;
 
                 let error;
                 try {
