@@ -10,7 +10,9 @@
     ],
     'data': [
         'security/ir.model.access.csv',
+        'data/esg_data.xml',
         'views/emission_source_views.xml',
+        'views/esg_gas_views.xml',
         'views/esg_menus.xml',
     ],
     'assets': {

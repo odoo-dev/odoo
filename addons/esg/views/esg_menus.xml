@@ -77,9 +77,10 @@
                 sequence="20"
             >
                 <menuitem
-                    id="menu_esg_gasses"
+                    id="menu_esg_configuration_carbon_emissions_gasses"
                     name="Gases"
                     sequence="30"
+                    action="action_esg_gasses_list"
                 />
                 <menuitem
                     id="menu_esg_type_of_emissions"

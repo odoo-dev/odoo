@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="esg_gas_co2" model="esg.gas">
+        <field name="name">Carbon Dioxide (CO2)</field>
+        <field name="global_warming_potential">1</field>
+        <field name="category">co2</field>
+    </record>
+    <record id="esg_gas_ch4" model="esg.gas">
+        <field name="name">Methane (CH4)</field>
+        <field name="global_warming_potential">21</field>
+        <field name="category">ch4</field>
+    </record>
+    <record id="esg_gas_n2o" model="esg.gas">
+        <field name="name">Nitrous Oxide (N2O)</field>
+        <field name="global_warming_potential">310</field>
+        <field name="category">n2o</field>
+    </record>
+    <record id="esg_gas_hfc_134a" model="esg.gas">
+        <field name="name">HFC-134a</field>
+        <field name="global_warming_potential">1430</field>
+        <field name="category">hfc</field>
+    </record>
+        <record id="esg_gas_hfc_23" model="esg.gas">
+        <field name="name">HFC-23</field>
+        <field name="global_warming_potential">14800</field>
+        <field name="category">hfc</field>
+    </record>
+        <record id="esg_gas_hfc_152a" model="esg.gas">
+        <field name="name">HFC-152a</field>
+        <field name="global_warming_potential">124</field>
+        <field name="category">hfc</field>
+    </record>
+    <record id="esg_gas_pfc_cf4" model="esg.gas">
+        <field name="name">Carbon Tetrafluoride (CF4)</field>
+        <field name="global_warming_potential">7390</field>
+        <field name="category">pfc</field>
+    </record>
+    <record id="esg_gas_pfc_c2f6" model="esg.gas">
+        <field name="name">Hexafluoroethane (C2F6)</field>
+        <field name="global_warming_potential">12200</field>
+        <field name="category">pfc</field>
+    </record>
+    <record id="esg_gas_sf6" model="esg.gas">
+        <field name="name">Sulfur Hexafluoride (SF6)</field>
+        <field name="global_warming_potential">23900</field>
+        <field name="category">sf6</field>
+    </record>
+</odoo>

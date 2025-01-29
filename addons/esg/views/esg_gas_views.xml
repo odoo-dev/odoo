@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="esg_gas_list" model="ir.ui.view">
+        <field name="name">esg.gas.list</field>
+        <field name="model">esg.gas</field>
+        <field name="arch" type="xml">
+            <list expand="True">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="global_warming_potential"/>
+                <field name="category" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_esg_gasses_list" model="ir.actions.act_window">
+        <field name="name">Gasses</field>
+        <field name="res_model">esg.gas</field>
+        <field name="path">gasses</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'group_by': 'category'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                No data yet!
+            </p>
+        </field>
+    </record>
+</odoo>
