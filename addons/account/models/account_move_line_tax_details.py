@@ -29,8 +29,40 @@ class AccountMoveLine(models.Model):
         #TO OVERRIDE
         return SQL()
 
-    @api.model
     def _get_query_tax_details(self, table_references, search_condition, fallback=True) -> SQL:
+        query = SQL(
+            '''
+            SELECT
+                account_move_line.id,
+                account_move_line.id AS base_line_id,
+                (json_data.value->>'tax_line_id')::INTEGER  AS tax_line_id,
+                'tax' as display_type,
+                NULL AS src_line_id,
+                (json_data.value->>'tax_id')::INTEGER AS tax_id,
+                NULL AS group_tax_id,
+                TRUE AS tax_exigible,
+                NULL AS base_account_id,
+                (json_data.value->>'tax_repartition_line_id')::INTEGER AS tax_repartition_line_id,
+                (json_data.value->>'tax_amount')::NUMERIC AS tax_amount,
+                (json_data.value->>'tax_amount')::NUMERIC AS tax_amount_currency,
+                (json_data.value->>'base_amount')::NUMERIC AS base_amount,
+                (json_data.value->>'base_amount')::NUMERIC AS base_amount_currency
+            FROM
+                account_move_line account_move_line
+            LEFT JOIN LATERAL
+                jsonb_each(account_move_line.tax_ids_json::jsonb) AS json_data
+                ON account_move_line.tax_ids_json IS NOT NULL
+            WHERE
+                (%(search_condition)s)
+                and account_move_line.display_type = 'product'
+            ''',
+            table_references=table_references,
+            search_condition=search_condition,
+        )
+        return query
+
+    @api.model
+    def _get_query_tax_details_old(self, table_references, search_condition, fallback=True) -> SQL:
         """ Create the tax details sub-query based on the orm domain passed as parameter.
 
         :param table_references:    The query to inject after the FROM, as an SQL object.

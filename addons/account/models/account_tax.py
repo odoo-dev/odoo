@@ -2433,11 +2433,14 @@ class AccountTax(models.Model):
         }
 
         for k, v in tax_lines_mapping.items():
-            tax_ids_json = {k['tax_repartition_line_id']: {
-                "base_amount": v['tax_base_amount'],
-                "tax_tag_ids": k['tax_tag_ids'][0][2],
+            tax_ids_json = {
+                k['tax_repartition_line_id']: {
+                    "base_amount": v['tax_base_amount'],
+                    "tax_tag_ids": k['tax_tag_ids'][0][2],
+                    "tag_ids": k['tax_tag_ids'][0][2],
+                },
                 "tag_ids": k['tax_tag_ids'][0][2],
-            }}
+            }
             tax_lines_mapping[k]['tax_ids_json'] = tax_ids_json
 
         # Compute 'tax_lines_to_update' / 'tax_lines_to_delete' / 'tax_lines_to_add'.
@@ -2564,7 +2567,7 @@ class AccountTax(models.Model):
             tax = tax_data['tax']
             for tax_rep_data in tax_data['tax_reps_data']:
                 rep_line = tax_rep_data['tax_rep']
-                taxes.append({
+                tax_data = {
                     'id': tax.id,
                     'name': partner and tax.with_context(lang=partner.lang).name or tax.name,
                     'amount': tax_rep_data['tax_amount_currency'],
@@ -2580,9 +2583,13 @@ class AccountTax(models.Model):
                     'group': tax_data['group'],
                     'tag_ids': tax_rep_data['tax_tags'].ids,
                     'tax_ids': tax_rep_data['taxes'].ids,
-                })
+                }
+                if tax.amount == 0:
+                    tax_data['tax_percentage'] = True
+                taxes.append(tax_data)
                 if not rep_line.account_id:
                     total_void += tax_rep_data['tax_amount_currency']
+
 
         if self._context.get('round_base', True):
             total_excluded = currency.round(total_excluded)

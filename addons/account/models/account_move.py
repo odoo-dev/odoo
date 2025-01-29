@@ -3256,9 +3256,11 @@ class AccountMove(models.Model):
         for move in self:
             is_refund = move.move_type in ('out_refund', 'in_refund')
             group_by_repartition_key = {}
+            base_line_tax_line_map = {}
             for line in move.line_ids:
                 if line.tax_repartition_line_id:
                     group_by_repartition_key.setdefault(line.tax_repartition_line_id.id, 0.00)
+                    base_line_tax_line_map.setdefault(line.tax_repartition_line_id.id, line.id)
                     group_by_repartition_key[line.tax_repartition_line_id.id] += line.balance
             line_data = {}
             for line in move.line_ids:
@@ -3278,8 +3280,21 @@ class AccountMove(models.Model):
                                 "base_tag_ids": list(map(int, all_taxes.get('base_tags'))),
                                 "tax_repartition_line_id": tax['tax_repartition_line_id'],
                                 "tag_ids": all_taxes['base_tags'],
+                                "tax_line_id": base_line_tax_line_map.get(tax['tax_repartition_line_id']),
                             }
                             group_by_repartition_key[tax['tax_repartition_line_id']] += tax_amount
+                        elif tax.get('tax_percentage'):
+                            line_data[line.id][tax['tax_repartition_line_id']] = {
+                                "base_amount": tax['base'],
+                                "tax_amount": float(tax['amount']),
+                                "tax_id": tax['id'],
+                                "tax_tag_ids": list(map(int, tax['tag_ids'])),
+                                "base_tag_ids": list(map(int, all_taxes.get('base_tags'))),
+                                "tax_repartition_line_id": tax['tax_repartition_line_id'],
+                                "tag_ids": all_taxes['base_tags'],
+                                "tax_line_id": base_line_tax_line_map.get(tax['tax_repartition_line_id']),
+                            }
+                    line_data[line.id]['tag_ids'] = all_taxes.get('base_tags')
             if group_by_repartition_key:
                 for rp_line in group_by_repartition_key:
                     if group_by_repartition_key[rp_line] != 0.0:
