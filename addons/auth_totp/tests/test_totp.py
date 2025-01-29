@@ -131,3 +131,12 @@ class TestTOTP(TestTOTPMixin, HttpCase):
         response = self.url_open("/web/session/authenticate", data=json.dumps(payload), headers=headers)
         data = response.json()
         self.assertEqual(data['result']['uid'], None)
+
+
+    def test_totp_field_access(self):
+        """
+        Ensure that the field of the totp secret cannot be accessed even by the admin
+        """
+        user_test.write({'totp_secret': '000000'})
+        self.env.cache.invalidate()
+        self.assertFalse(user.sudo().totp_secret)

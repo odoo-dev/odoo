@@ -11,16 +11,14 @@ from odoo import _, api, fields, models
 from odoo.addons.base.models.res_users import check_identity
 from odoo.exceptions import AccessDenied, UserError
 from odoo.http import request
-from odoo.tools import sql
+from odoo.tools import sql, SQL
 
 from odoo.addons.auth_totp.models.totp import TOTP, TOTP_SECRET_SIZE
 
 _logger = logging.getLogger(__name__)
 
 compress = functools.partial(re.sub, r'\s', '')
-
-
-class ResUsers(models.Model):
+class Users(models.Model):
     _inherit = 'res.users'
 
     totp_secret = fields.Char(copy=False, groups=fields.NO_ACCESS, compute='_compute_totp_secret', inverse='_inverse_token')
@@ -70,8 +68,10 @@ class ResUsers(models.Model):
 
     @api.depends('totp_secret')
     def _compute_totp_enabled(self):
-        for r, v in zip(self, self.sudo()):
-            r.totp_enabled = bool(v.totp_secret)
+        self.env.cr.execute(SQL('SELECT id, totp_secret FROM res_users WHERE id IN (%s)', SQL(',').join([SQL('%s', id ) for id in self.ids])))
+        result = {_id: secret for _id, secret in self.env.cr.fetchall()}
+        for rec in self:
+            rec.totp_enabled = bool(result[rec.id])
 
     def _rpc_api_keys_only(self):
         # 2FA enabled means we can't allow password-based RPC
@@ -82,13 +82,14 @@ class ResUsers(models.Model):
         return super()._get_session_token_fields() | {'totp_secret'}
 
     def _totp_check(self, code):
-        sudo = self.sudo()
-        key = base64.b32decode(sudo.totp_secret)
+        self.env.cr.execute('SELECT totp_secret FROM res_users WHERE id=%s', (self.id,))
+        totp_secret = self.env.cr.fetchone()[0]
+        key = base64.b32decode(totp_secret)
         match = TOTP(key).match(code)
         if match is None:
-            _logger.info("2FA check: FAIL for %s %r", self, sudo.login)
+            _logger.info("2FA check: FAIL for %s %r", self, self.sudo().login)
             raise AccessDenied(_("Verification failed, please double-check the 6-digit code"))
-        _logger.info("2FA check: SUCCESS for %s %r", self, sudo.login)
+        _logger.info("2FA check: SUCCESS for %s %r", self, self.sudo().login)
 
     def _totp_try_setting(self, secret, code):
         if self.totp_enabled or self != self.env.user:
@@ -178,8 +179,7 @@ class ResUsers(models.Model):
 
     def _compute_totp_secret(self):
         for user in self:
-            self.env.cr.execute('SELECT totp_secret FROM res_users WHERE id=%s', (user.id,))
-            user.totp_secret = self.env.cr.fetchone()[0]
+            user.totp_secret = ''
 
     def _inverse_token(self):
         for user in self:
