@@ -28,7 +28,8 @@ class EventRegistration(models.Model):
             'line_type_id': self.env.ref('event_hr_skills.resume_type_events').id,
         }
 
-    def _regenerate_resume_lines(self):
+    @api.depends('state', 'partner_id.employee_ids', 'event_id.tag_ids.category_id.show_on_resume')
+    def _compute_resume_line_ids(self):
         create_vals_list = []
         lines_to_unlink = self.env['hr.resume.line']
         for registration in self:
@@ -52,13 +53,3 @@ class EventRegistration(models.Model):
         lines_to_unlink.unlink()
         if create_vals_list:
             self.env['hr.resume.line'].create(create_vals_list)
-
-    @api.depends('partner_id.employee_ids', 'event_id.tag_ids.category_id.show_on_resume')
-    def _compute_resume_line_ids(self):
-        self._regenerate_resume_lines()
-
-    def write(self, vals):
-        ret = super().write(vals)
-        if 'state' in vals:
-            self._regenerate_resume_lines()
-        return ret
