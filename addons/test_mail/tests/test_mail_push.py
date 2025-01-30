@@ -116,20 +116,22 @@ class TestWebPushNotification(SMSCommon):
                     payload_value = json.loads(push_to_end_point.call_args.kwargs['payload'])
                     if channel.channel_type == 'chat':
                         self.assertEqual(payload_value['title'], f'{self.user_email.name}')
+                        self.assertEqual(payload_value['options']['body'], 'Test Push')
                     elif channel.channel_type == 'group':
                         self.assertIn(self.user_email.name, payload_value['title'])
                         self.assertIn(self.user_inbox.name, payload_value['title'])
+                        self.assertEqual(payload_value['options']['body'], f"{sender.name}: Test Push")
                         self.assertIn(self.guest.name, payload_value['title'])
                         self.assertNotIn("False", payload_value['title'])
                     else:
                         self.assertEqual(payload_value['title'], f'#{channel.name}')
+                        self.assertEqual(payload_value['options']['body'], f"{sender.name}: Test Push")
                     icon = (
-                        '/web/static/img/odoo-icon-192x192.png'
+                        '/mail/static/description/icon.png'
                         if sender == self.guest
                         else f'/web/image/res.partner/{self.user_email.partner_id.id}/avatar_128'
                     )
                     self.assertEqual(payload_value['options']['icon'], icon)
-                    self.assertEqual(payload_value['options']['body'], 'Test Push')
                     self.assertEqual(payload_value['options']['data']['res_id'], channel.id)
                     self.assertEqual(payload_value['options']['data']['model'], channel._name)
                     self.assertEqual(push_to_end_point.call_args.kwargs['device']['endpoint'], 'https://test.odoo.com/webpush/user2')
@@ -307,7 +309,7 @@ class TestWebPushNotification(SMSCommon):
         self._assert_notification_count_for_cron(0)
         push_to_end_point.assert_called_once()
         payload_value = json.loads(push_to_end_point.call_args.kwargs['payload'])
-        self.assertIn(self.user_email.name, payload_value['title'])
+        self.assertIn(self.user_email.name, payload_value["options"]["body"])
         self.assertIn(
             'Please call me as soon as possible this afternoon!\n\n--\nSylvie',
             payload_value['options']['body'],
@@ -331,15 +333,9 @@ class TestWebPushNotification(SMSCommon):
                 if has_notification:
                     push_to_end_point.assert_called_once()
                     payload_value = json.loads(push_to_end_point.call_args.kwargs['payload'])
-                    self.assertEqual(
-                        payload_value['title'],
-                        f'{self.user_admin.name}: {self.record_simple.display_name}'
-                    )
-                    self.assertEqual(
-                        payload_value['options']['icon'],
-                        f'/web/image/res.partner/{self.user_admin.partner_id.id}/avatar_128'
-                    )
-                    self.assertEqual(payload_value['options']['body'], 'Test Push Notif')
+                    self.assertEqual(payload_value["title"], self.record_simple.display_name)
+                    self.assertEqual(payload_value['options']['icon'], "/base/static/description/icon.png")
+                    self.assertEqual(payload_value['options']['body'], f'{self.user_admin.name}: Test Push Notif')
                     self.assertEqual(payload_value['options']['data']['res_id'], self.record_simple.id)
                     self.assertEqual(payload_value['options']['data']['model'], self.record_simple._name)
                     self.assertEqual(push_to_end_point.call_args.kwargs['device']['endpoint'], 'https://test.odoo.com/webpush/user2')

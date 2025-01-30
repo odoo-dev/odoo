@@ -28,7 +28,7 @@ from markupsafe import Markup, escape
 from requests import Session
 from werkzeug import urls
 
-from odoo import _, api, exceptions, fields, models, Command
+from odoo import _, api, exceptions, fields, models, modules, Command
 from odoo.addons.mail.tools.discuss import Store
 from odoo.addons.mail.tools.web_push import (
     push_to_end_point, DeviceUnreachableError,
@@ -3828,8 +3828,6 @@ class MailThread(models.AbstractModel):
         REM: It is having a limit of 4000 bytes (4kb)
         """
         if msg_vals:
-            author_id = [msg_vals.get('author_id')]
-            author_name = self.env['res.partner'].browse(author_id).name
             model = msg_vals.get('model')
             title = msg_vals.get('record_name') or msg_vals.get('subject')
             res_id = msg_vals.get('res_id')
@@ -3837,8 +3835,6 @@ class MailThread(models.AbstractModel):
             if not model and body:
                 model, res_id = self._extract_model_and_id(msg_vals)
         else:
-            author_id = message.author_id.ids
-            author_name = self.env['res.partner'].browse(author_id).name
             model = message.model
             title = message.record_name or message.subject
             res_id = message.res_id
@@ -3846,10 +3842,12 @@ class MailThread(models.AbstractModel):
 
         icon = '/web/static/img/odoo-icon-192x192.png'
 
-        if author_name:
-            title = "%s: %s" % (author_name, title)
-            icon = "/web/image/res.partner/%d/avatar_128" % author_id[0]
-
+        if self.env[model]._original_module:
+            icon = modules.module.get_module_icon(
+                self.env[model]._original_module
+            )
+        if self._include_author_in_notification_body():
+            body = "%s: %s" % (self._message_get_author_name(message, msg_vals), body)
         payload = {
             'title': title,
             'options': {
@@ -3864,6 +3862,16 @@ class MailThread(models.AbstractModel):
         payload['options']['body'] += self._generate_tracking_message(message)
 
         return payload
+
+    def _message_get_author_name(self, message, msg_vals=False):
+        author_id = [msg_vals.get('author_id')] if msg_vals else message.author_id.ids
+        author = self.env['res.partner'].browse(author_id)
+        return author.name
+
+    def _include_author_in_notification_body(self):
+        """ Determine whether to include the author name in the notification body.
+        The author name is included if there is more than one recipient"""
+        return True
 
     def _notify_get_recipients(self, message, msg_vals, **kwargs):
         """ Compute recipients to notify based on subtype and followers. This

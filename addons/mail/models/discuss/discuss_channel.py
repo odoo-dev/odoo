@@ -667,18 +667,31 @@ class Channel(models.Model):
         author = self.env["res.partner"].browse(author_id) or self.env["mail.guest"].browse(
             msg_vals.get("author_guest_id", message.author_guest_id.id)
         )
+        model = msg_vals.get("model", message.model)
+        if model == "discuss.channel" and author_id:
+            payload["options"]["icon"] = "/web/image/res.partner/%d/avatar_128" % author_id[0]
+
         if self.channel_type == 'chat':
             payload['title'] = author.name
         elif self.channel_type == 'channel':
-            payload['title'] = "#%s - %s" % (record_name, author.name)
+            payload["title"] = "#%s" % (record_name)
         elif self.channel_type == 'group':
             if not record_name:
                 member_names = self.channel_member_ids.mapped(lambda m: m.partner_id.name if m.partner_id else m.guest_id.name)
                 record_name = f"{', '.join(member_names[:-1])} and {member_names[-1]}" if len(member_names) > 1 else member_names[0] if member_names else ""
-            payload['title'] = "%s - %s" % (record_name, author.name)
-        else:
-            payload['title'] = "#%s" % (record_name)
+                payload["title"] = record_name
         return payload
+
+    def _message_get_author_name(self, message, msg_vals=False):
+        author_id = [msg_vals["author_id"]] if msg_vals and msg_vals.get("author_id") else message.author_id.ids
+        author_guest_id = [msg_vals["author_guest_id"]] if msg_vals and msg_vals.get("author_guest_id") else message.author_guest_id.ids
+        author = self.env["res.partner"].browse(author_id) or self.env["mail.guest"].browse(author_guest_id)
+        return author.name
+
+    def _include_author_in_notification_body(self):
+        if self.channel_type == 'chat':
+            return False
+        return super()._include_author_in_notification_body()
 
     def _notify_thread_by_web_push(self, message, recipients_data, msg_vals=False, **kwargs):
         # only notify "web_push" recipients in discuss channels.
