@@ -24,7 +24,7 @@ class EsgEmissionFactorLine(models.Model):
         # TODO
         pass
 
-    @api.depends('value', 'gas_id.factor')
+    @api.depends('value', 'gas_id.global_warming_potential')
     def _compute_total_value(self):
         for emission in self:
-            emission.total_value = emission.value * emission.gas_id.factor
+            emission.total_value = emission.value * emission.gas_id.global_warming_potential

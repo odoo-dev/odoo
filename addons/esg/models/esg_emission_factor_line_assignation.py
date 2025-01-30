@@ -2,8 +2,8 @@ from odoo import fields, models, _
 
 
 class EsgAssignation(models.Model):
-    _name = 'esg.assignation'
-    _description = 'Assignation'
+    _name = 'esg.emission.factor.line.assignation'
+    _description = 'Emission Assignation Line'
 
     account_id = fields.Many2one('account.account')
     vendor_id = fields.Many2one('res.partner')

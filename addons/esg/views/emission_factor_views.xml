@@ -39,7 +39,7 @@
                     </page>
                     <page name="assignations" string="Assignations">
                         <field name="assignation_ids" nolabel="1">
-                            <list>
+                            <list editable="bottom">
                                 <field name="account_id"/>
                                 <field name="vendor_id"/>
                                 <field name="product_id"/>

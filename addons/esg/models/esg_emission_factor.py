@@ -6,10 +6,11 @@ class EsgEmissionFactor(models.Model):
     _description = 'Emission Factor'
 
     name = fields.Char(required=True)
+    sequence = fields.Integer()
 
     # to validate with bedo
-    code = fields.Char(string="Code", required=True)
-    factor_type = fields.Selection(selection=[('element', 'Element'), ('post', 'Post')], default='element')
+    # code = fields.Char(string="Code", required=True)
+    # factor_type = fields.Selection(selection=[('element', 'Element'), ('post', 'Post')], default='element')
     co2_equivalent = fields.Float(compute='_compute_co2_equivalent')
     co2_equivalent_range_min = fields.Float(compute='_compute_co2_equivalent')
     co2_equivalent_range_max = fields.Float(compute='_compute_co2_equivalent')
@@ -35,7 +36,7 @@ class EsgEmissionFactor(models.Model):
     currency_id = fields.Many2one('res.currency')
     database_id = fields.Many2one('esg.database')
     emission_line_ids = fields.One2many('esg.emission.factor.line', 'emission_factor_id')
-    assignation_ids = fields.One2many('esg.assignation', 'emission_factor_id')
+    assignation_ids = fields.One2many('esg.emission.factor.line.assignation', 'emission_factor_id')
     description = fields.Html()
 
     @api.depends('emission_line_ids.total_value', 'compute_method', 'uom_id', 'currency_id')

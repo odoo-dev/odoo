@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="esg_emission_factor_1" model="esg.emission.factor">
+            <field name="name">Emission Factor 1</field>
+            <field name="uncertainty">0.1</field>
+            <field name="compute_method">physically</field>
+            <field name="uom_id" ref="uom.product_uom_kgm"/>
+            <field name="description">Description for Emission Factor 1</field>
+        </record>
+
+        <record id="esg_emission_factor_2" model="esg.emission.factor">
+            <field name="name">Emission Factor 2</field>
+            <field name="uncertainty">0.2</field>
+            <field name="compute_method">monetary</field>
+            <field name="currency_id" ref="base.USD"/>
+            <field name="description">Description for Emission Factor 2</field>
+        </record>
+
+        <record id="esg_emission_factor_3" model="esg.emission.factor">
+            <field name="name">Emission Factor 3</field>
+            <field name="uncertainty">0.3</field>
+            <field name="compute_method">monetary</field>
+            <field name="currency_id" ref="base.USD"/>
+        </record>
+
+        <record id="esg_emission_factor_4" model="esg.emission.factor">
+            <field name="name">Emission Factor 4</field>
+            <field name="uncertainty">0.4</field>
+            <field name="compute_method">monetary</field>
+            <field name="currency_id" ref="base.USD"/>
+        </record>
+
+        <record id="esg_emission_factor_line_1" model="esg.emission.factor.line">
+            <field name="emission_factor_id" ref="esg_emission_factor_1"/>
+            <field name="value">5.0</field>
+            <field name="gas_id" ref="esg_gas_co2"/>
+        </record>
+
+        <record id="esg_emission_factor_line_2" model="esg.emission.factor.line">
+            <field name="emission_factor_id" ref="esg_emission_factor_1"/>
+            <field name="value">7.5</field>
+            <field name="gas_id" ref="esg_gas_co2"/>
+        </record>
+
+        <record id="esg_emission_factor_line_3" model="esg.emission.factor.line">
+            <field name="emission_factor_id" ref="esg_emission_factor_2"/>
+            <field name="value">10.0</field>
+            <field name="gas_id" ref="esg_gas_ch4"/>
+        </record>
+
+        <record id="esg_emission_factor_line_4" model="esg.emission.factor.line">
+            <field name="emission_factor_id" ref="esg_emission_factor_2"/>
+            <field name="value">15.0</field>
+            <field name="gas_id" ref="esg_gas_n2o"/>
+        </record>
+
+        <record id="account_1" model="account.account">
+            <field name="name">Account 1</field>
+            <field name="code">600001</field>
+            <field name="account_type">expense</field>
+        </record>
+
+        <record id="account_2" model="account.account">
+            <field name="name">Account 2</field>
+            <field name="code">600002</field>
+            <field name="account_type">expense</field>
+        </record>
+
+        <record id="esg_emission_factor_line_assignation_1" model="esg.emission.factor.line.assignation">
+            <field name="emission_factor_id" ref="esg_emission_factor_1"/>
+            <field name="vendor_id" ref="base.res_partner_1"/>
+        </record>
+
+        <record id="esg_emission_factor_line_assignation_2" model="esg.emission.factor.line.assignation">
+            <field name="emission_factor_id" ref="esg_emission_factor_1"/>
+            <field name="product_id" ref="product.product_product_1"/>
+        </record>
+
+        <record id="esg_emission_factor_line_assignation_3" model="esg.emission.factor.line.assignation">
+            <field name="emission_factor_id" ref="esg_emission_factor_2"/>
+            <field name="account_id" ref="account_1"/>
+        </record>
+
+        <record id="esg_emission_factor_line_assignation_4" model="esg.emission.factor.line.assignation">
+            <field name="emission_factor_id" ref="esg_emission_factor_2"/>
+            <field name="vendor_id" ref="base.res_partner_2"/>
+        </record>
+
+        <record id="esg_emission_factor_line_assignation_5" model="esg.emission.factor.line.assignation">
+            <field name="emission_factor_id" ref="esg_emission_factor_1"/>
+            <field name="product_id" ref="product.product_product_2"/>
+        </record>
+
+        <record id="esg_emission_factor_line_assignation_6" model="esg.emission.factor.line.assignation">
+            <field name="emission_factor_id" ref="esg_emission_factor_2"/>
+            <field name="account_id" ref="account_2"/>
+        </record>
+
+        <record id="esg_emission_factor_line_assignation_7" model="esg.emission.factor.line.assignation">
+            <field name="emission_factor_id" ref="esg_emission_factor_2"/>
+            <field name="product_id" ref="product.product_product_1"/>
+            <field name="vendor_id" ref="base.res_partner_2"/>
+        </record>
+
+        <record id="esg_emission_factor_line_assignation_8" model="esg.emission.factor.line.assignation">
+            <field name="emission_factor_id" ref="esg_emission_factor_3"/>
+            <field name="product_id" ref="product.product_product_1"/>
+            <field name="vendor_id" ref="base.res_partner_1"/>
+        </record>
+
+        <record id="esg_emission_factor_line_assignation_9" model="esg.emission.factor.line.assignation">
+            <field name="emission_factor_id" ref="esg_emission_factor_4"/>
+            <field name="product_id" ref="product.product_product_1"/>
+            <field name="vendor_id" ref="base.res_partner_1"/>
+            <field name="account_id" ref="account_2"/>
+        </record>
+
+    </data>
+</odoo>
