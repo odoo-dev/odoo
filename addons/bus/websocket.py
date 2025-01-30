@@ -184,6 +184,7 @@ class CloseCode(IntEnum):
     BAD_GATEWAY = 1014
     SESSION_EXPIRED = 4001
     KEEP_ALIVE_TIMEOUT = 4002
+    KILL_NOW = 4003
 
 
 class ConnectionState(IntEnum):
@@ -593,7 +594,9 @@ class Websocket:
         called from the WebSocket event loop. To close the connection, use
         `self.close`.
         """
-        if code is CloseCode.ABNORMAL_CLOSURE:
+        if self.state is ConnectionState.CLOSED:
+            return
+        if code in (CloseCode.ABNORMAL_CLOSURE, CloseCode.KILL_NOW):
             self._terminate()
         else:
             self._send_close_frame(code, reason)
@@ -702,7 +705,7 @@ class Websocket:
                     )
 
     def _send_control_command(self, command, data=None):
-        """Send a command to the websocket event loop
+        """Send a command to the websocket event loop.
 
         :param ControlCommand command: The command to be executed.
         :param dict | None data: An optional dictionary of parameters.
@@ -963,6 +966,11 @@ class WebsocketConnectionHandler:
 
     @classmethod
     def websocket_allowed(cls, request):
+        # WebSockets are disabled during tests because the test environment and
+        # the WebSocket thread use the same cursor, leading to race conditions.
+        # However, they are enabled during tours as RPC requests and WebSocket
+        # instances both use the `TestCursor` class wich is locked.
+        # See `HttpCase@browser_js`.
         return not modules.module.current_test
 
     @classmethod
@@ -1108,11 +1116,11 @@ class WebsocketConnectionHandler:
                     _logger.exception("Exception occurred during websocket request handling")
 
 
-def _kick_all():
+def _kick_all(code=CloseCode.GOING_AWAY):
     """ Disconnect all the websocket instances. """
     for websocket in _websocket_instances:
         if websocket.state is ConnectionState.OPEN:
-            websocket.close(CloseCode.GOING_AWAY)
+            websocket.close(code)
 
 
 CommonServer.on_stop(_kick_all)
