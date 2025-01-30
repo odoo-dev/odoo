@@ -355,10 +355,21 @@ export async function applyModifications(img, dataOptions = {}) {
  *     or a placeholder image if the src is not found.
  */
 export function loadImage(src, img = new Image()) {
+    if (this?.randomUniqueID) {
+        var self = this;
+    }
+
     const handleImage = (source, resolve, reject) => {
-        img.addEventListener("load", () => resolve(img), {once: true});
+        img.addEventListener("load", () => {
+            if (self) {console.log(">>> loadImage: ", JSON.stringify(self._getImg().dataset), self.randomUniqueID, "Before resolve");} // empty
+            resolve(img);
+        }, {once: true});
         img.addEventListener("error", reject, {once: true});
         img.src = source;
+        if (self) {
+            console.log(">>> loadImage: ", JSON.stringify(self._getImg().dataset), self.randomUniqueID, "After changing src");
+        }
+
     };
     // The server will return a placeholder image with the following src.
     // grep: LOAD_IMAGE_404
@@ -489,6 +500,7 @@ export async function loadImageInfo(img, attachmentSrc = '') {
     const relativeSrc = srcUrl.pathname;
 
     const {original} = await rpc('/web_editor/get_image_info', {src: relativeSrc});
+    console.log(">>> web.loadImageInfo After RPC " + src + " | " + JSON.stringify(original));
     // If src was an absolute "external" URL, we consider unlikely that its
     // relative part matches something from the DB and even if it does, nothing
     // bad happens, besides using this random image as the original when using
@@ -510,6 +522,7 @@ export async function loadImageInfo(img, attachmentSrc = '') {
         img.dataset.originalId = original.id;
         img.dataset.originalSrc = original.image_src;
         img.dataset.mimetypeBeforeConversion = original.mimetype;
+        console.log(">>> web.loadImageInfo Dataset " + JSON.stringify(img.dataset));
     }
 }
 

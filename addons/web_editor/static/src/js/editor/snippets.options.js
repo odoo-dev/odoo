@@ -3377,6 +3377,9 @@ const SnippetOptionWidget = publicWidget.Widget.extend({
     init: function (parent, $uiElements, $target, $overlay, data, options) {
         this._super.apply(this, arguments);
 
+        this.randomUniqueID = Math.random();
+        console.log(">>> init ", $target, this.randomUniqueID);
+
         this.$originalUIElements = $uiElements;
 
         this.$target = $target;
@@ -6227,8 +6230,12 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
      */
     async willStart() {
         const _super = this._super.bind(this);
+        console.log(">>> ImageHandlerOption.willStart " + this.randomUniqueID + " before");
         await this._initializeImage();
-        return _super(...arguments);
+        console.log(">>> ImageHandlerOption.willStart " + this.randomUniqueID + " after");
+        return _super(...arguments).then(() => {
+            console.log(">>> ImageHandlerOption.willStart " + this.randomUniqueID + " then");
+        });
     },
     /**
      * @override
@@ -6406,8 +6413,11 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
             return [];
         }
         const img = this._getImg();
-        const original = await loadImage(this.originalSrc);
+        console.log(">>> ImageTools._getImg: ", JSON.stringify(img.dataset), this.originalSrc, this.randomUniqueID, "Before loadImage");
+        const original = await loadImage.call(this, this.originalSrc);
+        console.log(">>> ImageTools._getImg: ", JSON.stringify(img.dataset), this.originalSrc, this.randomUniqueID, "After loadImage");
         const maxWidth = img.dataset.width ? img.naturalWidth : original.naturalWidth;
+        //const maxWidth = img.naturalWidth; //1200
         const optimizedWidth = Math.min(maxWidth, this._computeMaxDisplayWidth());
         this.optimizedWidth = optimizedWidth;
         const widths = {
