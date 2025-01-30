@@ -1,7 +1,8 @@
-from odoo.tests.common import RecordCapturer, TransactionCase
+import json
+from odoo.tests.common import RecordCapturer, HttpCase
 
 
-class TestPropertiesExportImport(TransactionCase):
+class TestPropertiesExportImport(HttpCase):
     maxDiff = None
 
     @classmethod
@@ -10,6 +11,7 @@ class TestPropertiesExportImport(TransactionCase):
 
         cls.ModelDefinition = cls.env['import.properties.definition']
         cls.ModelProperty = cls.env['import.properties']
+        cls.ModelPropertyInherits = cls.env['import.properties.inherits']
         cls.definition_records = cls.ModelDefinition.create(
             [
                 {
@@ -91,6 +93,31 @@ class TestPropertiesExportImport(TransactionCase):
                 },
             ]
         )
+
+        cls.inherits_records = cls.ModelPropertyInherits.create([
+            {'parent_id': record_parent.id}
+            for record_parent in cls.properties_records
+        ])
+
+    def test_export_get_property_fields(self):
+        self.authenticate('admin', 'admin')
+        res = self.url_open(
+            "/web/export/get_fields",
+            data=json.dumps({"params": {"model": 'import.properties.inherits',
+                                        'import_compat': True,
+                                        'domain': []}}),
+            headers={"Content-Type": "application/json"}
+        )
+        res = json.loads(res.content)['result']
+
+        res = self.url_open(
+            "/web/export/get_fields",
+            data=json.dumps({"params": {"model": 'import.properties.inherits',
+                                        'import_compat': True,
+                                        'domain': [('id', 'in', self.inherits_records[0].ids)]}}),
+            headers={"Content-Type": "application/json"}
+        )
+        res = json.loads(res.content)['result']
 
     def test_export_properties(self):
         all_properties = [
