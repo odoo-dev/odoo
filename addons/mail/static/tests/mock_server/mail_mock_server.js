@@ -93,7 +93,7 @@ export function registerRoute(route, handler) {
             return res;
         }
         const response = handler.call(this, request);
-        res = await beforeCallableHandler.after?.(response);
+        res = await beforeCallableHandler?.after?.(response);
         if (res !== undefined) {
             return res;
         }
@@ -950,7 +950,13 @@ async function processRequest(request) {
 
     const store = new mailDataHelpers.Store();
     const args = await parseRequestParams(request);
-    for (const fetchParam of args.fetch_params) {
+    let fetchParams = args.fetch_params;
+    if (args.method === "lazy_session_info") {
+        fetchParams = ResUsers._is_public(this.env.uid)
+            ? ["init_messaging"]
+            : ["failures", "systray_get_activities", "init_messaging"];
+    }
+    for (const fetchParam of fetchParams) {
         const [name, params] =
             typeof fetchParam === "string" || fetchParam instanceof String
                 ? [fetchParam, undefined]
@@ -1027,7 +1033,7 @@ async function processRequest(request) {
         }
         mailDataHelpers._process_request_for_internal_user.call(this, store, name, params);
     }
-    return store;
+    return args.method === "lazy_session_info" ? { storeData: store.get_result() } : store;
 }
 
 function _process_request_for_internal_user(store, name, params) {
@@ -1363,6 +1369,10 @@ class Store {
         return record.id;
     }
 }
+
+// replace the lazy_session_info call
+registry.category("mock_rpc").remove("/web/dataset/call_kw/ir.http/lazy_session_info");
+registerRoute("/web/dataset/call_kw/ir.http/lazy_session_info", processRequest);
 
 export const mailDataHelpers = {
     _process_request_for_internal_user,
