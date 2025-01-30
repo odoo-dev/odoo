@@ -4,5 +4,5 @@ access_esg_gas,esg.gas,model_esg_gas,base.group_user,1,1,1,1
 access_esg_activity_type_model,access_esg_activity_type_model,model_esg_activity_type,base.group_user,1,1,1,1
 access_esg_assignation_model,access_esg_assignation_model,model_esg_assignation,base.group_user,1,1,1,1
 access_esg_emission_factor_model,access_esg_emission_factor_model,model_esg_emission_factor,base.group_user,1,1,1,1
-access_esg_gas_emission_model,access_esg_gas_emission_model,model_esg_gas_emission,base.group_user,1,1,1,1
+access_esg_emission_factor_line_model,access_esg_emission_factor_line_model,model_esg_emission_factor_line,base.group_user,1,1,1,1
 access_esg_database_model,access_esg_database_model,model_esg_database,base.group_user,1,1,1,1

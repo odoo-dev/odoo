@@ -13,20 +13,20 @@
                     <group>
                         <field name="activity_type_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                         <field name="company_id"/>
-                        <field name="validity_start_date" widget="daterange" options="{'end_date_field': 'validity_end_date'}"/>
-                        <field name="validity_end_date" invisible="1" required="validity_start_date"/>
+                        <field name="valid_from" widget="daterange" options="{'end_date_field': 'valid_to'}"/>
+                        <field name="valid_to" invisible="1" required="valid_from"/>
                     </group>
                     <group>
                         <field name="uncertainty"/>
                         <field name="compute_method"/>
                         <field name="uom_id" required="compute_method == 'physically'" invisible="compute_method == 'monetary'"/>
                         <field name="currency_id" required="compute_method == 'monetary'" invisible="compute_method == 'physically'"/>
-                        <field name="source_database_id"/>
+                        <field name="database_id"/>
                     </group>
                 </group>
                 <notebook>
                     <page name="gas_emissions" string="Gas Emissions">
-                        <field name="gas_emission_ids" nolabel="1">
+                        <field name="emission_line_ids" nolabel="1">
                             <list editable="bottom">
                                 <field name="gas_id"/>
                                 <field name="activity_type_id"/>

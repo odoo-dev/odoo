@@ -6,12 +6,23 @@ class EsgEmissionFactor(models.Model):
     _description = 'Emission Factor'
 
     name = fields.Char(required=True)
+
+    # to validate with bedo
+    code = fields.Char(string="Code", required=True)
+    factor_type = fields.Selection(selection=[('element', 'Element'), ('post', 'Post')], default='element')
+    co2_equivalent = fields.Float(compute='_compute_co2_equivalent')
+    co2_equivalent_range_min = fields.Float(compute='_compute_co2_equivalent')
+    co2_equivalent_range_max = fields.Float(compute='_compute_co2_equivalent')
+
     emissions_value = fields.Float(compute='_compute_emissions_value', string='Emissions')
     source_id = fields.Many2one('esg.emission.source')
     activity_type_ids = fields.Many2many('esg.activity.type', string='Activity Types', compute='_compute_activity_type_id')
     company_id = fields.Many2one('res.company')
-    validity_start_date = fields.Date()
-    validity_end_date = fields.Date()
+
+    valid_from = fields.Date()
+    valid_to = fields.Date()
+    last_update = fields.Date()
+
     uncertainty = fields.Float()
     compute_method = fields.Selection(selection=[
             ('physically', 'Physically (Quantity)'),
@@ -22,20 +33,29 @@ class EsgEmissionFactor(models.Model):
     )
     uom_id = fields.Many2one('uom.uom')
     currency_id = fields.Many2one('res.currency')
-    source_database_id = fields.Many2one('esg.database')
-    gas_emission_ids = fields.One2many('esg.gas.emission', 'emission_factor_id')
+    database_id = fields.Many2one('esg.database')
+    emission_line_ids = fields.One2many('esg.emission.factor.line', 'emission_factor_id')
     assignation_ids = fields.One2many('esg.assignation', 'emission_factor_id')
     description = fields.Html()
 
-    @api.depends('gas_emission_ids.total_value', 'compute_method', 'uom_id', 'currency_id')
+    @api.depends('emission_line_ids.total_value', 'compute_method', 'uom_id', 'currency_id')
     def _compute_emissions_value(self):
         for factor in self:
             if factor.compute_method == 'physically':
-                factor.emissions_value = sum([emission.uom_id._compute_quantity(emission.total_value, factor.uom_id) for emission in factor.gas_emission_ids])
+                factor.emissions_value = sum([emission.uom_id._compute_quantity(emission.total_value, factor.uom_id) for emission in factor.emission_line_ids])
             else:
-                factor.emissions_value = sum([emission.currency_id._convert(emission.total_value, factor.currency_id) for emission in factor.gas_emission_ids])
+                factor.emissions_value = sum([emission.currency_id._convert(emission.total_value, factor.currency_id) for emission in factor.emission_line_ids])
 
-    @api.depends('gas_emission_ids.activity_type_id')
+    @api.depends('emission_line_ids.activity_type_id')
     def _compute_activity_type_id(self):
         for factor in self:
-            factor.activity_type_ids = factor.gas_emission_ids.activity_type_id.ids
+            factor.activity_type_ids = factor.emission_line_ids.activity_type_id.ids
+
+
+    @api.depends('emission_line_ids')
+    def _compute_co2_equivalent(self):
+        for factor in self:
+            co2_value = sum(factor.emission_line_ids.mapped('co2_equivalent'))
+            factor.co2_equivalent = co2_value
+            factor.co2_equivalent_range_min = co2_value * (1 - factor.uncertainty / 100)
+            factor.co2_equivalent_range_max = co2_value * (1 + factor.uncertainty / 100)

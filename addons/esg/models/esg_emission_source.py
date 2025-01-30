@@ -11,6 +11,7 @@ class EsgEmissionSource(models.Model):
     name = fields.Char(required=True)
     parent_id = fields.Many2one('esg.emission.source')
     child_ids = fields.One2many('esg.emission.source', 'parent_id')
+    complete_name = fields.Char(compute='_compute_complete_name')
     scope = fields.Selection(selection=[
             ('direct', 'Direct'),
             ('indirect', 'Indirect'),
@@ -38,3 +39,10 @@ class EsgEmissionSource(models.Model):
     def _compute_scope(self):
         for source in self:
             source.scope = source.parent_id.scope
+
+    @api.depends('name', 'parent_id')
+    def _compute_complete_name(self):
+        for source in self:
+            source.complete_name = source.name
+            if self.parent_id:
+                source.complete_name = source.parent_id.complete_name + " > " + source.name
