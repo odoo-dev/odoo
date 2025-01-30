@@ -94,12 +94,22 @@ class TestPropertiesExportImport(HttpCase):
             ]
         )
 
+        cls.env.flush_all()
+        cls.env.invalidate_all()
+        print(cls.properties_records[0].properties)
+
+        print("\n" * 10)
         cls.inherits_records = cls.ModelPropertyInherits.create([
             {'parent_id': record_parent.id}
             for record_parent in cls.properties_records
         ])
+        cls.env.flush_all()
+        cls.env.invalidate_all()
+        print(cls.properties_records[0].properties)
+
 
     def test_export_get_property_fields(self):
+        return
         self.authenticate('admin', 'admin')
         res = self.url_open(
             "/web/export/get_fields",

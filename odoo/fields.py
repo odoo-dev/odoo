@@ -3484,7 +3484,7 @@ class Properties(Field):
     # the field is computed editable by design (see the compute method below)
     store = True
     readonly = False
-    precompute = True
+    precompute = False
 
     definition = None
     definition_record = None         # field on the current model that point to the definition record
