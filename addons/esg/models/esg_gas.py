@@ -1,9 +1,9 @@
 from odoo import api, fields, models
-from odoo.exceptions import ValidationError
 
 
 class EsgGas(models.Model):
     _name = "esg.gas"
+    _description = "Gas"
 
     name = fields.Char()
     sequence = fields.Integer(default=10)

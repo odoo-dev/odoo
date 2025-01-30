@@ -1,5 +1,3 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from odoo import api, fields, models, _
 
 
@@ -14,6 +12,7 @@ class EsgGasEmission(models.Model):
     uom_id = fields.Many2one('uom.uom')
     currency_id = fields.Many2one('res.currency')
     emission_factor_id = fields.Many2one('esg.emission.factor')
+    compute_method = fields.Selection(related='emission_factor_id.compute_method')
 
     @api.depends('value', 'gas_id.factor')
     def _compute_total_value(self):

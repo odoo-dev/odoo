@@ -92,6 +92,7 @@
                     id="menu_esg_emission_factors"
                     name="Emission Factors"
                     sequence="50"
+                    action="action_view_emission_factor"
                 />
                 <menuitem
                     id="menu_esg_source_databases"
