@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="esg_employee_report_search" model="ir.ui.view">
+        <field name="name">esg.employee.report.search</field>
+        <field name="model">esg.employee.report</field>
+        <field name="inherit_id" ref="esg_hr.esg_employee_report_search"/>
+        <field name="arch" type="xml">
+            <field name="department_id" position="after">
+                <field name="contract_type_id"/>
+            </field>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="esg_employee_report_search" model="ir.ui.view">
+        <field name="name">esg.employee.report.search</field>
+        <field name="model">esg.employee.report</field>
+        <field name="arch" type="xml">
+            <search string="Gender Parity">
+                <field name="department_id"/>
+                <filter string="Full-Time Workers" name="full_time" domain="[('is_full_time', '=', True)]"/>
+                <filter string="Part-Time Workers" name="part_time" domain="[('is_full_time', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="esg_employee_report_graph" model="ir.ui.view">
+        <field name="name">esg.employee.report.graph</field>
+        <field name="model">esg.employee.report</field>
+        <field name="arch" type="xml">
+                <graph string="Gender Parity" type="bar" disable_linking="1">
+                     <field name="gender"/>
+                     <field name="management_depth" invisible="1"/>
+                     <field name="leadership_reach" invisible="1"/>
+                 </graph>
+             </field>
+    </record>
+
+    <record id="action_esg_employee_report_management_depth" model="ir.actions.act_window">
+        <field name="name">Management Depth</field>
+        <field name="res_model">esg.employee.report</field>
+        <field name="path">management-depth</field>
+        <field name="view_mode">graph</field>
+        <field name="context">{'group_by': ['management_depth', 'gender'], 'graph_measure': '__count__'}</field>
+        <field name="search_view_id" ref="esg_employee_report_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                No data yet!
+            </p>
+        </field>
+    </record>
+
+    <record id="action_esg_employee_report_leadership_reach" model="ir.actions.act_window">
+        <field name="name">Leadership Reach</field>
+        <field name="res_model">esg.employee.report</field>
+        <field name="path">leadership-reach</field>
+        <field name="view_mode">graph</field>
+        <field name="context">{'group_by': ['leadership_reach', 'gender'], 'graph_measure': '__count__'}</field>
+        <field name="search_view_id" ref="esg_employee_report_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                No data yet!
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem
+        id="menu_esg_social"
+        name="Social"
+        sequence="10"
+        parent="esg.menu_esg_measure"
+    >
+        <menuitem
+            id="menu_esg_gender_parity"
+            name="Gender Parity"
+            sequence="20"
+        >
+            <menuitem
+                id="menu_esg_management_depth"
+                name="Management Depth"
+                sequence="10"
+                action="action_esg_employee_report_management_depth"
+            />
+            <menuitem
+                id="menu_esg_leadership_reach"
+                name="Leadership Reach"
+                sequence="20"
+                action="action_esg_employee_report_leadership_reach"
+            />
+        </menuitem>
+    </menuitem>
+</odoo>

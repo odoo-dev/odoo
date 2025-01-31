@@ -49,17 +49,6 @@
                     sequence="30"
                 />
             </menuitem>
-            <menuitem
-                id="menu_esg_social"
-                name="Social"
-                sequence="20"
-            >
-                <menuitem
-                    id="menu_esg_parity"
-                    name="Parity"
-                    sequence="10"
-                />
-            </menuitem>
         </menuitem>
         <menuitem
             id="menu_esg_configuration"
