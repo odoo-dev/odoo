@@ -53,11 +53,12 @@ export class ColorPicker extends Component {
         enabledTabs: { type: Array, optional: true },
         colorPrefix: { type: String },
         noTransparency: { type: Boolean, optional: true },
+        withGradient: { type: Boolean, optional: true },
         close: { type: Function, optional: true },
     };
     static defaultProps = {
         close: () => {},
-        enabledTabs: ["solid", "gradient", "custom"],
+        withGradient: true,
     };
 
     setup() {
