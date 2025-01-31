@@ -400,6 +400,8 @@ class TestDomainOptimize(TransactionCase):
         model = self.env['test_new_api.mixed']
         self.assertIs(Domain.TRUE._optimize(model), Domain.TRUE)
         self.assertIs(Domain.FALSE._optimize(model), Domain.FALSE)
+        from odoo.osv.expression import domain_combine_anies
+        domain_combine_anies(list(Domain.TRUE), model)
 
     def test_condition_build(self):
         # the terms do not change during the build of the condition
