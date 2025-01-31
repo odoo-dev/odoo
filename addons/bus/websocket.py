@@ -594,6 +594,10 @@ class Websocket:
         called from the WebSocket event loop. To close the connection, use
         `self.close`.
         """
+        print("[WS.DEBUG] _disconnect", code, reason)
+        import traceback
+        traceback.print_stack()
+        print()
         if self.state is ConnectionState.CLOSED:
             return
         if code in (CloseCode.ABNORMAL_CLOSURE, CloseCode.KILL_NOW):
@@ -612,6 +616,10 @@ class Websocket:
             self.__socket.settimeout(1)
             while self.__socket.recv(4096):
                 pass
+        print("[WS.DEBUG] _terminate")
+        import traceback
+        traceback.print_stack()
+        print()
         self.__selector.unregister(self.__socket)
         self.__selector.close()
         self.__socket.close()
