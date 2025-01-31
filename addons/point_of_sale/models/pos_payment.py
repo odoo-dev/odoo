@@ -42,6 +42,7 @@ class PosPayment(models.Model):
     is_change = fields.Boolean(string='Is this payment change?', default=False)
     account_move_id = fields.Many2one('account.move', index='btree_not_null')
     uuid = fields.Char(string='Uuid', readonly=True, default=lambda self: str(uuid4()), copy=False)
+    refund_payment_amount_per = fields.Float(string='Refund Payment Amount Percentage', default=0.0, help='Refund Payment Amount Percentage')
 
     @api.model
     def _load_pos_data_domain(self, data):

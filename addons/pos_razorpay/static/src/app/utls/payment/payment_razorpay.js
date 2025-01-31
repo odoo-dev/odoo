@@ -3,6 +3,7 @@ import { PaymentInterface } from "@point_of_sale/app/utils/payment/payment_inter
 import { AlertDialog, ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { serializeDateTime } from "@web/core/l10n/dates";
 import { register_payment_method } from "@point_of_sale/app/services/pos_store";
+import { roundPrecision } from "@web/core/utils/numbers";
 
 const REQUEST_TIMEOUT = 10000;
 const { DateTime } = luxon;
@@ -87,6 +88,7 @@ export class PaymentRazorpay extends PaymentInterface {
     }
 
     _razorpayHandleRefundResponse(response) {
+        debugger
         const paymentLine = this.pendingRazorpayline();
         if (response?.error) {
             paymentLine.setPaymentStatus("retry");
@@ -103,6 +105,7 @@ export class PaymentRazorpay extends PaymentInterface {
                 error: _t("Reference number mismatched"),
             });
         } else if (resultCode === "REFUNDED" || resultCode === "VOIDED") {
+            this._updateRelatedPaymentLine(paymentLine, resultCode);
             this._updatePaymentLine(paymentLine, response);
             paymentLine.payment_date = this._getPaymentDate(response?.postingDate - 19800000);
             paymentLine.setPaymentStatus("done");
@@ -126,6 +129,29 @@ export class PaymentRazorpay extends PaymentInterface {
         });
     }
 
+    async _updateRelatedPaymentLine(paymentLine, resultCode) {
+        debugger
+        const relatedPaymentLine = this.pos.getOrder().lines[0].refunded_orderline_id.order_id.payment_ids.find(
+            (pi) => pi.transaction_id === paymentLine.transaction_id
+        );"250131063625303E010040199"
+        console.log(">>>relatedPaymentLine",relatedPaymentLine);
+        console.log(">>>paymentLine",paymentLine);
+        
+        if (resultCode === "VOIDED") {
+            await this.pos.data.write("pos.payment", [relatedPaymentLine.id], {
+                refund_payment_amount_per: 100.00
+            });
+            // relatedPaymentLine.update({  });
+        } else {
+            const totalAmount = relatedPaymentLine.amount;
+            const preRefundedAmount = (relatedPaymentLine.refund_payment_amount_per * totalAmount) / 100;
+            const currentRefundedAmount = Math.abs(parseFloat(paymentLine.amount));
+            await this.pos.data.write("pos.payment", [relatedPaymentLine.id], {
+                refund_payment_amount_per: parseFloat(roundPrecision(Math.abs(((preRefundedAmount + currentRefundedAmount) / totalAmount) * 100)))
+            });
+            // relatedPaymentLine.update({ payment_status: ((preRefundedAmount + currentRefundedAmount) / totalAmount) * 100 });
+        }
+    }
     async _processRazorpay(cid) {
         const order = this.pos.getOrder();
         const line = order.getSelectedPaymentline();

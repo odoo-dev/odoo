@@ -31,7 +31,8 @@ patch(PaymentScreen.prototype, {
             const razorpayPaymentline = refundedOrder.payment_ids.find(
                 (pi) =>
                     pi.payment_method_id.use_payment_terminal === "razorpay" &&
-                    !transactionsIds.find((x) => x === pi.transaction_id)
+                    !transactionsIds.find((x) => x === pi.transaction_id) &&
+                    pi.refund_payment_amount_per < 100.00
             );
             const currentDue = this.currentOrder.getDue();
             if (!razorpayPaymentline || currentDue === 0) {
