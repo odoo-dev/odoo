@@ -90,4 +90,4 @@ class TestUi(AccountTestInvoicingHttpCommon):
         self.start_tour("/odoo", 'account_tax_group', login="admin")
 
     def test_search_read_method(self):
-        self.start_tour("/odoo", 'search_read_tour', login="admin")
+        self.start_tour("/odoo/customer-invoices/new", 'search_read_tour', login="admin", watch=True)

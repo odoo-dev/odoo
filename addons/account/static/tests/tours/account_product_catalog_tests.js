@@ -2,24 +2,8 @@ import { accountTourSteps } from "@account/js/tours/account";
 import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add('search_read_tour', {
-    url: "/odoo",
+    url: "/odoo/customer-invoices/new",
     steps: () => [
-    ...accountTourSteps.goToAccountMenu("Go to Invoicing"),
-    {
-        content: "Go to Customers",
-        trigger: 'span:contains("Customers")',
-        run: "click",
-    },
-    {
-        content: "Go to Invoices",
-        trigger: 'a:contains("Invoices")',
-        run: "click",
-    },
-    {
-        content: "Create new invoice",
-        trigger: '.o_control_panel_main_buttons .o_list_button_add',
-        run: "click",
-    },
     {
         content: "Click Catalog Button",
         trigger: 'button[name=action_add_from_catalog]',
