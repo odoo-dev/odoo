@@ -7,8 +7,9 @@ import { useCalendarPopover, useClickHandler, useFullCalendar } from "../hooks";
 import { CalendarCommonPopover } from "./calendar_common_popover";
 import { makeWeekColumn } from "./calendar_common_week_column";
 
-import { Component } from "@odoo/owl";
+import { Component, onWillUpdateProps, useEffect, useRef } from "@odoo/owl";
 import { useBus } from "@web/core/utils/hooks";
+import { CALENDAR_MODE } from "@web/views/calendar/calendar_controller";
 
 const SCALE_TO_FC_VIEW = {
     day: "timeGridDay",
@@ -56,15 +57,68 @@ export class CalendarCommonRenderer extends Component {
         editRecord: Function,
         deleteRecord: Function,
         setDate: { type: Function, optional: true },
+        calendarMode: { type: String, optional: true },
+    };
+
+    static defaultProps = {
+        calendarMode: CALENDAR_MODE.normal,
     };
 
     setup() {
-        this.fc = useFullCalendar("fullCalendar", this.options);
+        this.calendarRef = useRef("fullCalendar");
+
+        this.fc = useFullCalendar("fullCalendar", this.finalOptions(this.props.calendarMode));
         this.click = useClickHandler(this.onClick, this.onDblClick);
         this.popover = useCalendarPopover(this.constructor.components.Popover);
+
+        this.multiCreateClearState();
+
         useBus(this.props.model.bus, "SCROLL_TO_CURRENT_HOUR", () =>
             this.fc.api.scrollToTime(`${luxon.DateTime.local().hour - 2}:00:00`)
         );
+
+        useEffect(
+            (el) => {
+                const multiCreatePointerDownBound = this.multiCreatePointerDown.bind(this);
+                const multiCreatePointerMoveBound = this.multiCreatePointerMove.bind(this);
+                const multiCreatePointerUpBound = this.multiCreatePointerUp.bind(this);
+                const multiCreatePointerCancelBound = this.multiCreatePointerCancel.bind(this);
+                window.addEventListener("pointerdown", multiCreatePointerDownBound, {
+                    capture: true,
+                });
+                window.addEventListener("pointermove", multiCreatePointerMoveBound, {
+                    capture: true,
+                });
+                window.addEventListener("pointerup", multiCreatePointerUpBound, { capture: true });
+                window.addEventListener("pointercancel", multiCreatePointerCancelBound, {
+                    capture: true,
+                });
+                return () => {
+                    window.removeEventListener("pointerdown", multiCreatePointerDownBound, {
+                        capture: true,
+                    });
+                    window.removeEventListener("pointermove", multiCreatePointerMoveBound, {
+                        capture: true,
+                    });
+                    window.removeEventListener("pointerup", multiCreatePointerUpBound, {
+                        capture: true,
+                    });
+                    window.removeEventListener("pointercancel", multiCreatePointerCancelBound, {
+                        capture: true,
+                    });
+                };
+            },
+            () => [this.calendarRef.el]
+        );
+
+        onWillUpdateProps((nextProps) => {
+            if ("calendarMode" in nextProps) {
+                const options = this.finalOptions(nextProps.calendarMode);
+                this.fc.api.setOption("editable", options["editable"]);
+                this.fc.api.setOption("selectable", options["selectable"]);
+                this.fc.api.setOption("dateClick", options["dateClick"]);
+            }
+        });
     }
 
     get options() {
@@ -130,6 +184,16 @@ export class CalendarCommonRenderer extends Component {
         return {
             weekNumbersWithinDays: !this.env.isSmall,
         };
+    }
+
+    finalOptions(calendarMode) {
+        const options = this.options;
+        if (calendarMode !== CALENDAR_MODE.normal) {
+            options["editable"] = false;
+            options["selectable"] = false;
+            options["dateClick"] = () => {};
+        }
+        return options;
     }
 
     viewDidMount({ el, view }) {
@@ -221,6 +285,9 @@ export class CalendarCommonRenderer extends Component {
         this.props.editRecord(this.props.model.records[info.event.id]);
     }
     onEventClick(info) {
+        if (this.props.calendarMode !== CALENDAR_MODE.normal) {
+            return;
+        }
         this.click(info);
     }
     onEventContent({ event }) {
@@ -393,5 +460,117 @@ export class CalendarCommonRenderer extends Component {
         el.classList.remove("fc-daygrid-more-link");
         el.parentNode.insertBefore(wrapper, el);
         wrapper.appendChild(el);
+    }
+
+    getElementIndex(element) {
+        return [].indexOf.call(element?.parentNode.children || [], element);
+    }
+
+    multiCreateClearState() {
+        this.startCol = -1;
+        this.endCol = -1;
+        this.startRow = -1;
+        this.endRow = -1;
+
+        this.currentSelectionElement = [];
+    }
+
+    multiCreateGetSelectedElement() {
+        const elementsToSelect = [];
+        const [startX, endX] = [this.startCol, this.endCol].sort();
+        const [startY, endY] = [this.startRow, this.endRow].sort();
+
+        for (let x = startX; x <= endX; x++) {
+            for (let y = startY; y <= endY; y++) {
+                elementsToSelect.push(
+                    `tbody tr[role="row"]:nth-child(${y + 1}) > .fc-day:nth-child(${x + 1})`
+                );
+            }
+        }
+
+        if (elementsToSelect.length) {
+            return this.calendarRef.el.querySelectorAll(elementsToSelect.join(","));
+        } else {
+            return [];
+        }
+    }
+
+    multiCreateDrawHighlight() {
+        const highlight = "o-highlight";
+
+        this.calendarRef.el.querySelectorAll(`.${highlight}`).forEach((node) => {
+            node.classList.remove(highlight);
+        });
+
+        this.currentSelectionElement.forEach((node) => {
+            node.classList.add(highlight);
+        });
+    }
+
+    multiCreatePointerDown(ev) {
+        if (this.props.calendarMode === CALENDAR_MODE.normal) {
+            return;
+        }
+        const targetElement = ev.target.closest(".fc-day:not(.fc-col-header-cell)");
+        if (!targetElement) {
+            return;
+        }
+        const rowSelector = 'tr[role="row"]';
+        this.startCol = this.endCol = this.getElementIndex(targetElement);
+        this.startRow = this.endRow = this.getElementIndex(targetElement.closest(rowSelector));
+        this.currentSelectionElement = [targetElement];
+        this.multiCreateDrawHighlight();
+    }
+
+    multiCreatePointerMove(ev) {
+        if (this.props.calendarMode === CALENDAR_MODE.normal) {
+            return;
+        }
+        const targetElement = ev.target.closest(".fc-day:not(.fc-col-header-cell)");
+        if (!targetElement || this.startCol < 0 || this.startRow < 0) {
+            return;
+        }
+        const rowSelector = 'tr[role="row"]';
+        this.endCol = this.getElementIndex(targetElement);
+        this.endRow = this.getElementIndex(targetElement.closest(rowSelector));
+        this.currentSelectionElement = this.multiCreateGetSelectedElement();
+        this.multiCreateDrawHighlight();
+    }
+
+    async multiCreatePointerUp(ev) {
+        if (this.props.calendarMode === CALENDAR_MODE.normal) {
+            return;
+        }
+        const targetElement = ev.target.closest(".fc-day:not(.fc-col-header-cell)");
+        if (!targetElement) {
+            this.multiCreateClearState();
+            this.multiCreateDrawHighlight();
+            return;
+        }
+        if (this.props.calendarMode === CALENDAR_MODE.quick_add) {
+            const dates = [];
+            for (const element of this.currentSelectionElement) {
+                const date = DateTime.fromISO(element.dataset.date);
+                if (!date.invalid) {
+                    dates.push(date);
+                }
+            }
+            await this.props.model.createRecordNoInteraction(dates);
+        } else if (this.props.calendarMode === CALENDAR_MODE.quick_remove) {
+            const ids = [];
+            for (const element of this.currentSelectionElement) {
+                for (const event of [...element.querySelectorAll(".fc-event")]) {
+                    ids.push(parseInt(event.dataset.eventId, 10));
+                }
+            }
+            await this.props.model.unlinkRecords(ids);
+        }
+        this.multiCreateClearState();
+        this.multiCreateDrawHighlight();
+    }
+
+    multiCreatePointerCancel(ev) {
+        this.multiCreateClearState();
+        this.multiCreateDrawHighlight();
     }
 }

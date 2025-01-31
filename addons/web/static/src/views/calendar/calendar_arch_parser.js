@@ -41,6 +41,7 @@ export class CalendarArchParser {
         let monthOverflow = true;
         const popoverFieldNodes = {};
         const filtersInfo = {};
+        const multiCreateFields = {};
 
         visitXML(arch, (node) => {
             switch (node.tagName) {
@@ -182,6 +183,36 @@ export class CalendarArchParser {
 
                     break;
                 }
+                case "multi_create": {
+                    for (const childNode of node.children) {
+                        if (childNode.tagName === "field") {
+                            if (childNode.hasAttribute("name")) {
+                                const fieldName = childNode.getAttribute("name");
+                                fieldNames.add(fieldName);
+
+                                if (
+                                    !childNode.hasAttribute("widget") &&
+                                    ["many2one", "selection"].includes(
+                                        models[modelName].fields[fieldName].type
+                                    )
+                                ) {
+                                    childNode.setAttribute("widget", "calendar_radio");
+                                }
+
+                                const parseFieldNode = Field.parseFieldNode(
+                                    childNode,
+                                    models,
+                                    modelName,
+                                    "multi_create_calendar",
+                                    jsClass
+                                );
+
+                                multiCreateFields[fieldName] = parseFieldNode;
+                            }
+                        }
+                    }
+                    return false;
+                }
             }
         });
 
@@ -193,6 +224,7 @@ export class CalendarArchParser {
             eventLimit,
             fieldMapping,
             fieldNames: [...fieldNames],
+            multiCreateFields,
             filtersInfo,
             formViewId,
             hasEditDialog,
