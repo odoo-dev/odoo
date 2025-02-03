@@ -84,9 +84,15 @@
                     action="action_view_emission_factor"
                 />
                 <menuitem
+                    id="menu_esg_other_emissions"
+                    name="Other Emissions"
+                    sequence="60"
+                    action="action_view_other_emissions"
+                />
+                <menuitem
                     id="menu_esg_source_databases"
                     name="Source Databases"
-                    sequence="60"
+                    sequence="70"
                 />
             </menuitem>
         </menuitem>

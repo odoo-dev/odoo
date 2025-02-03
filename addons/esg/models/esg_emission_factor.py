@@ -60,3 +60,10 @@ class EsgEmissionFactor(models.Model):
             factor.co2_equivalent = co2_value
             factor.co2_equivalent_range_min = co2_value * (1 - factor.uncertainty / 100)
             factor.co2_equivalent_range_max = co2_value * (1 + factor.uncertainty / 100)
+
+    def _get_action_view_other_emissions(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('esg.action_view_emission_factor')
+        action['display_name'] = _('Other Emissions')
+        self._cr.execute('SELECT DISTINCT(emission_factor_id) FROM account_move_line WHERE emission_factor_id IS NOT NULL')
+        action['domain'] = [('id', 'not in', [emission_factor_id for emission_factor_id, in self._cr.fetchall()])]
+        return action
