@@ -173,8 +173,8 @@ export class BuilderSidebar extends Component {
             // Ensure that the iframe is loaded and the editor is created before
             // instantiating the sub components that potentially need the
             // editor.
-            const iframeEl = await this.props.iframeLoaded;
-            this.editor.attachTo(iframeEl.contentDocument.body.querySelector("#wrapwrap"));
+            this.iframeEl = await this.props.iframeLoaded;
+            this.editor.attachTo(this.iframeEl.contentDocument.body.querySelector("#wrapwrap"));
         });
 
         useSubEnv({

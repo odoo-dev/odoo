@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="html_builder.BackgroundShapeComponent">
+    <header class="o_pager_nav d-flex flex-column flex-wrap flex-shrink-0 mh-100">
+        <div class="d-flex align-items-center">
+            <button class="o_pager_nav_angle fa fa-angle-left btn btn-secondary bg-transparent border-0" t-on-click="hideComponent"/>
+            <h5 class="o_pager_nav_title mb-0 text-white">Background Shapes</h5>
+        </div>
+        <div class="d-flex">
+            <button type="button" class="o_pager_nav_btn p-0 text-uppercase active" t-on-click="() => this.scrollToShapes('basic')">
+                <span class="w-100">Basic</span>
+            </button>
+            <button type="button" class="o_pager_nav_btn p-0 text-uppercase" t-on-click="() => this.scrollToShapes('linear')">
+                <span class="w-100">Linear</span>
+            </button>
+            <button type="button" class="o_pager_nav_btn p-0 text-uppercase" t-on-click="() => this.scrollToShapes('creative')">
+                <span class="w-100">Creative</span>
+            </button>
+        </div>
+    </header>
+    <div class="o_pager_container">
+        <div t-ref="basic">
+            <span>Connections</span>
+            <t t-call="html_builder.shapePage">
+                <t t-set="shapes" t-value="connectionShapes"/>
+            </t>
+            <span>Origins</span>
+            <t t-call="html_builder.shapePage">
+                <t t-set="shapes" t-value="originShapes"/>
+            </t>
+            <span>Bold</span>
+            <t t-call="html_builder.shapePage">
+                <t t-set="shapes" t-value="boldShapes"/>
+            </t>
+            <span>Blobs</span>
+            <t t-call="html_builder.shapePage">
+                <t t-set="shapes" t-value="blobShapes"/>
+            </t>
+        </div>
+        <div t-ref="linear">
+            <span>Airy &amp; Zigs</span>
+            <t t-call="html_builder.shapePage">
+                <t t-set="shapes" t-value="airyAndZigShapes"/>
+            </t>
+        </div>
+        <div t-ref="creative">
+            <span>Wavy</span>
+            <t t-call="html_builder.shapePage">
+                <t t-set="shapes" t-value="wavyShapes"/>
+            </t>
+            <span>Block &amp; Rainy</span>
+            <t t-call="html_builder.shapePage">
+                <t t-set="shapes" t-value="blockAndRainyShapes"/>
+            </t>
+            <span>Floating Shape</span>
+            <t t-call="html_builder.shapePage">
+                <t t-set="shapes" t-value="floatingShapes"/>
+            </t>
+        </div>
+    </div>
+</t>
+
+<!-- TODO: improve the style of the shapes-->
+<t t-name="html_builder.shapePage">
+    <div class="builder_select_page">
+        <t t-foreach="shapes" t-as="shape" t-key="shape_index">
+            <t t-set="urlShape" t-value="getShapeUrl(shape.shape)"/>
+            <div class="button_shape" t-on-click="hideComponent">
+                <BuilderButton action="'applyShape'" actionParam="{'shape': shape.shape, 'url': urlShape}">
+                    <div>
+                        <div class="o_we_shape" t-attf-style="background-image: {{urlShape}};"/>
+                        <span t-if="shape.animated" class="o_we_shape_animated_label">Animated</span>
+                    </div>
+                </BuilderButton>
+            </div>
+        </t>
+    </div>
+</t>
+
+</templates>

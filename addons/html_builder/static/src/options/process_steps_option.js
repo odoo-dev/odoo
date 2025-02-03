@@ -1,4 +1,5 @@
 import { defaultBuilderComponents } from "../builder_components/default_builder_components";
+import { BackgroundComponent } from "./background_component";
 import { coreBuilderActions } from "@html_builder/core_builder_action_plugin";
 import { applyFunDependOnSelectorAndExclude } from "@html_builder/options/utils";
 import { Plugin } from "@html_editor/plugin";
@@ -7,12 +8,25 @@ import { registry } from "@web/core/registry";
 
 class ProcessStepsOptionPlugin extends Plugin {
     static id = "ProcessStepsOption";
+    static dependencies = ["media"];
     selector = ".s_process_steps";
     resources = {
-        builder_options: {
-            OptionComponent: ProcessStepsOption,
-            selector: this.selector,
-        },
+        builder_options: [
+            {
+                OptionComponent: ProcessStepsOption,
+                selector: this.selector,
+            },
+            {
+                selector: ".s_process_step .s_process_step_number",
+                OptionComponent: BackgroundComponent,
+                props: {
+                    withColors: true,
+                    withImages: false,
+                    withColorCombinations: false,
+                    withGradient: true,
+                },
+            },
+        ],
         builder_actions: this.getActions(),
         content_updated_handlers: (rootEl) =>
             applyFunDependOnSelectorAndExclude(reloadConnectors, rootEl, this.selector),

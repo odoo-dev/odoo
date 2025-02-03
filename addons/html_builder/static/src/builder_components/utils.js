@@ -199,7 +199,7 @@ export function useSelectableItemComponent(id, { getLabel = () => {} } = {}) {
 export function useClickableBuilderComponent() {
     useBuilderComponent();
     const comp = useComponent();
-    const { getAllActions, callOperation } = getAllActionsAndOperations(comp);
+    const { getAllActions, callOperation, isApplied } = getAllActionsAndOperations(comp);
     const getAction = comp.env.editor.shared.builderActions.getAction;
     const applyOperation = comp.env.editor.shared.history.makePreviewableOperation(callApply);
     const shouldToggle = !comp.env.actionBus;
@@ -255,7 +255,7 @@ export function useClickableBuilderComponent() {
     function callApply(applySpecs) {
         comp.env.selectableContext?.cleanSelectedItem(applySpecs);
         const cleans = comp.props.inheritedActions
-            ?.map((actionId) => comp.env.dependencyManager.get(actionId).cleanSelectedItem)
+            ?.map((actionId) => comp.env.dependencyManager.get(actionId)?.cleanSelectedItem)
             .filter(Boolean);
         for (const clean of new Set(cleans)) {
             clean(applySpecs);
@@ -280,33 +280,6 @@ export function useClickableBuilderComponent() {
                 });
             }
         }
-    }
-    function isApplied() {
-        const editingElements = comp.env.getEditingElements();
-        if (!editingElements.length) {
-            return;
-        }
-        const areActionsActiveTabs = getAllActions().map((o) => {
-            const { actionId, actionParam, actionValue } = o;
-            // TODO isApplied === first editing el or all ?
-            const editingElement = editingElements[0];
-            const isApplied = getAction(actionId).isApplied?.({
-                editingElement,
-                param: actionParam,
-                value: actionValue,
-            });
-            return comp.props.inverseAction ? !isApplied : isApplied;
-        });
-        // If there is no `isApplied` method for the widget return false
-        if (areActionsActiveTabs.every((el) => el === undefined)) {
-            return false;
-        }
-        // If `isApplied` is explicitly false for an action return false
-        if (areActionsActiveTabs.some((el) => el === false)) {
-            return false;
-        }
-        // `isApplied` is true for at least one action
-        return true;
     }
     function getPriority() {
         return (
@@ -546,6 +519,11 @@ export function getAllActionsAndOperations(comp) {
                             if (!applySpec.load) {
                                 return;
                             }
+                            const shouldToggle = !comp.env.actionBus;
+                            if (shouldToggle && isApplied()) {
+                                // The element will be cleaned, do not load
+                                return;
+                            }
                             const result = await applySpec.load({
                                 editingElement: applySpec.editingElement,
                                 param: applySpec.actionParam,
@@ -558,8 +536,37 @@ export function getAllActionsAndOperations(comp) {
             }
         );
     }
+    function isApplied() {
+        const getAction = comp.env.editor.shared.builderActions.getAction;
+        const editingElements = comp.env.getEditingElements();
+        if (!editingElements.length) {
+            return;
+        }
+        const areActionsActiveTabs = getAllActions().map((o) => {
+            const { actionId, actionParam, actionValue } = o;
+            // TODO isApplied === first editing el or all ?
+            const editingElement = editingElements[0];
+            const isApplied = getAction(actionId).isApplied?.({
+                editingElement,
+                param: actionParam,
+                value: actionValue,
+            });
+            return comp.props.inverseAction ? !isApplied : isApplied;
+        });
+        // If there is no `isApplied` method for the widget return false
+        if (areActionsActiveTabs.every((el) => el === undefined)) {
+            return false;
+        }
+        // If `isApplied` is explicitly false for an action return false
+        if (areActionsActiveTabs.some((el) => el === false)) {
+            return false;
+        }
+        // `isApplied` is true for at least one action
+        return true;
+    }
     return {
         getAllActions: getAllActions,
         callOperation: callOperation,
+        isApplied: isApplied,
     };
 }

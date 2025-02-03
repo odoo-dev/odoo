@@ -1,4 +1,4 @@
-import { Component, useSubEnv, markup } from "@odoo/owl";
+import { Component, useState, useSubEnv, markup } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { defaultBuilderComponents } from "../builder_components/default_builder_components";
@@ -6,10 +6,15 @@ import { globalBuilderOptions } from "../builder_components/global_builder_optio
 import { useVisibilityObserver, useApplyVisibility } from "../builder_components/utils";
 import { DependencyManager } from "../plugins/dependency_manager";
 import { getSnippetName } from "@html_builder/utils/utils";
+import { globalSidebarComponent } from "@html_builder/components/global_sidebar_component";
 
 export class OptionsContainer extends Component {
     static template = "html_builder.OptionsContainer";
-    static components = { ...defaultBuilderComponents, ...globalBuilderOptions };
+    static components = {
+        ...defaultBuilderComponents,
+        ...globalBuilderOptions,
+        ...globalSidebarComponent,
+    };
     static props = {
         snippetModel: { type: Object },
         options: { type: Array },
@@ -21,11 +26,17 @@ export class OptionsContainer extends Component {
     setup() {
         this.notification = useService("notification");
 
+        this.state = useState({
+            componentToShow: undefined,
+        });
+
         useSubEnv({
             dependencyManager: new DependencyManager(),
             getEditingElement: () => this.props.editingElement,
             getEditingElements: () => [this.props.editingElement],
             weContext: {},
+            showComponent: this.showComponent.bind(this),
+            hideComponent: this.hideComponent.bind(this),
         });
         useVisibilityObserver("content", useApplyVisibility("root"));
     }
@@ -45,6 +56,14 @@ export class OptionsContainer extends Component {
 
     selectElement() {
         this.env.editor.shared["builder-options"].updateContainers(this.props.editingElement);
+    }
+
+    showComponent(componentName) {
+        this.state.componentToShow = componentName;
+    }
+
+    hideComponent() {
+        this.state.componentToShow = undefined;
     }
 
     toggleOverlayPreview(el, show) {

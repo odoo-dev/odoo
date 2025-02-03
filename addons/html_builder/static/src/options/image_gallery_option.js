@@ -29,6 +29,7 @@ class ImageGalleryOption extends Plugin {
                     }),
                 apply: ({ editingElement, loadResult: images }) => {
                     addImages(images, editingElement);
+                    // TODO: check if really needed
                     this.dependencies.history.addStep();
                 },
             },

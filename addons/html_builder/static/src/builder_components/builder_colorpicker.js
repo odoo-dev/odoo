@@ -13,6 +13,7 @@ export class BuilderColorPicker extends Component {
     static props = {
         ...basicContainerBuilderComponentProps,
         unit: { type: String, optional: true },
+        title: { type: String, optional: true },
     };
     static components = {
         ColorSelector,

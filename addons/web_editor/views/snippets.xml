@@ -107,6 +107,7 @@
                     t-att-data-css-compatible="css_compatible and 'true' or None"/>
 </template>
 
+
 <template id="snippet_options_background_options">
     <div t-att-data-js="with_colors and with_color_combinations and 'ColoredLevelBackground' or 'BackgroundToggler'"
          t-att-data-selector="selector"

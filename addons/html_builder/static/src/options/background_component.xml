@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="html_builder.BackgroundComponent">
+    <!-- todo: o_we_full_row-->
+    <BuilderRow label.translate="Background" t-if="props.withColor or props.withImages">
+    <!-- todo: snippet_options_background_color_widget-->
+        <BuilderColorPicker title.translate="'Color'" styleAction="'backgroundColor'" t-if="props.withColors"/>
+        <t t-if="props.withImages">
+            <button type="button" class="btn btn-primary" t-on-click="() => this.onClick()">
+                <img src="/html_builder/static/src/img/options/bg_shape.svg"/>
+            </button>
+            <BuilderButton
+                action="'toggleBgImage'"
+                title="'Image'"
+                preview="false"
+                className="'ms-auto fa fa-fw fa-camera'"
+                id="'toggle_bg_image_id'"
+            />
+            <t t-if="props.withShapes">
+                <BuilderButton
+                    action="'toggleBgShape'"
+                    preview="false"
+                    iconImg="'/html_builder/static/src/img/options/bg_shape.svg'"
+                />
+            </t>
+            <!-- TODO: handle videos in website-->
+        </t>
+    </BuilderRow>
+    <t t-if="props.withImages">
+        <!-- BackgroundImage -->
+        <BuilderRow dependencies="'toggle_bg_image_id'" label.translate="Image" level="1">
+            <BuilderButton preview="false" title.translate="Edit image" action="'replaceImage'"> Add </BuilderButton>
+        </BuilderRow>
+        <!-- TODO adapt colorpicker and add a title?
+                <we-row string="Main Color" class="o_we_sublevel_2" title="Main Color" data-name="main_color_opt">
+            <we-colorpicker data-dynamic-color="true" data-color-name="c1"/>
+            <we-colorpicker data-dynamic-color="true" data-color-name="c2"/>
+            <we-colorpicker data-dynamic-color="true" data-color-name="c3"/>
+            <we-colorpicker data-dynamic-color="true" data-color-name="c4"/>
+            <we-colorpicker data-dynamic-color="true" data-color-name="c5"/>
+        </we-row>
+        -->
+        <BuilderRow t-if="showWebShapeColorpicker()" label.translate="Main Color" level="2">
+            <BuilderColorPicker/>
+        </BuilderRow>
+
+        <!-- BackgroundPosition -->
+        <BuilderRow label.translate="Position" level="2">
+            <BuilderButtonGroup preview="false">
+                <BuilderButton action="'backgroundType'" actionParam="'cover'">Cover</BuilderButton>
+                <BuilderButton action="'backgroundType'" actionParam="'repeat-pattern'" id="'background_repeat_opt'">Repeat pattern</BuilderButton>
+            </BuilderButtonGroup>
+            <BuilderButton icon="'fa-crosshairs'" title.translate="Background Position" preview="false" action="'backgroundPositionOverlay'"></BuilderButton>
+        </BuilderRow>
+    </t>
+</t>
+
+</templates>
