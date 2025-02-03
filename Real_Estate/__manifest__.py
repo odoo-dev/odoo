@@ -5,8 +5,6 @@
     "application":True,
     "category": "Tutorials",
     "installable" : True,
-
-
     "depends": [],
     "data": [],
     "demo": [],
