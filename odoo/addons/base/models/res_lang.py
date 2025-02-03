@@ -74,10 +74,13 @@ class Lang(models.Model):
     @api.constrains('time_format', 'date_format')
     def _check_format(self):
         for lang in self:
-            for pattern in lang._disallowed_datetime_patterns:
-                if (lang.time_format and pattern in lang.time_format) or \
-                        (lang.date_format and pattern in lang.date_format):
-                    raise ValidationError(_('Invalid date/time format directive specified. '
+            try:
+                if lang.time_format or lang.date_format:
+                    locale = tools.babel_locale_parse(lang.code)
+                    format_string = lang.date_format or lang.time_format
+                    tools.posix_to_ldml(format_string, locale=locale)
+            except KeyError:
+                raise ValidationError(_('Invalid date/time format directive specified. '
                                             'Please refer to the list of allowed directives, '
                                             'displayed when you edit a language.'))
 
