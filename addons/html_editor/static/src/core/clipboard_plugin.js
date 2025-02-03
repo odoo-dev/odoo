@@ -329,6 +329,7 @@ export class ClipboardPlugin extends Plugin {
                 });
             });
             this.dependencies.dom.insert(modifiedTextFragment);
+            selection = this.dependencies.selection.getEditableSelection();
             if (textIndex < textFragments.length) {
                 // Break line by inserting new paragraph and
                 // remove current paragraph's bottom margin.
