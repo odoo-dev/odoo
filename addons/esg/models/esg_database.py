@@ -7,4 +7,4 @@ class EsgDatabase(models.Model):
 
     name = fields.Char(required=True)
     url = fields.Char()
-    last_update = fields.Datetime(default=lambda self: fields.Datetime.now())
+    last_update = fields.Datetime(default=fields.Datetime.now)

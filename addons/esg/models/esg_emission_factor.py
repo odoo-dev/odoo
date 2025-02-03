@@ -15,7 +15,7 @@ class EsgEmissionFactor(models.Model):
     co2_equivalent_range_min = fields.Float(compute='_compute_co2_equivalent')
     co2_equivalent_range_max = fields.Float(compute='_compute_co2_equivalent')
 
-    emissions_value = fields.Float(compute='_compute_emissions_value', string='Emissions')
+    emissions_value = fields.Float(compute='_compute_emissions_value', string='Emissions', readonly=False, store=True)
     source_id = fields.Many2one('esg.emission.source')
     activity_type_ids = fields.Many2many('esg.activity.type', string='Activity Types', compute='_compute_activity_type_id')
     company_id = fields.Many2one('res.company')

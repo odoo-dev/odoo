@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="factors_retroaction_wizard_action" model="ir.actions.act_window">
+        <field name="name">Apply New Factors</field>
+        <field name="res_model">factors.retroaction.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="factors_retroaction_wizard_form_view" model="ir.ui.view">
+        <field name="name">emission.factor.form</field>
+        <field name="model">factors.retroaction.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="start_date" widget="daterange" options="{'end_date_field': 'end_date'}"/>
+                    <field name="end_date" invisible="1"/>
+                </group>
+            </form>
+        </field>
+    </record>
+</odoo>

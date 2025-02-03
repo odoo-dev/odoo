@@ -5,51 +5,59 @@
         <field name="model">esg.emission.factor</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <field name="name"/>
-                    <field name="emissions_value"/>
-                </group>
-                <group>
+                <sheet>
+                   <header>
+                        <button string="Apply Retroactively" name="%(factors_retroaction_wizard_action)d" type="action"/>
+                    </header>
+                     <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
                     <group>
-                        <field name="activity_type_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
-                        <field name="company_id"/>
-                        <field name="valid_from" widget="daterange" options="{'end_date_field': 'valid_to'}"/>
-                        <field name="valid_to" invisible="1" required="valid_from"/>
+                        <group>
+                            <field name="emissions_value"/>
+                                <field name="source_id"/>
+                                <field name="activity_type_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                                <field name="company_id"/>
+                                <field name="valid_from" widget="daterange" options="{'end_date_field': 'valid_to'}"/>
+                                <field name="valid_to" invisible="1" required="valid_from"/>
+                        </group>
+                        <group>
+                                <field name="uncertainty"/>
+                                <field name="compute_method"/>
+                                <field name="uom_id" required="compute_method == 'physically'" invisible="compute_method == 'monetary'"/>
+                                <field name="currency_id" required="compute_method == 'monetary'" invisible="compute_method == 'physically'"/>
+                                <field name="database_id"/>
+                        </group>
                     </group>
-                    <group>
-                        <field name="uncertainty"/>
-                        <field name="compute_method"/>
-                        <field name="uom_id" required="compute_method == 'physically'" invisible="compute_method == 'monetary'"/>
-                        <field name="currency_id" required="compute_method == 'monetary'" invisible="compute_method == 'physically'"/>
-                        <field name="database_id"/>
-                    </group>
-                </group>
-                <notebook>
-                    <page name="gas_emissions" string="Gas Emissions">
-                        <field name="emission_line_ids" nolabel="1">
-                            <list editable="bottom">
-                                <field name="gas_id"/>
-                                <field name="activity_type_id"/>
-                                <field name="value"/>
-                                <field name="total_value"/>
-                                <field name="uom_id" required="compute_method == 'physically'" column_invisible="parent.compute_method == 'monetary'"/>
-                                <field name="currency_id" required="compute_method == 'monetary'" column_invisible="parent.compute_method == 'physically'"/>
-                            </list>
-                        </field>
-                    </page>
-                    <page name="assignations" string="Assignations">
-                        <field name="assignation_ids" nolabel="1">
-                            <list editable="bottom">
-                                <field name="account_id"/>
-                                <field name="vendor_id"/>
-                                <field name="product_id"/>
-                            </list>
-                        </field>
-                    </page>
-                    <page name="description" string="Description">
-                        <field name="description" nolabel="1"/>
-                    </page>
-                </notebook>
+                    <notebook>
+                        <page name="gas_emissions" string="Gas Emissions">
+                            <field name="emission_line_ids" nolabel="1">
+                                <list editable="bottom">
+                                        <field name="gas_id"/>
+                                        <field name="activity_type_id"/>
+                                        <field name="value"/>
+                                        <field name="total_value"/>
+                                        <field name="uom_id" required="compute_method == 'physically'" column_invisible="parent.compute_method == 'monetary'"/>
+                                        <field name="currency_id" required="compute_method == 'monetary'" column_invisible="parent.compute_method == 'physically'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page name="assignations" string="Assignations">
+                            <field name="assignation_ids" nolabel="1">
+                                <list editable="bottom">
+                                        <field name="account_id"/>
+                                        <field name="vendor_id"/>
+                                        <field name="product_id"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page name="description" string="Description">
+                                <field name="description" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
             </form>
         </field>
     </record>
@@ -92,5 +100,14 @@
                 Create a new emission factor
             </p>
         </field>
+    </record>
+
+    <record id="action_apply_factors_retroaction" model="ir.actions.server">
+        <field name="name">Apply New Factors</field>
+        <field name="model_id" ref="esg.model_esg_emission_factor"/>
+        <field name="binding_model_id" ref="esg.model_esg_emission_factor"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = env['ir.actions.act_window']._for_xml_id('esg.factors_retroaction_wizard_action')</field>
     </record>
 </odoo>

@@ -2,6 +2,36 @@
 <odoo>
     <data noupdate="1">
 
+        <record id="esg_emission_source_1" model="esg.emission.source">
+            <field name="name">Stationary Combustion</field>
+            <field name="scope">direct</field>
+        </record>
+
+        <record id="esg_emission_source_2" model="esg.emission.source">
+            <field name="name">Purchased Electricity</field>
+            <field name="scope">indirect</field>
+        </record>
+
+        <record id="esg_emission_source_3" model="esg.emission.source">
+            <field name="name">Upstream Activities</field>
+            <field name="scope">indirect_others</field>
+        </record>
+
+        <record id="esg_emission_source_4" model="esg.emission.source">
+            <field name="name">Downstream Activities</field>
+            <field name="scope">indirect_others</field>
+        </record>
+
+        <record id="esg_emission_source_5" model="esg.emission.source">
+            <field name="name">Purchased Goods and Services</field>
+            <field name="parent_id" ref="esg_emission_source_3"/>
+        </record>
+
+        <record id="esg_emission_source_6" model="esg.emission.source">
+            <field name="name">Downstream Transportation and Distribution</field>
+            <field name="parent_id" ref="esg_emission_source_4"/>
+        </record>
+
         <record id="esg_emission_factor_1" model="esg.emission.factor">
             <field name="name">Emission Factor 1</field>
             <field name="uncertainty">0.1</field>
