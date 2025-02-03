@@ -220,7 +220,7 @@ export class DiscussSidebarCategories extends Component {
     }
 
     onClickFindOrStartConversation() {
-        this.command.openMainPalette({ searchValue: "@" });
+        this.command.openMainPalette({ searchValue: "@", isLoading: true });
     }
 }
 
