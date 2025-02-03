@@ -77,11 +77,8 @@ class Properties(Field):
          'separator',
     )
 
-    def _setup_attrs(self, model_class, name):
-        super()._setup_attrs(model_class, name)
-        self._setup_definition_attrs()
-
-    def _setup_definition_attrs(self):
+    def setup_nonrelated(self):
+        super().setup_nonrelated()
         if self.definition:
             # determine definition_record and definition_record_field
             assert self.definition.count(".") == 1
@@ -95,7 +92,9 @@ class Properties(Field):
         super().setup_related(model)
         if self.inherited_field and not self.definition:
             self.definition = self.inherited_field.definition
-            self._setup_definition_attrs()
+            # determine definition_record and definition_record_field
+            assert self.definition.count(".") == 1
+            self.definition_record, self.definition_record_field = self.definition.rsplit('.', 1)
 
     # Database/cache format: a value is either None, or a dict mapping property
     # names to their corresponding value, like
