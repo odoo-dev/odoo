@@ -124,7 +124,16 @@ class MailingContact(models.Model):
                     subscription_ids.append((0, 0, {'list_id': list_id}))
                 vals['subscription_ids'] = subscription_ids
 
-        return super(MailingContact, self.with_context(default_list_ids=False)).create(vals_list)
+        records = super(MailingContact, self.with_context(default_list_ids=False)).create(vals_list)
+
+        # Need to invalidate list_ids because it is a many2many using a real model and
+        # the ORM cache will be empty for it since list_ids is set to False and the ORM
+        # won't understand that it was actually no-empty because of `subscription_ids`
+        if default_list_ids:
+            records.invalidate_recordset(['list_ids'])
+
+        return records
+
 
     def copy(self, default=None):
         """ Cleans the default_list_ids while duplicating mailing contact in context of
