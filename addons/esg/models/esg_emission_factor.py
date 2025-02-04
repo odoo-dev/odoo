@@ -17,7 +17,7 @@ class EsgEmissionFactor(models.Model):
 
     emissions_value = fields.Float(compute='_compute_emissions_value', string='Emissions', readonly=False, store=True)
     source_id = fields.Many2one('esg.emission.source')
-    activity_type_ids = fields.Many2many('esg.activity.type', string='Activity Types', compute='_compute_activity_type_id')
+    activity_type_ids = fields.Many2many('esg.activity.type', string='Activity Types', compute='_compute_activity_type_id', store=True)
     company_id = fields.Many2one('res.company')
 
     valid_from = fields.Date()

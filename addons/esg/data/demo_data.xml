@@ -66,24 +66,28 @@
             <field name="emission_factor_id" ref="esg_emission_factor_1"/>
             <field name="value">5.0</field>
             <field name="gas_id" ref="esg_gas_co2"/>
+            <field name="uom_id" ref="uom.product_uom_kgm"/>
         </record>
 
         <record id="esg_emission_factor_line_2" model="esg.emission.factor.line">
             <field name="emission_factor_id" ref="esg_emission_factor_1"/>
             <field name="value">7.5</field>
             <field name="gas_id" ref="esg_gas_co2"/>
+            <field name="uom_id" ref="uom.product_uom_kgm"/>
         </record>
 
         <record id="esg_emission_factor_line_3" model="esg.emission.factor.line">
             <field name="emission_factor_id" ref="esg_emission_factor_2"/>
             <field name="value">10.0</field>
             <field name="gas_id" ref="esg_gas_ch4"/>
+            <field name="currency_id" ref="base.USD"/>
         </record>
 
         <record id="esg_emission_factor_line_4" model="esg.emission.factor.line">
             <field name="emission_factor_id" ref="esg_emission_factor_2"/>
             <field name="value">15.0</field>
             <field name="gas_id" ref="esg_gas_n2o"/>
+            <field name="currency_id" ref="base.USD"/>
         </record>
 
         <record id="account_1" model="account.account">

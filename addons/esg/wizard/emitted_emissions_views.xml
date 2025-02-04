@@ -22,4 +22,36 @@
             </list>
         </field>
     </record>
+
+    <record id="emitted_emissions_search_view" model="ir.ui.view">
+        <field name="name">emitted.emission.search</field>
+        <field name="model">esg.emitted.emissions</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="emission_factor_id"/>
+                <field name="move_id"/>
+                <filter name="emissions_emitted" string="Emitted" domain="[('value', '>', 0.0)]"/>
+                <filter name="emissions_offsetted" string="Offsetted" domain="[('value', '&lt;', 0.0)]"/>
+                <separator/>
+                <filter name="account_emissions" string="Accounting" domain="[('type', '=', 'account_emission')]"/>
+                <filter name="other_emissions" string="Others" domain="[('type', '=', 'other_emission')]"/>
+                <separator/>
+                <filter name="low_uncertainty" string="Low Uncertainty" domain="[('uncertainty', '&lt;', 0.05)]"/>
+                <filter name="medium_uncertainty" string="Medium Uncertainty" domain="[('uncertainty', '>=', 0.05), ('uncertainty', '&lt;', 0.20)]"/>
+                <filter name="high_uncertainty" string="High Uncertainty" domain="[('uncertainty', '>=', 0.20), ('uncertainty', '&lt;', 0.50)]"/>
+                <filter name="very_high_uncertainty" string="Very High Uncertainty" domain="[('uncertainty', '>=', 0.50)]"/>
+                <separator/>
+                <filter string="Date" name="date" date="date" end_month="1" end_year="1"/>
+                <separator/>
+                <group string="Group By">
+                    <filter name="group_by_vendor_id" context="{'group_by': 'vendor_id'}"/>
+                    <filter name="group_by_scope" context="{'group_by': 'scope'}"/>
+                    <filter name="group_by_emission_factor_id" context="{'group_by': 'emission_factor_id'}"/>
+                    <filter name="group_by_activity_type_ids" context="{'group_by': 'activity_type_ids'}"/>
+                    <separator/>
+                    <filter name="group_by_date" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
 </odoo>

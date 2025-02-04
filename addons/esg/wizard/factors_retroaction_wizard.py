@@ -2,20 +2,17 @@
 
 from odoo import fields, models, _
 from odoo.osv import expression
-from odoo.exceptions import UserError
 
 
 class FactorsRetroactionWizard(models.TransientModel):
     _name = 'factors.retroaction.wizard'
     _description = "Apply retroactiverly new factors to old bills and other emissions"
 
-    start_date = fields.Date()
+    start_date = fields.Date(required=True)
     end_date = fields.Date()
 
     def create(self, vals):
         wizard = super().create(vals)
-        if not wizard.start_date:
-            raise UserError(_('Please provide a starting date.'))
         emission_factors = self.env['esg.emission.factor'].browse(self.env.context.get('active_ids'))
         domain = [
             ('emission_factor_id', 'in', emission_factors.ids),

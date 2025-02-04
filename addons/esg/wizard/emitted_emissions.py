@@ -11,12 +11,15 @@ class EmittedEmissions(models.TransientModel):
     move_id = fields.Many2one('account.move', string='Bill')
     note = fields.Text()
     quantity = fields.Integer(required=True, default=1)
-    value = fields.Float(string='CO2', compute='_compute_value')
+    value = fields.Float(string='CO2', compute='_compute_value', store=True)
     uncertainty = fields.Float(related='emission_factor_id.uncertainty')
     type = fields.Selection(
         selection=[('other_emission', 'Other Emission'), ('account_emission', 'Account Emission')],
         default='other_emission',
     )
+    vendor_id = fields.Many2one(related='move_id.partner_id')
+    scope = fields.Selection(related='emission_factor_id.source_id.scope')
+    activity_type_ids = fields.Many2many(related='emission_factor_id.activity_type_ids')
 
     @api.depends('quantity', 'emission_factor_id')
     def _compute_value(self):
@@ -32,7 +35,6 @@ class EmittedEmissions(models.TransientModel):
             'note': line.product_id.description,
             'quantity': line.quantity,
             'value': line.total_value,
-            'uncertainty': line.uncertainty,
             'type': 'account_emission',
         } for line in self.env['account.move.line'].search([('emission_factor_id', '!=', False)])] + [{
             'res_id': other_emission.id,
@@ -42,7 +44,6 @@ class EmittedEmissions(models.TransientModel):
             'note': other_emission.note,
             'quantity': other_emission.quantity,
             'value': other_emission.value,
-            'uncertainty': other_emission.uncertainty,
             'type': 'other_emission',
         } for other_emission in self.env['esg.other.emission'].search([])])
 
