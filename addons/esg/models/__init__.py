@@ -7,3 +7,4 @@ from . import esg_emission_source
 from . import esg_emission_factor_line
 from . import esg_gas
 from . import esg_unit
+from . import esg_other_emission

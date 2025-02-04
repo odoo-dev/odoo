@@ -22,7 +22,26 @@
             id="menu_esg_collect"
             name="Collect"
             sequence="20"
-        />
+        >
+            <menuitem
+                id="menu_esg_collect_carbon_emissions"
+                name="Carbon Emissions"
+                sequence="10"
+            >
+                <menuitem
+                    id="menu_esg_emitted_emissions"
+                    name="Emitted Emissions"
+                    sequence="10"
+                    action="action_view_emitted_emissions"
+                />
+                <menuitem
+                    id="menu_esg_other_emissions"
+                    name="Other Emissions"
+                    sequence="20"
+                    action="action_view_other_emissions"
+                />
+            </menuitem>
+        </menuitem>
         <menuitem
             id="menu_esg_measure"
             name="Measure"
@@ -84,15 +103,9 @@
                     action="action_view_emission_factor"
                 />
                 <menuitem
-                    id="menu_esg_other_emissions"
-                    name="Other Emissions"
-                    sequence="60"
-                    action="action_view_other_emissions"
-                />
-                <menuitem
                     id="menu_esg_source_databases"
                     name="Source Databases"
-                    sequence="70"
+                    sequence="60"
                 />
             </menuitem>
         </menuitem>

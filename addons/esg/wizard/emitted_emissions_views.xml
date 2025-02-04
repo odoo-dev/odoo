@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_view_emitted_emissions" model="ir.actions.server">
+        <field name="name">Emitted Emissions Action</field>
+        <field name="model_id" ref="esg.model_esg_emitted_emissions"/>
+        <field name="state">code</field>
+        <field name="code">action = model._action_emmitted_emissions()</field>
+    </record>
+
+    <record id="emitted_emissions_list_view" model="ir.ui.view">
+        <field name="name">emitted.emission.form</field>
+        <field name="model">esg.emitted.emissions</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" multi_edit="1">
+                <field name="date" readonly="type == 'account_emission'" required="1"/>
+                <field name="emission_factor_id" required="1"/>
+                <field name="move_id" readonly="1"/>
+                <field name="note" optional="hide" readonly="type == 'account_emission'"/>
+                <field name="quantity"/>
+                <field name="value" readonly="1"/>
+                <field name="uncertainty" readonly="1"/>
+            </list>
+        </field>
+    </record>
+</odoo>

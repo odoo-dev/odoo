@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="other_emission_form_view" model="ir.ui.view">
+        <field name="name">other.emission.form</field>
+        <field name="model">esg.other.emission</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="emission_factor_id"/>
+                            <field name="note"/>
+                            <field name="quantity"/>
+                            <field name="value"/>
+                            <field name="uncertainty"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="other_emission_list_view" model="ir.ui.view">
+        <field name="name">other.emission.list</field>
+        <field name="model">esg.other.emission</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="date" required="1"/>
+                <field name="emission_factor_id" required="1"/>
+                <field name="note" optional="hide"/>
+                <field name="quantity"/>
+                <field name="value"/>
+                <field name="uncertainty"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_view_other_emissions" model="ir.actions.act_window">
+        <field name="name">Other Emissions</field>
+        <field name="res_model">esg.other.emission</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new other emission
+            </p>
+        </field>
+    </record>
+</odoo>
