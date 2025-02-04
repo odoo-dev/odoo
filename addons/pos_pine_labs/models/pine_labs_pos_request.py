@@ -5,7 +5,7 @@ import requests
 from odoo import _
 
 REQUEST_TIMEOUT = 10
-PINE_LABS_AUTO_CANCEL_DURATION_MIN = 10
+PINE_LABS_AUTO_CANCEL_DURATION_MIN = 1
 
 _logger = logging.getLogger(__name__)
 

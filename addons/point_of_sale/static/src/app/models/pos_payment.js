@@ -76,7 +76,9 @@ export class PosPayment extends Base {
     }
 
     handle_payment_response(isPaymentSuccessful) {
-        if (isPaymentSuccessful) {
+        if (isPaymentSuccessful === undefined) {
+            this.set_payment_status("force_done");
+        } else if (isPaymentSuccessful) {
             this.set_payment_status("done");
             if (this.payment_method_id.payment_method_type !== "qr_code") {
                 this.can_be_reversed = this.payment_method_id.payment_terminal.supports_reversals;

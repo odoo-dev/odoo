@@ -27,4 +27,23 @@ patch(PaymentScreen.prototype, {
             }
         });
     },
+    async sendForceDone(line) {
+        if (line.payment_method_id.use_payment_terminal === "pine_labs") {
+            line.set_payment_status("waitingCard");
+            const payment_status =
+                await line.payment_method_id.payment_terminal._waitForPaymentToConfirm();
+            if (payment_status?.status === "TXN APPROVED") {
+                line.set_payment_status("done");
+                this.pos.paymentTerminalInProgress = false;
+            } else if (payment_status?.status === "INVALID TRANSACTION NUMBER") {
+                line.set_payment_status("retry");
+                this.pos.paymentTerminalInProgress = false;
+            } else {
+                line.set_payment_status("done");
+                this.pos.paymentTerminalInProgress = false;
+            }
+            return;
+        }
+        return super.sendForceDone(...arguments);
+    },
 });

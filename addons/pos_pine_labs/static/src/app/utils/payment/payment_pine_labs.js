@@ -37,8 +37,9 @@ export class PaymentPineLabs extends PaymentInterface {
             .catch((error) => {
                 const line = this.pendingPineLabsPaymentLine();
                 if (line) {
-                    line.set_payment_status("retry");
+                    line.set_payment_status("force_done");
                 }
+                this._removePaymentHandler();
                 offlineErrorHandler(this.env, error, error);
             });
     }
@@ -121,8 +122,8 @@ export class PaymentPineLabs extends PaymentInterface {
      * This method waits for the payment to be confirmed by Pine Labs.
      * Also, this method uses polling to check the payment status..
      */
-    async _waitForPaymentToConfirm() {
-        const paymentLine = this.pos.get_order().get_selected_paymentline();
+    async _waitForPaymentToConfirm(line = false) {
+        const paymentLine = line || this.pos.get_order().get_selected_paymentline();
         if (!paymentLine || paymentLine.payment_status == "retry") {
             return false;
         }
@@ -135,7 +136,7 @@ export class PaymentPineLabs extends PaymentInterface {
             clearTimeout(this.pollingTimeout);
 
             // If the user navigates to another screen, stop the polling
-            if (this.pos.mainScreen.component.name !== "PaymentScreen") {
+            if (this.pos.mainScreen.component.name !== "PaymentScreen" && !line) {
                 return;
             }
 
@@ -148,11 +149,18 @@ export class PaymentPineLabs extends PaymentInterface {
             }
 
             const response = await this._callPineLabs(data, "pine_labs_fetch_payment_status");
+            if (!response) {
+                return resolve();
+            }
             if (paymentLine.payment_status == "retry") {
                 return resolve(false);
             }
-            if (![0, 1001].includes(response.responseCode)) {
-                return this._pineLabsHandleResponse(response);
+            if (![0, 1001].includes(response?.responseCode)) {
+                if (line) {
+                    return resolve(response);
+                } else {
+                    return this._pineLabsHandleResponse(response);
+                }
             }
             const resultStatus = response?.status;
             if (
@@ -175,6 +183,7 @@ export class PaymentPineLabs extends PaymentInterface {
                         data["Transaction Date"],
                         data["Transaction Time"]
                     ),
+                    is_payment_recorded: true,
                 });
                 this._removePaymentHandler();
                 return resolve(response);
