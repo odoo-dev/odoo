@@ -81,7 +81,7 @@ _BLACKLIST = set(to_opcodes([
     # can be used to set field values
     'STORE_ATTR', 'DELETE_ATTR',
     # no reason to allow this
-    'STORE_GLOBAL', 'DELETE_GLOBAL',
+    'STORE_GLOBAL', 'DELETE_GLOBAL', 'SET_FUNCTION_ATTRIBUTE'
 ]))
 # opcodes necessary to build literal values
 _CONST_OPCODES = set(to_opcodes([
@@ -100,6 +100,8 @@ _CONST_OPCODES = set(to_opcodes([
     'RESUME',
     # 3.12 https://docs.python.org/3/whatsnew/3.12.html#cpython-bytecode-changes
     'RETURN_CONST',
+    # 3.13
+    'TO_BOOL',
 ])) - _BLACKLIST
 
 # operations which are both binary and inplace, same order as in doc'
@@ -174,6 +176,10 @@ _SAFE_OPCODES = _EXPR_OPCODES.union(to_opcodes([
     'POP_JUMP_IF_NOT_NONE', 'POP_JUMP_IF_NONE',
     'CALL_INTRINSIC_1',
     'STORE_SLICE',
+    # 3.13
+    'CALL_KW', 'LOAD_FAST_LOAD_FAST',
+    'STORE_FAST_STORE_FAST', 'STORE_FAST_LOAD_FAST',
+    'CONVERT_VALUE', 'FORMAT_SIMPLE', 'FORMAT_WITH_SPEC'
 ])) - _BLACKLIST
 
 
