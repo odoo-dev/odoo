@@ -11,14 +11,10 @@ class AnimateOptionPlugin extends Plugin {
     resources = {
         builder_options: [
             withSequence(20, {
-                OptionComponent: AnimateOption,
+                OptionComponent: this.getAnimateOption(),
                 selector: ".o_animable, section .row > div, img, .fa, .btn, .o_animated_text",
                 exclude:
                     "[data-oe-xpath], .o_not-animable, .s_col_no_resize.row > div, .s_col_no_resize",
-                props: {
-                    getDirectionsItems: this.getDirectionsItems.bind(this),
-                    getEffectsItems: this.getEffectsItems.bind(this),
-                },
                 // todo: to implement
                 // textSelector: ".o_animated_text",
             }),
@@ -266,69 +262,69 @@ class AnimateOptionPlugin extends Plugin {
             el.classList.remove("o_animate_preview");
         }
     }
+
+    getAnimateOption() {
+        const plugin = this;
+        return class AnimateOption extends Component {
+            static template = "html_builder.AnimateOption";
+            static components = { ...defaultBuilderComponents };
+
+            setup() {
+                this.isActiveItem = useIsActiveItem();
+
+                this.state = useDomState((editingElement) => {
+                    const hasAnimateClass = editingElement.classList.contains("o_animate");
+
+                    return {
+                        hasAnimateClass: hasAnimateClass,
+                        canHover: editingElement.tagName === "IMG",
+                        isLimitedAnimation: this.limitedAnimations.some((className) =>
+                            editingElement.classList.contains(className)
+                        ),
+                        showIntensity: this.shouldShowIntensity(editingElement, hasAnimateClass),
+                        effectItems: plugin.getEffectsItems(this.isActiveItem),
+                        directionItems: plugin
+                            .getDirectionsItems(editingElement)
+                            .filter((i) => !i.check || i.check(editingElement)),
+                        isInDropdown: editingElement.closest(".dropdown"),
+                    };
+                });
+            }
+            get limitedAnimations() {
+                // Animations for which the "On Scroll" and "Direction" options are not
+                // available.
+                return [
+                    "o_anim_flash",
+                    "o_anim_pulse",
+                    "o_anim_shake",
+                    "o_anim_tada",
+                    "o_anim_flip_in_x",
+                    "o_anim_flip_in_y",
+                ];
+            }
+
+            shouldShowIntensity(editingElement, hasAnimateClass) {
+                if (!hasAnimateClass) {
+                    return false;
+                }
+                if (!editingElement.classList.contains("o_anim_fade_in")) {
+                    return true;
+                }
+
+                const possibleDirections = plugin
+                    .getDirectionsItems()
+                    .map((i) => i.className)
+                    .filter(Boolean);
+                const hasDirection = possibleDirections.some((direction) =>
+                    editingElement.classList.contains(direction)
+                );
+
+                return hasDirection;
+            }
+        };
+    }
 }
 registry.category("website-plugins").add(AnimateOptionPlugin.id, AnimateOptionPlugin);
-
-class AnimateOption extends Component {
-    static template = "html_builder.AnimateOption";
-    static components = { ...defaultBuilderComponents };
-    static props = {
-        getDirectionsItems: Function,
-        getEffectsItems: Function,
-    };
-
-    setup() {
-        this.isActiveItem = useIsActiveItem();
-
-        this.state = useDomState((editingElement) => {
-            const hasAnimateClass = editingElement.classList.contains("o_animate");
-            return {
-                hasAnimateClass: hasAnimateClass,
-                canHover: editingElement.tagName === "IMG",
-                isLimitedAnimation: this.limitedAnimations.some((className) =>
-                    editingElement.classList.contains(className)
-                ),
-                showIntensity: this.shouldShowIntensity(editingElement, hasAnimateClass),
-                effectItems: this.props.getEffectsItems(this.isActiveItem),
-                directionItems: this.props
-                    .getDirectionsItems(editingElement)
-                    .filter((i) => !i.check || i.check(editingElement)),
-                isInDropdown: editingElement.closest(".dropdown"),
-            };
-        });
-    }
-    get limitedAnimations() {
-        // Animations for which the "On Scroll" and "Direction" options are not
-        // available.
-        return [
-            "o_anim_flash",
-            "o_anim_pulse",
-            "o_anim_shake",
-            "o_anim_tada",
-            "o_anim_flip_in_x",
-            "o_anim_flip_in_y",
-        ];
-    }
-
-    shouldShowIntensity(editingElement, hasAnimateClass) {
-        if (!hasAnimateClass) {
-            return false;
-        }
-        if (!editingElement.classList.contains("o_anim_fade_in")) {
-            return true;
-        }
-
-        const possibleDirections = this.props
-            .getDirectionsItems()
-            .map((i) => i.className)
-            .filter(Boolean);
-        const hasDirection = possibleDirections.some((direction) =>
-            editingElement.classList.contains(direction)
-        );
-
-        return hasDirection;
-    }
-}
 
 function intersect(a, b) {
     return a.filter((value) => b.includes(value));
