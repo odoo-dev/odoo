@@ -17,4 +17,3 @@ class IrAttachment(models.Model):
             for attachment in self
         ):
             raise UserError(_("You can't unlink an attachment that you received from the government"))
-        return super()._unlink_except_government_document()
