@@ -32,4 +32,11 @@ patch(PosOrderline.prototype, {
             "skip-change": this.skip_change && this.config.module_pos_restaurant,
         };
     },
+    getDisplayClassess() {
+        return {
+            ...super.getDisplayClasses(),
+            "has-change": this.uiState.hasChange && this.config.module_pos_restaurant,
+            "skip-change": this.skip_change && this.config.module_pos_restaurant,
+        };
+    },
 });
