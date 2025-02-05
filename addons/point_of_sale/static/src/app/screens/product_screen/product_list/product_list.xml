@@ -26,6 +26,8 @@
                             name="product.display_name"
                             productId="product.id"
                             price="product.getFormattedUnitPrice()"
+                            barcode="product.barcode"
+                            default_code="product.default_code"
                             imageUrl="pos.show_product_images and product.getImageUrl()"
                             onClick="() =>this.pos.addProductToCurrentOrder(product)"
                             productInfo="true"

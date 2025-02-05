@@ -15,10 +15,19 @@
                 <img class="w-100" t-att-src="props.imageUrl" t-att-alt="props.name" />
             </div>
             <div class="product-content d-flex flex-column justify-content-between h-100 mx-2 py-1">
+            <t t-debug="" />
+            <t t-if="props.barcode">
                 <div class="overflow-hidden lh-sm fw-bolder product-name"
                     t-att-class="{'no-image': !props.imageUrl}" 
                     t-attf-id="article_product_{{props.productId}}"
+                    t-esc="props.default_code + props.barcode" />
+            </t>
+            <t t-else="">
+             <div class="overflow-hidden lh-sm fw-bolder product-name"
+                    t-att-class="{'no-image': !props.imageUrl}" 
+                    t-attf-id="article_product_{{props.productId}}"
                     t-esc="props.name" />
+                    </t>
                 <span t-if="props.price" class="price-tag text-primary py-1 fw-bolder"
                     t-esc="props.price" />
             </div>
