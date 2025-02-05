@@ -10,7 +10,7 @@
         id="esg_main_menu"
         name="ESG"
         sequence="1"
-        web_icon=""
+        web_icon="esg,static/description/icon.png"
     >
         <menuitem
             id="menu_esg_dashboard"
