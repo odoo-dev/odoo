@@ -24,7 +24,13 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'esg/static/src/**/*',
+            'esg/static/src/*',
+            'esg/static/src/img/*',
+            'esg/static/src/scss/esg.scss',
+            # 'esg/static/src/**/*',
+        ],
+        'web.assets_web_dark': [
+            'esg/static/src/scss/*.dark.scss',
         ],
     },
     'application': True,

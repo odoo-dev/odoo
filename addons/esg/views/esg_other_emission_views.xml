@@ -41,9 +41,157 @@
         <field name="res_model">esg.other.emission</field>
         <field name="view_mode">list,form</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Create a new other emission
-            </p>
+            <!-- Environment Dashboard -->
+            <div class="o_nocontent_esg d-flex gap-3 flex-column flex-md-row w-100 mt-3 pt-5 p-3 pe-auto">
+                <div class="o_esg_step w-100 mx-auto text-center">
+                    <img src="/esg/static/src/img/magnifying_glass.svg" alt="Collect" class="mb-3"/>
+                    <h2>Collect</h2>
+                    <p class="mb-0">Automatically gather transaction data from your Odoo, ensuring accurate emissions tracking using certified emission factors.</p>
+                </div>
+                <i class="o_esg_step_icon oi oi-arrow-right align-self-center fs-2 text-muted"/>
+                <div class="o_esg_step w-100 mx-auto text-center">
+                    <img src="/esg/static/src/img/statistics.svg" alt="Collect" class="mb-3"/>
+                    <h2>Measure</h2>
+                    <p class="mb-0">Generate a comprehensive carbon footprint report, covering Scope 1, 2, and key Scope 3 emissions, to assess your environmental impact.</p>
+                </div>
+                <i class="o_esg_step_icon oi oi-arrow-right align-self-center fs-2 text-muted"/>
+                <div class="o_esg_step w-100 mx-auto text-center">
+                    <img src="/esg/static/src/img/target.svg" alt="Collect" class="mb-3"/>
+                    <h2>Act</h2>
+                    <p class="mb-0">Implement and track emission-reduction initiatives, monitoring progress to drive sustainable change in your business.</p>
+                </div>
+            </div>
+
+            <!-- ESG Dashboard -->
+            <div class="o_nocontent_esg d-flex gap-3 flex-column flex-md-row w-100 mt-3 pt-5 p-3 pe-auto">
+                <div class="o_esg_step w-100 mx-auto text-center">
+                    <img src="/esg/static/src/img/magnifying_glass.svg" alt="Collect" class="mb-3"/>
+                    <h2>Collect</h2>
+                    <p class="mb-0">Automatically gather all ESG data from your Odoo, ensuring accurate tracking with certified frameworks.</p>
+                </div>
+                <i class="o_esg_step_icon oi oi-arrow-right align-self-center fs-2 text-muted"/>
+                <div class="o_esg_step w-100 mx-auto text-center">
+                    <img src="/esg/static/src/img/statistics.svg" alt="Collect" class="mb-3"/>
+                    <h2>Measure</h2>
+                    <p class="mb-0">Get a full ESG assessment and generate required compliance reports effortlessly.</p>
+                </div>
+                <i class="o_esg_step_icon oi oi-arrow-right align-self-center fs-2 text-muted"/>
+                <div class="o_esg_step w-100 mx-auto text-center">
+                    <img src="/esg/static/src/img/target.svg" alt="Collect" class="mb-3"/>
+                    <h2>Act</h2>
+                    <p class="mb-0">Launch initiatives, track impact, and drive positive change across your organization.</p>
+                </div>
+            </div>
+
+            <!-- Carbon Footprint empty screen -->
+            <div class="o_nocontent_esg d-flex flex-column gap-3 w-100 mt-3 pt-5 px-3 pe-auto">
+                <div class="card overflow-hidden">
+                    <div class="card-body d-flex align-items-start gap-3">
+                        <!-- // TODO: Use Accounting or Invoicing icon depending on the installed app -->
+                        <img class="o_carbon_fp_icon_app rounded-3" src="/account/static/description/icon.png"/>
+                        <div class="w-md-75 pe-md-5">
+                            <h2>Effortless Carbon Footprint Calculation</h2>
+                            <p class="mb-0">Track your company's carbon footprint with ease! Most emissions are seamlessly calculated from your accounting data, using account move lines to generate precise and compliant reports.</p>
+                        </div>
+                        <div class="o_carbon_fp_icon_demo position-absolute end-0 d-none d-md-flex align-self-end flex-column gap-2">
+                            <div class="d-flex gap-2 justify-content-center">
+                                <img src="/esg/static/src/img/app_icon_account_asset.png" class="rounded-3"/>
+                                <img src="/esg/static/src/img/app_icon_account.png" class="rounded-3"/>
+                                <img src="/esg/static/src/img/app_icon_fleet.png" class="rounded-3"/>
+                                <img src="/esg/static/src/img/app_icon_hr_expense.png" class="rounded-3"/>
+                                <img src="/esg/static/src/img/app_icon_hr.png" class="rounded-3"/>
+                            </div>
+                            <div class="d-flex gap-2 justify-content-center">
+                                <img src="/esg/static/src/img/app_icon_purchase.png" class="rounded-3"/>
+                                <img src="/esg/static/src/img/app_icon_sale_renting.png" class="rounded-3"/>
+                                <img src="/esg/static/src/img/app_icon_sale.png" class="rounded-3"/>
+                                <img src="/esg/static/src/img/app_icon_stock.png" class="rounded-3"/>
+                            </div>
+                            <div class="d-flex gap-2 justify-content-center">
+                                <img src="/esg/static/src/img/app_icon_stock.png" class="rounded-3"/>
+                                <img src="/esg/static/src/img/app_icon_account_asset.png" class="rounded-3"/>
+                                <img src="/esg/static/src/img/app_icon_purchase.png" class="rounded-3"/>
+                                <img src="/esg/static/src/img/app_icon_sale.png" class="rounded-3"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center gap-4 flex-wrap pt-3">
+                    <span class="o_carbon_fp_cloud position-relative d-inline-block rounded-pill px-4 py-1 bg-200 fs-4 fw-bold">CH₄</span>
+                    <span class="o_carbon_fp_cloud position-relative d-inline-block rounded-pill px-4 py-1 bg-200 fs-4 fw-bold">HFCs</span>
+                    <span class="o_carbon_fp_cloud position-relative d-inline-block rounded-pill px-4 py-1 bg-200 fs-4 fw-bold">SF₆</span>
+                    <span class="o_carbon_fp_cloud position-relative d-inline-block rounded-pill px-4 py-1 bg-200 fs-4 fw-bold">PFCs</span>
+                    <span class="o_carbon_fp_cloud position-relative d-inline-block rounded-pill px-4 py-1 bg-200 fs-4 fw-bold">N₂O</span>
+                    <span class="o_carbon_fp_cloud position-relative d-inline-block rounded-pill px-4 py-1 bg-200 fs-4 fw-bold">NF₃</span>
+                    <span class="o_carbon_fp_cloud position-relative d-inline-block rounded-pill px-4 py-1 bg-200 fs-4 fw-bold">CO₂</span>
+                </div>
+                <div class="overflow-auto">
+                    <div class="o_carbon_fp_scopes_wrap grid gap-3">
+                        <div class="o_carbon_fp_scope g-col-3 position-relative p-3 bg-primary-subtle text-primary-emphasis">
+                            <div class="text-center">
+                                <p class="mb-0 text-uppercase opacity-50">Scope 2</p>
+                                <h6 class="text-reset">Indirect emissions</h6>
+                            </div>
+                            <hr class="border-top border-primary-subtle opacity-100"/>
+                            <ul class="d-flex flex-column gap-2 mb-0">
+                                <li>Purchased electricity, steam, heating, and cooling for own use</li>
+                            </ul>
+                        </div>
+                        <div class="o_carbon_fp_scope g-col-3 position-relative p-3 bg-primary-subtle text-primary-emphasis">
+                            <div class="text-center">
+                                <p class="mb-0 text-uppercase opacity-50">Scope 3</p>
+                                <h6 class="text-reset">Other indirect emissions</h6>
+                            </div>
+                            <hr class="border-top border-primary-subtle opacity-100"/>
+                            <ul class="d-flex flex-column gap-2 mb-0">
+                                <li class="o_add_manually">Employee commuting</li>
+                                <li>Transportation and Distribution</li>
+                                <li>Waste generated in operations</li>
+                                <li>Fuel and energy related activities</li>
+                                <li>Purchased goods and services. </li>
+                                <li>Capital Goods</li>
+                                <li>Business Travel</li>
+                                <li>Leased Assets</li>
+                            </ul>
+                        </div>
+                        <div class="o_carbon_fp_scope g-col-3 position-relative p-3 bg-info-subtle text-info-emphasis">
+                            <div class="text-center">
+                                <p class="mb-0 text-uppercase opacity-50">Scope 1</p>
+                                <h6 class="text-reset">Direct emissions</h6>
+                            </div>
+                            <hr class="border-top border-info-subtle opacity-100"/>
+                            <ul class="d-flex flex-column gap-2 mb-0">
+                                <li>Company vehicles</li>
+                                <li>Company facilities</li>
+                            </ul>
+                        </div>
+                        <div class="o_carbon_fp_scope g-col-3 position-relative p-3 bg-warning-subtle text-warning-emphasis">
+                            <div class="text-center">
+                                <p class="mb-0 text-uppercase opacity-50">Scope 3</p>
+                                <h6 class="text-reset">Other indirect emissions</h6>
+                            </div>
+                            <hr class="border-top border-warning-subtle opacity-100"/>
+                            <ul class="d-flex flex-column gap-2 mb-0">
+                                <li>Transportation and Distribution</li>
+                                <li>Processing of sold product</li>
+                                <li>Use of sold products</li>
+                                <li class="o_add_manually">End-of-live treatment of sold products</li>
+                                <li>Leased Assets</li>
+                                <li>Investment</li>
+                            </ul>
+                        </div>
+
+                        <div class="o_carbon_fp_activitie o_first g-col-6 position-relative py-2 bg-primary-subtle text-primary-emphasis text-center">Upstream activities</div>
+                        <div class="o_carbon_fp_activitie g-col-3 position-relative py-2 bg-info-subtle text-info-emphasis text-center">Company reporting</div>
+                        <div class="o_carbon_fp_activitie g-col-3 position-relative py-2 bg-warning-subtle text-warning-emphasis text-center">Downstream activities</div>
+                    </div>
+                </div>
+                <ul class="o_carbon_fp_legends d-flex flex-column flex-md-row column-gap-3 row-gap-2 justify-content-center p-0">
+                    <!-- // TODO: Use "Accounting" or "Invoicing" depending on the installed app -->
+                    <li>Included in <span>Accounting</span></li>
+                    <li class="o_add_manually">Can be added manually</li>
+                </ul>
+            </div>
         </field>
     </record>
 </odoo>

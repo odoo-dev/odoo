@@ -1,0 +1,98 @@
+
+.o_nocontent_esg {
+    .o_nocontent_help:has(&) {
+        max-width: map-get($container-max-widths, 'lg') + map-get($spacers, 3) * 2;
+        width: 100%;
+        padding: 0;
+        text-align: inherit;
+        color: inherit;
+        font-size: inherit;
+    }
+
+    .o_carbon_fp_scopes_wrap {
+        min-width: map-get($container-max-widths, 'lg');
+    }
+
+    .o_carbon_fp_scope {
+        clip-path: polygon(0 #{map-get($spacers, 3)}, 50% 0, 100% #{map-get($spacers, 3)}, 100% 100%, 0 100%);
+    }
+
+    .o_carbon_fp_icon_app {
+        aspect-ratio: 1;
+        width: 70px;
+        padding: 10px;
+        background-color: var(--AppSwitcherIcon-background, rgba(#fff, 1));
+        box-shadow: var(--AppSwitcherIcon-inset-shadow, inset 0 0 0 1px rgba(0,0,0, .2)),
+            0 1px 1px rgba(#000, .02),
+            0 2px 2px rgba(#000, .02),
+            0 4px 4px rgba(#000, .02),
+            0 8px 8px rgba(#000, .02),
+            0 16px 16px rgba(#000, .02);
+    }
+
+    .o_carbon_fp_icon_demo {
+        margin: $card-spacer-y * -1 $card-spacer-x * -1 $card-spacer-y * -1 0;
+        transform: translate(55px, 32px) rotate(-45deg);
+
+        img {
+            width: 35px;
+            background-color: var(--AppSwitcherIcon-background, #{$white});
+            box-shadow: var(--AppSwitcherIcon-inset-shadow, inset 0 0 0 1px #{rgba($black, .2)});
+        }
+    }
+
+    .o_carbon_fp_cloud {
+        &::before {
+            @include border-top-radius($border-radius-pill);
+            @include o-position-absolute($right: 20%, $bottom: 100%);
+            content: '';
+            display: block;
+            width: 50%;
+            height: map-get($spacers, 3);
+            background: $gray-200;
+        }
+    }
+
+    .o_carbon_fp_activitie {
+        &::before, &::after {
+            @include o-position-absolute(0);
+            content: '';
+            display: block;
+            width: map-get($spacers, 2);
+            height: 100%;
+            background: $o-webclient-background-color;
+            clip-path: polygon(0 0, 100% 50%, 0 100%);
+        }
+
+        &::before {
+            left: 0;
+        }
+
+        &::after {
+            left: 100%;
+            background: inherit;
+        }
+
+        &.o_first:before, &:last-child:after {
+            display: none;
+        }
+    }
+
+    .o_carbon_fp_legends {
+        list-style-position: inside;
+    }
+
+    .o_add_manually {
+        list-style-type: circle;
+    }
+
+    .o_esg_step {
+        max-width: 320px;
+    }
+
+    .o_esg_step_icon {
+        @include media-breakpoint-down(md) {
+            transform: rotate(90deg) #{"/*rtl:ignore*/"};
+        }
+    }
+}
