@@ -11,6 +11,14 @@ patch(PaymentInterface.prototype, {
         return false;
     },
 
+    firstCommitFunction() {
+
+    },
+
+    secondCommitFunction() {
+
+    },
+
     /**
      * Called when the amount authorized by a payment request should
      * be adjusted to account for a new order line, it can only be called if
