@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_emitted_emission_report_list_view" model="ir.actions.act_window">
+        <field name="name">Emitted Emissions</field>
+        <field name="res_model">esg.emitted.emission.report</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new emitted emission
+            </p>
+        </field>
+    </record>
+
+    <record id="emitted_emission_report_list_view" model="ir.ui.view">
+        <field name="name">emitted.emission.report.list</field>
+        <field name="model">esg.emitted.emission.report</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" multi_edit="1">
+                <field name="date" readonly="id &lt; 0"/>
+                <field name="emission_factor_id"/>
+                <field name="move_id" readonly="1"/>
+                <field name="note" optional="hide" readonly="id &lt; 0"/>
+                <field name="quantity"/>
+                <field name="value" readonly="1"/>
+                <field name="uncertainty" readonly="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="emitted_emission_report_search_view" model="ir.ui.view">
+        <field name="name">emitted.emission.report.search</field>
+        <field name="model">esg.emitted.emission.report</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="emission_factor_id"/>
+                <field name="move_id"/>
+                <filter name="emissions_emitted" string="Emitted" domain="[('value', '>', 0.0)]"/>
+                <filter name="emissions_offsetted" string="Offsetted" domain="[('value', '&lt;', 0.0)]"/>
+                <separator/>
+                <filter name="account_emissions" string="Accounting" domain="[('id', '>', 0)]"/>
+                <filter name="other_emissions" string="Others" domain="[('id', '&lt;', 0)]"/>
+                <separator/>
+                <filter name="low_uncertainty" string="Low Uncertainty (&lt; 5%)" domain="[('uncertainty', '&lt;', 0.05)]"/>
+                <filter name="medium_uncertainty" string="Medium Uncertainty (5-20%)" domain="[('uncertainty', '>=', 0.05), ('uncertainty', '&lt;', 0.20)]"/>
+                <filter name="high_uncertainty" string="High Uncertainty (20-50%)" domain="[('uncertainty', '>=', 0.20), ('uncertainty', '&lt;', 0.50)]"/>
+                <filter name="very_high_uncertainty" string="Very High Uncertainty (> 50%)" domain="[('uncertainty', '>=', 0.50)]"/>
+                <separator/>
+                <filter string="Date" name="date" date="date" end_month="1" end_year="1"/>
+                <separator/>
+                <group string="Group By">
+                    <filter name="group_by_vendor_id" context="{'group_by': 'vendor_id'}"/>
+                    <filter name="group_by_scope" context="{'group_by': 'scope'}"/>
+                    <filter name="group_by_emission_factor_id" context="{'group_by': 'emission_factor_id'}"/>
+                    <filter name="group_by_activity_type_ids" context="{'group_by': 'activity_type_ids'}"/>
+                    <separator/>
+                    <filter name="group_by_date" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_emitted_emission_report_views" model="ir.actions.act_window">
+        <field name="name">Emitted Emissions</field>
+        <field name="res_model">esg.emitted.emission.report</field>
+        <field name="view_mode">graph,pivot</field>
+    </record>
+
+    <record id="emitted_emission_report_graph_view" model="ir.ui.view">
+        <field name="name">emitted.emission.report.graph</field>
+        <field name="model">esg.emitted.emission.report</field>
+        <field name="arch" type="xml">
+            <graph>
+                <field name="date"/>
+                <field name="emission_factor_id"/>
+                <field name="move_id"/>
+                <field name="note"/>
+                <field name="quantity"/>
+                <field name="value"/>
+                <field name="uncertainty"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="emitted_emission_report_pivot_view" model="ir.ui.view">
+        <field name="name">emitted.emission.report.pivot</field>
+        <field name="model">esg.emitted.emission.report</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="date"/>
+                <field name="emission_factor_id"/>
+                <field name="move_id"/>
+                <field name="note"/>
+                <field name="quantity"/>
+                <field name="value"/>
+                <field name="uncertainty"/>
+            </pivot>
+        </field>
+    </record>
+</odoo>

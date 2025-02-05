@@ -32,7 +32,7 @@
                     id="menu_esg_emitted_emissions"
                     name="Emitted Emissions"
                     sequence="10"
-                    action="action_view_emitted_emissions"
+                    action="action_emitted_emission_report_list_view"
                 />
                 <menuitem
                     id="menu_esg_other_emissions"
@@ -61,6 +61,7 @@
                     id="menu_esg_carbon_analytics"
                     name="Carbon Analytics"
                     sequence="20"
+                    action="action_emitted_emission_report_views"
                 />
                 <menuitem
                     id="menu_esg_carbon_footprint"

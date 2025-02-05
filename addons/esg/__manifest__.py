@@ -10,8 +10,8 @@
     'data': [
         'data/esg_data.xml',
         'security/ir.model.access.csv',
+        'report/esg_emitted_emission_report_views.xml',
         'wizard/factors_retroaction_wizard_views.xml',
-        'wizard/emitted_emissions_views.xml',
         'views/account_move_views.xml',
         'views/esg_emission_factor_views.xml',
         'views/esg_emission_source_views.xml',
