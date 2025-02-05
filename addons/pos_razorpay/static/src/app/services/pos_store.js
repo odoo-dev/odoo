@@ -50,4 +50,25 @@ patch(PosStore.prototype, {
             }
         }
     },
+    async closeSession() {
+        const unrecordedPinelabsPayments = this.models["pos.payment"].filter(
+            (payment) =>
+                !payment.is_payment_recorded &&
+                payment.payment_method_id.use_payment_terminal === "razorpay"
+        );
+        if (unrecordedPinelabsPayments.length) {
+            for (const payment of unrecordedPinelabsPayments) {
+                const payment_status =
+                    await payment.payment_method_id.payment_terminal._waitForPaymentConfirmation(
+                        payment
+                    );
+                if (payment_status?.status === "AUTHORIZED") {
+                    payment.update({ payment_status: "done" });
+                } else {
+                    payment.pos_order_id.update({ state: "cancel" });
+                }
+            }
+        }
+        super.closeSession(...arguments);
+    },
 });

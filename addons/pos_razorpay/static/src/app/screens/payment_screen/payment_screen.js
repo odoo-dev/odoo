@@ -55,4 +55,24 @@ patch(PaymentScreen.prototype, {
             return await super.addNewPaymentLine(paymentMethod);
         }
     },
+    async sendForceDone(line) {
+        if (line.payment_method_id.use_payment_terminal === "razorpay") {
+            line.setPaymentStatus("waitingCard");
+            const payment_status =
+                await line.payment_method_id.payment_terminal._waitForPaymentConfirmation();
+            debugger
+            if (payment_status?.status === "AUTHORIZED") {
+                line.setPaymentStatus("done");
+                this.pos.paymentTerminalInProgress = false;
+            } else if (payment_status?.status === "INVALID TRANSACTION NUMBER") {
+                line.setPaymentStatus("retry");
+                this.pos.paymentTerminalInProgress = false;
+            } else {
+                line.setPaymentStatus("done");
+                this.pos.paymentTerminalInProgress = false;
+            }
+            return;
+        }
+        return super.sendForceDone(...arguments);
+    },
 });

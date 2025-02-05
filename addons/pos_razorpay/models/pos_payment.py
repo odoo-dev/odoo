@@ -6,3 +6,4 @@ class PosPayment(models.Model):
 
     razorpay_reverse_ref_no = fields.Char('Razorpay Reverse Reference No.')
     razorpay_p2p_request_id = fields.Char('Razorpay p2pRequestId', help='Required to fetch payment status during the refund order process')
+    is_payment_recorded = fields.Boolean(string='Is Payment Recorded', default=False)
