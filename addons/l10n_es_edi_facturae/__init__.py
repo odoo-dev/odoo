@@ -12,6 +12,7 @@ def _l10n_es_edi_facturae_post_init_hook(env):
     """
     for company in env['res.company'].search([('chart_template', '=like', 'es_%'), ('parent_id', '=', False)]):
         Template = env['account.chart.template'].with_company(company)
+        Template.try_loading(company.chart_template, company)
         Template._load_data({
             'account.tax': Template._get_es_facturae_account_tax(),
         })
