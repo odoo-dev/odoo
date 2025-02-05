@@ -33,6 +33,7 @@ class PosSelfOrderControllerRazorpay(PosSelfOrderController):
                 'payment_method_payment_mode': razorpay_status_response.get('paymentMode'),
                 'payment_ref_no': razorpay_status_response.get('externalRefNumber'),
                 'razorpay_reverse_ref_no': razorpay_status_response.get('reverseReferenceNumber'),
+                'razorpay_p2p_request_id': razorpay_status_response.get('p2pRequestId'),
             })
 
             order.action_pos_order_paid()

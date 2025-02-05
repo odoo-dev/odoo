@@ -44,6 +44,7 @@ class PosMakePayment(models.TransientModel):
         """Check the order:
         if the order is not paid: continue payment,
         if the order is paid print ticket.
+        if terminal payment method is used, check if the order is refund order then refund the payment in original payment mode.
         """
         self.ensure_one()
 
