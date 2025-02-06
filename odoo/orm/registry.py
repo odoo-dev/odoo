@@ -41,7 +41,7 @@ if typing.TYPE_CHECKING:
     from odoo.fields import Field
     from odoo.models import BaseModel
     from odoo.sql_db import BaseCursor, Connection, Cursor
-    from odoo.modules import graph
+    from odoo.modules import module_graph
 
 
 _logger = logging.getLogger('odoo.registry')

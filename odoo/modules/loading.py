@@ -358,7 +358,7 @@ def _check_module_names(cr: BaseCursor, module_names: Iterable[str]) -> None:
 
 def load_marked_modules(
     env: Environment,
-    graph: Graph,
+    graph: ModuleGraph,
     states: Collection[str],
     force: list[str],
     progressdict: None,
