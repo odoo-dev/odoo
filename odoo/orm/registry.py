@@ -284,7 +284,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
                 queue.extend(func(model))
         return models
 
-    def load(self, cr: Cursor, module: graph.Node) -> OrderedSet[str]:
+    def load(self, cr: Cursor, module: module_graph.ModuleNode) -> OrderedSet[str]:
         """ Load a given module in the registry, and return the names of the
         modified models.
 

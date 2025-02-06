@@ -305,16 +305,11 @@ def load_module_graph(
         if needs_update:
             processed_modules.append(package.name)
 
-            ver = adapt_version(package.data['version'])
+            ver = adapt_version(package.manifest['version'])
             # Set new modules and dependencies
             module.write({'state': 'installed', 'latest_version': ver})
 
-            package.load_state = package.state
-            package.load_version = package.installed_version
             package.state = 'installed'
-            for kind in ('init', 'demo', 'update'):
-                if hasattr(package, kind):
-                    delattr(package, kind)
             module.env.flush_all()
             module.env.cr.commit()
 
@@ -349,9 +344,7 @@ def load_module_graph(
 
 def _check_module_names(cr: BaseCursor, module_names: Iterable[str]) -> None:
     mod_names = set(module_names)
-    if 'base' in mod_names:
-        # ignore dummy 'all' module
-        mod_names.discard('all')
+    mod_names.discard('all')
     if mod_names:
         cr.execute("SELECT count(id) AS count FROM ir_module_module WHERE name in %s", (tuple(mod_names),))
         row = cr.fetchone()
@@ -427,10 +420,6 @@ def load_modules(registry: Registry, force_demo: bool = False, status: None = No
                 return
             _logger.info("init db")
             modules_db.initialize(cr)
-            update_module = True # process auto-installed modules
-            tools.config["init"]["all"] = 1
-            if not tools.config['without_demo']:
-                tools.config["demo"]['all'] = 1
 
         if 'base' in tools.config['update'] or 'all' in tools.config['update']:
             cr.execute("update ir_module_module set state=%s where name=%s and state=%s", ('to upgrade', 'base', 'installed'))
@@ -457,6 +446,7 @@ def load_modules(registry: Registry, force_demo: bool = False, status: None = No
             update_module=update_module,
             report=report,
             models_to_check=models_to_check,
+            install_demo=new_db_demo,
         )
 
         load_lang = tools.config._cli_options.pop('load_language', None)
@@ -597,7 +587,7 @@ def load_modules(registry: Registry, force_demo: bool = False, status: None = No
                 cr.commit()
                 _logger.info('Reloading registry once more after uninstalling modules')
                 registry = Registry.new(
-                    cr.dbname, force_demo, update_module=update_module
+                    cr.dbname, update_module=update_module
                 )
                 cr.reset()
                 registry.check_tables_exist(cr)
