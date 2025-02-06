@@ -353,6 +353,8 @@ def load_modules(
     registry: Registry,
     *,
     update_module: bool = False,
+    upgrade_modules: tuple[str] = (),
+    install_modules: tuple[str] = (),
     new_db_demo: bool = False,
 ) -> None:
     """ Load the modules for a registry object that has just been created.  This
@@ -379,7 +381,7 @@ def load_modules(
             _logger.info("init db")
             modules_db.initialize(cr)
 
-        if 'base' in tools.config['update'] or 'all' in tools.config['update']:
+        if 'base' in upgrade_modules:
             cr.execute("update ir_module_module set state=%s where name=%s and state=%s", ('to upgrade', 'base', 'installed'))
 
         # STEP 1: LOAD BASE (must be done before module dependencies can be computed for later steps)
@@ -422,15 +424,13 @@ def load_modules(
 
             _check_module_names(cr, itertools.chain(tools.config['init'], tools.config['update']))
 
-            module_names = [k for k, v in tools.config['init'].items() if v]
-            if module_names:
-                modules = Module.search([('state', '=', 'uninstalled'), ('name', 'in', module_names)])
+            if install_modules:
+                modules = Module.search([('state', '=', 'uninstalled'), ('name', 'in', install_modules)])
                 if modules:
                     modules.button_install()
 
-            module_names = [k for k, v in tools.config['update'].items() if v]
-            if module_names:
-                modules = Module.search([('state', 'in', ('installed', 'to upgrade')), ('name', 'in', module_names)])
+            if upgrade_modules:
+                modules = Module.search([('state', 'in', ('installed', 'to upgrade')), ('name', 'in', upgrade_modules)])
                 if modules:
                     modules.button_upgrade()
 
@@ -509,9 +509,6 @@ def load_modules(
             # Cleanup orphan records
             env['ir.model.data']._process_end(registry.updated_modules)
             env.flush_all()
-
-        for kind in ('init', 'update'):
-            tools.config[kind] = {}
 
         # STEP 5: Uninstall modules to remove
         if update_module:
