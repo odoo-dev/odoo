@@ -222,7 +222,7 @@ class ModuleGraph:
                 try:
                     module.depends = OrderedSet(self._modules[dep] for dep in depends)
                 except KeyError:
-                    _logger.warning('module %s: some depends are not loaded, skipped', name)
+                    _logger.info('module %s: some depends are not loaded, skipped', name)
                     self._remove(name)
 
     def _update_depth(self, names: Iterable[str]) -> None:

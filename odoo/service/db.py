@@ -383,7 +383,7 @@ def exp_migrate_databases(databases):
     for db in databases:
         _logger.info('migrate database %s', db)
         odoo.tools.config['update']['base'] = True
-        odoo.modules.registry.Registry.new(db, force_demo=False, update_module=True)
+        odoo.modules.registry.Registry.new(db, update_module=True)
     return True
 
 #----------------------------------------------------------

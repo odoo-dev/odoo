@@ -140,6 +140,7 @@ def load_module_graph(
     skip_modules: Collection[str] = (),
     report: OdooTestResult | None = None,
     models_to_check: set[str] | None = None,
+    install_demo: bool = True,
 ) -> tuple[list[str], list[str]]:
     """Migrates+Updates or Installs all module nodes from ``graph``
 
@@ -149,6 +150,7 @@ def load_module_graph(
        :param update_module: whether to update modules or not
        :param report:
        :param set models_to_check:
+       :param bool install_demo: whether try to install demo data for new installed modules
        :return: list of modules that were installed or updated
     """
     if models_to_check is None:
@@ -360,7 +362,6 @@ def load_marked_modules(
     env: Environment,
     graph: ModuleGraph,
     states: Collection[str],
-    force: list[str],
     progressdict: None,
     report: OdooTestResult | None,
     loaded_modules: list[str],
@@ -381,7 +382,7 @@ def load_marked_modules(
         module_list = [name for (name,) in env.cr.fetchall() if name not in graph]
         if not module_list:
             break
-        graph.add_modules(env.cr, module_list, force)
+        graph.extend(module_list)
         _logger.debug('Updating graph with %d more modules', len(module_list))
         loaded, processed = load_module_graph(
             env,
@@ -398,12 +399,19 @@ def load_marked_modules(
     return processed_modules
 
 
-def load_modules(registry: Registry, force_demo: bool = False, status: None = None, update_module: bool = False) -> None:
+def load_modules(
+        registry: Registry,
+        *,
+        update_module: bool = False,
+        new_db_demo: bool = False,
+    ) -> None:
     """ Load the modules for a registry object that has just been created.  This
         function is part of Registry.new() and should not be used anywhere else.
+
+        :param Registry registry: The new inited registry object used to load modules.
+        :param bool update_module: Whether to update (install, upgrade, or uninstall) modules. Defaults to ``False``
+        :param bool new_db_demo: Whether to install demo data for new database. Defaults to ``False``
     """
-    if status is not None:
-        warnings.warn("Deprecated since 19.0, status is deprecated, do not set it")
     initialize_sys_path()
 
     models_to_check: set[str] = set()
@@ -501,11 +509,11 @@ def load_modules(registry: Registry, force_demo: bool = False, status: None = No
             previously_processed = len(processed_modules)
             processed_modules += load_marked_modules(
                 env, graph, ['installed', 'to upgrade', 'to remove'],
-                force, None, report, loaded_modules, update_module, models_to_check)
+                None, report, loaded_modules, update_module, models_to_check)
             if update_module:
                 processed_modules += load_marked_modules(
                     env, graph, ['to install'],
-                    force, None, report, loaded_modules, update_module, models_to_check)
+                    None, report, loaded_modules, update_module, models_to_check)
 
         if update_module:
             # set up the registry without the patch for translated fields
