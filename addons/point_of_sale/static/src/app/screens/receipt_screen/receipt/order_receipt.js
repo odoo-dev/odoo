@@ -57,4 +57,8 @@ export class OrderReceipt extends Component {
     getPortalURL() {
         return `${this.order.session._base_url}/pos/ticket`;
     }
+
+    get companyAddress() {
+        return this.order.company?.partner_id.pos_contact_address.split("\n")
+    }
 }

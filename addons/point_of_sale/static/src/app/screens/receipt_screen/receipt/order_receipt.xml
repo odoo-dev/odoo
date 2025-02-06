@@ -81,26 +81,20 @@
                 <div class="before-footer" />
 
                 <t t-set="useQrCode" t-value="this.qrCode" />
-                <div t-if="useQrCode">
-                    <br/>
-                    <div class="pos-receipt-order-data mb-2">
-                        Need an invoice for your purchase ?
+                <div t-if="useQrCode" class="d-flex my-2">
+                    <div t-if="['qr_code', 'qr_code_and_url'].includes(this.header.company.point_of_sale_ticket_portal_url_display_mode)">
+                        <img id="posqrcode" t-att-src="useQrCode" class="pos-qr-code"/>
                     </div>
-                </div>
-
-                <div t-if="['qr_code', 'qr_code_and_url'].includes(this.header.company.point_of_sale_ticket_portal_url_display_mode) and useQrCode" class="mb-2">
-                    <img id="posqrcode" t-att-src="useQrCode" class="pos-receipt-logo"/>
-                </div>
-
-                <div t-if="useQrCode">
-                    <div class="pos-receipt-order-data">
-                        Unique Code: <t t-esc="order.ticket_code"/>
-                    </div>
-                </div>
-
-                <div t-if="['url', 'qr_code_and_url'].includes(this.header.company.point_of_sale_ticket_portal_url_display_mode) and useQrCode">
-                    <div class="pos-receipt-order-data">
-                        Portal URL: <t t-esc="getPortalURL()"/>
+                    <div class="d-flex flex-column">
+                        <div class="">Need an invoice?</div>
+                        <div t-if="['url', 'qr_code_and_url'].includes(this.header.company.point_of_sale_ticket_portal_url_display_mode)">
+                            <div style="font-size: 75%;">
+                                <t t-esc="getPortalURL()"/>
+                            </div>
+                        </div>
+                        <div style="font-size: 75%;">
+                            Code: <t t-esc="order.ticket_code"/>
+                        </div>
                     </div>
                 </div>
             </t>
@@ -134,9 +128,22 @@
 
             <br/>
             <div class="pos-receipt-order-data">
+                <div class="company_address d-flex justify-content-between">
+                    <div class="d-flex flex-column text-start">
+                        <t t-if="companyAddress">
+                            <span t-foreach="companyAddress" t-as="line" t-key="line_index">
+                                <t t-esc="line"/>
+                            </span>
+                        </t>
+                    </div>
+                    <div class="d-flex flex-column text-end">
+                        <div t-if="order.company.phone" t-esc="order.company.phone" />
+                        <div t-if="order.company.vat" t-esc="vatText"/>
+                        <div t-if="order.company.email" t-esc="order.company.email" />
+                        <div t-if="order.company.website" t-esc="order.company.website" />
+                    </div>
+                </div>
                 <p>Powered by Odoo</p>
-                <div t-esc="order.pos_reference" />
-                <div id="order-date" t-esc="order.formatDateOrTime('date_order')" />
             </div>
 
         </div>
