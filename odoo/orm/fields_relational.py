@@ -33,8 +33,8 @@ class _Relational(Field[BaseModel]):
     """ Abstract class for relational fields. """
     relational: typing.Literal[True] = True
     comodel_name: str = ''
-    domain: DomainType = []         # domain for searching values
-    context: ContextType = {}       # context for searching values
+    domain: DomainType = Domain.TRUE  # domain for searching values
+    context: ContextType = {}         # context for searching values
     bypass_search_access: bool = False  # whether access rights are bypassed on the comodel
     check_company: bool = False
 
@@ -588,9 +588,14 @@ class _RelationalMulti(_Relational):
     # X2many fields must be written last, because they flush other fields when deleting lines.
     write_sequence = 20
 
-    # Important: the cache contains the ids of all the records in the relation,
-    # including inactive records.  Inactive records are filtered out by
-    # convert_to_record(), depending on the context.
+    # Important: the cache contains the ids of all the records in the relation.
+
+    def setup_nonrelated(self, model):
+        super().setup_nonrelated(model)
+        if not self.domain:
+            self.domain = Domain.TRUE
+        if 'active_test' in self.context:
+            _logger.warning("active_test in %s (POC)", self)
 
     def _update_inverse(self, records, value):
         new_id = value.id
@@ -717,11 +722,6 @@ class _RelationalMulti(_Relational):
             else:
                 # default behaviour
                 corecords = corecords._filtered_access('read')
-        if (
-            Comodel._active_name
-            and self.context.get('active_test', env.context.get('active_test', True))
-        ):
-            corecords = corecords.filtered(Comodel._active_name).with_prefetch(prefetch_ids)
         return corecords
 
     def convert_to_record_multi(self, values, records: BaseModel):
@@ -871,7 +871,7 @@ class _RelationalMulti(_Relational):
                     # this is usually the case for one2many
                     if inverse_field.column_type and inverse_field not in comodel.env.registry.not_null_fields:
                         domain &= Domain(inverse_field.name, '!=', False)
-                query = comodel._search(domain, bypass_access=bypass_access)
+                query = comodel._search(domain, bypass_access=bypass_access, active_test=False)
             assert isinstance(query, Query)
         elif isinstance(value, Query):
             domain = field_domain.optimize_full(comodel)
@@ -992,9 +992,7 @@ class One2many(_RelationalMulti):
 
     def read(self, records):
         # retrieve the lines in the comodel
-        context = {'active_test': False}
-        context.update(self.context)
-        comodel = records.env[self.comodel_name].with_context(**context)
+        comodel = records.env[self.comodel_name].with_context(**self.context)
         inverse = self.inverse_name
         inverse_field = comodel._fields[inverse]
 
@@ -1007,8 +1005,8 @@ class One2many(_RelationalMulti):
         if not comodel.env.su:
             # add fields for security rules
             sec_domain = comodel._access_domain('read')
-            field_names.update(c.field_expr for c in sec_domain.optimize(comodel.sudo()).iter_conditions())
-        lines = comodel.sudo().search_fetch(domain, field_names)
+            field_names.update(c.field_expr for c in sec_domain.optimize(comodel.sudo().with_context(active_test=False)).iter_conditions())
+        lines = comodel.sudo().with_context(active_test=False).search_fetch(domain, field_names)
 
         # group lines by inverse field (without prefetching other fields)
         get_id = (lambda rec: rec.id) if inverse_field.type == 'many2one' else int
@@ -1107,7 +1105,7 @@ class One2many(_RelationalMulti):
                         # assign the given lines to the last record only
                         lines = browse(line_ids)
                         domain = self.get_comodel_domain(model) & Domain(inverse, 'in', recs.ids) & Domain('id', 'not in', lines.ids)
-                        unlink(comodel.search(domain))
+                        unlink(comodel.with_context(active_test=False).search(domain))
                         lines[inverse] = recs[-1]
 
             flush()
@@ -1182,7 +1180,7 @@ class One2many(_RelationalMulti):
         model = table._model
         comodel = model.env[self.comodel_name].with_context(**self.context)
         codomain = self.get_comodel_domain(model)
-        coquery = comodel._search(codomain, bypass_access=self.bypass_search_access)
+        coquery = comodel._search(codomain, bypass_access=self.bypass_search_access, active_test=False)
 
         coalias = table._make_alias(self.name, comodel)
         condition = SQL(
@@ -1414,14 +1412,12 @@ class Many2many(_RelationalMulti):
             )
 
     def read(self, records):
-        context = {'active_test': False}
-        context.update(self.context)
-        comodel = records.env[self.comodel_name].with_context(**context)
+        comodel = records.env[self.comodel_name].with_context(**self.context)
 
         # make the query for the lines
         domain = self.get_comodel_domain(records)
         # bypass_access set because of context management in ir.attachment
-        query = comodel.sudo()._search(domain, order=comodel._order, bypass_access=True)
+        query = comodel.sudo()._search(domain, order=comodel._order, bypass_access=True, active_test=False)
 
         # join with many2many relation table
         sql_id1 = SQL.identifier(self.relation, self.column1)
@@ -1471,13 +1467,6 @@ class Many2many(_RelationalMulti):
         # value.
         relation_records = records.sudo() if self.store else records
         old_relation = {record.id: OrderedSet(record[self.name]._ids) for record in relation_records}
-        if records.env.context.get('active_test', True):
-            old_inactive_relation = {
-                record.id: OrderedSet(record[self.name]._ids) - old_relation[record.id]
-                for record in relation_records.with_context(active_test=False)
-            }
-        else:
-            old_inactive_relation = None
         new_relation = {x: OrderedSet(ys) for x, ys in old_relation.items()}
         inaccessible_coids = (
             OrderedSet()
@@ -1589,8 +1578,6 @@ class Many2many(_RelationalMulti):
         # update the cache of self
         for record in records:
             new_ids = tuple(new_relation[record.id])
-            if old_inactive_relation is not None:
-                new_ids += tuple(old_inactive_relation[record.id])
             self._update_cache(record, new_ids)
 
         # determine pairs to add and to remove in the relation
@@ -1714,7 +1701,7 @@ class Many2many(_RelationalMulti):
         comodel = model.env[self.comodel_name].with_context(**self.context)
         rel_table, rel_id1, rel_id2 = self.relation, self.column1, self.column2
         codomain = self.get_comodel_domain(model)
-        coquery = comodel._search(codomain, bypass_access=self.bypass_search_access)
+        coquery = comodel._search(codomain, bypass_access=self.bypass_search_access, active_test=False)
 
         rel_alias = table._make_alias(f'{self.name}__rel')
         condition = SQL(
