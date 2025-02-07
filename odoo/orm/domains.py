@@ -1792,7 +1792,7 @@ def _optimize_type_binary_attachment(condition, model):
 
 
 @operator_optimization(['parent_of', 'child_of'], OptimizationLevel.FULL)
-def _operator_hierarchy(condition, model):
+def _operator_hierarchy(condition: DomainCondition, model):
     """Transform a hierarchy operator into a simpler domain.
 
     ### Semantic of hierarchical operator: `(field, operator, value)`
@@ -1821,14 +1821,16 @@ def _operator_hierarchy(condition, model):
     # - comodel: used to search for ids based on the value
     field = condition._field(model)
     if field.type == 'many2one':
-        comodel = model.env[field.comodel_name].with_context(active_test=False)
+        comodel = model.env[field.comodel_name]
     elif field.type in ('one2many', 'many2many'):
         comodel = model.env[field.comodel_name].with_context(**field.context)
     elif field.name == 'id':
         comodel = model
     else:
         condition._raise(f"Cannot execute {condition.operator} for {field}, works only for relational fields")
-    comodel_sudo = comodel.sudo().with_context(active_test=False)
+        raise Exception('unreachable')  # for pylint
+    comodel = comodel.with_context(active_test=False)  # ignore active_test when searching
+    comodel_sudo = comodel.sudo()
     parent = comodel._parent_name
     if comodel._name == model._name:
         if condition.field_expr != 'id':

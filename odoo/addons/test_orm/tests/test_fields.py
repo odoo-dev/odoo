@@ -3377,8 +3377,25 @@ class TestX2many(TransactionExpressionCase):
         act_children = child1
         all_children = child1 + child2
         self.assertEqual(parent.children_ids, act_children)
-        self.assertEqual(parent.with_context(active_test=True).children_ids, act_children)
-        self.assertEqual(parent.with_context(active_test=False).children_ids, all_children)
+        self.assertEqual(parent.with_context(active_test=False).children_ids, act_children, "context has no effect")
+
+        self.assertEqual(parent.all_children_ids, all_children)
+        self.assertEqual(parent.with_context(active_test=True).all_children_ids, all_children)
+        self.assertEqual(parent.with_context(active_test=False).all_children_ids, all_children)
+
+        self.assertEqual(parent.active_children_ids, act_children)
+        self.assertEqual(parent.with_context(active_test=True).active_children_ids, act_children)
+        self.assertEqual(parent.with_context(active_test=False).active_children_ids, act_children)
+
+        # check after invalidation
+        self.env.invalidate_all()
+        self.assertEqual(parent.children_ids, act_children)
+        self.assertEqual(parent.all_children_ids, all_children)
+        self.assertEqual(parent.active_children_ids, act_children)
+        self.env.invalidate_all()
+        self.assertEqual(parent.with_context(active_test=False).children_ids, act_children)
+        self.assertEqual(parent.with_context(active_test=False).all_children_ids, all_children)
+        self.assertEqual(parent.with_context(active_test=False).active_children_ids, act_children)
 
         # create with active_test=False in context
         child3, child4 = Model.with_context(active_test=False).create([
@@ -3389,61 +3406,31 @@ class TestX2many(TransactionExpressionCase):
         all_children = child1 + child2 + child3 + child4
         self.assertEqual(parent.children_ids, act_children)
         self.assertEqual(parent.with_context(active_test=True).children_ids, act_children)
-        self.assertEqual(parent.with_context(active_test=False).children_ids, all_children)
+        self.assertEqual(parent.with_context(active_test=False).children_ids, act_children)
 
         # replace active children
         parent.write({'children_ids': [Command.set([child1.id])]})
         act_children = child1
         all_children = child1 + child2 + child4
         self.assertEqual(parent.children_ids, act_children)
-        self.assertEqual(parent.with_context(active_test=True).children_ids, act_children)
-        self.assertEqual(parent.with_context(active_test=False).children_ids, all_children)
+        parent.invalidate_recordset(['active_children_ids', 'all_children_ids'])
+        self.assertEqual(parent.active_children_ids, act_children)
+        self.assertEqual(parent.all_children_ids, all_children)
 
         # replace all children
         parent.with_context(active_test=False).write({'children_ids': [Command.set([child1.id])]})
+        all_children = child1 + (all_children - act_children)
         act_children = child1
-        all_children = child1
         self.assertEqual(parent.children_ids, act_children)
-        self.assertEqual(parent.with_context(active_test=True).children_ids, act_children)
-        self.assertEqual(parent.with_context(active_test=False).children_ids, all_children)
+        parent.invalidate_recordset(['active_children_ids', 'all_children_ids'])
+        self.assertEqual(parent.active_children_ids, act_children)
+        self.assertEqual(parent.all_children_ids, all_children)
 
         # check recomputation of inactive records
         parent.write({'children_ids': [Command.set(child4.ids)]})
         self.assertTrue(child4.parent_active)
         parent.active = False
         self.assertFalse(child4.parent_active)
-
-    def test_12_active_test_one2many_with_context(self):
-        Model = self.env['test_orm.model_active_field']
-        parent = Model.create({})
-        all_children = Model.create([
-            {'parent_id': parent.id, 'active': True},
-            {'parent_id': parent.id, 'active': False},
-        ])
-        act_children = all_children[0]
-
-        self.assertEqual(parent.children_ids, act_children)
-        self.assertEqual(parent.with_context(active_test=True).children_ids, act_children)
-        self.assertEqual(parent.with_context(active_test=False).children_ids, all_children)
-
-        self.assertEqual(parent.all_children_ids, all_children)
-        self.assertEqual(parent.with_context(active_test=True).all_children_ids, all_children)
-        self.assertEqual(parent.with_context(active_test=False).all_children_ids, all_children)
-
-        self.assertEqual(parent.active_children_ids, act_children)
-        self.assertEqual(parent.with_context(active_test=True).active_children_ids, act_children)
-        self.assertEqual(parent.with_context(active_test=False).active_children_ids, act_children)
-
-        # check read()
-        self.env.invalidate_all()
-        self.assertEqual(parent.children_ids, act_children)
-        self.assertEqual(parent.all_children_ids, all_children)
-        self.assertEqual(parent.active_children_ids, act_children)
-
-        self.env.invalidate_all()
-        self.assertEqual(parent.with_context(active_test=False).children_ids, all_children)
-        self.assertEqual(parent.with_context(active_test=False).all_children_ids, all_children)
-        self.assertEqual(parent.with_context(active_test=False).active_children_ids, act_children)
 
     def test_12_active_test_one2many_search(self):
         Model = self.env['test_orm.model_active_field']
@@ -3513,17 +3500,16 @@ class TestX2many(TransactionExpressionCase):
     def test_13_active_test_many2many_write(self):
         Model = self.env['test_orm.model_active_field']
         parent = Model.create({
-            'relatives_ids': [
+            'all_relatives_ids': [
                 Command.create({'name': 'A', 'active': True}),
                 Command.create({'name': 'B', 'active': False}),
             ],
         })
-        child_a, child_b = parent.with_context(active_test=False).relatives_ids
+        child_a, child_b = parent.all_relatives_ids
 
-        # parent has active_test=True
         self.assertEqual(parent.relatives_ids, child_a)
         parent.relatives_ids = child_a  # should leave the ids unchanged
-        self.assertEqual(parent.with_context(active_test=False).relatives_ids, child_a + child_b)
+        self.assertEqual(parent.all_relatives_ids, child_a + child_b)
 
     def test_14_cache_update_many2many_write(self):
         Model = self.env['test_orm.model_active_field']
