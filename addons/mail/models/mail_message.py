@@ -252,9 +252,9 @@ class MailMessage(models.Model):
     is_current_user_or_guest_author = fields.Boolean(compute='_compute_is_current_user_or_guest_author')
     # recipients: include inactive partners (they may have been archived after
     # the message was sent, but they should remain visible in the relation)
-    partner_ids = fields.Many2many('res.partner', string='Recipients (To)', context={'active_test': False})
+    partner_ids = fields.Many2many('res.partner', string='Recipients (To)', domain=[])
     partner_cc_ids = fields.Many2many('res.partner', relation='mail_message_res_partner_cc_rel',
-                                      string='Recipients (Cc)', context={'active_test': False})
+                                      string='Recipients (Cc)', domain=[])
     # email recipients of incoming emails: comma separated list of emails (not necessarily normalized)
     incoming_email_to = fields.Text('Emails To')
     incoming_email_cc = fields.Char('Emails Cc')
@@ -264,7 +264,7 @@ class MailMessage(models.Model):
     # mainly usefull for testing
     notified_partner_ids = fields.Many2many(
         'res.partner', 'mail_notification', string='Partners with Need Action',
-        context={'active_test': False}, depends=['notification_ids'], copy=False)
+        domain=[], depends=['notification_ids'], copy=False)
     needaction = fields.Boolean(
         'Need Action', compute='_compute_needaction', search='_search_needaction')
     has_error = fields.Boolean(

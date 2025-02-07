@@ -96,7 +96,7 @@ class TestOrmDiscussion(models.Model):
     moderator = fields.Many2one('res.users')
     categories = fields.Many2many('test_orm.category',
         'test_orm_discussion_category', 'discussion', 'category')
-    participants = fields.Many2many('res.users', context={'active_test': False})
+    participants = fields.Many2many('res.users', domain=[])
     messages = fields.One2many('test_orm.message', 'discussion', copy=True)
     message_concat = fields.Text(string='Message concatenate')
     important_messages = fields.One2many('test_orm.message', 'discussion',
@@ -1263,10 +1263,8 @@ class TestOrmModel_Active_Field(models.Model):
     active = fields.Boolean(default=True)
     parent_id = fields.Many2one('test_orm.model_active_field')
     children_ids = fields.One2many('test_orm.model_active_field', 'parent_id')
-    all_children_ids = fields.One2many('test_orm.model_active_field', 'parent_id',
-                                       context={'active_test': False})
-    active_children_ids = fields.One2many('test_orm.model_active_field', 'parent_id',
-                                          context={'active_test': True})
+    all_children_ids = fields.One2many('test_orm.model_active_field', 'parent_id', domain=[])
+    active_children_ids = fields.One2many('test_orm.model_active_field', 'parent_id', domain=[('active', '=', True)])
     relatives_ids = fields.Many2many(
         'test_orm.model_active_field',
         'model_active_field_relatives_rel', 'source_id', 'dest_id',
@@ -1274,7 +1272,7 @@ class TestOrmModel_Active_Field(models.Model):
     all_relatives_ids = fields.Many2many(
         'test_orm.model_active_field',
         'model_active_field_relatives_rel', 'source_id', 'dest_id',
-        context={'active_test': False},
+        domain=[],
     )
     a_relatives_ids = fields.Many2many(
         'test_orm.model_active_field',

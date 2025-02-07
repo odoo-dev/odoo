@@ -14,7 +14,7 @@ class Web_TourTour(models.Model):
     rainbow_man_message = fields.Html(default="<b>Good job!</b> You went through all steps of this tour.", translate=True)
     sequence = fields.Integer(default=1000)
     custom = fields.Boolean(string="Custom")
-    user_consumed_ids = fields.Many2many("res.users")
+    user_consumed_ids = fields.Many2many("res.users", domain=[])
 
     _uniq_name = models.Constraint(
         'unique(name)',

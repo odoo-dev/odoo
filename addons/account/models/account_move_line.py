@@ -228,7 +228,7 @@ class AccountMoveLine(models.Model):
         column2='account_tax_id',
         string="Taxes",
         compute='_compute_tax_ids', store=True, readonly=False, precompute=True,
-        context={'active_test': False, 'hide_original_tax_ids': True},
+        context={'hide_original_tax_ids': True},
         check_company=True,
         tracking=True,
     )
@@ -266,7 +266,6 @@ class AccountMoveLine(models.Model):
         string="Tags",
         comodel_name='account.account.tag',
         ondelete='restrict',
-        context={'active_test': False},
         tracking=True,
         help="Tags assigned to this line by the tax creating it, if any. It determines its impact on financial reports.",
     )

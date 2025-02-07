@@ -40,7 +40,7 @@ class PurchaseOrderLine(models.Model):
         column1='purchase_order_line_id',
         column2='account_tax_id',
         string='Taxes',
-        context={'active_test': False, 'hide_original_tax_ids': True},
+        context={'hide_original_tax_ids': True},
     )
     document_tax_mode = fields.Selection(related='order_id.document_tax_mode')
     allowed_uom_ids = fields.Many2many('uom.uom', compute='_compute_allowed_uom_ids')
