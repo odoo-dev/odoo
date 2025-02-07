@@ -70,11 +70,9 @@ class MailMail(models.Model):
     # different recipients
     email_to = fields.Text('To', help='Message recipients (emails)')
     email_cc = fields.Char('Cc', help='Carbon copy message recipients')
-    recipient_ids = fields.Many2many('res.partner', string='To (Partners)',
-        context={'active_test': False})
+    recipient_ids = fields.Many2many('res.partner', string='To (Partners)', domain=[])
     recipient_cc_ids = fields.Many2many('res.partner', relation='mail_mail_res_partner_cc_rel',
-                                        string='Cc (Partners)', context={'active_test': False})
-    # process
+                                        string='Cc (Partners)', domain=[])
     state = fields.Selection([
         ('outgoing', 'Outgoing'),
         ('sent', 'Sent'),

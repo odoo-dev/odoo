@@ -9,16 +9,17 @@ class CrmLead2opportunityPartnerMass(models.TransientModel):
     _description = 'Convert Lead to Opportunity (in mass)'
 
     duplicated_lead_ids = fields.Many2many(
-        'crm.lead', context={'active_test': False}, compute='_compute_duplicated_lead_ids',
+        'crm.lead', domain=[], compute='_compute_duplicated_lead_ids',
         store=True, compute_sudo=False, readonly=False)
     duplicated_lead_ids_domain = fields.Many2many(
-        'crm.lead', 'crm_lead_duplicate_domain_rel', context={'active_test': False},
+        'crm.lead', 'crm_lead_duplicate_domain_rel', domain=[],
         compute='_compute_duplicated_lead_ids', store=True, compute_sudo=False)
     force_assignment = fields.Boolean('Even if assigned')
     lead_tomerge_ids = fields.Many2many(
         'crm.lead', 'crm_convert_lead_mass_lead_rel',
-        string='Active Leads', context={'active_test': False},
-        default=lambda self: self.env.context.get('active_ids', [])
+        string='Active Leads',
+        default=lambda self: self.env.context.get('active_ids', []),
+        domain=[],
     )
     link_to_matching_customer = fields.Boolean(string="Link to matching customers",
         help="Link these opportunities to customers by either finding a match or creating a new one.")

@@ -85,7 +85,7 @@ class DiscussChannel(models.Model):
         "im_livechat_channel_member_history_discuss_channel_bot_rel",
         string="Bots",
         compute="_compute_livechat_bot_partner_ids",
-        context={"active_test": False},
+        domain=[],
         store=True,
     )
     livechat_customer_partner_ids = fields.Many2many(

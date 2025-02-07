@@ -16,7 +16,7 @@ class ResGroups(models.Model):
     _clear_cache_on_fields = {'implied_ids', 'implied_by_ids'}
 
     name = fields.Char(required=True, translate=True)
-    user_ids = fields.Many2many('res.users', 'res_groups_users_rel', 'gid', 'uid', help='Users explicitly in this group')
+    user_ids = fields.Many2many('res.users', 'res_groups_users_rel', 'gid', 'uid', help='Users explicitly in this group', domain=[])
     all_user_ids = fields.Many2many('res.users', string='Users and implied users',
         compute='_compute_all_user_ids', search='_search_all_user_ids', inverse='_inverse_all_user_ids')
 

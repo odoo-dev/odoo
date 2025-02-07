@@ -617,7 +617,7 @@ class IrActionsServer(models.Model):
     model_name = fields.Char(related='model_id.model', string='Model Name')
     warning = fields.Text(string='Warning', compute='_compute_warning', recursive=True)
     # Inverse relation of ir.cron.ir_actions_server_id (has delegate=True, so either 0 or 1 cron, even if o2m field)
-    ir_cron_ids = fields.One2many('ir.cron', 'ir_actions_server_id', 'Scheduled Action', context={'active_test': False})
+    ir_cron_ids = fields.One2many('ir.cron', 'ir_actions_server_id', 'Scheduled Action', domain=Domain.TRUE)
     # Python code
     code = fields.Text(string='Python Code', groups='base.group_system',
                        help="Write Python code that the action will execute. Some variables are "

@@ -461,8 +461,6 @@ class Many2one(_Relational):
         corecord = self.convert_to_record(value, records)
         for invf in records.pool.field_inverses[self]:
             valid_records = records.filtered_domain(invf.get_comodel_domain(corecord))
-            if not valid_records:
-                continue
             ids0 = invf._get_cache(corecord.env).get(corecord.id)
             # if the value for the corecord is not in cache, but this is a new
             # record, assign it anyway, as you won't be able to fetch it from
@@ -1551,6 +1549,8 @@ class Many2many(_RelationalMulti):
             if to_create:
                 # create lines in batch, and link them
                 lines = comodel.create([vals for ids, vals in to_create])
+                if len(lines.filtered_domain(self.get_comodel_domain(model))) < len(lines):
+                    raise ValueError(f"Cannot create inaccessible records in {self}")
                 for line, (ids, _vals) in zip(lines, to_create):
                     relation_add(ids, line.id)
 

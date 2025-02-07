@@ -339,7 +339,7 @@ class TestViewInheritance(ViewCase):
         self.assertEqual(counter.hit, hit)
         self.assertEqual(counter.miss, miss + 2)
 
-        with self.assertQueryCount(5):
+        with self.assertQueryCount(5), self.assertQueries([]):
             self.assertValid("""
                 <field name="name" position="replace"/>
             """, inherit_id=base_view.id)

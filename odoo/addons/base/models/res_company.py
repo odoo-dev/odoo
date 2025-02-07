@@ -86,7 +86,7 @@ class ResCompany(models.CachedModel):
     sequence = fields.Integer(help='Used to order Companies in the company switcher', default=10)
     parent_id = fields.Many2one('res.company', string='Parent Company', index=True, ondelete='restrict')
     child_ids = fields.One2many('res.company', 'parent_id', string='Branches')
-    all_child_ids = fields.One2many('res.company', 'parent_id', context={'active_test': False})
+    all_child_ids = fields.One2many('res.company', 'parent_id', domain=Domain.TRUE)
     parent_path = fields.Char(index=True)
     parent_ids = fields.Many2many('res.company', compute='_compute_parent_ids', compute_sudo=True)
     root_id = fields.Many2one('res.company', compute='_compute_parent_ids', compute_sudo=True)
@@ -99,7 +99,7 @@ class ResCompany(models.CachedModel):
     logo_web = fields.Binary(compute='_compute_logo_web', store=True)
     uses_default_logo = fields.Boolean(compute='_compute_uses_default_logo', store=True)
     currency_id = fields.Many2one('res.currency', string='Currency', required=True, default=lambda self: self._default_currency_id())
-    user_ids = fields.Many2many('res.users', 'res_company_users_rel', 'cid', 'user_id', string='Accepted Users')
+    user_ids = fields.Many2many('res.users', 'res_company_users_rel', 'cid', 'user_id', string='Accepted Users', domain=[])
     street = fields.Char(compute='_compute_address', inverse='_inverse_street')
     street2 = fields.Char(compute='_compute_address', inverse='_inverse_street2')
     zip = fields.Char(compute='_compute_address', inverse='_inverse_zip')
@@ -513,8 +513,11 @@ class ResCompany(models.CachedModel):
     def _get_public_user(self):
         self.ensure_one()
         # We need sudo to be able to see public users from others companies too
-        public_users = self.env.ref('base.group_public').sudo().with_context(active_test=False).all_user_ids
-        public_users_for_company = public_users.filtered(lambda user: user.company_id == self)
+        public_groups = self.env.ref('base.group_public').sudo().all_implied_by_ids
+        public_users_for_company = public_groups.env['res.users'].with_context(active_test=False).search([
+            ('company_id', 'in', self.ids),
+            ('group_ids', 'in', public_groups.ids),
+        ])
 
         if public_users_for_company:
             return public_users_for_company[0]

@@ -30,7 +30,7 @@ class PaymentMethod(models.Model):
         help="The brands of the payment methods that will be displayed on the payment form.",
         comodel_name="payment.method",
         inverse_name="primary_payment_method_id",
-        context={"active_test": False},
+        domain=[],
     )
     is_primary = fields.Boolean(
         string="Is Primary Payment Method",
@@ -107,7 +107,7 @@ class PaymentMethod(models.Model):
         " allows it). When paying with another currency, this payment method is not available to"
         " customers.",
         comodel_name="res.currency",
-        context={"active_test": False},
+        domain=[],
     )
 
     # === SQL CONSTRAINTS === #

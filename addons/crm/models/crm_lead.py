@@ -233,7 +233,7 @@ class CrmLead(models.Model):
     # Statistics
     calendar_event_ids = fields.One2many('calendar.event', 'opportunity_id', string='Meetings')
     duplicate_lead_ids = fields.Many2many("crm.lead", compute="_compute_potential_lead_duplicates", string="Potential Duplicate Lead",
-        context={"active_test": False}, compute_sudo=True)
+        domain=[], compute_sudo=True)
     duplicate_lead_count = fields.Integer(compute="_compute_potential_lead_duplicates", string="Potential Duplicate Lead Count",
         compute_sudo=True)
     meeting_display_date = fields.Date(compute="_compute_meeting_display")

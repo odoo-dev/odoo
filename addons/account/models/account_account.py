@@ -139,7 +139,7 @@ class AccountAccount(models.Model):
         check_company=True,
     )
     parent_path = fields.Char(index=True)
-    parent_ids = fields.Many2many('account.account', compute='_compute_parent_ids', compute_sudo=True, context={'active_test': False})
+    parent_ids = fields.Many2many('account.account', compute='_compute_parent_ids', compute_sudo=True, domain=[])
     opening_debit = fields.Monetary(string="Opening Debit", compute='_compute_opening_debit_credit', inverse='_set_opening_debit', currency_field='company_currency_id')
     opening_credit = fields.Monetary(string="Opening Credit", compute='_compute_opening_debit_credit', inverse='_set_opening_credit', currency_field='company_currency_id')
     opening_balance = fields.Monetary(string="Opening Balance", compute='_compute_opening_debit_credit', inverse='_set_opening_balance', currency_field='company_currency_id')

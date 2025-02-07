@@ -222,7 +222,7 @@ class ResPartner(models.Model):
     parent_id: ResPartner = fields.Many2one('res.partner', string='Related Company', index=True)
     # It's Stored intentionally and will act in place of `company_name`
     parent_name = fields.Char(related='parent_id.name', readonly=True, store=False, string='Parent name')
-    child_ids: ResPartner = fields.One2many('res.partner', 'parent_id', string='Related Contacts', domain=[('active', '=', True)], context={'active_test': False})
+    child_ids = fields.One2many('res.partner', 'parent_id', string='Related Contacts', domain=[('active', '=', True)])  # TODO context={'active_test': False})
     ref = fields.Char(string='Reference', index=True)
     lang = fields.Selection(_lang_get, string='Language',
                             compute='_compute_lang', readonly=False, store=True,
@@ -285,8 +285,8 @@ class ResPartner(models.Model):
     industry_id: ResPartnerIndustry = fields.Many2one('res.partner.industry', 'Industry')
     company_id: ResCompany = fields.Many2one('res.company', 'Company', index=True)
     color = fields.Integer(string='Color Index', default=0)
-    user_ids: ResUsers = fields.One2many('res.users', 'partner_id', string='Users', bypass_search_access=True)
-    main_user_id: ResUsers = fields.Many2one(
+    user_ids = fields.One2many('res.users', 'partner_id', string='Users', bypass_search_access=True, domain=[])
+    main_user_id = fields.Many2one(
         "res.users",
         string="Main User",
         compute="_compute_main_user_id",

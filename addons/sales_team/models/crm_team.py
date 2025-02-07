@@ -107,11 +107,11 @@ class CrmTeam(models.Model):
     member_warning = fields.Text('Membership Issue Warning', compute='_compute_member_warning')
     crm_team_member_ids = fields.One2many(
         'crm.team.member', 'crm_team_id', string='Sales Team Members',
-        context={'active_test': True},
         help="Add members to automatically assign their documents to this sales team.")
     crm_team_member_all_ids = fields.One2many(
         'crm.team.member', 'crm_team_id', string='Sales Team Members (incl. inactive)',
-        context={'active_test': False})
+        domain=[],
+        help="All members, including inactive ones.")
     # UX options
     color = fields.Integer(string='Color Index', help="The color of the channel", default=_get_default_color)
     favorite_user_ids = fields.Many2many(

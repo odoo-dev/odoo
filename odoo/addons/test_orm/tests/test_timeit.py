@@ -23,7 +23,7 @@ class TestPerformanceTimeit(TransactionCase):
         def create_parent(size):
             return cls.Model.create({
                 'name': f'parent_{size}_children',
-                'child_ids': [
+                'all_child_ids': [
                     Command.create({
                         'name': f'{size}_child_{i}',
                         'active': (i % 4) != 0,
@@ -143,7 +143,7 @@ class TestPerformanceTimeit(TransactionCase):
 
     def test_perf_field_set(self):
         self.launch_perf("records.name = 'ok'", self.parent_0_child)
-        self.launch_perf_set("records.name = records[0].name")
+        self.launch_perf_set("records.name = records[:1].name")
 
     def test_perf_field_set_flush(self):
         self.launch_perf("records.flush_recordset()", self.parent_0_child)

@@ -57,13 +57,13 @@ class PaymentProvider(models.Model):
         string="Supported Payment Methods",
         comodel_name="payment.method",
         inverse_name="provider_id",
-        context={"active_test": False},
+        domain=[],
     )
     primary_payment_method_ids = fields.One2many(
         string="Primary Payment Methods",
         comodel_name="payment.method",
         compute="_compute_primary_payment_method_ids",
-        context={"active_test": False},
+        domain=[],
     )  # PMs with code "unknown" are excluded from this set
     payment_transaction_ids = fields.One2many(
         string="Payment Transactions",
@@ -163,7 +163,7 @@ class PaymentProvider(models.Model):
         compute="_compute_available_currency_ids",
         store=True,
         readonly=False,
-        context={"active_test": False},
+        domain=fields.Domain.TRUE,
     )
     available_country_ids = fields.Many2many(
         string="Countries",

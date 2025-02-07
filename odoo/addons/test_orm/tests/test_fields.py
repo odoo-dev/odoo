@@ -3466,7 +3466,7 @@ class TestX2many(TransactionExpressionCase):
     def test_12_active_test_many2many_search(self):
         Model = self.env['test_orm.model_active_field']
         parent = Model.create({
-            'relatives_ids': [
+            'all_relatives_ids': [
                 Command.create({'name': 'A', 'active': True}),
                 Command.create({'name': 'B', 'active': False}),
             ],
