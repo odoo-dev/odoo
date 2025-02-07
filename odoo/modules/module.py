@@ -165,6 +165,9 @@ def initialize_sys_path() -> None:
         odoo.addons.__path__._path_finder = lambda *a: None  # prevent path invalidation
         odoo.upgrade.__path__._path_finder = lambda *a: None  # prevent path invalidation
         sys.meta_path.insert(0, UpgradeHook())
+        # hook for test path
+        test_path = os.path.join(os.path.dirname(tools.config.root_path), 'test')
+        sys.path.append(test_path)
         initialize_sys_path.called = True  # type: ignore
 
 
