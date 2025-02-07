@@ -209,8 +209,10 @@ export class ProductProduct extends Base {
     }
 
     exactMatch(searchWord) {
-        const fields = ["barcode", "default_code"];
-        return fields.some((field) => this[field] && this[field].includes(searchWord));
+        const fields = ["barcode", "default_code", "searchString"];
+        return fields.some(
+            (field) => this[field] && this[field].toLowerCase().includes(searchWord.toLowerCase())
+        );
     }
 }
 registry.category("pos_available_models").add(ProductProduct.pythonModel, ProductProduct);
