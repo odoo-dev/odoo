@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models, fields
+from odoo import _, api, models, fields
 from odoo.http import request
 from odoo.tools import email_normalize, get_lang, html2plaintext, is_html_empty, plaintext2html
+from odoo.exceptions import ValidationError
 
 
 class ChatbotScript(models.Model):
@@ -27,6 +28,12 @@ class ChatbotScript(models.Model):
         ('first_step_operator', 'First Step Operator'),
         ('first_step_invalid', 'First Step Invalid'),
     ], compute="_compute_first_step_warning")
+
+    @api.constrains('script_step_ids')
+    def _check_question_selection(self):
+        for step in self.script_step_ids:
+            if step.step_type == 'question_selection' and not step.answer_ids:
+                raise ValidationError(_('Step of type "Question" must have answers.'))
 
     def _compute_livechat_channel_count(self):
         channels_data = self.env['im_livechat.channel.rule']._read_group(
