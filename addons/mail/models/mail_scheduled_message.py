@@ -54,7 +54,7 @@ class MailScheduledMessage(models.Model):
     # recipients
     partner_ids = fields.Many2many('res.partner', string='Recipients (To)')
     partner_cc_ids = fields.Many2many('res.partner', relation='mail_scheduled_message_res_partner_cc_rel',
-                                      string='Recipients (Cc)', context={'active_test': False})
+                                      string='Recipients (Cc)', domain=[])
     # characteristics
     is_note = fields.Boolean('Is a note', default=False, help="If the message will be posted as a Note.")
     # notify parameters (email_from, mail_server_id, force_email_lang,...)

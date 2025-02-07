@@ -1944,12 +1944,12 @@ class TestQueries(TransactionCase):
             {'name': 'a1', 'parent_id': pub_active.id},
             {'name': 'a2', 'parent_id': pub_inactive.id},
             {'name': 'a3', 'parent_id': pub_active.id, 'child_ids': [Command.create({'name': 'not PRI'})]},
+            {'name': 'ua4', 'parent_id': pub_active.id, 'child_ids': [Command.link(pri_inactive.id)]},
         ])
         inaccessible_records = PartnerCateg.create([
             {'name': 'ua1'},  # No public parent
             {'name': 'ua2', 'parent_id': pri_active.id},
             {'name': 'ua3', 'parent_id': pub_active.id, 'child_ids': [Command.link(pri_active.id)]},
-            {'name': 'ua4', 'parent_id': pub_active.id, 'child_ids': [Command.link(pri_inactive.id)]},
         ])
         records = accessible_records + inaccessible_records
         domain = [('id', 'in', records.ids)]
@@ -1969,6 +1969,7 @@ class TestQueries(TransactionCase):
                             FROM "test_orm_partner_category"
                             WHERE
                                 (
+                                    "test_orm_partner_category"."active" IS TRUE
                                     "test_orm_partner_category"."name" ->> %s ILIKE %s
                                     AND "test_orm_partner_category"."parent_id" IS NOT NULL
                                 )
@@ -2569,7 +2570,7 @@ class TestOne2many(TransactionCase):
         ''']):
             self.Partner.search([('child_ids.bank_ids.id', 'in', self.partner.bank_ids.ids)])
 
-    def testbypass_search_access_mixed(self):
+    def test_bypass_search_access_mixed(self):
         self.patch(self.Partner._fields['child_ids'], 'bypass_search_access', True)
         self.patch(self.Partner._fields['state_id'], 'bypass_search_access', True)
         self.patch(self.Partner.state_id._fields['country_id'], 'bypass_search_access', True)

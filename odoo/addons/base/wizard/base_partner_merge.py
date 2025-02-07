@@ -65,7 +65,7 @@ class BasePartnerMergeAutomaticWizard(models.TransientModel):
     number_group = fields.Integer('Group of Contacts', readonly=True)
     current_line_id = fields.Many2one('base.partner.merge.line', string='Current Line')
     line_ids = fields.One2many('base.partner.merge.line', 'wizard_id', string='Lines')
-    partner_ids = fields.Many2many('res.partner', string='Contacts', context={'active_test': False})
+    partner_ids = fields.Many2many('res.partner', string='Contacts', domain=[])
     dst_partner_id = fields.Many2one('res.partner', string='Destination Contact')
 
     exclude_contact = fields.Boolean('A user associated to the contact')
