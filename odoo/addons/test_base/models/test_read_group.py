@@ -187,7 +187,7 @@ class Test_Read_GroupTask(models.Model):
         'task_id',
         'tag_id',
         string="All Tags",
-        context={'active_test': False},
+        domain=[],
     )
     date = fields.Date()
     integer = fields.Integer()

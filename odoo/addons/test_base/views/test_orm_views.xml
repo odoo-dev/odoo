@@ -122,7 +122,7 @@
                         </group>
                         <notebook>
                             <page string="Messages">
-                                <field name="messages">
+                                <field name="active_messages">
                                     <list name="Messages" editable="bottom">
                                         <field name="name"/>
                                         <field name="author"/>
