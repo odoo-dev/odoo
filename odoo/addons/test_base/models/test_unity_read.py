@@ -23,7 +23,7 @@ class TestOrmLesson(models.Model):
 
     name = fields.Char('Name')
     course_id = fields.Many2one('test_orm.course')
-    attendee_ids = fields.Many2many('test_orm.person', context={'active_test': False})
+    attendee_ids = fields.Many2many('test_orm.person', domain=[])
     teacher_id = fields.Many2one('test_orm.person')
     teacher_birthdate = fields.Date(related='teacher_id.birthday')
     date = fields.Date()
@@ -65,7 +65,7 @@ class TestOrmEmployer(models.Model):
 
     name = fields.Char('Name')
     employee_ids = fields.One2many('test_orm.person', 'employer_id')
-    all_employee_ids = fields.One2many('test_orm.person', 'employer_id', context={'active_test': False})
+    all_employee_ids = fields.One2many('test_orm.person', 'employer_id', domain=[])
 
 
 class TestOrmPersonAccount(models.Model):

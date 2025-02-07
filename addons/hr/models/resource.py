@@ -14,7 +14,7 @@ class ResourceResource(models.Model):
     _inherit = "resource.resource"
 
     user_id = fields.Many2one(copy=False)
-    employee_id = fields.One2many('hr.employee', 'resource_id', check_company=True, context={'active_test': False})
+    employee_id = fields.One2many('hr.employee', 'resource_id', check_company=True, domain=[])
     tz = fields.Selection(compute='_compute_tz', inverse='_inverse_tz', store=True, readonly=False)
     hours_per_week = fields.Float(compute='_compute_hours_per_week', inverse='_inverse_hours_per_week', store=True, readonly=False)
     hours_per_day = fields.Float(compute='_compute_hours_per_day', inverse='_inverse_hours_per_day', store=True, readonly=False)
