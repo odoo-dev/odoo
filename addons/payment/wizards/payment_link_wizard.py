@@ -33,6 +33,11 @@ class PaymentLinkWizard(models.TransientModel):
     link = fields.Char(string="Payment Link", compute='_compute_link')
     company_id = fields.Many2one('res.company', compute='_compute_company_id')
     warning_message = fields.Char(compute='_compute_warning_message')
+    copy_active = fields.Boolean(compute='_compute_copy_active', store=False)
+
+    @api.depends('link')
+    def _compute_copy_active(self):
+        self.copy_active = True
 
     @api.depends('amount', 'amount_max')
     def _compute_warning_message(self):

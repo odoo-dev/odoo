@@ -38,9 +38,11 @@
         'web.assets_frontend': [
             'payment/static/lib/jquery.payment/jquery.payment.js',
             'payment/static/src/**/*',
+            ('remove', 'payment/static/src/js/payment_wizard_form_view.js'),
         ],
         'web.assets_backend': [
             'payment/static/src/scss/payment_provider.scss',
+            'payment/static/src/js/payment_wizard_form_view.js'
         ],
     },
     'license': 'LGPL-3',

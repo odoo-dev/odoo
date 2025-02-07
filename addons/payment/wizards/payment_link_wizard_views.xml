@@ -5,7 +5,7 @@
         <field name="name">payment.link.wizard.form</field>
         <field name="model">payment.link.wizard</field>
         <field name="arch" type="xml">
-            <form string="Generate Payment Link">
+            <form string="Generate Payment Link" js_class="payment_wizard_form_view">
                 <div class="alert alert-warning fw-bold"
                      role="alert"
                      invisible="partner_email">
@@ -22,6 +22,7 @@
                         <field name="amount"/>
                         <field name="warning_message" invisible="1"/>
                         <field name="currency_id" invisible="1"/>
+                        <field name="copy_active" invisible="1"/>
                     </group>
                 </group>
                 <div name="payment_link_warning_information"
@@ -34,7 +35,7 @@
                     <field name="link"
                            string="Generate and Copy Payment Link"
                            readonly="1"
-                           disabled="bool(warning_message)"
+                           disabled="bool(warning_message) or not copy_active"
                            widget="CopyClipboardButton"
                            data-hotkey="q"/>
                     <button string="Close"
