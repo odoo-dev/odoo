@@ -317,7 +317,7 @@ class BaseString(Field[str | typing.Literal[False]]):
             and value
             and operator in ('=', 'in', 'like', 'ilike', '=like', '=ilike')
             and self.index == 'trigram'
-            and model.pool.has_trigram
+            and model.env.registry.has_trigram
             and (
                 isinstance(value, str)
                 or (isinstance(value, COLLECTION_TYPES) and all(isinstance(v, str) for v in value))

@@ -2136,7 +2136,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         field = new_disc._fields.get("participants")
         # make sure that there is no inverse field for discussions on res_users,
         # as the test depends on it
-        self.assertFalse(new_disc.pool.field_inverses[field])
+        self.assertFalse(new_disc.env.registry.field_inverses[field])
         convert = field.convert_to_write(new_disc["participants"], new_disc)
         self.assertEqual(convert, [(6, 0, self.env.user.ids)])
 

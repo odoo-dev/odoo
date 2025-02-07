@@ -351,7 +351,7 @@ class Field(typing.Generic[T]):
         assert '_models' not in globals() or isinstance(owner, _models.MetaModel)
         self.model_name = owner._name
         self.name = name
-        if getattr(owner, 'pool', None) is None:  # models.is_model_definition(owner)
+        if getattr(owner, '_registry_pool', None) is None:  # models.is_model_definition(owner)
             # only for fields on definition classes, not registry classes
             self._module = owner._module
             owner._field_definitions.append(self)
@@ -559,7 +559,7 @@ class Field(typing.Generic[T]):
         # determine the chain of fields, and make sure they are all set up
         model_name = self.model_name
         for name in self.related.split('.'):
-            field = model.pool[model_name]._fields.get(name)
+            field = model._registry_pool[model_name]._fields.get(name)
             if field is None:
                 raise KeyError(
                     f"Field {name} referenced in related field definition {self} does not exist."
@@ -817,7 +817,7 @@ class Field(typing.Generic[T]):
                     yield tuple(field_seq)
 
                 if field.type == 'one2many':
-                    for inv_field in Model.pool.field_inverses[field]:
+                    for inv_field in Model._registry_pool.field_inverses[field]:
                         yield tuple(field_seq) + (inv_field,)
 
                 if check_precompute and field.type == 'many2one':
@@ -1056,7 +1056,7 @@ class Field(typing.Generic[T]):
                 join_field.type == 'many2one'
                 and join_field.store and not join_field.compute
             ):
-                model.pool.post_init(self.update_db_related, model)
+                model._registry_pool.post_init(self.update_db_related, model)
                 # discard the "classical" computation
                 return False
 
@@ -1097,11 +1097,11 @@ class Field(typing.Generic[T]):
 
         if self.required and not has_notnull:
             # _init_column may delay computations in post-init phase
-            @model.pool.post_init
+            @model._registry_pool.post_init
             def add_not_null():
                 # flush values before adding NOT NULL constraint
                 model.flush_model([self.name])
-                model.pool.post_constraint(apply_required, model, self.name)
+                model._registry_pool.post_constraint(apply_required, model, self.name)
 
         elif not self.required and has_notnull:
             sql.drop_not_null(model._cr, model._table, self.name)
@@ -1505,7 +1505,7 @@ class Field(typing.Generic[T]):
         if new_ids:
             # new records: no business logic
             new_records = records.__class__(records.env, tuple(new_ids), records._prefetch_ids)
-            with records.env.protecting(records.pool.field_computed.get(self, [self]), new_records):
+            with records.env.protecting(records._registry_pool.field_computed.get(self, [self]), new_records):
                 if self.relational:
                     new_records.modified([self.name], before=True)
                 self.write(new_records, value)
@@ -1546,7 +1546,7 @@ class Field(typing.Generic[T]):
                 # mark the field as computed on missing records, otherwise they
                 # remain to compute forever, which may lead to an infinite loop
                 missing = records - existing
-                for f in records.pool.field_computed[self]:
+                for f in records._registry_pool.field_computed[self]:
                     records.env.remove_to_compute(f, missing)
 
         if self.recursive:
@@ -1574,7 +1574,7 @@ class Field(typing.Generic[T]):
         env = records.env
         if self.compute_sudo:
             records = records.sudo()
-        fields = records.pool.field_computed[self]
+        fields = records.env.registry.field_computed[self]
 
         # Just in case the compute method does not assign a value, we already
         # mark the computation as done. This is also necessary if the compute

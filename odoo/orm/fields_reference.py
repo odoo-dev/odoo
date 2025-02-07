@@ -89,7 +89,7 @@ class Many2oneReference(Integer):
         cache = records.env.cache
         model_ids = self._record_ids_per_res_model(records)
 
-        for invf in records.pool.field_inverses[self]:
+        for invf in records._registry_pool.field_inverses[self]:
             records = records.browse(model_ids[invf.model_name])
             if not records:
                 continue

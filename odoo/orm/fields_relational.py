@@ -69,8 +69,8 @@ class _Relational(Field[M], typing.Generic[M]):
 
     def setup_nonrelated(self, model):
         super().setup_nonrelated(model)
-        assert self.comodel_name in model.pool, \
-            f"Field {self} with unknown comodel_name {self.comodel_name or '???'!r}"
+        if self.comodel_name not in model._registry_pool:
+            raise ValueError(f"Field {self} with unknown comodel_name {self.comodel_name or '???'!r}")
 
     def get_comodel_domain(self, model: BaseModel) -> Domain:
         """ Return a domain from the domain attribute. """
@@ -234,7 +234,7 @@ class Many2one(_Relational[M]):
 
     def update_db_column(self, model, column):
         super(Many2one, self).update_db_column(model, column)
-        model.pool.post_init(self.update_db_foreign_key, model, column)
+        model._registry_pool.post_init(self.update_db_foreign_key, model, column)
 
     def update_db_foreign_key(self, model, column):
         if self.company_dependent:
@@ -247,7 +247,7 @@ class Many2one(_Relational[M]):
         if not comodel._auto or comodel._table == 'ir_actions':
             return
         # create/update the foreign key, and reflect it in 'ir.model.constraint'
-        model.pool.add_foreign_key(
+        model._registry_pool.add_foreign_key(
             model._table, self.name, comodel._table, 'id', self.ondelete or 'set null',
             model, self._module
         )
@@ -290,13 +290,13 @@ class Many2one(_Relational[M]):
         # use registry to avoid creating a recordset for the model
         ids = () if value is None else (value,)
         prefetch_ids = PrefetchMany2one(record, self)
-        return record.pool[self.comodel_name](record.env, ids, prefetch_ids)
+        return record.env.registry[self.comodel_name](record.env, ids, prefetch_ids)
 
     def convert_to_record_multi(self, values, records):
         # return the ids as a recordset without duplicates
         prefetch_ids = PrefetchMany2one(records, self)
         ids = tuple(unique(id_ for id_ in values if id_ is not None))
-        return records.pool[self.comodel_name](records.env, ids, prefetch_ids)
+        return records.env.registry[self.comodel_name](records.env, ids, prefetch_ids)
 
     def convert_to_read(self, value, record, use_display_name=True):
         if use_display_name and value:
@@ -361,7 +361,7 @@ class Many2one(_Relational[M]):
         # align(id) returns a NewId if records are new, a real id otherwise
         align = (lambda id_: id_) if all(record_ids) else (lambda id_: id_ and NewId(id_))
 
-        for invf in records.pool.field_inverses[self]:
+        for invf in records._registry_pool.field_inverses[self]:
             corecords = records.env[self.comodel_name].browse(
                 align(id_) for id_ in cache.get_values(records, self)
             )
@@ -377,7 +377,7 @@ class Many2one(_Relational[M]):
             return
         cache = records.env.cache
         corecord = self.convert_to_record(value, records)
-        for invf in records.pool.field_inverses[self]:
+        for invf in records._registry_pool.field_inverses[self]:
             valid_records = records.filtered_domain(invf.get_comodel_domain(corecord))
             if not valid_records:
                 continue
@@ -510,7 +510,7 @@ class _RelationalMulti(_Relational[M], typing.Generic[M]):
     def convert_to_record(self, value, record):
         # use registry to avoid creating a recordset for the model
         prefetch_ids = PrefetchX2many(record, self)
-        Comodel = record.pool[self.comodel_name]
+        Comodel = record.env.registry[self.comodel_name]
         corecords = Comodel(record.env, value, prefetch_ids)
         if (
             Comodel._active_name
@@ -522,7 +522,7 @@ class _RelationalMulti(_Relational[M], typing.Generic[M]):
     def convert_to_record_multi(self, values, records):
         # return the list of ids as a recordset without duplicates
         prefetch_ids = PrefetchX2many(records, self)
-        Comodel = records.pool[self.comodel_name]
+        Comodel = records.env.registry[self.comodel_name]
         ids = tuple(unique(id_ for ids in values for id_ in ids))
         corecords = Comodel(records.env, ids, prefetch_ids)
         if (
@@ -545,7 +545,7 @@ class _RelationalMulti(_Relational[M], typing.Generic[M]):
                 return val._origin if isinstance(val, BaseModel) else val
 
             # make result with new and existing records
-            inv_names = {field.name for field in record.pool.field_inverses[self]}
+            inv_names = {field.name for field in record.env.registry.field_inverses[self]}
             result = [Command.set([])]
             for record in value:
                 origin = record._origin
@@ -747,8 +747,8 @@ class One2many(_RelationalMulti[M]):
             if isinstance(invf, (Many2one, Many2oneReference)):
                 # setting one2many fields only invalidates many2one inverses;
                 # integer inverses (res_model/res_id pairs) are not supported
-                model.pool.field_inverses.add(self, invf)
-            comodel.pool.field_inverses.add(invf, self)
+                model._registry_pool.field_inverses.add(self, invf)
+            comodel._registry_pool.field_inverses.add(invf, self)
 
     _description_relation_field = property(attrgetter('inverse_name'))
 
@@ -784,7 +784,7 @@ class One2many(_RelationalMulti[M]):
         if records is not None and self.inverse_name is not None:
             # force the computation of the inverse field to ensure that the
             # cache value of self is consistent
-            inverse_field = records.pool[self.comodel_name]._fields[self.inverse_name]
+            inverse_field = records.env.regsitry[self.comodel_name]._fields[self.inverse_name]
             if inverse_field.compute:
                 records.env[self.comodel_name]._recompute_model([self.inverse_name])
         return super().__get__(records, owner)
@@ -1147,7 +1147,7 @@ class Many2many(_RelationalMulti[M]):
             self.relation = self.column1 = self.column2 = None
 
         if self.relation:
-            m2m = model.pool._m2m
+            m2m = model._registry_pool._m2m
 
             # check whether other fields use the same schema
             fields = m2m[(self.relation, self.column1, self.column2)]
@@ -1167,8 +1167,8 @@ class Many2many(_RelationalMulti[M]):
 
             # retrieve inverse fields, and link them in field_inverses
             for field in m2m[(self.relation, self.column2, self.column1)]:
-                model.pool.field_inverses.add(self, field)
-                model.pool.field_inverses.add(field, self)
+                model._registry_pool.field_inverses.add(self, field)
+                model._registry_pool.field_inverses.add(field, self)
 
     def update_db(self, model, columns):
         cr = model._cr
@@ -1176,7 +1176,7 @@ class Many2many(_RelationalMulti[M]):
         # module. They are automatically removed when dropping the corresponding
         # 'ir.model.field'.
         if not self.manual:
-            model.pool.post_init(model.env['ir.model.relation']._reflect_relation,
+            model._registry_pool.post_init(model.env['ir.model.relation']._reflect_relation,
                                  model, self.relation, self._module)
         comodel = model.env[self.comodel_name]
         if not sql.table_exists(cr, self.relation):
@@ -1192,21 +1192,21 @@ class Many2many(_RelationalMulti[M]):
                 comment=f"RELATION BETWEEN {model._table} AND {comodel._table}",
             ))
             _schema.debug("Create table %r: m2m relation between %r and %r", self.relation, model._table, comodel._table)
-            model.pool.post_init(self.update_db_foreign_keys, model)
+            model._registry_pool.post_init(self.update_db_foreign_keys, model)
             return True
 
-        model.pool.post_init(self.update_db_foreign_keys, model)
+        model._registry_pool.post_init(self.update_db_foreign_keys, model)
 
     def update_db_foreign_keys(self, model):
         """ Add the foreign keys corresponding to the field's relation table. """
         comodel = model.env[self.comodel_name]
         if model._is_an_ordinary_table():
-            model.pool.add_foreign_key(
+            model._registry_pool.add_foreign_key(
                 self.relation, self.column1, model._table, 'id', 'cascade',
                 model, self._module, force=False,
             )
         if comodel._is_an_ordinary_table():
-            model.pool.add_foreign_key(
+            model._registry_pool.add_foreign_key(
                 self.relation, self.column2, comodel._table, 'id', self.ondelete,
                 model, self._module,
             )
@@ -1345,7 +1345,7 @@ class Many2many(_RelationalMulti[M]):
             for x, y in pairs:
                 y_to_xs[y].add(x)
                 modified_corecord_ids.add(y)
-            for invf in records.pool.field_inverses[self]:
+            for invf in records._registry_pool.field_inverses[self]:
                 domain = invf.get_comodel_domain(comodel)
                 valid_ids = set(records.filtered_domain(domain)._ids)
                 if not valid_ids:
@@ -1388,7 +1388,7 @@ class Many2many(_RelationalMulti[M]):
                 ))
 
             # update the cache of inverse fields
-            for invf in records.pool.field_inverses[self]:
+            for invf in records._registry_pool.field_inverses[self]:
                 for y, xs in y_to_xs.items():
                     corecord = comodel.browse(y)
                     try:
@@ -1404,7 +1404,7 @@ class Many2many(_RelationalMulti[M]):
             corecords = comodel.browse(modified_corecord_ids)
             corecords.modified([
                 invf.name
-                for invf in model.pool.field_inverses[self]
+                for invf in model._registry_pool.field_inverses[self]
                 if invf.model_name == self.comodel_name
             ])
 
@@ -1474,7 +1474,7 @@ class Many2many(_RelationalMulti[M]):
             for x, y in pairs:
                 y_to_xs[y].add(x)
                 modified_corecord_ids.add(y)
-            for invf in records.pool.field_inverses[self]:
+            for invf in records._registry_pool.field_inverses[self]:
                 domain = invf.get_comodel_domain(comodel)
                 valid_ids = set(records.filtered_domain(domain)._ids)
                 if not valid_ids:
@@ -1496,7 +1496,7 @@ class Many2many(_RelationalMulti[M]):
             for x, y in pairs:
                 y_to_xs[y].add(x)
                 modified_corecord_ids.add(y)
-            for invf in records.pool.field_inverses[self]:
+            for invf in records._registry_pool.field_inverses[self]:
                 for y, xs in y_to_xs.items():
                     corecord = comodel.browse([y])
                     try:
@@ -1512,7 +1512,7 @@ class Many2many(_RelationalMulti[M]):
             corecords = comodel.browse(modified_corecord_ids)
             corecords.modified([
                 invf.name
-                for invf in model.pool.field_inverses[self]
+                for invf in model._registry_pool.field_inverses[self]
                 if invf.model_name == self.comodel_name
             ])
 

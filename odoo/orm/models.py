@@ -342,7 +342,7 @@ class BaseModel(metaclass=MetaModel):
     env: Environment
     id: IdType | typing.Literal[False]
     display_name: str | typing.Literal[False]
-    pool: Registry  # instances are always registry classes
+    _registry_pool: Registry  # instances are always registry classes
 
     _fields: dict[str, Field]
     _auto = False
@@ -578,7 +578,7 @@ class BaseModel(metaclass=MetaModel):
         return methods
 
     def _is_an_ordinary_table(self):
-        return self.pool.is_an_ordinary_table(self)
+        return self._registry_pool.is_an_ordinary_table(self)
 
     def __ensure_xml_id(self, skip=False):
         """ Create missing external ids for records in ``self``, and return an
@@ -1010,7 +1010,7 @@ class BaseModel(metaclass=MetaModel):
             sp.rollback()
             ids = False
             # cancel all changes done to the registry/ormcache
-            self.pool.reset_changes()
+            self.env.registry.reset_changes()
         sp.close(rollback=False)
 
         nextrow = info['rows']['to'] + 1
@@ -1839,7 +1839,7 @@ class BaseModel(metaclass=MetaModel):
         field = self._fields[fname]
 
         if field.relational or fname == 'id':
-            Model = self.pool[field.comodel_name] if field.relational else self.pool[self._name]
+            Model = self.env.registry[field.comodel_name if field.relational else self._name]
             prefetch_ids = tuple(raw_value for raw_value in raw_values if raw_value)
 
             def recordset(value):
@@ -1865,7 +1865,7 @@ class BaseModel(metaclass=MetaModel):
         fname, __, func = parse_read_group_spec(aggregate_spec)
         if func == 'recordset':
             field = self._fields[fname]
-            Model = self.pool[field.comodel_name] if field.relational else self.pool[self._name]
+            Model = self.env.registry[field.comodel_name if field.relational else self._name]
             prefetch_ids = tuple(unique(
                 id_
                 for array_values in raw_values if array_values
@@ -3442,7 +3442,7 @@ class BaseModel(metaclass=MetaModel):
                 fields_to_fetch.append(field)
             else:
                 # optimization: fetch field dependencies
-                for dotname in self.pool.field_depends[field]:
+                for dotname in self.env.registry.field_depends[field]:
                     dep_field = self._fields[dotname.split('.', 1)[0]]
                     if (not dep_field.store) or (
                         dep_field.prefetch is True
@@ -3977,7 +3977,7 @@ class BaseModel(metaclass=MetaModel):
         bad_names = {'id', 'parent_path'}
         if self._log_access:
             # the superuser can set log_access fields while loading registry
-            if not (self.env.uid == SUPERUSER_ID and not self.pool.ready):
+            if not (self.env.uid == SUPERUSER_ID and not self.env.registry.ready):
                 bad_names.update(LOG_ACCESS_COLUMNS)
 
         # set magic fields
@@ -4006,7 +4006,7 @@ class BaseModel(metaclass=MetaModel):
                     # order to avoid an inconsistent update.
                     self[fname]
                 determine_inverses[field.inverse].append(field)
-            if self.pool.is_modifying_relations(field):
+            if self.env.registry.is_modifying_relations(field):
                 fnames_modifying_relations.append(fname)
             if field.inverse or (field.compute and not field.readonly):
                 if field.store or field.type not in ('one2many', 'many2many'):
@@ -4019,7 +4019,7 @@ class BaseModel(metaclass=MetaModel):
                     # will automatically invalidate the field from the cache,
                     # forcing its value to be recomputed once dependencies are
                     # up-to-date.
-                    protected.update(self.pool.field_computed.get(field, [field]))
+                    protected.update(self.env.registry.field_computed.get(field, [field]))
             if fname == 'company_id' or (field.relational and field.check_company):
                 check_company = True
 
@@ -4261,7 +4261,7 @@ class BaseModel(metaclass=MetaModel):
                 # protect editable computed fields and precomputed fields
                 # against (re)computation
                 if field.compute and (not field.readonly or field.precompute):
-                    protected.update(self.pool.field_computed.get(field, [field]))
+                    protected.update(self.env.registry.field_computed.get(field, [field]))
 
             data_list.append(data)
 
@@ -4352,7 +4352,7 @@ class BaseModel(metaclass=MetaModel):
         bad_names = ['id', 'parent_path']
         if self._log_access:
             # the superuser can set log_access fields while loading registry
-            if not (self.env.uid == SUPERUSER_ID and not self.pool.ready):
+            if not (self.env.uid == SUPERUSER_ID and not self.env.registry.ready):
                 bad_names.extend(LOG_ACCESS_COLUMNS)
 
         # also discard precomputed readonly fields (to force their computation)
@@ -4498,7 +4498,7 @@ class BaseModel(metaclass=MetaModel):
                 else:
                     cache_value = field.convert_to_cache(value, record)
                     self.env.cache.set(record, field, cache_value)
-                    if field.type in ('many2one', 'many2one_reference') and self.pool.field_inverses[field]:
+                    if field.type in ('many2one', 'many2one_reference') and self.env.registry.field_inverses[field]:
                         inverses_update[(field, cache_value)].append(record.id)
 
         for (field, value), record_ids in inverses_update.items():
@@ -4541,7 +4541,7 @@ class BaseModel(metaclass=MetaModel):
 
         if field.store and any(self._ids):
             # check constraints of the fields that have been computed
-            fnames = [f.name for f in self.pool.field_computed[field]]
+            fnames = [f.name for f in self.env.registry.field_computed[field]]
             self.filtered('id')._validate_fields(fnames)
 
     def _parent_store_create(self):
@@ -5448,6 +5448,11 @@ class BaseModel(metaclass=MetaModel):
     _uid = property(lambda self: self.env.uid)
     _context = property(lambda self: self.env.context)
 
+    @property
+    def pool(self):
+        warnings.warn("Since 19.0, use self.env.registry directly")
+        return self.env.registry
+
     #
     # Conversion methods
     #
@@ -5631,7 +5636,7 @@ class BaseModel(metaclass=MetaModel):
                     continue
                 # we need to adapt the value of the inverse fields to integrate self into it:
                 # x2many fields should add self, while many2one fields should replace with self
-                for invf in self.pool.field_inverses[field]:
+                for invf in self.env.registry.field_inverses[field]:
                     invf._update(inv_recs, self)
 
     def _convert_to_record(self, values):
@@ -5837,7 +5842,7 @@ class BaseModel(metaclass=MetaModel):
                         # ilike uses unaccent and lower-case comparison
                         # we may get something which is not a string
                         def unaccent(x):
-                            return self.pool.unaccent_python(str(x).lower()) if x else ''
+                            return self.env.registry.unaccent_python(str(x).lower()) if x else ''
                     else:
                         def unaccent(x):
                             return str(x) if x else ''
@@ -6355,7 +6360,7 @@ class BaseModel(metaclass=MetaModel):
         for field in fields:
             spec.append((field, ids))
             # TODO VSC: used to remove the inverse of many_to_one from the cache, though we might not need it anymore
-            for invf in self.pool.field_inverses[field]:
+            for invf in self.env.registry.field_inverses[field]:
                 self.env[invf.model_name].flush_model([invf.name])
                 spec.append((invf, None))
         self.env.cache.invalidate(spec)
@@ -6460,7 +6465,7 @@ class BaseModel(metaclass=MetaModel):
         def select(field):
             return (field.compute and field.store) or cache.contains_field(field)
 
-        tree = self.pool.get_trigger_tree(fields, select=select)
+        tree = self.env.registry.get_trigger_tree(fields, select=select)
         if not tree:
             return ()
 
@@ -6486,7 +6491,7 @@ class BaseModel(metaclass=MetaModel):
 
             # subtree is another tree of dependencies
             model = self.env[field.model_name]
-            for invf in model.pool.field_inverses[field]:
+            for invf in model.env.registry.field_inverses[field]:
                 # use an inverse of field without domain
                 if not (invf.type in ('one2many', 'many2many') and invf.domain):
                     if invf.type == 'many2one_reference':
@@ -6575,7 +6580,7 @@ class BaseModel(metaclass=MetaModel):
         """
         return (field.name in self._onchange_methods) or any(
             dep in other_fields
-            for dep in self.pool.get_dependent_fields(field.base_field)
+            for dep in self.env.registry.get_dependent_fields(field.base_field)
         )
 
     def _apply_onchange_methods(self, field_name, result):

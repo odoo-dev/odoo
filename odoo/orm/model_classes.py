@@ -136,14 +136,15 @@ _logger = logging.getLogger('odoo.registry')
 # we add them on definition classes that define a model without extending it.
 # This increases the number of fields that are shared across registries.
 
+
 def is_model_definition(cls):
     """ Return whether ``cls`` is a model definition class. """
-    return isinstance(cls, models.MetaModel) and getattr(cls, 'pool', None) is None
+    return isinstance(cls, models.MetaModel) and getattr(cls, '_registry_pool', None) is None
 
 
 def is_model_class(cls):
     """ Return whether ``cls`` is a model registry class. """
-    return getattr(cls, 'pool', None) is not None
+    return getattr(cls, '_registry_pool', None) is not None
 
 
 def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[BaseModel]:
@@ -174,7 +175,7 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
         _check_model_extension(model_cls, model_def)
     else:
         model_cls = type(name, (model_def,), {
-            'pool': registry,                       # this makes it a model class
+            '_registry_pool': registry,             # this makes it a model class
             '_name': name,
             '_register': False,
             '_original_module': model_def._module,
@@ -281,7 +282,7 @@ def _init_model_class_attributes(model_cls: type[BaseModel]):
         model_cls._depends = depends
 
     # update _inherits_children of parent models
-    registry = model_cls.pool
+    registry = model_cls._registry_pool
     for parent_name in model_cls._inherits:
         registry[parent_name]._inherits_children.add(model_cls._name)
 
@@ -349,7 +350,7 @@ def _setup(model: BaseModel):
     # registry classes; the purpose of this attribute is to behave as a
     # cache of [c for c in model_cls.mro() if not is_model_class(c))], which
     # is heavily used in function fields.resolve_mro()
-    model_cls._model_classes__ = tuple(c for c in model_cls.mro() if getattr(c, 'pool', None) is None)
+    model_cls._model_classes__ = tuple(c for c in model_cls.mro() if getattr(c, '_registry_pool', None) is None)
 
     # 1. determine the proper fields of the model: the fields defined on the
     # class and magic fields, not the inherited or custom ones
@@ -369,7 +370,7 @@ def _setup(model: BaseModel):
                 definitions[field.name].append(field)
 
     for name, fields_ in definitions.items():
-        if f'{model_cls._name}.{name}' in model_cls.pool._database_translated_fields:
+        if f'{model_cls._name}.{name}' in model_cls._registry_pool._database_translated_fields:
             # the field is currently translated in the database; ensure the
             # field is translated to avoid converting its column to varchar
             # and losing data
@@ -387,7 +388,7 @@ def _setup(model: BaseModel):
             add_field(model, name, Field(_base_fields=fields_))
 
     # 2. add manual fields
-    if model.pool._init_modules:
+    if model._registry_pool._init_modules:
         _add_manual_fields(model)
 
     # 3. make sure that parent models determine their own fields, then add
@@ -455,8 +456,8 @@ def _check_inherits(model: BaseModel):
                 field.required = True
             if field.ondelete.lower() not in ('cascade', 'restrict'):
                 field.ondelete = 'cascade'
-            model.pool[model._name]._inherits = {**model._inherits, field.comodel_name: field.name}
-            model.pool[field.comodel_name]._inherits_children.add(model._name)
+            model._registry_pool[model._name]._inherits = {**model._inherits, field.comodel_name: field.name}
+            model._registry_pool[field.comodel_name]._inherits_children.add(model._name)
 
 
 def _add_inherited_fields(model: BaseModel):
@@ -521,7 +522,7 @@ def _add_manual_models(env: Environment):
             del env.registry.models[name]
             # remove the model's name from its parents' _inherit_children
             for parent_cls in model_cls.__bases__:
-                if hasattr(parent_cls, 'pool'):
+                if hasattr(parent_cls, '_registry_pool'):
                     parent_cls._inherit_children.discard(name)
 
     # we cannot use self._fields to determine translated fields, as it has not been set up yet
@@ -604,8 +605,8 @@ def pop_field(model: BaseModel, name: str) -> Field | None:
     if model_cls._rec_name == name:
         # fixup _rec_name and display_name's dependencies
         model_cls._rec_name = None
-        if model_cls.display_name in model_cls.pool.field_depends:
-            model_cls.pool.field_depends[model_cls.display_name] = tuple(
-                dep for dep in model_cls.pool.field_depends[model_cls.display_name] if dep != name
+        if model_cls.display_name in model_cls._registry_pool.field_depends:
+            model_cls._registry_pool.field_depends[model_cls.display_name] = tuple(
+                dep for dep in model_cls._registry_pool.field_depends[model_cls.display_name] if dep != name
             )
     return field

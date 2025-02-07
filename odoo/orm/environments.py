@@ -619,14 +619,14 @@ class Cache:
     def _get_field_cache(self, model: BaseModel, field: Field) -> Mapping[IdType, typing.Any]:
         """ Return the field cache of the given field, but not for modifying it. """
         field_cache = self._data.get(field, EMPTY_DICT)
-        if field_cache and field in model.pool.field_depends_context:
+        if field_cache and field in model.env.registry.field_depends_context:
             field_cache = field_cache.get(model.env.cache_key(field), EMPTY_DICT)
         return field_cache
 
     def _set_field_cache(self, model: BaseModel, field: Field) -> dict[IdType, typing.Any]:
         """ Return the field cache of the given field for modifying it. """
         field_cache = self._data[field]
-        if field in model.pool.field_depends_context:
+        if field in model.env.registry.field_depends_context:
             field_cache = field_cache.setdefault(model.env.cache_key(field), {})
         return field_cache
 
@@ -695,7 +695,7 @@ class Cache:
         if dirty:
             assert field.column_type and field.store and record_id
             self._dirty[field].add(record_id)
-            if field in record.pool.field_depends_context:
+            if field in record.env.registry.field_depends_context:
                 # put the values under conventional context key values {'context_key': None},
                 # in order to ease the retrieval of those values to flush them
                 record = record.with_env(record.env(context={}))
@@ -742,7 +742,7 @@ class Cache:
         if dirty:
             assert field.column_type and field.store and all(records._ids)
             self._dirty[field].update(records._ids)
-            if not field.company_dependent and field in records.pool.field_depends_context:
+            if not field.company_dependent and field in records.env.registry.field_depends_context:
                 # put the values under conventional context key values {'context_key': None},
                 # in order to ease the retrieval of those values to flush them
                 records = records.with_env(records.env(context={}))
@@ -892,7 +892,7 @@ class Cache:
         But when ``all_contexts`` is true, it checks for values *in all contexts*.
         """
         ids: Iterable
-        if all_contexts and field in model.pool.field_depends_context:
+        if all_contexts and field in model.env.registry.field_depends_context:
             field_cache = self._data.get(field, EMPTY_DICT)
             ids = OrderedSet(id_ for sub_cache in field_cache.values() for id_ in sub_cache)
         else:
