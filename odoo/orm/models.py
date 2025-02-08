@@ -2971,6 +2971,8 @@ class BaseModel(metaclass=MetaModel):
                 continue
 
             description = field.get_description(self.env, attributes=attributes)
+            if not description.get('readonly', True) and not self._has_field_access(field, 'write'):
+                description['readonly'] = True
             res[fname] = description
 
         return res
@@ -2981,9 +2983,11 @@ class BaseModel(metaclass=MetaModel):
         You may override this method to customize the access to fields.
 
         :param field: the field to check
-        :param operation: one of ``create``, ``read``, ``write``, ``unlink``
+        :param operation: one of ``read``, ``write``
         :return: whether the field is accessible
         """
+        if field.readonly and operation == 'write':
+            return self.env.su
         if not field.groups or self.env.su:
             return True
         if field.groups == NO_ACCESS:
@@ -2995,7 +2999,7 @@ class BaseModel(metaclass=MetaModel):
         """Check the user access rights on the given field.
 
         :param field: the field to check
-        :param operation: one of ``create``, ``read``, ``write``, ``unlink``
+        :param operation: one of ``read``, ``write``
         :raise AccessError: if the user is not allowed to access the provided field
         """
         if self._has_field_access(field, operation):
@@ -3020,6 +3024,8 @@ class BaseModel(metaclass=MetaModel):
         if self.env.user._has_group('base.group_no_one'):
             if field.groups == NO_ACCESS:
                 allowed_groups_msg = _("always forbidden")
+            elif field.readonly:
+                allowed_groups_msg = _("forbidden on readonly field")
             else:
                 groups_list = [self.env.ref(g) for g in field.groups.split(',')]
                 groups = self.env['res.groups'].union(*groups_list).sorted('id')
@@ -4231,6 +4237,11 @@ class BaseModel(metaclass=MetaModel):
 
         self = self.browse()
         self.check_access('create')
+        for field_name in {k for vals in vals_list for k in vals}:
+            try:
+                self._check_field_access(self._fields[field_name], 'write')
+            except KeyError as e:
+                raise ValueError(f"Invalid field {field_name!r} in {self._name!r}") from e
 
         new_vals_list = self._prepare_create_values(vals_list)
 
