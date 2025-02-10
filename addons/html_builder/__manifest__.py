@@ -32,6 +32,10 @@
             'website/static/src/xml/website_form_editor.xml',
             # TODO Remove the module's form js - this is for testing.
             'website/static/src/js/send_mail_form.js',
+            # TODO when moving options to website: load this from website
+            # directly. This file is loaded in assets_wysiwyg in website, but we
+            # need to load it here for html_builder.
+            'website/static/src/xml/website.cookies_bar.xml',
         ],
         # this bundle is lazy loaded when the editor is ready
         'html_builder.assets': [
