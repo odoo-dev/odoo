@@ -546,9 +546,9 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         pick = so.picking_ids
         pick.move_ids.write({'quantity': 1, 'picked': True})
         Form.from_action(self.env, pick.button_validate()).save().process()
-        self.assertEqual(so.invoice_status, 'no', 'Sale MRP: so invoice_status should be "no" after partial delivery of a kit')
+        self.assertEqual(so.invoice_status, 'to invoice')
         del_qty = sum(sol.qty_delivered for sol in so.order_line)
-        self.assertEqual(del_qty, 0.0, 'Sale MRP: delivered quantity should be zero after partial delivery of a kit')
+        self.assertEqual(del_qty, 0.25)
         # deliver remaining products, check the so's invoice_status and delivered quantities
         self.assertEqual(len(so.picking_ids), 2, 'Sale MRP: number of pickings should be 2')
         pick_2 = so.picking_ids.filtered('backorder_id')
@@ -870,7 +870,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
 
         # Even if some components are delivered completely,
         # no KitParent should be delivered
-        self.assertEqual(order_line.qty_delivered, 0)
+        self.assertEqual(order_line.qty_delivered, 0.58)
 
         # Process just enough components to make 1 kit_parent
         qty_to_process = {
@@ -986,7 +986,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         Form.from_action(self.env, return_of_return_pick.button_validate()).save().process()
 
         # As one of each component is missing, only 6 kit_parents should be delivered
-        self.assertEqual(order_line.qty_delivered, 6)
+        self.assertEqual(order_line.qty_delivered, 6.5)
 
         # Check that the 4th backorder is created.
         self.assertEqual(len(so.picking_ids), 7)

@@ -190,6 +190,60 @@ class TestSaleMrpKitBom(TransactionCase):
         # Checks the delivery amount (must be 10).
         self.assertEqual(so.order_line.qty_delivered, 10)
 
+    def test_qty_delivered_with_bom_kit(self):
+        """Check the delivered quantity of a kit product accurately reflects decimal values when a phantom BoM contains a non-integer quantity."""
+
+        self.product_1 = self.env['product.product'].create({
+                        'name': 'KIT',
+                        'is_storable': True,
+                        'uom_id': self.env.ref('uom.product_uom_foot').id,
+                    })
+        self.component = self.env['product.product'].create({
+                        'name': 'Component',
+                        'is_storable': True,
+                        'uom_id': self.env.ref('uom.product_uom_unit').id,
+                    })
+
+        # Create BoM for Kit
+        bom_product_form = Form(self.env['mrp.bom'])
+        bom_product_form.product_id = self.product_1
+        bom_product_form.product_tmpl_id = self.product_1.product_tmpl_id
+        bom_product_form.product_qty = 121.70
+        bom_product_form.type = 'phantom'
+
+        with bom_product_form.bom_line_ids.new() as bom_line:
+            bom_line.product_id = self.component
+            bom_line.product_qty = 10
+
+        self.bom = bom_product_form.save()
+
+        self.customer = self.env['res.partner'].create({
+            'name': 'customer',
+        })
+
+        so = self.env['sale.order'].create({
+            'partner_id': self.customer.id,
+            'order_line': [
+                (0, 0, {
+                    'name': self.product_1.name,
+                    'product_id': self.product_1.id,
+                    'product_uom_qty': 121.70,
+                    'product_uom': self.product_1.uom_id.id,
+                    'price_unit': 1,
+                    'tax_id': False,
+                })],
+        })
+        so.action_confirm()
+        self.assertTrue(so.picking_ids)
+        self.assertEqual(so.order_line.qty_delivered, 0)
+
+        picking = so.picking_ids
+        picking.move_ids.write({'quantity': 10, 'picked': True})
+        picking.button_validate()
+
+        # Checks the delivery amount (must be 121.70).
+        self.assertEqual(so.order_line.qty_delivered, 121.70)
+
     def test_qty_delivered_with_bom_using_kit(self):
         """Check the quantity delivered, when one product is a kit
         and his bom uses another product that is also a kit"""

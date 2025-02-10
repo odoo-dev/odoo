@@ -361,7 +361,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
 
         # Even if some components are received completely,
         # no KitParent should be received
-        self.assertEqual(order_line.qty_received, 0)
+        self.assertEqual(order_line.qty_received, 0.58)
 
         # Process just enough components to make 1 kit_parent
         qty_to_process = {
@@ -476,7 +476,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         Form.from_action(self.env, return_of_return_pick.button_validate()).save().process()
 
         # As one of each component is missing, only 6 kit_parents should be received
-        self.assertEqual(order_line.qty_received, 6)
+        self.assertEqual(order_line.qty_received, 6.5)
 
         # Check that the 4th backorder is created.
         self.assertEqual(len(po.picking_ids), 7)
