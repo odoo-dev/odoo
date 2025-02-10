@@ -3,7 +3,7 @@
 
 <t t-name="html_builder.base_popup_options">
     <!-- For the cookies popup, only display this for popup mode. -->
-    <BuilderRow label.translate="Position" t-if="!isActiveItem('cookies_bar_layout_opt') or isActiveItem('layout_popup_opt')">
+    <BuilderRow label.translate="Position" t-if="!isCookiesOption or isActiveItem('layout_popup_opt')">
         <BuilderSelect>
             <BuilderSelectItem classAction="'s_popup_top'">Top</BuilderSelectItem>
             <BuilderSelectItem classAction="'s_popup_middle'">Middle</BuilderSelectItem>
@@ -59,6 +59,8 @@
 </t>
 
 <t t-name="html_builder.PopupCookiesOption">
-    <t t-call="html_builder.base_popup_options"/>
+    <t t-call="html_builder.base_popup_options">
+        <t t-set="isCookiesOption" t-value="true"/>
+    </t>
 </t>
 </templates>
