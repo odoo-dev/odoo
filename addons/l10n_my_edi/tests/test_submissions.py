@@ -1,15 +1,16 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from datetime import datetime
+from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 
 from odoo import Command
-from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.addons.account.tests.test_account_move_send import TestAccountMoveSendCommon
 from odoo.exceptions import UserError
 from odoo.tests import tagged
-from unittest.mock import patch
+
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.addons.account.tests.test_account_move_send import TestAccountMoveSendCommon
 
 CONTACT_PROXY_METHOD = 'odoo.addons.l10n_my_edi.models.account_edi_proxy_user.AccountEdiProxyClientUser._l10n_my_edi_contact_proxy'
 
@@ -51,9 +52,7 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
         cls.product_a.l10n_my_edi_classification_code = "001"
 
         # We can reuse this invoice for the flow tests.
-        cls.basic_invoice = cls.init_invoice(
-            'out_invoice', products=cls.product_a
-        )
+        cls.basic_invoice = cls.init_invoice('out_invoice', products=cls.product_a)
         cls.basic_invoice.action_post()
 
         # For simplicity, we will test everything using a 'test' mode user, but we create it using demo to avoid triggering any api calls.
@@ -71,20 +70,21 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
         with patch(CONTACT_PROXY_METHOD, new=self._test_01_mock):
             self.basic_invoice.action_l10n_my_edi_send_invoice()
 
+        myinvois_document = self.basic_invoice.l10n_my_edi_document_ids._get_active_document()
         # Now that the invoice has been sent successfully, we assert that some info have been saved correctly.
         self.assertRecordValues(
-            self.basic_invoice,
+            myinvois_document,
             [{
-                'l10n_my_edi_state': 'valid',
-                'l10n_my_edi_validation_time': datetime.strptime('2024-07-15 05:00:00', '%Y-%m-%d %H:%M:%S'),
-                'l10n_my_edi_invoice_long_id': '123-789-654',
-                'l10n_my_edi_submission_uid': '123456789',
-                'l10n_my_edi_external_uuid': '123458974513518',
-            }]
+                'myinvois_state': 'valid',
+                'myinvois_validation_time': datetime.strptime('2024-07-15 05:00:00', '%Y-%m-%d %H:%M:%S'),
+                'myinvois_document_long_id': '123-789-654',
+                'myinvois_submission_uid': '123456789',
+                'myinvois_external_uuid': '123458974513518',
+            }],
         )
 
         # We will test the actual file in another test class, but we ensure it was generated as expected.
-        self.assertTrue(self.basic_invoice.l10n_my_edi_file_id)
+        self.assertTrue(myinvois_document.myinvois_file_id)
 
     @freeze_time('2024-07-15 10:00:00')
     def test_02_new_failed_submission(self):
@@ -119,12 +119,12 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
         # When such error occurs, we expect the hash and retry time to be set, has we need to avoid allowing a user to
         # resend an invoice right away without any changes.
         self.assertRecordValues(
-            self.basic_invoice,
+            self.basic_invoice.l10n_my_edi_document_ids[0],
             [{
-                'l10n_my_error_document_hash': 'HX164532#=',
-                'l10n_my_edi_retry_at': '2024-07-15 10:10:00',
-                'l10n_my_edi_state': 'invalid',
-            }]
+                'myinvois_error_document_hash': 'HX164532#=',
+                'myinvois_retry_at': '2024-07-15 10:10:00',
+                'myinvois_state': 'invalid',
+            }],
         )
 
     @freeze_time('2024-07-15 10:00:00')
@@ -143,13 +143,8 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
             })
             # Cancel the invoice
             wizard.button_request_update()
-        self.assertRecordValues(
-            self.basic_invoice,
-            [{
-                'l10n_my_edi_state': 'cancelled',
-                'state': 'cancel',
-            }]
-        )
+        self.assertEqual(self.basic_invoice.state, 'cancel')
+        self.assertEqual(self.basic_invoice.l10n_my_edi_document_ids[0].myinvois_state, 'cancelled')
 
     @freeze_time('2024-07-15 10:00:00')
     def test_05_new_cancellation_failures(self):
@@ -160,13 +155,13 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
         with patch(CONTACT_PROXY_METHOD, new=self._test_05_mock):
             self.basic_invoice.action_l10n_my_edi_send_invoice()
 
-            self.basic_invoice.l10n_my_edi_validation_time = datetime.strptime('2024-07-12 10:00:00', '%Y-%m-%d %H:%M:%S')
+            self.basic_invoice.l10n_my_edi_document_ids[0].myinvois_validation_time = datetime.strptime('2024-07-12 10:00:00', '%Y-%m-%d %H:%M:%S')
 
             # More than 72h, it failed
             with self.assertRaises(UserError, msg='It has been more than 72h since the invoice validation, you can no longer cancel it.\nInstead, you should issue a debit or credit note.'):
                 self.basic_invoice.button_request_cancel()
 
-            self.basic_invoice.l10n_my_edi_validation_time = datetime.now()
+            self.basic_invoice.l10n_my_edi_document_ids[0].myinvois_validation_time = datetime.now()
             action = self.basic_invoice.button_request_cancel()
             wizard = self.env[action['res_model']].with_context(action['context']).create({
                 'reason': 'Discount not applied',
@@ -196,15 +191,15 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
             self.basic_invoice.button_draft()
 
             self.assertRecordValues(
-                self.basic_invoice,
+                self.basic_invoice.l10n_my_edi_document_ids[0],
                 [{
-                    'l10n_my_error_document_hash': 'HX164532#=',
-                    'l10n_my_edi_retry_at': '2024-07-15 10:10:00',
-                    'l10n_my_edi_state': False,
-                    'l10n_my_edi_validation_time': False,
-                    'l10n_my_edi_submission_uid': False,
-                    'l10n_my_edi_external_uuid': False,
-                }]
+                    'myinvois_error_document_hash': 'HX164532#=',
+                    'myinvois_retry_at': '2024-07-15 10:10:00',
+                    'myinvois_state': 'invalid',
+                    'myinvois_validation_time': False,
+                    'myinvois_submission_uid': '123456789',
+                    'myinvois_external_uuid': False,
+                }],
             )
 
             # ... we change whatever
@@ -216,7 +211,7 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                 self.basic_invoice,
                 [{
                     'l10n_my_edi_state': 'valid',
-                }]
+                }],
             )
 
     @freeze_time('2024-07-15 10:00:00')
@@ -230,25 +225,25 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
             self.basic_invoice.action_l10n_my_edi_send_invoice()
 
             self.assertRecordValues(
-                self.basic_invoice,
+                self.basic_invoice.l10n_my_edi_document_ids[0],
                 [{
-                    'l10n_my_edi_state': 'in_progress',
-                    'l10n_my_edi_submission_uid': '123456789',
-                    'l10n_my_edi_external_uuid': '123458974513518',
-                }]
+                    'myinvois_state': 'in_progress',
+                    'myinvois_submission_uid': '123456789',
+                    'myinvois_external_uuid': '123458974513518',
+                }],
             )
 
             # ... some time later, the cron runs.
-            self.env['account.move']._cron_l10n_my_edi_synchronize_myinvois()
+            self.env['myinvois.document']._myinvois_statuses_update_cron()
 
             # The update should be reflected on the move.
             self.assertRecordValues(
-                self.basic_invoice,
+                self.basic_invoice.l10n_my_edi_document_ids[0],
                 [{
-                    'l10n_my_edi_state': 'valid',
-                    'l10n_my_edi_validation_time': datetime.strptime('2024-07-15 05:00:00', '%Y-%m-%d %H:%M:%S'),
-                    'l10n_my_edi_invoice_long_id': '123-789-654',
-                }]
+                    'myinvois_state': 'valid',
+                    'myinvois_validation_time': datetime.strptime('2024-07-15 05:00:00', '%Y-%m-%d %H:%M:%S'),
+                    'myinvois_document_long_id': '123-789-654',
+                }],
             )
 
     @freeze_time('2024-07-15 10:00:00')
@@ -271,7 +266,7 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
         self.submission_invoice |= self.basic_invoice
 
         with patch(CONTACT_PROXY_METHOD, new=self._test_08_mock), \
-             patch('odoo.addons.l10n_my_edi.models.account_move.SUBMISSION_MAX_SIZE', 2):
+             patch('odoo.addons.l10n_my_edi.models.myinvois_document.SUBMISSION_MAX_SIZE', 2):
             self.submission_invoice.action_l10n_my_edi_send_invoice()
 
         # we have 10 invoices, with a max size of 2 we expect 5 different submissions.
@@ -284,12 +279,12 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
             self.basic_invoice.action_l10n_my_edi_send_invoice()
 
             self.assertRecordValues(
-                self.basic_invoice,
+                self.basic_invoice.l10n_my_edi_document_ids[0],
                 [{
-                    'l10n_my_edi_state': 'in_progress',
-                    'l10n_my_edi_submission_uid': '123456789',
-                    'l10n_my_edi_external_uuid': '123458974513518',
-                }]
+                    'myinvois_state': 'in_progress',
+                    'myinvois_submission_uid': '123456789',
+                    'myinvois_external_uuid': '123458974513518',
+                }],
             )
 
             # ... some time later, the user does not want to wait for the cron and press the button.
@@ -318,7 +313,7 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
             })
             # Cancel the invoice
             wizard.button_request_update()
-            self.assertEqual(self.basic_invoice.l10n_my_edi_state, 'cancelled')
+            self.assertEqual(self.basic_invoice.l10n_my_edi_document_ids[0].myinvois_state, 'cancelled')
 
     @freeze_time('2024-07-15 10:00:00')
     def test_11_qr_code_generation(self):
@@ -347,7 +342,7 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
         self.submission_invoice |= self.basic_invoice
 
         with patch(CONTACT_PROXY_METHOD, new=self._test_12_mock), \
-             patch('odoo.addons.l10n_my_edi.models.account_move.SUBMISSION_MAX_SIZE', 1):
+             patch('odoo.addons.l10n_my_edi.models.myinvois_document.SUBMISSION_MAX_SIZE', 1):
             self.submission_invoice.action_l10n_my_edi_send_invoice()
 
         self.assertEqual(self.submission_count, 5)
@@ -393,47 +388,47 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
             with freeze_time('2024-07-15 10:00:00'):
                 # We use multiple invoices to test the cron logic, but all of them will always keep a same status so we can just validate the one.
                 self.assertRecordValues(
-                    self.basic_invoice,
+                    self.basic_invoice.l10n_my_edi_document_ids[0],
                     [{
-                        'l10n_my_edi_state': 'in_progress',
-                        'l10n_my_edi_submission_uid': '123456789',
-                        'l10n_my_edi_external_uuid': '123458974513510',
-                    }]
+                        'myinvois_state': 'in_progress',
+                        'myinvois_submission_uid': '123456789',
+                        'myinvois_external_uuid': '123458974513510',
+                    }],
                 )
 
                 # ... some time later, the cron runs.
-                self.env['account.move']._cron_l10n_my_edi_synchronize_myinvois()
+                self.env['myinvois.document']._myinvois_statuses_update_cron()
                 self.submission_status_count += 1
 
                 # The move got updated to valid, and the retry time should have been set.
                 self.assertRecordValues(
-                    self.basic_invoice,
+                    self.basic_invoice.l10n_my_edi_document_ids[0],
                     [{
-                        'l10n_my_edi_state': 'valid',
-                        'l10n_my_edi_validation_time': datetime.strptime('2024-07-15 05:00:00', '%Y-%m-%d %H:%M:%S'),
-                        'l10n_my_edi_invoice_long_id': '123-789-654',
-                        'l10n_my_edi_retry_at': '2024-07-15 11:00:00',
-                    }]
+                        'myinvois_state': 'valid',
+                        'myinvois_validation_time': datetime.strptime('2024-07-15 05:00:00', '%Y-%m-%d %H:%M:%S'),
+                        'myinvois_document_long_id': '123-789-654',
+                        'myinvois_retry_at': '2024-07-15 11:00:00',
+                    }],
                 )
 
             with freeze_time('2024-07-15 10:01:00'):
                 # We have more invoices to process, the cron got triggered again. Our invoice won't trigger an API call
-                self.env['account.move']._cron_l10n_my_edi_synchronize_myinvois()  # If failed to avoid the query, the mock method will raise.
+                self.env['myinvois.document']._myinvois_statuses_update_cron()  # If failed to avoid the query, the mock method will raise.
                 self.submission_status_count += 1
 
             with freeze_time('2024-07-15 11:00:00'):
                 # One hour later, the next cron run starts and our invoice is updated again
-                self.env['account.move']._cron_l10n_my_edi_synchronize_myinvois()
+                self.env['myinvois.document']._myinvois_statuses_update_cron()
                 self.submission_status_count += 1
                 # We should have updated the status again, and thus pushed the l10n_my_edi_retry_at time to one hour later.
                 self.assertRecordValues(
-                    self.basic_invoice,
+                    self.basic_invoice.l10n_my_edi_document_ids[0],
                     [{
-                        'l10n_my_edi_state': 'valid',
-                        'l10n_my_edi_validation_time': datetime.strptime('2024-07-15 05:00:00', '%Y-%m-%d %H:%M:%S'),
-                        'l10n_my_edi_invoice_long_id': '123-789-654',
-                        'l10n_my_edi_retry_at': '2024-07-15 12:00:00',
-                    }]
+                        'myinvois_state': 'valid',
+                        'myinvois_validation_time': datetime.strptime('2024-07-15 05:00:00', '%Y-%m-%d %H:%M:%S'),
+                        'myinvois_document_long_id': '123-789-654',
+                        'myinvois_retry_at': '2024-07-15 12:00:00',
+                    }],
                 )
 
     # -------------------------------------------------------------------------
@@ -449,9 +444,9 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                     'move_id': params['documents'][0]['move_id'],
                     'uuid': '123458974513518',
                     'success': True,
-                }]
+                }],
             }
-        elif endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
+        if endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
             return {
                 'statuses': {
                     '123458974513518': {
@@ -459,12 +454,11 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                         'reason': '',
                         'long_id': '123-789-654',
                         'valid_datetime': '2024-07-15T05:00:00Z',
-                    }
+                    },
                 },
                 'document_count': 1,
             }
-        else:
-            raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
+        raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
 
     def _test_02_mock(self, endpoint, params):
         """ Basic mocked method that simulate what the proxy would return depending on the endpoint. """
@@ -473,10 +467,9 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                 'error': {
                     'reference': 'internal_server_error',
                     'data': {},
-                }
+                },
             }
-        else:
-            raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
+        raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
 
     def _test_03_mock(self, endpoint, params):
         """ Basic mocked method that simulate what the proxy would return depending on the endpoint. """
@@ -492,10 +485,9 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                     }],
                     'error_document_hash': 'HX164532#=',
                     'retry_at': datetime.now() + relativedelta(minutes=10),
-                }]
+                }],
             }
-        else:
-            raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
+        raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
 
     def _test_04_mock(self, endpoint, params):
         """ Basic mocked method that simulate what the proxy would return depending on the endpoint. """
@@ -506,9 +498,9 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                     'move_id': params['documents'][0]['move_id'],
                     'uuid': '123458974513518',
                     'success': True,
-                }]
+                }],
             }
-        elif endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
+        if endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
             return {
                 'statuses': {
                     '123458974513518': {
@@ -516,16 +508,15 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                         'reason': '',
                         'long_id': '',
                         'valid_datetime': '2024-07-15T13:15:10Z',
-                    }
+                    },
                 },
                 'document_count': 1,
             }
-        elif endpoint == 'api/l10n_my_edi/1/update_status':
+        if endpoint == 'api/l10n_my_edi/1/update_status':
             return {
                 'success': True,
             }
-        else:
-            raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
+        raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
 
     def _test_05_mock(self, endpoint, params):
         """ Basic mocked method that simulate what the proxy would return depending on the endpoint. """
@@ -536,9 +527,9 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                     'move_id': params['documents'][0]['move_id'],
                     'uuid': '123458974513518',
                     'success': True,
-                }]
+                }],
             }
-        elif endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
+        if endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
             return {
                 'statuses': {
                     '123458974513518': {
@@ -546,19 +537,18 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                         'reason': '',
                         'long_id': '',
                         'valid_datetime': '2024-07-15T13:15:10Z',
-                    }
+                    },
                 },
                 'document_count': 1,
             }
-        elif endpoint == 'api/l10n_my_edi/1/update_status':
+        if endpoint == 'api/l10n_my_edi/1/update_status':
             return {
                 'error': {
                     'reference': 'update_forbidden',
                     'data': {},
-                }
+                },
             }
-        else:
-            raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
+        raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
 
     def _test_06_mock(self, endpoint, params):
         """ Basic mocked method that simulate what the proxy would return depending on the endpoint. """
@@ -574,18 +564,18 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                     }],
                     'error_document_hash': 'HX164532#=',
                     'retry_at': datetime.now() + relativedelta(minutes=10),
-                }]
+                }],
             }
-        elif endpoint == 'api/l10n_my_edi/1/submit_invoices' and params['documents'][0]['error_document_hash']:
+        if endpoint == 'api/l10n_my_edi/1/submit_invoices' and params['documents'][0]['error_document_hash']:
             return {
                 'submission_uid': '123456789',
                 'documents': [{
                     'move_id': params['documents'][0]['move_id'],
                     'uuid': '123458974513518',
                     'success': True,
-                }]
+                }],
             }
-        elif endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
+        if endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
             return {
                 'statuses': {
                     '123458974513518': {
@@ -593,12 +583,11 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                         'reason': '',
                         'long_id': '',
                         'valid_datetime': '2024-07-15T05:00:00Z',
-                    }
+                    },
                 },
                 'document_count': 1,
             }
-        else:
-            raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
+        raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
 
     def _test_07_mock(self, endpoint, params):
         """ Basic mocked method that simulate what the proxy would return depending on the endpoint. """
@@ -609,9 +598,9 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                     'move_id': params['documents'][0]['move_id'],
                     'uuid': '123458974513518',
                     'success': True,
-                }]
+                }],
             }
-        elif endpoint == 'api/l10n_my_edi/1/get_submission_statuses' and self.get_submission_status_count == 0:
+        if endpoint == 'api/l10n_my_edi/1/get_submission_statuses' and self.get_submission_status_count < 3:
             self.get_submission_status_count += 1
             return {
                 'statuses': {
@@ -620,11 +609,11 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                         'reason': '',
                         'long_id': '',
                         'valid_datetime': '',
-                    }
+                    },
                 },
                 'document_count': 1,
             }
-        elif endpoint == 'api/l10n_my_edi/1/get_submission_statuses' and self.get_submission_status_count == 1:
+        if endpoint == 'api/l10n_my_edi/1/get_submission_statuses' and self.get_submission_status_count == 3:
             self.get_submission_status_count += 1
             return {
                 'statuses': {
@@ -633,12 +622,11 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                         'reason': '',
                         'long_id': '123-789-654',
                         'valid_datetime': '2024-07-15T05:00:00Z',
-                    }
+                    },
                 },
                 'document_count': 1,
             }
-        else:
-            raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
+        raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
 
     def _test_08_mock(self, endpoint, params):
         """ Basic mocked method that simulate what the proxy would return depending on the endpoint. """
@@ -651,23 +639,22 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                     'move_id': document['move_id'],
                     'uuid': str(123458974513519 + i + self.submission_count),
                     'success': True,
-                } for i, document in enumerate(params['documents'])]
+                } for i, document in enumerate(params['documents'])],
             }
-        elif endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
-            invoices = self.submission_invoice.grouped('l10n_my_edi_submission_uid').get(params['submission_uid'])
+        if endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
+            documents = self.submission_invoice.l10n_my_edi_document_ids.grouped('myinvois_submission_uid').get(params['submission_uid'])
             return {
                 'statuses': {
-                    invoice.l10n_my_edi_external_uuid: {
+                    document.myinvois_external_uuid: {
                         'status': 'valid',
                         'reason': '',
                         'long_id': '',
                         'valid_datetime': '2024-07-15T05:00:00Z',
-                    } for invoice in invoices
+                    } for document in documents
                 },
                 'document_count': 1,
             }
-        else:
-            raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
+        raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
 
     def _test_09_mock(self, endpoint, params):
         """ Basic mocked method that simulate what the proxy would return depending on the endpoint. """
@@ -678,9 +665,9 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                     'move_id': params['documents'][0]['move_id'],
                     'uuid': '123458974513518',
                     'success': True,
-                }]
+                }],
             }
-        elif endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
+        if endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
             return {
                 'statuses': {
                     '123458974513518': {
@@ -688,19 +675,18 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                         'reason': '',
                         'long_id': '',
                         'valid_datetime': '',
-                    }
+                    },
                 },
                 'document_count': 1,
             }
-        elif endpoint == 'api/l10n_my_edi/1/get_status':
+        if endpoint == 'api/l10n_my_edi/1/get_status':
             return {
                 'status': 'valid',
                 'status_reason': '',
                 'long_id': '',
                 'valid_datetime': '2024-07-15T05:00:00Z',
             }
-        else:
-            raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
+        raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
 
     def _test_10_mock(self, endpoint, params):
         """ Basic mocked method that simulate what the proxy would return depending on the endpoint. """
@@ -711,9 +697,9 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                     'move_id': params['documents'][0]['move_id'],
                     'uuid': '123458974513518',
                     'success': True,
-                }]
+                }],
             }
-        elif endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
+        if endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
             return {
                 'statuses': {
                     '123458974513518': {
@@ -721,23 +707,22 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                         'reason': '',
                         'long_id': '',
                         'valid_datetime': '2024-07-15T05:00:00Z',
-                    }
+                    },
                 },
                 'document_count': 1,
             }
-        elif endpoint == 'api/l10n_my_edi/1/get_status':
+        if endpoint == 'api/l10n_my_edi/1/get_status':
             return {
                 'status': 'rejected',
                 'status_reason': 'Wrong address',
                 'long_id': '',
                 'valid_datetime': '',
             }
-        elif endpoint == 'api/l10n_my_edi/1/update_status':
+        if endpoint == 'api/l10n_my_edi/1/update_status':
             return {
                 'success': True,
             }
-        else:
-            raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
+        raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
 
     def _test_11_mock(self, endpoint, params):
         """ Basic mocked method that simulate what the proxy would return depending on the endpoint. """
@@ -748,9 +733,9 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                     'move_id': params['documents'][0]['move_id'],
                     'uuid': '123458974513518',
                     'success': True,
-                }]
+                }],
             }
-        elif endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
+        if endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
             return {
                 'statuses': {
                     '123458974513518': {
@@ -758,12 +743,11 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                         'reason': '',
                         'long_id': '123-789-654',
                         'valid_datetime': '2024-07-15T05:00:00Z',
-                    }
+                    },
                 },
                 'document_count': 1,
             }
-        else:
-            raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
+        raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
 
     def _test_12_mock(self, endpoint, params):
         """ Mock response simulating multiple invoice submissions where one fails. """
@@ -774,7 +758,7 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                     'error': {
                         'reference': 'internal_server_error',
                         'data': {},
-                    }
+                    },
                 }
             return {
                 'submission_uid': str(123456789 + self.submission_count),
@@ -782,29 +766,28 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                     'move_id': document['move_id'],
                     'uuid': str(123458974513519 + i + self.submission_count),
                     'success': True,
-                } for i, document in enumerate(params['documents'])]
+                } for i, document in enumerate(params['documents'])],
             }
-        elif endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
-            invoices = self.submission_invoice.grouped('l10n_my_edi_submission_uid').get(params['submission_uid'])
+        if endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
+            documents = self.submission_invoice.l10n_my_edi_document_ids.grouped('myinvois_submission_uid').get(params['submission_uid'])
             return {
                 'statuses': {
-                    invoice.l10n_my_edi_external_uuid: {
+                    document.myinvois_external_uuid: {
                         'status': 'valid',
                         'reason': '',
                         'long_id': '',
                         'valid_datetime': '2024-07-15T05:00:00Z',
-                    } for invoice in invoices
+                    } for document in documents
                 },
                 'document_count': 1,
             }
-        else:
-            raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
+        raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
 
     def _test_13_mock_first_submission(self, endpoint, params):
         if endpoint == 'api/l10n_my_edi/1/submit_invoices':
             res = {
                 'submission_uid': '123456788',
-                'documents': []
+                'documents': [],
             }
             for i, document in enumerate(params['documents']):
                 res['documents'].append({
@@ -813,7 +796,7 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                     'success': True,
                 })
             return res
-        elif endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
+        if endpoint == 'api/l10n_my_edi/1/get_submission_statuses':
             return {
                 'statuses': {
                     '123458974513500': {
@@ -849,14 +832,13 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                 },
                 'document_count': 5,
             }
-        else:
-            raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
+        raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
 
     def _test_13_mock(self, endpoint, params):
         if endpoint == 'api/l10n_my_edi/1/submit_invoices':
             res = {
                 'submission_uid': '123456789',
-                'documents': []
+                'documents': [],
             }
             for i, document in enumerate(params['documents']):
                 res['documents'].append({
@@ -865,7 +847,7 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                     'success': True,
                 })
             return res
-        elif endpoint == 'api/l10n_my_edi/1/get_submission_statuses' and self.submission_status_count == 0:
+        if endpoint == 'api/l10n_my_edi/1/get_submission_statuses' and self.submission_status_count == 0:
             return {
                 'statuses': {
                     '123458974513510': {
@@ -901,7 +883,7 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                 },
                 'document_count': 5,
             }
-        elif endpoint == 'api/l10n_my_edi/1/get_submission_statuses' and self.submission_status_count == 1:
+        if endpoint == 'api/l10n_my_edi/1/get_submission_statuses' and self.submission_status_count in [1, 3]:
             res = {'statuses': {}, 'document_count': 10}
             # Build the res using loops otherwise it'd take a lot of lines.
             for i in range(2):
@@ -913,17 +895,4 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
                         'valid_datetime': '2024-07-15T05:00:00Z',
                     }
             return res
-        elif endpoint == 'api/l10n_my_edi/1/get_submission_statuses' and self.submission_status_count == 3:
-            res = {'statuses': {}, 'document_count': 10}
-            # Build the res using loops otherwise it'd take a lot of lines.
-            for i in range(2):
-                for j in range(5):
-                    res['statuses'][f'1234589745135{i}{j}'] = {
-                        'status': 'valid',
-                        'reason': '',
-                        'long_id': '123-789-654',
-                        'valid_datetime': '2024-07-15T05:00:00Z',
-                    }
-            return res
-        else:
-            raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
+        raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))

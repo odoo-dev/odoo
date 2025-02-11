@@ -1,5 +1,4 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from odoo import api, fields, models
 
 
@@ -45,7 +44,7 @@ class ResCompany(models.Model):
         """
         for company in self:
             company.l10n_my_edi_proxy_user_id = company.account_edi_proxy_client_ids.filtered(
-                lambda u: u.proxy_type == 'l10n_my_edi' and u.edi_mode == company.l10n_my_edi_mode
+                lambda u: u.proxy_type == 'l10n_my_edi' and u.edi_mode == company.l10n_my_edi_mode,
             )[:1]
 
     @api.depends('l10n_my_identification_type')
@@ -74,3 +73,7 @@ class ResCompany(models.Model):
         self.ensure_one()
         if not self.l10n_my_edi_proxy_user_id:
             self.env['account_edi_proxy_client.user']._register_proxy_user(self, 'l10n_my_edi', self.l10n_my_edi_mode)
+
+    def _l10n_my_edi_enabled(self):
+        self.ensure_one()
+        return bool(self.sudo().l10n_my_edi_proxy_user_id)

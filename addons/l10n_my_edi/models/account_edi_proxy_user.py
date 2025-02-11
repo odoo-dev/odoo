@@ -5,8 +5,11 @@ import logging
 from werkzeug.urls import url_join
 
 from odoo import _, fields, models
-from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
 from odoo.exceptions import UserError
+
+from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import (
+    AccountEdiProxyError,
+)
 
 _logger = logging.getLogger(__name__)
 

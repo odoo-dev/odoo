@@ -1,6 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -25,7 +24,7 @@ class ResConfigSettings(models.TransientModel):
     def _onchange_l10n_my_edi_mode(self):
         """ This onchange is mostly here to improve usability by avoiding the need to save when changing the mode. """
         self.l10n_my_edi_proxy_user_id = self.company_id.account_edi_proxy_client_ids.filtered(
-            lambda u: u.proxy_type == 'l10n_my_edi' and u.edi_mode == self.l10n_my_edi_mode
+            lambda u: u.proxy_type == 'l10n_my_edi' and u.edi_mode == self.l10n_my_edi_mode,
         )
 
     # --------------
@@ -49,7 +48,7 @@ class ResConfigSettings(models.TransientModel):
 
         if not result.get('success'):
             # If we get a result, it should always be successful as we only archive. If for any reason it is not, we will raise an error.
-            raise UserError(_("An unexpected error occurred while unregistering. Please try again later."))
+            raise UserError(self.env._("An unexpected error occurred while unregistering. Please try again later."))
 
         # If all goes well we can deactivate the local user.
         proxy_user.active = False

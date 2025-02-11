@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="PartnerDetailsEdit" t-inherit="point_of_sale.PartnerDetailsEdit" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('partner-details-box')]" position="after">
+            <div t-if="pos.company.country?.code === 'MY'" class="partner-details-box row row-cols-1 row-cols-sm-2 gy-3 mt-3">
+                <h3 class="w-100">Additional invoicing information</h3>
+                <div class="partner-detail col">
+                    <label class="form-label" for="identification_type">Identification Type</label>
+                    <select
+                        class="detail form-select"
+                        t-att="{'disabled': isFieldCommercialAndPartnerIsChild('l10n_my_identification_type')}"
+                        name="l10n_my_identification_type"
+                        t-model="changes.l10n_my_identification_type"
+                        id="identification_type"
+                        >
+                        <t t-foreach="pos.l10n_my_identification_type" t-as="identification_type" t-key="identification_type.value">
+                            <option
+                                t-att-value="identification_type.value"
+                                t-out="identification_type.name" />
+                        </t>
+                    </select>
+                </div>
+                <div class="partner-detail col">
+                    <label class="form-label" for="identification_number">Identification Number</label>
+                    <input class="detail form-control"
+                           id="identification_number"
+                           t-att="{'disabled': isFieldCommercialAndPartnerIsChild('l10n_my_identification_number')}"
+                           name="l10n_my_identification_number"
+                           t-model="changes.l10n_my_identification_number"/>
+                </div>
+                <div class="partner-detail col">
+                    <label class="form-label" for="malaysian_tin">Malaysian TIN</label>
+                    <input class="detail form-control"
+                           id="malaysian_tin"
+                           t-att="{'disabled': isFieldCommercialAndPartnerIsChild('l10n_my_edi_malaysian_tin')}"
+                           name="l10n_my_edi_malaysian_tin"
+                           t-model="changes.l10n_my_edi_malaysian_tin"/>
+                </div>
+            </div>
+        </xpath>
+    </t>
+
+</templates>
