@@ -407,15 +407,49 @@ export class AddSnippetDialog extends Component {
             this.props.installModule(moduleId, selectedSnippetEl.dataset.name);
         } else {
             selectedSnippetEl = this.props.snippets.get(snippetKey);
+            const snippetName = selectedSnippetEl.name;
             selectedSnippetEl = selectedSnippetEl.baseBody.cloneNode(true);
             selectedSnippetEl.classList.remove("oe_snippet_body");
             const snippetDialogPreviews = selectedSnippetEl.querySelectorAll(".s_dialog_preview");
             for (const snippetDialogPreview of snippetDialogPreviews) {
                 snippetDialogPreview.remove();
             }
+
+            if (snippetName === "s_media_list") {
+                // Options for the observer (which mutations to observe)
+                const config = {
+                    attributes: true,
+                    childList: true,
+                    subtree: true,
+                    attributeOldValue: true,
+                    // attributeFilter: [
+                    //     "data-mimetype",
+                    // ],
+                };
+
+                // Callback function to execute when mutations are observed
+                const callback = (mutationList, observer) => {
+                    for (const mutation of mutationList) {
+                        if (mutation.type === "childList") {
+                            console.trace("A child node has been added or removed.");
+                            console.log(mutation.addedNodes);
+                            console.log(mutation.removedNodes);
+                        } else if (mutation.type === "attributes" && mutation.attributeName !== "class") {
+                            console.trace(`The ${mutation.attributeName} attribute was modified ${mutation.oldValue} ${mutation.target.attributes.getNamedItem(mutation.attributeName).value}.`);
+                        }
+                    }
+                };
+
+                // Create an observer instance linked to the callback function
+                const observer = new MutationObserver(callback);
+                // Start observing the target node for configured mutations
+                observer.observe(selectedSnippetEl, config);
+            }
+
             this.props.addSnippet(selectedSnippetEl);
             // Adapt the snippet content right after adding it to the DOM.
             this._updateSnippetContent(selectedSnippetEl);
+
             this.props.close();
         }
     }

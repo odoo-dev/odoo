@@ -1035,8 +1035,8 @@ export class OdooEditor extends EventTarget {
 
         if (!this.observer) {
             this.observer = new MutationObserver(records => {
-                console.log(">>> observerActive", JSON.stringify(records))
-                console.trace();
+                //console.log(">>> observerActive", JSON.stringify(records))
+                //console.trace();
                 this.observerIdSet(records);
                 records = this.filterMutationRecords(records);
                 if (!records.length) return;

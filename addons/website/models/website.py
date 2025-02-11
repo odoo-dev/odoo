@@ -1683,6 +1683,7 @@ class Website(models.Model):
     def get_client_action_url(self, url, mode_edit=False):
         action_params = {
             "path": url,
+            "debug": "assets",
         }
         if mode_edit:
             action_params["enable_editor"] = 1
