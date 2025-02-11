@@ -194,8 +194,10 @@ class PosOrder(models.Model):
         :param sign: An optional parameter to force the sign of amounts.
         :return: A list of python dictionaries (see '_prepare_base_line_for_taxes_computation' in account.tax).
         """
-        self.ensure_one()
-        return self.lines._prepare_tax_base_line_values() or []
+        result = []
+        for order in self:
+            result.extend(order.lines._prepare_tax_base_line_values() or [])
+        return result
 
     @api.model
     def _get_invoice_lines_values(self, line_values, pos_order_line):
@@ -237,7 +239,7 @@ class PosOrder(models.Model):
                     'name': line.customer_note,
                     'display_type': 'line_note',
                 }))
-        if self.general_customer_note:
+        if len(self) == 1 and self.general_customer_note:
             invoice_lines.append((0, None, {
                 'name': self.general_customer_note,
                 'display_type': 'line_note',
@@ -612,17 +614,6 @@ class PosOrder(models.Model):
             'res_id': self.account_move.id,
         }
 
-    def action_view_multiple_invoice(self, invoices):
-        """Return the appropriate action for the created invoices (list view or form view)."""
-        action = self.env['ir.actions.actions']._for_xml_id('account.action_move_out_invoice_type')
-        if len(invoices) == 1:
-            form_view = [(self.env.ref('account.view_move_form').id, 'form')]
-            action['views'] = form_view
-            action['res_id'] = invoices.id
-        else:
-            action['domain'] = [('id', 'in', invoices.ids)]
-        return action
-
     def action_create_invoices(self):
         return {
             'name': _('Create Invoice(s)'),
@@ -673,27 +664,32 @@ class PosOrder(models.Model):
 
     def _get_partner_bank_id(self):
         bank_partner_id = False
-        if self.amount_total <= 0 and self.partner_id.bank_ids:
+        amount_total = sum(order.amount_total for order in self)
+        if amount_total <= 0 and self.partner_id.bank_ids:
             bank_partner_id = self.partner_id.bank_ids[0].id
-        elif self.amount_total >= 0 and self.company_id.partner_id.bank_ids:
+        elif amount_total >= 0 and self.company_id.partner_id.bank_ids:
             bank_partner_id = self.company_id.partner_id.bank_ids[0].id
         return bank_partner_id
 
     def _create_invoice(self, move_vals):
-        self.ensure_one()
-        invoice = self.env['account.move'].sudo()\
+        AccountMove = self.env['account.move']
+
+        invoice = AccountMove.sudo()\
             .with_company(self.company_id)\
             .with_context(default_move_type=move_vals['move_type'], linked_to_pos=True)\
             .create(move_vals)
+        currency = self.currency_id
+        amount_total = sum(order.amount_total for order in self)
+        payment_total = sum(order.amount_paid for order in self)
 
         if self.config_id.cash_rounding:
             line_ids_commands = []
             rate = invoice.invoice_currency_rate
             sign = invoice.direction_sign
-            amount_paid = (-1 if self.amount_total < 0.0 else 1) * self.amount_paid
+            amount_paid = (-1 if amount_total < 0.0 else 1) * payment_total
             difference_currency = sign * (amount_paid - invoice.amount_total)
             difference_balance = invoice.company_currency_id.round(difference_currency / rate) if rate else 0.0
-            if not self.currency_id.is_zero(difference_currency):
+            if not currency.is_zero(difference_currency):
                 rounding_line = invoice.line_ids.filtered(lambda line: line.display_type == 'rounding' and not line.tax_line_id)
                 if rounding_line:
                     line_ids_commands.append(Command.update(rounding_line.id, {
@@ -720,9 +716,12 @@ class PosOrder(models.Model):
                     'amount_currency': existing_terms_line.amount_currency - difference_currency,
                     'balance': existing_terms_line.balance - difference_balance,
                 }))
-                with self.env['account.move']._check_balanced({'records': invoice}):
+                with AccountMove._check_balanced({'records': invoice}):
                     invoice.with_context(skip_invoice_sync=True).line_ids = line_ids_commands
-        invoice.message_post(body=_("This invoice has been created from the point of sale session: %s", self._get_html_link()))
+
+        if len(self) == 1:
+            invoice.message_post(body=_("This invoice has been created from the point of sale session: %s", self._get_html_link()))
+
         return invoice
 
     def action_pos_order_paid(self):
@@ -756,40 +755,50 @@ class PosOrder(models.Model):
         return True
 
     def _prepare_invoice_vals(self):
-        self.ensure_one()
+        # TODO: JCB: SJAI: check compatibility of records in self
+
         timezone = pytz.timezone(self._context.get('tz') or self.env.user.tz or 'UTC')
-        invoice_date = fields.Datetime.now() if self.session_id.state == 'closed' else self.date_order
         pos_refunded_invoice_ids = []
         for orderline in self.lines:
             if orderline.refunded_orderline_id and orderline.refunded_orderline_id.order_id.account_move:
                 pos_refunded_invoice_ids.append(orderline.refunded_orderline_id.order_id.account_move.id)
 
+        fiscal_position = self.fiscal_position_id
+        pos_config = self.config_id
+        rounding_method = pos_config.rounding_method
+        amount_total = sum(order.amount_total for order in self)
+
         vals = {
-            'invoice_origin': self.name,
+            'invoice_origin': ", ".join([order.name for order in self]),
             'pos_refunded_invoice_ids': pos_refunded_invoice_ids,
             'pos_order_ids': self.ids,
             'journal_id': self.session_id.config_id.invoice_journal_id.id,
-            'move_type': 'out_invoice' if self.amount_total >= 0 else 'out_refund',
-            'ref': self.name,
+            'move_type': 'out_invoice' if amount_total >= 0 else 'out_refund',
             'partner_id': self.partner_id.address_get(['invoice'])['invoice'],
             'partner_bank_id': self._get_partner_bank_id(),
             'currency_id': self.currency_id.id,
             'invoice_user_id': self.user_id.id,
-            'invoice_date': invoice_date.astimezone(timezone).date(),
-            'fiscal_position_id': self.fiscal_position_id.id,
+            'fiscal_position_id': fiscal_position.id,
             'invoice_line_ids': self._prepare_invoice_lines(),
             'invoice_payment_term_id': self.partner_id.property_payment_term_id.id or False,
-            'invoice_cash_rounding_id': self.config_id.rounding_method.id,
+            'invoice_cash_rounding_id': rounding_method.id,
+            'invoice_date': fields.Datetime.now().astimezone(timezone).date(),
         }
-        if self.refunded_order_id.account_move:
-            vals['ref'] = _('Reversal of: %s', self.refunded_order_id.account_move.name)
-            vals['reversed_entry_id'] = self.refunded_order_id.account_move.id
-        if self.floating_order_name:
-            vals.update({'narration': self.floating_order_name})
+
+        if len(self) == 1:
+            if self.session_id.state == 'closed':
+                vals['invoice_date'] = self.date_order.astimezone(timezone).date()
+
+            if self.refunded_order_id.account_move:
+                vals['ref'] = _('Reversal of: %s', self.refunded_order_id.account_move.name)
+                vals['reversed_entry_id'] = self.refunded_order_id.account_move.id
+
+        if narration := ", ".join([order.floating_order_name for order in self if order.floating_order_name]):
+            vals['narration'] = narration
+
         return vals
 
     def _prepare_aml_values_list_per_nature(self):
-        self.ensure_one()
         AccountTax = self.env['account.tax']
         sign = 1 if self.amount_total < 0 else -1
         commercial_partner = self.partner_id.commercial_partner_id
@@ -927,6 +936,7 @@ class PosOrder(models.Model):
         This is done by taking data from the order and using it to somewhat replicate the resulting entry in order to
         reverse partially the movements done ine the POS closing entry.
         """
+        self.ensure_one()
         aml_values_list_per_nature = self._prepare_aml_values_list_per_nature()
         move_lines = []
         for aml_values_list in aml_values_list_per_nature.values():
@@ -965,40 +975,7 @@ class PosOrder(models.Model):
         self.write({'to_invoice': True})
         if self.company_id.anglo_saxon_accounting and self.session_id.update_stock_at_closing and self.session_id.state != 'closed':
             self._create_order_picking()
-        return self._generate_pos_order_invoice()
-
-    def _generate_pos_order_invoice(self):
-        moves = self.env['account.move']
-
-        for order in self:
-            # Force company for all SUPERUSER_ID action
-            if order.account_move:
-                moves += order.account_move
-                continue
-
-            if not order.partner_id:
-                raise UserError(_('Please provide a partner for the sale.'))
-
-            move_vals = order._prepare_invoice_vals()
-            new_move = order._create_invoice(move_vals)
-
-            order.state = 'done'
-            new_move.sudo().with_company(order.company_id).with_context(skip_invoice_sync=True)._post()
-
-            moves += new_move
-            payment_moves = order._apply_invoice_payments(order.session_id.state == 'closed')
-
-            # Send and Print
-            if self.env.context.get('generate_pdf', True):
-                new_move.with_context(skip_invoice_sync=True)._generate_and_send()
-
-            if order.session_id.state == 'closed':  # If the session isn't closed this isn't needed.
-                # If a client requires the invoice later, we need to revers the amount from the closing entry, by making a new entry for that.
-                order._create_misc_reversal_move(payment_moves)
-
-        if not moves:
-            return {}
-
+        move = self._generate_pos_order_invoice()
         return {
             'name': _('Customer Invoice'),
             'view_mode': 'form',
@@ -1007,8 +984,47 @@ class PosOrder(models.Model):
             'context': "{'move_type':'out_invoice'}",
             'type': 'ir.actions.act_window',
             'target': 'current',
-            'res_id': moves and moves.ids[0] or False,
+            'res_id': move.id,
         }
+
+    def _generate_pos_order_invoice(self):
+
+        # Ensure all orders is linked to a partner, and that all partners are the same.
+        if not (all([o.partner_id for o in self]) and len(self.partner_id) == 1):
+            raise UserError(_("You cannot invoice orders with different partners."))
+
+        self.state = 'done'
+
+        # invoice
+        move = self._create_invoice(self._prepare_invoice_vals())
+        move.sudo().with_company(self.company_id).with_context(skip_invoice_sync=True)._post()
+
+        # payments (tracked by session per order)
+        orders_by_session = defaultdict(lambda: self.env['pos.order'])
+        for order in self:
+            orders_by_session[order.session_id] |= order
+
+        # map: session -> [(order, payment_moves)]
+        payment_moves = {}
+        for session, orders in orders_by_session.items():
+            payment_moves[session] = [(o, o._apply_invoice_payments(o.session_id.state == 'closed')) for o in orders]
+
+        # required reversals when the session is closed
+        for session, payment_moves in payment_moves.items():
+            if session.state == 'closed':
+                for (order, moves) in payment_moves:
+                    order._create_misc_reversal_move(moves)
+
+        if self.env.context.get('generate_pdf', True):
+            move.with_context(skip_invoice_sync=True)._generate_and_send()
+
+        move.message_post_with_source(
+            'mail.message_origin_link',
+            render_values={'self': move, 'origin': self},
+            subtype_xmlid='mail.mt_note',
+        )
+
+        return move
 
     def action_pos_order_cancel(self):
         if self.env.context.get('active_ids'):
