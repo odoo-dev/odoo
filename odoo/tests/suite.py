@@ -15,10 +15,15 @@ to minimise the code to maintain
 
 import logging
 import sys
+import time
+import json
+from unittest import mock
+from contextlib import ExitStack
+import freezegun
 
 import odoo
 from . import case
-from .common import HttpCase
+from .common import HttpCase, TransactionCase, save_test_file
 from .result import stats_logger
 from unittest import util, BaseTestSuite, TestCase
 
@@ -34,6 +39,12 @@ class TestSuite(BaseTestSuite):
     """
 
     def run(self, result, debug=False):
+        self.profile_data = {
+            'time_spent': 0,
+            'suite_time_total': 0,
+            'potential_gain': 0,
+        }
+        start_time = freezegun.api.real_monotonic()
         for test in self:
             if result.shouldStop:
                 break
@@ -47,6 +58,20 @@ class TestSuite(BaseTestSuite):
                 test(result)
 
         self._tearDownPreviousClass(None, result)
+        end_time = freezegun.api.real_monotonic()
+        self.profile_data['suite_time_total'] = end_time - start_time
+        # Post process data
+        def _visit_node(node: dict):
+            if 'time_spent' and 'number_calls' in node and node['number_calls']:
+                node['mean'] = node['time_spent'] / node['number_calls']
+                node['potential_gain'] = (node['number_calls'] - 1) * node['mean']
+                self.profile_data['potential_gain'] += node['potential_gain']
+            for v in node.values():
+                if not isinstance(v, dict):
+                    continue
+                _visit_node(v)
+        _visit_node(self.profile_data)
+        save_test_file('profile_data', json.dumps(self.profile_data).encode(), 'profile_data_', extension='json', document_type=f'Profile Json ({self.profile_data["potential_gain"]:.2f}s potential gains)')
         return result
 
     def _handleClassSetUp(self, test, result):
@@ -62,7 +87,43 @@ class TestSuite(BaseTestSuite):
         currentClass._classSetupFailed = False
 
         try:
-            currentClass.setUpClass()
+            # Compute a key for the class, that is the qualname of all classes that override setUpClass
+            klss = [kls for kls in currentClass.__mro__ if issubclass(kls, TransactionCase) and kls != TransactionCase]
+            klss.reverse()
+            # Filter classes which do not explicitely override setUpClass
+            klss = [kls for idx, kls in enumerate(klss) if idx == 0 or klss[idx - 1].setUpClass != kls.setUpClass]
+
+            with ExitStack() as stack:
+                last_data = self.profile_data
+                start_time_stack = []
+                for kls in klss:
+                    kls_data = last_data.setdefault(kls.__qualname__, {
+                        'number_calls': 0,
+                        'time_spent': 0,
+                        'mean': 0,
+                        'potential_gain': 0,
+                    })
+                    def mock_method_factory(kkls):
+                        _this_data = kls_data
+                        idx = currentClass.__mro__.index(kkls)
+                        if idx == 0:
+                            original = kkls.setUpClass
+                        else:
+                            original = super(currentClass.__mro__[idx - 1], currentClass).setUpClass
+                        def _patched(*args, **kwargs):
+                            nonlocal start_time_stack
+                            start_time_stack.append(freezegun.api.real_monotonic())
+                            original(*args, **kwargs)
+                            end_time = freezegun.api.real_monotonic()
+                            _this_data['number_calls'] += 1
+                            time_spent = end_time - start_time_stack.pop()
+                            _this_data['time_spent'] += time_spent
+                            self.profile_data['time_spent'] += time_spent
+                            start_time_stack = [ts + time_spent for ts in start_time_stack]
+                        return _patched
+                    stack.enter_context(mock.patch.object(kls, 'setUpClass', name=f'wraps_{kls.__qualname__}', wraps=mock_method_factory(kls)))
+                    last_data = kls_data
+                currentClass.setUpClass()
         except Exception as e:
             currentClass._classSetupFailed = True
             className = util.strclass(currentClass)
