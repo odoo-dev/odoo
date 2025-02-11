@@ -37,7 +37,7 @@ class PosMakeInvoice(models.TransientModel):
         vals = {
             'invoice_origin': ', '.join(orders.mapped('name')),
             'pos_refunded_invoice_ids': pos_refunded_invoice_ids,
-            'journal_id': orders[0].config_id.invoice_journal_id.id,
+            'journal_id': orders[0].session_id.config_id.invoice_journal_id.id,
             'move_type': 'out_invoice' if amount_total >= 0 else 'out_refund',
             'partner_id': partner_id.address_get(['invoice'])['invoice'],
             'partner_bank_id': orders[0]._get_partner_bank_id(),
@@ -70,7 +70,7 @@ class PosMakeInvoice(models.TransientModel):
                 "Cannot create an invoice. No items are available to invoice.\n"
                 "To resolve this issue, please ensure that there are some orders to be invoiced among the selected orders."
             ))
-        pos_orders = self.env['pos.order'].browse(self.env.context.get('active_ids')).filtered(lambda o: o.invoice_status != 'invoiced')
+        pos_orders = self.env['pos.order'].browse(self.env.context.get('active_ids')).filtered(lambda o: not o.account_move)
         invoices = self.env['account.move']
         if not self.consolidated_billing:
             for order in pos_orders:
@@ -89,20 +89,60 @@ class PosMakeInvoice(models.TransientModel):
                     if order_wo_fiscal:
                         inv2 = self.prepare_invoices(order_wo_fiscal)
                         invoices |= inv2
+                # payment_moves = orders_by_config._apply_invoice_payments(orders_by_config.session_id.state == 'closed')
+                # if orders_by_config.session_id.state == 'closed':  # If the session isn't closed this isn't needed.
+                #     # If a client requires the invoice later, we need to revers the amount from the closing entry, by making a new entry for that.
+                #     orders_by_config._create_misc_reversal_move(payment_moves)
         if pos_orders:
             return pos_orders.action_view_multiple_invoice(invoices=invoices)
 
     def prepare_invoices(self, orders):
-        invoices = self.env['account.move']
         move_vals = self._prepare_invoice_vals(orders)
-        move = self.env['account.move'].with_context(default_move_type=move_vals['move_type']).create(move_vals)
-        orders.write({'account_move': move.id, 'state': 'invoiced'})
-        move.message_post_with_source(
+        invoice = self.env['account.move'].with_company(orders.company_id).with_context(default_move_type=move_vals['move_type'], linked_to_pos=True).create(move_vals)
+
+        if orders.config_id.cash_rounding:
+            line_ids_commands = []
+            rate = invoice.invoice_currency_rate
+            sign = invoice.direction_sign
+            amount_paid = (-1 if sum(order.amount_total for order in orders) < 0.0 else 1) * sum(order.amount_paid for order in orders)
+            difference_currency = sign * (amount_paid - invoice.amount_total)
+            difference_balance = invoice.company_currency_id.round(difference_currency / rate) if rate else 0.0
+            if not self.currency_id.is_zero(difference_currency):
+                rounding_line = invoice.line_ids.filtered(lambda line: line.display_type == 'rounding' and not line.tax_line_id)
+                if rounding_line:
+                    line_ids_commands.append(Command.update(rounding_line.id, {
+                        'amount_currency': rounding_line.amount_currency + difference_currency,
+                        'balance': rounding_line.balance + difference_balance,
+                    }))
+                else:
+                    if difference_currency > 0.0:
+                        account = invoice.invoice_cash_rounding_id.loss_account_id
+                    else:
+                        account = invoice.invoice_cash_rounding_id.profit_account_id
+                    line_ids_commands.append(Command.create({
+                        'name': invoice.invoice_cash_rounding_id.name,
+                        'amount_currency': difference_currency,
+                        'balance': difference_balance,
+                        'currency_id': invoice.currency_id.id,
+                        'display_type': 'rounding',
+                        'account_id': account.id,
+                    }))
+                existing_terms_line = invoice.line_ids\
+                    .filtered(lambda line: line.display_type == 'payment_term')\
+                    .sorted(lambda line: -abs(line.amount_currency))[:1]
+                line_ids_commands.append(Command.update(existing_terms_line.id, {
+                    'amount_currency': existing_terms_line.amount_currency - difference_currency,
+                    'balance': existing_terms_line.balance - difference_balance,
+                }))
+                with self.env['account.move']._check_balanced({'records': invoice}):
+                    invoice.with_context(skip_invoice_sync=True).line_ids = line_ids_commands
+        invoice.message_post(body=_("This invoice has been created from the point of sale session: %s", orders[0]._get_html_link()))
+        orders.state = 'done'
+        orders.write({'account_move': invoice.id, 'invoice_status': 'invoiced'})
+        invoice.message_post_with_source(
             'mail.message_origin_link',
-            render_values={'self': move, 'origin': orders},
+            render_values={'self': invoice, 'origin': orders},
             subtype_xmlid='mail.mt_note',
         )
-        move.write({'payment_state': 'paid'})
-        invoices |= move
-
-        return invoices
+        invoice.write({'payment_state': 'paid'})
+        return invoice
