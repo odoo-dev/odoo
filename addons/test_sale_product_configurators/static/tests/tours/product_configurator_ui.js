@@ -4,6 +4,7 @@ import { registry } from "@web/core/registry";
 import { stepUtils } from "@web_tour/tour_service/tour_utils";
 import configuratorTourUtils from "@sale/js/tours/product_configurator_tour_utils";
 import tourUtils from "@sale/js/tours/tour_utils";
+import { delay } from "@odoo/hoot-dom";
 
 // Note: please keep this test without pricelist for maximum coverage.
 // The pricelist is tested on the other tours.
@@ -68,6 +69,9 @@ registry.category("web_tour.tours").add('sale_product_configurator_tour', {
         },
         {
             trigger: 'td.o_data_cell:contains("Chair floor protection")',
+            run: async() => {
+                await delay(300);
+            },
         },
         {
             trigger: 'span[name=amount_total]:contains("960.60")',
