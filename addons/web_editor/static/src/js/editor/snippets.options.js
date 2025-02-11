@@ -8036,6 +8036,7 @@ registry.BackgroundOptimize = ImageHandlerOption.extend({
         // First delete the data attributes relative to the image background
         // from the target as a data attribute could have been be removed (ex:
         // glFilter).
+        console.log(">>> _applyImage", this.$target[0]); // NOpe
         for (const attribute in this.$target[0].dataset) {
             if (isBackgroundImageAttribute(attribute)) {
                 delete this.$target[0].dataset[attribute];
@@ -8267,6 +8268,7 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
         // Delete the dataset information relative to the background-image of
         // the old target.
         filteredOldDataset.forEach(([key]) => {
+            console.log(">>> setTarget Hoho to check", this.$target[0]); //nope
             delete this.$target[0].dataset[key];
         });
         // It is important to delete ".o_modified_image_to_save" from the old
