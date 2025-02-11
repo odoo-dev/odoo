@@ -5,9 +5,14 @@
             <t t-set-slot="control-panel-buttons">
                 <ForecastedButtons action="this.props.action" reloadReport.bind="this.reloadReport" resModel="this.resModel"/>
             </t>
-            <t t-set-slot="control-panel-actions">
-                <div class="btn-group o_search_options position-static" role="search">
-                    <ForecastedWarehouseFilter action="this.props.action" warehouses="this.warehouses" setWarehouseInContext.bind="this.updateWarehouse"/>
+            <t t-set-slot="layout-actions">
+                <div class="d-flex gap-4">
+                    <div class="btn-group o_search_options position-static" role="search">
+                        <ForecastedWarehouseFilter action="this.props.action" warehouses="this.warehouses" setWarehouseInContext.bind="this.updateWarehouse"/>
+                    </div>
+                    <div class="btn-group o_search_options position-static" role="search">
+                        <ForecastedProductVariantFilter action="this.props.action" variants="this.variants" setVariantInContext.bind="this.updateVariant"/>
+                    </div>
                 </div>
             </t>
         </ControlPanel>
