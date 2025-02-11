@@ -456,8 +456,8 @@ class AccountTax(models.Model):
                     not record.refund_repartition_line_ids:
                 continue
 
-            invoice_repartition_line_ids = record.invoice_repartition_line_ids.sorted(lambda l: (l.sequence, l.id))
-            refund_repartition_line_ids = record.refund_repartition_line_ids.sorted(lambda l: (l.sequence, l.id))
+            invoice_repartition_line_ids = record.invoice_repartition_line_ids.sorted(lambda l: (l.sequence, l._origin.id))
+            refund_repartition_line_ids = record.refund_repartition_line_ids.sorted(lambda l: (l.sequence, l._origin.id))
             record._check_repartition_lines(invoice_repartition_line_ids)
             record._check_repartition_lines(refund_repartition_line_ids)
 

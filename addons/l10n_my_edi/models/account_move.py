@@ -249,7 +249,7 @@ class AccountMove(models.Model):
 
     # API methods
 
-    def _l10n_my_edi_submit_documents(self, xml_contents):
+    def _l10n_my_edi_submit_documents(self, xml_contents, commit=True):
         """ Contact our IAP service in order to send the invoice xml to the MyInvois API. """
         proxy_user = self._l10n_my_edi_ensure_proxy_user()
 
@@ -313,7 +313,7 @@ class AccountMove(models.Model):
 
                     move.write(updated_values)
 
-            if self._can_commit():
+            if commit and self._can_commit():
                 self._cr.commit()
 
         # For successful moves, we log the sending here. Any errors will be handled by the send & print wizard.
@@ -328,7 +328,7 @@ class AccountMove(models.Model):
 
         return errors
 
-    def _l10n_my_edi_fetch_updated_statuses(self):
+    def _l10n_my_edi_fetch_updated_statuses(self, commit=True):
         """
         Contact our IAP service in order to get the status of the invoices in self.
         Statuses are fetched in batches using the l10n_my_edi_submission_uid field.
@@ -355,6 +355,9 @@ class AccountMove(models.Model):
 
             for move in move_batch:
                 status_info = statuses.get(move.l10n_my_edi_external_uuid)
+                if (status_info and status_info['status'] == 'in_progress') or (not status_info and move.l10n_my_edi_state == 'in_progress'):  # l10n_my_edi_state would already be in progress as its set during submission
+                    any_in_progress = True
+
                 # If the status did not change, we do not need to do anything.
                 if not status_info or move.l10n_my_edi_state == status_info['status']:
                     continue
@@ -379,7 +382,7 @@ class AccountMove(models.Model):
                 elif move.l10n_my_edi_state == 'valid':
                     move._update_validation_fields(status_info)
 
-            if self._can_commit():
+            if commit and self._can_commit():
                 self._cr.commit()
 
         # We don't consider these errors per-say. From my understanding an invalid invoice is considered as cancelled,
