@@ -1,9 +1,17 @@
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { useActiveElement } from "../ui/ui_service";
 import { useForwardRefToParent } from "@web/core/utils/hooks";
-import { Component, onWillDestroy, useChildSubEnv, useExternalListener, useState } from "@odoo/owl";
+import {
+    Component,
+    onWillDestroy,
+    useChildSubEnv,
+    useExternalListener,
+    useState,
+    onMounted,
+} from "@odoo/owl";
 import { throttleForAnimation } from "@web/core/utils/timing";
 import { makeDraggableHook } from "../utils/draggable_hook_builder_owl";
+import { isVisible } from "@web/core/utils/ui";
 
 const useDialogDraggable = makeDraggableHook({
     name: "useDialogDraggable",
@@ -89,6 +97,7 @@ export class Dialog extends Component {
             },
             { bypassEditableProtection: true }
         );
+        this.state = useState({ buttonCount: 0 });
         this.id = `dialog_${this.data.id}`;
         useChildSubEnv({ inDialog: true, dialogId: this.id });
         this.isMovable = this.props.header;
@@ -114,10 +123,19 @@ export class Dialog extends Component {
                 this.data.scrollToOrigin();
             }
         });
+        onMounted(() => {
+            requestAnimationFrame(() => {
+                this.updateButtonCount();
+            });
+        });
     }
 
     get isFullscreen() {
-        return this.props.fullscreen || this.env.isSmall;
+        return this.props.fullscreen || (this.env.isSmall && this.design !== "minimal");
+    }
+
+    get design() {
+        return ["sm", "md"].includes(this.props.size) ? "minimal" : "default";
     }
 
     get contentStyle() {
@@ -127,9 +145,20 @@ export class Dialog extends Component {
         return "";
     }
 
+    updateButtonCount() {
+        if (!this.modalRef.el) {
+            this.state.buttonCount = 0;
+            return;
+        }
+        this.state.buttonCount = Array.from(
+            this.modalRef.el.querySelectorAll(".modal-footer > .btn")
+        ).filter((btn) => isVisible(btn)).length;
+    }
+
     onResize() {
         this.position.left = 0;
         this.position.top = 0;
+        this.updateButtonCount();
     }
 
     onEscape() {
