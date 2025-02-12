@@ -222,7 +222,7 @@ export class ImageCrop extends Component {
     async _save(refreshOptions = true) {
         // Mark the media for later creation of cropped attachment
         this.media.classList.add('o_modified_image_to_save');
-
+        console.log('>>> Hoho APP');
         [...cropperDataFields, 'aspectRatio'].forEach(attr => {
             delete this.media.dataset[attr];
             const value = this._getAttributeValue(attr);

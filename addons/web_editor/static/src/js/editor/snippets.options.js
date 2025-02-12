@@ -8279,6 +8279,7 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
         this._super(...arguments);
         if (oldBgURL) {
             this._setBackground(oldBgURL);
+            console.log(">>> Merci Lucas");
             filteredOldDataset.forEach(([key, value]) => {
                 this.$target[0].dataset[key] = value;
             });
