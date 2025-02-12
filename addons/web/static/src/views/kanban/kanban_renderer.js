@@ -231,11 +231,26 @@ export class KanbanRenderer extends Component {
         useHotkey("ArrowRight", ({ area }) => this.focusNextCard(area, "right"), arrowsOptions);
 
         let previousScrollTop = 0;
+        let activeColumnId = null;
         onWillPatch(() => {
             previousScrollTop = this.rootRef.el.scrollTop;
+            const activeElement = document.activeElement;
+            if (activeElement.closest('.o_column_folded')) {
+                const columnId = activeElement.closest(".o_kanban_group").dataset.id;
+                if (columnId) {
+                    activeColumnId = columnId;
+                }
+            }
         });
         onPatched(() => {
             this.rootRef.el.scrollTop = previousScrollTop;
+            if (activeColumnId) {
+                const column = document.querySelector(`.o_kanban_group[data-id="${activeColumnId}"]`);
+                if (column) {
+                    column.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+                }
+                activeColumnId = null;
+            }
         });
         const handleAltKeyDown = (ev) => {
             if (ev.key === "Alt") {
