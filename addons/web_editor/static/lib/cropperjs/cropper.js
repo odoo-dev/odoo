@@ -509,6 +509,7 @@
    */
 
   function removeData(element, name) {
+    console.log(">>> BISOUS Here we are");
     if (isObject(element[name])) {
       try {
         delete element[name];
@@ -518,6 +519,7 @@
     } else if (element.dataset) {
       // #128 Safari not allows to delete dataset property
       try {
+        console.log(">>> BISOUS");
         delete element.dataset[name];
       } catch (error) {
         element.dataset[name] = undefined;
