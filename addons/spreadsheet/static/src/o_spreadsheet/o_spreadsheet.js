@@ -2383,6 +2383,37 @@
         setIsFastStrategy(isFast) {
             this.isFastIdStrategy = isFast;
         }
+        /**
+         * Generates a custom UUID using a simple 26^8 method (8-character alphanumeric string with lowercase letters)
+         * This has a higher chance of collision than a UUIDv4, but not only faster to generate than an UUIDV4,
+         * it also has a smaller size, which is preferable to alleviate the overall data size.
+         *
+         * This method is preferable when generating uuids for the core data (sheetId, figureId, etc)
+         * as they will appear several times in the revisions and local history.
+         *
+         */
+        smallUuid() {
+            if (this.isFastIdStrategy) {
+                this.fastIdStart++;
+                return String(this.fastIdStart);
+                //@ts-ignore
+            }
+            else if (window.crypto && window.crypto.getRandomValues) {
+                //@ts-ignore
+                return [1e7 + -1e3].replace(/[018]/g, (c) => (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16));
+            }
+            else {
+                // mainly for jest and other browsers that do not have the crypto functionality
+                return "xxxxxxxx-xxxx".replace(/[xy]/g, function (c) {
+                    var r = (Math.random() * 16) | 0, v = c == "x" ? r : (r & 0x3) | 0x8;
+                    return v.toString(16);
+                });
+            }
+        }
+        /**
+         * Generates an UUIDV4, has astronomically low chance of collision, but is larger in size than the smallUuid.
+         * This method should be used when you need to avoid collisions at all costs, like the id of a revision.
+         */
         uuidv4() {
             if (this.isFastIdStrategy) {
                 this.fastIdStart++;
@@ -5540,7 +5571,7 @@
     const CREATE_SHEET_ACTION = (env) => {
         const activeSheetId = env.model.getters.getActiveSheetId();
         const position = env.model.getters.getSheetIds().indexOf(activeSheetId) + 1;
-        const sheetId = env.model.uuidGenerator.uuidv4();
+        const sheetId = env.model.uuidGenerator.smallUuid();
         env.model.dispatch("CREATE_SHEET", { sheetId, position });
         env.model.dispatch("ACTIVATE_SHEET", { sheetIdFrom: activeSheetId, sheetIdTo: sheetId });
     };
@@ -5551,7 +5582,7 @@
         const getters = env.model.getters;
         const zone = getters.getSelectedZone();
         let dataSetZone = zone;
-        const id = env.model.uuidGenerator.uuidv4();
+        const id = env.model.uuidGenerator.smallUuid();
         let labelRange;
         if (zone.left !== zone.right) {
             dataSetZone = { ...zone, left: zone.left + 1 };
@@ -6027,7 +6058,7 @@
         name: _lt("Delete"),
         sequence: 10,
         isVisible: (env) => {
-            return env.model.getters.getSheetIds().length > 1;
+            return env.model.getters.getVisibleSheetIds().length > 1;
         },
         action: (env) => env.askConfirmation(_lt("Are you sure you want to delete this sheet ?"), () => {
             env.model.dispatch("DELETE_SHEET", { sheetId: env.model.getters.getActiveSheetId() });
@@ -6038,7 +6069,7 @@
         sequence: 20,
         action: (env) => {
             const sheetIdFrom = env.model.getters.getActiveSheetId();
-            const sheetIdTo = env.model.uuidGenerator.uuidv4();
+            const sheetIdTo = env.model.uuidGenerator.smallUuid();
             env.model.dispatch("DUPLICATE_SHEET", {
                 sheetId: sheetIdFrom,
                 sheetIdTo,
@@ -6677,7 +6708,7 @@
     class SelectionInput extends owl.Component {
         constructor() {
             super(...arguments);
-            this.id = uuidGenerator$1.uuidv4();
+            this.id = uuidGenerator$1.smallUuid();
             this.previousRanges = this.props.ranges || [];
             this.originSheet = this.env.model.getters.getActiveSheetId();
             this.state = owl.useState({
@@ -8433,7 +8464,7 @@
             const dataset = {
                 label,
                 data,
-                borderColor: "#FFFFFF",
+                borderColor: chart.background || "#FFFFFF",
                 backgroundColor,
             };
             config.data.datasets.push(dataset);
@@ -9794,7 +9825,7 @@
                         rule: this.getEditorRule(),
                         id: this.state.mode === "edit"
                             ? this.state.currentCF.id
-                            : this.env.model.uuidGenerator.uuidv4(),
+                            : this.env.model.uuidGenerator.smallUuid(),
                     },
                     ranges: this.state.currentCF.ranges.map((xc) => this.env.model.getters.getRangeDataFromXc(sheetId, xc)),
                     sheetId,
@@ -9862,7 +9893,7 @@
             this.state.mode = "add";
             this.state.currentCFType = "CellIsRule";
             this.state.currentCF = {
-                id: this.env.model.uuidGenerator.uuidv4(),
+                id: this.env.model.uuidGenerator.smallUuid(),
                 ranges: this.env.model.getters
                     .getSelectedZones()
                     .map((zone) => this.env.model.getters.zoneToXC(this.env.model.getters.getActiveSheetId(), zone)),
@@ -10350,7 +10381,7 @@
             this.uuidGenerator = new UuidGenerator();
         }
         add(name, value) {
-            const component = { ...value, id: this.uuidGenerator.uuidv4() };
+            const component = { ...value, id: this.uuidGenerator.smallUuid() };
             return super.add(name, component);
         }
     }
@@ -27252,7 +27283,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         for (const sheet of data.sheets || []) {
             for (const figure of sheet.figures || []) {
                 if (figureIds.has(figure.id)) {
-                    figure.id += uuidGenerator.uuidv4();
+                    figure.id += uuidGenerator.smallUuid();
                 }
                 figureIds.add(figure.id);
             }
@@ -29142,10 +29173,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.filters = [];
             this.zone = zone;
             const uuid = new UuidGenerator();
-            this.id = uuid.uuidv4();
+            this.id = uuid.smallUuid();
             for (const i of range(zone.left, zone.right + 1)) {
                 const filterZone = { ...this.zone, left: i, right: i };
-                this.filters.push(new Filter(uuid.uuidv4(), filterZone));
+                this.filters.push(new Filter(uuid.smallUuid(), filterZone));
             }
         }
         /** Get zone of the table without the headers */
@@ -29325,7 +29356,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 if (filters.length < zoneToDimension(zone).width) {
                     for (let col = zone.left; col <= zone.right; col++) {
                         if (!filters.find((filter) => filter.col === col)) {
-                            filters.push(new Filter(this.uuidGenerator.uuidv4(), { ...zone, left: col, right: col }));
+                            filters.push(new Filter(this.uuidGenerator.smallUuid(), { ...zone, left: col, right: col }));
                         }
                     }
                     filters.sort((f1, f2) => f1.col - f2.col);
@@ -30388,7 +30419,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 case "RENAME_SHEET":
                     return this.isRenameAllowed(cmd);
                 case "DELETE_SHEET":
-                    return this.orderedSheetIds.length > 1
+                    return this.getVisibleSheetIds().length > 1
                         ? 0 /* CommandResult.Success */
                         : 9 /* CommandResult.NotEnoughSheets */;
                 case "ADD_COLUMNS_ROWS":
@@ -32516,7 +32547,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 y: this.getters.getRowDimensions(sheetId, target[0].top).start,
             };
             const newChart = this.copiedChart.copyInSheetId(sheetId);
-            const newId = new UuidGenerator().uuidv4();
+            const newId = new UuidGenerator().smallUuid();
             this.dispatch("CREATE_CHART", {
                 id: newId,
                 sheetId,
@@ -33646,7 +33677,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             const cfInTarget = this.getters
                 .getConditionalFormats(targetSheetId)
                 .find((cf) => cf.stopIfTrue === originCF.stopIfTrue && deepEquals(cf.rule, originCF.rule));
-            return cfInTarget ? cfInTarget : { ...originCF, id: this.uuidGenerator.uuidv4(), ranges: [] };
+            return cfInTarget
+                ? cfInTarget
+                : { ...originCF, id: this.uuidGenerator.smallUuid(), ranges: [] };
         }
     }
     EvaluationConditionalFormatPlugin.getters = ["getConditionalIcon", "getCellComputedStyle"];
@@ -35168,23 +35201,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                             gridSelection: deepCopy(gridSelection),
                         };
                     }
-                    if (!this.getters.tryGetSheet(this.getters.getActiveSheetId())) {
-                        const currentSheetIds = this.getters.getVisibleSheetIds();
-                        this.activeSheet = this.getters.getSheet(currentSheetIds[0]);
-                        if (this.activeSheet.id in this.sheetsData) {
-                            const { anchor } = this.clipSelection(this.activeSheet.id, this.sheetsData[this.activeSheet.id].gridSelection);
-                            this.selectCell(anchor.cell.col, anchor.cell.row);
-                        }
-                        else {
-                            this.selectCell(0, 0);
-                        }
-                        const { col, row } = this.gridSelection.anchor.cell;
-                        this.moveClient({
-                            sheetId: this.getters.getActiveSheetId(),
-                            col,
-                            row,
-                        });
-                    }
+                    this.fallbackToVisibleSheet();
                     const sheetId = this.getters.getActiveSheetId();
                     this.gridSelection.zones = this.gridSelection.zones.map((z) => this.getters.expandZone(sheetId, z));
                     this.gridSelection.anchor.zone = this.getters.expandZone(sheetId, this.gridSelection.anchor.zone);
@@ -35194,6 +35211,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
         }
         finalize() {
+            this.fallbackToVisibleSheet();
             /** Any change to the selection has to be  reflected in the selection processor. */
             this.selection.resetDefaultAnchor(this, deepCopy(this.gridSelection.anchor));
         }
@@ -35496,6 +35514,25 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
             return 0 /* CommandResult.Success */;
         }
+        fallbackToVisibleSheet() {
+            if (!this.getters.tryGetSheet(this.getters.getActiveSheetId())) {
+                const currentSheetIds = this.getters.getVisibleSheetIds();
+                this.activeSheet = this.getters.getSheet(currentSheetIds[0]);
+                if (this.activeSheet.id in this.sheetsData) {
+                    const { anchor } = this.clipSelection(this.activeSheet.id, this.sheetsData[this.activeSheet.id].gridSelection);
+                    this.selectCell(anchor.cell.col, anchor.cell.row);
+                }
+                else {
+                    this.selectCell(0, 0);
+                }
+                const { col, row } = this.gridSelection.anchor.cell;
+                this.moveClient({
+                    sheetId: this.getters.getActiveSheetId(),
+                    col,
+                    row,
+                });
+            }
+        }
         //-------------------------------------------
         // Helpers for extensions
         // ------------------------------------------
@@ -35720,7 +35757,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         setContent(index, xc) {
             this.ranges[index] = {
                 ...this.ranges[index],
-                id: uuidGenerator.uuidv4(),
+                id: uuidGenerator.smallUuid(),
                 xc,
             };
         }
@@ -38491,7 +38528,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         addSheet() {
             const activeSheetId = this.env.model.getters.getActiveSheetId();
             const position = this.env.model.getters.getSheetIds().findIndex((sheetId) => sheetId === activeSheetId) + 1;
-            const sheetId = this.env.model.uuidGenerator.uuidv4();
+            const sheetId = this.env.model.uuidGenerator.smallUuid();
             const name = this.env.model.getters.getNextSheetName(this.env._t("Sheet"));
             this.env.model.dispatch("CREATE_SHEET", { sheetId, position, name });
             this.env.model.dispatch("ACTIVATE_SHEET", { sheetIdFrom: activeSheetId, sheetIdTo: sheetId });
@@ -43369,7 +43406,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         setupConfig(config) {
             const client = config.client || {
-                id: this.uuidGenerator.uuidv4(),
+                id: this.uuidGenerator.smallUuid(),
                 name: _lt("Anonymous").toString(),
             };
             const transportService = config.transportService || new LocalTransportService();
@@ -43620,8 +43657,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.61';
-    __info__.date = '2025-02-10T09:46:48.793Z';
-    __info__.hash = 'a350bc7';
+    __info__.date = '2025-02-12T09:42:03.461Z';
+    __info__.hash = 'b12cab3';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
