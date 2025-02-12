@@ -431,7 +431,7 @@ export class AddSnippetDialog extends Component {
                 const callback = (mutationList, observer) => {
                     for (const mutation of mutationList) {
                         if (mutation.type === "childList") {
-                            console.trace("A child node has been added or removed.");
+                            console.log("A child node has been added or removed.");
                             console.log(mutation.addedNodes);
                             console.log(mutation.removedNodes);
                         } else if (mutation.type === "attributes" && mutation.attributeName !== "class") {
