@@ -42,6 +42,7 @@ export class CalendarFormController extends FormController {
         return super.beforeExecuteActionButton(...arguments);
     }
 
+    
     /**
      * Custom delete function for calendar events, which can call the unlink action or not.
      * When there is only one attendee, who is also the organizer, and the organizer is not listed in the current attendees, it performs the default delete.
