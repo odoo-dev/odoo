@@ -1740,8 +1740,8 @@ which leads to stray network requests and inconsistencies."""
 
     LINE_PATTERN = '\tat %(functionName)s (%(url)s:%(lineNumber)d:%(columnNumber)d)\n'
     def _format_stack(self, logrecord):
-        if logrecord['type'] not in ['trace']:
-            return
+        #if logrecord['type'] not in ['trace']:
+        #    return
 
         trace = logrecord.get('stackTrace')
         while trace:
