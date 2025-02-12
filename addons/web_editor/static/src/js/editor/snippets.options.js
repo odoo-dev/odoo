@@ -8210,6 +8210,7 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
         this._setBackground(widgetValue);
 
         if (previewMode !== 'reset') {
+            console.log(">>> BOOOUUUUMMMMM");
             removeOnImageChangeAttrs.forEach(attr => delete this.$target[0].dataset[attr]);
             this.$target.trigger('background_changed', [previewMode]);
         }
