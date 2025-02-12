@@ -436,6 +436,9 @@ export class AddSnippetDialog extends Component {
                             console.log(mutation.removedNodes);
                         } else if (mutation.type === "attributes" && mutation.attributeName !== "class") {
                             console.trace(`The ${mutation.attributeName} attribute was modified ${mutation.oldValue} ${mutation.target.attributes.getNamedItem(mutation.attributeName)?.value}.`);
+                            if (!mutation.target.attributes.getNamedItem(mutation.attributeName)) {
+                                throw new Error(">>> Observer Callback");
+                            }
                         }
                     }
                 };
