@@ -1102,6 +1102,7 @@ class ChromeBrowser:
         }
         emulated_device['width'], emulated_device['height'] = [int(size) for size in test_case.browser_size.split(",")]
         self._websocket_request('Emulation.setDeviceMetricsOverride', params=emulated_device)
+        self._websocket_send('Runtime.setAsyncCallStackDepth', params={'maxDepth': 10})
 
     @property
     def screencasts_frames_dir(self):
