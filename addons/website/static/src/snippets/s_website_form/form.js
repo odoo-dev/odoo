@@ -262,10 +262,10 @@ export class Form extends Interaction {
     async send() {
         // Prevent users from crazy clicking
         const buttonEl = this.el.querySelector(".s_website_form_send, .o_website_form_send");
-        buttonEl.classList.add("disabled"); // !compatibility
-        buttonEl.setAttribute("disabled", "disabled");
-        this.restoreBtnLoading = addLoadingEffect(buttonEl);
-        this.el.querySelector("#s_website_form_result, #o_website_form_result").replaceChildren(); // !compatibility
+        buttonEl?.classList.add("disabled"); // !compatibility
+        buttonEl?.setAttribute("disabled", "disabled");
+        this.restoreBtnLoading = buttonEl ? addLoadingEffect(buttonEl) : () => {};
+        this.el.querySelector("#s_website_form_result, #o_website_form_result")?.replaceChildren(); // !compatibility
         if (!this.checkErrorFields({})) {
             if (this.fileInputError) {
                 const errorMessage = this.fileInputError.type === "number"
@@ -363,8 +363,8 @@ export class Form extends Interaction {
         post(this.el.getAttribute("action") + (this.el.dataset.force_action || this.el.dataset.model_name), formData)
             .then(async (resultData) => {
                 // Restore send button behavior
-                buttonEl.removeAttribute("disabled");
-                buttonEl.classList.remove("disabled"); // !compatibility
+                buttonEl?.removeAttribute("disabled");
+                buttonEl?.classList.remove("disabled"); // !compatibility
                 if (!resultData.id) {
                     // Failure, the server didn't return the created record ID
                     this.updateStatus("error", resultData.error ? resultData.error : false);
@@ -568,8 +568,8 @@ export class Form extends Interaction {
     updateStatus(status, message) {
         if (status !== "success") { // Restore send button behavior if result is an error
             const buttonEl = this.el.querySelector(".s_website_form_send, .o_website_form_send");
-            buttonEl.removeAttribute("disabled");
-            buttonEl.classList.remove("disabled"); // !compatibility
+            buttonEl?.removeAttribute("disabled");
+            buttonEl?.classList.remove("disabled"); // !compatibility
             this.restoreBtnLoading();
         }
         const resultEl = this.el.querySelector("#s_website_form_result, #o_website_form_result"); // !compatibility
@@ -578,10 +578,12 @@ export class Form extends Interaction {
             message = _t("An error has occured, the form has not been sent.");
         }
 
-        this.renderAt(`website.s_website_form_status_${status}`, {
-            message: message,
-        }, resultEl, "afterend");
-        resultEl.remove();
+        if (resultEl) {
+            this.renderAt(`website.s_website_form_status_${status}`, {
+                message: message,
+            }, resultEl, "afterend");
+            resultEl.remove();
+        }
     }
 
     /**
