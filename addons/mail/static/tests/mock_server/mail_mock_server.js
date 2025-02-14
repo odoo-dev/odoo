@@ -14,6 +14,7 @@ import { serializeDateTime } from "@web/core/l10n/dates";
 import { registry } from "@web/core/registry";
 import { groupBy } from "@web/core/utils/arrays";
 
+const mockRpcRegistry = registry.category("mock_rpc");
 export const DISCUSS_ACTION_ID = 104;
 
 /**
@@ -99,7 +100,7 @@ export function registerRoute(route, handler) {
         }
         return response;
     };
-    registry.category("mock_rpc").add(route, beforeCallableHandler);
+    mockRpcRegistry.add(route, beforeCallableHandler);
 }
 
 // RPC handlers
@@ -873,7 +874,7 @@ registerRoute("/mail/thread/recipients/fields", mail_thread_recipients_fields);
 async function mail_thread_recipients_fields(request) {
     return {
         partner_fields: [],
-        primary_email_field: []
+        primary_email_field: [],
     };
 }
 
@@ -952,9 +953,7 @@ async function processRequest(request) {
     const args = await parseRequestParams(request);
     let fetchParams = args.fetch_params;
     if (args.method === "lazy_session_info") {
-        fetchParams = ResUsers._is_public(this.env.uid)
-            ? ["init_messaging"]
-            : ["failures", "systray_get_activities", "init_messaging"];
+        fetchParams = ["failures", "systray_get_activities", "init_messaging"];
     }
     for (const fetchParam of fetchParams) {
         const [name, params] =
@@ -1033,7 +1032,7 @@ async function processRequest(request) {
         }
         mailDataHelpers._process_request_for_internal_user.call(this, store, name, params);
     }
-    return args.method === "lazy_session_info" ? { storeData: store.get_result() } : store;
+    return store;
 }
 
 function _process_request_for_internal_user(store, name, params) {
@@ -1371,8 +1370,15 @@ class Store {
 }
 
 // replace the lazy_session_info call
-registry.category("mock_rpc").remove("/web/dataset/call_kw/ir.http/lazy_session_info");
-registerRoute("/web/dataset/call_kw/ir.http/lazy_session_info", processRequest);
+const lazySessionHandler = mockRpcRegistry.get("/web/dataset/call_kw/ir.http/lazy_session_info");
+mockRpcRegistry.remove("/web/dataset/call_kw/ir.http/lazy_session_info");
+registerRoute("/web/dataset/call_kw/ir.http/lazy_session_info", async function (request) {
+    const originalHandler = await lazySessionHandler.call(this, request);
+    const discussHandler = {
+        storeData: (await processRequest.call(this, request)).get_result(),
+    };
+    return Object.assign(originalHandler, discussHandler);
+});
 
 export const mailDataHelpers = {
     _process_request_for_internal_user,
