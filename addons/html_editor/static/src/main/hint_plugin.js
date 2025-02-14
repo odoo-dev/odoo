@@ -1,7 +1,7 @@
 import { Plugin } from "@html_editor/plugin";
 import { isEmptyBlock, isProtected } from "@html_editor/utils/dom_info";
 import { removeClass } from "@html_editor/utils/dom";
-import { childNodes, selectElements } from "@html_editor/utils/dom_traversal";
+import { childNodes, closestElement, selectElements } from "@html_editor/utils/dom_traversal";
 import { closestBlock } from "../utils/blocks";
 import { baseContainerGlobalSelector } from "@html_editor/utils/base_container";
 
@@ -10,14 +10,14 @@ export class HintPlugin extends Plugin {
     static dependencies = ["history", "selection"];
     resources = {
         /** Handlers */
-        selectionchange_handlers: this.updateHints.bind(this),
+        selectionchange_handlers: this.onSelectionChange.bind(this),
         external_history_step_handlers: () => {
             this.clearHints();
-            this.updateHints();
+            this.onSelectionChange();
         },
         normalize_handlers: this.normalize.bind(this),
         clean_for_save_handlers: ({ root }) => this.clearHints(root),
-        content_updated_handlers: this.updateHints.bind(this),
+        content_updated_handlers: this.onSelectionChange.bind(this),
 
         system_classes: ["o-we-hint"],
         system_attributes: ["o-we-hint-text"],
@@ -43,19 +43,46 @@ export class HintPlugin extends Plugin {
     };
 
     setup() {
-        this.hint = null;
-        this.updateHints(this.editable);
+        this.hintedElements = [];
     }
 
-    destroy() {
-        super.destroy();
-        this.clearHints();
+    makeHint(el, text) {
+        this.dispatchTo("make_hint_handlers", el);
+        el.setAttribute("o-we-hint-text", text);
+        el.classList.add("o-we-hint");
+        this.hintedElements.push(el);
     }
 
     normalize() {
-        this.hint = null;
         this.clearHints();
-        this.updateHints();
+        this.addHints();
+    }
+
+    onSelectionChange() {
+        this.hintedElements.forEach((el) => this.removeHint(el));
+        this.hintedElements = [];
+        this.addHints();
+    }
+
+    addHints() {
+        const selectionData = this.dependencies.selection.getSelectionData();
+        const { anchorNode, isCollapsed } = selectionData.editableSelection;
+        if (!isCollapsed) {
+            return;
+        }
+        const emptyBlock = closestElement(anchorNode, isEmptyBlock);
+        for (const hint of this.getResource("hints")) {
+            if (hint.selector) {
+                // selector-based hint
+                if (emptyBlock?.matches(hint.selector)) {
+                    this.makeHint(emptyBlock, hint.text);
+                    return;
+                }
+            } else if (hint.addHints(this.makeHint.bind(this), selectionData)) {
+                // custom hint(s)
+                return;
+            }
+        }
     }
 
     /**
@@ -90,24 +117,16 @@ export class HintPlugin extends Plugin {
         }
     }
 
-    makeHint(el, text) {
-        this.dispatchTo("make_hint_handlers", el);
-        el.setAttribute("o-we-hint-text", text);
-        el.classList.add("o-we-hint");
-    }
-
     removeHint(el) {
         el.removeAttribute("o-we-hint-text");
         removeClass(el, "o-we-hint");
         this.getResource("system_style_properties").forEach((n) => el.style.removeProperty(n));
-        if (this.hint === el) {
-            this.hint = null;
-        }
     }
 
     clearHints(root = this.editable) {
         for (const elem of selectElements(root, ".o-we-hint")) {
             this.removeHint(elem);
         }
+        this.hintedElements = [];
     }
 }
