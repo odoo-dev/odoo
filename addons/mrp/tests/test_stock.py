@@ -316,6 +316,42 @@ class TestWarehouseMrp(common.TestMrpCommon):
         self.assertEqual(backorder.state, 'done')
         self.assertEqual(mo.move_raw_ids.move_line_ids.mapped('quantity_product_uom'), [20, 80])
 
+    def test_active_rules_visibility_in_routes(self):
+        """
+            Test to ensure that only those rules are shown in routes which are active itself and it's destination locations is active.
+            if both are inactive then rules is not shown in routes.
+        """
+
+        self.env.user.group_ids += self.env.ref('stock.group_adv_location')
+        warehouse = self.env['stock.warehouse'].search([], limit=1)
+        mto_route = self.env.ref('stock.route_warehouse0_mto')
+
+        # initially 'WH: Stock → Pre-Production (MTO)' is inactive and not shown in MTO route.
+        self.assertEqual(warehouse.manufacture_steps, 'mrp_one_step')
+        self.assertFalse(warehouse.pbm_mto_pull_id.active)
+        self.assertFalse(warehouse.pbm_mto_pull_id.location_dest_id.active)
+        self.assertFalse(mto_route.active)
+        self.assertNotIn(warehouse.pbm_mto_pull_id, mto_route.rule_ids)
+
+        # Activate the MTO route and still 'WH: Stock → Pre-Production (MTO)' is not shown in MTO route.
+        self.env.ref('stock.route_warehouse0_mto').active = True
+        self.assertFalse(warehouse.pbm_mto_pull_id.active)
+        self.assertFalse(warehouse.pbm_mto_pull_id.location_dest_id.active)
+        self.assertNotIn(warehouse.pbm_mto_pull_id, mto_route.rule_ids)
+
+        # Change MRP steps mrp_one_step to pbm_sam and now that rule is shown in mto route.
+        warehouse.manufacture_steps = 'pbm_sam'
+        self.assertTrue(warehouse.pbm_mto_pull_id.active)
+        self.assertTrue(warehouse.pbm_mto_pull_id.location_dest_id.active)
+        self.assertIn(warehouse.pbm_mto_pull_id, mto_route.rule_ids)
+
+        # Revert to mrp_one_step MRP and confirm rules visibility is updated correctly
+        warehouse.manufacture_steps = 'mrp_one_step'
+        self.assertFalse(warehouse.pbm_mto_pull_id.active)
+        self.assertFalse(warehouse.pbm_mto_pull_id.location_dest_id.active)
+        self.assertNotIn(warehouse.pbm_mto_pull_id, mto_route.rule_ids)
+
+
 class TestKitPicking(common.TestMrpCommon):
     @classmethod
     def setUpClass(cls):
