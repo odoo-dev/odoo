@@ -743,14 +743,24 @@ class TestReorderingRule(TransactionCase):
             'product_id': product.id,
             'route_id': warehouse_2.resupply_route_ids.id,
             'qty_to_order_manual': 5.0,
-        }).with_context(lang="fr_FR") # read the order point with french context as when you impersonnate a french user.
-        orderpoint.action_replenish()
+        })
+        french_user = self.env['res.users'].create(
+            {
+                'login': 'french user',
+                'name': 'Arnold',
+                'email': 'frenchuser@example.com',
+                'lang': 'fr_FR',
+                'groups_id': [Command.set(self.env.user.groups_id.ids)]
+            }
+        )
+        self.env.company.partner_id.lang = "fr_FR"
+        orderpoint.with_user(french_user).action_replenish() # read the order point with french context as when you impersonnate a french user.
 
         po_line = self.env['purchase.order.line'].search([('partner_id', '=', default_vendor.id), ('product_id', '=', product.id)], limit=1)
         self.assertRecordValues(po_line, [{"name": "[A] produit en français", "product_qty": 5.0}])
         self.assertRecordValues(po_line.move_dest_ids, [{"product_uom_qty": 5.0}])
         orderpoint.qty_to_order_manual = 4.0
-        orderpoint.action_replenish()
+        orderpoint.with_user(french_user).action_replenish()
         self.assertRecordValues(po_line, [{"name": "[A] produit en français", "product_qty": 9.0}])
         self.assertEqual(len(po_line.order_id.order_line), 1)
         self.assertRecordValues(po_line.move_dest_ids, [{"product_uom_qty": 9.0}])

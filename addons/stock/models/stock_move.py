@@ -2061,7 +2061,7 @@ Please change the quantity done or the rounding precision of your unit of measur
 
     def _get_lang(self):
         """Determine language to use for translated description"""
-        return self.picking_id.partner_id.lang or self.partner_id.lang or (self.env.user.id != SUPERUSER_ID and self.env.user.lang) or self.env.context.get('lang') or self.env['res.users'].browse(SUPERUSER_ID).lang
+        return self.picking_id.partner_id.lang or self.partner_id.lang or self.env.user.lang
 
     def _get_source_document(self):
         """ Return the move's document, used by `stock.forecasted_product_productt`
