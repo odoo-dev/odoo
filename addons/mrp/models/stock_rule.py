@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 from odoo import api, fields, models, SUPERUSER_ID, _
 from odoo.fields import Domain
 from odoo.tools import OrderedSet
+from odoo.addons.stock.models.stock_rule import ProcurementException
 
 
 class StockRule(models.Model):
@@ -40,11 +41,15 @@ class StockRule(models.Model):
     @api.model
     def _run_manufacture(self, procurements):
         new_productions_values_by_company = defaultdict(lambda: defaultdict(list))
+        errors = []
         for procurement, rule in procurements:
             if procurement.product_uom.compare(procurement.product_qty, 0) <= 0:
                 # If procurement contains negative quantity, don't create a MO that would be for a negative value.
                 continue
             bom = rule._get_matching_bom(procurement.product_id, procurement.company_id, procurement.values)
+            if not bom and self.env.context.get('from_orderpoint'):
+                msg = self.env._('There is no Bill of Materials to generate a Manufacturing Order for the product %s. Go to the product form and create a Bill of Materials for this product.', procurement.product_id.display_name)
+                errors.append((procurement, msg))
 
             mo = self.env['mrp.production']
             if procurement.origin != 'MPS':
@@ -69,6 +74,9 @@ class StockRule(models.Model):
                     'mo_id': mo.id,
                     'product_qty': mo.product_id.uom_id._compute_quantity((mo.product_uom_qty + procurement.product_qty), mo.product_uom_id)
                 }).change_prod_qty()
+
+        if errors:
+            raise ProcurementException(errors)
 
         for company_id in new_productions_values_by_company:
             productions_vals_list = new_productions_values_by_company[company_id]['values']

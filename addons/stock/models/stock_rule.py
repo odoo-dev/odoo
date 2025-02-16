@@ -551,6 +551,7 @@ class ProcurementGroup(models.Model):
         if warehouse_ids:
             valid_route_ids |= set(warehouse_ids.route_ids.ids)
         if valid_route_ids:
+            valid_route_ids |= set(self._get_product_routes(product_id, valid_route_ids).ids)
             domain &= Domain('route_id', 'in', list(valid_route_ids))
         res = self.env["stock.rule"]._read_group(
             domain,
@@ -590,6 +591,21 @@ class ProcurementGroup(models.Model):
                 res = Rule.search(Domain('route_id', 'in', warehouse_routes.ids) & domain, order='route_sequence, sequence', limit=1)
         return res
 
+    def _get_product_routes(self, product, valid_route_ids):
+        """ Keep only valid routes for a product based on the following conditions:
+            - Exclude 'Buy' if 'purchase_ok' is disabled or no vendor is set.
+            - Exclude 'Manufacture' if the product has no Bill of Materials (BOM).
+            - Exclude 'Resupply Subcontractor on Order' if the product is not a subcontracting BOM component.
+        """
+        if not product or not valid_route_ids:
+            return self.env['stock.route']
+        route_ids = self.env['stock.route'].browse(valid_route_ids)
+        # For multi-company we need all warehouses accessible by the user.
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.company_ids.ids)])
+        route_ids |= warehouse.route_ids
+        route_ids -= product._get_invalid_routes(route_ids)
+        return route_ids
+
     @api.model
     def _get_rule(self, product_id, location_id, values):
         """ Find a pull rule for the location_id, fallback on the parent
@@ -614,7 +630,13 @@ class ProcurementGroup(models.Model):
 
         def extract_rule(rule_dict, route_ids, warehouse_id, location_dest_id):
             rule = self.env['stock.rule']
-            for route_id in sorted(route_ids, key=lambda r: r.sequence):
+            valid_route_ids = set()
+            if route_ids:
+                valid_route_ids |= set(route_ids.ids)
+                valid_route_ids = set(self._get_product_routes(product_id, valid_route_ids).ids)
+            valid_route_ids = self.env['stock.route'].browse(list(valid_route_ids))
+            # Give priority based on selected routes on product, then by sequence.
+            for route_id in sorted(valid_route_ids, key=lambda r: (r not in product_id.route_ids, r.sequence)):
                 sub_dict = rule_dict.get((location_dest_id.id, route_id.id))
                 if not sub_dict:
                     continue

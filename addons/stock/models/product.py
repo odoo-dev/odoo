@@ -403,6 +403,9 @@ class ProductProduct(models.Model):
             loc_domain & dest_loc_domain_out,
         )
 
+    def _get_invalid_routes(self, route_ids):
+        return self.env['stock.route']
+
     def _search_qty_available(self, operator, value):
         # In the very specific case we want to retrieve products with stock available, we only need
         # to use the quants, not the stock moves. Therefore, we bypass the usual

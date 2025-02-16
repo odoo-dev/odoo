@@ -76,7 +76,7 @@ class StockWarehouseOrderpoint(models.Model):
     lead_horizon_date = fields.Date(compute='_compute_lead_days')
     lead_days = fields.Float(compute='_compute_lead_days')
     route_id = fields.Many2one(
-        'stock.route', string='Route', domain="[('product_selectable', '=', True)]")
+        'stock.route', string='Route', domain="['|', ('product_selectable', '=', True), ('warehouse_selectable', '=', True)]")
     qty_on_hand = fields.Float('On Hand', readonly=True, compute='_compute_qty', digits='Product Unit')
     qty_forecast = fields.Float('Forecast', readonly=True, compute='_compute_qty', digits='Product Unit')
     qty_to_order = fields.Float('To Order', compute='_compute_qty_to_order', inverse='_inverse_qty_to_order', search='_search_qty_to_order', digits='Product Unit')
