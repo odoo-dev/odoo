@@ -547,6 +547,8 @@ class ProcurementGroup(models.Model):
         valid_route_ids |= set((product_id.route_ids | product_id.categ_id.total_route_ids).ids)
         if warehouse_ids:
             valid_route_ids |= set(warehouse_ids.route_ids.ids)
+        if product_id and valid_route_ids:
+            valid_route_ids |= set(self._get_product_routes(product_id, valid_route_ids, warehouse_ids).ids)
         if valid_route_ids:
             domain &= Domain('route_id', 'in', list(valid_route_ids))
         res = self.env["stock.rule"]._read_group(
@@ -578,14 +580,38 @@ class ProcurementGroup(models.Model):
             if packaging_routes:
                 res = Rule.search(Domain('route_id', 'in', packaging_routes.ids) & domain, order='route_sequence, sequence', limit=1)
         if not res:
-            product_routes = product_id.route_ids | product_id.categ_id.total_route_ids
-            if product_routes:
-                res = Rule.search(Domain('route_id', 'in', product_routes.ids) & domain, order='route_sequence, sequence', limit=1)
+            valid_route_ids = (product_id.route_ids | product_id.categ_id.total_route_ids)
+
+            if warehouse_id:
+                valid_route_ids = self._get_product_routes(product_id, set(valid_route_ids.ids), warehouse_id)
+            if valid_route_ids:
+                res = Rule.search(Domain('route_id', 'in', valid_route_ids.ids) & domain, order='route_sequence, sequence', limit=1)
+
         if not res and warehouse_id:
             warehouse_routes = warehouse_id.route_ids
+
             if warehouse_routes:
                 res = Rule.search(Domain('route_id', 'in', warehouse_routes.ids) & domain, order='route_sequence, sequence', limit=1)
         return res
+
+    def _get_product_routes(self, product, valid_route_ids, warehouse_id):
+        """ Get valid routes for a product based on the following conditions:
+            - If `purchase_ok` is enabled and the product has a vendor, select the 'Buy' route.
+            - If the product has a Bill of Materials (BOM), select the 'Manufacturing' route.
+            - If the product is a component of a subcontracting BOM and has sufficient stock,
+            select the 'Resupply Subcontractor on Order' route.
+        """
+        if not product:
+            return self.env['stock.route']
+        route_ids = self.env['stock.route'].browse(valid_route_ids)
+        if not route_ids:
+            route_ids = self.env['stock.route']
+        if warehouse_id:
+            # For multi company we need all warehouse which access by the user.
+            warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.company_ids.ids)])
+            # Take only those routes whose has rules.
+            route_ids |= (warehouse.route_ids | warehouse_id.route_ids).filtered(lambda r: r.rule_ids)
+        return route_ids
 
     @api.model
     def _get_rule(self, product_id, location_id, values):
@@ -611,7 +637,13 @@ class ProcurementGroup(models.Model):
 
         def extract_rule(rule_dict, route_ids, warehouse_id, location_dest_id):
             rule = self.env['stock.rule']
-            for route_id in sorted(route_ids, key=lambda r: r.sequence):
+            valid_route_ids = set()
+            if route_ids:
+                valid_route_ids |= set(route_ids.ids)
+                valid_route_ids = set(self._get_product_routes(product_id, valid_route_ids, warehouse_id).ids)
+            valid_route_ids = self.env['stock.route'].browse(list(valid_route_ids))
+            # Give priority based on selected routes on product, then by sequence.
+            for route_id in sorted(valid_route_ids, key=lambda r: (r not in product_id.route_ids, r.sequence)):
                 sub_dict = rule_dict.get((location_dest_id.id, route_id.id))
                 if not sub_dict:
                     continue
