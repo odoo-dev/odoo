@@ -2804,7 +2804,7 @@ class TestViews(ViewCase):
                 <form string="View attachment">
                     <field name="company_id" invisible="not name" groups="base.group_erp_manager"/>
                     <field name="company_id" invisible="not name" groups="base.group_system"/>
-                    <field name="company_id" invisible="not name" invisible="not companies.multi_company"/>
+                    <field name="company_id" invisible="not name or not companies.multi_company"/>
                     <field name="company_id" invisible="not name" groups="base.group_user"/>
                 </form>
             """, field='name', demo=True)
@@ -2826,7 +2826,7 @@ class TestViews(ViewCase):
         validate("""
                 <form string="View attachment">
                     <group groups="base.group_erp_manager">
-                        <field name="company_id" invisible="not name" invisible="not companies.multi_company"/>
+                        <field name="company_id" invisible="not name or not companies.multi_company"/>
                         <field name="company_id" invisible="not name" groups="base.group_user"/>
                     </group>
                 </form>
@@ -2834,7 +2834,7 @@ class TestViews(ViewCase):
         validate("""
                 <form string="View attachment">
                     <group groups="base.group_erp_manager" invisible="not display_name">
-                        <field name="company_id" invisible="not name" invisible="not companies.multi_company"/>
+                        <field name="company_id" invisible="not name or not companies.multi_company"/>
                         <field name="company_id" invisible="not name" groups="base.group_user"/>
                     </group>
                 </form>
@@ -2842,7 +2842,7 @@ class TestViews(ViewCase):
         validate("""
                 <form string="View attachment">
                     <group groups="base.group_erp_manager" invisible="not display_name">
-                        <field name="company_id" invisible="not name" invisible="not companies.multi_company"/>
+                        <field name="company_id" invisible="not name or not companies.multi_company"/>
                         <field name="company_id" invisible="not name" groups="base.group_user"/>
                     </group>
                 </form>
@@ -2850,7 +2850,7 @@ class TestViews(ViewCase):
         validate("""
                 <form string="View attachment">
                     <group groups="base.group_user" invisible="not display_name">
-                        <field name="company_id" invisible="not name" invisible="not companies.multi_company"/>
+                        <field name="company_id" invisible="not name" groups="base.group_multi_currency"/>
                         <field name="company_id" invisible="not name" groups="base.group_erp_manager"/>
                     </group>
                 </form>
@@ -2858,7 +2858,7 @@ class TestViews(ViewCase):
         validate("""
                 <form string="View attachment">
                     <group groups="base.group_user" invisible="not display_name">
-                        <field name="company_id" invisible="not name" invisible="not companies.multi_company"/>
+                        <field name="company_id" invisible="not name or not companies.multi_company"/>
                         <field name="company_id" invisible="not name" groups="base.group_erp_manager"/>
                     </group>
                 </form>
@@ -2871,7 +2871,7 @@ class TestViews(ViewCase):
                     <field name="name" invisible="not companies.multi_company"/>
 
                     <group groups="base.group_erp_manager" invisible="not name">
-                        <field name="company_id" invisible="not name" invisible="not companies.multi_company"/>
+                        <field name="company_id" invisible="not name or not companies.multi_company"/>
                         <field name="company_id" invisible="not name" groups="base.group_user"/>
                     </group>
                 </form>
