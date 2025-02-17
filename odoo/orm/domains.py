@@ -820,7 +820,7 @@ class DomainCondition(Domain):
             return DomainCondition(parent_fname, 'any', parent_domain)
 
         # handle non-stored fields (replace by searchable/stored items)
-        if not field.store:
+        if not field.sqlable:
             # check that we have just the field (basic optimization only)
             if field.name != self.field_expr:
                 return self
