@@ -83,7 +83,7 @@ registry.category("web_tour.tours").add('shop_sale_loyalty', {
         },
         {
             content: "check reduction amount got recomputed and merged both discount lines into one only",
-            trigger: '.oe_website_sale .oe_cart',
+            trigger: '.oe_website_sale #chekout_content',
         },
         /* 3. Add some cabinet to get a free one, play with quantity */
         {

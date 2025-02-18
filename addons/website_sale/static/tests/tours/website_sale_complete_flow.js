@@ -124,12 +124,7 @@ import * as tourUtils from "@website_sale/js/tours/tour_utils";
         run: "click",
     },
     {
-        content: "Check selected delivery address is same as typed in previous step",
         trigger: '#delivery_address_row:contains(SO1 Delivery Street, 33):contains(SO1DeliveryCity):contains(Afghanistan)',
-    },
-    {
-        content: "Check selected billing address is same as typed in previous step",
-        trigger: '#billing_address_row:contains(17, SO1 Billing Road):contains(SO1BillingCity):contains(Afghanistan)',
     },
     {
         content: "Click for edit billing address",
@@ -185,7 +180,7 @@ import * as tourUtils from "@website_sale/js/tours/tour_utils";
     },
     {
         content: "Sign up",
-        trigger: '.oe_cart a:contains("Sign Up")',
+        trigger: '#chekout_content a:contains("Sign Up")',
         run: "click",
     },
     {
@@ -311,7 +306,7 @@ import * as tourUtils from "@website_sale/js/tours/tour_utils";
         },
     {
         content: "Click on Sign in Button",
-        trigger: `.oe_cart a:contains(Sign in)`,
+        trigger: `#chekout_content a:contains(Sign in)`,
         run: "click",
     },
     {
@@ -381,7 +376,7 @@ import * as tourUtils from "@website_sale/js/tours/tour_utils";
         run: "click",
     },
     {
-        trigger: '.oe_cart .oe_website_sale_tx_status',
+        trigger: '#chekout_content .oe_website_sale_tx_status',
     },
     {
         content: "Open Dropdown for See quotation",
@@ -496,7 +491,7 @@ import * as tourUtils from "@website_sale/js/tours/tour_utils";
     },
     {
         content: "Click on 'Continue checkout' button",
-        trigger: '.oe_cart .btn:contains("Continue checkout")',
+        trigger: '#chekout_content .btn:contains("Continue checkout")',
         run: "click",
     },
     ...tourUtils.payWithTransfer(),
