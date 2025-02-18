@@ -43,6 +43,10 @@ class PosCategory(models.Model):
         if config_id.limit_categories and config_id.iface_available_categ_ids:
             category_ids = config_id._get_available_categories().ids
             product_catg_ids = list(set(product_catg_ids) & set(category_ids))
+        parent_categ_ids = self.env['pos.category'].browse(product_catg_ids).parent_id
+        while parent_categ_ids:
+            product_catg_ids += parent_categ_ids.ids
+            parent_categ_ids = parent_categ_ids.parent_id
         return [('id', 'in', product_catg_ids)]
 
     @api.model
