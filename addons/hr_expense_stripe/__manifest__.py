@@ -12,13 +12,16 @@
     'depends': ['hr_expense'],
     'data': [
         'security/ir.model.access.csv',
-
         'data/product.mcc.stripe.tag.csv',
-
         'views/hr_expense_stripe_credit_card.xml',
-        'views/hr_employee_views.xml',
         'views/res_config_settings.xml',
+        'wizard/cardholder_wizard.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'hr_expense_stripe/static/src/**/*',
+        ],
+    },
     'post_init_hook': '_post_init_hook_create_stripe_journal',
     'installable': True,
     'application': False,

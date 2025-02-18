@@ -1,6 +1,7 @@
 import logging
 
 import requests
+import json
 
 from odoo import _
 from odoo.exceptions import ValidationError
@@ -103,26 +104,6 @@ STRIPE_ERRORS = {
     '429': 'Too Many Requests',
     '5': 'Server Errors',
 }
-
-def get_publishable_key():
-    """ Return the publishable key for Stripe.
-
-    Note: This method serves as a hook for modules that would fully implement Stripe Connect.
-    :return: The publishable key
-    :rtype: str
-    """
-    return False
-
-
-def get_secret_key():
-    """ Return the secret key for Stripe.
-
-    Note: This method serves as a hook for modules that would fully implement Stripe Connect.
-    :return: The secret key
-    :rtype: str
-    """
-    return False
-
 
 # According to https://en.wikipedia.org/wiki/ISO_4217#Minor_unit_fractions
 # Taken from payment module TODO JUAL: Do we move it deeper?
@@ -470,54 +451,54 @@ def format_amount_to_stripe(amount, currency):
     """ Helper to convert currencies according from stripe formatting which is the amount in the currency's minor unit with exceptions  """
     return to_minor_currency_units(amount, currency, arbitrary_decimal_number=STRIPE_EXCEPTIONS_CURRENCY_MINOR_UNITS.get(currency.name))
 
-def stripe_make_request(api_key, endpoint, payload=None, method='POST', offline=False, idempotency_key=None):
+def flatten_dict(dict_vals, level=0):
     """
-    Make a request to Stripe API at the specified endpoint.
+    Stripe has a flat data hierarchy and do not accept objects
 
-    Note: self.ensure_one()
+    this ->     {
+                    'person': {
+                        'name': "Eli",
+                        'lastname': "Lambert", 
+                    }
+                }
 
-    :param str endpoint: The endpoint to be reached by the request
-    :param dict payload: The payload of the request
-    :param str method: The HTTP method of the request
-    :param bool offline: Whether the operation of the transaction being processed is 'offline'
-    :param str idempotency_key: The idempotency key to pass in the request.
-    :return The JSON-formatted content of the response
-    :rtype: dict
-    :raise: ValidationError if an HTTP error occurs
+    becomes ->  {
+                    'person[name]': "Eli",
+                    'person[lastname]': "Lambert"
+                }
     """
+    new_dict = {}
 
-    url = '/'.join(('https://api.stripe.com/v1', endpoint))
+    for key, item in dict_vals.items():
+        dict_key = f'{key}' if level == 0 else f'[{key}]'
+        if isinstance(item, dict):
+            new_sub_dict = flatten_dict(item, level + 1)
+            # Add sub dict to this dict
+            for sub_dict_key, sub_dict_item in new_sub_dict.items():
+                new_dict[f'{dict_key}{sub_dict_key}'] = sub_dict_item
+        else:
+            new_dict[dict_key] = item
+    return new_dict
+
+def make_request_stripe_proxy(route, payload=None, method="POST", headers=None, test_mode=False):
+    if not headers:
+        headers = {}
+
     headers = {
-        'AUTHORIZATION': f'Bearer {api_key}',
-        'Stripe-Version': API_VERSION,  # SetupIntent requires a specific version.
+        'Content-Type': 'application/json',
+        **headers,
     }
-    if method == 'POST' and idempotency_key:
-        headers['Idempotency-Key'] = idempotency_key
+
+    proxy_server = 'https://stripe-issuing-proxy.test.odoo.com' if test_mode else 'https://stripe-issuing-proxy.api.odoo.com'
+    proxy_server = "http://127.0.0.1:8070"  # Temp local IAP server
+    url = f"{proxy_server}/{route}"
     try:
-        response = requests.request(method, url, data=payload, headers=headers, timeout=60)
-        # Stripe can send 4XX errors for payment failures (not only for badly-formed requests).
-        # Check if an error code is present in the response content and raise only if not.
-        # See https://stripe.com/docs/error-codes.
-        # If the request originates from an offline operation, don't raise to avoid a cursor
-        # rollback and return the response as-is for flow-specific handling.
-        if (
-                not response.ok
-                and not offline
-                and 400 <= response.status_code < 500
-                and response.json().get('error')
-        ):  # The 'code' entry is sometimes missing
-            try:
-                response.raise_for_status()
-            except requests.exceptions.HTTPError:
-                _logger.exception("invalid API request at %s with data %s", url, payload)
-                error_msg = response.json().get('error', {}).get('message', '')
-                raise ValidationError(
-                    "Stripe: " + _(
-                        "The communication with the API failed.\n"
-                        "Stripe gave us the following info about the problem:\n'%s'", error_msg
-                    )
-                )
+        response = requests.request(method, url, data=json.dumps(flatten_dict(payload)), headers=headers, timeout=60)
+
+        response_content = response.json()
+        if 'error' in response_content:
+            raise ValidationError(response_content['error']['data']['message'])
     except requests.exceptions.ConnectionError:
         _logger.exception("unable to reach endpoint at %s", url)
-        raise ValidationError("Stripe: " + _("Could not establish the connection to the API."))
-    return response.json()
+        raise ValidationError("Stripe Proxy: " + _("Could not establish the connection to the Proxy Server."))
+    return response_content['result']

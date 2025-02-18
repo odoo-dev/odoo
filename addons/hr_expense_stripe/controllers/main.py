@@ -11,9 +11,9 @@ from odoo.tools.safe_eval import time
 _logger = logging.getLogger(__name__)
 
 class StripeIssuingController(Controller):
-    _webhook_url='/stripe_issuing/webhook'
+    _webhook_url='stripe_issuing/webhook'
 
-    @route(_webhook_url, type='http', methods=['POST'], auth='public', csrf=False)
+    @route(f"/{_webhook_url}", type='http', methods=['POST'], auth='public', csrf=False)
     def stripe_issuing_webhook(self):
         event = request.get_json_data()
         _logger.info('Received Stripe event: %s', {key: value for key, value in event.items() if key != 'data'})

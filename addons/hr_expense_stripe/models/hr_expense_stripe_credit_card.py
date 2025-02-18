@@ -1,8 +1,7 @@
 import logging
 import re
 
-from odoo import Command, _, api, fields, models
-
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
@@ -11,13 +10,14 @@ EXPIRATION_PATTERN = re.compile(r'\d{2}/\d{2}')  # 01/12
 # https://docs.stripe.com/api/issuing/cards
 class HrExpenseStripeCreditCard(models.Model):
     _name = 'hr.expense.stripe.credit.card'
-    _inherit = ['mail.thread', 'stripe.issuing']
+    _inherit = ['mail.thread']
     _description = 'Employee Credit Card'
     _check_company_auto = True
-    _rec_name = 'card_number_public'
+    _rec_name = 'last_4'
 
+    stripe_card_id = fields.Char(string="Stripe Card ID")
     company_id = fields.Many2one(comodel_name='res.company', string='Company', default=lambda self: self.env.company, required=True)
-    cardholder_id = fields.Many2one(comodel_name='hr.employee', string="Cardholder", check_company=True, required=True)
+    employee_id = fields.Many2one(comodel_name='hr.employee', string="Cardholder", check_company=True, required=True)
     journal_id = fields.Many2one(
         comodel_name='account.journal',
         string='Stripe Journal',
@@ -27,6 +27,7 @@ class HrExpenseStripeCreditCard(models.Model):
         required=True,
     )
     currency_id = fields.Many2one(related='company_id.stripe_currency_id')
+    
     state = fields.Selection(  # Stripe states
         string="Status",
         selection=[
@@ -47,26 +48,23 @@ class HrExpenseStripeCreditCard(models.Model):
         ],
         default='virtual',
     )
+
+    # Post Creation Data
     last_4 = fields.Char(string='Last 4 digits', copy=False)
-    card_number_public = fields.Char(string='Card Number', compute='_compute_card_number_public', copy=False, size=20)
-    cvv_public = fields.Char(string='CVV', default='***', store=False, copy=False, size=3)
+    card_name = fields.Char(string="Card Name", help="The name displayed on the card")
     expiration = fields.Char(string='Expiration Date', readonly=True, size=5, copy=False)
+
+    # Spending Policy
     spending_policy_category_ids = fields.Many2many(comodel_name='product.product', domain=[('can_be_expensed', '=', True)])  # TODO JUAL REMOVE
     spending_policy_limit_ids = fields.One2many(
         string='Spending Policy Limits',
         comodel_name='hr.expense.stripe.spending.limit',
         inverse_name='card_id',
     )
-    replaced_by = fields.Many2one(comodel_name='hr.expense.stripe.credit.card', string='Replaced By', readonly=True, copy=False)
     expense_ids = fields.One2many(comodel_name='hr.expense', inverse_name='card_id', string='Transactions')
 
-    # Related fields
-    cardholder_phone = fields.Char(related='cardholder_id.mobile_phone', string='Mobile', readonly=False)
-    cardholder_first_name = fields.Char(related='cardholder_id.private_first_name', string='Cardholder First Name', readonly=False)
-    cardholder_last_name = fields.Char(related='cardholder_id.private_last_name', string='Cardholder Last Name', readonly=False)
-    country_code = fields.Char(comodel_name='res.country', related='company_id.country_code')
-
     # Stripe object additional fields
+    replaced_by = fields.Many2one(comodel_name='hr.expense.stripe.credit.card', string='Replaced By', readonly=True, copy=False)
     cancellation_reason = fields.Selection(
         string="Cancellation Reason",
         selection=[
@@ -83,146 +81,29 @@ class HrExpenseStripeCreditCard(models.Model):
             if not re.match(EXPIRATION_PATTERN, card.expiration):
                 raise ValidationError(_('Expiration date must be in the format DD/MM'))
 
-    def _compute_card_number_public(self):
-        for card in self:
-            card.card_number_public = f'**** **** **** {card.last_4 or "****"}'
+    @api.model_create_multi
+    def _create(self, data_list):
+        return super()._create(data_list)
 
-    @api.model
-    def _convert_stripe_data_to_odoo_vals(self, stripe_data):
-        # EXTENDS stripe.issuing
-        res = super()._convert_stripe_data_to_odoo_vals(stripe_data)
-        if not res:
-            return {}
-        if stripe_data['replaced_by']:
-            card_id = self.env['hr.expense.stripe.credit.card'].search([('stripe_id', '=', stripe_data['replaced_by'])], limit=1).id
-            if card_id:
-                res['replaced_by'] = card_id
-        spending_data = stripe_data['spending_controls']
-        allowed_categories = spending_data.get('allowed_categories', [])
-        blocked_categories = spending_data.get('blocked_categories', [])
-        # if allowed_categories:
-        #     res['category_tag_ids'] = self.env['product.mcc.stripe.tag'].search([
-        #         ('stripe_name', 'in', allowed_categories),
-        #     ]).ids
-        #     res['category_tag_rule'] = 'allowed'
-        # elif blocked_categories:
-        #     res['category_tag_ids'] = self.env['product.mcc.stripe.tag'].search([
-        #         ('stripe_name', 'in', blocked_categories),
-        #     ]).ids
-        #     res['category_tag_rule'] = 'blocked'
-        #
-        # allowed_merchant_countries = spending_data.get('allowed_merchant_countries', [])
-        # blocked_merchant_countries = spending_data.get('blocked_merchant_countries', [])
-        # if allowed_merchant_countries:
-        #     res['merchant_country_ids'] = self.env['res.country'].search([
-        #         ('code', 'in', allowed_merchant_countries)
-        #     ]).ids
-        #     res['merchant_country_rule'] = 'allowed'
-        # elif blocked_merchant_countries:
-        #     res['merchant_country_ids'] = self.env['res.country'].search([
-        #         ('code', 'in', blocked_merchant_countries)
-        #     ]).ids
-        #     res['merchant_country_rule'] = 'blocked'
+    def action_open_cardholder_wizard(self):
+        self.ensure_one()
 
-        res.update({
-            # 'cardholder_id': , # Must be defined outside the function as a search is required
-            'state': stripe_data['status'],
-            'currency_id': self.env['res.currency'].search([('name', '=', stripe_data['currency'].upper())], limit=1).id,
-            'expiration': f'{stripe_data["exp_month"]:0>2}/{str(stripe_data["exp_year"])[2:]}',
-            'last_4': stripe_data['last4'],
-            'card_type': stripe_data['type'],
-            'spending_policy_limits': self.env['hr.expense.stripe.spending.limit']._create_vals_from_stripe(spending_data),
+        wizard = self.env['hr.expense.stripe.cardholder.wizard'].create({
+            'company_id': self.company_id.id,
+            'employee_id': self.env.context.get('selected_employee_id', self.employee_id.id),
         })
-        return res
 
-    def _create_from_stripe(self, vals):
-        # OVERRIDDE stripe.issuing
-        create_vals = []
-        for record_data in vals:
-            if record_data['livemode'] != (self._get_stripe_mode() == 'live'):
-                raise ValidationError(_(
-                    "The stripe data received is not in the same mode as the company. Are you sending test data to a live company?"
-                ))
-            cardholder_data = record_data['cardholder']
-            cardholder = self.env['hr.employee'].search(
-                [
-                    ('company_id', '=', self.env.company.id),
-                    '|', ('stripe_id', '=', cardholder_data['id']),
-                         '&', ('stripe_id', '=', False),
-                              '|', ('email', '=', cardholder_data['email']), ('work_email', '=', cardholder_data['email']),
-                ], limit=1
-            )
-            if not cardholder:
-                cardholder = self.env['hr.employee']._create_from_stripe([{cardholder_data['id']: cardholder_data}])
-            if cardholder:  # Not created if invalid
-                create_data = self._convert_stripe_data_to_odoo_vals(record_data)
-                spending_policy_limit_ids = create_data.pop('spending_policy_limits', [])
-                create_data['spending_policy_limit_ids'] = [
-                    Command.create(limit)
-                    for limit in spending_policy_limit_ids
-                ]
-                create_data['cardholder_id'] = cardholder.id
-                if create_data:  # Skip impossible imports
-                    create_vals.append(create_data)
-        new_records = self.create(create_vals)
-        return new_records
-
-    def _update_from_stripe(self, vals):
-        # OVERRIDE stripe.issuing
-        for record in self:
-            record_data_raw = vals.get(record.stripe_id, {})
-            if not record_data_raw:
-                raise ValidationError(_("The stripe data received is invalid"))
-
-            if record_data_raw['livemode'] != (self._get_stripe_mode() == 'live'):
-                raise ValidationError(_(
-                    "The stripe data received is not in the same mode as the company. Are you sending test data to a live company?"
-                ))
-            record_data = self._convert_stripe_data_to_odoo_vals(record_data_raw)
-
-            spending_limits_changes = []
-            spending_limits_values_to_record_id = {
-                (existing_limit.amount, existing_limit.interval): existing_limit.id  #, sorted(existing_limit.mcc_ids.ids))
-                for existing_limit in record.spending_policy_limit_ids}
-            existing_spending_limits_keys = set(spending_limits_values_to_record_id.keys())
-            for new_spending_policy in record_data.pop('spending_policy_limits', []):
-                new_spending_policy_values = (
-                    new_spending_policy['amount'],
-                    new_spending_policy['interval'],
-                    # sorted(new_spending_policy['mcc_ids'])
-                )
-                if new_spending_policy_values not in existing_spending_limits_keys:
-                    spending_limits_changes.append(Command.create({
-                        'card_id': record.id,
-                        'amount': new_spending_policy['amount'],
-                        'interval': new_spending_policy['interval'],
-                    }))
-                else:
-                    del spending_limits_values_to_record_id[new_spending_policy_values]
-            for record_id_to_delete in spending_limits_values_to_record_id.values():
-                spending_limits_changes.append(Command.delete(record_id_to_delete))
-            record_data['spending_policy_limit_ids'] = spending_limits_changes
-            cardholder = self.env['hr.employee'].search(
-                [
-                    ('company_id', '=', self.env.company.id),
-                    '|', ('stripe_id', '=', record_data_raw['cardholder']['id']),
-                         '&',('stripe_id', '=', False), ('work_email', '=', record_data_raw['cardholder']['email']),
-                ], limit=1
-            )
-            if not cardholder:
-                raise ValidationError(_("The stripe data received is invalid, cannot find the cardholder in the employees"))
-            if not cardholder.stripe_id:
-                cardholder.can_use_stripe_cards = True
-                cardholder.stripe_id = record_data_raw['cardholder']['id']
-            record_data['cardholder_id'] = cardholder.id
-            record.write(record_data)
-
-    @api.constrains('company_id')
-    def _check_company_id(self):
-        for card in self:
-            if not card.requires_stripe_sync:
-                raise ValidationError(_("The Stripe issuing account isn't properly set, please connect you to Stripe in the config"))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Cardholder Configuration"),
+            'view_mode': 'form',
+            'res_model': wizard._name,
+            'target': 'new',
+            'context': self.env.context,
+            'views': [[False, 'form']],
+            'res_id': wizard.id
+        }
 
     def _can_pay_amount(self):
         self.ensure_one()
-        return self.cardholder_id.active
+        return self.employee_id.active

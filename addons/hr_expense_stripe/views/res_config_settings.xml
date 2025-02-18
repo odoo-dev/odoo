@@ -11,14 +11,8 @@
                     <setting string="Live Publishable key">
                         <field name="stripe_publishable_live_key"/>
                     </setting>
-                    <setting string="Live Secret key">
-                        <field name="stripe_secret_live_key"/>
-                    </setting>
                     <setting string="Test Publishable key">
                         <field name="stripe_publishable_test_key"/>
-                    </setting>
-                    <setting string="Test Secret key">
-                        <field name="stripe_secret_test_key"/>
                     </setting>
                     <setting string="Test mode">
                         <field name="stripe_mode"/>
@@ -27,13 +21,19 @@
                              help="Journal where stripe transactions are recorded">
                         <field name="stripe_journal_id"/>
                     </setting>
+                    
                     <setting string="Account" invisible="not module_hr_expense_stripe or stripe_issuing_activated"
                              help="Link your stripe issuing account to manage company credit cards for your employees through Odoo">
-                            <button name="action_connect_to_stripe" type="object" string="Connect to Stripe"/>
-                    </setting>
-                    <setting string="Create Webhook" invisible="not module_hr_expense_stripe or not stripe_issuing_activated"
-                             help="Create the webhook to allow Stripe to send us data">
-                            <button name="action_stripe_create_webhook" type="object" string="Create Webhook"/>
+                            <div class="mt8" invisible="stripe_account_id">
+                                <button name="action_create_stripe_account" icon="oi-arrow-right" type="object" string="Connect" class="btn-link"/>
+                            </div>
+                            <div class="mt8" invisible="not stripe_account_id">
+                                <button name="action_refresh_stripe_account" icon="oi-arrow-right" type="object" string="Refresh" class="btn-link mr8"/>
+                                <field name="stripe_account_issuing_status" invisible="not stripe_account_id" widget="badge" decoration-danger="stripe_account_issuing_status == 'restricted'" decoration-success="stripe_account_issuing_status == 'verified'"/>
+                            </div>
+                            <div class="mt8" invisible="not stripe_account_id">
+                                <button name="action_configure_stripe_account" icon="oi-arrow-right" type="object" string="Configure" class="btn-link"/>
+                            </div>
                     </setting>
                 </xpath>
             </field>

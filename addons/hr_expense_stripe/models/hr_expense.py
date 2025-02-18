@@ -15,7 +15,7 @@ class HrExpense(models.Model):
         readonly=True,
         groups='hr.group_hr_manager',
     )
-    card_number = fields.Char(related='card_id.card_number_public', readonly=True, related_sudo=True)
+    # card_number = fields.Char(related='card_id.card_number_public', readonly=True, related_sudo=True)
 
     def _get_default_responsible_for_approval(self):
         # EXTEND hr_expense to bypass approval for expenses created from a stripe transaction

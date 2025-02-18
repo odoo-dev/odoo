@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="hr_expense_stripe_cardholder_wizard_form" model="ir.ui.view">
+            <field name="name">hr.expense.stripe.cardholder.wizard.form</field>
+            <field name="model">hr.expense.stripe.cardholder.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <field name="stripe_cardholder_id" invisible="1"/>
+                    <group>
+                        <group>
+                            <field name="employee_id"/>
+                            <field name="firstname"/>
+                            <field name="lastname"/>
+                            <field name="birthday"/>
+                        </group>
+                        <group>
+                            <field name="phone_number" readonly="stripe_cardholder_id"/>
+                            <field name="email"/>
+                            <field name="billing_address_line1"/>
+                            <field name="billing_address_city"/>
+                            <field name="billing_address_postal_code"/>
+                            <field name="billing_address_country"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="action_save_cardholder" class="btn btn-primary" type="object">Save</button>
+                        <button string="Cancel" special="cancel" data-hotkey="x"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>
