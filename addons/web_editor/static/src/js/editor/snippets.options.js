@@ -7621,6 +7621,7 @@ registry.ImageTools = ImageHandlerOption.extend({
                 img.dataset.originalMimetype = img.dataset.mimetype;
             }
             if (!this._isImageSupportedForProcessing(img)) {
+                console.log(">>> _loadImageInfo: DELETE dataset")
                 delete img.dataset.shape;
                 delete img.dataset.shapeColors;
                 delete img.dataset.fileName;
