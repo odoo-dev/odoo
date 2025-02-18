@@ -2,7 +2,6 @@ import logging
 
 from odoo import _, api, fields, models
 
-from odoo.addons.hr_expense_stripe.utils import get_publishable_key, get_secret_key, stripe_make_request
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -41,7 +40,7 @@ class StripeIssuing(models.AbstractModel):
         """
         company = self.company_id or self.env.company
         mode = self._get_stripe_mode()
-        return company[f'stripe_publishable_{mode}_key'] or get_publishable_key()
+        return None
 
     @api.model
     def _get_secret_key(self):
@@ -53,7 +52,7 @@ class StripeIssuing(models.AbstractModel):
         """
         company = self.company_id or self.env.company
         mode = self._get_stripe_mode()
-        return company[f'stripe_secret_{mode}_key'] or get_secret_key()
+        return None
 
     @api.model
     def _stripe_get_endpoint(self, extra_url=''):
@@ -149,7 +148,7 @@ class StripeIssuing(models.AbstractModel):
         :rtype: dict
         :raise: ValidationError if an HTTP error occurs
         """
-        return stripe_make_request(self._get_secret_key(), endpoint, payload,  method, offline, idempotency_key)
+        return None
 
     @api.model
     def _stripe_search_filters(self):

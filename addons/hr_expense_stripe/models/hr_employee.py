@@ -1,10 +1,12 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
+from odoo.addons.hr_expense_stripe.utils import make_request_stripe_proxy
+
 
 class HrEmployee(models.Model):
     _name = 'hr.employee'
-    _inherit = ['hr.employee', 'stripe.issuing']
+    _inherit = ['hr.employee']
 
     stripe_id = fields.Char(string='Stripe ID', readonly=True, copy=False, index='trigram', groups="hr.group_hr_user")
     private_first_name = fields.Char(string='First Name', compute='_compute_from_name', store=True, groups="hr.group_hr_user")

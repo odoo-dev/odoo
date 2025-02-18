@@ -1,13 +1,25 @@
+import uuid
+
 from odoo import _, api, models, fields
 from odoo.addons.hr_expense_stripe.controllers.main import StripeIssuingController
-from odoo.addons.hr_expense_stripe.utils import API_VERSION, HANDLED_WEBHOOK_EVENTS, STRIPE_VALID_JOURNAL_CURRENCIES, stripe_make_request
-from odoo.exceptions import UserError
+from odoo.addons.hr_expense_stripe.utils import API_VERSION, HANDLED_WEBHOOK_EVENTS, STRIPE_VALID_JOURNAL_CURRENCIES, make_request_stripe_proxy
+from odoo.exceptions import UserError, ValidationError
 
 
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    # Stripe account
     stripe_account_id = fields.Char(string='Stripe Account ID', copy=False)
+    stripe_account_status = fields.Selection(
+        selection=[
+            ('restricted', "Restricted"),
+            ('verified', "Verified"),
+        ],
+        string="Status",
+        default='restricted'
+    )
+
     stripe_journal_id = fields.Many2one(
         comodel_name='account.journal',
         string='Stripe Issuing Journal',
@@ -23,15 +35,12 @@ class ResCompany(models.Model):
         readonly=True,
         copy=False,
     )
-
     stripe_issuing_activated = fields.Boolean(groups='base.group_system')
 
     stripe_publishable_live_key = fields.Char(groups='base.group_system')
-    stripe_secret_live_key = fields.Char(groups='base.group_system')
     stripe_publishable_test_key = fields.Char(groups='base.group_system')
-    stripe_secret_test_key = fields.Char(groups='base.group_system')
-
     stripe_webhook_secret = fields.Char(groups='base.group_system')
+
     stripe_mode = fields.Selection(
         selection=[
             ('test', 'Test'),
@@ -43,7 +52,8 @@ class ResCompany(models.Model):
     )
 
     def _get_stripe_webhook_url(self):
-        return '/'.join((self.get_base_url(), StripeIssuingController._webhook_url))
+        self.ensure_one()
+        return '/'.join((self.get_base_url(), StripeIssuingController._webhook_url, self.stripe_webhook_secret))
 
     @api.depends('country_id')
     def _compute_stripe_currency(self):
@@ -59,56 +69,68 @@ class ResCompany(models.Model):
         if not self.stripe_journal_id:
             raise UserError(_("Please select a bank journal to be connected to Stripe"))
 
-    def _create_webhook(self):
-        """ Create a webhook and return a feedback notification.
+    def _create_webhook_secret(self):
+        """ Create a webhook secret and return a feedback notification.
 
         Note: This action only works for instances using a public URL
-        Note: Adapted copy of payment_stripe payment.provider.action_create_webhook
 
         :return: The feedback notification
         :rtype: dict
         """
         self.ensure_one()
-        secret_key = self.stripe_secret_live_key if self.stripe_mode == 'live' else self.stripe_secret_test_key
-        if not secret_key:
-            message = _("You cannot create a Stripe Webhook if your Stripe Secret Key is not set.")
-            notification_type = 'danger'
-        else:
-            # 1. Get all existing webhooks
-            existing_webhooks = stripe_make_request(secret_key, endpoint='webhook_endpoints', method='GET')
 
-            # 2. Get the webhooks that would conflict with ours
-            webhooks_to_delete = []
-            for webhook in existing_webhooks.get('data', []):
-                if any(event  in HANDLED_WEBHOOK_EVENTS for event in webhook.get('enabled_events', [])):
-                    webhooks_to_delete.append(webhook.get('id'))
+        if self.stripe_webhook_secret:
+            raise UserError(_("A Webhook URL already exists for this company."))
 
-            # 3. Delete unwanted webhooks
-            for webhook_id in webhooks_to_delete:
-                stripe_make_request(secret_key, endpoint=f'webhook_endpoints/{webhook_id}', method='DELETE')
+        self.stripe_webhook_secret = uuid.uuid4()
 
-            # 4. Create the new webhook
-            webhook = stripe_make_request(
-                secret_key,
-                endpoint='webhook_endpoints',
-                payload={
-                    'url': self._get_stripe_webhook_url(),
-                    'enabled_events[]': HANDLED_WEBHOOK_EVENTS,
-                    'api_version': API_VERSION,
-                },
-                method='POST',
-            )
-            self.stripe_webhook_secret = webhook.get('secret')
-            message = _("You Stripe Webhook was successfully set up!")
-            notification_type = 'info'
+    def action_create_stripe_account(self):
+        self.ensure_one()
+        if self.stripe_account_id:
+            raise UserError("User is already connected to stripe issuing.")
+        self._create_webhook_secret()
+        payload = {
+            'webhook_url': self._get_stripe_webhook_url(),
+            'country': self.country_id.code,
+            'phone': self.partner_id.phone,
+        }
 
+        response = make_request_stripe_proxy('api/stripe_issuing/1/create_connected_account', payload)
+        self.stripe_account_id = response['stripe_ident']
+
+        # Now that we have created the account, we redirect the user to Stripe to let him configure it 
+        payload = {
+            'account': self.stripe_account_id,
+            'refresh_url': self.get_base_url(),
+            'return_url': self.get_base_url(),
+        }
+        response = make_request_stripe_proxy('api/stripe_issuing/1/get_onboarding_link', payload)
         return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'message': message,
-                'sticky': False,
-                'type': notification_type,
-                'next': {'type': 'ir.actions.act_window_close'},  # Refresh the form to show the key
+                'type': 'ir.actions.act_url',
+                'url': response['onboarding_url'],
+                'target': 'self',
             }
+
+    def action_refresh_stripe_account(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window_close',
+        }
+
+    def action_configure_stripe_account(self):
+        self.ensure_one()
+
+        if not self.stripe_account_id:
+            raise ValidationError(_("You need to be connected to stripe in order to configure your account."))
+
+        payload = {
+            'account': self.stripe_account_id,
+            'refresh_url': self.get_base_url(),
+            'return_url': self.get_base_url(),
+        }
+        response = make_request_stripe_proxy('api/stripe_issuing/1/get_onboarding_link', payload)
+        return {
+            'type': 'ir.actions.act_url',
+            'url': response['onboarding_url'],
+            'target': 'self',
         }
