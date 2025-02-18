@@ -108,8 +108,8 @@
                                 </t>
                             </Dropdown>
                         </div>
-                        <nav t-else="" class="o_cp_switch_buttons d-print-none d-inline-flex btn-group">
-                            <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
+                        <nav t-else="" class="o_cp_switch_buttons d-print-none d-inline-flex btn-group flex-column gap-3">
+                            <!-- <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
                                 <button class="btn btn-secondary o_switch_view "
                                     t-attf-class="o_{{view.type}} {{view.active ? 'active' : ''}}"
                                     t-att-data-tooltip="view.name"
@@ -118,7 +118,88 @@
                                 >
                                     <i t-att-class="view.icon" />
                                 </button>
-                            </t>
+                            </t> -->
+                            <h3>Before</h3>
+                            <div class="btn-group">
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-chevron-left" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-chevron-right"/>
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-chevron-up" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-chevron-down" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-arrow-left" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-arrow-right" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-arrow-up" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-arrow-down" />
+                            </button>
+                            </div>
+                            <!-- <h3>after v1</h3>
+                            <div class="btn-group">
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-chevron-left-1" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-chevron-right-1"/>
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-chevron-top-1" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-chevron-bottom-1" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-arrow-left" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-arrow-right" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-arrow-up" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-arrow-down" />
+                            </button>
+                            </div> -->
+                            <h3>after</h3>
+                            <div class="btn-group">
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-chevron-left-2" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-chevron-right-2"/>
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-chevron-up-2" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-chevron-down-2" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-arrow-left" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-arrow-right" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-arrow-up" />
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="oi oi-arrow-down" />
+                            </button>
+                            </div>
                         </nav>
                     </t>
                     <t t-slot="control-panel-navigation-additional"/>

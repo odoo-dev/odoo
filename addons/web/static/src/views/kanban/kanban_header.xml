@@ -10,10 +10,35 @@
                     <span t-if="group.count > 0 and !props.list.model.useSampleModel" t-esc="'(' + group.count + ')'"/>
                 </div>
                 <div t-if="!group.isFolded"
-                    class="o_column_title flex-grow-1 min-w-0 mw-100 gap-1 d-flex fs-4 fw-bold align-top text-900"
+                    class="o_column_title flex-grow-1 min-w-0 mw-100 gap-1 d-flex fs-4 fw-bold align-top text-900 flex-column"
                       t-on-mouseenter="onTitleMouseEnter" t-on-mouseleave="onTitleMouseLeave"
                 >
-                    <span class="text-truncate" t-esc="group.displayName"/>
+                    <!-- <span class="text-truncate" t-esc="group.displayName"/> -->
+                    <div>
+                    <h1><i class="oi oi-arrow-right"/> Before (h1) <i class="oi oi-chevron-left"/></h1>
+                    <h2><i class="oi oi-arrow-right"/> Before (h2) <i class="oi oi-chevron-left"/></h2>
+                    <h3><i class="oi oi-arrow-right"/> Before (h3) <i class="oi oi-chevron-left"/></h3>
+                    <h4><i class="oi oi-arrow-right"/> Before (h4) <i class="oi oi-chevron-left"/></h4>
+                    <h5><i class="oi oi-arrow-right"/> Before (h5) <i class="oi oi-chevron-left"/></h5>
+                    <h6><i class="oi oi-arrow-right"/> Before (h6) <i class="oi oi-chevron-left"/></h6>
+                    </div>
+                    <!-- <div class="mt-4">
+                    <h1><i class="oi oi-arrow-right"/> After v1 (h1) <i class="oi oi-chevron-left-1"/></h1>
+                    <h2><i class="oi oi-arrow-right"/> After v1 (h2) <i class="oi oi-chevron-left-1"/></h2>
+                    <h3><i class="oi oi-arrow-right"/> After v1 (h3) <i class="oi oi-chevron-left-1"/></h3>
+                    <h4><i class="oi oi-arrow-right"/> After v1 (h4) <i class="oi oi-chevron-left-1"/></h4>
+                    <h5><i class="oi oi-arrow-right"/> After v1 (h5) <i class="oi oi-chevron-left-1"/></h5>
+                    <h6><i class="oi oi-arrow-right"/> After v1 (h6) <i class="oi oi-chevron-left-1"/></h6>
+                    </div> -->
+                    <div class="mt-4">
+                    <h1><i class="oi oi-arrow-right"/> After (h1) <i class="oi oi-chevron-left-2"/></h1>
+                    <h2><i class="oi oi-arrow-right"/> After (h2) <i class="oi oi-chevron-left-2"/></h2>
+                    <h3><i class="oi oi-arrow-right"/> After (h3) <i class="oi oi-chevron-left-2"/></h3>
+                    <h4><i class="oi oi-arrow-right"/> After (h4) <i class="oi oi-chevron-left-2"/></h4>
+                    <h5><i class="oi oi-arrow-right"/> After (h5) <i class="oi oi-chevron-left-2"/></h5>
+                    <h6><i class="oi oi-arrow-right"/> After (h6) <i class="oi oi-chevron-left-2"/></h6>
+                    </div>
+
                     <span t-if="!progressBar and !props.list.model.useSampleModel" t-esc="'(' + group.count + ')'"/>
                 </div>
                 <t t-if="env.isSmall or !group.isFolded">
