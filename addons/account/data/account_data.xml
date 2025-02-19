@@ -150,5 +150,10 @@
             <field name="code">action = records.action_share()</field>
         </record>
 
+        <record id="account_move_line_aggregate" model="ir.aggregate.config">
+            <field name="model_id" ref="account.model_account_move_line"/>
+            <field name="field_ids" eval="[ref('account.field_account_move_line__balance')]"/>
+            <field name="groupby">journal_id,company_id</field>
+        </record>
     </data>
 </odoo>

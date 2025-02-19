@@ -1570,37 +1570,54 @@ class BaseModel(metaclass=MetaModel):
         :raise AccessError: if user is not allowed to access requested information
         """
         self.browse().check_access('read')
+        domain = Domain(domain)._optimize(self)
 
-        query = self._search(domain)
-        if query.is_empty():
-            if not groupby:
-                # when there is no group, postgresql always return a row
-                return [tuple(
-                    self._read_group_empty_value(spec)
-                    for spec in itertools.chain(groupby, aggregates)
-                )]
-            return []
+        row_values = None
+        if (
+            not self.env.context.get('ignore_ir_aggregate')
+            and not order
+            and not limit
+            and not offset
+        ):
+            row_values = self.env['ir.aggregate'].get_values(
+                model_name=self._name,
+                domain=domain,
+                groupby=groupby,
+                aggregates=aggregates,
+                having=having,
+            )
 
-        query.limit = limit
-        query.offset = offset
+        if row_values is None:
+            query = self._search(domain)
+            if query.is_empty():
+                if not groupby:
+                    # when there is no group, postgresql always return a row
+                    return [tuple(
+                        self._read_group_empty_value(spec)
+                        for spec in itertools.chain(groupby, aggregates)
+                    )]
+                return []
 
-        groupby_terms: dict[str, SQL] = {
-            spec: self._read_group_groupby(spec, query)
-            for spec in groupby
-        }
-        if groupby_terms:
-            query.groupby = SQL(", ").join(groupby_terms.values())
-            query.having = self._read_group_having(having, query)
-            # _read_group_orderby may possibly extend query.groupby for orderby
-            query.order = self._read_group_orderby(order, groupby_terms, query)
+            query.limit = limit
+            query.offset = offset
 
-        select_terms: list[SQL] = [
-            self._read_group_select(spec, query)
-            for spec in aggregates
-        ]
+            groupby_terms: dict[str, SQL] = {
+                spec: self._read_group_groupby(spec, query)
+                for spec in groupby
+            }
+            if groupby_terms:
+                query.groupby = SQL(", ").join(groupby_terms.values())
+                query.having = self._read_group_having(having, query)
+                # _read_group_orderby may possibly extend query.groupby for orderby
+                query.order = self._read_group_orderby(order, groupby_terms, query)
 
-        # row_values: [(a1, b1, c1), (a2, b2, c2), ...]
-        row_values = self.env.execute_query(query.select(*groupby_terms.values(), *select_terms))
+            select_terms: list[SQL] = [
+                self._read_group_select(spec, query)
+                for spec in aggregates
+            ]
+
+            # row_values: [(a1, b1, c1), (a2, b2, c2), ...]
+            row_values = self.env.execute_query(query.select(*groupby_terms.values(), *select_terms))
 
         if not row_values:
             return row_values
@@ -3822,6 +3839,7 @@ class BaseModel(metaclass=MetaModel):
             return True
 
         self.check_access('unlink')
+        self.env['ir.aggregate']._process(self, remove=True)
 
         from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
         for func in self._ondelete_methods:
@@ -3999,6 +4017,7 @@ class BaseModel(metaclass=MetaModel):
             return True
 
         self.check_access('write')
+        self.env['ir.aggregate']._process(self, remove=True)
         for field_name in vals:
             try:
                 self._check_field_access(self._fields[field_name], 'write')
@@ -4141,6 +4160,7 @@ class BaseModel(metaclass=MetaModel):
 
         if check_company and self._check_company_auto:
             self._check_company()
+        self.env['ir.aggregate']._process(self, add=True)
         return True
 
     def _write(self, vals):
@@ -4361,6 +4381,8 @@ class BaseModel(metaclass=MetaModel):
 
         if self._check_company_auto:
             records._check_company()
+
+        self.env['ir.aggregate']._process(records, add=True)
 
         import_module = self.env.context.get('_import_current_module')
         if not import_module: # not an import -> bail

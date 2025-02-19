@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="ir_aggregate_config_form">
+        <field name="model">ir.aggregate.config</field>
+        <field name="arch" type="xml">
+            <form string="Aggregate Config">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="model_id"/>
+                            <field name="model_name" invisible="1"/>
+                            <field name="field_ids">
+                                <list>
+                                    <field name="name"/>
+                                </list>
+                            </field>
+                        </group>
+                        <group>
+                            <field name="domain" widget="domain" options="{'model': 'model_name'}"/>
+                            <field name="groupby_ids" mode="list">
+                                <list editable="bottom">
+                                    <field name="field_id"/>
+                                    <field name="granularity"/>
+                                </list>
+                            </field>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="ir_aggregate_config_list">
+        <field name="model">ir.aggregate.config</field>
+        <field name="arch" type="xml">
+            <list string="Aggregate Configs">
+                <field name="model_id"/>
+                <field name="model_name" column_invisible="1"/>
+                <field name="domain" widget="domain" options="{'model': 'model_name'}"/>
+            </list>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="ir_aggregate_config_action">
+        <field name="name">Aggregates Configuration</field>
+        <field name="res_model">ir.aggregate.config</field>
+        <field name="view_id" ref="ir_aggregate_config_list"/>
+    </record>
+
+    <record model="ir.actions.server" id="action_refresh_aggregates">
+        <field name="name">Refresh aggregates</field>
+        <field name="model_id" ref="base.model_ir_aggregate_config"/>
+        <field name="group_ids" eval="[(4, ref('base.group_system'))]"/>
+        <field name="binding_model_id" ref="base.model_ir_aggregate_config" />
+        <field name="state">code</field>
+        <field name="binding_view_types">form,list,kanban</field>
+        <field name="code">
+            if records:
+                action = records.refresh_counters()
+        </field>
+    </record>
+
+    <menuitem action="base.ir_aggregate_config_action" id="menu_ir_aggregate_config" parent="base.next_id_9"/>
+</odoo>

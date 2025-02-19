@@ -795,7 +795,8 @@ class DomainCondition(Domain):
         )
 
     def __hash__(self):
-        return hash(self.field_expr) ^ hash(self.operator) ^ hash(self.value)
+        value = self.value if self.value.__hash__ else tuple(self.value)
+        return hash(self.field_expr) ^ hash(self.operator) ^ hash(value)
 
     def iter_conditions(self):
         yield self
