@@ -13,6 +13,36 @@
             </record>
         </field>
         <field name="line_ids">
+            <record id="tax_report_obsup_section" model="account.report.line">
+                <field name="name">Corrective declaration</field>
+                <field name="hierarchy_level">0</field>
+                <field name="expression_ids">
+                    <record id="tax_report_obsup_section_enable" model="account.report.expression">
+                        <field name="engine">external</field>
+                        <field name="formula">most_recent</field>
+                        <field name="subformula">editable</field>
+                        <field name="figure_type">boolean</field>
+                    </record>
+                </field>
+                <field name="children_ids">
+                    <record id="tax_report_obsup_prev_amount" model="account.report.line">
+                        <field name="name">Previously declared amount</field>
+                        <field name="expression_ids">
+                            <record id="tax_report_obsup_prev_amount_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable</field>
+                            </record>
+                            <record id="tax_report_obsup_prev_amount_default" model="account.report.expression">
+                                <field name="label">_default_balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">NLTAX_B5g.balance</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
             <record id="tax_report_rub_1" model="account.report.line">
                 <field name="name">Section 1: Domestic performance</field>
                 <field name="aggregation_formula">1A_OMZET.balance + 1B_OMZET.balance + 1C_OMZET.balance + 1D_OMZET.balance + 1E_OMZET.balance</field>
