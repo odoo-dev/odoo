@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="sale.ProductCatalogSaleOrderLine"
+       t-inherit="product.ProductCatalogOrderLine"
+       t-inherit-mode="primary">
+        <xpath expr="//t[@t-if='showPrice']" position="replace">
+            <t t-portal="`#product-${props.productId}-price`" t-if="showPrice">
+                <span t-if="is_sale_catalog" class="o_product_catalog_price"><t t-out="price"/> / Units</span>
+                <span t-else="" class="o_product_catalog_price">Unit price: <t t-out="price"/></span>
+            </t>
+        </xpath>
+        <xpath expr="//div[hasclass('o_product_catalog_quantity')]" position="after">
+            <div t-elif="!isInOrder() and props.last_invoice_date and is_sale_catalog" class="text-muted">
+                <t t-out="invoice_date"/> ago
+            </div>
+        </xpath>
+    </t>
+</templates>

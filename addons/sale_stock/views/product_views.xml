@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_view_kanban_catalog_sale_only" model="ir.ui.view">
+        <field name="name">product.view.kanban.catalog.sale.stock.inherit</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="sale.product_view_kanban_catalog_sale_only"/>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='o_kanban_qty_available']" position="replace">
+                <div t-if="record.is_storable.raw_value" name="o_kanban_qty_available" t-attf-id="product-{{record.id.raw_value}}-for">
+                    <field name="qty_available"/>
+                    <span> On Hand</span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

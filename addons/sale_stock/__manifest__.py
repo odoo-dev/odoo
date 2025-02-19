@@ -31,6 +31,7 @@ Preferences
         'views/stock_lot_views.xml',
         'views/res_users_views.xml',
         'views/stock_picking_views.xml',
+        'views/product_views.xml',
 
         'report/sale_order_report_templates.xml',
         'report/stock_report_deliveryslip.xml',
