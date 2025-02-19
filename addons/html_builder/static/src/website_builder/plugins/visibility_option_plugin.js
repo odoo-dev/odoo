@@ -3,6 +3,7 @@ import { Plugin } from "@html_editor/plugin";
 import { selectElements } from "@html_editor/utils/dom_traversal";
 import { pyToJsLocale } from "@web/core/l10n/utils";
 import { VisibilityOption } from "./visibility_option";
+import { withSequence } from "@html_editor/utils/resource";
 
 export const device_visibility_option_selector = "section .row > div";
 
@@ -14,20 +15,22 @@ class VisibilityOptionPlugin extends Plugin {
     deviceSelector = "section .row > div";
     resources = {
         builder_options: [
-            {
-                OptionComponent: VisibilityOption,
-                props: {
-                    websiteSession: this.dependencies.websiteSession.getSession(),
-                },
-                selector: this.visibilityOptionSelector,
-                cleanForSave: this.dependencies.visibility.cleanForSaveVisibility,
-            },
-            {
-                template: "html_builder.DeviceVisibilityOption",
-                selector: this.deviceSelector,
-                exclude: ".s_col_no_resize.row > div, .s_masonry_block .s_col_no_resize",
-                cleanForSave: this.dependencies.visibility.cleanForSaveVisibility,
-            },
+            withSequence(15,
+                {
+                    OptionComponent: VisibilityOption,
+                    props: {
+                        websiteSession: this.dependencies.websiteSession.getSession(),
+                    },
+                    selector: this.visibilityOptionSelector,
+                    cleanForSave: this.dependencies.visibility.cleanForSaveVisibility,
+                }),
+            withSequence(15,
+                {
+                    template: "html_builder.DeviceVisibilityOption",
+                    selector: this.deviceSelector,
+                    exclude: ".s_col_no_resize.row > div, .s_masonry_block .s_col_no_resize",
+                    cleanForSave: this.dependencies.visibility.cleanForSaveVisibility,
+                }),
         ],
         builder_actions: this.getActions(),
         target_show: this.onTargetShow.bind(this),

@@ -2,12 +2,14 @@ import { applyFunDependOnSelectorAndExclude } from "@html_builder/plugins/utils"
 import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import { BackgroundOption } from "./background_option";
+import { withSequence } from "@html_editor/utils/resource";
 
 class BackgroundOptionPlugin extends Plugin {
     static id = "backgroundOption";
     resources = {
         builder_options: [
             // TODO: add the other options that need BackgroundComponent
+            withSequence(15,
             {
                 selector: "section",
                 OptionComponent: BackgroundOption,
@@ -19,14 +21,15 @@ class BackgroundOptionPlugin extends Plugin {
                     withGradient: true,
                     withColorCombinations: true,
                 },
-            },
+            }),
         ],
         normalize_handlers: this.normalize.bind(this),
         system_classes: ["o_colored_level"],
     };
     setup() {
         this.coloredLevelBackgroundParams = [];
-        for (const builderOption of this.resources.builder_options) {
+        for (const item of this.resources.builder_options) {
+            const builderOption = item.object;
             if (builderOption.props.withColors && builderOption.props.withColorCombinations) {
                 this.coloredLevelBackgroundParams.push({
                     selector: builderOption.selector,

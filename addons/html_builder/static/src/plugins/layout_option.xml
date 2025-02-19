@@ -24,11 +24,7 @@
             </Dropdown>
         </t>
     </BuilderRow>
-    <t t-if="state.elementLayout === 'grid'">
-        <AddElementOption />
-        <SpacingOption />
-    </t>
-    <t t-else="">
+    <t t-if="state.elementLayout !== 'grid'">
         <BuilderContext applyTo="'.row'">
             <t t-call="html_builder.VerticalAlignmentOption">
                 <t t-set="level" t-value="1"/>

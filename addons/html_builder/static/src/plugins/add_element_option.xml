@@ -2,12 +2,28 @@
 <templates xml:space="preserve">
 
 <t t-name="html_builder.AddElementOption">
-    <BuilderRow label.translate="'Add element" level="1">
-        <BuilderButtonGroup>
-            <Button label="'Text'" onClick="this.addText"/>
-            <Button label="'Image'" onClick="this.addImage"/>
-            <Button label="'Button'" onClick="this.addButton"/>
-        </BuilderButtonGroup>
+    <BuilderRow label.translate="Add Elements" level="props.level">
+        <BuilderButton
+                action="'addElText'"
+                preview="false"
+                className="'o_we_bg_brand_primary'"
+                applyTo="props.applyTo">
+            Text
+        </BuilderButton>
+        <BuilderButton
+                action="'addElImage'"
+                preview="false"
+                className="'o_we_bg_brand_primary'"
+                applyTo="props.applyTo">
+            Image
+        </BuilderButton>
+        <BuilderButton
+                action="'addElButton'"
+                preview="false"
+                className="'o_we_bg_brand_primary'"
+                applyTo="props.applyTo">
+            Button
+        </BuilderButton>
     </BuilderRow>
 </t>
 
