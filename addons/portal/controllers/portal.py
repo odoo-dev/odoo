@@ -5,6 +5,7 @@ import base64
 import json
 import math
 import re
+import logging
 
 from werkzeug import urls
 
@@ -12,6 +13,8 @@ from odoo import http, tools, _, SUPERUSER_ID
 from odoo.exceptions import AccessDenied, AccessError, MissingError, UserError, ValidationError
 from odoo.http import content_disposition, Controller, request, route
 from odoo.tools import consteq
+
+_logger = logging.getLogger(__name__)
 
 # --------------------------------------------------
 # Misc tools
@@ -417,6 +420,9 @@ class CustomerPortal(Controller):
         # error message for empty required fields
         if [err for err in error.values() if err == 'missing']:
             error_message.append(_('Some required fields are empty.'))
+
+        _logger.warning('PASO DATA: %s', str(data))
+        _logger.warning('PASO ALL FIELD: %s', str(self._get_mandatory_fields() + self._get_optional_fields()))
 
         unknown = [k for k in data if k not in self._get_mandatory_fields() + self._get_optional_fields()]
         if unknown:

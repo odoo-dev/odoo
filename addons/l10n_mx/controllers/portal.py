@@ -1,5 +1,9 @@
+import logging
+
 from odoo.addons.portal.controllers import portal
 from odoo.http import request
+
+_logger = logging.getLogger(__name__)
 
 class CustomerPortal(portal.CustomerPortal):
 
@@ -9,7 +13,8 @@ class CustomerPortal(portal.CustomerPortal):
             country_id = int(request.env.context.get('portal_form_country_id', ''))
         except ValueError:
             country_id = None
-
+        if country_id:
+            _logger.warning('PASO 1.1 country_id: %s', request.env['res.country'].sudo().browse(country_id).code)
         mandatory_fields = super()._get_mandatory_fields()
         if country_id and request.env['res.country'].sudo().browse(country_id).code == 'MX':
             mandatory_fields += ['zipcode', 'vat']

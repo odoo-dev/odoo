@@ -189,6 +189,7 @@ class PosController(PortalAccount):
             # Check that the "optional" additional fields are filled.
             error, error_message = self.extra_details_form_validate(partner_values, additional_partner_fields, error, error_message)
             error, error_message = self.extra_details_form_validate(invoice_values, additional_invoice_fields, error, error_message)
+            _logger.warning('PASO TEST error_message: %s - %s', error, error_message)
             if not error:
                 return self._get_invoice(partner_values, invoice_values, pos_order, additional_invoice_fields, kwargs)
             else:
