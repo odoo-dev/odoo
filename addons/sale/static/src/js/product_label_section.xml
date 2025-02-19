@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="sale.SaleProductLabelSectionAutocomplete" t-inherit="web.AutoComplete">
+        <xpath expr="//t[@t-esc='option.label']" position="replace">
+            <div class="d-flex justify-content-between">
+                <t t-out="option.label" />
+                <span class="text-muted" t-out="getLastInvoiceDate()"/>
+            </div>
+        </xpath>
+    </t>
+</templates>
