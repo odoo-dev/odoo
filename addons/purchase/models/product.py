@@ -34,6 +34,27 @@ class ProductTemplate(models.Model):
         for template in self:
             template.purchased_product_qty = float_round(sum([p.purchased_product_qty for p in template.product_variant_ids]), precision_rounding=template.uom_id.rounding)
 
+    @api.model
+    def name_search(self, name='', args=None, operator='ilike', limit=100):
+        """
+        Returns the products in a prioritized sequence for the purchase order line product selection.
+        First, it lists all products that have been invoiced to the specified customer,
+        sorted from the most recent to the oldest invoice date.
+        Afterward, it includes the remaining products in their default order of display.
+        """
+        args = args or []
+        if not name and self.env.context.get('partner_id') and self.env.context.get('is_purchase'):
+            product_id =  [item['product_id'] for item in self.env['product.template'].get_prioritized_product_and_time('purchase')[:limit]]
+            prioritized_products = self.browse(product_id)
+            remaining_products = self.search(
+                [('id', 'not in', prioritized_products.ids)] + args,
+                limit=limit - len(prioritized_products)
+            )
+            products = prioritized_products + remaining_products
+            return [(product.id, product.display_name) for product in products]
+        else:
+            return super().name_search(name, args, operator, limit)
+
     def _get_backend_root_menu_ids(self):
         return super()._get_backend_root_menu_ids() + [self.env.ref('purchase.menu_purchase_root').id]
 
