@@ -228,7 +228,7 @@ class Binary(http.Controller):
                 filename = unicodedata.normalize('NFD', ufile.filename)
 
             try:
-                attachment = Model.sudo().create({
+                attachment = Model.create({
                     'name': filename,
                     'raw': ufile.read(),
                     'res_model': model,

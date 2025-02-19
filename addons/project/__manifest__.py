@@ -25,6 +25,7 @@
         'security/ir.model.access.xml',
         'data/digest_data.xml',
         'report/project_task_burndown_chart_report_views.xml',
+        'wizard/set_cover_image_project_sharing.xml',
         'views/account_analytic_account_views.xml',
         'views/digest_digest_views.xml',
         'views/rating_rating_views.xml',
@@ -55,6 +56,7 @@
         'wizard/project_task_type_delete_views.xml',
         'wizard/project_project_stage_delete_views.xml',
         'views/project_menus.xml',
+        
     ],
     'demo': [
         'data/mail_template_demo.xml',

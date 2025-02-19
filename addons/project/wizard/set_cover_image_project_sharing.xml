@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <record id="set_cover_image_form_action" model="ir.actions.act_window">
+        <field name="name">project.task.image</field>
+        <field name="res_model">project.task.image</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+
+    <record id="set_cover_image_form_view" model="ir.ui.view">
+        <field name="name">project.task.image.form.view</field>
+        <field name="model">project.task.image</field>
+        <field name="arch" type="xml">
+            <form string="Delete Stage">
+                <span>
+                    <field name="img" widget="image" class="o_image_64_cover me-2 float-start" string="" />
+                </span>
+
+                <footer>
+                    <button name="action_create_image" string="Create" type="object" class="btn-primary" icon="fa-check" />
+                    <button string="cancle" class="btn-secondary" special="cancel" icon="fa-times" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+
+</odoo>
