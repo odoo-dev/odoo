@@ -4341,6 +4341,7 @@ export class OdooEditor extends EventTarget {
             this.execCommand('strikeThrough');
             this.historyResetLatestComputedSelection(true);
         } else if (IS_KEYBOARD_EVENT_LEFT_ARROW(ev) || IS_KEYBOARD_EVENT_RIGHT_ARROW(ev)) {
+            debugger
             const isRTL = this.options.direction === 'rtl';
             const previousName = isRTL ? 'next' : 'previous';
             const nextName = isRTL ? 'previous' : 'next';
@@ -4372,8 +4373,10 @@ export class OdooEditor extends EventTarget {
             // If the selection is at the edge of a code element at the edge of
             // its parent, make sure there's a zws next to it, where the
             // selection can then be set.
+            debugger
             const codeElement = anchorNode && closestElement(anchorNode, 'code');
             const siblingProperty = `${side}Sibling`;
+            const highlighedElemenmt = closestElement(anchorNode, '.o_text_highlight_item');
             if (
                 codeElement?.classList.contains('o_inline_code') &&
                 (
@@ -4385,12 +4388,26 @@ export class OdooEditor extends EventTarget {
             ) {
                 codeElement[side === 'previous' ? 'before' : 'after'](document.createTextNode('\u200B'));
                 setSelection(codeElement[siblingProperty], side === 'previous' ? 0 : 1);
+            } else if (highlighedElemenmt) {
+                // this condition is resulting into only moving the cursor
+                // in left direction need to update the logic for side (left & right).
+                debugger
+                if (selection.anchorNode && selection.anchorNode.nodeType === 3) {
+                    let range = document.createRange();
+                    range.setStart(selection.anchorNode, selection.anchorOffset + 1);
+                    range.collapse(true);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    ev.preventDefault();
+                }
             } else {
+                debugger
                 // Move selection if adjacent character is zero-width space.
                 let didSkipFeff = false;
                 let adjacentCharacter = getAdjacentCharacter(this.editable, side);
                 let previousSelection; // Is used to stop if `modify` doesn't move the selection.
                 const hasSelectionChanged = (oldSelection = {}) => {
+                    debugger
                     const newSelection = this.document.getSelection();
                     return (
                         oldSelection.anchorNode !== newSelection.anchorNode ||
@@ -4448,6 +4465,7 @@ export class OdooEditor extends EventTarget {
      * @private
      */
     _onSelectionChange() {
+        debugger
         const currentKeyPress = this._currentKeyPress;
         delete this._currentKeyPress;
         const selection = this.document.getSelection();

@@ -2483,7 +2483,8 @@ input[value*="data-oe-translation-source-sha"] {
     // Text highlight SVG container.
     > .o_text_highlight_item {
         position: relative;
-        display: inline-block;
+        // display: inline-block;
+        display: inline !important;
         line-height: normal;
         white-space: pre-wrap;
         isolation: isolate;
@@ -2495,6 +2496,11 @@ input[value*="data-oe-translation-source-sha"] {
             z-index: -1;
         }
     }
+}
+
+.o_text_highlight_svg {
+    pointer-events: none !important;
+    user-select: none !important;
 }
 
 // Compatibility <= 13.0
