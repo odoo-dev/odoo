@@ -28,7 +28,7 @@ import {
     patchWithCleanup,
     serverState,
     waitForSteps,
-    contains as webContains
+    contains as webContains,
 } from "@web/../tests/web_test_helpers";
 import { Domain } from "@web/core/domain";
 import { formatDate, serializeDate } from "@web/core/l10n/dates";
@@ -887,7 +887,7 @@ test("Activity view: many2one_avatar_user widget in activity view", async () => 
         res_model: "mail.test.activity",
         views: [[false, "activity"]],
     });
-    await contains(".o_m2o_avatar", { count: 2 });
+    await contains(".o_m2o_avatar", { count: 1 });
     await contains(
         `tr:nth-child(2) .o_m2o_avatar > img[data-src="/web/image/res.users/${resUsersId1}/avatar_128"]`
     );
@@ -1148,19 +1148,20 @@ test("update activity view after creating multiple activities", async () => {
     registerArchs(archs);
     MailTestActivity._views = {
         ...MailTestActivity._views,
-        "list,false": '<list string="MailTestActivity"><field name="name"/><field name="activity_ids" widget="list_activity"/></list>',
+        "list,false":
+            '<list string="MailTestActivity"><field name="name"/><field name="activity_ids" widget="list_activity"/></list>',
     };
 
     MailActivitySchedule._views = {
         ...MailActivitySchedule._views,
         [`form,${DEFAULT_MAIL_VIEW_ID}`]: "<form><field name='summary'/></form>",
-    }
+    };
 
     const Activity = pyEnv["mail.activity"];
     const activityToCreate = omit(Activity[0], "id");
     Activity.unlink(Activity.search([]));
 
-    onRpc(({method, model}) => {
+    onRpc(({ method, model }) => {
         if (method === "web_save" && model === "mail.activity.schedule") {
             Activity.create(activityToCreate);
         }
@@ -1181,7 +1182,7 @@ test("update activity view after creating multiple activities", async () => {
     await insertText(`.o_form_view .o_field_widget[name='summary'] input`, "test1", {
         target: modalSchedule,
     });
-    await click(".modal-footer button.o_form_button_save", {target: modalSchedule});
+    await click(".modal-footer button.o_form_button_save", { target: modalSchedule });
     await click(".modal-footer button.o_form_button_cancel");
     await waitFor(".o_activity_summary_cell:not(.o_activity_empty_cell)");
     expect(".o_activity_summary_cell:not(.o_activity_empty_cell)").toHaveCount(1);
@@ -1212,8 +1213,7 @@ test("Activity View: Hide 'New' button in SelectCreateDialog based on action con
             <list string="MailTestActivity">
                 <field name="name"/>
                 <field name="activity_ids" widget="list_activity"/>
-            </list>`
-        ,
+            </list>`,
     };
 
     await start();
@@ -1224,7 +1224,7 @@ test("Activity View: Hide 'New' button in SelectCreateDialog based on action con
     });
     await click("table tfoot tr .o_record_selector");
     await animationFrame();
-    expect('.o_create_button').toHaveCount(0, {
+    expect(".o_create_button").toHaveCount(0, {
         message: "'New' button should be hidden",
     });
 });

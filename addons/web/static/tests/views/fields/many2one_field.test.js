@@ -941,7 +941,7 @@ test("empty readonly many2one field", async () => {
     });
 
     expect("div.o_field_widget[name=trululu]").toHaveCount(1);
-    expect(".o_field_widget[name=trululu]").toHaveInnerHTML("");
+    expect(".o_field_widget[name=trululu] .o-many2one").toHaveText("");
 });
 
 test("empty many2one field with node options", async () => {
@@ -3710,7 +3710,7 @@ test("external_button performs a doAction by default", async () => {
     });
 
     await selectFieldDropdownItem("trululu", "first record");
-    expect(".o_field_widget .o_external_button.oi-arrow-right").toHaveCount(1);
+    expect(".o_field_widget .o_external_button .oi-arrow-right").toHaveCount(1);
     await contains(".o_field_widget .o_external_button", { visible: false }).click();
 
     expect.verifySteps(["get_formview_action"]);
@@ -3730,7 +3730,7 @@ test("external_button opens a FormViewDialog in dialogs", async () => {
     expect(".modal").toHaveCount(1);
 
     await selectFieldDropdownItem("trululu", "first record");
-    expect(".o_field_widget .o_external_button.oi-launch").toHaveCount(1);
+    expect(".o_field_widget .o_external_button .oi-launch").toHaveCount(1);
     await contains(".o_field_widget .o_external_button", { visible: false }).click();
 
     expect.verifySteps(["get_formview_id"]);
@@ -3796,7 +3796,7 @@ test("keep changes when editing related record in a dialog", async () => {
     await contains(".o_field_widget[name=foo] input").edit("some value", { confirm: false });
     await runAllTimers();
     await selectFieldDropdownItem("trululu", "first record");
-    expect(".o_field_widget .o_external_button.oi-launch").toHaveCount(1);
+    expect(".o_field_widget .o_external_button .oi-launch").toHaveCount(1);
     await contains(".o_field_widget .o_external_button", { visible: false }).click();
     expect(".modal").toHaveCount(2);
 

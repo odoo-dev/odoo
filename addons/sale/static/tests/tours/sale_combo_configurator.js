@@ -51,7 +51,7 @@ registry
             comboConfiguratorTourUtils.assertPrice('93.00'),
             // Assert that the order's content is correct.
             ...comboConfiguratorTourUtils.saveConfigurator(),
-            tourUtils.checkSOLDescriptionContains("Combo product x 3"),
+            tourUtils.checkSOLDescriptionContains("Combo product\nx 3"),
             tourUtils.checkSOLDescriptionContains(
                 "Product A1", "No variant attribute: B: Some custom value"
             ),
@@ -74,7 +74,7 @@ registry
             },
             // Assert that the combo configurator is opened with the previous selection when the
             // combo is edited.
-            tourUtils.editLineMatching("Combo product x 3"),
+            tourUtils.editLineMatching("Combo product\nx 3"),
             tourUtils.editConfiguration(),
             comboConfiguratorTourUtils.setQuantity(2),
             comboConfiguratorTourUtils.assertComboItemSelected("Product A1"),
@@ -82,7 +82,7 @@ registry
             comboConfiguratorTourUtils.selectComboItem("Product A2"),
             // Assert that the order's content has been updated.
             ...comboConfiguratorTourUtils.saveConfigurator(),
-            tourUtils.checkSOLDescriptionContains("Combo product x 2"),
+            tourUtils.checkSOLDescriptionContains("Combo product\nx 2"),
             tourUtils.checkSOLDescriptionContains("Product A2"),
             tourUtils.checkSOLDescriptionContains("Product B2"),
             {

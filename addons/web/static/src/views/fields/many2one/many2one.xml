@@ -34,8 +34,8 @@
                     <div class="o-many2one-selection o_field_many2one_selection" t-ref="root">
                         <AutoComplete t-props="autoCompleteProps">
                             <t t-set-slot="recordItem" t-slot-scope="recordItemScope">
-                                <t t-if="props.slots?.autoCompleteItems">
-                                    <t t-slot="autoCompleteItems" t-props="recordItemScope.recordItem"/>
+                                <t t-if="props.slots?.autoCompleteItem">
+                                    <t t-slot="autoCompleteItem" t-props="recordItemScope.recordItem"/>
                                 </t>
                                 <t t-else="">
                                     <t t-esc="recordItemScope.recordItem.label"/>
