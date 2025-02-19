@@ -182,6 +182,30 @@ class ProductTemplate(models.Model):
         included_computed_price = self.taxes_id.with_context(force_price_include=True).compute_all(price, self.currency_id)
         return included_computed_price['total_excluded']
 
+    def get_prioritized_product_and_time(self, journal_type=''):
+        partner_id = self.env.context.get('partner_id')
+        query = """
+            SELECT product_id, product_tmpl_id, invoice_date
+            FROM(
+                SELECT DISTINCT ON (p.product_tmpl_id)
+                    aml.product_id,
+                    p.product_tmpl_id,
+                    am.invoice_date
+                FROM account_move am
+                JOIN account_move_line aml ON aml.move_id = am.id
+                JOIN product_product p ON p.id = aml.product_id
+                JOIN account_journal aj ON aj.id = am.journal_id
+                WHERE am.partner_id = %s
+                    AND am.state = 'posted'
+                    AND aj.type = %s
+                ORDER BY p.product_tmpl_id
+            ) sub
+            ORDER BY invoice_date DESC;
+        """
+        self.env.cr.execute(query, (partner_id, journal_type))
+        query_result = self.env.cr.dictfetchall()
+        return query_result
+
 
 class ProductProduct(models.Model):
     _inherit = "product.product"
