@@ -143,7 +143,7 @@ class PurchaseOrder(models.Model):
     payment_term_id = fields.Many2one('account.payment.term', 'Payment Terms', domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     incoterm_id = fields.Many2one('account.incoterms', 'Incoterm', help="International Commercial Terms are a series of predefined commercial terms used in international transactions.")
 
-    product_id = fields.Many2one('product.product', related='order_line.product_id', string='Product')
+    product_id = fields.Many2one('product.product', string='Product', compute='_compute_product_id', search='_search_product_id')
     user_id = fields.Many2one(
         'res.users', string='Buyer', index=True, tracking=True,
         default=lambda self: self.env.user, check_company=True)
@@ -259,6 +259,14 @@ class PurchaseOrder(models.Model):
                 record.tax_country_id = record.fiscal_position_id.country_id
             else:
                 record.tax_country_id = record.company_id.account_fiscal_country_id
+
+    @api.depends('order_line.product_id')
+    def _compute_product_id(self):
+        for order in self:
+            order.product_id = next((line.product_id for line in order.order_line), False)
+
+    def _search_product_id(self, operator, value):
+        return [('order_line.product_id', operator, value)]
 
     @api.depends('order_line', 'order_line.product_id')
     def _compute_show_comparison(self):

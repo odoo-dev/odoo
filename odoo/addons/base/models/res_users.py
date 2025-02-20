@@ -220,7 +220,10 @@ class ResUsers(models.Model):
         help="If specified, this action will be opened at log on for this user, in addition to the standard menu.")
     log_ids = fields.One2many('res.users.log', 'create_uid', string='User log entries')
     device_ids = fields.One2many('res.device', 'user_id', string='User devices')
-    login_date = fields.Datetime(related='log_ids.create_date', string='Latest authentication', readonly=False)
+    login_date = fields.Datetime(
+        string='Latest authentication',
+        compute='_compute_login_date', search='_search_login_date', compute_sudo=True,
+    )
     share = fields.Boolean(compute='_compute_share', compute_sudo=True, string='Share User', store=True,
          help="External user with limited access, created only for the purpose of sharing data.")
     companies_count = fields.Integer(compute='_compute_companies_count', string="Number of Companies")
@@ -402,6 +405,22 @@ class ResUsers(models.Model):
     def _compute_signature(self):
         for user in self.filtered(lambda user: user.name and is_html_empty(user.signature)):
             user.signature = Markup('<p>%s</p>') % user['name']
+
+    @api.depends('log_ids')
+    def _compute_login_date(self):
+        if self.ids:
+            login_dates = dict(self.env['res.users.log']._read_group(
+                [('create_uid', 'in', self.ids)],
+                groupby=['create_uid'], aggregates=['create_date:max'],
+            ))
+        else:
+            login_dates = {}
+        for user in self:
+            user.login_date = login_dates.get(user._origin)
+
+    def _search_login_date(self, operator, value):
+        log = self.env['res.users.log'].sudo()
+        return [('log_ids', 'any', log._search([('create_date', operator, value)]))]
 
     @api.depends('all_group_ids')
     def _compute_share(self):

@@ -30,7 +30,10 @@ class PurchaseRequisition(models.Model):
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     purchase_ids = fields.One2many('purchase.order', 'requisition_id', string='Purchase Orders')
     line_ids = fields.One2many('purchase.requisition.line', 'requisition_id', string='Products to Purchase', copy=True)
-    product_id = fields.Many2one('product.product', related='line_ids.product_id', string='Product')
+    product_id = fields.Many2one(
+        'product.product', string='Product',
+        compute='_compute_product_id', search='_search_product_id', compute_sudo=True,
+    )
     state = fields.Selection(
         selection=[
             ('draft', 'Draft'),
@@ -73,6 +76,14 @@ class PurchaseRequisition(models.Model):
     def _compute_orders_number(self):
         for requisition in self:
             requisition.order_count = len(requisition.purchase_ids)
+
+    @api.depends('line_ids.product_id')
+    def _compute_product_id(self):
+        for requisition in self:
+            requisition.product_id = next((line.product_id for line in requisition.line_ids), False)
+
+    def _search_product_id(self, operator, value):
+        return [('line_ids.product_id', operator, value)]
 
     @api.constrains('date_start', 'date_end')
     def _check_dates(self):

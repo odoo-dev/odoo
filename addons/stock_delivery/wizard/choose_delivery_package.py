@@ -12,7 +12,7 @@ class ChooseDeliveryPackage(models.TransientModel):
     delivery_package_type_id = fields.Many2one('stock.package.type', 'Delivery Package Type', check_company=True)
     shipping_weight = fields.Float('Shipping Weight', compute='_compute_shipping_weight', store=True, readonly=False)
     weight_uom_name = fields.Char(string='Weight unit of measure label', compute='_compute_weight_uom_name')
-    company_id = fields.Many2one(related='move_line_ids.company_id')
+    company_id = fields.Many2one('res.company', compute='_compute_company_id', search='_search_company_id', compute_sudo=True)
 
     @api.depends('delivery_package_type_id')
     def _compute_weight_uom_name(self):
@@ -39,6 +39,14 @@ class ChooseDeliveryPackage(models.TransientModel):
                 'message': _('The weight of your package is higher than the maximum weight authorized for this package type. Please choose another package type.')
             }
             return {'warning': warning_mess}
+
+    @api.depends('move_line_ids.company_id')
+    def _compute_company_id(self):
+        for package in self:
+            package.company_id = next((line.company_id for line in package.move_line_ids), False)
+
+    def _search_company_id(self, operator, value):
+        return [('move_line_ids.company_id', operator, value)]
 
     def action_put_in_pack(self):
         return self.move_line_ids.action_put_in_pack(weight=self.shipping_weight, package_type=self.delivery_package_type_id, from_package_wizard=True)

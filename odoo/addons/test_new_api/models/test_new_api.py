@@ -1752,7 +1752,12 @@ class Test_New_ApiTriggerLeft(models.Model):
     _description = 'model with a related many2one'
 
     middle_ids = fields.One2many('test_new_api.trigger.middle', 'left_id')
-    right_id = fields.Many2one(related='middle_ids.right_id', store=True)
+    right_id = fields.Many2one('test_new_api.trigger.right', compute='_compute_right_id', store=True)
+
+    @api.depends('middle_ids.right_id')
+    def _compute_right_id(self):
+        for record in self:
+            record.right_id = next((middle.right_id for middle in record.middle_ids), False)
 
 
 class Test_New_ApiTriggerMiddle(models.Model):

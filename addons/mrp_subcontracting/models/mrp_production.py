@@ -20,7 +20,7 @@ class MrpProduction(models.Model):
     subcontractor_id = fields.Many2one('res.partner', string="Subcontractor", help="Used to restrict access to the portal user through Record Rules")
     bom_product_ids = fields.Many2many('product.product', compute="_compute_bom_product_ids", help="List of Products used in the BoM, used to filter the list of products in the subcontracting portal view")
 
-    incoming_picking = fields.Many2one(related='move_finished_ids.move_dest_ids.picking_id')
+    incoming_picking = fields.Many2one('stock.picking', compute='_compute_incoming_picking', search='_search_incoming_picking', compute_sudo=True)
 
     @api.depends('move_raw_ids.move_line_ids')
     def _compute_move_line_raw_ids(self):
@@ -44,6 +44,15 @@ class MrpProduction(models.Model):
                 move['additional'] = True
                 production.move_raw_ids = [(0, 0, move)]
                 production.move_raw_ids.filtered(lambda m: m.product_id == product_id)[:1].move_line_ids = lines
+
+    @api.depends('move_finished_ids.move_dest_ids.picking_id')
+    def _compute_incoming_picking(self):
+        self.move_finished_ids.move_dest_ids.fetch(['picking_id'])
+        for production in self:
+            production.incoming_picking = production.move_finished_ids[:1].move_dest_ids[:1].picking_id
+
+    def _search_incoming_picking(self, operator, value):
+        return [('move_finished_ids.move_dest_ids.picking_id', operator, value)]
 
     def write(self, vals):
         if self.env.user._is_portal() and not self.env.su:

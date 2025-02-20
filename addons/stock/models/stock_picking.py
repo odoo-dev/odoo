@@ -589,7 +589,7 @@ class StockPicking(models.Model):
              " * Cancelled: The transfer has been cancelled.")
     group_id = fields.Many2one(
         'procurement.group', 'Procurement Group',
-        readonly=True, related='move_ids.group_id', store=True)
+        compute='_compute_group_id', compute_sudo=True, store=True)
     priority = fields.Selection(
         PROCUREMENT_PRIORITIES, string='Priority', default='0',
         help="Products will be reserved first for the transfers with the highest priorities.")
@@ -682,8 +682,8 @@ class StockPicking(models.Model):
         "Volume for Shipping", compute="_compute_shipping_volume")
 
     # Used to search on pickings
-    product_id = fields.Many2one('product.product', 'Product', related='move_ids.product_id', readonly=True)
-    lot_id = fields.Many2one('stock.lot', 'Lot/Serial Number', related='move_line_ids.lot_id', readonly=True)
+    product_id = fields.Many2one('product.product', 'Product', compute='_compute_product_id', search='_search_product_id', compute_sudo=True)
+    lot_id = fields.Many2one('stock.lot', 'Lot/Serial Number', compute='_compute_lot_id', search='_search_lot_id', compute_sudo=True)
     # TODO: delete this field `show_operations`
     show_operations = fields.Boolean(related='picking_type_id.show_operations')
     show_lots_text = fields.Boolean(compute='_compute_show_lots_text')
@@ -853,6 +853,11 @@ class StockPicking(models.Model):
                     else:
                         picking.state = relevant_move_state
 
+    @api.depends('move_ids.group_id')
+    def _compute_group_id(self):
+        for picking in self:
+            picking.group_id = next((move.group_id for move in picking.move_ids), False)
+
     @api.depends('move_ids.state', 'move_ids.date', 'move_type')
     def _compute_scheduled_date(self):
         for picking in self:
@@ -895,6 +900,22 @@ class StockPicking(models.Model):
             for move in picking.move_ids:
                 volume += move.product_uom._compute_quantity(move.quantity, move.product_id.uom_id) * move.product_id.volume
             picking.shipping_volume = volume
+
+    @api.depends('move_ids.product_id')
+    def _compute_product_id(self):
+        for picking in self:
+            picking.product_id = next((move.product_id for move in picking.move_ids), False)
+
+    def _search_product_id(self, operator, value):
+        return [('move_ids.product_id', operator, value)]
+
+    @api.depends('move_line_ids.lot_id')
+    def _compute_lot_id(self):
+        for picking in self:
+            picking.lot_id = next((line.lot_id for line in picking.move_line_ids), False)
+
+    def _search_lot_id(self, operator, value):
+        return [('move_line_ids.lot_id', operator, value)]
 
     @api.depends('move_ids.date_deadline', 'move_type')
     def _compute_date_deadline(self):

@@ -11,7 +11,7 @@ class StockQuantRelocate(models.TransientModel):
     _description = 'Stock Quantity Relocation'
 
     quant_ids = fields.Many2many('stock.quant')
-    company_id = fields.Many2one(related="quant_ids.company_id")
+    company_id = fields.Many2one('res.company', compute='_compute_company_id', compute_sudo=True)
     dest_location_id = fields.Many2one('stock.location', domain="[('usage', '=', 'internal'), ('company_id', '=', company_id)]")
     dest_package_id_domain = fields.Char(compute="_compute_dest_package_id_domain")
     dest_package_id = fields.Many2one('stock.quant.package', domain="dest_package_id_domain", compute="_compute_dest_package_id", store=True)
@@ -19,6 +19,11 @@ class StockQuantRelocate(models.TransientModel):
     is_partial_package = fields.Boolean(compute='_compute_is_partial_package')
     partial_package_names = fields.Char(compute="_compute_is_partial_package")
     is_multi_location = fields.Boolean(compute='_compute_is_multi_location')
+
+    @api.depends('quant_ids')
+    def _compute_company_id(self):
+        for wizard in self:
+            wizard.company_id = next((quant.company_id for quant in wizard.quant_ids), False)
 
     @api.depends('quant_ids')
     def _compute_is_partial_package(self):

@@ -43,6 +43,7 @@ class TestSelfAccessProfile(TestHrCommon):
             el.get('name')
             for el in etree.fromstring(view_infos['arch']).xpath('//field[not(ancestor::field)]')
             if fields[el.get('name')].related and fields[el.get('name')].related.split('.')[0] == 'employee_id'
+            if el.get('name') not in james.SELF_WRITEABLE_FIELDS
         }
 
         form = Form(james, view=view)

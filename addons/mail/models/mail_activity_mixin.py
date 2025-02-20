@@ -67,10 +67,14 @@ class MailActivityMixin(models.AbstractModel):
         groups="base.group_user")
     activity_type_id = fields.Many2one(
         'mail.activity.type', 'Next Activity Type',
-        related='activity_ids.activity_type_id', readonly=False,
+        compute='_compute_activity_type_id', compute_sudo=True,
+        inverse='_inverse_activity_type_id',
         search='_search_activity_type_id',
         groups="base.group_user")
-    activity_type_icon = fields.Char('Activity Type Icon', related='activity_ids.icon')
+    activity_type_icon = fields.Char(
+        'Activity Type Icon',
+        compute='_compute_activity_type_icon', compute_sudo=True,
+    )
     activity_date_deadline = fields.Date(
         'Next Activity Deadline',
         compute='_compute_activity_date_deadline', search='_search_activity_date_deadline',
@@ -82,7 +86,8 @@ class MailActivityMixin(models.AbstractModel):
         compute_sudo=False, readonly=True, groups="base.group_user")
     activity_summary = fields.Char(
         'Next Activity Summary',
-        related='activity_ids.summary', readonly=False,
+        compute='_compute_activity_summary', compute_sudo=True,
+        inverse='_inverse_activity_summary',
         search='_search_activity_summary',
         groups="base.group_user",)
     activity_exception_decoration = fields.Selection([
@@ -208,9 +213,36 @@ class MailActivityMixin(models.AbstractModel):
             return [('activity_ids', '=', False)]
         return [('activity_ids', 'any', [('active', 'in', [True, False]), ('user_id', operator, operand)])]
 
+    @api.depends('activity_ids.activity_type_id')
+    def _compute_activity_type_id(self):
+        for record in self.sudo():
+            record.activity_type_id = next((activity.activity_type_id for activity in record.activity_ids), False)
+
+    def _inverse_activity_type_id(self):
+        for record in self:
+            # same as record.activity_ids[:1] but with prefetching
+            activity = next(iter(record.activity_ids), self.env['mail.activity'])
+            activity.activity_type_id = record.activity_type_id
+
     @api.model
     def _search_activity_type_id(self, operator, operand):
         return [('activity_ids.activity_type_id', operator, operand)]
+
+    @api.depends('activity_ids.icon')
+    def _compute_activity_type_icon(self):
+        for record in self.sudo():
+            record.activity_type_icon = next((activity.icon for activity in record.activity_ids), False)
+
+    @api.depends('activity_ids.summary')
+    def _compute_activity_summary(self):
+        for record in self.sudo():
+            record.activity_summary = next((activity.summary for activity in record.activity_ids), False)
+
+    def _inverse_activity_summary(self):
+        for record in self:
+            # same as record.activity_ids[:1] but with prefetching
+            activity = next(iter(record.activity_ids), self.env['mail.activity'])
+            activity.summary = record.activity_summary
 
     @api.model
     def _search_activity_summary(self, operator, operand):

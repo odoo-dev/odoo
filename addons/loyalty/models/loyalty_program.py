@@ -86,7 +86,12 @@ class LoyaltyProgram(models.Model):
         inverse='_inverse_mail_template_id',
         readonly=False,
     )
-    trigger_product_ids = fields.Many2many(related='rule_ids.product_ids', readonly=False)
+    trigger_product_ids = fields.Many2many(
+        comodel_name='product.product',
+        compute='_compute_trigger_product_ids', compute_sudo=True,
+        inverse='_inverse_trigger_product_ids',
+        search='_search_trigger_product_ids',
+    )
 
     coupon_ids = fields.One2many(comodel_name='loyalty.card', inverse_name='program_id')
     coupon_count = fields.Integer(compute='_compute_coupon_count')
@@ -235,6 +240,20 @@ class LoyaltyProgram(models.Model):
                     'trigger': 'create',
                     'mail_template_id': program.mail_template_id.id,
                 })
+
+    @api.depends('rule_ids.product_ids')
+    def _compute_trigger_product_ids(self):
+        for program in self:
+            program.trigger_product_ids = next((rule.product_ids for rule in program.rule_ids), False)
+
+    def _inverse_trigger_product_ids(self):
+        for program in self:
+            # same as program.rule_ids[:1] but with prefetching
+            rule = next(iter(program.rule_ids), self.env['loyalty.rule'])
+            rule.product_ids = program.trigger_product_ids
+
+    def _search_trigger_product_ids(self, operator, value):
+        return [('rule_ids.product_ids', operator, value)]
 
     @api.depends('company_id')
     def _compute_currency_id(self):

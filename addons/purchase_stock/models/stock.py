@@ -10,11 +10,19 @@ class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
     purchase_id = fields.Many2one(
-        'purchase.order', related='move_ids.purchase_line_id.order_id',
-        string="Purchase Orders", readonly=True)
+        'purchase.order', string="Purchase Orders",
+        compute='_compute_purchase_id', search='_search_purchase_id', compute_sudo=True)
 
     days_to_arrive = fields.Datetime(compute='_compute_effective_date', search="_search_days_to_arrive", copy=False)
     delay_pass = fields.Datetime(compute='_compute_date_order', search="_search_delay_pass", index=True, copy=False)
+
+    @api.depends('move_ids.purchase_line_id.order_id')
+    def _compute_purchase_id(self):
+        for picking in self:
+            picking.purchase_id = next((move.purchase_line_id.order_id for move in picking.move_ids), False)
+
+    def _search_purchase_id(self, operator, value):
+        return [('move_ids.purchase_line_id.order_id', operator, value)]
 
     @api.depends('state', 'location_dest_id.usage', 'date_done')
     def _compute_effective_date(self):

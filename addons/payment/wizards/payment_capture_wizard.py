@@ -27,7 +27,7 @@ class PaymentCaptureWizard(models.TransientModel):
     )
     is_amount_to_capture_valid = fields.Boolean(compute='_compute_is_amount_to_capture_valid')
     void_remaining_amount = fields.Boolean()
-    currency_id = fields.Many2one(related='transaction_ids.currency_id')
+    currency_id = fields.Many2one('res.currency', compute='_compute_currency_id', compute_sudo=True)
     support_partial_capture = fields.Boolean(
         help="Whether each of the transactions' provider supports the partial capture.",
         compute='_compute_support_partial_capture',
@@ -82,6 +82,11 @@ class PaymentCaptureWizard(models.TransientModel):
         for wizard in self:
             is_valid = 0 < wizard.amount_to_capture <= wizard.available_amount
             wizard.is_amount_to_capture_valid = is_valid
+
+    @api.depends('transaction_ids')
+    def _compute_currency_id(self):
+        for wizard in self:
+            wizard.currency_id = next((tx.currency_id for tx in wizard.transaction_ids), False)
 
     @api.depends('transaction_ids')
     def _compute_support_partial_capture(self):

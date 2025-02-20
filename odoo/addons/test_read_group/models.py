@@ -132,7 +132,6 @@ class Test_Read_GroupRelated_Bar(models.Model):
     name = fields.Char(aggregator="count_distinct")
 
     foo_ids = fields.One2many('test_read_group.related_foo', 'bar_id')
-    foo_names_sudo = fields.Char('name_one2many_related', related='foo_ids.name')
 
     base_ids = fields.Many2many('test_read_group.related_base')
     computed_base_ids = fields.Many2many('test_read_group.related_base', compute='_compute_computed_base_ids')

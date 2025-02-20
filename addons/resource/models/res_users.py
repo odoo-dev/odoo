@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class ResUsers(models.Model):
@@ -11,7 +11,16 @@ class ResUsers(models.Model):
         'resource.resource', 'user_id', 'Resources')
     resource_calendar_id = fields.Many2one(
         'resource.calendar', 'Default Working Hours',
-        related='resource_ids.calendar_id', readonly=False)
+        compute='_compute_resource_calendar_id', search='_search_resource_calendar_id', compute_sudo=True,
+    )
+
+    @api.depends('resource_ids.calendar_id')
+    def _compute_resource_calendar_id(self):
+        for user in self:
+            user.resource_calendar_id = next((res.calendar_id for res in user.resource_ids), False)
+
+    def _search_resource_calendar_id(self, operator, value):
+        return [('resource_ids.calendar_id', operator, value)]
 
     def write(self, vals):
         rslt = super().write(vals)

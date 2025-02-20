@@ -306,10 +306,13 @@ class ResUsers(models.Model):
     def _compute_company_employee(self):
         employee_per_user = {
             employee.user_id: employee
-            for employee in self.env['hr.employee'].search([('user_id', 'in', self.ids), ('company_id', '=', self.env.company.id)])
+            for employee in self.env['hr.employee'].search_fetch(
+                [('user_id', 'in', self.ids), ('company_id', '=', self.env.company.id)],
+                ['user_id'],
+            )
         }
         for user in self:
-            user.employee_id = employee_per_user.get(user)
+            user.employee_id = employee_per_user.get(user._origin)
 
     def _search_company_employee(self, operator, value):
         return [('employee_ids', operator, value)]

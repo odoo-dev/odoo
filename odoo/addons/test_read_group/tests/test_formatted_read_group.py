@@ -1430,9 +1430,9 @@ class TestWebReadGroup(common.TransactionCase):
             [{'__extra_domain': [(1, '=', 1)], 'foo_id_bar_id_name:count_distinct': 1}],
         )
 
-        # Cannot groupby on foo_names_sudo because it traverse One2many
+        # Cannot groupby on foo_ids because One2many
         with self.assertRaises(ValueError):
-            RelatedBar.formatted_read_group([], ['foo_names_sudo'])
+            RelatedBar.formatted_read_group([], ['foo_ids'])
 
     def test_inherited(self):
         RelatedBase = self.env['test_read_group.related_base']

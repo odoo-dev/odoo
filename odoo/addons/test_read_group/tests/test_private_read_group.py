@@ -1027,9 +1027,9 @@ class TestPrivateReadGroup(common.TransactionCase):
                 [(1,)],
             )
 
-        # Cannot groupby on foo_names_sudo because it traverse One2many
+        # Cannot groupby on foo_ids because One2many
         with self.assertRaises(ValueError):
-            RelatedBar._read_group([], ['foo_names_sudo'])
+            RelatedBar._read_group([], ['foo_ids'])
 
     def test_inherited(self):
         RelatedBase = self.env['test_read_group.related_base']

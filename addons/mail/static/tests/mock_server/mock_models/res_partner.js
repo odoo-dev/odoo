@@ -20,6 +20,12 @@ export class ResPartner extends webModels.ResPartner {
         relation: "ir.attachment",
         string: "Main attachment",
     });
+    activity_type_id = fields.Many2one({
+        relation: "mail.activity.type",
+        compute: "_compute_activity_type_id",
+    });
+    activity_type_icon = fields.Char({ compute: "_compute_activity_type_icon" });
+    activity_summary = fields.Char({ compute: "_compute_activity_summary" });
 
     _views = {
         [`search, ${DEFAULT_MAIL_SEARCH_ID}`]: /* xml */ `<search/>`,
@@ -31,6 +37,39 @@ export class ResPartner extends webModels.ResPartner {
                 <chatter/>
             </form>`,
     };
+
+    _compute_activity_type_id() {
+        for (const record of this) {
+            if (record.activity_ids.length > 0) {
+                const [activity] = this.env['mail.activity'].browse(record.activity_ids[0]);
+                record.activity_type_id = activity.activity_type_id;
+            } else {
+                record.activity_type_id = false;
+            }
+        }
+    }
+
+    _compute_activity_type_icon() {
+        for (const record of this) {
+            if (record.activity_ids.length > 0) {
+                const [activity] = this.env['mail.activity'].browse(record.activity_ids[0]);
+                record.activity_type_icon = activity.icon;
+            } else {
+                record.activity_type_icon = false;
+            }
+        }
+    }
+
+    _compute_activity_summary() {
+        for (const record of this) {
+            if (record.activity_ids.length > 0) {
+                const [activity] = this.env['mail.activity'].browse(record.activity_ids[0]);
+                record.activity_summary = activity.summary;
+            } else {
+                record.activity_summary = false;
+            }
+        }
+    }
 
     /**
      * @param {string} [search]
