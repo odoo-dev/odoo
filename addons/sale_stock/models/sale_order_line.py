@@ -266,6 +266,7 @@ class SaleOrderLine(models.Model):
             'product_description_variants': self.with_context(lang=self.order_id.partner_id.lang)._get_sale_order_line_multiline_description_variants(),
             'company_id': self.order_id.company_id,
             'sequence': self.sequence,
+            'uom_id': self.product_uom.id,
             'never_product_template_attribute_value_ids': self.product_no_variant_attribute_value_ids,
             'packaging_uom_id': self.product_uom_id,
         })

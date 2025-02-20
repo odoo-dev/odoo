@@ -1583,13 +1583,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         if quantity:
             # TODO could be also move in create/write
             rounding = self.env['decimal.precision'].precision_get('Product Unit')
-            uom_quantity = self.product_id.uom_id._compute_quantity(quantity, self.product_uom, rounding_method='HALF-UP')
-            uom_quantity = float_round(uom_quantity, precision_digits=rounding)
-            uom_quantity_back_to_product_uom = self.product_uom._compute_quantity(uom_quantity, self.product_id.uom_id, rounding_method='HALF-UP')
-            if float_compare(quantity, uom_quantity_back_to_product_uom, precision_digits=rounding) == 0:
-                vals = dict(vals, quantity=uom_quantity)
-            else:
-                vals = dict(vals, quantity=quantity, product_uom_id=self.product_id.uom_id.id)
+            vals = dict(vals, quantity=quantity, product_uom_id=self.product_id.uom_id.id)
         package = None
         if reserved_quant:
             package = reserved_quant.package_id
@@ -1638,20 +1632,12 @@ Please change the quantity done or the rounding precision in your settings.""",
                 grouped_quants[quant.location_id, quant.lot_id, quant.package_id, quant.owner_id][1] += quantity
         for reserved_quant, quantity in grouped_quants.values():
             taken_quantity += quantity
-            to_update = candidate_lines.get((reserved_quant.location_id, reserved_quant.lot_id, reserved_quant.package_id, reserved_quant.owner_id))
-            if to_update:
-                uom_quantity = self.product_id.uom_id._compute_quantity(quantity, to_update.product_uom_id, rounding_method='HALF-UP')
-                uom_quantity = float_round(uom_quantity, precision_digits=rounding)
-                uom_quantity_back_to_product_uom = to_update.product_uom_id._compute_quantity(uom_quantity, self.product_id.uom_id, rounding_method='HALF-UP')
-            if to_update and float_compare(quantity, uom_quantity_back_to_product_uom, precision_digits=rounding) == 0:
-                to_update.with_context(reserved_quant=reserved_quant).quantity += uom_quantity
+            if self.product_id.tracking == 'serial' and (self.picking_type_id.use_create_lots or self.picking_type_id.use_existing_lots):
+                vals_list = self._add_serial_move_line_to_vals_list(reserved_quant, quantity)
+                if vals_list:
+                    move_line_vals += vals_list
             else:
-                if self.product_id.tracking == 'serial' and (self.picking_type_id.use_create_lots or self.picking_type_id.use_existing_lots):
-                    vals_list = self._add_serial_move_line_to_vals_list(reserved_quant, quantity)
-                    if vals_list:
-                        move_line_vals += vals_list
-                else:
-                    move_line_vals.append(self._prepare_move_line_vals(quantity=quantity, reserved_quant=reserved_quant))
+                move_line_vals.append(self._prepare_move_line_vals(quantity=quantity, reserved_quant=reserved_quant))
         if move_line_vals:
             self.env['stock.move.line'].create(move_line_vals)
         return taken_quantity
