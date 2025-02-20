@@ -1695,7 +1695,7 @@ which leads to stray network requests and inconsistencies."""
         self._logger.info('Navigating to: "%s"', url)
         nav_result = self._websocket_request('Page.navigate', params={'url': url}, timeout=20.0)
         self._logger.info("Navigation result: %s", nav_result)
-        self._websocket_send('Debugger.enable')
+        self._websocket_request('Debugger.enable')
         self._websocket_send('Runtime.setAsyncCallStackDepth', params={'maxDepth': 10})
         if wait_stop:
             frame_id = nav_result['frameId']
