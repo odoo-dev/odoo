@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- TODO: check groups; maybe better:  groups="base.group_system" -->
+        <!-- The menu is not visible if it does not have any children -->
+        <menuitem id="menu_l10n_es_certificates"
+                  name="Spain Certificates"
+                  sequence="100"
+                  groups="account.group_account_manager"
+                  parent="account.menu_finance_configuration"/>
+    </data>
+</odoo>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <!-- TODO: upgrade script: delete l10n_es_edi_verifactu.menu_l10n_es_edi_verifactu_root -->
+        <menuitem id="menu_l10n_es_edi_verifactu_certificates"
+                  parent="l10n_es.menu_l10n_es_certificates"
+                  name="Veri*Factu"
+                  action="l10n_es_edi_verifactu_certificate_action"
+                  sequence="100"
+                  groups="account.group_account_manager"/>
+
+    </data>
+</odoo>
