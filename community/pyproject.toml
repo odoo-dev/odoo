@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=41"]
+
+[project]
+name = "odoo-community"
+description = "Odoo Community Addons"
+authors = [
+    {name = "Odoo S.A.", email = "info@odoo.com"}
+]
+readme = "README.md"
+keywords = ["odoo", "framework"]
+license = {file = "LICENSE"}
+classifiers = [
+    # https://pypi.org/pypi?%3Aaction=list_classifiers
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Programming Language :: Python :: 3",
+]
+# XXX requires-python should be parsed instead of trying to find odoo.MIN_PY_VERSION
+# XXX these variables should also be moved to odoo/release.py
+requires-python = ">=3.10"
+dependencies = [
+    'odoo',
+]
+
+[project.optional-dependencies]
+ldap = ["odoo[ldap]"]
+
+[project.urls]
+"Homepage" = "https://www.odoo.com"
+"Repository" = "https://github.com/odoo/odoo"
+"Download" = "https://www.odoo.com/page/download"
+"Documentation" = "https://www.odoo.com/documentation"
+"Bug Tracker" = "https://www.odoo.com/help"
+
+[tool.setuptools]
+packages = ["odoo"]
