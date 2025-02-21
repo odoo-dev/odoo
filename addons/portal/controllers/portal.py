@@ -4,6 +4,7 @@ import json
 import math
 import re
 
+import psycopg2
 from werkzeug import urls
 from werkzeug.exceptions import Forbidden
 
@@ -496,6 +497,7 @@ class CustomerPortal(Controller):
         """
         use_delivery_as_billing = str2bool(use_delivery_as_billing or 'false')
 
+        login = form_data.pop("login", "").strip()
         # Parse form data into address values, and extract incompatible data as extra form data.
         address_values, extra_form_data = self._parse_form_data(form_data)
 
@@ -508,6 +510,9 @@ class CustomerPortal(Controller):
             required_fields or '',
             **extra_form_data,
         )
+
+        # Validate the login and highlights the problems in the form, if any.
+        self._validate_login_and_update(login, invalid_fields, missing_fields, error_messages)
         if error_messages:
             return partner_sudo, {
                 'invalid_fields': list(invalid_fields | missing_fields),
@@ -735,6 +740,38 @@ class CustomerPortal(Controller):
             error_messages.append(_("Some required fields are empty."))
 
         return invalid_fields, missing_fields, error_messages
+
+    def _validate_login_and_update(
+        self,
+        login,
+        invalid_fields,
+        missing_fields,
+        error_messages
+    ):
+        """ Validate login and update the user login if necessary.
+
+        :param str login: Login to validate and update.
+        :param set invalid_fields: The set of invalid fields.
+        :param set missing_fields: The set of missing fields.
+        :param list error_messages: The list of error messages.
+        :return: None
+        """
+
+        old_login = request.env.user.login
+        if not login:
+            missing_fields.add("login")
+            error_messages.append(_("Some required fields are empty."))
+        elif old_login != login:
+            try:
+                with request.env.cr.savepoint():
+                    request.env.user.write({"login": login})
+                    if error_messages:
+                        request.env.user.write({"login": old_login})
+                # update session token so the user does not get logged out
+                request.session.session_token = request.env.user._compute_session_token(request.session.sid)
+            except (ValidationError, psycopg2.errors.UniqueViolation):
+                invalid_fields.add("login")
+                error_messages.append(_("The user name %s is already taken. Please choose another one.", login))
 
     def _get_vat_validation_fields(self):
         return {'country_id', 'vat'}
