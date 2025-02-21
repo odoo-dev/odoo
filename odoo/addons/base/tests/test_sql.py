@@ -3,7 +3,7 @@
 
 from psycopg2.errors import CheckViolation
 
-from odoo.tests.common import BaseCase, TransactionCase
+from odoo.tests.common import BaseCase, TransactionCase, patch_savepoint
 from odoo.tools import SQL, mute_logger, sql
 
 
@@ -180,7 +180,8 @@ class TestSqlTools(TransactionCase):
 
     def test_add_constraint(self):
         definition = "CHECK (name !~ '%')"
-        sql.add_constraint(self.env.cr, 'res_bank', 'test_constraint_dummy', definition)
+        with patch_savepoint():
+            sql.add_constraint(self.env.cr, 'res_bank', 'test_constraint_dummy', definition)
 
         # ensure the constraint with % works and it's in the DB
         with self.assertRaises(CheckViolation), mute_logger('odoo.sql_db'):
@@ -192,7 +193,8 @@ class TestSqlTools(TransactionCase):
 
     def test_add_index(self):
         definition = "(name, id)"
-        sql.add_index(self.env.cr, 'res_bank_test_name', 'res_bank', definition, unique=False)
+        with patch_savepoint():
+            sql.add_index(self.env.cr, 'res_bank_test_name', 'res_bank', definition, unique=False)
 
         # check the definition
         db_definition, db_comment = sql.index_definition(self.env.cr, 'res_bank_test_name')
@@ -202,7 +204,8 @@ class TestSqlTools(TransactionCase):
     def test_add_index_escape(self):
         definition = "(id) WHERE name ~ '%'"
         comment = r'some%comment'
-        sql.add_index(self.env.cr, 'res_bank_test_percent_escape', 'res_bank', definition, unique=False, comment=comment)
+        with patch_savepoint():
+            sql.add_index(self.env.cr, 'res_bank_test_percent_escape', 'res_bank', definition, unique=False, comment=comment)
 
         # ensure the definitions match (definition is the comment if it is set)
         db_definition, db_comment = sql.index_definition(self.env.cr, 'res_bank_test_percent_escape')

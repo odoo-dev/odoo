@@ -5,7 +5,8 @@ from contextlib import contextmanager
 from unittest.mock import patch, Mock
 
 from odoo import Command, modules
-from odoo.tests.common import new_test_user, TransactionCase, HttpCase
+from odoo.addons.base.wizard.base_partner_merge import BasePartnerMergeAutomaticWizard
+from odoo.tests.common import new_test_user, TransactionCase, HttpCase, patch_savepoint
 from odoo.tools.mail import email_split_and_format
 
 DISABLED_MAIL_CONTEXT = {

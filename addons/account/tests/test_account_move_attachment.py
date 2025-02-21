@@ -1,10 +1,13 @@
 from odoo import http
-from odoo.tests import tagged, HttpCase
+from odoo.tests import tagged, HttpCase, patch_savepoint
+
+from odoo.addons.account.models.account_move import AccountMove
 
 
 @tagged("-at_install", "post_install")
 class TestAccountMoveAttachment(HttpCase):
 
+    @patch_savepoint(AccountMove, '_extend_with_attachments')
     def test_preserving_manually_added_attachments(self):
         """ Preserve attachments manually added (not coming from emails) to an invoice """
         self.authenticate("admin", "admin")

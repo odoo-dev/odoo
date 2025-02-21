@@ -67,23 +67,24 @@ class TestRealCursor(BaseCase):
 
 class TestHTTPCursor(HttpCase):
     def test_cursor_keeps_readwriteness(self):
-        with self.env.registry.cursor(readonly=False) as cr:
-            self.assertFalse(cr.readonly)
-            cr.execute("SELECT 1")
-            cr.rollback()
-            self.assertFalse(cr.readonly)
-            cr.execute("SELECT 1")
-            cr.commit()
-            self.assertFalse(cr.readonly)
+        with self.allow_savepoint_commit():
+            with self.env.registry.cursor(readonly=False) as cr:
+                self.assertFalse(cr.readonly)
+                cr.execute("SELECT 1")
+                cr.rollback()
+                self.assertFalse(cr.readonly)
+                cr.execute("SELECT 1")
+                cr.commit()
+                self.assertFalse(cr.readonly)
 
-        with self.env.registry.cursor(readonly=True) as cr:
-            self.assertTrue(cr.readonly)
-            cr.execute("SELECT 1")
-            cr.rollback()
-            self.assertTrue(cr.readonly)
-            cr.execute("SELECT 1")
-            cr.commit()
-            self.assertTrue(cr.readonly)
+            with self.env.registry.cursor(readonly=True) as cr:
+                self.assertTrue(cr.readonly)
+                cr.execute("SELECT 1")
+                cr.rollback()
+                self.assertTrue(cr.readonly)
+                cr.execute("SELECT 1")
+                cr.commit()
+                self.assertTrue(cr.readonly)
 
     def test_call_kw_readonly(self):
         self.authenticate('admin', 'admin')
@@ -124,6 +125,14 @@ class TestHTTPCursor(HttpCase):
 
 
 class TestTestCursor(common.TransactionCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        # The whole class uses separate cursors and is not affected
+        # by the subtransaction overflow issues.
+        for p in cls.savepoint_patchers:
+            p.stop()
+
     def setUp(self):
         super().setUp()
         # make the registry in test mode

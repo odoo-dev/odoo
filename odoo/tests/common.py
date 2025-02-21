@@ -30,6 +30,9 @@ import time
 import traceback
 import unittest
 import warnings
+import operator
+import functools
+from types import FunctionType
 from collections import defaultdict, deque
 from concurrent.futures import Future, CancelledError, wait
 from contextlib import contextmanager, ExitStack
@@ -59,7 +62,8 @@ from odoo.exceptions import AccessError
 from odoo.fields import Command
 from odoo.modules.registry import Registry
 from odoo.service import security
-from odoo.sql_db import BaseCursor, Cursor
+from odoo.http import Request
+from odoo.sql_db import BaseCursor, Cursor, Savepoint
 from odoo.tools import config, float_compare, mute_logger, profiler, SQL, DotDict
 from odoo.tools.mail import single_email_re
 from odoo.tools.misc import find_in_path, lower_logging
@@ -902,6 +906,29 @@ class TransactionCase(BaseCase):
         cls.close_patcher = patch.object(cls.cr, 'close', forbidden)
         cls.startClassPatcher(cls.close_patcher)
 
+        # Patch Savepoint, it's not allowed to close without rolling back during
+        # testing.
+        # TODO: link to explanation /!\
+        orig_savepoint_rollback = Savepoint.rollback
+        def _rollback(self):
+            self._rollback = True
+            return orig_savepoint_rollback(self)
+        orig_savepoint_close = Savepoint._close
+        def _close(self, _rollback: bool):
+            rollback = getattr(self, '_rollback', _rollback)
+            if not rollback:
+                raise AssertionError(
+                    'Cannot close a savepoint without rolling back first during tests.\n'
+                    'Use odoo.tests.common.patch_savepoint to patch your calls.'
+                )
+            return orig_savepoint_close(self, _rollback)
+        cls.savepoint_patchers = [
+            patch.object(Savepoint, 'rollback', _rollback),
+            patch.object(Savepoint, '_close', _close),
+        ]
+        for p in cls.savepoint_patchers:
+            cls.startClassPatcher(p)
+
         cls.env = api.Environment(cls.cr, api.SUPERUSER_ID, {})
 
         # speedup CryptContext. Many user an password are done during tests, avoid spending time hasing password with many rounds
@@ -944,6 +971,19 @@ class TransactionCase(BaseCase):
         self.cr.execute('SAVEPOINT test_%d' % self._savepoint_id)
         self.addCleanup(self.cr.execute, 'ROLLBACK TO SAVEPOINT test_%d' % self._savepoint_id)
 
+        # def _test():
+        #     with self.registry.cursor() as cr:
+        #         cr.execute('select pg_export_snapshot();')
+        #         export_name = cr.fetchone()[0]
+        #         _logger.runbot('Exported snapshot after %s, %s', self.__class__.__name__, export_name)
+        #         PG_RUN_ROOT = '/opt/homebrew/var/postgresql@17/'
+        #         with open(f'{PG_RUN_ROOT}pg_snapshots/{export_name}', 'r') as file:
+        #             sof_line = next(iter(line for line in file.readlines() if line.startswith('sof')))
+        #             print(sof_line.strip())
+        #             if '1' in sof_line:
+        #                 breakpoint()
+        # self.addCleanup(_test)
+
     @contextmanager
     def enter_registry_test_mode(self):
         """
@@ -961,6 +1001,21 @@ class TransactionCase(BaseCase):
         finally:
             registry.leave_test_mode()
             env.invalidate_all()
+
+    @classmethod
+    @contextmanager
+    def allow_savepoint_commit(cls):
+        """
+        Disables savepoint patches related to blocking non rolled-back savepoints.
+        Should only be used when opening a new cursor.
+        """
+        for p in cls.savepoint_patchers:
+            p.stop()
+        try:
+            yield
+        finally:
+            for p in cls.savepoint_patchers:
+                p.start()
 
 
 class SingleTransactionCase(BaseCase):
@@ -1858,6 +1913,7 @@ class HttpCase(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+
         if cls.registry_test_mode:
             cls.registry.enter_test_mode(cls.cr, cls.readonly_enabled)
             cls.addClassCleanup(cls.registry.leave_test_mode)
@@ -1927,14 +1983,17 @@ class HttpCase(TransactionCase):
             message,
         )
 
-    def url_open(self, url, data=None, files=None, timeout=12, headers=None, allow_redirects=True, head=False):
-        if url.startswith('/'):
-            url = self.base_url() + url
-        if head:
-            return self.opener.head(url, data=data, files=files, timeout=timeout, headers=headers, allow_redirects=False)
-        if data or files:
-            return self.opener.post(url, data=data, files=files, timeout=timeout, headers=headers, allow_redirects=allow_redirects)
-        return self.opener.get(url, timeout=timeout, headers=headers, allow_redirects=allow_redirects)
+    def url_open(self, url, data=None, files=None, timeout=12, headers=None, allow_redirects=True, head=False, expect_savepoint_rollback=False):
+        with ExitStack() as stack:
+            if not expect_savepoint_rollback:
+                stack.enter_context(patch_savepoint(Request, '_transactioning'))
+            if url.startswith('/'):
+                url = self.base_url() + url
+            if head:
+                return self.opener.head(url, data=data, files=files, timeout=timeout, headers=headers, allow_redirects=False)
+            if data or files:
+                return self.opener.post(url, data=data, files=files, timeout=timeout, headers=headers, allow_redirects=allow_redirects)
+            return self.opener.get(url, timeout=timeout, headers=headers, allow_redirects=allow_redirects)
 
     def _wait_remaining_requests(self, timeout=10):
 
@@ -2152,7 +2211,8 @@ class HttpCase(TransactionCase):
         if options["delayToCheckUndeterminisms"] > 0:
             timeout = timeout + 1000 * options["delayToCheckUndeterminisms"]
             _logger.runbot("Tour %s is launched with mode: check for undeterminisms.", tour_name)
-        return self.browser_js(url_path=url_path, code=code, ready=ready, timeout=timeout, success_signal="tour succeeded", **kwargs)
+        with patch_savepoint():
+            return self.browser_js(url_path=url_path, code=code, ready=ready, timeout=timeout, success_signal="tour succeeded", **kwargs)
 
     def profile(self, **kwargs):
         """
@@ -2328,3 +2388,77 @@ class freeze_time:
     def __exit__(self, *args):
         if self.freezer:
             self.freezer.stop()
+
+def patch_savepoint(*args):
+    """
+    Patches a method such that savepoints within that method do nothing.
+    Note that readonly savepoints are still executed as they are always rolled back.
+
+    The method can be used as a regular decorator or as a context manager if
+    the object and method to patch are provided.
+
+    ```
+    @patch_savepoint
+    def method():
+        ...
+
+    @patch_savepoint(MyClass, 'MyMethod')
+    def method():
+        ...
+
+    def method():
+        with patch_savepoint:
+            ...
+
+    def method():
+        with patch_savepoint(MyClass, 'MyMethod'):
+            ...
+    ```
+    """
+    f = None
+    if args and isinstance(args[0], FunctionType):
+        f = args[0]
+
+    orig_attributes = {**Savepoint.__dict__}
+    def __init(self, cr, /, readonly: bool = False):
+        if readonly:
+            orig_attributes['__init__'](self, cr, readonly=readonly)
+        else:
+            self.name = 'patched_savepoint'
+            self._cr = cr
+            self.closed = False
+            self.readonly = readonly
+
+    def _close(self, rollback: bool):
+        if self.readonly:
+            orig_attributes['_close'](self, rollback)
+        else:
+            self.closed = True
+
+    def rollback(self, *args, **kwargs):
+        if self.readonly:
+            orig_attributes['rollback'](self, *args, **kwargs)
+
+    patches = [
+        patch.object(Savepoint, '__init__', __init),
+        patch.object(Savepoint, 'rollback', rollback),
+        patch.object(Savepoint, '_close', _close),
+    ]
+
+    def _get_stack():
+        stack = ExitStack()
+        for p in patches:
+            stack.enter_context(p)
+        return stack
+
+    def _wrapper(f):
+        @functools.wraps(f)
+        def _wrapped(self, *args, **kwargs):
+            with _get_stack():
+                return f(self, *args, **kwargs)
+        return _wrapped
+    if f:
+        return _wrapper(f)
+    elif len(args) == 2 and isinstance(args[1], str):
+        return patch.object(*args, _wrapper(operator.attrgetter(args[1])(args[0])))
+    return _get_stack()

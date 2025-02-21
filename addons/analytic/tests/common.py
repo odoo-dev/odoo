@@ -1,4 +1,7 @@
+from odoo.tests.common import patch_savepoint
+
 from odoo.addons.base.tests.common import BaseCommon
+from odoo.addons.analytic.models.analytic_plan import AccountAnalyticPlan
 
 
 class AnalyticCommon(BaseCommon):
@@ -6,6 +9,8 @@ class AnalyticCommon(BaseCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+
+        cls.startClassPatcher(patch_savepoint(AccountAnalyticPlan, '_sync_plan_column'))
 
         cls.analytic_plan_offset = len(cls.env['account.analytic.plan'].get_relevant_plans())
         cls.analytic_plan_1, cls.analytic_plan_2 = cls.env['account.analytic.plan'].create([

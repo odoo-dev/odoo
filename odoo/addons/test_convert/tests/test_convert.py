@@ -8,7 +8,7 @@ from lxml import etree as ET
 from lxml.builder import E
 
 import odoo
-from odoo.tests import common
+from odoo.tests import common, patch_savepoint
 from odoo.tools.convert import convert_file, xml_import, _eval_xml
 from odoo.tools.misc import file_path
 
@@ -258,7 +258,8 @@ class TestEvalXML(common.TransactionCase):
         self.assertEqual(record.name, 'bar')
         # Reset the value to the one from the XML data file,
         # with a lang passed in the environment.
-        convert_file(env_fr, 'test_convert', 'data/test_translated_field/test_convert.test_model.csv', {})
+        with patch_savepoint(): # .csv call model.load which uses savepoint
+            convert_file(env_fr, 'test_convert', 'data/test_translated_field/test_convert.test_model.csv', {})
         self.assertEqual(record.with_context(lang=None).name, 'foo')
 
     @unittest.skip("not tested")

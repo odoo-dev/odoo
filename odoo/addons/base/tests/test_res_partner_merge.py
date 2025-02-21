@@ -3,6 +3,14 @@ from odoo.tests.common import TransactionCase
 
 class TestMergePartner(TransactionCase):
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        # Class validated not to cause any subtransaction overflow issues.
+        for p in cls.savepoint_patchers:
+            p.stop()
+
     def setUp(self):
         super().setUp()
         self.Partner = self.env['res.partner']
