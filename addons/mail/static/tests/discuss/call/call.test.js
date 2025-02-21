@@ -467,7 +467,7 @@ test("Sort call participants in side bar by name", async () => {
     });
 });
 
-test("expand call participants when joining a call", async () => {
+test.debug("expand call participants when joining a call", async () => {
     mockGetMedia();
     const pyEnv = await startServer();
     const partners = pyEnv["res.partner"].create([

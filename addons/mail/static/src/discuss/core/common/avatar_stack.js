@@ -25,7 +25,7 @@ export class AvatarStack extends Component {
     static defaultProps = {
         avatarClass: () => "",
         max: 4,
-        size: 24,
+        size: 26,
         direction: "h",
     };
 
@@ -36,7 +36,7 @@ export class AvatarStack extends Component {
         }
         // Compute cumulative offset,
         const marginDirection = this.props.direction === "v" ? "top" : "left";
-        style += `margin-${marginDirection}: -${this.props.size / 3}px`;
+        style += `margin-${marginDirection}: -${this.props.size / 4}px`;
         return style;
     }
 }
