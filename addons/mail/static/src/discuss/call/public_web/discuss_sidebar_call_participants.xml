@@ -31,7 +31,7 @@
                 t-if="!state.expanded"
                 direction="compact ? 'v' : 'h'"
                 avatarClass="(p) => this.avatarClass(p)"
-                max="compact ? 1 : 4"
+                max="compact ? 1 : 6"
                 personas="sessions.map((s) => s.channel_member_id?.persona).filter(p => p)"
             >
                 <t t-set-slot="avatarExtraInfo" t-slot-scope="scope">

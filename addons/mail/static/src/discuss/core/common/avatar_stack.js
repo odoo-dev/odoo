@@ -30,13 +30,19 @@ export class AvatarStack extends Component {
     };
 
     getStyle(index) {
-        let style = `width: ${this.props.size}px; height: ${this.props.size}px;`;
-        if (index === 0) {
-            return style;
+        const paddingDirection = this.props.direction === "v" ? "bottom" : "right";
+        const styles = [
+            "box-sizing: content-box",
+            `height: ${this.props.size}px`,
+            `padding-${paddingDirection}: 1.5px`,
+            `width: ${this.props.size}px`,
+            `z-index: ${this.props.personas.length - index}`,
+        ];
+        if (index !== 0) {
+            // Compute cumulative offset,
+            const marginDirection = this.props.direction === "v" ? "top" : "left";
+            styles.push(`margin-${marginDirection}: -${this.props.size / 4.5}px`);
         }
-        // Compute cumulative offset,
-        const marginDirection = this.props.direction === "v" ? "top" : "left";
-        style += `margin-${marginDirection}: -${this.props.size / 4}px`;
-        return style;
+        return styles.join(";");
     }
 }
