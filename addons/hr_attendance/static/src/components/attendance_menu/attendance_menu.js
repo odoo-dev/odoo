@@ -16,7 +16,6 @@ export class ActivityMenu extends Component {
 
     setup() {
         this.ui = useService("ui");
-        this.lazySession = useService("lazy_session");
         this.employee = false;
         this.state = useState({
             checkedIn: false,
@@ -24,15 +23,7 @@ export class ActivityMenu extends Component {
         });
         this.date_formatter = registry.category("formatters").get("float_time")
         this.dropdown = useDropdownState();
-        onWillStart(()=> {
-            // access lazy session but do no wait for it, to prevent from delaying the whole webclient
-            this.lazySession.getValue("attendance_user_data", (employee) => {
-                if (employee) {
-                    this.employee = employee;
-                    this._searchReadEmployeeFill();
-                }
-            });
-        });
+        onWillStart(() => this.searchReadEmployee());
     }
 
     async searchReadEmployee(){
