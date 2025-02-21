@@ -1349,6 +1349,11 @@ export class PosStore extends Reactive {
             });
         }
     }
+    async saveOrders() {
+        const order = this.get_order();
+        await this.syncAllOrders({ orders: [order] });
+        this.data.localDeleteCascade(order);
+    }
     async getServerOrders() {
         return await this.loadServerOrders([
             ["config_id", "in", [...this.config.raw.trusted_config_ids, this.config.id]],

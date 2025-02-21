@@ -10,7 +10,16 @@
                 class="buttonClass"
                 setter="(orderline, note) => orderline.setNote(note)" />
         </t>
-        <button class="btn btn-light btn-lg flex-shrink-0 ms-auto" t-if="!props.showRemainingButtons and !ui.isSmall and props.onClickMore" t-on-click="props.onClickMore">
+        <t t-set="showSave" t-value="this.pos.config.raw.trusted_config_ids.length > 0 and this.pos.get_order().lines.length > 0" />
+        <button t-if="showSave"
+            t-on-click="() => this.pos.saveOrders()"
+            class="btn btn-light btn-lg ms-auto">
+            <i class="fa fa-floppy-o" aria-hidden="true" />
+        </button>
+        <button class="btn btn-light btn-lg flex-shrink-0"
+            t-att-class="{'ms-auto': !showSave}"
+            t-if="!props.showRemainingButtons and !ui.isSmall and props.onClickMore"
+            t-on-click="props.onClickMore">
             Actions
         </button>
         <!-- All these buttons will only be displayed in a dialog -->

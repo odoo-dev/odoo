@@ -7,6 +7,12 @@
                 <BackButton t-if="!props.showActionButton and pos.showBackButton()" onClick="() => pos.onClickBackButton()"/>
                 <t t-if="props.onClickMore">
                     <SelectPartnerButton partner="props.partner"/>
+                    <t t-set="showSave" t-value="this.pos.config.raw.trusted_config_ids.length > 0 and this.pos.get_order().lines.length > 0" />
+                    <button class="btn btn-light btn-lg"
+                        t-if="showSave"
+                        t-on-click="() => this.pos.saveOrders()">
+                        <i class="fa fa-floppy-o" aria-hidden="true" />
+                    </button>
                     <button class="button mobile-more-button btn btn-light btn-lg flex-fill" t-on-click="props.onClickMore">
                         <span>Actions</span>
                     </button>
