@@ -4264,8 +4264,8 @@ class BaseModel(metaclass=MetaModel):
                     inversed[key] = val
                     determine_inverses[field.inverse].add(field)
                 # protect editable computed fields and precomputed fields
-                # against (re)computation
-                if field.compute and (not field.readonly or field.precompute):
+                # against (re)computation expect inherited fields (already manage in the next loop)
+                if field.compute and (not field.readonly or field.precompute) and not field.inherited:
                     protected.update(self.pool.field_computed.get(field, [field]))
 
             data_list.append(data)
@@ -4478,8 +4478,7 @@ class BaseModel(metaclass=MetaModel):
         common_set_vals = set(LOG_ACCESS_COLUMNS + ['id', 'parent_path'])
         for data, record in zip(data_list, records.with_context(bin_size=False)):
             data['record'] = record
-            # DLE P104: test_inherit.py, test_50_search_one2many
-            vals = dict({k: v for d in data['inherited'].values() for k, v in d.items()}, **data['stored'])
+            vals = data['stored']
             set_vals = common_set_vals.union(vals)
 
             # put None in cache for all fields that are not part of the INSERT
