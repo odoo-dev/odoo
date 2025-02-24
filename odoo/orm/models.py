@@ -4471,32 +4471,29 @@ class BaseModel(metaclass=MetaModel):
             ))
             ids.extend(id_ for id_, in cr.fetchall())
 
-        # put the new records in cache, and update inverse fields, for many2one
+        # put the new records in cache, and update inverse fields for many2one
         # (using bin_size=False to put binary values in the right place)
         records = self.browse(ids)
         inverses_update = defaultdict(list)     # {(field, value): ids}
-        common_set_vals = set(LOG_ACCESS_COLUMNS + ['id', 'parent_path'])
+        ignore_fields = ('id', 'parent_path') if self._parent_store else ('id',)
+        cache = self.env.cache
         for data, record in zip(data_list, records.with_context(bin_size=False)):
             data['record'] = record
             vals = data['stored']
-            set_vals = common_set_vals.union(vals)
 
-            # put None in cache for all fields that are not part of the INSERT
-            for field in self._fields.values():
-                if not field.store:
+            for fname, field in self._fields.items():
+                if fname in ignore_fields:
                     continue
                 if field.type in ('one2many', 'many2many'):
-                    self.env.cache.set(record, field, ())
-                elif field.name not in set_vals:
-                    self.env.cache.set(record, field, None)
-
-            for fname, value in vals.items():
-                field = self._fields[fname]
-                if field.type not in ('one2many', 'many2many'):
-                    cache_value = field.convert_to_cache(value, record)
-                    self.env.cache.set(record, field, cache_value)
+                    if field.store:
+                        cache.set(record, field, ())
+                elif fname in vals:
+                    cache_value = field.convert_to_cache(vals[fname], record)
+                    cache.set(record, field, cache_value)
                     if field.type in ('many2one', 'many2one_reference') and self.pool.field_inverses[field]:
                         inverses_update[(field, cache_value)].append(record.id)
+                elif field.store:  # put None in cache for fields that are not part of the INSERT
+                    cache.set(record, field, None)
 
         for (field, value), record_ids in inverses_update.items():
             field._update_inverses(self.browse(record_ids), value)
