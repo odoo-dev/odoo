@@ -2943,7 +2943,7 @@ class TestRoutes(TestStockCommon):
         picking_type = self.env['stock.picking.type'].create({
             'name': 'new_picking_type',
             'code': 'internal',
-            'sequence_code': 'NPT',
+            'sequence_prefix': 'NPT',
             'default_location_src_id': self.env.ref('stock.stock_location_stock').id,
             'default_location_dest_id': new_loc.id,
             'warehouse_id': self.wh.id,

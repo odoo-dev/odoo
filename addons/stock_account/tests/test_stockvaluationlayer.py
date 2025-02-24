@@ -1162,14 +1162,14 @@ class TestAngloSaxonAccounting(AccountTestInvoicingCommon, TestStockValuationCom
         })
         cls.picking_type_in = cls.env['stock.picking.type'].create({
             'name': 'pick type in',
-            'sequence_code': '1',
+            'sequence_prefix': '1',
             'code': 'incoming',
             'company_id': cls.company_data['company'].id,
             'warehouse_id': cls.warehouse_in.id,
         })
         cls.picking_type_out = cls.env['stock.picking.type'].create({
             'name': 'pick type in',
-            'sequence_code': '2',
+            'sequence_prefix': '2',
             'code': 'outgoing',
             'company_id': cls.company_data['company'].id,
             'warehouse_id': cls.warehouse_out.id,

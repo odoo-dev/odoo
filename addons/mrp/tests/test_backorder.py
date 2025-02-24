@@ -702,9 +702,9 @@ class TestMrpProductionBackorder(TestMrpCommon):
             'priority': '1',
             'picking_type_id': picking_type_id or self.warehouse.manu_type_id.id,
         })
-        picking_type_always = self.warehouse.manu_type_id.copy({'name': "Always BO", 'sequence_code': "always", 'create_backorder': "always"})
-        picking_type_ask = self.warehouse.manu_type_id.copy({'name': "Ask BO", 'sequence_code': "ask", 'create_backorder': "ask"})
-        picking_type_never = self.warehouse.manu_type_id.copy({'name': "Never BO", 'sequence_code': "never", 'create_backorder': "never"})
+        picking_type_always = self.warehouse.manu_type_id.copy({'name': "Always BO", 'sequence_prefix': "always", 'create_backorder': "always"})
+        picking_type_ask = self.warehouse.manu_type_id.copy({'name': "Ask BO", 'sequence_prefix': "ask", 'create_backorder': "ask"})
+        picking_type_never = self.warehouse.manu_type_id.copy({'name': "Never BO", 'sequence_prefix': "never", 'create_backorder': "never"})
 
         # always + ask (backorder=yes) => both are backordered in the end
         mo_produce_all = create_mo()

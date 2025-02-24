@@ -6,7 +6,7 @@
         <field name="model">stock.picking.type</field>
         <field name="inherit_id" ref="stock.view_picking_type_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='sequence_code']" position="after">
+            <xpath expr="//field[@name='sequence_prefix']" position="after">
                 <field name="print_label" invisible="code not in ['internal', 'outgoing']"/>
             </xpath>
         </field>

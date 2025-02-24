@@ -685,7 +685,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         super_receipt = self.env['stock.picking.type'].create({
             'name': 'Super receipt',
             'code': 'incoming',
-            'sequence_code': 'SR',
+            'sequence_prefix': 'SR',
             'default_location_src_id': self.env.ref("stock.stock_location_suppliers").id,
             'default_location_dest_id': sub_location.id,
         })

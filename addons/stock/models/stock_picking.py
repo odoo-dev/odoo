@@ -29,7 +29,8 @@ class StockPickingType(models.Model):
     sequence_id = fields.Many2one(
         'ir.sequence', 'Reference Sequence',
         check_company=True, copy=False)
-    sequence_code = fields.Char('Sequence Prefix', required=True)
+    sequence_code = fields.Char('Sequence Code')
+    sequence_prefix = fields.Char('Sequence Prefix', related='sequence_id.prefix', readonly=False, required=True, precompute=True, store=True)
     default_location_src_id = fields.Many2one(
         'stock.location', 'Source Location', compute='_compute_default_location_src_id',
         check_company=True, store=True, readonly=False, precompute=True, required=True,
@@ -153,18 +154,23 @@ class StockPickingType(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            if not vals.get('sequence_id') and vals.get('sequence_code'):
+            # sequence code recieved from backend
+            # if not vals.get('sequence_prefix') and vals.get('sequence_code'):
+            #     wh = self.env['stock.warehouse'].browse(vals.get('warehouse_id')) if vals.get('warehouse_id') else None
+            #     vals['sequence_prefix'] = f"{wh.code}/{vals['sequence_code']}/" if wh else vals['sequence_code']
+            # sequence prefix recieved from user
+            if not vals.get('sequence_id') and vals.get('sequence_prefix'):
                 if vals.get('warehouse_id'):
                     wh = self.env['stock.warehouse'].browse(vals['warehouse_id'])
                     vals['sequence_id'] = self.env['ir.sequence'].sudo().create({
-                        'name': _('%(warehouse)s Sequence %(code)s', warehouse=wh.name, code=vals['sequence_code']),
-                        'prefix': wh.code + '/' + vals['sequence_code'] + '/', 'padding': 5,
+                        'name': _('%(warehouse)s Sequence %(code)s', warehouse=wh.name, code=vals['sequence_prefix']),
+                        'padding': 5,
                         'company_id': wh.company_id.id,
                     }).id
                 else:
                     vals['sequence_id'] = self.env['ir.sequence'].sudo().create({
-                        'name': _('Sequence %(code)s', code=vals['sequence_code']),
-                        'prefix': vals['sequence_code'], 'padding': 5,
+                        'name': _('Sequence %(code)s', code=vals['sequence_prefix']),
+                        'padding': 5,
                         'company_id': vals.get('company_id') or self.env.company.id,
                     }).id
         return super().create(vals_list)
@@ -175,8 +181,8 @@ class StockPickingType(models.Model):
         for picking, vals in zip(self, vals_list):
             if 'name' not in default:
                 vals['name'] = _("%s (copy)", picking.name)
-            if 'sequence_code' not in default and 'sequence_id' not in default:
-                vals['sequence_code'] = _("%s (copy)", picking.sequence_code)
+            if 'sequence_prefix' not in default and 'sequence_code' not in default:
+                vals['sequence_prefix'] = _("%s (copy)", picking.sequence_prefix)
         return vals_list
 
     def write(self, vals):
@@ -184,18 +190,18 @@ class StockPickingType(models.Model):
             for picking_type in self:
                 if picking_type.company_id.id != vals['company_id']:
                     raise UserError(_("Changing the company of this record is forbidden at this point, you should rather archive it and create a new one."))
-        if 'sequence_code' in vals:
+        if 'sequence_prefix' in vals:
             for picking_type in self:
                 if picking_type.warehouse_id:
                     picking_type.sequence_id.sudo().write({
-                        'name': _('%(warehouse)s Sequence %(code)s', warehouse=picking_type.warehouse_id.name, code=vals['sequence_code']),
-                        'prefix': picking_type.warehouse_id.code + '/' + vals['sequence_code'] + '/', 'padding': 5,
+                        'name': _('%(warehouse)s Sequence %(code)s', warehouse=picking_type.warehouse_id.name, code=vals['sequence_prefix']),
+                        'padding': 5,
                         'company_id': picking_type.warehouse_id.company_id.id,
                     })
                 else:
                     picking_type.sequence_id.sudo().write({
-                        'name': _('Sequence %(code)s', code=vals['sequence_code']),
-                        'prefix': vals['sequence_code'], 'padding': 5,
+                        'name': _('Sequence %(code)s', code=vals['sequence_prefix']),
+                        'padding': 5,
                         'company_id': picking_type.env.company.id,
                     })
         if 'reservation_method' in vals:

@@ -24,7 +24,7 @@ class TestRoutes(TransactionCase):
 
         receipt_1 = self.env['stock.picking.type'].create({
             'name': 'Receipts from loc1',
-            'sequence_code': 'IN1',
+            'sequence_prefix': 'IN1',
             'code': 'incoming',
             'warehouse_id': warehouse.id,
             'default_location_dest_id': location_1.id,
@@ -32,7 +32,7 @@ class TestRoutes(TransactionCase):
 
         receipt_2 = self.env['stock.picking.type'].create({
             'name': 'Receipts from loc2',
-            'sequence_code': 'IN2',
+            'sequence_prefix': 'IN2',
             'code': 'incoming',
             'warehouse_id': warehouse.id,
             'default_location_dest_id': location_2.id,

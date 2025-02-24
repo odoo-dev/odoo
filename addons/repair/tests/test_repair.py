@@ -601,12 +601,12 @@ class TestRepair(common.TransactionCase):
         picking_type_1 = self.env['stock.picking.type'].create({
             'name': 'new_picking_type_1',
             'code': 'repair_operation',
-            'sequence_code': 'PT1/',
+            'sequence_prefix': 'PT1/',
         })
         picking_type_2 = self.env['stock.picking.type'].create({
             'name': 'new_picking_type_2',
             'code': 'repair_operation',
-            'sequence_code': 'PT2/',
+            'sequence_prefix': 'PT2/',
         })
         repair_order.picking_type_id = picking_type_1
         self.assertEqual(repair_order.name, "PT1/00001")

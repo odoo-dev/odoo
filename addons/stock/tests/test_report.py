@@ -1237,15 +1237,15 @@ class TestReports(TestReportsCommon):
         picking_type_by_date = picking_type_manual.copy()
         picking_type_at_confirm = picking_type_manual.copy()
         picking_type_manual.reservation_method = 'manual'
-        picking_type_manual.sequence_code = 'manual'
+        picking_type_manual.sequence_prefix = 'manual'
         picking_type_by_date.reservation_method = 'by_date'
-        picking_type_by_date.sequence_code = 'by'
+        picking_type_by_date.sequence_prefix = 'by'
         # artificially make non-priority moves reserve before priority moves to
         # check order doesn't prioritize priority
         picking_type_by_date.reservation_days_before = '6'
         picking_type_by_date.reservation_days_before_priority = '4'
         picking_type_at_confirm.reservation_method = 'at_confirm'
-        picking_type_at_confirm.sequence_code = 'confirm'
+        picking_type_at_confirm.sequence_prefix = 'confirm'
 
         # 'manual' reservation => no reservation_date
         delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')

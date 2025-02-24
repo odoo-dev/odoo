@@ -385,7 +385,7 @@ class TestBatchPicking(TransactionCase):
         warehouse = self.env['stock.warehouse'].search([], limit=1)
         type_special_out = self.env['stock.picking.type'].create({
             'name': 'Special Delivery',
-            'sequence_code': 'SPECOUT',
+            'sequence_prefix': 'SPECOUT',
             'code': 'outgoing',
             'company_id': self.env.company.id,
             'warehouse_id': warehouse.id,

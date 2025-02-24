@@ -1653,11 +1653,11 @@ class TestStockFlow(TestStockCommon):
         picking_type_ask = self.env['stock.picking.type'].browse(self.picking_type_in)
         picking_type_ask.create_backorder = 'ask'
         picking_type_always = picking_type_ask.copy({
-            'sequence_code': 'always',
+            'sequence_prefix': 'always',
             'create_backorder': 'always',
         })
         picking_type_never = picking_type_ask.copy({
-            'sequence_code': 'never',
+            'sequence_prefix': 'never',
             'create_backorder': 'never',
         })
 
@@ -2613,12 +2613,12 @@ class TestStockFlowPostInstall(TestStockCommon):
         picking_type_1 = self.env['stock.picking.type'].create({
             'name': 'new_picking_type_1',
             'code': 'internal',
-            'sequence_code': 'PT1/',
+            'sequence_prefix': 'PT1/',
         })
         picking_type_2 = self.env['stock.picking.type'].create({
             'name': 'new_picking_type_2',
             'code': 'internal',
-            'sequence_code': 'PT2/',
+            'sequence_prefix': 'PT2/',
         })
         picking = self.env['stock.picking'].create({
             'picking_type_id': picking_type_1.id,

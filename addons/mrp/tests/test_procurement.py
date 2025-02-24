@@ -710,7 +710,7 @@ class TestProcurement(TestMrpCommon):
         manu_operation02 = manu_operation01.copy()
         with Form(manu_operation02) as form:
             form.name = 'Manufacturing 02'
-            form.sequence_code = 'MO2'
+            form.sequence_prefix = 'MO2'
             form.default_location_dest_id = stock_location02
 
         manu_rule01 = warehouse.manufacture_pull_id

@@ -451,7 +451,7 @@ class TestMultiCompany(TransactionCase):
 
         picking_type_to_transit = self.env['stock.picking.type'].create({
             'name': 'To Transit',
-            'sequence_code': 'TRANSIT',
+            'sequence_prefix': 'TRANSIT',
             'code': 'outgoing',
             'company_id': self.company_a.id,
             'warehouse_id': False,

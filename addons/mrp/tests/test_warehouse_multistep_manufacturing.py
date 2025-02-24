@@ -104,11 +104,11 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
 
         # create 2 picking type having 2 different pre-prod location
         pick_1 = self.warehouse.manu_type_id.copy({
-            'sequence_code': 'PRE1',
+            'sequence_prefix': 'PRE1',
             'default_location_src_id': pre_1.id,
         })
         pick_2 = self.warehouse.manu_type_id.copy({
-            'sequence_code': 'PRE2',
+            'sequence_prefix': 'PRE2',
             'default_location_src_id': pre_2.id,
         })
 
@@ -552,7 +552,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
             'warehouse_id': warehouse.id,
             'default_location_src_id': self.warehouse.pbm_loc_id.copy().id,
             'default_location_dest_id': self.warehouse.sam_loc_id.copy().id,
-            'sequence_code': 'TMP',
+            'sequence_prefix': 'TMP',
             'sequence_id': self.env['ir.sequence'].create({
                 'code': 'mrp.production',
                 'name': 'tmp_production_sequence',
