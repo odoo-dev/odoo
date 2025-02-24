@@ -14,13 +14,13 @@
                     <div class="oe_button_box" name="button_box"></div>
                     <group>
                         <group>
-                            <field name="stripe_card_id" invisible="True"/>
+                            <field name="stripe_id" invisible="True"/>
                             <field name="employee_id" widget="many2one_cardholder" class="oe_inline" options="{'no_create': True}"/>
                         </group>
                         <group>
                             <field name="card_type" readonly="True"/>
-                            <field name="company_id" groups="base.group_multi_company" readonly="stripe_card_id"/>
-                            <field name="journal_id" readonly="stripe_card_id"/>
+                            <field name="company_id" groups="base.group_multi_company" readonly="stripe_id"/>
+                            <field name="journal_id" readonly="stripe_id"/>
                         </group>
                     </group>
                     <notebook>
@@ -30,13 +30,12 @@
                                 <field name="spending_policy_limit_ids"/>
                             </group>
                         </page>
-                        <!-- <page string="Card Details" invisible="not last_4">
+                        <page string="Card Details" invisible="not stripe_id">
                             <group>
                                 <field name="card_number_public" placeholder="**** **** **** ****"/>
                                 <field name="expiration"/>
-                                <field name="cvv_public"/>
                             </group>
-                        </page> -->
+                        </page>
                     </notebook>
                 </sheet>
                 <div class="o_attachment_preview o_center_attachment"/>

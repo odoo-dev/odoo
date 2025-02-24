@@ -4,7 +4,7 @@ from odoo import _, fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
-    stripe_account_id = fields.Char(related='company_id.stripe_account_id')
+    stripe_id = fields.Char(related='company_id.stripe_id')
     stripe_account_issuing_status = fields.Selection(related="company_id.stripe_account_issuing_status", readonly=True)
     stripe_journal_id = fields.Many2one(
         comodel_name='account.journal',

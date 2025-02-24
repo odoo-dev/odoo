@@ -451,28 +451,16 @@ def format_amount_to_stripe(amount, currency):
     """ Helper to convert currencies according from stripe formatting which is the amount in the currency's minor unit with exceptions  """
     return to_minor_currency_units(amount, currency, arbitrary_decimal_number=STRIPE_EXCEPTIONS_CURRENCY_MINOR_UNITS.get(currency.name))
 
-def flatten_dict(dict_vals, level=0):
+def conver_dict_to_url_encoded_forms(dict_vals, level=0):
     """
-    Stripe has a flat data hierarchy and do not accept objects
-
-    this ->     {
-                    'person': {
-                        'name': "Eli",
-                        'lastname': "Lambert", 
-                    }
-                }
-
-    becomes ->  {
-                    'person[name]': "Eli",
-                    'person[lastname]': "Lambert"
-                }
+    Convert python dict into url encoded forms
     """
     new_dict = {}
 
     for key, item in dict_vals.items():
         dict_key = f'{key}' if level == 0 else f'[{key}]'
         if isinstance(item, dict):
-            new_sub_dict = flatten_dict(item, level + 1)
+            new_sub_dict = conver_dict_to_url_encoded_forms(item, level + 1)
             # Add sub dict to this dict
             for sub_dict_key, sub_dict_item in new_sub_dict.items():
                 new_dict[f'{dict_key}{sub_dict_key}'] = sub_dict_item
@@ -490,15 +478,15 @@ def make_request_stripe_proxy(route, payload=None, method="POST", headers=None, 
     }
 
     proxy_server = 'https://stripe-issuing-proxy.test.odoo.com' if test_mode else 'https://stripe-issuing-proxy.api.odoo.com'
-    proxy_server = "http://127.0.0.1:8070"  # Temp local IAP server
-    url = f"{proxy_server}/{route}"
+    proxy_server = "http://127.0.0.1:8070"  # TODO: remove Temp local IAP server
+    url = f"{proxy_server}/api/stripe_issuing/1/{route}"
     try:
-        response = requests.request(method, url, data=json.dumps(flatten_dict(payload)), headers=headers, timeout=60)
+        response = requests.request(method, url, data=json.dumps(conver_dict_to_url_encoded_forms(payload or {})), headers=headers, timeout=60)
 
         response_content = response.json()
         if 'error' in response_content:
             raise ValidationError(response_content['error']['data']['message'])
     except requests.exceptions.ConnectionError:
         _logger.exception("unable to reach endpoint at %s", url)
-        raise ValidationError("Stripe Proxy: " + _("Could not establish the connection to the Proxy Server."))
+        raise ValidationError(_("Stripe Proxy: Could not establish the connection to the Proxy Server."))
     return response_content['result']

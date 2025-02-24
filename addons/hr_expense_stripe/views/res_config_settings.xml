@@ -24,14 +24,14 @@
                     
                     <setting string="Account" invisible="not module_hr_expense_stripe or stripe_issuing_activated"
                              help="Link your stripe issuing account to manage company credit cards for your employees through Odoo">
-                            <div class="mt8" invisible="stripe_account_id">
+                            <div class="mt8" invisible="stripe_id">
                                 <button name="action_create_stripe_account" icon="oi-arrow-right" type="object" string="Connect" class="btn-link"/>
                             </div>
-                            <div class="mt8" invisible="not stripe_account_id">
+                            <div class="mt8" invisible="not stripe_id">
                                 <button name="action_refresh_stripe_account" icon="oi-arrow-right" type="object" string="Refresh" class="btn-link mr8"/>
-                                <field name="stripe_account_issuing_status" invisible="not stripe_account_id" widget="badge" decoration-danger="stripe_account_issuing_status == 'restricted'" decoration-success="stripe_account_issuing_status == 'verified'"/>
+                                <field name="stripe_account_issuing_status" invisible="not stripe_id" widget="badge" decoration-danger="stripe_account_issuing_status == 'restricted'" decoration-success="stripe_account_issuing_status == 'verified'"/>
                             </div>
-                            <div class="mt8" invisible="not stripe_account_id">
+                            <div class="mt8" invisible="not stripe_id">
                                 <button name="action_configure_stripe_account" icon="oi-arrow-right" type="object" string="Configure" class="btn-link"/>
                             </div>
                     </setting>

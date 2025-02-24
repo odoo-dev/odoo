@@ -12,9 +12,12 @@
     'depends': ['hr_expense'],
     'data': [
         'security/ir.model.access.csv',
+
         'data/product.mcc.stripe.tag.csv',
+
         'views/hr_expense_stripe_credit_card.xml',
         'views/res_config_settings.xml',
+
         'wizard/cardholder_wizard.xml',
     ],
     'assets': {

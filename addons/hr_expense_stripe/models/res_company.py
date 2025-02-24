@@ -10,7 +10,7 @@ class ResCompany(models.Model):
     _inherit = 'res.company'
 
     # Stripe account
-    stripe_account_id = fields.Char(string='Stripe Account ID', copy=False)
+    stripe_id = fields.Char(string='Stripe Account ID', copy=False)
     stripe_account_issuing_status = fields.Selection(
         selection=[
             ('restricted', "Restricted"),
@@ -69,26 +69,15 @@ class ResCompany(models.Model):
         if not self.stripe_journal_id:
             raise UserError(_("Please select a bank journal to be connected to Stripe"))
 
-    def _create_webhook_secret(self):
-        """ Create a webhook secret and return a feedback notification.
-
-        Note: This action only works for instances using a public URL
-
-        :return: The feedback notification
-        :rtype: dict
-        """
+    def action_create_stripe_account(self):
         self.ensure_one()
-
+        if self.stripe_id:
+            raise UserError("User is already connected to stripe issuing.")
+        
         if self.stripe_webhook_secret:
             raise UserError(_("A Webhook URL already exists for this company."))
 
         self.stripe_webhook_secret = uuid.uuid4()
-
-    def action_create_stripe_account(self):
-        self.ensure_one()
-        if self.stripe_account_id:
-            raise UserError("User is already connected to stripe issuing.")
-        self._create_webhook_secret()
 
         payload = {
             # IAP Data
@@ -96,45 +85,45 @@ class ResCompany(models.Model):
             'country': self.country_id.code,
         }
 
-        response = make_request_stripe_proxy('api/stripe_issuing/1/accounts', payload, method='POST')
-        self.stripe_account_id = response['stripe_ident']
+        response = make_request_stripe_proxy('accounts', payload, method='POST')
+        self.stripe_id = response['id']
 
         # Now that we have created the account, we redirect the user to Stripe to let him configure it 
         payload = {
-            'account': self.stripe_account_id,
+            'account': self.stripe_id,
             'refresh_url': self.get_base_url(),
             'return_url': self.get_base_url(),
         }
-        response = make_request_stripe_proxy('api/stripe_issuing/1/account_links', payload, method='POST')
+        response = make_request_stripe_proxy('account_links', payload, method='POST')
         return {
                 'type': 'ir.actions.act_url',
-                'url': response['onboarding_url'],
+                'url': response['url'],
                 'target': 'self',
             }
 
     def action_refresh_stripe_account(self):
         self.ensure_one()
 
-        if not self.stripe_account_id:
+        if not self.stripe_id:
             raise ValidationError(_("You need to be connected to stripe in order to refresh your account."))
 
-        response = make_request_stripe_proxy(f'api/stripe_issuing/1/accounts/{self.stripe_account_id}', method='GET')
+        response = make_request_stripe_proxy(f'accounts/{self.stripe_id}', method='GET')
         self.stripe_account_issuing_status = 'verified' if response['capabilities']['card_issuing'] == 'active' else 'restricted' 
 
     def action_configure_stripe_account(self):
         self.ensure_one()
 
-        if not self.stripe_account_id:
+        if not self.stripe_id:
             raise ValidationError(_("You need to be connected to stripe in order to configure your account."))
 
         payload = {
-            'account': self.stripe_account_id,
+            'account': self.stripe_id,
             'refresh_url': self.get_base_url(),
             'return_url': self.get_base_url(),
         }
-        response = make_request_stripe_proxy('api/stripe_issuing/1/account_links', payload, method='POST')
+        response = make_request_stripe_proxy('account_links', payload, method='POST')
         return {
             'type': 'ir.actions.act_url',
-            'url': response['onboarding_url'],
+            'url': response['url'],
             'target': 'self',
         }

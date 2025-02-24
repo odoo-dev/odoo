@@ -6,21 +6,23 @@
             <field name="model">hr.expense.stripe.cardholder.wizard</field>
             <field name="arch" type="xml">
                 <form>
-                    <field name="stripe_cardholder_id" invisible="1"/>
+                    <field name="employee_stripe_id" invisible="1"/>
                     <group>
                         <group>
                             <field name="employee_id"/>
-                            <field name="firstname"/>
-                            <field name="lastname"/>
-                            <field name="birthday"/>
+                            <field name="firstname" required="1"/>
+                            <field name="lastname" required="1"/>
+                            <field name="birthday" required="1"/>
                         </group>
                         <group>
-                            <field name="phone_number" readonly="stripe_cardholder_id"/>
-                            <field name="email"/>
-                            <field name="billing_address_line1"/>
-                            <field name="billing_address_city"/>
-                            <field name="billing_address_postal_code"/>
-                            <field name="billing_address_country"/>
+                            <field name="phone_number" required="1"/>
+                            <field name="email" required="1"/>
+                            <field name="billing_address_line1" required="1"/>
+                            <field name="billing_address_line2" />
+                            <field name="billing_address_city" required="1"/>
+                            <field name="billing_address_state" required="company_country_id.code == 'US'"/>
+                            <field name="billing_address_postal_code" required="1"/>
+                            <field name="billing_address_country" required="1"/>
                         </group>
                     </group>
                     <footer>
