@@ -3,7 +3,7 @@
 -------------------------------------------------------------------------
 
 CREATE TABLE ir_actions (
-  id serial,
+  id bigserial,
   primary key(id)
 );
 CREATE TABLE ir_act_window (primary key(id)) INHERITS (ir_actions);
@@ -13,7 +13,7 @@ CREATE TABLE ir_act_server (primary key(id)) INHERITS (ir_actions);
 CREATE TABLE ir_act_client (primary key(id)) INHERITS (ir_actions);
 
 CREATE TABLE res_users (
-    id serial NOT NULL,
+    id bigserial NOT NULL,
     -- No FK references below, will be added later by ORM
     -- (when the destination rows exist)
     company_id integer, -- references res_company,
@@ -26,13 +26,13 @@ CREATE TABLE res_users (
 );
 
 CREATE TABLE res_groups (
-    id serial NOT NULL,
+    id bigserial NOT NULL,
     name jsonb NOT NULL,
     primary key(id)
 );
 
 CREATE TABLE ir_module_category (
-    id serial NOT NULL,
+    id bigserial NOT NULL,
     create_uid integer, -- references res_users on delete set null,
     create_date timestamp without time zone,
     write_date timestamp without time zone,
@@ -43,7 +43,7 @@ CREATE TABLE ir_module_category (
 );
 
 CREATE TABLE ir_module_module (
-    id serial NOT NULL,
+    id bigserial NOT NULL,
     create_uid integer, -- references res_users on delete set null,
     create_date timestamp without time zone,
     write_date timestamp without time zone,
@@ -69,7 +69,7 @@ CREATE TABLE ir_module_module (
 );
 
 CREATE TABLE ir_module_module_dependency (
-    id serial NOT NULL,
+    id bigserial NOT NULL,
     name character varying,
     module_id integer REFERENCES ir_module_module ON DELETE cascade,
     auto_install_required boolean DEFAULT true,
@@ -77,7 +77,7 @@ CREATE TABLE ir_module_module_dependency (
 );
 
 CREATE TABLE ir_model_data (
-    id serial NOT NULL,
+    id bigserial NOT NULL,
     create_uid integer,
     create_date timestamp without time zone DEFAULT (now() at time zone 'UTC'),
     write_date timestamp without time zone DEFAULT (now() at time zone 'UTC'),
@@ -91,14 +91,14 @@ CREATE TABLE ir_model_data (
 );
 
 CREATE TABLE res_currency (
-    id serial,
+    id bigserial,
     name varchar NOT NULL,
     symbol varchar NOT NULL,
     primary key(id)
 );
 
 CREATE TABLE res_company (
-    id serial,
+    id bigserial,
     name varchar NOT NULL,
     partner_id integer,
     currency_id integer,
@@ -108,7 +108,7 @@ CREATE TABLE res_company (
 );
 
 CREATE TABLE res_partner (
-    id serial,
+    id bigserial,
     company_id integer,
     create_date timestamp without time zone,
     name varchar,
@@ -138,3 +138,45 @@ select setval('res_users_id_seq', 1);
 insert into res_groups (id, name) VALUES (1, '{"en_US": "Employee"}');
 insert into ir_model_data (name, module, model, noupdate, res_id) VALUES ('group_user', 'base', 'res.groups', true, 1);
 select setval('res_groups_id_seq', 1);
+
+----------------------------------
+-- Big Integer Based Functions
+----------------------------------
+CREATE OR REPLACE FUNCTION BOOL(value bigint)
+RETURNS boolean
+LANGUAGE SQL
+IMMUTABLE
+AS $$
+    SELECT CASE WHEN value IS NULL OR value = 0 THEN false ELSE true END;
+$$;
+
+CREATE CAST (bigint AS boolean) WITH FUNCTION BOOL(bigint) AS IMPLICIT;
+
+CREATE OR REPLACE FUNCTION bigint_array_eq_integer_array(bigint[], integer[])
+RETURNS boolean
+LANGUAGE SQL
+IMMUTABLE
+AS $$
+    SELECT $1 = $2::bigint[];
+$$;
+
+CREATE OR REPLACE FUNCTION integer_array_eq_bigint_array(integer[], bigint[])
+RETURNS boolean
+LANGUAGE SQL
+IMMUTABLE
+AS $$
+    SELECT $1::bigint[] = $2;
+$$;
+
+CREATE OPERATOR = (
+    LEFTARG = bigint[],
+    RIGHTARG = integer[],
+    FUNCTION = bigint_array_eq_integer_array
+);
+
+CREATE OPERATOR = (
+    LEFTARG = integer[],
+    RIGHTARG = bigint[],
+    FUNCTION = integer_array_eq_bigint_array
+);
+

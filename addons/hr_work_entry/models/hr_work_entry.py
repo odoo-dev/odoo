@@ -57,7 +57,7 @@ class HrWorkEntry(models.Model):
             """
                 EXCLUDE USING GIST (
                     tsrange(date_start, date_stop, '()') WITH &&,
-                    int4range(employee_id, employee_id, '[]') WITH =
+                    int8range(employee_id, employee_id, '[]') WITH =
                 )
                 WHERE (state = 'validated' AND active = TRUE)
             """,

@@ -259,13 +259,14 @@ SQL_ORDER_BY_TYPE = defaultdict(lambda: 16, {
     'bool': 7,          # 1 byte aligned on 1 byte
     'timestamp': 8,     # 8 bytes aligned on 8 bytes
     'float8': 9,        # 8 bytes aligned on 8 bytes
+    'int8': 10,
 })
 
 
 def create_model_table(cr, tablename, comment=None, columns=()):
     """ Create the table for a model. """
     colspecs = [
-        SQL('id SERIAL NOT NULL'),
+        SQL('id BIGSERIAL NOT NULL'),
         *(SQL("%s %s", SQL.identifier(colname), SQL(coltype)) for colname, coltype, _ in columns),
         SQL('PRIMARY KEY(id)'),
     ]

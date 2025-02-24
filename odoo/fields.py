@@ -3161,7 +3161,7 @@ class Many2one(_Relational[M]):
         company_id(s) are compatible with the currently active company.
     """
     type = 'many2one'
-    _column_type = ('int4', 'int4')
+    _column_type = ('int8', 'int8')
 
     ondelete = None                     # what to do when value is deleted
     auto_join = False                   # whether joins are generated upon search
@@ -4965,8 +4965,8 @@ class Many2many(_RelationalMulti[M]):
         comodel = model.env[self.comodel_name]
         if not sql.table_exists(cr, self.relation):
             cr.execute(SQL(
-                """ CREATE TABLE %(rel)s (%(id1)s INTEGER NOT NULL,
-                                          %(id2)s INTEGER NOT NULL,
+                """ CREATE TABLE %(rel)s (%(id1)s BIGINT NOT NULL,
+                                          %(id2)s BIGINT NOT NULL,
                                           PRIMARY KEY(%(id1)s, %(id2)s));
                     COMMENT ON TABLE %(rel)s IS %(comment)s;
                     CREATE INDEX ON %(rel)s (%(id2)s, %(id1)s); """,
@@ -5303,8 +5303,8 @@ class Many2many(_RelationalMulti[M]):
 
 class Id(Field[IdType | typing.Literal[False]]):
     """ Special case for field 'id'. """
-    type = 'integer'
-    column_type = ('int4', 'int4')
+    type = 'bigint'
+    column_type = ('int8', 'int8')
 
     string = 'ID'
     store = True

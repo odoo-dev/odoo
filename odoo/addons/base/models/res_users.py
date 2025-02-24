@@ -2331,7 +2331,7 @@ class APIKeys(models.Model):
         table = SQL.identifier(self._table)
         self.env.cr.execute(SQL("""
         CREATE TABLE IF NOT EXISTS %(table)s (
-            id serial primary key,
+            id bigserial primary key,
             name varchar not null,
             user_id integer not null REFERENCES res_users(id) ON DELETE CASCADE,
             scope varchar,
