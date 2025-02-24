@@ -985,6 +985,7 @@ class AccountPayment(models.Model):
                     )
                 ],
                 'origin_payment_id': pay.id,
+                # 'statement_line_id': statement_line_id.id,
             })
         moves = self.env['account.move'].create(move_vals)
         for pay, move in zip(need_move, moves):
@@ -1028,6 +1029,20 @@ class AccountPayment(models.Model):
                     method_name=self.payment_method_line_id.name,
                     partner=payment.partner_id.display_name,
                 ))
+            # Create transaction when outstanding account of the payment method is a bank/cash account
+            if payment.outstanding_account_id.account_type == 'asset_cash':
+                sign = 1 if payment.payment_type == 'inbound' else -1
+                statement_line_id = self.env['account.bank.statement.line'].create({
+                    'journal_id': payment.journal_id.id,
+                    'partner_id': payment.partner_id.id,
+                    'amount': sign * payment.amount,
+                    'date': fields.Date.context_today(self),
+                    'payment_ref': payment.memo,
+                })
+                if self.reconciled_statement_line_ids:
+                    self.reconciled_statement_line_ids |= statement_line_id
+                else:
+                    self.reconciled_statement_line_ids = statement_line_id
         self.filtered(lambda pay: pay.outstanding_account_id.account_type == 'asset_cash').state = 'paid'
         # Avoid going back one state when clicking on the confirm action in the payment list view and having paid expenses selected
         # We need to set values to each payment to avoid recomputation later
