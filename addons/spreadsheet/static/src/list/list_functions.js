@@ -1,6 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { helpers, registries, EvaluationError } from "@odoo/o-spreadsheet";
 import { sprintf } from "@web/core/utils/strings";
+import { LOADING_ERROR } from "@spreadsheet/data_sources/data_source";
 
 const { arg, toString, toNumber } = helpers;
 const { functionRegistry } = registries;
@@ -33,6 +34,38 @@ const ODOO_LIST = {
     returns: ["NUMBER", "STRING"],
 };
 
+// This cache should be invalidated when EVALUATE_CELLS is triggered
+// or even better, when a new command/event/whatever "CLEAR_CACHES"
+// is triggered. (I see it useful when we want to force a refresh of
+// a data source)
+const ASYNC_CACHE = {};
+
+function computeAsync(ctx, name, args, fn) {
+    const key = name + JSON.stringify(args);
+    if (!ASYNC_CACHE[key]) {
+        fn.bind(ctx)(...args).then((result) => {
+            ASYNC_CACHE[key] = result;
+            //Trigger recompute, but of course there should be a cleaner way in ctx
+            ctx.odooDataProvider.trigger("data-source-updated");
+        });
+        return LOADING_ERROR;
+    }
+    return ASYNC_CACHE[key];
+}
+
+// function computeList(listId, fieldName) {
+//     const id = toString(listId);
+//     const field = toString(fieldName);
+//     assertListsExists(id, this.getters);
+//     return this.getters.getListHeaderValue(id, field);
+// }
+
+async function computeList(listId, fieldName) {
+    // Cannot try right now because computeList is not async and returns
+    // directly a value or an error
+    return `${toString(listId)} - ${toString(fieldName)}`;
+}
+
 const ODOO_LIST_HEADER = {
     description: _t("Get the header of a list."),
     args: [
@@ -41,10 +74,7 @@ const ODOO_LIST_HEADER = {
     ],
     category: "Odoo",
     compute: function (listId, fieldName) {
-        const id = toString(listId);
-        const field = toString(fieldName);
-        assertListsExists(id, this.getters);
-        return this.getters.getListHeaderValue(id, field);
+        return computeAsync(this, "LIST_HEADER", [listId, fieldName], computeList);
     },
     returns: ["NUMBER", "STRING"],
 };
