@@ -243,7 +243,15 @@ registry.category("web_tour.tours").add("BillScreenTour", {
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.clickValidate(),
-            billScreenQRCode,
+            {
+                trigger: "body",
+                run: () => {
+                    const qr = document.querySelector("#posqrcode");
+                    if (!qr) {
+                        throw new Error("Qr is Not Found");
+                    }
+                },
+            },
         ].flat(),
 });
 
