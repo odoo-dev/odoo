@@ -5,7 +5,10 @@
         <div class="o-mail-MessageNotificationPopover m-2">
             <div t-foreach="props.message.notifications" t-as="notification" t-key="notification.id">
                 <i class="me-2" t-att-class="notification.statusIcon" t-att-title="notification.statusTitle" role="img"/>
-                <span t-if="notification.persona" t-esc="notification.persona.nameOrDisplayName"/>
+                <span t-if="notification.persona">
+                    <t t-esc="notification.persona.nameOrDisplayName"/>
+                    <t t-if="notification.persona.email"> (<t t-esc="notification.persona.email"/>)</t>
+                </span>
             </div>
         </div>
     </t>
