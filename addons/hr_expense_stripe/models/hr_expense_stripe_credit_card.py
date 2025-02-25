@@ -14,7 +14,9 @@ class HrExpenseStripeCreditCard(models.Model):
     _description = 'Employee Credit Card'
     _check_company_auto = True
     _rec_name = 'card_number_public'
+    _order = "sequence"
 
+    sequence = fields.Integer()
     stripe_id = fields.Char(string="Stripe Card ID")
     company_id = fields.Many2one(comodel_name='res.company', string='Company', default=lambda self: self.env.company, required=True)
     employee_id = fields.Many2one(comodel_name='hr.employee', string="Cardholder", check_company=True, required=True)
@@ -179,6 +181,23 @@ class HrExpenseStripeCreditCard(models.Model):
             'views': [[False, 'form']],
             'res_id': wizard.id
         }
+
+    def action_open_card_private_view(self):
+        self.ensure_one()
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'hr_expense_stripe.private_card_view_action',
+            'params': {
+                'res_id': self.id,
+            }
+        }
+
+    def send_iap_2fa_code(self):
+        pass
+
+    def request_ephemeral_key(self, params):
+        pass
 
     def _can_pay_amount(self):
         self.ensure_one()

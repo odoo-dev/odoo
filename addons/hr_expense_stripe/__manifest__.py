@@ -20,6 +20,7 @@
         'views/hr_expense_stripe_credit_card.xml',
         'views/hr_expense_views.xml',
         'views/res_config_settings.xml',
+        'views/res_users_views.xml',
 
         'wizard/cardholder_wizard.xml',
     ],

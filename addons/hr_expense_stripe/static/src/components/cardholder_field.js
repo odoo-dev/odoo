@@ -1,6 +1,5 @@
 import { registry } from "@web/core/registry";
 import { many2OneField, Many2OneField } from "@web/views/fields/many2one/many2one_field";
-import { makeContext } from "@web/core/context";
 
 export class Many2OneCardholderField extends Many2OneField {
     static template = Many2OneField.template;
@@ -18,7 +17,6 @@ export class Many2OneCardholderField extends Many2OneField {
         await this.action.doAction(action, { newWindow });
     }
 }
-
 
 export const many2OneCardholderField = {
     ...many2OneField,

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="res_users_view_form" model="ir.ui.view">
+        <field name="name">hr.user.preferences.form.inherit.cards</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="hr.res_users_view_form_profile"/>
+        <field name="arch" type="xml">
+            <notebook position="before">
+                <script src="https://js.stripe.com/v3/"></script>
+            </notebook>
+            <notebook position="inside">
+                <page name="card" string="Cards">
+                    <field name="stripe_credit_card_ids" >
+                        <kanban can_open="0" delete="0" create="0" edit="0">
+                            <templates>
+                                <field name="sequence" invisible="1"/>
+                                <t t-name="card" class="stripe_record_card">
+                                    <div>
+                                        <div class="card_header">
+                                            <field name="card_type"/>
+                                        </div>
+                                        <div class="card_body">
+                                            <div class="card_body_left">
+                                                <span class="card_name card_text">
+                                                    <field name="card_name"/>
+                                                </span>
+                                                <div>
+                                                    <span class="card_number card_text">
+                                                        <field name="card_number_public"/>
+                                                        <button name="action_open_card_private_view" icon="fa-eye" type="object" class="card_reveal"/>
+                                                    </span>
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <span class="card_expiry card_text"><field name="expiration"/></span>
+                                                        <span class="card_cvc card_text">CVC ***</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <h1 class="card_body_right">
+                                                <i class="mastercard-icon"/>
+                                            </h1>
+                                        </div>
+                                    </div>
+                                </t>
+                            </templates>
+                        </kanban>
+                    </field>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>

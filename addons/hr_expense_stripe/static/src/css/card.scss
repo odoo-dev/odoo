@@ -1,0 +1,101 @@
+.stripe_record_card {
+    &:not(.o_kanban_ghost) {
+        padding: 0;
+        border: 0px;
+    }
+
+    > div {
+        background-color: black;
+        aspect-ratio: 1.586;
+        border-radius: 20px;
+        padding: 20px;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        height:100%;
+
+        .card_header {
+            display: flex;
+            flex-direction: row;
+            justify-content: end;
+            height: 20%;
+        }
+        .card_body {
+            display: flex;
+            margin-top: auto;
+            align-items: flex-end;
+            justify-content: space-between;
+        }
+
+        .card_body_left {
+            width: 75%;
+            display: flex;
+            flex-direction: column;
+        }
+        .card_body_rigtht {
+            width: 25%;
+            display: flex;
+        }
+
+        .card_name {
+            font-weight: 700;
+        }
+
+        .card_number {
+            font-weight: 500;
+        }
+
+        .card_expiry {
+            font-weight: 300;
+        }
+
+        .card_cvc {
+            font-weight: 300;
+        }
+    }
+
+    .card_text {
+        color: #fff;
+            display: block;
+            width: 100%;
+    }
+
+    .card_reveal {
+        color: #fff;
+        align-self: center;
+    }
+}
+
+.mastercard-icon {
+    display: inline-block;
+    height: 1em;
+    isolation: isolate;
+    position: relative;
+    line-height: 1em;
+    vertical-align: text-bottom;
+    align-self: flex-end;
+    width: 1.611em;
+  }
+  
+  .mastercard-icon::before,
+  .mastercard-icon::after {
+    border-radius: .5em;
+    content: "";
+    display: inline-block;
+    height: 1em;
+    position: absolute;
+    width: 1em;
+  }
+  
+  .mastercard-icon::before {
+    background-color: #eb001b;
+    left: 0;
+    top: 0;
+  }
+  
+  .mastercard-icon::after {
+    background-color: #f79e1b;
+    mix-blend-mode: hard-light;
+    right: 0;
+    top: 0;
+  }

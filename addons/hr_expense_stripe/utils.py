@@ -470,7 +470,7 @@ def format_amount_to_stripe(amount, currency):
     """ Helper to convert currencies according from stripe formatting which is the amount in the currency's minor unit with exceptions  """
     return to_minor_currency_units(amount, currency, arbitrary_decimal_number=STRIPE_EXCEPTIONS_CURRENCY_MINOR_UNITS.get(currency.name))
 
-def conver_dict_to_url_encoded_forms(dict_vals, level=0):
+def convert_dict_to_url_encoded_forms(dict_vals, level=0):
     """
     Convert python dict into url encoded forms
     """
@@ -479,7 +479,7 @@ def conver_dict_to_url_encoded_forms(dict_vals, level=0):
     for key, item in dict_vals.items():
         dict_key = f'{key}' if level == 0 else f'[{key}]'
         if isinstance(item, dict):
-            new_sub_dict = conver_dict_to_url_encoded_forms(item, level + 1)
+            new_sub_dict = convert_dict_to_url_encoded_forms(item, level + 1)
             # Add sub dict to this dict
             for sub_dict_key, sub_dict_item in new_sub_dict.items():
                 new_dict[f'{dict_key}{sub_dict_key}'] = sub_dict_item
@@ -491,21 +491,16 @@ def make_request_stripe_proxy(route, payload=None, method="POST", headers=None, 
     if not headers:
         headers = {}
 
-    headers = {
-        'Content-Type': 'application/json',
-        **headers,
-    }
-
     proxy_server = 'https://stripe-issuing-proxy.test.odoo.com' if test_mode else 'https://stripe-issuing-proxy.api.odoo.com'
     proxy_server = "http://127.0.0.1:8070"  # TODO: remove Temp local IAP server
     url = f"{proxy_server}/api/stripe_issuing/1/{route}"
     try:
-        response = requests.request(method, url, data=json.dumps(conver_dict_to_url_encoded_forms(payload or {})), headers=headers, timeout=60)
-
+        response = requests.request(method, url, data=convert_dict_to_url_encoded_forms(payload or {}), headers=headers, timeout=60)
+        response.raise_for_status()
         response_content = response.json()
-        if 'error' in response_content:
-            raise ValidationError(response_content['error']['data']['message'])
+        # if response['status_code'] <= 400 and response['status_code'] >  500 and  'error' in response_content:
+        #     raise ValidationError(response_content['error']['data']['message'])
     except requests.exceptions.ConnectionError:
         _logger.exception("unable to reach endpoint at %s", url)
         raise ValidationError(_("Stripe Proxy: Could not establish the connection to the Proxy Server."))
-    return response_content['result']
+    return response_content
