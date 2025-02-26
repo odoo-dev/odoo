@@ -2454,10 +2454,6 @@ class AccountTax(models.Model):
             else:
                 tax_lines_to_delete.append(tax_line)
         tax_lines_to_add = [{**grouping_key, **values} for grouping_key, values in tax_lines_mapping.items()]
-        print("\n\n\n\n\nnnnnn",tax_lines_mapping)
-        for line in tax_lines_to_add:
-            line.pop('tax_base_amount')
-        print("tax_lines_to_add", tax_lines_to_add)
 
         return {
             'tax_lines_to_add': tax_lines_to_add,
@@ -2567,10 +2563,13 @@ class AccountTax(models.Model):
 
         # Convert to the 'old' compute_all api.
         taxes = []
+        print("tax_details['taxes_data'] ===========" , tax_details['taxes_data'])
         for tax_data in tax_details['taxes_data']:
             tax = tax_data['tax']
             for tax_rep_data in tax_data['tax_reps_data']:
                 rep_line = tax_rep_data['tax_rep']
+                print("\n\n\n\n\n\n")
+                print("tax_data ===========" , tax_data)
                 tax_data = {
                     'id': tax.id,
                     'name': partner and tax.with_context(lang=partner.lang).name or tax.name,

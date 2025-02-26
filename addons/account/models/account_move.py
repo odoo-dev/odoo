@@ -1661,7 +1661,7 @@ class AccountMove(models.Model):
     @api.depends_context('lang')
     @api.depends(
         'invoice_line_ids.currency_rate',
-        # 'invoice_line_ids.tax_base_amount',
+        'invoice_line_ids.tax_base_amount',
         'invoice_line_ids.tax_line_id',
         'invoice_line_ids.price_total',
         'invoice_line_ids.price_subtotal',
