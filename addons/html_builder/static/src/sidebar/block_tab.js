@@ -55,11 +55,12 @@ export class BlockTab extends Component {
                 const snippet = this.snippetModel.getSnippet(category, id);
                 this.dropzonePlugin.displayDropZone(snippet);
             },
-            onDrag: ({ element }) => {
-                this.dropzonePlugin.dragElement(element);
+            onDrag: ({ element, x, y }) => {
+                this.dropzonePlugin.dragElement(element, x, y);
             },
-            onDrop: ({ element }) => {
-                const { x, y, height, width } = element.getClientRects()[0];
+            onDrop: ({ element, x, y }) => {
+                const { height, width } = element.getClientRects()[0];
+
                 const position = { x, y, height, width };
                 const { category, id } = element.dataset;
                 const snippet = this.snippetModel.getSnippet(category, id);
