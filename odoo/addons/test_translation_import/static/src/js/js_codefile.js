@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 import { _t } from "@web/core/l10n/translation";
 
 export class TestTranslationExportModel {
