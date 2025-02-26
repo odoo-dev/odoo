@@ -2454,6 +2454,10 @@ class AccountTax(models.Model):
             else:
                 tax_lines_to_delete.append(tax_line)
         tax_lines_to_add = [{**grouping_key, **values} for grouping_key, values in tax_lines_mapping.items()]
+        print("\n\n\n\n\nnnnnn",tax_lines_mapping)
+        for line in tax_lines_to_add:
+            line.pop('tax_base_amount')
+        print("tax_lines_to_add", tax_lines_to_add)
 
         return {
             'tax_lines_to_add': tax_lines_to_add,

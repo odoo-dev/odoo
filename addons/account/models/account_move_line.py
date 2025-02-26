@@ -3,10 +3,6 @@ from contextlib import contextmanager, ExitStack
 from datetime import date
 import logging
 import re
-import json
-
-import odoo.orm.domains as orm_domains
-
 
 from odoo import api, fields, models, Command, _
 from odoo.exceptions import ValidationError, UserError
@@ -212,11 +208,11 @@ class AccountMoveLine(models.Model):
         string='Originator tax group',
         related='tax_line_id.tax_group_id', store=True, precompute=True,
     )
-    tax_base_amount = fields.Monetary(
-        string="Base Amount",
-        readonly=True,
-        currency_field='company_currency_id',
-    )
+    # tax_base_amount = fields.Monetary(
+    #     string="Base Amount",
+    #     readonly=True,
+    #     currency_field='company_currency_id',
+    # )
     tax_repartition_line_id = fields.Many2one(
         comodel_name='account.tax.repartition.line',
         string="Originator Tax Distribution Line",
@@ -1410,6 +1406,7 @@ class AccountMoveLine(models.Model):
         return vals
 
     def _prepare_create_values(self, vals_list):
+        print("\nvals_list\n", vals_list)
         result_vals_list = super()._prepare_create_values(vals_list)
         for init_vals, res_vals in zip(vals_list, result_vals_list):
             # Allow computing the balance based on the amount_currency if it wasn't specified in the create vals.
@@ -2813,14 +2810,14 @@ class AccountMoveLine(models.Model):
                         account_vals_to_fix[grouping_key].update({
                             'debit': balance if balance > 0 else 0,
                             'credit': -balance if balance < 0 else 0,
-                            'tax_base_amount': account_vals_to_fix[grouping_key]['tax_base_amount'] + line.tax_base_amount,
+                            # 'tax_base_amount': account_vals_to_fix[grouping_key]['tax_base_amount'] + line.tax_base_amount,
                             'amount_currency': account_vals_to_fix[grouping_key]['amount_currency'] + line.amount_currency,
                         })
                     else:
                         account_vals_to_fix[grouping_key] = {
                             **vals,
                             'account_id': line.account_id.id,
-                            'tax_base_amount': line.tax_base_amount,
+                            # 'tax_base_amount': line.tax_base_amount,
                             'tax_repartition_line_id': line.tax_repartition_line_id.id,
                         }
 
@@ -2928,7 +2925,7 @@ class AccountMoveLine(models.Model):
                             'account_id': values['account_id'],
                             'tax_ids': [],
                             'tax_tag_ids': [],
-                            'tax_base_amount': 0,
+                            # 'tax_base_amount': 0,
                             'tax_repartition_line_id': False,
                             'sequence': next_sequence + 1,
                         }),
