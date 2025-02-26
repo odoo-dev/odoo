@@ -3657,8 +3657,8 @@ class BaseModel(metaclass=MetaModel):
 
         if inconsistencies:
             lines = [_("Uh-oh! You’ve got some company inconsistencies here:")]
-            company_msg = _lt("- Record is company {company} while {field_description} ({field_name}: {values}) belongs to a totally different company.")
-            record_msg = _lt("- {record} belongs to company {company} while {field_description} ({field_name}: {values}) belongs to a totally different company.")
+            company_msg = _lt("- Record is company {company} while {field_description} ({field_name}: {values}) belongs to another company.")
+            record_msg = _lt("- {record} belongs to company {company} while {field_description} ({field_name}: {values}) belongs to another company.")
             root_company_msg = _lt("- Only a root company can be set on “%(record)s”. Currently set to “%(company)s”")
             for record, name, corecords in inconsistencies[:5]:
                 if record._name == 'res.company':

@@ -5716,7 +5716,7 @@ class AccountMove(models.Model):
                         move._post()
                 except UserError as e:
                     move.checked = False
-                    msg = _('The move could not be posted for the following reason: %(error_message)s', error_message=e)
+                    msg = _('Please provide a customer to validate the invoice.\n %(error_message)s', error_message=e)
                     move.message_post(body=msg, message_type='comment')
 
         if len(moves) == 100:  # assumes there are more whenever search hits limit
