@@ -286,6 +286,9 @@ export function useClickableBuilderComponent() {
                     cancelPrevious: () => applyOperation.revert(),
                 },
             });
+            comp.env.editor.resources["on_preview"].forEach((handler) =>
+                handler(comp.env.getEditingElement())
+            );
         },
         revert: () => {
             // The `next` will cancel the previous operation, which will revert

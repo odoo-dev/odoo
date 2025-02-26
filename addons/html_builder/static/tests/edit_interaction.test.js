@@ -40,6 +40,7 @@ test("dropping a new snippet starts its interaction", async () => {
         },
     });
     await openBuilderSidebar();
+    expect.verifySteps(["update"]);
     await waitFor(".o-website-builder_sidebar.o_builder_sidebar_open");
     expect.verifySteps([]);
     await contains(
@@ -58,6 +59,7 @@ test("replacing a snippet starts the interaction of the new snippet", async () =
         },
     });
     await openBuilderSidebar();
+    expect.verifySteps(["update"]);
     await waitFor(":iframe [data-snippet='s_text_block']");
     expect.verifySteps([]);
     await click(`:iframe [data-snippet="s_text_block"]`);
@@ -85,16 +87,16 @@ test("removing a snippet stops its interaction", async () => {
 
 test("throw if edit interactions are started but website_edit service hasn't started", async () => {
     await setupWebsiteBuilder("", { openEditor: false });
-    let plugin;
+    // let plugin;
     patchWithCleanup(EditInteractionPlugin.prototype, {
         setup() {
             super.setup();
             this.websiteEditService = undefined;
-            plugin = this;
+            // plugin = this;
         },
     });
-    await openBuilderSidebar();
-    expect(() => plugin.startInteractions()).toThrow("website edit service not loaded");
+    expect(await openBuilderSidebar()).toThrow("website edit service not loaded");
+    // expect(() => plugin.startInteractions()).toThrow("website edit service not loaded");
 });
 
 test("throw if edit interactions are stopped but website_edit service hasn't started", async () => {

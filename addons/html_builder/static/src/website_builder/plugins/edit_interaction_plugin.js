@@ -5,13 +5,16 @@ export class EditInteractionPlugin extends Plugin {
     static id = "edit_interaction";
 
     resources = {
-        update_interactions: this.startInteractions.bind(this),
-        on_remove_handlers: this.stopInteractions.bind(this),
+        // update_interactions: this.startInteractions.bind(this),
+        // on_remove_handlers: this.stopInteractions.bind(this),
+        normalize_handlers: this.startInteractions.bind(this),
+        on_preview: this.startInteractions.bind(this),
     };
 
     setup() {
         this.websiteEditService = undefined;
-
+        // Note: the goal is to retrieve the website_edit service. It can not
+        // be retrieved thanks `this.services` as it is loaded on the iframe.
         window.parent.document.addEventListener(
             "transfer_website_edit_service",
             this.updateEditInteraction.bind(this),
