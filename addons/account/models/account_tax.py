@@ -2563,14 +2563,11 @@ class AccountTax(models.Model):
 
         # Convert to the 'old' compute_all api.
         taxes = []
-        print("tax_details['taxes_data'] ===========" , tax_details['taxes_data'])
         for tax_data in tax_details['taxes_data']:
             tax = tax_data['tax']
             for tax_rep_data in tax_data['tax_reps_data']:
                 rep_line = tax_rep_data['tax_rep']
-                print("\n\n\n\n\n\n")
-                print("tax_data ===========" , tax_data)
-                tax_data = {
+                taxes.append({
                     'id': tax.id,
                     'name': partner and tax.with_context(lang=partner.lang).name or tax.name,
                     'amount': tax_rep_data['tax_amount_currency'],
@@ -2586,10 +2583,7 @@ class AccountTax(models.Model):
                     'group': tax_data['group'],
                     'tag_ids': tax_rep_data['tax_tags'].ids,
                     'tax_ids': tax_rep_data['taxes'].ids,
-                }
-                if tax.amount == 0:
-                    tax_data['tax_percentage'] = True
-                taxes.append(tax_data)
+                })
                 if not rep_line.account_id:
                     total_void += tax_rep_data['tax_amount_currency']
 

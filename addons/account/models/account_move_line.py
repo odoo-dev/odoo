@@ -1406,7 +1406,6 @@ class AccountMoveLine(models.Model):
         return vals
 
     def _prepare_create_values(self, vals_list):
-        print("\nvals_list\n", vals_list)
         result_vals_list = super()._prepare_create_values(vals_list)
         for init_vals, res_vals in zip(vals_list, result_vals_list):
             # Allow computing the balance based on the amount_currency if it wasn't specified in the create vals.
