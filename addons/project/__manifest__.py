@@ -198,7 +198,7 @@
             'web_tour/static/src/tour_service/**/*',
             'web/static/lib/hoot-dom/**/*',
 
-            'html_editor/static/src/**/*',
+            ('include', 'html_editor.assets_editor'),
 
             'mail/static/src/scss/variables/*.scss',
             'mail/static/src/chatter/web/form_renderer.scss',
