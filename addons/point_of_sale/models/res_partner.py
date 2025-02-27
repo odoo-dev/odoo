@@ -51,7 +51,8 @@ class ResPartner(models.Model):
         loaded_order_partner_ids = {order['partner_id'] for order in data['pos.order']}
 
         # Extract partner IDs from the tuples returned by get_limited_partners_loading
-        limited_partner_ids = {partner[0] for partner in config_id.get_limited_partners_loading()}
+        limit = config_id.get_limited_partner_count()
+        limited_partner_ids = {partner[0] for partner in config_id.get_limited_partners_loading(limit=limit)}
 
         limited_partner_ids.add(self.env.user.partner_id.id)  # Ensure current user is included
         partner_ids = limited_partner_ids.union(loaded_order_partner_ids)

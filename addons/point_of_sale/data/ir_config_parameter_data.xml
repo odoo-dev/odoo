@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="pos_limited_product_count_param" model="ir.config_parameter">
+            <field name="key">point_of_sale.limited_product_count</field>
+            <field name="value">5000</field>
+        </record>
+        <record id="pos_limited_customer_count_param" model="ir.config_parameter">
+            <field name="key">point_of_sale.limited_customer_count</field>
+            <field name="value">100</field>
+        </record>
+    </data>
+</odoo>

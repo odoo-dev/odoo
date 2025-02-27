@@ -717,7 +717,15 @@ class PosConfig(models.Model):
         except (TypeError, ValueError, OverflowError):
             return default_limit
 
-    def get_limited_partners_loading(self, offset=0):
+    def get_limited_partner_count(self):
+        default_limit = 100
+        config_param = self.env['ir.config_parameter'].sudo().get_param('point_of_sale.limited_customer_count', default_limit)
+        try:
+            return int(config_param)
+        except (TypeError, ValueError, OverflowError):
+            return default_limit
+
+    def get_limited_partners_loading(self, offset=0, limit=100):
         return self.env.execute_query(SQL("""
             WITH pm AS
             (
@@ -735,7 +743,7 @@ class PosConfig(models.Model):
             )
             ORDER BY  COALESCE(pm.order_count, 0) DESC,
                       NAME limit %s offset %s;
-        """, self.company_id.id, 100, offset))
+        """, self.company_id.id, limit, offset))
 
     def action_pos_config_modal_edit(self):
         return {
