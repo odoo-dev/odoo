@@ -42,7 +42,7 @@ export class Chrome extends Component {
 
         onWillStart(this.pos._loadFonts);
         onMounted(this.props.disableLoader);
-        if (this.pos.config.customer_display_type === "none") {
+        if (!this.pos.config.is_customer_display) {
             return;
         }
         effect(

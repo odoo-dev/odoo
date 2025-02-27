@@ -17,19 +17,7 @@ export class CustomerDisplayPosAdapter {
     }
 
     dispatch(pos) {
-        if (pos.config.customer_display_type === "local") {
-            this.channel.postMessage(JSON.parse(JSON.stringify(this.data)));
-        }
-
-        if (pos.config.customer_display_type === "remote") {
-            pos.data.call("pos.config", "update_customer_display", [
-                [pos.config.id],
-                this.data,
-                pos.config.access_token,
-            ]);
-        }
-
-        if (pos.config.customer_display_type === "proxy") {
+        if (pos.config.is_customer_display_proxy) {
             const proxyIP = pos.getDisplayDeviceIP();
             fetch(`${deduceUrl(proxyIP)}/hw_proxy/customer_facing_display`, {
                 method: "POST",
@@ -46,6 +34,12 @@ export class CustomerDisplayPosAdapter {
             }).catch(() => {
                 console.log("Failed to send data to customer display");
             });
+        } else {
+            pos.data.call("pos.config", "update_customer_display", [
+                [pos.config.id],
+                this.data,
+                pos.config.access_token,
+            ]);
         }
     }
 

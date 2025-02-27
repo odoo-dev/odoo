@@ -110,7 +110,7 @@ export class Navbar extends Component {
         this.pos.scanning = !this.pos.scanning;
     }
     get customerFacingDisplayButtonIsShown() {
-        return this.pos.config.customer_display_type !== "none" && !isMobileOS();
+        return this.pos.config.is_customer_display && !isMobileOS();
     }
     get showCashMoveButton() {
         return Boolean(this.pos.config.cash_control && this.pos.session._has_cash_move_perm);
@@ -133,18 +133,7 @@ export class Navbar extends Component {
     }
 
     openCustomerDisplay() {
-        if (this.pos.config.customer_display_type === "local") {
-            window.open(
-                `/pos_customer_display/${this.pos.config.id}/${this.pos.config.access_token}`,
-                "newWindow",
-                "width=800,height=600,left=200,top=200"
-            );
-            this.notification.add("Connected");
-        }
-        if (this.pos.config.customer_display_type === "remote") {
-            this.notification.add("Navigate to your POS Customer Display on the other computer");
-        }
-        if (this.pos.config.customer_display_type === "proxy") {
+        if (this.pos.config.is_customer_display_proxy) {
             this.notification.add("Connecting to the IoT Box");
             const proxyIP = this.pos.getDisplayDeviceIP();
             fetch(`${deduceUrl(proxyIP)}/hw_proxy/customer_facing_display`, {
@@ -167,6 +156,13 @@ export class Navbar extends Component {
                 .catch(() => {
                     this.notification.add("Connection failed", { type: "danger" });
                 });
+        } else {
+            window.open(
+                `/pos_customer_display/${this.pos.config.id}/${this.pos.config.access_token}`,
+                "newWindow",
+                "width=800,height=600,left=200,top=200"
+            );
+            this.notification.add("Connected");
         }
     }
 
