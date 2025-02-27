@@ -253,6 +253,8 @@ class AccountChartTemplate(models.AbstractModel):
         data.pop('account.reconcile.model', None)
         if 'res.company' in data:
             data['res.company'][company.id].setdefault('anglo_saxon_accounting', company.anglo_saxon_accounting)
+            if self.ref(data['res.company'][company.id]['external_report_layout_id']) != company.external_report_layout_id:
+                data['res.company'][company.id].pop('external_report_layout_id')
 
         for xmlid, journal_data in list(data.get('account.journal', {}).items()):
             if self.ref(xmlid, raise_if_not_found=False):
