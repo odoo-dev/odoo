@@ -48,9 +48,9 @@ class AccountMoveLine(models.Model):
                 (json_data.value->>'base_amount')::NUMERIC AS base_amount,
                 (json_data.value->>'base_amount')::NUMERIC AS base_amount_currency
             FROM %(table_references)s
-            JOIN account_move_line_account_tax_rel tax_rel ON
+            LEFT JOIN account_move_line_account_tax_rel tax_rel ON
                 tax_rel.account_tax_id = COALESCE(account_move_line.group_tax_id, account_move_line.tax_line_id)
-            JOIN account_move_line base_line ON
+            LEFT JOIN account_move_line base_line ON
                 base_line.id = tax_rel.account_move_line_id
                 AND base_line.tax_repartition_line_id IS NULL
                 AND base_line.move_id = account_move_line.move_id
@@ -60,12 +60,13 @@ class AccountMoveLine(models.Model):
                 ON account_move_line.tax_ids_json IS NOT NULL
             WHERE
                 (%(search_condition)s)
-                and account_move_line.display_type = 'product'
+                AND account_move_line.display_type = 'product'
+                AND json_data.value->>'tax_line_id' IS NOT NULL
+                AND json_data.value->>'tax_repartition_line_id' IS NOT NULL
             ''',
             table_references=table_references,
             search_condition=search_condition,
         )
-        print("\n\nquery ------------------\n", query, "\n\n")
         return query
 
     @api.model

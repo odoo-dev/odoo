@@ -3255,11 +3255,12 @@ class AccountMove(models.Model):
     def _compute_aml_tax_details(self):
         for move in self:
             is_refund = move.move_type in ('out_refund', 'in_refund')
+            sign = -1 if move.move_type in ('in_invoice', 'out_refund') else 1
             group_by_repartition_key = {}
             for line in move.line_ids:
                 if line.tax_repartition_line_id:
                     group_by_repartition_key.setdefault(line.tax_repartition_line_id.id, 0.00)
-                    group_by_repartition_key[line.tax_repartition_line_id.id] += line.balance
+                    group_by_repartition_key[line.tax_repartition_line_id.id] += (line.balance * sign)
             line_data = {}
             for line in move.line_ids:
                 if line.tax_ids:
