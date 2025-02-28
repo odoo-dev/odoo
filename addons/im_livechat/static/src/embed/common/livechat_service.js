@@ -73,6 +73,15 @@ export class LivechatService {
         this.busService = services.bus_service;
         this.notificationService = services.notification;
         this.store = services["mail.store"];
+        this.busService.addEventListener("update_state", () => {
+            // Update state comes from the worker, which means it's been
+            // started. We can now add the guest channel. At leaast one update
+            // is made when initializing the connection to the worker.
+            const guestToken = getGuestToken();
+            if (guestToken) {
+                this.busService.addChannel(`mail.guest_${guestToken}`);
+            }
+        });
     }
 
     async initialize() {
@@ -94,15 +103,12 @@ export class LivechatService {
                 ? SESSION_STATE.PERSISTED
                 : SESSION_STATE.CREATED;
         }
-        if (this.state === SESSION_STATE.PERSISTED) {
-            await this.busService.addChannel(`mail.guest_${this.guestToken}`);
-        } else {
+        if (this.state !== SESSION_STATE.PERSISTED) {
             this.store.chatHub.preFirstFetchPromise.then(() => {
                 if (!this.store.fetchParams.length) {
                     return;
                 }
                 this.store.initialize({ force: true });
-                this.store.env.services.bus_service.start();
             });
         }
         this.initialized = true;
@@ -142,7 +148,6 @@ export class LivechatService {
         }
         this.thread.fetchNewMessages();
         this.env.services["mail.store"].initialize();
-        this.busService.addChannel(`mail.guest_${this.guestToken}`);
         this.thread.readyToSwapDeferred.then(async () => {
             if (!this.thread) {
                 return;
