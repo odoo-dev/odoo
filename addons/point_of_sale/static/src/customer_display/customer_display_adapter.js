@@ -16,19 +16,7 @@ export class CustomerDisplayPosAdapter {
         this.channel = new BroadcastChannel("UPDATE_CUSTOMER_DISPLAY");
     }
 
-    dispatch(pos) {
-        if (pos.config.customer_display_type === "local") {
-            this.channel.postMessage(JSON.parse(JSON.stringify(this.data)));
-        }
-
-        if (pos.config.customer_display_type === "remote") {
-            pos.data.call("pos.config", "update_customer_display", [
-                [pos.config.id],
-                this.data,
-                pos.config.access_token,
-            ]);
-        }
-
+    async dispatch(pos) {
         const proxyIP = pos.getDisplayDeviceIP();
         if (proxyIP) {
             fetch(`${deduceUrl(proxyIP)}/hw_proxy/customer_facing_display`, {
@@ -46,6 +34,20 @@ export class CustomerDisplayPosAdapter {
             }).catch(() => {
                 console.log("Failed to send data to customer display");
             });
+        } else {
+            // Send customer display data for local type (same device/browser)
+            this.channel.postMessage(JSON.parse(JSON.stringify(this.data)));
+
+            // Send customer display data for remote type (different devices/browser)
+            try {
+                await pos.data.call("pos.config", "update_customer_display", [
+                    [pos.config.id],
+                    this.data,
+                    pos.config.access_token,
+                ]);
+            } catch (error) {
+                console.info("Failed to update customer display:", error);
+            }
         }
     }
 
