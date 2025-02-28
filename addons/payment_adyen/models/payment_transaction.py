@@ -254,7 +254,7 @@ class PaymentTransaction(models.Model):
         source_reference = notification_data.get('originalReference')
         if event_code == 'AUTHORISATION':
             tx = self.search([('reference', '=', reference), ('provider_code', '=', 'adyen')])
-        elif event_code in ['CAPTURE', 'CANCELLATION']:
+        elif event_code in ['CAPTURE', 'CANCELLATION', 'OFFER_CLOSED']:
             # The capture/void may be initiated from Adyen, so we can't trust the reference.
             # We find the transaction based on the original provider reference since Adyen will have
             # two different references: one for the original transaction and one for the capture.
@@ -331,8 +331,9 @@ class PaymentTransaction(models.Model):
         # webhook notification.
         event_code = notification_data.get('eventCode', 'AUTHORISATION')
 
-        # Handle the provider reference. If the event code is 'CAPTURE' or 'CANCELLATION', we
-        # discard the pspReference as it is different from the original pspReference of the tx.
+        # Handle the provider reference. If the event code is 'CAPTURE', 'CANCELLATION' or
+        # 'OFFER_CLOSE', we discard the pspReference as it is different from the original
+        # pspReference of the tx.
         if 'pspReference' in notification_data and event_code in ['AUTHORISATION', 'REFUND']:
             self.provider_reference = notification_data.get('pspReference')
 

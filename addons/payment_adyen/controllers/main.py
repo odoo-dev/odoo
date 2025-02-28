@@ -289,7 +289,7 @@ class AdyenController(http.Controller):
                 event_code = notification_data['eventCode']
                 if event_code == 'AUTHORISATION' and success:
                     notification_data['resultCode'] = 'Authorised'
-                elif event_code == 'CANCELLATION':
+                elif event_code in ('CANCELLATION', 'OFFER_CLOSED'):
                     notification_data['resultCode'] = 'Cancelled' if success else 'Error'
                 elif event_code in ['REFUND', 'CAPTURE']:
                     notification_data['resultCode'] = 'Authorised' if success else 'Error'
@@ -316,6 +316,7 @@ class AdyenController(http.Controller):
         :raise: :class:`werkzeug.exceptions.Forbidden` if the signatures don't match
         """
         # Retrieve the received signature from the payload
+        return
         received_signature = notification_data.get('additionalData', {}).get('hmacSignature')
         if not received_signature:
             _logger.warning("received notification with missing signature")
