@@ -1,3 +1,5 @@
+$box-shadow: 0 .5rem 1rem rgba($black, .08);
+
 :root {
     --secondary-active-background: #{mix($o-action, $o-white, 10%)};
     --secondary-active-border: #{$o-action};
@@ -11,6 +13,26 @@
     // Target 4K devices
     @media #{screen and (min-width: 3839px), (min-height: 3839px)} {
         --root-font-size: #{$o-so-font-size-4k};
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes selfOrderModalScale {
+    from {
+        transform: scale(0.8);
+    }
+    to {
+        transform: scale(1);
     }
 }
 
@@ -29,6 +51,26 @@ small {
     font-size: .875em;
 }
 
+ul, ol {
+    padding: 0;
+    margin: 0;
+}
+li {
+    list-style-type: none;
+}
+
+.touch-device * {
+    cursor: none !important;
+}
+
+.modal-content {
+    text-wrap: pretty;
+}
+
+.numpad-button:disabled {
+    background-color: $o-gray-100;
+}
+
 .o-so-tabular-nums {
     font-variant: tabular-nums;
 }
@@ -43,13 +85,14 @@ small {
     }
 }
 
+.o-so-fade{
+    animation: fadeIn 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .o-so-products-row {
-    @include make-row();
-
-    --gutter-y: 8vw;
-
     > * {
         @include make-col-ready();
+        margin-top: 0;
     }
 
     @include row-cols(1);
@@ -64,24 +107,128 @@ small {
         --gutter-y: 2vw;
     }
 
-    @include media-breakpoint-up(xl) {
+    @include media-breakpoint-up(lg) {
         @include o-so-landscape() {
             @include row-cols(6);
         }
 
         @include o-so-portrait() {
-            @include row-cols(4);
+            @include row-cols(3);
         }
     }
 }
-ul, ol {
-    padding: 0;
-    margin: 0;
-}
-li {
-    list-style-type: none;
+
+@include media-breakpoint-up(lg) {
+    @media (orientation: portrait) {
+        body {
+            font-size: 1.4vh;
+        }
+
+        h1 {
+            font-size: 2.2vh;
+        }
+
+        h2 {
+            font-size: 1.8vh;
+        }
+
+        .btn {
+            font-size: 1.9vh;
+            padding: 1.4vh 2.8vh;
+            border-radius: $border-radius-xl;
+            text-align: center;
+            white-space: normal;
+
+            &:active {
+                transform: scale(0.98);
+                transition: transform 100ms ease;
+            }
+        }
+
+        .btn-group > .btn {
+            padding: 0.9vh 1.35vh;
+        }
+
+        .btn-kiosk-small {
+            padding: 1.8vh 1.8vh !important;
+        }
+
+        .modal-content {
+            border-radius: $border-radius-xl;
+        }
+
+        .modal-dialog {
+            transform: scale(0.8);
+            animation: selfOrderModalScale 120ms ease-out forwards;
+        }
+
+        .card {
+            border-radius: $border-radius-xl;
+        }
+
+        .pos_self_order_combo_image {
+            width: 15vw;
+            border-radius: $border-radius-xl;
+        }
+        
+        .self_order_product_card {
+            transition: transform 100ms ease;
+
+            > div {
+                box-shadow: $box-shadow;
+            }
+        
+            &:active {
+                transform: scale(0.98);
+            }
+        }
+
+        .self_order_attribute_selection_option {
+            transition: all 120ms ease-out;
+            transform-origin: center;
+
+            > div {
+                box-shadow: $box-shadow;
+            }
+            
+            &:active {
+                transform: scale(0.98);
+            }
+        }
+
+        .nav-link {
+            transition: transform 100ms ease;
+        
+            &:active {
+                transform: scale(0.98);
+            }
+        }
+    }
 }
 
-.touch-device * {
-    cursor: none !important;
+@include media-breakpoint-up(xl) {
+    @media (orientation: portrait) {
+        body {
+            font-size: 1.65vh;
+        }
+
+        h1 {
+            font-size: 2.5vh;
+        }
+
+        h2 {
+            font-size: 2vh;
+        }
+
+        .btn {
+            font-size: 2.2vh;
+            padding: 2vh 3vh;
+            border-radius: $border-radius-lg;
+            text-align: center;
+            white-space: normal;
+        }
+        .btn-group > .btn {
+            padding: 1vh 1.5vh;
+        }
+    }
 }

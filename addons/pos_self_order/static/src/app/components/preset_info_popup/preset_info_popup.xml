@@ -2,14 +2,12 @@
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.PresetInfoPopup">
         <div class="position-absolute bg-dark bg-opacity-25 w-100 h-100 fixed-top" />
-        <div class="select_popup_preset_info shadow-lg position-absolute fixed-bottom bg-white w-100 p-4 flex-column d-flex justify-content-between">
-            <div class="mb-3 d-flex justify-content-between align-items-start">
-                <div>
-                    <h3>We need more info</h3>
-                </div>
-                <button class="btn btn-close" t-on-click="close"/>
+        <div class="select_popup_preset_info position-absolute fixed-bottom d-flex flex-column justify-content-between w-100 p-4 shadow-lg bg-white">
+            <div class="mt-2 mb-4 d-flex justify-content-between align-items-center">
+                <h2>Please tell us a bit more</h2>
+                <button type="button" class="btn-close" aria-label="Close" t-on-click="close"/>
             </div>
-            <select t-if="preset.needsSlot" class="slot-select form-select mb-3" t-model="state.selectedSlot">
+            <select t-if="preset.needsSlot" class="slot-select form-select form-select-lg mb-2" t-model="state.selectedSlot">
                 <option value="">
                     Choose your time
                 </option>
@@ -22,7 +20,7 @@
                 </t>
             </select>
             <select t-if="preset.needsPartner and existingPartners.length"
-                class="partner-select form-select mb-3"
+                class="partner-select form-select form-select-lg mb-3"
                 t-on-change="selectExistingPartner"
                 t-model="state.selectedPartnerId">
                 <option value="">
@@ -34,17 +32,17 @@
             </select>
             <input t-if="preset.needsName || preset.needsPartner"
                 type="text"
-                class="form-control mb-3"
+                class="form-control form-control-lg mb-3"
                 placeholder="Name"
                 t-model="state.name"
                 t-att-disabled="partnerIsSelected" />
             <t t-if="preset.needsPartner">
                 <input type="text"
-                    class="form-control mb-3"
+                    class="form-control form-control-lg mb-3"
                     placeholder="Phone"
                     t-model="state.phone"
                     t-att-disabled="partnerIsSelected"/>
-                <select class="partner-select form-select mb-3" t-model="state.countryId" t-att-disabled="partnerIsSelected">
+                <select class="partner-select form-select form-select-lg mb-3" t-model="state.countryId" t-att-disabled="partnerIsSelected">
                     <option value="">
                         Select a country
                     </option>
@@ -54,20 +52,20 @@
                 </select>
                 <div class="d-flex gap-3">
                     <input type="text"
-                        class="form-control mb-3 w-75"
+                        class="form-contro form-control-lg mb-3 w-75"
                         placeholder="Street and Number"
                         t-model="state.street"
                         t-att-disabled="partnerIsSelected"/>
                     <input
                         type="text"
-                        class="form-control mb-3 w-25"
+                        class="form-control form-control-lg mb-3 w-25"
                         placeholder="Zip"
                         t-model="state.zip"
                         t-att-disabled="partnerIsSelected"/>
                 </div>
                 <div class="d-flex gap-3">
                     <t t-set="availableState" t-value="this.states" />
-                    <select t-if="availableState.length" class="partner-select form-select mb-3" t-model="state.stateId" t-att-disabled="partnerIsSelected">
+                    <select t-if="availableState.length" class="partner-select form-select form-select-lg mb-3" t-model="state.stateId" t-att-disabled="partnerIsSelected">
                         <option value="">
                             Select a state
                         </option>
@@ -76,7 +74,7 @@
                         </t>
                     </select>
                     <input type="text"
-                        class="form-control mb-3"
+                        class="form-control form-control-lg mb-3"
                         placeholder="City"
                         t-model="state.city"
                         t-att-disabled="partnerIsSelected"/>

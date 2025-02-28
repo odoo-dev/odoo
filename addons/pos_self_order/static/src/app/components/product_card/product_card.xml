@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.ProductCard">
-        <article class="self_order_product_card d-flex flex-row-reverse flex-md-column align-items-start gap-2 user-select-none"
+        <article class="self_order_product_card mb-2 mb-sm-3 user-select-none"
             role="button"
             t-att-title="props.productTemplate.name"
             t-on-click="() => this.selectProduct()"
@@ -9,31 +9,33 @@
             <div t-if="props.productTemplate.public_description" class="product-information-tag" t-on-click.prevent.stop="showProductInfo">
                 <i class="product-information-tag-logo fa fa-info fs-4" role="img" aria-label="Product Information" title="Product Information" />
             </div>
-            <div
-                class="ratio ratio-1x1 w-25 w-sm-50 w-md-100"
-                t-att-class="{
-                    'd-md-block': !props.productTemplate.image_128
-                }">
-                <div class="placeholder-glow o_self_order_item_card_no_image">
-                    <div t-attf-class="{{ props.productTemplate.image_128 ? 'placeholder' : 'd-flex align-items-center justify-content-center h-100' }} bg-200 w-100 h-100 rounded">
-                        <span t-if="!props.productTemplate.image_128" t-esc="props.productTemplate.name" class="text-center text-white fs-2 fw-bold mb-1 mb-sm-2 text-truncate w-100"/>
+            <div class="d-flex flex-row-reverse flex-md-column align-items-center align-items-md-center gap-2 h-100 py-2 ps-3 pe-2 p-md-2 rounded-4 text-bg-light">
+                <div
+                    class="ratio ratio-1x1 w-25 w-sm-50 w-md-100 rounded-4 overflow-hidden"
+                    t-att-class="{
+                        'd-md-block': !props.productTemplate.image_128
+                    }">
+                    <div class="placeholder-glow o_self_order_item_card_no_image">
+                        <div t-attf-class="{{ props.productTemplate.image_128 ? 'placeholder' : 'd-flex align-items-center justify-content-center h-100' }} bg-200 w-100 h-100 rounded">
+                            <span t-if="!props.productTemplate.image_128" t-esc="props.productTemplate.name" class="w-100 text-center text-muted fw-bold text-truncate"/>
+                        </div>
                     </div>
+                    <img
+                        t-if="props.productTemplate.image_128"
+                        class="o_self_order_item_card_image w-100 rounded"
+                        t-attf-src="/web/image/product.template/{{ props.productTemplate.id }}/image_512?unique={{props.productTemplate.write_date}}"
+                        alt="Product image"
+                        loading="lazy"
+                        onerror="this.remove()"/>
                 </div>
-                <img
-                    t-if="props.productTemplate.image_128"
-                    class="o_self_order_item_card_image w-100 rounded"
-                    t-attf-src="/web/image/product.template/{{ props.productTemplate.id }}/image_512?unique={{props.productTemplate.write_date}}"
-                    alt="Product image"
-                    loading="lazy"
-                    onerror="this.remove()"/>
-            </div>
-            <div class="product-infos d-flex flex-column justify-content-between text-start flex-grow-1 w-100 lh-1 overflow-hidden">
-                <span t-esc="props.productTemplate.name" class="fs-4 fw-bold mb-1 mb-sm-2 text-truncate w-100"/>
-                <div class="d-flex justify-content-between align-items-end gap-3">
-                    <span t-esc="selfOrder.formatMonetary(selfOrder.getProductDisplayPrice(props.productTemplate))" class="o-so-tabular-nums fs-4 text-muted flex-grow-1" />
-                    <div class="text-center ms-2 fs-lighter">
-                        <div t-if="!props.productTemplate.self_order_available" class="fs-lighter bg-secondary rounded p-1">Out of stock</div>
-                        <div t-elif="!this.isAvailable" class="fs-lighter bg-secondary rounded p-1">Unavailable</div>
+                <div class="product-infos d-flex flex-column justify-content-between flex-grow-1 gap-2 w-100 px-2 my-0 my-md-2 text-start overflow-hidden">
+                    <span t-esc="props.productTemplate.name" class="product-infos-name w-100 lh-sm fw-bold"/>
+                    <div class="price-container d-flex justify-content-between align-items-end">
+                        <span t-esc="selfOrder.formatMonetary(selfOrder.getProductDisplayPrice(props.productTemplate))" class="o-so-tabular-nums text-primary fw-bold flex-grow-1" />
+                        <div class="text-center ms-2 fs-lighter">
+                            <div t-if="!props.productTemplate.self_order_available" class="fs-lighter bg-secondary rounded p-1">Out of stock</div>
+                            <div t-elif="!this.isAvailable" class="fs-lighter bg-secondary rounded p-1">Unavailable</div>
+                        </div>
                     </div>
                 </div>
             </div>

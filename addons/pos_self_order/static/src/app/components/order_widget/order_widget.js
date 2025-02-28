@@ -89,7 +89,7 @@ export class OrderWidget extends Component {
 
         return {
             name: back ? _t("Back") : _t("Cancel"),
-            icon: back ? "fa fa-arrow-left btn-back" : "btn-close btn-cancel",
+            icon: back ? "oi oi-chevron-left btn-back" : "oi oi-close btn-cancel",
         };
     }
 

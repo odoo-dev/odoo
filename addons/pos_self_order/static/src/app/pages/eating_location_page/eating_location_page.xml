@@ -1,24 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.EatingLocationPage">
-        <div class="o_kiosk_eating_location d-flex flex-column align-items-center flex-grow-1 bg-300 bg-gradient overflow-y-auto text-center">
-            <h1 class="pt-3 m-0">Choose your eating location</h1>
-            <div class="container d-flex flex-wrap align-items-center justify-content-center gap-3 my-auto">
-                <button t-foreach="presets"
-                    t-as="preset" t-key="preset.id"
-                    t-on-click="() => this.selectPreset(preset)"
-                    role="button"
-                    class="o_kiosk_eating_location_box btn btn-light">
-                    <img t-if="preset.image_128" t-att-src="'data:image/png;base64,' + preset.image_128" />
-                    <h3 t-esc="preset.name"/>
-                </button>
+        <div class="o_kiosk_eating_location d-flex flex-column align-items-center flex-grow-1 bg-secondary overflow-y-auto text-center o-so-fade">
+            <div class="container d-flex flex-column my-auto">
+                <h1 class="mb-4 m-0">Choose your eating location</h1>
+                <div class="d-flex flex-column flex-md-row align-items-center justify-content-center gap-3">
+                    <button t-foreach="presets"
+                        t-as="preset" t-key="preset.id"
+                        t-on-click="() => this.selectPreset(preset)"
+                        role="button"
+                        class="o_kiosk_eating_location_box btn btn-light border-transparent py-4 py-md-5">
+                        <img t-if="preset.image_128" t-att-src="'data:image/png;base64,' + preset.image_128" />
+                        <h2 t-attf-class="mb-0 {{ preset.image_128 ? 'mt-3' : '' }}" t-esc="preset.name"/>
+                    </button>
+                </div>
             </div>
-        </div>
-        <div class="page-buttons shadow-sm p-3 bg-view border-top text-center">
-            <button class="btn btn-secondary btn-lg" t-on-click="back">
-                <i class="oi oi-chevron-left"/>
-                Back
-            </button>
         </div>
     </t>
 </templates>

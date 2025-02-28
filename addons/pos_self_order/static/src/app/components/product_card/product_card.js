@@ -20,44 +20,83 @@ export class ProductCard extends Component {
 
     flyToCart() {
         const productCardEl = this.selfRef.el;
-        if (!productCardEl) {
-            return;
-        }
-
         const toOrder = document.querySelector(".to-order");
-        if (!toOrder || window.getComputedStyle(toOrder).display === "none") {
+        if (!productCardEl || !toOrder || window.getComputedStyle(toOrder).display === "none") {
             return;
         }
 
-        let pic = this.selfRef.el.querySelector(".o_self_order_item_card_image");
-        if (!pic) {
-            pic = this.selfRef.el.querySelector(".o_self_order_item_card_no_image");
+        const ANIMATION_CONFIG = {
+            flyDuration: "900ms",
+            cartDuration: "200ms",
+            flyEasing: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+            initialScale: "1.05",
+            finalScale: "0.3",
+            cartScale: "1.08",
+            rotation: "5deg",
+        };
+
+        const cardRect = productCardEl.getBoundingClientRect();
+        const toOrderRect = toOrder.getBoundingClientRect();
+        const offsetTop = toOrderRect.top - cardRect.top;
+        const offsetLeft = toOrderRect.left - cardRect.left;
+
+        const clonedCard = productCardEl.cloneNode(true);
+        const initialStyles = {
+            top: `${cardRect.top}px`,
+            left: `${cardRect.left}px`,
+            width: `${cardRect.width}px`,
+            height: `${cardRect.height}px`,
+            transform: "scale(1)",
+            opacity: "1",
+            transition: `all ${ANIMATION_CONFIG.flyDuration} ${ANIMATION_CONFIG.flyEasing}`,
+            pointerEvents: "none",
+        };
+
+        Object.assign(clonedCard.style, initialStyles);
+        clonedCard.classList.add("position-fixed", "shadow-lg", "z-1");
+
+        const infosDiv = clonedCard.querySelector(".product-infos");
+        if (infosDiv) {
+            Object.assign(infosDiv.style, {
+                transform: "scale(0.9)",
+                transition: `all ${ANIMATION_CONFIG.flyDuration} ${ANIMATION_CONFIG.flyEasing}`,
+            });
         }
 
-        const picRect = pic.getBoundingClientRect();
-        const clonedPic = pic.cloneNode(true);
-        const toOrderRect = toOrder.getBoundingClientRect();
-
-        clonedPic.classList.remove("w-100", "h-100");
-        clonedPic.classList.add("position-fixed", "border", "border-white", "border-4", "z-1");
-        clonedPic.style.top = `${picRect.top}px`;
-        clonedPic.style.left = `${picRect.left}px`;
-        clonedPic.style.width = `${picRect.width}px`;
-        clonedPic.style.height = `${picRect.height}px`;
-        clonedPic.style.transition = "all 400ms cubic-bezier(0.6, 0, 0.9, 1.000)";
-
-        document.body.appendChild(clonedPic);
+        document.body.appendChild(clonedCard);
 
         requestAnimationFrame(() => {
-            const offsetTop = toOrderRect.top - picRect.top - picRect.height * 0.5;
-            const offsetLeft = toOrderRect.left - picRect.left - picRect.width * 0.25;
-            clonedPic.style.transform =
-                "translateY(" + offsetTop + "px) translateX(" + offsetLeft + "px) scale(0.5)";
-            clonedPic.style.opacity = "0"; // Fading out the card
+            clonedCard.style.transform = `scale(${ANIMATION_CONFIG.initialScale})`;
+            requestAnimationFrame(() => {
+                clonedCard.style.transform = `
+                    translateY(${offsetTop}px) 
+                    translateX(${offsetLeft}px) 
+                    scale(${ANIMATION_CONFIG.finalScale}) 
+                    rotate(${ANIMATION_CONFIG.rotation})
+                `;
+                clonedCard.style.opacity = "0";
+
+                if (infosDiv) {
+                    infosDiv.style.transform = "scale(0.7)";
+                }
+
+                const cartAnimation = {
+                    transform: `scale(${ANIMATION_CONFIG.cartScale})`,
+                    transition: `transform ${ANIMATION_CONFIG.cartDuration} ${ANIMATION_CONFIG.flyEasing}`,
+                };
+                Object.assign(toOrder.style, cartAnimation);
+
+                setTimeout(() => {
+                    Object.assign(toOrder.style, {
+                        transform: "scale(1)",
+                        transition: `transform ${ANIMATION_CONFIG.cartDuration} ${ANIMATION_CONFIG.flyEasing}`,
+                    });
+                }, parseInt(ANIMATION_CONFIG.cartDuration));
+            });
         });
 
-        clonedPic.addEventListener("transitionend", () => {
-            clonedPic.remove();
+        clonedCard.addEventListener("transitionend", () => {
+            clonedCard.remove();
         });
     }
 

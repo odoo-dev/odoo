@@ -11,10 +11,6 @@ export class EatingLocationPage extends Component {
         this.router = useService("router");
     }
 
-    back() {
-        this.router.navigate("default");
-    }
-
     selectPreset(preset) {
         this.selfOrder.currentOrder.setPreset(preset);
         this.selfOrder.currentTable = null;

@@ -93,6 +93,14 @@ export class ComboPage extends Component {
         } else {
             this.state.selectedCombos.push(selectedCombo);
         }
+
+        const container = document.querySelector(".o_self_order_combo_container");
+        if (container) {
+            container.classList.remove("o-so-fade");
+            void container.offsetWidth;
+            container.classList.add("o-so-fade");
+        }
+
         this.resetState();
         if (this.state.editMode) {
             this.state.editMode = false;

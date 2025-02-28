@@ -1,0 +1,12 @@
+.numpad-so {
+    background-color: $o-white;
+    border-radius: $border-radius-xl;
+
+    & button {
+        background-color: $o-white;
+
+        &::after {
+            border: $border-width solid $o-gray-200;
+        }
+    }
+}

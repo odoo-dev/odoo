@@ -9,6 +9,7 @@
                 <page string="Self Ordering" name="self_ordering">
                     <group>
                         <field name="available_in_self" />
+                        <field name="image_128" />
                         <field name="service_at" invisible="not available_in_self" />
                     </group>
                 </page>

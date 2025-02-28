@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.PaymentPage">
-        <div t-if="state.selection" class="h-100 d-flex flex-wrap p-5 gap-5 align-items-center justify-content-center">
+        <div t-if="state.selection" class="h-100 d-flex flex-wrap p-5 gap-5 align-items-center justify-content-center o-so-fade">
             <div
                 t-foreach="selfOrder.models['pos.payment.method'].getAll()"
                 t-as="payment_method"

@@ -3,13 +3,16 @@
         <record model="pos.preset" id="pos_restaurant.pos_takein_preset">
             <field name="available_in_self">True</field>
             <field name="service_at">table</field>
+            <field name="image_128" type="base64" file="pos_self_order/static/img/eatin.png"/>
         </record>
         <record model="pos.preset" id="pos_restaurant.pos_takeout_preset">
             <field name="available_in_self">True</field>
+            <field name="image_128" type="base64" file="pos_self_order/static/img/takeout.png"/>
         </record>
         <record model="pos.preset" id="pos_restaurant.pos_delivery_preset">
             <field name="available_in_self">True</field>
             <field name="service_at">delivery</field>
+            <field name="image_128" type="base64" file="pos_self_order/static/img/delivery.png"/>
         </record>
     </data>
 </odoo>

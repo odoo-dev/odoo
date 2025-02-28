@@ -1,16 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.CartPage">
-        <div class="order-cart-content d-flex flex-column flex-grow-1 justify-content-between overflow-y-auto">
+        <div class="order-cart-content d-flex flex-column flex-grow-1 justify-content-between overflow-y-auto o-so-fade">
             <div class="d-flex align-items-center flex-shrink-0 justify-content-between gap-3 p-3 w-100 bg-view border-bottom overflow-x-auto z-1">
                 <h1 class="mb-0 fw-bolder text-nowrap">Your Order</h1>
             </div>
             <div class="order-content flex-grow-1 overflow-auto pb-4">
                 <t t-foreach="linesToDisplay" t-as="line" t-key="line.uuid">
-                    <div t-if="!line.combo_parent_id" class="product-card-item py-2 py-lg-4 px-3 bg-view border-bottom">
+                    <div t-if="!line.combo_parent_id" class="product-card-item d-flex py-2 py-lg-4 px-3 bg-view border-bottom">
                         <t t-set="product" t-value="line.product_id"/>
-                        <div class="product-wrapper d-flex align-items-start gap-2 gap-lg-3">
-                            <div class="product-info d-flex flex-column gap-2 flex-grow-1">
+                        <div class="product-image-wrapper d-flex align-items-center me-2 me-lg-3">
+                            <div class="o_self_order_item_card_image_wrapper flex-shrink-0 ratio ratio-1x1">
+                                <img
+                                    class="o_self_order_item_card_image w-100 w-100 rounded bg-view"
+                                    t-attf-src="/web/image/product.product/{{ line.product_id.id}}/image_512"
+                                    alt="Product image"
+                                    loading="lazy"
+                                    onerror="this.remove()"/>
+                            </div>
+                        </div>
+                        <div class="product-wrapper d-flex flex-column align-items-start justify-content-center flex-grow-1">
+                            <div class="product-info d-flex flex-column">
                                 <div>
                                     <span t-if="Object.keys(selfOrder.currentOrder.changes).length === 0"><t t-esc="line.qty" />x </span>
                                     <strong t-esc="line.product_id.display_name"/>
@@ -41,36 +51,29 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="o_self_order_item_card_image_wrapper flex-shrink-0 ratio ratio-1x1">
-                                <img
-                                    class="o_self_order_item_card_image w-100 w-100 rounded bg-view"
-                                    t-attf-src="/web/image/product.product/{{ line.product_id.id}}/image_512"
-                                    alt="Product image"
-                                    loading="lazy"
-                                    onerror="this.remove()"/>
-                            </div>
+                            <div class="line-price o-so-tabular-nums text-muted" t-esc="selfOrder.formatMonetary(getPrice(line))"/>
+
                         </div>
-                        <div class="product-controllers d-flex flex-wrap flex-grow-1 align-items-center justify-content-between mt-2">
+                        <div class="product-controllers d-flex align-items-center justify-content-between">
                             <div>
                                 <div t-if="Object.keys(selfOrder.currentOrder.changes).length > 0" class="btn-group">
                                     <button
                                         t-if="canDeleteLine(line) &amp;&amp; getLineChangeQty(line) > 1"
                                         type="button"
                                         t-on-click= "() => this.changeQuantity(line, false)"
-                                        t-attf-class="btn btn-secondary px-3"><span class="fs-2 fa-fw d-inline-block">－</span></button>
+                                        t-attf-class="btn btn-secondary"><span class="fa-fw d-inline-block">－</span></button>
                                     <button
                                         t-else=""
                                         type="button"
                                         t-on-click= "() => this.removeLine(line)"
-                                        t-attf-class="btn btn-secondary px-3"><i class="fa fa-fw fa-trash-o"/></button>
+                                        t-attf-class="btn btn-secondary"><i class="fa fa-fw fa-trash-o"/></button>
 
                                     <div class="o-so-tabular-nums d-flex align-items-center fw-bold px-2 px-md-3 text-bg-200" t-esc="getLineChangeQty(line)"/>
                                     <button type="button"
                                         t-on-click = "() => this.changeQuantity(line, true)"
-                                        class="btn btn-secondary px-3"><span class="fs-2 fa-fw d-inline-block">＋</span></button>
+                                        class="btn btn-secondary"><span class="fa-fw d-inline-block">＋</span></button>
                                 </div>
                             </div>
-                            <div class="line-price o-so-tabular-nums" t-esc="selfOrder.formatMonetary(getPrice(line))"/>
                         </div>
                     </div>
                 </t>
