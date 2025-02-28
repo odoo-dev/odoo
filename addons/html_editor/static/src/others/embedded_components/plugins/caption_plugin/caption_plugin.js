@@ -42,6 +42,7 @@ export class CaptionPlugin extends Plugin {
         unsplittable_node_predicates: [
             (node) => ["FIGURE", "FIGCAPTION"].includes(node.nodeName), // avoid merge
         ],
+        image_name_predicates: [this.getImageName.bind(this)],
     };
 
     setup() {
@@ -195,6 +196,12 @@ export class CaptionPlugin extends Plugin {
                 undo: this.dependencies.history.undo,
                 redo: this.dependencies.history.redo,
             });
+        }
+    }
+
+    getImageName(image) {
+        if (closestElement(image, "figure")) {
+            return image.getAttribute("data-caption");
         }
     }
 
