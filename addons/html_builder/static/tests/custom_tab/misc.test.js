@@ -7,7 +7,12 @@ import { Component, onWillStart, xml } from "@odoo/owl";
 import { contains, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { defaultBuilderComponents } from "../../src/core/default_builder_components";
 import { OptionsContainer } from "../../src/sidebar/option_container";
-import { addOption, defineWebsiteModels, setupWebsiteBuilder } from "../website_helpers";
+import {
+    addActionOption,
+    addOption,
+    defineWebsiteModels,
+    setupWebsiteBuilder,
+} from "../website_helpers";
 
 defineWebsiteModels();
 
@@ -425,6 +430,40 @@ test("useDomState callback shouldn't be called when the editingElement is remove
     await animationFrame();
     expect(".options-container .test_option").toHaveCount(1);
     expect.verifySteps(["useDomState 1"]);
+});
+
+test("should trigger isApplied only once per target change", async () => {
+    addActionOption({
+        testAction: {
+            isApplied: ({ editingElement }) => {
+                expect.step("isApplied");
+                return editingElement.classList.contains("a");
+            },
+            apply: () => {},
+        },
+    });
+    addOption({
+        selector: ".test-options-target",
+        template: xml`
+            <BuilderButtonGroup>
+                <BuilderButton action="'testAction'" id="'id1'">b1</BuilderButton>
+                <BuilderButton classAction="'myClass'">b2</BuilderButton>
+            </BuilderButtonGroup>
+            <div t-if="isActiveItem('id1')" class="test"></div>
+        `,
+    });
+    await setupWebsiteBuilder(
+        `<div class="test-options-target a">a</div><div class="test-options-target b">b</div>`
+    );
+    await contains(":iframe .a").click();
+    expect("[data-action-id='testAction']").toHaveClass("active");
+    expect("div.test").toHaveCount(1);
+    expect.verifySteps(["isApplied"]);
+
+    await contains(":iframe .b").click();
+    expect("[data-action-id='testAction']").not.toHaveClass("active");
+    expect("div.test").toHaveCount(0);
+    expect.verifySteps(["isApplied"]);
 });
 
 describe("isActiveItem", () => {
