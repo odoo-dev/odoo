@@ -12,11 +12,11 @@ import { CacheWeak } from "@web/core/utils/cache";
 
 export class BuilderActionsPlugin extends Plugin {
     static id = "builderActions";
-    static shared = ["getAction"];
+    static shared = ["getAction", "clearActionCache"];
     resources = {
         step_added_handlers: ({ isPreviewing }) => {
             if (!isPreviewing) {
-                this.actionCache.invalidate();
+                this.clearActionCache();
             }
         },
     };
@@ -61,5 +61,9 @@ export class BuilderActionsPlugin extends Plugin {
             throw new Error(`Unknown builder action id: ${actionId}`);
         }
         return action;
+    }
+
+    clearActionCache() {
+        this.actionCache.invalidate();
     }
 }

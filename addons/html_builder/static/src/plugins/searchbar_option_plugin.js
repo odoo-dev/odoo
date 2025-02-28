@@ -5,6 +5,7 @@ import { SearchbarOption } from "./searchbar_option";
 
 class SearchbarOptionPlugin extends Plugin {
     static id = "searchbarOption";
+    static dependencies = ["builderActions"];
     resources = {
         builder_options: [
             {
@@ -69,6 +70,8 @@ class SearchbarOptionPlugin extends Plugin {
                 apply: ({ editingElement, value: formAction, dependencyManager }) => {
                     this.getFormEl(editingElement).action = formAction;
 
+                    // clear the cache to force re-evaluation of the active action based on the new formAction.
+                    this.dependencies.builderActions.clearActionCache();
                     const isDependencyActive = (dep) =>
                         !dep || dependencyManager.get(dep).isActive();
 
