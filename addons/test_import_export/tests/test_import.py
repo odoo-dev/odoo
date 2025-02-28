@@ -334,10 +334,10 @@ class TestPreview(TransactionCase):
     def test_csv_success(self):
         import_wizard = self.env['base_import.import'].create({
             'res_model': 'import.preview',
-            'file': b'name,Some Value,Counter\n'
-                    b'foo,,\n'
-                    b'bar,,4\n'
-                    b'qux,5,6\n',
+            'file': b'name,Some Value,Counter,Date,Datetime\n'
+                    b'foo,,,30/06/2025,30/06/2025 13:37:00\n'
+                    b'bar,,4,07/01/2024,07/02/2024 13:37:00\n'
+                    b'qux,5,6,25/06/2025,25/06/2025 13:37:00\n',
             'file_type': 'text/csv'
         })
 
@@ -347,16 +347,24 @@ class TestPreview(TransactionCase):
             'has_headers': True,
         })
         self.assertIsNone(result.get('error'))
-        self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue']})
-        self.assertEqual(result['headers'], ['name', 'Some Value', 'Counter'])
+        self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue'], 3: ['date'], 4: ['datetime']})
+        self.assertEqual(result['headers'], ['name', 'Some Value', 'Counter', 'Date', 'Datetime'])
         # Order depends on iteration order of fields_get
         self.assertItemsEqual(result['fields'], [
             get_id_field('import.preview'),
             {'id': 'name', 'name': 'name', 'string': 'Name', 'required': False, 'fields': [], 'type': 'char', 'model_name': 'import.preview'},
             {'id': 'somevalue', 'name': 'somevalue', 'string': 'Some Value', 'required': True, 'fields': [], 'type': 'integer', 'model_name': 'import.preview'},
             {'id': 'othervalue', 'name': 'othervalue', 'string': 'Other Variable', 'required': False, 'fields': [], 'type': 'integer', 'model_name': 'import.preview'},
+            {'id': 'date', 'name': 'date', 'string': 'Date', 'required': False, 'fields': [], 'type': 'date', 'model_name': 'import.preview'},
+            {'id': 'datetime', 'name': 'datetime', 'string': 'Datetime', 'required': False, 'fields': [], 'type': 'datetime', 'model_name': 'import.preview'},
         ])
-        self.assertEqual(result['preview'], [['foo', 'bar', 'qux'], ['5'], ['4', '6']])
+        self.assertEqual(result['preview'], [
+            ['foo', 'bar', 'qux'],
+            ['5'],
+            ['4', '6'],
+            ['30/06/2025', '07/01/2024', '25/06/2025'],
+            ['30/06/2025 13:37:00', '07/02/2024 13:37:00', '25/06/2025 13:37:00'],
+        ])
 
     @unittest.skipUnless(can_import('xlrd'), "XLRD module not available")
     def test_xls_success(self):
@@ -369,17 +377,27 @@ class TestPreview(TransactionCase):
 
         result = import_wizard.parse_preview({
             'has_headers': True,
+            'date_format': '%m/%d/%Y',
+            'datetime_format': '%m/%d/%Y %H:%M:%S',
         })
         self.assertIsNone(result.get('error'))
-        self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue']})
-        self.assertEqual(result['headers'], ['name', 'Some Value', 'Counter'])
+        self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue'], 3: ['date'], 4: ['datetime']})
+        self.assertEqual(result['headers'], ['name', 'Some Value', 'Counter', 'Date', 'Datetime'])
         self.assertItemsEqual(result['fields'], [
             get_id_field('import.preview'),
             {'id': 'name', 'name': 'name', 'string': 'Name', 'required': False, 'fields': [], 'type': 'char', 'model_name': 'import.preview'},
             {'id': 'somevalue', 'name': 'somevalue', 'string': 'Some Value', 'required': True, 'fields': [], 'type': 'integer', 'model_name': 'import.preview'},
             {'id': 'othervalue', 'name': 'othervalue', 'string': 'Other Variable', 'required': False, 'fields': [], 'type': 'integer', 'model_name': 'import.preview'},
+            {'id': 'date', 'name': 'date', 'string': 'Date', 'required': False, 'fields': [], 'type': 'date', 'model_name': 'import.preview'},
+            {'id': 'datetime', 'name': 'datetime', 'string': 'Datetime', 'required': False, 'fields': [], 'type': 'datetime', 'model_name': 'import.preview'},
         ])
-        self.assertEqual(result['preview'], [['foo', 'bar', 'qux'], ['1', '3', '5'], ['2', '4', '6']])
+        self.assertEqual(result['preview'], [
+            ['foo', 'bar', 'qux'],
+            ['1', '3', '5'],
+            ['2', '4', '6'],
+            ['30/06/2025', '07/01/2024', '25/06/2025'],
+            ['30/06/2025 13:37:00', '07/02/2024 13:37:00', '25/06/2025 13:37:00'],
+        ])
 
     @unittest.skipUnless(can_import('xlrd.xlsx') or can_import('openpyxl'), "XLRD/XLSX not available")
     def test_xlsx_success(self):
@@ -392,17 +410,27 @@ class TestPreview(TransactionCase):
 
         result = import_wizard.parse_preview({
             'has_headers': True,
+            'date_format': '%m/%d/%Y',
+            'datetime_format': '%m/%d/%Y %H:%M:%S',
         })
         self.assertIsNone(result.get('error'))
-        self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue']})
-        self.assertEqual(result['headers'], ['name', 'Some Value', 'Counter'])
+        self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue'], 3: ['date'], 4: ['datetime']})
+        self.assertEqual(result['headers'], ['name', 'Some Value', 'Counter', 'Date', 'Datetime'])
         self.assertItemsEqual(result['fields'], [
             get_id_field('import.preview'),
             {'id': 'name', 'name': 'name', 'string': 'Name', 'required': False, 'fields': [], 'type': 'char', 'model_name': 'import.preview'},
             {'id': 'somevalue', 'name': 'somevalue', 'string': 'Some Value', 'required': True, 'fields': [], 'type': 'integer', 'model_name': 'import.preview'},
             {'id': 'othervalue', 'name': 'othervalue', 'string': 'Other Variable', 'required': False, 'fields': [], 'type': 'integer', 'model_name': 'import.preview'},
+            {'id': 'date', 'name': 'date', 'string': 'Date', 'required': False, 'fields': [], 'type': 'date', 'model_name': 'import.preview'},
+            {'id': 'datetime', 'name': 'datetime', 'string': 'Datetime', 'required': False, 'fields': [], 'type': 'datetime', 'model_name': 'import.preview'},
         ])
-        self.assertEqual(result['preview'], [['foo', 'bar', 'qux'], ['1', '3', '5'], ['2', '4', '6']])
+        self.assertEqual(result['preview'], [
+            ['foo', 'bar', 'qux'],
+            ['1', '3', '5'],
+            ['2', '4', '6'],
+            ['30/06/2025', '07/01/2024', '25/06/2025'],
+            ['30/06/2025 13:37:00', '07/02/2024 13:37:00', '25/06/2025 13:37:00'],
+        ])
 
     @unittest.skipUnless(can_import('odf'), "ODFPY not available")
     def test_ods_success(self):

@@ -454,7 +454,10 @@ class Import(models.TransientModel):
         book = xlrd.open_workbook(file_contents=self.file or b'')
         sheets = options['sheets'] = book.sheet_names()
         sheet = options['sheet'] = options.get('sheet') or sheets[0]
-        return self._read_xls_book(book, sheet)
+        return self.with_context(
+            datetime_format=options.get('datetime_format'),
+            date_format=options.get('date_format'),
+        )._read_xls_book(book, sheet)
 
     def _read_xls_book(self, book, sheet_name):
         sheet = book.sheet_by_name(sheet_name)
@@ -475,9 +478,9 @@ class Import(models.TransientModel):
                     # emulate xldate_as_datetime for pre-0.9.3
                     dt = datetime.datetime(*xlrd.xldate.xldate_as_tuple(cell.value, book.datemode))
                     values.append(
-                        dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+                        dt.strftime(self.env.context.get('datetime_format') or DEFAULT_SERVER_DATETIME_FORMAT)
                         if is_datetime
-                        else dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
+                        else dt.strftime(self.env.context.get('date_format') or DEFAULT_SERVER_DATE_FORMAT)
                     )
                 elif cell.ctype is xlrd.XL_CELL_BOOLEAN:
                     values.append(u'True' if cell.value else u'False')
@@ -527,9 +530,9 @@ class Import(models.TransientModel):
                 elif cell.is_date:
                     d_fmt = styles.is_datetime(cell.number_format)
                     if d_fmt == "datetime":
-                        values.append(cell.value.strftime(DEFAULT_SERVER_DATETIME_FORMAT))
+                        values.append(cell.value.strftime(options.get('datetime_format') or DEFAULT_SERVER_DATETIME_FORMAT))
                     elif d_fmt == "date":
-                        values.append(cell.value.strftime(DEFAULT_SERVER_DATE_FORMAT))
+                        values.append(cell.value.strftime(options.get('date_format') or DEFAULT_SERVER_DATE_FORMAT))
                     else:
                         raise ValueError(
                         _("Invalid cell format at row %(row)s, column %(col)s: %(cell_value)s, with format: %(cell_format)s, as (%(format_type)s) formats are not supported.", row=rowx, col=colx, cell_value=cell.value, cell_format=cell.number_format, format_type=d_fmt)
