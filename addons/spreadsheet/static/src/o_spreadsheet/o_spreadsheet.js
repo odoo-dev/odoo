@@ -3581,10 +3581,13 @@
     })
         .add("increment_number", {
         condition: (cell) => cell.evaluated.type === CellValueType.number,
-        generateRule: (cell, cells) => {
+        generateRule: (cell, cells, direction) => {
             const group = getGroup(cell, cells);
             let increment = 1;
-            if (group.length == 2) {
+            if (group.length === 1 && ["up", "left"].includes(direction)) {
+                increment = -1;
+            }
+            else if (group.length == 2) {
                 increment = (group[1] - group[0]) * 2;
             }
             else if (group.length > 2) {
@@ -25522,29 +25525,33 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
      * In all the sheets, replace the table-only references in the formula cells with standard references.
      */
     function convertTableFormulaReferences(convertedSheets, xlsxSheets) {
-        for (let sheet of convertedSheets) {
-            const tables = xlsxSheets.find((s) => s.sheetName === sheet.name).tables;
+        for (let tableSheet of convertedSheets) {
+            const tables = xlsxSheets.find((s) => s.sheetName === tableSheet.name).tables;
             for (let table of tables) {
                 const tabRef = table.name + "[";
-                for (let position of positions(toZone(table.ref))) {
-                    const xc = toXC(position.col, position.row);
-                    const cell = sheet.cells[xc];
-                    if (cell && cell.content && cell.content.startsWith("=")) {
-                        let refIndex;
-                        while ((refIndex = cell.content.indexOf(tabRef)) !== -1) {
-                            let reference = cell.content.slice(refIndex + tabRef.length);
-                            // Expression can either be tableName[colName] or tableName[[#This Row], [colName]]
-                            let endIndex = reference.indexOf("]");
-                            if (reference.startsWith(`[`)) {
-                                endIndex = reference.indexOf("]", endIndex + 1);
-                                endIndex = reference.indexOf("]", endIndex + 1);
+                for (let sheet of convertedSheets) {
+                    for (let xc in sheet.cells) {
+                        const cell = sheet.cells[xc];
+                        if (cell && cell.content && cell.content.startsWith("=")) {
+                            let refIndex;
+                            while ((refIndex = cell.content.indexOf(tabRef)) !== -1) {
+                                let endIndex = refIndex + tabRef.length;
+                                let openBrackets = 1;
+                                while (openBrackets > 0 && endIndex < cell.content.length) {
+                                    if (cell.content[endIndex] === "[") {
+                                        openBrackets++;
+                                    }
+                                    else if (cell.content[endIndex] === "]") {
+                                        openBrackets--;
+                                    }
+                                    endIndex++;
+                                }
+                                let reference = cell.content.slice(refIndex + tabRef.length, endIndex - 1);
+                                const sheetPrefix = tableSheet.id === sheet.id ? "" : tableSheet.name + "!";
+                                const convertedRef = convertTableReference(sheetPrefix, reference, table, xc);
+                                cell.content =
+                                    cell.content.slice(0, refIndex) + convertedRef + cell.content.slice(endIndex);
                             }
-                            reference = reference.slice(0, endIndex);
-                            const convertedRef = convertTableReference(reference, table, xc);
-                            cell.content =
-                                cell.content.slice(0, refIndex) +
-                                    convertedRef +
-                                    cell.content.slice(tabRef.length + refIndex + endIndex + 1);
                         }
                     }
                 }
@@ -25552,11 +25559,17 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
     /**
-     * Convert table-specific references in formulas into standard references.
+     * Convert table-specific references in formulas into standard references. A table reference is composed of columns names,
+     * and of keywords determining the rows of the table to reference.
      *
      * A reference in a table can have the form (only the part between brackets should be given to this function):
      *  - tableName[colName] : reference to the whole column "colName"
+     *  - tableName[#keyword] : reference to the whatever row the keyword refers to
      *  - tableName[[#keyword], [colName]] : reference to some of the element(s) of the column colName
+     *  - tableName[[#keyword], [colName]:[col2Name]] : reference to some of the element(s) of the columns colName to col2Name
+     *  - tableName[[#keyword1], [#keyword2], [colName]] : reference to all the rows referenced by the keywords in the column colName
+     *  - tableName[[#keyword1], [colName], [#keyword2]]: the keywords and colName can be in any order
+     *
      *
      * The available keywords are :
      * - #All : all the column (including totals)
@@ -25564,58 +25577,109 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
      * - #Headers : only the header of the column
      * - #Totals : only the totals of the column
      * - #This Row : only the element in the same row as the cell
+     *
+     * Note that the only valid combination of multiple keywords are #Data + #Totals and #Headers + #Data.
      */
-    function convertTableReference(expr, table, cellXc) {
-        const refElements = expr.split(",");
+    function convertTableReference(sheetPrefix, expr, table, cellXc) {
+        // TODO: Ideally we'd want to make a real tokenizer, this simple approach won't work if for example the column name
+        // contain # or , characters. But that's probably an edge case that we can ignore for now.
+        const parts = expr.split(",").map((part) => part.trim());
         const tableZone = toZone(table.ref);
-        const refZone = { ...tableZone };
-        let isReferencedZoneValid = true;
-        // Single column reference
-        if (refElements.length === 1) {
-            const colRelativeIndex = table.cols.findIndex((col) => col.name === refElements[0]);
-            refZone.left = refZone.right = colRelativeIndex + tableZone.left;
-            if (table.headerRowCount) {
-                refZone.top += table.headerRowCount;
+        const colIndexes = [];
+        const rowIndexes = [];
+        const foundKeywords = [];
+        for (const part of parts) {
+            if (removeBrackets(part).startsWith("#")) {
+                const keyWord = removeBrackets(part);
+                foundKeywords.push(keyWord);
+                switch (keyWord) {
+                    case "#All":
+                        rowIndexes.push(tableZone.top, tableZone.bottom);
+                        break;
+                    case "#Data":
+                        const top = table.headerRowCount ? tableZone.top + table.headerRowCount : tableZone.top;
+                        const bottom = table.totalsRowCount
+                            ? tableZone.bottom - table.totalsRowCount
+                            : tableZone.bottom;
+                        rowIndexes.push(top, bottom);
+                        break;
+                    case "#This Row":
+                        rowIndexes.push(toCartesian(cellXc).row);
+                        break;
+                    case "#Headers":
+                        if (!table.headerRowCount) {
+                            return INCORRECT_RANGE_STRING;
+                        }
+                        rowIndexes.push(tableZone.top);
+                        break;
+                    case "#Totals":
+                        if (!table.totalsRowCount) {
+                            return INCORRECT_RANGE_STRING;
+                        }
+                        rowIndexes.push(tableZone.bottom);
+                        break;
+                }
             }
-            if (table.totalsRowCount) {
-                refZone.bottom -= 1;
+            else {
+                const columns = part
+                    .split(":")
+                    .map((part) => part.trim())
+                    .map(removeBrackets);
+                if (colIndexes.length) {
+                    return INCORRECT_RANGE_STRING;
+                }
+                const colRelativeIndex = table.cols.findIndex((col) => col.name === columns[0]);
+                if (colRelativeIndex === -1) {
+                    return INCORRECT_RANGE_STRING;
+                }
+                colIndexes.push(colRelativeIndex + tableZone.left);
+                if (columns[1]) {
+                    const colRelativeIndex2 = table.cols.findIndex((col) => col.name === columns[1]);
+                    if (colRelativeIndex2 === -1) {
+                        return INCORRECT_RANGE_STRING;
+                    }
+                    colIndexes.push(colRelativeIndex2 + tableZone.left);
+                }
             }
         }
-        // Other references
-        else {
-            switch (refElements[0].slice(1, refElements[0].length - 1)) {
-                case "#All":
-                    refZone.top = table.headerRowCount ? tableZone.top + table.headerRowCount : tableZone.top;
-                    refZone.bottom = tableZone.bottom;
-                    break;
-                case "#Data":
-                    refZone.top = table.headerRowCount ? tableZone.top + table.headerRowCount : tableZone.top;
-                    refZone.bottom = table.totalsRowCount ? tableZone.bottom + 1 : tableZone.bottom;
-                    break;
-                case "#This Row":
-                    refZone.top = refZone.bottom = toCartesian(cellXc).row;
-                    break;
-                case "#Headers":
-                    refZone.top = refZone.bottom = tableZone.top;
-                    if (!table.headerRowCount) {
-                        isReferencedZoneValid = false;
-                    }
-                    break;
-                case "#Totals":
-                    refZone.top = refZone.bottom = tableZone.bottom;
-                    if (!table.totalsRowCount) {
-                        isReferencedZoneValid = false;
-                    }
-                    break;
-            }
-            const colRef = refElements[1].slice(1, refElements[1].length - 1);
-            const colRelativeIndex = table.cols.findIndex((col) => col.name === colRef);
-            refZone.left = refZone.right = colRelativeIndex + tableZone.left;
-        }
-        if (!isReferencedZoneValid) {
+        if (!areKeywordsCompatible(foundKeywords)) {
             return INCORRECT_RANGE_STRING;
         }
-        return refZone.top !== refZone.bottom ? zoneToXc(refZone) : toXC(refZone.left, refZone.top);
+        if (rowIndexes.length === 0) {
+            const top = table.headerRowCount ? tableZone.top + table.headerRowCount : tableZone.top;
+            const bottom = table.totalsRowCount
+                ? tableZone.bottom - table.totalsRowCount
+                : tableZone.bottom;
+            rowIndexes.push(top, bottom);
+        }
+        if (colIndexes.length === 0) {
+            colIndexes.push(tableZone.left, tableZone.right);
+        }
+        const refZone = {
+            top: Math.min(...rowIndexes),
+            left: Math.min(...colIndexes),
+            bottom: Math.max(...rowIndexes),
+            right: Math.max(...colIndexes),
+        };
+        return sheetPrefix + zoneToXc(refZone);
+    }
+    function removeBrackets(str) {
+        return str.startsWith("[") && str.endsWith("]") ? str.slice(1, str.length - 1) : str;
+    }
+    function areKeywordsCompatible(keywords) {
+        if (keywords.length < 2) {
+            return true;
+        }
+        else if (keywords.length > 2) {
+            return false;
+        }
+        else if (keywords.includes("#Data") && keywords.includes("#Totals")) {
+            return true;
+        }
+        else if (keywords.includes("#Headers") && keywords.includes("#Data")) {
+            return true;
+        }
+        return false;
     }
 
     // -------------------------------------
@@ -31593,7 +31657,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         getRule(cell, cells) {
             const rules = autofillRulesRegistry.getAll().sort((a, b) => a.sequence - b.sequence);
             const rule = rules.find((rule) => rule.condition(cell, cells));
-            return rule && rule.generateRule(cell, cells);
+            return rule && this.direction && rule.generateRule(cell, cells, this.direction);
         }
         /**
          * Create the generator to be able to autofill the next cells.
@@ -43691,8 +43755,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.63';
-    __info__.date = '2025-02-25T06:04:07.007Z';
-    __info__.hash = 'b01aca6';
+    __info__.date = '2025-03-03T16:32:51.815Z';
+    __info__.hash = 'cb5e85f';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
