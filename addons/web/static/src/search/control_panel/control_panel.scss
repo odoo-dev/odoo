@@ -12,7 +12,7 @@
 
         @include media-breakpoint-down(md) {
             &.o_mobile_sticky {
-                @include o-position-sticky();
+                @include o-position-sticky($top:0!important);
                 z-index: 10;
             }
         }
