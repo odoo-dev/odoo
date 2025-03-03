@@ -26,6 +26,7 @@ export class ImportAction extends Component {
     static props = { ...standardActionServiceProps };
 
     setup() {
+        this.action = useService("action");
         this.notification = useService("notification");
         this.orm = useService("orm");
         this.env.config.setDisplayName(this.props.action.name || _t("Import a File"));
@@ -97,7 +98,21 @@ export class ImportAction extends Component {
     }
 
     exit(resIds) {
-        this.env.config.historyBack();
+        if (resIds && resIds.length) {
+            this.env.services.action.doAction({
+                type: "ir.actions.act_window",
+                res_model: this.resModel,
+                view_mode: "list",
+                views: [[false, "list"]],
+                domain: [["id", "in", resIds]], // Show only the newly imported records
+                name: _t("Imported Records"),  // Breadcrumb label
+                context: {
+                    active_id: false, // Ensures breadcrumbs show "All Records"
+                }
+            });
+        } else {
+            this.env.config.historyBack();
+        }
     }
 
     get display() {
@@ -225,9 +240,6 @@ export class ImportAction extends Component {
 
         if (res.ids.length) {
             if (!isTest) {
-                this.notification.add(_t("%s records successfully imported", res.ids.length), {
-                    type: "success",
-                });
                 this.exit(res.ids);
             } else {
                 this.state.isTested = true;

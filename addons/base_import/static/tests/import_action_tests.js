@@ -314,6 +314,13 @@ QUnit.module("Base Import Tests", (hooks) => {
                     records: [],
                 },
             },
+            views: {
+                "partner,false,list": `<list>
+                        <field name="id"/>
+                        <field name="display_name"/>
+                    </list>`,
+                "partner,false,search": `<search/>`,
+            },
         };
         target = getFixture();
     });
