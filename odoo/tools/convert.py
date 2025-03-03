@@ -410,14 +410,15 @@ form: module.record_id""" % (xml_id,)
                     # take the first element of the search
                     f_val = s[0][f_use]
             elif f_ref := field.get("ref"):
+                raise_if_not_found = nodeattr2bool(rec, 'forcecreate', True)
                 if f_name in model._fields and model._fields[f_name].type == 'reference':
-                    val = self.model_id_get(f_ref)
-                    f_val = val[0] + ',' + str(val[1])
+                    val = self.model_id_get(f_ref, raise_if_not_found=raise_if_not_found)
+                    f_val = val[0] and (val[0] + ',' + str(val[1]))
                 else:
-                    f_val = self.id_get(f_ref, raise_if_not_found=nodeattr2bool(rec, 'forcecreate', True))
-                    if not f_val:
-                        _logger.warning("Skipping creation of %r because %s=%r could not be resolved", xid, f_name, f_ref)
-                        return None
+                    f_val = self.id_get(f_ref, raise_if_not_found=raise_if_not_found)
+                if not f_val:
+                    _logger.warning("Skipping creation of %r because %s=%r could not be resolved", xid, f_name, f_ref)
+                    return None
             else:
                 f_val = _eval_xml(self, field, env)
                 if f_name in model._fields:
@@ -440,6 +441,8 @@ form: module.record_id""" % (xml_id,)
                     elif field_type == 'html':
                         if field.get('type') == 'xml':
                             _logger.warning('HTML field %r is declared as `type="xml"`', f_name)
+                    elif field_type == 'many2many' and f_val:
+                        f_val = [val for val in f_val if val]
             res[f_name] = f_val
         if extra_vals:
             res.update(extra_vals)
