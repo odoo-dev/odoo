@@ -64,6 +64,7 @@ const threadPatch = {
         this.correspondent = Record.one("discuss.channel.member", {
             /** @this {import("models").Thread} */
             compute() {
+                console.log(this.computeCorrespondent().persona.country);
                 return this.computeCorrespondent();
             },
         });

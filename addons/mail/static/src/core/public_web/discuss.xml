@@ -19,7 +19,7 @@
                         </FileUploader>
                     </div>
                     <CountryFlag t-if="thread.showCorrespondentCountry" country="thread.correspondentCountry" class="'o-mail-Discuss-headerCountry border'"/>
-                    <ImStatus t-if="thread.channel_type === 'chat' and thread.correspondent" className="'me-1'" member="thread.correspondent" />
+                    <ImStatus t-if="thread.correspondent" className="'me-1'" member="thread.correspondent" />
                     <div class="d-flex flex-grow-1 align-self-center align-items-center h-100 py-2">
                         <div t-if="thread.parent_channel_id" class="d-flex align-items-center gap-1 ms-1">
                             <span class="fw-bolder cursor-pointer opacity-75 opacity-100-hover o-hover-text-underline" t-esc="thread.parent_channel_id.displayName" t-on-click="() => this.thread.parent_channel_id.open({ focus: true })"/>
