@@ -176,7 +176,8 @@ export class DomainField extends Component {
         }
 
         const domain = this.getEvaluatedDomain(props);
-        if (domain.isInvalid) {
+        const isValid = await this.quickValidityCheck(props);
+        if (domain.isInvalid || !isValid) {
             this.updateState({ isValid: false, recordCount: 0 });
             return;
         }
