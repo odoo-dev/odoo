@@ -1671,7 +1671,7 @@ Please change the quantity done or the rounding precision of your unit of measur
                         if float_is_zero(missing_reserved_quantity, precision_rounding=move.product_id.uom_id.rounding):
                             break
 
-                if missing_reserved_quantity and move.product_id.tracking == 'serial' and (move.picking_type_id.use_create_lots or move.picking_type_id.use_existing_lots):
+                if missing_reserved_quantity and move.product_id.tracking == 'serial' and (move.picking_type_id.use_create_lots or move.picking_type_id.use_existing_lots) and not self.env.context.get('no_lines'):
                     for i in range(0, int(missing_reserved_quantity)):
                         move_line_vals_list.append(move._prepare_move_line_vals(quantity=1))
                 elif missing_reserved_quantity:
