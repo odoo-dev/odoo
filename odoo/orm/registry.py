@@ -69,6 +69,8 @@ _CACHES_BY_KEY = {
     'groups': ('groups', 'templates', 'templates.cached_values'),  # The processing of groups is saved in the view
 }
 
+ODOO_NOTIFY_FUNCTION = os.getenv('ODOO_NOTIFY_FUNCTION', 'pg_notify')
+
 
 def _unaccent(x: SQL | str | psycopg2.sql.Composable) -> SQL | str | psycopg2.sql.Composed:
     if isinstance(x, SQL):
@@ -244,6 +246,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
         # invalidated (i.e. cleared).
         self.registry_sequence: int = -1
         self.cache_sequences: dict[str, int] = {}
+        self.last_signal_time: float = 0.0  # last monotonic time of a signal received by the RegistrySignals worker
 
         # Flags indicating invalidation of the registry or the cache.
         self._invalidation_flags = threading.local()
@@ -255,6 +258,11 @@ class Registry(Mapping[str, type["BaseModel"]]):
 
         self.unaccent = _unaccent if self.has_unaccent else lambda x: x  # type: ignore
         self.unaccent_python = remove_accents if self.has_unaccent else lambda x: x
+
+        from odoo.service.server import server
+        if config['workers']:
+            self.registry_signals = server.registry_signals
+            self.registry_signals_version = self.registry_signals.get('_uid', 0.0)
 
     @classmethod
     @locked
@@ -904,6 +912,19 @@ class Registry(Mapping[str, type["BaseModel"]]):
         if self.in_test_mode():
             return self
 
+        if config['workers']:
+            if self.registry_signals_version != self.registry_signals.get('_uid', 0.0):
+                # registry signals worker has been restarted
+                self.registry_signals_version = self.registry_signals.get('_uid', 0.0)
+                self.last_signal_time = -1.0
+            if time.time() - self.registry_signals.get('_watchdog_time', 0.0) > 120:
+                # registry signals worker is dead and not restarted
+                self.last_signal_time = -1.0
+
+            if self.last_signal_time >= self.registry_signals.get(self.db_name, 0.0):
+                return self
+            self.last_signal_time = self.registry_signals.get(self.db_name, 0.0)
+
         with nullcontext(cr) if cr is not None else closing(self.cursor(readonly=True)) as cr:
             assert cr is not None
             db_registry_sequence, db_cache_sequences = self.get_sequences(cr)
@@ -962,6 +983,12 @@ class Registry(Mapping[str, type["BaseModel"]]):
                     # and the next call to check_signaling() will detect that and trigger cache invalidation.
                     # otherwise, self.cache_sequences[cache_name] should be equal to cr.fetchone()[0]
                     self.cache_sequences[cache_name] += 1
+        
+        # notify after the transactions for updating orm_signaling_* tables are commited
+        if (self.registry_invalidated or self.cache_invalidated) and config['workers']:
+            with sql_db.db_connect('postgres').cursor() as cr:
+                cr.execute(SQL("SELECT %s('registry_signals', %s)", SQL.identifier(ODOO_NOTIFY_FUNCTION), self.db_name))
+                _logger.info("Signaled registry changes to the RegistrySignals worker")
 
         self.registry_invalidated = False
         self.cache_invalidated.clear()

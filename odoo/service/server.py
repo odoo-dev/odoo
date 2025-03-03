@@ -21,6 +21,7 @@ from io import BytesIO
 
 import psutil
 import werkzeug.serving
+from multiprocessing import Manager
 
 if os.name == 'posix':
     # Unix only for workers
@@ -804,6 +805,11 @@ class PreforkServer(CommonServer):
         self.queue = []
         self.long_polling_pid = None
 
+        # Add shared registry_signals dictionary
+        self.manager = Manager()
+        self.registry_signals = self.manager.dict()
+        self.workers_registry_signals = {}
+
     def pipe_new(self):
         pipe = os.pipe()
         for fd in pipe:
@@ -856,6 +862,7 @@ class PreforkServer(CommonServer):
             try:
                 self.workers_http.pop(pid, None)
                 self.workers_cron.pop(pid, None)
+                self.workers_registry_signals.pop(pid, None)
                 u = self.workers.pop(pid)
                 u.close()
             except OSError:
@@ -920,6 +927,8 @@ class PreforkServer(CommonServer):
                 self.worker_kill(pid, signal.SIGKILL)
 
     def process_spawn(self):
+        if not self.workers_registry_signals:
+            self.worker_spawn(WorkerRegistrySignals, self.workers_registry_signals)
         if config['http_enable']:
             while len(self.workers_http) < self.population:
                 self.worker_spawn(WorkerHTTP, self.workers_http)
@@ -996,6 +1005,8 @@ class PreforkServer(CommonServer):
             _logger.info("Stopping forcefully")
         for pid in self.workers:
             self.worker_kill(pid, signal.SIGTERM)
+
+        self.manager.shutdown()
 
     def run(self, preload, stop):
         self.start()
@@ -1291,6 +1302,66 @@ class WorkerCron(Worker):
             self.dbcursor.execute("LISTEN cron_trigger")
         else:
             _logger.warning("PG cluster in recovery mode, cron trigger not activated")
+        self.dbcursor.commit()
+
+    def stop(self):
+        super().stop()
+        self.dbcursor.close()
+
+class WorkerRegistrySignals(Worker):
+    """Registry Signal Worker that listens for Postgres notifications and updates shared registry_signals dict"""
+    
+    def __init__(self, multi):
+        super().__init__(multi)
+        self.registry_signals = multi.registry_signals
+        self.registry_signals.clear()  # clear in case the worker is restarted
+        self.registry_signals['_uid'] = random.random()
+        self.registry_signals['_watchdog_time'] = time.time()
+        self.alive_time = time.monotonic()
+
+    def sleep(self):
+        cnx = self.dbcursor._cnx
+        self.registry_signals['_watchdog_time'] = time.time()
+        try:
+            select.select([self.wakeup_fd_r, cnx], [], [], SLEEP_INTERVAL)
+            # clear pg_conn/wakeup pipe if we were interrupted
+            cnx.poll()
+            empty_pipe(self.wakeup_fd_r)
+        except select.error as e:
+            if e.args[0] != errno.EINTR:
+                raise
+
+    def process_work(self):
+        """Listen for notifications and update registry_signals dict"""
+        cnx = self.dbcursor._cnx
+        while cnx.notifies:
+            notify = cnx.notifies.pop()
+            registry_name = notify.payload
+            self.registry_signals[registry_name] = time.monotonic()
+            _logger.info("Updated signal timestamp for registry %s", registry_name)
+    
+    def check_limits(self):
+        super().check_limits()
+
+        if config['limit_time_worker_cron'] > 0 and (time.monotonic() - self.alive_time) > config['limit_time_worker_cron']:
+            _logger.info('WorkerRegistrySignals (%s) max age (%ss) reached.', self.pid, config['limit_time_worker_cron'])
+            self.alive = False
+
+    def start(self):
+        os.nice(10)  # TBD
+        Worker.start(self)
+        if self.multi.socket:
+            self.multi.socket.close()
+
+        dbconn = sql_db.db_connect('postgres')
+        self.dbcursor = dbconn.cursor()
+        # LISTEN / NOTIFY doesn't work in recovery mode
+        self.dbcursor.execute("SELECT pg_is_in_recovery()")
+        in_recovery = self.dbcursor.fetchone()[0]
+        if not in_recovery:
+            self.dbcursor.execute("LISTEN registry_signals")
+        else:
+            raise Exception("PG cluster in recovery mode, registry signals not activated")
         self.dbcursor.commit()
 
     def stop(self):
