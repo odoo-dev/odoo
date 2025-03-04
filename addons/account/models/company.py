@@ -157,7 +157,7 @@ class ResCompany(models.Model):
             'padding': 5,
             'use_date_range': True,
             'company_id': self.id,
-            'prefix': 'BATCH/%(year)s/',
+            'prefix': 'PAY/%(year)s/',
         }),
     )
 
@@ -262,10 +262,10 @@ class ResCompany(models.Model):
     )
     company_vat_placeholder = fields.Char(compute='_compute_company_vat_placeholder')
 
-    def get_next_batch_payment_communication(self):
+    def get_next_group_payment_communication(self):
         '''
-        When in need of a batch payment communication reference (several invoices paid at the same time)
-        use batch_payment_sequence_id to get it (eventually create it first): e.g BATCH/2024/00001
+        When in need of a group payment communication reference (several invoices paid at the same time)
+        use batch_payment_sequence_id (old name) to get it (eventually create it first): e.g PAY/2024/00001
         '''
         self.ensure_one()
         return self.sudo().batch_payment_sequence_id.next_by_id()
