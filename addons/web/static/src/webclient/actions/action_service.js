@@ -1062,8 +1062,12 @@ export function makeActionManager(env, router = _router) {
         }
 
         const currentController = _getCurrentController();
-        if (currentController && currentController.getLocalState) {
-            currentController.exportedState = currentController.getLocalState();
+        if (nextStack.length > controllerStack.length) {
+            if (currentController && currentController.getLocalState) {
+                currentController.exportedState = currentController.getLocalState();
+            }
+        } else {
+            delete currentController.exportedState;
         }
         if (controller.exportedState) {
             controller.props.state = controller.exportedState;
