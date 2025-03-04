@@ -28,7 +28,7 @@ class SaleOrder(models.Model):
         'stock.warehouse', string='Warehouse',
         compute='_compute_warehouse_id', store=True, readonly=False, precompute=True,
         check_company=True)
-    picking_ids = fields.One2many('stock.picking', 'sale_id', string='Transfers')
+    picking_ids = fields.One2many('stock.picking', string='Transfers', compute="_compute_picking_ids")
     delivery_count = fields.Integer(string='Delivery Orders', compute='_compute_picking_ids')
     delivery_status = fields.Selection([
         ('pending', 'Not Delivered'),
@@ -68,14 +68,14 @@ class SaleOrder(models.Model):
             query = f'UPDATE "{self._table}" SET "{column_name}" = %s WHERE "{column_name}" IS NULL'
             self._cr.execute(query, (value,))
 
-    @api.depends('picking_ids.date_done')
+    @api.depends('order_line.move_ids.picking_id.date_done')
     def _compute_effective_date(self):
         for order in self:
             pickings = order.picking_ids.filtered(lambda x: x.state == 'done' and x.location_dest_id.usage == 'customer')
             dates_list = [date for date in pickings.mapped('date_done') if date]
             order.effective_date = min(dates_list, default=False)
 
-    @api.depends('picking_ids', 'picking_ids.state')
+    @api.depends('order_line.move_ids.picking_id', 'order_line.move_ids.picking_id.state')
     def _compute_delivery_status(self):
         for order in self:
             if not order.picking_ids or all(p.state == 'cancel' for p in order.picking_ids):
@@ -182,9 +182,10 @@ class SaleOrder(models.Model):
         self.order_line._action_launch_stock_rule()
         return super(SaleOrder, self)._action_confirm()
 
-    @api.depends('picking_ids')
+    @api.depends('order_line.move_ids')
     def _compute_picking_ids(self):
         for order in self:
+            order.picking_ids = order.order_line.move_ids.picking_id
             order.delivery_count = len(order.picking_ids)
 
     @api.depends('user_id', 'company_id')

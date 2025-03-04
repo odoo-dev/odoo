@@ -15,7 +15,9 @@ class SaleOrderLine(models.Model):
 
     qty_delivered_method = fields.Selection(selection_add=[('stock_move', 'Stock Moves')])
     route_ids = fields.Many2many('stock.route', string='Routes', domain=[('sale_selectable', '=', True)], ondelete='restrict')
-    move_ids = fields.One2many('stock.move', 'sale_line_id', string='Stock Moves')
+    move_ids = fields.Many2many(
+        'stock.move', 'sale_line_stock_move_rel', 'sale_line_id', 'stock_move_id', string='Stock Moves'
+    )
     virtual_available_at_date = fields.Float(compute='_compute_qty_at_date', digits='Product Unit')
     scheduled_date = fields.Datetime(compute='_compute_qty_at_date')
     forecast_expected_date = fields.Datetime(compute='_compute_qty_at_date')
@@ -256,7 +258,7 @@ class SaleOrderLine(models.Model):
         date_planned = date_deadline - timedelta(days=self.order_id.company_id.security_lead)
         values.update({
             'group_id': group_id,
-            'sale_line_id': self.id,
+            'sale_line_ids': self.ids,
             'date_planned': date_planned,
             'date_deadline': date_deadline,
             'route_ids': self.route_ids,
@@ -327,7 +329,6 @@ class SaleOrderLine(models.Model):
         return {
             'name': self.order_id.name,
             'move_type': self.order_id.picking_policy,
-            'sale_id': self.order_id.id,
             'partner_id': self.order_id.partner_shipping_id.id,
         }
 

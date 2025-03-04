@@ -14,20 +14,21 @@ class StockRoute(models.Model):
 
 class StockMove(models.Model):
     _inherit = "stock.move"
-    sale_line_id = fields.Many2one('sale.order.line', 'Sale Line', index='btree_not_null')
+    sale_line_ids = fields.Many2many(
+        'sale.order.line', 'sale_line_stock_move_rel', 'stock_move_id', 'sale_line_id', 'Sale Line')
 
     @api.model
     def _prepare_merge_moves_distinct_fields(self):
         distinct_fields = super(StockMove, self)._prepare_merge_moves_distinct_fields()
-        distinct_fields.append('sale_line_id')
+        distinct_fields.append('sale_line_ids')
         return distinct_fields
 
-    @api.depends('sale_line_id', 'sale_line_id.product_uom_id')
+    @api.depends('sale_line_ids', 'sale_line_ids.product_uom_id')
     def _compute_packaging_uom_id(self):
         super()._compute_packaging_uom_id()
         for move in self:
-            if move.sale_line_id:
-                move.packaging_uom_id = move.sale_line_id.product_uom_id
+            if move.sale_line_ids:
+                move.packaging_uom_id = move.sale_line_ids.product_uom_id
 
     def _get_related_invoices(self):
         """ Overridden from stock_account to return the customer invoices
@@ -41,18 +42,18 @@ class StockMove(models.Model):
 
     def _get_source_document(self):
         res = super()._get_source_document()
-        return self.sudo().sale_line_id.order_id or res
+        return self.sudo().sale_line_ids.order_id or res
 
     def _get_sale_order_lines(self):
         """ Return all possible sale order lines for one stock move. """
         self.ensure_one()
-        return (self + self.browse(self._rollup_move_origs() | self._rollup_move_dests())).sale_line_id
+        return (self + self.browse(self._rollup_move_origs() | self._rollup_move_dests())).sale_line_ids
 
     def _assign_picking_post_process(self, new=False):
         super(StockMove, self)._assign_picking_post_process(new=new)
         if new:
             picking_id = self.mapped('picking_id')
-            sale_order_ids = self.mapped('sale_line_id.order_id')
+            sale_order_ids = self.mapped('sale_line_ids.order_id')
             for sale_order_id in sale_order_ids:
                 picking_id.message_post_with_source(
                     'mail.message_origin_link',
@@ -61,7 +62,7 @@ class StockMove(models.Model):
                 )
 
     def _get_all_related_sm(self, product):
-        return super()._get_all_related_sm(product) | self.filtered(lambda m: m.sale_line_id.product_id == product)
+        return super()._get_all_related_sm(product) | self.filtered(lambda m: m.sale_line_ids.product_id == product)
 
 
 class StockMoveLine(models.Model):
@@ -71,68 +72,35 @@ class StockMoveLine(models.Model):
         return 'customer' in {self.location_id.usage, self.location_dest_id.usage}
 
 
-class ProcurementGroup(models.Model):
-    _inherit = 'procurement.group'
-
-    sale_id = fields.Many2one('sale.order', 'Sale Order')
-
-
 class StockRule(models.Model):
     _inherit = 'stock.rule'
 
     def _get_custom_move_fields(self):
         fields = super(StockRule, self)._get_custom_move_fields()
-        fields += ['sale_line_id', 'partner_id', 'sequence', 'to_refund']
+        fields += ['sale_line_ids', 'partner_id', 'sequence', 'to_refund']
         return fields
 
 
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
-    sale_id = fields.Many2one('sale.order', compute="_compute_sale_id", inverse="_set_sale_id", string="Sales Order", store=True, index='btree_not_null')
+    sale_ids = fields.One2many('sale.order', compute="_compute_sale_ids", string="Sales Order")
 
-    @api.depends('group_id')
-    def _compute_sale_id(self):
+    @api.depends('move_ids', 'move_ids.sale_line_ids')
+    def _compute_sale_ids(self):
         for picking in self:
-            picking.sale_id = picking.group_id.sale_id
-
-    def _set_sale_id(self):
-        if self.group_id:
-            self.group_id.sale_id = self.sale_id
-        else:
-            if self.sale_id:
-                vals = {
-                    'sale_id': self.sale_id.id,
-                    'name': self.sale_id.name,
-                }
-            else:
-                vals = {}
-
-            pg = self.env['procurement.group'].create(vals)
-            self.group_id = pg
-
-    def _auto_init(self):
-        """
-        Create related field here, too slow
-        when computing it afterwards through _compute_related.
-
-        Since group_id.sale_id is created in this module,
-        no need for an UPDATE statement.
-        """
-        if not column_exists(self.env.cr, 'stock_picking', 'sale_id'):
-            create_column(self.env.cr, 'stock_picking', 'sale_id', 'int4')
-        return super()._auto_init()
+            picking.sale_ids = picking.move_ids.sale_line_ids.order_id.ids
 
     def _action_done(self):
         res = super()._action_done()
         sale_order_lines_vals = []
         for move in self.move_ids:
-            sale_order = move.picking_id.sale_id
+            sale_order = move.picking_id.sale_ids[:-1]
             # Creates new SO line only when pickings linked to a sale order and
             # for moves with qty. done and not already linked to a SO line.
             if not sale_order \
                 or (move.location_dest_id.usage not in ['customer', 'transit'] and not (move.location_id.usage == 'customer' and move.to_refund)) \
-                or move.sale_line_id \
+                or move.sale_line_ids \
                 or not move.picked:
                 continue
             product = move.product_id
@@ -197,14 +165,14 @@ class StockPicking(models.Model):
             }
             return self.env['ir.qweb']._render('sale_stock.exception_on_picking', values)
 
-        documents = self.sudo()._log_activity_get_documents(moves, 'sale_line_id', 'DOWN', _keys_in_groupby)
+        documents = self.sudo()._log_activity_get_documents(moves, 'sale_line_ids', 'DOWN', _keys_in_groupby)
         self._log_activity(_render_note_exception_quantity, documents)
 
         return super(StockPicking, self)._log_less_quantities_than_expected(moves)
 
     def _can_return(self):
         self.ensure_one()
-        return super()._can_return() or self.sale_id
+        return super()._can_return() or self.sale_ids
 
 
 class StockLot(models.Model):
@@ -218,8 +186,8 @@ class StockLot(models.Model):
         sale_orders = defaultdict(lambda: self.env['sale.order'])
         for move_line in self.env['stock.move.line'].search([('lot_id', 'in', self.ids), ('state', '=', 'done')]):
             move = move_line.move_id
-            if move.picking_id.location_dest_id.usage in ('customer', 'transit') and move.sale_line_id.order_id:
-                sale_orders[move_line.lot_id.id] |= move.sale_line_id.order_id
+            if move.picking_id.location_dest_id.usage in ('customer', 'transit') and move.sale_line_ids.order_id:
+                sale_orders[move_line.lot_id.id] |= move.sale_line_ids.order_id
         for lot in self:
             lot.sale_order_ids = sale_orders[lot.id]
             lot.sale_order_count = len(lot.sale_order_ids)

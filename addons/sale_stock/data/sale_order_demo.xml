@@ -131,15 +131,15 @@
 
         <!-- Change date of those sale orders' delivery -->
         <function model="stock.picking" name="write">
-            <value model="stock.picking" search="[('sale_id', '=', obj().env.ref('sale_stock.sale_order_19').id)]"/>
+            <value model="stock.picking" search="[('sale_ids', 'in', obj().env.ref('sale_stock.sale_order_19').id)]"/>
             <value eval="{'scheduled_date': (datetime.now() + relativedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')}"/>
         </function>
         <function model="stock.picking" name="write">
-            <value model="stock.picking" search="[('sale_id', '=', obj().env.ref('sale_stock.sale_order_20').id)]"/>
+            <value model="stock.picking" search="[('sale_ids', 'in', obj().env.ref('sale_stock.sale_order_20').id)]"/>
             <value eval="{'scheduled_date': (datetime.now() + relativedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')}"/>
         </function>
         <function model="stock.picking" name="write">
-            <value model="stock.picking" search="[('sale_id', '=', obj().env.ref('sale_stock.sale_order_21').id)]"/>
+            <value model="stock.picking" search="[('sale_ids', 'in', obj().env.ref('sale_stock.sale_order_21').id)]"/>
             <value eval="{'scheduled_date': (datetime.now() + relativedelta(days=3)).strftime('%Y-%m-%d %H:%M:%S')}"/>
         </function>
 

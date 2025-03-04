@@ -7,7 +7,7 @@ from ast import literal_eval
 from datetime import date, timedelta
 from collections import defaultdict
 
-from odoo import SUPERUSER_ID, _, api, fields, models
+from odoo import SUPERUSER_ID, _, api, fields, models, Command
 from odoo.addons.stock.models.stock_move import PROCUREMENT_PRIORITIES
 from odoo.addons.web.controllers.utils import clean_action
 from odoo.exceptions import UserError, ValidationError
@@ -554,8 +554,8 @@ class StockPicking(models.Model):
         'Reference', default='/',
         copy=False, index='trigram', readonly=True)
     origin = fields.Char(
-        'Source Document', index='trigram',
-        help="Reference of the document")
+        'Source Document', index='trigram', compute='_compute_origin',
+        help="Reference of the document", store=True, readonly=False)
     note = fields.Html('Notes')
     backorder_id = fields.Many2one(
         'stock.picking', 'Back Order of',
@@ -722,6 +722,10 @@ class StockPicking(models.Model):
     def _compute_has_tracking(self):
         for picking in self:
             picking.has_tracking = any(m.has_tracking != 'none' for m in picking.move_ids)
+
+    def _compute_origin(self):
+        for picking in self:
+            picking.origin = False
 
     @api.depends('picking_type_id')
     def _compute_move_type(self):

@@ -81,5 +81,5 @@ class PurchaseOrder(models.Model):
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
-    sale_order_id = fields.Many2one(related='sale_line_id.order_id', string="Sale Order")
-    sale_line_id = fields.Many2one('sale.order.line', string="Origin Sale Item", index='btree_not_null', copy=False)
+    sale_order_id = fields.Many2one(related='sale_line_ids.order_id', string="Sale Order")
+    sale_line_ids = fields.Many2many('sale.order.line', string="Origin Sale Item", index='btree_not_null', copy=False)

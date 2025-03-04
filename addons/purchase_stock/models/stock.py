@@ -10,7 +10,7 @@ class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
     purchase_id = fields.Many2one(
-        'purchase.order', related='move_ids.purchase_line_id.order_id',
+        'purchase.order', related='move_ids.purchase_line_ids.order_id',
         string="Purchase Orders", readonly=True)
 
     days_to_arrive = fields.Datetime(compute='_compute_effective_date', search="_search_days_to_arrive", copy=False)
@@ -101,7 +101,7 @@ class StockReturnPicking(models.TransientModel):
     def _prepare_move_default_values(self, return_line, new_picking):
         vals = super()._prepare_move_default_values(return_line, new_picking)
         if self.location_id.usage == "supplier":
-            vals['purchase_line_id'], vals['partner_id'] = return_line.move_id._get_purchase_line_and_partner_from_chain()
+            vals['purchase_line_ids'], vals['partner_id'] = return_line.move_id._get_purchase_lines_and_partner_from_chain()
         return vals
 
     def _create_return(self):
@@ -253,8 +253,8 @@ class StockLot(models.Model):
         purchase_orders = defaultdict(lambda: self.env['purchase.order'])
         for move_line in self.env['stock.move.line'].search([('lot_id', 'in', self.ids), ('state', '=', 'done')]):
             move = move_line.move_id
-            if move.picking_id.location_id.usage in ('supplier', 'transit') and move.purchase_line_id.order_id:
-                purchase_orders[move_line.lot_id.id] |= move.purchase_line_id.order_id
+            if move.picking_id.location_id.usage in ('supplier', 'transit') and move.purchase_line_ids.order_id:
+                purchase_orders[move_line.lot_id.id] |= move.purchase_line_ids.order_id
         for lot in self:
             lot.purchase_order_ids = purchase_orders[lot.id]
             lot.purchase_order_count = len(lot.purchase_order_ids)

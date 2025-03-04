@@ -23,7 +23,9 @@ class PurchaseOrderLine(models.Model):
     qty_received_method = fields.Selection(selection_add=[('stock_moves', 'Stock Moves')],
                                            ondelete={'stock_moves': _ondelete_stock_moves})
 
-    move_ids = fields.One2many('stock.move', 'purchase_line_id', string='Reservation', readonly=True, copy=False)
+    move_ids = fields.Many2many(
+        'stock.move', 'purchase_line_stock_move_rel','purchase_line_id', 'stock_move_id',
+        string='Reservation', readonly=True, copy=False)
     orderpoint_id = fields.Many2one('stock.warehouse.orderpoint', 'Orderpoint', copy=False, index='btree_not_null')
     move_dest_ids = fields.Many2many('stock.move', 'stock_move_created_purchase_line_rel', 'created_purchase_line_id', 'move_id', 'Downstream moves alt')
     product_description_variants = fields.Char('Custom Description')
@@ -291,7 +293,7 @@ class PurchaseOrderLine(models.Model):
             'partner_id': self.order_id.dest_address_id.id,
             'move_dest_ids': [(4, x) for x in self.move_dest_ids.ids],
             'state': 'draft',
-            'purchase_line_id': self.id,
+            'purchase_line_ids': self.ids,
             'company_id': self.order_id.company_id.id,
             'price_unit': price_unit,
             'picking_type_id': self.order_id.picking_type_id.id,
