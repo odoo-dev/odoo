@@ -1,4 +1,4 @@
-import { convertNumericToUnit } from "@html_editor/utils/formatting";
+import { convertNumericToUnit, getHtmlStyle } from "@html_editor/utils/formatting";
 import { Component } from "@odoo/owl";
 import {
     basicContainerBuilderComponentProps,
@@ -15,10 +15,12 @@ export class BuilderNumberInput extends Component {
         default: { type: Number, optional: true },
         unit: { type: String, optional: true },
         saveUnit: { type: String, optional: true },
+        fakeUnit: { type: String, optional: true },
         step: { type: Number, optional: true },
         id: { type: String, optional: true },
         placeholder: { type: String, optional: true },
         style: { type: String, optional: true },
+        title: { type: String, optional: true },
         // TODO support a min and max value
     };
     static components = { BuilderComponent };
@@ -62,7 +64,12 @@ export class BuilderNumberInput extends Component {
             value = value.match(/[\d.e+-]+/g)[0];
             if (saveUnit) {
                 // Convert value from saveUnit to unit
-                value = convertNumericToUnit(value, saveUnit, unit);
+                value = convertNumericToUnit(
+                    value,
+                    saveUnit,
+                    unit,
+                    getHtmlStyle(this.env.getEditingElement().ownerDocument)
+                );
             }
             return value;
         });
@@ -74,7 +81,12 @@ export class BuilderNumberInput extends Component {
             const saveUnit = this.props.saveUnit;
             if (unit && saveUnit) {
                 // Convert value from unit to saveUnit
-                value = convertNumericToUnit(value, unit, saveUnit);
+                value = convertNumericToUnit(
+                    value,
+                    unit,
+                    saveUnit,
+                    getHtmlStyle(this.env.getEditingElement().ownerDocument)
+                );
             }
             if (unit) {
                 if (saveUnit || saveUnit === "") {

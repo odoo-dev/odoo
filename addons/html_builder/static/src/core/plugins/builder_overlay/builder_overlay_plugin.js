@@ -143,14 +143,14 @@ export class BuilderOverlayPlugin extends Plugin {
         this.toggleOverlaysVisibility(false);
         // Show the preview of the one corresponding to the given element.
         const overlayToShow = this.overlays.find((overlay) => overlay.overlayTarget === el);
-        overlayToShow.toggleOverlayPreview(true);
-        overlayToShow.toggleOverlayVisibility(true);
+        overlayToShow?.toggleOverlayPreview(true);
+        overlayToShow?.toggleOverlayVisibility(true);
     }
 
     hideOverlayPreview(el) {
         // Remove the preview.
         const overlayToHide = this.overlays.find((overlay) => overlay.overlayTarget === el);
-        overlayToHide.toggleOverlayPreview(false);
+        overlayToHide?.toggleOverlayPreview(false);
         // Show back the active overlays.
         this.toggleOverlaysVisibility(true);
     }

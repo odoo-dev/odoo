@@ -90,6 +90,7 @@ export class BuilderOptionsPlugin extends Plugin {
                 isClonable: isClonable(element),
                 optionsContainerTopButtons: this.getOptionsContainerTopButtons(element),
             }));
+        console.log(93, newContainers);
 
         // Do not update the containers if they did not change.
         if (newContainers.length === this.lastContainers.length) {
