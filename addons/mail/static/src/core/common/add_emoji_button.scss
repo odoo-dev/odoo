@@ -1,0 +1,12 @@
+$aeb-emojiPopAnimation-duration: 0.2s;
+
+.o-discuss-AddEmojiButton {
+    filter: grayscale(80%);
+    transform: scale(1);
+    transition: transform $aeb-emojiPopAnimation-duration ease-in-out;
+
+    &.o-discuss-AddEmojiButton-hovered {
+        filter: unset;
+        transform: scale(1.15);
+    }
+}

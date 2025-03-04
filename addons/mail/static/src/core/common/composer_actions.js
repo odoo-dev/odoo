@@ -4,6 +4,7 @@ import { useEmojiPicker } from "@web/core/emoji_picker/emoji_picker";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { markEventHandled } from "@web/core/utils/misc";
+import { AddEmojiButton } from "./add_emoji_button";
 
 export const composerActionsRegistry = registry.category("mail.composer/actions");
 
@@ -77,14 +78,15 @@ composerActionsRegistry
         sequenceQuick: 30,
     })
     .add("add-emoji", {
-        icon: "fa fa-smile-o",
         isPicker: true,
         pickerName: _t("Emoji"),
-        name: _t("Add Emojis"),
-        onClick: (component, action, ev) => {
-            pickerOnClick(component, action, ev);
-            markEventHandled(ev, "Composer.onClickAddEmoji");
-        },
+        component: AddEmojiButton,
+        componentProps: (component, action) => ({
+            onClick(ev) {
+                pickerOnClick(component, action, ev);
+                markEventHandled(ev, "Composer.onClickAddEmoji");
+            },
+        }),
         setup: (action) => {
             const component = useComponent();
             pickerSetup(action, () =>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.AddEmojiButton">
+        <button class="btn border-0 rounded-circle opacity-75" t-att-class="{ 'o-large': ui.isSmall and env.inChatWindow, 'o-small': !ui.isSmall or !env.inChatWindow }" title="Add Emojis" t-on-click="props.onClick" t-ref="root">
+            <span class="o-discuss-AddEmojiButton" t-att-class="{'o-discuss-AddEmojiButton-hovered': hoverState.isHover, 'fa fa-fw fa-lg': state.customIcon}">
+                <t t-esc="state.customIcon"/>
+            </span>
+            <i t-if="!state.customIcon" class="fa-fw fa-lg fa fa-smile-o"/>
+        </button>
+    </t>
+</templates>
