@@ -27,13 +27,16 @@
         </div>
         <div class="o-tab-content overflow-y-auto overflow-x-hidden flex-grow-1 pt-1">
             <t t-if="state.activeTab === 'blocks'">
+                <t t-out="(this.noSelectionTab = 'blocks') and ''"/>
                 <BlockTab />
             </t>
             <t t-if="state.activeTab === 'customize'">
+                <t t-out="(this.noSelectionTab = 'blocks') and ''"/>
                 <CustomizeTab currentOptionsContainers="state.currentOptionsContainers" snippetModel="snippetModel"/>
             </t>
             <t t-if="state.activeTab === 'theme'">
-                theme
+                <t t-out="(this.noSelectionTab = 'theme') and ''"/>
+                <ThemeTab/>
             </t>
         </div>
         <InvisibleElementsPanel t-if="state.invisibleEls.length" invisibleEls="state.invisibleEls" invisibleSelector="this.getInvisibleSelector()"/>
