@@ -83,29 +83,15 @@ export class CalendarCommonRenderer extends Component {
                 const multiCreatePointerMoveBound = this.multiCreatePointerMove.bind(this);
                 const multiCreatePointerUpBound = this.multiCreatePointerUp.bind(this);
                 const multiCreatePointerCancelBound = this.multiCreatePointerCancel.bind(this);
-                window.addEventListener("pointerdown", multiCreatePointerDownBound, {
-                    capture: true,
-                });
-                window.addEventListener("pointermove", multiCreatePointerMoveBound, {
-                    capture: true,
-                });
-                window.addEventListener("pointerup", multiCreatePointerUpBound, { capture: true });
-                window.addEventListener("pointercancel", multiCreatePointerCancelBound, {
-                    capture: true,
-                });
+                window.addEventListener("pointerdown", multiCreatePointerDownBound);
+                window.addEventListener("pointermove", multiCreatePointerMoveBound);
+                window.addEventListener("pointerup", multiCreatePointerUpBound);
+                window.addEventListener("pointercancel", multiCreatePointerCancelBound);
                 return () => {
-                    window.removeEventListener("pointerdown", multiCreatePointerDownBound, {
-                        capture: true,
-                    });
-                    window.removeEventListener("pointermove", multiCreatePointerMoveBound, {
-                        capture: true,
-                    });
-                    window.removeEventListener("pointerup", multiCreatePointerUpBound, {
-                        capture: true,
-                    });
-                    window.removeEventListener("pointercancel", multiCreatePointerCancelBound, {
-                        capture: true,
-                    });
+                    window.removeEventListener("pointerdown", multiCreatePointerDownBound);
+                    window.removeEventListener("pointermove", multiCreatePointerMoveBound);
+                    window.removeEventListener("pointerup", multiCreatePointerUpBound);
+                    window.removeEventListener("pointercancel", multiCreatePointerCancelBound);
                 };
             },
             () => [this.calendarRef.el]
@@ -285,9 +271,6 @@ export class CalendarCommonRenderer extends Component {
         this.props.editRecord(this.props.model.records[info.event.id]);
     }
     onEventClick(info) {
-        if (this.props.calendarMode !== CALENDAR_MODE.normal) {
-            return;
-        }
         this.click(info);
     }
     onEventContent({ event }) {
@@ -509,6 +492,9 @@ export class CalendarCommonRenderer extends Component {
 
     multiCreatePointerDown(ev) {
         if (this.props.calendarMode === CALENDAR_MODE.normal) {
+            return;
+        }
+        if (ev.target.closest(".fc-event")) {
             return;
         }
         const targetElement = ev.target.closest(".fc-day:not(.fc-col-header-cell)");
