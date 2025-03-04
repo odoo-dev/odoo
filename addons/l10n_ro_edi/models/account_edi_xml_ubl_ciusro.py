@@ -2,7 +2,7 @@
 
 from odoo import models, _
 
-
+DEFAULT_VAT = '0000000000000'
 SECTOR_RO_CODES = ('SECTOR1', 'SECTOR2', 'SECTOR3', 'SECTOR4', 'SECTOR5', 'SECTOR6')
 
 
@@ -49,21 +49,27 @@ class AccountEdiXmlUbl_Ro(models.AbstractModel):
         # EXTENDS 'account_edi_ubl_cii'
         vals_list = super()._get_partner_party_tax_scheme_vals_list(partner, role)
 
-        if not partner.vat and partner.company_registry:
+        if (
+            (
+                not partner.vat
+                or len(partner.vat) == 1
+            ) 
+            and partner.company_registry
+            and role == 'supplier'
+        ):
             # Use company_registry (Company ID) as the VAT replacement
             for vals in vals_list:
                 tax_scheme_id = 'VAT' if partner.company_registry[:2].isalpha() else 'NOT_EU_VAT'
                 vals.update({'company_id': partner.company_registry, 'tax_scheme_vals': {'id': tax_scheme_id}})
-
-        return vals_list
-
-    def _get_partner_party_legal_entity_vals_list(self, partner):
-        # EXTENDS 'account_edi_ubl_cii'
-        vals_list = super()._get_partner_party_legal_entity_vals_list(partner)
-
-        for vals in vals_list:
-            if not partner.vat and partner.company_registry:
-                vals['company_id'] = partner.company_registry
+        elif (
+            (
+                not partner.vat
+                or len(partner.vat) == 1
+            )
+            and role == 'customer'
+        ):
+            for vals in vals_list:
+                vals.update({'company_id': DEFAULT_VAT, 'tax_scheme_vals': {'id': 'NOT_EU_VAT'}})
 
         return vals_list
 
@@ -75,6 +81,26 @@ class AccountEdiXmlUbl_Ro(models.AbstractModel):
             'customization_id': 'urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1',
             'tax_currency_code': 'RON',
         })
+
+        # Deal with legal_entity_vals here, as there is no way to distinguish between customer and supplier in _get_partner_party_legal_entity_vals_list
+        for legal_entity_vals in vals['vals']['accounting_supplier_party_vals']['party_vals']['party_legal_entity_vals']:
+            supplier = legal_entity_vals['commercial_partner']
+            if (
+                (
+                    not supplier.vat
+                    or len(supplier.vat) == 1
+                )
+                and supplier.company_registry
+            ):
+                legal_entity_vals['company_id'] = supplier.company_registry
+
+        for legal_entity_vals in vals['vals']['accounting_customer_party_vals']['party_vals']['party_legal_entity_vals']:
+            customer = legal_entity_vals['commercial_partner']
+            if (
+                not customer.vat
+                or len(customer.vat) == 1
+            ):
+                legal_entity_vals['company_id'] = DEFAULT_VAT
 
         return vals
 
@@ -89,6 +115,19 @@ class AccountEdiXmlUbl_Ro(models.AbstractModel):
         # EXTENDS 'account_edi_ubl_cii'
         constraints = super()._export_invoice_constraints(invoice, vals)
 
+        # Default VAT is only allowed for the receiver (customer), not the provider (supplier)
+        if (
+            (
+                not vals['supplier'].commercial_partner_id.vat
+                or len(vals['supplier'].commercial_partner_id.vat) == 1
+            )
+                and not vals['supplier'].commercial_partner_id.company_registry
+        ):
+            constraints["ciusro_supplier_tax_identifier_required"] = _(
+                "The following partner doesn't have a VAT nor Company ID: %s. "
+                "At least one of them is required. ",
+                vals['supplier'].display_name)
+
         for partner_type in ('supplier', 'customer'):
             partner = vals[partner_type]
 
@@ -97,12 +136,6 @@ class AccountEdiXmlUbl_Ro(models.AbstractModel):
                 f"ciusro_{partner_type}_street_required": self._check_required_fields(partner, 'street'),
                 f"ciusro_{partner_type}_state_id_required": self._check_required_fields(partner, 'state_id'),
             })
-
-            if not partner.commercial_partner_id.vat and not partner.commercial_partner_id.company_registry:
-                constraints[f"ciusro_{partner_type}_tax_identifier_required"] = _(
-                    "The following partner doesn't have a VAT nor Company ID: %s. "
-                    "At least one of them is required. ",
-                    partner.display_name)
 
             if (partner.country_code == 'RO'
                     and partner.state_id
