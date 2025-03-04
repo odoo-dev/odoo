@@ -3799,7 +3799,7 @@ msgid "Batch Payment Number Sequence"
 msgstr "Séquence numéros de paiements par lot"
 
 #. module: account
-#: model:ir.model.fields,field_description:account.field_res_company__batch_payment_sequence_id
+#: model:ir.model.fields,field_description:account.field_res_company__group_payment_sequence_id
 msgid "Batch Payment Sequence"
 msgstr "Séquence de paiement par lot"
 
