@@ -11,6 +11,7 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
     events: Object.assign({}, VariantMixin.events || {}, {
         'change form .js_product:first input[name="add_qty"]': '_onChangeAddQuantity',
         'click a.js_add_cart_json': '_onChangeQuantity',
+        'change select[name="product_uom_id"]': '_onChangeUoM',
         'click .a-submit': '_onClickSubmit',
         'change form.js_attributes input, form.js_attributes select': '_onChangeAttribute',
         'submit .o_wsale_products_searchbar_form': '_onSubmitSaleSearch',
@@ -352,6 +353,13 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
             );  // Trigger `onChangeVariant` through .js_main_product
         }
     },
+    _onChangeUoM: function (ev) {
+        // trigger combination info change since the chosen uom changed
+        const input = ev.currentTarget.closest('.input-group').querySelector('input');
+        input.dispatchEvent(
+            new Event('change', {bubbles: true})
+        );  // Trigger `onChangeVariant` through .js_main_product
+    },
     /**
      * Search attribute values based on the input text.
      *
@@ -565,6 +573,7 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
             'input[type="radio"][name="product_id"]:checked',
         ].join(','))?.value);
         const quantity = parseFloat(form.querySelector('input[name="add_qty"]')?.value);
+        const uomId = parseInt(form.product_uom_id?.value);
         const isCombo = form.querySelector(
             'input[type="hidden"][name="product_type"]'
         )?.value === 'combo';
@@ -574,6 +583,7 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
                 'input[type="hidden"][name="product_template_id"]',
             ).value),
             ...(quantity ? {quantity: quantity} : {}),
+            ...(uomId ? {uomId: uomId} : {}),
             ptavs: this._getSelectedPTAV(form),
             productCustomAttributeValues: this._getCustomPTAVValues(form),
             noVariantAttributeValues: this._getSelectedNoVariantPTAV(form),

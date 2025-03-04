@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests.common import HttpCase, tagged
+from odoo.fields import Command
+from odoo.tests import HttpCase, tagged
 
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.sale.tests.product_configurator_common import TestProductConfiguratorCommon
@@ -263,3 +264,29 @@ class TestProductConfiguratorUi(HttpCase, TestProductConfiguratorCommon):
             sol.product_no_variant_attribute_value_ids,
             product_template.attribute_line_ids.product_template_value_ids,
         )
+
+    def test_product_configurator_uom_selection(self):
+        self.env.ref('base.group_user').write({
+            'implied_ids': [
+                # Required to set pricelist
+                Command.link(self.env.ref('product.group_product_pricelist').id),
+                # Required to set uom in configurator
+                Command.link(self.group_uom.id),
+            ],
+        })
+
+        self.product_product_custo_desk.uom_id = self.uom_unit
+        self.assertEqual(self.product_product_custo_desk.uom_id, self.uom_unit)
+        self.product_product_custo_desk.uom_ids += self.uom_dozen
+        self.product_product_conf_chair.uom_ids = self.uom_dozen
+
+        self.assertIn(self.uom_dozen, self.product_product_custo_desk.uom_ids)
+
+        # Add a 15% tax on desk
+        tax = self.env['account.tax'].create({'name': "Test tax", 'amount': 15})
+        self.product_product_custo_desk.taxes_id = tax
+
+        # Remove tax from Conference Chair and Chair floor protection
+        self.product_product_conf_chair.taxes_id = None
+        self.product_product_conf_chair_floor_protect.taxes_id = None
+        self.start_tour("/odoo", 'sale_product_configurator_uom_tour', login='salesman')

@@ -5,6 +5,8 @@ export class QuantityButtons extends Component {
     static template = 'sale.QuantityButtons';
     static props = {
         quantity: Number,
+        uom_id: { type: Number, optional: true },
+        uom_data: { type: Object, optional: true },
         setQuantity: Function,
         isMinusButtonDisabled: { type: Boolean, optional: true },
         isPlusButtonDisabled: { type: Boolean, optional: true },
@@ -15,14 +17,18 @@ export class QuantityButtons extends Component {
      * Increase the quantity.
      */
     increaseQuantity() {
-        this.props.setQuantity(this.props.quantity + 1);
+        this.props.setQuantity(this.props.quantity + 1, this.props.uom_id);
     }
 
     /**
      * Decrease the quantity.
      */
     decreaseQuantity() {
-        this.props.setQuantity(this.props.quantity - 1);
+        this.props.setQuantity(this.props.quantity - 1, this.props.uom_id);
+    }
+
+    onChangeUoM(ev) {
+        this.props.setQuantity(this.props.quantity, parseInt(ev.currentTarget.value));
     }
 
     /**

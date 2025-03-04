@@ -297,7 +297,7 @@ class ProductTemplate(models.Model):
 
     @api.model
     def _get_additional_configurator_data(
-        self, product_or_template, date, currency, pricelist, **kwargs
+        self, product_or_template, date, currency, pricelist, uom=None, **kwargs
     ):
         """ Return additional data about the specified product, to be used by the product and combo
         configurators.

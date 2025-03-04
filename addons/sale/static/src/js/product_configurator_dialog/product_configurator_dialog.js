@@ -118,14 +118,14 @@ export class ProductConfiguratorDialog extends Component {
         });
     }
 
-    async _updateCombination(product, quantity) {
+    async _updateCombination(product, quantity, uomId) {
         return rpc(this.updateCombinationUrl, {
             product_template_id: product.product_tmpl_id,
             ptav_ids: this._getCombination(product),
             currency_id: this.currency.id,
             so_date: this.props.soDate,
             quantity: quantity,
-            product_uom_id: this.props.productUOMId,
+            product_uom_id: uomId,
             company_id: this.props.companyId,
             pricelist_id: this.props.pricelistId,
             ...this._getAdditionalRpcParams(),
@@ -207,9 +207,11 @@ export class ProductConfiguratorDialog extends Component {
      *
      * @param {Number} productTmplId - The product template id, as a `product.template` id.
      * @param {Number} quantity - The new quantity of the product.
+     * @param {Number} uomId - The uom id, as an `uom.uom` id.
+     *  If not specified, the product default uom will be considered (e.g. combo flows)
      * @return {Boolean} - Whether the quantity was updated.
      */
-    async _setQuantity(productTmplId, quantity) {
+    async _setQuantity(productTmplId, quantity, uomId=undefined) {
         if (quantity <= 0) {
             if (productTmplId === this.env.mainProductTmplId) {
                 quantity = 1;
@@ -219,12 +221,16 @@ export class ProductConfiguratorDialog extends Component {
             }
         }
         const product = this._findProduct(productTmplId);
-        if (product.quantity === quantity) {
+        uomId = uomId || product.uom_id;
+        if (product.quantity === quantity && product.uom_id === uomId) {
             return false;
         }
-        const { price } = await this._updateCombination(product, quantity);
+        const { price } = await this._updateCombination(product, quantity, uomId);
         product.quantity = quantity;
         product.price = parseFloat(price);
+        if (product.uom_id !== uomId) {
+            product.uom_id = uomId;
+        }
         return true;
     }
 
@@ -251,7 +257,7 @@ export class ProductConfiguratorDialog extends Component {
         }
         this._checkExclusions(product);
         if (this._isPossibleCombination(product)) {
-            const updatedValues = await this._updateCombination(product, product.quantity);
+            const updatedValues = await this._updateCombination(product, product.quantity, product.uom_id);
             Object.assign(product, updatedValues);
             // When a combination should exist but was deleted from the database, it should not be
             // selectable and considered as an exclusion.

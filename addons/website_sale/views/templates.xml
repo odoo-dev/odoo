@@ -2069,6 +2069,24 @@
                 <a t-attf-href="#" class="btn btn-link float_left js_add_cart_json" aria-label="Add one" title="Add one">
                     <i class="fa fa-plus"/>
                 </a>
+                <t t-if="product.env['res.groups']._is_feature_enabled('uom.group_uom')">
+                    <!-- public users don't have access to uom.uom model -->
+                    <t t-set="product_template_sudo" t-value="product.sudo()"/>
+                    <select t-if="product_template_sudo._has_multiple_uoms() and product.type != 'combo'" class="form-select mb-2" name="product_uom_id">
+                        <t t-set="product_uoms_sudo" t-value="product_template_sudo.uom_id + product_template_sudo.uom_ids"/>
+                        <option
+                            t-foreach="product_uoms_sudo"
+                            t-as="uom_sudo"
+                            t-out="uom_sudo.name"
+                            t-att-value="uom_sudo.id"
+                            t-att-selected="uom_sudo.id == product.uom_id.id"/>
+                    </select>
+                    <span
+                        t-elif="product.type != 'combo'"
+                        t-out="product_template_sudo.uom_id.name"
+                    />
+                    <input t-else="" type="hidden" name="product_uom_id" t-att-value="product_template_sudo.uom_id.id"/>
+                </t>
             </div>
         </div>
     </template>
@@ -2308,6 +2326,7 @@
                                             class="d-inline align-top fw-bold text-wrap small"
                                         />
                                     </t>
+                                    <span t-if="line.product_template_id._has_multiple_uoms()" t-out="line.product_uom_id.name"/>
                                     <div
                                         t-attf-class="{{'d-block d-md-none' if not is_combo else ''}}"
                                         t-call="website_sale.cart_lines_price"
@@ -3096,13 +3115,15 @@
                                                                 name='website_sale_cart_summary_product_name'>
                                                                 <h6>
                                                                     <t t-out="int(line.product_uom_qty)" />
+                                                                    <t t-if="line.product_template_id._has_multiple_uoms()">
+                                                                        <t t-out="line.product_uom_id.name"/>
+                                                                    </t>
                                                                     <t t-if="line._get_shop_warning(clear=False)">
                                                                         <i class="fa fa-warning text-warning"
                                                                         role="img"
                                                                         t-att-title="line._get_shop_warning()"
                                                                         aria-label="Warning"/>
                                                                     </t>
-                                                                    x
                                                                     <t t-out="line.name_short"/>
                                                                 </h6>
                                                             </td>

@@ -62,6 +62,7 @@ var VariantMixin = {
             'product_id': this._getProductId($parent),
             'combination': combination,
             'add_qty': parseInt($parent.find('input[name="add_qty"]').val()),
+            'uom_id': parseInt($parent.find('select[name="product_uom_id"]').val()),
             'context': this.context,
             ...this._getOptionalCombinationInfoParam($parent),
         }).then((combinationData) => {

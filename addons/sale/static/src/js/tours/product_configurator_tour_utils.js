@@ -46,6 +46,18 @@ function removeOptionalProduct(productName) {
     };
 }
 
+function decreaseProductQuantity(productName) {
+    return {
+        content: `Increase the quantity of ${productName}`,
+        trigger: `
+            ${productSelector(productName)}
+            td.o_sale_product_configurator_qty
+            button:has(i.fa-minus)
+        `,
+        run: 'click',
+    };
+}
+
 function increaseProductQuantity(productName) {
     return {
         content: `Increase the quantity of ${productName}`,
@@ -67,6 +79,19 @@ function setProductQuantity(productName, quantity) {
             input[name="sale_quantity"]
         `,
         run: `edit ${quantity} && click .modal-body`,
+    };
+}
+
+function setProductUoM(productName, uomName) {
+    // UoM must be enabled
+    return {
+        content: `Set the uom of ${productName} to ${uomName}`,
+        trigger: `
+            ${productSelector(productName)}
+            td.o_sale_product_configurator_qty
+            select[name="sale_uom"]
+        `,
+        run: `selectByLabel ${uomName} && click .modal-body`,
     };
 }
 
@@ -222,7 +247,9 @@ export default {
     addOptionalProduct,
     removeOptionalProduct,
     increaseProductQuantity,
+    decreaseProductQuantity,
     setProductQuantity,
+    setProductUoM,
     assertProductQuantity,
     selectAttribute,
     setCustomAttribute,

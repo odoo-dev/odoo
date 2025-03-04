@@ -7,7 +7,11 @@ registry.category("web_tour.tours").add("website_sale_cart_notification", {
         ...tourUtils.addToCart({ productName: "website_sale_cart_notification_product_1" }),
         {
             content: "check that 1 website_sale_cart_notification_product_1 was added",
-            trigger: '.toast-body span:contains("1 x website_sale_cart_notification_product_1")',
+            trigger: '.toast-body span:contains("website_sale_cart_notification_product_1")',
+        },
+        {
+            content: "check that 1 website_sale_cart_notification_product_1 was added",
+            trigger: '.toast-body span:contains("1")',
         },
         {
             content: "check the price of 1 website_sale_cart_notification_product_1",
@@ -49,7 +53,11 @@ registry.category("web_tour.tours").add("website_sale_cart_notification", {
         },
         {
             content: "check that 3 website_sale_cart_notification_product_2 was added",
-            trigger: '.toast-body span:contains("3 x website_sale_cart_notification_product_2")',
+            trigger: '.toast-body span:contains("website_sale_cart_notification_product_2")',
+        },
+        {
+            content: "check that 3 website_sale_cart_notification_product_2 was added",
+            trigger: '.toast-body span:contains("3")',
         },
         {
             content: "check that the novariants/custom attributes are displayed.",

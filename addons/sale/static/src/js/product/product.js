@@ -17,6 +17,8 @@ export class Product extends Component {
         description_sale: [Boolean, String], // backend sends 'false' when there is no description
         price: Number,
         quantity: Number,
+        uom_id: Number,
+        uom_data: { type: Object, optional: true },
         attribute_lines: Object,
         optional: Boolean,
         imageURL: { type: String, optional: true },

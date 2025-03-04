@@ -61,8 +61,8 @@ class SaleProductConfiguratorController(Controller):
         pricelist = request.env['product.pricelist'].browse(pricelist_id)
         so_date = datetime.fromisoformat(so_date)
 
-        return dict(
-            products=[
+        return {
+            'products': [
                 dict(
                     **self._get_product_information(
                         product_template,
@@ -76,7 +76,7 @@ class SaleProductConfiguratorController(Controller):
                     ),
                 )
             ],
-            optional_products=[
+            'optional_products': [
                 dict(
                     **self._get_product_information(
                         optional_product_template,
@@ -95,8 +95,8 @@ class SaleProductConfiguratorController(Controller):
                 ) for optional_product_template in product_template.optional_product_ids if
                 self._should_show_product(optional_product_template, combination)
             ] if not only_main_product else [],
-            currency_id=currency_id,
-        )
+            'currency_id': currency_id,
+        }
 
     @route(
         route='/sale/product_configurator/create_product',
@@ -297,7 +297,10 @@ class SaleProductConfiguratorController(Controller):
                 'parent_exclusions': dict,
             }
         """
-        product_uom = request.env['uom.uom'].browse(product_uom_id)
+        uom_sudo = (
+            (product_uom_id and request.env['uom.uom'].sudo().browse(product_uom_id))
+            or product_template.sudo().uom_id
+        )
         product = product_template._get_variant_for_combination(combination)
         attribute_exclusions = product_template._get_attribute_exclusions(
             parent_combination=parent_combination,
@@ -312,33 +315,40 @@ class SaleProductConfiguratorController(Controller):
                 pricelist,
                 combination,
                 quantity=quantity,
-                uom=product_uom,
+                uom=uom_sudo,
                 currency=currency,
                 date=so_date,
                 **kwargs,
             ),
             quantity=quantity,
-            attribute_lines=[dict(
-                id=ptal.id,
-                attribute=dict(**ptal.attribute_id.read(['id', 'name', 'display_type'])[0]),
-                attribute_values=[
+            uom_id=uom_sudo.id,
+            attribute_lines=[{
+                'id': ptal.id,
+                'attribute': dict(**ptal.attribute_id.read(['id', 'name', 'display_type'])[0]),
+                'attribute_values': [
                     dict(
                         **ptav.read(['name', 'html_color', 'image', 'is_custom'])[0],
                         price_extra=self._get_ptav_price_extra(
                             ptav, currency, so_date, product_or_template
                         ),
                     ) for ptav in ptal.product_template_value_ids
-                    if ptav.ptav_active or combination and ptav.id in combination.ids
+                    if ptav.ptav_active or (combination and ptav.id in combination.ids)
                 ],
-                selected_attribute_value_ids=combination.filtered(
+                'selected_attribute_value_ids': combination.filtered(
                     lambda c: ptal in c.attribute_line_id
                 ).ids,
-                create_variant=ptal.attribute_id.create_variant,
-            ) for ptal in product_template.attribute_line_ids],
+                'create_variant': ptal.attribute_id.create_variant,
+            } for ptal in product_template.attribute_line_ids],
             exclusions=attribute_exclusions['exclusions'],
             archived_combinations=attribute_exclusions['archived_combinations'],
             parent_exclusions=attribute_exclusions['parent_exclusions'],
         )
+        if product_template.sudo()._has_multiple_uoms():
+            product_sudo = product.sudo()  # no uom access for public users
+            values['uom_data'] = {
+                uom.id: uom.name
+                for uom in (product_sudo.uom_id | product_sudo.uom_ids)
+            }
         # Shouldn't be sent client-side
         values.pop('pricelist_rule_id', None)
         return values

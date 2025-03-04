@@ -108,6 +108,7 @@ class Cart(PaymentPortal):
         product_template_id,
         product_id,
         quantity=1.0,
+        uom_id=None,
         product_custom_attribute_values=None,
         no_variant_attribute_value_ids=None,
         linked_products=None,
@@ -148,16 +149,28 @@ class Cart(PaymentPortal):
             product.type == 'combo'
             and combo_item_products
         ):
+            # TODO VFE ask LOTI, this duplicates the stock availability check,
+            # can't we handle it afterwards by considering the feedback from `_cart_add`
+            # (and update the main combo line with the minimal quantity then ?)
             # A combo product and its items should have the same quantity (by design). If the
             # requested quantity isn't available for one or more combo items, we should lower
             # the quantity of the combo product and its items to the maximum available quantity
             # of the combo item with the least available quantity.
             combo_quantity, _warning = order_sudo._verify_updated_quantity(
-                request.env['sale.order.line'], product_id, quantity, **kwargs
+                request.env['sale.order.line'],
+                product_id,
+                quantity,
+                uom_id=product.uom_id.id,
+                **kwargs
             )
             for item_product in combo_item_products:
+                product = request.env['product.product'].browse(product_id)
                 combo_item_quantity, _warning = order_sudo._verify_updated_quantity(
-                    request.env['sale.order.line'], item_product['product_id'], quantity, **kwargs
+                    request.env['sale.order.line'],
+                    item_product['product_id'],
+                    quantity,
+                    uom_id=product.uom_id.id,
+                    **kwargs
                 )
                 combo_quantity = min(combo_quantity, combo_item_quantity)
             quantity = combo_quantity
@@ -165,6 +178,7 @@ class Cart(PaymentPortal):
         values = order_sudo._cart_add(
             product_id=product_id,
             quantity=quantity,
+            uom_id=uom_id,
             product_custom_attribute_values=product_custom_attribute_values,
             no_variant_attribute_value_ids=no_variant_attribute_value_ids,
             **kwargs
@@ -194,6 +208,7 @@ class Cart(PaymentPortal):
                 product_values = order_sudo._cart_add(
                     product_id=product_data['product_id'],
                     quantity=product_data['quantity'],
+                    # TODO optional products uom
                     product_custom_attribute_values=product_data['product_custom_attribute_values'],
                     no_variant_attribute_value_ids=[
                         int(value_id) for value_id in product_data['no_variant_attribute_value_ids']
@@ -370,9 +385,10 @@ class Cart(PaymentPortal):
         return {}
 
     def _get_additional_cart_notification_information(self, line):
+        infos = {}
         # Only set the linked line id for combo items, not for optional products.
         if combo_item := line.combo_item_id:
-            infos = {'linked_line_id': line.linked_line_id.id}
+            infos['linked_line_id'] = line.linked_line_id.id
             # To sell a product type 'combo', one doesn't need to publish all combo choices. This
             # causes an issue when public users access the image of each choice via the /web/image
             # route. To bypass this access check, we send the raw image URL if the product is
@@ -382,5 +398,8 @@ class Cart(PaymentPortal):
                 and combo_item.product_id.image_128
             ):
                 infos['image_url'] = image_data_uri(combo_item.product_id.image_128)
-            return infos
-        return {}
+
+        if request.env['res.groups']._is_feature_enabled('uom.group_uom'):
+            infos['uom_name'] = line.product_uom_id.name
+
+        return infos
