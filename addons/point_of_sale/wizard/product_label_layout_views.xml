@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_label_layout_form_pos" model="ir.ui.view">
+        <field name="name">product.label.layout.form.pos</field>
+        <field name="model">product.label.layout</field>
+        <field name="inherit_id" ref="product.product_label_layout_form"/>
+        <field name="arch" type="xml">
+            <xpath expr='//field[@name="pricelist_id"]' position="after">
+                <field name="epson_template" invisible="'epson' not in print_format"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

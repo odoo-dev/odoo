@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="point_of_sale.print_lable">
+        <div class="d-flex justify-content-center align-items-center"
+            style="font-size: 30px; color: #000000; width: 512px">
+            <div class="d-flex flex-column align-items-center border border-dark rounded p-2"
+                t-att-style="'width: ' + this.labelSize.width + 'px; height: ' + this.labelSize.height + 'px;'">
+                <div class="fw-bold text-center w-100" t-att-style="'font-size: ' + this.fontSize + 'px;'">
+                    <t t-out="this.props.product?.name"/>
+                </div>
+                <t t-if="this.props.epson_template === 'jewelry'">
+                    <div class="d-flex flex-row justify-content-between align-items-center mt-1 w-100">
+                        <div t-if="this.props.product?.barcode" class="d-flex flex-column align-items-center">
+                            <img t-att-src="'/report/barcode/Code128/'+this.props.product.barcode"
+                                t-att-style="'width: ' + this.barcodeSize.width + 'px; height: ' + this.barcodeSize.height + 'px;'"
+                                alt="Barcode"/>
+                            <div class="text-center" t-att-style="'font-size: ' + this.fontSize + 'px;'">
+                                <t t-out="this.props.product.barcode"/>
+                            </div>
+                        </div>
+                        <div class="fw-bold" t-att-style="'font-size: ' + this.fontSize + 'px;'">
+                            <t t-out="this.props.product?.price"/>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="this.props.epson_template !== 'jewelry'">
+                    <div t-if="this.props.product?.barcode" class="mt-1">
+                        <img t-att-src="'/report/barcode/Code128/'+this.props.product.barcode"
+                            t-att-style="'width: ' + this.barcodeSize.width + 'px; height: ' + this.barcodeSize.height + 'px;'"
+                            alt="Barcode"/>
+                        <div class="text-center" t-att-style="'font-size: ' + this.fontSize + 'px;'">
+                            <t t-out="this.props.product.barcode"/>
+                        </div>
+                    </div>
+                    <div class="text-end w-100 fw-bold" t-att-style="'font-size: ' + this.fontSize + 'px;'">
+                        <t t-out="this.props.product?.price  "/>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>
