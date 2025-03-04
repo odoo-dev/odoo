@@ -1059,6 +1059,17 @@ class AccountTax(models.Model):
         for tax in reversed(sorted_taxes):
             eval_tax_amount(tax._eval_tax_amount_fixed_amount, tax)
 
+        # Then, let's the first price-excluded taxes that are not yet computed.
+        for tax in sorted_taxes:
+            is_already_computed = 'tax_amount' in taxes_data[tax.id]
+            if is_already_computed:
+                continue
+
+            if taxes_data[tax.id]['price_include']:
+                break
+            else:
+                eval_tax_amount(tax._eval_tax_amount_price_excluded, tax)
+
         # Then, let's travel the batches in the reverse order and process the price-included taxes.
         for tax in reversed(sorted_taxes):
             if taxes_data[tax.id]['price_include']:
