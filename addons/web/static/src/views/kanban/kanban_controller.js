@@ -56,8 +56,8 @@ export class KanbanController extends Component {
         });
         usePager(() => {
             const root = this.model.root;
-            const { count, hasLimitedCount, isGrouped, limit, offset } = root;
-            if (!isGrouped) {
+            const { count, hasLimitedCount, isGrouped,limit, offset } = root;
+            if (!isGrouped &&!this.model.useSampleModel) {
                 return {
                     offset: offset,
                     limit: limit,
