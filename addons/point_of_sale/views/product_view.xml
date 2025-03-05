@@ -134,6 +134,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='name']" position="after">
                 <field name="is_pos_groupable" groups="base.group_no_one"/>
+                <field name="is_pos_atq" groups="base.group_no_one"/>
             </xpath>
         </field>
     </record>
@@ -145,6 +146,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='name']" position="after">
                 <field name="is_pos_groupable" groups="base.group_no_one"/>
+                <field name="is_pos_atq" groups="base.group_no_one"/>
             </xpath>
         </field>
     </record>

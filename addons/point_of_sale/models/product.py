@@ -310,6 +310,8 @@ class UomCateg(models.Model):
 
     is_pos_groupable = fields.Boolean(string='Group Products in POS',
         help="Check if you want to group products of this category in point of sale orders")
+    is_pos_atq = fields.Boolean("Group for ATQ",
+        help="Check if you want to use ATQ for this category")
 
     @api.model
     def _load_pos_data_domain(self, data):
@@ -325,10 +327,11 @@ class Uom(models.Model):
     _inherit = ['uom.uom', 'pos.load.mixin']
 
     is_pos_groupable = fields.Boolean(related='category_id.is_pos_groupable', readonly=False)
+    is_pos_atq = fields.Boolean(related="category_id.is_pos_atq", readonly=False)
 
     @api.model
     def _load_pos_data_fields(self, config_id):
-        return ['id', 'name', 'category_id', 'factor_inv', 'factor', 'is_pos_groupable', 'uom_type', 'rounding']
+        return ['id', 'name', 'category_id', 'factor_inv', 'factor', 'is_pos_groupable', 'is_pos_atq', 'uom_type', 'rounding']
 
     def _load_pos_data(self, data):
         domain = self._load_pos_data_domain(data)

@@ -39,7 +39,7 @@
                 <button class="btn btn-secondary btn-lg py-5" t-on-click="() => this.pos.onDeleteOrder(this.pos.get_order())">
                     <i class="fa fa-trash me-1" role="img" /> Cancel Order 
                 </button>
-                <button t-if="!currentOrder?.is_empty() and pos.get_order()?.uiState.selected_orderline_uuid" t-att-class="buttonClass" t-attf-class="{{this.pos.amountQuantity ? 'highlight text-action' : ''}}" t-on-click="amountToggle">
+                <button t-if="!currentOrder?.is_empty() and pos.get_order()?.uiState.selected_orderline_uuid and currentOrder.get_selected_orderline().product_id.uom_id.is_pos_atq" t-att-class="buttonClass" t-attf-class="{{this.pos.amountQuantity ? 'highlight text-action' : ''}}" t-on-click="amountToggle">
                     <i class="fa fa-money me-1"/>Amount to Quantity
                 </button>
             </div>
