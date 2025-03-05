@@ -1,4 +1,3 @@
-
 .o_time_picker_input {
     transition: all .1s ease-in-out;
     transition-property: color, background-color, border-bottom-color;
@@ -17,13 +16,20 @@
 }
 
 .o_datetime_picker .o_time_picker {
-    width: 4rem;
-
-    input {
-        text-align: center;
-    }
-
     &.o_time_picker_seconds {
         width: 5.5rem;
+    }
+}
+
+/* Progressive enhancement for the input text sizing */
+.o_datetime_picker {
+    @supports not (field-sizing:content) {
+        max-width: 222px;
+    }
+
+    .o_time_picker_input {
+        @supports(field-sizing:content) {
+            field-sizing: content;
+        }
     }
 }

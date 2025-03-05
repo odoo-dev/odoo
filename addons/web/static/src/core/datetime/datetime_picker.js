@@ -159,7 +159,7 @@ const PRECISION_LEVELS = new Map()
 
             /** @type {WeekItem[]} */
             const lastWeeks = [];
-            let shouldAddLastWeek = false;
+            const shouldAddLastWeek = true;
 
             const dayItems = startDates.map((date, i) => {
                 const monthRange = [date.startOf("month"), date.endOf("month")];
@@ -184,9 +184,6 @@ const PRECISION_LEVELS = new Map()
                         weekDayItems.push(dayItem);
                         if (d === DAYS_PER_WEEK - 1) {
                             startOfNextWeek = day.plus({ day: 1 });
-                        }
-                        if (w === WEEKS_PER_MONTH - 1) {
-                            shouldAddLastWeek ||= !dayItem.isOutOfRange;
                         }
                     }
 
@@ -407,7 +404,7 @@ export class DateTimePicker extends Component {
             props.maxPrecision
         );
 
-        this.additionalMonth = props.range && !this.env.isSmall;
+        this.additionalMonth = false;
         this.maxDate = parseLimitDate(props.maxDate, MAX_VALID_DATE);
         this.minDate = parseLimitDate(props.minDate, MIN_VALID_DATE);
         if (this.props.type === "date") {
@@ -535,15 +532,16 @@ export class DateTimePicker extends Component {
      * @param {DateTimePickerProps} props
      */
     getTimeValues(props) {
-        const timeValues = this.values.map((val, index) =>
-            new Time({
-                hour:
-                    index === 1 && !this.values[1]
-                        ? (val || DateTime.local()).hour + 1
-                        : (val || DateTime.local()).hour,
-                minute: val?.minute || 0,
-                second: val?.second || 0,
-            })
+        const timeValues = this.values.map(
+            (val, index) =>
+                new Time({
+                    hour:
+                        index === 1 && !this.values[1]
+                            ? (val || DateTime.local()).hour + 1
+                            : (val || DateTime.local()).hour,
+                    minute: val?.minute || 0,
+                    second: val?.second || 0,
+                })
         );
 
         if (props.range) {
@@ -582,6 +580,10 @@ export class DateTimePicker extends Component {
         ev.preventDefault();
         const { step } = this.activePrecisionLevel;
         this.state.focusDate = this.clamp(this.state.focusDate.minus(step));
+    }
+
+    onDateInputChange(valueIndex, newDate) {
+        this.validateAndSelect(DateTime.fromFormat(newDate, "MM/dd/yyyy"), valueIndex, "date");
     }
 
     /**

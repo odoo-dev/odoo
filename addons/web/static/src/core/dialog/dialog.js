@@ -34,6 +34,7 @@ export class Dialog extends Component {
     static props = {
         contentClass: { type: String, optional: true },
         bodyClass: { type: String, optional: true },
+        bottomSheet: { type: String, optional: true },
         fullscreen: { type: Boolean, optional: true },
         footer: { type: Boolean, optional: true },
         header: { type: Boolean, optional: true },
@@ -59,6 +60,7 @@ export class Dialog extends Component {
     static defaultProps = {
         contentClass: "",
         bodyClass: "",
+        bottomSheet: false,
         fullscreen: false,
         footer: true,
         header: true,
@@ -117,7 +119,7 @@ export class Dialog extends Component {
     }
 
     get isFullscreen() {
-        return this.props.fullscreen || this.env.isSmall;
+        return this.props.fullscreen || (this.env.isSmall && !this.props.bottomSheet);
     }
 
     get contentStyle() {

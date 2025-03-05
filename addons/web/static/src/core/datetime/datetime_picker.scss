@@ -4,6 +4,8 @@
     --DateTimePicker__Template-rows: 3;
     --DateTimePicker__Template-columns: 4;
     --DateTimePicker__Day-template-rows: 6;
+    --selected-day-color: #{mix(lighten($o-component-active-border, 10%), $o-component-active-bg, 15%)};
+    --selection-color: #{$o-component-active-bg};
 
     // Header
     .o_datetime_picker_header .o_header_part {
@@ -22,53 +24,44 @@
         color: $o-component-active-color;
     }
 
-    .o_selected:not(.o_select_start):not(.o_select_end) {
+    .o_selected {
         background: $o-component-active-bg;
     }
 
-    .o_current,
-    .o_highlighted,
+    .o_today,
     .o_select_start,
     .o_select_end {
-        &:before {
-            content: "";
-            position: absolute;
-            box-shadow: inset 0 0 0 1px $o-component-active-border;
-            width: 100%;
-            aspect-ratio: 1;
-            border-radius: 100%;
-            z-index: 1;
+        --percent: calc(100% / sqrt(2));
+        background:
+            var(--selection-color)
+            radial-gradient(
+                circle,
+                var(--selected-day-color) 0%,
+                var(--selected-day-color) var(--percent),
+                rgba(255, 255, 255, 0) var(--percent),
+                rgba(255, 255, 255, 0) 100%
+            )
+        ;
+    }
+
+    .o_select_start {
+        border-top-left-radius: 50%;
+        border-bottom-left-radius: 50%;
+    }
+
+    .o_select_end  {
+        border-top-right-radius: 50%;
+        border-bottom-right-radius: 50%;
+    }
+
+    .o_today {
+        --selected-day-color: #{lighten($o-brand-primary, 50%)};
+        &:not(.o_selected) {
+            border-radius: 50%;
+            background: var(--selected-day-color);
         }
     }
 
-    .o_select_start,
-    .o_select_end {
-        &:before {
-            background: mix(lighten($o-component-active-border, 10%), $o-component-active-bg, 15%);
-        }
-
-        &:after {
-            content: "";
-            position: absolute;
-            background: transparent;
-            width: 50%;
-            aspect-ratio: 1/2;
-        }
-
-        &:not(.o_select_end):after {
-            right: 0;
-            background: $o-component-active-bg;
-        }
-
-        &:not(.o_select_start):after {
-            right: 50%;
-            background: $o-component-active-bg;
-        }
-    }
-
-    .o_today span {
-        border-bottom: 0.2em solid $danger;
-    }
 
     // Grids
 
@@ -106,15 +99,6 @@
         gap: calc(
             #{$btn-border-width} * 4 + #{$o-font-size-base} * 2 + #{$input-btn-padding-x} * 4
         );
-    }
-
-    .o_cell_md {
-        aspect-ratio: 1;
-        @include media-breakpoint-up(md) {
-            padding: 0.4rem;
-            width: var(--DateTimePicker__Cell-size-md);
-            height: var(--DateTimePicker__Cell-size-md);
-        }
     }
 
     .o_cell_lg {

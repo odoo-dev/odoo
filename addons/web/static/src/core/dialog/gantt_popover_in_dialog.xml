@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="web.GanttPopoverInDialog">
+      <Dialog header="false" footer="false" bottomSheet="true">
+          <t t-component="props.component" t-props="componentProps"/>
+      </Dialog>
+    </t>
+</templates>

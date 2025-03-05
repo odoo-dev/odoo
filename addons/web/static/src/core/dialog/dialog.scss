@@ -70,6 +70,18 @@
                 }
             }
         }
+        &.o_bottom_sheet {
+            .modal-dialog {
+                position: fixed;
+                inset: auto 0 0 0;
+                min-height: unset;
+                margin: 0;
+
+                .modal-body {
+                    padding: 0;
+                }
+            }
+        }
     }
 }
 

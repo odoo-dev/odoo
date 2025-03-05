@@ -6,6 +6,7 @@ import { ensureArray, zip, zipWith } from "../utils/arrays";
 import { deepCopy, shallowEqual } from "../utils/objects";
 import { DateTimePicker } from "./datetime_picker";
 import { DateTimePickerPopover } from "./datetime_picker_popover";
+import { GanttPopoverInDialog } from "@web/core/dialog/gantt_popover_in_dialog";
 
 /**
  * @typedef {luxon["DateTime"]["prototype"]} DateTime
@@ -51,8 +52,8 @@ const parsers = {
 };
 
 export const datetimePickerService = {
-    dependencies: ["popover"],
-    start(env, { popover: popoverService }) {
+    dependencies: ["popover", "dialog"],
+    start(env, { popover: popoverService, dialog: dialogService }) {
         return {
             /**
              * @param {DateTimePickerHookParams} hookParams
@@ -62,7 +63,7 @@ export const datetimePickerService = {
                     hookParams.createPopover ??
                     ((...args) => makePopover(popoverService.add, ...args));
                 const ensureVisibility = hookParams.ensureVisibility ?? (() => env.isSmall);
-                const popover = createPopover(DateTimePickerPopover, {
+                const popoverOptions = {
                     onClose: () => {
                         if (!allowOnClose) {
                             return;
@@ -75,7 +76,8 @@ export const datetimePickerService = {
                             restoreTargetMargin = null;
                         }
                     },
-                });
+                };
+                const popover = createPopover(DateTimePickerPopover, popoverOptions);
                 // Hook methods
 
                 /**
@@ -251,16 +253,27 @@ export const datetimePickerService = {
                     if (!popover.isOpen) {
                         const popoverTarget = getPopoverTarget();
                         if (ensureVisibility()) {
-                            const { marginBottom } = popoverTarget.style;
-                            // Adds enough space for the popover to be displayed below the target
-                            // even on small screens.
-                            popoverTarget.style.marginBottom = `100vh`;
-                            popoverTarget.scrollIntoView(true);
-                            restoreTargetMargin = async () => {
-                                popoverTarget.style.marginBottom = marginBottom;
+                            const onClose = () => {
+                                /*
+                                if (status(owner) !== "destroyed") {
+                                    popoverOptions.onClose?.();
+                                }*/
                             };
+                            const dialogAddFn = (_, comp, props, popoverOptions) =>
+                                dialogService.add(comp, props, popoverOptions);
+                            const popoverInDialog = makePopover(dialogAddFn, GanttPopoverInDialog, {
+                                onClose,
+                            });
+                            popoverInDialog.open(popoverTarget, {
+                                component: DateTimePickerPopover,
+                                componentProps: {
+                                    close: pickerProps.close,
+                                    pickerProps,
+                                },
+                            });
+                        } else {
+                            popover.open(popoverTarget, { pickerProps });
                         }
-                        popover.open(popoverTarget, { pickerProps });
                     }
 
                     focusActiveInput();
