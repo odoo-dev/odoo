@@ -149,7 +149,27 @@ export class OrderSummary extends Component {
                 }
             } else if (numpadMode === "discount" && val !== "remove") {
                 selectedLine.setDiscount(val);
-            } else if (numpadMode === "price" && val !== "remove") {
+            } else if (numpadMode === "price" && this.pos.amountQuantity){
+                if (selectedLine.combo_parent_id) {
+                    selectedLine = selectedLine.combo_parent_id;   
+                }
+                if (val === "remove") {
+                    this.currentOrder.removeOrderline(selectedLine);
+                } else {
+                    const qty = val / selectedLine.unitDisplayPrice;
+                    const result = selectedLine.setQuantity(
+                        qty,
+                        Boolean(selectedLine.combo_line_ids?.length)
+                    );
+                    for (const line of selectedLine.combo_line_ids) {
+                        line.setQuantity(qty, true);
+                    }
+                    if (result !== true) {
+                        this.dialog.add(AlertDialog, result);
+                        this.numberBuffer.reset();
+                    }
+                }
+            }else if (numpadMode === "price" && val !== "remove") {
                 this.setLinePrice(selectedLine, val);
             }
         }

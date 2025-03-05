@@ -124,6 +124,11 @@ export class ControlButtons extends Component {
         return order ? _t("General Note") : _t("Note");
     }
 
+    amountToggle() {
+        this.pos.amountQuantity = !this.pos.amountQuantity;
+        this.pos.numberBuffer.reset();
+    }
+    
     get buttonClass() {
         return this.props.showRemainingButtons
             ? "btn btn-secondary btn-lg py-5"

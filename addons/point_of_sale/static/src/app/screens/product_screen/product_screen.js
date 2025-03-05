@@ -134,7 +134,7 @@ export class ProductScreen extends Component {
             },
             {
                 value: "price",
-                text: _t("Price"),
+                text: this.pos.amountQuantity ? _t("ATQ") : _t("Price") ,
                 disabled:
                     !this.pos.cashierHasPriceControlRights() ||
                     this.pos.cashier._role === "minimal",
