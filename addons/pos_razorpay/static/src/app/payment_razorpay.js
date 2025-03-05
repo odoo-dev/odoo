@@ -4,7 +4,7 @@ import { _t } from "@web/core/l10n/translation";
 import { PaymentInterface } from "@point_of_sale/app/payment/payment_interface";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
-const REQUEST_TIMEOUT = 10000;
+const REQUEST_TIMEOUT = 5000;
 
 export class PaymentRazorpay extends PaymentInterface {
     setup() {
