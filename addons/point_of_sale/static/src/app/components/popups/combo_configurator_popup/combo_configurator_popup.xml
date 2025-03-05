@@ -30,7 +30,7 @@
             <t t-set-slot="footer">
                 <div class="d-flex flex-column flex-lg-row-reverse align-items-center gap-2 w-100">
                     <button class="confirm btn btn-primary btn-lg lh-lg w-100 w-lg-25 me-lg-auto"
-                        t-att-disabled="!areAllCombosSelected()" t-on-click="confirm">
+                        t-att-disabled="!areAllCombosSelected()" t-on-click="confirm" data-hotkey="enter">
                         Add to order
                     </button>
                 </div>

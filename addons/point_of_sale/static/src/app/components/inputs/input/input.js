@@ -28,6 +28,7 @@ export class Input extends TModelInput {
         class: { type: String, optional: true },
         callback: { type: Function, optional: true },
         isOpenCallback: { type: Function, optional: true },
+        index: { type: String, optional: true },
     };
     static defaultProps = {
         class: "",

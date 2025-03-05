@@ -20,10 +20,10 @@
                             </div>
                             <div class="receipt-options d-flex flex-column gap-2">
                                 <div class="d-flex gap-1">
-                                    <button class="button print btn btn-lg btn-secondary w-100 py-3" t-on-click="() => doFullPrint.call()">
+                                    <button class="button print btn btn-lg btn-secondary w-100 py-3" t-on-click="() => doFullPrint.call()" data-hotkey="p">
                                         <i t-attf-class="fa {{doFullPrint.status === 'loading' ? 'fa-fw fa-spin fa-circle-o-notch' : 'fa-print'}} me-1" />Print Full Receipt
                                     </button>
-                                    <button t-if="pos.config.basic_receipt" class="button print btn btn-lg btn-secondary w-100 py-3" t-on-click="() => doBasicPrint.call()">
+                                    <button t-if="pos.config.basic_receipt" class="button print btn btn-lg btn-secondary w-100 py-3" t-on-click="() => doBasicPrint.call()" data-hotkey="shift+p">
                                         <i t-attf-class="fa {{doBasicPrint.status === 'loading' ? 'fa-fw fa-spin fa-circle-o-notch' : 'fa-print'}} me-1" />Print Basic Receipt
                                     </button>
                                 </div>
@@ -52,7 +52,7 @@
                             </div>
                         </div>
                         <div id="action_btn_desktop" t-if="!ui.isSmall" class="validation-buttons d-flex w-100 gap-2 p-2 sticky-bottom">
-                            <button class="button next validation btn btn-primary btn-lg w-100 py-4 lh-lg" t-att-class="{ highlight: !locked }" t-on-click="orderDone" name="done">
+                            <button class="button next validation btn btn-primary btn-lg w-100 py-4 lh-lg" t-att-class="{ highlight: !locked }" t-on-click="orderDone" name="done" data-hotkey="enter">
                                 New Order
                             </button>
                         </div>

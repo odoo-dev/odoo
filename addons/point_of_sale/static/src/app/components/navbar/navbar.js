@@ -58,6 +58,9 @@ export class Navbar extends Component {
     }
 
     handleKeydown(event) {
+        if (event.altKey) {
+            return;
+        }
         const isEndCharacter = event.key.match(/(Enter|Tab)/);
         const isSpecialKey =
             !["Control", "Alt"].includes(event.key) && (event.key.length > 1 || event.metaKey);

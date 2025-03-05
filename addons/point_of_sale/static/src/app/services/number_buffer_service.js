@@ -163,6 +163,7 @@ class NumberBuffer extends EventBus {
     _onKeyboardInput(event) {
         return (
             this._currentBufferHolder &&
+            !event.altKey &&
             this._bufferEvents(this._onInput((event) => event.key))(event)
         );
     }

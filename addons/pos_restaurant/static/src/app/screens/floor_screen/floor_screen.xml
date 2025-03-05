@@ -6,7 +6,7 @@
             <t t-set="hasSelectedTable" t-value="selectedTables.length > 0" />
             <t t-set="firstSelectedTable" t-value="selectedTables.length ? selectedTables[0] : null" />
             <div t-attf-class="d-flex flex-row {{pos.isEditMode ? 'flex-wrap' : ''}} justify-content-between px-2 gap-1 border-bottom bg-view">
-                <button t-if="!pos.isEditMode" class="new-order btn btn-primary btn-lg lh-lg my-2" t-on-click="() => this.clickNewOrder()">
+                <button t-if="!pos.isEditMode" class="new-order btn btn-primary btn-lg lh-lg my-2" t-on-click="() => this.clickNewOrder()" data-hotkey="n">
                     <i class="fa fa-plus fa-fw" role="img" aria-label="New Order" title="New Order"/>
                     <span t-if="!ui.isSmall" class="ms-1">New Order</span>
                 </button>

@@ -126,11 +126,12 @@ export class ProductScreen extends Component {
             DEFAULT_LAST_ROW.map((button) => button.value) + [BACKSPACE.value];
 
         return getButtons(DEFAULT_LAST_ROW, [
-            { value: "quantity", text: _t("Qty") },
+            { value: "quantity", text: _t("Qty"), hotkey: "q" },
             {
                 value: "discount",
                 text: _t("%"),
                 disabled: !this.pos.config.manual_discount || this.pos.cashier._role === "minimal",
+                hotkey: "d",
             },
             {
                 value: "price",
@@ -138,6 +139,7 @@ export class ProductScreen extends Component {
                 disabled:
                     !this.pos.cashierHasPriceControlRights() ||
                     this.pos.cashier._role === "minimal",
+                hotkey: "p",
             },
             BACKSPACE,
         ]).map((button) => ({

@@ -34,7 +34,8 @@
                 <button class="button btn btn-lg btn-primary"
                 t-if="!(this.pos.cashier._role === 'minimal')"
                     t-on-click="confirm"
-                    t-att-disabled="!env.utils.isValidFloat(state.openingCash)">
+                    t-att-disabled="!env.utils.isValidFloat(state.openingCash)"
+                    data-hotkey="enter">
                     Open Register
                 </button>
                 <button class="backend-button button btn btn-lg btn-secondary"

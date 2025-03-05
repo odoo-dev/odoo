@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_restaurant.NumpadDropdown">
-        <button class="btn btn-secondary btn-lg lh-lg" t-on-click="() => this.toggleTableSelector()">
+        <button class="btn btn-secondary btn-lg lh-lg" t-on-click="() => this.toggleTableSelector()" data-hotkey="h">
             <i class="fa fa-fw fa-hashtag" aria-hidden="true"/>
         </button>
         <div t-if="this.pos.tableSelectorState and !this.isSmall" class="table-selector bg-light rounded d-flex flex-column z-3 shadow overflow-hidden">
@@ -10,7 +10,7 @@
                 <span t-else="" class="text-muted fs-3">Enter a table number</span>
             </div>
             <Numpad buttons="this.numpadButtons" class="'flex-grow-1 bg-200'"/>
-            <button class="jump-button w-100 btn btn-primary rounded-0 border-0" t-on-click="() => this.searchOrder()">
+            <button class="jump-button w-100 btn btn-primary rounded-0 border-0" t-on-click="() => this.searchOrder()" data-hotkey="enter">
                 Jump
             </button>
         </div>

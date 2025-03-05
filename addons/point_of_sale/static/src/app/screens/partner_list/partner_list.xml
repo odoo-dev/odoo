@@ -6,7 +6,7 @@
             <t t-set-slot="header">
                 <button t-if="!ui.isSmall and this.pos.cashier._role !== 'minimal'" class="btn btn-primary btn-lg lh-lg me-2" role="img" aria-label="Add a customer"
                         t-on-click="() => this.editPartner()"
-                        title="Add a customer">
+                        title="Add a customer" data-hotKey="n">
                 Create 
                 </button>
                 <span class="modal-title fs-4">Choose customer</span>
@@ -17,7 +17,8 @@
                     icon="{type: 'fa', value: 'fa-search'}"
                     t-on-enter="() => this.searchPartner()"
                     autofocus="true"
-                    debounceMillis="100" />
+                    debounceMillis="100"
+                    index="'s'" />
             </t>
             <div class="h-100">
                 <t t-set="initialPartners" t-value="getPartners(this.state.initialPartners)"/>

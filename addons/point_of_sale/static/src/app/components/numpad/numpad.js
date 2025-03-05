@@ -12,6 +12,7 @@ export const buttonsType = {
                 text: { type: String, optional: true },
                 class: { type: String, optional: true },
                 disabled: { type: Boolean, optional: true },
+                hotkey: { type: String, optional: true },
             },
         },
         Number,

@@ -79,7 +79,8 @@
         <t t-else="">
             <button class="button next validation btn btn-primary btn-lg w-50 py-3 lh-lg"
                 t-attf-class="{{currentOrder.isPaid() and currentOrder._isValidEmptyOrder() and !currentOrder.isRefundInProcess() ? 'highlight' : 'disabled'}}"
-                t-on-click="() => this.validateOrder()">
+                t-on-click="() => this.validateOrder()"
+                data-hotkey="enter">
                 <span class="next_text">Validate</span>
             </button>
         </t>
@@ -106,7 +107,8 @@
                 <t t-set="hasOptionalButtons" t-value="pos.config.iface_tipproduct and pos.config.tip_product_id or pos.config.iface_cashdrawer or pos.config.ship_later" />
                 <button class="button partner-button btn btn-secondary btn-lg w-100 w-md-50 lh-lg text-truncate"
                     t-att-class="{ 'highlight text-action': currentOrder.getPartner() }"
-                    t-on-click="() => this.pos.selectPartner()">
+                    t-on-click="() => this.pos.selectPartner()"
+                    data-hotkey="c">
                     <i class="fa fa-user me-2" role="img" title="Customer" />
                     <span class="partner-name">
                         <t t-if="currentOrder.getPartner()" t-esc="currentOrder.getPartner().name"/>
@@ -114,7 +116,7 @@
                     </span>
                 </button>
                 <button class="button js_invoice btn btn-secondary btn-lg d-flex justify-content-between align-items-baseline w-100 w-md-50 lh-lg" t-att-class="{ 'highlight active': currentOrder.isToInvoice() }"
-                    t-on-click="toggleIsToInvoice" t-att-disabled="currentOrder.lines[0]?.refunded_orderline_id?.order_id?.isToInvoice()">
+                    t-on-click="toggleIsToInvoice" t-att-disabled="currentOrder.lines[0]?.refunded_orderline_id?.order_id?.isToInvoice()" data-hotkey="i">
                     <span><i class="fa fa-file-text-o me-2" />Invoice</span>
                     <i class="fa me-2" t-attf-class="{{ currentOrder.isToInvoice() ? 'fa-check-square text-action' : 'fa-square-o' }}" /> 
                 </button>
@@ -148,7 +150,7 @@
                 <t t-foreach="payment_methods_from_config" t-as="paymentMethod" t-key="paymentMethod.id">
                     <div t-if="!(this.pos.cashier._role === 'minimal' and paymentMethod.type === 'pay_later')" class="button paymentmethod btn btn-secondary btn-lg lh-lg flex-fill"
                         t-att-class="{'opacity-50': this.pos.paymentTerminalInProgress and paymentMethod.use_payment_terminal}"
-                        t-on-click="() => this.addNewPaymentLine(paymentMethod)">
+                        t-on-click="() => this.addNewPaymentLine(paymentMethod)" t-att-data-hotkey="paymentMethod_index + 1">
                         <div class="payment-method-display d-flex align-items-center gap-2 text-wrap text-start lh-sm">
                             <img class="payment-method-icon" t-att-src="paymentMethodImage(paymentMethod.id)" />
                             <span class="payment-name" t-esc="pos.getPaymentMethodDisplayText(paymentMethod, currentOrder)" />

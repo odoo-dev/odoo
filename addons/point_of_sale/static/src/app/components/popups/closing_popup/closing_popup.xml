@@ -98,7 +98,7 @@
                 <div class="w-100 d-flex flex-wrap justify-content-between gap-2" t-att-class="{'container-fluid row p-0': this.ui.isSmall}">
                     <!-- First line of buttons -->
                     <div t-att-class="{'col-12 col-md-6 p-0': this.ui.isSmall}" class="d-flex gap-2">
-                        <button class="button highlight btn btn-primary" t-att-disabled="!canConfirm()" t-on-click="confirm" t-att-class="this.ui.isSmall ? 'w-100' : 'btn-lg'">Close Register</button>
+                        <button class="button highlight btn btn-primary" t-att-disabled="!canConfirm()" t-on-click="confirm" t-att-class="this.ui.isSmall ? 'w-100' : 'btn-lg'" data-hotkey="enter">Close Register</button>
                         <button class="button btn btn-secondary" t-att-disabled="!canCancel()" t-on-click="cancel" t-att-class="this.ui.isSmall ? 'w-100' : 'btn-lg'">Discard</button>
                     </div>
 

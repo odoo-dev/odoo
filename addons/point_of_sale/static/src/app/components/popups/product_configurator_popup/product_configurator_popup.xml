@@ -182,10 +182,10 @@
                     <button
                             class="btn btn-primary btn-lg lh-lg w-50 o-default-button"
                             t-att-class="{'disabled': isArchivedCombination()}"
-                            t-on-click="confirm">
+                            t-on-click="confirm" data-hotkey="enter">
                             Add
                         </button>
-                    <button class="btn btn-secondary btn-lg lh-lg w-50 o-default-button" t-on-click="close">Discard</button>
+                    <button class="btn btn-secondary btn-lg lh-lg w-50 o-default-button" t-on-click="close" data-hotkey="x">Discard</button>
                 </div>
             </t>
         </Dialog>

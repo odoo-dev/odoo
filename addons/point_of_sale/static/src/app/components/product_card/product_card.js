@@ -13,6 +13,7 @@ export class ProductCard extends Component {
         onClick: { type: Function, optional: true },
         showWarning: { type: Boolean, optional: true },
         productCartQty: { type: [Number, undefined], optional: true },
+        index: { type: [Number, Boolean], optional: true },
     };
     static defaultProps = {
         onClick: () => {},

@@ -10,7 +10,8 @@
           t-att-value="button.text or button.value"
           t-on-click="() => this.onClick(button.value)"
           t-att-disabled="button.disabled"
-          t-esc="button.text or button.value" />
+          t-esc="button.text or button.value"
+          t-att-data-hotkey="button.hotkey or false" />
       </t>
     </div>
   </t>

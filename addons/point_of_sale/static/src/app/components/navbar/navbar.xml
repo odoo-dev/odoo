@@ -6,11 +6,11 @@
             <div class="pos-leftheader d-flex align-items-center flex-grow-1 overflow-auto" t-att-class="{'d-none': ui.isSmall and state.searchBarOpen, 'mw-100': this.pos.getOrder()}">
                 <div class="d-flex flex-shrink-0 align-items-center gap-1 position-relative pe-2" t-att-class="{ 'w-100': !ui.isSmall }">
                     <div class="navbar-menu d-flex">
-                        <button class="register-label btn btn-lg btn-light lh-lg" t-att-class="{'active': mainButton === 'register'}" t-on-click="() => this.pos.showOrderScreen(true)">
+                        <button class="register-label btn btn-lg btn-light lh-lg" t-att-class="{'active': mainButton === 'register'}" t-on-click="() => this.pos.showOrderScreen(true)" data-hotkey="r">
                             <span t-if="!ui.isSmall">Register</span>
                             <i t-else="" class="fa fa-fw fa-pencil" t-att-class="{'fa-lg' : !ui.isSmall}"/>
                         </button>
-                        <button class="orders-button btn btn-lg btn-light lh-lg" t-att-class="{'active': mainButton === 'order'}" t-on-click="() => this.pos.showScreen('TicketScreen')">
+                        <button class="orders-button btn btn-lg btn-light lh-lg" t-att-class="{'active': mainButton === 'order'}" t-on-click="() => this.pos.showScreen('TicketScreen')" data-hotkey="o">
                             <t t-if="!ui.isSmall">
                                 <span>Orders</span>
                             </t>
@@ -38,7 +38,8 @@
                     debounceMillis="500"
                     getRef="(ref) => this.inputRef = ref"
                     t-if="pos.showSearchButton()"
-                    isOpenCallback="(isOpen) => state.searchBarOpen = isOpen" />
+                    isOpenCallback="(isOpen) => state.searchBarOpen = isOpen"
+                    index="'s'" />
                     <button class="btn btn-light btn-lg lh-lg" t-if="isBarcodeScannerSupported() and ['ProductScreen', 'TicketScreen'].includes(pos.mainScreen.component.name) and !pos.config.module_pos_restaurant" t-on-click="onClickScan">
                         <i class="fa fa-fw fa-lg fa-barcode" /><span t-if="this.pos.scanning" class="ms-1">Stop</span>
                     </button>
@@ -50,7 +51,7 @@
                     <!-- No need to show the cashier name on small screens -->
                     <CashierName t-if="!ui.isSmall"/>
                     <Dropdown>
-                        <button class="btn btn-light btn-lg lh-lg">
+                        <button class="btn btn-light btn-lg lh-lg" data-hotkey="l">
                             <i class="fa fa-fw fa-bars"/>
                         </button>
                         <t t-set-slot="content">
