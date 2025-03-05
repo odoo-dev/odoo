@@ -14,7 +14,56 @@ import {
 } from "@web/../tests/web_test_helpers";
 import { saleModels } from "./sale_test_helpers";
 
+class SaleOrder extends models.Model {
+    _name = "sale.order";
+
+    name = fields.Char();
+    order_line = fields.One2many({
+        relation: "sale.order.line",
+        relation_field: "order_id",
+    });
+    company_id = fields.Many2one({
+        string: 'company',
+        relation: "res.company",
+    });
+
+    _records = [
+        {
+            id: 1,
+            name: "first record",
+            order_line: [],
+            company_id: 1,
+        },
+    ];
+}
+
 class SaleOrderLine extends saleModels.SaleOrderLine {
+
+    _name = "sale.order.line";
+
+    order_id = fields.Many2one({
+        string: "Order Reference",
+        relation: "sale.order",
+        relation_field: "order_line",
+    });
+    product_template_id = fields.Many2one({
+        string: "Product",
+        relation: "product.template",
+    });
+    product_id = fields.Many2one({
+        string: "Product",
+        relation: "product.product",
+    });
+    name = fields.Char();
+    product_type = fields.Selection({
+        selection: [],
+    });
+    service_tracking = fields.Selection({
+        selection: [],
+    });
+    is_configurable_product = fields.Boolean({
+        string: "Is product configurable",
+    });
     product_template_attribute_value_ids = fields.Many2many({
         string: "Product template attributes values",
         relation: "product.template.attribute.value",
@@ -25,6 +74,8 @@ class ProductTemplateAttributeValue extends models.Model {
     _name = "product.template.attribute.value";
 
     name = fields.Char();
+
+    _records = [{ id: 14, name: "desk" }];
 }
 
 defineModels({ ...saleModels, SaleOrderLine, ProductTemplateAttributeValue });
@@ -41,17 +92,32 @@ saleModels.SaleOrder._views.form = /* xml */ `
     </form>
 `;
 
-test.tags("desktop");
+class Company extends models.Model {
+    _name = "res.company";
+
+    name = fields.Char();
+
+    _records = [{ id: 1, name: "test company" }];
+}
+
+defineModels([Company, SaleOrder, SaleOrderLine, ProductTemplate, ProductTemplateAttributeValue, Product]);
+defineMailModels();
+
+test.tags`desktop`;
 test("pressing tab with incomplete text will create a product", async () => {
     onRpc(({ method }) => {
         expect.step(method);
     });
+    onRpc('/sale/product/get_values', ()=>{
+        return {dialog: 'false'}
+    })
     await mountView({
         type: "form",
         resModel: "sale.order",
         arch: `
                 <form>
                     <sheet>
+                        <field name="company_id"/>
                         <field name="order_line">
                             <list editable="bottom">
                                 <field name="product_template_id" widget="sol_product_many2one"/>
@@ -74,7 +140,6 @@ test("pressing tab with incomplete text will create a product", async () => {
         "onchange",
         "web_name_search",
         "name_create",
-        "get_single_product_variant",
     ]);
 });
 
