@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="discuss_channel_action_new" model="ir.actions.act_window">
+            <field name="name">Live Chat Sessions</field>
+            <field name="res_model">discuss.channel</field>
+            <field name="view_mode">kanban,list,form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'kanban', 'view_id': ref('im_livechat.discuss_channel_view_kanban')}),
+                (0, 0, {'view_mode': 'list', 'view_id': ref('im_livechat.discuss_channel_view_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('im_livechat.discuss_channel_view_form')})]"/>
+            <field name="search_view_id" ref="im_livechat.discuss_channel_view_search"/>
+            <field name="domain">[('livechat_channel_id', '!=', None),("channel_member_ids.partner_id", "in", [active_id])]</field>
+            <field name="context">{'search_default_session_not_empty': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_empty_folder">
+                    Your chatter history is empty
+                </p><p>
+                    Create a channel and start chatting to fill up your history.
+                </p>
+            </field>
+        </record>
+
+        <record id="view_partner_form" model="ir.ui.view">
+            <field name="name">res.partner.view.buttons</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form" />
+            <field name="priority" eval="2"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                        <button
+                            groups="base.group_user"
+                            class="oe_stat_button"
+                            type="action"
+                            name="im_livechat.discuss_channel_action_new"
+                            invisible="not livechat_channel_count"
+                            icon="fa-comments"
+                        >
+                            <field string="Livechat" name="livechat_channel_count" widget="statinfo"/>
+                        </button>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
