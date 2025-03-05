@@ -4,6 +4,7 @@ import { mockDate } from "@odoo/hoot-mock";
 import {
     defineModels,
     fields,
+    mockService,
     models,
     mountView,
     onRpc,
@@ -37,7 +38,15 @@ const forecastDomain = (forecastStart) => [
 test("Forecast graph view", async () => {
     expect.assertions(5);
     mockDate("2021-09-16 16:54:00");
-
+    mockService("lazy_session", {
+        getValue(key, callback) {
+            if (key === "bundles") {
+                callback({ bundles: [] });
+            } else {
+                super.getValue(key, callback);
+            }
+        },
+    });
     const expectedDomains = [
         forecastDomain("2021-09-01"), // month granularity due to no groupby
         forecastDomain("2021-09-16"), // day granularity due to simple bar groupby

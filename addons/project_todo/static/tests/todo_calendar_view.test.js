@@ -1,6 +1,6 @@
 import { expect, test, describe } from "@odoo/hoot";
 import { click, edit } from "@odoo/hoot-dom";
-import { contains, mountView, onRpc } from "@web/../tests/web_test_helpers";
+import { contains, mockService, mountView, onRpc } from "@web/../tests/web_test_helpers";
 import { mockDate, animationFrame } from "@odoo/hoot-mock";
 
 import { defineTodoModels } from "./todo_test_helpers";
@@ -12,7 +12,15 @@ defineTodoModels();
 test("test creation of todo from the calendar view", async () => {
     mockDate("2022-01-03 12:00:00", +0);
     onRpc("has_access", () => true);
-
+    mockService("lazy_session", {
+        getValue(key, callback) {
+            if (key === "bundles") {
+                callback({ bundles: [] });
+            } else {
+                super.getValue(key, callback);
+            }
+        },
+    });
     ProjectTask._views = {
         form: `
             <form>

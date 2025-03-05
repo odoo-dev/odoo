@@ -11,7 +11,7 @@ import { registry } from "@web/core/registry";
 import { formatFloat } from "@web/views/fields/formatters";
 import { SEP } from "./graph_model";
 import { sortBy } from "@web/core/utils/arrays";
-import { loadBundle } from "@web/core/assets";
+import { loadBundleFromComponent } from "@web/core/assets";
 import { renderToMarkup } from "@web/core/utils/render";
 import { useService } from "@web/core/utils/hooks";
 
@@ -131,7 +131,7 @@ export class GraphRenderer extends Component {
         this.legendTooltip = null;
 
         onWillStart(async () => {
-            await loadBundle("web.chartjs_lib");
+            await loadBundleFromComponent("web.chartjs_lib", this.env);
         });
 
         useEffect(() => this.renderChart());

@@ -1,10 +1,11 @@
-import { expect, test } from "@odoo/hoot";
+import { beforeEach, expect, test } from "@odoo/hoot";
 import { click, press } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import {
     defineModels,
     fields,
     findComponent,
+    mockService,
     models,
     mountView,
 } from "@web/../tests/web_test_helpers";
@@ -81,7 +82,17 @@ class User extends models.Model {
     }
 }
 defineModels([Partner, User]);
-
+beforeEach(() => {
+    mockService("lazy_session", {
+        getValue(key, callback) {
+            if (key === "bundles") {
+                callback({ bundles: [] });
+            } else {
+                super.getValue(key, callback);
+            }
+        },
+    });
+});
 // Kanban
 // WOWL remove this helper and user the control panel instead
 const reload = async (kanban, params = {}) => {

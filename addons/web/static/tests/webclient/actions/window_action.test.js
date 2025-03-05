@@ -34,6 +34,7 @@ import {
     toggleSearchBarMenu,
     validateSearch,
     webModels,
+    mockService,
 } from "@web/../tests/web_test_helpers";
 
 import { browser } from "@web/core/browser/browser";
@@ -1302,6 +1303,16 @@ test("restore previous view state when switching back", async () => {
         },
     ]);
     Partner._views["graph,false"] = "<graph/>";
+
+    mockService("lazy_session", {
+        getValue(key, callback) {
+            if (key === "bundles") {
+                callback({ bundles: [] });
+            } else {
+                super.getValue(key, callback);
+            }
+        },
+    });
 
     await mountWithCleanup(WebClient);
     await getService("action").doAction(30);

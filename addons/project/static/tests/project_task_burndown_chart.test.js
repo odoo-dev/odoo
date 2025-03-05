@@ -71,6 +71,16 @@ mockService("notification", () => ({
     },
 }));
 
+mockService("lazy_session", {
+    getValue(key, callback) {
+        if (key === "bundles") {
+            callback({ bundles: [] });
+        } else {
+            super.getValue(key, callback);
+        }
+    },
+});
+
 const mountViewParams = {
     resModel: "project.task.burndown.chart.report",
     type: "graph",

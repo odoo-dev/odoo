@@ -1,4 +1,4 @@
-import { loadBundle } from "@web/core/assets";
+import { loadBundleFromComponent } from "@web/core/assets";
 import { registry } from "@web/core/registry";
 import { getColor, hexToRGBA, getCustomColor } from "@web/core/colors/colors";
 import { standardFieldProps } from "../standard_field_props";
@@ -21,7 +21,7 @@ export class JournalDashboardGraphField extends Component {
         this.canvasRef = useRef("canvas");
         this.data = JSON.parse(this.props.record.data[this.props.name]);
 
-        onWillStart(async () => await loadBundle("web.chartjs_lib"));
+        onWillStart(async () => await loadBundleFromComponent("web.chartjs_lib", this.env));
 
         useEffect(() => {
             this.renderChart();

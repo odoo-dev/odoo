@@ -10,7 +10,7 @@ import { extractLayoutComponents } from "@web/search/layout";
 import { WithSearch } from "@web/search/with_search/with_search";
 import { useActionLinks } from "@web/views/view_hook";
 import { computeViewClassName } from "./utils";
-import { loadBundle } from "@web/core/assets";
+import { loadBundleFromComponent } from "@web/core/assets";
 import { cookie } from "@web/core/browser/cookie";
 import {
     Component,
@@ -342,10 +342,11 @@ export class View extends Component {
             ? archXmlDoc.getAttribute("js_class")
             : props.jsClass || type;
         if (!viewRegistry.contains(jsClass)) {
-            await loadBundle(
+            await loadBundleFromComponent(
                 cookie.get("color_scheme") === "dark"
                     ? "web.assets_backend_lazy_dark"
-                    : "web.assets_backend_lazy"
+                    : "web.assets_backend_lazy",
+                this.env
             );
         }
         const descr = viewRegistry.get(jsClass);

@@ -2,7 +2,7 @@ import { expect, test, beforeEach, describe } from "@odoo/hoot";
 import { mockDate, animationFrame, runAllTimers } from "@odoo/hoot-mock";
 import { click, queryOne } from "@odoo/hoot-dom";
 
-import { mountView, onRpc } from "@web/../tests/web_test_helpers";
+import { mockService, mountView, onRpc } from "@web/../tests/web_test_helpers";
 
 import { defineProjectModels, ProjectTask } from "./project_models";
 
@@ -36,6 +36,15 @@ beforeEach(() => {
     ];
 
     onRpc("has_access", () => true);
+    mockService("lazy_session", {
+        getValue(key, callback) {
+            if (key === "bundles") {
+                callback({ bundles: [] });
+            } else {
+                super.getValue(key, callback);
+            }
+        },
+    });
 });
 
 const calendarMountParams = {

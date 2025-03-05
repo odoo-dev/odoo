@@ -2,7 +2,7 @@ import { expect, test, describe } from "@odoo/hoot";
 import { mockDate, runAllTimers } from "@odoo/hoot-mock";
 import { click, queryAllTexts } from "@odoo/hoot-dom";
 
-import { mountView, onRpc } from "@web/../tests/web_test_helpers";
+import { mockService, mountView, onRpc } from "@web/../tests/web_test_helpers";
 
 import { defineProjectModels } from "./project_models";
 
@@ -24,7 +24,15 @@ test("check 'Edit' and 'View Tasks' buttons are in Project Calendar Popover", as
             return true;
         }
     });
-
+    mockService("lazy_session", {
+        getValue(key, callback) {
+            if (key === "bundles") {
+                callback({ bundles: [] });
+            } else {
+                super.getValue(key, callback);
+            }
+        },
+    });
     await mountView({
         resModel: "project.project",
         type: "calendar",

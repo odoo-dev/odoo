@@ -1,4 +1,4 @@
-import { loadBundle } from "@web/core/assets";
+import { loadBundleFromComponent } from "@web/core/assets";
 
 import { onMounted, onPatched, onWillStart, onWillUnmount, useComponent, useRef } from "@odoo/owl";
 
@@ -16,7 +16,7 @@ export function useFullCalendar(refName, params) {
         return newParams;
     }
 
-    onWillStart(async () => await loadBundle("web.fullcalendar_lib"));
+    onWillStart(async () => await loadBundleFromComponent("web.fullcalendar_lib", component.env));
 
     onMounted(() => {
         try {

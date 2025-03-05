@@ -168,15 +168,13 @@ describe("board_desktop", () => {
     });
 
     test("views in the dashboard do not have a control panel", async () => {
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [
-                    [4, "list"],
-                    [5, "form"],
-                ],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [
+                [4, "list"],
+                [5, "form"],
+            ],
+        }));
         await mountView({
             type: "form",
             resModel: "board",
@@ -202,15 +200,13 @@ describe("board_desktop", () => {
         // action's params (like context or domain), as the dashboard can directly
         // retrieve them from the action. Same applies for the view_type, as the
         // first view of the action can be used, by default.
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [
-                    [4, "list"],
-                    [false, "form"],
-                ],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [
+                [4, "list"],
+                [false, "form"],
+            ],
+        }));
 
         await mountView({
             type: "form",
@@ -229,12 +225,10 @@ describe("board_desktop", () => {
     });
 
     test("can sort a sub list", async () => {
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "list"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "list"]],
+        }));
         await mountView({
             type: "form",
             resModel: "board",
@@ -271,12 +265,10 @@ describe("board_desktop", () => {
                 return true;
             },
         });
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "list"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "list"]],
+        }));
         await mountView({
             type: "form",
             resModel: "board",
@@ -308,15 +300,13 @@ describe("board_desktop", () => {
             },
         });
 
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [
-                    [4, "list"],
-                    [5, "form"],
-                ],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [
+                [4, "list"],
+                [5, "form"],
+            ],
+        }));
 
         await mountView({
             type: "form",
@@ -335,12 +325,10 @@ describe("board_desktop", () => {
     });
 
     test("can drag and drop a view", async () => {
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "list"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "list"]],
+        }));
         onRpc("/web/view/edit_custom", () => {
             expect.step("edit custom");
             return true;
@@ -379,15 +367,13 @@ describe("board_desktop", () => {
                     </t>
                 </templates>
             </kanban>`;
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [
-                    [4, "list"],
-                    [5, "kanban"],
-                ],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [
+                [4, "list"],
+                [5, "kanban"],
+            ],
+        }));
         onRpc("/web/view/edit_custom", () => {
             expect.step("edit custom");
             return true;
@@ -411,10 +397,12 @@ describe("board_desktop", () => {
     });
 
     test("non-existing action in a dashboard", async () => {
-        onRpc("/web/action/load", () => {
-            // server answer if the action doesn't exist anymore
-            return false;
-        });
+        onRpc(
+            "/web/action/load",
+            () =>
+                // server answer if the action doesn't exist anymore
+                false
+        );
         await mountView({
             type: "form",
             resModel: "board",
@@ -451,13 +439,11 @@ describe("board_desktop", () => {
                 expect(params.type).toBe("object");
             },
         });
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                view_mode: "kanban",
-                views: [[false, "kanban"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            view_mode: "kanban",
+            views: [[false, "kanban"]],
+        }));
         await mountView({
             type: "form",
             resModel: "board",
@@ -477,12 +463,10 @@ describe("board_desktop", () => {
     test("Views should be loaded in the user's language", async () => {
         expect.assertions(2);
         serverState.lang = "fr_FR";
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "list"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "list"]],
+        }));
         onRpc("get_views", (args) => {
             expect(args.kwargs.context.lang).toBe("fr_FR");
         });
@@ -502,12 +486,10 @@ describe("board_desktop", () => {
 
     test("Dashboard should use correct groupby", async () => {
         expect.assertions(1);
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "list"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "list"]],
+        }));
         onRpc("web_read_group", (args) => {
             expect(args.kwargs.groupby).toEqual(["bar"]);
         });
@@ -527,12 +509,10 @@ describe("board_desktop", () => {
 
     test("Dashboard should use correct groupby when defined as a string of one field", async () => {
         expect.assertions(1);
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "list"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "list"]],
+        }));
         onRpc("web_read_group", ({ kwargs }) => {
             expect(kwargs.groupby).toEqual(["bar"]);
         });
@@ -562,12 +542,10 @@ describe("board_desktop", () => {
             },
         });
 
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "pivot"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "pivot"]],
+        }));
         onRpc("web_read_group", (args) => {
             expect(args.kwargs.groupby).toEqual([]);
         });
@@ -594,11 +572,18 @@ describe("board_desktop", () => {
 
     test("graphs in dashboard aren't squashed", async () => {
         Partner._views["graph,4"] = '<graph><field name="int_field" type="measure"/></graph>';
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "graph"]],
-            };
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "graph"]],
+        }));
+        mockService("lazy_session", {
+            getValue(key, callback) {
+                if (key === "bundles") {
+                    callback({ bundles: [] });
+                } else {
+                    super.getValue(key, callback);
+                }
+            },
         });
         await mountView({
             type: "form",
@@ -633,7 +618,10 @@ describe("board_desktop", () => {
         onRpc(({ method, kwargs }) => {
             if (method === "get_property_definition") {
                 return {};
-            } else if (method === "formatted_read_group" && kwargs.groupby?.includes("properties.my_char")) {
+            } else if (
+                method === "formatted_read_group" &&
+                kwargs.groupby?.includes("properties.my_char")
+            ) {
                 return [
                     {
                         "properties.my_char": false,
@@ -669,12 +657,10 @@ describe("board_mobile", () => {
     test("can't switch views in the dashboard", async () => {
         Partner._views["list,4"] = '<list string="Partner"><field name="foo"/></list>';
 
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "list"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "list"]],
+        }));
         await mountView({
             type: "form",
             resModel: "board",
@@ -703,12 +689,10 @@ describe("board_mobile", () => {
     test("Correctly soft switch to '1' layout on small screen", async () => {
         Partner._views["list,4"] = '<list string="Partner"><field name="foo"/></list>';
 
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "list"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "list"]],
+        }));
         await mountView({
             type: "form",
             resModel: "board",
