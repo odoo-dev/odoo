@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
     <t t-name="pos_simplified_receipt.ReceiptScreen" t-inherit="point_of_sale.ReceiptScreen" t-inherit-mode="extension">
         <xpath expr="//div[contains(@class, 'receipt-options')]//div[contains(@class, 'd-flex gap-1')]" position="inside">
-            <button class="btn btn-lg btn-secondary w-100 py-3">
+            <button class="btn btn-lg btn-secondary w-100 py-3" t-on-click="onClick">
                 <i t-attf-class="fa {{doFullPrint.status === 'loading' ? 'fa-fw fa-spin fa-circle-o-notch' : 'fa-print'}} me-1" />Print Simplified Receipt
             </button>
         </xpath>
