@@ -175,10 +175,43 @@ export class OrderSummary extends Component {
                         this.numberBuffer.reset();
                     }
                 }
-            } else if (numpadMode === "discount" && val !== "remove") {
-                this.pos.setDiscountFromUI(selectedLine, val);
+            } else if (
+                numpadMode === "price" &&
+                this.pos.amountQuantity &&
+                this.pos.config.company_id.point_of_sale_atq_category_ids.includes(
+                    selectedLine.product_id.uom_id.category_id
+                )
+            ) {
+                if (selectedLine.combo_parent_id) {
+                    selectedLine = selectedLine.combo_parent_id;
+                }
+                const totalAmount =
+                    selectedLine.get_unit_display_price() +
+                    selectedLine.combo_line_ids.reduce(
+                        (sum, line) => sum + line.get_unit_display_price(),
+                        0
+                    );
+                if (val === "remove") {
+                    this.currentOrder.removeOrderline(selectedLine);
+                } else {
+                    const qty = val / totalAmount;
+                    const result = selectedLine.set_quantity(
+                        qty,
+                        Boolean(selectedLine.combo_line_ids?.length),
+                        true
+                    );
+                    for (const line of selectedLine.combo_line_ids) {
+                        line.set_quantity(qty, true, true);
+                    }
+                    if (result !== true) {
+                        this.dialog.add(AlertDialog, result);
+                        this.numberBuffer.reset();
+                    }
+                }
             } else if (numpadMode === "price" && val !== "remove") {
                 this.setLinePrice(selectedLine, val);
+            } else if (numpadMode === "discount" && val !== "remove") {
+                this.pos.setDiscountFromUI(selectedLine, val);
             }
         }
     }

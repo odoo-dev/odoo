@@ -158,7 +158,13 @@ export class ProductScreen extends Component {
             { value: "discount", text: _t("%"), disabled: !this.pos.config.manual_discount },
             {
                 value: "price",
-                text: _t("Price"),
+                text:
+                    this.pos.amountQuantity &&
+                    this.pos.config.company_id.point_of_sale_atq_category_ids.includes(
+                        this.currentOrder.get_selected_orderline().product_id.uom_id.category_id
+                    )
+                        ? _t("ATQ")
+                        : _t("Price"),
                 disabled: !this.pos.cashierHasPriceControlRights(),
             },
             BACKSPACE,

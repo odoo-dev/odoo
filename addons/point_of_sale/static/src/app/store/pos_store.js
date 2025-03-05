@@ -109,6 +109,7 @@ export class PosStore extends Reactive {
         // validation (order paid then sent to the backend).
         this.validated_orders_name_server_id_map = {};
         this.numpadMode = "quantity";
+        this.amountQuantity = false;
         this.mobile_pane = "right";
         this.ticket_screen_mobile_pane = "left";
         this.productListView = window.localStorage.getItem("productListView") || "grid";
