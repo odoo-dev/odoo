@@ -137,6 +137,7 @@ class AccountMove(models.Model):
         index=True,
         compute='_compute_date', store=True, required=True, readonly=False, precompute=True,
         copy=False,
+        default=fields.Date.context_today,
         tracking=True,
     )
     state = fields.Selection(
