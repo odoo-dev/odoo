@@ -24,6 +24,7 @@ const DEFAULT_ARCH_RESULTS = {
     isDateHidden: false,
     isTimeHidden: false,
     monthOverflow: true,
+    multiCreateFields: {},
     popoverFieldNodes: {},
     scale: "week",
     scales: ["day", "week", "month", "year"],
