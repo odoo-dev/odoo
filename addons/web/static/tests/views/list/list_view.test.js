@@ -17743,3 +17743,153 @@ test(`display the field's falsy_value_label for false group, if defined`, async 
 
     expect(`tbody tr:nth-child(3)`).toHaveText("I'm the false group (1)");
 });
+
+test.tags("desktop");
+test(`cell-level keyboard navigation in grouped list`, async () => {
+   
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list>
+                <field name="foo"/>
+                <field name="int_field"/>
+                <field name="bar"/>
+            </list>
+        `,
+        groupBy: ["bar"],
+    });
+    expect(`.o_data_row`).toHaveCount(0);
+    expect(`.o_group_header`).toHaveCount(2);
+
+    // Open first and second groups
+    await contains(`.o_group_header:eq(0)`).click();
+    await contains(`.o_group_header:eq(1)`).click();
+    expect(`.o_data_row`).toHaveCount(4);
+
+    await contains(`table thead tr th:nth-child(3)`).click();
+    //pree down key from the last cell of the first group
+    await press("down");
+    await animationFrame();
+
+    await press("down");
+    await animationFrame();
+
+    await press("right");
+    await animationFrame();
+
+    await press("down");
+    await animationFrame();
+
+    await press("down");
+    await animationFrame();
+
+    await animationFrame();
+    expect(`tbody tr:nth-child(4) td:nth-child(3)`).toBeFocused();
+
+    await press("up");
+    await animationFrame();
+
+    await press("up");
+    await animationFrame();
+    expect(`tbody tr:nth-child(2) td:nth-child(3)`).toBeFocused();
+
+
+    await press("left");
+    await animationFrame();
+
+    await press("down");
+    await animationFrame();
+
+    await press("down");
+    await animationFrame();
+    expect(`tbody tr:nth-child(4) td:nth-child(2)`).toBeFocused();
+
+    await press("right");
+    await animationFrame();
+
+    await press("up");
+    await animationFrame();
+
+    await press("up");
+    await animationFrame();
+    expect(`tbody tr:nth-child(2) td:nth-child(3)`).toBeFocused();
+
+    // // Tab should focus the first field of first data row
+    // await press("Tab");
+    // await animationFrame();
+    // expect(`.o_data_row:eq(0) [name=foo] input`).toBeFocused();
+
+    // // Shift+Tab should focus back the last field of last row
+    // await press("Shift+Tab");
+    // await animationFrame();
+    // expect(`.o_data_row:eq(3) [name=int_field] input`).toBeFocused();
+
+    // // Enter should add a new row at the bottom
+    // await press("Enter");
+    // await animationFrame();
+    // expect(`.o_data_row`).toHaveCount(5);
+    // expect(`.o_data_row:eq(4) [name=foo] input`).toBeFocused();
+
+    // // Enter should discard the edited row as it is pristine + get to first row
+    // await press("Enter");
+    // await animationFrame();
+    // expect(`.o_data_row`).toHaveCount(4);
+    // expect(`.o_data_row:eq(0) [name=foo] input`).toBeFocused();
+
+    // // Click on last cell
+    // await contains(`.o_data_row:eq(3) [name=int_field]`).click();
+    // expect(`.o_data_row:eq(3) [name=int_field] input`).toBeFocused();
+
+    // // Enter should add a new row at the bottom
+    // await press("Enter");
+    // await animationFrame();
+    // expect(`.o_data_row`).toHaveCount(5);
+    // expect(`.o_data_row:eq(4) [name=foo] input`).toBeFocused();
+
+    // // Edit the row and press enter: should add a new row
+    // await contains(`.o_data_row:eq(4) [name=foo] input`).edit("blork", { confirm: "enter" });
+    // expect(`.o_data_row`).toHaveCount(6);
+    // expect(`.o_data_row:eq(5) [name=foo] input`).toBeFocused();
+
+    // // Escape should discard the added row as it is pristine + view should go into readonly mode
+    // await press("Escape");
+    // await animationFrame();
+    // expect(`.o_data_row`).toHaveCount(5);
+    // expect(`.o_selected_row`).toHaveCount(0);
+
+    // // Click on last data row of first group
+    // expect(`.o_group_header:eq(0)`).toHaveText("No (1)\n -4");
+    // await contains(`.o_data_row:eq(0) [name=foo]`).click();
+    // expect(`.o_data_row:eq(0) [name=foo] input`).toBeFocused();
+
+    // // Enter should add a new row in the first group
+    // await press("Enter");
+    // await animationFrame();
+    // expect(`.o_data_row`).toHaveCount(6);
+    // expect(`.o_group_header:eq(0)`).toHaveText("No (2)\n -4");
+
+    // // Enter should discard the edited row as it is pristine + get to next data row
+    // await press("Enter");
+    // await animationFrame();
+    // expect(`.o_data_row`).toHaveCount(5);
+    // expect(`.o_group_header:eq(0)`).toHaveText("No (1)\n -4");
+    // expect(`.o_data_row:eq(1) [name=foo] input`).toBeFocused();
+
+    // // Shift+Tab should focus back the last field of first row
+    // await press("Shift+Tab");
+    // await animationFrame();
+    // expect(`.o_data_row:eq(0) [name=int_field] input`).toBeFocused();
+
+    // // Enter should add a new row in the first group
+    // await press("Enter");
+    // await animationFrame();
+    // expect(`.o_data_row`).toHaveCount(6);
+    // expect(`.o_group_header:eq(0)`).toHaveText("No (2)\n -4");
+
+    // // Edit the row and press enter: should add a new row
+    // await contains(`.o_data_row:eq(1) [name=foo] input`).edit("zzapp", { confirm: "enter" });
+    // expect(`.o_data_row`).toHaveCount(7);
+    // expect(`.o_group_header:eq(0)`).toHaveText("No (3)\n -4");
+    // expect(`.o_data_row:eq(2) [name=foo] input`).toBeFocused();
+});

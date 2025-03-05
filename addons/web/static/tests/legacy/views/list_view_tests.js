@@ -776,14 +776,14 @@ QUnit.module("Views", (hooks) => {
         triggerHotkey("ArrowDown");
 
         const firstVisibleDataRow = target.querySelector(".o_data_row");
-        assert.strictEqual(document.activeElement, firstVisibleDataRow.querySelector("[name=foo]"));
+        assert.strictEqual(document.activeElement, firstVisibleDataRow.querySelector("[type=checkbox]"));
 
         triggerHotkey("ArrowDown");
 
         const secondVisibleDataRow = target.querySelectorAll(".o_data_row")[1];
         assert.strictEqual(
             document.activeElement,
-            secondVisibleDataRow.querySelector("[name=foo]")
+            secondVisibleDataRow.querySelector("[type=checkbox]")
         );
 
         triggerHotkey("ArrowDown");

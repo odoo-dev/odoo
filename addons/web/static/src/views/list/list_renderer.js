@@ -1079,9 +1079,15 @@ export class ListRenderer extends Component {
                     );
                     const nextIsGroup = futureRow.classList.contains("o_group_header");
                     const rowTypeSwitched = cellIsInGroupRow !== nextIsGroup;
+                    if (!rowTypeSwitched) {
+                        // Store last known index if moving to the same type of row
+                        this.lastKnownIndex = index;
+                    }
+
+                    let targetIndex = rowTypeSwitched ? this.lastKnownIndex ?? 1 : index;
                     let defaultIndex = 0;
                     if (cellIsInGroupRow) {
-                        defaultIndex = this.hasSelectors ? 1 : 0;
+                        defaultIndex = this.hasSelectors ? targetIndex : 0;
                     }
                     futureCell =
                         addCell ||
@@ -1098,9 +1104,16 @@ export class ListRenderer extends Component {
                     );
                     const nextIsGroup = futureRow.classList.contains("o_group_header");
                     const rowTypeSwitched = cellIsInGroupRow !== nextIsGroup;
+                    if (!rowTypeSwitched) {
+                        // Store last known index if moving to the same type of row
+                        this.lastKnownIndex = index;
+                    }
+
+                    let targetIndex = rowTypeSwitched ? this.lastKnownIndex ?? 1 : index;
+                    console.log("targetIndex", targetIndex)
                     let defaultIndex = 0;
                     if (cellIsInGroupRow) {
-                        defaultIndex = this.hasSelectors ? 1 : 0;
+                        defaultIndex = this.hasSelectors ? targetIndex : 0;
                     }
                     futureCell =
                         addCell ||
@@ -1110,10 +1123,16 @@ export class ListRenderer extends Component {
             }
             case "left": {
                 futureCell = children[index - 1];
+                if (futureCell) {
+                    this.lastKnownIndex = index - 1; // Store last known index
+                }
                 break;
             }
             case "right": {
                 futureCell = children[index + 1];
+                if (futureCell) {
+                    this.lastKnownIndex = index + 1; // Store last known index
+                }
                 break;
             }
         }
