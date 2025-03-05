@@ -55,7 +55,7 @@
     </record>
 
     <!-- Menus -->
-    <menuitem id="web_test_calendar_menu" name="Test Calendar" web_icon="calendar,static/description/icon.png" groups="base.group_user">
-            <menuitem id="web_test_calendar_action_menu" name="Calendar" action="calendar_action" groups="base.group_user"/>
+    <menuitem id="web_test_calendar_menu" name="Test Calendar" web_icon="calendar,static/description/icon.png" groups="hr.group_hr_user">
+            <menuitem id="web_test_calendar_action_menu" name="Calendar" action="calendar_action" groups="hr.group_hr_user"/>
     </menuitem>
 </odoo>
