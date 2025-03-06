@@ -1847,7 +1847,7 @@ class JsonRpcException(Exception):
 
 class HttpCase(TransactionCase):
     """ Transactional HTTP TestCase with url_open and Chrome headless helpers. """
-    registry_test_mode = True
+    registry_test_mode = False
     readonly_enabled = True
     browser = None
     browser_size = '1366x768'
@@ -1893,8 +1893,12 @@ class HttpCase(TransactionCase):
 
     @contextmanager
     def enter_registry_test_mode(self):
-        _logger.warning("HTTPCase is already in test mode")
-        yield
+        if self.registry_test_mode:
+            _logger.warning("HTTPCase is already in test mode")
+            yield
+        else:
+            with super().enter_registry_test_mode():
+                yield
 
     def parse_http_location(self, location):
         """ Parse a Location http header typically found in 201/3xx
@@ -1931,11 +1935,12 @@ class HttpCase(TransactionCase):
     def url_open(self, url, data=None, files=None, timeout=12, headers=None, allow_redirects=True, head=False):
         if url.startswith('/'):
             url = self.base_url() + url
-        if head:
-            return self.opener.head(url, data=data, files=files, timeout=timeout, headers=headers, allow_redirects=False)
-        if data or files:
-            return self.opener.post(url, data=data, files=files, timeout=timeout, headers=headers, allow_redirects=allow_redirects)
-        return self.opener.get(url, timeout=timeout, headers=headers, allow_redirects=allow_redirects)
+        with self.enter_registry_test_mode():
+            if head:
+                return self.opener.head(url, data=data, files=files, timeout=timeout, headers=headers, allow_redirects=False)
+            if data or files:
+                return self.opener.post(url, data=data, files=files, timeout=timeout, headers=headers, allow_redirects=allow_redirects)
+            return self.opener.get(url, timeout=timeout, headers=headers, allow_redirects=allow_redirects)
 
     def _wait_remaining_requests(self, timeout=10):
 
@@ -2107,23 +2112,24 @@ class HttpCase(TransactionCase):
                     'Throttling browser CPU to %sx slowdown and extending timeout to %s sec', cpu_throttling, timeout)
                 browser._websocket_request('Emulation.setCPUThrottlingRate', params={'rate': cpu_throttling})
 
-            browser.navigate_to(url, wait_stop=not bool(ready))
+            with self.enter_registry_test_mode():
+                browser.navigate_to(url, wait_stop=not bool(ready))
 
-            # Needed because tests like test01.js (qunit tests) are passing a ready
-            # code = ""
-            self.assertTrue(browser._wait_ready(ready), 'The ready "%s" code was always falsy' % ready)
+                # Needed because tests like test01.js (qunit tests) are passing a ready
+                # code = ""
+                self.assertTrue(browser._wait_ready(ready), 'The ready "%s" code was always falsy' % ready)
 
-            error = False
-            try:
-                browser._wait_code_ok(code, timeout, error_checker=error_checker)
-            except ChromeBrowserException as chrome_browser_exception:
-                error = chrome_browser_exception
-            if error:  # dont keep initial traceback, keep that outside of except
-                if code:
-                    message = 'The test code "%s" failed' % code
-                else:
-                    message = "Some js test failed"
-                self.fail('%s\n\n%s' % (message, error))
+                error = False
+                try:
+                    browser._wait_code_ok(code, timeout, error_checker=error_checker)
+                except ChromeBrowserException as chrome_browser_exception:
+                    error = chrome_browser_exception
+                if error:  # dont keep initial traceback, keep that outside of except
+                    if code:
+                        message = 'The test code "%s" failed' % code
+                    else:
+                        message = "Some js test failed"
+                    self.fail('%s\n\n%s' % (message, error))
 
         finally:
             browser.stop()
