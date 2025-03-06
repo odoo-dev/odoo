@@ -372,9 +372,18 @@ export async function confirmAddSnippet(snippetName) {
     if (snippetName) {
         previewSelector += " [data-snippet='" + snippetName + "']";
     }
-    await waitFor(".o_add_snippet_dialog iframe.show.o_add_snippet_iframe");
+    await waitFor(".o_add_snippet_dialog iframe.show.o_add_snippet_iframe", { timeout: 500 });
     await contains(previewSelector).click();
     await animationFrame();
+}
+
+export async function insertCategorySnippet({ group, snippet } = {}) {
+    await contains(
+        `.o-snippets-menu #snippet_groups .o_snippet${
+            group ? `[data-snippet-group=${group}]` : ""
+        } .o_snippet_thumbnail`
+    ).click();
+    await confirmAddSnippet(snippet);
 }
 
 export async function setupWebsiteBuilderWithSnippet(snippetName, options = {}) {
