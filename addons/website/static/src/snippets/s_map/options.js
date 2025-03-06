@@ -31,36 +31,11 @@ options.registry.Map = options.Class.extend({
             this._updateSource();
         }
     },
-    /**
-     * @see this.selectClass for parameters
-     */
-    async showDescription(previewMode, widgetValue, params) {
-        const descriptionEl = this.$target[0].querySelector('.description');
-        if (widgetValue && !descriptionEl) {
-            this.$target.append($(`
-                <div class="description">
-                    <font>${_t('Visit us:')}</font>
-                    <span>${_t('Our office is open Monday – Friday 8:30 a.m. – 4:00 p.m.')}</span>
-                </div>`)
-            );
-        } else if (!widgetValue && descriptionEl) {
-            descriptionEl.remove();
-        }
-    },
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
-    /**
-     * @override
-     */
-    _computeWidgetState(methodName, params) {
-        if (methodName === 'showDescription') {
-            return !!this.$target[0].querySelector('.description');
-        }
-        return this._super(...arguments);
-    },
     /**
      * @private
      */
