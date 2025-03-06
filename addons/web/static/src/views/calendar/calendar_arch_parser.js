@@ -186,29 +186,14 @@ export class CalendarArchParser {
                 case "multi_create": {
                     for (const childNode of node.children) {
                         if (childNode.tagName === "field") {
-                            if (childNode.hasAttribute("name")) {
-                                const fieldName = childNode.getAttribute("name");
-                                fieldNames.add(fieldName);
-
-                                if (
-                                    !childNode.hasAttribute("widget") &&
-                                    ["many2one", "selection"].includes(
-                                        models[modelName].fields[fieldName].type
-                                    )
-                                ) {
-                                    childNode.setAttribute("widget", "calendar_radio");
-                                }
-
-                                const parseFieldNode = Field.parseFieldNode(
-                                    childNode,
-                                    models,
-                                    modelName,
-                                    "multi_create_calendar",
-                                    jsClass
-                                );
-
-                                multiCreateFields[fieldName] = parseFieldNode;
-                            }
+                            const fieldName = childNode.getAttribute("name");
+                            multiCreateFields[fieldName] = Field.parseFieldNode(
+                                childNode,
+                                models,
+                                modelName,
+                                "multi_create_calendar",
+                                jsClass
+                            );
                         }
                     }
                     return false;
