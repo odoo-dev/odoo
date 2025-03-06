@@ -942,8 +942,8 @@ class TransactionCase(BaseCase):
         self.env.flush_all()
 
         self._savepoint_id = next(savepoint_seq)
-        self.cr.execute('SAVEPOINT test_%d' % self._savepoint_id)
-        self.addCleanup(self.cr.execute, 'ROLLBACK TO SAVEPOINT test_%d' % self._savepoint_id)
+        self.cr._obj.execute('SAVEPOINT test_%d' % self._savepoint_id)
+        self.addCleanup(self.cr._obj.execute, 'ROLLBACK TO SAVEPOINT test_%d' % self._savepoint_id)
 
     @contextmanager
     def enter_registry_test_mode(self):
