@@ -5,6 +5,10 @@ import { evaluateExpr } from "@web/core/py_js/py";
 import { download } from "@web/core/network/download";
 import { rpc } from "@web/core/network/rpc";
 import { ExportDataDialog } from "@web/views/view_dialogs/export_data_dialog";
+import {
+    deleteConfirmationMessage,
+    ConfirmationDialog,
+} from "@web/core/confirmation_dialog/confirmation_dialog";
 
 import { useComponent, useEffect } from "@odoo/owl";
 
@@ -180,5 +184,29 @@ export function useExportRecords(env, context, getDefaultExportList) {
             getExportedFields: _getExportedFields,
             root,
         });
+    };
+}
+
+export function useDeleteRecords(model) {
+    function getDefaultDialogProps() {
+        let body = deleteConfirmationMessage;
+        if (model.root.isDomainSelected || model.root.selection.length > 1) {
+            body = _t("Are you sure you want to delete these records?");
+        }
+        return {
+            body,
+            cancel: () => {},
+            cancelLabel: _t("No, keep it"),
+            confirm: () => model.root.deleteRecords(),
+            confirmLabel: _t("Delete"),
+            title: _t("Bye-bye, record!"),
+        };
+    }
+    return {
+        getDialogProps: () => getDefaultDialogProps(),
+        deleteWithConfirmation: (dialogProps) => {
+            const defaultProps = getDefaultDialogProps();
+            model.dialog.add(ConfirmationDialog, { ...defaultProps, ...dialogProps });
+        },
     };
 }
