@@ -85,21 +85,12 @@ export class ThemeTabPlugin extends Plugin {
                     return currentValue;
                 },
                 load: async ({ param: { mainParam: variable, nullValue = "null" }, value }) => {
-<<<<<<< HEAD
-                    await this.makeSCSSCusto(
-                        "/website/static/src/scss/options/user_values.scss",
-=======
                     await this.customizeWebsiteVariables(
->>>>>>> origin/master-mysterious-egg-bso-2
                         {
                             [variable]: value,
                         },
                         nullValue
                     );
-<<<<<<< HEAD
-                    await this.reloadBundles();
-=======
->>>>>>> origin/master-mysterious-egg-bso-2
                 },
                 apply: () => this.stuffHappened(),
             },
@@ -117,11 +108,7 @@ export class ThemeTabPlugin extends Plugin {
                 apply: () => this.stuffHappened(),
             },
             switchTheme: {
-<<<<<<< HEAD
-                apply: async () => {
-=======
                 load: async () => {
->>>>>>> origin/master-mysterious-egg-bso-2
                     const save = await new Promise((resolve) => {
                         this.services.dialog.add(ConfirmationDialog, {
                             body: _t(
@@ -141,18 +128,10 @@ export class ThemeTabPlugin extends Plugin {
                 },
             },
             addLanguage: {
-<<<<<<< HEAD
-                apply: async () => {
-                    // Retrieve the website id to check by default the website checkbox in
-                    // the dialog box 'action_view_base_language_install'
-                    console.log(137, this);
-                    const websiteId = this.options.context.website_id;
-=======
                 load: async () => {
                     // Retrieve the website id to check by default the website checkbox in
                     // the dialog box 'action_view_base_language_install'
                     const websiteId = this.service.website.currentWebsite.id;
->>>>>>> origin/master-mysterious-egg-bso-2
                     const save = await new Promise((resolve) => {
                         this.services.dialog.add(ConfirmationDialog, {
                             body: _t(
@@ -223,15 +202,6 @@ export class ThemeTabPlugin extends Plugin {
                 },
             },
             customizeButtonStyle: {
-<<<<<<< HEAD
-                getValue: ({ param: { mainParam: which } }) => {
-                    console.log("customizeButtonStyle.get", which);
-                    return "outline";
-                },
-                apply: ({ param: { mainParam: which }, value }) => {
-                    console.log("customizeButtonStyle.apply", which, value);
-                },
-=======
                 isApplied: ({ param, value }) => {
                     const getAction = this.dependencies.builderActions.getAction;
                     const currentValue = getAction("customizeButtonStyle").getValue({ param });
@@ -255,21 +225,12 @@ export class ThemeTabPlugin extends Plugin {
                     );
                 },
                 apply: () => this.stuffHappened(),
->>>>>>> origin/master-mysterious-egg-bso-2
             },
             customizeWebsiteVariableAndAssets: {
                 isApplied: ({ param: { variable, assets } }) => {
                     console.log("customizeWebsiteVariableAndAssets.get", variable, assets);
                     return "outline";
                 },
-<<<<<<< HEAD
-                apply: ({ param: { variable, assets }, value }) => {
-                    console.log("customizeWebsiteVariableAndAssets.apply", variable, assets, value);
-                },
-                clear: ({ param: { variable, assets } }) => {
-                    console.log("customizeWebsiteVariableAndAssets.clear", variable, assets);
-                },
-=======
                 clean: ({ param: { variable, assets } }) => {
                     console.log("customizeWebsiteVariableAndAssets.clean", variable, assets);
                 },
@@ -277,7 +238,6 @@ export class ThemeTabPlugin extends Plugin {
                     console.log("customizeWebsiteVariableAndAssets.apply", variable, assets, value);
                 },
                 apply: () => this.stuffHappened(),
->>>>>>> origin/master-mysterious-egg-bso-2
             },
         };
     }
@@ -304,8 +264,6 @@ export class ThemeTabPlugin extends Plugin {
         }
         return finalValue;
     }
-<<<<<<< HEAD
-=======
     async customizeWebsiteVariables(variables = {}, nullValue) {
         if (!Object.keys(variables).length) {
             return;
@@ -317,7 +275,6 @@ export class ThemeTabPlugin extends Plugin {
         );
         await this.reloadBundles();
     }
->>>>>>> origin/master-mysterious-egg-bso-2
     async customizeWebsiteColors(colors = {}, { colorType, nullValue } = {}) {
         const baseURL = "/website/static/src/scss/options/colors/";
         colorType = colorType ? colorType + "_" : "";
