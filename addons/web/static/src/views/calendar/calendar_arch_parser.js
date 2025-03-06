@@ -17,14 +17,14 @@ const SCALES = ["day", "week", "month", "year"];
 export class CalendarParseArchError extends Error {}
 
 export class CalendarArchParser {
-    parse(arch, models, modelName) {
+    parse(xmlDoc, models, modelName) {
         const fields = models[modelName].fields;
         const fieldNames = new Set(fields.display_name ? ["display_name"] : []);
         const fieldMapping = { date_start: "date_start" };
         let jsClass = null;
         let eventLimit = 5;
         let scales = [...SCALES];
-        const sessionScale = browser.sessionStorage.getItem("calendar-scale");
+        const sessionScale = browser.sessionStorage.getItem("calendar-scale"); // FIXME: move
         let scale = sessionScale || "week";
         let canCreate = true;
         let canDelete = true;
@@ -32,6 +32,7 @@ export class CalendarArchParser {
         let aggregate;
         let quickCreate = true;
         let quickCreateViewId = null;
+        const multiCreateView = xmlDoc.getAttribute("multi_create_view");
         let hasEditDialog = false;
         let showUnusualDays = false;
         let isDateHidden = false;
@@ -41,9 +42,8 @@ export class CalendarArchParser {
         let monthOverflow = true;
         const popoverFieldNodes = {};
         const filtersInfo = {};
-        const multiCreateFields = {};
 
-        visitXML(arch, (node) => {
+        visitXML(xmlDoc, (node) => {
             switch (node.tagName) {
                 case "calendar": {
                     if (!node.hasAttribute("date_start")) {
@@ -183,21 +183,6 @@ export class CalendarArchParser {
 
                     break;
                 }
-                case "multi_create": {
-                    for (const childNode of node.children) {
-                        if (childNode.tagName === "field") {
-                            const fieldName = childNode.getAttribute("name");
-                            multiCreateFields[fieldName] = Field.parseFieldNode(
-                                childNode,
-                                models,
-                                modelName,
-                                "multi_create_calendar",
-                                jsClass
-                            );
-                        }
-                    }
-                    return false;
-                }
             }
         });
 
@@ -209,10 +194,10 @@ export class CalendarArchParser {
             eventLimit,
             fieldMapping,
             fieldNames: [...fieldNames],
-            multiCreateFields,
             filtersInfo,
             formViewId,
             hasEditDialog,
+            multiCreateView,
             quickCreate,
             quickCreateViewId,
             isDateHidden,

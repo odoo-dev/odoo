@@ -20,12 +20,13 @@ import { browser } from "@web/core/browser/browser";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { getLocalYearAndWeek } from "@web/core/l10n/dates";
 
-import { Component, useChildSubEnv, useState } from "@odoo/owl";
+import { Component, onWillStart, useChildSubEnv, useState } from "@odoo/owl";
 
 import { parseXML } from "@web/core/utils/xml";
 import { Record } from "@web/model/record";
 import { FormArchParser } from "@web/views/form/form_arch_parser";
 import { FormRenderer } from "@web/views/form/form_renderer";
+import { extractFieldsFromArchInfo } from "@web/model/relational_model/utils";
 
 const { DateTime } = luxon;
 
@@ -53,7 +54,7 @@ function useUniqueDialog() {
     };
 }
 
-export class CalendarQuickCreateForm extends FormRenderer {
+export class CalendarMultiCreateRenderer extends FormRenderer {
     setup() {
         super.setup();
 
@@ -75,7 +76,7 @@ export class CalendarController extends Component {
         ViewScaleSelector,
         CogMenu,
         Record,
-        CalendarQuickCreateForm,
+        CalendarMultiCreateRenderer,
     };
     static template = "web.CalendarController";
     static props = {
@@ -90,6 +91,7 @@ export class CalendarController extends Component {
 
     setup() {
         this.action = useService("action");
+        this.viewService = useService("view");
         this.orm = useService("orm");
         this.displayDialog = useUniqueDialog();
 
@@ -140,36 +142,37 @@ export class CalendarController extends Component {
 
         if (this.model.hasMultiCreate) {
             this.state.calendarMode = CALENDAR_MODE.quick_add;
-            this.hooks = {
-                onRecordChanged: this.onQuickCreateRootLoaded.bind(this),
-            };
-
-            this.multiCreateFields = this.model.meta.multiCreateFields;
-            this.archInfo = this.getMultiCreateArch();
+            onWillStart(async () => {
+                const { fields, relatedModels, views } = await this.viewService.loadViews({
+                    context: {
+                        ...this.props.context,
+                        form_view_ref: this.model.meta.multiCreateView,
+                    },
+                    resModel: this.props.resModel,
+                    views: [[false, "form"]],
+                });
+                const parser = new FormArchParser();
+                const arch = views.form.arch;
+                this.multiCreateArchInfo = parser.parse(
+                    parseXML(arch),
+                    relatedModels,
+                    this.props.resModel
+                );
+                const { activeFields } = extractFieldsFromArchInfo(
+                    this.multiCreateArchInfo,
+                    fields
+                );
+                this.multiCreateRecordProps = {
+                    resModel: this.props.resModel,
+                    fields,
+                    activeFields,
+                    context: this.props.context,
+                    hooks: {
+                        onRecordChanged: this.onQuickCreateRootLoaded.bind(this),
+                    },
+                };
+            });
         }
-    }
-
-    getMultiCreateArch() {
-        const resModel = this.props.resModel;
-        const quickFormModels = { [resModel]: { fields: this.props.fields } };
-
-        const archFields = Object.entries(this.multiCreateFields)
-            .map(
-                ([name, field]) =>
-                    `<field name="${name}" widget="${field.widget ?? ""}" invisible="${
-                        field.invisible ?? ""
-                    }" />`
-            )
-            .join("\n");
-
-        const arch = `
-            <form>
-                <group class="mb-0">
-                    ${archFields}
-                </group>
-            </form>
-        `;
-        return new FormArchParser().parse(parseXML(arch), quickFormModels, resModel);
     }
 
     get currentDate() {
@@ -481,10 +484,6 @@ export class CalendarController extends Component {
 
     get showQuickCreate() {
         return this.model.meta.scale === "month" && this.state.isQuickCreateMode;
-    }
-
-    get quickFieldsValues() {
-        return Object.fromEntries(Object.keys(this.multiCreateFields).map((name) => [name, false]));
     }
 
     onQuickCreateRootLoaded(record) {

@@ -130,7 +130,7 @@ export class CalendarModel extends Model {
         return this.meta.hasEditDialog;
     }
     get hasMultiCreate() {
-        return Object.keys(this.meta.multiCreateFields).length > 0;
+        return !!this.meta.multiCreateView;
     }
     get hasQuickCreate() {
         return this.meta.quickCreate;
