@@ -9,7 +9,7 @@ import { makeWeekColumn } from "./calendar_common_week_column";
 
 import { Component, onWillUpdateProps, useEffect, useRef } from "@odoo/owl";
 import { useBus } from "@web/core/utils/hooks";
-import { CALENDAR_MODE } from "@web/views/calendar/calendar_controller";
+import { CALENDAR_MODES } from "@web/views/calendar/calendar_controller";
 
 const SCALE_TO_FC_VIEW = {
     day: "timeGridDay",
@@ -61,7 +61,7 @@ export class CalendarCommonRenderer extends Component {
     };
 
     static defaultProps = {
-        calendarMode: CALENDAR_MODE.normal,
+        calendarMode: CALENDAR_MODES.filter,
     };
 
     setup() {
@@ -174,7 +174,7 @@ export class CalendarCommonRenderer extends Component {
 
     finalOptions(calendarMode) {
         const options = this.options;
-        if (calendarMode !== CALENDAR_MODE.normal) {
+        if (calendarMode !== CALENDAR_MODES.filter) {
             options["editable"] = false;
             options["selectable"] = false;
             options["dateClick"] = () => {};
@@ -491,7 +491,7 @@ export class CalendarCommonRenderer extends Component {
     }
 
     multiCreatePointerDown(ev) {
-        if (this.props.calendarMode === CALENDAR_MODE.normal) {
+        if (this.props.calendarMode === CALENDAR_MODES.filter) {
             return;
         }
         if (ev.target.closest(".fc-event")) {
@@ -509,7 +509,7 @@ export class CalendarCommonRenderer extends Component {
     }
 
     multiCreatePointerMove(ev) {
-        if (this.props.calendarMode === CALENDAR_MODE.normal) {
+        if (this.props.calendarMode === CALENDAR_MODES.filter) {
             return;
         }
         const targetElement = ev.target.closest(".fc-day:not(.fc-col-header-cell)");
@@ -524,7 +524,7 @@ export class CalendarCommonRenderer extends Component {
     }
 
     async multiCreatePointerUp(ev) {
-        if (this.props.calendarMode === CALENDAR_MODE.normal) {
+        if (this.props.calendarMode === CALENDAR_MODES.filter) {
             return;
         }
         const targetElement = ev.target.closest(".fc-day:not(.fc-col-header-cell)");
@@ -533,7 +533,7 @@ export class CalendarCommonRenderer extends Component {
             this.multiCreateDrawHighlight();
             return;
         }
-        if (this.props.calendarMode === CALENDAR_MODE.quick_add) {
+        if (this.props.calendarMode === CALENDAR_MODES.add) {
             const dates = [];
             for (const element of this.currentSelectionElement) {
                 const date = DateTime.fromISO(element.dataset.date);
@@ -542,7 +542,7 @@ export class CalendarCommonRenderer extends Component {
                 }
             }
             await this.props.model.createRecordNoInteraction(dates);
-        } else if (this.props.calendarMode === CALENDAR_MODE.quick_remove) {
+        } else if (this.props.calendarMode === CALENDAR_MODES.delete) {
             const ids = [];
             for (const element of this.currentSelectionElement) {
                 for (const event of [...element.querySelectorAll(".fc-event")]) {

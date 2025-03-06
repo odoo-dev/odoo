@@ -37,12 +37,6 @@ export const SCALE_LABELS = {
     year: _t("Year"),
 };
 
-export const CALENDAR_MODE = {
-    normal: "NORMAL",
-    quick_add: "QUICK_ADD",
-    quick_remove: "QUICK_REMOVE",
-};
-
 function useUniqueDialog() {
     const displayDialog = useOwnedDialogs();
     let close = null;
@@ -58,16 +52,123 @@ export class CalendarMultiCreateRenderer extends FormRenderer {
     setup() {
         super.setup();
 
-        useBus(this.env.calendarModel.bus, "ASK_QUICK_CREATE_FIELD_CHANGES", ({ detail }) => {
+        useBus(this.props.calendarModel.bus, "ASK_QUICK_CREATE_FIELD_CHANGES", ({ detail }) => {
             this.props.record.model.bus.trigger("NEED_LOCAL_CHANGES", { proms: detail.proms });
         });
     }
 }
 
-export class CalendarController extends Component {
+export const CALENDAR_MODES = {
+    filter: "FILTER",
+    add: "ADD",
+    delete: "DELETE",
+};
+
+class CalendarSidePanel extends Component {
     static components = {
+        CalendarMultiCreateRenderer,
         DatePicker: DateTimePicker,
         FilterPanel: CalendarFilterPanel,
+        Record,
+    };
+    static template = "web.CalendarSidePanel";
+    static props = ["model", "mode", "setMode", "context?"];
+    static defaultProps = {
+        context: {},
+    };
+
+    setup() {
+        this.viewService = useService("view");
+
+        this.CALENDAR_MODES = CALENDAR_MODES;
+        this.state = useState({
+            isReady: !this.props.model.hasMultiCreate,
+        });
+
+        if (this.props.model.hasMultiCreate) {
+            onWillStart(() => {
+                this.loadMultiCreateView().then(() => {
+                    this.state.isReady = true;
+                });
+            });
+        }
+    }
+
+    get datePickerProps() {
+        return {
+            type: "date",
+            showWeekNumbers: false,
+            maxPrecision: "days",
+            daysOfWeekFormat: "narrow",
+            onSelect: (date) => {
+                let scale = "week";
+
+                if (this.props.model.date.hasSame(date, "day")) {
+                    const scales = ["month", "week", "day"];
+                    scale = scales[(scales.indexOf(this.props.model.scale) + 1) % scales.length];
+                } else {
+                    // Check if dates are on the same week
+                    // As a.hasSame(b, "week") does not depend on locale and week always starts on Monday,
+                    // we are comparing derivated dates instead to take this into account.
+                    const currentDate =
+                        this.props.model.date.weekday === 7
+                            ? this.props.model.date.plus({ day: 1 })
+                            : this.props.model.date;
+                    const pickedDate = date.weekday === 7 ? date.plus({ day: 1 }) : date;
+
+                    // a.hasSame(b, "week") does not depend on locale and week alway starts on Monday
+                    if (currentDate.hasSame(pickedDate, "week")) {
+                        scale = "day";
+                    }
+                }
+
+                this.props.model.load({ scale, date });
+            },
+            value: this.props.model.date,
+        };
+    }
+    get filterPanelProps() {
+        return {
+            model: this.props.model,
+        };
+    }
+
+    get showDatePicker() {
+        return this.props.model.showDatePicker && !this.env.isSmall;
+    }
+
+    async loadMultiCreateView() {
+        const { fields, relatedModels, views } = await this.viewService.loadViews({
+            context: {
+                ...this.props.context,
+                form_view_ref: this.props.model.meta.multiCreateView,
+            },
+            resModel: this.props.model.resModel,
+            views: [[false, "form"]],
+        });
+        const parser = new FormArchParser();
+        const arch = views.form.arch;
+        const resModel = this.props.model.resModel;
+        this.multiCreateArchInfo = parser.parse(parseXML(arch), relatedModels, resModel);
+        const { activeFields } = extractFieldsFromArchInfo(this.multiCreateArchInfo, fields);
+        this.multiCreateRecordProps = {
+            resModel,
+            fields,
+            activeFields,
+            context: this.props.context,
+            hooks: {
+                onRecordChanged: this.onQuickCreateRootLoaded.bind(this),
+            },
+        };
+    }
+
+    onQuickCreateRootLoaded(record) {
+        this.props.model.data.quickCreateValuesCallback = record.getChanges.bind(record);
+    }
+}
+
+export class CalendarController extends Component {
+    static components = {
         MobileFilterPanel: CalendarMobileFilterPanel,
         QuickCreate: CalendarQuickCreate,
         QuickCreateFormView: FormViewDialog,
@@ -75,8 +176,7 @@ export class CalendarController extends Component {
         SearchBar,
         ViewScaleSelector,
         CogMenu,
-        Record,
-        CalendarMultiCreateRenderer,
+        CalendarSidePanel,
     };
     static template = "web.CalendarController";
     static props = {
@@ -91,7 +191,6 @@ export class CalendarController extends Component {
 
     setup() {
         this.action = useService("action");
-        this.viewService = useService("view");
         this.orm = useService("orm");
         this.displayDialog = useUniqueDialog();
 
@@ -122,7 +221,7 @@ export class CalendarController extends Component {
             showSideBar:
                 !this.env.isSmall &&
                 Boolean(sessionShowSidebar != null ? JSON.parse(sessionShowSidebar) : true),
-            calendarMode: CALENDAR_MODE.normal,
+            mode: this.model.hasMultiCreate ? CALENDAR_MODES.add : CALENDAR_MODES.filter,
         });
 
         this.searchBarToggler = useSearchBarToggler();
@@ -133,46 +232,6 @@ export class CalendarController extends Component {
             editRecord: this.editRecord.bind(this),
             setDate: this.setDate.bind(this),
         };
-
-        useChildSubEnv({
-            calendarModel: this.model,
-        });
-
-        this.CALENDAR_MODE = CALENDAR_MODE;
-
-        if (this.model.hasMultiCreate) {
-            this.state.calendarMode = CALENDAR_MODE.quick_add;
-            onWillStart(async () => {
-                const { fields, relatedModels, views } = await this.viewService.loadViews({
-                    context: {
-                        ...this.props.context,
-                        form_view_ref: this.model.meta.multiCreateView,
-                    },
-                    resModel: this.props.resModel,
-                    views: [[false, "form"]],
-                });
-                const parser = new FormArchParser();
-                const arch = views.form.arch;
-                this.multiCreateArchInfo = parser.parse(
-                    parseXML(arch),
-                    relatedModels,
-                    this.props.resModel
-                );
-                const { activeFields } = extractFieldsFromArchInfo(
-                    this.multiCreateArchInfo,
-                    fields
-                );
-                this.multiCreateRecordProps = {
-                    resModel: this.props.resModel,
-                    fields,
-                    activeFields,
-                    context: this.props.context,
-                    hooks: {
-                        onRecordChanged: this.onQuickCreateRootLoaded.bind(this),
-                    },
-                };
-            });
-        }
     }
 
     get currentDate() {
@@ -241,58 +300,29 @@ export class CalendarController extends Component {
             ...this._baseRendererProps,
             model: this.model,
             isWeekendVisible: this.model.scale === "day" || this.state.isWeekendVisible,
-            calendarMode: this.state.calendarMode,
+            calendarMode: this.state.mode,
         };
     }
-    get containerProps() {
-        return {
-            model: this.model,
-        };
-    }
-    get datePickerProps() {
-        return {
-            type: "date",
-            showWeekNumbers: false,
-            maxPrecision: "days",
-            daysOfWeekFormat: "narrow",
-            onSelect: (date) => {
-                let scale = "week";
 
-                if (this.model.date.hasSame(date, "day")) {
-                    const scales = ["month", "week", "day"];
-                    scale = scales[(scales.indexOf(this.model.scale) + 1) % scales.length];
-                } else {
-                    // Check if dates are on the same week
-                    // As a.hasSame(b, "week") does not depend on locale and week always starts on Monday,
-                    // we are comparing derivated dates instead to take this into account.
-                    const currentDate =
-                        this.model.date.weekday === 7
-                            ? this.model.date.plus({ day: 1 })
-                            : this.model.date;
-                    const pickedDate = date.weekday === 7 ? date.plus({ day: 1 }) : date;
-
-                    // a.hasSame(b, "week") does not depend on locale and week alway starts on Monday
-                    if (currentDate.hasSame(pickedDate, "week")) {
-                        scale = "day";
-                    }
-                }
-
-                this.model.load({ scale, date });
-            },
-            value: this.model.date,
-        };
-    }
-    get filterPanelProps() {
-        return {
-            model: this.model,
-        };
-    }
     get mobileFilterPanelProps() {
         return {
             model: this.model,
             sideBarShown: this.state.showSideBar,
             toggleSideBar: () => {
                 this.state.showSideBar = !this.state.showSideBar;
+            },
+        };
+    }
+
+    get sidePanelProps() {
+        return {
+            model: this.model,
+            context: this.props.context,
+            mode: this.state.mode,
+            setMode: (mode) => {
+                if (Object.values(CALENDAR_MODES).includes(mode)) {
+                    this.state.mode = mode;
+                }
             },
         };
     }
@@ -306,12 +336,8 @@ export class CalendarController extends Component {
         return !this.env.isSmall || !this.state.showSideBar;
     }
 
-    get showDatePicker() {
-        return this.model.showDatePicker && !this.env.isSmall;
-    }
-
     get hasSideBar() {
-        return this.showDatePicker || this.model.filterSections.length > 0;
+        return this.model.showDatePicker || this.model.filterSections.length > 0;
     }
 
     get showSideBar() {
@@ -478,26 +504,5 @@ export class CalendarController extends Component {
     toggleWeekendVisibility() {
         this.state.isWeekendVisible = !this.state.isWeekendVisible;
         browser.localStorage.setItem("calendar.isWeekendVisible", this.state.isWeekendVisible);
-    }
-
-    // quick Month
-
-    get showQuickCreate() {
-        return this.model.meta.scale === "month" && this.state.isQuickCreateMode;
-    }
-
-    onQuickCreateRootLoaded(record) {
-        console.log(record);
-        this.model.data.quickCreateValuesCallback = record.getChanges.bind(record);
-    }
-
-    setMode(mode) {
-        if (Object.values(CALENDAR_MODE).includes(mode)) {
-            this.state.calendarMode = mode;
-        }
-    }
-
-    isMode(mode) {
-        return this.state.calendarMode === mode;
     }
 }
