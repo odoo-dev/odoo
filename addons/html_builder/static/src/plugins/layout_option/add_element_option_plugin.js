@@ -1,22 +1,10 @@
-import { Plugin } from "@html_editor/plugin";
-import { registry } from "@web/core/registry";
-import { _t } from "@web/core/l10n/translation";
 import { resizeGrid, setElementToMaxZindex } from "@html_builder/utils/grid_layout_utils";
+import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
-import { Component } from "@odoo/owl";
-import { defaultBuilderComponents } from "@html_builder/core/default_builder_components";
+import { _t } from "@web/core/l10n/translation";
+import { registry } from "@web/core/registry";
+import { AddElementOption } from "./add_element_option";
 
-export class AddElementOption extends Component {
-    static template = "html_builder.AddElementOption";
-    static components = { ...defaultBuilderComponents };
-    static props = {
-        level: { type: Number, optional: true },
-        applyTo: { type: String, optional: true },
-    };
-    static defaultProps = {
-        level: 0,
-    };
-}
 export class AddElementOptionPlugin extends Plugin {
     static id = "AddElementOption";
     static dependencies = ["history", "media"];
@@ -73,6 +61,9 @@ export class AddElementOptionPlugin extends Plugin {
                     return selectedImage;
                 },
                 apply: ({ editingElement, loadResult: image }) => {
+                    if (!image) {
+                        return;
+                    }
                     const colSize = 6;
                     const rowSize = 6;
 

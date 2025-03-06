@@ -5,7 +5,7 @@ import { _t } from "@web/core/l10n/translation";
 
 class ImageGalleryOption extends Plugin {
     static id = "imageGalleryOption";
-    static dependencies = ["media", "dom", "history", "operation"];
+    static dependencies = ["media", "dom", "history", "operation", "selection", "builder-options"];
     resources = {
         builder_options: [
             {
@@ -29,9 +29,19 @@ class ImageGalleryOption extends Plugin {
             },
             setImageGalleryLayout: {
                 load: ({ editingElement }) => this.processImages(editingElement),
-                apply: ({ editingElement, param: { mainParam: mode }, loadResult: images }) => {
+                apply: ({ editingElement, param: { mainParam: mode }, loadResult }) => {
                     if (mode !== this.getMode(editingElement)) {
+                        const images = loadResult.images;
                         this.setImages(editingElement, mode, images);
+                        const clonedSelectedImage = loadResult.clonedSelectedImage;
+                        if (clonedSelectedImage && !this.dependencies.history.getIsPreviewing()) {
+                            // We want to update the container to the equivalent cloned image.
+                            // This has to be done in the new step so we manually add a step
+                            this.dependencies.history.addStep();
+                            this.dependencies["builder-options"].updateContainers(
+                                clonedSelectedImage
+                            );
+                        }
                     }
                 },
                 isApplied: ({ editingElement, param: { mainParam: mode } }) =>
@@ -76,7 +86,7 @@ class ImageGalleryOption extends Plugin {
                 }
                 return this.processImages(editingElement, selectedImages);
             },
-            apply: ({ editingElement, loadResult: images }) => {
+            apply: ({ editingElement, loadResult: { images } }) => {
                 if (images.length) {
                     const mode = this.getMode(editingElement);
                     this.setImages(editingElement, mode, images);
@@ -143,6 +153,9 @@ class ImageGalleryOption extends Plugin {
                 break;
             case "grid":
                 this.grid(imageGalleryElement, images);
+                break;
+            case "nomode":
+                this.nomode(imageGalleryElement, images);
                 break;
         }
     }
@@ -216,11 +229,29 @@ class ImageGalleryOption extends Plugin {
         }
     }
 
+    nomode(imageGalleryElement, images) {
+        const row = this.document.createElement("div");
+        row.classList.add("row", "s_nb_column_fixed");
+        const container = this.getContainer(imageGalleryElement);
+        container.replaceChildren(row);
+        for (const [index, img] of images.entries()) {
+            let wrapClass = "col-lg-3";
+            if (img.width >= img.height * 2 || img.width > 600) {
+                wrapClass = "col-lg-6";
+            }
+
+            const wrap = this.document.createElement("div");
+            wrap.classList.add(wrapClass);
+            wrap.appendChild(img);
+            row.appendChild(wrap);
+        }
+    }
+
     async processImages(editingElement, newImages = []) {
         await this.transformImagesToWebp(newImages);
         this.setImageProperties(editingElement, newImages);
-        const clonedContainerImg = await this.cloneContainerImages(editingElement);
-        return [...clonedContainerImg, ...newImages];
+        const { clonedImgs, clonedSelectedImage } = await this.cloneContainerImages(editingElement);
+        return { images: [...clonedImgs, ...newImages], clonedSelectedImage };
     }
 
     setImageProperties(imageGalleryElement, images) {
@@ -272,8 +303,10 @@ class ImageGalleryOption extends Plugin {
 
     async cloneContainerImages(imageGalleryElement) {
         const imagesHolder = this.getImageHolder(imageGalleryElement);
-        const newImgs = [];
+        const clonedImgs = [];
         const imgLoaded = [];
+        let clonedSelectedImage;
+        const currentContainers = this.dependencies["builder-options"].getContainers();
         for (const image of imagesHolder) {
             // Only on Chrome: appended images are sometimes invisible
             // and not correctly loaded from cache, we use a clone of the
@@ -285,10 +318,13 @@ class ImageGalleryOption extends Plugin {
                     newImg.loading = "lazy";
                 })
             );
-            newImgs.push(newImg);
+            if (currentContainers.at(-1)?.element === image) {
+                clonedSelectedImage = newImg;
+            }
+            clonedImgs.push(newImg);
         }
         await Promise.all(imgLoaded);
-        return newImgs;
+        return { clonedImgs, clonedSelectedImage };
     }
 
     /**

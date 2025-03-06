@@ -179,7 +179,11 @@
             <BuilderButtonGroup action="'customizeBodyBgType'">
                 <BuilderButton title.translate="Image" actionValue="'image'" className="'fa fa-fw fa-camera'"/>
                 <BuilderButton title.translate="Pattern" actionValue="'pattern'" className="'fa fa-fw fa-th'"/>
+<<<<<<< HEAD
                 <BuilderButton title.translate="None" actionValue="NONE" className="'fa fa-fw fa-ban'"/>
+=======
+                <BuilderButton title.translate="None" actionValue="'NONE'" className="'fa fa-fw fa-ban'"/>
+>>>>>>> origin/master-mysterious-egg-bso-2
             </BuilderButtonGroup>
             <!-- Hidden imagepicker enabled by above button-group -->
             <!--

@@ -47,7 +47,7 @@ export class CoreBuilderActionPlugin extends Plugin {
     getStyleActions() {
         const styleActions = {
             "box-shadow": {
-                getValue: (el, param) => {
+                getValue: ({ editingElement: el, param }) => {
                     const value = getStyleValue(el, param);
                     const inset = value.includes("inset");
                     let values = value
@@ -59,12 +59,10 @@ export class CoreBuilderActionPlugin extends Plugin {
                     values = values.join(" ").replace(color, "").trim();
                     return `${color} ${values}${inset ? " inset" : ""}`;
                 },
-                apply: (el, value, param) => {
-                    setStyleValue(el, param, value);
-                },
+                apply: setStyleValue,
             },
             "border-width": {
-                getValue: (el, param) => {
+                getValue: ({ editingElement: el, param }) => {
                     let value = getStyleValue(el, param);
                     if (value.endsWith("px")) {
                         value = value
@@ -79,16 +77,16 @@ export class CoreBuilderActionPlugin extends Plugin {
                     }
                     return value;
                 },
-                apply: (el, value, param) => {
-                    setStyleValue(el, param, value);
-                },
+                apply: setStyleValue,
             },
             "row-gap": {
-                getValue: (el, param) => parseInt(getStyleValue(el, param)) || 0,
+                getValue: ({ editingElement: el, param }) =>
+                    parseInt(getStyleValue(el, param)) || 0,
                 apply: setStyleValue,
             },
             "column-gap": {
-                getValue: (el, param) => parseInt(getStyleValue(el, param)) || 0,
+                getValue: ({ editingElement: el, param, value }) =>
+                    parseInt(getStyleValue(el, param)) || 0,
                 apply: setStyleValue,
             },
         };
@@ -99,25 +97,28 @@ export class CoreBuilderActionPlugin extends Plugin {
     }
 
     getStyleAction() {
-        const getValue = ({ editingElement, param }) =>
+        const getValue = (...args) => {
+            const { editingElement, param } = args[0];
             // Disable all transitions for the duration of the style check
             // as we want to know the final value of a property to properly
             // update the UI.
-            withoutTransition(editingElement, () => {
+            return withoutTransition(editingElement, () => {
                 const customStyle = this.customStyleActions[param.mainParam];
                 if (customStyle) {
-                    return customStyle.getValue(editingElement, param);
+                    return customStyle.getValue(...args);
                 } else {
                     return getStyleValue(editingElement, param);
                 }
             });
+        };
         return {
             getValue,
             isApplied: ({ editingElement, param = {}, value }) => {
                 const currentValue = getValue({ editingElement, param });
                 return currentValue === value;
             },
-            apply: ({ editingElement, param = {}, value }) => {
+            apply: (...args) => {
+                const { editingElement, param = {}, value } = args[0];
                 // Disable all transitions for the duration of the method as many
                 // comparisons will be done on the element to know if applying a
                 // property has an effect or not. Also, changing a css property via the
@@ -126,9 +127,9 @@ export class CoreBuilderActionPlugin extends Plugin {
                 withoutTransition(editingElement, () => {
                     const customStyle = this.customStyleActions[param.mainParam];
                     if (customStyle) {
-                        customStyle.apply(editingElement, value, param);
+                        customStyle.apply(...args);
                     } else {
-                        setStyleValue(editingElement, param, value);
+                        setStyleValue({ editingElement, param, value });
                     }
                 });
             },
@@ -153,11 +154,11 @@ function getStyleValue(el, { mainParam: styleName } = {}) {
     return cssValues.join(" ");
 }
 
-function setStyleValue(
-    el,
-    { mainParam: styleName, extraClass, force = false, allowImportant = true } = {},
-    value
-) {
+function setStyleValue({
+    editingElement: el,
+    param: { mainParam: styleName, extraClass, force = false, allowImportant = true } = {},
+    value,
+}) {
     const computedStyle = window.getComputedStyle(el);
     const cssProps = CSS_SHORTHANDS[styleName] || [styleName];
     // Always reset the inline style first to not put inline style on an
@@ -213,9 +214,7 @@ function setStyleValue(
 export function getGeneralStyle(param) {
     return {
         getValue: (editingElement) => getStyleValue(editingElement, param),
-        apply: (editingElement, value) => {
-            setStyleValue(editingElement, param, value);
-        },
+        apply: setStyleValue,
     };
 }
 

@@ -17,13 +17,18 @@ export class BuilderNumberInput extends Component {
         saveUnit: { type: String, optional: true },
         fakeUnit: { type: String, optional: true },
         step: { type: Number, optional: true },
+        min: { type: Number, optional: true },
+        max: { type: Number, optional: true },
         id: { type: String, optional: true },
         placeholder: { type: String, optional: true },
         style: { type: String, optional: true },
+        composable: { type: Boolean, optional: true },
         title: { type: String, optional: true },
-        // TODO support a min and max value
     };
     static components = { BuilderComponent };
+    static defaultProps = {
+        composable: false,
+    };
 
     setup() {
         if (this.props.saveUnit && !this.props.unit) {
@@ -53,7 +58,7 @@ export class BuilderNumberInput extends Component {
         if (!values) {
             return "";
         }
-        return values.split(/\s+/g).map(convertSingleValueFn).join(" ");
+        return values.trim().split(/\s+/g).map(convertSingleValueFn).join(" ");
     }
 
     formatRawValue(rawValue) {
@@ -75,8 +80,33 @@ export class BuilderNumberInput extends Component {
         });
     }
 
+    clampValue(value) {
+        if (parseFloat(value) < this.props.min) {
+            return `${this.props.min}`;
+        }
+        if (parseFloat(value) > this.props.max) {
+            return `${this.props.max}`;
+        }
+        return value;
+    }
+
     parseDisplayValue(displayValue) {
+        displayValue = displayValue.replace(/,/g, ".");
+        // Only accept 0-9, dot, - sign and space if multiple values are allowed
+        if (this.props.composable) {
+            displayValue = displayValue.replace(/[^0-9.-\s]/g, "");
+        } else {
+            displayValue = displayValue
+                .trim()
+                .split(" ")[0]
+                .replace(/[^0-9.-]/g, "");
+        }
+        displayValue = displayValue.split(" ").map(this.clampValue.bind(this)).join(" ");
+
         return this.convertSpaceSplitValues(displayValue, (value) => {
+            if (value === "") {
+                return value;
+            }
             const unit = this.props.unit;
             const saveUnit = this.props.saveUnit;
             if (unit && saveUnit) {
@@ -120,11 +150,11 @@ export class BuilderNumberInput extends Component {
         const values = e.target.value.split(" ").map((number) => parseFloat(number) || 0);
         if (e.key === "ArrowUp") {
             values.forEach((value, i) => {
-                values[i] = value + (this.props.step || 1);
+                values[i] = this.clampValue(value + (this.props.step || 1));
             });
         } else if (e.key === "ArrowDown") {
             values.forEach((value, i) => {
-                values[i] = value - (this.props.step || 1);
+                values[i] = this.clampValue(value - (this.props.step || 1));
             });
         }
         e.target.value = values.join(" ");
