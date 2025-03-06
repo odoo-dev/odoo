@@ -1859,13 +1859,13 @@ class HttpCase(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        ICP = cls.env['ir.config_parameter']
+        ICP.set_param('web.base.url', cls.base_url())
+        ICP.env.flush_all()
         if cls.registry_test_mode:
             cls.registry.enter_test_mode(cls.cr, cls.readonly_enabled)
             cls.addClassCleanup(cls.registry.leave_test_mode)
 
-        ICP = cls.env['ir.config_parameter']
-        ICP.set_param('web.base.url', cls.base_url())
-        ICP.env.flush_all()
         # v8 api with correct xmlrpc exception handling.
         cls.xmlrpc_url = f'{cls.base_url()}/xmlrpc/2/'
         cls._logger = logging.getLogger('%s.%s' % (cls.__module__, cls.__name__))
