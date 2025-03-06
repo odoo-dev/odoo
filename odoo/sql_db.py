@@ -8,6 +8,7 @@ the ORM does, in fact.
 """
 from __future__ import annotations
 
+import functools
 import logging
 import os
 import re
@@ -613,6 +614,7 @@ class TestCursor(BaseCursor):
         # in order to simulate commit and rollback, the cursor maintains a
         # savepoint at its last commit, the savepoint is created lazily
         self._savepoint: Savepoint | None = None
+        self._execute = functools.partial(Cursor.execute, cursor)
 
     def _check_savepoint(self) -> None:
         if not self._savepoint:
@@ -627,7 +629,7 @@ class TestCursor(BaseCursor):
     def execute(self, *args, **kwargs) -> None:
         assert not self._closed, "Cannot use a closed cursor"
         self._check_savepoint()
-        return self._cursor.execute(*args, **kwargs)
+        return self._execute(*args, **kwargs)
 
     def close(self) -> None:
         if not self._closed:

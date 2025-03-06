@@ -1000,6 +1000,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
         """ Enter the 'test' mode, where one cursor serves several requests. """
         assert self.test_cr is None
         self.test_cr = cr
+        self.test_cr.execute = None
         self.test_readonly_enabled = test_readonly_enabled
         self.test_lock = threading.RLock()
         assert Registry._saved_lock is None
@@ -1009,6 +1010,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
     def leave_test_mode(self) -> None:
         """ Leave the test mode. """
         assert self.test_cr is not None
+        del self.test_cr.execute
         self.test_cr = None
         del self.test_readonly_enabled
         del self.test_lock
