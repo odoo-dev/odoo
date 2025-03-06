@@ -102,7 +102,7 @@ export class CalendarCommonRenderer extends Component {
                 const options = this.finalOptions(nextProps.calendarMode);
                 this.fc.api.setOption("editable", options["editable"]);
                 this.fc.api.setOption("selectable", options["selectable"]);
-                this.fc.api.setOption("dateClick", options["dateClick"]);
+                this.fc.api.setOption("dateClick", options["dateClick"].bind(this));
             }
         });
     }
