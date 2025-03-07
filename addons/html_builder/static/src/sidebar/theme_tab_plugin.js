@@ -192,7 +192,7 @@ export class ThemeTabPlugin extends Plugin {
             },
             removeFont: {
                 load: async ({ param }) => {
-                    console.log("removeFont", param);
+                    // TODO
                     const getAction = this.dependencies.builderActions.getAction;
                     await getAction("customizeWebsiteVariable").load({
                         param: {

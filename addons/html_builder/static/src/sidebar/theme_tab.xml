@@ -71,7 +71,7 @@
         </BuilderRow>
         <BuilderRow label.translate="Line Height">
             <!-- "× ": \u00D7\u2000 -->
-            <BuilderNumberInput action="'customizeWebsiteVariable'" actionParam="'body-line-height'" fakeUnit="'× '"/>
+            <BuilderNumberInput action="'customizeWebsiteVariable'" actionParam="'body-line-height'" unit="'× '" saveUnit="''"/>
         </BuilderRow>
         <BuilderRow label.translate="Margins" action="'customizeWebsiteVariable'">
             <BuilderNumberInput title.translate="Top" actionParam="'paragraph-margin-top'" unit="'px'" saveUnit="'px'"/>
@@ -142,16 +142,16 @@
         </BuilderRow>
         <BuilderRow label.translate="Line Height" action="'customizeWebsiteVariable'">
             <!-- "× ": \u00D7\u2000 -->
-            <BuilderNumberInput title.translate="Heading 1" actionParam="'headings-line-height'" fakeUnit="'× '"/>
+            <BuilderNumberInput title.translate="Heading 1" actionParam="'headings-line-height'" unit="'× '" saveUnit="''"/>
             <t t-set-slot="collapse">
                 <t t-foreach="[2, 3, 4, 5, 6]" t-as="depth" t-key="depth">
                     <BuilderRow level="1" label="heading_label + ' ' + depth">
-                        <BuilderNumberInput actionParam="'h' + depth + '-line-height'" fakeUnit="'× '"/>
+                        <BuilderNumberInput actionParam="'h' + depth + '-line-height'" unit="'× '" saveUnit="''"/>
                     </BuilderRow>
                 </t>
                 <t t-foreach="used_display_font_sizes" t-as="depth" t-key="depth">
                     <BuilderRow level="1" label="display_label + ' ' + depth">
-                        <BuilderNumberInput actionParam="'display-' + depth + '-line-height'" fakeUnit="'× '"/>
+                        <BuilderNumberInput actionParam="'display-' + depth + '-line-height'" unit="'× '" saveUnit="''"/>
                     </BuilderRow>
                 </t>
             </t>

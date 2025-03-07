@@ -35,7 +35,6 @@
                 <CustomizeTab currentOptionsContainers="state.currentOptionsContainers" snippetModel="snippetModel"/>
             </t>
             <t t-if="state.activeTab === 'theme'">
-                <t t-out="(this.noSelectionTab = 'theme') and ''"/>
                 <ThemeTab/>
             </t>
         </div>

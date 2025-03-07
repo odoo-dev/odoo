@@ -64,7 +64,6 @@ export class ThemeColorsOption extends Component {
             }
             this.presets.push(preset);
         }
-        console.log(this.presets);
     }
 
     _getColor(color) {
