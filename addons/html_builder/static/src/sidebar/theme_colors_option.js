@@ -1,4 +1,4 @@
-import { Component } from "@odoo/owl";
+import { Component, useState, onMounted } from "@odoo/owl";
 import { getCSSVariableValue } from "@html_builder/utils/utils_css";
 import { defaultBuilderComponents } from "../core/default_builder_components";
 
@@ -6,6 +6,15 @@ export class ThemeColorsOption extends Component {
     static template = "html_builder.ThemeColorsOption";
     static components = { ...defaultBuilderComponents };
     setup() {
+        this.presets = useState([]);
+        this._updatePalettes();
+        onMounted(() => {
+            this.iframeDocument = document.querySelector("iframe").contentWindow.document;
+            this._updatePresets();
+        });
+    }
+
+    _updatePalettes() {
         this.palettes = [];
         const style = window.getComputedStyle(document.documentElement);
         const allPaletteNames = getCSSVariableValue("palette-names", style)
@@ -22,6 +31,35 @@ export class ThemeColorsOption extends Component {
             });
             this.palettes.push(palette);
         }
-        console.log(this.palettes);
+    }
+
+    _updatePresets() {
+        this.presets.length = 0;
+        for (let i = 1; i <= 5; i++) {
+            const preset = {
+                id: i,
+                background: this._getColor(`o-cc${i}-bg`),
+                backgroundGradient: this._getColor(`o-cc${i}-bg-gradient`),
+                text: this._getColor(`o-cc${i}-text`),
+                headings: this._getColor(`o-cc${i}-headings`),
+                primaryBtn: this._getColor(`o-cc${i}-btn-primary`),
+                primaryBtnText: this._getColor(`o-cc${i}-btn-primary-text`),
+                primaryBtnBorder: this._getColor(`o-cc${i}-btn-primary-border`),
+                secondaryBtn: this._getColor(`o-cc${i}-btn-secondary`),
+                secondaryBtnText: this._getColor(`o-cc${i}-btn-secondary-text`),
+                secondaryBtnBorder: this._getColor(`o-cc${i}-btn-secondary-border`),
+            };
+            if (preset.backgroundGradient) {
+                preset.backgroundGradient += ", url('/web/static/img/transparent.png')";
+            }
+            this.presets.push(preset);
+        }
+    }
+
+    _getColor(color) {
+        const style = this.iframeDocument.defaultView.getComputedStyle(
+            this.iframeDocument.documentElement
+        );
+        return getCSSVariableValue(color, style);
     }
 }
