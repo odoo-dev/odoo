@@ -3,6 +3,7 @@ from lxml import etree
 
 from odoo import _, models, Command
 from odoo.tools import html2plaintext, cleanup_xml_node
+from odoo.tools.float_utils import float_round
 
 UBL_NAMESPACES = {
     'cbc': "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
@@ -210,7 +211,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         else:
             return []
 
-    def _get_invoice_tax_totals_vals_list(self, invoice, taxes_vals):
+    def _get_invoice_tax_totals_vals_list_old_method(self, invoice, taxes_vals):
         tax_totals_vals = {
             'currency': invoice.currency_id,
             'currency_dp': self._get_currency_decimal_places(invoice.currency_id),
@@ -218,23 +219,19 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             'tax_subtotal_vals': [],
         }
 
-        # If it's not on the whole invoice, don't manage the EPD.
-        epd_tax_to_discount = {}
-        if not taxes_vals.get('invoice_line'):
-            epd_tax_to_discount = self._get_early_payment_discount_grouped_by_tax_rate(invoice)
-            epd_base_tax_amounts = defaultdict(lambda: {
-                'base_amount_currency': 0.0,
-                'tax_amount_currency': 0.0,
-            })
-            if epd_tax_to_discount:
-                for percentage, base_amount_currency in epd_tax_to_discount.items():
-                    epd_base_tax_amounts[percentage]['base_amount_currency'] += base_amount_currency
-                epd_accounted_tax_amount = 0.0
-                for percentage, amounts in epd_base_tax_amounts.items():
-                    amounts['tax_amount_currency'] = invoice.currency_id.round(
-                        amounts['base_amount_currency'] * percentage / 100.0)
-                    epd_accounted_tax_amount += amounts['tax_amount_currency']
-
+        epd_tax_to_discount = self._get_early_payment_discount_grouped_by_tax_rate(invoice)
+        epd_base_tax_amounts = defaultdict(lambda: {
+            'base_amount_currency': 0.0,
+            'tax_amount_currency': 0.0,
+        })
+        if epd_tax_to_discount:
+            for percentage, base_amount_currency in epd_tax_to_discount.items():
+                epd_base_tax_amounts[percentage]['base_amount_currency'] += base_amount_currency
+            epd_accounted_tax_amount = 0.0
+            for percentage, amounts in epd_base_tax_amounts.items():
+                amounts['tax_amount_currency'] = invoice.currency_id.round(
+                    amounts['base_amount_currency'] * percentage / 100.0)
+                epd_accounted_tax_amount += amounts['tax_amount_currency']
         for grouping_key, vals in taxes_vals['tax_details'].items():
             if grouping_key['tax_amount_type'] != 'fixed' or not self._context.get('convert_fixed_taxes'):
                 subtotal = {
@@ -272,6 +269,153 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             })
         return [tax_totals_vals]
 
+    def _get_invoice_line_tax_totals_vals_list_old_method(self, invoice_line, taxes_vals):
+        invoice = invoice_line.move_id
+        tax_totals_vals = {
+            'currency': invoice.currency_id,
+            'currency_dp': self._get_currency_decimal_places(invoice.currency_id),
+            'tax_amount': taxes_vals['tax_amount_currency'],
+            'tax_subtotal_vals': [],
+        }
+        for grouping_key, vals in taxes_vals['tax_details'].items():
+            if grouping_key['tax_amount_type'] != 'fixed' or not self._context.get('convert_fixed_taxes'):
+                tax_totals_vals['tax_subtotal_vals'].append({
+                    'currency': invoice.currency_id,
+                    'currency_dp': self._get_currency_decimal_places(invoice.currency_id),
+                    'taxable_amount': vals['base_amount_currency'],
+                    'tax_amount': vals['tax_amount_currency'],
+                    'percent': vals['tax_category_percent'],
+                    'tax_category_vals': vals['_tax_category_vals_'],
+                })
+        return [tax_totals_vals]
+
+    def _get_invoice_tax_totals_vals_list_new_method(self, invoice, base_lines):
+        AccountTax = self.env['account.tax']
+        customer = invoice.commercial_partner_id
+        supplier = invoice.company_id.partner_id.commercial_partner_id
+
+        tax_totals_vals = {
+            'currency': invoice.currency_id,
+            'currency_dp': self._get_currency_decimal_places(invoice.currency_id),
+            'tax_amount': 0.0,
+            'tax_subtotal_vals': [],
+        }
+
+        # Total tax amount.
+        def grouping_function(base_line, tax_data):
+            return {
+                'skip': tax_data['tax'].amount_type == 'fixed' and self._context.get('convert_fixed_taxes'),
+            }
+
+        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
+        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        for grouping_key, values in values_per_grouping_key.items():
+            if not grouping_key or grouping_key['skip']:
+                continue
+
+            tax_totals_vals['tax_amount'] += values['tax_amount_currency']
+
+        # Tax subtotals.
+        def grouping_function(base_line, tax_data):
+            return {
+                'tax_category_vals': self._get_tax_category_list(customer, supplier, tax_data['tax'])[0],
+                'skip': tax_data['tax'].amount_type == 'fixed' and self._context.get('convert_fixed_taxes'),
+            }
+
+        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
+        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        for grouping_key, values in values_per_grouping_key.items():
+            if not grouping_key or grouping_key['skip']:
+                continue
+
+            tax_category_vals = grouping_key['tax_category_vals']
+            tax_totals_vals['tax_subtotal_vals'].append({
+                'currency': invoice.currency_id,
+                'currency_dp': tax_totals_vals['currency_dp'],
+                'taxable_amount': values['base_amount_currency'],
+                'tax_amount': values['tax_amount_currency'],
+                'percent': tax_category_vals['percent'],
+                'tax_category_vals': tax_category_vals,
+            })
+
+        # Early payment discount.
+        if invoice.invoice_payment_term_id.early_pay_discount_computation != 'mixed':
+            return [tax_totals_vals]
+
+        def grouping_function(base_line, tax_data):
+            return {
+                'skip': base_line['special_type'] != 'early_payment',
+            }
+
+        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
+        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        for grouping_key, values in values_per_grouping_key.items():
+            if not grouping_key or grouping_key['skip']:
+                continue
+
+            tax_totals_vals['tax_subtotal_vals'].append({
+                'currency': invoice.currency_id,
+                'currency_dp': invoice.currency_id.decimal_places,
+                'taxable_amount': -values['base_amount_currency'],
+                'tax_amount': 0.0,
+                'tax_category_vals': {
+                    'id': 'E',
+                    'percent': 0.0,
+                    'tax_scheme_vals': {'id': "VAT"},
+                    'tax_exemption_reason': _("Exempt from tax"),
+                },
+            })
+
+        return [tax_totals_vals]
+
+    def _get_invoice_line_tax_totals_vals_list_new_method(self, invoice, base_line):
+        tax_details = base_line['tax_details']
+        AccountTax = self.env['account.tax']
+        customer = invoice.commercial_partner_id
+        supplier = invoice.company_id.partner_id.commercial_partner_id
+
+        tax_totals_vals = {
+            'currency': invoice.currency_id,
+            'currency_dp': self._get_currency_decimal_places(invoice.currency_id),
+            'tax_amount': sum(tax_data['tax_amount_currency'] for tax_data in tax_details['taxes_data']),
+            'tax_subtotal_vals': [],
+        }
+
+        def grouping_function(base_line, tax_data):
+            return {
+                'tax_category_vals': self._get_tax_category_list(customer, supplier, tax_data['tax'])[0],
+                'is_epd': base_line['special_type'] == 'early_payment',
+                'skip': tax_data['tax'].amount_type == 'fixed' and self._context.get('convert_fixed_taxes'),
+            }
+
+        aggregated_values = AccountTax._aggregate_base_line_tax_details(base_line, grouping_function)
+        for grouping_key, values in aggregated_values.items():
+            if not grouping_key or grouping_key['skip']:
+                continue
+
+            tax_category_vals = grouping_key['tax_category_vals']
+            tax_totals_vals['tax_subtotal_vals'].append({
+                'currency': invoice.currency_id,
+                'currency_dp': tax_totals_vals['currency_dp'],
+                'taxable_amount': values['base_amount_currency'],
+                'tax_amount': values['tax_amount_currency'],
+                'percent': tax_category_vals['percent'],
+                'tax_category_vals': tax_category_vals,
+            })
+        return [tax_totals_vals]
+
+    def _get_invoice_tax_totals_vals_list(self, invoice, taxes_vals):
+        if taxes_vals.get('invoice_line'):
+            if taxes_vals.get('base_line'):
+                return self._get_invoice_line_tax_totals_vals_list_new_method(invoice, taxes_vals['base_line'])
+            else:
+                return self._get_invoice_line_tax_totals_vals_list_old_method(taxes_vals['invoice_line'], taxes_vals)
+        else:
+            if taxes_vals.get('base_lines'):
+                return self._get_invoice_tax_totals_vals_list_new_method(invoice, taxes_vals['base_lines'])
+            else:
+                return self._get_invoice_tax_totals_vals_list_old_method(invoice, taxes_vals)
+
     def _get_invoice_line_item_vals(self, line, taxes_vals):
         """ Method used to fill the cac:InvoiceLine/cac:Item node.
         It provides information about what the product you are selling.
@@ -295,14 +439,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             'classified_tax_category_vals': tax_category_vals_list,
         }
 
-    def _get_document_allowance_charge_vals_list(self, invoice, taxes_vals=None):
-        """
-        https://docs.peppol.eu/poacc/billing/3.0/bis/#_document_level_allowance_or_charge
-        Usage for early payment discounts:
-        * Add one document level Allowance per tax rate (VAT included)
-        * Add one document level Charge (VAT excluded) with amount = the total sum of the early payment discount
-        The difference between these is the cash discount in case of early payment.
-        """
+    def _get_document_allowance_charge_vals_list_old_method(self, invoice):
         vals_list = []
         # Early Payment Discount
         epd_tax_to_discount = self._get_early_payment_discount_grouped_by_tax_rate(invoice)
@@ -338,6 +475,68 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             })
         return vals_list
 
+    def _get_document_allowance_charge_vals_list_new_method(self, invoice, base_lines):
+        AccountTax = self.env['account.tax']
+
+        def grouping_function(base_line, tax_data):
+            return {
+                'tax_amount_field': tax_data['tax'].amount,
+                'skip': base_line['special_type'] != 'early_payment',
+            }
+
+        epd_allowance_charge_values_list = []
+        total_epd_allowance_charge = 0.0
+        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
+        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        for grouping_key, values in values_per_grouping_key.items():
+            if not grouping_key or grouping_key['skip']:
+                continue
+
+            epd_allowance_charge_values_list.append({
+                'charge_indicator': 'false',
+                'allowance_charge_reason_code': '66',
+                'allowance_charge_reason': _("Conditional cash/payment discount"),
+                'amount': -values['base_amount_currency'],
+                'currency_dp': 2,
+                'currency_name': invoice.currency_id.name,
+                'tax_category_vals': [{
+                    'id': 'S',
+                    'percent': grouping_key['tax_amount_field'],
+                    'tax_scheme_vals': {'id': 'VAT'},
+                }],
+            })
+            total_epd_allowance_charge -= values['base_amount_currency']
+
+        if epd_allowance_charge_values_list:
+            epd_allowance_charge_values_list.append({
+                'charge_indicator': 'true',
+                'allowance_charge_reason_code': 'ZZZ',
+                'allowance_charge_reason': _("Conditional cash/payment discount"),
+                'amount': total_epd_allowance_charge,
+                'currency_dp': 2,
+                'currency_name': invoice.currency_id.name,
+                'tax_category_vals': [{
+                    'id': 'E',
+                    'percent': 0.0,
+                    'tax_scheme_vals': {'id': 'VAT'},
+                }],
+            })
+
+        return epd_allowance_charge_values_list
+
+    def _get_document_allowance_charge_vals_list(self, invoice, taxes_vals=None):
+        """
+        https://docs.peppol.eu/poacc/billing/3.0/bis/#_document_level_allowance_or_charge
+        Usage for early payment discounts:
+        * Add one document level Allowance per tax rate (VAT included)
+        * Add one document level Charge (VAT excluded) with amount = the total sum of the early payment discount
+        The difference between these is the cash discount in case of early payment.
+        """
+        if taxes_vals:
+            return self._get_document_allowance_charge_vals_list_new_method(invoice, taxes_vals['base_lines'])
+        else:
+            return self._get_document_allowance_charge_vals_list_old_method(invoice)
+
     def _get_invoice_line_allowance_vals_list(self, line, tax_values_list=None):
         """ Method used to fill the cac:{Invoice,CreditNote,DebitNote}Line>cac:AllowanceCharge node.
 
@@ -349,29 +548,50 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         :param line:    An invoice line.
         :return:        A list of python dictionaries.
         """
-        if self._context.get('convert_fixed_taxes'):
+        base_line = (tax_values_list or {}).get('base_line')
+
+        if self._context.get('convert_fixed_taxes') and base_line:
+
+            def grouping_function(base_line, tax_data):
+                return {
+                    'tax_name': tax_data['tax'].name,
+                    'skip': tax_data['tax'].amount_type != 'fixed',
+                }
+
+            aggregated_values = self.env['account.tax']._aggregate_base_line_tax_details(base_line, grouping_function)
             fixed_tax_charge_vals_list = []
-            for grouping_key, tax_details in tax_values_list['tax_details'].items():
-                if grouping_key['tax_amount_type'] == 'fixed':
-                    fixed_tax_charge_vals_list.append({
-                        'currency_name': line.currency_id.name,
-                        'currency_dp': self._get_currency_decimal_places(line.currency_id),
-                        'charge_indicator': 'true',
-                        'allowance_charge_reason_code': 'AEO',
-                        'allowance_charge_reason': grouping_key['tax_name'],
-                        'amount': tax_details['tax_amount_currency'],
-                    })
+            for grouping_key, values in aggregated_values.items():
+                if not grouping_key or grouping_key['skip']:
+                    continue
+
+                fixed_tax_charge_vals_list.append({
+                    'currency_name': line.currency_id.name,
+                    'currency_dp': self._get_currency_decimal_places(line.currency_id),
+                    'charge_indicator': 'true',
+                    'allowance_charge_reason_code': 'AEO',
+                    'allowance_charge_reason': grouping_key['tax_name'],
+                    'amount': values['tax_amount_currency'],
+                })
 
             if not line.discount:
                 return fixed_tax_charge_vals_list
 
-        # Price subtotal with discount subtracted:
-        net_price_subtotal = line.price_subtotal
-        # Price subtotal without discount subtracted:
-        if line.discount == 100.0:
-            gross_price_subtotal = 0.0
+        if base_line:
+            total_price = base_line['price_unit'] * base_line['quantity']
+            discount_factor = 1 - (base_line['discount'] / 100.0)
+            discount_amount = (
+                base_line['currency_id'].round(total_price)
+                - base_line['currency_id'].round(total_price * discount_factor)
+            )
         else:
-            gross_price_subtotal = line.currency_id.round(net_price_subtotal / (1.0 - (line.discount or 0.0) / 100.0))
+            net_price_subtotal = line.price_subtotal
+
+            # Price subtotal with discount:
+            if line.discount == 100.0:
+                gross_price_subtotal = 0.0
+            else:
+                gross_price_subtotal = line.currency_id.round(net_price_subtotal / (1.0 - (line.discount or 0.0) / 100.0))
+            discount_amount = gross_price_subtotal - net_price_subtotal
 
         allowance_vals = {
             'currency_name': line.currency_id.name,
@@ -386,37 +606,44 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             'allowance_charge_reason_code': 95,
 
             # The discount should be provided as an amount.
-            'amount': gross_price_subtotal - net_price_subtotal,
+            'amount': discount_amount,
         }
 
         return [allowance_vals] + fixed_tax_charge_vals_list
 
-    def _get_invoice_line_price_vals(self, line):
+    def _get_invoice_line_price_vals(self, line, base_line=None):
         """ Method used to fill the cac:InvoiceLine/cac:Price node.
         It provides information about the price applied for the goods and services invoiced.
 
         :param line:    An invoice line.
         :return:        A python dictionary.
         """
-        # Price subtotal without discount:
-        net_price_subtotal = line.price_subtotal
+        if base_line:
+            net_price_subtotal = base_line['tax_details']['raw_total_excluded_currency']
+        else:
+            net_price_subtotal = line.price_subtotal
+
         # Price subtotal with discount:
         if line.discount == 100.0:
             gross_price_subtotal = 0.0
         else:
             gross_price_subtotal = net_price_subtotal / (1.0 - (line.discount or 0.0) / 100.0)
+
         # Price subtotal with discount / quantity:
         gross_price_unit = gross_price_subtotal / line.quantity if line.quantity else 0.0
 
         uom = self._get_uom_unece_code(line.product_uom_id)
+        currency_dp = self._get_currency_decimal_places(line.currency_id)
+        product_price_dp = self.env['decimal.precision'].precision_get('Product Price')
+        price_amount = float_round(gross_price_unit, precision_digits=product_price_dp)
 
         return {
             'currency': line.currency_id,
-            'currency_dp': self._get_currency_decimal_places(line.currency_id),
+            'currency_dp': currency_dp,
 
             # The price of an item, exclusive of VAT, after subtracting item price discount.
-            'price_amount': round(gross_price_unit, 10),
-            'product_price_dp': self.env['decimal.precision'].precision_get('Product Price'),
+            'price_amount': price_amount,
+            'product_price_dp': product_price_dp,
 
             # The number of item units to which the price applies.
             # setting to None -> the xml will not comprise the BaseQuantity (it's not mandatory)
@@ -437,46 +664,84 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         :param line:    A document line.
         :return:        A python dictionary.
         """
+        base_line = taxes_vals['base_line']
+        tax_details = base_line['tax_details']
         allowance_charge_vals_list = self._get_invoice_line_allowance_vals_list(line, tax_values_list=taxes_vals)
 
         uom = self._get_uom_unece_code(line.product_uom_id)
-        total_fixed_tax_amount = sum(
-            vals['amount']
-            for vals in allowance_charge_vals_list
-            if vals.get('charge_indicator') == 'true'
-        )
         period_vals = {}
         # deferred_start_date & deferred_end_date are enterprise-only fields
-        if line._fields.get('deferred_start_date') and (line.deferred_start_date or line.deferred_end_date):
-            period_vals.update({'start_date': line.deferred_start_date})
-            period_vals.update({'end_date': line.deferred_end_date})
+        if base_line.get('deferred_start_date') or base_line.get('deferred_end_date'):
+            period_vals['start_date'] = base_line['deferred_start_date']
+            period_vals['end_date'] = base_line['deferred_end_date']
+
+        line_extension_amount = tax_details['total_excluded_currency'] + tax_details['delta_total_excluded_currency']
+        if self._context.get('convert_fixed_taxes'):
+            line_extension_amount += sum(
+                tax_data['tax_amount_currency']
+                for tax_data in tax_details['taxes_data']
+                if tax_data['tax'].amount_type == 'fixed'
+            )
+
         return {
             'currency': line.currency_id,
             'currency_dp': self._get_currency_decimal_places(line.currency_id),
             'id': line_id + 1,
             'line_quantity': line.quantity,
             'line_quantity_attrs': {'unitCode': uom},
-            'line_extension_amount': line.price_subtotal + total_fixed_tax_amount,
+            'line_extension_amount': line_extension_amount,
             'allowance_charge_vals': allowance_charge_vals_list,
             'tax_total_vals': self._get_invoice_line_tax_totals_vals_list(line, taxes_vals),
             'item_vals': self._get_invoice_line_item_vals(line, taxes_vals),
-            'price_vals': self._get_invoice_line_price_vals(line),
+            'price_vals': self._get_invoice_line_price_vals(line, base_line=base_line),
             'invoice_period_vals_list': [period_vals] if period_vals else []
         }
 
     def _get_invoice_monetary_total_vals(self, invoice, taxes_vals, line_extension_amount, allowance_total_amount, charge_total_amount):
         """ Method used to fill the cac:{Legal,Requested}MonetaryTotal node"""
-        return {
+        AccountTax = self.env['account.tax']
+        base_lines = taxes_vals['base_lines']
+
+        results = {
             'currency': invoice.currency_id,
             'currency_dp': self._get_currency_decimal_places(invoice.currency_id),
             'line_extension_amount': line_extension_amount,
-            'tax_exclusive_amount': taxes_vals['base_amount_currency'],
-            'tax_inclusive_amount': invoice.amount_total,
+            'tax_exclusive_amount': 0.0,
+            'tax_inclusive_amount': 0.0,
             'allowance_total_amount': allowance_total_amount or None,
             'charge_total_amount': charge_total_amount or None,
             'prepaid_amount': invoice.amount_total - invoice.amount_residual,
             'payable_amount': invoice.amount_residual,
         }
+
+        def grouping_function(base_line, tax_data):
+            return True
+
+        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
+        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        for grouping_key, values in values_per_grouping_key.items():
+            results['tax_exclusive_amount'] += values['base_amount_currency']
+            results['tax_inclusive_amount'] += values['base_amount_currency'] + values['tax_amount_currency']
+
+        # With this context key, the fixed tax amount has to be accounted as a base amount.
+        # We need a new grouping function for that to avoid adding twice the base amount when
+        # the same invoice line contains a fixed tax plus a percentage one.
+        if self._context.get('convert_fixed_taxes'):
+
+            def grouping_function(base_line, tax_data):
+                return {
+                    'skip': tax_data['tax'].amount_type != 'fixed',
+                }
+
+            base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
+            values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+            for grouping_key, values in values_per_grouping_key.items():
+                if not grouping_key or grouping_key['skip']:
+                    continue
+
+                results['tax_exclusive_amount'] += values['tax_amount_currency']
+
+        return results
 
     def _apply_invoice_tax_filter(self, base_line, tax_values):
         """
@@ -521,6 +786,9 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         return grouping_key
 
     def _export_invoice_vals(self, invoice):
+        compute_with_new_base_lines = self._name == 'account.edi.xml.ubl_bis3'
+        base_lines, _tax_lines = invoice._get_rounded_base_and_tax_lines()
+
         # Validate the structure of the taxes
         self._validate_taxes(invoice.invoice_line_ids.tax_ids)
 
@@ -531,19 +799,20 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             filter_invl_to_apply=self._apply_invoice_line_filter,
             round_from_tax_lines=True,
         )
+        taxes_vals['base_lines'] = base_lines
 
-        # Fixed Taxes: filter them on the document level, and adapt the totals
-        # Fixed taxes are not supposed to be taxes in real live. However, this is the way in Odoo to manage recupel
-        # taxes in Belgium. Since only one tax is allowed, the fixed tax is removed from totals of lines but added
-        # as an extra charge/allowance.
-        if self._context.get('convert_fixed_taxes'):
-            fixed_taxes_keys = [k for k in taxes_vals['tax_details'] if k['tax_amount_type'] == 'fixed']
-            for key in fixed_taxes_keys:
-                fixed_tax_details = taxes_vals['tax_details'].pop(key)
-                taxes_vals['tax_amount_currency'] -= fixed_tax_details['tax_amount_currency']
-                taxes_vals['tax_amount'] -= fixed_tax_details['tax_amount']
-                taxes_vals['base_amount_currency'] += fixed_tax_details['tax_amount_currency']
-                taxes_vals['base_amount'] += fixed_tax_details['tax_amount']
+        # # Fixed Taxes: filter them on the document level, and adapt the totals
+        # # Fixed taxes are not supposed to be taxes in real live. However, this is the way in Odoo to manage recupel
+        # # taxes in Belgium. Since only one tax is allowed, the fixed tax is removed from totals of lines but added
+        # # as an extra charge/allowance.
+        # if self._context.get('convert_fixed_taxes'):
+        #     fixed_taxes_keys = [k for k in taxes_vals['tax_details'] if k['tax_amount_type'] == 'fixed']
+        #     for key in fixed_taxes_keys:
+        #         fixed_tax_details = taxes_vals['tax_details'].pop(key)
+        #         taxes_vals['tax_amount_currency'] -= fixed_tax_details['tax_amount_currency']
+        #         taxes_vals['tax_amount'] -= fixed_tax_details['tax_amount']
+        #         taxes_vals['base_amount_currency'] += fixed_tax_details['tax_amount_currency']
+        #         taxes_vals['base_amount'] += fixed_tax_details['tax_amount']
 
         # Compute values for invoice lines.
         line_extension_amount = 0.0
@@ -551,9 +820,11 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         invoice_lines = invoice.invoice_line_ids.filtered(lambda line: line.display_type not in ('line_note', 'line_section') and line._check_edi_line_tax_required())
         document_allowance_charge_vals_list = self._get_document_allowance_charge_vals_list(invoice, taxes_vals)
         invoice_line_vals_list = []
+        base_lines_mapping = {base_line['record']: base_line for base_line in base_lines}
         for line_id, line in enumerate(invoice_lines):
+            base_line = base_lines_mapping[line]
             line_taxes_vals = taxes_vals['tax_details_per_record'][line]
-            line_vals = self._get_invoice_line_vals(line, line_id, {**line_taxes_vals, 'invoice_line': line})
+            line_vals = self._get_invoice_line_vals(line, line_id, {**line_taxes_vals, 'base_line': base_line, 'invoice_line': line})
             invoice_line_vals_list.append(line_vals)
 
             line_extension_amount += line_vals['line_extension_amount']
@@ -583,6 +854,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             'customer': customer,
 
             'taxes_vals': taxes_vals,
+            'base_lines': base_lines,
 
             'format_float': self.format_float,
             'AddressType_template': 'account_edi_ubl_cii.ubl_20_AddressType',
