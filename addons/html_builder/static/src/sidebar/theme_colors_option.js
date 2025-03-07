@@ -7,15 +7,22 @@ export class ThemeColorsOption extends Component {
     static components = { ...defaultBuilderComponents };
     setup() {
         this.presets = useState([]);
-        this._updatePalettes();
+        this.palettes = this._getPalettes();
+        this.observer = new MutationObserver(this._updatePresets.bind(this));
         onMounted(() => {
             this.iframeDocument = document.querySelector("iframe").contentWindow.document;
+            this.observer.observe(this.iframeDocument.documentElement, {
+                attributes: true,
+                childList: true,
+                subtree: true,
+                attributeFilter: ["style"],
+            });
             this._updatePresets();
         });
     }
 
-    _updatePalettes() {
-        this.palettes = [];
+    _getPalettes() {
+        const palettes = [];
         const style = window.getComputedStyle(document.documentElement);
         const allPaletteNames = getCSSVariableValue("palette-names", style)
             .split(", ")
@@ -29,8 +36,9 @@ export class ThemeColorsOption extends Component {
                 const color = getCSSVariableValue(`o-palette-${paletteName}-o-color-${c}`, style);
                 palette.colors.push(color);
             });
-            this.palettes.push(palette);
+            palettes.push(palette);
         }
+        return palettes;
     }
 
     _updatePresets() {
@@ -49,17 +57,22 @@ export class ThemeColorsOption extends Component {
                 secondaryBtnText: this._getColor(`o-cc${i}-btn-secondary-text`),
                 secondaryBtnBorder: this._getColor(`o-cc${i}-btn-secondary-border`),
             };
+
+            // TODO: check if this is necessary
             if (preset.backgroundGradient) {
                 preset.backgroundGradient += ", url('/web/static/img/transparent.png')";
             }
             this.presets.push(preset);
         }
+        console.log(this.presets);
     }
 
     _getColor(color) {
-        const style = this.iframeDocument.defaultView.getComputedStyle(
-            this.iframeDocument.documentElement
-        );
-        return getCSSVariableValue(color, style);
+        if (!this.iframeStyle) {
+            this.iframeStyle = this.iframeDocument.defaultView.getComputedStyle(
+                this.iframeDocument.documentElement
+            );
+        }
+        return getCSSVariableValue(color, this.iframeStyle);
     }
 }

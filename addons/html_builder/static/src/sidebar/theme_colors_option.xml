@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
     <t t-name="html_builder.ThemeColorsOption">
         <BuilderContext preview="false">
-            <!--
+            <!-- TODO
             <we-alert class="o_old_color_system_warning d-none mt-2">
                 It appears your website is still using the old color system of
                 Odoo 13.0 in some places. We made sure it is still working but
@@ -12,7 +12,7 @@
             <BuilderRow>
                 <div class="d-flex flex-row gap-3 w-100 justify-content-between" style="height: 50px">
                     <div class="d-flex flex-column h-100 justify-content-between">
-                        <span><it>Main</it></span>
+                        <span class="font-italic">Main</span>
                         <div class="d-flex flex-row">
                             <BuilderColorPicker
                                 title="Primary"
@@ -28,7 +28,7 @@
                         </div>
                     </div>
                     <div class="d-flex flex-column h-100 justify-content-between">
-                        <span><it>Light &amp; Dark</it></span>
+                        <span class="font-italic">Light &amp; Dark</span>
                         <div class="d-flex flex-row">
                             <BuilderColorPicker
                                 action="'customizeWebsiteColor'"
@@ -39,19 +39,24 @@
                         </div>
                     </div>
                     <div class="d-flex flex-column h-100">
-                        <!-- TODO: use icon for select button -->
-                        <!-- <img src="/website/static/src/img/snippets_options/palette.svg" /> -->
-                        <BuilderSelect action="'customizeWebsiteVariable'" actionParam="'color-palettes-name'">
-                            <t t-foreach="palettes" t-as="palette" t-key="palette.name">
-                                <BuilderSelectItem actionValue="palette.name">
-                                    <div class="d-flex flex-row">
-                                        <t t-foreach="palette.colors" t-as="color" t-key="color">
-                                            <span class="w-100" t-attf-style="background-color: {{color}}; height: 25px"></span>
-                                        </t>
-                                    </div>
-                                </BuilderSelectItem>
-                            </t>
-                        </BuilderSelect>
+                        <!-- TODO: use icon for palette selection button -->
+                        <!-- <button class="btn btn-primary h-100 p-2">
+                            <img class="p-2 h-100" src="/website/static/src/img/snippets_options/palette.svg" />
+                        </button> -->
+                        <div class="d-flex flex-column h-100 justify-content-between">
+                            <span class="font-italic">Palette</span>
+                            <BuilderSelect action="'customizeWebsiteVariable'" actionParam="'color-palettes-name'">
+                                <t t-foreach="palettes" t-as="palette" t-key="palette.name">
+                                    <BuilderSelectItem actionValue="palette.name">
+                                        <div class="d-flex flex-row" style="min-width: 60px">
+                                            <t t-foreach="palette.colors" t-as="color" t-key="color">
+                                                <span class="w-100" t-attf-style="background-color: {{color}}; height: 25px"></span>
+                                            </t>
+                                        </div>
+                                    </BuilderSelectItem>
+                                </t>
+                            </BuilderSelect>
+                        </div>
                     </div>
                 </div>
             </BuilderRow>
@@ -77,19 +82,19 @@
                                     Text
                                 </p>
                                 <button
-                                    class="btn btn-sm me-1 border"
+                                    class="btn btn-sm"
                                     t-attf-style="
                                         background-color: {{preset.primaryBtn}};
                                         color: {{preset.primaryBtnText}};
-                                        border-color: {{preset.primaryBtnBorder}};">
+                                        border: 1px solid {{preset.primaryBtnBorder}}">
                                     Button
                                 </button>
                                 <button
-                                    class="btn btn-sm border"
+                                    class="btn btn-sm"
                                     t-attf-style="
                                         background-color: {{preset.secondaryBtn}};
                                         color: {{preset.secondaryBtnText}};
-                                        border-color: {{preset.secondaryBtnBorder}};">
+                                        border: 1px solid {{preset.secondaryBtnBorder}}">
                                     Button
                                 </button>
                             </div>
@@ -144,33 +149,6 @@
                     </t>
                 </t>
             </BuilderRow>
-            <!--<we-row class="o_we_theme_colors_selector">
-                <div class="o_we_theme_colors_selector_group">
-                    <we-title>Main</we-title>
-                    <we-colorpicker data-name="color_1_opt" title="Primary"
-                                    data-customize-website-color="" data-color="o-color-1"
-                                    data-use-css-color="true" data-selected-tab="custom-colors"/>
-                    <we-colorpicker data-name="color_2_opt" title="Secondary"
-                                    data-customize-website-color="" data-color="o-color-2"
-                                    data-use-css-color="true" data-selected-tab="custom-colors"/>
-                    <we-colorpicker data-customize-website-color="" data-color="o-color-3"
-                                    data-use-css-color="true" data-selected-tab="custom-colors"/>
-                </div>
-                <div class="o_we_theme_colors_selector_group">
-                    <we-title>Light &amp; Dark</we-title>
-                    <we-colorpicker data-customize-website-color="" data-color="o-color-4"
-                                    data-use-css-color="true" data-selected-tab="custom-colors"/>
-                    <we-colorpicker data-customize-website-color="" data-color="o-color-5"
-                                    data-use-css-color="true" data-selected-tab="custom-colors"/>
-                </div>
-                <we-select
-                    data-img="/website/static/src/img/snippets_options/palette.svg"
-                    class="o_we_theme_colors_select"
-                    data-variable="color-palettes-name" />
-            </we-row>
-            <we-collapse class="o_we_theme_presets_collapse" string="Color Presets">
-            </we-collapse>
-            -->
         </BuilderContext>
     </t>
 </templates>
