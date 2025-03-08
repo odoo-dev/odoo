@@ -354,14 +354,3 @@ class StockMoveLine(models.Model):
 
         description = ', '.join(description_items)
         return description
-
-    @api.depends('picking_id')
-    def _compute_location_id(self):
-        if self._context.get('active_model') == 'stock.picking.batch':
-            for line in self:
-                if line.location_id != line.picking_id.location_id:
-                    line.location_id = line.picking_id.location_id
-                if line.location_dest_id != line.picking_id.location_dest_id:
-                    line.location_dest_id = line.picking_id.location_dest_id
-        else:
-            super()._compute_location_id()
