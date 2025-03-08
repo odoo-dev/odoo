@@ -206,7 +206,8 @@ class StockPickingBatch(models.Model):
                 sequence_prefix, sequence_number = (self.env['ir.sequence'].with_company(self.company_id).next_by_code('picking.batch') or '/').split('/')
                 self.name = f"{sequence_prefix}/{picking_type.sequence_code}/{sequence_number}"
             else:
-                sequence_prefix, sequence_code, sequence_number = self.display_name.split('/')
+                sequence_parts = self.name.split('/')
+                sequence_prefix, sequence_number = sequence_parts[0], sequence_parts[-1]
                 self.name = f"{sequence_prefix}/{picking_type.sequence_code}/{sequence_number}"
         return res
 
