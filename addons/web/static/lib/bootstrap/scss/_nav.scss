@@ -182,6 +182,59 @@
   }
 }
 
+.nav-header-fill {
+
+}
+.nav-header-outline {
+  .nav-link:not(.o_nav-link_secondary) {
+      padding-right: 1.5rem !important;
+      padding-left: 1.5rem !important;
+      border: $border-width solid transparent;
+      border-radius: $nav-pills-border-radius;
+    }
+  
+.nav-link.active,
+  .show > .nav-link {
+      border-color: currentColor;
+  }
+}
+.nav-header-pills {
+  .nav-link:not(.o_nav-link_secondary) {
+    padding-right: 1.5rem;
+    padding-left: 1.5rem;
+    border-radius: 10rem;
+  }
+  
+
+}
+.nav-header-block {
+  .nav-link:not(.o_nav-link_secondary) {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-radius: 0;
+
+  }
+}
+
+.nav-header-border-bottom {
+  .nav-link:not(.o_nav-link_secondary) {
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    margin: 0 1rem;
+    border-bottom: 0.5rem solid transparent;
+  }
+
+  .nav-link.active,
+  .show > .nav-link {
+      border-color: currentColor;
+  }
+}
+
+.navbar.nav-header-no-padding {
+  padding: 0;
+}
 
 // Tabbable tabs
 //
