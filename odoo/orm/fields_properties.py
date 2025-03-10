@@ -94,9 +94,10 @@ class Properties(Field):
 
 
     def setup(self, model):
-        if self.definition_record and self.definition_record_field:
+        if not self._setup_done and self.definition_record and self.definition_record_field:
             definition_record_field = model.env[model._fields[self.definition_record].comodel_name]._fields[self.definition_record_field]
             definition_record_field.properties_fields += (self,)
+        return super().setup(model)
 
     def setup_related(self, model):
         super().setup_related(model)
