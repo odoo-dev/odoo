@@ -1274,7 +1274,7 @@ test("edit a filter", async () => {
     expect(SELECTORS.condition).toHaveCount(0);
     expect(`.modal footer button:first`).not.toBeEnabled();
 
-    await contains(`.modal ${SELECTORS.addNewRule}`).click();
+    await contains(`.modal ${SELECTORS.newFilter}`).click();
     expect(SELECTORS.condition).toHaveCount(1);
     expect(getCurrentPath()).toBe("Id");
     expect(getCurrentOperator()).toBe("is equal");

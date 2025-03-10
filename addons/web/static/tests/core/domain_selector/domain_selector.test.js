@@ -5,23 +5,23 @@ import { Component, useState, xml } from "@odoo/owl";
 
 import { getPickerCell } from "@web/../tests/core/datetime/datetime_test_helpers";
 import {
-    Partner,
-    Product,
     Country,
+    Partner,
+    Player,
+    Product,
     Stage,
     Team,
-    Player,
-    addNewRule,
     clearNotSupported,
-    clickOnButtonAddBranch,
-    clickOnButtonAddNewRule,
     clickOnButtonDeleteNode,
+    clickOnNewFilter,
+    clickOnNewGroup,
     editValue,
     getConditionText,
     getCurrentOperator,
     getCurrentPath,
     getCurrentValue,
     getOperatorOptions,
+    getTreeEditorContent,
     getValueOptions,
     isNotSupportedOperator,
     isNotSupportedPath,
@@ -30,6 +30,7 @@ import {
     selectOperator,
     selectValue,
     toggleArchive,
+    toggleConnector,
 } from "@web/../tests/core/tree_editor/condition_tree_editor_test_helpers";
 import {
     contains,
@@ -89,13 +90,7 @@ test("creating a domain from scratch", async () => {
         isDebugMode: true,
     });
 
-    // As we gave an empty domain, there should be a visible button to add
-    // the first domain part
-    expect(SELECTORS.addNewRule).toHaveCount(1);
-
-    // Clicking on that button should add a visible field selector in the
-    // component so that the user can change the field chain
-    await addNewRule();
+    await clickOnNewFilter();
     expect(".o_model_field_selector").toHaveCount(1);
 
     // Focusing the field selector input should open a field selector popover
@@ -117,31 +112,21 @@ test("creating a domain from scratch", async () => {
     await contains(
         ".o_model_field_selector_popover .o_model_field_selector_popover_item_name"
     ).click();
-    expect(SELECTORS.debugArea).toHaveCount(1);
     expect(SELECTORS.debugArea).toHaveValue(`[("bar", "=", True)]`);
+    expect(SELECTORS.newFilter).toHaveCount(1);
 
-    // There should be a "+" button to add a domain part; clicking on it
-    // should add the default "('id', '=', 1)" domain
-    expect(SELECTORS.buttonAddNewRule).toHaveCount(1);
-    await clickOnButtonAddNewRule();
+    await clickOnNewFilter();
     expect(SELECTORS.debugArea).toHaveValue(`["&", ("bar", "=", True), ("bar", "=", True)]`);
 
-    // There should be two "Add branch" buttons to add a domain "branch"; clicking on
-    // the first one, should add this group with defaults "('id', '=', 1)"
-    // domains and the "|" operator
-    expect(SELECTORS.buttonAddBranch).toHaveCount(2);
-    await clickOnButtonAddBranch();
+    await clickOnNewGroup();
     expect(SELECTORS.debugArea).toHaveValue(
-        `["&", "&", ("bar", "=", True), "|", ("id", "=", 1), ("id", "=", 1), ("bar", "=", True)]`
+        `["&", "&", ("bar", "=", True), ("bar", "=", True), ("bar", "=", True)]`
     );
+    expect(SELECTORS.deleteFilter).toHaveCount(3);
 
-    // There should be five buttons to remove domain part; clicking on
-    // the two last ones, should leave a domain with only the "bar" and
-    // "foo" fields, with the initial "&" operator
-    expect(SELECTORS.buttonDeleteNode).toHaveCount(5);
     await clickOnButtonDeleteNode(-1);
     await clickOnButtonDeleteNode(-1);
-    expect(SELECTORS.debugArea).toHaveValue(`["&", ("bar", "=", True), ("id", "=", 1)]`);
+    expect(SELECTORS.debugArea).toHaveValue(`[("bar", "=", True)]`);
 });
 
 test("building a domain with a datetime", async () => {
@@ -547,12 +532,13 @@ test("reset domain", async () => {
     });
     expect(".o_domain_selector").toHaveText("This domain is not supported.\nReset domain");
     expect(SELECTORS.resetButton).toHaveCount(1);
-    expect(SELECTORS.addNewRule).toHaveCount(0);
+    expect(SELECTORS.newFilter).toHaveCount(0);
+    expect(SELECTORS.newGroup).toHaveCount(0);
 
     await contains(SELECTORS.resetButton).click();
-    expect(".o_domain_selector").toHaveText("Match all records\nNew Rule");
     expect(SELECTORS.resetButton).toHaveCount(0);
-    expect(SELECTORS.addNewRule).toHaveCount(1);
+    expect(SELECTORS.newFilter).toHaveCount(1);
+    expect(SELECTORS.newGroup).toHaveCount(1);
     expect.verifySteps(["[]"]);
 });
 
@@ -568,8 +554,8 @@ test("default condition depends on available fields", async () => {
             expect.step(domain);
         },
     });
-    expect(".o_domain_selector").toHaveText("Match all records\nNew Rule");
-    await addNewRule();
+    expect(".o_domain_selector").toHaveText("New filter\nNew group");
+    await clickOnNewFilter();
     expect.verifySteps(['[("user_id", "in", [])]']);
 });
 
@@ -673,7 +659,7 @@ test("between operator (5)", async () => {
         readonly: true,
     });
     expect(".o_domain_selector").toHaveText(
-        `Match\nany\nof the following rules:\nCreated on\nis between\n04/01/2023 00:00:00\nand\n04/30/2023 23:59:59\n0\nis equal\n1`
+        `Where\nCreated on\nis between\n04/01/2023 00:00:00\nand\n04/30/2023 23:59:59\nOr\n0\nis equal\n1`
     );
 });
 
@@ -705,99 +691,99 @@ test("support of connector '!' (mode readonly)", async () => {
     const toTest = [
         {
             domain: `["!", ("foo", "=", "abc")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis not equal\nabc`,
+            result: `Where\nFoo\nis not equal\nabc`,
         },
         {
             domain: `["!", "!", ("foo", "=", "abc")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis equal\nabc`,
+            result: `Where\nFoo\nis equal\nabc`,
         },
         {
             domain: `["!", "!", "!", ("foo", "=", "abc")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis not equal\nabc`,
+            result: `Where\nFoo\nis not equal\nabc`,
         },
         {
             domain: `["!", "&", ("foo", "=", "abc"), ("foo", "=", "def")]`,
-            result: `Match\nany\nof the following rules:\nFoo\nis not equal\nabc\nFoo\nis not equal\ndef`,
+            result: `Where\nFoo\nis not equal\nabc\nOr\nFoo\nis not equal\ndef`,
         },
         {
             domain: `["!", "|", ("foo", "=", "abc"), ("foo", "=", "def")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis not equal\nabc\nFoo\nis not equal\ndef`,
+            result: `Where\nFoo\nis not equal\nabc\nAnd\nFoo\nis not equal\ndef`,
         },
         {
             domain: `["&", "!", ("foo", "=", "abc"), ("foo", "=", "def")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis not equal\nabc\nFoo\nis equal\ndef`,
+            result: `Where\nFoo\nis not equal\nabc\nAnd\nFoo\nis equal\ndef`,
         },
         {
             domain: `["&", "!", "!", ("foo", "=", "abc"), ("foo", "=", "def")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis equal\nabc\nFoo\nis equal\ndef`,
+            result: `Where\nFoo\nis equal\nabc\nAnd\nFoo\nis equal\ndef`,
         },
         {
             domain: `["&", ("foo", "=", "abc"), "!", ("foo", "=", "def")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis equal\nabc\nFoo\nis not equal\ndef`,
+            result: `Where\nFoo\nis equal\nabc\nAnd\nFoo\nis not equal\ndef`,
         },
         {
             domain: `["&", ("foo", "=", "abc"), "!", "!", ("foo", "=", "def")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis equal\nabc\nFoo\nis equal\ndef`,
+            result: `Where\nFoo\nis equal\nabc\nAnd\nFoo\nis equal\ndef`,
         },
         {
             domain: `["|", "!", ("foo", "=", "abc"), ("foo", "=", "def")]`,
-            result: `Match\nany\nof the following rules:\nFoo\nis not equal\nabc\nFoo\nis equal\ndef`,
+            result: `Where\nFoo\nis not equal\nabc\nOr\nFoo\nis equal\ndef`,
         },
         {
             domain: `["|", "!", "!", ("foo", "=", "abc"), ("foo", "=", "def")]`,
-            result: `Match\nany\nof the following rules:\nFoo\nis equal\nabc\nFoo\nis equal\ndef`,
+            result: `Where\nFoo\nis equal\nabc\nOr\nFoo\nis equal\ndef`,
         },
         {
             domain: `["|", ("foo", "=", "abc"), "!", ("foo", "=", "def")]`,
-            result: `Match\nany\nof the following rules:\nFoo\nis equal\nabc\nFoo\nis not equal\ndef`,
+            result: `Where\nFoo\nis equal\nabc\nOr\nFoo\nis not equal\ndef`,
         },
         {
             domain: `["|", ("foo", "=", "abc"), "!", "!", ("foo", "=", "def")]`,
-            result: `Match\nany\nof the following rules:\nFoo\nis equal\nabc\nFoo\nis equal\ndef`,
+            result: `Where\nFoo\nis equal\nabc\nOr\nFoo\nis equal\ndef`,
         },
         {
             domain: `["&", "!", "&", ("foo", "=", "abc"), ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nall\nof the following rules:\nany\nof:\nFoo\nis not equal\nabc\nFoo\nis not equal\ndef\nFoo\nis equal\nghi`,
+            result: `Where\nWhere\nFoo\nis not equal\nabc\nOr\nFoo\nis not equal\ndef\nAnd\nFoo\nis equal\nghi`,
         },
         {
             domain: `["&", "!", "|", ("foo", "=", "abc"), ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis not equal\nabc\nFoo\nis not equal\ndef\nFoo\nis equal\nghi`,
+            result: `Where\nFoo\nis not equal\nabc\nAnd\nFoo\nis not equal\ndef\nAnd\nFoo\nis equal\nghi`,
         },
         {
             domain: `["|", "!", "&", ("foo", "=", "abc"), ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nany\nof the following rules:\nFoo\nis not equal\nabc\nFoo\nis not equal\ndef\nFoo\nis equal\nghi`,
+            result: `Where\nFoo\nis not equal\nabc\nOr\nFoo\nis not equal\ndef\nOr\nFoo\nis equal\nghi`,
         },
         {
             domain: `["|", "!", "|", ("foo", "=", "abc"), ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nany\nof the following rules:\nall\nof:\nFoo\nis not equal\nabc\nFoo\nis not equal\ndef\nFoo\nis equal\nghi`,
+            result: `Where\nWhere\nFoo\nis not equal\nabc\nAnd\nFoo\nis not equal\ndef\nOr\nFoo\nis equal\nghi`,
         },
         {
             domain: `["!", "&", "&", ("foo", "=", "abc"), ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nany\nof the following rules:\nFoo\nis not equal\nabc\nFoo\nis not equal\ndef\nFoo\nis not equal\nghi`,
+            result: `Where\nFoo\nis not equal\nabc\nOr\nFoo\nis not equal\ndef\nOr\nFoo\nis not equal\nghi`,
         },
         {
             domain: `["!", "|", "|", ("foo", "=", "abc"), ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis not equal\nabc\nFoo\nis not equal\ndef\nFoo\nis not equal\nghi`,
+            result: `Where\nFoo\nis not equal\nabc\nAnd\nFoo\nis not equal\ndef\nAnd\nFoo\nis not equal\nghi`,
         },
         {
             domain: `["!", "&", "|", ("foo", "=", "abc"), "!", ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nany\nof the following rules:\nall\nof:\nFoo\nis not equal\nabc\nFoo\nis equal\ndef\nFoo\nis not equal\nghi`,
+            result: `Where\nWhere\nFoo\nis not equal\nabc\nAnd\nFoo\nis equal\ndef\nOr\nFoo\nis not equal\nghi`,
         },
         {
             domain: `["!", "|", "&", ("foo", "=", "abc"), ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nall\nof the following rules:\nany\nof:\nFoo\nis not equal\nabc\nFoo\nis not equal\ndef\nFoo\nis not equal\nghi`,
+            result: `Where\nWhere\nFoo\nis not equal\nabc\nOr\nFoo\nis not equal\ndef\nAnd\nFoo\nis not equal\nghi`,
         },
         {
             domain: `["!", "&", ("foo", "=", "abc"), "|", ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nany\nof the following rules:\nFoo\nis not equal\nabc\nall\nof:\nFoo\nis not equal\ndef\nFoo\nis not equal\nghi`,
+            result: `Where\nFoo\nis not equal\nabc\nOr\nWhere\nFoo\nis not equal\ndef\nAnd\nFoo\nis not equal\nghi`,
         },
         {
             domain: `["!", "|", ("foo", "=", "abc"), "&", ("foo", "=", "def"), ("foo", "!=", "ghi")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis not equal\nabc\nany\nof:\nFoo\nis not equal\ndef\nFoo\nis equal\nghi`,
+            result: `Where\nFoo\nis not equal\nabc\nAnd\nWhere\nFoo\nis not equal\ndef\nOr\nFoo\nis equal\nghi`,
         },
         {
             domain: `["!", "|", ("foo", "=", "abc"), "&", ("foo", "!=", "def"), "!", ("foo", "=", "ghi")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis not equal\nabc\nany\nof:\nFoo\nis equal\ndef\nFoo\nis equal\nghi`,
+            result: `Where\nFoo\nis not equal\nabc\nAnd\nWhere\nFoo\nis equal\ndef\nOr\nFoo\nis equal\nghi`,
         },
     ];
 
@@ -823,99 +809,99 @@ test("support of connector '!' (debug mode)", async () => {
     const toTest = [
         {
             domain: `["!", ("foo", "=", "abc")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis not equal\nabc`,
+            result: `Where\nFoo\nis not equal\nabc`,
         },
         {
             domain: `["!", "!", ("foo", "=", "abc")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis equal\nabc`,
+            result: `Where\nFoo\nis equal\nabc`,
         },
         {
             domain: `["!", "!", "!", ("foo", "=", "abc")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis not equal\nabc`,
+            result: `Where\nFoo\nis not equal\nabc`,
         },
         {
             domain: `["!", "&", ("foo", "=", "abc"), ("foo", "=", "def")]`,
-            result: `Match\nnot all\nof the following rules:\nFoo\nis equal\nabc\nFoo\nis equal\ndef`,
+            result: `Where not\nFoo\nis equal\nabc\nOr not\nFoo\nis equal\ndef`,
         },
         {
             domain: `["!", "|", ("foo", "=", "abc"), ("foo", "=", "def")]`,
-            result: `Match\nnone\nof the following rules:\nFoo\nis equal\nabc\nFoo\nis equal\ndef`,
+            result: `Where not\nFoo\nis equal\nabc\nAnd not\nFoo\nis equal\ndef`,
         },
         {
             domain: `["&", "!", ("foo", "=", "abc"), ("foo", "=", "def")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis not equal\nabc\nFoo\nis equal\ndef`,
+            result: `Where\nFoo\nis not equal\nabc\nAnd\nFoo\nis equal\ndef`,
         },
         {
             domain: `["&", "!", "!", ("foo", "=", "abc"), ("foo", "=", "def")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis equal\nabc\nFoo\nis equal\ndef`,
+            result: `Where\nFoo\nis equal\nabc\nAnd\nFoo\nis equal\ndef`,
         },
         {
             domain: `["&", ("foo", "=", "abc"), "!", ("foo", "=", "def")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis equal\nabc\nFoo\nis not equal\ndef`,
+            result: `Where\nFoo\nis equal\nabc\nAnd\nFoo\nis not equal\ndef`,
         },
         {
             domain: `["&", ("foo", "=", "abc"), "!", "!", ("foo", "=", "def")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nis equal\nabc\nFoo\nis equal\ndef`,
+            result: `Where\nFoo\nis equal\nabc\nAnd\nFoo\nis equal\ndef`,
         },
         {
             domain: `["|", "!", ("foo", "=", "abc"), ("foo", "=", "def")]`,
-            result: `Match\nany\nof the following rules:\nFoo\nis not equal\nabc\nFoo\nis equal\ndef`,
+            result: `Where\nFoo\nis not equal\nabc\nOr\nFoo\nis equal\ndef`,
         },
         {
             domain: `["|", "!", "!", ("foo", "=", "abc"), ("foo", "=", "def")]`,
-            result: `Match\nany\nof the following rules:\nFoo\nis equal\nabc\nFoo\nis equal\ndef`,
+            result: `Where\nFoo\nis equal\nabc\nOr\nFoo\nis equal\ndef`,
         },
         {
             domain: `["|", ("foo", "=", "abc"), "!", ("foo", "=", "def")]`,
-            result: `Match\nany\nof the following rules:\nFoo\nis equal\nabc\nFoo\nis not equal\ndef`,
+            result: `Where\nFoo\nis equal\nabc\nOr\nFoo\nis not equal\ndef`,
         },
         {
             domain: `["|", ("foo", "=", "abc"), "!", "!", ("foo", "=", "def")]`,
-            result: `Match\nany\nof the following rules:\nFoo\nis equal\nabc\nFoo\nis equal\ndef`,
+            result: `Where\nFoo\nis equal\nabc\nOr\nFoo\nis equal\ndef`,
         },
         {
             domain: `["&", "!", "&", ("foo", "=", "abc"), ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nall\nof the following rules:\nnot all\nof:\nFoo\nis equal\nabc\nFoo\nis equal\ndef\nFoo\nis equal\nghi`,
+            result: `Where\nWhere not\nFoo\nis equal\nabc\nOr not\nFoo\nis equal\ndef\nAnd\nFoo\nis equal\nghi`,
         },
         {
             domain: `["&", "!", "|", ("foo", "=", "abc"), ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nall\nof the following rules:\nnone\nof:\nFoo\nis equal\nabc\nFoo\nis equal\ndef\nFoo\nis equal\nghi`,
+            result: `Where\nWhere not\nFoo\nis equal\nabc\nAnd not\nFoo\nis equal\ndef\nAnd\nFoo\nis equal\nghi`,
         },
         {
             domain: `["|", "!", "&", ("foo", "=", "abc"), ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nany\nof the following rules:\nnot all\nof:\nFoo\nis equal\nabc\nFoo\nis equal\ndef\nFoo\nis equal\nghi`,
+            result: `Where\nWhere not\nFoo\nis equal\nabc\nOr not\nFoo\nis equal\ndef\nOr\nFoo\nis equal\nghi`,
         },
         {
             domain: `["|", "!", "|", ("foo", "=", "abc"), ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nany\nof the following rules:\nnone\nof:\nFoo\nis equal\nabc\nFoo\nis equal\ndef\nFoo\nis equal\nghi`,
+            result: `Where\nWhere not\nFoo\nis equal\nabc\nAnd not\nFoo\nis equal\ndef\nOr\nFoo\nis equal\nghi`,
         },
         {
             domain: `["!", "&", "&", ("foo", "=", "abc"), ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nnot all\nof the following rules:\nFoo\nis equal\nabc\nFoo\nis equal\ndef\nFoo\nis equal\nghi`,
+            result: `Where not\nFoo\nis equal\nabc\nOr not\nFoo\nis equal\ndef\nOr not\nFoo\nis equal\nghi`,
         },
         {
             domain: `["!", "|", "|", ("foo", "=", "abc"), ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nnone\nof the following rules:\nFoo\nis equal\nabc\nFoo\nis equal\ndef\nFoo\nis equal\nghi`,
+            result: `Where not\nFoo\nis equal\nabc\nAnd not\nFoo\nis equal\ndef\nAnd not\nFoo\nis equal\nghi`,
         },
         {
             domain: `["!", "&", "|", ("foo", "=", "abc"), "!", ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nnot all\nof the following rules:\nany\nof:\nFoo\nis equal\nabc\nFoo\nis not equal\ndef\nFoo\nis equal\nghi`,
+            result: `Where not\nWhere\nFoo\nis equal\nabc\nOr\nFoo\nis not equal\ndef\nOr not\nFoo\nis equal\nghi`,
         },
         {
             domain: `["!", "|", "&", ("foo", "=", "abc"), ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nnone\nof the following rules:\nall\nof:\nFoo\nis equal\nabc\nFoo\nis equal\ndef\nFoo\nis equal\nghi`,
+            result: `Where not\nWhere\nFoo\nis equal\nabc\nAnd\nFoo\nis equal\ndef\nAnd not\nFoo\nis equal\nghi`,
         },
         {
             domain: `["!", "&", ("foo", "=", "abc"), "|", ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nnot all\nof the following rules:\nFoo\nis equal\nabc\nany\nof:\nFoo\nis equal\ndef\nFoo\nis equal\nghi`,
+            result: `Where not\nFoo\nis equal\nabc\nOr not\nWhere\nFoo\nis equal\ndef\nOr\nFoo\nis equal\nghi`,
         },
         {
             domain: `["!", "|", ("foo", "=", "abc"), "&", ("foo", "=", "def"), ("foo", "=", "ghi")]`,
-            result: `Match\nnone\nof the following rules:\nFoo\nis equal\nabc\nall\nof:\nFoo\nis equal\ndef\nFoo\nis equal\nghi`,
+            result: `Where not\nFoo\nis equal\nabc\nAnd not\nWhere\nFoo\nis equal\ndef\nAnd\nFoo\nis equal\nghi`,
         },
         {
             domain: `["!", "|", ("foo", "=", "abc"), "&", ("foo", "=", "def"), "!", ("foo", "=", "ghi")]`,
-            result: `Match\nnone\nof the following rules:\nFoo\nis equal\nabc\nall\nof:\nFoo\nis equal\ndef\nFoo\nis not equal\nghi`,
+            result: `Where not\nFoo\nis equal\nabc\nAnd not\nWhere\nFoo\nis equal\ndef\nAnd\nFoo\nis not equal\nghi`,
         },
     ];
 
@@ -1168,27 +1154,27 @@ test("support properties (mode readonly)", async () => {
     }
 });
 
-test("no button 'New Rule' (mode readonly)", async () => {
+test("no button 'New Filter' (mode readonly)", async () => {
     await makeDomainSelector({
         readonly: true,
         domain: `[("bar", "=", True)]`,
     });
     expect(SELECTORS.condition).toHaveCount(1);
-    expect("a[role=button]").toHaveCount(0);
+    expect(SELECTORS.newFilter).toHaveCount(0);
 });
 
-test("button 'New Rule' (edit mode)", async () => {
+test("button 'New Filter' (edit mode)", async () => {
     await makeDomainSelector();
     expect(SELECTORS.condition).toHaveCount(0);
-    expect(SELECTORS.addNewRule).toHaveCount(1);
+    expect(SELECTORS.newFilter).toHaveCount(1);
 
-    await addNewRule();
+    await clickOnNewFilter();
     expect(SELECTORS.condition).toHaveCount(1);
-    expect(SELECTORS.addNewRule).toHaveCount(1);
+    expect(SELECTORS.newFilter).toHaveCount(1);
 
-    await addNewRule();
+    await clickOnNewFilter();
     expect(SELECTORS.condition).toHaveCount(2);
-    expect(SELECTORS.addNewRule).toHaveCount(1);
+    expect(SELECTORS.newFilter).toHaveCount(1);
 });
 
 test("updating path should also update operator if invalid", async () => {
@@ -1564,8 +1550,6 @@ test("many2one field operators (edit)", async () => {
         "is not set",
         "starts with",
         "ends with",
-        "matches",
-        "matches none of",
     ]);
 });
 
@@ -1765,7 +1749,7 @@ test("many2many field: clone a set/not set condition", async () => {
     expect.verifySteps([`[("product_id", "=", False)]`]);
     expect(SELECTORS.condition).toHaveCount(1);
 
-    await clickOnButtonAddNewRule();
+    await clickOnNewFilter();
     expect(SELECTORS.condition).toHaveCount(2);
     expect(getCurrentOperator()).toBe("is not set");
     expect(getCurrentOperator(1)).toBe("is not set");
@@ -1788,8 +1772,6 @@ test("x2many field operators (edit)", async () => {
         "is not set",
         "starts with",
         "ends with",
-        "match",
-        "match none of",
     ]);
 });
 
@@ -1944,8 +1926,7 @@ test("Include archived button basic use", async () => {
         '["&", "&", ("foo", "=", "test"), ("bar", "=", True), ("active", "in", [True, False])]',
     ]);
 
-    await contains(".dropdown-toggle").click();
-    await contains(".dropdown-menu span:nth-child(2)").click();
+    await toggleConnector();
     expect(SELECTORS.condition).toHaveCount(2);
     expect.verifySteps([
         '["&", "|", ("foo", "=", "test"), ("bar", "=", True), ("active", "in", [True, False])]',
@@ -1983,7 +1964,7 @@ test("Include archived on empty tree", async () => {
     expect(SELECTORS.condition).toHaveCount(0);
     expect.verifySteps(['[("active", "in", [True, False])]']);
 
-    await addNewRule();
+    await clickOnNewFilter();
     expect(SELECTORS.condition).toHaveCount(1);
     expect.verifySteps(['["&", ("id", "=", 1), ("active", "in", [True, False])]']);
 });
@@ -2083,7 +2064,7 @@ test("datetime domain in readonly mode (check localization)", async () => {
         domain: `["&", ("datetime", ">=", "2023-11-03 11:41:23"), ("datetime", "<=", "2023-11-13 09:45:11")]`,
         readonly: true,
     });
-    expect(".o_tree_editor_condition").toHaveText(
+    expect(SELECTORS.condition).toHaveText(
         `Datetime\nis between\n11.03.2023 13:41:23\nand\n11.13.2023 11:45:11`
     );
 });
@@ -2099,7 +2080,7 @@ test("date domain in readonly mode (check localization)", async () => {
         domain: `["&", ("date", ">=", "2023-11-03"), ("date", "<=", "2023-11-13")]`,
         readonly: true,
     });
-    expect(".o_tree_editor_condition").toHaveText("Date\nis between\n03|11|2023\nand\n13|11|2023");
+    expect(SELECTORS.condition).toHaveText("Date\nis between\n03|11|2023\nand\n13|11|2023");
 });
 
 test(`any/not any operator in editable mode`, async () => {
@@ -2108,8 +2089,7 @@ test(`any/not any operator in editable mode`, async () => {
         isDebugMode: true,
         domain: `[("product_id", "any", ["|", ("team_id", "any", [("name", "=", "Mancester City")]), ("team_id.name", "not in", ["Leicester", "Liverpool"])])]`,
     });
-    expect(".o_tree_editor").toHaveCount(3);
-    expect(".o_tree_editor_row").toHaveCount(10);
+    expect(`${SELECTORS.tree}`).toHaveCount(3);
     expect(getCurrentPath(1)).toBe("Product Team");
     expect(getCurrentPath(3)).toBe("Product Team > Team Name");
     expect(getCurrentValue(1)).toBe("Leicester Liverpool");
@@ -2126,7 +2106,7 @@ test(`any/not any operator (readonly) with custom domain as value`, async () => 
     const toTest = [
         {
             domain: `[("product_id", "any", [("machin", "in", ["chose", "truc"] )] )]`,
-            text: `Match\nall\nof the following rules:\nProduct\nmatches\nall\nof:\nmachin\nis in\n(\nchose\n,\ntruc\n)`,
+            text: `Where\nProduct\nmatches\nWhere\nmachin\nis in\n(\nchose\n,\ntruc\n)`,
         },
     ];
     const parent = await makeDomainSelector({ readonly: true });
@@ -2140,19 +2120,19 @@ test(`any/not any operator (readonly) with invalid domain as value`, async () =>
     const toTest = [
         {
             domain: `[("product_id", "any", A )]`,
-            text: `Match\nall\nof the following rules:\nProduct\nmatches\n(\nA\n)`,
+            text: `Where\nProduct\nmatches\n(\nA\n)`,
         },
         {
             domain: `[("product_id", "any", "bete et méchant" )]`,
-            text: `Match\nall\nof the following rules:\nProduct\nmatches\n(\nbete et méchant\n)`,
+            text: `Where\nProduct\nmatches\n(\nbete et méchant\n)`,
         },
         {
             domain: `[("product_id", "any", [("team_id", "any", "bête et méchant")])]`,
-            text: `Match\nall\nof the following rules:\nProduct\nmatches\nall\nof:\nProduct Team\nmatches\n(\nbête et méchant\n)`,
+            text: `Where\nProduct\nmatches\nWhere\nProduct Team\nmatches\n(\nbête et méchant\n)`,
         },
         {
             domain: `[("product_id", "any", ["&"])]`,
-            text: `Match\nall\nof the following rules:\nProduct\nmatches\n(\n&\n)`,
+            text: `Where\nProduct\nmatches\n(\n&\n)`,
         },
     ];
     const parent = await makeDomainSelector({ readonly: true });
@@ -2167,7 +2147,7 @@ test(`any operator (edit) with invalid domain as value`, async () => {
     expect(SELECTORS.valueEditor).toHaveCount(1);
     expect(SELECTORS.clearNotSupported).toHaveCount(1);
     await contains(SELECTORS.clearNotSupported).click();
-    expect(`${SELECTORS.connector}:eq(1)`).toHaveText("all records");
+    expect(`${SELECTORS.connector}:eq(1)`).toHaveText("New filter\nNew group");
 });
 
 test(`any operator (edit) test getDefaultPath`, async () => {
@@ -2180,7 +2160,7 @@ test(`any operator (edit) test getDefaultPath`, async () => {
         resModel: "partner",
         domain: `[("country_id", "any", [])]`,
     });
-    await addNewRule();
+    await clickOnNewFilter();
     expect(getCurrentPath(0)).toBe("Country");
     expect(getCurrentPath(1)).toBe("Stage");
 });
@@ -2219,27 +2199,27 @@ test(`any/not any operator (readonly)`, async () => {
     const toTest = [
         {
             domain: `[("product_id", "any", [("name", "in", [37,41] )] )]`,
-            text: `Match\nall\nof the following rules:\nProduct\nmatches\nall\nof:\nProduct Name\nis in\n(\n37\n,\n41\n)`,
+            text: `Where\nProduct\nmatches\nWhere\nProduct Name\nis in\n(\n37\n,\n41\n)`,
         },
         {
             domain: `[("product_id", "not any", [("name", "in", [37,41] )] )]`,
-            text: `Match\nall\nof the following rules:\nProduct\nmatches none of\nall\nof:\nProduct Name\nis in\n(\n37\n,\n41\n)`,
+            text: `Where\nProduct\nmatches none of\nWhere\nProduct Name\nis in\n(\n37\n,\n41\n)`,
         },
         {
             domain: `[("product_id", "not any", ["|", ("team_id", "any", [("name", "ilike", "mancity")] ), ("name", "in", [37,41] )] )]`,
-            text: `Match\nall\nof the following rules:\nProduct\nmatches none of\nany\nof:\nProduct Team\nmatches\nall\nof:\nTeam Name\ncontains\nmancity\nProduct Name\nis in\n(\n37\n,\n41\n)`,
+            text: `Where\nProduct\nmatches none of\nWhere\nProduct Team\nmatches\nWhere\nTeam Name\ncontains\nmancity\nOr\nProduct Name\nis in\n(\n37\n,\n41\n)`,
         },
         {
             domain: `[("product_id", "any", ["|", ("name", "in", [37,41] ), ("bar", "=", True)] )]`,
-            text: `Match\nall\nof the following rules:\nProduct\nmatches\nany\nof:\nProduct Name\nis in\n(\n37\n,\n41\n)\nProduct Bar\nis\nset`,
+            text: `Where\nProduct\nmatches\nWhere\nProduct Name\nis in\n(\n37\n,\n41\n)\nOr\nProduct Bar\nis\nset`,
         },
         {
             domain: `[("product_id", "any", ["&", ("name", "in", ["JD7", "KDB"]), ("team_id", "not any", ["&", ("id", "=", 17), ("name", "ilike", "mancity")])])]`,
-            text: `Match\nall\nof the following rules:\nProduct\nmatches\nall\nof:\nProduct Name\nis in\n(\nJD7\n,\nKDB\n)\nProduct Team\nmatches none of\nall\nof:\nId\nis equal\n17\nTeam Name\ncontains\nmancity`,
+            text: `Where\nProduct\nmatches\nWhere\nProduct Name\nis in\n(\nJD7\n,\nKDB\n)\nAnd\nProduct Team\nmatches none of\nWhere\nId\nis equal\n17\nAnd\nTeam Name\ncontains\nmancity`,
         },
         {
             domain: `[("product_id", "any", ["|", ("name", "in", ["JD7", "KDB"]), ("team_id", "not any", ["|", ("id", "=", 17), ("name", "ilike", "mancity")])])]`,
-            text: `Match\nall\nof the following rules:\nProduct\nmatches\nany\nof:\nProduct Name\nis in\n(\nJD7\n,\nKDB\n)\nProduct Team\nmatches none of\nany\nof:\nId\nis equal\n17\nTeam Name\ncontains\nmancity`,
+            text: `Where\nProduct\nmatches\nWhere\nProduct Name\nis in\n(\nJD7\n,\nKDB\n)\nOr\nProduct Team\nmatches none of\nWhere\nId\nis equal\n17\nOr\nTeam Name\ncontains\nmancity`,
         },
     ];
     const parent = await makeDomainSelector({ readonly: true });
@@ -2255,7 +2235,7 @@ test(`any/not any operator (readonly) for one2many`, async () => {
         domain: `[("player_ids", "any", [('name', 'in', ["Kevin De Bruyne", "Jeremy Doku"])])]`,
         readonly: true,
     });
-    const text = `Match\nall\nof the following rules:\nPlayers\nmatch\nall\nof:\nPlayer Name\nis in\n(\nKevin De Bruyne\n,\nJeremy Doku\n)`;
+    const text = `Where\nPlayers\nmatch\nWhere\nPlayer Name\nis in\n(\nKevin De Bruyne\n,\nJeremy Doku\n)`;
     expect(".o_domain_selector").toHaveText(text);
 });
 
@@ -2265,7 +2245,7 @@ test(`within operator (readonly) for date`, async () => {
         domain: `["&", ("date", ">=", context_today().strftime("%Y-%m-%d")), ("date", "<=", (context_today() + relativedelta(weeks = 1)).strftime("%Y-%m-%d"))]`,
         readonly: true,
     });
-    const text = `Match\nall\nof the following rules:\nDate\nis within\n1\nweeks`;
+    const text = `Where\nDate\nis within\n1\nweeks`;
     expect(".o_domain_selector").toHaveText(text);
 });
 
@@ -2275,7 +2255,7 @@ test(`within operator (readonly) for datetime`, async () => {
         domain: `["&", ("datetime", ">=", datetime.datetime.combine(context_today(), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")), ("datetime", "<=", datetime.datetime.combine(context_today() + relativedelta(weeks=1), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S"))]`,
         readonly: true,
     });
-    const text = `Match\nall\nof the following rules:\nDatetime\nis within\n1\nweeks`;
+    const text = `Where\nDatetime\nis within\n1\nweeks`;
     expect(".o_domain_selector").toHaveText(text);
 });
 
@@ -2360,7 +2340,7 @@ test("shorten descriptions of long lists", async () => {
         domain: `[("id", "in", [${values}])]`,
         readonly: true,
     });
-    expect(".o_tree_editor_condition").toHaveText(
+    expect(SELECTORS.condition).toHaveText(
         `Id\nis in\n(\n${values.slice(0, 20).join("\n,\n")}\n,\n...\n)`
     );
 });
@@ -2437,7 +2417,7 @@ test("Hierarchical operators", async () => {
             expect.step(domain);
         },
     });
-    await addNewRule();
+    await clickOnNewFilter();
     expect.verifySteps(['[("id", "=", 1)]']);
     await openModelFieldSelectorPopover();
     await contains(
@@ -2457,8 +2437,6 @@ test("Hierarchical operators", async () => {
         "is not set",
         "starts with",
         "ends with",
-        "matches",
-        "matches none of",
     ]);
     await selectOperator("parent_of");
     expect.verifySteps(['[("product_id", "parent_of", [])]']);
@@ -2493,8 +2471,6 @@ test("Hierarchical operators", async () => {
             "is not set",
             "starts with",
             "ends with",
-            "matches",
-            "matches none of",
         ],
         { message: "no hierarchical operator if allow_hierachy_operators is set to false" }
     );
@@ -2513,14 +2489,16 @@ test("preserve virtual operators in sub domains", async () => {
     expect(getCurrentOperator(2)).toBe("is");
     expect(getCurrentOperator(3)).toBe("is not set");
 
-    await contains(".o_tree_editor:eq(1) a:contains('New Rule'):eq(1)").click();
+    await clickOnNewFilter(1);
     expect(getCurrentOperator()).toBe("matches");
     expect(getCurrentOperator(1)).toBe("matches");
     expect(getCurrentOperator(2)).toBe("is");
     expect(getCurrentOperator(3)).toBe("is not set");
-    expect(getCurrentOperator(4)).toBe("is equal");
+    expect(getCurrentOperator(4)).toBe("matches");
+    expect(getCurrentOperator(2)).toBe("is");
+    expect(getCurrentOperator(3)).toBe("is not set");
     expect.verifySteps([
-        `[("product_id", "any", ["&", ("team_id", "any", ["&", ("active", "=", False), ("name", "=", False)]), ("id", "=", 1)])]`,
+        `[("product_id", "any", ["&", ("team_id", "any", ["&", ("active", "=", False), ("name", "=", False)]), ("team_id", "any", ["&", ("active", "=", False), ("name", "=", False)])])]`,
     ]);
 
     await clickOnButtonDeleteNode(4);
@@ -2531,4 +2509,59 @@ test("preserve virtual operators in sub domains", async () => {
     expect.verifySteps([
         `[("product_id", "any", [("team_id", "any", ["&", ("active", "=", False), ("name", "=", False)])])]`,
     ]);
+});
+
+test("toggle 'include archived' button should preserve tree structure", async () => {
+    Partner._fields.active = fields.Boolean();
+    await makeDomainSelector({
+        domain: `[]`,
+        update(domain) {
+            expect.step(domain);
+        },
+    });
+
+    await clickOnNewGroup();
+    expect(getTreeEditorContent()).toEqual([
+        { value: "Where", level: 0 },
+        { value: "Where", level: 1 },
+        { value: ["Id", "is equal", "1"], level: 2 },
+    ]);
+    expect.verifySteps([`[("id", "=", 1)]`]);
+
+    await toggleArchive();
+    expect(getTreeEditorContent()).toEqual([
+        { value: "Where", level: 0 },
+        { value: "Where", level: 1 },
+        { value: ["Id", "is equal", "1"], level: 2 },
+    ]);
+    expect.verifySteps([`["&", ("id", "=", 1), ("active", "in", [True, False])]`]);
+
+    await toggleArchive();
+    expect(getTreeEditorContent()).toEqual([
+        { value: "Where", level: 0 },
+        { value: "Where", level: 1 },
+        { value: ["Id", "is equal", "1"], level: 2 },
+    ]);
+    expect.verifySteps([`[("id", "=", 1)]`]);
+});
+
+test("empty domain and two succive 'New group'", async () => {
+    await makeDomainSelector({
+        domain: `[]`,
+        isDebugMode: true,
+        update(domain) {
+            expect.step(domain);
+        },
+    });
+    await clickOnNewGroup();
+    expect.verifySteps([`[("id", "=", 1)]`]);
+    await clickOnNewGroup();
+    expect(getTreeEditorContent()).toEqual([
+        { value: "Where", level: 0 },
+        { value: "Where", level: 1 },
+        { value: ["Id", "is equal", "1"], level: 2 },
+        { value: "Where", level: 2 },
+        { value: ["Id", "is equal", "1"], level: 3 },
+    ]);
+    expect.verifySteps([`["|", ("id", "=", 1), ("id", "=", 1)]`]);
 });

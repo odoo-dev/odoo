@@ -216,29 +216,31 @@ export function complexCondition(value) {
 
 /**
  * @param {Value} value
+ * @param {Boolean} [cloneSubTrees=true]
  * @returns {Value}
  */
-function cloneValue(value) {
+function cloneValue(value, cloneSubTrees = true) {
     if (value instanceof Expression) {
         return new Expression(value.toAST());
     }
     if (Array.isArray(value)) {
-        return value.map(cloneValue);
+        return value.map((v) => cloneValue(v, cloneSubTrees));
     }
-    if (isTree(value)) {
-        return cloneTree(value);
+    if (cloneSubTrees && isTree(value)) {
+        return cloneTree(value, cloneSubTrees);
     }
     return value;
 }
 
 /**
  * @param {Tree} tree
+ * @param {Boolean} [cloneSubTrees=true]
  * @returns {Tree}
  */
-export function cloneTree(tree) {
+export function cloneTree(tree, cloneSubTrees = true) {
     const clone = {};
     for (const key in tree) {
-        clone[key] = cloneValue(tree[key]);
+        clone[key] = cloneValue(tree[key], cloneSubTrees);
     }
     return clone;
 }
@@ -281,6 +283,81 @@ export function isTree(value) {
         !Array.isArray(value) &&
         value !== null
     );
+}
+
+function _areEquivalentTrees(tree, otherTree) {
+    if (tree.type !== otherTree.type) {
+        return false;
+    }
+    if (tree.negate !== otherTree.negate) {
+        return false;
+    }
+    if (tree.type === "condition") {
+        if (formatValue(tree.path) !== formatValue(otherTree.path)) {
+            return false;
+        }
+        if (formatValue(tree.operator) !== formatValue(otherTree.operator)) {
+            return false;
+        }
+        if (isTree(tree.value)) {
+            if (isTree(otherTree.value)) {
+                return _areEquivalentTrees(tree.value, otherTree.value);
+            }
+            return false;
+        } else if (isTree(otherTree.value)) {
+            return false;
+        }
+        if (formatValue(tree.value) !== formatValue(otherTree.value)) {
+            return false;
+        }
+        return true;
+    }
+    if (tree.value !== otherTree.value) {
+        return false;
+    }
+    if (tree.type === "complex_condition") {
+        return true;
+    }
+    if (tree.children.length !== otherTree.children.length) {
+        return false;
+    }
+    for (let i = 0; i < tree.children.length; i++) {
+        const child = tree.children[i];
+        const otherChild = otherTree.children[i];
+        if (!_areEquivalentTrees(child, otherChild)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function normalizeConnectors(tree) {
+    if (["condition", "complex_condition"].includes(tree.type)) {
+        const newTree = cloneTree(tree, false);
+        if (isTree(tree.value)) {
+            return { ...newTree, value: normalizeConnectors(newTree.value) };
+        }
+        return newTree;
+    }
+    const processedChldren = tree.children.map(normalizeConnectors);
+    const newTree = { ...tree, children: [] };
+    for (const child of processedChldren) {
+        addChild(newTree, child);
+    }
+    if (newTree.children.length === 1 && !newTree.negate) {
+        return newTree.children[0];
+    }
+    return newTree;
+}
+
+export function areEquivalentTrees(tree, otherTree) {
+    const simplifiedTree = normalizeConnectors(
+        removeBetweenOperators(removeWithinOperators(removeVirtualOperators(tree)))
+    );
+    const otherSimplifiedTree = normalizeConnectors(
+        removeBetweenOperators(removeWithinOperators(removeVirtualOperators(otherTree)))
+    );
+    return _areEquivalentTrees(simplifiedTree, otherSimplifiedTree);
 }
 
 /**
