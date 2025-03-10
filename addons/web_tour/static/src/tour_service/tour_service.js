@@ -149,6 +149,7 @@ export const tourService = {
                     redirect(tour.url);
                 }
             });
+            console.log(willUnload)
             if (!willUnload) {
                 resumeTour();
             }
