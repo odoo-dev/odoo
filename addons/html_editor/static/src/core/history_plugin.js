@@ -570,7 +570,6 @@ export class HistoryPlugin extends Plugin {
         if (stepState) {
             this.stepsStates.set(currentStep.id, stepState);
         }
-        
         this.handleObserverRecords();
         const currentMutationsCount = currentStep.mutations.length;
         if (currentMutationsCount === 0) {
@@ -954,6 +953,7 @@ export class HistoryPlugin extends Plugin {
         let applied = false;
         // TODO ABD TODO @phoenix: selection may become obsolete, it should evolve with mutations.
         const selectionToRestore = this.dependencies.selection.preserveSelection();
+        const extraToRestore = {...this.currentStep.extra};
         return () => {
             if (applied) {
                 return;
@@ -967,6 +967,7 @@ export class HistoryPlugin extends Plugin {
             this.handleObserverRecords();
             // TODO ABD TODO @phoenix: evaluate if the selection is not restorable at the desired position
             selectionToRestore.restore();
+            this.currentStep.extra = extraToRestore;
             this.dispatchTo("restore_savepoint_handlers");
         };
     }
@@ -983,7 +984,10 @@ export class HistoryPlugin extends Plugin {
                 revertOperation();
                 revertOperation = this.makeSavePoint();
                 this.isPreviewing = true;
-                return operation(...args);
+                operation(...args);
+                // The operation should be similar than in the 'commit'
+                // (normalize etc...) hence the 'addStep'.
+                this.addStep();
             },
             commit: (...args) => {
                 revertOperation();
@@ -999,9 +1003,6 @@ export class HistoryPlugin extends Plugin {
         };
     }
 
-    getIsPreviewing() {
-        return this.isPreviewing;
-    }
     /**
      * Discard the current draft, and, if necessary, consume and revert
      * reversible steps until the specified step index, and ensure that
