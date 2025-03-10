@@ -54,7 +54,7 @@ export const spreadsheetLinkMenuCellService = {
                     }
                     return {
                         url,
-                        label: _t(label),
+                        label,
                         isExternal: false,
                         isUrlEditable: false,
                     };
@@ -73,11 +73,9 @@ export const spreadsheetLinkMenuCellService = {
                 sequence: 66,
                 match: isIrMenuXmlUrl,
                 createLink(url, label) {
-                    const xmlId = parseIrMenuXmlUrl(url);
-                    _getIrMenuByXmlId(xmlId);
                     return {
                         url,
-                        label: _t(label),
+                        label,
                         isExternal: false,
                         isUrlEditable: false,
                     };
@@ -100,7 +98,7 @@ export const spreadsheetLinkMenuCellService = {
                 createLink(url, label) {
                     return {
                         url,
-                        label: _t(label),
+                        label,
                         isExternal: false,
                         isUrlEditable: false,
                     };
