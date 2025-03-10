@@ -1,0 +1,292 @@
+diff --git a/addons/product/models/product_catalog_mixin.py b/addons/product/models/product_catalog_mixin.py
+index 30ecc5daff36..ff7f8269c42f 100644
+--- a/addons/product/models/product_catalog_mixin.py
++++ b/addons/product/models/product_catalog_mixin.py
+@@ -69,10 +69,23 @@ class ProductCatalogMixin(models.AbstractModel):
+                 'quantity': float (optional)
+                 'productType': string
+                 'price': float
++                'uom': dict
++                'code': string
+                 'readOnly': bool (optional)
+             }
+         """
+-        return {product.id: {'productType': product.type} for product in products}
++        return {
++            product.id: {
++                'productType': product.type,
++                'code': str(product.code),
++                'uom': {
++                    'display_name': product.uom_id.display_name,
++                    'id': product.uom_id.id,
++                },
++            }
++            for product in products
++        }
++
+ 
+     def _get_product_catalog_order_line_info(self, product_ids, child_field=False, **kwargs):
+         """ Returns products information to be shown in the catalog.
+@@ -86,23 +99,34 @@ class ProductCatalogMixin(models.AbstractModel):
+                 'quantity': float (optional)
+                 'productType': string
+                 'price': float
+-                'readOnly': bool (optional)
++                'code': String
++                'uom':dict
+             }
++
+         """
+         order_line_info = {}
+         default_data = self._default_order_line_values(child_field)
+ 
+         for product, record_lines in self._get_product_catalog_record_lines(product_ids, child_field=child_field, **kwargs).items():
++            line_data = record_lines._get_product_catalog_lines_data(
++                parent_record=self, **kwargs
++            )
++            uom = {
++                'display_name': product.uom_id.display_name,
++                'id': product.uom_id.id,
++            }
+             order_line_info[product.id] = {
+-               **record_lines._get_product_catalog_lines_data(parent_record=self, **kwargs),
++               **line_data,
+                'productType': product.type,
++               'code': str(product.code),
++               **({'uom': uom} if 'uom' not in line_data else {}),
+             }
+             product_ids.remove(product.id)
+-
+         products = self.env['product.product'].browse(product_ids)
+         product_data = self._get_product_catalog_order_data(products, **kwargs)
+         for product_id, data in product_data.items():
+             order_line_info[product_id] = {**default_data, **data}
++
+         return order_line_info
+ 
+     def _get_action_add_from_catalog_extra_context(self):
+diff --git a/addons/product/models/product_product.py b/addons/product/models/product_product.py
+index 15893b5e2f72..eb8995ffdcf4 100644
+--- a/addons/product/models/product_product.py
++++ b/addons/product/models/product_product.py
+@@ -105,7 +105,7 @@ class ProductProduct(models.Model):
+     # There could be no variant for a combination if using dynamic attributes.
+     _combination_unique = models.UniqueIndex("(product_tmpl_id, combination_indices) WHERE active IS TRUE")
+ 
+-    is_favorite = fields.Boolean(related='product_tmpl_id.is_favorite', readonly=True, store=True)
++    is_favorite = fields.Boolean(related='product_tmpl_id.is_favorite', readonly=False, store=True)
+     _is_favorite_index = models.Index("(is_favorite) WHERE is_favorite IS TRUE")
+ 
+     @api.depends('image_variant_1920', 'image_variant_1024')
+diff --git a/addons/product/static/src/product_catalog/order_line/order_line.js b/addons/product/static/src/product_catalog/order_line/order_line.js
+index 396f579fb267..426ab2aae4c1 100644
+--- a/addons/product/static/src/product_catalog/order_line/order_line.js
++++ b/addons/product/static/src/product_catalog/order_line/order_line.js
+@@ -8,6 +8,15 @@ export class ProductCatalogOrderLine extends Component {
+         quantity: Number,
+         price: Number,
+         productType: String,
++        code: { type: String, optional: true},
++        uom: {
++            type: Object,
++            optional: true,
++            shape: {
++                id: Number,
++                display_name: String,
++            },
++        },
+         readOnly: { type: Boolean, optional: true },
+         warning: { type: String, optional: true},
+     };
+diff --git a/addons/product/static/src/product_catalog/order_line/order_line.xml b/addons/product/static/src/product_catalog/order_line/order_line.xml
+index e5311be6c39e..a5962fd6c9f0 100644
+--- a/addons/product/static/src/product_catalog/order_line/order_line.xml
++++ b/addons/product/static/src/product_catalog/order_line/order_line.xml
+@@ -4,7 +4,10 @@
+         <!-- Replace the element found using the css selector by the content of the portalled
+              template.  -->
+         <t t-portal="`#product-${props.productId}-price`" t-if="showPrice">
+-            <span class="o_product_catalog_price">Unit price: <t t-out="price"/></span>
++            <span class="o_product_catalog_price">
++                <span><t t-out="price"/></span>
++                <span class="mx-2"><t t-out="props.code or ''" /></span>
++            </span>
+         </t>
+         <div 
+             t-if="props.readOnly and props.warning"
+@@ -33,6 +36,9 @@
+                         t-on-change="this.env.setQuantity"
+                         t-on-focus="_onFocus"
+                 />
++                <span t-if="props.uom.display_name" class="input-group-text text-muted">
++                    <t t-out="props.uom.display_name"/>
++                </span>
+                 <button class="btn btn-primary border"
+                         t-on-click.stop="(ev) => this.env.increaseQuantity()">
+                     <i class="fa fa-plus"/>
+diff --git a/addons/product/views/product_views.xml b/addons/product/views/product_views.xml
+index fea92946de61..6c264f9dd08e 100644
+--- a/addons/product/views/product_views.xml
++++ b/addons/product/views/product_views.xml
+@@ -646,6 +646,10 @@ action = {
+                         <div class="o_product_catalog_cancel_global_click">
+                             <a role="menuitem" type="open" class="dropdown-item border-top-0">Edit</a>
+                         </div>
++                        <div class="dropdown-item border-top-0">
++                            <field name="is_favorite" widget="boolean_favorite" nolabel="1"/>
++                            <span>Add to Favorites</span>
++                        </div>
+                     </t>
+                     <t t-name="card" class="p-0">
+                     <!-- TODO : not getting border when select record -->
+@@ -653,15 +657,13 @@ action = {
+                             <div class="p-2 pt-1 d-flex flex-column m-0"
+                                     t-attf-id="product-{{record.id.raw_value}}">
+                                 <div class="d-flex">
++                                    <field name="name" class="fw-bolder fs-4 text-reset mb-1 me-2"/>
+                                     <field class="mt-1 me-1"
+                                         name="is_favorite"
+                                         widget="boolean_favorite"
++                                        invisible="not is_favorite"
+                                         nolabel="1"
+                                         readonly="1"/>
+-                                    <field name="name" class="fw-bolder fs-4 text-reset mb-1"/>
+-                                </div>
+-                                <div t-if="record.default_code.value">
+-                                    [<field name="default_code"/>]
+                                 </div>
+                                 <!-- Used by @web/product/js/product_catalog/order_line to
+                                         show the price using a t-portal. -->
+diff --git a/addons/purchase/models/purchase_order_line.py b/addons/purchase/models/purchase_order_line.py
+index 1166d32c4095..a463e69d4f26 100644
+--- a/addons/purchase/models/purchase_order_line.py
++++ b/addons/purchase/models/purchase_order_line.py
+@@ -437,25 +437,19 @@ class PurchaseOrderLine(models.Model):
+                 'price': float,
+                 'readOnly': bool,
+                 'uom': dict,
+-                'purchase_uom': dict,
+                 'packaging': dict,
+                 'warning': String,
+             }
+         """
+         if len(self) == 1:
+             catalog_info = self.order_id._get_product_price_and_data(self.product_id)
+-            uom = {
+-                'display_name': self.product_id.uom_id.display_name,
+-                'id': self.product_id.uom_id.id,
+-            }
+             catalog_info.update(
+                 quantity=self.product_qty,
+                 price=self.price_unit * (1 - self.discount / 100),
+                 readOnly=self.order_id._is_readonly(),
+-                uom=uom,
+             )
+             if self.product_id.uom_id != self.product_uom_id:
+-                catalog_info['purchase_uom'] = {
++                catalog_info['uom'] = {
+                 'display_name': self.product_uom_id.display_name,
+                 'id': self.product_uom_id.id,
+             }
+diff --git a/addons/purchase/static/src/product_catalog/purchase_order_line/purchase_order_line.js b/addons/purchase/static/src/product_catalog/purchase_order_line/purchase_order_line.js
+index b0b302938b31..c26303bb8b1f 100644
+--- a/addons/purchase/static/src/product_catalog/purchase_order_line/purchase_order_line.js
++++ b/addons/purchase/static/src/product_catalog/purchase_order_line/purchase_order_line.js
+@@ -1,12 +1,10 @@
+ import { ProductCatalogOrderLine } from "@product/product_catalog/order_line/order_line";
+ 
+ export class ProductCatalogPurchaseOrderLine extends ProductCatalogOrderLine {
+-    static template = "ProductCatalogPurchaseOrderLine";
+     static props = {
+         ...ProductCatalogPurchaseOrderLine.props,
+         min_qty: { type: Number, optional: true },
+         packaging: { type: Object, optional: true },
+-        purchase_uom: { type: Object, optional: true },
+         uom: Object,
+     };
+ 
+diff --git a/addons/purchase/static/src/product_catalog/purchase_order_line/purchase_order_line.xml b/addons/purchase/static/src/product_catalog/purchase_order_line/purchase_order_line.xml
+deleted file mode 100644
+index fa0bfdf24089..000000000000
+--- a/addons/purchase/static/src/product_catalog/purchase_order_line/purchase_order_line.xml
++++ /dev/null
+@@ -1,19 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8" ?>
+-<templates xml:space="preserve">
+-    <t t-name="ProductCatalogPurchaseOrderLine"
+-       t-inherit="product.ProductCatalogOrderLine"
+-       t-inherit-mode="primary">
+-        <xpath expr="//span[hasclass('o_product_catalog_price')]" position="attributes">
+-            <attribute name="t-if">!this.env.displayUoM</attribute>
+-        </xpath>
+-        <xpath expr="//span[hasclass('o_product_catalog_price')]" position="after">
+-            <span class="o_product_catalog_price" t-if="env.displayUoM">
+-                Price: <t t-out="price"/>
+-                / <span t-att-class="{'fw-bold text-primary': props.purchase_uom}">
+-                    <t t-if="props.purchase_uom" t-esc="props.purchase_uom.display_name"/>
+-                    <t t-else="" t-esc="props.uom.display_name"/>
+-                </span>
+-            </span>
+-        </xpath>
+-    </t>
+-</templates>
+diff --git a/addons/purchase_stock/views/product_views.xml b/addons/purchase_stock/views/product_views.xml
+index 36f2c305bd66..1d1755aa01a7 100644
+--- a/addons/purchase_stock/views/product_views.xml
++++ b/addons/purchase_stock/views/product_views.xml
+@@ -34,12 +34,16 @@
+                     <attribute name="js_class">purchase_product_kanban_catalog</attribute>
+                     <attribute name="sample">1</attribute> 
+             </xpath>
+-            <div name="o_kanban_qty_available" position="after">
++            <div name="o_kanban_qty_available_and_on_hand" position="replace">
+                 <div t-if="record.is_storable.raw_value"
+-                     name="o_kanban_qty_forecasted">
+-                    <span>Forecasted: </span>
+-                    <field name="virtual_available"/>
+-                    <field name="uom_id" widget="many2one_uom" class="ms-1" groups="uom.group_uom"/>
++                     name="o_kanban_qty_available_and_forecast">
++                    <field name="qty_available"/>
++                    <span class="text-muted small"> On Hand</span>
++                    <t t-if="record.qty_available.raw_value != record.virtual_available.raw_value">
++                        <span> / </span>
++                        <field name="virtual_available"/>
++                        <span class="text-muted small"> Forecasted</span>
++                    </t>
+                 </div>
+             </div>
+         </field>
+diff --git a/addons/sale/models/sale_order.py b/addons/sale/models/sale_order.py
+index bca3e5129716..3055f57fd19e 100644
+--- a/addons/sale/models/sale_order.py
++++ b/addons/sale/models/sale_order.py
+@@ -1280,6 +1280,7 @@ class SaleOrder(models.Model):
+     def _get_action_add_from_catalog_extra_context(self):
+         return {
+             **super()._get_action_add_from_catalog_extra_context(),
++            'display_uom': self.env.user.has_group('uom.group_uom'),
+             'product_catalog_currency_id': self.currency_id.id,
+             'product_catalog_digits': self.order_line._fields['price_unit'].get_digits(self.env),
+         }
+diff --git a/addons/stock/views/product_views.xml b/addons/stock/views/product_views.xml
+index 74210ce5ee82..444f35095e4a 100644
+--- a/addons/stock/views/product_views.xml
++++ b/addons/stock/views/product_views.xml
+@@ -267,10 +267,14 @@
+                 </field>
+                 <div name="o_kanban_price" position="after">
+                     <div t-if="record.is_storable.raw_value"
+-                         name="o_kanban_qty_available">
+-                        <span>On Hand: </span>
++                         name="o_kanban_qty_available_and_on_hand">
++                        <t t-if="record.free_qty.raw_value != record.qty_available.raw_value">
++                            <field name="free_qty"/>
++                            <span class="text-muted small"> Available</span>
++                            <span> / </span>
++                        </t>
+                         <field name="qty_available"/>
+-                        <field name="uom_id" widget="many2one_uom" class="ms-1" groups="uom.group_uom"/>
++                        <span class="text-muted small"> On Hand</span>
+                     </div>
+                 </div>
+                 <a role="menuitem" type="open" position="after">

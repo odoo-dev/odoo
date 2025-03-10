@@ -69,10 +69,23 @@ class ProductCatalogMixin(models.AbstractModel):
                 'quantity': float (optional)
                 'productType': string
                 'price': float
+                'uom': dict
+                'code': string
                 'readOnly': bool (optional)
             }
         """
-        return {product.id: {'productType': product.type} for product in products}
+        return {
+            product.id: {
+                'productType': product.type,
+                'code': str(product.code),
+                'uom': {
+                    'display_name': product.uom_id.display_name,
+                    'id': product.uom_id.id,
+                },
+            }
+            for product in products
+        }
+
 
     def _get_product_catalog_order_line_info(self, product_ids, child_field=False, **kwargs):
         """ Returns products information to be shown in the catalog.
@@ -86,23 +99,34 @@ class ProductCatalogMixin(models.AbstractModel):
                 'quantity': float (optional)
                 'productType': string
                 'price': float
-                'readOnly': bool (optional)
+                'code': String
+                'uom':dict
             }
+
         """
         order_line_info = {}
         default_data = self._default_order_line_values(child_field)
 
         for product, record_lines in self._get_product_catalog_record_lines(product_ids, child_field=child_field, **kwargs).items():
+            line_data = record_lines._get_product_catalog_lines_data(
+                parent_record=self, **kwargs
+            )
+            uom = {
+                'display_name': product.uom_id.display_name,
+                'id': product.uom_id.id,
+            }
             order_line_info[product.id] = {
-               **record_lines._get_product_catalog_lines_data(parent_record=self, **kwargs),
+               **line_data,
                'productType': product.type,
+               'code': str(product.code),
+               **({'uom': uom} if 'uom' not in line_data else {}),
             }
             product_ids.remove(product.id)
-
         products = self.env['product.product'].browse(product_ids)
         product_data = self._get_product_catalog_order_data(products, **kwargs)
         for product_id, data in product_data.items():
             order_line_info[product_id] = {**default_data, **data}
+
         return order_line_info
 
     def _get_action_add_from_catalog_extra_context(self):
