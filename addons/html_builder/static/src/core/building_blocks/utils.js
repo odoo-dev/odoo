@@ -2,7 +2,8 @@ import { isTextNode } from "@html_editor/utils/dom_info";
 import {
     onMounted,
     onWillDestroy,
-    onWillStart,
+    reactive,
+    toRaw,
     useComponent,
     useEffect,
     useEnv,
@@ -11,6 +12,7 @@ import {
     useSubEnv,
 } from "@odoo/owl";
 import { useBus } from "@web/core/utils/hooks";
+import { effect } from "@web/core/utils/reactive";
 import { useDebounced } from "@web/core/utils/timing";
 
 export function useDomState(getState) {
@@ -163,8 +165,11 @@ export function useSelectableComponent(id, { onItemChange } = {}) {
     useBuilderComponent();
     const selectableItems = [];
     const refreshCurrentItemDebounced = useDebounced(refreshCurrentItem, 0, { immediate: true });
-    let currentSelectedItem;
     const env = useEnv();
+
+    const state = reactive({
+        currentSelectedItem: null,
+    });
 
     function refreshCurrentItem() {
         let currentItem;
@@ -175,8 +180,8 @@ export function useSelectableComponent(id, { onItemChange } = {}) {
                 itemPriority = selectableItem.priority;
             }
         }
-        if (currentItem && currentItem !== currentSelectedItem) {
-            currentSelectedItem = currentItem;
+        if (currentItem && currentItem !== toRaw(state.currentSelectedItem)) {
+            state.currentSelectedItem = currentItem;
             env.dependencyManager.triggerDependencyUpdated();
         }
         if (currentItem) {
@@ -199,8 +204,8 @@ export function useSelectableComponent(id, { onItemChange } = {}) {
         refreshCurrentItem();
     });
     function cleanSelectedItem(...args) {
-        if (currentSelectedItem) {
-            currentSelectedItem.clean(...args);
+        if (state.currentSelectedItem) {
+            state.currentSelectedItem.clean(...args);
         }
     }
 
@@ -217,10 +222,8 @@ export function useSelectableComponent(id, { onItemChange } = {}) {
                 }
             },
             update: refreshCurrentItemDebounced,
-            getSelectedItem: () => {
-                refreshCurrentItem();
-                return currentSelectedItem;
-            },
+            refreshCurrentItem: () => refreshCurrentItem(),
+            getSelectableState: () => state,
         },
     });
 }
@@ -229,8 +232,13 @@ export function useSelectableItemComponent(id, { getLabel = () => {} } = {}) {
     const env = useEnv();
 
     let isSelectableActive = isApplied;
+
+    let state;
     if (env.selectableContext) {
-        isSelectableActive = () => env.selectableContext.getSelectedItem() === selectableItem;
+        isSelectableActive = () => {
+            env.selectableContext.refreshCurrentItem();
+            return toRaw(selectableState.currentSelectedItem) === selectableItem;
+        };
 
         const selectableItem = {
             isApplied,
@@ -241,14 +249,26 @@ export function useSelectableItemComponent(id, { getLabel = () => {} } = {}) {
         };
 
         env.selectableContext.addSelectableItem(selectableItem);
+        const selectableState = env.selectableContext.getSelectableState();
+        state = useState({
+            isActive: false,
+        });
+        effect(
+            ({ currentSelectedItem }) => {
+                state.isActive = toRaw(currentSelectedItem) === selectableItem;
+            },
+            [selectableState]
+        );
+        env.selectableContext.refreshCurrentItem();
+
         onMounted(env.selectableContext.update);
         onWillDestroy(() => {
             env.selectableContext.removeSelectableItem(selectableItem);
         });
-        onWillStart(async () => {
-            await Promise.resolve();
-            state.isActive = isSelectableActive();
-        });
+    } else {
+        state = useDomState(() => ({
+            isActive: isSelectableActive(),
+        }));
     }
 
     if (id) {
@@ -259,10 +279,6 @@ export function useSelectableItemComponent(id, { getLabel = () => {} } = {}) {
             cleanSelectedItem: env.selectableContext?.cleanSelectedItem,
         });
     }
-
-    const state = useDomState(() => ({
-        isActive: isSelectableActive(),
-    }));
 
     return { state, operation };
 }

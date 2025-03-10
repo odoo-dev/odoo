@@ -185,3 +185,19 @@ test("button that matches with the highest priority should be active", async () 
     expect("[data-class-action='a b']").toHaveClass("active");
     expect("[data-class-action='a b c']").not.toHaveClass("active");
 });
+
+test("button that matches with the highest priority should be active", async () => {
+    addBuilderOption({
+        selector: ".test-options-target",
+        template: xml`<BuilderButtonGroup>
+            <BuilderButton classAction="'a'" >a</BuilderButton>
+            <BuilderButton classAction="'a b'">a b</BuilderButton>
+            <BuilderButton classAction="'a b c'">a b c</BuilderButton>
+        </BuilderButtonGroup>`,
+    });
+    await setupHTMLBuilder(`<div class="test-options-target a b">b</div>`);
+    await contains(":iframe .test-options-target").click();
+    expect("[data-class-action='a']").not.toHaveClass("active");
+    expect("[data-class-action='a b']").toHaveClass("active");
+    expect("[data-class-action='a b c']").not.toHaveClass("active");
+});
