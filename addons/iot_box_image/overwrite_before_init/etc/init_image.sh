@@ -20,7 +20,7 @@ echo "export LANGUAGE=en_US.UTF-8" >> ~/.bashrc
 echo "export LANG=en_US.UTF-8" >> ~/.bashrc
 echo "export LC_ALL=en_US.UTF-8" >> ~/.bashrc
 echo "export DISPLAY=:0" | tee -a ~/.bashrc /home/pi/.bashrc
-echo "export XAUTHORITY=/run/lightdm/pi/xauthority" >> /home/pi/.bashrc
+echo "export XAUTHORITY=/run/lightdm/odoo/xauthority" >> /home/pi/.bashrc
 echo "export XAUTHORITY=/run/lightdm/root/:0" >> ~/.bashrc
 # Aliases
 echo  "alias ll='ls -al'" | tee -a ~/.bashrc /home/pi/.bashrc

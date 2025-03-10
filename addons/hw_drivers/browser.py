@@ -53,7 +53,7 @@ class Browser:
         """
         self.env = env
         self.env['DISPLAY'] = f':0.{self._x_screen}'
-        self.env['XAUTHORITY'] = '/run/lightdm/pi/xauthority'
+        self.env['XAUTHORITY'] = '/run/lightdm/odoo/xauthority'
         for key in ['HOME', 'XDG_RUNTIME_DIR', 'XDG_CACHE_HOME']:
             self.env[key] = '/tmp/' + self._x_screen
 

@@ -44,7 +44,7 @@ class KeyboardUSBDriver(Driver):
 
     def __init__(self, identifier, device):
         if not hasattr(KeyboardUSBDriver, 'display'):
-            os.environ['XAUTHORITY'] = "/run/lightdm/pi/xauthority"
+            os.environ['XAUTHORITY'] = "/run/lightdm/odoo/xauthority"
             KeyboardUSBDriver.display = xlib.XOpenDisplay(bytes(":0.0", "utf-8"))
 
         super(KeyboardUSBDriver, self).__init__(identifier, device)
