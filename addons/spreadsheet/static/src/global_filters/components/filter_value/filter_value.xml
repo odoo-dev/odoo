@@ -6,7 +6,7 @@
             <div t-if="filter.type === 'text'" class="w-100">
                 <TextFilterValue
                     value="filterValue"
-                    label="filter.label"
+                    label="this.translate(filter.label)"
                     options="textAllowedValues"
                     onValueChanged="(value) => this.onTextInput(filter.id, value)"
                 />
@@ -14,7 +14,7 @@
             <span t-if="filter.type === 'relation'" class="w-100">
                 <MultiRecordSelector
                     t-if="isValid"
-                    placeholder="' ' + translate(filter.label)"
+                    placeholder="' ' + this.translate(filter.label)"
                     resModel="filter.modelName"
                     resIds="filterValue || []"
                     domain="relationalAllowedDomain"

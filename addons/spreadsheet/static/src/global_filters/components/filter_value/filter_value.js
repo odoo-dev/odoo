@@ -110,7 +110,7 @@ export class FilterValue extends Component {
     }
 
     translate(text) {
-        return _t(text);
+        return this.props.model.getters.dynamicTranslate(text);
     }
 
     clear(id) {

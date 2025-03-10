@@ -4,7 +4,6 @@ export const globalFiltersFieldMatchers = {};
 
 import { CommandResult } from "@spreadsheet/o_spreadsheet/cancelled_reason";
 import { checkFilterValueIsValid } from "@spreadsheet/global_filters/helpers";
-import { _t } from "@web/core/l10n/translation";
 import { escapeRegExp } from "@web/core/utils/strings";
 import { OdooCorePlugin } from "@spreadsheet/plugins";
 
@@ -157,7 +156,10 @@ export class GlobalFiltersCorePlugin extends OdooCorePlugin {
      * @returns {GlobalFilter|undefined}
      */
     getGlobalFilterLabel(label) {
-        return this.globalFilters.find((filter) => _t(filter.label) === _t(label));
+        return this.globalFilters.find(
+            (filter) =>
+                this.getters.dynamicTranslate(filter.label) === this.getters.dynamicTranslate(label)
+        );
     }
 
     /**
