@@ -15,6 +15,23 @@ class AccountMove(models.Model):
         string="UBL/CII File",
         copy=False,
     )
+    ubl_cii_edi_suggested_format = fields.Text(compute='_compute_ubl_cii_edi_suggested_format')
+
+    # # -------------------------------------------------------------------------
+    # # COMPUTES
+    # # -------------------------------------------------------------------------
+
+    # @api.depends('partner_id')
+    # def _compute_ubl_cii_edi_suggested_format(self):
+    #     for move in self:
+    #         move.ubl_cii_edi_suggested_format = move.partner_id and move.partner_id._get_suggested_ubl_cii_edi_format()
+
+    def get_invoice_ubl_format(self):
+        self.ensure_one()
+        invoice_edi_format= self.partner_id._get_suggested_ubl_cii_edi_format()
+        if invoice_edi_format:
+            return dict(self.env['res.partner']._fields['invoice_edi_format'].selection).get(invoice_edi_format)
+        return None
 
     # -------------------------------------------------------------------------
     # ACTIONS
@@ -28,6 +45,17 @@ class AccountMove(models.Model):
                 'target': 'download',
             }
         return False
+
+    def action_test(self):
+        invoice_edi_format = self.partner_id._get_suggested_ubl_cii_edi_format()
+        builder = self.partner_id._get_edi_builder(invoice_edi_format)
+        xml = builder._export_invoice(self)[0]
+        with open('/home/odoo/Desktop/dump.xml', 'wb') as f:
+            f.write(xml)
+        self.env['account.move.send']
+
+        # if attachments and self.sending_methods and 'manual' in self.sending_methods:
+        #     return self._action_download(attachments)
 
     # -------------------------------------------------------------------------
     # BUSINESS

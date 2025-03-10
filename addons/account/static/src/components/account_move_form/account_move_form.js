@@ -17,14 +17,29 @@ export class AccountMoveFormController extends FormController {
     }
 
     get cogMenuProps() {
-        return {
+        let res= {
             ...super.cogMenuProps,
             printDropdownTitle: _t("Print"),
             loadExtraPrintItems: this.loadExtraPrintItems.bind(this),
+            // getInvoiceUBLFormat: this.getInvoiceUBLFormat.bind(this),
         };
+
+
+        // {
+        //     key: "export",
+        //     description: _t("Export"),
+        //     callback: () => this.onExportData(),
+        // },
+        // debugger;
+        return res;
+    }
+
+    async getInvoiceUBLFormat() {
+        return this.orm.call("account.move", "get_invoice_ubl_format", [this.model.root.resId])
     }
 
     async loadExtraPrintItems() {
+        // debugger;
         if (!this.model.root.isNew) {
             return []
         }
