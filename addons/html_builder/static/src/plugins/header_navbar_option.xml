@@ -3,10 +3,10 @@
 
 <t t-name="html_builder.HeaderNavbarOption">
     <BuilderRow label.translate="Mobile Alignment">
-        <BuilderSelect>
-            <BuilderSelectItem action="'setMobileAlignment'" actionValue="'left'">Left</BuilderSelectItem>
+        <BuilderSelect >
+            <BuilderSelectItem action="'setMobileAlignment'" actionValue="'start'">Left</BuilderSelectItem>
             <BuilderSelectItem action="'setMobileAlignment'" actionValue="'center'">Center</BuilderSelectItem>
-            <BuilderSelectItem action="'setMobileAlignment'" actionValue="'right'">Right</BuilderSelectItem>
+            <BuilderSelectItem action="'setMobileAlignment'" actionValue="'end'">Right</BuilderSelectItem>
         </BuilderSelect>
     </BuilderRow>
     <BuilderRow label.translate="Font">
@@ -18,8 +18,8 @@
     </BuilderRow>
     <BuilderRow label.translate="Format">
         <BuilderButtonGroup>
-            <BuilderNumberInput action="'setIsDirty'" styleAction="'font-size'" unit="'px'" default="16"></BuilderNumberInput>
-            <BuilderColorPicker action="'setIsDirty'" applyTo="'.nav-item > .nav-link > *, .nav-item > .nav-link::after, .js_language_selector span, .badge'" styleAction="'color'"/>
+            <BuilderNumberInput styleAction="'font-size'" unit="'px'" default="16"></BuilderNumberInput>
+            <BuilderColorPicker applyTo="'.nav-item > .nav-link > *, .nav-item > .nav-link::after, .js_language_selector span, .badge'" styleAction="'color'"/>
             <BuilderSelect applyTo="'#top_menu'">
                 <BuilderSelectItem classAction="'me-auto'" ><i class="fa fa-align-left fa-fw"></i></BuilderSelectItem>
                 <BuilderSelectItem classAction="''" ><i class="fa fa-align-center fa-fw"></i></BuilderSelectItem>
@@ -28,7 +28,7 @@
         </BuilderButtonGroup>
     </BuilderRow>
     <BuilderRow label.translate="Link Style">
-        <BuilderSelect applyTo="'#top_menu'">
+        <BuilderSelect>
             <BuilderSelectItem action="'setLinkStyle'" actionValue="'default'">Default</BuilderSelectItem>
             <BuilderSelectItem action="'setLinkStyle'" actionValue="'fill'">Fill</BuilderSelectItem>
             <BuilderSelectItem action="'setLinkStyle'" actionValue="'outline'">Outline</BuilderSelectItem>
@@ -38,14 +38,14 @@
         </BuilderSelect>
     </BuilderRow>
     <BuilderRow label.translate="Additional color">
-        <BuilderSelect applyTo="'#top_menu'">
+        <BuilderSelect>
             <BuilderSelectItem action="'setAdditionalColor'" actionValue="'default'">Default</BuilderSelectItem>
             <BuilderSelectItem action="'setAdditionalColor'" actionValue="'primary'">Primary</BuilderSelectItem>
             <BuilderSelectItem action="'setAdditionalColor'" actionValue="'secondary'">Secondary</BuilderSelectItem>
         </BuilderSelect>
     </BuilderRow>
     <BuilderRow label.translate="Sub Menus">
-        <BuilderSelect applyTo="'#top_menu'">
+        <BuilderSelect>
             <BuilderSelectItem action="'setSubMenuOpenMode'" actionValue="'on-click'">On Click</BuilderSelectItem>
             <BuilderSelectItem action="'setSubMenuOpenMode'" actionValue="'on-hover'">On Hover</BuilderSelectItem>
         </BuilderSelect>

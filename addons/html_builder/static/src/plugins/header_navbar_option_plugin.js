@@ -16,9 +16,55 @@ class HeaderNavbarOptionPlugin extends Plugin {
     getActions() {
         return {
             setMobileAlignment: {
+                clean: ({ editingElement, value }) => {
+                    //todo
+                },
+
                 apply: ({ editingElement, value }) => {
                     console.log(value);
+                    const isStart = value === "start";
+                    const isCenter = value === "center";
+                    const isEnd = value === "end";
+
+                    const mobileNavbar = editingElement.ownerDocument.getElementById("top_menu_collapse_mobile");
+                    var menu = mobileNavbar.getElementsByClassName("nav navbar-nav top_menu");
+                    if (menu)
+                    {
+                        menu[0].classList.toggle("text-start", isStart);
+                        menu[0].classList.toggle("text-center", isCenter);
+                        menu[0].classList.toggle("text-end", isEnd);
+                    }
+                    else
+                    {
+                        console.log("no navbars with class name \"nav navbar-nav top_menu\" found.");
+                    }
+
+                },
+
+                isApplied: ({ editingElement, value }) => {
+                    const mobileNavbar = editingElement.ownerDocument.getElementById("top_menu_collapse_mobile");
+                    var menu = mobileNavbar.getElementsByClassName("nav navbar-nav top_menu");
+                    if (menu)
+                    {
+                        switch (value)
+                        {
+                            case "start":
+                                return menu[0].classList.contains("text-start");
+                            case "center":
+                                return menu[0].classList.contains("text-center");
+                            case "end":
+                                return menu[0].classList.contains("text-end");
+                            default:
+                                return false;
+                        }
+                    }
+                    else
+                    {
+                        console.log("no navbars with class name \"nav navbar-nav top_menu\" found.");
+                        return false;
+                    }
                 }
+
             },
             setTextColor: {
                 apply: ({ editingElement, value }) => {
@@ -27,18 +73,14 @@ class HeaderNavbarOptionPlugin extends Plugin {
             },
             setLinkStyle: {
                 clean: ({ editingElement, value }) => {
-                    const isSolid = ['fill', 'pills', 'block'].includes(value);
-
-                    editingElement.classList.toggle("nav-pills", !isSolid);
+                    //todo
                 },
 
                 apply: ({ editingElement, value }) => {
                     
                     const isSolid = ['fill', 'pills', 'block'].includes(value);
-                    //const isUnderline = value === 'border-bottom';
 
                     editingElement.classList.toggle("nav-pills", isSolid);
-                    //editingElement.classList.toggle("nav-underline", isUnderline);
                     
                     const isDefault = value === 'default';
                     const isFill = value === 'fill';
@@ -60,6 +102,10 @@ class HeaderNavbarOptionPlugin extends Plugin {
                         //todoo do something else than navbars[0]
                         navbars[0].classList.toggle("nav-header-no-padding", (isBlock || isBorderBottom));
 
+                    }
+                    else
+                    {
+                        console.log("no navbars with class name \"navbar\" found.");
                     }
 
 
