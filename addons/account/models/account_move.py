@@ -3257,10 +3257,12 @@ class AccountMove(models.Model):
             is_refund = move.move_type in ('out_refund', 'in_refund')
             sign = -1 if move.move_type in ('in_invoice', 'out_refund') else 1
             group_by_repartition_key = {}
+            base_line_tax_line_map = {}
             for line in move.line_ids:
                 if line.tax_repartition_line_id:
                     group_by_repartition_key.setdefault(line.tax_repartition_line_id.id, 0.00)
                     group_by_repartition_key[line.tax_repartition_line_id.id] += (line.balance * sign)
+                    base_line_tax_line_map.setdefault(line.tax_repartition_line_id.id, line.id)
             line_data = {}
             for line in move.line_ids:
                 if line.tax_ids:
@@ -3279,7 +3281,7 @@ class AccountMove(models.Model):
                                 "base_tag_ids": list(map(int, all_taxes.get('base_tags'))),
                                 "tax_repartition_line_id": tax['tax_repartition_line_id'],
                                 "tag_ids": all_taxes['base_tags'],
-                                "tax_line_id": tax['tax_repartition_line_id'],
+                                "tax_line_id": base_line_tax_line_map.get(tax['tax_repartition_line_id']),
                             }
                             group_by_repartition_key[tax['tax_repartition_line_id']] += tax_amount
                     line_data[line.id]['tag_ids'] = all_taxes.get('base_tags')
