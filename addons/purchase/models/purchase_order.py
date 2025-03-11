@@ -755,6 +755,8 @@ class PurchaseOrder(models.Model):
             raise UserError(_("In selected purchase order to merge these details must be same\nVendor, currency, destination, dropship address and agreement"))
         bunches_of_rfq_to_be_merge = [rfqs for rfqs in bunches_of_rfq_to_be_merge if len(rfqs) > 1]
 
+        oldest_rfq = None
+
         for rfqs in bunches_of_rfq_to_be_merge:
             if len(rfqs) <= 1:
                 continue
@@ -803,7 +805,7 @@ class PurchaseOrder(models.Model):
             'tag': 'display_notification',
             'params': {
                 'type': 'success',
-                'message': _('purchase orders merged'),
+                'message': _('Purchase orders merged into %s', oldest_rfq.name),
                 'next': {'type': 'ir.actions.act_window_close'},
             }
         }
