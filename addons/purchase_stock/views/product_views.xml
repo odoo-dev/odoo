@@ -34,12 +34,25 @@
                     <attribute name="js_class">purchase_product_kanban_catalog</attribute>
                     <attribute name="sample">1</attribute> 
             </xpath>
-            <div name="o_kanban_qty_available" position="after">
+            <xpath expr="//kanban" position="inside">
+                <field name="qty_available"/>
+                <field name="virtual_available"/>
+            </xpath>
+            <div name="o_kanban_qty_available_and_on_hand" position="replace">
                 <div t-if="record.is_storable.raw_value"
-                     name="o_kanban_qty_forecasted">
-                    <span>Forecasted: </span>
-                    <field name="virtual_available"/>
-                    <field name="uom_id" widget="many2one_uom" class="ms-1" groups="uom.group_uom"/>
+                     name="o_kanban_qty_available_and_forecast">
+                    <span class="fw-bolder"><t t-out="record.qty_available.raw_value"/></span>
+                    <span class="text-muted small"> On Hand</span>
+                    <t t-if="record.qty_available.raw_value != record.virtual_available.raw_value">
+                        <span> / </span>
+                        <t t-if="record.virtual_available.raw_value &lt; 0">
+                            <span class="fw-bold text-danger"><t t-out="record.virtual_available.raw_value"/></span>
+                        </t>
+                        <t t-else="">
+                            <span class="fw-bold"><t t-out="record.virtual_available.raw_value"/></span>
+                        </t>
+                        <span class="text-muted small"> Forecasted</span>
+                    </t>
                 </div>
             </div>
         </field>
