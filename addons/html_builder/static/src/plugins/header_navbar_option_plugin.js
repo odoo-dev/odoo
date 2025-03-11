@@ -16,10 +16,6 @@ class HeaderNavbarOptionPlugin extends Plugin {
     getActions() {
         return {
             setMobileAlignment: {
-                clean: ({ editingElement, value }) => {
-                    //todo
-                },
-
                 apply: ({ editingElement, value }) => {
                     console.log(value);
                     const isStart = value === "start";
@@ -42,18 +38,24 @@ class HeaderNavbarOptionPlugin extends Plugin {
                 },
 
                 isApplied: ({ editingElement, value }) => {
+
                     const mobileNavbar = editingElement.ownerDocument.getElementById("top_menu_collapse_mobile");
                     var menu = mobileNavbar.getElementsByClassName("nav navbar-nav top_menu");
+
                     if (menu)
                     {
+                        const isCenter = menu[0].classList.contains("text-center");
+                        const isEnd = menu[0].classList.contains("text-end");
+                        const isStart = (!isCenter && !isEnd);
+
                         switch (value)
                         {
                             case "start":
-                                return menu[0].classList.contains("text-start");
+                                return isStart;
                             case "center":
-                                return menu[0].classList.contains("text-center");
+                                return isCenter;
                             case "end":
-                                return menu[0].classList.contains("text-end");
+                                return isEnd;
                             default:
                                 return false;
                         }
@@ -72,24 +74,18 @@ class HeaderNavbarOptionPlugin extends Plugin {
                 }
             },
             setLinkStyle: {
-                clean: ({ editingElement, value }) => {
-                    //todo
-                },
-
                 apply: ({ editingElement, value }) => {
                     
                     const isSolid = ['fill', 'pills', 'block'].includes(value);
 
                     editingElement.classList.toggle("nav-pills", isSolid);
                     
-                    const isDefault = value === 'default';
                     const isFill = value === 'fill';
                     const isOutline = value === 'outline';
                     const isPills = value === 'pills';
                     const isBlock = value === 'block';
                     const isBorderBottom = value === 'border-bottom';
 
-                    editingElement.classList.toggle("nav-header-default", isDefault);
                     editingElement.classList.toggle("nav-header-fill", isFill);
                     editingElement.classList.toggle("nav-header-outline", isOutline);
                     editingElement.classList.toggle("nav-header-pills", isPills);
@@ -112,21 +108,29 @@ class HeaderNavbarOptionPlugin extends Plugin {
                 },
 
                 isApplied: ({ editingElement, value }) => {
+
                     
+                    const isFill = editingElement.classList.contains("nav-header-fill");
+                    const isOutline = editingElement.classList.contains("nav-header-outline");
+                    const isPills = editingElement.classList.contains("nav-header-pills");
+                    const isBlock = editingElement.classList.contains("nav-header-block");
+                    const isBorderBottom = editingElement.classList.contains("nav-header-border-bottom");
+                    const isDefault = (!isFill && !isOutline && !isPills && !isBlock && !isBorderBottom);
+
                     switch (value)
                     {
                         case "default":
-                            return editingElement.classList.contains("nav-header-default");
+                            return isDefault;
                         case "fill":
-                            return editingElement.classList.contains("nav-header-fill");
+                            return isFill;
                         case "outline":
-                            return editingElement.classList.contains("nav-header-outline");
+                            return isOutline;
                         case "pills":
-                            return editingElement.classList.contains("nav-header-pills");
+                            return isPills;
                         case "block":
-                            return editingElement.classList.contains("nav-header-block");
+                            return isBlock;
                         case "border-bottom":
-                            return editingElement.classList.contains("nav-header-border-bottom");
+                            return isBorderBottom;
                         default:
                             return false;
                     }
@@ -137,7 +141,44 @@ class HeaderNavbarOptionPlugin extends Plugin {
             },
             setAdditionalColor: {
                 apply: ({ editingElement, value }) => {
-                    console.log(value);
+                    
+                    const isPrimary = value === 'primary';
+                    const isSecondary = value === 'secondary';
+
+                    var additionalBtn = editingElement.getElementsByClassName("dropdown-toggle");
+                    
+                    if (additionalBtn)
+                    {
+                        additionalBtn[0].classList.toggle("btn-outline-primary", isPrimary);
+                        additionalBtn[0].classList.toggle("btn-outline-secondary", isSecondary);
+                    }
+                    
+                },
+
+                isApplied: ({ editingElement, value }) => {
+
+                    var additionalBtn = editingElement.getElementsByClassName("dropdown-toggle");
+                    
+                    if (additionalBtn)
+                    {
+                        const isPrimary = additionalBtn[0].classList.contains("btn-outline-primary");
+                        const isSecondary = additionalBtn[0].classList.contains("btn-outline-secondary");
+
+                        switch (value)
+                        {
+                            case "default":
+                                return (!isPrimary && !isSecondary);
+                            case "primary":
+                                return isPrimary;
+                            case "secondary":
+                                return isSecondary;
+                            default:
+                                return false;
+                        }
+                    }
+                    return false;
+                    
+                    
                 }
             },
             setSubMenuOpenMode: {
