@@ -4,7 +4,10 @@
         <!-- Replace the element found using the css selector by the content of the portalled
              template.  -->
         <t t-portal="`#product-${props.productId}-price`" t-if="showPrice">
-            <span class="o_product_catalog_price">Unit price: <t t-out="price"/></span>
+            <span class="o_product_catalog_price">
+                <span class="fw-bold"><t t-out="price" /></span>
+                <span class="mx-4 text-muted" t-if="props.code and props.code != 'False'"><t t-out="props.code" /></span>
+            </span>
         </t>
         <div 
             t-if="props.readOnly and props.warning"
@@ -21,22 +24,30 @@
         <div t-else="" class="d-flex justify-content-end align-items-center m-2">
             <div t-if="isInOrder()"
                     class="input-group o_product_catalog_quantity o_product_catalog_cancel_global_click w-50">
-                <button class="btn btn-primary border"
-                        t-on-click.stop="this.env.decreaseQuantity"
-                        t-att-disabled="disableRemove"
-                        t-att-data-tooltip="disabledButtonTooltip">
-                    <i class="fa fa-minus center"/>
-                </button>
-                <input class="o_input form-control border text-center text-bg-light"
-                        type="number"
-                        t-att-value="quantity"
-                        t-on-change="this.env.setQuantity"
-                        t-on-focus="_onFocus"
-                />
-                <button class="btn btn-primary border"
-                        t-on-click.stop="(ev) => this.env.increaseQuantity()">
-                    <i class="fa fa-plus"/>
-                </button>
+                <div class="d-flex">
+                    <button class="btn btn-primary border"
+                            t-on-click.stop="this.env.decreaseQuantity"
+                            t-att-disabled="disableRemove"
+                            t-att-data-tooltip="disabledButtonTooltip">
+                        <i class="fa fa-minus center"/>
+                    </button>
+                    <div class="d-flex">
+                        <input class="o_input border text-center text-bg-light"
+                                type="number"
+                                t-att-value="quantity"
+                                t-on-change="this.env.setQuantity"
+                                t-on-focus="_onFocus"
+                                style="border-right: 0px !important; flex: 1;"/>
+                        <span t-if="this.env.displayUoM and props.uom.display_name" class="border fst-italic text-muted text-bg-light text-truncate"
+                            style="border-left: 0px !important; flex: 1; padding: 6px 0;">
+                            <t t-out="props.uom.display_name"/>
+                        </span>
+                    </div>
+                    <button class="btn btn-primary border"
+                            t-on-click.stop="(ev) => this.env.increaseQuantity()">
+                        <i class="fa fa-plus"/>
+                    </button>
+                </div>
             </div>
             <t t-elif="props.warning">
                 <i class="fa fa-warning text-warning" t-att-title="props.warning"/>
