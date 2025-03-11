@@ -82,6 +82,7 @@ class PrinterDriver(Driver):
         self._actions.update({
             'cashbox': self.open_cashbox,
             'print_receipt': self.print_receipt,
+            'status': self.print_status,
             '': self._action_default,
         })
 
@@ -366,8 +367,13 @@ class PrinterDriver(Driver):
 
         return { "mac": mac, "pairing_code": pairing_code, "ssid": ssid, "ips": ips }
 
-    def print_status(self):
-        if not self.connected_by_usb:
+    def print_status(self, data=None):
+        """Prints the status ticket of the IoT Box on the current printer.
+
+        :param data: If not None, it means that it has been called from the action route, meaning
+        that no matter the connection type, the printer should print the status ticket.
+        """
+        if not self.connected_by_usb and not data:
             return
         if self.device_subtype == "receipt_printer":
             self.print_status_receipt()
@@ -375,51 +381,60 @@ class PrinterDriver(Driver):
             self.print_status_zpl()
 
     def print_status_receipt(self):
-        """Prints the status ticket of the IoTBox on the current printer."""
+        """Prints the status ticket of the IoT Box on the current printer."""
         wlan = ''
-        ip = ''
         mac = ''
         homepage = ''
         pairing_code = ''
 
         iot_status = self._get_iot_status()
 
+        if iot_status["pairing_code"]:
+            pairing_code = (
+                '\nOdoo not connected\n'
+                'Go to the IoT app, click "Connect",\n'
+                'Pairing Code: %s\n' % iot_status["pairing_code"]
+            )
+
         if iot_status['ssid']:
             wlan = '\nWireless network:\n%s\n\n' % iot_status["ssid"]
 
         ips = iot_status["ips"]
         if len(ips) == 0:
-            ip = '\nERROR: Could not connect to LAN\n\nPlease check that the IoTBox is correc-\ntly connected with a network cable,\n that the LAN is setup with DHCP, and\nthat network addresses are available'
+            ip = '\nERROR: Could not connect to LAN\n\nPlease check that the IoT Box is correc-\ntly connected with a network cable,\n that the LAN is setup with DHCP, and\nthat network addresses are available'
         elif len(ips) == 1:
-            ip = '\nIP Address:\n%s\n' % ips[0]
+            ip = '\nIoT Box IP Address:\n%s\n' % ips[0]
         else:
-            ip = '\nIP Addresses:\n%s\n' % '\n'.join(ips)
+            ip = '\nIoT Box IP Addresses:\n%s\n' % '\n'.join(ips)
 
         if len(ips) >= 1:
             mac = '\nMAC Address:\n%s\n' % iot_status["mac"]
-            homepage = '\nHomepage:\nhttp://%s:8069\n\n' % ips[0]
-
-        if iot_status["pairing_code"]:
-            pairing_code = '\nPairing Code: %s\n' % iot_status["pairing_code"]
-            pairing_code += 'Enter this code in the Odoo IoT app to pair your IoT Box.\n'
+            homepage = '\nIoT Box Homepage:\nhttp://%s:8069\n\n' % ips[0]
 
         commands = RECEIPT_PRINTER_COMMANDS[self.receipt_protocol]
-        title = commands['title'] % b'IoTBox Status'
-        self.print_raw(commands['center'] + title + b'\n' + wlan.encode() + mac.encode() + ip.encode() + homepage.encode() + pairing_code.encode() + commands['cut'])
+        title = commands['title'] % (b'IoT Box Connected' if helpers.get_odoo_server_url() else b'IoT Box Status')
+        self.print_raw(commands['center'] + title + b'\n' + pairing_code.encode() + wlan.encode() + mac.encode() + ip.encode() + homepage.encode() + commands['cut'])
 
     def print_status_zpl(self):
         iot_status = self._get_iot_status()
 
-        command = f"^XA^CI28 ^FT35,40 ^A0N,30 ^FDIoT Box Status^FS"
-        if iot_status["ssid"]:
-            command += f"^FT35,85 ^A0N,25 ^FDWiFi: {iot_status['ssid']}^FS"
-        if iot_status["mac"]:
-            command += f"^FT35,120 ^A0N,25 ^FDMAC: {iot_status['mac']}^FS"
-        if iot_status["ips"]:
-            command += f"^FT35,155 ^A0N,25 ^FDIP: {', '.join(iot_status['ips'])}^FS"
+        title = "IoT Box Connected" if helpers.get_odoo_server_url() else "IoT Box Status"
+        command = f"^XA^CI28 ^FT35,40 ^A0N,30 ^FD{title}^FS"
+        p = 85
         if iot_status["pairing_code"]:
-            command += f"^FT35,190 ^A0N,25 ^FDPairing code: {iot_status['pairing_code']}^FS"
-            command += "^FT35,225 ^A0N,25 ^FDEnter this code in the Odoo IoT app^FS"
+            command += f"^FT35,{p} ^A0N,25 ^FDGo to the IoT app, click \"Connect\",^FS"
+            p += 35
+            command += f"^FT35,{p} ^A0N,25 ^FDPairing code: {iot_status['pairing_code']}^FS"
+            p += 35
+        if iot_status["ssid"]:
+            command += f"^FT35,{p} ^A0N,25 ^FDWi-Fi: {iot_status['ssid']}^FS"
+            p += 35
+        if iot_status["mac"]:
+            command += f"^FT35,{p} ^A0N,25 ^FDMAC: {iot_status['mac']}^FS"
+            p += 35
+        if iot_status["ips"]:
+            command += f"^FT35,{p} ^A0N,25 ^FDIP: {', '.join(iot_status['ips'])}^FS"
+            p += 35
         command += "^XZ"
 
         self.print_raw(command.encode())
