@@ -1048,7 +1048,6 @@ class PurchaseOrder(models.Model):
     def _get_action_add_from_catalog_extra_context(self):
         return {
             **super()._get_action_add_from_catalog_extra_context(),
-            'display_uom': self.env.user.has_group('uom.group_uom'),
             'precision': self.env['decimal.precision'].precision_get('Product Unit'),
             'product_catalog_currency_id': self.currency_id.id,
             'product_catalog_digits': self.order_line._fields['price_unit'].get_digits(self.env),

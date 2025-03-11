@@ -1421,6 +1421,11 @@ class SaleOrderLine(models.Model):
             }
             if self.product_id.sale_line_warn != 'no-message' and self.product_id.sale_line_warn_msg:
                 res['warning'] = self.product_id.sale_line_warn_msg
+            if self.product_id.uom_id != self.product_uom_id:
+                res['uom'] = {
+                    'display_name': self.product_uom_id.display_name,
+                    'id': self.product_uom_id.id,
+                }
             return res
         elif self:
             self.product_id.ensure_one()
