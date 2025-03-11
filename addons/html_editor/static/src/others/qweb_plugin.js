@@ -32,13 +32,13 @@ const dataAttributesSelector = QWEB_DATA_ATTRIBUTES.map((attr) => `[${attr}]`).j
 export const isUnremovableQWebElement = (node) =>
     node.getAttribute?.("t-set") || node.getAttribute?.("t-call");
 
-
 export class QWebPlugin extends Plugin {
     static id = "qweb";
     static dependencies = ["overlay", "protectedNode", "selection"];
     resources = {
         /** Handlers */
         selectionchange_handlers: withSequence(8, this.onSelectionChange.bind(this)),
+        clean_handlers: this.clearDataAttributes.bind(this),
         clean_for_save_handlers: ({ root }) => {
             this.clearDataAttributes(root);
             for (const element of root.querySelectorAll(PROTECTED_QWEB_SELECTOR)) {
