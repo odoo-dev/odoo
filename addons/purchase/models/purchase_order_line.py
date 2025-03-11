@@ -437,25 +437,19 @@ class PurchaseOrderLine(models.Model):
                 'price': float,
                 'readOnly': bool,
                 'uom': dict,
-                'purchase_uom': dict,
                 'packaging': dict,
                 'warning': String,
             }
         """
         if len(self) == 1:
             catalog_info = self.order_id._get_product_price_and_data(self.product_id)
-            uom = {
-                'display_name': self.product_id.uom_id.display_name,
-                'id': self.product_id.uom_id.id,
-            }
             catalog_info.update(
                 quantity=self.product_qty,
                 price=self.price_unit * (1 - self.discount / 100),
                 readOnly=self.order_id._is_readonly(),
-                uom=uom,
             )
             if self.product_id.uom_id != self.product_uom_id:
-                catalog_info['purchase_uom'] = {
+                catalog_info['uom'] = {
                 'display_name': self.product_uom_id.display_name,
                 'id': self.product_uom_id.id,
             }
