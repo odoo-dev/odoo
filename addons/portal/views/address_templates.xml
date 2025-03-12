@@ -330,6 +330,7 @@
                     t-att-value="s.id"
                     t-att-selected="s.id == (int(state_id) if state_id else partner_sudo.state_id.id)"
                     t-out="s.name"
+                    t-att-data-country_id="s.country_id.id"
                 />
             </select>
         </div>

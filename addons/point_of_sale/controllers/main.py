@@ -211,6 +211,7 @@ class PosController(PortalAccount):
         # Most of the time, the country of the customer will be the same as the order. We can prefill it by default with the country of the company.
         if 'country' not in form_values:
             form_values['country'] = pos_order_country
+            form_values['country_states'] = pos_order_country.state_ids
 
         # Prefill the customer extra values if there is any and an user is connected
         if partner:
