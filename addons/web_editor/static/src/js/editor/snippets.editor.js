@@ -3203,6 +3203,8 @@ class SnippetsMenu extends Component {
         var $html = $(html);
 
         this.templateOptions = [];
+        window.templateOptions = this.templateOptions;
+        console.warn(`window.templateOptions:`, window.templateOptions);
         var selectors = [];
         var $styles = $html.find('[data-selector]');
         const snippetAdditionDropIn = $styles.filter('#so_snippet_addition').data('drop-in');
