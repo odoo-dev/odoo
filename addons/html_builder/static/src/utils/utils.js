@@ -1,7 +1,10 @@
 import { DependencyManager } from "../core/dependency_manager";
-import { useSubEnv } from "@odoo/owl";
+import { onWillDestroy, onWillStart, useComponent, useState, useSubEnv } from "@odoo/owl";
 import { SIZES, MEDIAS_BREAKPOINTS } from "@web/core/ui/ui_service";
 import { _t } from "@web/core/l10n/translation";
+import { Editor } from "@html_editor/editor";
+import { useService } from "@web/core/utils/hooks";
+import { Deferred } from "@web/core/utils/concurrency";
 
 /**
  * Checks if the view of the targeted element is mobile.
@@ -155,4 +158,83 @@ export function getSelectorParams(builderOptions, optionClass) {
         }
     }
     return selectorParams;
+}
+
+/**
+ * Instantiate a Snippet editor and its related snippetModel.
+ * Can be used as the editor in the context of a Builder.
+ *
+ * @param {Object} opt
+ * @param {EventBus} opt.editorBus
+ * @param {Function} opt.getRecordInfo
+ * @param {String} opt.localOverlayContainerKey
+ * @param {Function} opt.onChange
+ * @param {Function} opt.onCurrentOptionsContainersChange
+ * @param {Object} opt.overlayRef
+ * @param {Array<Object>} opt.Plugins
+ * @param {Function} opt.setHistoryState receives `canUndo` and `canRedo` editor states when they change
+ * @param {Object} [opt.resources]
+ * @param {Object} [opt.config]
+ * @returns {Object} editor, snippetModel, snippetModelPromise (loading promise)
+ */
+export function useSnippetEditor({
+    editorBus,
+    getRecordInfo,
+    localOverlayContainerKey,
+    onChange,
+    onCurrentOptionsContainersChange,
+    overlayRef,
+    Plugins,
+    setHistoryState,
+    resources = {},
+    config = {},
+}) {
+    const component = useComponent();
+    const snippetModel = useState(useService("html_builder.snippets"));
+    const snippetModelPromise = new Deferred();
+    const editor = new Editor(
+        {
+            Plugins,
+            onChange: ({ isPreviewing }) => {
+                if (!isPreviewing) {
+                    setHistoryState({
+                        canRedo: editor.shared.history.canRedo(),
+                        canUndo: editor.shared.history.canUndo(),
+                    });
+                    onChange();
+                    editorBus.trigger("UPDATE_EDITING_ELEMENT");
+                    editorBus.trigger("DOM_UPDATED");
+                }
+            },
+            resources: {
+                // disable the toolbar for images and icons
+                can_display_toolbar: (namespace) => !["image", "icon"].includes(namespace),
+                change_current_options_containers_listeners: (currentOptionsContainers) => {
+                    onCurrentOptionsContainersChange(currentOptionsContainers);
+                },
+                on_mobile_preview_clicked: () => {
+                    editorBus.trigger("DOM_UPDATED");
+                },
+                ...resources,
+            },
+            getRecordInfo,
+            localOverlayContainers: {
+                key: localOverlayContainerKey,
+                ref: overlayRef,
+            },
+            replaceSnippet: async (snippet) => await snippetModel.replaceSnippet(snippet),
+            saveSnippet: (snippetEl, cleanForSaveHandlers) =>
+                snippetModel.saveSnippet(snippetEl, cleanForSaveHandlers),
+            ...config,
+        },
+        component.env.services
+    );
+    useSubEnv({ editor, editorBus });
+    onWillStart(() => snippetModelPromise.resolve(snippetModel.load()));
+    onWillDestroy(() => editor.destroy());
+    return {
+        editor,
+        snippetModel,
+        snippetModelPromise,
+    };
 }

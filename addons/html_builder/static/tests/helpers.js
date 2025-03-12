@@ -1,4 +1,4 @@
-import { Builder } from "@html_builder/builder";
+import { WebsiteBuilderConfigurator } from "@html_builder/website_builder/builder_configurator/builder_configurator";
 import { SetupEditorPlugin } from "@html_builder/core/setup_editor_plugin";
 import { LocalOverlayContainer } from "@html_editor/local_overlay_container";
 import { Plugin } from "@html_editor/plugin";
@@ -60,10 +60,10 @@ class BuilderContainer extends Component {
             </div>
             <LocalOverlayContainer localOverlay="overlayRef" identifier="env.localOverlayContainerKey"/>
             <div t-if="state.isEditing" t-att-class="{'o_builder_sidebar_open': state.isEditing}" class="o-website-builder_sidebar border-start border-dark">
-                <Builder t-props="this.getBuilderProps()"/>
+                <WebsiteBuilderConfigurator t-props="this.getBuilderConfiguratorProps()"/>
             </div>
         </div>`;
-    static components = { Builder, LocalOverlayContainer };
+    static components = { WebsiteBuilderConfigurator, LocalOverlayContainer };
     static props = { content: String, Plugins: Array };
 
     setup() {
@@ -92,7 +92,7 @@ class BuilderContainer extends Component {
         this._originalIframeLoadedResolve();
     }
 
-    getBuilderProps() {
+    getBuilderConfiguratorProps() {
         return {
             closeEditor: () => {},
             snippetsName: "",

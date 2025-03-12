@@ -1,4 +1,4 @@
-import { Builder } from "@html_builder/builder";
+import { WebsiteBuilderConfigurator } from "@html_builder/website_builder/builder_configurator/builder_configurator";
 import { SetupEditorPlugin } from "@html_builder/core/setup_editor_plugin";
 import { EditInteractionPlugin } from "@html_builder/website_builder/plugins/edit_interaction_plugin";
 import { WebsiteSessionPlugin } from "@html_builder/website_builder/plugins/website_session_plugin";
@@ -153,7 +153,7 @@ export async function setupWebsiteBuilder(
         },
     });
 
-    patchWithCleanup(Builder.prototype, {
+    patchWithCleanup(WebsiteBuilderConfigurator.prototype, {
         setup() {
             super.setup();
             editor = this.editor;

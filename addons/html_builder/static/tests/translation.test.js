@@ -1,4 +1,4 @@
-import { Builder } from "@html_builder/builder";
+import { WebsiteBuilderConfigurator } from "@html_builder/website_builder/builder_configurator/builder_configurator";
 import { WebsiteBuilder } from "@html_builder/website_preview/website_builder_action";
 import { EditWebsiteSystrayItem } from "@html_builder/website_preview/edit_website_systray_item";
 import { setContent, setSelection } from "@html_editor/../tests/_helpers/selection";
@@ -117,7 +117,7 @@ async function setupSidebarBuilderForTranslation(options) {
     // on the "Edit" button of the systray. The goal of this hack is to avoid
     // the handling of an extra reload of the action to arrive in translate
     // mode.
-    patchWithCleanup(Builder.prototype, {
+    patchWithCleanup(WebsiteBuilderConfigurator.prototype, {
         setup() {
             super.setup();
             this.env.services.website = websiteServiceInTranslateMode;

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="html_builder.WebsiteBuilderConfigurator">
+    <Builder t-props="getBuilderProps()">
+        <t t-set-slot="viewModeButtons">
+            <button t-on-click="onMobilePreviewClick" type="button" class="btn btn-secondary" data-action="mobile" title="Mobile Preview" accesskey="v"><span class="fa fa-mobile"/></button>
+        </t>
+        <t t-set-slot="tabButtons">
+            <button class="px-2 cursor-pointer pb-1 pe-auto bg-transparent text-uppercase border-0" t-att-class="{'active text-white': state.activeTab === 'blocks'}" t-on-click="() => this.setTab('blocks')" t-att-disabled="props.isTranslation">
+                <span class="ps-1">Blocks</span>
+            </button>
+            <button class="px-2 cursor-pointer pb-1 bg-transparent text-uppercase border-0" t-att-class="{'active text-white': state.activeTab === 'customize'}" t-on-click="() => this.setTab('customize')">
+                <span>Customize</span>
+            </button>
+            <button class="px-2 cursor-pointer pb-1 bg-transparent text-uppercase border-0" t-att-class="{'active text-white': state.activeTab === 'theme'}" t-on-click="() => this.setTab('theme')" t-att-disabled="props.isTranslation">
+                <span class="pe-1">Theme</span>
+            </button>
+        </t>
+        <t t-set-slot="tabs">
+            <t t-if="state.activeTab === 'blocks'">
+                <BlockTab />
+            </t>
+            <t t-if="state.activeTab === 'customize'">
+                <CustomizeTab currentOptionsContainers="state.currentOptionsContainers" snippetModel="snippetModel"/>
+            </t>
+            <t t-if="state.activeTab === 'theme'">
+                <ThemeTab/>
+            </t>
+        </t>
+        <t t-set-slot="panels">
+            <InvisibleElementsPanel t-if="state.invisibleEls.length" invisibleEls="state.invisibleEls" invisibleSelector="this.getInvisibleSelector()"/>
+        </t>
+    </Builder>
+</t>
+
+</templates>
