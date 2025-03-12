@@ -331,8 +331,8 @@ export function useClickableBuilderComponent() {
         for (const clean of new Set(cleans)) {
             clean(applySpecs);
         }
-        let shouldClean = shouldToggle && isApplied();
-        shouldClean = comp.props.inverseAction ? !shouldClean : shouldClean;
+        const hasClean = applySpecs.some((applySpec) => applySpec.clean);
+        const shouldClean = _shouldClean(comp, hasClean, isApplied());
         for (const applySpec of applySpecs) {
             if (shouldClean) {
                 applySpec.clean?.({
@@ -622,14 +622,14 @@ export function getAllActionsAndOperations(comp) {
                 fn(actionsSpecs);
             },
             {
-                load: async () =>
-                    Promise.all(
+                load: async () => {
+                    const hasClean = actionsSpecs.some((applySpec) => applySpec.clean);
+                    return Promise.all(
                         actionsSpecs.map(async (applySpec) => {
                             if (!applySpec.load) {
                                 return;
                             }
-                            const shouldToggle = !comp.env.actionBus;
-                            if (shouldToggle && isApplied()) {
+                            if (_shouldClean(comp, hasClean, isApplied())) {
                                 // The element will be cleaned, do not load
                                 return;
                             }
@@ -640,7 +640,8 @@ export function getAllActionsAndOperations(comp) {
                             });
                             applySpec.loadResult = result;
                         })
-                    ),
+                    );
+                },
                 ...params.operationParams,
             }
         );
@@ -678,4 +679,9 @@ export function getAllActionsAndOperations(comp) {
         callOperation: callOperation,
         isApplied: isApplied,
     };
+}
+function _shouldClean(comp, hasClean, isApplied) {
+    const shouldToggle = !comp.env.selectableContext;
+    const shouldClean = shouldToggle && hasClean && isApplied;
+    return comp.props.inverseAction ? !shouldClean : shouldClean;
 }
