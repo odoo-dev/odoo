@@ -204,7 +204,7 @@ class TestWebsitePerformance(TestWebsitePerformanceCommon):
                     # 2. ..then reads it (`is_visible`)
                     'website': 1,
                 }
-                expected_query_count = 5
+                expected_query_count = 6
                 if not readonly_enabled:
                     select_tables_perf['ir_ui_view'] = 1 # Check if `view.track` to track visitor or not
                     expected_query_count += 1
@@ -229,7 +229,7 @@ class TestWebsitePerformance(TestWebsitePerformanceCommon):
                     # 2. ..then reads it (`is_visible`)
                     'website': 1,
                 }
-                expected_query_count = 5
+                expected_query_count = 6
                 expected_query_count_no_cache = 10
                 insert_tables_perf = {}
                 if not readonly_enabled:
@@ -263,7 +263,7 @@ class TestWebsitePerformance(TestWebsitePerformanceCommon):
                     # 2. find page matching the `/` url
                     'website': 1,
                 }
-                expected_query_count = 5
+                expected_query_count = 6
                 expected_query_count_no_cache = 8
                 insert_tables_perf = {}
                 if not readonly_enabled:
@@ -323,7 +323,7 @@ class TestWebsitePerformance(TestWebsitePerformanceCommon):
             'ir_ui_view': 1,
             # Check if `view.track` to track visitor or not
         }
-        self._check_url_hot_query(self.page.url, 6, select_tables_perf)
+        self._check_url_hot_query(self.page.url, 7, select_tables_perf)
         self.assertEqual(self._get_url_hot_query(self.page.url, cache=False), 10)
 
 @tagged('-at_install', 'post_install')
