@@ -13,7 +13,12 @@ export class DynamicPlaceholderPopover extends Component {
     static components = {
         ModelFieldSelectorPopover,
     };
-    static props = ["resModel", "validate", "close"];
+    static props = {
+        resModel: { type: String },
+        validate: { type: Function },
+        close: { type: Function },
+        filter: { type: Function, optional: true },
+    };
 
     setup() {
         useAutofocus();
@@ -38,7 +43,12 @@ export class DynamicPlaceholderPopover extends Component {
         if (!this.isTemplateEditor && !this.allowedQwebExpressions.includes(fullPath)) {
             return false;
         }
-        return !["one2many", "boolean", "many2many"].includes(fieldDef.type) && fieldDef.searchable;
+        if (this.props.filter) {
+            return this.props.filter(fieldDef);
+        }
+        return (
+            !["one2many", "boolean", "many2many"].includes(fieldDef.type) && !fieldDef.searchable
+        );
     }
     closeFieldSelector(isPathSelected = false) {
         if (isPathSelected) {
@@ -49,13 +59,14 @@ export class DynamicPlaceholderPopover extends Component {
     }
     setPath(path, fieldInfo) {
         this.state.path = path;
+        this.state.fieldInfo = fieldInfo;
         this.state.fieldName = fieldInfo?.string;
     }
     setDefaultValue(value) {
         this.state.defaultValue = value;
     }
     validate() {
-        this.props.validate(this.state.path, this.state.defaultValue);
+        this.props.validate(this.state.path, this.state.defaultValue, this.state.fieldInfo);
         this.props.close();
     }
 
