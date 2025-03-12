@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="ir_cron_check_eta_submissions" model="ir.cron">
+            <field name="name">ETA: Check submission validity</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="model_id" ref="point_of_sale.model_pos_order"/>
+            <field name="code">model._cron_check_eta_submissions()</field>
+            <field name="state">code</field>
+        </record>
+    </data>
+</odoo>

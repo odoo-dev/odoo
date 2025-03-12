@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('o_notification_alert')]" position="before">
+                <div class="o_notification_alert alert alert-info my-1" invisible="country_code != 'EG' or l10n_eg_production_env" role="alert">
+                    <i class="fa fa-info-circle mr-1"/>
+                    You are currently using the eReceipts integration in pre-production,
+                    which does not handle device activation. For the sake of testing,
+                    device activation merely simulates the actual process.
+                </div>
+            </xpath>
+            <block id="restaurant_section" position="before">
+                <block id="l10n_eg_pos_eta_configuration" title="ETA Configuration">
+                    <setting string="POS Serial Number">
+                        <field name="pos_l10n_eg_pos_serial" required="country_code == 'EG'"/>
+                    </setting>
+                    <setting string="POS Version">
+                        <field name="pos_l10n_eg_pos_version" required="country_code == 'EG'"/>
+                    </setting>
+                    <setting string="Model Framework">
+                        <field name="pos_l10n_eg_pos_model_framework" />
+                    </setting>
+                    <setting id="l10n_eg_pos_eta_authentication"
+                            string="Authentication Status" help="Client ID/Secret of the POS system">
+                        <div class="content-group mt16">
+                            <div class="row my-2">
+                                <label for="pos_l10n_eg_pos_client_id" class="col-lg-3 o_light_label"/>
+                                <field name="pos_l10n_eg_pos_client_id"/>
+                            </div>
+                            <div class="row my-2">
+                                <label for="pos_l10n_eg_pos_client_secret" class="col-lg-3 o_light_label"/>
+                                <field name="pos_l10n_eg_pos_client_secret"/>
+                            </div>
+                            <div class="row my-2">
+                                <span invisible="not pos_l10n_eg_pos_client_authenticated">
+                                    <i class="fa fa-check text-success me-2"/>
+                                    Authenticated (<button name="l10n_eg_pos_action_authenticate_device" type="object"
+                                        confirm="Device has already been activated, are you sure?"
+                                        string="Update" class="btn-link"/>)
+                                </span>
+                                <span invisible="pos_l10n_eg_pos_client_authenticated">
+                                    <i class="fa fa-times text-danger me-2"/>
+                                    Not Authenticated (<button name="l10n_eg_pos_action_authenticate_device" type="object"
+                                        string="Authenticate" class="btn-link"/>)
+                                </span>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </block>
+        </field>
+    </record>
+</odoo>

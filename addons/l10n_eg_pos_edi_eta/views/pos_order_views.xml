@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_pos_form" model="ir.ui.view">
+        <field name="name">pos.order.form.inherit.l10n_eg_pos_edi_eta</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//button[@name='action_pos_order_invoice']" position="attributes">
+                <attribute name="invisible" separator=" or " add="l10n_eg_pos_eta_state != 'ignore'" />
+            </xpath>
+
+            <xpath expr="//header" position="after">
+                <field name="l10n_eg_pos_eta_state" invisible="1" />
+                <field name="l10n_eg_pos_eta_error" invisible="1" />
+                <div class="alert alert-info" role="alert" style="margin-bottom:0px;"
+                        invisible="l10n_eg_pos_eta_state != 'pending'">
+                     <div>The receipt needs to be submitted to the ETA:</div>
+                     <button name="l10n_eg_pos_eta_process_receipts" type="object" class="oe_link" string="Submit now" />
+                </div>
+                <div class="alert alert-danger" role="alert" style="margin-bottom:0px;"
+                        invisible="l10n_eg_pos_eta_state != 'pending' or not l10n_eg_pos_eta_error">
+                    <div class="o_row">
+                        <field name="l10n_eg_pos_eta_error" />
+                        <button name="l10n_eg_pos_eta_process_receipts" type="object" class="oe_link oe_inline" string="Retry" />
+                    </div>
+                </div>
+                <div class="alert alert-success" role="alert" style="margin-bottom:0px;"
+                        invisible="l10n_eg_pos_eta_state != 'sent'">
+                    <div class="o_row">
+                        <div>The receipt was successfully submitted to the ETA</div>
+                    </div>
+                </div>
+            </xpath>
+
+            <notebook position="inside">
+                <field name="country_code" invisible="1" />
+                <page string="ETA E-Invoice" invisible="country_code != 'EG'">
+                    <group>
+                        <group>
+                            <field name="l10n_eg_pos_uuid" readonly="1"/>
+                            <field name="l10n_eg_pos_submission_number" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="l10n_eg_pos_json_doc_id" readonly="1" invisible="1"/>
+                            <field name="l10n_eg_pos_qrcode" readonly="1" />
+                        </group>
+                    </group>
+                </page>
+            </notebook>
+
+        </field>
+    </record>
+
+    <record id="view_pos_order_tree" model="ir.ui.view">
+        <field name="name">pos.order.tree.inherit.l10n_eg_pos_edi_eta</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
+        <field name="arch" type="xml">
+            <field name="state" position="after">
+                <field name="l10n_eg_pos_eta_state" widget="badge"
+                       decoration-info="l10n_eg_pos_eta_state == 'pending'"
+                       decoration-success="l10n_eg_pos_eta_state == 'sent'"
+                       decoration-muted="l10n_eg_pos_eta_state == 'ignore'"/>
+            </field>
+        </field>
+    </record>
+</odoo>

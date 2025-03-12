@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="document_type_version" model="ir.config_parameter">
+        <field name="key">l10n_eg_pos_edi_eta.document_type_version</field>
+        <field name="value" eval="'1.2'"/>
+    </record>
+</odoo>
