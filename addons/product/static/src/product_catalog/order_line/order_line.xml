@@ -6,7 +6,7 @@
         <t t-portal="`#product-${props.productId}-price`" t-if="showPrice">
             <span class="o_product_catalog_price">
                 <span class="fw-bolder"><t t-out="price" /></span>
-                <span class="mx-3 text-muted" t-if="props.code != 'False'"><t t-out="props.code" /></span>
+                <span class="mx-3 text-muted" t-if="props.code and props.code != 'False'"><t t-out="props.code" /></span>
             </span>
         </t>
         <div 
@@ -30,13 +30,14 @@
                         t-att-data-tooltip="disabledButtonTooltip">
                     <i class="fa fa-minus center"/>
                 </button>
-                <input class="o_input form-control border text-center text-bg-light"
+                <input class="o_input form-control border text-end text-bg-light" 
+                        style="border-right: 0px !important;"
                         type="number"
                         t-att-value="quantity"
                         t-on-change="this.env.setQuantity"
                         t-on-focus="_onFocus"
                 />
-                <span t-if="props.uom.display_name" class="input-group-text text-muted">
+                <span t-if="props.uom.display_name" class="input-group-text text-muted text-bg-light border fst-italic">
                     <t t-out="props.uom.display_name"/>
                 </span>
                 <button class="btn btn-primary border"
