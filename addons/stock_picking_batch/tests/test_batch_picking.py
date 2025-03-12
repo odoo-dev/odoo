@@ -507,11 +507,11 @@ class TestBatchPicking(TransactionCase):
         })
         self.env['stock.quant']._update_available_quantity(self.productA, warehouse_1.lot_stock_id, 10)
         self.env['stock.quant']._update_available_quantity(self.productB, warehouse_1.lot_stock_id, 10)
-        procurement_1 = self.env['procurement.group'].create({
+        procurement_1 = self.env['stock.rule'].create({
             'move_type': 'direct',
             'partner_id': self.client_1.id
         })
-        procurement_2 = self.env['procurement.group'].create({
+        procurement_2 = self.env['stock.rule'].create({
             'move_type': 'direct',
             'partner_id': self.client_1.id
         })
@@ -521,7 +521,6 @@ class TestBatchPicking(TransactionCase):
             'product_id': self.productA.id,
             'product_min_qty': 1,
             'product_max_qty': 1,
-            'group_id': procurement_1.id,
             'route_id': warehouse_2.resupply_route_ids[0].id,
         })
         op2 = self.env['stock.warehouse.orderpoint'].create({
@@ -530,7 +529,6 @@ class TestBatchPicking(TransactionCase):
             'product_id': self.productB.id,
             'product_min_qty': 1,
             'product_max_qty': 1,
-            'group_id': procurement_2.id,
             'route_id': warehouse_2.resupply_route_ids[0].id,
         })
         self.productA.route_ids = warehouse_2.resupply_route_ids

@@ -103,7 +103,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         self.assertFalse(mo.picking_type_id.active)
 
         # Create a RR
-        pg1 = self.env['procurement.group'].create({})
+        # pg1 = self.env['procurement.group'].create({})
         self.env['stock.warehouse.orderpoint'].create({
             'name': 'xxx',
             'product_id': self.comp1.id,
@@ -114,7 +114,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         })
 
         # Run the scheduler and check the created picking
-        self.env['procurement.group'].run_scheduler()
+        self.env['stock.rule'].run_scheduler()
         picking = self.env['stock.picking'].search([('group_id', '=', pg1.id)])
         self.assertEqual(len(picking), 1)
         self.assertEqual(picking.picking_type_id, wh.subcontracting_resupply_type_id)
@@ -1278,7 +1278,7 @@ class TestSubcontractingTracking(TransactionCase):
         self.assertFalse(mo.picking_type_id.active)
 
         # Create a RR
-        pg1 = self.env['procurement.group'].create({})
+        # pg1 = self.env['procurement.group'].create({})
         self.env['stock.warehouse.orderpoint'].create({
             'name': 'xxx',
             'product_id': self.comp1_sn.id,
@@ -1289,7 +1289,7 @@ class TestSubcontractingTracking(TransactionCase):
         })
 
         # Run the scheduler and check the created picking
-        self.env['procurement.group'].run_scheduler()
+        self.env['stock.rule'].run_scheduler()
         picking = self.env['stock.picking'].search([('group_id', '=', pg1.id)])
         self.assertEqual(len(picking), 1)
         self.assertEqual(picking.picking_type_id, wh.subcontracting_resupply_type_id)

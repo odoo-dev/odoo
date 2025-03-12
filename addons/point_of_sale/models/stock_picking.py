@@ -190,12 +190,6 @@ class StockPickingType(models.Model):
         return ['id', 'use_create_lots', 'use_existing_lots']
 
 
-class ProcurementGroup(models.Model):
-    _inherit = 'procurement.group'
-
-    pos_order_id = fields.Many2one('pos.order', 'POS Order')
-
-
 class StockMove(models.Model):
     _inherit = 'stock.move'
 

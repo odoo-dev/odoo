@@ -83,7 +83,6 @@ class StockMove(models.Model):
         for move in moves:
             if not move.repair_id:
                 continue
-            move.group_id = move.repair_id.procurement_group_id.id
             move.origin = move.name
             move.picking_type_id = move.repair_id.picking_type_id.id
             repair_moves |= move

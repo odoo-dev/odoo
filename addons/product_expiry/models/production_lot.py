@@ -89,12 +89,12 @@ class StockLot(models.Model):
         })
 
 
-class ProcurementGroup(models.Model):
-    _inherit = 'procurement.group'
+class StockRule(models.Model):
+    _inherit = 'stock.rule'
 
     @api.model
     def _run_scheduler_tasks(self, use_new_cursor=False, company_id=False):
-        super(ProcurementGroup, self)._run_scheduler_tasks(use_new_cursor=use_new_cursor, company_id=company_id)
+        super()._run_scheduler_tasks(use_new_cursor=use_new_cursor, company_id=company_id)
         self.env['stock.lot']._alert_date_exceeded()
         if 'scheduler_task_done' in self._context:
             task_done = self._context.get('scheduler_task_done', {'task_done': 0})['task_done'] + 1
