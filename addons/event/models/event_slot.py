@@ -70,12 +70,15 @@ class EventSlot(models.Model):
 
     @api.depends("event_id.date_tz", "date", "start_hour", "end_hour")
     def _compute_datetimes(self):
+        """ Start / End is expressed in 'event timezone'. We have to localize
+        the datetime in that timezone, then express it in the current user
+        timezone as it is how he expects it to be displayed. """
         for slot in self:
             event_tz = pytz.timezone(slot.event_id.date_tz)
             start = datetime.combine(slot.date, EventSlot._float_to_time(slot.start_hour))
             end = datetime.combine(slot.date, EventSlot._float_to_time(slot.end_hour))
-            slot.start_datetime = event_tz.localize(start).astimezone(pytz.UTC).replace(tzinfo=None)
-            slot.end_datetime = event_tz.localize(end).astimezone(pytz.UTC).replace(tzinfo=None)
+            slot.start_datetime = event_tz.localize(start).astimezone(pytz.timezone(self.env.user.tz or 'UTC')).replace(tzinfo=None)
+            slot.end_datetime = event_tz.localize(end).astimezone(pytz.timezone(self.env.user.tz or 'UTC')).replace(tzinfo=None)
 
     @api.depends("event_id", "event_id.seats_limited", "seats_available")
     def _compute_is_sold_out(self):
