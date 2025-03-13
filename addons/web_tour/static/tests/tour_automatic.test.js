@@ -47,8 +47,8 @@ beforeEach(() => {
     });
 });
 
-afterEach(() => {
-    macro.stop();
+afterEach(async () => {
+    await macro.stop();
 });
 
 test("Step Tour validity", async () => {
