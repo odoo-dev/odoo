@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<template>
+    <t t-name="account.Commission" t-inherit="account.TaxTotalsField" t-inherit-mode="extension">
+        <xpath expr="//tr[1]" position="replace">
+            <tr>
+                <td class="o_td_label">
+                    <label class="o_form_label o_tax_total_label" t-out="subtotal.name"/>
+                </td>
+                <td class="o_list_monetary">
+                    <span t-att-name="subtotal.name"
+                            style="white-space: nowrap; font-weight: bold;"
+                            t-out="formatMonetary(subtotal.base_amount)"/>
+                </td>
+            </tr>
+        </xpath>
+        <xpath expr="//tr[1]" position="after">
+            <t t-if="subtotal.base_amount_currency-subtotal.base_amount != 0">
+                <tr>
+                    <td class="o_td_label">
+                        <label class="o_form_label o_tax_total_label">Commission</label>
+                    </td>
+                    <td class="o_list_monetary">
+                        <span t-att-name="subtotal.name"
+                                style="white-space: nowrap; font-weight: bold;"
+                                t-out="formatMonetary(subtotal.base_amount_currency-subtotal.base_amount)"/>
+                    </td>
+                </tr>
+            </t>
+        </xpath>
+    </t>
+</template>
