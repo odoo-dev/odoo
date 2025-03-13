@@ -503,6 +503,12 @@ export class SelectionPlugin extends Plugin {
         [anchorNode, anchorOffset] = isCollapsed
             ? [focusNode, focusOffset]
             : normalizeSelfClosingElement(anchorNode, anchorOffset, "left");
+        // In conformity to some spec we don't understand why (ask FGE!):
+        // "set a collapse selection in a contenteditable false should move it after this node"
+        if (isCollapsed) {
+            const [node, offset] = normalizeNotEditableNode(anchorNode, anchorOffset, "right");
+            [anchorNode, anchorOffset, focusNode, focusOffset] = [node, offset, node, offset];
+        }
         if (normalize) {
             // normalize selection
             [anchorNode, anchorOffset] = normalizeDeepCursorPosition(anchorNode, anchorOffset);

@@ -117,8 +117,8 @@ test("Inserting a banner at the top of the editable also inserts a paragraph abo
 
 test("Everything gets selected with ctrl+a, including a contenteditable=false as first element", async () => {
     const { el } = await setupEditor(
-        `<div class="o_editor_banner user-select-none o-contenteditable-false lh-1 d-flex align-items-center alert alert-info pb-0 pt-3" data-oe-role="status" contenteditable="false" role="status">
-                <i class="o_editor_banner_icon mb-3 fst-normal" data-oe-aria-label="Banner Info" aria-label="Banner Info">💡</i>
+        `<div class="o_editor_banner user-select-none o_not_editable lh-1 d-flex align-items-center alert alert-info pb-0 pt-3" role="status" contenteditable="false">
+                <i class="o_editor_banner_icon mb-3 fst-normal" aria-label="Banner Info">💡</i>
                 <div class="w-100 px-3" contenteditable="true">
                     <p><br></p>
                 </div>
@@ -127,8 +127,8 @@ test("Everything gets selected with ctrl+a, including a contenteditable=false as
     await press(["ctrl", "a"]);
     await animationFrame();
     expect(getContent(el)).toBe(
-        `<div class="o_editor_banner user-select-none o-contenteditable-false lh-1 d-flex align-items-center alert alert-info pb-0 pt-3" data-oe-role="status" contenteditable="false" role="status">
-                <i class="o_editor_banner_icon mb-3 fst-normal" data-oe-aria-label="Banner Info" aria-label="Banner Info">[💡</i>
+        `<div class="o_editor_banner user-select-none o_not_editable lh-1 d-flex align-items-center alert alert-info pb-0 pt-3" role="status" contenteditable="false">
+                <i class="o_editor_banner_icon mb-3 fst-normal" aria-label="Banner Info">[💡</i>
                 <div class="w-100 px-3" contenteditable="true">
                     <p><br></p>
                 </div>
@@ -169,7 +169,7 @@ test("Everything gets selected with ctrl+a, including a contenteditable=false as
     );
     await press(["ctrl", "a"]);
     expect(getContent(el)).toBe(
-        '<div data-oe-role="status" contenteditable="false" role="status">[a</div><div data-oe-role="status" contenteditable="false" role="status">b</div><p>cd]</p>'
+        '<div contenteditable="false">[a</div><div contenteditable="false">b</div><p>cd]</p>'
     );
 
     await press("Backspace");
