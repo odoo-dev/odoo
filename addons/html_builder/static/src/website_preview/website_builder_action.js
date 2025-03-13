@@ -116,7 +116,9 @@ export class WebsiteBuilder extends Component {
     }
 
     loadAssetsEditBundle() {
-        loadBundle("website.assets_edit_frontend", {
+        // TODO Should be website.assets_edit_frontend, but that is currently
+        // still used by website, so let's not impact it yet.
+        loadBundle("html_builder.assets_edit_frontend", {
             targetDoc: this.websiteContent.el.contentDocument,
         });
         loadBundle("html_builder.inside_builder_style", {
