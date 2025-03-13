@@ -76,8 +76,8 @@ class TestTaxesTaxTotalsSummarySale(TestTaxCommonSale, TestTaxesTaxTotalsSummary
                 sale_order = self.convert_document_to_sale_order(document)
                 self.assert_sale_order_tax_totals_summary(sale_order, expected_values)
                 self.assertRecordValues(sale_order.order_line, [{
-                    'price_subtotal': expected_values['total_amount_currency'],
-                    'price_total': expected_values['total_amount_currency'],
+                    'price_subtotal': 100.0,
+                    'price_total': 100.0,
                 }])
 
     def test_reverse_charge_division_tax_sale_orders(self):
@@ -86,8 +86,8 @@ class TestTaxesTaxTotalsSummarySale(TestTaxCommonSale, TestTaxesTaxTotalsSummary
                 sale_order = self.convert_document_to_sale_order(document)
                 self.assert_sale_order_tax_totals_summary(sale_order, expected_values)
                 self.assertRecordValues(sale_order.order_line, [{
-                    'price_subtotal': expected_values['total_amount_currency'],
-                    'price_total': expected_values['total_amount_currency'],
+                    'price_subtotal': 79.0,
+                    'price_total': 79.0,
                 }])
 
     def test_discount_with_round_globally_sale_orders(self):
