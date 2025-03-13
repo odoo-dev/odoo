@@ -224,17 +224,20 @@ export class CalendarCommonRenderer extends Component {
         this.click(info);
     }
     onEventContent({ event }) {
-        const record = this.props.model.records[event.id];
-        if (record) {
-            // This is needed in order to give the possibility to change the event template.
-            const fragment = renderToFragment(this.constructor.eventTemplate, {
-                ...record,
-                startTime: this.getStartTime(record),
-                endTime: this.getEndTime(record),
-            });
-            return { domNodes: fragment.children };
+        let record = this.props.model.records[event.id];
+        if (!record) {
+            record = {
+                highlight: true,
+                start: luxon.DateTime.fromJSDate(event.start),
+                end: luxon.DateTime.fromJSDate(event.end),
+            };
         }
-        return true;
+        const fragment = renderToFragment(this.constructor.eventTemplate, {
+            ...record,
+            startTime: this.getStartTime(record),
+            endTime: this.getEndTime(record),
+        });
+        return { domNodes: fragment.children };
     }
     eventClassNames({ el, event }) {
         const classesToAdd = [];
