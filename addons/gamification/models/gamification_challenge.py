@@ -198,14 +198,10 @@ class Challenge(models.Model):
         return super().create(vals_list)
 
     def write(self, vals):
-        if vals.get('user_domain'):
-            users = self._get_challenger_users(ustr(vals.get('user_domain')))
+        write_res = super().write(vals)
 
-            if not vals.get('user_ids'):
-                vals['user_ids'] = []
-            vals['user_ids'].extend((4, user.id) for user in users)
-
-        write_res = super(Challenge, self).write(vals)
+        if vals.get('state') == 'inprogress' or vals.get('user_domain'):
+            self._recompute_challenge_users()
 
         if vals.get('report_message_frequency', 'never') != 'never':
             # _recompute_challenge_users do not set users for challenges with no reports, subscribing them now
@@ -213,7 +209,6 @@ class Challenge(models.Model):
                 challenge.message_subscribe([user.partner_id.id for user in challenge.user_ids])
 
         if vals.get('state') == 'inprogress':
-            self._recompute_challenge_users()
             self._generate_goals_from_challenge()
 
         elif vals.get('state') == 'done':
