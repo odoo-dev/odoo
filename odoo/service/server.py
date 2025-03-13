@@ -708,117 +708,6 @@ class ThreadedServer(CommonServer):
     def reload(self):
         os.kill(self.pid, signal.SIGHUP)
 
-class GeventServer(CommonServer):
-    def __init__(self, app):
-        super(GeventServer, self).__init__(app)
-        self.port = config['gevent_port']
-        self.httpd = None
-
-    def process_limits(self):
-        restart = False
-        if self.ppid != os.getppid():
-            _logger.warning("Gevent Parent changed: %s", self.pid)
-            restart = True
-        memory = memory_info(psutil.Process(self.pid))
-        limit_memory_soft = config['limit_memory_soft_gevent'] or config['limit_memory_soft']
-        if limit_memory_soft and memory > limit_memory_soft:
-            _logger.warning('Gevent virtual memory limit reached: %s', memory)
-            restart = True
-        if restart:
-            # suicide !!
-            os.kill(self.pid, signal.SIGTERM)
-
-    def watchdog(self, beat=4):
-        import gevent
-        self.ppid = os.getppid()
-        while True:
-            self.process_limits()
-            gevent.sleep(beat)
-
-    def start(self):
-        import gevent
-        try:
-            from gevent.pywsgi import WSGIServer, WSGIHandler
-        except ImportError:
-            from gevent.wsgi import WSGIServer, WSGIHandler
-
-        class ProxyHandler(WSGIHandler):
-            """ When logging requests, try to get the client address from
-            the environment so we get proxyfix's modifications (if any).
-
-            Derived from werzeug.serving.WSGIRequestHandler.log
-            / werzeug.serving.WSGIRequestHandler.address_string
-            """
-            def _connection_upgrade_requested(self):
-                if self.headers.get('Connection', '').lower() == 'upgrade':
-                    return True
-                if self.headers.get('Upgrade', '').lower() == 'websocket':
-                    return True
-                return False
-
-            def format_request(self):
-                old_address = self.client_address
-                if getattr(self, 'environ', None):
-                    self.client_address = self.environ['REMOTE_ADDR']
-                elif not self.client_address:
-                    self.client_address = '<local>'
-                # other cases are handled inside WSGIHandler
-                try:
-                    return super().format_request()
-                finally:
-                    self.client_address = old_address
-
-            def finalize_headers(self):
-                # We need to make gevent.pywsgi stop dealing with chunks when the connection
-                # Is being upgraded. see https://github.com/gevent/gevent/issues/1712
-                super().finalize_headers()
-                if self.code == 101:
-                    # Switching Protocols. Disable chunked writes.
-                    self.response_use_chunked = False
-
-            def get_environ(self):
-                # Add the TCP socket to environ in order for the websocket
-                # connections to use it.
-                environ = super().get_environ()
-                environ['socket'] = self.socket
-                # Disable support for HTTP chunking on reads which cause
-                # an issue when the connection is being upgraded, see
-                # https://github.com/gevent/gevent/issues/1712
-                if self._connection_upgrade_requested():
-                    environ['wsgi.input'] = self.rfile
-                    environ['wsgi.input_terminated'] = False
-                return environ
-
-        set_limit_memory_hard()
-        if os.name == 'posix':
-            # Set process memory limit as an extra safeguard
-            signal.signal(signal.SIGQUIT, dumpstacks)
-            signal.signal(signal.SIGUSR1, log_ormcache_stats)
-            gevent.spawn(self.watchdog)
-
-        self.httpd = WSGIServer(
-            (self.interface, self.port), self.app,
-            log=logging.getLogger('longpolling'),
-            error_log=logging.getLogger('longpolling'),
-            handler_class=ProxyHandler,
-        )
-        _logger.info('Evented Service (longpolling) running on %s:%s', self.interface, self.port)
-        try:
-            self.httpd.serve_forever()
-        except:
-            _logger.exception("Evented Service (longpolling): uncaught error during main loop")
-            raise
-
-    def stop(self):
-        import gevent
-        self.httpd.stop()
-        super().stop()
-        gevent.shutdown()
-
-    def run(self, preload, stop):
-        self.start()
-        self.stop()
-
 class PreforkServer(CommonServer):
     """ Multiprocessing inspired by (g)unicorn.
     PreforkServer (aka Multicorn) currently uses accept(2) as dispatching
@@ -1419,8 +1308,8 @@ def start(preload=None, stop=False):
     load_server_wide_modules()
     import odoo.http  # noqa: PLC0415
 
-    if odoo.evented:
-        server = GeventServer(odoo.http.root)
+    if False:
+        pass #server = GeventServer(odoo.http.root)
     elif config['workers']:
         if config['test_enable']:
             _logger.warning("Unit testing in workers mode could fail; use --workers 0.")
