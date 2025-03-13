@@ -4,21 +4,6 @@
 from odoo import Command, api, models
 
 
-class PurchaseOrder(models.Model):
-    _inherit = 'purchase.order'
-
-    @api.depends('order_line.move_dest_ids.group_id.sale_id', 'order_line.move_ids.move_dest_ids.group_id.sale_id')
-    def _compute_sale_order_count(self):
-        super()._compute_sale_order_count()
-
-    def _get_sale_orders(self):
-        linked_so = self.order_line.move_dest_ids.group_id.sale_id \
-                  | self.env['stock.move'].browse(self.order_line.move_ids._rollup_move_dests()).group_id.sale_id
-        group_so = self.order_line.group_id.sale_id
-
-        return super()._get_sale_orders() | linked_so | group_so
-
-
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
@@ -46,5 +31,11 @@ class PurchaseOrderLine(models.Model):
     @api.model
     def _prepare_purchase_order_line_from_procurement(self, product_id, product_qty, product_uom, location_dest_id, name, origin, company_id, values, po):
         res = super()._prepare_purchase_order_line_from_procurement(product_id, product_qty, product_uom, location_dest_id, name, origin, company_id, values, po)
-        res['sale_line_id'] = values.get('sale_line_id', False)
+        res['sale_line_ids'] = values.get('sale_line_ids', False)
+        return res
+
+    def _update_purchase_order_line(self, product_id, product_qty, product_uom, company_id, values, line):
+        res = super()._update_purchase_order_line(product_id, product_qty, product_uom, company_id, values, line)
+        for sale_line_id in values.get('sale_line_ids', []):
+            line.sale_line_ids = Command.link(sale_line_id)
         return res

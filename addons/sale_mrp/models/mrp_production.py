@@ -9,18 +9,24 @@ class MrpProduction(models.Model):
 
     sale_order_count = fields.Integer(
         "Count of Source SO",
-        compute='_compute_sale_order_count',
+        compute='_compute_sale_order',
         groups='sales_team.group_sale_salesman')
-    sale_line_id = fields.Many2one('sale.order.line', 'Origin sale order line')
+    sale_ids = fields.One2many(
+        'sale.order', string='Source Sale Orders',
+        compute='_compute_sale_order')
+    sale_line_ids = fields.Many2many(
+        'sale.order.line', 'mrp_production_sale_line_rel', 'mrp_production_id',
+        'sale_line_id' ,'Origin sale order line')
 
-    @api.depends('procurement_group_id.mrp_production_ids.move_dest_ids.group_id.sale_id')
-    def _compute_sale_order_count(self):
+    @api.depends('sale_line_ids')
+    def _compute_sale_order(self):
         for production in self:
-            production.sale_order_count = len(production.procurement_group_id.mrp_production_ids.move_dest_ids.group_id.sale_id | production.sale_line_id.order_id)
+            production.sale_ids = production.sale_line_ids.order_id
+            production.sale_order_count = len(production.sale_ids)
 
     def action_view_sale_orders(self):
         self.ensure_one()
-        sale_order_ids = self.procurement_group_id.mrp_production_ids.move_dest_ids.group_id.sale_id.ids + self.sale_line_id.order_id.ids
+        sale_order_ids = self.sale_line_ids.order_id.ids
         action = {
             'res_model': 'sale.order',
             'type': 'ir.actions.act_window',
@@ -46,9 +52,3 @@ class MrpProduction(models.Model):
                     lambda m: m.product_id == production.product_id
                 ).sale_line_id = production.sale_line_id
         return res
-
-    def _post_run_manufacture(self, procurements):
-        for production, procurement in zip(self, procurements):
-            if procurement.values.get('group_id'):
-                production.procurement_group_id.sale_id = procurement.values['group_id'].sale_id
-        return super()._post_run_manufacture(procurements)

@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models
+from odoo import api, fields, models
 from odoo.tools import float_compare
 
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
+
+    mrp_production_ids = fields.Many2many(
+        'mrp.production', 'mrp_production_sale_line_rel',
+        'sale_line_id', 'mrp_production_id', 'Linked Productions')
 
     @api.depends('product_uom_qty', 'qty_delivered', 'product_id', 'state')
     def _compute_qty_to_deliver(self):

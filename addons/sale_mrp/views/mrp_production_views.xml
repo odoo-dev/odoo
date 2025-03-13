@@ -14,6 +14,9 @@
                     </div>
                 </button>
             </xpath>
+            <field name="is_delayed" position="after">
+                <field name="sale_ids" widget="many2many_tags"/>
+            </field>
         </field>
     </record>
 </data></odoo>

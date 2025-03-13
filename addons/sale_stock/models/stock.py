@@ -23,6 +23,11 @@ class StockMove(models.Model):
         distinct_fields.append('sale_line_ids')
         return distinct_fields
 
+    def _prepare_procurement_values(self):
+        res = super()._prepare_procurement_values()        
+        res['sale_line_ids'] = self.sale_line_ids.ids
+        return res
+
     @api.depends('sale_line_ids', 'sale_line_ids.product_uom_id')
     def _compute_packaging_uom_id(self):
         super()._compute_packaging_uom_id()
@@ -35,7 +40,7 @@ class StockMove(models.Model):
         related to this stock move.
         """
         rslt = super(StockMove, self)._get_related_invoices()
-        invoices = self.mapped('picking_id.sale_id.invoice_ids').filtered(lambda x: x.state == 'posted')
+        invoices = self.mapped('sale_line_ids.order_id.invoice_ids').filtered(lambda x: x.state == 'posted')
         rslt += invoices
         #rslt += invoices.mapped('reverse_entry_ids')
         return rslt
@@ -80,27 +85,34 @@ class StockRule(models.Model):
         fields += ['sale_line_ids', 'partner_id', 'sequence', 'to_refund']
         return fields
 
+    def _get_stock_move_values(self, product_id, product_qty, product_uom, location_dest_id, name, origin, company_id, values):
+        move_values = super()._get_stock_move_values(product_id, product_qty, product_uom, location_dest_id, name, origin, company_id, values)
+        move_values['sale_line_ids'] = values.get('sale_line_ids', False)
+        return move_values
 
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
-    sale_ids = fields.One2many('sale.order', compute="_compute_sale_ids", string="Sales Order")
+    # We kept a Many2one in order to only use if for delivery context.
+    sale_id = fields.Many2one('sale.order', compute="_compute_sale_id", string="Sales Order")
 
     @api.depends('move_ids', 'move_ids.sale_line_ids')
-    def _compute_sale_ids(self):
+    def _compute_sale_id(self):
+        self.sale_id = False
         for picking in self:
-            picking.sale_ids = picking.move_ids.sale_line_ids.order_id.ids
+            if picking.location_dest_id.usage == 'customer':
+                picking.sale_id = picking.move_ids.sale_line_ids.order_id.ids
 
     def _action_done(self):
         res = super()._action_done()
         sale_order_lines_vals = []
         for move in self.move_ids:
-            sale_order = move.picking_id.sale_ids[:-1]
+            sale_order = move.picking_id.sale_id
             # Creates new SO line only when pickings linked to a sale order and
             # for moves with qty. done and not already linked to a SO line.
             if not sale_order \
                 or (move.location_dest_id.usage not in ['customer', 'transit'] and not (move.location_id.usage == 'customer' and move.to_refund)) \
-                or move.sale_line_ids \
+                or move.sale_line_id \
                 or not move.picked:
                 continue
             product = move.product_id

@@ -1027,7 +1027,7 @@ class StockQuant(models.Model):
         :return: tuple (available_quantity, in_date as a datetime)
         """
         if not (quantity or reserved_quantity):
-            raise ValidationError(_('Quantity or Reserved Quantity should be set.'))
+            return self._get_available_quantity(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True, allow_negative=True), in_date
         self = self.sudo()
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
         if lot_id and quantity > 0:

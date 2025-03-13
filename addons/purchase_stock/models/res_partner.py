@@ -29,11 +29,12 @@ class ResPartner(models.Model):
         lines_quantity = defaultdict(lambda: 0)
         moves = self.env['stock.move'].search([
             ('purchase_line_ids', 'in', order_lines.ids),
-            ('state', '=', 'done')])
+            ('state', '=', 'done'),
+            ('location_id.usage', '=', 'supplier')])
         # Fetch fields from db and put them in cache.
         order_lines.read(['date_planned', 'partner_id', 'product_uom_qty'], load='')
         moves.read(['purchase_line_ids', 'date'], load='')
-        moves = moves.filtered(lambda m: m.date.date() <= m.purchase_line_id.date_planned.date())
+        moves = moves.filtered(lambda m: m.date.date() <= m.purchase_line_ids.date_planned.date())
         for move, quantity in zip(moves, moves.mapped('quantity')):
             lines_quantity[move.purchase_line_id.id] += quantity
         partner_dict = {}

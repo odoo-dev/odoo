@@ -12,7 +12,7 @@ class MrpProduction(models.Model):
         compute='_compute_purchase_order_count',
         groups='purchase.group_purchase_user')
 
-    @api.depends('procurement_group_id.stock_move_ids.created_purchase_line_ids.order_id', 'procurement_group_id.stock_move_ids.move_orig_ids.purchase_line_id.order_id')
+    @api.depends('move_raw_ids.purchase_line_ids.order_id')
     def _compute_purchase_order_count(self):
         for production in self:
             production.purchase_order_count = len(production._get_purchase_orders())
