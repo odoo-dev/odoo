@@ -19,9 +19,7 @@ const macroSchema = {
                 trigger: { type: [Function, String], optional: true },
                 value: { type: [String, Number], optional: true },
             },
-            validate: (step) => {
-                return step.action || step.trigger;
-            },
+            validate: (step) => step.action || step.trigger,
         },
     },
     onComplete: { type: Function, optional: true },
@@ -60,7 +58,6 @@ export async function waitForStable(target = document, timeout = 1000 / 16) {
 export class Macro {
     currentIndex = 0;
     isComplete = false;
-    calledBack = false;
     constructor(descr) {
         try {
             validate(descr, macroSchema);
@@ -109,23 +106,27 @@ export class Macro {
         if (this.currentStep.trigger) {
             this.setTimer();
         }
-        let proceedToAction = true;
-        if (this.currentStep.trigger) {
-            proceedToAction = this.findTrigger();
-        }
-        if (proceedToAction) {
-            this.onStep(this.currentElement, this.currentStep, this.currentIndex);
-            this.clearTimer();
-            const actionResult = await this.stepAction(this.currentElement);
-            if (!actionResult) {
-                // If falsy action result, it means the action worked properly.
-                // So we can proceed to the next step.
-                this.currentIndex++;
-                if (this.currentIndex >= this.steps.length) {
-                    this.stop();
-                }
-                this.debounceAdvance("next");
+        try {
+            let proceedToAction = true;
+            if (this.currentStep.trigger) {
+                proceedToAction = this.findTrigger();
             }
+            if (proceedToAction) {
+                this.onStep(this.currentElement, this.currentStep, this.currentIndex);
+                this.clearTimer();
+                const actionResult = await this.stepAction(this.currentElement);
+                if (!actionResult) {
+                    // If falsy action result, it means the action worked properly.
+                    // So we can proceed to the next step.
+                    this.currentIndex++;
+                    if (this.currentIndex >= this.steps.length) {
+                        await this.stop();
+                    }
+                    this.debounceAdvance("next");
+                }
+            }
+        } catch (error) {
+            await this.stop(error);
         }
     }
 
@@ -148,11 +149,9 @@ export class Macro {
                 throw new Error(`Trigger can only be string or function.`);
             }
         } catch (error) {
-            this.stop(
-                new MacroError("Trigger", `ERROR during find trigger:\n${error.message}`, {
-                    cause: error,
-                })
-            );
+            throw new MacroError("Trigger", `ERROR during find trigger:\n${error.message}`, {
+                cause: error,
+            });
         }
         return !!this.currentElement;
     }
@@ -168,11 +167,9 @@ export class Macro {
         try {
             return await action(element);
         } catch (error) {
-            this.stop(
-                new MacroError("Action", `ERROR during perform action:\n${error.message}`, {
-                    cause: error,
-                })
-            );
+            throw new MacroError("Action", `ERROR during perform action:\n${error.message}`, {
+                cause: error,
+            });
         }
     }
 
@@ -196,11 +193,9 @@ export class Macro {
         const timeout = this.currentStep.timeout || this.timeout;
         if (timeout > 0) {
             this.timer = browser.setTimeout(() => {
-                this.stop(
-                    new MacroError(
-                        "Timeout",
-                        `TIMEOUT step failed to complete within ${timeout} ms.`
-                    )
+                throw new MacroError(
+                    "Timeout",
+                    `TIMEOUT step failed to complete within ${timeout} ms.`
                 );
             }, timeout);
         }
@@ -239,7 +234,7 @@ export class Macro {
         // When browser refresh just after the last step.
         if (!this.currentStep && this.currentIndex === 0) {
             await delay(300);
-            this.stop();
+            await this.stop();
         } else if (from === "next" && !this.currentStep.trigger) {
             this.advance();
         } else {
@@ -250,19 +245,20 @@ export class Macro {
         }
     }
 
-    stop(error) {
+    async stop(error) {
         this.clearTimer();
+        if (this.isComplete) {
+            return;
+        }
+        await waitForStable();
         this.isComplete = true;
         this.observer.disconnect();
-        if (!this.calledBack) {
-            this.calledBack = true;
-            if (error) {
-                this.onError(error, this.currentStep, this.currentIndex);
-            } else if (this.currentIndex === this.steps.length) {
-                mutex.getUnlockedDef().then(() => {
-                    this.onComplete();
-                });
-            }
+        if (error) {
+            this.onError(error, this.currentStep, this.currentIndex);
+        } else if (this.currentIndex === this.steps.length) {
+            mutex.getUnlockedDef().then(() => {
+                this.onComplete();
+            });
         }
         return;
     }
