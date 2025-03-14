@@ -91,14 +91,14 @@ registry.category("services").add("website_edit", {
             patches.push(
                 patch(Colibri.prototype, {
                     setupInteraction() {
-                        historyCallbacks.ignoreDOMMutations(() => {
-                            super.setupInteraction();
-                        });
+                        historyCallbacks.disableObserver();
+                        super.setupInteraction();
+                        historyCallbacks.enableObserver();
                     },
                     destroyInteraction() {
-                        historyCallbacks.ignoreDOMMutations(() => {
-                            super.destroyInteraction();
-                        });
+                        historyCallbacks.disableObserver();
+                        super.destroyInteraction();
+                        historyCallbacks.enableObserver();
                     },
                     protectSyncAfterAsync(interaction, name, fn) {
                         fn = super.protectSyncAfterAsync(interaction, name, fn);

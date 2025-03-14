@@ -38,14 +38,6 @@ export class Colibri {
         this.interaction.destroy();
     }
 
-    startInteraction(content) {
-        if (content) {
-            this.processContent(content);
-            this.updateContent();
-        }
-        this.interaction.start();
-    }
-
     async start() {
         await this.interaction.willStart();
         if (this.isDestroyed) {
