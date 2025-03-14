@@ -615,7 +615,7 @@ export class Record extends DataPoint {
                 ) {
                     // TO REMOVE: need refactoring PropertyField to use the same format as the server
                     value = property.value;
-                } else {
+                } else if (property.value !== undefined) {
                     value = this._formatServerValue(property.type, property.value);
                 }
                 return {

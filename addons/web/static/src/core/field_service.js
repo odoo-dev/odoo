@@ -1,7 +1,6 @@
 import { Cache } from "@web/core/utils/cache";
 import { Domain } from "@web/core/domain";
 import { registry } from "@web/core/registry";
-import { _t } from "@web/core/l10n/translation";
 
 /**
  * @typedef {Object} LoadFieldsOptions
