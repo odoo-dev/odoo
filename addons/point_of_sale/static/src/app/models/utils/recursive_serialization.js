@@ -182,9 +182,10 @@ const deepSerialization = (
             continue;
         }
         if (fieldName === "id") {
-            if (typeof record[fieldName] === "number") {
-                result[fieldName] = record[fieldName];
-            }
+            result[fieldName] =
+                typeof record[fieldName] === "number"
+                    ? record[fieldName]
+                    : parseInt(record[fieldName].split("_")[1]);
             continue;
         }
         result[fieldName] = record[fieldName] !== undefined ? record[fieldName] : false;
