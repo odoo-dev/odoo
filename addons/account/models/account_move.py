@@ -849,7 +849,7 @@ class AccountMove(models.Model):
         for record in self:
             record.type_name = type_name_mapping[record.move_type]
 
-    @api.depends('line_ids.account_id.account_type')
+    @api.depends('line_ids.account_id.account_type', 'tax_cash_basis_rec_id')
     def _compute_always_tax_exigible(self):
         for record in self.with_context(prefetch_fields=False):
             # We need to check is_invoice as well because always_tax_exigible is used to
@@ -857,7 +857,8 @@ class AccountMove(models.Model):
             # line has been created yet, the invoice would be detected as always exigible,
             # and set the tags on some lines ; which would be wrong.
             record.always_tax_exigible = not record.is_invoice(True) \
-                                         and not record._collect_tax_cash_basis_values()
+                                         and (not record.tax_cash_basis_rec_id or
+                                              not record._collect_tax_cash_basis_values())
 
     @api.depends('partner_id')
     def _compute_commercial_partner_id(self):
@@ -2674,6 +2675,10 @@ class AccountMove(models.Model):
                 values['total_residual_currency'] += sign * line.amount_residual_currency
 
             elif line.tax_line_id.tax_exigibility == 'on_payment':
+                # modified accounts; do not do caba
+                if line.account_id != line.tax_line_id.tax_repartition_line_id.account_id:
+                    return None
+
                 values['to_process_lines'].append(('tax', line))
                 currencies.add(line.currency_id)
 
