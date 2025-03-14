@@ -23,6 +23,44 @@ class Certificate(models.Model):
         return ', '.join([s.rfc4514_string() for s in cert.issuer.rdns[::-1]])
 
     @api.model
+    def _l10n_sa_get_csr_vals(self, journal, partner=False):
+        partner = partner or journal.company_id.partner_id
+        company_id = journal.company_id
+        version_info = service.common.exp_version()
+        return {
+            "subject_names": {
+                # Country Name
+                NameOID.COUNTRY_NAME: partner.country_id.code,
+                # Organization Unit Name
+                NameOID.ORGANIZATIONAL_UNIT_NAME: partner.name,
+                # Organization Name
+                NameOID.ORGANIZATION_NAME: partner.name,
+                # Subject Common Name
+                NameOID.COMMON_NAME: '%s|%s|%s' % (journal.code, journal.name, partner.name),
+                # Organization Identifier
+                ObjectIdentifier('2.5.4.97'): partner.vat,
+                # State/Province Name
+                NameOID.STATE_OR_PROVINCE_NAME: partner.state_id.name,
+                # Locality Name
+                NameOID.LOCALITY_NAME: partner.city,
+            },
+            "extensions": {
+                # EGS Serial Number. Manufacturer or Solution Provider Name, Model or Version and Serial Number.
+                # To be written in the following format: "1-... |2-... |3-..."
+                ObjectIdentifier('2.5.4.4'): '1-Odoo|2-%s|3-%s' % (
+                    version_info['server_version_info'][0], journal.l10n_sa_serial_number),
+                # Organisation Identifier (UID)
+                NameOID.USER_ID: partner.vat,
+                # Invoice Type. 4-digit numerical input using 0 & 1
+                NameOID.TITLE: company_id._l10n_sa_get_csr_invoice_type(),
+                # Location
+                ObjectIdentifier('2.5.4.26'): partner.street,
+                # Industry
+                ObjectIdentifier('2.5.4.15'): partner.industry_id.name or 'Other',
+            }
+        }
+
+    @api.model
     def _l10n_sa_get_csr_str(self, journal):
         """
             Return a string representation of a ZATCA compliant CSR that will be sent to the Compliance API in order to get back
@@ -32,47 +70,24 @@ class Certificate(models.Model):
             return
 
         company_id = journal.company_id
-        version_info = service.common.exp_version()
         builder = x509.CertificateSigningRequestBuilder()
-        subject_names = (
-            # Country Name
-            (NameOID.COUNTRY_NAME, company_id.country_id.code),
-            # Organization Unit Name
-            (NameOID.ORGANIZATIONAL_UNIT_NAME, (company_id.vat or '')[:10]),
-            # Organization Name
-            (NameOID.ORGANIZATION_NAME, company_id.name),
-            # Subject Common Name
-            (NameOID.COMMON_NAME, company_id.name),
-            # Organization Identifier
-            (ObjectIdentifier('2.5.4.97'), company_id.vat),
-            # State/Province Name
-            (NameOID.STATE_OR_PROVINCE_NAME, company_id.state_id.name),
-            # Locality Name
-            (NameOID.LOCALITY_NAME, company_id.city),
-        )
+        csr_vals = self._l10n_sa_get_csr_vals(journal)
+        subject_names = csr_vals["subject_names"]
+        extensions = csr_vals["extensions"]
+
         # The CertificateSigningRequestBuilder instances are immutable, which is why everytime we modify one,
         # we have to assign it back to itself to keep track of the changes
         builder = builder.subject_name(x509.Name([
-            x509.NameAttribute(n[0], '%s' % n[1]) for n in subject_names
+            x509.NameAttribute(key, '%s' % val) for key, val in subject_names.items()
         ]))
 
         x509_alt_names_extension = x509.SubjectAlternativeName([
-            x509.DirectoryName(x509.Name([
-                # EGS Serial Number. Manufacturer or Solution Provider Name, Model or Version and Serial Number.
-                # To be written in the following format: "1-... |2-... |3-..."
-                x509.NameAttribute(ObjectIdentifier('2.5.4.4'), '1-Odoo|2-%s|3-%s' % (
-                    version_info['server_version_info'][0], journal.l10n_sa_serial_number)),
-                # Organisation Identifier (UID)
-                x509.NameAttribute(NameOID.USER_ID, company_id.vat),
-                # Invoice Type. 4-digit numerical input using 0 & 1
-                x509.NameAttribute(NameOID.TITLE, company_id._l10n_sa_get_csr_invoice_type()),
-                # Location
-                x509.NameAttribute(ObjectIdentifier('2.5.4.26'), company_id.street),
-                # Industry
-                x509.NameAttribute(ObjectIdentifier('2.5.4.15'), company_id.partner_id.industry_id.name or 'Other'),
-            ]))
+            x509.DirectoryName(
+                x509.Name(
+                    [x509.NameAttribute(key, val) for key, val in extensions.items()]
+                )
+            )
         ])
-
         x509_extensions = (
             # Add Certificate template name extension
             (x509.UnrecognizedExtension(ObjectIdentifier('1.3.6.1.4.1.311.20.2'),
