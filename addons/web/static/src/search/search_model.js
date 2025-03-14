@@ -932,7 +932,9 @@ export class SearchModel extends EventBus {
                     // already in the list, can happen if we unfold the properties field
                     // open a form view, edit the property and then go back to the search view
                     // the label of the property might have been changed
-                    existingSearchItem.description = `${definition.string} (${definitionRecordName})`;
+                    existingSearchItem.description = definitionRecordName
+                        ? `${definition.string} (${definitionRecordName})`
+                        : definition.string;
                     searchItemIds.add(existingSearchItem.id);
                     continue;
                 }
@@ -941,10 +943,14 @@ export class SearchModel extends EventBus {
                     id,
                     type: "field_property",
                     fieldName: searchItem.fieldName,
-                    propertyDomain: [definitionRecord, "=", definitionRecordId],
+                    propertyDomain: definitionRecord
+                        ? [definitionRecord, "=", definitionRecordId]
+                        : [1, "=", 1],
                     propertyFieldDefinition: definition,
                     propertyItemId: searchItem.id,
-                    description: `${definition.string} (${definitionRecordName})`,
+                    description: definitionRecordName
+                        ? `${definition.string} (${definitionRecordName})`
+                        : definition.string,
                     groupId: this.nextGroupId++,
                 };
                 if (["many2many", "tags"].includes(definition.type)) {
@@ -1017,7 +1023,9 @@ export class SearchModel extends EventBus {
                         selection: definition.selection,
                         sortable: true,
                         store: true,
-                        string: `${definition.string} (${definitionRecordName})`,
+                        string: definitionRecordName
+                            ? `${definition.string} (${definitionRecordName})`
+                            : definition.string,
                         type: definition.type,
                         relatedPropertyField: field,
                     };
@@ -1026,7 +1034,7 @@ export class SearchModel extends EventBus {
                         const groupByItem = {
                             description: definition.string,
                             definitionRecordId,
-                            definitionRecordName,
+                            definitionRecordName: definitionRecordName,
                             fieldName: fullName,
                             fieldType: definition.type,
                             isProperty: true,
@@ -1070,7 +1078,7 @@ export class SearchModel extends EventBus {
         );
         const result = groupBy(Object.values(definitions), (definition) => definition.record_id);
         return Object.entries(result).map(([recordId, definitions]) => ({
-            definitionRecordId: parseInt(recordId),
+            definitionRecordId: parseInt(recordId) || false,
             definitionRecordName: definitions[0]?.record_name,
             definitions,
         }));

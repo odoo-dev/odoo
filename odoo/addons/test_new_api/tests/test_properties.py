@@ -393,7 +393,7 @@ class PropertiesCase(TestPropertiesMixin):
         # first create to cache the access rights
         self.env['test_new_api.message'].create({'name': 'test'})
 
-        with self.assertQueryCount(2):
+        with self.assertQueryCount(4):
             messages = self.env['test_new_api.message'].create([{
                 'name': 'Test Message',
                 'discussion': False,
@@ -1719,7 +1719,6 @@ class PropertiesCase(TestPropertiesMixin):
         self.assertEqual(ve.exception.args[0],
             "The path contained by the field 'Field to Update Path' contains a non-relational field (Properties) that is not the last field in the path. You can't traverse non-relational fields (even in the quantum realm). Make sure only the last field in the path is non-relational."
         )
-
 
 class PropertiesSearchCase(TestPropertiesMixin):
     @classmethod
