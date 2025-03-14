@@ -2707,13 +2707,28 @@ class BaseModel(metaclass=MetaModel):
         check_property_field_value_name(property_name)
 
         target_model = self.env[self._fields[field.definition_record].comodel_name]
+        base_field = field
+        while base_field.inherited_field:
+            base_field = base_field.inherited_field
+
+        # TODO: limit on the union
         self.env.cr.execute(SQL(
             """ SELECT definition
                   FROM %(table)s, jsonb_array_elements(%(field)s) definition
                  WHERE %(field)s IS NOT NULL AND definition->>'name' = %(name)s
+          UNION SELECT definition
+                  FROM properties_base_definition, jsonb_array_elements(properties_definition) definition
+                  JOIN ir_model_fields AS field
+                    ON field.name = %(field_str)s
+                   AND field.model = %(model_str)s
+                 WHERE definition IS NOT NULL
+                   AND definition->>'name' = %(name)s
+                   AND properties_base_definition.properties_field_id = field.id
                  LIMIT 1 """,
             table=SQL.identifier(target_model._table),
             field=SQL.identifier(field.definition_record_field),
+            field_str=base_field.name,
+            model_str=base_field.model_name,
             name=property_name,
         ))
         result = self.env.cr.dictfetchone()

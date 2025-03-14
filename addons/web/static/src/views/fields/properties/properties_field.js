@@ -658,7 +658,12 @@ export class PropertiesField extends Component {
      */
     async checkDefinitionWriteAccess() {
         if (!this.definitionRecordId || !this.definitionRecordModel) {
-            return false;
+            // TODO: cache
+            return await this.orm.call(
+                "properties.base.definition",
+                "has_access_properties_definition",
+                [this.props.record._config.resModel]
+            );
         }
 
         return await user.checkAccessRight(

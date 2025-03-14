@@ -513,7 +513,11 @@ export class ListRenderer extends Component {
                 if (propertyGroups[id]) {
                     propertyGroups[id].optionalFields.push(optionalField);
                 } else {
-                    propertyGroups[id] = { id, displayName, optionalFields: [optionalField] };
+                    propertyGroups[id] = {
+                        id,
+                        displayName: displayName || _t("No Parent"),
+                        optionalFields: [optionalField],
+                    };
                 }
             }
         }
