@@ -45,12 +45,20 @@ export const fieldService = {
          * @param {import("@web/core/domain").DomainListRepr} [domain=[]]
          * @returns {Promise<Object>}
          */
-        async function _loadPropertyDefinitions(fieldDefs, name, domain = []) {
+        async function _loadPropertyDefinitions(resModel, fieldDefs, name, domain = []) {
             const {
                 definition_record: definitionRecord,
                 definition_record_field: definitionRecordField,
             } = fieldDefs[name];
             const definitionRecordModel = fieldDefs[definitionRecord].relation;
+
+            if (definitionRecordModel === "properties.base.definition") {
+                domain = Domain.and([
+                    [["properties_field_id.name", "=", name]],
+                    [["properties_field_id.model", "=", resModel]],
+                    domain,
+                ]).toList();
+            }
 
             domain = Domain.and([[[definitionRecordField, "!=", false]], domain]).toList();
 
@@ -86,7 +94,7 @@ export const fieldService = {
          */
         async function loadPropertyDefinitions(resModel, fieldName, domain) {
             const fieldDefs = await loadFields(resModel);
-            return _loadPropertyDefinitions(fieldDefs, fieldName, domain);
+            return _loadPropertyDefinitions(resModel, fieldDefs, fieldName, domain);
         }
 
         /**
@@ -124,7 +132,7 @@ export const fieldService = {
             } else if (fieldDef.type === "properties") {
                 subResult = await _loadPath(
                     "*",
-                    await _loadPropertyDefinitions(fieldDefs, name),
+                    await _loadPropertyDefinitions(resModel, fieldDefs, name),
                     remainingNames
                 );
             }
