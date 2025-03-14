@@ -1,6 +1,6 @@
 import { Component } from "@odoo/owl";
 import { defaultBuilderComponents } from "../core/default_builder_components";
-import { useDomState } from "../core/building_blocks/utils";
+import { useDomState, useGetAction } from "../core/building_blocks/utils";
 
 export class BorderConfigurator extends Component {
     static template = "html_builder.BorderConfiguratorOption";
@@ -20,6 +20,7 @@ export class BorderConfigurator extends Component {
         this.state = useDomState((editingElement) => ({
             hasBorder: this.hasBorder(editingElement),
         }));
+        this.getAction = useGetAction();
     }
     getStyleActionParam(param) {
         return `border-${this.props.direction ? this.props.direction + "-" : ""}${param}`;
@@ -28,8 +29,7 @@ export class BorderConfigurator extends Component {
         if (!editingElement) {
             return false;
         }
-        const getAction = this.env.editor.shared.builderActions.getAction;
-        const styleActionValue = getAction("styleAction").getValue({
+        const styleActionValue = this.getAction("styleAction").getValue({
             editingElement,
             param: {
                 mainParam: this.getStyleActionParam("width"),

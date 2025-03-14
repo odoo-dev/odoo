@@ -35,6 +35,12 @@ function querySelectorAll(targets, selector) {
     return [...elements];
 }
 
+export function useGetAction() {
+    const env = useEnv();
+    return (actionName) =>
+        env.localActions?.[actionName] || env.editor.shared.builderActions.getAction(actionName);
+}
+
 export function useBuilderComponent() {
     const comp = useComponent();
     const newEnv = {};
@@ -269,7 +275,7 @@ export function useClickableBuilderComponent() {
     useBuilderComponent();
     const comp = useComponent();
     const { getAllActions, callOperation, isApplied } = getAllActionsAndOperations(comp);
-    const getAction = comp.env.editor.shared.builderActions.getAction;
+    const getAction = useGetAction();
     const applyOperation = comp.env.editor.shared.history.makePreviewableOperation(callApply);
     const shouldToggle = !comp.env.selectableContext;
     const inheritedActionIds =
@@ -382,7 +388,7 @@ export function useInputBuilderComponent({
 } = {}) {
     const comp = useComponent();
     const { getAllActions, callOperation } = getAllActionsAndOperations(comp);
-    const getAction = comp.env.editor.shared.builderActions.getAction;
+    const getAction = useGetAction();
     const state = useDomState(getState);
     const applyOperation = comp.env.editor.shared.history.makePreviewableOperation((applySpecs) => {
         for (const applySpec of applySpecs) {
@@ -529,8 +535,8 @@ export function getAllActionsAndOperations(comp) {
     const inheritedActionIds =
         comp.props.inheritedActions || comp.env.weContext.inheritedActions || [];
 
+    const getAction = useGetAction();
     function getActionsSpecs(actions, userInputValue) {
-        const getAction = comp.env.editor.shared.builderActions.getAction;
         const specs = [];
         for (let { actionId, actionParam, actionValue } of actions) {
             const action = getAction(actionId);
@@ -646,7 +652,6 @@ export function getAllActionsAndOperations(comp) {
         );
     }
     function isApplied() {
-        const getAction = comp.env.editor.shared.builderActions.getAction;
         const editingElements = comp.env.getEditingElements();
         if (!editingElements.length) {
             return;

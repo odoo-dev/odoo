@@ -7,6 +7,7 @@ import {
     getAllActionsAndOperations,
     useBuilderComponent,
     useDomState,
+    useGetAction,
 } from "./utils";
 import { isColorGradient } from "@web/core/utils/colors";
 
@@ -14,7 +15,7 @@ import { isColorGradient } from "@web/core/utils/colors";
 export function useColorPickerBuilderComponent() {
     const comp = useComponent();
     const { getAllActions, callOperation } = getAllActionsAndOperations(comp);
-    const getAction = comp.env.editor.shared.builderActions.getAction;
+    const getAction = useGetAction();
     const state = useDomState(getState);
     const applyOperation = comp.env.editor.shared.history.makePreviewableOperation((applySpecs) => {
         for (const applySpec of applySpecs) {

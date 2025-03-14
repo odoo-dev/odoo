@@ -5,6 +5,7 @@ import {
     getAllActionsAndOperations,
     useBuilderComponent,
     useDomState,
+    useGetAction,
 } from "./utils";
 import { BuilderComponent } from "./builder_component";
 import { BasicMany2Many } from "./basic_many2many";
@@ -40,8 +41,8 @@ export class BuilderMany2Many extends Component {
         this.state = useState({
             searchModel: undefined,
         });
+        const getAction = useGetAction();
         this.domState = useDomState((el) => {
-            const getAction = this.env.editor.shared.builderActions.getAction;
             const actionWithGetValue = getAllActions().find(
                 ({ actionId }) => getAction(actionId).getValue
             );
