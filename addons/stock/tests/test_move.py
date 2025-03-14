@@ -9,7 +9,6 @@ from odoo.tests import Form, new_test_user
 from odoo.tests.common import TransactionCase
 from odoo.addons.mail.tests.common import mail_new_test_user
 
-
 class StockMove(TransactionCase):
     @classmethod
     def setUpClass(cls):
