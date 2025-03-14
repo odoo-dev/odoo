@@ -393,7 +393,7 @@ class PropertiesCase(TestPropertiesMixin):
         # first create to cache the access rights
         self.env['test_new_api.message'].create({'name': 'test'})
 
-        with self.assertQueryCount(2):
+        with self.assertQueryCount(4):
             messages = self.env['test_new_api.message'].create([{
                 'name': 'Test Message',
                 'discussion': False,
@@ -1720,6 +1720,53 @@ class PropertiesCase(TestPropertiesMixin):
             "The path contained by the field 'Field to Update Path' contains a non-relational field (Properties) that is not the last field in the path. You can't traverse non-relational fields (even in the quantum realm). Make sure only the last field in the path is non-relational."
         )
 
+    def test_properties_no_parent(self):
+        for model in ('test_new_api.emailmessage', 'test_new_api.message'):
+            base_definition = self.env["properties.base.definition"].search([
+                ("properties_field_id.model", "=", "test_new_api.emailmessage"),
+                ("properties_field_id.name", "=", "attributes"),
+            ])
+            self.assertFalse(base_definition)
+
+        self.env['test_new_api.emailmessage'].create({
+            'attributes': [{
+                'name': 'char',
+                'type': 'char',
+                'string': 'Char',
+                'default': 'Default',
+                'value': 'red',
+                'definition_changed': True,
+            }],
+        })
+
+        base_definition = self.env["properties.base.definition"].search([
+            ("properties_field_id.model", "=", "test_new_api.emailmessage"),
+            ("properties_field_id.name", "=", "attributes"),
+        ])
+        self.assertFalse(base_definition)
+
+        base_definition = self.env["properties.base.definition"].search([
+            ("properties_field_id.model", "=", "test_new_api.message"),
+            ("properties_field_id.name", "=", "attributes"),
+        ])
+        self.assertEqual(len(base_definition), 1, "Should have created the record for the base definition")
+        self.assertEqual(base_definition.properties_definition, [{'default': 'Default', 'name': 'char', 'string': 'Char', 'type': 'char'}])
+
+        record = self.env['test_new_api.emailmessage'].create({
+            'attributes': [{
+                'name': 'char',
+                'type': 'char',
+                'string': 'Char',
+                'default': 'Default',
+            }],
+        })
+        self.assertEqual(record.read(['attributes'])[0]['attributes'][0].get('value'), 'Default')
+
+        self.env.flush_all()
+        self.assertEqual(
+            self.env['test_new_api.emailmessage'].get_property_definition('attributes.char'),
+            {'name': 'char', 'type': 'char', 'string': 'Char', 'default': 'Default'},
+        )
 
 class PropertiesSearchCase(TestPropertiesMixin):
     @classmethod
