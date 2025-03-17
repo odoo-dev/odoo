@@ -41,6 +41,14 @@ export function useGetAction() {
         env.localActions?.[actionName] || env.editor.shared.builderActions.getAction(actionName);
 }
 
+export function useLocalAction(actions) {
+    const env = useEnv();
+    const localActions = { ...env.localActions, ...actions };
+    useSubEnv({
+        localActions,
+    });
+}
+
 export function useBuilderComponent() {
     const comp = useComponent();
     const newEnv = {};

@@ -17,10 +17,10 @@ export class BorderConfigurator extends Component {
     };
 
     setup() {
+        this.getAction = useGetAction();
         this.state = useDomState((editingElement) => ({
             hasBorder: this.hasBorder(editingElement),
         }));
-        this.getAction = useGetAction();
     }
     getStyleActionParam(param) {
         return `border-${this.props.direction ? this.props.direction + "-" : ""}${param}`;
