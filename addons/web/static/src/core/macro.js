@@ -59,15 +59,6 @@ class MacroStep {
         this.index = index;
     }
 
-    get debounceDelay() {
-        let delay = this.index === 0 ? 0 : 50;
-        if (this.initialDelay) {
-            const initialDelay = parseFloat(this.initialDelay());
-            delay = initialDelay >= 0 ? initialDelay : delay;
-        }
-        return delay;
-    }
-
     async performAction(trigger) {
         if (!this.action) {
             return;
@@ -172,9 +163,6 @@ export class Macro {
     }
 
     async step() {
-        if (this.currentStep.debounceDelay > 0) {
-            await delay(this.currentStep.debounceDelay);
-        }
         const trigger = await this.currentStep.waitFor();
         await this.onStep({ ...this.currentStep }, trigger, this.currentIndex);
         return this.currentStep.performAction(trigger);
