@@ -354,7 +354,7 @@ class Properties(Field):
                     default = env.context[context_key]
                 else:
                     default = properties_value.get('default')
-                if default is not None:
+                if default:
                     properties_value['value'] = default
 
         return properties_list_values
