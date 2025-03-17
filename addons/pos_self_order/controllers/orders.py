@@ -10,7 +10,7 @@ class PosSelfOrderController(http.Controller):
     def process_order(self, order, access_token, table_identifier, device_type):
         pos_config, _ = self._verify_authorization(access_token, table_identifier, order)
         pos_session = pos_config.current_session_id
-        preset_id = order['preset_id'] if pos_config.use_presets else False
+        preset_id = order.get('preset_id') if pos_config.use_presets else False
         preset_id = pos_config.env['pos.preset'].browse(preset_id) if preset_id else False
 
         if not preset_id and pos_config.use_presets:
