@@ -2,6 +2,7 @@ import { DependencyManager } from "../core/dependency_manager";
 import { useSubEnv } from "@odoo/owl";
 import { SIZES, MEDIAS_BREAKPOINTS } from "@web/core/ui/ui_service";
 import { _t } from "@web/core/l10n/translation";
+import { isVisible } from "@web/core/utils/ui";
 
 /**
  * Checks if the view of the targeted element is mobile.
@@ -65,6 +66,18 @@ export function isElementInViewport(el) {
         Math.round(rect.right) <= viewportWidth &&
         Math.round(rect.bottom) <= viewportHeight
     );
+}
+
+/**
+ * Checks if the element is visible while editing. Checks the current state of
+ * the element itself (@see isVisible for the limits) and that it doesn't have a
+ * `data-invisible` ancestor.
+ *
+ * @param {HTMLElement} el
+ * @returns {Boolean}
+ */
+export function isElementVisible(el) {
+    return isVisible(el) && !el.closest("[data-invisible='1']");
 }
 
 /**
