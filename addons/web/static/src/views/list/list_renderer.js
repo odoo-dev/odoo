@@ -515,7 +515,7 @@ export class ListRenderer extends Component {
                 } else {
                     propertyGroups[id] = {
                         id,
-                        displayName: displayName || _t("No Parent"),
+                        displayName: displayName || _t("Properties"),
                         optionalFields: [optionalField],
                     };
                 }

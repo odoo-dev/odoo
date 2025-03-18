@@ -22,9 +22,7 @@ class PropertiesBaseDefinition(models.Model):
         """Return True if the current user can edit the base definition."""
         if not self.env[model_name].has_access('write'):
             return False
-
-        # TODO: who can edit the base definition?
-        return True
+        return self.env.user._is_system()
 
     def _get_or_create_record(self, model_name, field_name):
         definition_record = self.sudo().search(

@@ -51,10 +51,9 @@ export const fieldService = {
                 definition_record: definitionRecord,
                 definition_record_field: definitionRecordField,
             } = fieldDefs[name];
-            const definitionRecordModel = fieldDefs[definitionRecord].relation;
             const definitions = {};
 
-            if (!domain?.length) {
+            if (!fieldDefs[definitionRecord]) {
                 // Add the definitions for the record without parent
                 const resultNoParent = await orm.webSearchRead(
                     "properties.base.definition",
@@ -81,10 +80,12 @@ export const fieldService = {
                         };
                     }
                 }
+                return definitions;
             }
 
             domain = Domain.and([[[definitionRecordField, "!=", false]], domain]).toList();
 
+            const definitionRecordModel = fieldDefs[definitionRecord].relation;
             const result = await orm.webSearchRead(definitionRecordModel, domain, {
                 specification: {
                     display_name: {},

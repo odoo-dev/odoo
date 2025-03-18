@@ -360,8 +360,8 @@ class Properties(Field):
         return properties_list_values
 
     def _get_properties_definition_record(self, record):
-        container = record[self.definition_record]
-        if container:
+        if self.definition_record:
+            container = record[self.definition_record]
             return container, self.definition_record_field
         return self._get_properties_base_definition_record(record.env), "properties_definition"
 
@@ -369,12 +369,11 @@ class Properties(Field):
         field = self
         while field.inherited_field:
             field = field.inherited_field
-        return env["properties.base.definition"].sudo() \
-            ._get_or_create_record(field.model_name, field.name)
+        return env["properties.base.definition"]._get_or_create_record(field.model_name, field.name)
 
     def _get_properties_definition(self, record):
         """Return the properties definition of the given record."""
-        container, definition_record_field = self._get_properties_definition_record(record)
+        container, definition_record_field = self._get_properties_definition_record(record.sudo())
         return container.sudo()[definition_record_field]
 
     @classmethod

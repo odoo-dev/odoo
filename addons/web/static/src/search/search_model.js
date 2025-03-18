@@ -923,7 +923,6 @@ export class SearchModel extends EventBus {
         }
 
         for (const { definitionRecordId, definitionRecordName, definitions } of result) {
-            const parentDescription = definitionRecordName || _t("No Parent");
             for (const definition of definitions) {
                 if (definition.type === "separator") {
                     continue;
@@ -933,7 +932,9 @@ export class SearchModel extends EventBus {
                     // already in the list, can happen if we unfold the properties field
                     // open a form view, edit the property and then go back to the search view
                     // the label of the property might have been changed
-                    existingSearchItem.description = `${definition.string} (${parentDescription})`;
+                    existingSearchItem.description = definitionRecordName
+                        ? `${definition.string} (${definitionRecordName})`
+                        : definition.string;
                     searchItemIds.add(existingSearchItem.id);
                     continue;
                 }
@@ -942,10 +943,14 @@ export class SearchModel extends EventBus {
                     id,
                     type: "field_property",
                     fieldName: searchItem.fieldName,
-                    propertyDomain: [definitionRecord, "=", definitionRecordId],
+                    propertyDomain: definitionRecord
+                        ? [definitionRecord, "=", definitionRecordId]
+                        : [1, "=", 1],
                     propertyFieldDefinition: definition,
                     propertyItemId: searchItem.id,
-                    description: `${definition.string} (${parentDescription})`,
+                    description: definitionRecordName
+                        ? `${definition.string} (${definitionRecordName})`
+                        : definition.string,
                     groupId: this.nextGroupId++,
                 };
                 if (["many2many", "tags"].includes(definition.type)) {
@@ -1009,7 +1014,6 @@ export class SearchModel extends EventBus {
                     // in searchViewFields to be able to have the type, it's description, etc
                     // the name of the property is stored as "<properties field name>.<property name>"
                     const fullName = `${field.name}.${definition.name}`;
-                    const parentDescription = definitionRecordName || _t("No Parent");
                     this.searchViewFields[fullName] = {
                         name: fullName,
                         readonly: false,
@@ -1019,7 +1023,9 @@ export class SearchModel extends EventBus {
                         selection: definition.selection,
                         sortable: true,
                         store: true,
-                        string: `${definition.string} (${parentDescription})`,
+                        string: definitionRecordName
+                            ? `${definition.string} (${definitionRecordName})`
+                            : definition.string,
                         type: definition.type,
                         relatedPropertyField: field,
                     };
@@ -1028,7 +1034,7 @@ export class SearchModel extends EventBus {
                         const groupByItem = {
                             description: definition.string,
                             definitionRecordId,
-                            definitionRecordName: parentDescription,
+                            definitionRecordName: definitionRecordName,
                             fieldName: fullName,
                             fieldType: definition.type,
                             isProperty: true,
