@@ -80,8 +80,8 @@ beforeEach(async () => {
     });
 });
 
-afterEach(() => {
-    macro.stop();
+afterEach(async () => {
+    await macro.stop();
 });
 
 test("element is no longer visible", async () => {
