@@ -775,7 +775,7 @@ export class Record extends DataPoint {
                 data[propertyFieldName] = staticList;
             } else if (property.type === "many2one") {
                 data[propertyFieldName] =
-                    property.value.length && property.value[1] === null
+                    property.value?.length && property.value[1] === null
                         ? [property.value[0], _t("No Access")]
                         : property.value;
             } else {
