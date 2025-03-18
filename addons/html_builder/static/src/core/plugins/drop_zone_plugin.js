@@ -297,7 +297,15 @@ export class DropZonePlugin extends Plugin {
             insertMethod = "appendChild";
         }
         this.clearDropZone();
-        return (elementToAdd) => {
+        return async (elementToAdd) => {
+            for (const handler of this.getResource("before_add_element_handlers").filter(
+                (handler) => elementToAdd.matches(handler.selector)
+            )) {
+                elementToAdd = await handler.process(elementToAdd);
+                if (!elementToAdd) {
+                    return;
+                }
+            }
             target[insertMethod](elementToAdd);
             this.dispatchTo("on_add_element_handlers", { elementToAdd: elementToAdd });
             scrollToWindow(elementToAdd, { behavior: "smooth", offset: 50 });

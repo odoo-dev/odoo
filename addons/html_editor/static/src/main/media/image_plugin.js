@@ -11,6 +11,7 @@ import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
 import { closestBlock } from "@html_editor/utils/blocks";
 import { fillEmpty } from "@html_editor/utils/dom";
 import { reactive } from "@odoo/owl";
+import { MediaDialog } from "./media_dialog/media_dialog";
 
 function hasShape(imagePlugin, shapeName) {
     return () => imagePlugin.isSelectionShaped(shapeName);
@@ -183,6 +184,17 @@ export class ImagePlugin extends Plugin {
         selectionchange_handlers: this.updateImageParams.bind(this),
         post_undo_handlers: this.updateImageParams.bind(this),
         post_redo_handlers: this.updateImageParams.bind(this),
+        before_add_element_handlers: {
+            selector: ".s_image",
+            process: (_elementToAdd) =>
+                new Promise((resolve) => {
+                    this.services.dialog.add(
+                        MediaDialog,
+                        { onlyImages: true, save: resolve },
+                        { onClose: resolve }
+                    );
+                }),
+        },
 
         /** Overrides */
         paste_url_overrides: this.handlePasteUrl.bind(this),
