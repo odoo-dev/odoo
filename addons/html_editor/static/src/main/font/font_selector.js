@@ -5,7 +5,7 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 export class FontSelector extends Component {
     static template = "html_editor.FontSelector";
     static props = {
-        title: String,
+        ...toolbarButtonProps,
         getItems: Function,
         getDisplay: Function,
         onSelected: Function,

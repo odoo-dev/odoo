@@ -205,26 +205,100 @@ test("use BuilderSelect with styleAction", async () => {
     );
     expect(".we-bg-options-container .dropdown").toHaveText("dotted");
 });
-test("do not put inline style on an element which already has this style through css stylesheets", async () => {
-    addOption({
-        selector: ".test",
-        template: xml`
+//HOOT fix toHaveStyle
+test.todo(
+    "do not put inline style on an element which already has this style through css stylesheets",
+    async () => {
+        addOption({
+            selector: ".test",
+            template: xml`
                 <BuilderSelect applyTo="'hr'" styleAction="'border-top-style'">
                     <BuilderSelectItem styleActionValue="'dotted'">dotted</BuilderSelectItem>
                     <BuilderSelectItem styleActionValue="'inset'">inset</BuilderSelectItem>
                 </BuilderSelect>`,
-    });
-    await setupWebsiteBuilder(`
+        });
+        await setupWebsiteBuilder(`
             <div class="test">
                 <hr class="w-100">
             </div>
     `);
+        await contains(":iframe .test").click();
+        expect(".we-bg-options-container .dropdown").toHaveText("inset");
+        await contains(".we-bg-options-container .dropdown").click();
+        await contains(".o-dropdown--menu  div:contains('dotted')").click();
+        expect(":iframe hr").toHaveStyle({ "border-top-style": "dotted" });
+        await contains(".we-bg-options-container .dropdown").click();
+        await contains(".o-dropdown--menu  div:contains('inset')").click();
+        expect(":iframe hr").not.toHaveStyle("border-top-style");
+    }
+);
+test("revert a preview when cancelling a BuilderSelect by clicking outside of it", async () => {
+    addOption({
+        selector: ".test",
+        template: xml`
+                <BuilderSelect dataAttributeAction="'choice'">
+                    <BuilderSelectItem dataAttributeActionValue="'0'">0</BuilderSelectItem>
+                    <BuilderSelectItem dataAttributeActionValue="'1'">1</BuilderSelectItem>
+                </BuilderSelect>`,
+    });
+    await setupWebsiteBuilder(`<div class="test">Test</div>`);
     await contains(":iframe .test").click();
-    expect(".we-bg-options-container .dropdown").toHaveText("inset");
+    expect(":iframe .test").not.toHaveAttribute("data-choice");
     await contains(".we-bg-options-container .dropdown").click();
-    await contains(".o-dropdown--menu  div:contains('dotted')").click();
-    expect(":iframe hr").toHaveStyle({ "border-top-style": "dotted" });
+    await contains(".o-dropdown--menu  div:contains('0')").hover();
+    expect(":iframe .test").toHaveAttribute("data-choice", "0");
+    await click(".we-bg-options-container");
+    expect(":iframe .test").not.toHaveAttribute("data-choice");
+});
+test("revert a preview when cancelling a BuilderSelect with escape", async () => {
+    addOption({
+        selector: ".test",
+        template: xml`
+                <BuilderSelect dataAttributeAction="'choice'">
+                    <BuilderSelectItem dataAttributeActionValue="'0'">0</BuilderSelectItem>
+                    <BuilderSelectItem dataAttributeActionValue="'1'">1</BuilderSelectItem>
+                </BuilderSelect>`,
+    });
+    await setupWebsiteBuilder(`<div class="test">Test</div>`);
+    await contains(":iframe .test").click();
+    expect(":iframe .test").not.toHaveAttribute("data-choice");
     await contains(".we-bg-options-container .dropdown").click();
-    await contains(".o-dropdown--menu  div:contains('inset')").click();
-    expect(":iframe hr").not.toHaveStyle("border-top-style");
+    await contains(".o-dropdown--menu  div:contains('0')").hover();
+    expect(":iframe .test").toHaveAttribute("data-choice", "0");
+    await press("escape");
+    expect(":iframe .test").not.toHaveAttribute("data-choice");
+});
+test("preview when cycling through options with the keyboard", async () => {
+    addOption({
+        selector: ".test",
+        template: xml`
+                <BuilderSelect dataAttributeAction="'choice'">
+                    <BuilderSelectItem dataAttributeActionValue="'0'">0</BuilderSelectItem>
+                    <BuilderSelectItem dataAttributeActionValue="'1'">1</BuilderSelectItem>
+                </BuilderSelect>`,
+    });
+    await setupWebsiteBuilder(`<div class="test">Test</div>`);
+    await contains(":iframe .test").click();
+    expect(":iframe .test").not.toHaveAttribute("data-choice");
+    await contains(".we-bg-options-container .dropdown").press("enter");
+    await press("arrowdown");
+    expect(":iframe .test").toHaveAttribute("data-choice", "0");
+});
+test("revert a preview selected with the keyboard when cancelling with escape", async () => {
+    addOption({
+        selector: ".test",
+        template: xml`
+                <BuilderSelect dataAttributeAction="'choice'">
+                    <BuilderSelectItem dataAttributeActionValue="'0'">0</BuilderSelectItem>
+                    <BuilderSelectItem dataAttributeActionValue="'1'">1</BuilderSelectItem>
+                </BuilderSelect>`,
+    });
+    await setupWebsiteBuilder(`<div class="test">Test</div>`);
+    await contains(":iframe .test").click();
+    expect(":iframe .test").not.toHaveAttribute("data-choice");
+    await contains(".we-bg-options-container .dropdown").press("enter");
+    await press("arrowdown");
+    expect(".o-dropdown--menu  div:contains('0')").toBeFocused();
+    await press("escape");
+    expect(":iframe .test").not.toHaveAttribute("data-choice");
 });
