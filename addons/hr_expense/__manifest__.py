@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+"I don't know why, but the custom expense description is automatically replaced with 'transport' upon submitting; can you look into that?"
 
 {
     'name': 'Expenses',
