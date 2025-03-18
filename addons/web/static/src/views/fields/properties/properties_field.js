@@ -286,7 +286,7 @@ export class PropertiesField extends Component {
      * @returns {integer}
      */
     get definitionRecordId() {
-        return this.definitionRecordField && this.props.record.data[this.definitionRecordField][0];
+        return this.props.record.data[this.definitionRecordField][0];
     }
 
     /**
@@ -295,10 +295,7 @@ export class PropertiesField extends Component {
      * @returns {string}
      */
     get definitionRecordModel() {
-        return (
-            this.definitionRecordField &&
-            this.props.record.fields[this.definitionRecordField].relation
-        );
+        return this.props.record.fields[this.definitionRecordField].relation;
     }
 
     /**
@@ -582,13 +579,19 @@ export class PropertiesField extends Component {
      * @param {string} propertyName
      */
     onPropertyDelete(propertyName) {
+        let message = _t("Are you sure you want to delete this property field?");
+        if (this.definitionRecordModel !== "properties.base.definition") {
+            message +=
+                " " +
+                _t(
+                    'It will be removed for everyone using the "%(parentName)s" %(parentFieldLabel)s.',
+                    { parentName: this.parentName, parentFieldLabel: this.parentString }
+                );
+        }
         this.popover.close();
         const dialogProps = {
             title: _t("Delete Property Field"),
-            body: _t(
-                'Are you sure you want to delete this property field? It will be removed for everyone using the "%(parentName)s" %(parentFieldLabel)s.',
-                { parentName: this.parentName, parentFieldLabel: this.parentString }
-            ),
+            body: message,
             confirmLabel: _t("Delete"),
             confirm: () => {
                 const propertiesDefinitions = this.propertiesList;
@@ -660,14 +663,7 @@ export class PropertiesField extends Component {
      * if we don't have access for parent or if no parent is set.
      */
     async checkDefinitionWriteAccess() {
-        if (!this.definitionRecordModel) {
-            // TODO: cache
-            return await this.orm.call(
-                "properties.base.definition",
-                "has_access_properties_definition",
-                [this.props.record._config.resModel]
-            );
-        } else if (!this.definitionRecordId) {
+        if (!this.definitionRecordId || !this.definitionRecordModel) {
             return false;
         }
         return await user.checkAccessRight(
@@ -707,8 +703,8 @@ export class PropertiesField extends Component {
      * @returns {string}
      */
     _getSeparatorFoldKey() {
-        const definitionRecordId = this.definitionRecordId;
-        const definitionRecordModel = this.definitionRecordModel;
+        const definitionRecordId = this.props.record.data[this.definitionRecordField][0];
+        const definitionRecordModel = this.props.record.fields[this.definitionRecordField].relation;
         // store the fold / unfold information per definition record
         // to clean the keys (to not keep information about removed separator)
         return `properties.fold,${definitionRecordModel},${definitionRecordId}`;
@@ -783,28 +779,19 @@ export class PropertiesField extends Component {
      * and therefor update the properties definition.
      */
     async _checkDefinitionAccess() {
-        if (this.definitionRecordField) {
-            this.parentName = this.props.record.data[this.definitionRecordField][1];
-            this.parentString = this.props.record.fields[this.definitionRecordField].string;
-        } else {
-            this.parentName = false;
-            this.parentString = false;
+        this.parentName = this.props.record.data[this.definitionRecordField][1];
+        this.parentString = this.props.record.fields[this.definitionRecordField].string;
+
+        if (!this.definitionRecordModel) {
+            this.state.canChangeDefinition = false;
+            return;
         }
 
-        if (this.definitionRecordModel) {
-            // check if we can write on the definition record
-            this.state.canChangeDefinition = await user.checkAccessRight(
-                this.definitionRecordModel,
-                "write"
-            );
-        } else {
-            // TODO: cache
-            this.state.canChangeDefinition = await this.orm.call(
-                "properties.base.definition",
-                "has_access_properties_definition",
-                [this.props.record._config.resModel]
-            );
-        }
+        // check if we can write on the definition record
+        this.state.canChangeDefinition = await user.checkAccessRight(
+            this.definitionRecordModel,
+            "write"
+        );
     }
 
     /**
@@ -917,7 +904,7 @@ export class PropertiesField extends Component {
         this.popover.open(target, {
             fieldName: this.props.name,
             definitionRecordField: this.definitionRecordField,
-            definitionRecordId: this.definitionRecordId,
+            definitionRecordId: this.props.record.data[this.definitionRecordField][0],
             readonly: this.props.readonly || !this.state.canChangeDefinition,
             canChangeDefinition: this.state.canChangeDefinition,
             checkDefinitionWriteAccess: () => this.checkDefinitionWriteAccess(),

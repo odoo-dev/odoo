@@ -80,7 +80,7 @@
                         class="o_field_property_add d-none d-sm-block"
                         t-att-class="{'g-col-2': props.columns !== 1}">
                         <button
-                            t-if="!props.readonly and state.canChangeDefinition"
+                            t-if="!props.readonly and state.canChangeDefinition and definitionRecordId"
                             class="btn btn-light text-muted text-break m-0"
                             t-on-click="onPropertyCreate">
                             <i class="fa fa-plus"/>

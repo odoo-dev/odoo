@@ -283,13 +283,14 @@ class Properties(Field):
                 definition.pop('definition_changed', None)
 
             # update the properties definition on the container
-            container, definition_record_field = self._get_properties_definition_record(records)
-            properties_definition = copy.deepcopy(value)
-            for property_definition in properties_definition:
-                property_definition.pop('value', None)
-            container[definition_record_field] = properties_definition
+            container = records[self.definition_record]
+            if container:
+                properties_definition = copy.deepcopy(value)
+                for property_definition in properties_definition:
+                    property_definition.pop('value', None)
+                container[self.definition_record_field] = properties_definition
 
-            _logger.info('Properties field: User #%i changed definition of %r', records.env.user.id, container)
+                _logger.info('Properties field: User #%i changed definition of %r', records.env.user.id, container)
 
         return super().write(records, value)
 
@@ -313,8 +314,12 @@ class Properties(Field):
         """
         properties_values = values.get(self.name) or {}
 
-        container_id = values.get(self.definition_record)
-        if not isinstance(container_id, (type(None), int, BaseModel)):
+        if not values.get(self.definition_record):
+            # container is not given in the value, can not find properties definition
+            return {}
+
+        container_id = values[self.definition_record]
+        if not isinstance(container_id, (int, BaseModel)):
             raise ValueError(f"Wrong container value {container_id!r}")
 
         if isinstance(container_id, int):
@@ -324,12 +329,7 @@ class Properties(Field):
             container_model_name = definition_record_field.comodel_name
             container_id = env[container_model_name].sudo().browse(container_id)
 
-        definition_record_field = self.definition_record_field
-        if not container_id:
-            container_id = self._get_properties_base_definition_record(env)
-            definition_record_field = "properties_definition"
-
-        properties_definition = container_id[definition_record_field]
+        properties_definition = container_id[self.definition_record_field]
         if not (properties_definition or (
             isinstance(properties_values, list)
             and any(d.get('definition_changed') for d in properties_values)
@@ -359,22 +359,11 @@ class Properties(Field):
 
         return properties_list_values
 
-    def _get_properties_definition_record(self, record):
-        if self.definition_record:
-            container = record[self.definition_record]
-            return container, self.definition_record_field
-        return self._get_properties_base_definition_record(record.env), "properties_definition"
-
-    def _get_properties_base_definition_record(self, env):
-        field = self
-        while field.inherited_field:
-            field = field.inherited_field
-        return env["properties.base.definition"]._get_or_create_record(field.model_name, field.name)
-
     def _get_properties_definition(self, record):
         """Return the properties definition of the given record."""
-        container, definition_record_field = self._get_properties_definition_record(record.sudo())
-        return container.sudo()[definition_record_field]
+        container = record[self.definition_record]
+        if container:
+            return container.sudo()[self.definition_record_field]
 
     @classmethod
     def _add_display_name(cls, values_list, env, value_keys=('value', 'default')):

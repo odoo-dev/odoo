@@ -1,5 +1,6 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, ValidationError
+from odoo.tools import ormcache
 
 
 class PropertiesBaseDefinition(models.Model):
@@ -9,21 +10,30 @@ class PropertiesBaseDefinition(models.Model):
     _description = "Properties Base Definition"
     _log_access = False
 
+    display_name = fields.Char("Display Name", compute="_compute_display_name")
     properties_field_id = fields.Many2one("ir.model.fields")
     properties_definition = fields.PropertiesDefinition("Properties Definition")
 
-    @api.constrains('properties_field_id')
+    @api.depends("properties_field_id")
+    def _compute_display_name(self):
+        for definition in self:
+            definition.display_name = _("All %s", self.env[definition.properties_field_id.model]._description)
+
+    @api.constrains("properties_field_id")
     def _check_properties_field_id(self):
-        if set(self.mapped('properties_field_id.ttype')) - {'properties'}:
-            raise ValidationError(_("The definition needs to be linked to a properties field."))
+        if set(self.mapped("properties_field_id.ttype")) - {"properties"}:
+            raise ValidationError(
+                _("The definition needs to be linked to a properties field.")
+            )
 
     @api.model
     def has_access_properties_definition(self, model_name):
         """Return True if the current user can edit the base definition."""
-        if not self.env[model_name].has_access('write'):
+        if not self.env[model_name].has_access("write"):
             return False
         return self.env.user._is_system()
 
+    @ormcache()
     def _get_or_create_record(self, model_name, field_name):
         definition_record = self.sudo().search(
             [

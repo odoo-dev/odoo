@@ -1,7 +1,6 @@
 import { Cache } from "@web/core/utils/cache";
 import { Domain } from "@web/core/domain";
 import { registry } from "@web/core/registry";
-import { _t } from "@web/core/l10n/translation";
 
 /**
  * @typedef {Object} LoadFieldsOptions
@@ -51,41 +50,18 @@ export const fieldService = {
                 definition_record: definitionRecord,
                 definition_record_field: definitionRecordField,
             } = fieldDefs[name];
-            const definitions = {};
+            const definitionRecordModel = fieldDefs[definitionRecord].relation;
 
-            if (!fieldDefs[definitionRecord]) {
-                // Add the definitions for the record without parent
-                const resultNoParent = await orm.webSearchRead(
-                    "properties.base.definition",
-                    [
-                        ["properties_definition", "!=", false],
-                        ["properties_field_id.name", "=", fieldDefs[name].name],
-                        ["properties_field_id.model", "=", resModel],
-                    ],
-                    {
-                        specification: {
-                            display_name: {},
-                            ["properties_definition"]: {},
-                        },
-                    }
-                );
-                for (const record of resultNoParent.records) {
-                    for (const definition of record["properties_definition"]) {
-                        definitions[definition.name] = {
-                            is_property: true,
-                            searchable: true,
-                            record_id: false,
-                            record_name: false,
-                            ...definition,
-                        };
-                    }
-                }
-                return definitions;
+            if (definitionRecordModel === "properties.base.definition") {
+                domain = Domain.and([
+                    [["properties_field_id.name", "=", name]],
+                    [["properties_field_id.model", "=", resModel]],
+                    domain,
+                ]).toList();
             }
 
             domain = Domain.and([[[definitionRecordField, "!=", false]], domain]).toList();
 
-            const definitionRecordModel = fieldDefs[definitionRecord].relation;
             const result = await orm.webSearchRead(definitionRecordModel, domain, {
                 specification: {
                     display_name: {},
@@ -93,6 +69,7 @@ export const fieldService = {
                 },
             });
 
+            const definitions = {};
             for (const record of result.records) {
                 for (const definition of record[definitionRecordField]) {
                     definitions[definition.name] = {

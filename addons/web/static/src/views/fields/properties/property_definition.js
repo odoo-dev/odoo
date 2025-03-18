@@ -30,7 +30,7 @@ export class PropertyDefinition extends Component {
     };
     static props = {
         fieldName: { type: String },
-        definitionRecordField: { type: String, optional: true },
+        definitionRecordField: { type: String },
         definitionRecordId: { type: Number, optional: true },
         readonly: { type: Boolean, optional: true },
         canChangeDefinition: { type: Boolean, optional: true },
