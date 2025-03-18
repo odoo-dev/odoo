@@ -119,6 +119,24 @@ class TestPropertiesMixin(TransactionCase):
 
 class PropertiesCase(TestPropertiesMixin):
 
+    def test_base_properties_model_access(self):
+        with self.assertRaises(AccessError):
+            self.env['res.partner'].with_user(self.test_user).create({
+                'name': 'test', 'properties': [{'name': 'test', 'type': 'char', 'definition_changed': True}]})
+
+        definition_record = self.env['properties.base.definition']._get_or_create_record('res.partner', 'properties')
+        self.assertEqual(definition_record.properties_definition, [])
+
+        record_0, record_1 = self.env['res.partner'].create([{'properties': [{'name': 'test', 'type': 'char', 'definition_changed': True, 'value': 'test'}], 'name': 'test'}, {'name': 'test'}])
+        self.assertEqual(record_0.properties_base_definition_id, definition_record)
+        self.assertEqual(definition_record.properties_definition, [{'name': 'test', 'type': 'char'}])
+
+        record_2, record_3 = self.env['test_new_api.emailmessage'].create([{}, {}])
+        record_2.write({'common_attributes': [{'name': 'test_2', 'type': 'char', 'definition_changed': True, 'value': 'test'}]})
+        self.assertNotEqual(definition_record, record_2.properties_base_definition_id)
+        self.assertEqual(record_2.properties_base_definition_id.properties_definition, [{'name': 'test_2', 'type': 'char'}])
+        self.assertEqual(definition_record.properties_definition, [{'name': 'test', 'type': 'char'}])
+
     def test_properties_field(self):
         self.assertTrue(isinstance(self.message_1.attributes, dict))
         # testing assigned value

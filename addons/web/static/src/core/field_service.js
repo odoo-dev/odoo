@@ -52,22 +52,22 @@ export const fieldService = {
             } = fieldDefs[name];
             const definitionRecordModel = fieldDefs[definitionRecord].relation;
 
+            let result;
             if (definitionRecordModel === "properties.base.definition") {
-                domain = Domain.and([
-                    [["properties_field_id.name", "=", name]],
-                    [["properties_field_id.model", "=", resModel]],
-                    domain,
-                ]).toList();
+                result = await orm.call(
+                    "properties.base.definition",
+                    "get_properties_base_definition",
+                    [resModel, name]
+                );
+            } else {
+                domain = Domain.and([[[definitionRecordField, "!=", false]], domain]).toList();
+                result = await orm.webSearchRead(definitionRecordModel, domain, {
+                    specification: {
+                        display_name: {},
+                        [definitionRecordField]: {},
+                    },
+                });
             }
-
-            domain = Domain.and([[[definitionRecordField, "!=", false]], domain]).toList();
-
-            const result = await orm.webSearchRead(definitionRecordModel, domain, {
-                specification: {
-                    display_name: {},
-                    [definitionRecordField]: {},
-                },
-            });
 
             const definitions = {};
             for (const record of result.records) {
