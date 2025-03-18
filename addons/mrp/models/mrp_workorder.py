@@ -70,7 +70,7 @@ class MrpWorkorder(models.Model):
         ('done', 'Finished'),
         ('cancel', 'Cancelled')], string='Status',
         compute='_compute_state', store=True,
-        default='blocked', copy=False, recursive=True, index=True)
+        default='ready', copy=False, index=True)
     leave_id = fields.Many2one(
         'resource.calendar.leaves',
         help='Slot into workcenter calendar once planned',
@@ -152,13 +152,13 @@ class MrpWorkorder(models.Model):
                                      domain="[('allow_workorder_dependencies', '=', True), ('id', '!=', id), ('production_id', '=', production_id)]",
                                      copy=False)
 
-    @api.depends('qty_ready', 'blocked_by_workorder_ids.state')
+    @api.depends('qty_ready')
     def _compute_state(self):
         for workorder in self:
             if not workorder.product_uom_id or workorder.state not in ('blocked', 'ready'):
                 continue
             has_qty_ready = float_compare(workorder.qty_ready, 0, precision_rounding=workorder.product_uom_id.rounding) > 0
-            if not workorder.blocked_by_workorder_ids or has_qty_ready or all(wo.state in ('cancel', 'done') for wo in workorder.blocked_by_workorder_ids):
+            if has_qty_ready:
                 workorder.write({'state': 'ready'})
             else:
                 workorder.write({'state': 'blocked'})
@@ -174,6 +174,7 @@ class MrpWorkorder(models.Model):
                 wo.write('ready')  # Middle step to solve further conflict
             ids_to_update.append(wo.id)
         wo_to_update = self.browse(ids_to_update)
+
         if state == 'cancel':
             wo_to_update.action_cancel()
         elif state == 'done':
@@ -247,7 +248,7 @@ class MrpWorkorder(models.Model):
                 workorder.production_id.qty_producing = workorder.qty_producing
                 workorder.production_id._set_qty_producing(False)
 
-    @api.depends('blocked_by_workorder_ids.qty_produced')
+    @api.depends('blocked_by_workorder_ids', 'blocked_by_workorder_ids.qty_produced')
     def _compute_qty_ready(self):
         for workorder in self:
             if workorder.state in ('cancel', 'done'):

@@ -1470,7 +1470,6 @@ class MrpProduction(models.Model):
         move_raws_to_adjust._adjust_procure_method()
         moves_to_confirm._action_confirm(merge=False)
         workorder_to_confirm._action_confirm()
-        workorder_to_confirm.filtered(lambda w: not w.blocked_by_workorder_ids).state = 'ready'
         # run scheduler for moves forecasted to not have enough in stock
         ignored_mo_ids = self.env.context.get('ignore_mo_ids', [])
         self.move_raw_ids.with_context(ignore_mo_ids=ignored_mo_ids + self.ids)._trigger_scheduler()
