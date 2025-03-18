@@ -1322,10 +1322,10 @@ class AccountTax(models.Model):
         :param fallback:        The value to return if not found in record or extra_values.
         :return:                The field value corresponding to 'field'.
         """
-        need_origin = isinstance(fallback, models.Model)
+        need_origin = isinstance(fallback, models.BaseModel)
         if field in extra_values:
             value = extra_values[field] or fallback
-        elif isinstance(record, models.Model) and field in record._fields:
+        elif isinstance(record, models.BaseModel) and field in record._fields:
             value = record[field]
         elif isinstance(record, dict):
             value = record.get(field, fallback)

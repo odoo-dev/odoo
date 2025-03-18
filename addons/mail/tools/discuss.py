@@ -94,7 +94,7 @@ class Store:
         """
         if not records:
             return self
-        assert isinstance(records, models.Model)
+        assert isinstance(records, models.BaseModel)
         if fields is None:
             if as_thread:
                 fields = []
@@ -148,7 +148,7 @@ class Store:
         """
         if not records:
             return self
-        assert isinstance(records, models.Model)
+        assert isinstance(records, models.BaseModel)
         if not fields:
             return self
         fields = self._format_fields(records, fields)
@@ -177,7 +177,7 @@ class Store:
         """Delete records from the store."""
         if not records:
             return self
-        assert isinstance(records, models.Model)
+        assert isinstance(records, models.BaseModel)
         model_name = "mail.thread" if as_thread else records._name
         for record in records:
             values = (
@@ -302,10 +302,10 @@ class Store:
             super().__init__(field_name, predicate=predicate, rename=rename, sudo=sudo, value=value)
             assert (
                 not records_or_field_names
-                or isinstance(records_or_field_names, (str, models.Model))
+                or isinstance(records_or_field_names, (str, models.BaseModel))
             ), f"expected recordset, field name, or empty value for Relation: {records_or_field_names}"
             self.records = (
-                records_or_field_names if isinstance(records_or_field_names, models.Model) else None
+                records_or_field_names if isinstance(records_or_field_names, models.BaseModel) else None
             )
             self.as_thread = as_thread
             self.fields = fields

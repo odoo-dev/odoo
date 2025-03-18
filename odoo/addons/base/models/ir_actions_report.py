@@ -664,7 +664,7 @@ class IrActionsReport(models.Model):
         ReportSudo = self.env['ir.actions.report'].sudo()
         if isinstance(report_ref, int):
             return ReportSudo.browse(report_ref)
-        if isinstance(report_ref, models.Model):
+        if isinstance(report_ref, models.BaseModel):
             if report_ref._name != self._name:
                 raise ValueError("Expected report of type %s, got %s" % (self._name, report_ref._name))
             return report_ref.sudo()
@@ -1140,7 +1140,7 @@ class IrActionsReport(models.Model):
         """
         context = self.env.context
         if docids:
-            if isinstance(docids, models.Model):
+            if isinstance(docids, models.BaseModel):
                 active_ids = docids.ids
             elif isinstance(docids, int):
                 active_ids = [docids]
