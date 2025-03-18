@@ -786,7 +786,7 @@ class Base(models.AbstractModel):
             raise exceptions.UserError(
                 _("We were not able to fetch value of field '%(field)s'", field=field_path)
             ) from err
-        if isinstance(field_value, models.Model):
+        if isinstance(field_value, models.BaseModel):
             return ' '.join((value.display_name or '') for value in field_value)
         if any(isinstance(value, datetime) for value in field_value):
             tz = self._mail_get_timezone()

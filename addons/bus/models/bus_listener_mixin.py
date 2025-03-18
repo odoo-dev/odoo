@@ -16,7 +16,7 @@ class BusListenerMixin(models.AbstractModel):
         """Send a notification to the webclient."""
         for record in self:
             main_channel = record._bus_channel()
-            assert isinstance(main_channel, models.Model)
+            assert isinstance(main_channel, models.BaseModel)
             main_channel.ensure_one()
             channel = main_channel if subchannel is None else (main_channel, subchannel)
             self.env["bus.bus"]._sendone(channel, notification_type, message)

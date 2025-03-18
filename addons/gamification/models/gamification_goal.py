@@ -207,7 +207,7 @@ class GamificationGoal(models.Model):
                         # user_values has format of _read_group: [(<partner>, <aggregate>), ...]
                         for goal in [g for g in goals if g.id in query_goals]:
                             for field_value, aggregate in user_values:
-                                queried_value = field_value.id if isinstance(field_value, models.Model) else field_value
+                                queried_value = field_value.id if isinstance(field_value, models.BaseModel) else field_value
                                 if queried_value == query_goals[goal.id]:
                                     goals_to_write.update(goal._get_write_values(aggregate))
 
