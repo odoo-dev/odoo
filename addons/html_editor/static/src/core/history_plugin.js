@@ -86,7 +86,7 @@ import { withSequence } from "@html_editor/utils/resource";
  * @property { HistoryPlugin['addStep'] } addStep
  * @property { HistoryPlugin['canRedo'] } canRedo
  * @property { HistoryPlugin['canUndo'] } canUndo
- * @property { HistoryPlugin['ignoreDOMChanges'] } ignoreDOMChanges
+ * @property { HistoryPlugin['ignoreDOMMutations'] } ignoreDOMMutations
  * @property { HistoryPlugin['getHistorySteps'] } getHistorySteps
  * @property { HistoryPlugin['getNodeById'] } getNodeById
  * @property { HistoryPlugin['makePreviewableOperation'] } makePreviewableOperation
@@ -109,7 +109,7 @@ export class HistoryPlugin extends Plugin {
         "addStep",
         "canRedo",
         "canUndo",
-        "ignoreDOMChanges",
+        "ignoreDOMMutations",
         "getHistorySteps",
         "getNodeById",
         "makePreviewableOperation",
@@ -218,7 +218,7 @@ export class HistoryPlugin extends Plugin {
      * @param { HistoryStep[] } steps
      */
     resetFromSteps(steps) {
-        this.ignoreDOMChanges(() => {
+        this.ignoreDOMMutations(() => {
             this.editable.replaceChildren();
             this.clean();
             this.stageSelection();
@@ -301,7 +301,7 @@ export class HistoryPlugin extends Plugin {
      *
      * @param {Function} callback
      */
-    ignoreDOMChanges(callback) {
+    ignoreDOMMutations(callback) {
         const enableObserver = this.disableObserver();
         try {
             callback();

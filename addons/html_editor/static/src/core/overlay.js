@@ -115,7 +115,7 @@ export class EditorOverlay extends Component {
             // Attention, using ignoring DOM changes is always dangerous (when we add or remove nodes)
             // because if another mutation uses the target that is not observed, that mutation can never be applied
             // again (when undo/redo and in collaboration).
-            this.props.history.ignoreDOMChanges(() => {
+            this.props.history.ignoreDOMMutations(() => {
                 const clonedRange = range.cloneRange();
                 const shadowCaret = doc.createTextNode("|");
                 clonedRange.insertNode(shadowCaret);
