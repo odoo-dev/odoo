@@ -3,5 +3,6 @@
 }
 
 .o_mrp_overview_badge.text-bg-muted {
-    @extend .text-bg-300;
+    @include o-print-color(map-get($o-grays, 300), background-color, bg-opacity);
+    @include o-print-color(color-contrast(map-get($o-grays, 300)), color, text-opacity);
 }

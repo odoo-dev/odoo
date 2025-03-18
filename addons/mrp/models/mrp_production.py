@@ -589,6 +589,7 @@ class MrpProduction(models.Model):
                                 # If for some reason a non-relevant workorder is still there, e.g. after a change in never_product_template_attribute_value_ids
                                 workorders_list += [Command.delete(workorder.id)]
                             continue
+                        #TODO : workorder missing values are set here
                         workorders_values += [{
                             'name': operation.name,
                             'production_id': production.id,
@@ -945,7 +946,7 @@ class MrpProduction(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        # FIXME : When created from Form(...), the product_uom_id on workorder_ids is not set
+        # FIXME : When created from Form(...), values computed in _compute_workorder_ids are missing...
         for vals in vals_list:
             # Remove from `move_finished_ids` the by-product moves and then move `move_byproduct_ids`
             # into `move_finished_ids` to avoid duplicate and inconsistency.
@@ -2478,6 +2479,7 @@ class MrpProduction(models.Model):
             elif workorder.operation_id and workorder.operation_id not in operations_by_id:
                 workorders_to_unlink |= workorder
         # Creates a workorder for each remaining operation.
+        #TODO : Why is it not called from Form in unit tests ?
         workorders_values = []
         for operation in operations_by_id.values():
             workorder_vals = {

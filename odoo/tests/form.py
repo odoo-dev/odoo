@@ -515,7 +515,7 @@ class Form:
                     if node.get('name') == field_name
                 )
                 if not field_node.get('force_save'):
-                    continue
+                    continue  #FIXME: info lost here
 
             if field_info['type'] == 'one2many':
                 if mode == 'all':
@@ -1034,4 +1034,3 @@ class Dotter:
     def __getattr__(self, key):
         val = self.__values[key]
         return Dotter(val) if isinstance(val, dict) else val
-

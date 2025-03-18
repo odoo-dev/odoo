@@ -18,9 +18,6 @@ class MrpWorkorder(models.Model):
     def _default_sequence(self):
         return self.operation_id.sequence or 100
 
-    # def _default_product_uom_id(self):
-        # return self.production_id.product_uom_id or self.operation_id.bom_id.product_uom_id
-
     def _read_group_workcenter_id(self, workcenters, domain):
         workcenter_ids = self.env.context.get('default_workcenter_id')
         if not workcenter_ids:
@@ -40,7 +37,7 @@ class MrpWorkorder(models.Model):
         string='Workcenter Status', related='workcenter_id.working_state') # technical: used in views only
     product_id = fields.Many2one(related='production_id.product_id')
     product_tracking = fields.Selection(related="product_id.tracking")
-    product_uom_id = fields.Many2one('uom.uom', 'Unit', required=True, readonly=True)  # , default=_default_product_uom_id)
+    product_uom_id = fields.Many2one(related='production_id.product_uom_id')
     production_id = fields.Many2one('mrp.production', 'Manufacturing Order', required=True, check_company=True, readonly=True, index='btree')
     production_availability = fields.Selection(
         string='Stock Availability', readonly=True,
@@ -70,7 +67,7 @@ class MrpWorkorder(models.Model):
         ('done', 'Finished'),
         ('cancel', 'Cancelled')], string='Status',
         compute='_compute_state', store=True,
-        default='blocked', copy=False, recursive=True, index=True)
+        default='ready', copy=False, index=True)
     leave_id = fields.Many2one(
         'resource.calendar.leaves',
         help='Slot into workcenter calendar once planned',
@@ -152,13 +149,13 @@ class MrpWorkorder(models.Model):
                                      domain="[('allow_workorder_dependencies', '=', True), ('id', '!=', id), ('production_id', '=', production_id)]",
                                      copy=False)
 
-    @api.depends('qty_ready', 'blocked_by_workorder_ids.state')
+    @api.depends('qty_ready')
     def _compute_state(self):
         for workorder in self:
             if not workorder.product_uom_id or workorder.state not in ('blocked', 'ready'):
                 continue
             has_qty_ready = float_compare(workorder.qty_ready, 0, precision_rounding=workorder.product_uom_id.rounding) > 0
-            if not workorder.blocked_by_workorder_ids or has_qty_ready or all(wo.state in ('cancel', 'done') for wo in workorder.blocked_by_workorder_ids):
+            if has_qty_ready :
                 workorder.write({'state': 'ready'})
             else:
                 workorder.write({'state': 'blocked'})
@@ -174,30 +171,29 @@ class MrpWorkorder(models.Model):
                 wo.write('ready')  # Middle step to solve further conflict
             ids_to_update.append(wo.id)
         
-        wo_to_update = self.browse(ids_to_update).group_workorders_by_dependency_level()
-        for wo in wo_to_update:
-            if state == 'cancel':
-                wo.action_cancel()
-            elif state == 'done':
-                wo.action_mark_as_done()
-            elif state == 'progress':
-                wo.button_start()
-            else:
-                wo.write({'state': state})
+        wo_to_update = self.browse(ids_to_update)
+        if state == 'cancel':
+            wo_to_update.action_cancel()
+        elif state == 'done':
+            wo_to_update.action_mark_as_done()
+        elif state == 'progress':
+            wo_to_update.button_start()
+        else:
+            wo_to_update.write({'state': state})
 
-    def group_workorders_by_dependency_level(self):
-        ordered_workorders = []
-        ordered_workorders.append(self.filtered(lambda wo: not wo.blocked_by_workorder_ids))
-        known_ids = ordered_workorders[-1].ids
+    # def group_workorders_by_dependency_level(self):
+        # ordered_workorders = []
+        # ordered_workorders.append(self.filtered(lambda wo: not wo.blocked_by_workorder_ids))
+        # known_ids = ordered_workorders[-1].ids
 
-        while any(wo.needed_by_workorder_ids and wo.needed_by_workorder_ids in self for wo in ordered_workorders[-1]):
-            next_level_workorders = ordered_workorders[-1].mapped('needed_by_workorder_ids').filtered(
-                lambda wo: wo in self and all(blocking_wo.id in known_ids or blocking_wo.id not in self.ids for blocking_wo in wo.blocked_by_workorder_ids)
-            )
-            if next_level_workorders:
-                ordered_workorders.append(next_level_workorders)
-                known_ids += next_level_workorders.ids
-        return ordered_workorders
+        # while any(wo.needed_by_workorder_ids and wo.needed_by_workorder_ids in self for wo in ordered_workorders[-1]):
+            # next_level_workorders = ordered_workorders[-1].mapped('needed_by_workorder_ids').filtered(
+                # lambda wo: wo in self and all(blocking_wo.id in known_ids or blocking_wo.id not in self.ids for blocking_wo in wo.blocked_by_workorder_ids)
+            # )
+            # if next_level_workorders:
+                # ordered_workorders.append(next_level_workorders)
+                # known_ids += next_level_workorders.ids
+        # return ordered_workorders
 
     @api.depends('production_id.date_start', 'date_start')
     def _compute_production_date(self):

@@ -76,7 +76,7 @@
                 <field name="workcenter_id" readonly="state in ['cancel', 'done', 'progress']"/>
                 <field name="product_id" optional="show"/>
                 <field name="qty_remaining" optional="show" string="Quantity"/>
-                <field name="qty_ready" optional="hide"/>
+                <field name="qty_ready" optional="hide" groups="base.group_no_one"/>
                 <field name="finished_lot_id" optional="hide" string="Lot/Serial"/>
                 <field name="date_start" optional="hide" readonly="state in ['progress', 'done', 'cancel']"/>
                 <field name="date_finished" optional="hide" readonly="state in ['progress', 'done', 'cancel']"/>
@@ -164,7 +164,7 @@
                 <field name="finished_lot_id" invisible="1"/>
                 <group>
                     <group>
-                        <field name="name" readonly="1"/>
+                        <field name="name" readonly="state in ['cancel', 'done']" force_save="1"/>
                         <field name="workcenter_id" readonly="state in ['cancel', 'done', 'progress']"/>
                     </group>
                     <group>
@@ -192,7 +192,7 @@
                         </div>
                     </group>
                     <group>
-                        <field name="production_id"/>
+                        <field name="production_id" force_save="1"/>
                     </group>
                 </group>
                 <notebook>
