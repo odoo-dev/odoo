@@ -1316,6 +1316,12 @@ class SaleOrder(models.Model):
         new_default_data = self.env['sale.order.line']._get_product_catalog_lines_data()
         return {**default_data, **new_default_data}
 
+    def action_add_from_catalog(self):
+        res = super().action_add_from_catalog()
+        kanban_view_id = self.env.ref('sale.product_view_kanban_catalog_sale_only').id
+        res['views'][0] = (kanban_view_id, 'kanban')
+        return res
+
     def _get_action_add_from_catalog_extra_context(self):
         return {
             **super()._get_action_add_from_catalog_extra_context(),
@@ -2105,12 +2111,24 @@ class SaleOrder(models.Model):
             **kwargs,
         )
         res = super()._get_product_catalog_order_data(products, **kwargs)
+
+        invoices = self.env['account.move'].search([
+            ('partner_id', '=', self.partner_id.id),
+            ('state', '=', 'posted'),
+            ('journal_id.type', '=', 'sale'),
+            ('invoice_line_ids.product_id', 'in', products.ids),
+        ])
+
         for product in products:
             res[product.id]['price'] = pricelist.get(product.id)
             if product.sale_line_warn != 'no-message' and product.sale_line_warn_msg:
                 res[product.id]['warning'] = product.sale_line_warn_msg
             if product.sale_line_warn == "block":
                 res[product.id]['readOnly'] = True
+
+            product_invoices = invoices.filtered(lambda inv: product.id in inv.invoice_line_ids.mapped('product_id').ids)
+            last_invoice_date = max(product_invoices.mapped('invoice_date'), default=False)
+            res[product.id]['last_invoice_date'] = last_invoice_date.strftime("%m/%d/%y") if last_invoice_date else False
         return res
 
     def _get_product_catalog_record_lines(self, product_ids, **kwargs):
