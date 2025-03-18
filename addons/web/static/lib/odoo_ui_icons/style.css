@@ -60,6 +60,17 @@
 .oi-smile-add:before { content: '\e84e'; }
 .oi-close:before { content: '\e852'; }
 .oi-food-delivery:before { content: '\e82a'; }
+.oi-applicant:before { content: '\e859'; }
+.oi-add-user:before { content: '\e85a'; }
+.oi-voice-record:before { content: '\e85b'; }
+.oi-add-activity:before { content: '\e85c'; }
+.oi-user:before { content: '\e85d'; }
+.oi-transfer:before { content: '\e85e'; }
+.oi-users:before { content: '\e85f'; }
+.oi-merge:before { content: '\e860'; }
+.oi-add-applicant:before { content: '\e804'; }
+.oi-numpad:before { content: '\e805'; }
+.oi-backspace-o:before { content: '\e806'; }
 
 /* RTL adaptations. */
 /* Flip directional icons by 180 degree. */
