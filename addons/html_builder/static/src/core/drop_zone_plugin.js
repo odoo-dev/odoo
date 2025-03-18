@@ -1,5 +1,6 @@
-import { _t } from "@web/core/l10n/translation";
+import { isElementVisible } from "@html_builder/utils/utils";
 import { Plugin } from "@html_editor/plugin";
+import { _t } from "@web/core/l10n/translation";
 
 export class DropZonePlugin extends Plugin {
     static id = "dropzone";
@@ -26,7 +27,7 @@ export class DropZonePlugin extends Plugin {
      */
     getDropRootElement() {
         const openModalEl = this.editable.querySelector(".modal.show");
-        if (openModalEl) {
+        if (isElementVisible(openModalEl)) {
             return openModalEl;
         }
         const openDropdownEl = this.editable.querySelector(
