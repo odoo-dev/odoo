@@ -26,14 +26,7 @@ class PropertiesBaseDefinition(models.Model):
                 _("The definition needs to be linked to a properties field.")
             )
 
-    @api.model
-    def has_access_properties_definition(self, model_name):
-        """Return True if the current user can edit the base definition."""
-        if not self.env[model_name].has_access("write"):
-            return False
-        return self.env.user._is_system()
-
-    @ormcache()
+    @ormcache('model_name', 'field_name')
     def _get_or_create_record(self, model_name, field_name):
         definition_record = self.sudo().search(
             [
