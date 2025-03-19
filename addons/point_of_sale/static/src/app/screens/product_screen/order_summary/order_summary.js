@@ -27,6 +27,17 @@ export class OrderSummary extends Component {
             triggerAtInput: (...args) => this.updateSelectedOrderline(...args),
             useWithBarcode: true,
         });
+        useEffect(()=>{
+            this.order = this.pos.get_order();
+            this.product = this.pos.config.discount_product_id;
+            this.lines = this.order?.get_orderlines();
+            console.log(this.lines);
+            console.log("checking the use-effect line...")
+            if(this.lines.length === 1 && this.lines[0].full_product_name === 'Discount'){
+                this.lines.filter((line) => line.get_product() === this.product).forEach((line) => line.delete());
+                console.log("Deleted")
+            }
+        },()=>[this.order, this.order?.get_orderlines()])
     }
 
     get currentOrder() {
