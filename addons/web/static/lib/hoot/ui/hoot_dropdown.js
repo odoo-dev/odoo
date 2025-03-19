@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { Component, useRef, useState, xml } from "@odoo/owl";
-import { useAutofocus, useWindowListener } from "../hoot_utils";
+import { useAutofocus, usePersistentListeners, useWindowListener } from "../hoot_utils";
 
 /**
  * @typedef {{
@@ -54,6 +54,8 @@ export class HootDropdown extends Component {
     };
 
     setup() {
+        usePersistentListeners();
+
         this.rootRef = useRef("root");
         this.togglerRef = useRef("toggler");
         this.state = useState({

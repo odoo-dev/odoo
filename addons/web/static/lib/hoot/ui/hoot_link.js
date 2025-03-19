@@ -3,6 +3,7 @@
 import { Component, useState, xml } from "@odoo/owl";
 import { FILTER_KEYS } from "../core/config";
 import { createUrlFromId } from "../core/url";
+import { usePersistentListeners } from "../hoot_utils";
 
 /**
  * @typedef {{
@@ -66,6 +67,8 @@ export class HootLink extends Component {
     };
 
     setup() {
+        usePersistentListeners();
+
         this.state = useState({ href: "#" });
     }
 

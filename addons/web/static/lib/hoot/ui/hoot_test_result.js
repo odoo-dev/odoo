@@ -12,6 +12,7 @@ import {
     getTypeOf,
     isLabel,
     ordinal,
+    usePersistentListeners,
 } from "../hoot_utils";
 import { HootLink } from "./hoot_link";
 import { HootTechnicalValue } from "./hoot_technical_value";
@@ -265,6 +266,7 @@ export class HootTestResult extends Component {
     ordinal = ordinal;
 
     setup() {
+        usePersistentListeners();
         subscribeToURLParams("*");
 
         this.config = useState(this.env.runner.config);

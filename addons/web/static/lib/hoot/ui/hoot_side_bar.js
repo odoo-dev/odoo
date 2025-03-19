@@ -3,7 +3,7 @@
 import { Component, onWillRender, useEffect, useRef, useState, xml } from "@odoo/owl";
 import { Suite } from "../core/suite";
 import { createUrlFromId } from "../core/url";
-import { lookup, normalize } from "../hoot_utils";
+import { lookup, normalize, usePersistentListeners } from "../hoot_utils";
 import { HootJobButtons } from "./hoot_job_buttons";
 
 /**
@@ -213,6 +213,8 @@ export class HootSideBar extends Component {
     unfoldedIds = new Set();
 
     setup() {
+        usePersistentListeners();
+
         const { runner, ui } = this.env;
 
         this.searchInputRef = useRef("search-input");

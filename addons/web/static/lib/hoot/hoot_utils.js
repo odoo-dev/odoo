@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { queryAll } from "@odoo/hoot-dom";
-import { reactive, useEffect, useExternalListener } from "@odoo/owl";
+import { onPatched, onWillPatch, reactive, useEffect, useExternalListener } from "@odoo/owl";
 import { isNode } from "@web/../lib/hoot-dom/helpers/dom";
 import { isIterable, toSelector } from "@web/../lib/hoot-dom/hoot_dom_utils";
 import { DiffMatchPatch } from "./lib/diff_match_patch";
@@ -89,6 +89,7 @@ const {
     Set,
     setTimeout,
     String,
+    Symbol,
     TypeError,
     WeakSet,
     window,
@@ -297,6 +298,9 @@ const R_CLASS = /^[A-Z][a-z]/;
 const R_NAMED_FUNCTION = /^\s*(async\s+)?function/;
 const R_INVISIBLE_CHARACTERS = /[\u00a0\u200b-\u200d\ufeff]/g;
 const R_OBJECT = /^\[object ([\w-]+)\]$/;
+const R_OWL_SYNTHETIC_LISTENER = /\bnativeToSyntheticEvent\b/;
+
+const S_ALLOW_LISTENER = Symbol("allow-listener");
 
 const dmp = new DiffMatchPatch();
 const { DIFF_INSERT, DIFF_DELETE } = DiffMatchPatch;
@@ -307,10 +311,20 @@ const windowTarget = {
     addEventListener: window.addEventListener.bind(window),
     removeEventListener: window.removeEventListener.bind(window),
 };
+let keepListeners = false;
 
 //-----------------------------------------------------------------------------
 // Exports
 //-----------------------------------------------------------------------------
+
+/**
+ * @param {() => any} handler
+ */
+export function canKeepListener(handler) {
+    return (
+        keepListeners || handler[S_ALLOW_LISTENER] || R_OWL_SYNTHETIC_LISTENER.test(String(handler))
+    );
+}
 
 /**
  * @template P
@@ -1208,6 +1222,11 @@ export function toExplicitString(value) {
     );
 }
 
+export function usePersistentListeners() {
+    onWillPatch(() => (keepListeners = true));
+    onPatched(() => (keepListeners = false));
+}
+
 /**
  * @param {{ el?: HTMLElement }} ref
  */
@@ -1234,7 +1253,12 @@ export function useAutofocus(ref) {
 
 /** @type {EventTarget["addEventListener"]} */
 export function useWindowListener(type, callback, options) {
-    return useExternalListener(windowTarget, type, (ev) => ev.isTrusted && callback(ev), options);
+    const handler = (ev) => ev.isTrusted && callback(ev);
+    Object.assign(handler, {
+        bind: () => handler,
+        [S_ALLOW_LISTENER]: true,
+    });
+    return useExternalListener(windowTarget, type, handler, options);
 }
 
 export class Callbacks {

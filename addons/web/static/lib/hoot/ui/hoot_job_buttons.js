@@ -4,6 +4,7 @@ import { Component, xml } from "@odoo/owl";
 import { Job } from "../core/job";
 import { Test } from "../core/test";
 import { HootLink } from "./hoot_link";
+import { usePersistentListeners } from "../hoot_utils";
 
 /**
  * @typedef {{
@@ -54,6 +55,10 @@ export class HootJobButtons extends Component {
             </HootLink>
         </div>
     `;
+
+    setup() {
+        usePersistentListeners();
+    }
 
     getType() {
         return this.props.job instanceof Test ? "test" : "suite";

@@ -4,7 +4,7 @@ import { Component, useState, xml } from "@odoo/owl";
 import { CONFIG_KEYS } from "../core/config";
 import { LOG_LEVELS } from "../core/logger";
 import { refresh } from "../core/url";
-import { CASE_EVENT_TYPES, strictEqual } from "../hoot_utils";
+import { CASE_EVENT_TYPES, strictEqual, usePersistentListeners } from "../hoot_utils";
 import { generateSeed, internalRandom } from "../mock/math";
 import { toggleColorScheme, useColorScheme } from "./hoot_colors";
 import { HootCopyButton } from "./hoot_copy_button";
@@ -281,6 +281,8 @@ export class HootConfigMenu extends Component {
     toggleColorScheme = toggleColorScheme;
 
     setup() {
+        usePersistentListeners();
+
         const { runner, ui } = this.env;
         this.color = useColorScheme();
         this.config = useState(runner.config);

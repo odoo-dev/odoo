@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { Component, useState, xml } from "@odoo/owl";
-import { copy, hasClipboard } from "../hoot_utils";
+import { copy, hasClipboard, usePersistentListeners } from "../hoot_utils";
 
 /**
  * @typedef {{
@@ -34,6 +34,8 @@ export class HootCopyButton extends Component {
     hasClipboard = hasClipboard;
 
     setup() {
+        usePersistentListeners();
+
         this.state = useState({ copied: false });
     }
 

@@ -3,6 +3,7 @@
 import { Component, xml } from "@odoo/owl";
 import { Tag } from "../core/tag";
 import { HootLink } from "./hoot_link";
+import { usePersistentListeners } from "../hoot_utils";
 
 /**
  * @typedef {{
@@ -50,5 +51,9 @@ export class HootTagButton extends Component {
 
     get title() {
         return `Tag ${this.props.tag.name}`;
+    }
+
+    setup() {
+        usePersistentListeners();
     }
 }

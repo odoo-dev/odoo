@@ -2,7 +2,7 @@
 
 import { Component, useState, xml } from "@odoo/owl";
 import { createUrl, refresh } from "../core/url";
-import { useWindowListener } from "../hoot_utils";
+import { usePersistentListeners, useWindowListener } from "../hoot_utils";
 import { HootButtons } from "./hoot_buttons";
 import { HootConfigMenu } from "./hoot_config_menu";
 import { HootDebugToolBar } from "./hoot_debug_toolbar";
@@ -95,6 +95,8 @@ export class HootMain extends Component {
     escapeKeyPresses = 0;
 
     setup() {
+        usePersistentListeners();
+
         const { runner } = this.env;
         this.state = useState({
             debugTest: null,

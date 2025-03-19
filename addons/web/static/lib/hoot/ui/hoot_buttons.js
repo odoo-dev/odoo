@@ -2,7 +2,7 @@
 
 import { Component, useState, xml } from "@odoo/owl";
 import { refresh, subscribeToURLParams } from "../core/url";
-import { STORAGE, storageSet } from "../hoot_utils";
+import { STORAGE, storageSet, usePersistentListeners } from "../hoot_utils";
 import { HootLink } from "./hoot_link";
 
 /**
@@ -102,6 +102,8 @@ export class HootButtons extends Component {
     `;
 
     setup() {
+        usePersistentListeners();
+
         const { runner } = this.env;
         this.state = useState({
             disable: false,

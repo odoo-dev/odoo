@@ -17,6 +17,7 @@ import {
     storageSet,
     stringify,
     title,
+    usePersistentListeners,
     useWindowListener,
 } from "../hoot_utils";
 import { HootTagButton } from "./hoot_tag_button";
@@ -360,6 +361,8 @@ export class HootSearch extends Component {
     }, 16);
 
     setup() {
+        usePersistentListeners();
+
         const { runner } = this.env;
 
         runner.beforeAll(() => {

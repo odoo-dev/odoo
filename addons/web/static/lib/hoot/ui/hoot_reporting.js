@@ -4,7 +4,7 @@ import { Component, onWillRender, useState, xml } from "@odoo/owl";
 import { parseRegExp } from "../../hoot-dom/hoot_dom_utils";
 import { Test } from "../core/test";
 import { EXCLUDE_PREFIX } from "../core/url";
-import { formatTime, getFuzzyScore, normalize } from "../hoot_utils";
+import { formatTime, getFuzzyScore, normalize, usePersistentListeners } from "../hoot_utils";
 import { HootJobButtons } from "./hoot_job_buttons";
 import { HootLogCounters } from "./hoot_log_counters";
 import { HootTestPath } from "./hoot_test_path";
@@ -213,6 +213,8 @@ export class HootReporting extends Component {
     formatTime = formatTime;
 
     setup() {
+        usePersistentListeners();
+
         const { runner, ui } = this.env;
 
         this.config = useState(runner.config);

@@ -5,6 +5,7 @@ import { Test } from "../core/test";
 import { HootCopyButton } from "./hoot_copy_button";
 import { HootLink } from "./hoot_link";
 import { HootTagButton } from "./hoot_tag_button";
+import { usePersistentListeners } from "../hoot_utils";
 
 /**
  * @typedef {{
@@ -93,6 +94,8 @@ export class HootTestPath extends Component {
     `;
 
     setup() {
+        usePersistentListeners();
+
         this.results = useState(this.props.test.results);
         this.uiState = useState(this.env.ui);
     }

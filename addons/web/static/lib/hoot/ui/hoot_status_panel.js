@@ -2,7 +2,7 @@
 
 import { Component, onWillRender, useEffect, useRef, useState, xml } from "@odoo/owl";
 import { Test } from "../core/test";
-import { formatTime } from "../hoot_utils";
+import { formatTime, usePersistentListeners } from "../hoot_utils";
 import { getTitle, setTitle } from "../mock/window";
 import { getColors, onColorSchemeChange } from "./hoot_colors";
 import { HootTestPath } from "./hoot_test_path";
@@ -208,6 +208,8 @@ export class HootStatusPanel extends Component {
     formatTime = formatTime;
 
     setup() {
+        usePersistentListeners();
+
         const startTimer = () => {
             stopTimer();
 

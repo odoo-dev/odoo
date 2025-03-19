@@ -3,7 +3,7 @@
 import { Component, onWillRender, useState, xml } from "@odoo/owl";
 import { Test } from "../core/test";
 import { refresh } from "../core/url";
-import { formatTime } from "../hoot_utils";
+import { formatTime, usePersistentListeners } from "../hoot_utils";
 import { HootConfigMenu } from "./hoot_config_menu";
 import { HootTestPath } from "./hoot_test_path";
 import { HootTestResult } from "./hoot_test_result";
@@ -112,6 +112,8 @@ export class HootDebugToolBar extends Component {
     }
 
     setup() {
+        usePersistentListeners();
+
         this.runnerState = useState(this.env.runner.state);
         this.state = useState({
             configOpen: false,

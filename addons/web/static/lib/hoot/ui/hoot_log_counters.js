@@ -1,6 +1,7 @@
 /** @odoo-module */
 
 import { Component, xml } from "@odoo/owl";
+import { usePersistentListeners } from "../hoot_utils";
 
 /**
  * @typedef {{
@@ -40,4 +41,8 @@ export class HootLogCounters extends Component {
             </span>
         </t>
     `;
+
+    setup() {
+        usePersistentListeners();
+    }
 }
