@@ -473,7 +473,7 @@ class TestSubcontractingDropshippingPortal(TestSubcontractingPortal):
         subcontractor, vendor = self.portal_user.partner_id | self.env['res.partner'].create([
             {'name': 'SuperVendor'},
         ])
-        routes = self.env.ref('purchase_stock.route_warehouse0_buy') | self.env.ref('mrp_subcontracting_dropshipping.route_subcontracting_dropshipping')
+        routes = self.env.ref('purchase_stock.route_warehouse0_buy') | self.env.ref('stock_dropshipping.route_drop_shipping')
         finished_product, component = self.env['product.product'].create([
             {
                 'name': 'Robot',
