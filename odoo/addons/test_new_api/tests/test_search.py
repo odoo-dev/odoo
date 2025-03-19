@@ -868,7 +868,6 @@ class TestSearchRelated(TransactionCase):
         model = self.env['test_new_api.related']
 
         # warmup
-        model.search([('foo_name', '=', 'a')])
         model.search([('foo_name', '!=', 'a')])
         model.search([('foo_name', '=', False)])
         model.search([('foo_name', '!=', False)])
@@ -878,18 +877,44 @@ class TestSearchRelated(TransactionCase):
         model.search([('foo_name', 'not in', ['a', False])])
         model.search([('foo_bar_name', '=', False)])
         model.search([('foo_bar_name', '!=', False)])
+        model.search([('foo_bar_name_sudo', '=', False)])
+        model.search([('foo_bar_name_sudo', '!=', False)])
 
         with self.assertQueries(["""
             SELECT "test_new_api_related"."id"
             FROM "test_new_api_related"
-            WHERE "test_new_api_related"."foo_id" IN (
-                SELECT "test_new_api_related_foo"."id"
-                FROM "test_new_api_related_foo"
-                WHERE "test_new_api_related_foo"."name" IN %s
+            LEFT JOIN "test_new_api_related_foo" AS "test_new_api_related__foo_id"
+                ON ("test_new_api_related"."foo_id" = "test_new_api_related__foo_id"."id")
+            WHERE (
+                "test_new_api_related__foo_id"."name" NOT IN %s
+                OR "test_new_api_related__foo_id"."name" IS NULL
             )
             ORDER BY "test_new_api_related"."id"
         """]):
-            model.search([('foo_name', '=', 'a')])
+            model.search([('foo_name_sudo', '!=', 'a')])
+
+        with self.assertQueries(["""
+            SELECT "test_new_api_related"."id"
+            FROM "test_new_api_related"
+            LEFT JOIN "test_new_api_related_foo" AS "test_new_api_related__foo_id"
+                ON ("test_new_api_related"."foo_id" = "test_new_api_related__foo_id"."id")
+            WHERE (
+                "test_new_api_related__foo_id"."name" IN %s
+                OR "test_new_api_related__foo_id"."name" IS NULL
+            )
+            ORDER BY "test_new_api_related"."id"
+        """]):
+            model.search([('foo_name_sudo', '=', False)])
+
+        with self.assertQueries(["""
+            SELECT "test_new_api_related"."id"
+            FROM "test_new_api_related"
+            LEFT JOIN "test_new_api_related_foo" AS "test_new_api_related__foo_id"
+                ON ("test_new_api_related"."foo_id" = "test_new_api_related__foo_id"."id")
+            WHERE "test_new_api_related__foo_id"."name" NOT IN %s
+            ORDER BY "test_new_api_related"."id"
+        """]):
+            model.search([('foo_name_sudo', '!=', False)])
 
         with self.assertQueries(["""
             SELECT "test_new_api_related"."id"
@@ -1001,7 +1026,7 @@ class TestSearchRelated(TransactionCase):
                         OR "test_new_api_related_foo"."bar_id" IN (
                             SELECT "test_new_api_related_bar"."id"
                             FROM "test_new_api_related_bar"
-                            WHERE ("test_new_api_related_bar"."name" IN %s OR "test_new_api_related_bar"."name" IS NULL)
+                            WHERE "test_new_api_related_bar"."name" IN %s
                         )
                     )
                 )
@@ -1025,6 +1050,33 @@ class TestSearchRelated(TransactionCase):
             ORDER BY "test_new_api_related"."id"
         """]):
             model.search([('foo_bar_name', '!=', False)])
+
+        with self.assertQueries(["""
+            SELECT "test_new_api_related"."id"
+            FROM "test_new_api_related"
+            LEFT JOIN "test_new_api_related_foo" AS "test_new_api_related__foo_id"
+                ON ("test_new_api_related"."foo_id" = "test_new_api_related__foo_id"."id")
+            LEFT JOIN "test_new_api_related_bar" AS "test_new_api_related__foo_id__bar_id"
+                ON ("test_new_api_related__foo_id"."bar_id" = "test_new_api_related__foo_id__bar_id"."id")
+            WHERE (
+                "test_new_api_related__foo_id__bar_id"."name" IN %s
+                OR "test_new_api_related__foo_id__bar_id"."name" IS NULL
+            )
+            ORDER BY "test_new_api_related"."id"
+        """]):
+            model.search([('foo_bar_name_sudo', '=', False)])
+
+        with self.assertQueries(["""
+            SELECT "test_new_api_related"."id"
+            FROM "test_new_api_related"
+            LEFT JOIN "test_new_api_related_foo" AS "test_new_api_related__foo_id"
+                ON ("test_new_api_related"."foo_id" = "test_new_api_related__foo_id"."id")
+            LEFT JOIN "test_new_api_related_bar" AS "test_new_api_related__foo_id__bar_id"
+                ON ("test_new_api_related__foo_id"."bar_id" = "test_new_api_related__foo_id__bar_id"."id")
+            WHERE "test_new_api_related__foo_id__bar_id"."name" NOT IN %s
+            ORDER BY "test_new_api_related"."id"
+        """]):
+            model.search([('foo_bar_name_sudo', '!=', False)])
 
     def test_related_inherited(self):
         model = self.env['test_new_api.related_inherits'].with_user(self.env.ref('base.user_admin'))
