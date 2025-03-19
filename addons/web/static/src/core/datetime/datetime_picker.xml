@@ -51,24 +51,21 @@
                 </div>
             </t>
         </div>
-        <div t-attf-class="position-relative d-flex flex-column flex-md-row gap-4 gap-md-3 {{ props.type === 'datetime' ? 'justify-content-center' : 'justify-content-end' }}">
-            <div t-attf-class="d-flex gap-3 w-100 {{ props.type === 'datetime' ? 'justify-content-around' : 'd-none' }}">
-                <t t-if="props.type === 'datetime'">
-                    <t t-foreach="state.timeValues" t-as="timeValue" t-key="timeValue_index">
-                        <TimePicker
-                            t-if="timeValue"
-                            value="timeValue"
-                            onChange="(newTime) => this.onTimeChange(timeValue_index, newTime)"
-                            minutesRounding="props.rounding"
-                            showSeconds="props.rounding === 0"
-                        />
-                    </t>
+        <div class="d-flex justify-content-around">
+            <t t-if="props.type === 'datetime'">
+                <t t-foreach="state.timeValues" t-as="timeValue" t-key="timeValue_index">
+                    <TimePicker
+                        t-if="timeValue"
+                        value="timeValue"
+                        onChange="(newTime) => this.onTimeChange(timeValue_index, newTime)"
+                        minutesRounding="props.rounding"
+                        showSeconds="props.rounding === 0"
+                    />
                 </t>
-            </div>
-
-            <div t-attf-class="o_datetime_buttons {{ props.type === 'datetime' ? 'position-md-absolute h-100 end-0' : '' }}">
-                <t t-slot="buttons" />
-            </div>
+            </t>
+        </div>
+        <div class="o_datetime_buttons d-flex justify-content-end mt-2">
+            <t t-slot="buttons" />
         </div>
     </t>
 
@@ -116,7 +113,7 @@
                 >
                     <t t-foreach="titles" t-as="title" t-key="title">
                         <strong
-                            t-attf-class="o_header_part fs-5 {{ props.range ? 'flex-basis-50' : 'flex-basis-100' }}"
+                            class="o_header_part fs-5"
                             t-esc="title"
                         />
                     </t>

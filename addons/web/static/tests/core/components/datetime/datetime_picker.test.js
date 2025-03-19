@@ -548,9 +548,10 @@ test("focus is adjusted to selected date", async () => {
                     [14, 15, 16, 17, 18, 19, 20],
                     [21, 22, 23, 24, 25, 26, 27],
                     [28, [29], 30, 31, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0],
                 ],
                 daysOfWeek: ["#", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-                weekNumbers: [18, 19, 20, 21, 22],
+                weekNumbers: [18, 19, 20, 21, 22, 23],
             },
         ],
         time: ["23:55"],
@@ -595,9 +596,10 @@ test("next month and previous month", async () => {
                     [12, 13, 14, 15, 16, 17, 18],
                     [19, 20, 21, 22, 23, 24, 25],
                     [26, 27, 28, 29, 30, 31, 0],
+                    [0, 0, 0, 0, 0, 0, 0],
                 ],
                 daysOfWeek: ["#", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-                weekNumbers: [9, 10, 11, 12, 13],
+                weekNumbers: [9, 10, 11, 12, 13, 14],
             },
         ],
     });
@@ -636,104 +638,12 @@ test("next month and previous month", async () => {
                     [14, 15, 16, 17, 18, 19, 20],
                     [21, 22, 23, 24, 25, 26, 27],
                     [28, 29, 30, 31, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0],
                 ],
                 daysOfWeek: ["#", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-                weekNumbers: [18, 19, 20, 21, 22],
+                weekNumbers: [18, 19, 20, 21, 22, 23],
             },
         ],
-    });
-});
-
-test.tags("desktop");
-test("additional month, hide time picker", async () => {
-    await mountWithCleanup(DateTimePicker, {
-        props: {
-            value: [
-                DateTime.fromObject({ hour: 9, minute: 36 }),
-                DateTime.fromObject({ hour: 21, minute: 5 }),
-            ],
-            range: true,
-            type: "date",
-        },
-    });
-
-    assertDateTimePicker({
-        title: "April 2023\nMay 2023",
-        date: [
-            {
-                cells: [
-                    [0, 0, 0, 0, 0, 0, 1],
-                    [2, 3, 4, 5, 6, 7, 8],
-                    [9, 10, 11, 12, 13, 14, 15],
-                    [16, 17, 18, 19, 20, 21, 22],
-                    [23, 24, ["25"], 26, 27, 28, 29],
-                    [30, 0, 0, 0, 0, 0, 0],
-                ],
-                daysOfWeek: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-            },
-            {
-                cells: [
-                    [0, 1, 2, 3, 4, 5, 6],
-                    [7, 8, 9, 10, 11, 12, 13],
-                    [14, 15, 16, 17, 18, 19, 20],
-                    [21, 22, 23, 24, 25, 26, 27],
-                    [28, 29, 30, 31, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0],
-                ],
-                daysOfWeek: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-            },
-        ],
-    });
-});
-
-test.tags("desktop");
-test("additional month, empty range value", async () => {
-    await mountWithCleanup(DateTimePicker, {
-        props: {
-            value: [null, null],
-            range: true,
-        },
-    });
-
-    assertDateTimePicker({
-        title: "April 2023\nMay 2023",
-        date: [
-            {
-                cells: [
-                    [0, 0, 0, 0, 0, 0, 1],
-                    [2, 3, 4, 5, 6, 7, 8],
-                    [9, 10, 11, 12, 13, 14, 15],
-                    [16, 17, 18, 19, 20, 21, 22],
-                    [23, 24, "25", 26, 27, 28, 29],
-                    [30, 0, 0, 0, 0, 0, 0],
-                ],
-                daysOfWeek: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-            },
-            {
-                cells: [
-                    [0, 1, 2, 3, 4, 5, 6],
-                    [7, 8, 9, 10, 11, 12, 13],
-                    [14, 15, 16, 17, 18, 19, 20],
-                    [21, 22, 23, 24, 25, 26, 27],
-                    [28, 29, 30, 31, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0],
-                ],
-                daysOfWeek: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-            },
-        ],
-        time: ["13:00", "14:00"],
-    });
-
-    await click(".o_time_picker_input:eq(0)");
-    await animationFrame();
-    expect(queryAllTexts(".o_time_picker_option")).toEqual(TIME_OPTIONS);
-
-    await click(".o_time_picker_input:eq(1)");
-    await animationFrame();
-    expect(queryAllTexts(".o_time_picker_option")).toEqual(TIME_OPTIONS);
-
-    expect(".o_datetime_picker").toHaveStyle({
-        "--DateTimePicker__Day-template-columns": "7",
     });
 });
 
@@ -750,7 +660,7 @@ test("range value", async () => {
     });
 
     assertDateTimePicker({
-        title: "April 2023\nMay 2023",
+        title: "April 2023",
         date: [
             {
                 cells: [
@@ -760,17 +670,6 @@ test("range value", async () => {
                     [[16], [17], [18], [19], [20], [21], [22]],
                     [[23], [24], ["25"], [26], [27], [28], [29]],
                     [[30], 0, 0, 0, 0, 0, 0],
-                ],
-                daysOfWeek: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-            },
-            {
-                cells: [
-                    [0, [1], [2], [3], [4], [5], [6]],
-                    [[7], [8], [9], [10], [11], [12], [13]],
-                    [[14], [15], [16], [17], [18], 19, 20],
-                    [21, 22, 23, 24, 25, 26, 27],
-                    [28, 29, 30, 31, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0],
                 ],
                 daysOfWeek: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
             },
@@ -845,7 +744,7 @@ test("range value, previous month", async () => {
     });
 
     assertDateTimePicker({
-        title: "April 2023\nMay 2023",
+        title: "April 2023",
         date: [
             {
                 cells: [
@@ -855,17 +754,6 @@ test("range value, previous month", async () => {
                     [16, 17, 18, 19, 20, 21, 22],
                     [23, 24, "25", 26, 27, 28, 29],
                     [30, 0, 0, 0, 0, 0, 0],
-                ],
-                daysOfWeek: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-            },
-            {
-                cells: [
-                    [0, 1, 2, 3, 4, 5, 6],
-                    [7, 8, 9, 10, 11, 12, 13],
-                    [14, 15, 16, 17, 18, 19, 20],
-                    [21, 22, 23, 24, 25, 26, 27],
-                    [28, 29, 30, 31, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0],
                 ],
                 daysOfWeek: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
             },
@@ -877,7 +765,7 @@ test("range value, previous month", async () => {
     await animationFrame();
 
     assertDateTimePicker({
-        title: "March 2023\nApril 2023",
+        title: "March 2023",
         date: [
             {
                 cells: [
@@ -887,17 +775,6 @@ test("range value, previous month", async () => {
                     [19, 20, 21, 22, 23, 24, 25],
                     [26, 27, 28, 29, 30, 31, 0],
                     [0, 0, 0, 0, 0, 0, 0],
-                ],
-                daysOfWeek: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-            },
-            {
-                cells: [
-                    [0, 0, 0, 0, 0, 0, 1],
-                    [2, 3, 4, 5, 6, 7, 8],
-                    [9, 10, 11, 12, 13, 14, 15],
-                    [16, 17, 18, 19, 20, 21, 22],
-                    [23, 24, "25", 26, 27, 28, 29],
-                    [30, 0, 0, 0, 0, 0, 0],
                 ],
                 daysOfWeek: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
             },
@@ -1226,7 +1103,7 @@ test("range value, select date for second value", async () => {
         },
     });
 
-    await click(getPickerCell("21").at(0));
+    await click(getPickerCell("21"));
     await animationFrame();
     expect.verifySteps(["2023-04-20T08:43:00,2023-04-21T17:16:00"]);
 });
@@ -1263,7 +1140,7 @@ test("range value, select date for second value before first value", async () =>
         },
     });
 
-    await click(getPickerCell("19").at(0));
+    await click(getPickerCell("19"));
     await animationFrame();
     expect.verifySteps(["2023-04-20T08:43:00,2023-04-19T17:16:00"]);
 });
@@ -1331,6 +1208,7 @@ test("focus proper month when changing props out of current month", async () => 
                     [14, 15, 16, 17, 18, 19, 20],
                     [21, 22, 23, 24, 25, 26, 27],
                     [28, 29, 30, 31, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0],
                 ],
                 daysOfWeek: ["#", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
             },
