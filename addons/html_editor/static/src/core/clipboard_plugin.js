@@ -1,7 +1,13 @@
 import { isTextNode, isParagraphRelatedElement } from "../utils/dom_info";
 import { Plugin } from "../plugin";
 import { closestBlock } from "../utils/blocks";
-import { removeClass, removeStyle, unwrapContents, wrapInlinesInBlocks, splitTextNode } from "../utils/dom";
+import {
+    removeClass,
+    removeStyle,
+    unwrapContents,
+    wrapInlinesInBlocks,
+    splitTextNode,
+} from "../utils/dom";
 import { childNodes, closestElement } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
 import {
@@ -177,11 +183,18 @@ export class ClipboardPlugin extends Plugin {
         this.dispatchTo("before_paste_handlers", selection);
         // refresh selection after potential changes from `before_paste` handlers
         selection = this.dependencies.selection.getEditableSelection();
-
-        this.handlePasteUnsupportedHtml(selection, ev.clipboardData) ||
-            this.handlePasteOdooEditorHtml(ev.clipboardData) ||
-            this.handlePasteHtml(selection, ev.clipboardData) ||
+        const closestTitle = closestElement(
+            selection.anchorNode,
+            'div[data-embedded="toggleBlock"]'
+        );
+        if (closestTitle) {
             this.handlePasteText(selection, ev.clipboardData);
+        } else {
+            this.handlePasteUnsupportedHtml(selection, ev.clipboardData) ||
+                this.handlePasteOdooEditorHtml(ev.clipboardData) ||
+                this.handlePasteHtml(selection, ev.clipboardData) ||
+                this.handlePasteText(selection, ev.clipboardData);
+        }
 
         this.dependencies.history.addStep();
     }
