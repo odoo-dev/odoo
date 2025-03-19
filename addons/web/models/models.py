@@ -635,7 +635,7 @@ class Base(models.AbstractModel):
         for aggregate_spec, values in column_mapping.items():
             if currency_agg := mapping_currency_aggregates.get(aggregate_spec):
                 for value, currencies, dict_group in zip(values, column_mapping[currency_agg], result):
-                    dict_group[aggregate_spec] = value if len(currencies) == 1 and currencies != [None] else False
+                    dict_group[aggregate_spec] = (value, currencies[0]) if len(currencies) == 1 and currencies != [None] else False
             else:
                 for value, dict_group in zip(values, result, strict=True):
                     dict_group[aggregate_spec] = value

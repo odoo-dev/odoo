@@ -316,11 +316,16 @@ export function formatX2many(value) {
 export function formatMonetary(value, options = {}) {
     // Monetary fields want to display nothing when the value is unset.
     // You wouldn't want a value of 0 euro if nothing has been provided.
+    let currencyId = options.currencyId;
+    if (Array.isArray(value)) {
+        currencyId = value[1];
+        value = value[0];
+    }
+
     if (value === false) {
         return "";
     }
 
-    let currencyId = options.currencyId;
     if (!currencyId && options.data) {
         const currencyField =
             options.currencyField ||
