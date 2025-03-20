@@ -2,7 +2,7 @@ import { Plugin } from "@html_editor/plugin";
 import { isBlock, closestBlock } from "@html_editor/utils/blocks";
 import { fillEmpty } from "@html_editor/utils/dom";
 import { leftLeafOnlyNotBlockPath } from "@html_editor/utils/dom_state";
-import { isVisibleTextNode } from "@html_editor/utils/dom_info";
+import { isEmptyBlock, isVisibleTextNode } from "@html_editor/utils/dom_info";
 import {
     closestElement,
     createDOMPathGenerator,
@@ -104,7 +104,7 @@ const rightLeafOnlyNotBlockPath = createDOMPathGenerator(DIRECTIONS.RIGHT, {
 });
 
 const headingTags = ["H1", "H2", "H3", "H4", "H5", "H6"];
-const handledElemSelector = [...headingTags, "PRE", "BLOCKQUOTE"].join(", ");
+const handledElemSelector = [...headingTags, "PRE", "BLOCKQUOTE", "DIV"].join(", ");
 
 export class FontPlugin extends Plugin {
     static id = "font";
@@ -453,7 +453,17 @@ export class FontPlugin extends Plugin {
             return;
         }
         // Check if cursor is inside an empty heading, blockquote or pre.
-        const closestHandledElement = closestElement(endContainer, handledElemSelector);
+        let closestHandledElement = closestElement(endContainer, handledElemSelector);
+        if (closestHandledElement?.tagName === "DIV") {
+            if (
+                closestHandledElement.classList.contains("o-signature-container") &&
+                isEmptyBlock(closestHandledElement)
+            ) {
+                closestHandledElement.replaceChildren(this.document.createElement("br"));
+            } else {
+                closestHandledElement = null;
+            }
+        }
         if (!closestHandledElement || closestHandledElement.textContent.length) {
             return;
         }

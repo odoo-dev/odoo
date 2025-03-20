@@ -502,6 +502,14 @@ describe("Selection collapsed", () => {
                 contentAfter: `<p>a[]</p>`,
             });
         });
+        test("should replace signature container with base paragraph", async () => {
+            await testEditor({
+                contentBefore: `<div class="o-signature-container">[]</div>`,
+                stepFunction: deleteBackward,
+                contentAfter: `<div>[]<br></div>`,
+                config: { baseContainer: "DIV" },
+            });
+        });
     });
 
     describe("Line breaks", () => {
