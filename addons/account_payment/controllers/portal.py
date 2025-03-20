@@ -86,11 +86,11 @@ class PortalAccount(portal.PortalAccount, PaymentPortal):
         values.update({
             'payment': {
                 'date': fields.Date.today(),
-                'reference': batch_name,
                 'amount': total_amount,
                 'currency': currency,
             },
             'amount': total_amount,
+            'reference_prefix': batch_name,
         })
 
         common_view_values = self._get_common_page_view_values(
@@ -100,7 +100,6 @@ class PortalAccount(portal.PortalAccount, PaymentPortal):
                 'total_amount': total_amount,
                 'currency': currency,
                 'amount_residual': amount_residual,
-                'payment_reference': batch_name,
                 'landing_route': '/my/invoices/',
                 'transaction_route': '/invoice/transaction/overdue',
             },
@@ -159,7 +158,6 @@ class PortalAccount(portal.PortalAccount, PaymentPortal):
             'transaction_route': invoices_data['transaction_route'],
             'landing_route': invoices_data['landing_route'],
             'access_token': access_token,
-            'payment_reference': invoices_data.get('payment_reference', False),
         }
         # Merge the dictionaries while allowing the redefinition of keys.
         values = portal_page_values | payment_form_values | payment_context | self._get_extra_payment_form_values(**kwargs)

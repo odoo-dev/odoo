@@ -62,7 +62,7 @@
                         <t t-call="payment.summary_item">
                             <t t-set="name" t-value="'reference'"/>
                             <t t-set="label">Reference</t>
-                            <t t-set="value" t-value="payment['reference']"/>
+                            <t t-set="value" t-value="reference_prefix"/>
                             <t t-set="include_separator" t-value="True"/>
                         </t>
                     </div>

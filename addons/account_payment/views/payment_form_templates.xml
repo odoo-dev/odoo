@@ -5,7 +5,6 @@
         <xpath expr="//form[@id='o_payment_form']" position="attributes">
             <attribute name="t-att-data-invoice-next-amount-to-pay">next_amount_to_pay</attribute>
             <attribute name="t-att-data-invoice-amount-due">amount_due</attribute>
-            <attribute name="t-att-data-payment-reference">payment_reference</attribute>
         </xpath>
     </template>
 
