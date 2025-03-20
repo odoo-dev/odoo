@@ -585,7 +585,12 @@ export async function runTests(options) {
     // Run all test files
     const filteredSuitePaths = new Set(suites.map((s) => s.fullName));
     let currentAddonsKey = "";
+    let lastSuiteName = undefined;
+    let lastNumberTests = 0;
     for (const moduleName of testModuleNames) {
+        if (lastSuiteName) {
+            await __gcAndLogMemory(lastSuiteName, lastNumberTests);
+        }
         const suitePath = getSuitePath(moduleName);
         if (!filteredSuitePaths.has(suitePath)) {
             continue;
@@ -614,11 +619,15 @@ export async function runTests(options) {
         const running = await start(suite);
 
         moduleSetLoader.cleanup();
-        await __gcAndLogMemory(suite.fullName, suite.reporting.tests);
+        lastSuiteName = suite.fullName;
+        lastNumberTests = suite.reporting.tests.length;
 
         if (!running) {
             break;
         }
+    }
+    if (lastSuiteName) {
+        await __gcAndLogMemory(lastSuiteName, lastNumberTests);
     }
 
     await stop();
