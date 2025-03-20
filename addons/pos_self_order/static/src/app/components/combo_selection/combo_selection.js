@@ -1,6 +1,8 @@
 import { Component } from "@odoo/owl";
 import { useSelfOrder } from "@pos_self_order/app/self_order_service";
 import { AttributeSelection } from "@pos_self_order/app/components/attribute_selection/attribute_selection";
+import { useService } from "@web/core/utils/hooks";
+import { ProductInfoPopup } from "@pos_self_order/app/components/product_info_popup/product_info_popup";
 
 export class ComboSelection extends Component {
     static template = "pos_self_order.ComboSelection";
@@ -9,6 +11,7 @@ export class ComboSelection extends Component {
 
     setup() {
         this.selfOrder = useSelfOrder();
+        this.dialog = useService("dialog");
     }
 
     productClicked(line) {
@@ -30,5 +33,22 @@ export class ComboSelection extends Component {
             return;
         }
         this.props.comboState.showQtyButtons = true;
+    }
+
+    showProductInfo(line) {
+        this.dialog.add(ProductInfoPopup, {
+            product: line.product_id,
+            line: line,
+            addToCart: () => {
+                this.productClicked(line);
+            },
+        });
+    }
+
+    isHtmlEmpty(line) {
+        const div = Object.assign(document.createElement("div"), {
+            innerHTML: line.product_id.public_description,
+        });
+        return div.innerText.trim() === "";
     }
 }

@@ -110,7 +110,7 @@ export class ProductCard extends Component {
             if (isProductInCart) {
                 isProductInCart.qty += qty;
             } else {
-                this.selfOrder.addToCart(product, 1);
+                this.selfOrder.addToCart(product, qty);
             }
         }
     }
