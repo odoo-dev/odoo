@@ -524,6 +524,12 @@ class ProcurementGroup(models.Model):
             rule_dict[group[0].id, group[2].id][group[1].id] = group[3].sorted(lambda rule: (rule.route_sequence, rule.sequence))[0]
         return rule_dict
 
+    @api.model
+    def _find_or_create(self, vals):
+        domain = [(f_name, '=', value) for f_name, value in vals.items()]
+        group = self.search(domain, limit=1)
+        return group or self.create(vals)
+
     def _search_rule(self, route_ids, packaging_id, product_id, warehouse_id, domain):
         """ First find a rule among the ones defined on the procurement
         group, then try on the routes defined for the product, finally fallback

@@ -125,7 +125,7 @@ class StockPicking(models.Model):
 
     def _prepare_subcontract_mo_vals(self, subcontract_move, bom):
         subcontract_move.ensure_one()
-        group = self.env['procurement.group'].create({
+        group = self.env['procurement.group']._find_or_create({
             'name': self.name,
             'partner_id': self.partner_id.id,
         })
