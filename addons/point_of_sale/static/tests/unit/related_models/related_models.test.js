@@ -1,7 +1,7 @@
 import { expect, test, describe } from "@odoo/hoot";
 import { createRelatedModels, Base } from "@point_of_sale/app/models/related_models";
 import { serializeDateTime } from "@web/core/l10n/dates";
-import { SERIALIZED_UI_STATE_PROP } from "@point_of_sale/app/models/related_models/utils";
+import { SERIALIZED_STATE_PROP } from "@point_of_sale/app/models/related_models/utils";
 import { MODEL_DEF as modelDefs, MODEL_OPTS as modelOpts } from "./utils";
 const { DateTime } = luxon;
 
@@ -1149,7 +1149,7 @@ describe("Related Model", () => {
         test("Simple create", () => {
             class PosOrder extends Base {
                 setup(vals) {
-                    this.__lineInSetup = this.lines[0];
+                    this.__lineInSetup = this.lines[0].id;
                 }
             }
 
@@ -1161,13 +1161,13 @@ describe("Related Model", () => {
             });
 
             const order = models["pos.order"].create({ id: 99, lines: [11] });
-            expect(order.__lineInSetup).toBe(line1);
+            expect(order.__lineInSetup).toBe(line1.id);
         });
 
         test("Load connected data", () => {
             class PosOrder extends Base {
                 setup(vals) {
-                    this.__lineInSetup = this.lines[0];
+                    this.__lineInSetup = this.lines[0].id;
                 }
             }
 
@@ -1198,13 +1198,13 @@ describe("Related Model", () => {
 
             const order = models["pos.order"].get(1);
             expect(results["pos.order"][0]).toBe(order);
-            expect(order.__lineInSetup).toBe(order.lines[0]);
+            expect(order.__lineInSetup).toBe(order.lines[0].id);
         });
 
         test("Connect new data", () => {
             class PosOrder extends Base {
                 setup(vals) {
-                    this.__linesInSetup = [...this.lines];
+                    this.__linesInSetup = this.lines.map((line) => line.id);
                 }
             }
 
@@ -1237,8 +1237,8 @@ describe("Related Model", () => {
 
             const order = models["pos.order"].get(1);
             expect(order.__linesInSetup.length).toBe(2);
-            expect(order.__linesInSetup[0]).toBe(models["pos.order.line"].get(11));
-            expect(order.__linesInSetup[1]).toBe(models["pos.order.line"].get(12));
+            expect(order.__linesInSetup[0]).toBe(11);
+            expect(order.__linesInSetup[1]).toBe(12);
         });
     });
 
@@ -1253,11 +1253,6 @@ describe("Related Model", () => {
             initState() {
                 super.initState();
                 calls.push("initState");
-            }
-
-            restoreState(uiState) {
-                super.restoreState(uiState);
-                calls.push("restoreState");
             }
         }
         const { models } = createRelatedModels(modelDefs, { "pos.order": PosOrder }, modelOpts);
@@ -1291,14 +1286,14 @@ describe("Related Model", () => {
                         id: 1,
                         total: 10,
                         uuid: order1.uuid,
-                        [SERIALIZED_UI_STATE_PROP]: '{"test":true}',
+                        [SERIALIZED_STATE_PROP]: { state_test: true },
                     },
                 ],
             },
             []
         );
-        expect(calls).toEqual(["setup", "restoreState"]);
-        expect(order1.uiState).toEqual({ test: true });
+        expect(calls).toEqual(["setup"]);
+        expect(order1.state_test).toEqual(true);
 
         //Loading new data
         calls = [];

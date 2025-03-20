@@ -1,5 +1,7 @@
 import { WithLazyGetterTrap } from "@point_of_sale/lazy_getter";
 import { deepImmutable, clone, RAW_SYMBOL } from "./utils";
+import { defineStateSetterTrap } from "./model_state";
+
 import { toRaw } from "@odoo/owl";
 const { DateTime } = luxon;
 
@@ -7,7 +9,7 @@ export class Base extends WithLazyGetterTrap {
     static excludedLazyGetters = ["id", "models"];
 
     constructor({ model, raw }) {
-        super({});
+        super({ traps: { set: defineStateSetterTrap() } });
         this.model = model;
         this[RAW_SYMBOL] = raw;
     }
@@ -29,25 +31,12 @@ export class Base extends WithLazyGetterTrap {
      * This method is called when the instance is created or updated
      * @param {*} _vals
      */
-    setup(_vals) {
-        this._dirty = typeof this.id !== "number";
-    }
+    setup(_vals) {}
 
     /**
      *  This method is invoked only during instance creation to preserve the state across updates.
      */
     initState() {}
-
-    /**
-     *  Restore state serialized from indexedDB
-     */
-    restoreState(uiState) {
-        this.uiState = uiState;
-    }
-
-    isDirty() {
-        return this._dirty;
-    }
 
     formatDateOrTime(field, type = "datetime") {
         if (type === "date") {
@@ -76,25 +65,11 @@ export class Base extends WithLazyGetterTrap {
         return this.model.serializeForIndexedDB(this);
     }
 
-    serializeState() {
-        if (!this.uiState) {
-            return;
-        }
-        return { ...this.uiState };
+    isDirty() {
+        return !!this._dirty;
     }
 
     backLink(link) {
         return this.model.backLink(this, link);
-    }
-
-    _markDirty() {
-        if (this.models._loadingData || this._dirty) {
-            return;
-        }
-
-        this._dirty = true;
-        this.model.getParentFields().forEach((field) => {
-            this[field.name]?._markDirty?.();
-        });
     }
 }

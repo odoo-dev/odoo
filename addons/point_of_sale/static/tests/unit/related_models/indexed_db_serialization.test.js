@@ -1,6 +1,9 @@
 import { expect, test, describe } from "@odoo/hoot";
 import { createRelatedModels } from "@point_of_sale/app/models/related_models";
-import { SERIALIZED_UI_STATE_PROP } from "@point_of_sale/app/models/related_models/utils";
+import {
+    SERIALIZED_STATE_PROP,
+    STATE_SYMBOL,
+} from "@point_of_sale/app/models/related_models/utils";
 
 const getModels = () =>
     createRelatedModels(
@@ -85,7 +88,7 @@ describe("IndexedDB serialization", () => {
             expect(result.lines.length).toBe(2);
             expect(result.lines[0]).toBe(line1.id);
             expect(result.lines[1]).toBe(line2.id);
-            expect(result[SERIALIZED_UI_STATE_PROP]).toBeEmpty();
+            expect(result[SERIALIZED_STATE_PROP]).toEqual({ _dirty: true });
         }
 
         {
@@ -93,20 +96,21 @@ describe("IndexedDB serialization", () => {
             expect(result.id).toBe(line1.id);
             expect(result.quantity).toBe(1);
             expect(result.attribute_ids).toEqual([99]);
-            expect(result[SERIALIZED_UI_STATE_PROP]).toBeEmpty();
+            expect(result[SERIALIZED_STATE_PROP]).toEqual({ _dirty: true });
         }
     });
 
-    test("UIState serialization", () => {
+    test("State serialization", () => {
         const models = getModels();
         const order = models["pos.order"].create({ total: 10 });
-        order.uiState = { demoValue: 99 };
+        order.stateValue = { demoValue: 99 };
 
         const result = order.serializeForIndexedDB();
         expect(result.id).toBe(order.id);
         expect(result.total).toBe(10);
-        expect(result[SERIALIZED_UI_STATE_PROP]).not.toBeEmpty();
-        expect(typeof result[SERIALIZED_UI_STATE_PROP]).toBe("string");
+        const serializedState = result[SERIALIZED_STATE_PROP];
+        expect(serializedState).not.toBeEmpty();
+        expect(serializedState.stateValue.demoValue).toBe(99);
     });
 
     test("Restore serialized data", () => {
@@ -114,7 +118,7 @@ describe("IndexedDB serialization", () => {
         const storedData = {
             "pos.order": [
                 {
-                    [SERIALIZED_UI_STATE_PROP]: '{"demoValue":999}',
+                    [SERIALIZED_STATE_PROP]: { demoValue: 999 },
                     total: 10,
                     id: 99,
                     lines: [11],
@@ -131,8 +135,9 @@ describe("IndexedDB serialization", () => {
 
         models.loadConnectedData(storedData);
         const order = models["pos.order"].get(99);
-        // UI state is restored
-        expect(order.uiState.demoValue).toBe(999);
+        // State is restored
+        expect(order.demoValue).toBe(999);
+        expect(order[STATE_SYMBOL].demoValue).toBe(999);
         // UIState must be excluded from the raw data
         expect(order.raw.uiState).toBeEmpty();
         expect(order.raw.lines).toEqual([11]);

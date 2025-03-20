@@ -4,10 +4,12 @@ export const DATE_TIME_TYPE = new Set(["date", "datetime"]);
 export const X2MANY_TYPES = new Set(["many2many", "one2many"]);
 export const PARENT_X2MANY_TYPES = new Set(["many2one", "many2many"]);
 export const RAW_SYMBOL = Symbol("raw");
+export const STATE_SYMBOL = Symbol("state");
 export const STORE_SYMBOL = Symbol("store");
-export const SERIALIZED_UI_STATE_PROP = "JSONuiState";
+export const SERIALIZED_STATE_PROP = "@state";
+export const SERIALIZED_IDB_PROP = "@idb";
 export const BACKREF_PREFIX = "<-";
-
+export const INTERNAL_MODEL_PROPS = new Set(["model", "models"]);
 export function getBackRef(model, fieldName) {
     return `${BACKREF_PREFIX}${model}.${fieldName}`;
 }
@@ -87,43 +89,45 @@ export function deepImmutable(obj, errorMsg) {
     });
 }
 
-export class AggregatedUpdates {
-    constructor() {
-        this.updates = new Map();
+/**
+ * Recursively removes  reactivity Proxies from an object,
+ * ensuring the returned value is fully "raw" and serializable.
+ * Useful when working with `structuredClone`, IndexedDB
+ * which do not support Proxy-wrapped data.
+ *
+ *  @param {any} value - The potentially proxied value to unwrap.
+ *  @returns {any} - A deeply unproxied, structured-clone-safe version of the input.
+ */
+export function deepUnproxy(value) {
+    if (value === null || typeof value !== "object") {
+        return value;
     }
 
-    /**
-     * Adds a field update for the given record.
-     * @param {Object} record - The record
-     * @param {string} fieldName - The name of the field that was updated.
-     */
-    add(record, fieldName) {
-        if (!this.updates.has(record)) {
-            this.updates.set(record, new Set());
+    if (Array.isArray(value)) {
+        return value.map(deepUnproxy);
+    }
+
+    if (value instanceof Set) {
+        const unwrappedSet = new Set();
+        for (const item of value) {
+            unwrappedSet.add(deepUnproxy(item));
         }
-        this.updates.get(record).add(fieldName);
+        return unwrappedSet;
     }
 
-    /**
-     * Iterates over all updated records, fires the update event (unless silenced), and marks the records as dirty.
-     *
-     * @param {Object} opts - Options for controlling the update behavior.
-     * @param {string[]} [opts.silentModels=[]] - List of model names to exclude from triggering update events.
-     */
-    fireEventAndDirty(opts = {}) {
-        const { silentModels = [] } = opts;
-        for (const [record, fields] of this.updates) {
-            if (!silentModels.includes(record.model.name)) {
-                record.model.triggerEvents("update", { id: record.id, fields: [...fields] });
-            }
-            record._markDirty();
+    if (value instanceof Map) {
+        const unwrappedMap = new Map();
+        for (const [key, val] of value.entries()) {
+            unwrappedMap.set(deepUnproxy(key), deepUnproxy(val));
+        }
+        return unwrappedMap;
+    }
+
+    const unwrappedObj = {};
+    for (const key in value) {
+        if (Object.hasOwn(value, key)) {
+            unwrappedObj[key] = deepUnproxy(value[key]);
         }
     }
-
-    /**
-     *  Remove record updated
-     */
-    remove(record) {
-        this.updates.delete(record);
-    }
+    return unwrappedObj;
 }

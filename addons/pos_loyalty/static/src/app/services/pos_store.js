@@ -543,7 +543,7 @@ patch(PosStore.prototype, {
         });
 
         this.models["product.product"].addEventListener(
-            "create",
+            "load",
             this.computeDiscountProductIdsForAllRewards.bind(this)
         );
 
@@ -551,7 +551,7 @@ patch(PosStore.prototype, {
             rule.validProductIds = new Set(rule.raw.valid_product_ids);
         }
 
-        this.models["loyalty.card"].addEventListener("create", (records) => {
+        this.models["loyalty.card"].addEventListener("load", (records) => {
             records = records.ids.map((record) => this.models["loyalty.card"].get(record));
             this.computePartnerCouponIds(records);
         });

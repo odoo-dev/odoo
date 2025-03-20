@@ -85,9 +85,10 @@ describe("Dirty record", () => {
         expect(order.isDirty()).toBe(true);
         order.price = 23.5;
         models.serializeForORM(order, { orm: true });
+        expect(order.isDirty()).toBe(false);
 
         // Setting the same value must not mark the record as dirty.
-        expect(order.isDirty()).toBe(false);
+
         order.price = 23.5;
         expect(order.isDirty()).toBe(false);
         order.price = 25;

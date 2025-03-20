@@ -72,6 +72,7 @@ patch(PosOrder.prototype, {
     },
     initState() {
         super.initState();
+
         this.uiState = {
             ...this.uiState,
             disabledRewards: this.uiState.disabledRewards || new Set(),

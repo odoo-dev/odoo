@@ -1,9 +1,9 @@
 import { Reactive } from "@web/core/utils/reactive";
-import { Base, createRelatedModels } from "@point_of_sale/app/models/related_models";
+import { createRelatedModels } from "@point_of_sale/app/models/related_models";
 import { registry } from "@web/core/registry";
 import { Mutex } from "@web/core/utils/concurrency";
 import { markRaw } from "@odoo/owl";
-import { batched } from "@web/core/utils/timing";
+
 import IndexedDB from "../models/utils/indexed_db";
 import { DataServiceOptions } from "../models/data_service_options";
 import { getOnNotified, uuidv4 } from "@point_of_sale/utils";
@@ -12,7 +12,6 @@ import { ConnectionLostError, RPCError } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 
 const { DateTime } = luxon;
-const INDEXED_DB_VERSION = 1;
 
 export class PosData extends Reactive {
     static modelToLoad = []; // When empty all models are loaded
@@ -94,7 +93,12 @@ export class PosData extends Reactive {
 
     async resetIndexedDB() {
         // Remove data_server_date since it's used to determine the last time the data was loaded
-        await this.indexedDB.reset();
+        try {
+            await this.indexedDB.deleteDatabase();
+            await this.indexedDB.init();
+        } catch (error) {
+            console.error("Failed to reset IndexedDB", error);
+        }
     }
 
     async initIndexedDB(relations) {
@@ -109,45 +113,11 @@ export class PosData extends Reactive {
             return [key, model];
         });
 
-        return new Promise((resolve) => {
-            this.indexedDB = new IndexedDB(this.databaseName, INDEXED_DB_VERSION, models, resolve);
-        });
-    }
-
-    async synchronizeLocalDataInIndexedDB() {
-        // This methods will synchronize local data and state in indexedDB. This methods is mostly
-        // used with models like pos.order, pos.order.line, pos.payment etc. These models are created
-        // in the frontend and are not loaded from the backend.
-        const modelsParams = Object.entries(this.opts.databaseTable);
-        for (const [model, params] of modelsParams) {
-            const put = [];
-            const remove = [];
-            const data = this.models[model].getAll();
-
-            for (const record of data) {
-                const isToRemove = params.condition(record);
-
-                if (isToRemove === undefined || isToRemove === true) {
-                    if (record[params.key]) {
-                        remove.push(record[params.key]);
-                    }
-                } else {
-                    put.push(record.serializeForIndexedDB());
-                }
-            }
-
-            await this.indexedDB.delete(model, remove);
-            await this.indexedDB.create(model, put);
-        }
-    }
-
-    async synchronizeServerDataInIndexedDB(serverData = {}) {
-        for (const [model, data] of Object.entries(serverData)) {
-            try {
-                await this.indexedDB.create(model, data);
-            } catch {
-                console.info(`Error while updating ${model} in indexedDB.`);
-            }
+        try {
+            this.indexedDB = new IndexedDB(this.databaseName, models);
+            await this.indexedDB.init();
+        } catch (error) {
+            console.error("Failed to reset IndexedDB", error);
         }
     }
 
@@ -155,25 +125,18 @@ export class PosData extends Reactive {
         // Used to retrieve models containing states from the indexedDB.
         // This method will load the records directly via loadData.
         const models = Object.keys(this.opts.databaseTable);
-        const data = await this.indexedDB.readAll(models);
-
+        let data;
+        try {
+            data = await this.indexedDB.readAll(models);
+        } catch (e) {
+            console.warn("Internal error reading data from the indexed database.", e);
+        }
         if (!data) {
             return;
         }
-
-        const newData = {};
-        for (const model of models) {
-            const rawRec = data[model];
-
-            if (rawRec) {
-                newData[model] = rawRec.filter((r) => !this.models[model].get(r.id));
-            }
-        }
-
         const preLoadData = await this.preLoadData(data);
         const missing = await this.missingRecursive(preLoadData);
         const results = this.models.loadConnectedData(missing, []);
-
         await this.checkAndDeleteMissingOrders(results);
 
         return results;
@@ -182,18 +145,23 @@ export class PosData extends Reactive {
     async getCachedServerDataFromIndexedDB() {
         // Used to load models that have not yet been loaded into related_models.
         // These models have been sent to the indexedDB directly after the RPC load_data.
-        const data = await this.indexedDB.readAll();
-        const modelToIgnore = Object.keys(this.opts.databaseTable);
-        const results = {};
+        try {
+            const data = await this.indexedDB.readAll();
+            const modelToIgnore = Object.keys(this.opts.databaseTable);
+            const results = {};
 
-        for (const name in data) {
-            if (name in modelToIgnore) {
-                continue;
+            for (const name in data) {
+                if (name in modelToIgnore) {
+                    continue;
+                }
+                results[name] = data[name];
             }
-            results[name] = data[name];
-        }
 
-        return results;
+            return results;
+        } catch (e) {
+            console.warn("Internal error reading data from the indexed database.", e);
+            return [];
+        }
     }
 
     async loadInitialData() {
@@ -213,7 +181,6 @@ export class PosData extends Reactive {
 
                 if (serverDateTime < lastConfigChange) {
                     await this.resetIndexedDB();
-                    await this.initIndexedDB(this.relations);
                     localData = [];
                 }
 
@@ -242,8 +209,6 @@ export class PosData extends Reactive {
                         localData[model] = local.concat(values);
                     }
                 }
-
-                this.synchronizeServerDataInIndexedDB(localData);
             } catch (error) {
                 let message = _t("An error occurred while loading the Point of Sale: \n");
                 if (error instanceof RPCError) {
@@ -313,8 +278,50 @@ export class PosData extends Reactive {
                 ...extraFields,
             };
         }
-
-        const { models } = createRelatedModels(relations, modelClasses, this.opts);
+        if (this.indexedDB) {
+            const self = this;
+            this.storageAdapter = {
+                save(record) {
+                    if (!record) {
+                        return;
+                    }
+                    const modelName = record.model.name;
+                    Promise.resolve()
+                        .then(() => self.indexedDB.add(modelName, record.serializeForIndexedDB()))
+                        .catch((err) => {
+                            console.error(
+                                `Failed to saves record '${modelName}#${record.id}' from IndexedDB`,
+                                err
+                            );
+                        });
+                },
+                delete(record) {
+                    if (!record) {
+                        return;
+                    }
+                    const modelName = record.model.name;
+                    Promise.resolve()
+                        .then(() => {
+                            const modelName = record.model.name;
+                            const key = self.opts.databaseTable[modelName]?.key || "id";
+                            return self.indexedDB.delete(modelName, record[key]);
+                        })
+                        .catch((err) => {
+                            console.error(
+                                `Failed to delete record '${modelName}#${record.id}' from IndexedDB`,
+                                err
+                            );
+                        });
+                },
+            };
+        }
+        const { models } = createRelatedModels(relations, modelClasses, {
+            databaseTable: this.opts.databaseTable,
+            dynamicModels: this.opts.dynamicModels,
+            databaseIndex: this.opts.databaseIndex,
+            cascadeDeleteModels: { "pos.order": this.opts.cascadeDeleteModels },
+            storageAdapter: this.storageAdapter,
+        });
 
         this.fields = fields;
         this.relations = relations;
@@ -322,42 +329,7 @@ export class PosData extends Reactive {
 
         await this.initData();
         await this.getLocalDataFromIndexedDB();
-        this.initListeners();
         this.network.loading = false;
-    }
-
-    initListeners() {
-        this.models["pos.order"].addEventListener(
-            "update",
-            batched(this.synchronizeLocalDataInIndexedDB.bind(this))
-        );
-
-        const ignore = Object.keys(this.opts.databaseTable);
-        for (const model of Object.keys(this.relations)) {
-            if (ignore.includes(model)) {
-                continue;
-            }
-
-            this.models[model].addEventListener("delete", (params) => {
-                this.indexedDB.delete(model, [params.key]);
-            });
-
-            this.models[model].addEventListener("update", (params) => {
-                const record = this.models[model].get(params.id)?.raw;
-                if (!record) {
-                    return; // the record may be deleted
-                }
-                for (const [key, value] of Object.entries(record)) {
-                    if (value instanceof Base) {
-                        record[key] = value.id;
-                    } else if (Array.isArray(value) && value[0] instanceof Base) {
-                        record[key] = value.map((v) => v.id);
-                    }
-                }
-
-                this.synchronizeServerDataInIndexedDB({ [model]: [record] });
-            });
-        }
     }
 
     async execute({
@@ -461,7 +433,6 @@ export class PosData extends Reactive {
                         }
 
                         localRecord.update(formattedForUpdate, { omitUnknownField: true });
-                        this.synchronizeServerDataInIndexedDB({ [model]: [localRecord.raw] });
                     } else {
                         nonExistentRecords.push(record);
                     }
@@ -481,14 +452,12 @@ export class PosData extends Reactive {
                 (!limitedFields || nonExistentRecords.length)
             ) {
                 const data = await this.missingRecursive({ [model]: result });
-                this.synchronizeServerDataInIndexedDB(data);
                 const results = this.models.connectNewData(data);
                 result = results[model];
             } else if (type === "write") {
                 const localRecord = this.models[model].get(ids[0]);
                 if (localRecord) {
                     localRecord.update(values, { omitUnknownField: true });
-                    this.synchronizeServerDataInIndexedDB({ [model]: [localRecord.raw] });
                 }
             }
 
@@ -633,7 +602,7 @@ export class PosData extends Reactive {
 
                 for (const id of ids) {
                     if (!serverIds.includes(id)) {
-                        this.localDeleteCascade(this.models["pos.order"].get(id));
+                        this.models["pos.order"].get(id)?.delete();
                     }
                 }
             }
@@ -725,29 +694,6 @@ export class PosData extends Reactive {
 
     async ormDelete(model, ids, queue = true) {
         return await this.execute({ type: "delete", model, ids, queue });
-    }
-
-    localDeleteCascade(record, removeFromServer = false) {
-        const recordModel = record.constructor.pythonModel;
-
-        const relationsToDelete = Object.values(this.relations[recordModel])
-            .filter((rel) => this.opts.cascadeDeleteModels.includes(rel.relation))
-            .map((rel) => rel.name);
-        const recordsToDelete = Object.entries(record)
-            .filter(([idx, values]) => relationsToDelete.includes(idx) && values)
-            .map(([idx, values]) => values)
-            .flat();
-
-        // Delete all children records before main record
-        this.indexedDB.delete(recordModel, [record.uuid]);
-        for (const item of recordsToDelete) {
-            this.indexedDB.delete(item.model.name, [item.uuid]);
-            item.delete({ silent: !removeFromServer });
-        }
-
-        // Delete the main record
-        const result = record.delete({ silent: !removeFromServer });
-        return result;
     }
 
     deleteUnsyncData(uuid) {

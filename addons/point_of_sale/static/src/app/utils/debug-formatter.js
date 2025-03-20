@@ -1,5 +1,5 @@
 import { Base } from "../models/related_models";
-import { RAW_SYMBOL } from "../models/related_models/utils";
+import { RAW_SYMBOL, STATE_SYMBOL } from "../models/related_models/utils";
 import { WithLazyGetterTrap } from "../../lazy_getter";
 import { toRaw } from "@odoo/owl";
 
@@ -108,8 +108,9 @@ function formatBaseInstance(obj) {
         blocks.push(createSubObjectBlock("[relations]", relations));
     }
     if (obj.uiState) {
-        blocks.push(createSubObjectBlock("[uiState]", toRaw(obj.uiState)));
+        blocks.push(createSubObjectBlock("[state]", toRaw(obj[STATE_SYMBOL])));
     }
+
     const dismissFields = new Set([
         "_dirty",
         "model",
@@ -118,10 +119,9 @@ function formatBaseInstance(obj) {
         "raw",
         ...Object.keys(obj.model.fields),
     ]);
-
     const debugObject = getDebugObject(obj, dismissFields);
     if (debugObject) {
-        blocks.push(createSubObjectBlock("[other props]", debugObject));
+        blocks.push(createSubObjectBlock("[other properties]", debugObject));
     }
     // blocks.push(createSubBlock("(dirty)", obj._dirty));
     // blocks.push(createSubObjectBlock("[model]", obj.model));

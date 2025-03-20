@@ -357,10 +357,10 @@ export class PosStore extends WithLazyGetterTrap {
 
         // Monitor product pricelist
         this.models["product.product"].addEventListener(
-            "create",
+            "load",
             this.computeProductPricelistCache.bind(this)
         );
-        this.models["product.pricelist.item"].addEventListener("create", () => {
+        this.models["product.pricelist.item"].addEventListener("load", () => {
             const order = this.getOrder();
             if (!order) {
                 return;
@@ -989,7 +989,7 @@ export class PosStore extends WithLazyGetterTrap {
             return;
         }
 
-        return this.data.localDeleteCascade(order);
+        return order.delete();
     }
 
     /**
@@ -1073,8 +1073,6 @@ export class PosStore extends WithLazyGetterTrap {
             } else {
                 throw error;
             }
-        } finally {
-            this.data.synchronizeLocalDataInIndexedDB();
         }
     }
     /**

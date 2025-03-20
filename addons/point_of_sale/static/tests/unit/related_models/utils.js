@@ -65,3 +65,14 @@ export const MODEL_OPTS = {
         "pos.order.line": { key: "uuid" },
     },
 };
+
+export function getModelNames() {
+    return Object.keys(MODEL_DEF);
+}
+
+export function getModelStores() {
+    return getModelNames().map((model) => {
+        const key = MODEL_OPTS.databaseTable[model]?.key || "id";
+        return [key, model];
+    });
+}
