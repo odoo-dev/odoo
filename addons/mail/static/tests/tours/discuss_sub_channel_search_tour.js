@@ -1,5 +1,6 @@
-import { contains, dragenterFiles, dropFiles, scroll } from "@web/../tests/utils";
+import { contains, dragenterFiles, dropFiles } from "@web/../tests/utils";
 import { registry } from "@web/core/registry";
+import { scroll } from "@odoo/hoot-dom";
 
 registry.category("web_tour.tours").add("test_discuss_sub_channel_search", {
     steps: () => [
@@ -11,11 +12,11 @@ registry.category("web_tour.tours").add("test_discuss_sub_channel_search", {
             trigger: ".o-mail-SubChannelList",
             async run() {
                 // 30 newest sub channels are loaded initially.
+                await contains(".o-mail-SubChannelList-thread", { count: 30 });
                 for (let i = 99; i > 69; i--) {
                     await contains(".o-mail-SubChannelList-thread", {
                         text: `Sub Channel ${i}`,
                     });
-                    await contains(".o-mail-SubChannelList-thread", { count: 30 });
                 }
             },
         },
@@ -50,8 +51,13 @@ registry.category("web_tour.tours").add("test_discuss_sub_channel_search", {
                     });
                 }
                 await contains(".o-mail-SubChannelList-thread", { text: `Sub Channel 10` });
-                // Ensure lazy loading is still working after a search.
-                await scroll(".o-mail-ActionPanel:has(.o-mail-SubChannelList)", "bottom");
+            },
+        },
+        {
+            content: "Ensure lazy loading is still working after a search.",
+            trigger: ".o-mail-ActionPanel:has(.o-mail-SubChannelList)",
+            async run(helpers) {
+                await scroll(helpers.anchor, { y: 10000 });
             },
         },
         {
@@ -63,7 +69,13 @@ registry.category("web_tour.tours").add("test_discuss_sub_channel_search", {
                         text: `Sub Channel ${i}`,
                     });
                 }
-                await scroll(".o-mail-ActionPanel:has(.o-mail-SubChannelList)", "bottom");
+            },
+        },
+        {
+            content: "Ensure lazy loading is still working after a search.",
+            trigger: ".o-mail-ActionPanel:has(.o-mail-SubChannelList)",
+            async run(helpers) {
+                await scroll(helpers.anchor, { y: 10000 });
             },
         },
         {
@@ -75,7 +87,13 @@ registry.category("web_tour.tours").add("test_discuss_sub_channel_search", {
                         text: `Sub Channel ${i}`,
                     });
                 }
-                await scroll(".o-mail-ActionPanel:has(.o-mail-SubChannelList)", "bottom");
+            },
+        },
+        {
+            content: "Ensure lazy loading is still working after a search.",
+            trigger: ".o-mail-ActionPanel:has(.o-mail-SubChannelList)",
+            async run(helpers) {
+                await scroll(helpers.anchor, { y: 10000 });
             },
         },
         {

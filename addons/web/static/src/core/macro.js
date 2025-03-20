@@ -5,7 +5,6 @@ import { validate } from "@odoo/owl";
 const macroSchema = {
     name: { type: String, optional: true },
     checkDelay: { type: Number, optional: true }, //Delay before checking if element is in DOM.
-
     timeout: { type: Number, optional: true },
     steps: {
         type: Array,
@@ -54,19 +53,8 @@ export async function waitForStable(target = document, timeout = 1000 / 16) {
 }
 
 class MacroStep {
-    constructor(step, index) {
+    constructor(step) {
         Object.assign(this, step);
-        this.index = index;
-    }
-
-    //TODO: To be removed
-    get debounceDelay() {
-        let delay = this.index === 0 ? 0 : 50;
-        if (this.initialDelay) {
-            const initialDelay = parseFloat(this.initialDelay());
-            delay = initialDelay >= 0 ? initialDelay : delay;
-        }
-        return delay;
     }
 
     async performAction(trigger) {
@@ -82,7 +70,7 @@ class MacroStep {
         }
     }
 
-    async waitFor() {
+    async waitForTrigger() {
         if (!this.trigger) {
             return;
         }
@@ -149,7 +137,6 @@ export class Macro {
     }
 
     async start() {
-        this.steps = this.steps.map((step, index) => new MacroStep(step, index));
         await waitForStable();
         await this.advance();
     }
@@ -168,7 +155,14 @@ export class Macro {
                     `TIMEOUT step failed to complete within ${timeout_delay} ms.`
                 );
             };
-            const actionResult = await Promise.race([this.executeStep(), timeout()]);
+            const executeStep = async () => {
+                await delay(50);
+                const currentMacroStep = new MacroStep(this.currentStep);
+                const trigger = await currentMacroStep.waitForTrigger();
+                await this.onStep(this.currentStep, trigger, this.currentIndex);
+                return currentMacroStep.performAction(trigger);
+            };
+            const actionResult = await Promise.race([executeStep(), timeout()]);
             if (actionResult) {
                 await this.stop();
                 return;
@@ -181,16 +175,6 @@ export class Macro {
         await this.advance();
     }
 
-    async executeStep() {
-        //TODO: To be removed
-        if (this.currentStep.debounceDelay > 0) {
-            await delay(this.currentStep.debounceDelay);
-        }
-        const trigger = await this.currentStep.waitFor();
-        await this.onStep({ ...this.currentStep }, trigger, this.currentIndex);
-        return this.currentStep.performAction(trigger);
-    }
-
     async stop(error) {
         if (this.isComplete) {
             return;
@@ -198,7 +182,7 @@ export class Macro {
         await waitForStable();
         this.isComplete = true;
         if (error) {
-            this.onError(error, { ...this.currentStep }, this.currentIndex);
+            this.onError(error, this.currentStep, this.currentIndex);
         } else if (this.currentIndex === this.steps.length) {
             this.onComplete();
         }
