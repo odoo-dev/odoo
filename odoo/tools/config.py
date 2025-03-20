@@ -278,6 +278,8 @@ class configmanager:
         group.add_option("--screenshots", dest="screenshots", type='path', my_default=temp_tests_dir,
                          metavar='DIR',
                          help="Screenshots will go in DIR/{db_name}/screenshots. Defaults to %s." % temp_tests_dir)
+        group.add_option("--test-local", dest="test_local", action="store_true", my_default=False,
+                         help="Flag to indicate that the test is running in local.")
         parser.add_option_group(group)
 
         # Logging Group

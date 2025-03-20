@@ -100,6 +100,7 @@ class TestConfigManager(TransactionCase):
             'test_tags': None,
             'screencasts': '',
             'screenshots': '/tmp/odoo_tests',
+            'test_local': False,
 
             # logging
             'logfile': '',
@@ -215,6 +216,7 @@ class TestConfigManager(TransactionCase):
             'test_tags': ':TestMantra.test_is_extra_mile_done',
             'screencasts': '/tmp/screencasts',
             'screenshots': '/tmp/screenshots',
+            'test_local': True,
 
             # logging
             'logfile': '/tmp/odoo.log',
@@ -359,6 +361,7 @@ class TestConfigManager(TransactionCase):
             'test_enable': False,
             'test_file': '',
             'test_tags': None,
+            'test_local': False,
             'transient_age_limit': 1.0,
             'translate_modules': ['all'],
             'unaccent': False,
@@ -489,6 +492,7 @@ class TestConfigManager(TransactionCase):
             'test_tags': ':TestMantra.test_is_extra_mile_done',
             'screencasts': '/tmp/screencasts',
             'screenshots': '/tmp/screenshots',
+            'test_local': False,
 
             # logging
             'logfile': '/tmp/odoo.log',
