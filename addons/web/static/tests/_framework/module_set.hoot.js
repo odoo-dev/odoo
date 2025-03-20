@@ -293,6 +293,7 @@ const __gcAndLogMemory = async (label, testCount) => {
 
     // Run garbage collection
     await window.gc({ type: "major", execution: "async" });
+    await window.gc({ type: "major", execution: "async" });
 
     // Log memory usage
     const logs = [
