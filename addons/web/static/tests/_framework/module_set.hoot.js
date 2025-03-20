@@ -202,13 +202,11 @@ const getSuitePath = (name) => name.replace("../tests/", "");
  *
  * @param {string} name
  */
-const makeFixedFactory = (name) => {
-    return () => {
-        if (!loader.modules.has(name)) {
-            loader.startModule(name);
-        }
-        return loader.modules.get(name);
-    };
+const makeFixedFactory = (name) => () => {
+    if (!loader.modules.has(name)) {
+        loader.startModule(name);
+    }
+    return loader.modules.get(name);
 };
 
 /**
@@ -294,6 +292,7 @@ const __gcAndLogMemory = async (label, testCount) => {
     textarea.remove();
 
     // Run garbage collection
+    await window.gc({ type: "major", execution: "async" });
     await window.gc({ type: "major", execution: "async" });
 
     // Log memory usage
