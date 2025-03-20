@@ -250,6 +250,30 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         """)
         # setting up models should not crash
         self.registry._setup_models__(self.cr)
+    
+    def test_10_context_dependent_related(self):
+        user = self.env['res.users'].create({'name': 'Foo', 'login': 'foo'})
+        self.env['res.lang']._activate_lang('fr_FR')
+
+        container = self.env['test_new_api.compute.container'].create({'name': 'test', 'name_translated': 'test_en'})
+        container.with_context(lang='fr_FR').name_translated = 'test_fr'
+        member = self.env['test_new_api.compute.member'].create({'name': 'test'})
+
+        self.assertEqual(member.with_user(user).container_context_id, container)
+        self.assertEqual(member.with_user(user).container_context_name, 'test')
+        self.assertFalse(member.with_user(1).container_context_id)
+        self.assertFalse(member.with_user(1).container_context_name)
+
+        self.assertEqual(member.with_user(user).container_context_name_translated, 'test_en')
+        self.assertEqual(member.with_user(user).with_context(lang='fr_FR').container_context_name_translated, 'test_fr')
+        self.assertFalse(member.with_user(1).container_context_name_translated)
+        self.assertFalse(member.with_user(1).with_context(lang='fr_FR').container_context_name_translated)
+
+        member.with_user(user).sudo().update_field_translations('container_context_name_translated', {'fr_FR': 'test_fr_new'})
+        self.assertEqual(member.with_user(user).container_context_name_translated, 'test_en')
+        self.assertEqual(member.with_user(user).with_context(lang='fr_FR').container_context_name_translated, 'test_fr_new')
+        self.assertFalse(member.with_user(1).container_context_name_translated)
+        self.assertFalse(member.with_user(1).with_context(lang='fr_FR').container_context_name_translated)
 
     def test_10_display_name(self):
         """ test definition of automatic field 'display_name' """
