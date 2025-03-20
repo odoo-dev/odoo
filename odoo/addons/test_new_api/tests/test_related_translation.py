@@ -125,7 +125,7 @@ class TestRelatedTranslation(odoo.tests.TransactionCase):
 
     def test_import_from_po(self):
         self.assertEqual(self.test2.with_context(lang='fr_FR').name, 'Couteau')
-        test1_xml_id = self.test1.export_data(['id']).get('datas')[0][0]
+        test1_xml_id = self.test1.export_data(['id'])[0][0]
         po_string = '''
                 #. module: test_new_api
                 #: model:test_new_api.related_translation_1,name:%s

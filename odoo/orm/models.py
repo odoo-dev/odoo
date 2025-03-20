@@ -838,7 +838,7 @@ class BaseModel(metaclass=MetaModel):
 
         return lines
 
-    def export_data(self, fields_to_export):
+    def export_data(self, fields_to_export, ids=None, domain=None):
         """ Export fields for selected objects
 
         This method is used when exporting data via client menu
@@ -850,7 +850,16 @@ class BaseModel(metaclass=MetaModel):
         if not (self.env.is_admin() or self.env.user.has_group('base.group_allow_export')):
             raise UserError(_("You don't have the rights to export data. Please contact an Administrator."))
         fields_to_export = [fix_import_export_id_paths(f) for f in fields_to_export]
-        return {'datas': self._export_rows(fields_to_export)}
+        assert ids is not None or domain is not None, "At least ids or domain must be passed"
+        records = self.browse(ids) if ids else self.search(domain)
+        _logger.info(
+            "User %d exported %d %r records. Fields: %s. %s: %s",
+            self.env.user.id, len(records.ids), records._name,
+            ','.join('.'.join(path) for path in fields_to_export),
+            'Domain' if domain is not None else 'IDs sample',
+            domain if domain is not None else records.ids[:10],
+        )
+        return records._export_rows(fields_to_export)
 
     @api.model
     def load(self, fields, data):

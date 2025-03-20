@@ -368,7 +368,7 @@ class TestTranslation(TransactionCase):
         cls.env['res.lang']._activate_lang('fr_FR')
         cls.customers = cls.env['res.partner.category'].create({'name': 'Customers'})
 
-        cls.customers_xml_id = cls.customers.export_data(['id']).get('datas')[0][0]
+        cls.customers_xml_id = cls.customers.export_data(['id'])[0][0]
         po_string = '''
         #. module: __export__
         #: model:res.partner.category,name:%s
@@ -580,7 +580,7 @@ class TestTranslationWrite(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.category = cls.env['res.partner.category'].create({'name': 'Reblochon'})
-        cls.category_xml_id = cls.category.export_data(['id']).get('datas')[0][0]
+        cls.category_xml_id = cls.category.export_data(['id'])[0][0]
 
     def test_00(self):
         self.env['res.lang']._activate_lang('fr_FR')
@@ -901,7 +901,7 @@ class TestTranslationWrite(TransactionCase):
         ir_model_field = self.env['ir.model.fields']._get('ir.model', 'name')
         LABEL = "Description du Modèle"
 
-        ir_model_field_xml_id = ir_model_field.export_data(['id']).get('datas')[0][0]
+        ir_model_field_xml_id = ir_model_field.export_data(['id'])[0][0]
         po_string = '''
         #. module: __export__
         #: model:ir.model.fields,field_description:%s

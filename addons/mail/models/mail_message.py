@@ -746,11 +746,11 @@ class MailMessage(models.Model):
             partner._bus_send("mail.message/delete", {"message_ids": messages.ids})
         return super().unlink()
 
-    def export_data(self, fields_to_export):
+    def export_data(self, fields_to_export, ids=None, domain=None):
         if not self.env.is_admin():
             raise AccessError(_("Only administrators are allowed to export mail message"))
 
-        return super().export_data(fields_to_export)
+        return super().export_data(fields_to_export, ids, domain)
 
     # ------------------------------------------------------
     # ACTIONS

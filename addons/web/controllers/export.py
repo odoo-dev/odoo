@@ -61,9 +61,10 @@ class GroupsTreeNode:
     build a leaf. The entire tree is built by inserting all leaves.
     """
 
-    def __init__(self, model, fields, groupby, groupby_type):
+    def __init__(self, model, fields, export_data, groupby, groupby_type):
         self._model = model
         self._export_field_names = fields  # exported field names (e.g. 'journal_id', 'account_id/name', ...)
+        self._export_data = export_data
         self._groupby = groupby
         self._groupby_type = groupby_type
 
@@ -137,7 +138,7 @@ class GroupsTreeNode:
         :return: the child node
         """
         if key not in self.children:
-            self.children[key] = GroupsTreeNode(self._model, self._export_field_names, self._groupby, self._groupby_type)
+            self.children[key] = GroupsTreeNode(self._model, self._export_field_names, self._export_data, self._groupby, self._groupby_type)
         return self.children[key]
 
     def insert_leaf(self, group):
@@ -147,9 +148,6 @@ class GroupsTreeNode:
         """
         leaf_path = [group.get(groupby_field) for groupby_field in self._groupby]
         count = group.pop('__count')
-
-        # reorder the record with the default order (it doesn't respect order from the view/user)
-        records = self._model.with_context(active_test=False).search([('id', 'in', group.pop('id:array_agg'))])
 
         # Follow the path from the top level group to the deepest
         # group which actually contains the records' data.
@@ -161,7 +159,14 @@ class GroupsTreeNode:
             # Update count value and aggregated value.
             node.count += count
 
-        node.data = records.with_env(self._model.env).export_data(self._export_field_names).get('datas', [])
+        data = []
+        for record_id in group.pop('id:array_agg'):
+            record_data = self._export_data[record_id]
+            data.append(record_data['data'])
+            if 'sub_rows' in record_data:
+                data.extend(record_data['sub_rows'])
+
+        node.data = data
 
 
 class ExportXlsxWriter:
@@ -561,6 +566,7 @@ class ExportFormat(object):
 
         groupby = params.get('groupby')
         if not import_compat and groupby:
+            data = Model.export_data(['.id'] + field_names, ids, domain)
             groupby_type = [Model._fields[x.split(':')[0]].type for x in groupby]
             if ids:
                 domain = [('id', 'in', ids)]
@@ -571,15 +577,22 @@ class ExportFormat(object):
 
             # formatted_read_group returns a dict only for final groups (with actual data),
             # not for intermediary groups. The full group tree must be re-constructed.
-            tree = GroupsTreeNode(Model, field_names, groupby, groupby_type)
+            export_data = {}
+            current_id = None
+            for row in data:
+                if row[0]:
+                    current_id = int(row[0])
+                    export_data[current_id] = {'data': row[1:]}
+                else:
+                    export_data[current_id].setdefault('sub_rows', []).append(row[1:])
+
+            tree = GroupsTreeNode(Model, field_names, export_data, groupby, groupby_type)
             for leaf in groups_data:
                 tree.insert_leaf(leaf)
 
             response_data = self.from_group_data(fields, columns_headers, tree)
         else:
-            records = Model.browse(ids) if ids else Model.search(domain)
-
-            export_data = records.export_data(field_names).get('datas', [])
+            export_data = Model.export_data(field_names, ids, domain)
             response_data = self.from_data(fields, columns_headers, export_data)
 
         # TODO: call `clean_filename` directly in `content_disposition`?
