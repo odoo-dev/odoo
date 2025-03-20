@@ -292,8 +292,11 @@ const __gcAndLogMemory = async (label, testCount) => {
     textarea.remove();
 
     // Run garbage collection
+    const before = Date.now();
     await window.gc({ type: "major", execution: "async" });
+    const afterOne = Date.now() - before;
     await window.gc({ type: "major", execution: "async" });
+    const afterTwo = Date.now() - before;
 
     // Log memory usage
     const logs = [
@@ -304,6 +307,10 @@ const __gcAndLogMemory = async (label, testCount) => {
         window.performance.memory.totalJSHeapSize,
         "- limit:",
         window.performance.memory.jsHeapSizeLimit,
+        "- gc time (1):",
+        afterOne,
+        "- gc time (2):",
+        afterTwo,
     ];
     if (Number.isInteger(testCount)) {
         logs.push("- tests:", testCount);
