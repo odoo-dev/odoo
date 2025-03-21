@@ -454,13 +454,7 @@ class DiscussChannel(models.Model):
             (partner or guest)._bus_send_store(custom_store)
             return
         if post_leave_message:
-            notification = Markup('<div class="o_mail_notification">%s</div>') % _(
-                "left the channel"
-            )
-            # sudo: mail.message - post as sudo since the user just unsubscribed from the channel
-            member.channel_id.sudo().message_post(
-                body=notification, subtype_xmlid="mail.mt_comment", author_id=partner.id
-            )
+            self._post_notification("channel-left")
         # send custom store after message_post to avoid is_pinned reset to True
         member._bus_send_store(custom_store)
         member.unlink()

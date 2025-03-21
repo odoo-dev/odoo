@@ -89,6 +89,8 @@ export class Message extends Record {
             switch (this.notification_data.type) {
                 case "channel-joined":
                     return this._computeAddMembersNotificationBody();
+                case "channel-left":
+                    return _t("%s left the channel", this.authorName);
                 case "pin": {
                     return this._computePinMessageNotificationBody();
                 }
