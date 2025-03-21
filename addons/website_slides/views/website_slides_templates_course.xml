@@ -141,25 +141,6 @@
                                     <h1 t-field="channel.name"/>
                                     <div class="mb-0 mb-xl-3" t-field="channel.description"/>
                                 </div>
-                                <div class="d-flex flex-column justify-content-center h5 flex-grow-1 mb-md-5 o_not_editable" t-if="channel.allow_comment">
-                                    <t t-call="portal_rating.rating_stars_static_popup_composer">
-                                        <t t-set="rating_avg" t-value="rating_avg"/>
-                                        <t t-set="rating_count" t-value="rating_count"/>
-                                        <t t-set="object" t-value="channel"/>
-                                        <t t-set="token" t-value="channel.access_token"/>
-                                        <t t-set="hash" t-value="message_post_hash"/>
-                                        <t t-set="pid" t-value="message_post_pid"/>
-                                        <t t-set="default_message" t-value="last_message"/>
-                                        <t t-set="default_message_id" t-value="last_message_id"/>
-                                        <t t-set="default_rating_value" t-value="last_rating_value"/>
-                                        <t t-set="default_attachment_ids" t-value="last_message_attachment_ids"/>
-                                        <t t-set="force_submit_url" t-value="'/mail/message/update_content' if last_message_id else False"/>
-                                        <t t-set="rate_with_void_content" t-value="True"/>
-                                        <t t-set="disable_composer" t-value="not channel.can_review"/>
-                                        <t t-set="_link_btn_classes" t-value="'btn-sm btn-link mx-3 o_wslides_header_text'"/>
-                                        <t t-set="_text_classes" t-value="'css_editable_mode_hidden'"/>
-                                    </t>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -227,14 +208,24 @@
                                     <t t-if="channel.channel_type == 'training'" t-call="website_slides.course_slides_list"/>
                                     <t t-else="" t-call="website_slides.course_slides_cards"/>
                                 </div>
-                                <div t-if="channel.allow_comment" t-att-class="'tab-pane fade %s' % ('show active' if active_tab == 'review' else '')" id="review" role="tabpanel" aria-labelledby="review-tab">
-                                    <t t-call="portal.message_thread">
-                                        <t t-set="object" t-value="channel"/>
-                                        <t t-set="hash" t-value="message_post_hash"/>
-                                        <t t-set="pid" t-value="message_post_pid"/>
-                                        <t t-set="display_rating" t-value="True"/>
-                                        <t t-set="disable_composer" t-value="True"/>
-                                    </t>
+                                <div t-if="channel.allow_comment"
+                                    t-att-class="'tab-pane fade %s' % ('show active' if active_tab == 'review' else '')"
+                                    id="review" role="tabpanel" aria-labelledby="review-tab">
+
+                                    <!-- Add Review Button -->
+                                    <a type="button" class="d-flex justify-content-between text-decoration-none collapsed" data-bs-toggle="collapse" data-bs-target="#reviewComposer">
+                                        Add review
+                                    </a>
+
+                                    <!-- Collapsible Review Composer -->
+                                    <div id="reviewComposer" class="collapse mt-3">
+                                        <t t-call="portal.message_thread">
+                                            <t t-set="object" t-value="channel"/>
+                                            <t t-set="hash" t-value="message_post_hash"/>
+                                            <t t-set="pid" t-value="message_post_pid"/>
+                                            <t t-set="display_rating" t-value="True"/>
+                                        </t>
+                                    </div>
                                 </div>
                             </div>
                         </div>
