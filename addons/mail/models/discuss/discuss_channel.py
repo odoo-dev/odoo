@@ -874,20 +874,7 @@ class DiscussChannel(models.Model):
 
         self._bus_send_store(message_to_update, "pinned_at")
         if pinned:
-            notification_text = '''
-                <div data-oe-type="pin" class="o_mail_notification">
-                    %(user_pinned_a_message_to_this_channel)s
-                    <a href="#" data-oe-type="pin-menu">%(see_all_pins)s</a>
-                </div>
-            '''
-            notification = Markup(notification_text) % {
-                'user_pinned_a_message_to_this_channel': Markup('<a href="#" data-oe-type="highlight" data-oe-id="%s">%s</a>') % (
-                    message_id,
-                    _('%(user_name)s pinned a message to this channel.', user_name=self.env.user.display_name),
-                ),
-                'see_all_pins': _('See all pinned messages.'),
-            }
-            self.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment")
+            self._post_notification("pin", {"message_id": message_id})
 
     def _find_or_create_member_for_self(self):
         self.ensure_one()

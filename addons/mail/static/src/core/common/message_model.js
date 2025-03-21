@@ -89,6 +89,9 @@ export class Message extends Record {
             switch (this.notification_data.type) {
                 case "channel-joined":
                     return this._computeAddMembersNotificationBody();
+                case "pin": {
+                    return this._computePinMessageNotificationBody();
+                }
             }
             const safeAuthorName = htmlEscape(this.author.getContextualName(this.thread));
             if (safeAuthorName && !this.body.includes(safeAuthorName)) {
@@ -447,35 +450,6 @@ export class Message extends Record {
         }
     }
 
-    _computeAddMembersNotificationBody() {
-        const inviterData = this.notification_data.payload.inviter_persona;
-        const inviteeData = this.notification_data.payload.invitee_persona;
-        const inviter = this.store.Persona.get(inviterData);
-        const invitee = this.store.Persona.get(inviteeData);
-        const inviterName = htmlEscape(
-            inviter ? inviter.getContextualName(this.thread) : _t("Deleted user")
-        );
-        const inviteeName = htmlEscape(
-            invitee ? invitee.getContextualName(this.thread) : _t("Deleted user")
-        );
-        const isSelfInvite =
-            inviterData.id === inviteeData.id && inviterData.type === inviteeData.type;
-        if (isSelfInvite) {
-            return _t("%s joined the channel", inviterName);
-        }
-        let inviteeLink = `@${inviteeName}`;
-        if (invitee) {
-            const inviteeModel = invitee.type === "partner" ? "res.partner" : "mail.guest";
-            inviteeLink = markup(
-                `<a href="#" data-oe-id=${invitee.id} data-oe-model=${inviteeModel}>@${inviteeName}</a>`
-            );
-        }
-        return _t("%(inviterName)s invited %(inviteeLink)s to the channel", {
-            inviterName,
-            inviteeLink,
-        });
-    }
-
     /** @param {import("models").Thread} thread the thread where the message is shown */
     canAddReaction(thread) {
         return Boolean(!this.is_transient && this.thread && !this.thread.isTransient);
@@ -593,6 +567,58 @@ export class Message extends Record {
     hideAllLinkPreviews() {
         rpc("/mail/link_preview/hide", {
             message_link_preview_ids: this.message_link_preview_ids.map((lpm) => lpm.id),
+        });
+    }
+
+    //===================================================================
+    // NOTIFICATION BODY COMPUTATION
+    // ==================================================================
+
+    _computeAddMembersNotificationBody() {
+        const inviterData = this.notification_data.payload.inviter_persona;
+        const inviteeData = this.notification_data.payload.invitee_persona;
+        const inviter = this.store.Persona.get(inviterData);
+        const invitee = this.store.Persona.get(inviteeData);
+        const inviterName = htmlEscape(
+            inviter ? inviter.getContextualName(this.thread) : _t("Deleted user")
+        );
+        const inviteeName = htmlEscape(
+            invitee ? invitee.getContextualName(this.thread) : _t("Deleted user")
+        );
+        const isSelfInvite =
+            inviterData.id === inviteeData.id && inviterData.type === inviteeData.type;
+        if (isSelfInvite) {
+            return _t("%s joined the channel", inviterName);
+        }
+        let inviteeLink = `@${inviteeName}`;
+        if (invitee) {
+            const inviteeModel = invitee.type === "partner" ? "res.partner" : "mail.guest";
+            inviteeLink = markup(
+                `<a href="#" data-oe-id=${invitee.id} data-oe-model=${inviteeModel}>@${inviteeName}</a>`
+            );
+        }
+        return _t("%(inviterName)s invited %(inviteeLink)s to the channel", {
+            inviterName,
+            inviteeLink,
+        });
+    }
+
+    _computePinMessageNotificationBody() {
+        const safeId = htmlEscape(this.notification_data.payload.message_id);
+        const messageLink = markup(
+            `<a href="#" data-oe-id="${safeId}" data-oe-type="highlight">${htmlEscape(
+                _t("a message")
+            )}</a>`
+        );
+        const seeAllLink = markup(
+            `<a href="#" data-oe-id="${safeId}" data-oe-type="pin-menu">${htmlEscape(
+                _t("See all messages")
+            )}</a>`
+        );
+        return _t("%(userName)s pinned %(messageLink)s to this channel. %(seeAllLink)s.", {
+            userName: this.authorName,
+            messageLink,
+            seeAllLink,
         });
     }
 }
