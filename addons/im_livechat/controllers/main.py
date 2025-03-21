@@ -6,6 +6,7 @@ from werkzeug.exceptions import NotFound
 from urllib.parse import urlsplit
 
 from odoo import http, _
+from odoo.addons.rating.models import rating_data
 from odoo.exceptions import UserError
 from odoo.http import request
 from odoo.tools import replace_exceptions
@@ -178,25 +179,6 @@ class LivechatController(http.Controller):
             "channel_id": channel_id,
         }
 
-    def _post_feedback_message(self, channel, rating, reason):
-        reason = Markup("<br>" + re.sub(r'\r\n|\r|\n', "<br>", reason) if reason else "")
-        body = Markup(
-            """<div class="o_mail_notification o_hide_author">"""
-            """%(rating)s: <img class="o_livechat_emoji_rating" src="%(rating_url)s" alt="rating"/>%(reason)s"""
-            """</div>"""
-        ) % {
-            "rating": _("Rating"),
-            "rating_url": rating.rating_image_url,
-            "reason": reason,
-        }
-        # sudo: discuss.channel - not necessary for posting, but necessary to update related rating
-        channel.sudo().message_post(
-            body=body,
-            message_type="notification",
-            rating_id=rating.id,
-            subtype_xmlid="mail.mt_comment",
-        )
-
     @http.route("/im_livechat/feedback", type="jsonrpc", auth="public")
     @add_guest_to_context
     def feedback(self, channel_id, rate, reason=None, **kwargs):
@@ -226,8 +208,7 @@ class LivechatController(http.Controller):
                 rating = channel.rating_ids[0]
                 # sudo: rating.rating - guest or portal user can update their livechat rating
                 rating.sudo().write(values)
-            self._post_feedback_message(channel, rating, reason)
-            return rating.id
+            channel._post_notification("livechat-feedback", {"rating": rating.rating, "reason": reason})            return rating.id
         return False
 
     @http.route("/im_livechat/history", type="jsonrpc", auth="public")

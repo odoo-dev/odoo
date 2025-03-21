@@ -86,20 +86,7 @@ export class Message extends Record {
             if (!this.isNotification) {
                 return;
             }
-            switch (this.notification_data.type) {
-                case "channel-joined":
-                    return this._computeAddMembersNotificationBody();
-                case "channel-left":
-                    return _t("%s left the channel", this.authorName);
-                case "pin": {
-                    return this._computePinMessageNotificationBody();
-                }
-            }
-            const safeAuthorName = htmlEscape(this.author.getContextualName(this.thread));
-            if (safeAuthorName && !this.body.includes(safeAuthorName)) {
-                return markup(`${safeAuthorName} ${this.body}`);
-            }
-            return this.body;
+            return this._computeNotificationBody();
         },
     });
 
@@ -575,6 +562,23 @@ export class Message extends Record {
     //===================================================================
     // NOTIFICATION BODY COMPUTATION
     // ==================================================================
+
+    _computeNotificationBody() {
+        switch (this.notification_data.type) {
+            case "channel-joined":
+                return this._computeAddMembersNotificationBody();
+            case "channel-left":
+                return _t("%s left the channel", this.authorName);
+            case "pin": {
+                return this._computePinMessageNotificationBody();
+            }
+        }
+        const safeAuthorName = htmlEscape(this.author.getContextualName(this.thread));
+        if (safeAuthorName && !this.body.includes(safeAuthorName)) {
+            return markup(`${safeAuthorName} ${this.body}`);
+        }
+        return this.body;
+    }
 
     _computeAddMembersNotificationBody() {
         const inviterData = this.notification_data.payload.inviter_persona;
