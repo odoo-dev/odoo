@@ -2133,6 +2133,7 @@ class TestBoM(TestMrpCommon):
 
     def test_availability_bom_type_kit(self):
         """ Product should only be available if bom type is kit """
+        warehouse = self.env.ref('stock.warehouse0')
         uom_unit = self.env.ref('uom.product_uom_unit')
         location = self.env.ref('stock.stock_location_stock')
         product_one = self.env['product.product'].create({

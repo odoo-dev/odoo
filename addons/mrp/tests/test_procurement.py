@@ -102,6 +102,8 @@ class TestProcurement(TestMrpCommon):
     def test_procurement_2(self):
         """Check that a manufacturing order create the right procurements when the route are set on
         a parent category of a product"""
+        Manufacture_route = self.env['stock.route'].search([('name', '=', 'Manufacture')])
+        Manufacture_route.product_selectable = True
         # find a child category id
         child_categ_id = self.env['product.category'].search([('parent_id', '!=', False)], limit=1)
         all_categ_id = child_categ_id.parent_id
@@ -133,6 +135,7 @@ class TestProcurement(TestMrpCommon):
         warehouse = self.env['stock.warehouse'].search([], limit=1)
         warehouse.write({'reception_steps': 'three_steps'})
         warehouse.mto_pull_id.route_id.active = True
+        warehouse.manufacture_pull_id.route_id.write({'sequence': 20})
         self.env['stock.location']._parent_store_compute()
         warehouse.reception_route_id.rule_ids.filtered(
             lambda p: p.location_src_id == warehouse.wh_input_stock_loc_id and
