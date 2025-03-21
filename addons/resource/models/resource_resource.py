@@ -209,7 +209,6 @@ class ResourceResource(models.Model):
                 # Make the conjunction between work intervals and calendar validity
                 resource_work_intervals[resource.id] |= work_intervals_batch[resource.id] & resource_calendar_validity_intervals[resource.id][calendar]
             calendar_work_intervals[calendar.id] = work_intervals_batch[False]
-
         return resource_work_intervals, calendar_work_intervals
 
     def _is_fully_flexible(self):
