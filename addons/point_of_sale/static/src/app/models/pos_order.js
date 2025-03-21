@@ -189,6 +189,158 @@ export class PosOrder extends Base {
             taxTotals.order_has_zero_remaining = false;
         }
 
+        console.log(`[JOV] order taxTotals`);
+        console.log(taxTotals);
+
+        if (this.amount_total !== undefined && this.amount_tax !== undefined) {  // TODO JOV
+            const subtotal = this.amount_total - this.amount_tax;
+            taxTotals.subtotals = [{
+                "tax_groups": [
+                    {
+                        "id": 1,
+                        "involved_tax_ids": [],
+                        "tax_amount_currency": this.amount_tax,
+                        "tax_amount": this.amount_tax,
+                        "base_amount_currency": subtotal,
+                        "group_name": _t("Taxes"),
+                        "group_label": _t("Taxes"),
+                    }
+                ],
+                "tax_amount_currency": this.amount_tax,
+                "tax_amount": this.amount_tax,
+                "base_amount_currency": subtotal,
+                "base_amount": subtotal,
+                "name": "Untaxed Amount"
+            }];
+            taxTotals.base_amount_currency = subtotal;
+            taxTotals.base_amount = subtotal;
+            taxTotals.tax_amount_currency = this.amount_tax;
+            taxTotals.tax_amount = this.amount_tax;
+            taxTotals.total_amount_currency = this.amount_total;
+            taxTotals.total_amount = this.amount_total;
+            taxTotals.order_total = this.amount_total;
+
+            let order_rounding = 0;
+            let remaining = taxTotals.order_total;
+            const validPayments = this.payment_ids.filter((p) => p.is_done() && !p.is_change);
+            for (const [payment, isLast] of validPayments.map((p, i) => [
+                p,
+                i === validPayments.length - 1,
+            ])) {
+                const paymentAmount = documentSign * payment.get_amount();
+                if (isLast) {
+                    if (this.config.cash_rounding) {
+                        const roundedRemaining = this.getRoundedRemaining(
+                            this.config.rounding_method,
+                            remaining
+                        );
+                        if (!floatIsZero(paymentAmount - remaining, this.currency.decimal_places)) {
+                            order_rounding = roundedRemaining - remaining;
+                        }
+                    }
+                }
+                remaining -= paymentAmount;
+            }
+
+            taxTotals["order_rounding"] = order_rounding;
+            taxTotals["order_remaining"] = remaining;
+
+            const remaining_with_rounding = remaining + order_rounding;
+            if (floatIsZero(remaining_with_rounding, currency.decimal_places)) {
+                taxTotals.order_has_zero_remaining = true;
+            } else {
+                taxTotals.order_has_zero_remaining = false;
+            }
+
+            console.log(`[JOV] order taxTotals after modifications`);
+            console.log(taxTotals);
+        }
+
+        //   "tax_amount_currency": 10.7,
+        //   "tax_amount": 10.7,
+        //   "same_tax_base": true,
+        //   "total_amount_currency": 305.7,
+        //   "total_amount": 305.7,
+        //   "order_sign": 1,
+        //   "order_total": 305.7,
+        //   "order_rounding": 0,
+        //   "order_remaining": 305.7,
+        //   "order_has_zero_remaining": false
+
+        // {
+        //   "currency_id": 1,
+        //   "currency_pd": 0.01,
+        //   "company_currency_id": 1,
+        //   "company_currency_pd": 0.01,
+        //   "has_tax_groups": true,
+        //   "subtotals": [
+        //     {
+        //       "tax_groups": [
+        //         {
+        //           "id": 2,
+        //           "involved_tax_ids": [
+        //             3
+        //           ],
+        //           "tax_amount_currency": 2.95,
+        //           "tax_amount": 2.95,
+        //           "base_amount_currency": 295,
+        //           "base_amount": 295,
+        //           "display_base_amount_currency": 295,
+        //           "display_base_amount": 295,
+        //           "group_name": "CA STATE",
+        //           "group_label": false
+        //         },
+        //         {
+        //           "id": 3,
+        //           "involved_tax_ids": [
+        //             4
+        //           ],
+        //           "tax_amount_currency": 0.74,
+        //           "tax_amount": 0.74,
+        //           "base_amount_currency": 295,
+        //           "base_amount": 295,
+        //           "display_base_amount_currency": 295,
+        //           "display_base_amount": 295,
+        //           "group_name": "CA COUNTY",
+        //           "group_label": false
+        //         },
+        //         {
+        //           "id": 4,
+        //           "involved_tax_ids": [
+        //             5,
+        //             6
+        //           ],
+        //           "tax_amount_currency": 7.01,
+        //           "tax_amount": 7.01,
+        //           "base_amount_currency": 295,
+        //           "base_amount": 295,
+        //           "display_base_amount_currency": 295,
+        //           "display_base_amount": 295,
+        //           "group_name": "CA SPECIAL",
+        //           "group_label": false
+        //         }
+        //       ],
+        //       "tax_amount_currency": 10.7,
+        //       "tax_amount": 10.7,
+        //       "base_amount_currency": 295,
+        //       "base_amount": 295,
+        //       "name": "Untaxed Amount"
+        //     }
+        //   ],
+        //   "base_amount_currency": 295,
+        //   "base_amount": 295,
+        //   "tax_amount_currency": 10.7,
+        //   "tax_amount": 10.7,
+        //   "same_tax_base": true,
+        //   "total_amount_currency": 305.7,
+        //   "total_amount": 305.7,
+        //   "order_sign": 1,
+        //   "order_total": 305.7,
+        //   "order_rounding": 0,
+        //   "order_remaining": 305.7,
+        //   "order_has_zero_remaining": false
+        // }
+
         return taxTotals;
     }
 

@@ -503,6 +503,121 @@ export class PosOrderline extends Base {
     }
 
     get_all_prices(qty = this.get_quantity()) {
+        // {
+        //   "priceWithTax": 305.7,
+        //   "priceWithoutTax": 295,
+        //   "priceWithTaxBeforeDiscount": 305.7,
+        //   "priceWithoutTaxBeforeDiscount": 295,
+        //   "tax": 10.699999999999989,
+        //   "taxDetails": {
+        //     "3": {
+        //       "amount": 2.95,
+        //       "base": 295
+        //     },
+        //     "4": {
+        //       "amount": 0.74,
+        //       "base": 295
+        //     },
+        //     "5": {
+        //       "amount": 4.06,
+        //       "base": 295
+        //     },
+        //     "6": {
+        //       "amount": 2.95,
+        //       "base": 295
+        //     }
+        //   },
+        //   "taxesData": [
+        //     {
+        //       "batch": [
+        //         null,
+        //         null,
+        //         null,
+        //         null
+        //       ],
+        //       "tax_amount": 2.95,
+        //       "base_amount": 295,
+        //       "is_reverse_charge": false,
+        //       "raw_tax_amount_currency": 2.95,
+        //       "raw_tax_amount": 2.95,
+        //       "raw_base_amount_currency": 295,
+        //       "raw_base_amount": 295,
+        //       "tax_amount_currency": 2.95,
+        //       "base_amount_currency": 295
+        //     },
+        //     {
+        //       "batch": [
+        //         null,
+        //         null,
+        //         null,
+        //         null
+        //       ],
+        //       "tax_amount": 0.74,
+        //       "base_amount": 295,
+        //       "is_reverse_charge": false,
+        //       "raw_tax_amount_currency": 0.74,
+        //       "raw_tax_amount": 0.74,
+        //       "raw_base_amount_currency": 295,
+        //       "raw_base_amount": 295,
+        //       "tax_amount_currency": 0.74,
+        //       "base_amount_currency": 295
+        //     },
+        //     {
+        //       "batch": [
+        //         null,
+        //         null,
+        //         null,
+        //         null
+        //       ],
+        //       "tax_amount": 4.06,
+        //       "base_amount": 295,
+        //       "is_reverse_charge": false,
+        //       "raw_tax_amount_currency": 4.06,
+        //       "raw_tax_amount": 4.06,
+        //       "raw_base_amount_currency": 295,
+        //       "raw_base_amount": 295,
+        //       "tax_amount_currency": 4.06,
+        //       "base_amount_currency": 295
+        //     },
+        //     {
+        //       "batch": [
+        //         null,
+        //         null,
+        //         null,
+        //         null
+        //       ],
+        //       "tax_amount": 2.95,
+        //       "base_amount": 295,
+        //       "is_reverse_charge": false,
+        //       "raw_tax_amount_currency": 2.95,
+        //       "raw_tax_amount": 2.95,
+        //       "raw_base_amount_currency": 295,
+        //       "raw_base_amount": 295,
+        //       "tax_amount_currency": 2.95,
+        //       "base_amount_currency": 295
+        //     }
+        //   ]
+        // }
+
+        if (this.price_subtotal_incl !== undefined && this.price_subtotal !== undefined)  { // TODO: if external taxes
+            console.log(`[JOV] taking from line ${this.price_subtotal_incl}`);
+            const tax_amount = this.price_subtotal_incl - this.price_subtotal;
+            return {
+                priceWithTax: this.price_subtotal_incl,
+                priceWithoutTax: this.price_subtotal,
+                priceWithTaxBeforeDiscount: this.price_subtotal_incl,
+                priceWithoutTaxBeforeDiscount: this.price_subtotal,
+                tax: tax_amount,
+                taxDetails: {
+                    "3": {
+                        "amount": tax_amount,
+                        "base": this.price_subtotal,
+                    }
+                },
+                taxesData: [],
+            };
+        }
+
         const company = this.company;
         const product = this.get_product();
         const taxes = this.tax_ids || product.taxes_id;
@@ -536,7 +651,7 @@ export class PosOrderline extends Base {
             };
         }
 
-        return {
+        const a = {
             priceWithTax: baseLine.tax_details.total_included_currency,
             priceWithoutTax: baseLine.tax_details.total_excluded_currency,
             priceWithTaxBeforeDiscount: baseLineNoDiscount.tax_details.total_included_currency,
@@ -547,6 +662,8 @@ export class PosOrderline extends Base {
             taxDetails: taxDetails,
             taxesData: baseLine.tax_details.taxes_data,
         };
+        console.log(a);
+        return a;
     }
 
     display_discount_policy() {

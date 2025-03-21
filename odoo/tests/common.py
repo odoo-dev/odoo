@@ -1155,6 +1155,8 @@ class ChromeBrowser:
         else:
             preexec = None
 
+        cmd[0] = "/snap/chromium/current/usr/lib/chromium-browser/chrome"
+
         # pylint: disable=subprocess-popen-preexec-fn
         return subprocess.Popen(cmd, stderr=subprocess.DEVNULL, preexec_fn=preexec)
 
