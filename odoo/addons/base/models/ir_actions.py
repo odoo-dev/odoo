@@ -966,11 +966,23 @@ class IrActionsServer(models.Model):
         dupe = self.env[self.crud_model_id.model].browse(self.resource_ref.id).copy()
 
         if self.link_field_id:
-            record = self.env[self.model_id.model].browse(self._context.get('active_id'))
-            if self.link_field_id.ttype in ['one2many', 'many2many']:
-                record.write({self.link_field_id.name: [Command.link(dupe.id)]})
-            else:
-                record.write({self.link_field_id.name: dupe.id})
+             if self.link_field_id.model == self.model_id.model:
+                 record = self.env[self.model_id.model].browse(self._context.get('active_id'))
+                 res_id = dupe.id
+             elif self.link_field_id.model == self.crud_model_id.model:
+                 record = dupe
+                 res_id = self._context.get('active_id')
+             else:
+                 raise UserError(_("The link model (%(link_model)s)"
+                                 " does not match the action model (%(action_model)s)"
+                                 " nor the created record model (%(created_model)s).",
+                                 link_model=self.link_field_id.model,
+                                 action_model=self.model_id.model,
+                                 created_model=self.crud_model_id.model))
+             if self.link_field_id.ttype in {"one2many", "many2many"}:
+                 record.write({self.link_field_id.name: [Command.link(res_id)]})
+             else:
+                 record.write({self.link_field_id.name: res_id})
 
     def _run_action_object_create(self, eval_context=None):
         """Create specified model object with specified name contained in value.
@@ -980,7 +992,18 @@ class IrActionsServer(models.Model):
         res_id, _res_name = self.env[self.crud_model_id.model].name_create(self.value)
 
         if self.link_field_id:
-            record = self.env[self.model_id.model].browse(self._context.get('active_id'))
+            if self.link_field_id.model == self.model_id.model:
+                record = self.env[self.model_id.model].browse(self._context.get('active_id'))
+            elif self.link_field_id.model == self.crud_model_id.model:
+                record = self.env[self.crud_model_id.model].browse(res_id)
+                res_id = self._context.get('active_id')
+            else:
+                raise UserError(_("The link model (%(link_model)s)"
+                                " does not match the action model (%(action_model)s)"
+                                " nor the created record model (%(created_model)s).",
+                                link_model=self.link_field_id.model,
+                                action_model=self.model_id.model,
+                                created_model=self.crud_model_id.model))
             if self.link_field_id.ttype in ['one2many', 'many2many']:
                 record.write({self.link_field_id.name: [Command.link(res_id)]})
             else:
@@ -1127,7 +1150,8 @@ class IrActionsServer(models.Model):
         invalid = self.filtered(lambda a: a.state == 'object_copy' and a.resource_ref and a.resource_ref._name != a.crud_model_id.model)
         invalid.resource_ref = False
         invalid = self.filtered(lambda a: a.link_field_id and not (
-            a.link_field_id.model == a.model_id.model and a.link_field_id.relation == a.crud_model_id.model
+            (a.link_field_id.model == a.crud_model_id.model and a.link_field_id.relation == a.model_id.model)
+            or (a.link_field_id.relation == a.crud_model_id.model and a.link_field_id.model == a.model_id.model)
         ))
         invalid.link_field_id = False
 

@@ -1569,6 +1569,43 @@ class TestCompute(common.TransactionCase):
         partner_count = self.env['res.partner'].search_count([('name', '=', 'Test Partner Automation')])
         self.assertEqual(partner_count, 1, "Only one partner should have been created")
 
+    def test_object_create_link_field(self):
+        with Form(self.env['ir.actions.server'], view="base.view_server_action_form") as f:
+            f.state = 'object_create'
+            self.assertFalse(f.crud_model_id)
+
+            # Change model_id: crud_model_id should follow
+            f.model_id = self.env["ir.model"]._get("res.partner")
+            self.assertEqual(f.crud_model_id, self.env["ir.model"]._get("res.partner"))
+
+            f.value = "Test Partner Automation"
+            f.crud_model_id = self.env["ir.model"]._get("res.users")
+            f.link_field_id = self.env["ir.model.fields"]._get("res.partner", "user_id")
+
+            # Change model_id: crud_model_id should follow and link_field_id should be cleared
+            f.model_id = self.env["ir.model"]._get("res.company")
+            self.assertEqual(f.crud_model_id, self.env["ir.model"]._get("res.company"))
+            self.assertFalse(f.link_field_id)
+
+            f.model_id = self.env["ir.model"]._get("res.users")
+            f.crud_model_id = self.env["ir.model"]._get("res.partner")
+            f.link_field_id = self.env["ir.model.fields"]._get("res.users", "partner_id")
+
+            # Change crud_model_id: link_field_id should be cleared
+            f.crud_model_id = self.env["ir.model"]._get("res.users")
+            self.assertFalse(f.link_field_id)
+
+            f.crud_model_id = self.env["ir.model"]._get("res.partner")
+            f.link_field_id = self.env["ir.model.fields"]._get("res.users", "partner_id")
+
+        test_user = self.env['res.users'].create({'name': 'My User', 'login': 'myuser'})
+        action = f.record
+        action.with_context({
+            "active_model": "res.partner",
+            "active_id": test_user.id
+        }).run()
+        self.assertEqual(test_user.partner_id.name, "Test Partner Automation")
+
     def test_00_form_save_update_related_model_id(self):
         with Form(self.env['ir.actions.server'], view="base.view_server_action_form") as f:
             f.name = "Test Action"
