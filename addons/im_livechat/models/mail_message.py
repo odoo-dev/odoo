@@ -61,22 +61,21 @@ class MailMessage(models.Model):
                         message, {"chatbotStep": {"scriptStep": step.id, "message": message.id}}
                     )
 
-    def _author_to_store(self, store: Store):
-        messages_w_author_channel = self.filtered(
-            lambda message: message.author_id
-            and message.model == "discuss.channel"
-            and message.res_id
+    def _author_to_store(self, record):
+        if (
+            self.model != "discuss.channel"
+            or not self.res_id
+            or record.channel_type != "livechat"
+            or not self.author_id
+        ):
+            return super()._author_to_store(record)
+        return Store.One(
+            self.author_id,
+            ["avatar_128", "is_company", "user_livechat_username", "user"],
+            rename="author",
         )
-        channel_by_message = messages_w_author_channel._record_by_message()
-        messages_w_author_livechat = messages_w_author_channel.filtered(
-            lambda message: channel_by_message[message].channel_type == "livechat"
-        )
-        super(MailMessage, self - messages_w_author_livechat)._author_to_store(store)
-        store.add(
-            messages_w_author_livechat,
-            Store.One(
-                "author_id",
-                ["avatar_128", "is_company", "user_livechat_username", "user"],
-                rename="author",
-            ),
-        )
+
+    def _should_add_email_from_to_store(self, record):
+        if self.model == "discuss.channel" and record.channel_type == "livechat" and self.author_id:
+            return False
+        return super()._should_add_email_from_to_store(record)

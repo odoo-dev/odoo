@@ -1056,69 +1056,97 @@ class MailMessage(models.Model):
             store.add(record, record_fields, as_thread=True)
         if for_current_user:
             fields.append("starred")
-        store.add(self, fields)
-        for message in self:
-            # model, res_id, record_name need to be kept for mobile app as iOS app cannot be updated
-            record = record_by_message.get(message)
-            if record:
-                # sudo: if mentionned in a non accessible thread, user should be able to see the name
-                record_name = record.sudo().display_name
-                default_subject = record_name
-                if hasattr(record, "_message_compute_subject"):
-                    # sudo: if mentionned in a non accessible thread, user should be able to see the subject
-                    default_subject = record.sudo()._message_compute_subject()
-            else:
-                record_name = False
-                default_subject = False
-            data = {
-                "default_subject": default_subject,
-                "record_name": record_name,  # keep for iOS app
-                "scheduledDatetime": scheduled_dt_by_msg_id.get(message.id, False),
-                "thread": Store.One(record, [], as_thread=True),
-            }
 
-            if message.incoming_email_cc:
-                data["incoming_email_cc"] = tools.mail.email_split_tuples(message.incoming_email_cc)
-            if message.incoming_email_to:
-                data["incoming_email_to"] = tools.mail.email_split_tuples(message.incoming_email_to)
-            if for_current_user:
-                # sudo: mail.message - filtering allowed tracking values
-                displayed_tracking_ids = message.sudo().tracking_value_ids._filter_has_field_access(
-                    self.env
-                )
-                if record and hasattr(record, "_track_filter_for_display"):
-                    displayed_tracking_ids = record._track_filter_for_display(
-                        displayed_tracking_ids
-                    )
-                # sudo: mail.message - checking whether there is a notification for the current user is acceptable
-                notifications_partners = message.sudo().notification_ids.filtered(
-                    lambda n: not n.is_read
-                ).res_partner_id
-                data["needaction"] = (
-                    not self.env.user._is_public() and current_partner in notifications_partners
-                )
-                data["trackingValues"] = displayed_tracking_ids._tracking_value_format()
-            store.add(message, data)
-        # sudo: mail.message: access to author is allowed
-        self.sudo()._author_to_store(store)
+        def default_subject(m):
+            r = record_by_message.get(m)
+            if not r:
+                return False
+            # sudo: if mentionned in a non accessible thread, user should be able to see the name
+            return (
+                r.sudo()._message_compute_subject()
+                if hasattr(r, "_message_compute_subject")
+                else r.sudo().display_name
+            )
+        # model, res_id, record_name need to be kept for mobile app as iOS app cannot be updated
+        fields.extend(
+            [
+                Store.Attr("default_subject", lambda m: default_subject(m)),
+                Store.Attr(
+                    "record_name",
+                    # sudo: if mentionned in a non accessible thread, user should be able to see the name
+                    lambda m: record_by_message[m].sudo().display_name
+                    if m in record_by_message
+                    else False,
+                ),
+                Store.Attr("scheduledDatetime", lambda m: scheduled_dt_by_msg_id.get(m.id, False)),
+                Store.Attr(
+                    "thread", lambda m: Store.One(record_by_message.get(m), [], as_thread=True)
+                ),
+                Store.Attr(
+                    "incoming_email_cc",
+                    lambda m: tools.mail.email_split_tuples(m.incoming_email_cc),
+                    predicate=lambda m: m.incoming_email_cc,
+                ),
+                Store.Attr(
+                    "incoming_email_to",
+                    lambda m: tools.mail.email_split_tuples(m.incoming_email_to),
+                    predicate=lambda m: m.incoming_email_to,
+                ),
+                Store.Attr(
+                    "author",
+                    lambda m: m._author_to_store(
+                        record_by_message.get(m, self.env["mail.message"])
+                    ),
+                ),
+                Store.Attr(
+                    "email_from",
+                    predicate=lambda m: m._should_add_email_from_to_store(
+                        record_by_message.get(m, self.env["mail.message"])
+                    ),
+                ),
+            ]
+        )
+
+        def tracking_values(m):
+            # sudo: mail.message - filtering allowed tracking values
+            displayed_tracking_ids = m.sudo().tracking_value_ids._filter_has_field_access(self.env)
+            if (r := record_by_message.get(m)) and hasattr(r, "_track_filter_for_display"):
+                displayed_tracking_ids = r._track_filter_for_display(displayed_tracking_ids)
+            return displayed_tracking_ids
+
+        if for_current_user:
+            fields.extend(
+                [
+                    Store.Attr(
+                        "needaction",
+                        lambda m: not self.env.user._is_public()
+                        and current_partner
+                        # sudo: mail.message - checking whether there is a notification for the current user is acceptable
+                        in m.sudo()
+                        .notification_ids.filtered(lambda n: not n.is_read)
+                        .res_partner_id,
+                    ),
+                    Store.Attr("trackingValues", lambda m: tracking_values(m)._tracking_value_format()),
+                ]
+            )
+        store.add(self, fields)
         # Add extras at the end to guarantee order in result. In particular, the parent message
         # needs to be after the current message (client code assuming the first received message is
         # the one just posted for example, and not the message being replied to).
         self._extras_to_store(store, format_reply=format_reply)
 
-    def _author_to_store(self, store: Store):
-        for message in self:
-            data = {
-                "author": False,
-                "email_from": message.email_from,
-            }
-            # sudo: mail.message: access to author is allowed
-            if guest_author := message.sudo().author_guest_id:
-                data["author"] = Store.One(guest_author, ["avatar_128", "name"])
-            # sudo: mail.message: access to author is allowed
-            elif author := message.sudo().author_id:
-                data["author"] = Store.One(author, ["avatar_128", "name", "is_company", "user"])
-            store.add(message, data)
+    def _author_to_store(self, record):
+        self.ensure_one()
+        # sudo: mail.message: access to author is allowed
+        if guest_author := self.sudo().author_guest_id:
+            return Store.One(guest_author, ["avatar_128", "name"])
+        # sudo: mail.message: access to author is allowed
+        elif author := self.sudo().author_id:
+            return Store.One(author, ["avatar_128", "name", "is_company", "user"])
+        return False
+
+    def _should_add_email_from_to_store(self, record):
+        return True
 
     def _extras_to_store(self, store: Store, format_reply):
         pass
