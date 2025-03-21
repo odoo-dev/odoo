@@ -112,25 +112,17 @@ export const assets = {
         delay: 5000,
         extraDelay: 2500,
     },
-
     /**
-     * Get the files information as descriptor object from a public asset template.
-     *
      * @param {string} bundleName Name of the bundle containing the list of files
-     * @param {Object} options
-     * @param {Document} [options.targetDoc=document] document to which the bundle will be applied (e.g. iframe document)
+     * @param {Map<string, Promise<BundleFileNames | void>>} cacheMap
      * @returns {Promise<BundleFileNames>}
      */
-    getBundle(bundleName, { targetDoc = document } = {}) {
-        const cacheMap = getCacheMap(targetDoc);
-        if (cacheMap.has(bundleName)) {
-            return cacheMap.get(bundleName);
-        }
+    _queryBundle(bundleName, cacheMap) {
         const url = new URL(`/web/bundle/${bundleName}`, location.origin);
         for (const [key, value] of Object.entries(session.bundle_params || {})) {
             url.searchParams.set(key, value);
         }
-        const promise = fetch(url)
+        return fetch(url)
             .then(async (response) => {
                 const cssLibs = [];
                 const jsLibs = [];
@@ -150,6 +142,52 @@ export const assets = {
                 cacheMap.delete(bundleName);
                 throw new AssetsLoadingError(`The loading of ${url} failed`, { cause: reason });
             });
+    },
+    /**
+     *
+     * @param {string} bundleName Name of the bundle containing the list of files
+     * @param {Map<string, Promise<BundleFileNames | void>>} cacheMap
+     * @param lazySession session service
+     * @returns {Promise<BundleFileNames>}}
+     * @private
+     */
+    _queryLazySession(bundleName, cacheMap, lazySession) {
+        return new Promise((resolve, reject) => {
+            lazySession.getValue("bundles", (bundles) => {
+                if (bundles[bundleName]) {
+                    const cssLibs = [];
+                    const jsLibs = [];
+                    for (const { src, type } of Object.values(bundles[bundleName])) {
+                        if (type === "link" && src) {
+                            cssLibs.push(src);
+                        } else if (type === "script" && src) {
+                            jsLibs.push(src);
+                        }
+                    }
+                    resolve({ cssLibs, jsLibs });
+                } else {
+                    assets._queryBundle(bundleName, cacheMap).then(resolve, reject);
+                }
+            });
+        });
+    },
+    /**
+     * Get the files information as descriptor object from a public asset template.
+     *
+     * @param {string} bundleName Name of the bundle containing the list of files
+     * @param {Object} options
+     * @param {Document} [options.targetDoc=document] document to which the bundle will be applied (e.g. iframe document)
+     * @param {lazySession} [options.lazySession=sessionService] session service to query the lazySession (optional)
+     * @returns {Promise<BundleFileNames>}
+     */
+    getBundle(bundleName, { targetDoc = document, lazySession = null } = {}) {
+        const cacheMap = getCacheMap(targetDoc);
+        if (cacheMap.has(bundleName)) {
+            return cacheMap.get(bundleName);
+        }
+        const promise = lazySession
+            ? assets._queryLazySession(bundleName, cacheMap, lazySession)
+            : assets._queryBundle(bundleName, cacheMap);
         cacheMap.set(bundleName, promise);
         return promise;
     },
@@ -163,9 +201,13 @@ export const assets = {
      * @param {Document} [options.targetDoc=document] document to which the bundle will be applied (e.g. iframe document)
      * @param {Boolean} [options.css=true] apply bundle css on targetDoc
      * @param {Boolean} [options.js=true] apply bundle js on targetDoc
+     * @param {lazySession} [options.lazySession=sessionService] session service to query the lazySession (optional)
      * @returns {Promise<void[]>}
      */
-    loadBundle(bundleName, { targetDoc = document, css = true, js = true } = {}) {
+    loadBundle(
+        bundleName,
+        { targetDoc = document, css = true, js = true, lazySession = null } = {}
+    ) {
         if (typeof bundleName !== "string") {
             throw new Error(
                 `loadBundle(bundleName:string) accepts only bundleName argument as a string ! Not ${JSON.stringify(
@@ -173,7 +215,7 @@ export const assets = {
                 )} as ${typeof bundleName}`
             );
         }
-        return getBundle(bundleName, { targetDoc }).then(({ cssLibs, jsLibs }) => {
+        return getBundle(bundleName, { targetDoc, lazySession }).then(({ cssLibs, jsLibs }) => {
             const promises = [];
             if (css && cssLibs) {
                 promises.push(...cssLibs.map((url) => assets.loadCSS(url, { targetDoc })));
