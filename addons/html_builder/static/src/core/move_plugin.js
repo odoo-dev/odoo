@@ -69,7 +69,7 @@ export class MovePlugin extends Plugin {
         get_overlay_buttons: withSequence(0, {
             getButtons: this.getActiveOverlayButtons.bind(this),
         }),
-        on_clone_handlers: this.onClone.bind(this),
+        on_cloned_handlers: this.onCloned.bind(this),
         on_remove_handlers: this.onRemove.bind(this),
     };
 
@@ -113,7 +113,7 @@ export class MovePlugin extends Plugin {
         return buttons;
     }
 
-    onClone({ cloneEl, originalEl }) {
+    onCloned({ cloneEl, originalEl }) {
         if (!isMovable(originalEl)) {
             return;
         }
