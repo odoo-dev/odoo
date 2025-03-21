@@ -189,10 +189,7 @@ export class PosOrder extends Base {
             taxTotals.order_has_zero_remaining = false;
         }
 
-        console.log(`[JOV] order taxTotals`);
-        console.log(taxTotals);
-
-        if (this.amount_total !== undefined && this.amount_tax !== undefined) {  // TODO JOV
+        if ((this.get_screen_data().name === "PaymentScreen" || this.get_screen_data().name === "ReceiptScreen") && this.amount_total !== undefined && this.amount_tax !== undefined) {  // TODO JOV
             const subtotal = this.amount_total - this.amount_tax;
             taxTotals.subtotals = [{
                 "tax_groups": [

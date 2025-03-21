@@ -599,7 +599,7 @@ export class PosOrderline extends Base {
         //   ]
         // }
 
-        if (this.price_subtotal_incl !== undefined && this.price_subtotal !== undefined)  { // TODO: if external taxes
+        if ((this.order_id.get_screen_data().name === "PaymentScreen" || this.order_id.get_screen_data().name === "ReceiptScreen") && this.price_subtotal_incl !== undefined && this.price_subtotal !== undefined)  { // TODO: if external taxes
             console.log(`[JOV] taking from line ${this.price_subtotal_incl}`);
             const tax_amount = this.price_subtotal_incl - this.price_subtotal;
             return {
@@ -609,7 +609,7 @@ export class PosOrderline extends Base {
                 priceWithoutTaxBeforeDiscount: this.price_subtotal,
                 tax: tax_amount,
                 taxDetails: {
-                    "3": {
+                    "1": {  // TODO JOV: is this a tax id?
                         "amount": tax_amount,
                         "base": this.price_subtotal,
                     }
