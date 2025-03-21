@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
-from collections import defaultdict
+import json
 from hashlib import sha512
 from secrets import choice
 from markupsafe import Markup
@@ -513,15 +513,18 @@ class DiscussChannel(models.Model):
                     payload["invited_by_user_id"] = self.env.user.id
                 member._bus_send("discuss.channel/joined", payload)
                 if post_joined_message:
-                    notification = (
-                        _("joined the channel")
-                        if member.is_self
-                        else _("invited %s to the channel", member._get_html_link(for_persona=True))
-                    )
-                    member.channel_id.message_post(
-                        body=Markup('<div class="o_mail_notification">%s</div>') % notification,
-                        message_type="notification",
-                        subtype_xmlid="mail.mt_comment",
+                    member.channel_id._post_notification(
+                        "channel-joined",
+                        {
+                            "inviter_persona": {
+                                "id": current_partner.id or current_guest.id,
+                                "type": "partner" if current_partner else "guest",
+                            },
+                            "invitee_persona": {
+                                "id": member.partner_id.id or member.guest_id.id,
+                                "type": "partner" if member.partner_id else "guest",
+                            },
+                        },
                     )
             if new_members:
                 channel._bus_send_store(Store(channel, "member_count").add(new_members))
@@ -1037,6 +1040,18 @@ class DiscussChannel(models.Model):
 
     def _to_store(self, store: Store, fields):
         store.add_records_fields(self, fields)
+
+    def _post_notification(self, notification_type, data=None):
+        """Post a notification on this channel.
+
+        :notification_type str: Type of the notification.
+        :data dict: Optional data used to compute the message body.
+        """
+        body = Markup(
+            "<div class='o_mail_notification' data-oe-type='%(notification_type)s'"
+            "data-o-mail-notification='%(data)s'></div>"
+        ) % {"notification_type": notification_type, "data": json.dumps(data) if data else "{}"}
+        self.message_post(body=body, message_type="notification", subtype_xmlid="mail.mt_comment")
 
     # User methods
 
