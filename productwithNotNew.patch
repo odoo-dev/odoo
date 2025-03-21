@@ -1,0 +1,44 @@
+diff --git a/addons/hr_expense/views/product_product_views.xml b/addons/hr_expense/views/product_product_views.xml
+index b620f4c12a2a..288a5d3eac6d 100644
+--- a/addons/hr_expense/views/product_product_views.xml
++++ b/addons/hr_expense/views/product_product_views.xml
+@@ -86,6 +86,9 @@
+             <field name="mode">primary</field>
+             <field name="model">product.product</field>
+             <field name="arch" type="xml">
++                <kanban position="attributes">
++                    <attribute name="create">True</attribute>
++                </kanban>
+                 <xpath expr="//main" position="inside">
+                     <span>
+                         Cost: <field name="standard_price"/>
+diff --git a/addons/product/views/product_views.xml b/addons/product/views/product_views.xml
+index bdc720e830d5..f0d860687c21 100644
+--- a/addons/product/views/product_views.xml
++++ b/addons/product/views/product_views.xml
+@@ -302,7 +302,7 @@
+             <field name="model">product.product</field>
+             <field eval="7" name="priority"/>
+             <field name="arch" type="xml">
+-                <list string="Product Variants" multi_edit="1" duplicate="false" sample="1" default_order="is_favorite desc, default_code, name, id">
++                <list string="Product Variants" create="0" multi_edit="1" duplicate="false" sample="1" default_order="is_favorite desc, default_code, name, id">
+                     <field name="is_favorite" widget="boolean_favorite" nolabel="1" readonly="1"/>
+                     <field name="default_code" optional="show" readonly="1"/>
+                     <field name="barcode" optional="hide" readonly="1"/>
+@@ -361,6 +361,7 @@
+                 <form position="attributes">
+                     <attribute name="string">Product Variant</attribute>
+                     <attribute name="duplicate">false</attribute>
++                    <attribute name="create">false</attribute>
+                 </form>
+                 <xpath expr="//div[@name='standard_price_uom']" position="after">
+                     <field name="default_code"/>
+@@ -450,7 +451,7 @@
+             <field name="name">Product Kanban</field>
+             <field name="model">product.product</field>
+             <field name="arch" type="xml">
+-                <kanban sample="1" default_order="is_favorite desc, default_code, name, id">
++                <kanban sample="1" create="0" default_order="is_favorite desc, default_code, name, id">
+                     <field name="activity_state"/>
+                     <field name="color"/>
+                     <progressbar field="activity_state" colors='{"planned": "success", "today": "warning", "overdue": "danger"}'/>
