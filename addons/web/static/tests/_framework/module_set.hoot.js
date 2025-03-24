@@ -202,13 +202,11 @@ const getSuitePath = (name) => name.replace("../tests/", "");
  *
  * @param {string} name
  */
-const makeFixedFactory = (name) => {
-    return () => {
-        if (!loader.modules.has(name)) {
-            loader.startModule(name);
-        }
-        return loader.modules.get(name);
-    };
+const makeFixedFactory = (name) => () => {
+    if (!loader.modules.has(name)) {
+        loader.startModule(name);
+    }
+    return loader.modules.get(name);
 };
 
 /**
@@ -621,6 +619,7 @@ export async function runTests(options) {
         moduleSetLoader.cleanup();
         lastSuiteName = suite.fullName;
         lastNumberTests = suite.reporting.tests.length;
+        window.pro.clear();
 
         if (!running) {
             break;
