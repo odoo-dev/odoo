@@ -2,8 +2,10 @@ import { _t } from "@web/core/l10n/translation";
 import { useErrorHandlers, useTrackedAsync } from "@point_of_sale/app/hooks/hooks";
 import { registry } from "@web/core/registry";
 import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
-import { useState, Component, onMounted } from "@odoo/owl";
+import { useState, Component, onMounted, onWillStart } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
+import { getTemplate, clearProcessedTemplates } from "@web/core/templates";
+
 import { useService } from "@web/core/utils/hooks";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
@@ -36,6 +38,22 @@ export class ReceiptScreen extends Component {
             if (!this.pos.config.module_pos_restaurant) {
                 this.pos.sendOrderInPreparation(order, { orderDone: true });
             }
+        });
+
+        onWillStart(() => {
+            clearProcessedTemplates();
+            const currentOrder = this.pos.getOrder();
+            const rLayout = getTemplate("point_of_sale.OrderReceipt");
+            const posReceipt = rLayout.querySelector(".pos-receipt");
+            if (currentOrder.partner_id?.lang) {
+                posReceipt.setAttribute("t-translation-context", currentOrder.partner_id.lang);
+            } else {
+                posReceipt.removeAttribute("t-translation-context");
+            }
+            console.log(
+                "posReceipt.getAttribute == ",
+                posReceipt.getAttribute("t-translation-context")
+            );
         });
     }
     actionSendReceiptOnEmail() {

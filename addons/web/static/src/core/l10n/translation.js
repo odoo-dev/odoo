@@ -121,7 +121,7 @@ export async function loadLanguages(orm) {
  * @param  {...any} values Primitive values to insert in place of placeholders.
  * @returns {string|Markup}
  */
-function _safeFormatAndSprintf(str, ...values) {
+export function _safeFormatAndSprintf(str, ...values) {
     let hasMarkup = false;
     let valuesObject = values;
     if (values.length === 1 && Object.prototype.toString.call(values[0]) === "[object Object]") {

@@ -9,6 +9,7 @@ import { session } from "@web/session";
 import { mountComponent } from "@web/env";
 import { Chrome } from "@point_of_sale/app/pos_app";
 import { jsToPyLocale } from "@web/core/l10n/utils";
+import { _t_pos } from "@point_of_sale/app/services/pos_translation";
 
 const loader = reactive({ isShown: true });
 whenReady(() => {
@@ -28,6 +29,7 @@ whenReady(() => {
     const app = await mountComponent(Chrome, document.body, {
         name: "Odoo Point of Sale",
         props: { disableLoader: () => (loader.isShown = false) },
+        translateFn: _t_pos,
     });
     window.addEventListener("beforeunload", function (event) {
         if (!navigator.onLine) {

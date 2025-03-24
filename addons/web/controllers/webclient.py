@@ -84,6 +84,27 @@ class WebClient(http.Controller):
         ])
         return response
 
+    @http.route('/web/webclient/translations/all', type='http', auth='public', cors='*', readonly=True)
+    def all_translations(self):
+        mods = list(request.env.registry._init_modules) + odoo.tools.config['server_wide_modules']
+
+        langs = [code for code, _name in self.env['res.lang'].get_installed()]
+        translations = {}
+        for lang in langs:
+            translations_per_module, lang_params = request.env["ir.http"].get_translations_for_webclient(mods, lang)
+            translations[lang] = translations_per_module
+
+        body = {
+            'langs': langs,
+            'translations': translations,
+        }
+
+        # The type of the route is set to HTTP, but the rpc is made with a get and expects JSON
+        response = request.make_json_response(body, [
+            ('Cache-Control', f'public, max-age={http.STATIC_CACHE_LONG}'),
+        ])
+        return response
+
     @http.route('/web/webclient/version_info', type='jsonrpc', auth="none")
     def version_info(self):
         return odoo.service.common.exp_version()

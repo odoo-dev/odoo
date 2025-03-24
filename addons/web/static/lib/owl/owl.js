@@ -4120,6 +4120,10 @@
             const attrs = {};
             for (let key in ast.attrs) {
                 let expr, attrName;
+                if (key == "t-att-t-translation-context") {
+                    console.log("compileTDomNode :: ")
+                    debugger
+                }
                 if (key.startsWith("t-attf")) {
                     expr = interpolate(ast.attrs[key]);
                     const idx = block.insertData(expr, "attr");
@@ -4182,6 +4186,7 @@
                 const fullExpression = `${bExprId}[${exprId}]`;
                 let idx;
                 if (specialInitTargetAttr) {
+                    console.log("compileTDomNode :: specialInitTargetAttr", specialInitTargetAttr);
                     let targetExpr = targetAttr in attrs && `'${attrs[targetAttr]}'`;
                     if (!targetExpr && ast.attrs) {
                         // look at the dynamic attribute counterpart
@@ -5043,6 +5048,11 @@
                 on[attr.slice(5)] = value;
             }
             else if (attr.startsWith("t-model")) {
+                if (attr.startsWith("t-att-t-translation-context-")) {
+                    const attrName = attr.slice(22);
+                    console.log("parseDOMNode : ", attr)
+
+                }
                 if (!["input", "select", "textarea"].includes(tagName)) {
                     throw new OwlError("The t-model directive only works with <input>, <textarea> and <select>");
                 }
@@ -5384,6 +5394,9 @@
         let propsTranslationCtx = null;
         for (let name of node.getAttributeNames()) {
             const value = node.getAttribute(name);
+            if(name.startsWith("t-att-t-translation-context")) {
+                console.log("parseComponent : ", name);
+            }
             if (name.startsWith("t-translation-context-")) {
                 const attrName = name.slice(22);
                 propsTranslationCtx = propsTranslationCtx || {};
@@ -5538,6 +5551,9 @@
     // -----------------------------------------------------------------------------
     function parseTTranslationContext(node, ctx) {
         const translationCtx = node.getAttribute("t-translation-context");
+        if (translationCtx) {
+            console.log("translationCtx == : ", translationCtx);
+        }
         if (!translationCtx) {
             return null;
         }

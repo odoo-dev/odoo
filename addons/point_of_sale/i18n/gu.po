@@ -6957,3 +6957,9 @@ msgstr ""
 #: code:addons/point_of_sale/static/src/xml/Popups/OrderImportPopup.xml:0
 msgid "were duplicates of existing orders"
 msgstr ""
+
+#. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/xml/Popups/OrderImportPopup.xml:0
+msgid "Hello World"
+msgstr "હેલો વર્લ્ડ"
