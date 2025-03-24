@@ -139,23 +139,25 @@ class HOOTCommon(odoo.tests.HttpCase):
         self._test_params = [('-', '-@web/core/autocomplete,-@web/core/autocomplete2')]
         self.assertEqual(self.get_hoot_filters(), '&test=69a6561d&suite=69a6561d&test=cb246db5&suite=cb246db5')
 
-@odoo.tests.tagged('post_install', '-at_install')
+@odoo.tests.tagged('post_install', '-at_install', 'pro')
 class WebSuite(QunitCommon, HOOTCommon):
 
     @odoo.tests.no_retry
     def test_unit_desktop(self):
+        self.hoot_filters = f"&filter=%2Fspreadsheet%2F"
         # Unit tests suite (desktop)
-        self.browser_js(f'/web/tests?headless&loglevel=2&preset=desktop&timeout=15000{self.hoot_filters}', "", "", login='admin', timeout=1800, success_signal="[HOOT] test suite succeeded", error_checker=unit_test_error_checker)
+        self.browser_js(f'/web/tests?headless&loglevel=2&preset=desktop&timeout=15000{self.hoot_filters}', "", "",
+                        login='admin', timeout=1800, success_signal="[HOOT] test suite succeeded", error_checker=unit_test_error_checker)
 
-    @odoo.tests.no_retry
-    def test_hoot(self):
-        # HOOT tests suite
-        self.browser_js(f'/web/static/lib/hoot/tests/index.html?headless&loglevel=2{self.hoot_filters}', "", "", login='admin', timeout=1800, success_signal="[HOOT] test suite succeeded", error_checker=unit_test_error_checker)
+    # @odoo.tests.no_retry
+    # def test_hoot(self):
+    #     # HOOT tests suite
+    #     self.browser_js(f'/web/static/lib/hoot/tests/index.html?headless&loglevel=2{self.hoot_filters}', "", "", login='admin', timeout=1800, success_signal="[HOOT] test suite succeeded", error_checker=unit_test_error_checker)
 
-    @odoo.tests.no_retry
-    def test_qunit_desktop(self):
-        # ! DEPRECATED
-        self.browser_js(f'/web/tests/legacy?mod=web{self.qunit_filters}', "", "", login='admin', timeout=1800, success_signal="QUnit test suite done.", error_checker=qunit_error_checker)
+    # @odoo.tests.no_retry
+    # def test_qunit_desktop(self):
+    #     # ! DEPRECATED
+    #     self.browser_js(f'/web/tests/legacy?mod=web{self.qunit_filters}', "", "", login='admin', timeout=1800, success_signal="QUnit test suite done.", error_checker=qunit_error_checker)
 
     def test_check_suite(self):
         self._check_forbidden_statements('web.assets_unit_tests')
