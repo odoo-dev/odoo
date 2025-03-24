@@ -8,15 +8,8 @@ export class ProductCatalogOrderLine extends Component {
         quantity: Number,
         price: Number,
         productType: String,
+        uomDisplayName: String,
         code: { type: String, optional: true},
-        uom: {
-            type: Object,
-            optional: true,
-            shape: {
-                id: Number,
-                display_name: String,
-            },
-        },
         readOnly: { type: Boolean, optional: true },
         warning: { type: String, optional: true},
     };

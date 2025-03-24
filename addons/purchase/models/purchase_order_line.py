@@ -436,7 +436,7 @@ class PurchaseOrderLine(models.Model):
                 'quantity': float,
                 'price': float,
                 'readOnly': bool,
-                'uom': dict,
+                'uomDisplayName': String,
                 'packaging': dict,
                 'warning': String,
             }
@@ -449,10 +449,7 @@ class PurchaseOrderLine(models.Model):
                 readOnly=self.order_id._is_readonly(),
             )
             if self.product_id.uom_id != self.product_uom_id:
-                catalog_info['uom'] = {
-                'display_name': self.product_uom_id.display_name,
-                'id': self.product_uom_id.id,
-            }
+                catalog_info['uomDisplayName'] = self.product_uom_id.display_name
             return catalog_info
         elif self:
             self.product_id.ensure_one()

@@ -69,7 +69,7 @@ class ProductCatalogMixin(models.AbstractModel):
                 'quantity': float (optional)
                 'productType': string
                 'price': float
-                'uom': dict
+                'uomDisplayName': string
                 'code': string
                 'readOnly': bool (optional)
             }
@@ -77,11 +77,8 @@ class ProductCatalogMixin(models.AbstractModel):
         return {
             product.id: {
                 'productType': product.type,
-                'code': str(product.code),
-                'uom': {
-                    'display_name': product.uom_id.display_name,
-                    'id': product.uom_id.id,
-                },
+                'uomDisplayName': product.uom_id.name,
+                'code': product.code if product.code else '',
             }
             for product in products
         }
@@ -99,8 +96,8 @@ class ProductCatalogMixin(models.AbstractModel):
                 'quantity': float (optional)
                 'productType': string
                 'price': float
+                'uomDisplayName': string
                 'code': String
-                'uom':dict
                 'readOnly': bool (optional)
             }
         """
@@ -111,15 +108,11 @@ class ProductCatalogMixin(models.AbstractModel):
             line_data = record_lines._get_product_catalog_lines_data(
                 parent_record=self, **kwargs
             )
-            uom = {
-                'display_name': product.uom_id.display_name,
-                'id': product.uom_id.id,
-            }
             order_line_info[product.id] = {
                **line_data,
                'productType': product.type,
-               'code': str(product.code),
-               **({'uom': uom} if 'uom' not in line_data else {}),
+                **({'uomDisplayName': product.uom_id.name} if 'uomDisplayName' not in line_data else {}),
+               'code': product.code if product.code else '',
             }
             product_ids.remove(product.id)
 

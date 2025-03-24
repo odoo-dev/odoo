@@ -5,8 +5,8 @@
              template.  -->
         <t t-portal="`#product-${props.productId}-price`" t-if="showPrice">
             <span class="o_product_catalog_price">
-                <span class="fw-bold"><t t-out="price" /></span>
-                <span class="mx-4 text-muted" t-if="props.code and props.code != 'False'"><t t-out="props.code" /></span>
+                <span class="fw-bold" t-out="price" />
+                <span class="mx-4 text-muted" t-if="props.code" t-out="props.code" />
             </span>
         </t>
         <div 
@@ -38,9 +38,7 @@
                                 t-att-value="quantity"
                                 t-on-change="this.env.setQuantity"
                                 t-on-focus="_onFocus"/>
-                        <span t-if="this.env.displayUoM and props.uom.display_name" class="fst-italic text-muted text-bg-light text-truncate w-50 border border-start-0 py-1">
-                            <t t-out="props.uom.display_name"/>
-                        </span>
+                        <span class="fst-italic text-muted text-bg-light text-truncate w-50 border border-start-0 py-1" t-if="this.env.displayUoM" t-out="props.uomDisplayName"/>
                     </div>
                     <button class="btn btn-primary border"
                             t-on-click.stop="(ev) => this.env.increaseQuantity()">

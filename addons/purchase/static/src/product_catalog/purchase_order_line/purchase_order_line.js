@@ -5,7 +5,6 @@ export class ProductCatalogPurchaseOrderLine extends ProductCatalogOrderLine {
         ...ProductCatalogPurchaseOrderLine.props,
         min_qty: { type: Number, optional: true },
         packaging: { type: Object, optional: true },
-        uom: Object,
     };
 
     get highlightUoM() {

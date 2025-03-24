@@ -1081,10 +1081,7 @@ class PurchaseOrder(models.Model):
         self.ensure_one()
         product_infos = {
             'price': product.standard_price,
-            'uom': {
-                'display_name': product.uom_id.display_name,
-                'id': product.uom_id.id,
-            },
+            'uomDisplayName': product.uom_id.display_name
         }
         if product.purchase_line_warn_msg:
             product_infos['warning'] = product.purchase_line_warn_msg
