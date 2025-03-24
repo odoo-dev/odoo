@@ -34,7 +34,8 @@
                             name="getProductName(product)"
                             color="product.color || product.pos_categ_ids?.at(-1)?.color"
                             imageUrl="pos.config.show_product_images and this.getProductImage(product)"
-                            onClick.bind="() => this.addProductToOrder(product)"
+                            t-on-pointerdown="() => this.startLongPress(product)"
+                            t-on-pointerup="() => this.handleClick(product, () => this.addProductToOrder(product))"
                             productCartQty="this.state.quantityByProductTmplId[product.id]" />
                     </div>
                     <div t-else="" class="flex-grow-1 text-center mt-5">

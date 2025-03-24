@@ -10,7 +10,6 @@ import {
 import { _t } from "@web/core/l10n/translation";
 import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { SelectPartnerButton } from "@point_of_sale/app/screens/product_screen/control_buttons/select_partner_button/select_partner_button";
-import { ProductInfoPopup } from "@point_of_sale/app/components/popups/product_info_popup/product_info_popup";
 
 export class ControlButtons extends Component {
     static template = "point_of_sale.ControlButtons";
@@ -147,8 +146,7 @@ export class ControlButtons extends Component {
     }
 
     async onProductInfoClick(productTemplate) {
-        const info = await this.pos.getProductInfo(productTemplate, 1);
-        this.dialog.add(ProductInfoPopup, { info: info, productTemplate: productTemplate });
+        this.pos.onProductInfoClick(productTemplate);
     }
 }
 

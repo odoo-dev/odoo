@@ -374,6 +374,31 @@ export class ProductScreen extends Component {
             });
         }
     }
+
+    startLongPress(product) {
+        if (this.longPressTimeout) {
+            clearTimeout(this.longPressTimeout);
+        }
+
+        this.longPressTimeout = setTimeout(() => {
+            this.onLongPress(product);
+        }, 800);
+    }
+
+    handleClick(product, onClick) {
+        if (this.longPressTimeout) {
+            clearTimeout(this.longPressTimeout);
+            this.longPressTimeout = null;
+            if (onClick) {
+                onClick(product);
+            }
+        }
+    }
+
+    onLongPress(product) {
+        this.longPressTimeout = null;
+        this.pos.onProductInfoClick(product);
+    }
 }
 
 registry.category("pos_screens").add("ProductScreen", ProductScreen);

@@ -17,6 +17,7 @@ import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment
 import { EditListPopup } from "@point_of_sale/app/components/popups/select_lot_popup/select_lot_popup";
 import { ProductConfiguratorPopup } from "@point_of_sale/app/components/popups/product_configurator_popup/product_configurator_popup";
 import { ComboConfiguratorPopup } from "@point_of_sale/app/components/popups/combo_configurator_popup/combo_configurator_popup";
+import { ProductInfoPopup } from "@point_of_sale/app/components/popups/product_info_popup/product_info_popup";
 import {
     makeAwaitable,
     ask,
@@ -1363,6 +1364,10 @@ export class PosStore extends WithLazyGetterTrap {
     }
     async getClosePosInfo() {
         return await this.data.call("pos.session", "get_closing_control_data", [[this.session.id]]);
+    }
+    async onProductInfoClick(productTemplate) {
+        const info = await this.getProductInfo(productTemplate, 1);
+        this.dialog.add(ProductInfoPopup, { info: info, productTemplate: productTemplate });
     }
     // return the current order
     getOrder() {
