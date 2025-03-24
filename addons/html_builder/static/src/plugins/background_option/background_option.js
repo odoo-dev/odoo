@@ -239,7 +239,6 @@ export class BackgroundComponent extends Component {
         withColors: { type: Boolean },
         withImages: { type: Boolean },
         withColorCombinations: { type: Boolean },
-        withGradient: { type: Boolean },
         withShapes: { type: Boolean, optional: true },
         getShapeData: { type: Function },
         getShapeStyleUrl: { type: Function },
