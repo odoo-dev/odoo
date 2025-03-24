@@ -94,15 +94,15 @@ export class RecordInternal {
         if (Model._.fieldsCompute.get(fieldName)) {
             if (!Model._.fieldsEager.get(fieldName)) {
                 onChange(recordProxy, fieldName, () => {
-                    if (this.fieldsComputing.get(fieldName)) {
-                        /**
-                         * Use a reactive to reset the computeInNeed flag when there is
-                         * a change. This assumes when other reactive are still
-                         * observing the value, its own callback will reset the flag to
-                         * true through the proxy getters.
-                         */
-                        this.fieldsComputeInNeed.delete(fieldName);
-                    }
+                    // if (this.fieldsComputing.get(fieldName)) {
+                    //     /**
+                    //      * Use a reactive to reset the computeInNeed flag when there is
+                    //      * a change. This assumes when other reactive are still
+                    //      * observing the value, its own callback will reset the flag to
+                    //      * true through the proxy getters.
+                    //      */
+                    //     this.fieldsComputeInNeed.delete(fieldName);
+                    // }
                 });
                 // reset flags triggered by registering onChange
                 this.fieldsComputeInNeed.delete(fieldName);
