@@ -8,7 +8,7 @@ import { boundariesOut } from "@html_editor/utils/position";
 
 export class CaptionPlugin extends Plugin {
     static id = "caption";
-    static dependencies = ["image", "media", "split", "history", "embeddedComponents", "selection", "baseContainer"];
+    static dependencies = ["image", "split", "history", "embeddedComponents", "selection", "baseContainer"];
     resources = {
         user_commands: [
             {
@@ -64,7 +64,6 @@ export class CaptionPlugin extends Plugin {
             const caption = root.ownerDocument.createElement("figcaption");
             caption.textContent = image.getAttribute("data-caption");
             image.removeAttribute("data-caption");
-            this.dependencies.media.unmarkMediaAsEditable(image);
             image.removeAttribute("data-caption-id");
             image.after(caption);
         }
@@ -132,7 +131,6 @@ export class CaptionPlugin extends Plugin {
         figure.append(caption);
         // Ensure it's not possible to write inside the figure.
         figure.setAttribute("contenteditable", "false");
-        this.dependencies.media.markMediaAsEditable(image); // Needed because the image is in a non-editable container.
         // Ensure it's possible to write before and after the figure.
         const block = closestBlock(link || image);
         if (!block.previousSibling) {
@@ -166,7 +164,6 @@ export class CaptionPlugin extends Plugin {
             }
             unwrapContents(figure);
             image.removeAttribute("data-caption-id"); // (keep the data-caption for if we toggle again)
-            this.dependencies.media.unmarkMediaAsEditable(image);
             // Select the image.
             const [anchorNode, anchorOffset, focusNode, focusOffset] = boundariesOut(image);
             this.dependencies.selection.setSelection({
