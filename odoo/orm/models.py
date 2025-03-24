@@ -5000,6 +5000,30 @@ class BaseModel(metaclass=MetaModel):
             # that client change the record in a Form view)
             self._clean_properties()
 
+        # when updating, reset other translations of noupdate=False records
+        if self.env.context.get('install_mode'):
+            no_update_records = None
+            for field in self._fields.values():
+                if not (field.translate and (value := values.get(field.name))):
+                    continue
+                if no_update_records is None:
+                    no_update_records = self.browse(
+                        self.env['ir.model.data'].sudo().search_fetch(
+                            [
+                                ('model', '=', self._name),
+                                ('res_id', 'in', self.ids),
+                                ('noupdate', '=', False),
+                            ],
+                            ['res_id'],
+                            order='res_id',
+                        ).mapped('res_id')
+                    )
+                    if not no_update_records:
+                        break
+                # write False then the value to force flush the field
+                no_update_records.write({field.name: False})
+                no_update_records.write({field.name: value})
+
     def _load_records_create(self, vals_list):
         records = self.create(vals_list)
         if any(field.type == 'properties' for field in self._fields.values()):
