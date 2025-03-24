@@ -69,6 +69,7 @@ class TestSelfOrderKiosk(SelfOrderCommonTest):
         self.start_tour(self_route, "self_order_price_null")
 
     def test_self_order_language_changes(self):
+        "Useless change to generate a runbot"
         self.env['res.lang']._activate_lang('fr_FR')
         self.pos_config.write({
             'self_ordering_available_language_ids': [Command.link(lang.id) for lang in self.env['res.lang'].search([])],
