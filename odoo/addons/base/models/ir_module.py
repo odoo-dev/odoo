@@ -942,6 +942,34 @@ class IrModuleModule(models.Model):
     @api.model
     def _load_module_terms(self, modules, langs, overwrite=False):
         """ Load PO files of the given modules for the given languages. """
+
+        if overwrite and modules and any(lang != 'en_US' for lang in langs):
+            # When overwriting, remove translations given by users for noupdate=False objects
+            remove_langs = [lang for lang in langs if lang != 'en_US']
+            data = self.env['ir.model.data']._read_group(
+                [('module', 'in', modules), ('noupdate', '=', False)],
+                ['model'],
+                ['res_id:array_agg'],
+            )
+            _logger.debug("Remove translations in %d models: %s", len(data), remove_langs)
+            for model_name, record_ids in data:
+                model = self.env[model_name]
+                model.invalidate_model()
+                field_names = [name for name, f in model._fields.items() if f.translate and f.store]
+                for field_name in field_names:
+                    self.env.cr.execute(
+                        f"""
+                        UPDATE "{model._table}"
+                        SET "{field_name}" = "{field_name}" - %s
+                        WHERE "{field_name}" IS NOT NULL
+                        AND id IN %s
+                        """,
+                        (
+                            remove_langs,
+                            tuple(record_ids),
+                        ),
+                    )
+
         # load i18n files
         translation_importer = TranslationImporter(self.env.cr, verbose=False)
 
