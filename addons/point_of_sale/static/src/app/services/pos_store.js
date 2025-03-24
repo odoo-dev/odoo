@@ -1864,7 +1864,7 @@ export class PosStore extends WithLazyGetterTrap {
 
         if (preset) {
             if (preset.identification === "address" && !order.partner_id) {
-                const partner = await this.selectPartner();
+                const partner = await this.selectPartner(preset);
                 if (!partner) {
                     return;
                 }
@@ -1909,7 +1909,7 @@ export class PosStore extends WithLazyGetterTrap {
     setPartnerToCurrentOrder(partner) {
         this.getOrder().setPartner(partner);
     }
-    async selectPartner() {
+    async selectPartner(preset = undefined) {
         // FIXME, find order to refund when we are in the ticketscreen.
         const currentOrder = this.getOrder();
         if (!currentOrder) {
@@ -1929,6 +1929,28 @@ export class PosStore extends WithLazyGetterTrap {
         const payload = await makeAwaitable(this.dialog, PartnerList, {
             partner: currentPartner,
         });
+        if (!payload) {
+            return;
+        }
+        const presetRequiresAddress = preset || (currentOrder.preset_id?.identification === "address");
+        const partnerHasAddress = payload?.street;
+
+        if (presetRequiresAddress && !partnerHasAddress) {
+            this.notification.add(_t("Address Required."), {
+                type: "warning",
+            });
+            const updatedPartner = await this.editPartner(payload);
+            if (updatedPartner && updatedPartner.street) {
+                this.setPartnerToCurrentOrder(updatedPartner);
+                return updatedPartner;
+            } else {
+                this.dialog.add(AlertDialog, {
+                    title: _t("Address Required"),
+                    body: _t("A delivery address is required for this order."),
+                });
+                return false;
+            }
+        }
 
         this.setPartnerToCurrentOrder(payload || false);
 
