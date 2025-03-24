@@ -1929,10 +1929,31 @@ export class PosStore extends WithLazyGetterTrap {
         const payload = await makeAwaitable(this.dialog, PartnerList, {
             partner: currentPartner,
         });
+        if (!payload) {
+            return;
+        }
+        const presetRequiresAddress = currentOrder.preset_id?.identification === "address";
+        const partnerHasAddress = payload?.street;
 
-        this.setPartnerToCurrentOrder(payload || false);
-
-        return payload;
+        if (presetRequiresAddress && !partnerHasAddress) {
+            this.notification.add(_t("Address Required."), {
+                type: "warning",
+            });
+            const updatedPartner = await this.editPartner(payload);
+            if (updatedPartner && updatedPartner.street) {
+                this.setPartnerToCurrentOrder(updatedPartner);
+                return updatedPartner;
+            } else {
+                this.dialog.add(AlertDialog, {
+                    title: _t("Address Required"),
+                    body: _t("A delivery address is required for this order."),
+                });
+                return false;
+            }
+        } else {
+            this.setPartnerToCurrentOrder(payload || false);
+            return payload;
+        }
     }
     async editLots(product, packLotLinesToEdit) {
         const isAllowOnlyOneLot = product.isAllowOnlyOneLot();
