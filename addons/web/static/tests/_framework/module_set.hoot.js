@@ -620,7 +620,7 @@ export async function runTests(options) {
         moduleSetLoader.cleanup();
         lastSuiteName = suite.fullName;
         lastNumberTests = suite.reporting.tests.length;
-        window.pro.clear();
+        // window.pro.clear();
 
         if (!running) {
             break;
