@@ -167,6 +167,22 @@ class CommonRequestHandler(werkzeug.serving.WSGIRequestHandler):
 
         self.log("info", '"%s" %s %s', msg, code, size)
 
+    def log_error(self, format, *args):
+        if "Request timed ou" not in format:
+            super().log_error(format, *args)
+            return
+        try:
+            path = uri_to_iri(self.path)
+            fragment = thread_local.rpc_model_method
+            if fragment:
+                path += '#' + fragment
+            msg = f"{self.command} {path} {self.request_version}"
+        except AttributeError:
+            # path isn't set if the requestline was bad
+            msg = self.requestline
+        super().log_error(f"Request timed out: {msg}")
+
+
 
 class RequestHandler(CommonRequestHandler):
     def setup(self):
