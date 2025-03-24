@@ -21,6 +21,7 @@
    */
 
   const elementMap = new Map();
+  window.pro = elementMap;
   const data = {
     set(element, key, instance) {
       if (!elementMap.has(element)) {
