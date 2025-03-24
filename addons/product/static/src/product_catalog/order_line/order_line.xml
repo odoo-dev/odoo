@@ -6,7 +6,7 @@
         <t t-portal="`#product-${props.productId}-price`" t-if="showPrice">
             <span class="o_product_catalog_price">
                 <span class="fw-bold"><t t-out="price" /></span>
-                <span class="mx-4 text-muted" t-if="props.code and props.code != 'False'"><t t-out="props.code" /></span>
+                <span class="mx-4 text-muted" t-if="props.code"><t t-out="props.code" /></span>
             </span>
         </t>
         <div 
@@ -38,9 +38,9 @@
                                 t-on-change="this.env.setQuantity"
                                 t-on-focus="_onFocus"
                                 style="border-right: 0px !important; flex: 1;"/>
-                        <span t-if="this.env.displayUoM and props.uom.display_name" class="border fst-italic text-muted text-bg-light text-truncate"
+                        <span t-if="this.env.displayUoM" class="border fst-italic text-muted text-bg-light text-truncate"
                             style="border-left: 0px !important; flex: 1; padding: 6px 0;">
-                            <t t-out="props.uom.display_name"/>
+                            <t t-out="props.uomDisplayName"/>
                         </span>
                     </div>
                     <button class="btn btn-primary border"

@@ -1389,7 +1389,8 @@ class SaleOrderLine(models.Model):
                 'quantity': float,
                 'price': float,
                 'readOnly': bool,
-                'warning': String
+                'warning': String,
+                'uomDisplayName': String,
             }
         """
         if len(self) == 1:
@@ -1404,6 +1405,8 @@ class SaleOrderLine(models.Model):
             }
             if self.product_id.sale_line_warn != 'no-message' and self.product_id.sale_line_warn_msg:
                 res['warning'] = self.product_id.sale_line_warn_msg
+            if self.product_id.uom_id != self.product_uom_id:
+                res['uomDisplayName'] = self.product_uom_id.display_name
             return res
         elif self:
             self.product_id.ensure_one()

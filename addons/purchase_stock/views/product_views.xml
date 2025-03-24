@@ -45,12 +45,9 @@
                     <span class="text-muted small"> On Hand</span>
                     <t t-if="record.qty_available.raw_value != record.virtual_available.raw_value">
                         <span> / </span>
-                        <t t-if="record.virtual_available.raw_value &lt; 0">
-                            <span class="fw-bold text-danger"><t t-out="record.virtual_available.raw_value"/></span>
-                        </t>
-                        <t t-else="">
-                            <span class="fw-bold"><t t-out="record.virtual_available.raw_value"/></span>
-                        </t>
+                        <span class="fw-bold" t-att-class="record.virtual_available.raw_value &lt; 0 ? 'text-danger' : ''">
+                            <t t-out="record.virtual_available.raw_value"/>
+                        </span>
                         <span class="text-muted small"> Forecasted</span>
                     </t>
                 </div>
