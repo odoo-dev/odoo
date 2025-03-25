@@ -24,7 +24,9 @@ publicWidget.registry.PaymentPostProcessing = publicWidget.Widget.extend({
 
                 // Redirect the user to the landing route if the transaction reached a final state.
                 if (self._getFinalStates(provider_code).has(state)) {
-                    window.location = landing_route;
+                    const url = new URL(landing_route, window.location.origin);
+                    url.searchParams.set('display_success_msg', 'True');
+                    window.location = url.toString();
                 } else {
                     self._poll();
                 }
