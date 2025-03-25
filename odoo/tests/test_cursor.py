@@ -49,13 +49,13 @@ class TestCursor(BaseCursor):
 
     def _check_savepoint(self) -> None:
         if not self._savepoint:
-            # we use self._cursor._obj for the savepoint to avoid having the
+            # we use self._cursor._obj__ for the savepoint to avoid having the
             # savepoint queries in the query counts, profiler, ...
             # Those queries are tests artefacts and should be invisible.
-            self._savepoint = Savepoint(self._cursor._obj)
+            self._savepoint = Savepoint(self._cursor._obj__)
             if self.readonly:
                 # this will simulate a readonly connection
-                self._cursor._obj.execute('SET TRANSACTION READ ONLY')  # use _obj to avoid impacting query count and profiler.
+                self._cursor._obj__.execute('SET TRANSACTION READ ONLY')  # use _obj to avoid impacting query count and profiler.
 
     def execute(self, *args, **kwargs) -> None:
         assert not self._closed, "Cannot use a closed cursor"
