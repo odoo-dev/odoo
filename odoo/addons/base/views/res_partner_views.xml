@@ -28,6 +28,7 @@
                     <field name="vat" optional="hide" readonly="1"/>
                     <field name="category_id" optional="hide" widget="many2many_tags" options="{'color_field': 'color'}"/>
                     <field name="company_id" groups="base.group_multi_company" readonly="1"/>
+                    <field name="properties" optional="hide"/>
                 </list>
             </field>
         </record>
