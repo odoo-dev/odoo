@@ -230,7 +230,7 @@
         </t>
         <td class="text-center" name="move_line_lot_quantity">
             <span t-field="move_line.quantity"/>
-            <span t-field="move_line.product_uom_id"/>
+            <span t-field="move_line.product_uom_id" groups="uom.group_uom"/>
             <span t-if="move_line.move_id.product_packaging_id" groups="product.group_stock_packaging">
                 (<span t-field="move_line.product_packaging_qty" t-options='{"widget": "integer"}'/> <span t-field="move_line.move_id.product_packaging_id.display_name"/>)
             </span>
@@ -247,7 +247,7 @@
             <td class="text-center" name="move_line_aggregated_qty_ordered">
                 <span t-esc="aggregated_lines[line]['qty_ordered']"
                     t-options="{'widget': 'float', 'decimal_precision': 'Product Unit of Measure'}"/>
-                <span t-esc="aggregated_lines[line]['product_uom'].name"/>
+                <span t-esc="aggregated_lines[line]['product_uom'].name" groups="uom.group_uom"/>
                 <span t-if="aggregated_lines[line]['packaging'].name">
                     (<span t-out="aggregated_lines[line]['packaging_qty']" t-options='{"widget": "integer"}'/> <span t-out="aggregated_lines[line]['packaging'].name"/>)
                 </span>
@@ -256,7 +256,7 @@
                 <t t-if="aggregated_lines[line]['quantity']">
                     <span t-esc="aggregated_lines[line]['quantity']"
                         t-options="{'widget': 'float', 'decimal_precision': 'Product Unit of Measure'}"/>
-                    <span t-esc="aggregated_lines[line]['product_uom'].name"/>
+                    <span t-esc="aggregated_lines[line]['product_uom'].name" groups="uom.group_uom"/>
                     <span t-if="aggregated_lines[line]['packaging'].name">
                         (<span t-out="aggregated_lines[line]['packaging_quantity']" t-options='{"widget": "integer"}'/> <span t-out="aggregated_lines[line]['packaging'].name"/>)
                     </span>
