@@ -8,7 +8,10 @@ import { patch } from "@web/core/utils/patch";
 patch(DiscussClientAction.prototype, {
     setup() {
         super.setup(...arguments);
-        this.rtc = useService("discuss.rtc");
+        this.store = useService("mail.store");
+    },
+    get rtc() {
+        return this.store.rtc;
     },
     async joinCallWithWelcomeSettings() {
         if (this.store.discuss_public_thread.default_display_mode !== "video_full_screen") {

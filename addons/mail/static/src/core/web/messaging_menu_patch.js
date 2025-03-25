@@ -23,18 +23,18 @@ patch(MessagingMenu.prototype, {
         useEffect(
             () => {
                 if (
-                    this.store.discuss.searchTerm &&
+                    this.store.discuss?.searchTerm &&
                     this.lastSearchTerm !== this.store.discuss.searchTerm &&
                     this.state.activeIndex
                 ) {
                     this.state.activeIndex = 0;
                 }
-                if (!this.store.discuss.searchTerm) {
+                if (!this.store.discuss?.searchTerm) {
                     this.state.activeIndex = null;
                 }
-                this.lastSearchTerm = this.store.discuss.searchTerm;
+                this.lastSearchTerm = this.store.discuss?.searchTerm;
             },
-            () => [this.store.discuss.searchTerm]
+            () => [this.store.discuss?.searchTerm]
         );
         useEffect(
             () => {
@@ -52,6 +52,7 @@ patch(MessagingMenu.prototype, {
             if (
                 !this.store.inbox.isLoaded &&
                 this.store.inbox.status !== "loading" &&
+                this.store.inbox &&
                 this.store.inbox.counter !== this.store.inbox.messages.length
             ) {
                 this.store.inbox.fetchNewMessages();
@@ -166,6 +167,9 @@ patch(MessagingMenu.prototype, {
         this.state.searchOpen = !this.state.searchOpen;
     },
     get counter() {
+        if (!this.store.exists() || !this.store.inbox) {
+            return 0;
+        }
         let value =
             this.store.inbox.counter +
             this.store.failures.reduce((acc, f) => acc + parseInt(f.notifications.length), 0);
