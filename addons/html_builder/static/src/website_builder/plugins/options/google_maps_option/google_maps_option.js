@@ -1,5 +1,3 @@
-/* global google */
-
 import { useRef, onMounted, useState, useEffect, onWillDestroy } from "@odoo/owl";
 import { BaseOptionComponent } from "@html_builder/core/utils";
 
@@ -26,15 +24,12 @@ export class GoogleMapsOption extends BaseOptionComponent {
         this.env;
         this.inputRef = useRef("inputRef");
         /** @type {{ formattedAddress: string }} */
-        this.state = useState({
+        this.state = useState(({
             formattedAddress: this.env.getEditingElement().dataset.pinAddress || "",
-        });
-        useEffect(
-            () => {
-                this.env.getEditingElement().dataset.pinAddress = this.state.formattedAddress;
-            },
-            () => [this.state.formattedAddress]
-        );
+        }));
+        useEffect(() => {
+            this.env.getEditingElement().dataset.pinAddress = this.state.formattedAddress;
+        }, () => [ this.state.formattedAddress ]);
         onMounted(async () => {
             this.initializeAutocomplete(this.inputRef.el);
         });
@@ -44,7 +39,7 @@ export class GoogleMapsOption extends BaseOptionComponent {
             }
             // Without this, the Google library injects elements inside the
             // DOM but does not remove them once the option is closed.
-            for (const container of document.body.querySelectorAll(".pac-container")) {
+            for (const container of document.body.querySelectorAll('.pac-container')) {
                 container.remove();
             }
         });
@@ -56,24 +51,21 @@ export class GoogleMapsOption extends BaseOptionComponent {
      * @param {Element} inputEl
      */
     initializeAutocomplete(inputEl) {
-        if (
-            !this.googleMapsAutocomplete &&
-            typeof google === "object" &&
-            typeof google.maps === "object"
-        ) {
-            this.googleMapsAutocomplete = new google.maps.places.Autocomplete(inputEl, {
-                types: ["geocode"],
-            });
+        if (!this.googleMapsAutocomplete && window.google?.maps?.places) {
+            this.googleMapsAutocomplete = new google.maps.places.Autocomplete(
+                inputEl,
+                { types: [ "geocode" ] },
+            );
             this.autocompleteListener = google.maps.event.addListener(
                 this.googleMapsAutocomplete,
                 "place_changed",
-                this.onPlaceChanged.bind(this)
+                this.onPlaceChanged.bind(this),
             );
             if (!this.state.formattedAddress) {
                 const editingElement = this.env.getEditingElement();
                 /** @type {Coordinates} */
                 const coordinates = editingElement.dataset.mapGps;
-                this.props.getPlace(editingElement, coordinates).then((place) => {
+                this.props.getPlace(editingElement, coordinates).then(place => {
                     if (place?.formatted_address) {
                         this.state.formattedAddress = place.formatted_address;
                     }

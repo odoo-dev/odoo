@@ -42,13 +42,16 @@ export class GoogleMapsOptionPlugin extends Plugin {
             },
         ],
         builder_actions: this.getActions(),
-        normalize_handlers: async (root) => {
+        on_snippet_dropped_handlers: ({ snippetEl }) => this.loadGoogleMaps(snippetEl),
+        normalize_handlers: root => {
+            // This is needed if there is already a Google Maps snippet in the
+            // DOM when starting edition.
             for (const snippet of root.querySelectorAll(".s_google_map")) {
                 if (!this.isGoogleMapsReady && !this.isGoogleMapsErrorBeingHandled) {
-                    await this.loadGoogleMaps(snippet);
+                    this.loadGoogleMaps(snippet);
                 } else if (!this.mapsAPI) {
-                    this.mapsAPI = google.maps;
-                    this.placesAPI = google.maps.places;
+                    this.mapsAPI = google?.maps;
+                    this.placesAPI = google?.maps.places;
                 }
             }
         },
@@ -111,22 +114,15 @@ export class GoogleMapsOptionPlugin extends Plugin {
         // already called `loadJS` with it, `loadJS` will fetch the result from
         // cache and never actually call the Google API's URL, bypassing its
         // callback in the process, on which we depend to resolve the promise.
-        const didLoad = !!(await this.loadGoogleMapsAPIFromService(didReconfigure));
-        if (didLoad) {
-            this.mapsAPI = google.maps;
-            this.placesAPI = google.maps.places;
-        }
-        // Try to fail early if there is a configuration issue.
-        const foundPlace = !!(await this.getPlace(editingElement, editingElement.dataset.mapGps));
-        this.isGoogleMapsReady = didLoad && foundPlace;
-        // @TODO mysterious-egg: this would not be needed if we didn't duplicate
-        // the API loading:
-        if (didReconfigure) {
-            // Make sure to reload the API in the iframe with the new API key.
-            window.top.refetchGoogleMaps = true;
-            // Restart interactions to re-render the map.
-            this.dispatchTo("content_manually_updated_handlers");
-        }
+        this.loadGoogleMapsAPIFromService(didReconfigure).then(async response => {
+            if (response) {
+                this.mapsAPI = window.google?.maps;
+                this.placesAPI = window.google?.maps.places;
+            }
+            // Try to fail early if there is a configuration issue.
+            const foundPlace = !!(await this.getPlace(editingElement, editingElement.dataset.mapGps));
+            this.isGoogleMapsReady = !!response && foundPlace;
+        });
     }
 
     /**
@@ -210,26 +206,24 @@ export class GoogleMapsOptionPlugin extends Plugin {
         const websiteId = this.websiteService.currentWebsite.id;
 
         /** @type {boolean} */
-        const didReconfigure = await new Promise((resolve) => {
+        const didReconfigure = await new Promise(resolve => {
             let isInvalidated = false;
             // Open the Google API Key Dialog.
-            this.dialog.add(
-                GoogleMapsApiKeyDialog,
-                {
-                    originalApiKey: apiKey,
-                    originalApiKeyValidation: apiKeyValidation,
-                    onSave: async (newApiKey) => {
-                        await this.orm.write("website", [websiteId], {
-                            google_maps_api_key: newApiKey,
-                        });
-                        isInvalidated = true;
-                    },
-                    validateGMapsApiKey: this.validateGMapsApiKey.bind(this),
+            this.dialog.add(GoogleMapsApiKeyDialog, {
+                originalApiKey: apiKey,
+                originalApiKeyValidation: apiKeyValidation,
+                onSave: async newApiKey => {
+                    await this.orm.write(
+                        "website",
+                        [ websiteId ],
+                        { google_maps_api_key: newApiKey },
+                    );
+                    isInvalidated = true;
                 },
-                {
-                    onClose: () => resolve(isInvalidated),
-                }
-            );
+                validateGMapsApiKey: this.validateGMapsApiKey.bind(this),
+            }, {
+                onClose: () => resolve(isInvalidated),
+            });
         });
         return didReconfigure;
     }
@@ -243,11 +237,7 @@ export class GoogleMapsOptionPlugin extends Plugin {
      * @returns {Promise<{ status: number }>}
      */
     async fetchGoogleMaps(key) {
-        return await fetch(
-            `https://maps.googleapis.com/maps/api/staticmap?center=belgium&size=10x10&key=${encodeURIComponent(
-                key
-            )}`
-        );
+        return await fetch(`https://maps.googleapis.com/maps/api/staticmap?center=belgium&size=10x10&key=${encodeURIComponent(key)}`);
     }
 
     /**
@@ -270,15 +260,12 @@ export class GoogleMapsOptionPlugin extends Plugin {
         if (key) {
             try {
                 const response = await this.fetchGoogleMaps(key);
-                const isValid = response.status === 200;
+                const isValid = (response.status === 200);
                 return {
                     isValid,
                     message: isValid
                         ? undefined
-                        : _t(
-                              "Invalid API Key. The following error was returned by Google: %(error)s",
-                              { error: await response.text() }
-                          ),
+                        : _t("Invalid API Key. The following error was returned by Google: %(error)s", { error: await response.text() }),
                 };
             } catch {
                 return {
@@ -301,48 +288,42 @@ export class GoogleMapsOptionPlugin extends Plugin {
             return place;
         }
 
-        const p = coordinates.substring(1).slice(0, -1).split(",");
+        const p = coordinates.substring(1).slice(0, -1).split(',');
         const location = new this.mapsAPI.LatLng(p[0] || 0, p[1] || 0);
-        return new Promise((resolve) => {
-            const placesService = new this.placesAPI.PlacesService(document.createElement("div"));
-            placesService.nearbySearch(
-                {
-                    // Do a 'nearbySearch' followed by 'getDetails' to avoid using
-                    // GMaps Geocoder which the user may not have enabled... but
-                    // ideally Geocoder should be used to get the exact location at
-                    // those coordinates and to limit billing query count.
-                    location,
-                    radius: 1,
-                },
-                (results, status) => {
-                    const GMAPS_CRITICAL_ERRORS = [
-                        this.placesAPI.PlacesServiceStatus.REQUEST_DENIED,
-                        this.placesAPI.PlacesServiceStatus.UNKNOWN_ERROR,
-                    ];
-                    if (status === this.placesAPI.PlacesServiceStatus.OK) {
-                        placesService.getDetails(
-                            {
-                                placeId: results[0].place_id,
-                                fields: ["geometry", "formatted_address"],
-                            },
-                            (place, status) => {
-                                if (status === this.placesAPI.PlacesServiceStatus.OK) {
-                                    this.gpsMapCache.set(coordinates, place);
-                                    resolve(place);
-                                } else if (GMAPS_CRITICAL_ERRORS.includes(status)) {
-                                    resolve({ error: status });
-                                } else {
-                                    resolve();
-                                }
-                            }
-                        );
-                    } else if (GMAPS_CRITICAL_ERRORS.includes(status)) {
-                        resolve({ error: status });
-                    } else {
-                        resolve();
-                    }
+        return new Promise(resolve => {
+            const placesService = new this.placesAPI.PlacesService(document.createElement('div'));
+            placesService.nearbySearch({
+                // Do a 'nearbySearch' followed by 'getDetails' to avoid using
+                // GMaps Geocoder which the user may not have enabled... but
+                // ideally Geocoder should be used to get the exact location at
+                // those coordinates and to limit billing query count.
+                location,
+                radius: 1,
+            }, (results, status) => {
+                const GMAPS_CRITICAL_ERRORS = [
+                    this.placesAPI.PlacesServiceStatus.REQUEST_DENIED,
+                    this.placesAPI.PlacesServiceStatus.UNKNOWN_ERROR
+                ];
+                if (status === this.placesAPI.PlacesServiceStatus.OK) {
+                    placesService.getDetails({
+                        placeId: results[0].place_id,
+                        fields: ['geometry', 'formatted_address'],
+                    }, (place, status) => {
+                        if (status === this.placesAPI.PlacesServiceStatus.OK) {
+                            this.gpsMapCache.set(coordinates, place);
+                            resolve(place);
+                        } else if (GMAPS_CRITICAL_ERRORS.includes(status)) {
+                            resolve({ error: status });
+                        } else {
+                            resolve();
+                        }
+                    });
+                } else if (GMAPS_CRITICAL_ERRORS.includes(status)) {
+                    resolve({ error: status });
+                } else {
+                    resolve();
                 }
-            );
+            });
         });
     }
 
@@ -364,10 +345,8 @@ export class GoogleMapsOptionPlugin extends Plugin {
             this.isGoogleMapsErrorBeingHandled = true;
 
             this.notification.add(
-                _t(
-                    "A Google Maps error occurred. Make sure to read the key configuration popup carefully."
-                ),
-                { type: "danger", sticky: true }
+                _t("A Google Maps error occurred. Make sure to read the key configuration popup carefully."),
+                { type: 'danger', sticky: true }
             );
             // Try again.
             this.loadGoogleMaps(editingElement, true).then(() => {

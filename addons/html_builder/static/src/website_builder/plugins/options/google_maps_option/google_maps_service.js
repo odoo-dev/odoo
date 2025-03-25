@@ -1,6 +1,3 @@
-/* eslint-disable prettier/prettier */
-/* eslint-disable no-async-promise-executor */
-
 import { loadJS } from "@web/core/assets";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
@@ -15,12 +12,6 @@ registry.category("services").add("google_maps", {
         const notification = deps["notification"];
         let gMapsAPIKeyProm;
         let gMapsAPILoading;
-        const promiseKeys = {};
-        const promiseKeysResolves = {};
-        let lastKey;
-        window.odoo_gmaps_api_post_load = (async function odoo_gmaps_api_post_load() {
-            promiseKeysResolves[lastKey]?.();
-        }).bind(this);
         return {
             /**
              * @param {boolean} [refetch=false]
@@ -46,22 +37,12 @@ registry.category("services").add("google_maps", {
                 if (refetch || !gMapsAPILoading) {
                     gMapsAPILoading = new Promise(async resolve => {
                         const key = await this.getGMapsAPIKey(refetch);
-                        lastKey = key;
 
-                        if (key) {
-                            if (!promiseKeys[key]) {
-                                promiseKeys[key] = new Promise((resolve) => {
-                                    promiseKeysResolves[key] = resolve;
-                                });
-                                await loadJS(
-                                    `https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&callback=odoo_gmaps_api_post_load&key=${encodeURIComponent(
-                                        key
-                                    )}`
-                                );
-                            }
-                            await promiseKeys[key];
+                        window.odoo_gmaps_api_post_load = (async function odoo_gmaps_api_post_load() {
                             resolve(key);
-                        } else {
+                        }).bind(this);
+
+                        if (!key) {
                             if (!editableMode && user.isAdmin) {
                                 const message = _t("Cannot load google map.");
                                 const urlTitle = _t("Check your configuration.");
@@ -74,11 +55,14 @@ registry.category("services").add("google_maps", {
                                 );
                             }
                             resolve(false);
+                            gMapsAPILoading = false;
+                            return;
                         }
+                        await loadJS(`https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&callback=odoo_gmaps_api_post_load&key=${encodeURIComponent(key)}`);
                     });
                 }
                 return gMapsAPILoading;
             },
-        };
-    },
+        }
+    }
 });

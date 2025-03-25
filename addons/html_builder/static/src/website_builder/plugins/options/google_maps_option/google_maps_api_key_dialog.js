@@ -32,7 +32,7 @@ export class GoogleMapsApiKeyDialog extends Component {
         if (this.state.apiKey) {
             /** @type {NodeList} */
             const buttons = this.modalRef.el.querySelectorAll("button");
-            buttons.forEach((button) => button.setAttribute("disabled", true));
+            buttons.forEach(button => button.setAttribute("disabled", true));
             /** @type {ApiKeyValidation} */
             const apiKeyValidation = await this.props.validateGMapsApiKey(this.state.apiKey);
             this.state.apiKeyValidation = apiKeyValidation;
@@ -40,7 +40,7 @@ export class GoogleMapsApiKeyDialog extends Component {
                 await this.props.onSave(this.state.apiKey);
                 this.props.close();
             }
-            buttons.forEach((button) => button.removeAttribute("disabled"));
+            buttons.forEach(button => button.removeAttribute("disabled"));
         } else {
             this.state.apiKeyValidation = {
                 isValid: false,
@@ -48,4 +48,4 @@ export class GoogleMapsApiKeyDialog extends Component {
             };
         }
     }
-}
+};
