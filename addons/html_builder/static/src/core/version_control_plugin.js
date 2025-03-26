@@ -7,6 +7,9 @@ export class VersionControlPlugin extends Plugin {
     static shared = ["hasAccessToOutdatedEl", "giveAccessToOutdatedEl", "replaceWithNewVersion"];
 
     hasAccessToOutdatedEl(el) {
+        if (!el.dataset.snippet) {
+            return true;
+        }
         if (this.accessPerOutdatedEl.has(el)) {
             return this.accessPerOutdatedEl.get(el);
         }
