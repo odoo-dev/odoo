@@ -5,6 +5,7 @@ import ast
 import base64
 import datetime
 import json
+from collections.abc import Iterable
 
 from odoo import _, api, fields, models, Command, tools
 from odoo.exceptions import UserError, ValidationError
@@ -65,6 +66,13 @@ class MailComposeMessage(models.TransientModel):
             raise ValueError(_("Deprecated usage of 'default_res_id', should use 'default_res_ids'."))
 
         result = super().default_get(fields_list)
+
+        # check that we have access to parters
+        # for test_composer_default_recipients_private_norights
+        if isinstance(partner_values := result.get('partner_ids'), Iterable):
+            for cmd in partner_values:
+                if cmd[0] == Command.SET:
+                    self.env['res.partner'].browse(cmd[2]).check_access('read')
 
         # when being in new mode, create_uid is not granted -> ACLs issue may arise
         if 'create_uid' in fields_list and 'create_uid' not in result:
