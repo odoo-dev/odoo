@@ -549,7 +549,8 @@ export class PosOrderline extends Base {
         // so this is heuristic used to imitate the same behavior.
         if (
             this.order_id.pricelist_id &&
-            this.order_id.pricelist_id.item_ids
+            this.order_id.pricelist_id
+                .backLink("<-product.pricelist.item.pricelist_id")
                 .map((rule) => rule.compute_price)
                 .includes("percentage")
         ) {

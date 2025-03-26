@@ -189,21 +189,21 @@ export class ProductTemplate extends Base {
         const productTmpl = variant.product_tmpl_id || this;
         const standardPrice = variant ? variant.standard_price : this.standard_price;
         const basePrice = variant ? variant.lst_price : this.list_price;
-        const productTmplRules =
-            productTmpl.backLink("<-product.pricelist.item.product_tmpl_id") || [];
-        const productRules =
-            (product && product.backLink("<-product.pricelist.item.product_id")) || [];
-        const rulesIds = [...productTmplRules, ...productRules].map((rule) => rule.id);
 
         let price = basePrice + (price_extra || 0);
         const rules =
-            pricelist?.item_ids?.filter(
-                (rule) =>
-                    (rulesIds.includes(rule.id) || (!rule.product_id && !rule.product_tmpl_id)) &&
-                    (!rule.min_quantity || quantity >= rule.min_quantity) &&
-                    (!rule.product_id || rule.product_id.id === product?.id) &&
-                    (!rule.categ_id || rule.categ_id.id === product?.categ_id?.id)
-            ) || [];
+            (pricelist &&
+                pricelist
+                    .backLink("<-product.pricelist.item.pricelist_id")
+                    ?.filter(
+                        (rule) =>
+                            !rule.product_id &&
+                            !rule.product_tmpl_id &&
+                            (!rule.min_quantity || quantity >= rule.min_quantity) &&
+                            (!rule.product_id || rule.product_id.id === product?.id) &&
+                            (!rule.categ_id || rule.categ_id.id === product?.categ_id?.id)
+                    )) ||
+            [];
 
         // We take in first assigned product rules instead of common one.
         let commonRule = "";

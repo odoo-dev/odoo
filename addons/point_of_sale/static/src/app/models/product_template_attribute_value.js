@@ -5,6 +5,7 @@ export class ProductTemplateAttributeValue extends Base {
     static pythonModel = "product.template.attribute.value";
 
     get exclusions() {
+        // TODO: This method is very slow, it should be optimized.
         const values = this.models["product.template.attribute.value"].filter((value) =>
             value.exclude_for.some(({ value_ids }) => value_ids.some(({ id }) => id === this.id))
         );

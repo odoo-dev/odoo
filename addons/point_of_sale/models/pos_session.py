@@ -169,6 +169,7 @@ class PosSession(models.Model):
                 continue
 
             try:
+                print('....loading...', model)
                 response[model] = self.env[model]._load_pos_data(response)
             except AccessError:
                 response[model] = []
