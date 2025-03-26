@@ -874,7 +874,7 @@ class ResCompany(models.Model):
         if opening_move:
             opening_move.write(move_values)
         else:
-            self.account_opening_move_id = self.env['account.move'].create(move_values)
+            self.sudo().account_opening_move_id = self.env['account.move'].create(move_values)
 
     def action_save_onboarding_sale_tax(self):
         """ Set the onboarding step as done """
@@ -932,7 +932,7 @@ class ResCompany(models.Model):
         """Checks that all hashed moves have still the same data as when they were hashed
         and raises an error with the result.
         """
-        if not self.env.user.has_group('account.group_account_user'):
+        if not self.env.su and not self.env.user.has_group('account.group_account_user'):
             raise UserError(_('Please contact your accountant to print the Hash integrity result.'))
 
         journals = self.env['account.journal'].search(self.env['account.journal']._check_company_domain(self))
