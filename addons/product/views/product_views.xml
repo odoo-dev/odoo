@@ -646,8 +646,8 @@ action = {
                         <div class="o_product_catalog_cancel_global_click">
                             <a role="menuitem" type="open" class="dropdown-item border-top-0">Edit</a>
                         </div>
-                        <div class="dropdown-item border-top-0">
-                            <field name="is_favorite" widget="boolean_favorite"/>
+                        <div class="container p-0">
+                            <field name="is_favorite" widget="boolean_favorite" class="col-12 pe-0"/>
                         </div>
                     </t>
                     <t t-name="card" class="p-0">
