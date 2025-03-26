@@ -1,5 +1,5 @@
 from odoo import _, api, fields, models
-from odoo.exceptions import AccessError, ValidationError
+from odoo.exceptions import ValidationError
 from odoo.tools import ormcache
 
 
@@ -17,7 +17,7 @@ class PropertiesBaseDefinition(models.Model):
     @api.depends("properties_field_id")
     def _compute_display_name(self):
         for definition in self:
-            definition.display_name = _("All %s", self.env[definition.properties_field_id.model]._description)
+            definition.display_name = _("%s Properties", self.env[definition.properties_field_id.model]._description)
 
     @api.constrains("properties_field_id")
     def _check_properties_field_id(self):
