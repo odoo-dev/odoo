@@ -104,6 +104,7 @@ class SmsSms(models.Model):
     def action_set_outgoing(self):
         self._update_sms_state_and_trackers('outgoing', failure_type=False)
 
+    # XXX should remove this function, always use the queue
     def send(self, unlink_sent=True, raise_exception=False):
         """ Main API method to send SMS.
 
@@ -113,19 +114,15 @@ class SmsSms(models.Model):
           :param unlink_sent: unlink sent SMS after IAP feedback;
           :param raise_exception: raise if there is an issue contacting IAP;
         """
-        domain = [('state', '=', 'outgoing'), ('to_delete', '!=', True)]
-        to_send = self.try_lock_for_update().filtered_domain(domain)
+        to_send = self.filtered_domain(self._send_precondition()).grouped(lambda sms: sms._get_sms_company())
 
-        for sms_api, sms in to_send._split_by_api():
-            for batch_ids in sms._split_batch():
-                self.browse(batch_ids).with_context(sms_api=sms_api)._send(
-                    unlink_sent=unlink_sent,
-                    raise_exception=raise_exception,
-                )
-
-    def _split_by_api(self):
-        yield SmsApi(self.env), self
-
+        for sms in to_send.values():
+            sms = sms.with_context(send_sms_params=dict(
+                unlink_sent=unlink_sent,
+                raise_exception=raise_exception,
+            ))
+            api.process.run_try_now(sms, '_send')
+>>>>>>> 9026abd0bf7f (poc api.process tools)
     def resend_failed(self):
         sms_to_send = self.filtered(lambda sms: sms.state == 'error' and not sms.to_delete)
         sms_to_send.state = 'outgoing'
@@ -156,42 +153,41 @@ class SmsSms(models.Model):
     @api.model
     def _process_queue(self):
         """ CRON job to send queued SMS messages. """
-        domain = [('state', '=', 'outgoing'), ('to_delete', '!=', True)]
+        api.process.cron_implementation(
+            self,
+            '_send',
+            search_limit=self._send_batch_size(),
+            search_order='id',
+            # XXX group by for resources? split_by_api
+        )
 
-        batch_size = self._get_send_batch_size()
-        records = self.search(domain, limit=batch_size, order='id').try_lock_for_update()
-        if not records:
-            return
-        for sms_api, sms in records._split_by_api():
-            sms.with_context(sms_api=sms_api)._send(unlink_sent=True, raise_exception=False)
-        self.env['ir.cron']._commit_progress(len(records), remaining=self.search_count(domain) if len(records) == batch_size else 0)
+    def _send_precondition(self):
+        return [('state', '=', 'outgoing'), ('to_delete', '!=', True)]
 
-    def _get_send_batch_size(self):
+    def _send_batch_size(self):
         return self.env['ir.config_parameter'].sudo().get_int('sms.session.batch.size') or 500
+
+    def _send_error_handler(self, exception):
+        raise exception
 
     def _get_sms_company(self):
         return self.mail_message_id.record_company_id or self.env.company
 
-    def _split_batch(self):
-        batch_size = self._get_send_batch_size()
-        yield from tools.split_every(batch_size, self.ids)
+    def _send_resource(self, old_resource=None):
+        company = self._get_sms_company()
+        company.ensure_one()  # This should always be the case since the grouping is done in `send`
+        sms_api = company._get_sms_api_class()(self.env)
+        sms_api._set_company(company)
+        return sms_api
 
     def _send(self, unlink_sent=True, raise_exception=False):
         """Send SMS after checking the number (presence and formatting)."""
-        sms_api = self.env.context.get('sms_api')
-        if not sms_api:
-            company = self._get_sms_company()
-            company.ensure_one()  # should always be the case since the grouping is done in `send` or `_process_queue`
-            sms_api = company._get_sms_api_class()(self.env)
+        if params := self.env.context.get('send_sms_params'):
+            unlink_failed = params['unlink_failed']
+            unlink_sent = params['unlink_sent']
+            raise_exception = params['raise_exception']
+        sms_api = api.process_check(self, '_send')
 
-        return self._send_with_api(
-            sms_api,
-            unlink_sent=unlink_sent,
-            raise_exception=raise_exception,
-        )
-
-    def _send_with_api(self, sms_api, unlink_sent=True, raise_exception=False):
-        """Send SMS after checking the number (presence and formatting)."""
         messages = [{
             'content': body,
             'numbers': [{'number': sms.number, 'uuid': sms.uuid} for sms in body_sms_records],
