@@ -460,8 +460,8 @@ class TestFrontend(TestFrontendCommon):
     def test_user_on_residual_order(self):
         self.pos_config.write({'printer_ids': False})
         self.pos_config.with_user(self.pos_admin).open_ui()
-        self.start_pos_tour('LeaveResidualOrder', login="pos_admin")
-        self.start_pos_tour('FinishResidualOrder', login="pos_user")
+        self.start_pos_tour('LeaveResidualOrder')
+        self.start_pos_tour('FinishResidualOrder')
         orders = self.env['pos.order'].search([])
         self.assertEqual(orders[0].user_id.id, self.pos_user.id, "Pos user not registered on order")
         self.assertEqual(orders[1].user_id.id, self.pos_admin.id, "Pos admin not registered on order")
