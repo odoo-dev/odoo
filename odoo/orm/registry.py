@@ -380,6 +380,11 @@ class Registry(Mapping[str, type["BaseModel"]]):
         for model in env.values():
             for field in model._fields.values():
                 depends, depends_context = field.get_depends(model)
+                if depends_context and field.store and not field._depends_context and field.type not in ('many2many', 'one2many'):
+                    warnings.warn(
+                        f"Field {field!r} is stored but context dependent",
+                        stacklevel=1,
+                    )
                 self.field_depends[field] = tuple(depends)
                 self.field_depends_context[field] = tuple(depends_context)
 
