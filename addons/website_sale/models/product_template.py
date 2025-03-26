@@ -365,26 +365,27 @@ class ProductTemplate(models.Model):
     def _cron_update_suggested_products(self, batch_size=100):
         if not self._is_automate_suggested_product_feature_enabled():
             return  # Skip the automation if the cron was activated without the feature.
+        api.process.cron_implementation(
+            # self._update_suggested_products,  # XXX easier?
+            self,
+            '_update_suggested_products',
+            search_condition=(
+                Domain("suggested_products_last_update", "<", "-12H")
+                | Domain("suggested_products_last_update", "=", False)
+            ),
+            search_order='suggested_products_last_update',
+        )
 
-        products_domain = Domain([("sale_ok", "=", True), ("is_published", "=", True)])
-        cron_domain = products_domain & (
-            Domain("suggested_products_last_update", "<", "-12H")
-            | Domain("suggested_products_last_update", "=", False)
-        )
-        # Order by last update (desc) to ensure the cron processes all products over time,
-        # starting with those that haven't been updated recently
-        products_to_update = self.search(
-            cron_domain, order="suggested_products_last_update", limit=batch_size
-        )
+    _update_suggested_products_batch_size = 100
 
-        remaining = (
-            len(products_to_update)
-            if len(products_to_update) < batch_size
-            else self.search_count(cron_domain)
-        )
-        self.env["ir.cron"]._commit_progress(remaining=remaining)
-        products_to_update._update_suggested_products()
-        self.env["ir.cron"]._commit_progress(processed=len(products_to_update))
+    @api.model
+    def _update_suggested_products_precondition(self):
+        if not self._is_automate_suggested_product_feature_enabled():
+            return Domain.FALSE  # feature not active
+        return Domain("sale_ok", "=", True) & Domain("is_published", "=", True)
+
+    def _update_suggested_products_error_handler(self, exception):
+        raise exception
 
     def action_update_suggested_products(self):
         # If called from the server action, reset the suggest_ fields

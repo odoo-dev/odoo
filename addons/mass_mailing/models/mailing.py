@@ -1163,24 +1163,7 @@ class MailingMailing(models.Model):
 
     @api.model
     def _process_mass_mailing_queue(self):
-        mass_mailings = self.search([('state', 'in', ('in_queue', 'sending')), '|', ('schedule_date', '<', fields.Datetime.now()), ('schedule_date', '=', False)])
-        self.env['ir.cron']._commit_progress(remaining=len(mass_mailings))
-        for mass_mailing in mass_mailings:
-            context_user = mass_mailing.user_id or mass_mailing.write_uid or self.env.user
-            mass_mailing = mass_mailing.with_context(
-                **self.env['res.users'].with_user(context_user).context_get()
-            )
-            if len(mass_mailing._get_remaining_recipients()) > 0:
-                mass_mailing.state = 'sending'
-                mass_mailing._action_send_mail()
-            else:
-                mass_mailing.write({
-                    'state': 'done',
-                    'sent_date': fields.Datetime.now(),
-                    # send the KPI mail only if it's the first sending
-                    'kpi_mail_required': not mass_mailing.sent_date,
-                })
-            self.env['ir.cron']._commit_progress(processed=1)
+        api.process.cron_implementation(self, '_process_mass_mailing')
 
         if self.env['ir.config_parameter'].sudo().get_bool('mass_mailing.mass_mailing_reports'):
             mailings = self.env['mailing.mailing'].search([
@@ -1191,6 +1174,27 @@ class MailingMailing(models.Model):
             ])
             if mailings:
                 mailings._action_send_statistics()
+
+    _process_mass_mailing_cron_id = 'mass_mailing.cron...'
+    _process_mass_mailing_domain = [('state', 'in', ('in_queue', 'sending')), '|', ('schedule_date', '<=', 'now'), ('schedule_date', '=', False)]
+
+    def _process_mass_mailing(self):
+        mass_mailing = self.ensure_one()
+        context_user = mass_mailing.user_id or mass_mailing.write_uid or self.env.user
+        mass_mailing = mass_mailing.with_context(
+            **self.env['res.users'].with_user(context_user).context_get()
+        )
+        recipients = mass_mailing._get_remaining_recipients()
+        if not recipients:
+            mass_mailing.write({
+                'state': 'done',
+                'sent_date': fields.Datetime.now(),
+                # send the KPI mail only if it's the first sending
+                'kpi_mail_required': not mass_mailing.sent_date,
+            })
+            return
+        mass_mailing.state = 'sending'
+        mass_mailing._action_send_mail()
 
     # ------------------------------------------------------
     # STATISTICS

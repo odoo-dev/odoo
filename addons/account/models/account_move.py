@@ -6945,63 +6945,62 @@ class AccountMove(models.Model):
     # CRON
     # -------------------------------------------------------------------------
 
+    @api.model
     def _autopost_draft_entries(self, batch_size=100):
         ''' This method is called from a cron job.
         It is used to post entries such as those created by the module
         account_asset and recurring entries created in _post().
         '''
-        domain = [
-            ('state', '=', 'draft'),
-            ('date', '<=', fields.Date.context_today(self)),
-            ('auto_post', '!=', 'no'),
-        ]
-        moves = self.search(domain, limit=batch_size)
-        remaining = len(moves) if len(moves) < batch_size else self.search_count(domain)
-        self.env['ir.cron']._commit_progress(remaining=remaining)
+        api.process.cron_implementation(self.with_context(batch_size=batch_size), '_post')
 
-        try:  # try posting in batch
-            moves._post()
-            self.env['ir.cron']._commit_progress(len(moves))
+    _post_cron_id = 'account.ir_cron_auto_post_draft_entry'
+    _post_precondition = Domain([
+        ('state', '=', 'draft'),
+        ('date', '<=', 'today'),
+        ('auto_post', '!=', 'no'),
+    ])
+
+    @api.model
+    def _post_batch_size(self):
+        return self.env.context.get('batch_size') or 100
+
+    def _post_error_handler(self, exception):
+        if not isinstance(exception, UserError):
+            raise exception
+        if len(self) > 1:
+            # on UserError, try to post one by one
+            for move in self:
+                if not api.process.run_with_commit(move, '_post'):
+                    break  # no remaining time
             return
-        except UserError:  # if at least one move cannot be posted, handle moves one by one
-            self.env['ir.cron']._rollback_progress()
-
-        for move in moves:
-            try:
-                move = move.try_lock_for_update().filtered_domain(domain)
-                if not move:
-                    continue
-                move._post()
-                self.env['ir.cron']._commit_progress(1)
-            except UserError as e:
-                self.env['ir.cron']._rollback_progress()
-                msg = _('The move could not be posted for the following reason: %(error_message)s', error_message=e)
-                move.message_post(body=msg, message_type='comment')
-                move.auto_post = 'no'
-                self.env['ir.cron']._commit_progress(1)
+        msg = _('The move could not be posted for the following reason: %(error_message)s', error_message=exception)
+        self.message_post(body=msg, message_type='comment')
+        self.auto_post = 'no'  # XXX stop endless retry?
 
     @api.model
     def _cron_account_move_send(self, job_count=10):
         """ Process invoices generation and sending asynchronously.
         :param job_count: maximum number of jobs to process if specified.
         """
-        domain = [
-            ('sending_data', '!=', False),
-            ('state', '=', 'posted'),
-        ]
-        to_process = self.search(
-            domain,
-            order='date asc, invoice_date asc, sequence_number asc, id asc',
-            limit=job_count)
-        to_process.try_lock_for_update()
-        if not to_process:
-            return
-
-        self.env['account.move.send']._generate_and_send_invoices(
-            to_process,
-            from_cron=True,
+        api.process.cron_implementation(
+            self.with_context(batch_size=job_count, from_cron=True),
+            '_generate_and_send_invoices',
         )
-        self.env['ir.cron']._commit_progress(len(to_process), remaining=self.search_count(domain))
+
+    _generate_and_send_invoices_cron_id = 'account.ir_cron_account_move_send'
+    _generate_and_send_invoices_precondition = Domain('sending_data', '!=', False) & Domain('state', '=', 'posted')
+    _generate_and_send_invoices_order = 'date asc, invoice_date asc, sequence_number asc, id asc'
+
+    def _generate_and_send_invoices(self):
+        from_cron = bool(self.env.context.get('from_cron'))
+        self.env['account.move.send']._generate_and_send_invoices(self, from_cron=from_cron)
+
+    @api.model
+    def _generate_and_send_invoices_batch_size(self):
+        return self.env.context.get('batch_size') or 10
+
+    def _generate_and_send_invoices_error_handler(self, exception):
+        raise exception
 
     # -------------------------------------------------------------------------
     # HELPER METHODS
