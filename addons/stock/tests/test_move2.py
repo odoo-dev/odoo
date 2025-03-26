@@ -14,6 +14,10 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 class TestPickShip(TestStockCommon):
+    user_groups=[
+        'stock.group_stock_manager',
+    ]
+
     def create_pick_ship(self):
         picking_client = self.env['stock.picking'].create({
             'location_id': self.pack_location,
@@ -958,7 +962,12 @@ class TestPickShip(TestStockCommon):
         self.assertEqual(return_pick.move_line_ids[1].quantity, 6)
         self.assertEqual(return_pick.picking_type_id, picking_client.location_id.warehouse_id.in_type_id)
 
+
 class TestSinglePicking(TestStockCommon):
+    user_groups=[
+        'stock.group_stock_manager',
+    ]
+
     def test_backorder_1(self):
         """ Check the good behavior of creating a backorder for an available stock move.
         """
@@ -2703,6 +2712,10 @@ class TestSinglePicking(TestStockCommon):
 
 
 class TestStockUOM(TestStockCommon):
+    user_groups=[
+        'stock.group_stock_manager',
+    ]
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -2927,7 +2940,6 @@ class TestRoutes(TestStockCommon):
         3. confirm the delivery
         4. check the ship move is created with the destination as the subloc
         """
-
         self._enable_pick_ship()
 
         # Create sublocation of Customer

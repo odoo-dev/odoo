@@ -12,15 +12,17 @@ from lxml import etree
 
 
 class TestUBLCommon(AccountTestInvoicingCommon):
+    user_groups=[
+        'base.group_partner_manager',
+        'account.group_account_manager',
+        'uom.group_uom', # Required for `product_uom_id` to be visible in the form views
+    ]
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
 
         cls.other_currency = cls.setup_other_currency('USD', rounding=0.001)
-
-        # Required for `product_uom_id` to be visible in the form views
-        cls.env.user.group_ids += cls.env.ref('uom.group_uom')
 
         # remove this tax, otherwise, at import, this tax with children taxes can be selected and the total is wrong
         cls.tax_armageddon.children_tax_ids.unlink()

@@ -11,7 +11,6 @@ class SaleCommon(
     ProductCommon, # BaseCommon, UomCommon
     SalesTeamCommon,
 ):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -61,6 +60,9 @@ class SaleCommon(
 
 
 class TestSaleCommon(AccountTestInvoicingCommon):
+    user_groups=[
+        'sales_team.group_sale_manager',
+    ]
 
     @classmethod
     def collect_company_accounting_data(cls, company):
@@ -203,6 +205,12 @@ class TestSaleCommon(AccountTestInvoicingCommon):
 
 
 class TestTaxCommonSale(TestTaxCommon):
+    user_groups=[
+        'base.group_partner_manager',
+        'account.group_account_manager',
+        'analytic.group_analytic_accounting',
+        'sales_team.group_sale_manager',
+    ]
 
     @classmethod
     def setUpClass(cls):

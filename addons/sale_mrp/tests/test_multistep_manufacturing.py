@@ -6,17 +6,18 @@ from odoo.addons.mrp.tests.common import TestMrpCommon
 
 
 class TestMultistepManufacturing(TestMrpCommon):
+    user_groups=[
+        # Required for `uom_id ` to be visible in the view
+        'uom.group_uom',
+        # Required for `manufacture_steps` to be visible in the view
+        'stock.group_adv_location',
+        # Required for `product_id` to be visible in the view
+        'product.group_product_variant',
+    ]
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
-        # Required for `uom_id ` to be visible in the view
-        cls.env.user.group_ids += cls.env.ref('uom.group_uom')
-        # Required for `manufacture_steps` to be visible in the view
-        cls.env.user.group_ids += cls.env.ref('stock.group_adv_location')
-        # Required for `product_id` to be visible in the view
-        cls.env.user.group_ids += cls.env.ref('product.group_product_variant')
 
         cls.env.ref('stock.route_warehouse0_mto').active = True
         cls.MrpProduction = cls.env['mrp.production']

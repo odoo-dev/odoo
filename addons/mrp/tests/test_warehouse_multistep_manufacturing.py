@@ -8,14 +8,19 @@ from odoo import Command
 
 @tagged('post_install', '-at_install')
 class TestMultistepManufacturingWarehouse(TestMrpCommon):
+    user_groups=[
+        'mrp.group_mrp_manager',
+        # Required for `uom_id` to be visible in the view
+        'uom.group_uom',
+        # Required for `manufacture_steps` to be visible in the view
+        'stock.group_adv_location',
+        # Required to use stock.warehouse
+        'stock.group_stock_manager',
+    ]
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Required for `uom_id` to be visible in the view
-        cls.env.user.group_ids += cls.env.ref('uom.group_uom')
-        # Required for `manufacture_steps` to be visible in the view
-        cls.env.user.group_ids += cls.env.ref('stock.group_adv_location')
         # Create warehouse
         cls.customer_location = cls.env['ir.model.data']._xmlid_to_res_id('stock.stock_location_customers')
         warehouse_form = Form(cls.env['stock.warehouse'])

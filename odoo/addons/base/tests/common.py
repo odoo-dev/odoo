@@ -4,7 +4,8 @@
 from contextlib import contextmanager
 from unittest.mock import patch, Mock
 
-from odoo import Command, modules
+from odoo import Command
+from odoo.models import BaseModel
 from odoo.tests.common import new_test_user, TransactionCase, HttpCase
 from odoo.tools.mail import email_split_and_format
 
@@ -28,10 +29,19 @@ class BaseCommon(TransactionCase):
         # Hack to use with_context and avoid manual context dict modification
         cls.env = cls.env['base'].with_context(**cls.default_env_context()).env
 
-        independent_user = cls.setup_independent_user()
-        if independent_user:
-            cls.env = cls.env(user=independent_user)
-            cls.user = cls.env.user
+        if cls.user_groups:
+            cls.user = cls._env_user
+        else:
+            # TODO: remove this user creation without user_groups
+            cls.user = new_test_user(
+                cls.env,
+                name='Because I am testing user!',
+                login='testingUser',
+                password='testingUser',
+                email='testing@test.com',
+                groups='base.group_user',
+                company_id=cls.env.company.id,
+            )
 
         independent_company = cls.setup_independent_company()
         if independent_company:
@@ -82,16 +92,8 @@ class BaseCommon(TransactionCase):
         return None
 
     @classmethod
-    def setup_independent_user(cls):
-        return None
-
-    @classmethod
-    def get_default_groups(cls):
-        return cls.env['res.users']._default_groups()
-
-    @classmethod
     def setup_main_company(cls, currency_code='USD'):
-        cls._use_currency(cls.env.company, currency_code)
+        cls._use_currency(cls.env.company.sudo(), currency_code)
 
     @classmethod
     def _enable_currency(cls, currency_code):
@@ -122,7 +124,7 @@ class BaseCommon(TransactionCase):
 
     @classmethod
     def _create_company(cls, **create_values):
-        company = cls.env['res.company'].create({
+        company = cls.env['res.company'].sudo().create({
             'name': "Test Company",
             **create_values,
         })

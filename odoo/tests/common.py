@@ -55,6 +55,7 @@ from urllib3.util import Url, parse_url
 
 import odoo.orm.registry
 from odoo import api
+from odoo.models import BaseModel
 from odoo.exceptions import AccessError
 from odoo.fields import Command
 from odoo.modules.registry import Registry, DummyRLock
@@ -198,8 +199,10 @@ def new_test_user(env, login='', groups='base.group_user', context=None, **kwarg
         raise ValueError('New users require at least user groups')
     if context is None:
         context = {}
+    if isinstance(groups, str):
+        groups = groups.split(',')
 
-    group_ids = [Command.set(kwargs.pop('group_ids', False) or [env.ref(g.strip()).id for g in groups.split(',')])]
+    group_ids = [Command.set(kwargs.pop('group_ids', False) or [env.ref(g.strip()).id for g in groups])]
     create_values = dict(kwargs, login=login, group_ids=group_ids)
     # automatically generate a name as "Login (groups)" to ease user comprehension
     if not create_values.get('name'):
@@ -217,7 +220,7 @@ def new_test_user(env, login='', groups='base.group_user', context=None, **kwarg
     if 'company_id' in create_values and 'company_ids' not in create_values:
         create_values['company_ids'] = [(4, create_values['company_id'])]
 
-    return env['res.users'].with_context(**context).create(create_values)
+    return env['res.users'].sudo().with_context(**context).create(create_values)
 
 def loaded_demo_data(env):
     return bool(env.ref('base.user_demo', raise_if_not_found=False))
@@ -918,6 +921,7 @@ class TransactionCase(BaseCase):
     cr: Cursor = None
     muted_registry_logger = mute_logger(odoo.orm.registry._logger.name)
     freeze_time = None
+    user_groups = None
 
     @classmethod
     def _gc_filestore(cls):
@@ -993,7 +997,23 @@ class TransactionCase(BaseCase):
         cls._crypt_context_patcher = patch('odoo.addons.base.models.res_users.ResUsersPatchedInTest._crypt_context', _crypt_context)
         cls.startClassPatcher(cls._crypt_context_patcher)
 
+        if cls.user_groups:
+            cls._env_user = new_test_user(
+                cls.env,
+                name='Because I am testing user!',
+                login='testingUser',
+                password='testingUser',
+                email='testing@test.com',
+                groups=cls.user_groups,
+                company_id=cls.env.company.id,
+            )
+
     def setUp(self):
+        """
+        The setUpClass is performed in superuser mode.
+        When the test runs, all records use the environment with the test user if the user_groups is defined.
+        The classes define the groups applied to this test user, corresponding to the required roles/privileges.
+        """
         super().setUp()
         # restore environments after the test to avoid invoking flush() with an
         # invalid environment (inexistent user id) from another test
@@ -1022,6 +1042,14 @@ class TransactionCase(BaseCase):
 
         savepoint = Savepoint(self.cr)
         self.addCleanup(savepoint.close)
+
+        if self.user_groups:
+            # switch to the test user with restricted access
+            self.env = self.env(user=self._env_user)
+            for name in dir(self):
+                value = getattr(self, name)
+                if isinstance(value, BaseModel):
+                    setattr(self, name, value.with_env(self.env))
 
     @contextmanager
     def enter_registry_test_mode(self):

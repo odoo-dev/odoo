@@ -9,6 +9,10 @@ from odoo.tests.common import TransactionCase
 
 
 class TestMrpProductionBackorder(TestMrpCommon):
+    user_groups=[
+        'stock.group_stock_manager',
+        'mrp.group_mrp_manager',
+    ]
 
     @classmethod
     def setUpClass(cls):

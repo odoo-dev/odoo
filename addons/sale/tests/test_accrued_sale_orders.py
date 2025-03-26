@@ -8,6 +8,12 @@ from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 @freeze_time('2022-01-01')
 @tagged('post_install', '-at_install')
 class TestAccruedSaleOrders(AccountTestInvoicingCommon):
+    user_groups=[
+        'base.group_partner_manager',
+        'account.group_account_manager',
+        'analytic.group_analytic_accounting',
+        'sales_team.group_sale_manager',
+    ]
 
     @classmethod
     def setUpClass(cls):

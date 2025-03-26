@@ -14,6 +14,11 @@ from freezegun import freeze_time
 
 @tagged('post_install', '-at_install')
 class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
+    user_groups=[
+        'base.group_partner_manager',
+        'account.group_account_manager',
+        'uom.group_uom',
+    ]
 
     @classmethod
     def setUpClass(cls):
@@ -131,7 +136,6 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'amount_tax': 210.0,
             'amount_total': 1410.0,
         }
-        cls.env.user.group_ids += cls.env.ref('uom.group_uom')
 
     def setUp(self):
         super(TestAccountMoveOutInvoiceOnchanges, self).setUp()

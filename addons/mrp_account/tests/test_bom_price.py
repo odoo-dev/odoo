@@ -7,6 +7,12 @@ from odoo.tools.float_utils import float_round, float_compare
 
 
 class TestBomPriceCommon(common.TransactionCase):
+    user_groups=[
+        # Required for `product_uom_id ` to be visible in the view
+        'uom.group_uom',
+        # Required for `product_id ` to be visible in the view
+        'product.group_product_variant',
+    ]
 
     @classmethod
     def _create_product(cls, name, price):
@@ -19,10 +25,6 @@ class TestBomPriceCommon(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Required for `product_uom_id ` to be visible in the view
-        cls.env.user.group_ids += cls.env.ref('uom.group_uom')
-        # Required for `product_id ` to be visible in the view
-        cls.env.user.group_ids += cls.env.ref('product.group_product_variant')
         cls.Product = cls.env['product.product']
         cls.Bom = cls.env['mrp.bom']
 

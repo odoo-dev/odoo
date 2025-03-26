@@ -36,8 +36,3 @@ class AnalyticCommon(BaseCommon):
         if not company:
             company = cls._create_company(name='analytic', **kwargs)
         return company
-
-    @classmethod
-    def get_default_groups(cls):
-        groups = super().get_default_groups()
-        return groups + cls.env.ref('analytic.group_analytic_accounting')

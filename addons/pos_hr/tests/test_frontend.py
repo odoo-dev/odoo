@@ -7,11 +7,13 @@ from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCom
 
 
 class TestPosHrHttpCommon(TestPointOfSaleHttpCommon):
+    user_groups=[
+        'hr.group_hr_user',
+    ]
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
-        cls.env.user.group_ids += cls.env.ref('hr.group_hr_user')
 
         cls.main_pos_config.write({"module_pos_hr": True})
 

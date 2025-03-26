@@ -9,12 +9,16 @@ from odoo.addons.l10n_in.tests.common import L10nInTestInvoicingCommon
 
 @tagged('post_install', '-at_install', 'post_install_l10n')
 class TestStockEwaybill(L10nInTestInvoicingCommon):
+    user_groups=[
+        'base.group_partner_manager',
+        'account.group_account_manager',
+        'stock.group_stock_manager',
+    ]
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.env.user.group_ids += cls.env.ref('stock.group_stock_manager')
         cls.product_a.standard_price = 500.00
         cls.partner_a.write({
             'vat': '27DJMPM8965E1ZE',

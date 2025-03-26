@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import Command, fields
-from odoo.tests import Form, TransactionCase, users
+from odoo.tests import Form, TransactionCase, users, new_test_user
 
 from datetime import datetime, time
 from dateutil.relativedelta import relativedelta
@@ -9,23 +9,27 @@ from freezegun import freeze_time
 
 
 class TestProjectRecurrence(TransactionCase):
+    user_groups=[
+        'project.group_project_manager',
+        'project.group_project_recurring_tasks',
+    ]
+
     @classmethod
     def setUpClass(cls):
         super(TestProjectRecurrence, cls).setUpClass()
 
-        user_group_employee = cls.env.ref('base.group_user')
-        user_group_project_user = cls.env.ref('project.group_project_user')
-        user_group_project_recurring_task = cls.env.ref('project.group_project_recurring_tasks')
-        Users = cls.env['res.users'].with_context({'no_reset_password': True})
-
-        cls.env.user.group_ids += user_group_project_recurring_task
-        cls.user_projectuser = Users.create({
-            'name': 'Armande ProjectUser',
-            'login': 'armandel',
-            'password': 'armandel',
-            'email': 'armande.projectuser@example.com',
-            'group_ids': [(6, 0, [user_group_employee.id, user_group_project_user.id, user_group_project_recurring_task.id])]
-        })
+        cls.user_projectuser = new_test_user(
+            env=cls.env,
+            name='Armande ProjectUser',
+            login='armandel',
+            password='armandel',
+            email='armande.projectuser@example.com',
+            groups=[
+                'base.group_user',
+                'project.group_project_user',
+                'project.group_project_recurring_tasks',
+            ],
+            context={'no_reset_password': True})
 
         cls.stage_a = cls.env['project.task.type'].create({'name': 'a'})
         cls.stage_b = cls.env['project.task.type'].create({'name': 'b'})

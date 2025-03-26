@@ -18,6 +18,9 @@ _logger = logging.getLogger(__name__)
 
 
 class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
+    user_groups=[
+        'point_of_sale.group_pos_manager',
+    ]
 
     @classmethod
     def _get_main_company(cls):
@@ -45,7 +48,6 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
         super().setUpClass()
 
         env = cls.env
-        cls.env.user.group_ids += env.ref('point_of_sale.group_pos_manager')
         journal_obj = env['account.journal']
         account_obj = env['account.account']
         main_company = cls._get_main_company()

@@ -8,6 +8,9 @@ from odoo.tests import TransactionCase, tagged
 
 @tagged('post_install', '-at_install')
 class TestProductBarcode(TransactionCase):
+    user_groups=[
+        'product.group_product_manager',
+    ]
 
     @classmethod
     def setUpClass(cls):

@@ -12,6 +12,11 @@ from collections import defaultdict
 
 @tagged('post_install', '-at_install')
 class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
+    user_groups=[
+        'base.group_partner_manager',
+        'account.group_account_manager',
+        'uom.group_uom',
+    ]
 
     @classmethod
     def setUpClass(cls):
@@ -128,7 +133,6 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             'amount_tax': 168.0,
             'amount_total': 1128.0,
         }
-        cls.env.user.group_ids += cls.env.ref('uom.group_uom')
 
     @classmethod
     def setup_armageddon_tax(cls, tax_name, company_data, **kwargs):

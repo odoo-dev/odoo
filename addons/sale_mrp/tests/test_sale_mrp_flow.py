@@ -11,12 +11,14 @@ from odoo.addons.stock_account.tests.test_stockvaluation import _create_accounti
 
 # these tests create accounting entries, and therefore need a chart of accounts
 class TestSaleMrpFlowCommon(ValuationReconciliationTestCommon):
+    user_groups=[
+        # Required for `uom_id` to be visible in the view
+        'uom.group_uom',
+    ]
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Required for `uom_id` to be visible in the view
-        cls.env.user.group_ids += cls.env.ref('uom.group_uom')
         cls.env.ref('stock.route_warehouse0_mto').active = True
 
         # Useful models
@@ -550,13 +552,13 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         # These products are in the Test category
         # The bom consists of 2 component1 and 1 component2
         # The invoice policy of the finished product is based on delivered quantities
-        self.env.company.currency_id = self.env.ref('base.USD')
+        self.env.company.sudo().currency_id = self.env.ref('base.USD')
         self.uom_unit = self.UoM.create({
             'name': 'Test-Unit',
             'relative_factor': 1,
         })
         self.company = self.company_data['company']
-        self.company.anglo_saxon_accounting = True
+        self.company.sudo().anglo_saxon_accounting = True
         self.partner = self.env['res.partner'].create({'name': 'My Test Partner'})
         self.category = self.env.ref('product.product_category_goods').copy({
             'name': 'Test category',
@@ -1750,8 +1752,8 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         """
 
         # Create environment
-        self.env.company.currency_id = self.env.ref('base.USD')
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().currency_id = self.env.ref('base.USD')
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.partner = self.env['res.partner'].create({'name': 'Test Partner'})
         self.category = self.env.ref('product.product_category_goods').copy({
             'name': 'Test category',

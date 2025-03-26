@@ -12,12 +12,14 @@ from odoo.addons.sale.tests.common import SaleCommon
 
 @tagged('post_install', '-at_install')
 class TestDeliveryCost(DeliveryCommon, SaleCommon):
+    user_groups=[
+        'sales_team.group_sale_manager',
+        'uom.group_uom',
+    ]
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
-        cls._enable_uom()
 
         # the tests hereunder assume all the prices in USD
         cls.env.company.country_id = cls.env.ref('base.us').id

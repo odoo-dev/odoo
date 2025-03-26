@@ -14,6 +14,16 @@ from odoo.addons.mrp.tests.common import TestMrpCommon
 
 
 class TestMrpOrder(TestMrpCommon):
+    user_groups=[
+        'stock.group_stock_manager',
+        'mrp.group_mrp_manager',
+        # Both groups below are required to make fields `product_uom_id` and
+        # `workorder_ids` to be visible in the view of `mrp.production`. The
+        # field `product_uom_id` must be set by many tests, and subviews of
+        # `workorder_ids` must be present in many tests to create records.
+        'mrp.group_mrp_routings',
+        'uom.group_uom',
+    ]
 
     @classmethod
     def setUpClass(cls):

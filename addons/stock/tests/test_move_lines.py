@@ -10,13 +10,17 @@ from odoo.tests import Form
 
 
 class StockMoveLine(TestStockCommon):
+    user_groups=[
+        'stock.group_stock_manager',
+        'stock.group_tracking_owner',
+        'stock.group_tracking_lot',
+        'stock.group_production_lot',
+        'stock.group_stock_multi_locations',
+    ]
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.env.user.group_ids += cls.env.ref("stock.group_tracking_owner")
-        cls.env.user.group_ids += cls.env.ref("stock.group_tracking_lot")
-        cls.env.user.group_ids += cls.env.ref("stock.group_production_lot")
-        cls.env.user.group_ids += cls.env.ref('stock.group_stock_multi_locations')
         cls.product = cls.env['product.product'].create({
             'name': 'Product A',
             'is_storable': True,

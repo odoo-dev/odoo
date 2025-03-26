@@ -13,12 +13,13 @@ class ValuationReconciliationTestCommon(AccountTestInvoicingCommon):
     in anglosaxon accounting. It sets up everything we need in the tests, and is
     extended in both sale_stock and purchase modules to run the 'true' tests.
     """
+    user_groups=[
+        'stock_account.group_stock_accounting_automatic',
+    ]
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
-        cls.env.user.group_ids += cls.env.ref('stock_account.group_stock_accounting_automatic')
 
         cls.stock_account_product_categ = cls.env['product.category'].create({
             'name': 'Test category',

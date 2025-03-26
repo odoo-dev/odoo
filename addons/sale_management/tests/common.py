@@ -4,13 +4,14 @@ from odoo.addons.sale.tests.common import SaleCommon
 
 
 class SaleManagementCommon(SaleCommon):
+    user_groups=[
+        # Ensure user has access to sale order templates
+        'sale_management.group_sale_order_template',
+    ]
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
-        # Ensure user has access to sale order templates
-        cls.env.user.group_ids += cls.env.ref('sale_management.group_sale_order_template')
 
         cls.empty_order_template = cls.env['sale.order.template'].create({
             'name': "Test Quotation Template",

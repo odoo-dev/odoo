@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import fields, Command
-from odoo.tests import Form, HttpCase, new_test_user
+from odoo.tests import Form, HttpCase
 from odoo.tools.float_utils import float_round
 
 from odoo.addons.product.tests.common import ProductCommon
@@ -18,6 +18,54 @@ from unittest.mock import patch
 
 
 class AccountTestInvoicingCommon(ProductCommon):
+    user_groups=[
+        'base.group_partner_manager',
+        'account.group_account_manager',
+        'account.group_account_user',
+        'analytic.group_analytic_accounting',
+
+        # TODO: Progressively remove groups from this list, hopefully no groups share the same name.
+        # This is a consequence of moving groups from data to demo data: https://github.com/odoo/odoo/pull/198078
+        'group_account_manager', # account
+        'group_event_manager', # event
+        'fleet_group_manager', # fleet
+        'group_hr_manager', # hr
+        'group_hr_attendance_manager', # hr_attendance
+        'group_hr_contract_manager', # hr_contract
+        'group_hr_expense_manager', # hr_expense
+        'group_hr_holidays_manager', # hr_holidays
+        'group_hr_recruitment_manager', # hr_recruitment
+        'group_timesheet_manager', # hr_timesheet
+        'im_livechat_group_manager', # im_livechat
+        'group_lunch_manager', # lunch
+        'group_mass_mailing_user', # mass_mailing
+        'group_mrp_manager', # mrp
+        'group_pos_manager', # point_of_sale
+        'group_product_manager', # product
+        'group_project_manager', # project
+        'group_purchase_manager', # purchase
+        'group_sale_manager', # sales_team
+        'group_stock_manager', # stock
+        'group_survey_user', # survey
+        'group_website_designer', # website
+        'group_website_slides_manager', # website_slides
+        # enterprise groups
+        'group_appointment_manager', # appointment
+        'group_approval_manager', # approval
+        'group_documents_manager', # documents
+        'frontdesk_group_administrator', # frontdesk
+        'group_helpdesk_manager', # helpdesk
+        'group_hr_appraisal_manager', # hr_appraisal
+        'group_hr_payroll_manager', # hr_payroll
+        'group_hr_recruitment_manager', # hr_referral -> duplicate from hr_recruitment /!\
+        'group_fsm_manager', # industry_fsm
+        'group_marketing_automation_user', # marketing_automation
+        'group_plm_manager', # mrp_plm
+        'group_planning_manager', # planning
+        'group_sign_manager', # sign
+        'group_social_manager', # social
+    ]
+
     # to override by the helper methods setup_country and setup_chart_template to adapt to a localization
     chart_template = False
     country_code = False
@@ -221,18 +269,6 @@ class AccountTestInvoicingCommon(ProductCommon):
         return super().setup_independent_company(**kwargs)
 
     @classmethod
-    def setup_independent_user(cls):
-        return new_test_user(
-            cls.env,
-            name='Because I am accountman!',
-            login='accountman',
-            password='accountman',
-            email='accountman@test.com',
-            group_ids=cls.get_default_groups().ids,
-            company_id=cls.env.company.id,
-        )
-
-    @classmethod
     def _create_company(cls, **create_values):
         if cls.country_code:
             country = cls.env['res.country'].search([('code', '=', cls.country_code.upper())])
@@ -256,58 +292,6 @@ class AccountTestInvoicingCommon(ProductCommon):
         create_values.setdefault('property_account_expense_id', cls.company_data['default_account_expense'].id)
         create_values.setdefault('taxes_id', [Command.set(cls.tax_sale_a.ids)])
         return super()._create_product(**create_values)
-
-    @classmethod
-    def get_default_groups(cls):
-        groups = super().get_default_groups()
-        groups |= cls.env['res.groups'].browse(
-            cls.env['ir.model.data'].search([
-                ('model', '=', 'res.groups'),
-                ('name', 'in', (
-                    # TODO: Progressively remove groups from this list, hopefully no groups share the same name.
-                    # This is a consequence of moving groups from data to demo data: https://github.com/odoo/odoo/pull/198078
-                    'group_account_manager', # account
-                    'group_event_manager', # event
-                    'fleet_group_manager', # fleet
-                    'group_hr_manager', # hr
-                    'group_hr_attendance_manager', # hr_attendance
-                    'group_hr_contract_manager', # hr_contract
-                    'group_hr_expense_manager', # hr_expense
-                    'group_hr_holidays_manager', # hr_holidays
-                    'group_hr_recruitment_manager', # hr_recruitment
-                    'group_timesheet_manager', # hr_timesheet
-                    'im_livechat_group_manager', # im_livechat
-                    'group_lunch_manager', # lunch
-                    'group_mass_mailing_user', # mass_mailing
-                    'group_mrp_manager', # mrp
-                    'group_pos_manager', # point_of_sale
-                    'group_product_manager', # product
-                    'group_project_manager', # project
-                    'group_purchase_manager', # purchase
-                    'group_sale_manager', # sales_team
-                    'group_stock_manager', # stock
-                    'group_survey_user', # survey
-                    'group_website_designer', # website
-                    'group_website_slides_manager', # website_slides
-                    # enterprise groups
-                    'group_appointment_manager', # appointment
-                    'group_approval_manager', # approval
-                    'group_documents_manager', # documents
-                    'frontdesk_group_administrator', # frontdesk
-                    'group_helpdesk_manager', # helpdesk
-                    'group_hr_appraisal_manager', # hr_appraisal
-                    'group_hr_payroll_manager', # hr_payroll
-                    'group_hr_recruitment_manager', # hr_referral -> duplicate from hr_recruitment /!\
-                    'group_fsm_manager', # industry_fsm
-                    'group_marketing_automation_user', # marketing_automation
-                    'group_plm_manager', # mrp_plm
-                    'group_planning_manager', # planning
-                    'group_sign_manager', # sign
-                    'group_social_manager', # social
-                ))
-            ]).mapped('res_id')
-        )
-        return groups | cls.env.ref('account.group_account_manager') | cls.env.ref('account.group_account_user')
 
     @classmethod
     def setup_other_currency(cls, code, **kwargs):

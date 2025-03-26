@@ -35,11 +35,6 @@ class ProductCommon(UomCommon):
         ]).action_archive()
 
     @classmethod
-    def get_default_groups(cls):
-        groups = super().get_default_groups()
-        return groups | cls.quick_ref('base.group_system')
-
-    @classmethod
     def _enable_pricelists(cls):
         cls.env.user.group_ids += cls.group_product_pricelist
 
