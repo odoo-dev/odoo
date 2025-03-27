@@ -302,7 +302,6 @@ class AccountTestInvoicingCommon(ProductCommon):
                     'group_marketing_automation_user', # marketing_automation
                     'group_plm_manager', # mrp_plm
                     'group_planning_manager', # planning
-                    'group_sign_manager', # sign
                     'group_social_manager', # social
                 ))
             ]).mapped('res_id')
