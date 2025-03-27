@@ -188,7 +188,7 @@ function computePosition(popper, target, { container, flip, margin, position }) 
         let variantOverflow = 0;
         if (Math.floor(variantValue) < Math.ceil(variantMin)) {
             variantOverflow = Math.floor(variantValue) - Math.ceil(variantMin);
-        } else if (Math.ceil(variantValue + variantSize) > Math.floor(variantMax)) {
+        } else if (Math.ceil(variantValue) > Math.floor(variantMax)) {
             variantOverflow = Math.ceil(variantValue + variantSize) - Math.floor(variantMax);
         }
 
