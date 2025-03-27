@@ -20,6 +20,7 @@ import { SearchBar } from "@web/search/search_bar/search_bar";
 import { useSearchBarToggler } from "@web/search/search_bar/search_bar_toggler";
 import { session } from "@web/session";
 import { ListCogMenu } from "./list_cog_menu";
+import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { SelectionBox } from "@web/views/view_components/selection_box";
 import { useExportRecords, useDeleteRecords } from "@web/views/view_hook";
@@ -48,6 +49,7 @@ export class ListController extends Component {
         CogMenu: ListCogMenu,
         DropdownItem,
         SelectionBox,
+        Dropdown,
     };
     static props = {
         ...standardViewProps,
@@ -72,11 +74,9 @@ export class ListController extends Component {
         this.dialogService = useService("dialog");
         this.rootRef = useRef("root");
 
-        this.archInfo = this.props.archInfo;
-        this.activeActions = this.archInfo.activeActions;
         this.onOpenFormView = this.openRecord.bind(this);
-        this.editable = (!this.props.readonly && this.archInfo.editable) || false;
-        this.hasOpenFormViewButton = this.editable ? this.archInfo.openFormView : false;
+        this.editable = (!this.props.readonly && this.props.archInfo.editable) || false;
+        this.hasOpenFormViewButton = this.editable ? this.props.archInfo.openFormView : false;
         this.model = useState(
             useModelWithSampleData(this.props.Model, this.modelParams, this.modelOptions)
         );
@@ -194,15 +194,15 @@ export class ListController extends Component {
     }
 
     get modelParams() {
-        const { rawExpand } = this.archInfo;
+        const { rawExpand } = this.props.archInfo;
         const { activeFields, fields } = extractFieldsFromArchInfo(
-            this.archInfo,
+            this.props.archInfo,
             this.props.fields
         );
         const groupByInfo = {};
-        for (const fieldName in this.archInfo.groupBy.fields) {
-            const fieldNodes = this.archInfo.groupBy.fields[fieldName].fieldNodes;
-            const fields = this.archInfo.groupBy.fields[fieldName].fields;
+        for (const fieldName in this.props.archInfo.groupBy.fields) {
+            const fieldNodes = this.props.archInfo.groupBy.fields[fieldName].fieldNodes;
+            const fields = this.props.archInfo.groupBy.fields[fieldName].fields;
             groupByInfo[fieldName] = extractFieldsFromArchInfo({ fieldNodes }, fields);
         }
 
@@ -217,11 +217,11 @@ export class ListController extends Component {
             config: modelConfig,
             state: this.props.state?.modelState,
             groupByInfo,
-            limit: this.archInfo.limit || this.props.limit,
-            countLimit: this.archInfo.countLimit,
-            defaultOrderBy: this.archInfo.defaultOrder,
-            groupsLimit: this.archInfo.groupsLimit,
-            multiEdit: !this.props.readonly && this.archInfo.multiEdit,
+            limit: this.props.archInfo.limit || this.props.limit,
+            countLimit: this.props.archInfo.countLimit,
+            defaultOrderBy: this.props.archInfo.defaultOrder,
+            groupsLimit: this.props.archInfo.groupsLimit,
+            multiEdit: !this.props.readonly && this.props.archInfo.multiEdit,
             activeIdsLimit: session.active_ids_limit,
             hooks: {
                 onRecordSaved: this.onRecordSaved.bind(this),
@@ -263,6 +263,14 @@ export class ListController extends Component {
 
     get deleteConfirmationDialogProps() {
         return {};
+    }
+
+    get headerButtons() {
+        return this.props.archInfo.headerButtons;
+    }
+
+    get headerAlwaysButtons() {
+        return this.props.archInfo.headerButtons.filter((button) => button.display === "always");
     }
 
     getExportableFields() {
@@ -330,11 +338,11 @@ export class ListController extends Component {
         if (dirty) {
             await record.save();
         }
-        if (this.archInfo.openAction) {
+        if (this.props.archInfo.openAction) {
             this.actionService.doActionButton(
                 {
-                    name: this.archInfo.openAction.action,
-                    type: this.archInfo.openAction.type,
+                    name: this.props.archInfo.openAction.action,
+                    type: this.props.archInfo.openAction.type,
                     resModel: record.resModel,
                     resId: record.resId,
                     resIds: record.resIds,
@@ -351,6 +359,14 @@ export class ListController extends Component {
             const activeIds = this.model.root.records.map((datapoint) => datapoint.resId);
             this.props.selectRecord(record.resId, { activeIds, force, newWindow });
         }
+    }
+
+    get activeActions() {
+        return this.props.archInfo.activeActions;
+    }
+
+    get canCreate() {
+        return this.props.archInfo.activeActions.create;
     }
 
     async onClickCreate() {
@@ -431,7 +447,7 @@ export class ListController extends Component {
                 callback: () => this.model.root.toggleArchiveWithConfirmation(false),
             },
             delete: {
-                isAvailable: () => this.activeActions.delete,
+                isAvailable: () => this.props.archInfo.activeActions.delete,
                 sequence: 50,
                 icon: "fa fa-trash-o",
                 description: _t("Delete"),
@@ -523,7 +539,7 @@ export class ListController extends Component {
                     },
                     isDomainSelected,
                     fields: Object.keys(changes).map((fieldName) => {
-                        const fieldNode = Object.values(this.archInfo.fieldNodes).find(
+                        const fieldNode = Object.values(this.props.archInfo.fieldNodes).find(
                             (fieldNode) => fieldNode.name === fieldName
                         );
                         const label = fieldNode && fieldNode.string;

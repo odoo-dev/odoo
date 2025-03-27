@@ -21,6 +21,7 @@ import { KanbanCogMenu } from "./kanban_cog_menu";
 import { KanbanRenderer } from "./kanban_renderer";
 import { useProgressBar } from "./progress_bar_hook";
 import { SelectionBox } from "@web/views/view_components/selection_box";
+import { Dropdown } from "@web/core/dropdown/dropdown";
 
 import {
     Component,
@@ -47,6 +48,7 @@ export class KanbanController extends Component {
         SearchBar,
         CogMenu: KanbanCogMenu,
         SelectionBox,
+        Dropdown,
     };
     static props = {
         ...standardViewProps,
@@ -138,7 +140,6 @@ export class KanbanController extends Component {
                 activeBars
             );
         }
-        this.headerButtons = archInfo.headerButtons;
 
         const self = this;
         this.quickCreateState = reactive({
@@ -337,6 +338,14 @@ export class KanbanController extends Component {
         return {};
     }
 
+    get headerButtons() {
+        return this.props.archInfo.headerButtons;
+    }
+
+    get headerAlwaysButtons() {
+        return this.props.archInfo.headerButtons.filter((button) => button.display === "always");
+    }
+
     getExportableFields() {
         return Object.keys(this.model.root.config.activeFields)
             .map((e) => this.props.fields[e])
@@ -428,6 +437,10 @@ export class KanbanController extends Component {
         } else {
             await this.props.createRecord();
         }
+    }
+
+    get activeActions() {
+        return this.props.archInfo.activeActions;
     }
 
     get canCreate() {
