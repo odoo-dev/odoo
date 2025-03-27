@@ -112,9 +112,7 @@
         </div>
     </t>
 
-    <t t-name="web.ListView.Buttons">
-        <div t-if="props.showButtons" class="o_list_buttons d-contents"/>
-    </t>
+    <t t-name="web.ListView.Buttons"/>
 
     <t t-name="web.ListView.MultiRecordViewAlwaysButton">
         <MultiRecordViewButton
