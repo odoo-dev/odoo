@@ -1,22 +1,29 @@
 import { Plugin } from "@html_editor/plugin";
-import { registry } from "@web/core/registry";
 import { withSequence } from "@html_editor/utils/resource";
 import { rpc } from "@web/core/network/rpc";
+import { registry } from "@web/core/registry";
 import { Cache } from "@web/core/utils/cache";
 import { DynamicSnippetOption } from "./dynamic_snippet_option";
 
 class DynamicSnippetOptionPlugin extends Plugin {
     static id = "dynamicSnippetOption";
-    static shared = ["getComponentProps"];
+    static shared = ["getComponentProps", "setOptionsDefaultValues"];
+    selector = ".s_dynamic_snippet";
+    modelNameFilter = "";
     resources = {
         builder_options: [
             withSequence(10, {
                 OptionComponent: DynamicSnippetOption,
-                props: this.getComponentProps(),
-                selector: ".s_dynamic_snippet",
+                props: {
+                    ...this.getComponentProps(),
+                    modelNameFilter: this.modelNameFilter,
+                },
+                selector: this.selector,
             }),
         ],
         builder_actions: this.getActions(),
+        on_snippet_dropped_handlers: async ({ snippetEl }) =>
+            await this.onSnippetDropped(snippetEl, this.selector, this.modelNameFilter, []),
     };
     setup() {
         this.dynamicFiltersCache = new Cache(this._fetchDynamicFilters, JSON.stringify);
@@ -29,6 +36,48 @@ class DynamicSnippetOptionPlugin extends Plugin {
         super.destroy();
         this.dynamicFiltersCache.invalidate();
         this.dynamicFilterTemplatesCache.invalidate();
+    }
+    async onSnippetDropped(snippetEl, selector, modelNameFilter, contextualFilterDomain) {
+        if (snippetEl.matches(selector)) {
+            await this.setOptionsDefaultValues(snippetEl, modelNameFilter, contextualFilterDomain);
+        }
+    }
+    async setOptionsDefaultValues(snippetEl, modelNameFilter, contextualFilterDomain) {
+        const fetchedDynamicFilters = await this.fetchDynamicFilters({
+            model_name: modelNameFilter,
+            search_domain: contextualFilterDomain,
+        });
+        const dynamicFilters = {};
+        for (const dynamicFilter of fetchedDynamicFilters) {
+            dynamicFilters[dynamicFilter.id] = dynamicFilter;
+        }
+        const fetchedDynamicFilterTemplates = await this.fetchDynamicFilterTemplates({
+            filter_name: modelNameFilter.replaceAll(".", "_"),
+        });
+        const dynamicFilterTemplates = {};
+        for (const dynamicFilterTemplate of fetchedDynamicFilterTemplates) {
+            dynamicFilterTemplates[dynamicFilterTemplate.key] = dynamicFilterTemplate;
+        }
+        let selectedFilterId = snippetEl.dataset["filterId"];
+        if (Object.keys(dynamicFilters).length > 0) {
+            setOptionValueIfNotSet(snippetEl, "numberOfRecords", fetchedDynamicFilters[0].limit);
+            const defaultFilterId = fetchedDynamicFilters[0].id;
+            if (!dynamicFilters[selectedFilterId]) {
+                snippetEl.dataset["filterId"] = defaultFilterId;
+                selectedFilterId = defaultFilterId;
+            }
+        }
+        if (
+            dynamicFilters[selectedFilterId] &&
+            !dynamicFilterTemplates[snippetEl.dataset["templateKey"]]
+        ) {
+            const modelName = dynamicFilters[selectedFilterId].model_name.replaceAll(".", "_");
+            const defaultFilterTemplate = fetchedDynamicFilterTemplates.find((dynamicTemplate) =>
+                dynamicTemplate.key.includes(modelName)
+            );
+            snippetEl.dataset["templateKey"] = defaultFilterTemplate.key;
+            this.updateTemplate(snippetEl, defaultFilterTemplate);
+        }
     }
     getComponentProps() {
         return {
@@ -113,6 +162,7 @@ class DynamicSnippetOptionPlugin extends Plugin {
         } else {
             delete el.dataset.columnClasses;
         }
+        this.dispatchTo("dynamic_snippet_template_updated", { el: el, template: template });
     }
     async fetchDynamicFilters(params) {
         return this.dynamicFiltersCache.read(params);
@@ -125,6 +175,12 @@ class DynamicSnippetOptionPlugin extends Plugin {
     }
     async _fetchDynamicFilterTemplates(params) {
         return rpc("/website/snippet/filter_templates", params);
+    }
+}
+
+export function setOptionValueIfNotSet(snippetEl, optionName, value) {
+    if (snippetEl.dataset[optionName] === undefined) {
+        snippetEl.dataset[optionName] = value;
     }
 }
 
