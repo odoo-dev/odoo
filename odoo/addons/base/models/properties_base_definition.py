@@ -17,6 +17,10 @@ class PropertiesBaseDefinition(models.Model):
     @api.depends("properties_field_id")
     def _compute_display_name(self):
         for definition in self:
+            if not definition.properties_field_id.model:
+                definition.display_name = False
+                continue
+
             definition.display_name = _("%s Properties", self.env[definition.properties_field_id.model]._description)
 
     @api.constrains("properties_field_id")
