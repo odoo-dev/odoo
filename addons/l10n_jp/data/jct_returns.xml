@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="l10n_jp_jct_return_accumulation" model="account.report">
+        <field name="name">JCT Return (Accumulation)</field>
+        <field name="root_report_id" ref="account.generic_tax_report"/>
+        <field name="country_id" ref="base.jp"/>
+        <field name="filter_show_draft" eval="True"/>
+        <field name="filter_partner" eval="True"/>
+        <field name="filter_unfold_all" eval="True"/>
+        <field name="filter_unreconciled" eval="True"/>
+        <field name="filter_period_comparison" eval="False"/>
+        <field name="filter_multi_company">selector</field>
+        <field name="default_opening_date_filter">previous_year</field>
+        <field name="search_bar" eval="True"/>
+        <field name="load_more_limit" eval="80"/>
+        <field name="use_sections" eval="True"/>
+        <field name="section_report_ids" eval="[(6, 0, [ref('l10n_jp.l10n_jp_form_accumulation'), ref('l10n_jp.l10n_jp_schedule_1_3_accumulation'), ref('l10n_jp.l10n_jp_schedule_2_3_accumulation'), ref('l10n_jp.l10n_jp_schedule_4_3_accumulation'), ref('l10n_jp.l10n_jp_schedule_5_3_accumulation')])]"/>
+    </record>
+
+    <record id="l10n_jp_jct_return_deduction" model="account.report">
+        <field name="name">JCT Return (Deduction)</field>
+        <field name="root_report_id" ref="account.generic_tax_report"/>
+        <field name="country_id" ref="base.jp"/>
+        <field name="filter_show_draft" eval="True"/>
+        <field name="filter_partner" eval="True"/>
+        <field name="filter_unfold_all" eval="True"/>
+        <field name="filter_unreconciled" eval="True"/>
+        <field name="filter_period_comparison" eval="False"/>
+        <field name="filter_multi_company">selector</field>
+        <field name="default_opening_date_filter">previous_year</field>
+        <field name="search_bar" eval="True"/>
+        <field name="load_more_limit" eval="80"/>
+        <field name="use_sections" eval="True"/>
+        <field name="section_report_ids" eval="[(6, 0, [ref('l10n_jp.l10n_jp_form_deduction'), ref('l10n_jp.l10n_jp_schedule_1_3_deduction'), ref('l10n_jp.l10n_jp_schedule_2_3_deduction'), ref('l10n_jp.l10n_jp_schedule_4_3_deduction'), ref('l10n_jp.l10n_jp_schedule_5_3_deduction')])]"/>
+    </record>
+</odoo>

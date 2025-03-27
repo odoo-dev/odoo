@@ -1,0 +1,910 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo auto_sequence="1">
+    <record id="l10n_jp_form_accumulation" model="account.report">
+        <field name="name">Form (Accumulation)</field>
+        <field name="country_id" ref="base.jp"/>
+        <field name="filter_multi_company">tax_units</field>
+        <field name="default_opening_date_filter">previous_return_period</field>
+        <field name="only_tax_exigible" eval="True"/>
+        <field name="integer_rounding">DOWN</field>
+        <field name="column_ids">
+            <record id="l10n_jp_form_accumulation_balance" model="account.report.column">
+                <field name="name">Amount</field>
+                <field name="expression_label">balance</field>
+            </record>
+        </field>
+        <field name="line_ids">
+            <record id="l10n_jp_form_accumulation_acc_f3_1" model="account.report.line">
+                <field name="name">Page 1</field>
+                <field name="code">ACC_F3_1</field>
+                <field name="hierarchy_level">0</field>
+                <field name="foldable" eval="False"/>
+            </record>
+            <record id="l10n_jp_form_accumulation_acc_f3_1_cta" model="account.report.line">
+                <field name="name">Calculation of consumption tax amount based on this return</field>
+                <field name="code">ACC_F3_1_CTA</field>
+                <field name="hierarchy_level">0</field>
+                <field name="foldable" eval="False"/>
+                <field name="children_ids">
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_1" model="account.report.line">
+                        <field name="name">1. Tax base</field>
+                        <field name="code">ACC_F3_1_1</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_1_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_F3_2_1.balance</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_2" model="account.report.line">
+                        <field name="name">2. Consumption tax</field>
+                        <field name="code">ACC_F3_1_2</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_2_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_F3_2_11.balance</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_3" model="account.report.line">
+                        <field name="name">3. Tax adjustment for excess deduction</field>
+                        <field name="code">ACC_F3_1_3</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_3_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_F3_1_3.sub_balance_1_3 + ACC_F3_1_3.sub_balance_4_3</field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_3_sub_balance_1_3" model="account.report.expression">
+                                <field name="label">sub_balance_1_3</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_S1_3_3.balance_c</field>
+                                <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_1_3_accumulation)</field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_3_sub_balance_4_3" model="account.report.expression">
+                                <field name="label">sub_balance_4_3</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_S4_3_3.balance_c</field>
+                                <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_4_3_accumulation)</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_dta" model="account.report.line">
+                        <field name="name">Deductible tax</field>
+                        <field name="code">ACC_F3_1_DTA</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="children_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_4" model="account.report.line">
+                                <field name="name">4. Deduction tax on purchases</field>
+                                <field name="code">ACC_F3_1_4</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_1_4_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_F3_1_4.sub_balance_1_3 + ACC_F3_1_4.sub_balance_4_3</field>
+                                    </record>
+                                    <record id="l10n_jp_form_accumulation_acc_f3_1_4_sub_balance_1_3" model="account.report.expression">
+                                        <field name="label">sub_balance_1_3</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S1_3_4.balance_c</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_1_3_accumulation)</field>
+                                    </record>
+                                    <record id="l10n_jp_form_accumulation_acc_f3_1_4_sub_balance_4_3" model="account.report.expression">
+                                        <field name="label">sub_balance_4_3</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S4_3_4.balance_c</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_4_3_accumulation)</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_5" model="account.report.line">
+                                <field name="name">5. Tax relating to refunds and other charges</field>
+                                <field name="code">ACC_F3_1_5</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_6" model="account.report.line">
+                                <field name="name">6. Tax relating to bad debt</field>
+                                <field name="code">ACC_F3_1_6</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_1_6_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_F3_1_6.sub_balance_1_3 + ACC_F3_1_6.sub_balance_4_3</field>
+                                    </record>
+                                    <record id="l10n_jp_form_accumulation_acc_f3_1_6_sub_balance_1_3" model="account.report.expression">
+                                        <field name="label">sub_balance_1_3</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S1_3_6.balance_c</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_1_3_accumulation)</field>
+                                    </record>
+                                    <record id="l10n_jp_form_accumulation_acc_f3_1_6_sub_balance_4_3" model="account.report.expression">
+                                        <field name="label">sub_balance_4_3</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S4_3_6.balance_c</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_4_3_accumulation)</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_7" model="account.report.line">
+                                <field name="name">7. Subtotal of deduction tax (4+5+6)</field>
+                                <field name="code">ACC_F3_1_7</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_1_7_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_F3_1_4.balance + ACC_F3_1_6.balance</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_8" model="account.report.line">
+                        <field name="name">8. Tax refundable for insufficient deduction (7-2-3)</field>
+                        <field name="code">ACC_F3_1_8</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_8_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_F3_1_8.sub_balance_1_3 + ACC_F3_1_8.sub_balance_4_3</field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_8_sub_balance_1_3" model="account.report.expression">
+                                <field name="label">sub_balance_1_3</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_S1_3_8.balance_c</field>
+                                <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_1_3_accumulation)</field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_8_sub_balance_4_3" model="account.report.expression">
+                                <field name="label">sub_balance_4_3</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_S4_3_8.balance_c</field>
+                                <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_4_3_accumulation)</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_9" model="account.report.line">
+                        <field name="name">9. Balance (2+3-7)</field>
+                        <field name="code">ACC_F3_1_9</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_9_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_F3_1_9.sub_balance_1_3 + ACC_F3_1_9.sub_balance_4_3</field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_9_sub_balance_1_3" model="account.report.expression">
+                                <field name="label">sub_balance_1_3</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_S1_3_9.balance_c</field>
+                                <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_1_3_accumulation)</field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_9_sub_balance_4_3" model="account.report.expression">
+                                <field name="label">sub_balance_4_3</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_S4_3_9.balance_c</field>
+                                <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_4_3_accumulation)</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_10" model="account.report.line">
+                        <field name="name">10. Interim tax payment amount</field>
+                        <field name="code">ACC_F3_1_10</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_10_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=0</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_11" model="account.report.line">
+                        <field name="name">11. Tax amount paid (9-10)</field>
+                        <field name="code">ACC_F3_1_11</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_11_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_F3_1_9.balance - ACC_F3_1_10.balance</field>
+                                <field name="subformula">if_above(JPY(0))</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_12" model="account.report.line">
+                        <field name="name">12. Interim payment refund amount (10-9)</field>
+                        <field name="code">ACC_F3_1_12</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_12_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_F3_1_10.balance - ACC_F3_1_9.balance</field>
+                                <field name="subformula">if_above(JPY(0))</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_atr1" model="account.report.line">
+                        <field name="name">If this tax return is an amended tax return</field>
+                        <field name="code">ACC_F3_1_ATR1</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="children_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_13" model="account.report.line">
+                                <field name="name">13. Determined tax amount</field>
+                                <field name="code">ACC_F3_1_13</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_14" model="account.report.line">
+                                <field name="name">14. Deductible tax amount</field>
+                                <field name="code">ACC_F3_1_14</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_tsr" model="account.report.line">
+                        <field name="name">Taxable sales ratio</field>
+                        <field name="code">ACC_F3_1_TSR</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="children_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_15g" model="account.report.line">
+                                <field name="name">(General Taxpayer) 15. Amount of consideration for transfer of taxable assets, etc.</field>
+                                <field name="code">ACC_F3_1_15G</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_1_15g_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S2_3_4.balance_c</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_2_3_accumulation)</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_16g" model="account.report.line">
+                                <field name="name">(General Taxpayer) 16. Amount of consideration for transfer of assets, etc.</field>
+                                <field name="code">ACC_F3_1_16G</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_1_16g_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S2_3_7.balance_c</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_2_3_accumulation)</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="l10n_jp_form_accumulation_acc_f3_1_15s" model="account.report.line">
+                <field name="name">(Simplified Taxpayer) 15. Taxable sales for this tax period</field>
+                <field name="code">ACC_F3_1_15S</field>
+                <field name="hierarchy_level">3</field>
+                <field name="foldable" eval="False"/>
+                <field name="expression_ids">
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_15s_balance" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">ACC_F3_1_15S.sub_balance + ACC_F3_1_15S.sub_balance_4_3</field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_15s_sub_balance_4_3" model="account.report.expression">
+                        <field name="label">sub_balance_4_3</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">ACC_S4_3_1_1.balance_c</field>
+                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_4_3_accumulation)</field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_15s_sub_balance" model="account.report.expression">
+                        <field name="label">sub_balance</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">F3_1_15S</field>
+                    </record>
+                </field>
+            </record>
+            <record id="l10n_jp_form_accumulation_acc_f3_1_16s" model="account.report.line">
+                <field name="name">(Simplified Taxpayer) 16. Taxable sales in the base period</field>
+                <field name="code">ACC_F3_1_16S</field>
+                <field name="hierarchy_level">3</field>
+                <field name="foldable" eval="False"/>
+                <field name="expression_ids">
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_16s_balance" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">external</field>
+                        <field name="formula">sum</field>
+                        <field name="subformula">editable;rounding=0</field>
+                    </record>
+                </field>
+            </record>
+            <record id="l10n_jp_form_accumulation_acc_f3_1_lcta" model="account.report.line">
+                <field name="name">Calculation of local consumption tax amount based on this tax return</field>
+                <field name="code">ACC_F3_1_LCTA</field>
+                <field name="hierarchy_level">0</field>
+                <field name="foldable" eval="False"/>
+                <field name="children_ids">
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_tblct" model="account.report.line">
+                        <field name="name">Consumption tax amount that is the tax base for local consumption tax</field>
+                        <field name="code">ACC_F3_1_TBLCT</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="children_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_17" model="account.report.line">
+                                <field name="name">17. Tax refundable for insufficient deduction</field>
+                                <field name="code">ACC_F3_1_17</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_1_17_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S1_3_10.balance_c</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_1_3_accumulation)</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_18" model="account.report.line">
+                                <field name="name">18. Balance</field>
+                                <field name="code">ACC_F3_1_18</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_1_18_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S1_3_11.balance_c</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_1_3_accumulation)</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_ta" model="account.report.line">
+                        <field name="name">Transfer amount</field>
+                        <field name="code">ACC_F3_1_TA</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="children_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_19" model="account.report.line">
+                                <field name="name">19. Amount of tax refundable</field>
+                                <field name="code">ACC_F3_1_19</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_1_19_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S1_3_12.balance_c</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_1_3_accumulation)</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_20" model="account.report.line">
+                                <field name="name">20. Amount of tax payable</field>
+                                <field name="code">ACC_F3_1_20</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_1_20_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S1_3_13.balance_c</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_1_3_accumulation)</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_21" model="account.report.line">
+                        <field name="name">21. Interim payment transfer amount</field>
+                        <field name="code">ACC_F3_1_21</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_21_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=0</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_22" model="account.report.line">
+                        <field name="name">22. Payment transfer amount (20-21)</field>
+                        <field name="code">ACC_F3_1_22</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_22_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_F3_1_20.balance - ACC_F3_1_21.balance</field>
+                                <field name="subformula">if_above(JPY(0))</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_23" model="account.report.line">
+                        <field name="name">23. Interim payment refund transfer amount (21-20)</field>
+                        <field name="code">ACC_F3_1_23</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_23_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_F3_1_21.balance - ACC_F3_1_20.balance</field>
+                                <field name="subformula">if_above(JPY(0))</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_atr2" model="account.report.line">
+                        <field name="name">If this tax return is an amended tax return</field>
+                        <field name="code">ACC_F3_1_ATR2</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="children_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_24" model="account.report.line">
+                                <field name="name">24. Determined transfer amount</field>
+                                <field name="code">ACC_F3_1_24</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_1_25" model="account.report.line">
+                                <field name="name">25. Deductible transfer amount</field>
+                                <field name="code">ACC_F3_1_25</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="l10n_jp_form_accumulation_acc_f3_1_26" model="account.report.line">
+                <field name="name">26. Total amount of consumption tax and local consumption tax (paid or refunded)</field>
+                <field name="code">ACC_F3_1_26</field>
+                <field name="hierarchy_level">1</field>
+                <field name="foldable" eval="False"/>
+                <field name="expression_ids">
+                    <record id="l10n_jp_form_accumulation_acc_f3_1_26_balance" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">ACC_F3_1_11.balance + ACC_F3_1_22.balance - ACC_F3_1_8.balance - ACC_F3_1_12.balance - ACC_F3_1_19.balance - ACC_F3_1_23.balance</field>
+                    </record>
+                </field>
+            </record>
+            <record id="l10n_jp_form_accumulation_acc_f3_2" model="account.report.line">
+                <field name="name">Page 2</field>
+                <field name="code">ACC_F3_2</field>
+                <field name="hierarchy_level">0</field>
+                <field name="foldable" eval="False"/>
+                <field name="children_ids">
+                    <record id="l10n_jp_form_accumulation_acc_f3_2_1" model="account.report.line">
+                        <field name="name">1. Tax base</field>
+                        <field name="code">ACC_F3_2_1</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_1_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_F3_2_1.sub_balance_1_3 + ACC_F3_2_1.sub_balance_4_3</field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_1_sub_balance_1_3" model="account.report.expression">
+                                <field name="label">sub_balance_1_3</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_S1_3_1.balance_c</field>
+                                <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_1_3_accumulation)</field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_1_sub_balance_4_3" model="account.report.expression">
+                                <field name="label">sub_balance_4_3</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_S4_3_1.balance_c</field>
+                                <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_4_3_accumulation)</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_2_ta" model="account.report.line">
+                        <field name="name">Total amount of the transfer value of taxable assets, etc.</field>
+                        <field name="code">ACC_F3_2_TA</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="children_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_2" model="account.report.line">
+                                <field name="name">2. 3% applicable</field>
+                                <field name="code">ACC_F3_2_2</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_2_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=0</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_3" model="account.report.line">
+                                <field name="name">3. 4% applicable</field>
+                                <field name="code">ACC_F3_2_3</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_3_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=0</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_4" model="account.report.line">
+                                <field name="name">4. 6.3% applicable</field>
+                                <field name="code">ACC_F3_2_4</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_4_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=0</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_5" model="account.report.line">
+                                <field name="name">5. 6.24% applicable</field>
+                                <field name="code">ACC_F3_2_5</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_5_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_F3_2_5.sub_balance_1_3 + ACC_F3_2_5.sub_balance_4_3</field>
+                                    </record>
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_5_sub_balance_1_3" model="account.report.expression">
+                                        <field name="label">sub_balance_1_3</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S1_3_1_1.balance_a</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_1_3_accumulation)</field>
+                                    </record>
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_5_sub_balance_4_3" model="account.report.expression">
+                                        <field name="label">sub_balance_4_3</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S4_3_1_1.balance_a</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_4_3_accumulation)</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_6" model="account.report.line">
+                                <field name="name">6. 7.8% applicable</field>
+                                <field name="code">ACC_F3_2_6</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_6_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_F3_2_6.sub_balance_1_3 + ACC_F3_2_6.sub_balance_4_3</field>
+                                    </record>
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_6_sub_balance_1_3" model="account.report.expression">
+                                        <field name="label">sub_balance_1_3</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S1_3_1_1.balance_b</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_1_3_accumulation)</field>
+                                    </record>
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_6_sub_balance_4_3" model="account.report.expression">
+                                        <field name="label">sub_balance_4_3</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S4_3_1_1.balance_b</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_4_3_accumulation)</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_7" model="account.report.line">
+                                <field name="name">7. Total of 2~6</field>
+                                <field name="code">ACC_F3_2_7</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_7_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_F3_2_2.balance + ACC_F3_2_3.balance + ACC_F3_2_4.balance + ACC_F3_2_5.balance + ACC_F3_2_6.balance</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_2_tp" model="account.report.line">
+                        <field name="name">Total amount of value of payment for specified taxable purchases</field>
+                        <field name="code">ACC_F3_2_TP</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="children_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_8" model="account.report.line">
+                                <field name="name">8. 6.3% applicable</field>
+                                <field name="code">ACC_F3_2_8</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_8_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=0</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_9" model="account.report.line">
+                                <field name="name">9. 7.8% applicable</field>
+                                <field name="code">ACC_F3_2_9</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_9_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S1_3_1_2.balance_b</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_1_3_accumulation)</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_10" model="account.report.line">
+                                <field name="name">10. Sum of 8 + 9</field>
+                                <field name="code">ACC_F3_2_10</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_10_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_F3_2_8.balance + ACC_F3_2_9.balance</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_2_11" model="account.report.line">
+                        <field name="name">11. Consumption tax</field>
+                        <field name="code">ACC_F3_2_11</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_11_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ACC_F3_2_12.balance + ACC_F3_2_13.balance + ACC_F3_2_14.balance + ACC_F3_2_15.balance + ACC_F3_2_16.balance</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_2_11br" model="account.report.line">
+                        <field name="name">Breakdown of 11</field>
+                        <field name="code">ACC_F3_2_11BR</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="children_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_12" model="account.report.line">
+                                <field name="name">12. 3% applicable</field>
+                                <field name="code">ACC_F3_2_12</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_12_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=0</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_13" model="account.report.line">
+                                <field name="name">13. 4% applicable</field>
+                                <field name="code">ACC_F3_2_13</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_13_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=0</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_14" model="account.report.line">
+                                <field name="name">14. 6.3% applicable</field>
+                                <field name="code">ACC_F3_2_14</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_14_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=0</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_15" model="account.report.line">
+                                <field name="name">15. 6.24% applicable</field>
+                                <field name="code">ACC_F3_2_15</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_15_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_F3_2_15.sub_balance_1_3 + ACC_F3_2_15.sub_balance_4_3</field>
+                                    </record>
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_15_sub_balance_1_3" model="account.report.expression">
+                                        <field name="label">sub_balance_1_3</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S1_3_2.balance_a</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_1_3_accumulation)</field>
+                                    </record>
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_15_sub_balance_4_3" model="account.report.expression">
+                                        <field name="label">sub_balance_4_3</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S4_3_2.balance_a</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_4_3_accumulation)</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_16" model="account.report.line">
+                                <field name="name">16. 7.8% applicable</field>
+                                <field name="code">ACC_F3_2_16</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_16_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_F3_2_16.sub_balance_1_3 + ACC_F3_2_16.sub_balance_4_3</field>
+                                    </record>
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_16_sub_balance_1_3" model="account.report.expression">
+                                        <field name="label">sub_balance_1_3</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S1_3_2.balance_b</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_1_3_accumulation)</field>
+                                    </record>
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_16_sub_balance_4_3" model="account.report.expression">
+                                        <field name="label">sub_balance_4_3</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S4_3_2.balance_b</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_4_3_accumulation)</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_2_17" model="account.report.line">
+                        <field name="name">17. Tax relating to refunds and other charges</field>
+                        <field name="code">ACC_F3_2_17</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_2_17br" model="account.report.line">
+                        <field name="name">Breakdown of 17</field>
+                        <field name="code">ACC_F3_2_17BR</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="children_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_18" model="account.report.line">
+                                <field name="name">18. Amount of tax on value of refunds, for sales</field>
+                                <field name="code">ACC_F3_2_18</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_19" model="account.report.line">
+                                <field name="name">19. Amount of tax value of refunds, etc. for specified taxable purchases</field>
+                                <field name="code">ACC_F3_2_19</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_form_accumulation_acc_f3_2_lct" model="account.report.line">
+                        <field name="name">Consumption tax as local consumption tax base</field>
+                        <field name="code">ACC_F3_2_LCT</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="children_ids">
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_20" model="account.report.line">
+                                <field name="name">20. Total of 21~23</field>
+                                <field name="code">ACC_F3_2_20</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_20_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_F3_2_21.balance + ACC_F3_2_22.balance + ACC_F3_2_23.balance</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_21" model="account.report.line">
+                                <field name="name">21. 4% applicable</field>
+                                <field name="code">ACC_F3_2_21</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_21_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=0</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_22" model="account.report.line">
+                                <field name="name">22. 6.3% applicable</field>
+                                <field name="code">ACC_F3_2_22</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_22_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=0</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_form_accumulation_acc_f3_2_23" model="account.report.line">
+                                <field name="name">23. 6.24% and 7.8% applicable portion</field>
+                                <field name="code">ACC_F3_2_23</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_23_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_F3_2_23.sub_balance_1_3 + ACC_F3_2_23.sub_balance_4_3</field>
+                                    </record>
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_23_sub_balance_1_3" model="account.report.expression">
+                                        <field name="label">sub_balance_1_3</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S1_3_10.balance_c + ACC_S1_3_11.balance_c</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_1_3_accumulation)</field>
+                                    </record>
+                                    <record id="l10n_jp_form_accumulation_acc_f3_2_23_sub_balance_4_3" model="account.report.expression">
+                                        <field name="label">sub_balance_4_3</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">ACC_S4_3_10.balance_c + ACC_S4_3_11.balance_c</field>
+                                        <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_4_3_accumulation)</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+        </field>
+    </record>
+</odoo>

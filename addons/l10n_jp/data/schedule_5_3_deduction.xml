@@ -1,0 +1,1685 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo auto_sequence="1">
+    <record id="l10n_jp_schedule_5_3_deduction" model="account.report">
+        <field name="name">Schedule 5-3 (Deduction)</field>
+        <field name="country_id" ref="base.jp"/>
+        <field name="filter_multi_company">tax_units</field>
+        <field name="default_opening_date_filter">previous_return_period</field>
+        <field name="only_tax_exigible" eval="True"/>
+        <field name="integer_rounding">DOWN</field>
+        <field name="column_ids">
+            <record id="l10n_jp_schedule_5_3_deduction_balance_a" model="account.report.column">
+                <field name="name">A</field>
+                <field name="expression_label">balance_a</field>
+            </record>
+            <record id="l10n_jp_schedule_5_3_deduction_balance_b" model="account.report.column">
+                <field name="name">B</field>
+                <field name="expression_label">balance_b</field>
+            </record>
+            <record id="l10n_jp_schedule_5_3_deduction_balance_c" model="account.report.column">
+                <field name="name">C</field>
+                <field name="expression_label">balance_c</field>
+            </record>
+            <record id="l10n_jp_schedule_5_3_deduction_balance_d" model="account.report.column">
+                <field name="name">D</field>
+                <field name="expression_label">balance_d</field>
+            </record>
+        </field>
+        <field name="line_ids">
+            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_cta" model="account.report.line">
+                <field name="name">Ⅰ Consumption tax amount that is the basis for calculating the amount of input tax eligible for deduction</field>
+                <field name="code">DED_S5_3_CTA</field>
+                <field name="hierarchy_level">0</field>
+                <field name="foldable" eval="False"/>
+                <field name="children_ids">
+                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_1" model="account.report.line">
+                        <field name="name">1. Consumption tax amount relative to tax base amount</field>
+                        <field name="code">DED_S5_3_1</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_1_balance_a" model="account.report.expression">
+                                <field name="label">balance_a</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S4_3_2.balance_a</field>
+                                <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_4_3_deduction)</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_1_balance_b" model="account.report.expression">
+                                <field name="label">balance_b</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S4_3_2.balance_b</field>
+                                <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_4_3_deduction)</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_1_balance_c" model="account.report.expression">
+                                <field name="label">balance_c</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S5_3_1.balance_a + DED_S5_3_1.balance_b</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_2" model="account.report.line">
+                        <field name="name">2. Consumption tax amount related to bad debt collection</field>
+                        <field name="code">DED_S5_3_2</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_2_balance_a" model="account.report.expression">
+                                <field name="label">balance_a</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S4_3_3.balance_a</field>
+                                <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_4_3_deduction)</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_2_balance_b" model="account.report.expression">
+                                <field name="label">balance_b</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S4_3_3.balance_b</field>
+                                <field name="subformula">cross_report(l10n_jp.l10n_jp_schedule_4_3_deduction)</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_2_balance_c" model="account.report.expression">
+                                <field name="label">balance_c</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S5_3_2.balance_a + DED_S5_3_2.balance_b</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_3" model="account.report.line">
+                        <field name="name">3. Consumption tax amount related to refund of sales consideration, etc.</field>
+                        <field name="code">DED_S5_3_3</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                    </record>
+                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_4" model="account.report.line">
+                        <field name="name">4. Consumption tax amount as basis for calculation of deductible input tax amount</field>
+                        <field name="code">DED_S5_3_4</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_4_balance_a" model="account.report.expression">
+                                <field name="label">balance_a</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S5_3_1.balance_a + DED_S5_3_2.balance_a</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_4_balance_b" model="account.report.expression">
+                                <field name="label">balance_b</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S5_3_1.balance_b + DED_S5_3_2.balance_b</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_4_balance_c" model="account.report.expression">
+                                <field name="label">balance_c</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S5_3_4.balance_a + DED_S5_3_4.balance_b</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_it1" model="account.report.line">
+                <field name="name">II.Input tax amount eligible for deduction in the case of a specialist in one type of business</field>
+                <field name="code">DED_S5_3_IT1</field>
+                <field name="hierarchy_level">0</field>
+                <field name="foldable" eval="False"/>
+                <field name="children_ids">
+                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5" model="account.report.line">
+                        <field name="name">5. 4 x deemed purchase rate</field>
+                        <field name="code">DED_S5_3_5</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="expression_ids">
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5_balance_a" model="account.report.expression">
+                                <field name="label">balance_a</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S5_3_14.balance_a * 0.9 + DED_S5_3_15.balance_a * 0.8 + DED_S5_3_16.balance_a * 0.7 + DED_S5_3_17.balance_a * 0.6 + DED_S5_3_18.balance_a * 0.5 + DED_S5_3_19.balance_a * 0.4</field>
+                                <field name="subformula">if_other_expr_below(DED_S5_3_5.final_check, JPY(2))</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5_balance_b" model="account.report.expression">
+                                <field name="label">balance_b</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S5_3_14.balance_b * 0.9 + DED_S5_3_15.balance_b * 0.8 + DED_S5_3_16.balance_b * 0.7 + DED_S5_3_17.balance_b * 0.6 + DED_S5_3_18.balance_b * 0.5 + DED_S5_3_19.balance_b * 0.4</field>
+                                <field name="subformula">if_other_expr_below(DED_S5_3_5.final_check, JPY(2))</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5_balance_c" model="account.report.expression">
+                                <field name="label">balance_c</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S5_3_5.balance_a + DED_S5_3_5.balance_b</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5_final_check" model="account.report.expression">
+                                <field name="label">final_check</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S5_3_5.sub_check_1 + DED_S5_3_5.sub_check_2 + DED_S5_3_5.sub_check_3 + DED_S5_3_5.sub_check_4 + DED_S5_3_5.sub_check_5 + DED_S5_3_5.sub_check_6</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5_sub_check_1" model="account.report.expression">
+                                <field name="label">sub_check_1</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">1</field>
+                                <field name="subformula">if_other_expr_above(DED_S5_3_5.check_1, JPY(0))</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5_sub_check_2" model="account.report.expression">
+                                <field name="label">sub_check_2</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">1</field>
+                                <field name="subformula">if_other_expr_above(DED_S5_3_5.check_2, JPY(0))</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5_sub_check_3" model="account.report.expression">
+                                <field name="label">sub_check_3</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">1</field>
+                                <field name="subformula">if_other_expr_above(DED_S5_3_5.check_3, JPY(0))</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5_sub_check_4" model="account.report.expression">
+                                <field name="label">sub_check_4</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">1</field>
+                                <field name="subformula">if_other_expr_above(DED_S5_3_5.check_4, JPY(0))</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5_sub_check_5" model="account.report.expression">
+                                <field name="label">sub_check_5</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">1</field>
+                                <field name="subformula">if_other_expr_above(DED_S5_3_5.check_5, JPY(0))</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5_sub_check_6" model="account.report.expression">
+                                <field name="label">sub_check_6</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">1</field>
+                                <field name="subformula">if_other_expr_above(DED_S5_3_5.check_6, JPY(0))</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5_check_1" model="account.report.expression">
+                                <field name="label">check_1</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S5_3_14.sub_balance_a + DED_S5_3_14.sub_balance_b</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5_check_2" model="account.report.expression">
+                                <field name="label">check_2</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S5_3_15.sub_balance_a + DED_S5_3_15.sub_balance_b</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5_check_3" model="account.report.expression">
+                                <field name="label">check_3</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S5_3_16.sub_balance_a + DED_S5_3_16.sub_balance_b</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5_check_4" model="account.report.expression">
+                                <field name="label">check_4</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S5_3_17.sub_balance_a + DED_S5_3_17.sub_balance_b</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5_check_5" model="account.report.expression">
+                                <field name="label">check_5</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S5_3_18.sub_balance_a + DED_S5_3_18.sub_balance_b</field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_5_check_6" model="account.report.expression">
+                                <field name="label">check_6</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">DED_S5_3_19.sub_balance_a + DED_S5_3_19.sub_balance_b</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_it2" model="account.report.line">
+                <field name="name">Ⅲ Input tax amount eligible for deduction in the case of businesses operating two or more types of businesses</field>
+                <field name="code">DED_S5_3_IT2</field>
+                <field name="hierarchy_level">0</field>
+                <field name="foldable" eval="False"/>
+                <field name="children_ids">
+                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_tsbc" model="account.report.line">
+                        <field name="name">(1) Details of taxable sales (excluding tax) by business category</field>
+                        <field name="code">DED_S5_3_TSBC</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="children_ids">
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_6" model="account.report.line">
+                                <field name="name">6. Total amount by business category</field>
+                                <field name="code">DED_S5_3_6</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_6_balance_a" model="account.report.expression">
+                                        <field name="label">balance_a</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">DED_S5_3_7.balance_a + DED_S5_3_8.balance_a + DED_S5_3_9.balance_a + DED_S5_3_10.balance_a + DED_S5_3_11.balance_a  + DED_S5_3_12.balance_a</field>
+                                    </record>
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_6_balance_b" model="account.report.expression">
+                                        <field name="label">balance_b</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">DED_S5_3_7.balance_b + DED_S5_3_8.balance_b + DED_S5_3_9.balance_b + DED_S5_3_10.balance_b + DED_S5_3_11.balance_b  + DED_S5_3_12.balance_b</field>
+                                    </record>
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_6_balance_c" model="account.report.expression">
+                                        <field name="label">balance_c</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">DED_S5_3_6.balance_a + DED_S5_3_6.balance_b</field>
+                                    </record>
+                                </field>
+                                <field name="children_ids">
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_7" model="account.report.line">
+                                        <field name="name">7. Type 1 business (wholesale trade)</field>
+                                        <field name="code">DED_S5_3_7</field>
+                                        <field name="hierarchy_level">5</field>
+                                        <field name="foldable" eval="False"/>
+                                        <field name="expression_ids">
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_7_balance_a" model="account.report.expression">
+                                                <field name="label">balance_a</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_7.sub_balance_a + DED_S5_3_14.sub_balance_a)*100/108</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_7_balance_b" model="account.report.expression">
+                                                <field name="label">balance_b</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_7.sub_balance_b + DED_S5_3_14.sub_balance_b)*100/110</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_7_sub_balance_a" model="account.report.expression">
+                                                <field name="label">sub_balance_a</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_7A</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_7_sub_balance_b" model="account.report.expression">
+                                                <field name="label">sub_balance_b</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_7B</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_7_balance_c" model="account.report.expression">
+                                                <field name="label">balance_c</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_7.balance_a + DED_S5_3_7.balance_b</field>
+                                            </record>
+                                        </field>
+                                    </record>
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_8" model="account.report.line">
+                                        <field name="name">8. Type 2 business (retail business, etc.)</field>
+                                        <field name="code">DED_S5_3_8</field>
+                                        <field name="hierarchy_level">5</field>
+                                        <field name="foldable" eval="False"/>
+                                        <field name="expression_ids">
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_8_balance_a" model="account.report.expression">
+                                                <field name="label">balance_a</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_8.sub_balance_a + DED_S5_3_15.sub_balance_a)*100/108</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_8_balance_b" model="account.report.expression">
+                                                <field name="label">balance_b</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_8.sub_balance_b + DED_S5_3_15.sub_balance_b)*100/110</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_8_sub_balance_a" model="account.report.expression">
+                                                <field name="label">sub_balance_a</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_8A</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_8_sub_balance_b" model="account.report.expression">
+                                                <field name="label">sub_balance_b</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_8B</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_8_balance_c" model="account.report.expression">
+                                                <field name="label">balance_c</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_8.balance_a + DED_S5_3_8.balance_b</field>
+                                            </record>
+                                        </field>
+                                    </record>
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_9" model="account.report.line">
+                                        <field name="name">9. Type 3 business (manufacturing, etc.)</field>
+                                        <field name="code">DED_S5_3_9</field>
+                                        <field name="hierarchy_level">5</field>
+                                        <field name="foldable" eval="False"/>
+                                        <field name="expression_ids">
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_9_balance_a" model="account.report.expression">
+                                                <field name="label">balance_a</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_9.sub_balance_a + DED_S5_3_16.sub_balance_a)*100/108</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_9_balance_b" model="account.report.expression">
+                                                <field name="label">balance_b</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_9.sub_balance_b + DED_S5_3_16.sub_balance_b)*100/110</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_9_sub_balance_a" model="account.report.expression">
+                                                <field name="label">sub_balance_a</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_9A</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_9_sub_balance_b" model="account.report.expression">
+                                                <field name="label">sub_balance_b</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_9B</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_9_balance_c" model="account.report.expression">
+                                                <field name="label">balance_c</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_9.balance_a + DED_S5_3_9.balance_b</field>
+                                            </record>
+                                        </field>
+                                    </record>
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_10" model="account.report.line">
+                                        <field name="name">10. Type 4 business (other)</field>
+                                        <field name="code">DED_S5_3_10</field>
+                                        <field name="hierarchy_level">5</field>
+                                        <field name="foldable" eval="False"/>
+                                        <field name="expression_ids">
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_10_balance_a" model="account.report.expression">
+                                                <field name="label">balance_a</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_10.sub_balance_a + DED_S5_3_17.sub_balance_a)*100/108</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_10_balance_b" model="account.report.expression">
+                                                <field name="label">balance_b</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_10.sub_balance_b + DED_S5_3_17.sub_balance_b)*100/110</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_10_sub_balance_a" model="account.report.expression">
+                                                <field name="label">sub_balance_a</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_10A</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_10_sub_balance_b" model="account.report.expression">
+                                                <field name="label">sub_balance_b</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_10B</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_10_balance_c" model="account.report.expression">
+                                                <field name="label">balance_c</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_10.balance_a + DED_S5_3_10.balance_b</field>
+                                            </record>
+                                        </field>
+                                    </record>
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_11" model="account.report.line">
+                                        <field name="name">11. Type 5 business (service industry, etc.)</field>
+                                        <field name="code">DED_S5_3_11</field>
+                                        <field name="hierarchy_level">5</field>
+                                        <field name="foldable" eval="False"/>
+                                        <field name="expression_ids">
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_11_balance_a" model="account.report.expression">
+                                                <field name="label">balance_a</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_11.sub_balance_a + DED_S5_3_18.sub_balance_a)*100/108</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_11_balance_b" model="account.report.expression">
+                                                <field name="label">balance_b</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_11.sub_balance_b + DED_S5_3_18.sub_balance_b)*100/110</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_11_sub_balance_a" model="account.report.expression">
+                                                <field name="label">sub_balance_a</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_11A</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_11_sub_balance_b" model="account.report.expression">
+                                                <field name="label">sub_balance_b</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_11B</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_11_balance_c" model="account.report.expression">
+                                                <field name="label">balance_c</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_11.balance_a + DED_S5_3_11.balance_b</field>
+                                            </record>
+                                        </field>
+                                    </record>
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_12" model="account.report.line">
+                                        <field name="name">12. Type 6 business (real estate business)</field>
+                                        <field name="code">DED_S5_3_12</field>
+                                        <field name="hierarchy_level">5</field>
+                                        <field name="foldable" eval="False"/>
+                                        <field name="expression_ids">
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_12_balance_a" model="account.report.expression">
+                                                <field name="label">balance_a</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_12.sub_balance_a + DED_S5_3_19.sub_balance_a)*100/108</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_12_balance_b" model="account.report.expression">
+                                                <field name="label">balance_b</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_12.sub_balance_b + DED_S5_3_19.sub_balance_b)*100/110</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_12_sub_balance_a" model="account.report.expression">
+                                                <field name="label">sub_balance_a</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_12A</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_12_sub_balance_b" model="account.report.expression">
+                                                <field name="label">sub_balance_b</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_12B</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_12_balance_c" model="account.report.expression">
+                                                <field name="label">balance_c</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_12.balance_a + DED_S5_3_12.balance_b</field>
+                                            </record>
+                                        </field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_ctabc" model="account.report.line">
+                        <field name="name">(2) Details of consumption tax amount on taxable sales by business category in (1)</field>
+                        <field name="code">DED_S5_3_CTABC</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="children_ids">
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_13" model="account.report.line">
+                                <field name="name">13. Total amount by business category</field>
+                                <field name="code">DED_S5_3_13</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="expression_ids">
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_13_balance_a" model="account.report.expression">
+                                        <field name="label">balance_a</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">DED_S5_3_14.balance_a + DED_S5_3_15.balance_a + DED_S5_3_16.balance_a + DED_S5_3_17.balance_a + DED_S5_3_18.balance_a  + DED_S5_3_19.balance_a</field>
+                                    </record>
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_13_balance_b" model="account.report.expression">
+                                        <field name="label">balance_b</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">DED_S5_3_14.balance_b + DED_S5_3_15.balance_b + DED_S5_3_16.balance_b + DED_S5_3_17.balance_b + DED_S5_3_18.balance_b  + DED_S5_3_19.balance_b</field>
+                                    </record>
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_13_balance_c" model="account.report.expression">
+                                        <field name="label">balance_c</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">DED_S5_3_13.balance_a + DED_S5_3_13.balance_b</field>
+                                    </record>
+                                </field>
+                                <field name="children_ids">
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_14" model="account.report.line">
+                                        <field name="name">14. Type 1 business (wholesale trade)</field>
+                                        <field name="code">DED_S5_3_14</field>
+                                        <field name="hierarchy_level">5</field>
+                                        <field name="foldable" eval="False"/>
+                                        <field name="expression_ids">
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_14_balance_a" model="account.report.expression">
+                                                <field name="label">balance_a</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_7.balance_a + DED_S5_3_14.sub_balance_a) * 6.24 / 108</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_14_balance_b" model="account.report.expression">
+                                                <field name="label">balance_b</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_7.balance_b + DED_S5_3_14.sub_balance_b) * 7.8 / 110</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_14_sub_balance_a" model="account.report.expression">
+                                                <field name="label">sub_balance_a</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_A1</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_14_sub_balance_b" model="account.report.expression">
+                                                <field name="label">sub_balance_b</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_B1</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_14_balance_c" model="account.report.expression">
+                                                <field name="label">balance_c</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_14.balance_a + DED_S5_3_14.balance_b</field>
+                                            </record>
+                                        </field>
+                                    </record>
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_15" model="account.report.line">
+                                        <field name="name">15. Type 2 business (retail business, etc.)</field>
+                                        <field name="code">DED_S5_3_15</field>
+                                        <field name="hierarchy_level">5</field>
+                                        <field name="foldable" eval="False"/>
+                                        <field name="expression_ids">
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_15_balance_a" model="account.report.expression">
+                                                <field name="label">balance_a</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_8.balance_a + DED_S5_3_15.sub_balance_a) * 6.24 / 108</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_15_balance_b" model="account.report.expression">
+                                                <field name="label">balance_b</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_8.balance_b + DED_S5_3_15.sub_balance_b) * 7.8 / 110</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_15_sub_balance_a" model="account.report.expression">
+                                                <field name="label">sub_balance_a</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_A2</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_15_sub_balance_b" model="account.report.expression">
+                                                <field name="label">sub_balance_b</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_B2</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_15_balance_c" model="account.report.expression">
+                                                <field name="label">balance_c</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_15.balance_a + DED_S5_3_15.balance_b</field>
+                                            </record>
+                                        </field>
+                                    </record>
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_16" model="account.report.line">
+                                        <field name="name">16. Type 3 business (manufacturing, etc.)</field>
+                                        <field name="code">DED_S5_3_16</field>
+                                        <field name="hierarchy_level">5</field>
+                                        <field name="foldable" eval="False"/>
+                                        <field name="expression_ids">
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_16_balance_a" model="account.report.expression">
+                                                <field name="label">balance_a</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_9.balance_a + DED_S5_3_16.sub_balance_a) * 6.24 / 108</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_16_balance_b" model="account.report.expression">
+                                                <field name="label">balance_b</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_9.balance_b + DED_S5_3_16.sub_balance_b) * 7.8 / 110</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_16_sub_balance_a" model="account.report.expression">
+                                                <field name="label">sub_balance_a</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_A3</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_16_sub_balance_b" model="account.report.expression">
+                                                <field name="label">sub_balance_b</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_B3</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_16_balance_c" model="account.report.expression">
+                                                <field name="label">balance_c</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_16.balance_a + DED_S5_3_16.balance_b</field>
+                                            </record>
+                                        </field>
+                                    </record>
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_17" model="account.report.line">
+                                        <field name="name">17. Type 4 business (other)</field>
+                                        <field name="code">DED_S5_3_17</field>
+                                        <field name="hierarchy_level">5</field>
+                                        <field name="foldable" eval="False"/>
+                                        <field name="expression_ids">
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_17_balance_a" model="account.report.expression">
+                                                <field name="label">balance_a</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_10.balance_a + DED_S5_3_17.sub_balance_a) * 6.24 / 108</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_17_balance_b" model="account.report.expression">
+                                                <field name="label">balance_b</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_10.balance_b + DED_S5_3_17.sub_balance_b) * 7.8 / 110</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_17_sub_balance_a" model="account.report.expression">
+                                                <field name="label">sub_balance_a</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_A4</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_17_sub_balance_b" model="account.report.expression">
+                                                <field name="label">sub_balance_b</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_B4</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_17_balance_c" model="account.report.expression">
+                                                <field name="label">balance_c</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_17.balance_a + DED_S5_3_17.balance_b</field>
+                                            </record>
+                                        </field>
+                                    </record>
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_18" model="account.report.line">
+                                        <field name="name">18. Type 5 business (service industry, etc.)</field>
+                                        <field name="code">DED_S5_3_18</field>
+                                        <field name="hierarchy_level">5</field>
+                                        <field name="foldable" eval="False"/>
+                                        <field name="expression_ids">
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_18_balance_a" model="account.report.expression">
+                                                <field name="label">balance_a</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_11.balance_a + DED_S5_3_18.sub_balance_a) * 6.24 / 108</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_18_balance_b" model="account.report.expression">
+                                                <field name="label">balance_b</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_11.balance_b + DED_S5_3_18.sub_balance_b) * 7.8 / 110</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_18_sub_balance_a" model="account.report.expression">
+                                                <field name="label">sub_balance_a</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_A5</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_18_sub_balance_b" model="account.report.expression">
+                                                <field name="label">sub_balance_b</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_B5</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_18_balance_c" model="account.report.expression">
+                                                <field name="label">balance_c</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_18.balance_a + DED_S5_3_18.balance_b</field>
+                                            </record>
+                                        </field>
+                                    </record>
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_19" model="account.report.line">
+                                        <field name="name">19. Type 6 business (real estate business)</field>
+                                        <field name="code">DED_S5_3_19</field>
+                                        <field name="hierarchy_level">5</field>
+                                        <field name="foldable" eval="False"/>
+                                        <field name="expression_ids">
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_19_balance_a" model="account.report.expression">
+                                                <field name="label">balance_a</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_12.balance_a + DED_S5_3_19.sub_balance_a) * 6.24 / 108</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_19_balance_b" model="account.report.expression">
+                                                <field name="label">balance_b</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">(DED_S5_3_12.balance_b + DED_S5_3_19.sub_balance_b) * 7.8 / 110</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_19_sub_balance_a" model="account.report.expression">
+                                                <field name="label">sub_balance_a</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_A6</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_19_sub_balance_b" model="account.report.expression">
+                                                <field name="label">sub_balance_b</field>
+                                                <field name="engine">tax_tags</field>
+                                                <field name="formula">S5_3_B6</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_19_balance_c" model="account.report.expression">
+                                                <field name="label">balance_c</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_19.balance_a + DED_S5_3_19.balance_b</field>
+                                            </record>
+                                        </field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_dpta" model="account.report.line">
+                        <field name="name">(3) Details of calculation formula category for deductible purchase tax amount</field>
+                        <field name="code">DED_S5_3_DPTA</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="foldable" eval="False"/>
+                        <field name="children_ids">
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_pc" model="account.report.line">
+                                <field name="name">A) When applying principle calculation</field>
+                                <field name="code">DED_S5_3_PC</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="children_ids">
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_20" model="account.report.line">
+                                        <field name="name">20. 4×Deemed purchase rate [(14*90%+15*80%+16+70%+17+60%+18*50%+19*40%)/13]</field>
+                                        <field name="code">DED_S5_3_20</field>
+                                        <field name="hierarchy_level">5</field>
+                                        <field name="foldable" eval="False"/>
+                                        <field name="expression_ids">
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_20_balance_a" model="account.report.expression">
+                                                <field name="label">balance_a</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_20.sub_balance_a</field>
+                                                <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_20_balance_b" model="account.report.expression">
+                                                <field name="label">balance_b</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_20.sub_balance_b</field>
+                                                <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_20_sub_balance_a" model="account.report.expression">
+                                                <field name="label">sub_balance_a</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_14.balance_a * 0.9 + DED_S5_3_15.balance_a * 0.8 + DED_S5_3_16.balance_a * 0.7 + DED_S5_3_17.balance_a * 0.6 + DED_S5_3_18.balance_a * 0.5 + DED_S5_3_19.balance_a * 0.4) / DED_S5_3_13.balance_a</field>
+                                                <field name="subformula">ignore_zero_division</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_20_sub_balance_b" model="account.report.expression">
+                                                <field name="label">sub_balance_b</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_4.balance_b * (DED_S5_3_14.balance_b * 0.9 + DED_S5_3_15.balance_b * 0.8 + DED_S5_3_16.balance_b * 0.7 + DED_S5_3_17.balance_b * 0.6 + DED_S5_3_18.balance_b * 0.5 + DED_S5_3_19.balance_b * 0.4) / DED_S5_3_13.balance_b</field>
+                                                <field name="subformula">ignore_zero_division</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_20_balance_c" model="account.report.expression">
+                                                <field name="label">balance_c</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_20.balance_a + DED_S5_3_20.balance_b</field>
+                                            </record>
+                                        </field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_sc" model="account.report.line">
+                                <field name="name">B) When applying special calculation</field>
+                                <field name="code">DED_S5_3_SC</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="children_ids">
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_o75" model="account.report.line">
+                                        <field name="name">(a) 75% or more in one type of business</field>
+                                        <field name="code">DED_S5_3_O75</field>
+                                        <field name="hierarchy_level">4</field>
+                                        <field name="foldable" eval="False"/>
+                                        <field name="children_ids">
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21" model="account.report.line">
+                                                <field name="name">21. 4 x deemed purchase rate (90%/80%/70%/60%/50%/40%)</field>
+                                                <field name="code">DED_S5_3_21</field>
+                                                <field name="hierarchy_level">5</field>
+                                                <field name="foldable" eval="False"/>
+                                                <field name="expression_ids">
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_balance_a" model="account.report.expression">
+                                                        <field name="label">balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_21.sub_balance_a1 + DED_S5_3_21.sub_balance_a2 + DED_S5_3_21.sub_balance_a3 + DED_S5_3_21.sub_balance_a4 + DED_S5_3_21.sub_balance_a5 + DED_S5_3_21.sub_balance_a6</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_balance_b" model="account.report.expression">
+                                                        <field name="label">balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_21.sub_balance_b1 + DED_S5_3_21.sub_balance_b2 + DED_S5_3_21.sub_balance_b3 + DED_S5_3_21.sub_balance_b4 + DED_S5_3_21.sub_balance_b5 + DED_S5_3_21.sub_balance_b6</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_balance_c" model="account.report.expression">
+                                                        <field name="label">balance_c</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_21.balance_a + DED_S5_3_21.balance_b</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_sub_balance_a1" model="account.report.expression">
+                                                        <field name="label">sub_balance_a1</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * 0.9</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_21.check1, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_sub_balance_b1" model="account.report.expression">
+                                                        <field name="label">sub_balance_b1</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * 0.9</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_21.check1, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_check1" model="account.report.expression">
+                                                        <field name="label">check1</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_7.balance_c * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_sub_balance_a2" model="account.report.expression">
+                                                        <field name="label">sub_balance_a2</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * 0.8</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_21.check2, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_sub_balance_b2" model="account.report.expression">
+                                                        <field name="label">sub_balance_b2</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * 0.8</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_21.check2, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_check2" model="account.report.expression">
+                                                        <field name="label">check2</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_8.balance_c * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_sub_balance_a3" model="account.report.expression">
+                                                        <field name="label">sub_balance_a3</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * 0.7</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_21.check3, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_sub_balance_b3" model="account.report.expression">
+                                                        <field name="label">sub_balance_b3</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * 0.7</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_21.check3, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_check3" model="account.report.expression">
+                                                        <field name="label">check3</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_9.balance_c * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_sub_balance_a4" model="account.report.expression">
+                                                        <field name="label">sub_balance_a4</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * 0.6</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_21.check4, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_sub_balance_b4" model="account.report.expression">
+                                                        <field name="label">sub_balance_b4</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * 0.6</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_21.check4, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_check4" model="account.report.expression">
+                                                        <field name="label">check4</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_10.balance_c * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_sub_balance_a5" model="account.report.expression">
+                                                        <field name="label">sub_balance_a5</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * 0.5</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_21.check5, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_sub_balance_b5" model="account.report.expression">
+                                                        <field name="label">sub_balance_b5</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * 0.5</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_21.check5, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_check5" model="account.report.expression">
+                                                        <field name="label">check5</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_11.balance_c * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_sub_balance_a6" model="account.report.expression">
+                                                        <field name="label">sub_balance_a6</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * 0.4</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_21.check6, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_sub_balance_b6" model="account.report.expression">
+                                                        <field name="label">sub_balance_b6</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * 0.4</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_21.check6, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21_check6" model="account.report.expression">
+                                                        <field name="label">check6</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_12.balance_c * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                </field>
+                                            </record>
+                                        </field>
+                                    </record>
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_21g" model="account.report.line">
+                                        <field name="name">(b) 75% or more in two types of business</field>
+                                        <field name="code">DED_S5_3_21g</field>
+                                        <field name="hierarchy_level">4</field>
+                                        <field name="foldable" eval="False"/>
+                                        <field name="children_ids">
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_22" model="account.report.line">
+                                                <field name="name">22. Type 1 business and Type 2 business (7C + 8C)/6C≧75%</field>
+                                                <field name="code">DED_S5_3_22</field>
+                                                <field name="hierarchy_level">5</field>
+                                                <field name="foldable" eval="False"/>
+                                                <field name="expression_ids">
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_22_balance_a" model="account.report.expression">
+                                                        <field name="label">balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_22.sub_balance_a / DED_S5_3_13.balance_a</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_22_balance_b" model="account.report.expression">
+                                                        <field name="label">balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_22.sub_balance_b / DED_S5_3_13.balance_b</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_22_sub_balance_a" model="account.report.expression">
+                                                        <field name="label">sub_balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_14.balance_a * 0.9 + (DED_S5_3_13.balance_a - DED_S5_3_14.balance_a) * 0.8)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_22.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_22_sub_balance_b" model="account.report.expression">
+                                                        <field name="label">sub_balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * (DED_S5_3_14.balance_b * 0.9 + (DED_S5_3_13.balance_b - DED_S5_3_14.balance_b) * 0.8)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_22.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_22_balance_c" model="account.report.expression">
+                                                        <field name="label">balance_c</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_22.balance_a + DED_S5_3_22.balance_b</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_22.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_22_check" model="account.report.expression">
+                                                        <field name="label">check</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_22.check_bus</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_22_check_bus" model="account.report.expression">
+                                                        <field name="label">check_bus</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">(DED_S5_3_7.balance_c + DED_S5_3_8.balance_c) * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                </field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_23" model="account.report.line">
+                                                <field name="name">23. Type 1 business and Type 3 business (7C + 9C)/6C≧75%</field>
+                                                <field name="code">DED_S5_3_23</field>
+                                                <field name="hierarchy_level">5</field>
+                                                <field name="foldable" eval="False"/>
+                                                <field name="expression_ids">
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_23_balance_a" model="account.report.expression">
+                                                        <field name="label">balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_23.sub_balance_a / DED_S5_3_13.balance_a</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_23_balance_b" model="account.report.expression">
+                                                        <field name="label">balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_23.sub_balance_b / DED_S5_3_13.balance_b</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_23_sub_balance_a" model="account.report.expression">
+                                                        <field name="label">sub_balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_14.balance_a * 0.9 + (DED_S5_3_13.balance_a - DED_S5_3_14.balance_a) * 0.7)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_23.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_23_sub_balance_b" model="account.report.expression">
+                                                        <field name="label">sub_balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * (DED_S5_3_14.balance_b * 0.9 + (DED_S5_3_13.balance_b - DED_S5_3_14.balance_b) * 0.7)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_23.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_23_balance_c" model="account.report.expression">
+                                                        <field name="label">balance_c</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_23.balance_a + DED_S5_3_23.balance_b</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_23.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_23_check" model="account.report.expression">
+                                                        <field name="label">check</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_23.check_bus</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_23_check_bus" model="account.report.expression">
+                                                        <field name="label">check_bus</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">(DED_S5_3_7.balance_c + DED_S5_3_9.balance_c) * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                </field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_24" model="account.report.line">
+                                                <field name="name">24. Type 1 business and Type 4 business (7C + 10C)/6C≧75%</field>
+                                                <field name="code">DED_S5_3_24</field>
+                                                <field name="hierarchy_level">5</field>
+                                                <field name="foldable" eval="False"/>
+                                                <field name="expression_ids">
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_24_balance_a" model="account.report.expression">
+                                                        <field name="label">balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_24.sub_balance_a / DED_S5_3_13.balance_a</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_24_balance_b" model="account.report.expression">
+                                                        <field name="label">balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_24.sub_balance_b / DED_S5_3_13.balance_b</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_24_sub_balance_a" model="account.report.expression">
+                                                        <field name="label">sub_balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_14.balance_a * 0.9 + (DED_S5_3_13.balance_a - DED_S5_3_14.balance_a) * 0.6)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_24.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_24_sub_balance_b" model="account.report.expression">
+                                                        <field name="label">sub_balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * (DED_S5_3_14.balance_b * 0.9 + (DED_S5_3_13.balance_b - DED_S5_3_14.balance_b) * 0.6)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_24.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_24_balance_c" model="account.report.expression">
+                                                        <field name="label">balance_c</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_24.balance_a + DED_S5_3_24.balance_b</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_24.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_24_check" model="account.report.expression">
+                                                        <field name="label">check</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_24.check_bus</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_24_check_bus" model="account.report.expression">
+                                                        <field name="label">check_bus</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">(DED_S5_3_7.balance_c + DED_S5_3_10.balance_c) * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                </field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_25" model="account.report.line">
+                                                <field name="name">25. Type 1 business and Type 5 business (7C + 11C)/6C≧75%</field>
+                                                <field name="code">DED_S5_3_25</field>
+                                                <field name="hierarchy_level">5</field>
+                                                <field name="foldable" eval="False"/>
+                                                <field name="expression_ids">
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_25_balance_a" model="account.report.expression">
+                                                        <field name="label">balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_25.sub_balance_a / DED_S5_3_13.balance_a</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_25_balance_b" model="account.report.expression">
+                                                        <field name="label">balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_25.sub_balance_b / DED_S5_3_13.balance_b</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_25_sub_balance_a" model="account.report.expression">
+                                                        <field name="label">sub_balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_14.balance_a * 0.9 + (DED_S5_3_13.balance_a - DED_S5_3_14.balance_a) * 0.5)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_25.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_25_sub_balance_b" model="account.report.expression">
+                                                        <field name="label">sub_balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * (DED_S5_3_14.balance_b * 0.9 + (DED_S5_3_13.balance_b - DED_S5_3_14.balance_b) * 0.5)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_25.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_25_balance_c" model="account.report.expression">
+                                                        <field name="label">balance_c</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_25.balance_a + DED_S5_3_25.balance_b</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_25.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_25_check" model="account.report.expression">
+                                                        <field name="label">check</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_25.check_bus</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_25_check_bus" model="account.report.expression">
+                                                        <field name="label">check_bus</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">(DED_S5_3_7.balance_c + DED_S5_3_11.balance_c) * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                </field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_26" model="account.report.line">
+                                                <field name="name">26. Type 1 business and Type 6 business  (7C + 12C)/6C≧75%</field>
+                                                <field name="code">DED_S5_3_26</field>
+                                                <field name="hierarchy_level">5</field>
+                                                <field name="foldable" eval="False"/>
+                                                <field name="expression_ids">
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_26_balance_a" model="account.report.expression">
+                                                        <field name="label">balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_26.sub_balance_a / DED_S5_3_13.balance_a</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_26_balance_b" model="account.report.expression">
+                                                        <field name="label">balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_26.sub_balance_b / DED_S5_3_13.balance_b</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_26_sub_balance_a" model="account.report.expression">
+                                                        <field name="label">sub_balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_14.balance_a * 0.9 + (DED_S5_3_13.balance_a - DED_S5_3_14.balance_a) * 0.4)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_26.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_26_sub_balance_b" model="account.report.expression">
+                                                        <field name="label">sub_balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * (DED_S5_3_14.balance_b * 0.9 + (DED_S5_3_13.balance_b - DED_S5_3_14.balance_b) * 0.4)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_26.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_26_balance_c" model="account.report.expression">
+                                                        <field name="label">balance_c</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_26.balance_a + DED_S5_3_26.balance_b</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_26.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_26_check" model="account.report.expression">
+                                                        <field name="label">check</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_26.check_bus</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_26_check_bus" model="account.report.expression">
+                                                        <field name="label">check_bus</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">(DED_S5_3_7.balance_c + DED_S5_3_12.balance_c) * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                </field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_27" model="account.report.line">
+                                                <field name="name">27. Type 2 business and Type 3 business (8C+9C)/6C≧75%</field>
+                                                <field name="code">DED_S5_3_27</field>
+                                                <field name="hierarchy_level">5</field>
+                                                <field name="foldable" eval="False"/>
+                                                <field name="expression_ids">
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_27_balance_a" model="account.report.expression">
+                                                        <field name="label">balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_27.sub_balance_a / DED_S5_3_13.balance_a</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_27_balance_b" model="account.report.expression">
+                                                        <field name="label">balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_27.sub_balance_b / DED_S5_3_13.balance_b</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_27_sub_balance_a" model="account.report.expression">
+                                                        <field name="label">sub_balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_15.balance_a * 0.8 + (DED_S5_3_13.balance_a - DED_S5_3_15.balance_a) * 0.7)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_27.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_27_sub_balance_b" model="account.report.expression">
+                                                        <field name="label">sub_balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * (DED_S5_3_15.balance_b * 0.8 + (DED_S5_3_13.balance_b - DED_S5_3_15.balance_b) * 0.7)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_27.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_27_balance_c" model="account.report.expression">
+                                                        <field name="label">balance_c</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_27.balance_a + DED_S5_3_27.balance_b</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_27.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_27_check" model="account.report.expression">
+                                                        <field name="label">check</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_27.check_bus</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_27_check_bus" model="account.report.expression">
+                                                        <field name="label">check_bus</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">(DED_S5_3_8.balance_c + DED_S5_3_9.balance_c) * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                </field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_28" model="account.report.line">
+                                                <field name="name">28. Type 2 business and Type 4 business (8C+10C)/6C≧75%</field>
+                                                <field name="code">DED_S5_3_28</field>
+                                                <field name="hierarchy_level">5</field>
+                                                <field name="foldable" eval="False"/>
+                                                <field name="expression_ids">
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_28_balance_a" model="account.report.expression">
+                                                        <field name="label">balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_28.sub_balance_a / DED_S5_3_13.balance_a</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_28_balance_b" model="account.report.expression">
+                                                        <field name="label">balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_28.sub_balance_b / DED_S5_3_13.balance_b</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_28_sub_balance_a" model="account.report.expression">
+                                                        <field name="label">sub_balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_15.balance_a * 0.8 + (DED_S5_3_13.balance_a - DED_S5_3_15.balance_a) * 0.6)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_28.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_28_sub_balance_b" model="account.report.expression">
+                                                        <field name="label">sub_balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * (DED_S5_3_15.balance_b * 0.8 + (DED_S5_3_13.balance_b - DED_S5_3_15.balance_b) * 0.6)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_28.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_28_balance_c" model="account.report.expression">
+                                                        <field name="label">balance_c</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_28.balance_a + DED_S5_3_28.balance_b</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_28.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_28_check" model="account.report.expression">
+                                                        <field name="label">check</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_28.check_bus</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_28_check_bus" model="account.report.expression">
+                                                        <field name="label">check_bus</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">(DED_S5_3_8.balance_c + DED_S5_3_10.balance_c) * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                </field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_29" model="account.report.line">
+                                                <field name="name">29. Type 2 business and Type 5 business (8C+11C)/6C≧75%</field>
+                                                <field name="code">DED_S5_3_29</field>
+                                                <field name="hierarchy_level">5</field>
+                                                <field name="foldable" eval="False"/>
+                                                <field name="expression_ids">
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_29_balance_a" model="account.report.expression">
+                                                        <field name="label">balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_29.sub_balance_a / DED_S5_3_13.balance_a</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_29_balance_b" model="account.report.expression">
+                                                        <field name="label">balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_29.sub_balance_b / DED_S5_3_13.balance_b</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_29_sub_balance_a" model="account.report.expression">
+                                                        <field name="label">sub_balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_15.balance_a * 0.8 + (DED_S5_3_13.balance_a - DED_S5_3_15.balance_a) * 0.5)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_29.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_29_sub_balance_b" model="account.report.expression">
+                                                        <field name="label">sub_balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * (DED_S5_3_15.balance_b * 0.8 + (DED_S5_3_13.balance_b - DED_S5_3_15.balance_b) * 0.5)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_29.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_29_balance_c" model="account.report.expression">
+                                                        <field name="label">balance_c</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_29.balance_a + DED_S5_3_29.balance_b</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_29.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_29_check" model="account.report.expression">
+                                                        <field name="label">check</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_29.check_bus</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_29_check_bus" model="account.report.expression">
+                                                        <field name="label">check_bus</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">(DED_S5_3_8.balance_c + DED_S5_3_11.balance_c) * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                </field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_30" model="account.report.line">
+                                                <field name="name">30. Type 2 business and Type 6 business (8C+12C)/6C≧75%</field>
+                                                <field name="code">DED_S5_3_30</field>
+                                                <field name="hierarchy_level">5</field>
+                                                <field name="foldable" eval="False"/>
+                                                <field name="expression_ids">
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_30_balance_a" model="account.report.expression">
+                                                        <field name="label">balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_30.sub_balance_a / DED_S5_3_13.balance_a</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_30_balance_b" model="account.report.expression">
+                                                        <field name="label">balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_30.sub_balance_b / DED_S5_3_13.balance_b</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_30_sub_balance_a" model="account.report.expression">
+                                                        <field name="label">sub_balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_15.balance_a * 0.8 + (DED_S5_3_13.balance_a - DED_S5_3_15.balance_a) * 0.4)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_30.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_30_sub_balance_b" model="account.report.expression">
+                                                        <field name="label">sub_balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * (DED_S5_3_15.balance_b * 0.8 + (DED_S5_3_13.balance_b - DED_S5_3_15.balance_b) * 0.4)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_30.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_30_balance_c" model="account.report.expression">
+                                                        <field name="label">balance_c</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_30.balance_a + DED_S5_3_30.balance_b</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_30.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_30_check" model="account.report.expression">
+                                                        <field name="label">check</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_30.check_bus</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_30_check_bus" model="account.report.expression">
+                                                        <field name="label">check_bus</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">(DED_S5_3_8.balance_c + DED_S5_3_12.balance_c) * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                </field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_31" model="account.report.line">
+                                                <field name="name">31. Type 3 business and Type 4 business (9C+10C)/6C≧75</field>
+                                                <field name="code">DED_S5_3_31</field>
+                                                <field name="hierarchy_level">5</field>
+                                                <field name="foldable" eval="False"/>
+                                                <field name="expression_ids">
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_31_balance_a" model="account.report.expression">
+                                                        <field name="label">balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_31.sub_balance_a / DED_S5_3_13.balance_a</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_31_balance_b" model="account.report.expression">
+                                                        <field name="label">balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_31.sub_balance_b / DED_S5_3_13.balance_b</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_31_sub_balance_a" model="account.report.expression">
+                                                        <field name="label">sub_balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_16.balance_a * 0.7 + (DED_S5_3_13.balance_a - DED_S5_3_16.balance_a) * 0.6)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_31.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_31_sub_balance_b" model="account.report.expression">
+                                                        <field name="label">sub_balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * (DED_S5_3_16.balance_b * 0.7 + (DED_S5_3_13.balance_b - DED_S5_3_16.balance_b) * 0.6)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_31.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_31_balance_c" model="account.report.expression">
+                                                        <field name="label">balance_c</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_31.balance_a + DED_S5_3_31.balance_b</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_31.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_31_check" model="account.report.expression">
+                                                        <field name="label">check</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_31.check_bus</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_31_check_bus" model="account.report.expression">
+                                                        <field name="label">check_bus</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">(DED_S5_3_9.balance_c + DED_S5_3_10.balance_c) * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                </field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_32" model="account.report.line">
+                                                <field name="name">32. Type 3 business and Type 5 business (9C+11C)/6C≧75%</field>
+                                                <field name="code">DED_S5_3_32</field>
+                                                <field name="hierarchy_level">5</field>
+                                                <field name="foldable" eval="False"/>
+                                                <field name="expression_ids">
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_32_balance_a" model="account.report.expression">
+                                                        <field name="label">balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_32.sub_balance_a / DED_S5_3_13.balance_a</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_32_balance_b" model="account.report.expression">
+                                                        <field name="label">balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_32.sub_balance_b / DED_S5_3_13.balance_b</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_32_sub_balance_a" model="account.report.expression">
+                                                        <field name="label">sub_balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_16.balance_a * 0.7 + (DED_S5_3_13.balance_a - DED_S5_3_16.balance_a) * 0.5)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_32.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_32_sub_balance_b" model="account.report.expression">
+                                                        <field name="label">sub_balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * (DED_S5_3_16.balance_b * 0.7 + (DED_S5_3_13.balance_b - DED_S5_3_16.balance_b) * 0.5)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_32.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_32_balance_c" model="account.report.expression">
+                                                        <field name="label">balance_c</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_32.balance_a + DED_S5_3_32.balance_b</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_32.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_32_check" model="account.report.expression">
+                                                        <field name="label">check</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_32.check_bus</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_32_check_bus" model="account.report.expression">
+                                                        <field name="label">check_bus</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">(DED_S5_3_9.balance_c + DED_S5_3_11.balance_c) * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                </field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_33" model="account.report.line">
+                                                <field name="name">33. Type 3 business and Type 6 business (9C+12C)/6C≧75%</field>
+                                                <field name="code">DED_S5_3_33</field>
+                                                <field name="hierarchy_level">5</field>
+                                                <field name="foldable" eval="False"/>
+                                                <field name="expression_ids">
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_33_balance_a" model="account.report.expression">
+                                                        <field name="label">balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_33.sub_balance_a / DED_S5_3_13.balance_a</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_33_balance_b" model="account.report.expression">
+                                                        <field name="label">balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_33.sub_balance_b / DED_S5_3_13.balance_b</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_33_sub_balance_a" model="account.report.expression">
+                                                        <field name="label">sub_balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_16.balance_a * 0.7 + (DED_S5_3_13.balance_a - DED_S5_3_16.balance_a) * 0.4)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_33.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_33_sub_balance_b" model="account.report.expression">
+                                                        <field name="label">sub_balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_b * (DED_S5_3_16.balance_b * 0.7 + (DED_S5_3_13.balance_b - DED_S5_3_16.balance_b) * 0.4)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_33.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_33_balance_c" model="account.report.expression">
+                                                        <field name="label">balance_c</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_33.balance_a + DED_S5_3_33.balance_b</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_33.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_33_check" model="account.report.expression">
+                                                        <field name="label">check</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_33.check_bus</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_33_check_bus" model="account.report.expression">
+                                                        <field name="label">check_bus</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">(DED_S5_3_9.balance_c + DED_S5_3_12.balance_c) * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                </field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_34" model="account.report.line">
+                                                <field name="name">34. Type 4 business and Type 5 business  (10C + 11C)/6C≧75%</field>
+                                                <field name="code">DED_S5_3_34</field>
+                                                <field name="hierarchy_level">5</field>
+                                                <field name="foldable" eval="False"/>
+                                                <field name="expression_ids">
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_34_balance_a" model="account.report.expression">
+                                                        <field name="label">balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_34.sub_balance_a / DED_S5_3_13.balance_a</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_34_balance_b" model="account.report.expression">
+                                                        <field name="label">balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_34.sub_balance_b / DED_S5_3_13.balance_b</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_34_sub_balance_a" model="account.report.expression">
+                                                        <field name="label">sub_balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_17.balance_a * 0.6 + (DED_S5_3_13.balance_a - DED_S5_3_17.balance_a) * 0.5)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_34.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_34_sub_balance_b" model="account.report.expression">
+                                                        <field name="label">sub_balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_17.balance_a * 0.6 + (DED_S5_3_13.balance_a - DED_S5_3_17.balance_a) * 0.5)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_34.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_34_balance_c" model="account.report.expression">
+                                                        <field name="label">balance_c</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_34.balance_a + DED_S5_3_34.balance_b</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_34.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_34_check" model="account.report.expression">
+                                                        <field name="label">check</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_34.check_bus</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_34_check_bus" model="account.report.expression">
+                                                        <field name="label">check_bus</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">(DED_S5_3_10.balance_c + DED_S5_3_11.balance_c) * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                </field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_35" model="account.report.line">
+                                                <field name="name">35. Type 4 business and Type 6 business (10C + 12C)/6C≧75%</field>
+                                                <field name="code">DED_S5_3_35</field>
+                                                <field name="hierarchy_level">5</field>
+                                                <field name="foldable" eval="False"/>
+                                                <field name="expression_ids">
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_35_balance_a" model="account.report.expression">
+                                                        <field name="label">balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_35.sub_balance_a / DED_S5_3_13.balance_a</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_35_balance_b" model="account.report.expression">
+                                                        <field name="label">balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_35.sub_balance_b / DED_S5_3_13.balance_b</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_35_sub_balance_a" model="account.report.expression">
+                                                        <field name="label">sub_balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_17.balance_a * 0.6 + (DED_S5_3_13.balance_a - DED_S5_3_17.balance_a) * 0.4)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_35.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_35_sub_balance_b" model="account.report.expression">
+                                                        <field name="label">sub_balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_17.balance_a * 0.6 + (DED_S5_3_13.balance_a - DED_S5_3_17.balance_a) * 0.4)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_35.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_35_balance_c" model="account.report.expression">
+                                                        <field name="label">balance_c</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_35.balance_a + DED_S5_3_35.balance_b</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_35.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_35_check" model="account.report.expression">
+                                                        <field name="label">check</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_35.check_bus</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_35_check_bus" model="account.report.expression">
+                                                        <field name="label">check_bus</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">(DED_S5_3_10.balance_c + DED_S5_3_12.balance_c) * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                </field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_36" model="account.report.line">
+                                                <field name="name">36. Type 5 business and Type 6 business  (11C + 12C)/6C≧75%</field>
+                                                <field name="code">DED_S5_3_36</field>
+                                                <field name="hierarchy_level">5</field>
+                                                <field name="foldable" eval="False"/>
+                                                <field name="expression_ids">
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_36_balance_a" model="account.report.expression">
+                                                        <field name="label">balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_36.sub_balance_a / DED_S5_3_13.balance_a</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_36_balance_b" model="account.report.expression">
+                                                        <field name="label">balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_36.sub_balance_b / DED_S5_3_13.balance_b</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_36_sub_balance_a" model="account.report.expression">
+                                                        <field name="label">sub_balance_a</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_18.balance_a * 0.5 + (DED_S5_3_13.balance_a - DED_S5_3_18.balance_a) * 0.4)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_36.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_36_sub_balance_b" model="account.report.expression">
+                                                        <field name="label">sub_balance_b</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_4.balance_a * (DED_S5_3_18.balance_a * 0.5 + (DED_S5_3_13.balance_a - DED_S5_3_18.balance_a) * 0.4)</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_36.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_36_balance_c" model="account.report.expression">
+                                                        <field name="label">balance_c</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_36.balance_a + DED_S5_3_36.balance_b</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_36.check, JPY(74))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_36_check" model="account.report.expression">
+                                                        <field name="label">check</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">DED_S5_3_36.check_bus</field>
+                                                        <field name="subformula">if_other_expr_above(DED_S5_3_5.final_check, JPY(1))</field>
+                                                    </record>
+                                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_36_check_bus" model="account.report.expression">
+                                                        <field name="label">check_bus</field>
+                                                        <field name="engine">aggregation</field>
+                                                        <field name="formula">(DED_S5_3_11.balance_c + DED_S5_3_12.balance_c) * 100 / DED_S5_3_6.balance_c</field>
+                                                        <field name="subformula">ignore_zero_division</field>
+                                                    </record>
+                                                </field>
+                                            </record>
+                                        </field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_fdpta" model="account.report.line">
+                                <field name="name">C) Deductible purchase tax amount selected from the calculation formula category above</field>
+                                <field name="code">DED_S5_3_FDPTA</field>
+                                <field name="hierarchy_level">3</field>
+                                <field name="foldable" eval="False"/>
+                                <field name="children_ids">
+                                    <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_37" model="account.report.line">
+                                        <field name="name">37. Amount selected from selectable calculation formula categories (20 to 36)</field>
+                                        <field name="code">DED_S5_3_37</field>
+                                        <field name="hierarchy_level">5</field>
+                                        <field name="foldable" eval="False"/>
+                                        <field name="expression_ids">
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_37_balance_a" model="account.report.expression">
+                                                <field name="label">balance_a</field>
+                                                <field name="engine">external</field>
+                                                <field name="formula">sum</field>
+                                                <field name="subformula">editable;rounding=0</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_37_balance_b" model="account.report.expression">
+                                                <field name="label">balance_b</field>
+                                                <field name="engine">external</field>
+                                                <field name="formula">sum</field>
+                                                <field name="subformula">editable;rounding=0</field>
+                                            </record>
+                                            <record id="l10n_jp_schedule_5_3_deduction_ded_s5_3_37_balance_c" model="account.report.expression">
+                                                <field name="label">balance_c</field>
+                                                <field name="engine">aggregation</field>
+                                                <field name="formula">DED_S5_3_37.balance_a + DED_S5_3_37.balance_b</field>
+                                            </record>
+                                        </field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+        </field>
+    </record>
+</odoo>

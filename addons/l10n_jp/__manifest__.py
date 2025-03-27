@@ -29,6 +29,20 @@ Note:
     'auto_install': ['account'],
     'data': [
         'data/account_tax_report_data.xml',
+
+        'data/form_accumulation.xml',
+        'data/schedule_1_3_accumulation.xml',
+        'data/schedule_2_3_accumulation.xml',
+        'data/schedule_4_3_accumulation.xml',
+        'data/schedule_5_3_accumulation.xml',
+
+        'data/form_deduction.xml',
+        'data/schedule_1_3_deduction.xml',
+        'data/schedule_2_3_deduction.xml',
+        'data/schedule_4_3_deduction.xml',
+        'data/schedule_5_3_deduction.xml',
+
+        'data/jct_returns.xml',
     ],
     'demo': [
         'demo/demo_company.xml',
