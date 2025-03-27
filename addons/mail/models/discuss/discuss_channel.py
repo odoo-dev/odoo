@@ -1142,6 +1142,11 @@ class Channel(models.Model):
             :rtype: dict
         """
         partners_to = set(partners_to)
+
+        if not name:
+            partners = self.env['res.partner'].browse(partners_to)
+            name = ', '.join(partners.mapped('name')) # Set default name for group chat
+
         channel = self.create({
             'channel_member_ids': [Command.create({'partner_id': partner_id}) for partner_id in partners_to],
             'channel_type': 'group',
