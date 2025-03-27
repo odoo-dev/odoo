@@ -299,6 +299,7 @@ class MrpProduction(models.Model):
             production.mrp_production_backorder_count = len(production.procurement_group_id.mrp_production_ids)
 
     @api.depends('company_id', 'bom_id')
+    @api.depends_context('default_picking_type_id')
     def _compute_picking_type_id(self):
         domain = [
             ('code', '=', 'mrp_operation'),

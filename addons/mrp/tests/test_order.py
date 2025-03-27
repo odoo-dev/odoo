@@ -4,7 +4,7 @@
 from datetime import datetime, timedelta
 from freezegun import freeze_time
 
-from odoo import Command, fields
+from odoo import Command, fields, api
 from odoo.exceptions import UserError
 from odoo.tests import Form, users
 from odoo.tools.misc import format_date
@@ -3686,14 +3686,16 @@ class TestMrpOrder(TestMrpCommon):
         self.assertEqual(mo.name, "BWH/PT1/00002")
 
     def test_onchange_bom_ids_and_picking_type(self):
-        warehouse01 = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
-        warehouse02, warehouse03 = self.env['stock.warehouse'].sudo().create([
+        env = self.env(user=api.SUPERUSER_ID)  # FIXME: The test does not pass with test user.
+
+        warehouse01 = env['stock.warehouse'].search([('company_id', '=', env.company.id)], limit=1)
+        warehouse02, warehouse03 = env['stock.warehouse'].sudo().create([
             {'name': 'Second Warehouse', 'code': 'WH02'},
             {'name': 'Third Warehouse', 'code': 'WH03'},
         ])
 
-        finished_product = self.env['product.product'].create({'name': 'finished product'})
-        bom_wh01, bom_wh02 = self.env['mrp.bom'].create([{
+        finished_product = env['product.product'].create({'name': 'finished product'})
+        bom_wh01, bom_wh02 = env['mrp.bom'].create([{
             'product_id': finished_product.id,
             'product_tmpl_id': finished_product.product_tmpl_id.id,
             'product_uom_id': self.uom_unit.id,
@@ -3706,7 +3708,7 @@ class TestMrpOrder(TestMrpCommon):
         # Prioritize BoM of WH02
         bom_wh01.sequence = bom_wh02.sequence + 1
 
-        mo_form = Form(self.env['mrp.production'])
+        mo_form = Form(env['mrp.production'])
         mo_form.product_id = finished_product
         self.assertEqual(mo_form.bom_id, bom_wh02, 'Should select the first BoM in the list, whatever the picking type is')
         self.assertEqual(mo_form.picking_type_id, warehouse02.manu_type_id)
@@ -3726,12 +3728,12 @@ class TestMrpOrder(TestMrpCommon):
         self.assertEqual(mo_form.picking_type_id, warehouse01.manu_type_id, 'Should be adapted because of the found BoM '
                                                                             '(the selected picking type should be ignored)')
 
-        mo_form = Form(self.env['mrp.production'].with_context(default_picking_type_id=warehouse03.manu_type_id.id))
+        mo_form = Form(env['mrp.production'].with_context(default_picking_type_id=warehouse03.manu_type_id.id))
         mo_form.product_id = finished_product
         self.assertFalse(mo_form.bom_id, 'Should not find any BoM, because of the defined picking type')
         self.assertEqual(mo_form.picking_type_id, warehouse03.manu_type_id)
 
-        mo_form = Form(self.env['mrp.production'].with_context(default_picking_type_id=warehouse01.manu_type_id.id))
+        mo_form = Form(env['mrp.production'].with_context(default_picking_type_id=warehouse01.manu_type_id.id))
         mo_form.product_id = finished_product
         self.assertEqual(mo_form.bom_id, bom_wh01, 'Should select the BoM that matches the default picking type')
         self.assertEqual(mo_form.picking_type_id, warehouse01.manu_type_id, 'Should be the default one')
@@ -4915,6 +4917,8 @@ class TestMrpOrder(TestMrpCommon):
         """
         Test updating an MO from BoM when the finished product has a kit with variants as a component.
         """
+        self.env.ref('base.group_user').sudo().write({'implied_ids': [Command.link(self.env.ref('product.group_product_variant').id)]})
+
         # Create an attribute for variants
         color_attribute = self.env['product.attribute'].create({
             'name': 'Variant Color',
@@ -4982,6 +4986,8 @@ class TestMrpOrder(TestMrpCommon):
             {'product_id': paint_products[0].id, 'product_qty': 2},
             {'product_id': paint_products[1].id, 'product_qty': 1},
         ])
+
+        self.env.ref('base.group_user').sudo().write({'implied_ids': [Command.unlink(self.env.ref('product.group_product_variant').id)]})
 
     @freeze_time('2024-11-26 9:00')
     def test_workorder_planning_validity_with_workcenters(self):
