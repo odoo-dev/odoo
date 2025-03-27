@@ -6,9 +6,9 @@ from odoo.addons.hw_drivers.tools import helpers
 
 
 _logger = logging.getLogger(__name__)
-MIN_IMAGE_VERSION = 24.10
 
-CHROMIUM_ARGS = [
+BROWSER = 'chromium'
+BROWSER_ARGS = [
     '--incognito',
     '--disable-infobars',
     '--noerrdialogs',
@@ -36,13 +36,10 @@ class Browser:
         :param url: URL to open in the browser
         :param _x_screen: X screen number
         :param env: Environment variables (e.g. os.environ.copy())
-        :param kiosk: Whether the browser should be in kiosk mode
         """
         self.url = url
-        # helpers.get_version returns a string formatted as: <L|W><version> (L: Linux, W: Windows)
-        self.browser = 'chromium-browser' if float(helpers.get_version()[1:]) >= MIN_IMAGE_VERSION else 'firefox'
-        self.browser_process_name = 'chromium' if self.browser == 'chromium-browser' else self.browser
         self.state = BrowserState.NORMAL
+        self.instance = None
         self._x_screen = _x_screen
         self._set_environment(env)
 
@@ -53,7 +50,6 @@ class Browser:
         """
         self.env = env
         self.env['DISPLAY'] = f':0.{self._x_screen}'
-        self.env['XAUTHORITY'] = '/run/lightdm/pi/xauthority'
         for key in ['HOME', 'XDG_RUNTIME_DIR', 'XDG_CACHE_HOME']:
             self.env[key] = '/tmp/' + self._x_screen
 
@@ -69,33 +65,28 @@ class Browser:
         # Reopen to take new url or additional args into account
         self.close_browser()
 
-        browser_args = list(CHROMIUM_ARGS) if self.browser == 'chromium-browser' else []
+        browser_args = list(BROWSER_ARGS)
 
         if state == BrowserState.KIOSK:
             browser_args.append("--kiosk")
         elif state == BrowserState.FULLSCREEN:
             browser_args.append("--start-fullscreen")
 
-        subprocess.Popen(
+        self.instance = subprocess.Popen(
             [
-                self.browser,
+                BROWSER,
                 self.url,
                 *browser_args,
             ],
             env=self.env,
         )
 
-        if self.browser == 'firefox' and state == BrowserState.FULLSCREEN:
-            # Firefox does not support fullscreen via command line argument, so we use a keypress
-            self.xdotool_keystroke('F11')
-
         helpers.save_browser_state(url=self.url)
 
     def close_browser(self):
-        """close the browser"""
-        # Kill browser instance (can't `instance.pkill()` as we can't keep the instance after Odoo service restarts)
-        # We need to terminate it because Odoo will create a new instance each time it is restarted.
-        subprocess.run(['pkill', self.browser_process_name], check=False)
+        if self.instance:
+            self.instance.terminate()
+            self.instance = None
 
     def xdotool_keystroke(self, keystroke):
         """
@@ -106,21 +97,8 @@ class Browser:
             'xdotool', 'search',
             '--sync', '--onlyvisible',
             '--screen', self._x_screen,
-            '--class', self.browser_process_name,
+            '--class', BROWSER,
             'key', keystroke,
-        ], check=False)
-
-    def xdotool_type(self, text):
-        """
-        Type text using xdotool
-        :param text: Text to type
-        """
-        subprocess.run([
-            'xdotool', 'search',
-            '--sync', '--onlyvisible',
-            '--screen', self._x_screen,
-            '--class', self.browser_process_name,
-            'type', text,
         ], check=False)
 
     def refresh(self):
@@ -128,6 +106,5 @@ class Browser:
         self.xdotool_keystroke('ctrl+r')
 
     def disable_kiosk_mode(self):
-        """Removes arguments to chromium-browser cli to open it without kiosk mode"""
         if self.state == BrowserState.KIOSK:
             self.open_browser(state=BrowserState.FULLSCREEN)
