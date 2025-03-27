@@ -280,7 +280,6 @@ class AccountTestInvoicingCommon(ProductCommon):
                     'group_lunch_manager', # lunch
                     'group_mass_mailing_user', # mass_mailing
                     'group_mrp_manager', # mrp
-                    'group_pos_manager', # point_of_sale
                     'group_product_manager', # product
                     'group_project_manager', # project
                     'group_purchase_manager', # purchase
