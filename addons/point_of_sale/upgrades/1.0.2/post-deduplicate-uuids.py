@@ -27,7 +27,7 @@ def migrate(cr, version):
             """
         )
 
-        all_ids = [r[0] for r in cr.fetchall()]
+        all_ids = [r[0] for r in cr.fetchmany(100000)]
         for ids in cr.split_for_in_conditions(all_ids):
             cr.execute(
                 f"UPDATE {table} SET uuid = (%s::json)->>(id::text) WHERE id IN %s",
