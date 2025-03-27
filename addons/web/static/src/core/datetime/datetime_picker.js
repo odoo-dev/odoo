@@ -478,9 +478,9 @@ export class DateTimePicker extends Component {
      *      > range: current start date or current end date.
      * @param {DateItem} item
      */
-    getActiveRangeInfo({ isOutOfRange, range }) {
+    getActiveRangeInfo({ range }) {
         const result = {
-            isSelected: !isOutOfRange && isInRange(this.selectedRange, range),
+            isSelected: isInRange(this.selectedRange, range),
             isSelectStart: false,
             isSelectEnd: false,
             isHighlighted: isInRange(this.state.hoveredDate, range),

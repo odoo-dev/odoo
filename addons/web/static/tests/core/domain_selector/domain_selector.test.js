@@ -170,7 +170,7 @@ test("building a domain with a datetime", async () => {
 
     // Change the date in the datepicker
     await contains(".o_datetime_input").click();
-    await contains(getPickerCell("26")).click();
+    await contains(getPickerCell("26")[1]).click();
     await press("enter");
 
     // The input field should display the date and time in the user's timezone

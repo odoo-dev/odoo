@@ -59,7 +59,6 @@ export function assertDateTimePicker(expectedParams) {
 
     let selectedCells = 0;
     let invalidCells = 0;
-    let outOfRangeCells = 0;
     let todayCells = 0;
     for (let i = 0; i < date.length; i++) {
         const { cells, daysOfWeek, weekNumbers } = date[i];
@@ -110,7 +109,6 @@ export function assertDateTimePicker(expectedParams) {
                 if (value === 0) {
                     // Out of range
                     value = "";
-                    outOfRangeCells++;
                     expect(cellEl).toHaveClass("o_out_of_range");
                 } else if (value < 0) {
                     // Invalid
@@ -129,7 +127,6 @@ export function assertDateTimePicker(expectedParams) {
 
     expect(".o_selected").toHaveCount(selectedCells);
     expect(".o_datetime_button[disabled]").toHaveCount(invalidCells);
-    expect(".o_out_of_range").toHaveCount(outOfRangeCells);
     expect(".o_today").toHaveCount(todayCells);
 }
 
