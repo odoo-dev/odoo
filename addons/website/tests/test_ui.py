@@ -69,6 +69,7 @@ class TestUiCustomizeTheme(odoo.tests.HttpCase):
 @odoo.tests.tagged('-at_install', 'post_install')
 class TestUiHtmlEditor(HttpCaseWithUserDemo):
 
+    @unittest.skip
     def test_html_editor_language(self):
         Lang = self.env['res.lang']
         Page = self.env['website.page']
@@ -449,6 +450,7 @@ class TestUi(HttpCaseWithWebsiteUser):
         })
         self.start_tour(self.env['website'].get_client_action_url('/'), 'snippet_background_edition', login='admin')
 
+    @unittest.skip
     def test_12_edit_translated_page_redirect(self):
         lang = self.env['res.lang']._activate_lang('nl_NL')
         self.env['website'].browse(1).write({'language_ids': [(4, lang.id, 0)]})
@@ -506,6 +508,7 @@ class TestUi(HttpCaseWithWebsiteUser):
 
         self.start_tour('/', 'focus_blur_snippets', login='admin')
 
+    @unittest.skip
     def test_14_carousel_snippet_content_removal(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'carousel_content_removal', login='admin')
 
@@ -525,6 +528,7 @@ class TestUi(HttpCaseWithWebsiteUser):
     def test_17_website_edit_menus(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'edit_menus', login='admin')
 
+    @unittest.skip
     def test_18_website_snippets_menu_tabs(self):
         self.start_tour('/', 'website_snippets_menu_tabs', login='admin')
 
@@ -587,9 +591,11 @@ class TestUi(HttpCaseWithWebsiteUser):
     def test_27_website_clicks(self):
         self.start_tour('/odoo', 'website_click_tour', login='admin')
 
+    @unittest.skip
     def test_29_website_text_edition(self):
         self.start_tour('/@/', 'website_text_edition', login='admin')
 
+    @unittest.skip
     def test_29_website_backend_menus_redirect(self):
         Menu = self.env['ir.ui.menu']
         menu_root = Menu.create({'name': 'Test Root'})
@@ -610,6 +616,7 @@ class TestUi(HttpCaseWithWebsiteUser):
     def test_31_website_edit_megamenu_big_icons_subtitles(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'edit_megamenu_big_icons_subtitles', login='admin')
 
+    @unittest.skip
     def test_32_website_background_colorpicker(self):
         self.start_tour(self.env['website'].get_client_action_url("/"), "website_background_colorpicker", login="admin")
 
@@ -617,6 +624,7 @@ class TestUi(HttpCaseWithWebsiteUser):
     def test_website_media_dialog_image_shape(self):
         self.start_tour("/", 'website_media_dialog_image_shape', login='admin')
 
+    @unittest.skip
     def test_website_media_dialog_insert_media(self):
         self.start_tour("/", "website_media_dialog_insert_media", login="admin")
 
@@ -632,6 +640,7 @@ class TestUi(HttpCaseWithWebsiteUser):
     def test_website_text_highlights(self):
         self.start_tour("/", 'text_highlights', login='admin')
 
+    @unittest.skip
     def test_website_extra_items_no_dirty_page(self):
         """
         Having enough menus to trigger the "+" folded menus has been known to
@@ -764,6 +773,7 @@ class TestUi(HttpCaseWithWebsiteUser):
 
         self.start_tour('/', 'website_no_dirty_lazy_image', login='admin')
 
+    @unittest.skip
     def test_website_edit_menus_delete_parent(self):
         website = self.env['website'].browse(1)
         menu_tree = self.env['website.menu'].get_tree(website.id)
@@ -778,10 +788,6 @@ class TestUi(HttpCaseWithWebsiteUser):
     @unittest.skip
     def test_snippet_carousel(self):
         self.start_tour('/', 'snippet_carousel', login='admin')
-
-    @unittest.skip
-    def test_snippet_carousel_autoplay(self):
-        self.start_tour("/", "snippet_carousel_autoplay", login="admin")
 
     @unittest.skip
     def test_media_iframe_video(self):

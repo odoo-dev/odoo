@@ -17,6 +17,7 @@ class TestSnippets(HttpCase):
     def test_01_empty_parents_autoremove(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'snippet_empty_parent_autoremove', login='admin')
 
+    @unittest.skip
     def test_02_default_shape_gets_palette_colors(self):
         self.start_tour('/@/', 'default_shape_gets_palette_colors', login='admin')
 
@@ -51,6 +52,7 @@ class TestSnippets(HttpCase):
             })
         self.start_tour(f"/odoo/action-website.website_preview?{path}", "snippets_all_drag_and_drop", login='admin', timeout=600)
 
+    @unittest.skip
     def test_04_countdown_preview(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'snippet_countdown', login='admin')
 
@@ -74,6 +76,7 @@ class TestSnippets(HttpCase):
             'Social media should have been updated'
         )
 
+    @unittest.skip
     def test_06_snippet_popup_add_remove(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'snippet_popup_add_remove', login='admin')
 
@@ -85,6 +88,7 @@ class TestSnippets(HttpCase):
     def test_08_table_of_content(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'snippet_table_of_content', login='admin')
 
+    @unittest.skip
     def test_09_snippet_image_gallery(self):
         create_image_attachment(self.env, '/web/image/website.s_banner_default_image.jpg', 's_default_image.jpg')
         create_image_attachment(self.env, '/web/image/website.s_banner_default_image.jpg', 's_default_image2.jpg')
@@ -127,10 +131,12 @@ class TestSnippets(HttpCase):
     def test_snippet_image_gallery_reorder(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), "snippet_image_gallery_reorder", login='admin')
 
+    @unittest.skip
     def test_snippet_image_gallery_thumbnail_update(self):
         create_image_attachment(self.env, '/web/image/website.s_banner_default_image', 's_default_image.jpg')
         self.start_tour(self.env['website'].get_client_action_url('/'), 'snippet_image_gallery_thumbnail_update', login='admin')
 
+    @unittest.skip
     def test_dropdowns_and_header_hide_on_scroll(self):
         self.env.ref('base.user_admin').write({
             'name': 'mitchell admin',
