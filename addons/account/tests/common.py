@@ -279,13 +279,10 @@ class AccountTestInvoicingCommon(ProductCommon):
                     'im_livechat_group_manager', # im_livechat
                     'group_lunch_manager', # lunch
                     'group_mass_mailing_user', # mass_mailing
-                    'group_mrp_manager', # mrp
                     'group_pos_manager', # point_of_sale
                     'group_product_manager', # product
                     'group_project_manager', # project
-                    'group_purchase_manager', # purchase
                     'group_sale_manager', # sales_team
-                    'group_stock_manager', # stock
                     'group_survey_user', # survey
                     'group_website_designer', # website
                     'group_website_slides_manager', # website_slides
@@ -300,7 +297,6 @@ class AccountTestInvoicingCommon(ProductCommon):
                     'group_hr_recruitment_manager', # hr_referral -> duplicate from hr_recruitment /!\
                     'group_fsm_manager', # industry_fsm
                     'group_marketing_automation_user', # marketing_automation
-                    'group_plm_manager', # mrp_plm
                     'group_planning_manager', # planning
                     'group_sign_manager', # sign
                     'group_social_manager', # social
