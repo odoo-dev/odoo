@@ -25,6 +25,7 @@ export class CarouselOptionPlugin extends Plugin {
         on_will_clone_handlers: this.onWillClone.bind(this),
         on_add_element_handlers: this.onAddElement.bind(this),
         normalize_handlers: this.normalize.bind(this),
+        on_reorder_items_handlers: this.reorderCarouselItems.bind(this),
     };
 
     getActions() {
@@ -210,6 +211,63 @@ export class CarouselOptionPlugin extends Plugin {
                 activeIndicatorEl.classList.add("active");
                 activeIndicatorEl.setAttribute("aria-current", "true");
             }
+        }
+    }
+
+    reorderCarouselItems({ elementToReorder, position, optionName }) {
+        if (optionName === "Carousel") {
+            const editingCarouselElement = elementToReorder.closest(".s_carousel");
+            const itemsEls = [...editingCarouselElement.querySelectorAll(".carousel-item")];
+
+            // reorder carousel items
+            const oldPosition = itemsEls.indexOf(elementToReorder);
+            if (oldPosition === 0 && position === "prev") {
+                position = "last";
+            } else if (oldPosition === itemsEls.length - 1 && position === "next") {
+                position = "first";
+            }
+            itemsEls.splice(oldPosition, 1);
+            switch (position) {
+                case "first":
+                    itemsEls.unshift(elementToReorder);
+                    break;
+                case "prev":
+                    itemsEls.splice(Math.max(oldPosition - 1, 0), 0, elementToReorder);
+                    break;
+                case "next":
+                    itemsEls.splice(oldPosition + 1, 0, elementToReorder);
+                    break;
+                case "last":
+                    itemsEls.push(elementToReorder);
+                    break;
+            }
+
+            // replace the carousel-inner element by one with reordered carousel items
+            const carouselInnerEl = editingCarouselElement.querySelector(".carousel-inner");
+            const newCarouselInnerEl = document.createElement("div");
+            newCarouselInnerEl.classList.add("carousel-inner");
+            newCarouselInnerEl.append(...itemsEls);
+            carouselInnerEl.replaceWith(newCarouselInnerEl);
+
+            // slide to the reordered target carousel item and update indicators
+            const newItemPosition = itemsEls.indexOf(elementToReorder);
+            editingCarouselElement.classList.remove("slide");
+            const carouselInstance = window.Carousel.getOrCreateInstance(editingCarouselElement, {
+                ride: false,
+                pause: true,
+            });
+            carouselInstance.to(newItemPosition);
+            const indicatorEls = editingCarouselElement.querySelectorAll(
+                ".carousel-indicators > *"
+            );
+            indicatorEls.forEach((indicatorEl, i) => {
+                indicatorEl.classList.toggle("active", i === newItemPosition);
+            });
+            const activeImageEl = editingCarouselElement.querySelector(".carousel-item.active img");
+            this.dependencies["builder-options"].updateContainers(activeImageEl);
+            editingCarouselElement.classList.add("slide");
+            // Prevent the carousel from automatically sliding afterwards.
+            carouselInstance["pause"]();
         }
     }
 }
