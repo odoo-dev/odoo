@@ -34,6 +34,7 @@ export class DomainField extends Component {
     };
 
     setup() {
+        this.fieldService = useService("field");
         this.rpc = useService("rpc");
         this.orm = useService("orm");
         this.getDomainTreeDescription = useGetDomainTreeDescription();
@@ -163,6 +164,46 @@ export class DomainField extends Component {
         this.state.facets = await Promise.all(promises);
     }
 
+    async validateDomainField (domain, resModel) {
+        // Recursive function to validate domain fields across related models
+        const validateField = async (fieldPath, modelName) => {
+            if (fieldPath.length === 0) {
+                return true;
+            }
+
+            let currentFields = await this.fieldService.loadFields(modelName);
+            let fieldName = fieldPath[0];
+
+            if (!currentFields[fieldName]) {
+                return false;
+            }
+
+            const fieldType = currentFields[fieldName].type;
+
+            if (fieldType === "many2one" || fieldType === "one2many" || fieldType === "many2many") {
+                let relatedModel = currentFields[fieldName].relation;
+                return await validateField(fieldPath.slice(1), relatedModel);
+            } else if (fieldPath.length > 1) {
+                // If there are more fields but not traversable
+                return false;
+            }
+            return true;
+        }
+
+        for (const condition of domain) {
+            if (typeof condition === "string") {
+                // Skip logical operators ('|', '&', '!')
+                continue;
+            }
+            const fieldPath = condition[0].split(".");
+            const isConditionValid = await validateField(fieldPath, resModel);
+            if (!isConditionValid) {
+                return false;
+            }
+        }
+        return true;
+    };
+
     async checkProps(props = this.props) {
         const resModel = this.getResModel(props);
         if (!resModel) {
@@ -175,8 +216,17 @@ export class DomainField extends Component {
             throw new Error(`Invalid model: ${resModel}`);
         }
 
+        let isDomainInValid = true;
         const domain = this.getEvaluatedDomain(props);
-        if (domain.isInvalid) {
+
+        if (domain.isInvalid != true) {
+            const isValid = await this.validateDomainField(domain, resModel);
+            isDomainInValid = !isValid;
+        } else {
+            isDomainInValid = domain.isInvalid;
+        }
+
+        if (isDomainInValid) {
             this.updateState({ isValid: false, recordCount: 0 });
             return;
         }
