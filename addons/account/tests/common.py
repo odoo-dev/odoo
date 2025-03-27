@@ -268,16 +268,7 @@ class AccountTestInvoicingCommon(ProductCommon):
                     # This is a consequence of moving groups from data to demo data: https://github.com/odoo/odoo/pull/198078
                     'group_account_manager', # account
                     'group_event_manager', # event
-                    'fleet_group_manager', # fleet
-                    'group_hr_manager', # hr
-                    'group_hr_attendance_manager', # hr_attendance
-                    'group_hr_contract_manager', # hr_contract
-                    'group_hr_expense_manager', # hr_expense
-                    'group_hr_holidays_manager', # hr_holidays
-                    'group_hr_recruitment_manager', # hr_recruitment
-                    'group_timesheet_manager', # hr_timesheet
                     'im_livechat_group_manager', # im_livechat
-                    'group_lunch_manager', # lunch
                     'group_mass_mailing_user', # mass_mailing
                     'group_mrp_manager', # mrp
                     'group_pos_manager', # point_of_sale
@@ -291,13 +282,8 @@ class AccountTestInvoicingCommon(ProductCommon):
                     'group_website_slides_manager', # website_slides
                     # enterprise groups
                     'group_appointment_manager', # appointment
-                    'group_approval_manager', # approval
                     'group_documents_manager', # documents
-                    'frontdesk_group_administrator', # frontdesk
                     'group_helpdesk_manager', # helpdesk
-                    'group_hr_appraisal_manager', # hr_appraisal
-                    'group_hr_payroll_manager', # hr_payroll
-                    'group_hr_recruitment_manager', # hr_referral -> duplicate from hr_recruitment /!\
                     'group_fsm_manager', # industry_fsm
                     'group_marketing_automation_user', # marketing_automation
                     'group_plm_manager', # mrp_plm
