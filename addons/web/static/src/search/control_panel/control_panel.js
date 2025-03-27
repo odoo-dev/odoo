@@ -201,32 +201,6 @@ export class ControlPanel extends Component {
             this.initialScrollTop = this.getScrollingElement().scrollTop;
         });
 
-        this.mainButtons = useRef("mainButtons");
-
-        useEffect(() => {
-            // on small screen, clean-up the dropdown elements
-            const dropdownButtons = this.mainButtons.el.querySelectorAll(
-                ".o_control_panel_collapsed_create.dropdown-menu button"
-            );
-            if (!dropdownButtons.length) {
-                this.mainButtons.el
-                    .querySelectorAll(
-                        ".o_control_panel_collapsed_create.dropdown-menu, .o_control_panel_collapsed_create.dropdown-toggle"
-                    )
-                    .forEach((el) => el.classList.add("d-none"));
-                this.mainButtons.el
-                    .querySelectorAll(".o_control_panel_collapsed_create.btn-group")
-                    .forEach((el) => el.classList.remove("btn-group"));
-                return;
-            }
-            for (const button of dropdownButtons) {
-                for (const cl of Array.from(button.classList)) {
-                    button.classList.toggle(cl, !cl.startsWith("btn-"));
-                }
-                button.classList.add("dropdown-item", "btn", "btn-link");
-            }
-        });
-
         useSortable({
             enable: true,
             ref: this.root,
