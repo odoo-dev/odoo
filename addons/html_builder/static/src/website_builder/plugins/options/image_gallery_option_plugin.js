@@ -85,7 +85,7 @@ class ImageGalleryOption extends Plugin {
     }
 
     setup() {
-        const slideshowCarousels = this.document.querySelectorAll(".s_image_gallery .carousel");
+        const slideshowCarousels = this.editable.querySelectorAll(".s_image_gallery .carousel");
         this.addCarouselListener(slideshowCarousels);
     }
 
