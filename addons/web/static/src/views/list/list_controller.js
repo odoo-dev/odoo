@@ -265,14 +265,6 @@ export class ListController extends Component {
         return {};
     }
 
-    get headerButtons() {
-        return this.props.archInfo.headerButtons;
-    }
-
-    get headerAlwaysButtons() {
-        return this.props.archInfo.headerButtons.filter((button) => button.display === "always");
-    }
-
     getExportableFields() {
         return unique(
             this.props.archInfo.columns
@@ -363,6 +355,28 @@ export class ListController extends Component {
 
     get activeActions() {
         return this.props.archInfo.activeActions;
+    }
+
+    multiRecordViewButtonProps(button) {
+        return {
+            list: this.model.root,
+            className: button.className,
+            clickParams: button.clickParams,
+            defaultRank: "btn-secondary",
+            domain: this.props.domain,
+            icon: button.icon,
+            string: button.string,
+            title: button.title,
+            attrs: button.attrs,
+        };
+    }
+
+    get headerAlwaysButtons() {
+        return this.props.archInfo.headerButtons.filter((button) => button.display === "always");
+    }
+
+    get headerOtherButtons() {
+        return this.props.archInfo.headerButtons.filter((button) => button.display !== "always");
     }
 
     get canCreate() {
