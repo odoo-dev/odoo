@@ -216,15 +216,16 @@ export class FileViewer extends Component {
             "transform: " +
             `scale3d(${this.state.scale}, ${this.state.scale}, 1) ` +
             `rotate(${this.state.angle}deg);`;
-
+    
         if (this.state.angle % 180 !== 0) {
             style += `max-height: ${window.innerWidth}px; max-width: ${window.innerHeight}px;`;
         } else {
             style += "max-height: 100%; max-width: 100%;";
         }
+        style += `background: repeating-conic-gradient(#ccc 0deg 90deg, #fff 90deg 180deg) 50% / 20px 20px;`;
         return style;
     }
-
+    
     onClickPrint() {
         const printWindow = window.open("about:blank", "_new");
         printWindow.document.open();
