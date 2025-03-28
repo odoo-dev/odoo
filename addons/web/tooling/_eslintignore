@@ -121,6 +121,10 @@ web_map/static/tests/legacy/**/*
 !documents_spreadsheet
 !documents_spreadsheet/**/*
 
+# Whitelist documents_document
+!documents
+!documents/**/*
+
 # Whitelist spreadsheet
 !addons/spreadsheet
 !addons/spreadsheet/**/*
