@@ -14,7 +14,6 @@ export class TimeOffCalendarController extends CalendarController {
         ...CalendarController.components,
         CalendarSidePanel: TimeOffCalendarSidePanel,
     };
-    static template = "hr_holidays.CalendarController";
     setup() {
         super.setup();
         useSubEnv({
@@ -101,7 +100,8 @@ export class TimeOffCalendarController extends CalendarController {
                     title: _t("Time Off Request"),
                     viewId: this.model.formViewId,
                     onRecordSaved: onDialogClosed,
-                    onRecordDeleted: (record) => this._deleteRecord(record.resId, record.data.can_cancel),
+                    onRecordDeleted: (record) =>
+                        this._deleteRecord(record.resId, record.data.can_cancel),
                     onLeaveCancelled: onDialogClosed,
                     size: "md",
                 },

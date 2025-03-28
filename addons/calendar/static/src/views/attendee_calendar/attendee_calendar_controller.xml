@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
     <t t-name="calendar.AttendeeCalendarController" t-inherit="web.CalendarController" t-inherit-mode="primary">
-        <xpath expr="//Layout" position="inside">
-            <t t-set-slot="control-panel-create-button">
-                <button class="btn btn-primary o-calendar-button-new" t-on-click="onClickAddButton">New</button>
-            </t>
-        </xpath>
         <!-- Add header div to be filled with synchronization buttons in synchronization modules. -->
         <xpath expr="//Layout//div[hasclass('o_calendar_container')]//h5[hasclass('d-inline-flex')]" position="after">
             <div id="header_synchronization_settings" class="mx-2 ms-lg-auto">
@@ -45,6 +40,12 @@
         </xpath>
         <xpath expr="//t[@t-elif]//span[hasclass('o_current_week')]" position="attributes">
             <attribute name="t-if" add="!env.isSmall" separator="and"/>
+        </xpath>
+    </t>
+
+    <t t-name="calendar.AttendeeCalendarController.controlButtons" t-inherit="web.CalendarController.controlButtons" t-inherit-mode="primary">
+        <xpath expr="." position="inside">
+            <button class="btn btn-primary o-calendar-button-new" t-on-click="onClickAddButton">New</button>
         </xpath>
     </t>
 </templates>
