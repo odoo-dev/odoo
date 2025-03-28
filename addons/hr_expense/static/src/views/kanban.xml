@@ -18,12 +18,12 @@
     </t>
 
     <t t-name="hr_expense.KanbanButtons" t-inherit="web.KanbanView.Buttons" t-inherit-mode="primary">
-        <xpath expr="//div[hasclass('o_cp_buttons')]" position="attributes">
+        <xpath expr="." position="attributes">
             <!-- Ensure that dropdown items show vertically and not side-by-side -->
             <attribute name="class" remove="d-flex" separator=" "/>
             <attribute name="class" add="d-block d-xl-flex" separator=" "/>
         </xpath>
-        <xpath expr="//div[hasclass('o_cp_buttons')]" position="inside">
+        <xpath expr="." position="inside">
             <input type="file" name="ufile" class="d-none" t-ref="fileInput" multiple="1" accept="*" t-on-change="onChangeFileInput" />
             <t t-if="canCreate and props.showButtons and env.isSmall">
                 <button type="button" class="btn btn-primary o-kanban-button-new" data-hotkey="c" t-on-click="() => this.createRecord()" data-bounce-button="">

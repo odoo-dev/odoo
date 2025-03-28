@@ -403,7 +403,7 @@ registry.category("web_tour.tours").add("test_form_view_resequence_actions", {
         },
         {
             trigger:
-                ".o_form_renderer .o_field_widget[name='action_server_ids'] .o_kanban_view .o_cp_buttons button",
+                ".o_form_renderer .o_field_widget[name='action_server_ids'] .o_kanban_view .o_x2m_control_panel button",
             run: "click",
         },
         {

@@ -5,7 +5,7 @@
         t-inherit-mode="primary"
         t-inherit="web.X2ManyField"
     >
-        <xpath expr="//div[hasclass('o_cp_buttons')]/*" position="before">
+        <xpath expr="./*" position="before">
             <UploadButton
                 formData="formData"
                 allowedMIMETypes="allowedMIMETypes"

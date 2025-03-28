@@ -5,9 +5,7 @@
         <div class="o_action">
             <Layout display="display">
                 <t t-set-slot="layout-buttons">
-                    <div class="o_cp_buttons" role="toolbar" aria-label="Control panel buttons" t-ref="buttons">
-                        <button type="button" class="btn btn-primary" t-on-click="() => this.onClickPrint()">Print</button>
-                    </div>
+                    <button type="button" class="btn btn-primary" t-on-click="() => this.onClickPrint()">Print</button>
                 </t>
 
                 <div class="container-fluid o_stock_reports_page o_stock_reports_no_print">

@@ -2907,7 +2907,7 @@ test("one2many in kanban: add a line custom control create editable", async () =
         resId: 1,
     });
 
-    const createButtons = queryAll(".o_x2m_control_panel .o_cp_buttons button");
+    const createButtons = queryAll(".o_x2m_control_panel .o_control_panel_main_buttons button");
     expect(queryAllTexts(createButtons)).toEqual(["Add food", "Add pizza", "Add pasta"]);
 
     await contains(createButtons[0]).click();
@@ -2959,12 +2959,12 @@ test("one2many in kanban: add a line custom control create editable (2)", async 
         resId: 2,
     });
 
-    expect(queryAllTexts(".o_x2m_control_panel .o_cp_buttons button")).toEqual([
+    expect(queryAllTexts(".o_x2m_control_panel .o_control_panel_main_buttons button")).toEqual([
         "Create",
         "Action Button",
     ]);
 
-    await contains(".o_x2m_control_panel .o_cp_buttons button:eq(1)").click();
+    await contains(".o_x2m_control_panel .o_control_panel_main_buttons button:eq(1)").click();
     expect.verifySteps(["do_something"]);
 });
 
@@ -9003,10 +9003,10 @@ test("one2many kanban with custom control with invisible modifier", async () => 
             </form>`,
     });
 
-    expect(".o_cp_buttons button:contains(A)").toHaveCount(0);
-    expect(".o_cp_buttons button:contains(B)").toHaveCount(1);
-    expect(".o_cp_buttons button:contains(C)").toHaveCount(0);
-    expect(".o_cp_buttons button:contains(D)").toHaveCount(1);
+    expect(".o_control_panel_main_buttons button:contains(A)").toHaveCount(0);
+    expect(".o_control_panel_main_buttons button:contains(B)").toHaveCount(1);
+    expect(".o_control_panel_main_buttons button:contains(C)").toHaveCount(0);
+    expect(".o_control_panel_main_buttons button:contains(D)").toHaveCount(1);
 });
 
 test("one2many kanban with custom control with invisible modifier using context", async () => {
@@ -9036,10 +9036,10 @@ test("one2many kanban with custom control with invisible modifier using context"
         context: { someKey: true },
     });
 
-    expect(".o_cp_buttons button:contains(A)").toHaveCount(0);
-    expect(".o_cp_buttons button:contains(B)").toHaveCount(1);
-    expect(".o_cp_buttons button:contains(C)").toHaveCount(0);
-    expect(".o_cp_buttons button:contains(D)").toHaveCount(1);
+    expect(".o_control_panel_main_buttons button:contains(A)").toHaveCount(0);
+    expect(".o_control_panel_main_buttons button:contains(B)").toHaveCount(1);
+    expect(".o_control_panel_main_buttons button:contains(C)").toHaveCount(0);
+    expect(".o_control_panel_main_buttons button:contains(D)").toHaveCount(1);
 });
 
 test("one2many list with delete control with invisible modifier", async () => {

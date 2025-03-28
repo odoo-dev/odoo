@@ -686,7 +686,7 @@ test(`export feature in list for users not in base.group_allow_export`, async ()
     });
     expect(`div.o_control_panel .o_cp_action_menus`).toHaveCount(0);
     expect(`.o_data_row`).toHaveCount(4);
-    expect(`div.o_control_panel .o_cp_buttons .o_list_export_xlsx`).toHaveCount(0);
+    expect(`div.o_control_panel .o_control_panel_main_buttons .o_list_export_xlsx`).toHaveCount(0);
 
     await clickRecordSelector();
     expect(`div.o_control_panel .o_cp_action_menus`).toHaveCount(1);
