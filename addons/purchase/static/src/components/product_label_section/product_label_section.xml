@@ -6,11 +6,11 @@
             <attribute name="t-att-class">{'text-info': isPrioritized()}</attribute>
         </xpath>
     </t>
-
+<!-- 
     <t t-name="purchase.PurchaseProductLabelSectionFieldAutocomplete" t-inherit="account.ProductLabelSectionAndNoteFieldAutocomplete">
         <xpath expr="//AutoComplete" position="attributes">
             <attribute name="resModel">props.resModel</attribute>
         </xpath>
-    </t>
+    </t> -->
 
 </templates>
