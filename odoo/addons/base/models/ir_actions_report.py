@@ -8,6 +8,7 @@ import re
 import subprocess
 import tempfile
 import unittest
+import base64
 from ast import literal_eval
 from collections import OrderedDict
 from collections.abc import Iterable
@@ -186,6 +187,8 @@ class IrActionsReport(models.Model):
     attachment = fields.Char(string='Save as Attachment Prefix',
                              help='This is the filename of the attachment used to store the printing result. Keep empty to not save the printed reports. You can use a python expression with the object and time variables.')
     domain = fields.Char(string='Filter domain', help='If set, the action will only appear on records that matches the domain.')
+    is_printer_linked = fields.Boolean(string="Enable Printer Linkage")  
+    linked_printer_ids = fields.One2many("report.printer", "report_id", string="Linked Printers")  
 
     @api.depends('model')
     def _compute_model_id(self):
@@ -212,7 +215,7 @@ class IrActionsReport(models.Model):
 
     def _get_readable_fields(self):
         return super()._get_readable_fields() | {
-            "report_name", "report_type", "target",
+            "id", "report_name", "report_type", "target", "is_printer_linked",
             # these two are not real fields of ir.actions.report but are
             # expected in the route /report/<converter>/<reportname> and must
             # not be removed by clean_action
@@ -1150,6 +1153,7 @@ class IrActionsReport(models.Model):
             context = dict(self.env.context, active_ids=active_ids)
 
         report_action = {
+            'id': self.id,
             'context': context,
             'data': data,
             'type': 'ir.actions.report',
@@ -1157,6 +1161,7 @@ class IrActionsReport(models.Model):
             'report_type': self.report_type,
             'report_file': self.report_file,
             'name': self.name,
+            'is_printer_linked': self.is_printer_linked,
         }
 
         discard_logo_check = self.env.context.get('discard_logo_check')
@@ -1186,3 +1191,21 @@ class IrActionsReport(models.Model):
             if records.filtered_domain(literal_eval(action.domain)):
                 valid_action_report_ids.append(action.id)
         return valid_action_report_ids
+
+    def render_and_send_email(self, active_record_ids, data=None):
+        datas = self._render(self.report_name, active_record_ids, data)
+        data_bytes = datas[0]
+        data_base64 = base64.b64encode(data_bytes)
+
+        attachment = self.env['ir.attachment'].create({
+                'name': self.name + '.pdf',
+                'type': 'binary',
+                'datas': data_base64,
+                'mimetype': 'application/pdf'
+            })
+
+        mail_template_id = 'mail.mail_template_print_attachment'
+        mail_template = self.env.ref(mail_template_id, raise_if_not_found=False)
+        if not mail_template:
+            raise UserError(_("The mail template with xmlid %s not found.", mail_template_id))
+        mail_template.send_mail_batch(self.linked_printer_ids.ids, force_send=True, email_values={'attachment_ids': attachment.ids})

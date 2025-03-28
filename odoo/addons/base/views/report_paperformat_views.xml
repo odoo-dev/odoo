@@ -47,6 +47,19 @@
             <field name="res_model">ir.actions.report</field>
             <field name="view_mode">list,form</field>
         </record>
+        <record id='reports_printer_action' model='ir.actions.act_window'>
+            <field name="name">Printers</field>
+            <field name="res_model">report.printer</field>
+            <field name="view_mode">list,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Set up a printer to print report data effortlessly.
+                </p>
+                <p>
+                    Configure a printer here to print reports via IP or Email, ensuring smooth and efficient printing.
+                </p>
+            </field>
+        </record>
         <menuitem
             id="reporting_menuitem"
             name="Reporting"
@@ -70,5 +83,13 @@
             sequence="3"
             groups="base.group_no_one"
             />
+        <menuitem
+            id="reports_printer"
+            name="Printers"
+            parent="reporting_menuitem"
+            action="reports_printer_action"
+            sequence="4"
+            groups="base.group_no_one"
+        />
     </data>
 </odoo>

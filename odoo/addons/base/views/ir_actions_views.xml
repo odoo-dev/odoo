@@ -100,8 +100,14 @@
                             </page>
                             <page name='advanced' string="Advanced Properties">
                                 <group>
-                                    <field name="attachment_use"/>
-                                    <field name="attachment"/>
+                                    <group>
+                                        <field name="attachment_use"/>
+                                        <field name="attachment"/>
+                                    </group>
+                                    <group name="printers">
+                                        <field name="is_printer_linked" widget="boolean_toggle"/>
+                                        <field name="linked_printer_ids" widget="many2many_tags" invisible="not is_printer_linked"/>
+                                    </group>
                                 </group>
                             </page>
                         </notebook>

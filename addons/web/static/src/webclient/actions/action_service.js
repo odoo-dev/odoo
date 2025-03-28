@@ -1314,10 +1314,29 @@ export function makeActionManager(env, router = _router) {
      */
     async function _executeReportAction(action, options) {
         const handlers = registry.category("ir.actions.report handlers").getAll();
-        for (const handler of handlers) {
-            const result = await handler(action, options, env);
-            if (result) {
-                return result;
+        if (action.is_printer_linked || handlers.length) {
+            if (action.is_printer_linked) {
+                const orm = env.services.orm;
+                await orm.call("ir.actions.report", "render_and_send_email", [
+                    action.id,
+                    action.context.active_ids,
+                    action.data,
+                ]);
+                env.services.notification.add(_t("Email is send to printer with attachment.."), {
+                    type: "info",
+                });
+            }
+            for (const handler of handlers) {
+                const result = await handler(action, options, env);
+                if (result) {
+                    return result;
+                }
+            }
+            if (action.is_printer_linked) {
+                return doAction(
+                    { type: "ir.actions.act_window_close" },
+                    { onClose: options.onClose }
+                );
             }
         }
         if (action.report_type === "qweb-html") {
