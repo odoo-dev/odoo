@@ -205,36 +205,24 @@ odoo.define('payment_adyen.payment_form', require => {
                                         hasHolderName: true,
                                         holderNameRequired: true,
                                     },
+                                    paypal: {
+                                        blockPayPalCreditButton: true,
+                                        blockPayPalPayLaterButton: true,
+                                        showPayButton: true,
+                                        style: {
+                                            disableMaxWidth: true
+                                        },
+                                    },
                                 },
                                 openFirstStoredPaymentMethod: false,
                                 showStoredPaymentMethods: false,
                                 disableFinalAnimation: true,
                                 onSelect: component => {
                                     if (component.props.name === "PayPal") {
-                                        if (!this.paypalForm) {
-                                            // create div element to render PayPal component
-                                            this.paypalForm = document.createElement("div");
-                                            document.getElementById(
-                                                `o_adyen_dropin_container_${paymentOptionId}`
-                                            ).appendChild(this.paypalForm);
-                                            this.paypalForm.classList.add("mt-2");
-                                            // create and mount PayPal button in the component
-                                            checkout.create("paypal",
-                                                {
-                                                    style: {
-                                                        disableMaxWidth: true
-                                                    },
-                                                    blockPayPalCreditButton: true,
-                                                    blockPayPalPayLaterButton: true
-                                                }
-                                            ).mount(this.paypalForm).providerId = paymentOptionId;
-                                            this.txContext.tokenizationRequested = false;
-                                        }
-                                        // Hide Pay button and show PayPal component
+                                        // Hide Pay button
                                         this._hideInputs();
-                                        this.paypalForm.classList.remove('d-none');
-                                    } else if (this.paypalForm) {
-                                        this.paypalForm.classList.add('d-none');
+                                    }
+                                    else {
                                         this._showInputs();
                                     }
                                 }
