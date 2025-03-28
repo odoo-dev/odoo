@@ -1922,6 +1922,7 @@ test("onchange on one2many with x2many in list (no widget) and form view (list)"
                         fields: {
                             turtle_foo: {},
                         },
+                        limit: 40,
                     },
                 },
                 limit: 40,

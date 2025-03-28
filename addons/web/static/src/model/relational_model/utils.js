@@ -100,6 +100,10 @@ function completeActiveField(activeField, extra) {
                 };
             }
         }
+        activeField.limit = Math.max(
+            extra.limit || Number.MAX_SAFE_INTEGER,
+            activeField.limit || Number.MAX_SAFE_INTEGER
+        );
         Object.assign(activeField.related.fields, extra.related.fields);
     }
 }
@@ -214,6 +218,7 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
                 activeFields: {},
                 fields: {},
             };
+            activeField.limit = 1;
             if (fieldNode.views) {
                 const viewDescr = fieldNode.views[fieldNode.viewMode];
                 if (viewDescr) {
@@ -265,7 +270,10 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
                 activeField.required = "False";
             }
         }
-        if (["many2one", "many2one_reference"].includes(fields[fieldName].type) && fieldNode.views) {
+        if (
+            ["many2one", "many2one_reference"].includes(fields[fieldName].type) &&
+            fieldNode.views
+        ) {
             const viewDescr = fieldNode.views.default;
             activeField.related = extractFieldsFromArchInfo(viewDescr, viewDescr.fields);
         }
