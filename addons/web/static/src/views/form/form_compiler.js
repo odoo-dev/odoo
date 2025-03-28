@@ -266,8 +266,7 @@ export class FormCompiler extends ViewCompiler {
         if (replace && !exprToBoolean(replace)) {
             footer.append(
                 createElement("t", {
-                    "t-call": "web.DefaultButtonsSlot",
-                    "t-call-context": "{ props: __comp__.props }",
+                    "t-slot": "default_buttons",
                 })
             );
         }
