@@ -551,6 +551,7 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
     }
 
     async getMoreThemes() {
+        this.uiService.block({ message: "Loading themes..." });
         const removeLoadingEffect = addButtonLoadingEffect(this.extraThemesButtonRef.el);
         const themes = await getRecommendedThemes(
             this.orm,
@@ -563,6 +564,7 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
         this.state.extraThemes = themes.filter((extraTheme) => !mainThemeNames.includes(extraTheme.name));
         this.state.extraThemesLoaded = true;
         removeLoadingEffect();
+        this.uiService.unblock();
     }
 
     getExtraThemeName(idx) {
