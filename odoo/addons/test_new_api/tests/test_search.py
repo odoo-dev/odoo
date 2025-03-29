@@ -430,6 +430,10 @@ class TestSearchRelated(TransactionCase):
             'name': 'related_bar',
             'model_id': cls.env['ir.model']._get('test_new_api.related_bar').id,
             'domain_force': "[('id', '<', 1000)]",
+        }, {
+            'name': 'related_inherits',
+            'model_id': cls.env['ir.model']._get('test_new_api.related_inherits').id,
+            'domain_force': "[('id', '<', 1000)]",
         }])
 
     def test_related_simple(self):
@@ -1095,7 +1099,7 @@ class TestSearchRelated(TransactionCase):
             LEFT JOIN "test_new_api_related" AS "test_new_api_related_inherits__base_id"
                 ON ("test_new_api_related_inherits"."base_id" = "test_new_api_related_inherits__base_id"."id")
             WHERE "test_new_api_related_inherits__base_id"."name" IN %s
-            AND "test_new_api_related_inherits__base_id"."id" < %s
+            AND "test_new_api_related_inherits"."id" < %s
             ORDER BY "test_new_api_related_inherits"."id"
         """]):
             model.search([('name', '=', 'a')])
@@ -1109,7 +1113,7 @@ class TestSearchRelated(TransactionCase):
             LEFT JOIN "test_new_api_related_foo" AS "test_new_api_related_inherits__base_id__foo_id"
                 ON ("test_new_api_related_inherits__base_id"."foo_id" = "test_new_api_related_inherits__base_id__foo_id"."id")
             WHERE "test_new_api_related_inherits__base_id__foo_id"."name" IN %s
-            AND "test_new_api_related_inherits__base_id"."id" < %s
+            AND "test_new_api_related_inherits"."id" < %s
             ORDER BY "test_new_api_related_inherits"."id"
         """]):
             model.search([('foo_name_sudo', '=', 'a')])
@@ -1125,7 +1129,7 @@ class TestSearchRelated(TransactionCase):
                 WHERE "test_new_api_related_foo"."name" IN %s
                 AND "test_new_api_related_foo"."id" < %s
             )
-            AND "test_new_api_related_inherits__base_id"."id" < %s
+            AND "test_new_api_related_inherits"."id" < %s
             ORDER BY "test_new_api_related_inherits"."id"
         """]):
             model.search([('foo_name', '=', 'a')])
@@ -1140,7 +1144,7 @@ class TestSearchRelated(TransactionCase):
             LEFT JOIN "test_new_api_related_bar" AS "test_new_api_related_inherits__base_id__foo_id__bar_id"
                 ON ("test_new_api_related_inherits__base_id__foo_id"."bar_id" = "test_new_api_related_inherits__base_id__foo_id__bar_id"."id")
             WHERE "test_new_api_related_inherits__base_id__foo_id__bar_id"."name" IN %s
-            AND "test_new_api_related_inherits__base_id"."id" < %s
+            AND "test_new_api_related_inherits"."id" < %s
             ORDER BY "test_new_api_related_inherits"."id"
         """]):
             model.search([('foo_bar_name_sudo', '=', 'a')])
@@ -1161,7 +1165,7 @@ class TestSearchRelated(TransactionCase):
                 )
                 AND "test_new_api_related_foo"."id" < %s
             )
-            AND "test_new_api_related_inherits__base_id"."id" < %s
+            AND "test_new_api_related_inherits"."id" < %s
             ORDER BY "test_new_api_related_inherits"."id"
         """]):
             model.search([('foo_bar_name', '=', 'a')])

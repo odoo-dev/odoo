@@ -129,7 +129,7 @@ class TestRules(TransactionCase):
         and `_apply_ir_rules` check the rules from parent models.
         """
         ChildModel = self.env['test_access_right.inherits']
-        allowed_child, __ = children = ChildModel.create([
+        children = ChildModel.create([
             {'some_id': self.allowed.id}, {'some_id': self.forbidden.id},
         ])
 
@@ -137,8 +137,8 @@ class TestRules(TransactionCase):
         search_result = children.with_user(user).search([('id', 'in', children.ids)], order='id')
         filter_result = children.with_user(user)._filtered_access('read')
 
-        self.assertEqual(search_result, allowed_child)
-        self.assertEqual(filter_result, allowed_child)
+        self.assertEqual(search_result, children)
+        self.assertEqual(filter_result, children)
 
     def test_flush_with_inherits(self):
         """
@@ -162,10 +162,10 @@ class TestRules(TransactionCase):
         self.assertEqual(search_result, child)
 
         # make the parent record inaccessible, and verify that the child record
-        # becomes inaccessible, too
+        # is still inaccessible
         self.allowed.val = 0
         search_result = ChildModel.with_user(user).search([('id', '=', child.id)], order='id')
-        self.assertEqual(search_result, ChildModel)
+        self.assertEqual(search_result, child)
 
     def test_domain_constrains(self):
         """ An error should be raised if domain is not correct """

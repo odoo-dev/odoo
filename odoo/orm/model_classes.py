@@ -467,14 +467,14 @@ def _add_inherited_fields(model: BaseModel):
         if name not in model._fields:
             # inherited fields are implemented as related fields, with the
             # following specific properties:
-            #  - reading inherited fields should not bypass access rights
+            #  - reading inherited fields does bypass access rights
             #  - copy inherited fields iff their original field is copied
             field_cls = type(field)
             add_field(model, name, field_cls(
                 inherited=True,
                 inherited_field=field,
                 related=f"{parent_fname}.{name}",
-                related_sudo=False,
+                related_sudo=True,
                 copy=field.copy,
                 readonly=field.readonly,
                 export_string_translation=field.export_string_translation,

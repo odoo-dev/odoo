@@ -386,14 +386,12 @@ If you really, really need access, perhaps you can win over your friendly admini
 
 This seems to be a multi-company issue, you might be able to access the record by switching to the company: %s."""
         % (self.user.name, self.user.id, self.record._description, self.record.display_name, self.record._name, self.record.id, self.record.sudo().company_id.display_name, self.record.sudo().company_id.display_name))
-        p = self.env['test_access_right.inherits'].create({'some_id': self.record.id})
+
+        child = self.env['test_access_right.inherits'].create({'some_id': self.record.id})
         self.env.flush_all()
         self.env.invalidate_all()
-        with self.assertRaisesRegex(
-            AccessError,
-            r"Implicitly accessed through 'Object for testing related access rights' \(test_access_right.inherits\)\.",
-        ):
-            p.with_user(self.user).val
+        # reading inherited fields only depends on the child record's access
+        child.with_user(self.user).val
 
     def test_warn_company_access_multi_record(self):
         """ Test that AccessError handle correctly several companies """

@@ -1464,7 +1464,7 @@ class TestWebReadGroup(common.TransactionCase):
             ['groupable', 'aggregator'],
         )
         self.assertTrue(field_info['name']['groupable'])
-        self.assertFalse(field_info['foo_id_name']['groupable'])
+        self.assertTrue(field_info['foo_id_name']['groupable'])  # because inherited with related_sudo=True
         self.assertTrue(field_info['foo_id_name_sudo']['groupable'])
         self.assertEqual(field_info['value']['aggregator'], 'sum')
 
@@ -1493,9 +1493,9 @@ class TestWebReadGroup(common.TransactionCase):
             ]
         )
 
-        # Cannot groupby because foo_id_name is related_sudo=False
-        with self.assertRaises(ValueError):
-            RelatedInherits.formatted_read_group([], ['foo_id_name'])
+        # One can actually groupby because foo_id_name is related_sudo=False but
+        # inherited with related_sudo=True
+        RelatedInherits._read_group([], ['foo_id_name'])
 
     def test_related_many2many_groupby(self):
         bases = self.env['test_read_group.related_base'].create(
