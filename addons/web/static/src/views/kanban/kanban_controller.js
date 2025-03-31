@@ -214,20 +214,6 @@ export class KanbanController extends Component {
         this.deleteRecordsWithConfirmation = useDeleteRecords(this.model);
     }
 
-    get display() {
-        const { controlPanel } = this.props.display;
-        if (!controlPanel) {
-            return this.props.display;
-        }
-        return {
-            ...this.props.display,
-            controlPanel: {
-                ...controlPanel,
-                layoutActions: !this.hasSelectedRecords,
-            },
-        };
-    }
-
     get actionMenuItems() {
         const { actionMenus } = this.props.info;
         const staticActionItems = Object.entries(this.getStaticActionMenuItems())

@@ -55,6 +55,9 @@ export class ControlPanel extends Component {
         display: { type: Object, optional: true },
         slots: { type: Object, optional: true },
     };
+    static defaultProps = {
+        display: {},
+    };
 
     setup() {
         this.actionService = useService("action");
@@ -156,7 +159,7 @@ export class ControlPanel extends Component {
         useEffect(() => {
             if (
                 !this.env.isSmall ||
-                ("adaptToScroll" in this.display && !this.display.adaptToScroll)
+                ("adaptToScroll" in this.props.display && !this.props.display.adaptToScroll)
             ) {
                 return;
             }
@@ -192,7 +195,7 @@ export class ControlPanel extends Component {
             }
             if (
                 !this.env.isSmall ||
-                ("adaptToScroll" in this.display && !this.display.adaptToScroll)
+                ("adaptToScroll" in this.props.display && !this.props.display.adaptToScroll)
             ) {
                 return;
             }
@@ -254,16 +257,6 @@ export class ControlPanel extends Component {
         } else {
             return _t("Custom Embedded Action");
         }
-    }
-
-    /**
-     * @returns {Object}
-     */
-    get display() {
-        return {
-            layoutActions: true,
-            ...this.props.display,
-        };
     }
 
     onClickShowEmbedded() {

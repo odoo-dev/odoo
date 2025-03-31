@@ -1,14 +1,5 @@
 import { expect, test } from "@odoo/hoot";
-import { animationFrame } from "@odoo/hoot-mock";
-import {
-    Component,
-    onWillStart,
-    reactive,
-    useChildSubEnv,
-    useState,
-    useSubEnv,
-    xml,
-} from "@odoo/owl";
+import { Component, onWillStart, useChildSubEnv, useSubEnv, xml } from "@odoo/owl";
 import {
     defineModels,
     fields,
@@ -114,7 +105,7 @@ test(`Rendering with default ControlPanel and SearchPanel`, async () => {
             });
             useSubEnv({ searchModel: this.searchModel });
             onWillStart(async () => {
-                await this.searchModel.load({ resModel: "foo" , searchViewId: false});
+                await this.searchModel.load({ resModel: "foo", searchViewId: false });
             });
         }
     }
@@ -263,51 +254,4 @@ test(`Custom search panel`, async () => {
     expect(`.o_toy_content`).toHaveCount(1);
     expect(`.o_toy_search_panel`).toHaveCount(1);
     expect(`.o_search_panel`).toHaveCount(0);
-});
-
-test(`Simple rendering: with dynamically displayed search`, async () => {
-    const state = reactive({ displayLayoutActions: true });
-
-    class ToyComponent extends Component {
-        static props = ["*"];
-        static template = xml`
-            <Layout display="display">
-                <t t-set-slot="layout-actions">
-                    <div class="toy_search_bar"/>
-                </t>
-                <div class="toy_content"/>
-            </Layout>
-        `;
-        static components = { Layout };
-
-        setup() {
-            this.state = useState(state);
-        }
-
-        get display() {
-            return {
-                ...this.props.display,
-                controlPanel: {
-                    ...this.props.display.controlPanel,
-                    layoutActions: this.state.displayLayoutActions,
-                },
-            };
-        }
-    }
-
-    await mountWithSearch(ToyComponent, {
-        resModel: "foo",
-        searchViewId: false,
-    });
-    expect(`.o_control_panel .o_control_panel_actions .toy_search_bar`).toHaveCount(1);
-    expect(`.o_component_with_search_panel .o_search_panel`).toHaveCount(1);
-    expect(`.o_cp_searchview`).toHaveCount(0);
-    expect(`.o_content > .toy_content`).toHaveCount(1);
-
-    state.displayLayoutActions = false;
-    await animationFrame();
-    expect(`.o_control_panel .o_control_panel_actions .toy_search_bar`).toHaveCount(0);
-    expect(`.o_component_with_search_panel .o_search_panel`).toHaveCount(1);
-    expect(`.o_cp_searchview`).toHaveCount(0);
-    expect(`.o_content > .toy_content`).toHaveCount(1);
 });

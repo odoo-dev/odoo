@@ -505,20 +505,6 @@ export class ListController extends Component {
         return this.props.className;
     }
 
-    get display() {
-        const { controlPanel } = this.props.display;
-        if (!controlPanel) {
-            return this.props.display;
-        }
-        return {
-            ...this.props.display,
-            controlPanel: {
-                ...controlPanel,
-                layoutActions: !this.hasSelectedRecords,
-            },
-        };
-    }
-
     discardSelection() {
         this.model.root.records.forEach((record) => {
             record.toggleSelection(false);
