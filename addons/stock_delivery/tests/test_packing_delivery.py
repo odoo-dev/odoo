@@ -221,7 +221,7 @@ class TestPacking(TestPackingCommon):
         })
         wh_a = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
         wh_a.delivery_steps = 'pick_pack_ship'
-        company_b = self.env['res.company'].create({'name': 'Company B'})
+        company_b = self.env['res.company'].sudo().create({'name': 'Company B'})
         wh_b = self.env['stock.warehouse'].with_company(company_b).create({
             'name': 'Company B WH',
             'code': 'WH B',

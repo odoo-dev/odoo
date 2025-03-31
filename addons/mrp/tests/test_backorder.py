@@ -446,7 +446,7 @@ class TestMrpProductionBackorder(TestMrpCommon):
         default_picking_type_id = self.env['mrp.production']._get_default_picking_type_id(self.env.company.id)
         default_picking_type = self.env['stock.picking.type'].browse(default_picking_type_id)
         mo_sequence = default_picking_type.sequence_id
-        mo_sequence.prefix = "WH-MO-"
+        mo_sequence.sudo().prefix = "WH-MO-"
         initial_mo_name = mo_sequence.prefix + str(mo_sequence.number_next_actual).zfill(mo_sequence.padding)
         production = self.generate_mo(qty_final=5)[0]
         self.assertEqual(production.name, initial_mo_name)
@@ -501,7 +501,7 @@ class TestMrpProductionBackorder(TestMrpCommon):
 
     def test_split_merge(self):
         # Change 'Units' rounding to 1 (integer only quantities)
-        self.env['decimal.precision'].search([('name', '=', 'Product Unit')]).digits = 0
+        self.env['decimal.precision'].sudo().search([('name', '=', 'Product Unit')]).digits = 0
         # Create a mo for 10 products
         mo, _, _, p1, p2 = self.generate_mo(qty_final=10)
         # Split in 3 parts

@@ -470,7 +470,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         self.assertEqual(po_alt.order_line.name, '[code B] Product')
 
     def test_08_purchase_requisition_sequence(self):
-        new_company = self.env['res.company'].create({'name': 'Company 2'})
+        new_company = self.env['res.company'].sudo().create({'name': 'Company 2'})
         self.env['ir.sequence'].create({
             'code': 'purchase.requisition.blanket.order',
             'prefix': 'REQ_',

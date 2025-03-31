@@ -686,8 +686,8 @@ class TestPartnerAddressCompany(TransactionCase):
 
     def test_accessibility_of_company_partner_from_branch(self):
         """ Check accessibility of company partner from branch. """
-        company = self.env['res.company'].create({'name': 'company'})
-        branch = self.env['res.company'].create({
+        company = self.env['res.company'].sudo().create({'name': 'company'})
+        branch = self.env['res.company'].sudo().create({
             'name': 'branch',
             'parent_id': company.id
         })
@@ -766,7 +766,7 @@ class TestPartnerForm(TransactionCase):
         self.assertEqual(partner.child_ids.filtered(lambda p: p.name == "Second Child").lang, 'fr_FR')
 
     def test_onchange_parent_sync_user(self):
-        company_1 = self.env['res.company'].create({'name': 'company_1'})
+        company_1 = self.env['res.company'].sudo().create({'name': 'company_1'})
         test_user = self.env['res.users'].create({
             'name': 'This user',
             'login': 'thisu',

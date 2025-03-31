@@ -27,7 +27,7 @@ class TestPricelistAutoCreation(ProductCommon):
         """Make sure that when setting an inactive currency on a company, the activation of the
         multi-currency group won't
         """
-        self.env.company.currency_id = self.currency_usd
+        self.env.company.sudo().currency_id = self.currency_usd
         self.assertFalse(
             self.env['product.pricelist'].search([
                 ('currency_id.name', '=', 'EUR'),

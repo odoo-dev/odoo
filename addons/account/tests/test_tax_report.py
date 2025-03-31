@@ -211,7 +211,7 @@ class TaxReportTest(AccountTestInvoicingCommon):
         })
 
         # Make sure the fiscal country allows using this tax directly
-        self.env.company.account_fiscal_country_id = self.test_country_1
+        self.env.company.sudo().account_fiscal_country_id = self.test_country_1
 
         test_invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',

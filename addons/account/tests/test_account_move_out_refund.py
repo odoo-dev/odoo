@@ -492,7 +492,7 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
 
         # Test 'biggest_tax' rounding
 
-        self.company_data['company'].country_id = self.env.ref('base.us')
+        self.company_data['company'].sudo().country_id = self.env.ref('base.us')
 
         # Add a tag to product_a's default tax
         tax_line_tag = self.env['account.account.tag'].create({
@@ -889,7 +889,7 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
     def test_out_refund_create_storno(self):
         # Test creating an account_move refund (credit note)
         # with multiple lines while in Storno accounting
-        self.env.company.account_storno = True
+        self.env.company.sudo().account_storno = True
 
         move = self.env['account.move'].create({
             'move_type': 'out_refund',
@@ -976,8 +976,8 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
             'code': 'TBASE',
             'account_type': 'asset_current',
         })
-        self.env.company.account_cash_basis_base_account_id = tax_base_amount_account
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().account_cash_basis_base_account_id = tax_base_amount_account
+        self.env.company.sudo().tax_exigibility = True
         tax_tags = defaultdict(dict)
         for line_type, repartition_type in [(l, r) for l in ('invoice', 'refund') for r in ('base', 'tax')]:
             tax_tags[line_type][repartition_type] = self.env['account.account.tag'].create({
@@ -1100,7 +1100,7 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
             'code': 'NDI',
             'account_type': 'income',
         })
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
         tax_tags = defaultdict(dict)
         for line_type, repartition_type in [(l, r) for l in ('invoice', 'refund') for r in ('base', 'tax')]:
             tax_tags[line_type][repartition_type] = self.env['account.account.tag'].create({

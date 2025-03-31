@@ -1987,7 +1987,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         Check that the correct warnings are raised when you try to confirm
         a SO for a storable product without warehouse.
         """
-        new_company = self.env['res.company'].create({'name': 'Company 2'})
+        new_company = self.env['res.company'].sudo().create({'name': 'Company 2'})
         # Warhouses are created for new companies in test mode but not IRL
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', new_company.id)], limit=1)
         warehouse.active = False

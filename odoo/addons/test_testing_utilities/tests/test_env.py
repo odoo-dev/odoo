@@ -25,7 +25,7 @@ class TestEnv(TransactionCase):
         The main goal of the test is actually to check the values of the
         environment after this test execution (see test_env_company_part_02)
         """
-        company = self.env['res.company'].create({
+        company = self.env['res.company'].sudo().create({
             "name": "Test Company",
         })
         self.env.user.write({

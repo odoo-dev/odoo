@@ -248,7 +248,7 @@ class TestSaleStockMargin(TestStockValuationCommon):
             {'currency_id': new_company_currency.id, 'rate': 3, 'name': date, 'company_id': False},
         ])
 
-        new_company = self.env['res.company'].create({
+        new_company = self.env['res.company'].sudo().create({
             'name': 'Super Company',
             'currency_id': new_company_currency.id,
         })

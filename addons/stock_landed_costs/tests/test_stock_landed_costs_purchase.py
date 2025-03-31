@@ -367,7 +367,7 @@ class TestLandedCosts(TestStockLandedCostsCommon):
 @tagged('post_install', '-at_install')
 class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
     def test_invoice_after_lc(self):
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
         stock_valuation_account = self.company_data['default_account_stock_valuation']
@@ -431,7 +431,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
     def test_lc_with_avco_ordered_qty_backorder(self):
         """ Make sure the landed cost added in invoices are taken into account to compute product
         cost even in 'Ordered Quantity' invoice policy. """
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.landed_cost.split_method_landed_cost = 'by_quantity'
         product2 = self.env['product.product'].create({
             'name': 'product2',
@@ -497,7 +497,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         self.assertEqual(product2.standard_price, 3.5)
 
     def test_invoice_after_lc_amls(self):
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.landed_cost.landed_cost_ok = True
         self.landed_cost.categ_id.property_cost_method = 'fifo'
         self.landed_cost.categ_id.property_valuation = 'real_time'
@@ -568,7 +568,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         for products using dynamic cost methods should account for LCs associated with the order
         from which the move was derived.
         """
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.product1.purchase_method = 'purchase'
         self.product1.categ_id.write({
             'property_stock_account_input_categ_id': self.company_data['default_account_stock_in'].id,
@@ -630,7 +630,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         not yet created on the bill.
         """
 
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.product1.purchase_method = 'purchase'
         self.product1.categ_id.write({
             'property_stock_account_input_categ_id': self.company_data['default_account_stock_in'].id,

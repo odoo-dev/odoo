@@ -758,7 +758,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
 
         country1 = self.env['res.country'].create({'name': 'test country', 'code': 'ZV'})
         country2 = self.env['res.country'].create({'name': 'other country', 'code': 'ZX'})
-        company = self.env['res.company'].create({
+        company = self.env['res.company'].sudo().create({
             'name': 'test company',
             'child_ids': [
                 (0, 0, {'name': 'Child Company 1'}),
@@ -1507,8 +1507,8 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
 
         # consider three companies
         company0 = self.env.ref('base.main_company')
-        company1 = self.env['res.company'].create({'name': 'A'})
-        company2 = self.env['res.company'].create({'name': 'B'})
+        company1 = self.env['res.company'].sudo().create({'name': 'A'})
+        company2 = self.env['res.company'].sudo().create({'name': 'B'})
 
         # create one user per company
         user0 = self.env['res.users'].create({
@@ -1641,7 +1641,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
 
     def test_27_company_dependent_bool_integer_float(self):
         company0 = self.env.ref('base.main_company')
-        company1 = self.env['res.company'].create({'name': 'A'})
+        company1 = self.env['res.company'].sudo().create({'name': 'A'})
         Model = self.env['test_new_api.company']
         record = Model.create({})
         record.invalidate_recordset()
@@ -1661,7 +1661,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
     def test_27_company_dependent_missing_many2one(self):
         """ Test ORM can handle missing records for many2one company dependent fields """
         company0 = self.env.ref('base.main_company')
-        company1 = self.env['res.company'].create({'name': 'A'})
+        company1 = self.env['res.company'].sudo().create({'name': 'A'})
         Model = self.env['test_new_api.company']
         record = Model.create({})
         record.tag_id = 1000  # non-existing record id
@@ -1822,8 +1822,8 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         })
 
         company0 = self.env.ref('base.main_company')
-        company1 = self.env['res.company'].create({'name': 'A1', 'parent_id': company0.id})
-        company2 = self.env['res.company'].create({'name': 'B1', 'parent_id': company1.id})
+        company1 = self.env['res.company'].sudo().create({'name': 'A1', 'parent_id': company0.id})
+        company2 = self.env['res.company'].sudo().create({'name': 'B1', 'parent_id': company1.id})
 
         company1.partner_id.parent_id = company0.partner_id
         company2.partner_id.parent_id = company1.partner_id
@@ -1839,8 +1839,8 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
 
     def test_29_company_dependent_html(self):
         company0 = self.env.ref('base.main_company')
-        company1 = self.env['res.company'].create({'name': 'A'})
-        company2 = self.env['res.company'].create({'name': 'B'})
+        company1 = self.env['res.company'].sudo().create({'name': 'A'})
+        company2 = self.env['res.company'].sudo().create({'name': 'B'})
 
         user0 = self.env['res.users'].create({
             'name': 'Foo', 'login': 'foo', 'company_id': company0.id,
@@ -3191,7 +3191,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
 
     def test_cache_key_invalidation(self):
         company0 = self.env.ref('base.main_company')
-        company1 = self.env['res.company'].create({'name': 'A'})
+        company1 = self.env['res.company'].sudo().create({'name': 'A'})
 
         user0 = self.env['res.users'].create({
             'name': 'Foo', 'login': 'foo', 'company_id': company0.id,
@@ -3251,11 +3251,11 @@ class TestX2many(TransactionExpressionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user_portal = cls.env['res.users'].sudo().search([('login', '=', 'portal')])
+        cls.user_portal = cls.env['res.users'].search([('login', '=', 'portal')])
         cls.partner_portal = cls.user_portal.partner_id
 
         if not cls.user_portal:
-            cls.env['ir.config_parameter'].sudo().set_param('auth_password_policy.minlength', 4)
+            cls.env['ir.config_parameter'].set_param('auth_password_policy.minlength', 4)
             cls.partner_portal = cls.env['res.partner'].create({
                 'name': 'Joel Willis',
                 'email': 'joel.willis63@example.com',

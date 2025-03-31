@@ -43,7 +43,7 @@ class TestFrenchLeaves(TransactionCase):
 
     def test_no_differences(self):
         # Base case that should not have a different behaviour
-        self.company.resource_calendar_id = self.base_calendar
+        self.company.sudo().resource_calendar_id = self.base_calendar
         self.employee.resource_calendar_id = self.base_calendar
 
         leave = self.env['hr.leave'].create({
@@ -70,7 +70,7 @@ class TestFrenchLeaves(TransactionCase):
                 (0, 0, {'name': 'Wednesday Afternoon', 'dayofweek': '2', 'hour_from': 13, 'hour_to': 17, 'day_period': 'afternoon'}),
             ],
         })
-        self.company.resource_calendar_id = self.base_calendar
+        self.company.sudo().resource_calendar_id = self.base_calendar
         self.employee.resource_calendar_id = employee_calendar
 
         leave = self.env['hr.leave'].create({
@@ -97,7 +97,7 @@ class TestFrenchLeaves(TransactionCase):
                 (0, 0, {'name': 'Friday Afternoon', 'dayofweek': '4', 'hour_from': 13, 'hour_to': 17, 'day_period': 'afternoon'}),
             ],
         })
-        self.company.resource_calendar_id = self.base_calendar
+        self.company.sudo().resource_calendar_id = self.base_calendar
         self.employee.resource_calendar_id = employee_calendar
 
         leave = self.env['hr.leave'].create({
@@ -124,7 +124,7 @@ class TestFrenchLeaves(TransactionCase):
                 (0, 0, {'name': 'Friday Afternoon', 'dayofweek': '4', 'hour_from': 13, 'hour_to': 17, 'day_period': 'afternoon'}),
             ],
         })
-        self.company.resource_calendar_id = self.base_calendar
+        self.company.sudo().resource_calendar_id = self.base_calendar
         self.employee.resource_calendar_id = employee_calendar
 
         leave = self.env['hr.leave'].create({
@@ -157,7 +157,7 @@ class TestFrenchLeaves(TransactionCase):
                 (0, 0, {'name': 'Friday Afternoon', 'dayofweek': '4', 'hour_from': 13, 'hour_to': 17, 'day_period': 'afternoon'}),
             ],
         })
-        self.company.resource_calendar_id = self.base_calendar
+        self.company.sudo().resource_calendar_id = self.base_calendar
         self.employee.resource_calendar_id = employee_calendar
 
         leave = self.env['hr.leave'].create({
@@ -181,7 +181,7 @@ class TestFrenchLeaves(TransactionCase):
                 (0, 0, {'name': 'Wednesday Afternoon', 'dayofweek': '2', 'hour_from': 13, 'hour_to': 17, 'day_period': 'afternoon'}),
             ],
         })
-        self.company.resource_calendar_id = self.base_calendar
+        self.company.sudo().resource_calendar_id = self.base_calendar
         self.employee.resource_calendar_id = employee_calendar
 
         leave = self.env['hr.leave'].create({
@@ -239,7 +239,7 @@ class TestFrenchLeaves(TransactionCase):
                 (0, 0, {'name': 'Wednesday Afternoon', 'dayofweek': '2', 'hour_from': 13, 'hour_to': 17, 'day_period': 'afternoon'}),
             ],
         })
-        self.company.resource_calendar_id = company_calendar
+        self.company.sudo().resource_calendar_id = company_calendar
         self.employee.resource_calendar_id = employee_calendar
 
         # Week type 0
@@ -335,7 +335,7 @@ class TestFrenchLeaves(TransactionCase):
             ],
         })
 
-        self.company.resource_calendar_id = company_calendar
+        self.company.sudo().resource_calendar_id = company_calendar
         self.employee.resource_calendar_id = employee_calendar
 
         leave = self.env['hr.leave'].create({
@@ -368,7 +368,7 @@ class TestFrenchLeaves(TransactionCase):
     def test_leave_full_day_different_working_hours(self):
         """Check full days leave creation for an employee with different working hours than the 2 weeks company's calendar."""
 
-        self.company.resource_calendar_id = self.env['resource.calendar'].create({
+        self.company.sudo().resource_calendar_id = self.env['resource.calendar'].create({
             'name': 'Company Calendar - 2 weeks with different working hours for each week',
             'two_weeks_calendar': True,
             'attendance_ids': [attendance for i in range(5) for attendance in [

@@ -14,16 +14,16 @@ class TestProjectSharingWithSms(TestProjectSharingCommon, SMSCommon):
         project_settings = cls.env["res.config.settings"].create({'group_project_stages': True})
         project_settings.execute()
 
-        cls.sms_template = cls.env['sms.template'].sudo().create({
+        cls.sms_template = cls.env['sms.template'].create({
             'body': '{{ object.name }}',
-            'model_id': cls.env['ir.model'].sudo().search([('model', '=', 'project.task')]).id,
+            'model_id': cls.env['ir.model'].search([('model', '=', 'project.task')]).id,
         })
         cls.task_stage_with_sms = cls.project_portal.type_ids[-1]
         cls.task_stage_with_sms.write({'sms_template_id': cls.sms_template.id})
 
-        cls.sms_template_2 = cls.env['sms.template'].sudo().create({
+        cls.sms_template_2 = cls.env['sms.template'].create({
             'body': '{{ object.name }}',
-            'model_id': cls.env['ir.model'].sudo().search([('model', '=', 'project.project')]).id,
+            'model_id': cls.env['ir.model'].search([('model', '=', 'project.project')]).id,
         })
         cls.project_stage_with_sms = cls.project_portal.stage_id.browse(2)
         cls.project_stage_with_sms.write({'sms_template_id': cls.sms_template_2.id})

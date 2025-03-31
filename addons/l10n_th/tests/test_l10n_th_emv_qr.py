@@ -51,12 +51,12 @@ class TestL10nTHEmvQrCode(AccountTestInvoicingCommon):
 
         # Without company partner city should fail
         self.emv_qr_invoice.currency_id = self.env.ref('base.THB')
-        self.company_data['company'].partner_id.city = False
+        self.company_data['company'].sudo().partner_id.city = False
         with self.assertRaises(UserError, msg="Missing Merchant City."):
             self.emv_qr_invoice._generate_qr_code()
 
         # Without PromptPay infomation should fail
-        self.company_data['company'].partner_id.city = 'Thailand'
+        self.company_data['company'].sudo().partner_id.city = 'Thailand'
         self.emv_qr_invoice.partner_bank_id = self.acc_emv_th_without_promptpay_info
         with self.assertRaises(UserError, msg="The account receiving the payment must have a Proxy type and a Proxy value set."):
             self.emv_qr_invoice._generate_qr_code()

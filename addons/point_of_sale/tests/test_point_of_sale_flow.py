@@ -1353,8 +1353,8 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
         """ Test the flow of creating an invoice later, after the POS session has been closed and everything has been processed
         in the case of anglo-saxon accounting.
         """
-        self.env.company.anglo_saxon_accounting = True
-        self.env.company.point_of_sale_update_stock_quantities = 'closing'
+        self.env.company.sudo().anglo_saxon_accounting = True
+        self.env.company.sudo().point_of_sale_update_stock_quantities = 'closing'
         pos_order = self._create_pos_order_for_postponed_invoicing()
 
         with freeze_time('2020-01-03'):
@@ -1372,7 +1372,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
         """
         self.pos_config.open_ui()
         current_session = self.pos_config.current_session_id
-        current_session.company_id.account_default_pos_receivable_account_id = self.partner1.property_account_receivable_id
+        current_session.company_id.sudo().account_default_pos_receivable_account_id = self.partner1.property_account_receivable_id
 
         product5_order = {
             'amount_paid': 750,
@@ -1479,8 +1479,8 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
 
     def test_journal_entries_category_without_account(self):
         # Set company's default accounts to false
-        self.env.company.income_account_id = False
-        self.env.company.expense_account_id = False
+        self.env.company.sudo().income_account_id = False
+        self.env.company.sudo().expense_account_id = False
         product = self.env['product.product'].create({
             'name': 'Product with category without account',
             'is_storable': True,
@@ -1890,7 +1890,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
         self.assertEqual(quant1.quantity, 3)
 
     def test_pos_branch_account(self):
-        branch = self.env['res.company'].create({
+        branch = self.env['res.company'].sudo().create({
             'name': 'Branch 1',
             'parent_id': self.env.company.id,
             'chart_template': self.env.company.chart_template,
@@ -1990,7 +1990,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
         self.assertTrue(all([quant.lot_id == order_lot_id for quant in self.env['stock.quant'].search([('product_id', '=', self.product2.id)])]))
 
     def test_pos_creation_in_branch(self):
-        branch = self.env['res.company'].create({
+        branch = self.env['res.company'].sudo().create({
             'name': 'Branch 1',
             'parent_id': self.env.company.id,
             'chart_template': self.env.company.chart_template,

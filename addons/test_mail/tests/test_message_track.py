@@ -357,7 +357,7 @@ class TestTracking(MailCommon):
     def test_message_track_template_create_partner_multicompany(self):
         """ Test partner created due to usage of a mail.template, triggered by
         a tracking, in a multi company environment. """
-        company1 = self.env['res.company'].create({'name': 'company1'})
+        company1 = self.env['res.company'].sudo().create({'name': 'company1'})
         self.env.user.write({'company_ids': [(4, company1.id, False)]})
         self.assertNotEqual(self.env.company, company1)
 

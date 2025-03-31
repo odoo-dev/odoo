@@ -50,7 +50,7 @@ class TestPrivacyWizard(TransactionCase):
             'model_id': self.env.ref('base.model_res_partner').id,
             'domain_force': "['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]"
         })
-        company_2 = self.env['res.company'].create({'name': 'Company 2'})
+        company_2 = self.env['res.company'].sudo().create({'name': 'Company 2'})
         other_partner = self.env['res.partner'].create({
             'name': 'Rintin Tin',
             'email': 'rintin.tin@gmail.com',
@@ -92,7 +92,7 @@ class TestPrivacyWizard(TransactionCase):
         self.assertEqual(wizard.line_ids[1].res_model, bank._name)
 
     def test_wizard_indirect_reference(self):
-        self.env.company.partner_id = self.partner
+        self.env.company.sudo().partner_id = self.partner
 
         wizard = self.env['privacy.lookup.wizard'].with_context(
             default_email=self.partner.email,

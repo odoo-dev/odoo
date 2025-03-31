@@ -243,7 +243,7 @@ class TestLotSerial(TestStockCommon):
     def test_lot_id_with_branch_company(self):
         """Test that a lot can be created in branch company when
         the product is limited to the parent company"""
-        branch_a = self.env['res.company'].create({
+        branch_a = self.env['res.company'].sudo().create({
             'name': 'Branch X',
             'country_id': self.env.company.country_id.id,
             'parent_id': self.env.company.id,

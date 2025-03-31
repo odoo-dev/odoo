@@ -16,7 +16,7 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         # Creates 1 test company and a calendar for employees that
         # work part time. Then creates an employee per calendar (one
         # for the standard calendar and one for the one we created)
-        self.test_company = self.env['res.company'].create({
+        self.test_company = self.env['res.company'].sudo().create({
             'name': 'My Test Company',
         })
 
@@ -69,7 +69,7 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         ])
 
         # Create a 2nd company
-        self.test_company_2 = self.env['res.company'].create({
+        self.test_company_2 = self.env['res.company'].sudo().create({
             'name': 'My Test Company 2',
         })
 
@@ -267,7 +267,7 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         leave_start_datetime = datetime(2021, 1, 4, 7, 0)  # This is a monday
         leave_end_datetime = datetime(2021, 1, 8, 18, 0)  # This is a friday
 
-        new_company = self.env['res.company'].create({
+        new_company = self.env['res.company'].sudo().create({
             'name': 'Winterfell',
         })
 
@@ -409,7 +409,9 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         test_user = self.env['res.users'].with_company(self.test_company).create({
             'name': 'Jonathan Doe',
             'login': 'jdoe@example.com',
-            'group_ids': self.env.ref('hr_timesheet.group_hr_timesheet_user'),
+            'group_ids': [
+                Command.link(self.env.ref("hr_timesheet.group_hr_timesheet_user").id),
+            ],
         })
         test_user.with_company(self.test_company).action_create_employee()
         test_user.employee_id.write({

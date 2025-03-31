@@ -29,7 +29,7 @@ class TestLeadTime(TestCommonSalePurchaseNoChart):
     def test_supplier_lead_time(self):
         """ Basic stock configuration and a supplier with a minimum qty and a lead time """
 
-        self.env.user.company_id.po_lead = 7
+        self.env.user.company_id.sudo().po_lead = 7
         seller = self.env['product.supplierinfo'].create({
             'partner_id': self.vendor.id,
             'min_qty': 1,

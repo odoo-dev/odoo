@@ -74,7 +74,7 @@ class TestSaleOrderCreditLimit(TestSaleCommon):
 
     def test_warning_on_invoice_with_downpayment(self):
         # Activate the Credit Limit feature and set a value for partner_a.
-        self.env.company.account_use_credit_limit = True
+        self.env.company.sudo().account_use_credit_limit = True
         self.partner_a.credit_limit = 1000.0
 
         # Create and confirm a SO to reach (but not exceed) partner_a's credit limit.
@@ -211,7 +211,7 @@ class TestSaleOrderCreditLimit(TestSaleCommon):
 
     def test_invoice_independent_of_credit_to_invoice(self):
         # Activate the Credit Limit feature and set a value for partner_a.
-        self.env.company.account_use_credit_limit = True
+        self.env.company.sudo().account_use_credit_limit = True
         self.partner_a.credit_limit = 1000.0
 
         # Create and confirm a SO to reach (but not exceed) partner_a's credit limit.
@@ -274,7 +274,7 @@ class TestSaleOrderCreditLimit(TestSaleCommon):
 
     def test_credit_limit_and_warning_overinvoiced_sales_order(self):
         # Activate the Credit Limit feature and set a value for partner_a.
-        self.env.company.account_use_credit_limit = True
+        self.env.company.sudo().account_use_credit_limit = True
         self.partner_a.credit_limit = 1000.0
 
         # Create 2 SOs

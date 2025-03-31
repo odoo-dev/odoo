@@ -22,7 +22,7 @@ class TestProjectAccountProfitability(TestProjectProfitabilityCommon):
             'The profitability data of the project should return no data and so 0 for each total amount.'
         )
         # Create a new company with the foreign currency.
-        foreign_company = self.env['res.company'].create({'name': "My Test Company", 'currency_id': self.foreign_currency.id})
+        foreign_company = self.env['res.company'].sudo().create({'name': "My Test Company", 'currency_id': self.foreign_currency.id})
 
         # Create new AAL with the new company.
         self.env['account.analytic.line'].create([{

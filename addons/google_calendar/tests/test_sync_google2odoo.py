@@ -18,7 +18,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
 
     def setUp(self):
         super().setUp()
-        self.other_company = self.env['res.company'].create({'name': 'Other Company'})
+        self.other_company = self.env['res.company'].sudo().create({'name': 'Other Company'})
         self.public_partner = self.env['res.partner'].create({
             'name': 'Public Contact',
             'email': 'public_email@example.com',

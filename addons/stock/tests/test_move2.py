@@ -150,7 +150,6 @@ class TestPickShip(TestStockCommon):
         quants = self.env['stock.quant']._gather(product_unreserve, stock_location, strict=True)
         self.assertEqual(quants[0].reserved_quantity, 2)
 
-
     def test_mto_moves(self):
         """
             10 in stock, do pick->ship and check ship is assigned when pick is done, then backorder of ship
@@ -367,8 +366,9 @@ class TestPickShip(TestStockCommon):
         activity).
         """
         picking_pick, picking_pack, picking_ship = self.create_pick_pack_ship()
+
         stock_location = self.env['stock.location'].browse(self.stock_location)
-        warehouse_1 = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.id)], limit=1)
+        warehouse_1 = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.company_id.id)], limit=1)
         warehouse_1.write({'delivery_steps': 'pick_pack_ship'})
         warehouse_2 = self.env['stock.warehouse'].create({
             'name': 'Small Warehouse',
@@ -377,6 +377,7 @@ class TestPickShip(TestStockCommon):
         warehouse_1.write({
             'resupply_wh_ids': [(6, 0, [warehouse_2.id])]
         })
+
         resupply_route = self.env['stock.route'].search([('supplier_wh_id', '=', warehouse_2.id), ('supplied_wh_id', '=', warehouse_1.id)])
         self.assertTrue(resupply_route)
         self.productA.write({'route_ids': [(4, resupply_route.id), (4, self.env.ref('stock.route_warehouse0_mto').id)]})
@@ -1156,7 +1157,7 @@ class TestSinglePicking(TestStockCommon):
             'state': 'draft',
         })
         # Avoid to merge move3 and move4 for the test case
-        self.env['ir.config_parameter'].create({
+        self.env['ir.config_parameter'].sudo().create({
             'key': 'stock.merge_only_same_date',
             'value': True
         })
@@ -2792,7 +2793,7 @@ class TestStockUOM(TestStockCommon):
         we reserve less than the quantity in stock
         """
         precision = self.env.ref('uom.decimal_product_uom')
-        precision.digits = 3
+        precision.sudo().digits = 3
 
         product_G = self.env['product.product'].create({
             'name': 'Product G',

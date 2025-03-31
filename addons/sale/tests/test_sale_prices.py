@@ -356,7 +356,7 @@ class TestSalePrices(SaleCommon):
         current_curr = self.env.company.currency_id  # USD
         other_curr = self._enable_currency('EUR')
         # main_company.currency_id = other_curr # product.currency_id when no company_id set
-        other_company = self.env['res.company'].create({
+        other_company = self.env['res.company'].sudo().create({
             'name': 'Test',
             'currency_id': other_curr.id
         })

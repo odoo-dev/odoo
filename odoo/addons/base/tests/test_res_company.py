@@ -11,7 +11,7 @@ class TestCompany(TransactionCase):
         """Tests the ability to archive a company whether or not it still has active users.
         Tests an archived user in an archived company cannot be unarchived
         without changing its company to an active company."""
-        company = self.env['res.company'].create({'name': 'foo'})
+        company = self.env['res.company'].sudo().create({'name': 'foo'})
         user = self.env['res.users'].create({
             'name': 'foo',
             'login': 'foo',
@@ -41,7 +41,7 @@ class TestCompany(TransactionCase):
 
     def test_logo_check(self):
         """Ensure uses_default_logo is properly (re-)computed."""
-        company = self.env['res.company'].create({'name': 'foo'})
+        company = self.env['res.company'].sudo().create({'name': 'foo'})
 
         self.assertTrue(company.logo, 'Should have a default logo')
         self.assertTrue(company.uses_default_logo)

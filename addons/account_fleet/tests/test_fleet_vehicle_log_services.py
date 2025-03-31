@@ -2,10 +2,10 @@
 
 from odoo.exceptions import UserError
 from odoo.tests import tagged
-from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from .common import TestAccountFleetCommon
 
 @tagged('post_install', '-at_install')
-class TestFleetVehicleLogServices(AccountTestInvoicingCommon):
+class TestFleetVehicleLogServices(TestAccountFleetCommon):
 
     @classmethod
     def setUpClass(cls):

@@ -101,7 +101,7 @@ class TestSaleProcess(HttpCaseWithUserDemo, WebsiteSaleCommon, HttpCaseWithWebsi
         if self.env['ir.module.module']._get('payment_custom').state != 'installed':
             self.skipTest("Transfer provider is not installed")
 
-        self.env.company.country_id = self.country_us
+        self.env.company.sudo().country_id = self.country_us
         tax_group = self.env['account.tax.group'].create({'name': 'Tax 15%'})
         tax = self.env['account.tax'].create({
             'name': 'Tax 15%',

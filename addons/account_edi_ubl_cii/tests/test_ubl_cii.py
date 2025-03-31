@@ -58,14 +58,14 @@ class TestAccountEdiUblCii(AccountTestInvoicingCommon):
             }
         ]
         company = self.company_data_2['company']
-        company.country_id = self.env['res.country'].search([('code', '=', 'FR')])
-        company.vat = 'FR23334175221'
-        company.email = 'company@site.ext'
-        company.phone = '+33499999999'
-        company.zip = '78440'
+        company.sudo().country_id = self.env['res.country'].search([('code', '=', 'FR')])
+        company.sudo().vat = 'FR23334175221'
+        company.sudo().email = 'company@site.ext'
+        company.sudo().phone = '+33499999999'
+        company.sudo().zip = '78440'
 
-        company.partner_id.with_company(company).invoice_edi_format = 'facturx'
-        company.partner_id.bank_ids = [Command.create({
+        company.sudo().partner_id.with_company(company).invoice_edi_format = 'facturx'
+        company.sudo().partner_id.bank_ids = [Command.create({
             'acc_number': '999999',
             'partner_id': company.partner_id.id,
             'acc_holder_name': 'The Chosen One'

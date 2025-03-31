@@ -11,7 +11,7 @@ class TestResCompany(common.TransactionCase, MockIAPPartnerAutocomplete):
         cls._init_mock_partner_autocomplete()
 
     def test_enrich(self):
-        company = self.env['res.company'].create({'name': "Test Company 1"})
+        company = self.env['res.company'].sudo().create({'name': "Test Company 1"})
         with self.mockPartnerAutocomplete():
             res = company._enrich()
             self.assertFalse(res)
@@ -24,7 +24,7 @@ class TestResCompany(common.TransactionCase, MockIAPPartnerAutocomplete):
             self.assertEqual(company.country_id, self.env.ref('base.de'))
 
     def test_extract_company_domain(self):
-        company_1 = self.env['res.company'].create({'name': "Test Company 1"})
+        company_1 = self.env['res.company'].sudo().create({'name': "Test Company 1"})
 
         company_1.website = 'http://www.info.proximus.be/faq/test'
         self.assertEqual(company_1._get_company_domain(), "proximus.be")

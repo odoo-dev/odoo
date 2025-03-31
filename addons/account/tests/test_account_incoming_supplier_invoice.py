@@ -78,8 +78,8 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
 
     def _disable_ocr(self, company):
         if 'extract_in_invoice_digitalization_mode' in company._fields:
-            company.extract_in_invoice_digitalization_mode = 'no_send'
-            company.extract_out_invoice_digitalization_mode = 'no_send'
+            company.sudo().extract_in_invoice_digitalization_mode = 'no_send'
+            company.sudo().extract_out_invoice_digitalization_mode = 'no_send'
 
     @contextmanager
     def with_success_decoder(self, omit=None):

@@ -14,7 +14,7 @@ class TestPaymentProvider(AccountPaymentCommon):
         if you don't set the journal (only possible if the provider is disabled), it should not raise an error when trying to reopen it.
         We want the journal to be set only if the company has a Bank journal defined in it.
         """
-        child_company = self.env['res.company'].create({
+        child_company = self.env['res.company'].sudo().create({
             'name': 'Child Company',
             'parent_id': self.env.company.id,
         })

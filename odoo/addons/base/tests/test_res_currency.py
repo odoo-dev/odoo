@@ -10,7 +10,7 @@ class TestResCurrency(TransactionCase):
         """Tests the label of the company_rate and inverse_company_rate fields
         are well set according to the company currency in the currency form view and the currency rate list view.
         e.g. in the currency rate list view of a company using EUR, the company_rate label must be `Unit per EUR`"""
-        company_foo, company_bar = self.env['res.company'].create([
+        company_foo, company_bar = self.env['res.company'].sudo().create([
             {'name': 'foo', 'currency_id': self.env.ref('base.EUR').id},
             {'name': 'bar', 'currency_id': self.env.ref('base.USD').id},
         ])

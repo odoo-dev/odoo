@@ -19,7 +19,7 @@ class WebManifestRoutesTest(SelfOrderCommonTest):
         ])
 
     def test_webmanifest_scoped_icon_withoutdefault(self):
-        self.env.company.uses_default_logo = False
+        self.env.company.sudo().uses_default_logo = False
         self.authenticate('admin', 'admin')
         manifest_url = f'/web/manifest.scoped_app_manifest?app_id=pos_self_order&path=/pos-self/{self.pos_config.id}'
         response = self.url_open(manifest_url)

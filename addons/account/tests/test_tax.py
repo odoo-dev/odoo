@@ -90,7 +90,7 @@ class TestTax(TestTaxCommon):
                 Command.create({'repartition_type': 'tax', 'factor_percent': -100.0}),
             ],
         })
-        self.env.company.country_id = self.env.ref('base.in')
+        self.env.company.sudo().country_id = self.env.ref('base.in')
         self._check_compute_all_results(
             tax,
             {

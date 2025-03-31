@@ -108,7 +108,7 @@ class TestProductBarcode(TransactionCase):
     def test_duplicated_barcodes_are_allowed_for_different_companies(self):
         """Barcode needs to be unique only withing the same company"""
         company_a = self.env.company
-        company_b = self.env['res.company'].create({'name': 'CB'})
+        company_b = self.env['res.company'].sudo().create({'name': 'CB'})
 
         allowed_products = [
             # Allowed, barcode doesn't exist yet
@@ -146,7 +146,7 @@ class TestProductBarcode(TransactionCase):
         Barcode validation should be triggered and a duplicated barcode should be detected.
         """
         company_a = self.env.company
-        company_b = self.env['res.company'].create({'name': 'CB'})
+        company_b = self.env['res.company'].sudo().create({'name': 'CB'})
 
         variant_1 = self.template.product_variant_ids[0]
         variant_2 = self.template.product_variant_ids[1]

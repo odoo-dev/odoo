@@ -128,7 +128,7 @@ class TestRecruitmentProcess(TestHrCommon):
 
     def test_email_application_multi_company(self):
         """ Make sure that receiving emails for jobs in companies different from self.env.company work. """
-        other_company = self.env['res.company'].create({'name': 'Other Company'})
+        other_company = self.env['res.company'].sudo().create({'name': 'Other Company'})
         job_developer = self.env['hr.job'].create({
             'name': 'Experienced Developer (Other Company)',
             'company_id': other_company.id,

@@ -391,7 +391,7 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
         self.assertEqual(task_2.company_id, self.company_b, "The company of task_2 should have been set to company B.")
         self.assertFalse(task_3.company_id, "The company of the task_3 should not have been updated.")
         self.assertFalse(project.company_id, "The company of the project should not have been updated.")
-        company_c = self.env['res.company'].create({'name': 'company C'})
+        company_c = self.env['res.company'].sudo().create({'name': 'company C'})
         project.company_id = company_c
         for task in project.tasks:
             self.assertEqual(task.company_id, company_c, "The company of the tasks should have been updated to company C.")

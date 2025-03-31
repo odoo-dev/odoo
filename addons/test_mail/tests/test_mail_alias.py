@@ -392,7 +392,7 @@ class TestAliasCompany(TestMailAliasCommon):
         archived company"""
 
         # add archived company to multi company setup
-        self.company_archived = self.env['res.company'].create({
+        self.company_archived = self.env['res.company'].sudo().create({
                 'country_id': self.env.ref('base.be').id,
                 'currency_id': self.env.ref('base.EUR').id,
                 'email': 'company_archived@test.example.com',
@@ -547,7 +547,7 @@ class TestAliasCompany(TestMailAliasCommon):
     @users('erp_manager')
     def test_res_company_creation_alias_domain(self):
         """ Test alias domain configuration when creating new companies """
-        company = self.env['res.company'].create({
+        company = self.env['res.company'].sudo().create({
             'email': '"Super Company" <super.company@test3.mycompany.com>',
             'name': 'Super Company',
         })
@@ -557,7 +557,7 @@ class TestAliasCompany(TestMailAliasCommon):
             'Default alias domain: sequence based')
 
         # respect forced value
-        company = self.env['res.company'].create({
+        company = self.env['res.company'].sudo().create({
             'alias_domain_id': self.mail_alias_domain_c2.id,
             'email': '"Yet Another Company" <yet.another.company@test.embed.mycompany.com>',
             'name': 'Yet Another Company',

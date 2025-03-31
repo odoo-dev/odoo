@@ -167,8 +167,8 @@ class TestJoEdiPrecision(JoEdiCommon):
     def test_jo_sales_invoice_precision(self):
         eur = self.env.ref('base.EUR')
         self.setup_currency_rate(eur, 1.41)
-        self.company.l10n_jo_edi_taxpayer_type = 'sales'
-        self.company.l10n_jo_edi_sequence_income_source = '16683693'
+        self.company.sudo().l10n_jo_edi_taxpayer_type = 'sales'
+        self.company.sudo().l10n_jo_edi_sequence_income_source = '16683693'
 
         self._validate_invoice_vals_jo_edi_numbers({
             'name': 'TestEIN022',
@@ -312,8 +312,8 @@ class TestJoEdiPrecision(JoEdiCommon):
         })
 
     def test_jo_special_invoice_precision(self):
-        self.company.l10n_jo_edi_taxpayer_type = 'special'
-        self.company.l10n_jo_edi_sequence_income_source = '16683693'
+        self.company.sudo().l10n_jo_edi_taxpayer_type = 'special'
+        self.company.sudo().l10n_jo_edi_sequence_income_source = '16683693'
         self._validate_invoice_vals_jo_edi_numbers({
             'name': 'TestEIN014',
             'invoice_date': '2023-11-10',

@@ -60,7 +60,7 @@ class TestStockLandedCosts(TestStockLandedCostsCommon):
 
         # Confirm and assign picking
         picking_landed_cost_1.picking_type_id.create_backorder = 'never'
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         picking_landed_cost_1.action_confirm()
         picking_landed_cost_1.action_assign()
         picking_landed_cost_1.move_ids.quantity = 5

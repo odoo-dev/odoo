@@ -12,7 +12,7 @@ class TestPhonenumbersBlacklist(TransactionCase):
         blacklist = self.env['phone.blacklist']
         bl_entry = blacklist.create({'number': '+917589632587'})
         # be sure there is no company fallback for this test
-        self.env.company.country_id = False
+        self.env.company.sudo().country_id = False
 
         for user_country in [
             self.env.ref("base.be"),  # other country (should work as complete number)

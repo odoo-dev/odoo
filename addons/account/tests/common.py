@@ -236,8 +236,8 @@ class AccountTestInvoicingCommon(ProductCommon):
 
     @classmethod
     def change_company_country(cls, company, country):
-        company.country_id = country
-        company.account_fiscal_country_id = country
+        company.sudo().country_id = country
+        company.sudo().account_fiscal_country_id = country
         for model in ('account.tax', 'account.tax.group'):
             cls.env.add_to_compute(
                 cls.env[model]._fields['country_id'],
@@ -265,7 +265,7 @@ class AccountTestInvoicingCommon(ProductCommon):
                 'name': 'Test tax group',
                 'company_id': cls.env.company.id,
             })
-            cls.env.company.country_id = cls.quick_ref('base.be')
+            cls.env.company.sudo().country_id = cls.quick_ref('base.be')
         return super().setup_independent_company(**kwargs)
 
     @classmethod
@@ -282,7 +282,7 @@ class AccountTestInvoicingCommon(ProductCommon):
         cls._use_chart_template(company, cls.chart_template)
         # if the currency_id was defined explicitly (or via the country), it should override the one from the coa
         if create_values.get('currency_id'):
-            company.currency_id = create_values['currency_id']
+            company.sudo().currency_id = create_values['currency_id']
         return company
 
     @classmethod
@@ -312,9 +312,9 @@ class AccountTestInvoicingCommon(ProductCommon):
             raise SkipTest(f"Module required for the test is not installed ({template_module.name})")
 
         # Install the chart template
-        cls.env['account.chart.template'].try_loading(chart_template_ref, company=company, install_demo=False)
+        cls.env['account.chart.template'].sudo().try_loading(chart_template_ref, company=company, install_demo=False)
         if not company.account_fiscal_country_id:
-            company.account_fiscal_country_id = cls.env.ref('base.us')
+            company.sudo().account_fiscal_country_id = cls.env.ref('base.us')
 
     @classmethod
     def collect_company_accounting_data(cls, company):
@@ -874,7 +874,7 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
 
     @contextmanager
     def with_tax_calculation_rounding_method(self, rounding_method):
-        self.env.company.tax_calculation_rounding_method = rounding_method
+        self.env.company.sudo().tax_calculation_rounding_method = rounding_method
         yield
 
     def _create_assert_test(

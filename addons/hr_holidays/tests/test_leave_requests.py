@@ -284,8 +284,8 @@ class TestLeaveRequests(TestHrHolidaysCommon):
     @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
     def test_timezone_company_leave_request(self):
         """ Create a leave request for a company in another timezone """
-        company = self.env['res.company'].create({'name': "Hergé"})
-        company.resource_calendar_id.tz = 'Australia/Sydney'  # GMT+12
+        company = self.env['res.company'].sudo().create({'name': "Hergé"})
+        company.sudo().resource_calendar_id.tz = 'Australia/Sydney'  # GMT+12
         leave = self.env['hr.leave'].new({
             'employee_id': self.employee_emp.id,
             'holiday_status_id': self.holidays_type_1.id,
@@ -303,7 +303,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
     def test_timezone_company_validated(self):
         """ Create a leave request for a company in another timezone and validate it """
         self.env.user.tz = 'Australia/Sydney' # GMT+12
-        company = self.env['res.company'].create({'name': "Hergé"})
+        company = self.env['res.company'].sudo().create({'name': "Hergé"})
         employee = self.env['hr.employee'].create({'name': "Remi", 'company_id': company.id})
         leave_wizard_form = Form(self.env['hr.leave.generate.multi.wizard'])
         leave_wizard_form.allocation_mode = 'company'
@@ -344,7 +344,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         })
         employee = self.employee_emp
         employee.resource_calendar_id = calendar
-        self.env.user.company_id.resource_calendar_id = calendar
+        self.env.user.company_id.sudo().resource_calendar_id = calendar
         leave_type = self.env['hr.leave.type'].create({
             'name': 'Paid Time Off',
             'request_unit': 'hour',
@@ -408,7 +408,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         })
         employee = self.employee_emp
         employee.resource_calendar_id = calendar
-        self.env.user.company_id.resource_calendar_id = calendar
+        self.env.user.company_id.sudo().resource_calendar_id = calendar
         leave_type = self.env['hr.leave.type'].create({
             'name': 'Paid Time Off',
             'request_unit': 'hour',
@@ -527,7 +527,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         })
         employee = self.employee_emp
         employee.resource_calendar_id = calendar
-        self.env.user.company_id.resource_calendar_id = calendar
+        self.env.user.company_id.sudo().resource_calendar_id = calendar
         leave_type = self.env['hr.leave.type'].create({
             'name': 'Sick',
             'request_unit': 'hour',
@@ -673,7 +673,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         req1_form.save().action_approve()
 
     def test_leave_with_public_holiday_other_company(self):
-        other_company = self.env['res.company'].create({
+        other_company = self.env['res.company'].sudo().create({
             'name': 'Test Company 2',
         })
         # Create a public holiday for the second company

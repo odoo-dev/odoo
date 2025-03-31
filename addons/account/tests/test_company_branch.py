@@ -230,7 +230,7 @@ class TestCompanyBranch(AccountTestInvoicingCommon):
             'code': 'zz',
             'currency_id': self.other_currency.id
         })
-        root_company = self.env['res.company'].create({
+        root_company = self.env['res.company'].sudo().create({
             'name': 'Gold Company',
             'country_id': test_country.id,
         })

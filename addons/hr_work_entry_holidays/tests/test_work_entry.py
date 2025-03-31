@@ -61,7 +61,7 @@ class TestWorkeEntryHolidaysWorkEntry(TestWorkEntryHolidaysBase):
             there is an issue when accessing to the time off
             in Hong Kong.
         """
-        company = self.env['res.company'].create({'name': 'Another Company'})
+        company = self.env['res.company'].sudo().create({'name': 'Another Company'})
 
         employee = self.env['hr.employee'].create({
             'name': 'New Employee',

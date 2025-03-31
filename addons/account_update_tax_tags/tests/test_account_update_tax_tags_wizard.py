@@ -359,7 +359,7 @@ class TestAccountUpdateTaxTagsWizard(AccountTestInvoicingCommon):
 
     def test_update_with_caba_taxes(self):
         """  Ensure the CABA (cash basis) moves linked to the invoices are updated too. """
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
         tax = self._create_tax('caba_tax', 15, tag_names=self.tag_names, tax_exigibility='on_payment')
         invoice = self._create_invoice(taxes=tax, state='posted')
         # make payment
@@ -386,7 +386,7 @@ class TestAccountUpdateTaxTagsWizard(AccountTestInvoicingCommon):
         self.assertFalse(caba_counterpart_lines.tax_tag_ids, 'CABA counterpart lines should not have changed.')
 
     def test_update_caba_taxes_with_negative_line(self):
-        self.company.tax_exigibility = True
+        self.company.sudo().tax_exigibility = True
         tax = self._create_tax('caba_tax', 15, tag_names=self.tag_names, tax_exigibility='on_payment')
         invoice = self.init_invoice('out_invoice', invoice_date='2023-02-23', amounts=[-50, 100], taxes=tax, post=True)
         # make payment

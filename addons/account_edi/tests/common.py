@@ -44,7 +44,7 @@ class AccountEdiTestCommon(AccountTestInvoicingCommon):
             cls.edi_format = cls.env.ref(cls.edi_format_ref)
         else:
             with cls.mock_edi(cls, _needs_web_services_method=_generate_mocked_needs_web_services(True)):
-                cls.edi_format = cls.env['account.edi.format'].sudo().create({
+                cls.edi_format = cls.env['account.edi.format'].create({
                     'name': 'Test EDI format',
                     'code': 'test_edi',
                 })

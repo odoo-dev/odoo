@@ -116,7 +116,7 @@ class TestMultiCompanyFlows(PaymentHttpCommon):
         token = self._create_token(partner_id=self.portal_partner.id)
 
         # assign user to another company
-        company_b = self.env['res.company'].create({'name': 'Company B'})
+        company_b = self.env['res.company'].sudo().create({'name': 'Company B'})
         self.portal_user.write({'company_ids': [company_b.id], 'company_id': company_b.id})
 
         # Log in as portal user

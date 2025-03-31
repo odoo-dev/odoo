@@ -759,7 +759,7 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
             "allow_billable": True,
         })
 
-        company_a, company_b = self.env['res.company'].create([
+        company_a, company_b = self.env['res.company'].sudo().create([
             {"name": "Company A"},
             {"name": "Company B"},
         ])

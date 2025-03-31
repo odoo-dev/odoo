@@ -664,7 +664,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         vendor = self.env['res.partner'].create({'name': 'super vendor'})
 
         company_1 = self.kit_parent.bom_ids.company_id
-        company_2 = self.env['res.company'].create({
+        company_2 = self.env['res.company'].sudo().create({
             'name': 'TestCompany2',
         })
 
@@ -720,9 +720,9 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         and the current company has a manufacturing security lead time set.
         """
         # set purchase security lead time to 20 days
-        self.env.company.po_lead = 20
+        self.env.company.sudo().po_lead = 20
         # set manufacturing security lead time to 25 days
-        self.env.company.manufacturing_lead = 25
+        self.env.company.sudo().manufacturing_lead = 25
         product = self.env['product.product'].create({
             'name': 'super product',
             'is_storable': True,

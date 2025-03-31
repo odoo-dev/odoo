@@ -171,7 +171,7 @@ class TestWithholdingAndPensionFundTaxes(TestItEdi):
         with self.assertRaises(ValidationError):
             self.withholding_sale_tax.l10n_it_withholding_reason = False
         with self.assertRaises(ValidationError):
-            self.company.account_sale_tax_id.l10n_it_withholding_type = "RT02"
+            self.company.sudo().account_sale_tax_id.l10n_it_withholding_type = "RT02"
 
     ####################################################
     # WITHHOLDING TAX

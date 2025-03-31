@@ -343,7 +343,7 @@ class TestTransferWizard(AccountTestInvoicingCommon):
 
         destination_line = transfer_move.line_ids.filtered(lambda x: x.account_id == self.test_currency_account)
         self.assertEqual(destination_line.currency_id, self.test_currency_3, "Transferring to an account with a currency set should keep this currency on the transfer line.")
-        self.assertAlmostEqual(destination_line.amount_currency, 3000, self.company.currency_id.decimal_places, "Transferring two lines with different currencies (and the same partner) on an account with a currency set should convert the balance of these lines into this account's currency (here (270 + 30) * 10 = 3000)")
+        self.assertAlmostEqual(destination_line.amount_currency, 3000, self.company.sudo().currency_id.decimal_places, "Transferring two lines with different currencies (and the same partner) on an account with a currency set should convert the balance of these lines into this account's currency (here (270 + 30) * 10 = 3000)")
 
 
     def test_transfer_wizard_no_currency_conversion(self):
@@ -373,13 +373,13 @@ class TestTransferWizard(AccountTestInvoicingCommon):
         before the lock date, the adjustment entry is created on the first end of month after the lock date.
         """
         # Set up accrual accounts
-        self.company_data['company'].expense_accrual_account_id = self.env['account.account'].create({
+        self.company_data['company'].sudo().expense_accrual_account_id = self.env['account.account'].create({
             'name': 'Expense Accrual Account',
             'code': '113226',
             'account_type': 'asset_prepayments',
             'reconcile': True,
         })
-        self.company_data['company'].revenue_accrual_account_id = self.env['account.account'].create({
+        self.company_data['company'].sudo().revenue_accrual_account_id = self.env['account.account'].create({
             'name': 'Revenue Accrual Account',
             'code': '226113',
             'account_type': 'liability_current',

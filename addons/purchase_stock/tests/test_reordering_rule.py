@@ -1015,7 +1015,7 @@ class TestReorderingRule(TransactionCase):
         """
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
 
-        self.env.company.days_to_purchase = 10
+        self.env.company.sudo().days_to_purchase = 10
         expected_order_date = dt.combine(dt.today() + td(days=10), time(12))
         expected_delivery_date = expected_order_date + td(days=1.0)
 
@@ -1453,7 +1453,7 @@ class TestReorderingRule(TransactionCase):
 
         Check that the purchase order is created in COMP2, using its set of supplier.
         """
-        company_a, company_b = self.env['res.company'].create([
+        company_a, company_b = self.env['res.company'].sudo().create([
             {'name': 'Company A'},
             {'name': 'Company B'},
         ])

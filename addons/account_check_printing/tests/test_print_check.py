@@ -59,11 +59,11 @@ class TestPrintCheck(AccountTestInvoicingCommon):
         }])
 
         # Check pages.
-        self.company_data['company'].account_check_printing_multi_stub = True
+        self.company_data['company'].sudo().account_check_printing_multi_stub = True
         report_pages = payment._check_get_pages()
         self.assertEqual(len(report_pages), int(math.ceil(len(in_invoices) / INV_LINES_PER_STUB)))
 
-        self.company_data['company'].account_check_printing_multi_stub = False
+        self.company_data['company'].sudo().account_check_printing_multi_stub = False
         report_pages = payment._check_get_pages()
         self.assertEqual(len(report_pages), 1)
 
@@ -104,11 +104,11 @@ class TestPrintCheck(AccountTestInvoicingCommon):
         }])
 
         # Check pages.
-        self.company_data['company'].account_check_printing_multi_stub = True
+        self.company_data['company'].sudo().account_check_printing_multi_stub = True
         report_pages = payment._check_get_pages()
         self.assertEqual(len(report_pages), int(math.ceil(len(out_refunds) / INV_LINES_PER_STUB)))
 
-        self.company_data['company'].account_check_printing_multi_stub = False
+        self.company_data['company'].sudo().account_check_printing_multi_stub = False
         report_pages = payment._check_get_pages()
         self.assertEqual(len(report_pages), 1)
 

@@ -88,7 +88,7 @@ class TestFiscal(L10nInTestInvoicingCommon):
             account_fiscal_country_id=self.country_in.id,
         )
         with self._set_env_company(self.outside_in_company):
-            branch_2 = self.env['res.company'].create({
+            branch_2 = self.env['res.company'].sudo().create({
                 'name': 'Branch 2',
                 'parent_id': self.default_company.id,
                 'account_fiscal_country_id': self.country_in.id,

@@ -26,7 +26,7 @@ class FormatAddressCase(ViewCase):
         self.assertNotIn('"city"', arch)
 
         # custom view, address_view defined
-        self.env.company.country_id.address_view_id = address_view
+        self.env.company.sudo().country_id.address_view_id = address_view
         arch = self.env[model].get_view(view.id)['arch']
         self.assertNotIn('"street"', arch)
         self.assertIn('"city"', arch)
@@ -43,7 +43,7 @@ class FormatAddressCase(ViewCase):
         belgium.address_view_id = None
         france.address_view_id = address_view
 
-        company_a, company_b = self.env['res.company'].create([
+        company_a, company_b = self.env['res.company'].sudo().create([
             {'name': 'foo', 'country_id': belgium.id},
             {'name': 'bar', 'country_id': france.id},
         ])
@@ -59,5 +59,5 @@ class FormatAddressCase(ViewCase):
 
 class TestPartnerFormatAddress(FormatAddressCase):
     def test_address_view(self):
-        self.env.company.country_id = self.env.ref('base.us')
+        self.env.company.sudo().country_id = self.env.ref('base.us')
         self.assertAddressView('res.partner')

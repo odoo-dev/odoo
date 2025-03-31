@@ -16,7 +16,7 @@ class TestAccountEdi(AccountEdiTestCommon, CronMixinCase):
         cls.env['account.edi.document'].search([]).unlink()
         cls.env['account.edi.format'].search([]).unlink()
 
-        cls.test_edi_format = cls.env['account.edi.format'].sudo().create({
+        cls.test_edi_format = cls.env['account.edi.format'].create({
             'name': 'test_edi_format',
             'code': 'test_edi_format',
         })
@@ -140,6 +140,8 @@ class TestAccountEdi(AccountEdiTestCommon, CronMixinCase):
             capt.records.ensure_one()
 
     def test_cron_self_trigger(self):
+        self.env.user.group_ids += self.quick_ref('base.group_system')
+
         # Process single job by CRON call (and thus, disable the auto-commit).
         edi_cron = self.env.ref('account_edi.ir_cron_edi_network')
         edi_cron.code = 'model._cron_process_documents_web_services(job_count=1)'

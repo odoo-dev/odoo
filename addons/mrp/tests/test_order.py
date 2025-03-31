@@ -586,7 +586,7 @@ class TestMrpOrder(TestMrpCommon):
                 (0, 0, {'product_id': self.product_8.id, 'product_qty': 4.16})
             ]
         })
-        self.env['decimal.precision'].search([('name', '=', 'Product Unit')]).digits = 0
+        self.env['decimal.precision'].sudo().search([('name', '=', 'Product Unit')]).digits = 0
         production_form = Form(self.env['mrp.production'])
         production_form.product_id = self.product_6
         production_form.bom_id = bom_eff
@@ -2134,7 +2134,7 @@ class TestMrpOrder(TestMrpCommon):
 
         # the overall decimal accuracy is set to 3 digits
         precision = self.env.ref('uom.decimal_product_uom')
-        precision.digits = 3
+        precision.sudo().digits = 3
 
         # define L and ml, L has rounding .001 but ml has rounding .01
         # when producing e.g. 187.5ml, it will be rounded to .188L
@@ -2335,10 +2335,10 @@ class TestMrpOrder(TestMrpCommon):
         # Workcenter is based in Bangkok
         # Possible working hours are Monday to Friday, from 8:00 to 12:00 and from 13:00 to 17:00 (UTC+7)
         workcenter = self.workcenter_1
-        workcenter.resource_calendar_id.tz = 'Asia/Bangkok'
+        workcenter.resource_calendar_id.sudo().tz = 'Asia/Bangkok'
         # The test will try to plan some WO on next Monday. We need to unlink all
         # useless times off to ensure that nothing will disturb the slot reservation
-        (workcenter.resource_calendar_id.global_leave_ids | workcenter.resource_calendar_id.leave_ids).unlink()
+        (workcenter.resource_calendar_id.sudo().global_leave_ids | workcenter.resource_calendar_id.leave_ids).unlink()
 
         bom = self.env['mrp.bom'].create({
             'product_tmpl_id': self.product_1.product_tmpl_id.id,
@@ -2498,10 +2498,10 @@ class TestMrpOrder(TestMrpCommon):
 
     def test_products_with_variants(self):
         """Check for product with different variants with same bom"""
-        attribute = self.env['product.attribute'].create({
+        attribute = self.env['product.attribute'].sudo().create({
             'name': 'Test Attribute',
         })
-        attribute_values = self.env['product.attribute.value'].create([{
+        attribute_values = self.env['product.attribute.value'].sudo().create([{
             'name': 'Value 1',
             'attribute_id': attribute.id,
             'sequence': 1,
@@ -2510,17 +2510,17 @@ class TestMrpOrder(TestMrpCommon):
             'attribute_id': attribute.id,
             'sequence': 2,
         }])
-        product = self.env['product.template'].create({
+        product = self.env['product.template'].sudo().create({
             "attribute_line_ids": [
                 [0, 0, {"attribute_id": attribute.id, "value_ids": [[6, 0, attribute_values.ids]]}]
             ],
             "name": "Product with variants",
         })
 
-        variant_1 = product.product_variant_ids[0]
-        variant_2 = product.product_variant_ids[1]
+        variant_1 = product.product_variant_ids[0].with_env(self.env)
+        variant_2 = product.product_variant_ids[1].with_env(self.env)
 
-        component = self.env['product.template'].create({
+        component = self.env['product.template'].sudo().create({
             "name": "Component",
         })
 
@@ -3169,7 +3169,7 @@ class TestMrpOrder(TestMrpCommon):
         components
         """
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], order='id', limit=1)
-        warehouse.manu_type_id.reservation_method = 'manual'
+        warehouse.manu_type_id.sudo().reservation_method = 'manual'
 
         for product in self.product_1 + self.product_2:
             product.is_storable = True
@@ -3202,7 +3202,7 @@ class TestMrpOrder(TestMrpCommon):
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
         mto_route = warehouse.mto_pull_id.route_id
         manufacture_route = warehouse.manufacture_pull_id.route_id
-        mto_route.active = True
+        mto_route.sudo().active = True
 
         grandparent, parent, child = self.env['product.product'].create([{
             'name': n,
@@ -3224,8 +3224,8 @@ class TestMrpOrder(TestMrpCommon):
         } for finished_product, compo in [(grandparent, parent), (parent, child), (child, component)]])
         none_production = self.env['mrp.production']
         for steps, case_description, in [('mrp_one_step', '1-step Manufacturing'), ('pbm', '2-steps Manufacturing'), ('pbm_sam', '3-steps Manufacturing')]:
-            warehouse.manufacture_steps = steps
-            warehouse.manufacture_mto_pull_id.procure_method = "make_to_order"
+            warehouse.sudo().manufacture_steps = steps
+            warehouse.sudo().manufacture_mto_pull_id.procure_method = "make_to_order"
             grandparent_production_form = Form(self.env['mrp.production'])
             grandparent_production_form.product_id = grandparent
             grandparent_production = grandparent_production_form.save()
@@ -3395,7 +3395,7 @@ class TestMrpOrder(TestMrpCommon):
     def test_planning_cancelled_workorder(self):
         """Test when plan start time for workorders, cancelled workorders won't be taken into account.
         """
-        self.env.company.resource_calendar_id.tz = 'Europe/Brussels'
+        self.env.company.sudo().resource_calendar_id.tz = 'Europe/Brussels'
         workcenter_1 = self.env['mrp.workcenter'].create({
             'name': 'wc1',
             'default_capacity': 1,
@@ -3544,7 +3544,7 @@ class TestMrpOrder(TestMrpCommon):
             'relative_uom_id': self.uom_unit.id,
         })
         # Only consider whole units
-        self.env['decimal.precision'].search([('name', '=', 'Product Unit')]).digits = 0
+        self.env['decimal.precision'].sudo().search([('name', '=', 'Product Unit')]).digits = 0
 
         test_bom = self.env['mrp.bom'].create({
             'product_tmpl_id': self.product_7_template.id,
@@ -3622,7 +3622,7 @@ class TestMrpOrder(TestMrpCommon):
         Test that the operation type set on the bom is set in the manufacturing order
         when selecting the BoM"""
         self.env.user.group_ids += self.env.ref("stock.group_adv_location")
-        picking_type = self.env['stock.picking.type'].create({
+        picking_type = self.env['stock.picking.type'].sudo().create({
             'name': 'new_picking_type',
             'code': 'internal',
             'sequence_code': 'NPT',
@@ -3652,7 +3652,7 @@ class TestMrpOrder(TestMrpCommon):
         """
         stock_location_1 = self.env.ref('stock.stock_location_stock')
         stock_location_2 = stock_location_1.copy()
-        picking_type_1 = self.env['stock.picking.type'].create({
+        picking_type_1 = self.env['stock.picking.type'].sudo().create({
             'name': 'new_picking_type_1',
             'code': 'mrp_operation',
             'sequence_code': 'PT1',
@@ -3687,7 +3687,7 @@ class TestMrpOrder(TestMrpCommon):
 
     def test_onchange_bom_ids_and_picking_type(self):
         warehouse01 = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
-        warehouse02, warehouse03 = self.env['stock.warehouse'].create([
+        warehouse02, warehouse03 = self.env['stock.warehouse'].sudo().create([
             {'name': 'Second Warehouse', 'code': 'WH02'},
             {'name': 'Third Warehouse', 'code': 'WH03'},
         ])
@@ -3953,7 +3953,7 @@ class TestMrpOrder(TestMrpCommon):
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
         mto_route = warehouse.mto_pull_id.route_id
         manufacture_route = warehouse.manufacture_pull_id.route_id
-        mto_route.active = True
+        mto_route.sudo().active = True
 
         product01, product02, product03 = self.env['product.product'].create([{
             'name': 'Product %s' % (i + 1),
@@ -4029,7 +4029,7 @@ class TestMrpOrder(TestMrpCommon):
         """
         self.stock_location = self.env.ref('stock.stock_location_stock')
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
-        warehouse.manufacture_steps = 'pbm'
+        warehouse.sudo().manufacture_steps = 'pbm'
 
         mo, _bom, _p_final, p1, p2 = self.generate_mo(qty_final=5.0, qty_base_1=1.0, qty_base_2=1.0)
         mo.action_confirm()
@@ -4054,7 +4054,7 @@ class TestMrpOrder(TestMrpCommon):
         """
         rule = self.env['stock.rule'].search([('action', '=', 'manufacture')], limit=1)
 
-        self.env.company.manufacturing_lead = 1
+        self.env.company.sudo().manufacturing_lead = 1
         self.bom_1.days_to_prepare_mo = 2
         self.bom_1.produce_delay = 3
         delays, _ = rule._get_lead_days(self.bom_1.product_id, bom=self.bom_1)
@@ -4062,8 +4062,8 @@ class TestMrpOrder(TestMrpCommon):
 
         # switch to the 3 steps, only pre-production rules delays will be taken into account
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
-        warehouse.manufacture_steps = 'pbm_sam'
-        warehouse.pbm_route_id.rule_ids.delay = 100
+        warehouse.sudo().manufacture_steps = 'pbm_sam'
+        warehouse.sudo().pbm_route_id.rule_ids.delay = 100
         delays, _ = rule._get_lead_days(self.bom_1.product_id, bom=self.bom_1)
         self.assertEqual(delays['total_delay'], self.env.company.manufacturing_lead + self.bom_1.days_to_prepare_mo + self.bom_1.produce_delay + 100 * 2)
 
@@ -4100,7 +4100,7 @@ class TestMrpOrder(TestMrpCommon):
         Test that the moves are corrltly removed when the poduct variant is changed
         """
         # Add another attribute line to test efficiency the function bom_line check
-        size_attribute_line = self.env['product.template.attribute.line'].create([{
+        size_attribute_line = self.env['product.template.attribute.line'].sudo().create([{
                 'product_tmpl_id': self.product_7_template.id,
                  'attribute_id': self.size_attribute.id,
                  'value_ids': [(6, 0, self.size_attribute.value_ids.ids)]
@@ -4232,7 +4232,7 @@ class TestMrpOrder(TestMrpCommon):
     def test_batch_production_02(self):
         """ Test the wizard mrp.batch.produce with a single tracked serial.
         """
-        self.env['stock.picking.type'].search([('code', '=', 'mrp_operation')]).use_create_components_lots = True
+        self.env['stock.picking.type'].sudo().search([('code', '=', 'mrp_operation')]).use_create_components_lots = True
         self.product_1.tracking = 'serial'
         self.product_4.tracking = 'serial'
         self.bom_1.product_uom_id = self.product_4.uom_id
@@ -4273,7 +4273,7 @@ class TestMrpOrder(TestMrpCommon):
     def test_batch_production_03(self):
         """ Test the wizard mrp.batch.produce with a mix of lot and serial.
         """
-        self.env['stock.picking.type'].search([('code', '=', 'mrp_operation')]).use_create_components_lots = True
+        self.env['stock.picking.type'].sudo().search([('code', '=', 'mrp_operation')]).use_create_components_lots = True
         self.product_1.tracking = 'serial'
         self.product_2.tracking = 'lot'
         self.product_4.tracking = 'serial'
@@ -4394,7 +4394,7 @@ class TestMrpOrder(TestMrpCommon):
         will be set too. As if the finish date is not set the planned workorder will not
         be shown in planning gantt view
         """
-        self.env.company.resource_calendar_id.tz = 'Europe/Brussels'
+        self.env.company.sudo().resource_calendar_id.tz = 'Europe/Brussels'
         mo = self.env['mrp.production'].create({
             'product_id': self.product.id,
             'product_uom_id': self.bom_1.product_uom_id.id,
@@ -4707,7 +4707,7 @@ class TestMrpOrder(TestMrpCommon):
         routes = [Command.link(manufacture_route.id)]
         if mto:
             mto_route = self.env.ref('stock.route_warehouse0_mto')
-            mto_route.active = True
+            mto_route.sudo().active = True
             routes.append(Command.link(mto_route.id))
         product_to_build = self.env['product.product'].create({
             'name': 'Young Tom',
@@ -4987,7 +4987,7 @@ class TestMrpOrder(TestMrpCommon):
     def test_workorder_planning_validity_with_workcenters(self):
         # Create a workcenter with no pauses
         week_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        resource_calendar = self.env['resource.calendar'].create({
+        resource_calendar = self.env['resource.calendar'].sudo().create({
             'name': 'Default Calendar',
             'company_id': False,
             'hours_per_day': 24,
@@ -5092,7 +5092,7 @@ class TestMrpOrder(TestMrpCommon):
             - If the picking is validated, a new picking is created for that extra quantity.
         """
         warehouse = self.env['stock.warehouse'].search([], limit=1)
-        warehouse.write({'manufacture_steps': 'pbm'})
+        warehouse.sudo().write({'manufacture_steps': 'pbm'})
 
         product = self.env['product.product'].create({
             'name': 'Product',
@@ -5201,7 +5201,7 @@ class TestMrpOrder(TestMrpCommon):
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
         mto_route = warehouse.mto_pull_id.route_id
         manufacture_route = warehouse.manufacture_pull_id.route_id
-        mto_route.active = True
+        mto_route.sudo().active = True
 
         grandparent, parent, child = self.env['product.product'].create([{
             'name': n,
@@ -5241,8 +5241,8 @@ class TestMrpOrder(TestMrpCommon):
     def test_workcenter_with_resource_calendar_from_another_company(self):
         """Test that only the resource calendars from the same
         company as the work center can be set."""
-        new_company = self.env['res.company'].create({'name': "new company"})
-        resource_calendar = self.env['resource.calendar'].create({
+        new_company = self.env['res.company'].sudo().create({'name': "new company"})
+        resource_calendar = self.env['resource.calendar'].sudo().create({
             'name': 'Default Calendar',
             'company_id': new_company.id,
             'hours_per_day': 24,

@@ -47,7 +47,7 @@ class TestHrLeaveTypeTour(HttpCase):
         leaves_on_freeze_date.sudo().unlink()
         company_1 = self.env.company
         company_1.name = 'company_1'
-        company_2 = self.env['res.company'].create({'name': 'company_2'})
+        company_2 = self.env['res.company'].sudo().create({'name': 'company_2'})
         self.env["res.users"].browse(2).write({
             "company_ids": [Command.clear(), Command.link(company_1.id), Command.link(company_2.id)]
         })

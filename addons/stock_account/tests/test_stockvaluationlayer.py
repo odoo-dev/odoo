@@ -351,7 +351,7 @@ class TestStockValuationStandard(TestStockValuationCommon):
             'symbol': 'O',
             'rounding': 1,
         })
-        new_company = self.env['res.company'].create({
+        new_company = self.env['res.company'].sudo().create({
             'name': 'Super Company',
             'currency_id': currency.id,
         })
@@ -867,7 +867,7 @@ class TestStockValuationFIFO(TestStockValuationCommon):
             'symbol': 'O',
             'rounding': 1,
         })
-        new_company = self.env['res.company'].create({
+        new_company = self.env['res.company'].sudo().create({
             'name': 'Super Company',
             'currency_id': currency.id,
         })
@@ -1319,7 +1319,7 @@ class TestAngloSaxonAccounting(AccountTestInvoicingCommon, TestStockValuationCom
     def test_return_delivery_storno(self):
         """ When using STORNO accounting, reverse accounting moves should have negative values for credit/debit.
         """
-        self.env.company.account_storno = True
+        self.env.company.sudo().account_storno = True
         self.product1.categ_id.property_cost_method = 'fifo'
 
         self._make_in_move(self.product1, 10, unit_cost=10)

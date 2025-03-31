@@ -86,7 +86,7 @@ class TestSaleStockMultiCompany(TestSaleCommon, ValuationReconciliationTestCommo
         and that the resulting move can be created.
         """
         parent_company = self.env.company
-        branch_company = self.env['res.company'].create({
+        branch_company = self.env['res.company'].sudo().create({
             'name': 'Branch Company',
             'parent_id': parent_company.id,
         })

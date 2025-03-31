@@ -10,9 +10,9 @@ from odoo import Command
 class TestUi(TestPointOfSaleHttpCommon):
     @classmethod
     def _get_main_company(cls):
-        cls.company_data["company"].country_id = cls.env.ref("base.es").id
-        cls.company_data["company"].currency_id = cls.env.ref("base.EUR").id
-        cls.company_data["company"].vat = "ESA12345674"
+        cls.company_data["company"].sudo().country_id = cls.env.ref("base.es").id
+        cls.company_data["company"].sudo().currency_id = cls.env.ref("base.EUR").id
+        cls.company_data["company"].sudo().vat = "ESA12345674"
         return cls.company_data["company"]
 
     def test_spanish_pos(self):

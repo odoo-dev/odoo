@@ -270,7 +270,7 @@ class TestValuationReconciliation(TestValuationReconciliationCommon):
         This test checks if there is a step in the method that prevents this.
         """
 
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
 
         products = [self.test_product_delivery, self.test_product_delivery_2]
 

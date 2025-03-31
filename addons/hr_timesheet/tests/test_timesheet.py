@@ -393,8 +393,8 @@ class TestTimesheet(TestCommonTimesheet):
     def test_create_timesheet_employee_not_in_company(self):
         ''' ts.employee_id only if the user has an employee in the company or one employee for all companies.
         '''
-        company_2 = self.env['res.company'].create({'name': 'Company 2'})
-        company_3 = self.env['res.company'].create({'name': 'Company 3'})
+        company_2 = self.env['res.company'].sudo().create({'name': 'Company 2'})
+        company_3 = self.env['res.company'].sudo().create({'name': 'Company 3'})
 
         analytic_plan = self.env['account.analytic.plan'].create({
             'name': 'Plan Test',
@@ -442,7 +442,7 @@ class TestTimesheet(TestCommonTimesheet):
 
     def test_create_timesheet_with_multi_company(self):
         """ Always set the current company in the timesheet, not the employee company """
-        company_4 = self.env['res.company'].create({'name': 'Company 4'})
+        company_4 = self.env['res.company'].sudo().create({'name': 'Company 4'})
         empl_employee, archived_employee = self.env['hr.employee'].with_company(company_4).create([
             {'name': 'Employee 3'},
             {'name': 'Employee 4', 'active': False},
@@ -615,7 +615,7 @@ class TestTimesheet(TestCommonTimesheet):
             'unit_amount': 8,
             'employee_id': self.empl_employee2.id
         })
-        self.env.company.timesheet_encode_uom_id = self.env.ref('uom.product_uom_day')
+        self.env.company.sudo().timesheet_encode_uom_id = self.env.ref('uom.product_uom_day')
         self.assertEqual(project.total_timesheet_time, 1, "Total timesheet time should be 1 day")
         self.assertEqual(project.timesheet_encode_uom_id, self.env.company.timesheet_encode_uom_id, "Timesheet encode uom should be the one from the company of the env, since the project has no company.")
 

@@ -230,7 +230,7 @@ class TestWorkEntry(TestWorkEntryBase):
             'name': 'HK Employee',
             'resource_calendar_id': hk_resource_calendar_id.id,
         })
-        self.env.company.resource_calendar_id = hk_resource_calendar_id
+        self.env.company.sudo().resource_calendar_id = hk_resource_calendar_id
         self.env['hr.contract'].create({
             'date_start': datetime(2023, 8, 1),
             'name': 'Test Contract',

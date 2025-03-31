@@ -26,7 +26,7 @@ class TestFECExport(AccountTestInvoicingCommon):
     def test_fec_sub_companies(self):
         """When exporting FEC, data from child companies should be included"""
         main_company = self.env.company
-        branch_a, branch_b = self.env['res.company'].create([
+        branch_a, branch_b = self.env['res.company'].sudo().create([
             {
                 'name': 'Branch A',
                 'country_id': main_company.country_id.id,
@@ -37,7 +37,7 @@ class TestFECExport(AccountTestInvoicingCommon):
                 'parent_id': main_company.id
             }
         ])
-        branch_a1 = self.env['res.company'].create({
+        branch_a1 = self.env['res.company'].sudo().create({
             'name': 'Branch A1',
             'country_id': main_company.country_id.id,
             'parent_id': branch_a.id,

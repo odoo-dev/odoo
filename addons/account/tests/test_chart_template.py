@@ -395,7 +395,7 @@ class TestChartTemplate(AccountTestInvoicingCommon):
                         tax['tax_src_id'] = 'test_tax_3_template'
                     if tax['tax_dest_id'] == 'test_tax_1_template':
                         tax['tax_dest_id'] = 'test_tax_3_template'
-            data['res.company'][self.env.company.id]['account_sale_tax_id'] = 'test_tax_3_template'
+            data['res.company'][self.env.company.sudo().id]['account_sale_tax_id'] = 'test_tax_3_template'
             return data
 
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
@@ -420,7 +420,7 @@ class TestChartTemplate(AccountTestInvoicingCommon):
 
         # On a new company you would never see the old tax.
         # In case users need it, they can duplicate the new one and change the rate.
-        new_company = self.env['res.company'].create({'name': 'New Company'})
+        new_company = self.env['res.company'].sudo().create({'name': 'New Company'})
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
             self.env['account.chart.template'].try_loading('test', company=new_company, install_demo=False)
 
@@ -556,7 +556,7 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             data['account.tax']['test_tax_1_template']['amount'] += 1
             return data
 
-        company_2 = self.env['res.company'].create({
+        company_2 = self.env['res.company'].sudo().create({
             'name': 'TestCompany2',
             'country_id': self.env.ref('base.be').id,
         })
@@ -720,8 +720,8 @@ class TestChartTemplate(AccountTestInvoicingCommon):
     def test_branch(self):
         # Test the auto-installation of a chart template (including demo data) on a branch
         # Create a new main company, because install_demo doesn't do anything when reloading data
-        company = self.env['res.company'].create([{'name': 'Test Company'}])
-        branch = self.env['res.company'].create([{
+        company = self.env['res.company'].sudo().create([{'name': 'Test Company'}])
+        branch = self.env['res.company'].sudo().create([{
             'name': 'Test Branch',
             'parent_id': company.id,
         }])
@@ -743,7 +743,7 @@ class TestChartTemplate(AccountTestInvoicingCommon):
 
         # Check that company fields that should depend on CoA are reset when changing CoA
         # (afaik there is only `anglo_saxon_accounting`)
-        self.company.anglo_saxon_accounting = True
+        self.company.sudo().anglo_saxon_accounting = True
 
         with (
             patch.object(AccountChartTemplate, '_get_chart_template_mapping', _get_chart_template_mapping),
@@ -752,7 +752,7 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             self.env['account.chart.template'].try_loading('other_test', company=self.company, install_demo=True)
 
             # Create a branch and an unrelated company
-            branch, other_company = self.env['res.company'].create([
+            branch, other_company = self.env['res.company'].sudo().create([
                 {
                     'name': 'Test Branch',
                     'parent_id': self.company.id,
@@ -918,7 +918,7 @@ class TestChartTemplate(AccountTestInvoicingCommon):
         # Tranlations should fall back to more generic locale 'fr'
 
         # Target lang for untranslatable fields
-        company.partner_id.lang = self.env['res.lang']._activate_lang('fr_BE').code
+        company.sudo().partner_id.lang = self.env['res.lang']._activate_lang('fr_BE').code
 
         # Init empty mock translations to make sure we do not use unintended translation
         mock_python_translations = {}
@@ -1062,7 +1062,7 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             In this test we will try to install a chart template to a company without a country. The expected behavior
             is that the country of the chart template will be set on the company
         """
-        company = self.env['res.company'].create({'name': 'Test Company Without country'})
+        company = self.env['res.company'].sudo().create({'name': 'Test Company Without country'})
         self.assertFalse(company.country_id)
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=test_get_data, autospec=True):
             self.env['account.chart.template'].try_loading('test', company=company, install_demo=False)

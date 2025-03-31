@@ -10,7 +10,7 @@ from odoo.addons.mail.tests.common import MailCommon
 class TestLivechatCommon(MailCommon, TransactionCaseWithUserDemo):
     def setUp(self):
         super().setUp()
-        self.env.company.email = "test@test.example.com"
+        self.env.company.sudo().email = "test@test.example.com"
         self.base_datetime = fields.Datetime.from_string("2019-11-11 21:30:00")
 
         self.group_user = self.env.ref('base.group_user')

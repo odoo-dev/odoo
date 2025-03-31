@@ -37,7 +37,7 @@ class TestUi(AccountTestInvoicingCommon, OnlinePaymentCommon):
             return res
 
         with patch.object(AccountPaymentMethod, '_get_payment_method_information', _get_payment_method_information):
-            cls.env['account.payment.method'].sudo().create({
+            cls.env['account.payment.method'].create({
                 'name': 'Dummy method',
                 'code': 'none',
                 'payment_type': 'inbound'
@@ -283,7 +283,7 @@ class TestUi(AccountTestInvoicingCommon, OnlinePaymentCommon):
     @classmethod
     def tearDownClass(cls):
         # Restore company values after the tests
-        cls.company.account_default_pos_receivable_account_id = cls.old_account_default_pos_receivable_account_id
+        cls.company.sudo().account_default_pos_receivable_account_id = cls.old_account_default_pos_receivable_account_id
 
         # Restore dummy_provider values after the tests
         cls.payment_provider.write({

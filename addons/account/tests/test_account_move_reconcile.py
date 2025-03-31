@@ -2652,7 +2652,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
     # deal with taxes that are exigible on payment (cash basis).
     # -------------------------------------------------------------------------
     def _prepare_cash_basis_move(self):
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
         self.cash_basis_tax_tiny_amount.amount = 0.01
         cash_basis_move = self.env['account.move'].with_context(skip_invoice_sync=True).create({
             'move_type': 'entry',
@@ -2883,7 +2883,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             later on the invoice. When it gets posted, the reconciliation should be removed so that redoing the reconcilation 
             will create the caba move.
         '''
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
         caba_tax = self.env['account.tax'].create({
             'name': 'cash basis 20%',
             'type_tax_use': 'purchase',
@@ -3164,7 +3164,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
     def test_reconcile_cash_basis_workflow_multi_currency(self):
         ''' Same as before with a foreign currency. '''
 
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
         currency_id = self.other_currency.id
         taxes = self.cash_basis_tax_a_third_amount + self.cash_basis_tax_tiny_amount
 
@@ -3423,7 +3423,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         ''' Test the generation of the exchange difference for a tax cash basis journal entry when the transfer
         account is not reconcilable.
         '''
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
         currency_id = self.other_currency.id
 
         # Rate 1/3 in 2016.
@@ -3547,7 +3547,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         ''' Test the generation of the exchange difference for a tax cash basis journal entry when the transfer
         account is not a reconcile one.
         '''
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
         currency_id = self.setup_other_currency('CHF', rates=[('2016-01-01', 0.5), ('2017-01-01', 0.66666666666666)]).id
 
         # Rate 2/1 in 2016.
@@ -3625,7 +3625,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         ''' Test the generation of the exchange difference for a tax cash basis journal entry when the transfer
         account is not a reconcile one.
         '''
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
         currency_id = self.setup_other_currency('CHF', rates=[('2016-01-01', 0.5), ('2017-01-01', 0.66666666666666)]).id
 
         # Rate 2/1 in 2016.
@@ -3704,7 +3704,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         ''' Test the generation of the exchange difference for a tax cash basis journal entry when the tax
         account is a reconcile one.
         '''
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
         currency_id = self.other_currency.id
         cash_basis_transition_account = self.env['account.account'].create({
             'code': '209.01.01',
@@ -3812,7 +3812,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         self.assertFalse(receivable_lines.full_reconcile_id.exchange_move_id, "No exchange move difference should be created for the full reconcile object ,as there is no cash basis rounding.")
 
     def test_reconcile_cash_basis_refund_multicurrency(self):
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
         currency = self.setup_other_currency('CHF', rates=[('2016-01-01', 0.5), ('2017-01-01', 0.33333333333333333)])
 
         invoice = self.env['account.move'].create({
@@ -3962,7 +3962,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
 
     def test_reconcile_cash_basis_revert(self):
         ''' Ensure the cash basis journal entry can be reverted. '''
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
         self.cash_basis_transfer_account.reconcile = True
         self.cash_basis_tax_a_third_amount.cash_basis_transition_account_id = self.tax_account_1
 
@@ -4045,7 +4045,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         self.assertFullReconcile(reversed_taxes_full_reconcile, reversed_taxes_lines)
 
     def test_reconcile_cash_basis_tax_grid_refund(self):
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
         invoice_move = self.env['account.move'].create({
             'move_type': 'entry',
             'date': '2016-01-01',
@@ -4174,7 +4174,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
 
     def test_reconcile_cash_basis_tax_grid_multi_taxes(self):
         ''' Test the tax grid when reconciling an invoice with multiple taxes/tax repartition. '''
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
         base_taxes = self.cash_basis_tax_a_third_amount + self.cash_basis_tax_tiny_amount
         base_tags = self.tax_tags[0] + self.tax_tags[4]
 
@@ -4376,7 +4376,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
 
         # Make the tax account reconcilable
         self.tax_account_1.reconcile = True
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
 
         # Create a tax using the same accounts as the CABA one
         non_caba_tax = self.env['account.tax'].create({
@@ -4448,7 +4448,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
     def test_caba_double_tax_negative_line(self):
         """ Tests making a cash basis invoice with 2 lines using the same tax: a positive and a negative one.
         """
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
         invoice = self.init_invoice('in_invoice', amounts=[300, -60], post=True, taxes=self.cash_basis_tax_a_third_amount)
 
         pmt_wizard = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=invoice.ids).create({
@@ -4481,7 +4481,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
 
         # Make the tax account reconcilable
         self.tax_account_1.reconcile = True
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
 
         # Create an invoice with a CABA tax using the same tax account and pay half of it
         caba_inv = self.init_invoice('in_invoice', amounts=[900], post=True, taxes=self.cash_basis_tax_a_third_amount)
@@ -4550,7 +4550,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         bill.button_draft()
 
     def test_caba_foreign_vat(self):
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
 
         test_country = self.env['res.country'].create({
             'name': "Bretonnia",
@@ -4614,7 +4614,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         """ Test the CABA entries generated from an invoice with
         a tax group
         """
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
 
         # Make the tax account reconcilable
         self.tax_account_1.reconcile = True
@@ -4696,7 +4696,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         self.assertFalse(exchange_difference_move)
 
     def test_caba_rounding_adjustment_monocurrency(self):
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
 
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
@@ -4773,7 +4773,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         ])
 
     def test_caba_rounding_adjustment_multicurrency(self):
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
 
         # Rates are 1/3 for 2016, 1/2 for 2017 and 5/1 in 2018
         currency_id = self.setup_other_currency('CHF').id
@@ -4861,7 +4861,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         """
         Make sure that cash basis taxlines that don't have an account are handled properly.
         """
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
 
         tax = self.env['account.tax'].create({
             'name': 'cash basis 20%',
@@ -4961,7 +4961,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         """ Ensure the caba entry and the exchange difference journal entry for caba are not created in case of full
         refund.
         """
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
 
         tax = self.env['account.tax'].create({
             'name': 'cash basis 20%',
@@ -5059,7 +5059,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         """
 
         # Make sure the currency exchange journal is unset.
-        self.env.company.currency_exchange_journal_id = False
+        self.env.company.sudo().currency_exchange_journal_id = False
 
         move_vals = {
             'move_type': 'out_invoice',
@@ -5102,7 +5102,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         Check that the analytic distribution is applied correctly to the cash basis move lines.
         The tax used here is not an analytic tax (field `analytic` on the tax is `False`).
         """
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
 
         analytic_plan = self.env['account.analytic.plan'].create({
             'name': 'Default',
@@ -5289,7 +5289,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         Check that the analytic distribution is applied correctly to the cash basis move lines.
         The tax used here is not an analytic tax (field `analytic` on the tax is `True`).
         """
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
 
         analytic_plan = self.env['account.analytic.plan'].create({
             'name': 'Default',

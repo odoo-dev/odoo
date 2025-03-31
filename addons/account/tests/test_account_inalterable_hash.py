@@ -10,9 +10,6 @@ from unittest.mock import patch
 
 @tagged('post_install', '-at_install')
 class TestAccountMoveInalterableHash(AccountTestInvoicingCommon):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
 
     def _init_and_post(self, vals, hash_version=False, secure_sequence=None):
         moves = self.env['account.move']
@@ -40,7 +37,7 @@ class TestAccountMoveInalterableHash(AccountTestInvoicingCommon):
         """Before hash v4, we had a secure_sequence on hashed journals.
         We removed it starting v4, however, to test previous versions, we need to create it
         to mock the old behavior."""
-        return self.env['ir.sequence'].create({
+        return self.env['ir.sequence'].sudo().create({
             'name': 'SECURE_SEQUENCE',
             'code': 'SECURE_SEQUENCE',
             'implementation': 'no_gap',
@@ -51,7 +48,7 @@ class TestAccountMoveInalterableHash(AccountTestInvoicingCommon):
         })
 
     def _verify_integrity(self, moves, expected_msg_cover, expected_first_move=None, expected_last_move=None, prefix=None):
-        integrity_check = moves.company_id._check_hash_integrity()['results']
+        integrity_check = moves.company_id.sudo()._check_hash_integrity()['results']
         name = prefix or moves[0].sequence_prefix
         integrity_check = next(filter(lambda r: name in r.get('journal_name'), integrity_check))
         self.assertRegex(integrity_check['msg_cover'], expected_msg_cover)
@@ -488,6 +485,9 @@ class TestAccountMoveInalterableHash(AccountTestInvoicingCommon):
           * We should be able to hash moves protected by a lock date.
           * We should be able to lock a period containing unhashed moves.
         """
+
+        Company = self.company_data['company'].sudo()
+
         for lock_date_field in [
                 'hard_lock_date',
                 'fiscalyear_lock_date',
@@ -504,7 +504,7 @@ class TestAccountMoveInalterableHash(AccountTestInvoicingCommon):
                     self.assertFalse(move.inalterable_hash)
 
                 # Shouldn't raise (case no moves have ever been hashed)
-                self.company_data['company'][lock_date_field] = fields.Date.to_date('2024-01-31')
+                Company[lock_date_field] = fields.Date.to_date('2024-01-31')
 
                 # Let's has just one and revert the lock date
                 if lock_date_field == 'hard_lock_date':
@@ -512,13 +512,13 @@ class TestAccountMoveInalterableHash(AccountTestInvoicingCommon):
                         pass
 
                     with patch('odoo.addons.account.models.company.ResCompany._validate_locks', new=_validate_locks):
-                        self.company_data['company'][lock_date_field] = False
+                        Company[lock_date_field] = False
                 else:
-                    self.company_data['company'][lock_date_field] = False
+                    Company[lock_date_field] = False
                 move1.button_hash()
 
                 # We should be able to set the lock date (case there are hashed moves)
-                self.company_data['company'][lock_date_field] = fields.Date.to_date('2024-01-31')
+                Company[lock_date_field] = fields.Date.to_date('2024-01-31')
 
                 for move in (move2, move3, move4, move5):
                     self.assertFalse(move.inalterable_hash)
@@ -601,7 +601,7 @@ class TestAccountMoveInalterableHash(AccountTestInvoicingCommon):
             moves_v3_pre_restrict_mode[2].action_post()  # Revert
 
         # Check lock date, shouldn't raise even if there are no documents to hash
-        self.company_data['company'].fiscalyear_lock_date = fields.Date.to_date('2024-01-31')
+        self.company_data['company'].sudo().fiscalyear_lock_date = fields.Date.to_date('2024-01-31')
 
         # We should have something like (mix of v3 and v4):
         # Name          | Secure Sequence Number    | Inalterable Hash
@@ -738,7 +738,7 @@ class TestAccountMoveInalterableHash(AccountTestInvoicingCommon):
             } for idx, journal_type in enumerate(('sale', 'purchase', 'cash', 'bank', 'credit', 'general'))
         ])
         moves.action_post()
-        self.company_data['company'].hard_lock_date = '2023-01-02'
+        self.company_data['company'].sudo().hard_lock_date = '2023-01-02'
         wizard = self.env['account.secure.entries.wizard'].create({'hash_date': '2023-01-02'})
         wizard.action_secure_entries()
         self.assertTrue(False not in moves.mapped('inalterable_hash'))
@@ -832,7 +832,7 @@ class TestAccountMoveInalterableHash(AccountTestInvoicingCommon):
 
         # We can ignore the moves by setting the hard lock date:
         self.assertEqual(wizard.max_hash_date, fields.Date.from_string("2023-12-31"))
-        self.company_data['company'].hard_lock_date = "2024-01-01"
+        self.company_data['company'].sudo().hard_lock_date = "2024-01-01"
         # There is nothing to hash
         wizard = self.env['account.secure.entries.wizard'].create({'hash_date': '2024-01-03'})
         self.assertEqual(wizard.max_hash_date, fields.Date.from_string("2024-01-02"))

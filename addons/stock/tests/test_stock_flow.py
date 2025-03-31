@@ -1821,7 +1821,7 @@ class TestStockFlow(TestStockCommon):
             rule.procure_method = 'make_to_stock'
         route_b = f.save()
 
-        company_3 = self.env['res.company'].create({
+        company_3 = self.env['res.company'].sudo().create({
             'name': 'Alaska Company'
         })
 

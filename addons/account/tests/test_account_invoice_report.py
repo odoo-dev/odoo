@@ -170,7 +170,7 @@ class TestAccountInvoiceReport(AccountTestInvoicingCommon):
             Total price: 165$
             Average: 165 / 35 = 4.71
         """
-        product = self.product_a.copy()
+        product = self.product_a.sudo().copy()
         invoice = self.env["account.move"].create({
             'move_type': 'out_invoice',
                 'partner_id': self.partner_a.id,

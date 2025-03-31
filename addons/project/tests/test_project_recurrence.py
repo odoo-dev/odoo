@@ -128,7 +128,7 @@ class TestProjectRecurrence(TransactionCase):
         self.assertEqual(len(task.recurrence_id.task_ids), 2, "Since this is after repeat_until, next occurrence shouldn't have been created")
 
     def test_recurring_settings_change(self):
-        self.env['res.config.settings'] \
+        self.env['res.config.settings'].sudo() \
             .create({'group_project_recurring_tasks': True}) \
             .execute()
         test_task = self.env['project.task'].create({
@@ -137,7 +137,7 @@ class TestProjectRecurrence(TransactionCase):
             'recurring_task': True,
         })
         self.assertTrue(test_task.recurring_task, 'The "Recurring" feature should be enabled from settings.')
-        self.env['res.config.settings'] \
+        self.env['res.config.settings'].sudo() \
             .create({'group_project_recurring_tasks': False}) \
             .execute()
         self.assertFalse(test_task.recurring_task, 'The "Recurring" feature should not be enabled by default.')
@@ -339,7 +339,7 @@ class TestProjectRecurrence(TransactionCase):
             'recurring_task': True,
             'repeat_type': 'forever',
         })
-        self.user_projectuser.action_archive()
+        self.user_projectuser.sudo().action_archive()
         task.write({'state': '1_done'})
         self.assertEqual((task.recurrence_id.task_ids - task).user_ids, self.user)
 
@@ -366,6 +366,6 @@ class TestProjectRecurrence(TransactionCase):
                 'user_ids': [Command.set([self.user.id, self.user_projectuser.id])],
             })],
         })
-        self.user_projectuser.action_archive()
+        self.user_projectuser.sudo().action_archive()
         parent_task.write({'state': '1_done'})
         self.assertEqual((parent_task.recurrence_id.task_ids - parent_task).child_ids.user_ids, self.user)

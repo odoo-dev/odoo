@@ -158,7 +158,7 @@ class TestPeppolParticipant(TransactionCase):
         with self._set_context({'participant_state': 'rejected'}):
             wizard = wizard.with_env(self.env)
             wizard.button_register_peppol_participant()
-            company.account_peppol_proxy_state = 'smp_registration'
+            company.sudo().account_peppol_proxy_state = 'smp_registration'
             self.env['account_edi_proxy_client.user']._cron_peppol_get_participant_status()
             self.assertEqual(company.account_peppol_proxy_state, 'rejected')
 

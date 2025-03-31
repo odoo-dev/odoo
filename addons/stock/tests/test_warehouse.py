@@ -599,7 +599,7 @@ class TestWarehouse(TestStockCommon):
     def test_noleak(self):
         # non-regression test to avoid company_id leaking to other warehouses (see blame)
         partner = self.env['res.partner'].create({'name': 'Chicago partner'})
-        company = self.env['res.company'].create({
+        company = self.env['res.company'].sudo().create({
             'name': 'My Company (Chicago)1',
             'currency_id': self.ref('base.USD')
         })

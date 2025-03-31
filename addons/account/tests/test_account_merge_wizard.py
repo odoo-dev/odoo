@@ -89,8 +89,8 @@ class TestAccountMergeWizard(TestAccountMergeCommon):
         }
 
         # Also set up different names for the accounts in various languages
-        self.env['res.lang']._activate_lang('fr_FR')
-        self.env['res.lang']._activate_lang('nl_NL')
+        self.env['res.lang'].sudo()._activate_lang('fr_FR')
+        self.env['res.lang'].sudo()._activate_lang('nl_NL')
         self.accounts[0].with_context({'lang': 'fr_FR'}).name = "Mon premier compte"
         self.accounts[2].with_context({'lang': 'fr_FR'}).name = "Mon troisième compte"
         self.accounts[2].with_context({'lang': 'nl_NL'}).name = "Mijn derde conto"

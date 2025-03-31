@@ -1395,7 +1395,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
         Therefore, they have to stay like this to stay compliant.
         Note: this is a work in progress. The remaining stuff is coming...
         """
-        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self.env.company.sudo().tax_calculation_rounding_method = 'round_globally'
         tax_13 = self.percent_tax(13, tax_group_id=self.tax_groups[2].id)
         tax_23 = self.percent_tax(23, tax_group_id=self.tax_groups[3].id)
 
@@ -1550,7 +1550,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
             self.assert_invoice_tax_totals_summary(invoice, expected_values)
 
     def _test_reverse_charge_taxes_2(self):
-        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self.env.company.sudo().tax_calculation_rounding_method = 'round_globally'
         tax = self.percent_tax(
             21.0,
             invoice_repartition_line_ids=[
@@ -2402,7 +2402,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                 }])
 
     def _test_discount_with_round_globally(self):
-        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self.env.company.sudo().tax_calculation_rounding_method = 'round_globally'
         tax = self.percent_tax(21.0)
 
         document_params = self.init_document([

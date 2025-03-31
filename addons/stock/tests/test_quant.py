@@ -994,7 +994,7 @@ class StockQuant(TransactionCase):
         ### testing blocks on relocating quants from different companies
         package_03 = self.env['stock.quant.package'].create({})
         package_04 = self.env['stock.quant.package'].create({})
-        company_B = self.env['res.company'].create({
+        company_B = self.env['res.company'].sudo().create({
             'name': 'company B',
             'currency_id': self.env.ref('base.USD').id
         })

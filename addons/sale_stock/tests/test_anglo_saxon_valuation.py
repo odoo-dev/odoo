@@ -1225,7 +1225,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         self.assertEqual(income_aml_2.credit, 12)
 
     def test_fifo_uom_computation(self):
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.product.categ_id.property_cost_method = 'fifo'
         self.product.categ_id.property_valuation = 'real_time'
         quantity = 50.0

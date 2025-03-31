@@ -102,7 +102,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
     # Continental
     # -------------------------------------------------------------------------
     def test_dropship_standard_perpetual_continental_ordered(self):
-        self.env.company.anglo_saxon_accounting = False
+        self.env.company.sudo().anglo_saxon_accounting = False
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'standard'
         self.product1.product_tmpl_id.standard_price = 10
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
@@ -120,7 +120,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         self._check_results(expected_aml, 4, all_amls)
 
     def test_dropship_standard_perpetual_continental_delivered(self):
-        self.env.company.anglo_saxon_accounting = False
+        self.env.company.sudo().anglo_saxon_accounting = False
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'standard'
         self.product1.product_tmpl_id.standard_price = 10
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
@@ -138,7 +138,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         self._check_results(expected_aml, 4, all_amls)
 
     def test_dropship_fifo_perpetual_continental_ordered(self):
-        self.env.company.anglo_saxon_accounting = False
+        self.env.company.sudo().anglo_saxon_accounting = False
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         self.product1.product_tmpl_id.standard_price = 10
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
@@ -156,7 +156,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         self._check_results(expected_aml, 4, all_amls)
 
     def test_dropship_fifo_perpetual_continental_delivered(self):
-        self.env.company.anglo_saxon_accounting = False
+        self.env.company.sudo().anglo_saxon_accounting = False
 
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         self.product1.product_tmpl_id.standard_price = 10
@@ -178,7 +178,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
     # Anglosaxon
     # -------------------------------------------------------------------------
     def test_dropship_standard_perpetual_anglosaxon_ordered(self):
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'standard'
         self.product1.product_tmpl_id.standard_price = 10
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
@@ -201,7 +201,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         self._check_results(expected_aml, 10, all_amls)
 
     def test_dropship_standard_perpetual_anglosaxon_delivered(self):
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'standard'
         self.product1.product_tmpl_id.standard_price = 10
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
@@ -224,7 +224,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         self._check_results(expected_aml, 10, all_amls)
 
     def test_dropship_fifo_perpetual_anglosaxon_ordered(self):
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         self.product1.product_tmpl_id.standard_price = 10
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
@@ -244,7 +244,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         self._check_results(expected_aml, 10, all_amls)
 
     def test_dropship_fifo_perpetual_anglosaxon_delivered(self):
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         self.product1.product_tmpl_id.standard_price = 10
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
@@ -263,7 +263,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         self._check_results(expected_aml, 10, all_amls)
 
     def test_dropship_standard_perpetual_anglosaxon_ordered_return(self):
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'standard'
         self.product1.product_tmpl_id.standard_price = 10
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
@@ -300,7 +300,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         """Test the return of a dropship order with a product set to FIFO costing
         method. The unit price is correctly computed on the return picking svl.
         """
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
         self.product1.product_tmpl_id.invoice_policy = 'order'

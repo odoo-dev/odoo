@@ -15,7 +15,7 @@ class MockIAPReveal(MockIAPEnrich):
     @classmethod
     def setUpClass(cls):
         super(MockIAPReveal, cls).setUpClass()
-        cls._new_leads = cls.env['crm.lead'].sudo()
+        cls._new_leads = cls.env['crm.lead']
         cls.mine = False
 
     @contextmanager

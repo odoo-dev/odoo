@@ -309,7 +309,7 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
         self.assertEqual(aml_output[0].credit, 0.0, "Cost of Good Sold entry missing or mismatching")
 
     def test_action_pos_order_invoice(self):
-        self.company.point_of_sale_update_stock_quantities = 'closing'
+        self.company.sudo().point_of_sale_update_stock_quantities = 'closing'
 
         # Setup a running session, with a paid pos order that is not invoiced
         self.pos_config.open_ui()

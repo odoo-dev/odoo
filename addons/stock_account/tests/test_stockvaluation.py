@@ -4317,7 +4317,7 @@ class TestStockValuation(TestStockValuationBase):
         self._make_in_move(self.product1, 1, unit_cost=20)
         self.assertEqual(self.product1.standard_price, 20)
         # create a branch company
-        branch = self.env['res.company'].create({
+        branch = self.env['res.company'].sudo().create({
             'name': "Branch A",
             'parent_id': self.env.company.id,
         })

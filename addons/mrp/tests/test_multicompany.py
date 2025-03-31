@@ -246,6 +246,6 @@ class TestMrpMulticompany(common.TransactionCase):
         # Also specify the company of the "generic route" (the one from the master data)
         manufacture_route.company_id = company
 
-        new_company = self.env['res.company'].create({'name': 'Super Company'})
+        new_company = self.env['res.company'].sudo().create({'name': 'Super Company'})
         new_warehouse = self.env['stock.warehouse'].search([('company_id', '=', new_company.id)], limit=1)
         self.assertEqual(new_warehouse.manufacture_pull_id.route_id.company_id, new_company)

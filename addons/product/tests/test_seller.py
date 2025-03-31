@@ -40,7 +40,7 @@ class TestSeller(TransactionCase):
 
     def test_20_sellers_company(self):
         company_a = self.env.company
-        company_b = self.env['res.company'].create({
+        company_b = self.env['res.company'].sudo().create({
             'name': 'Saucisson Inc.',
         })
         self.product_consu.write({'seller_ids': [
@@ -120,7 +120,7 @@ class TestSeller(TransactionCase):
         """Test that the min_qty has the precision of Product UoM."""
         # Arrange: Change precision digits
         uom_precision = self.env.ref("uom.decimal_product_uom")
-        uom_precision.digits = 3
+        uom_precision.sudo().digits = 3
         product = self.product_service
         product.seller_ids = [
             Command.create({

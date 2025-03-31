@@ -50,7 +50,7 @@ class TestAccountMoveDateAlgorithm(AccountTestInvoicingCommon):
         return payment
 
     def _set_lock_date(self, lock_date):
-        self.env.company.fiscalyear_lock_date = fields.Date.from_string(lock_date)
+        self.env.company.sudo().fiscalyear_lock_date = fields.Date.from_string(lock_date)
 
     def _reverse_invoice(self, invoice):
         move_reversal = self.env['account.move.reversal']\
@@ -189,7 +189,7 @@ class TestAccountMoveDateAlgorithm(AccountTestInvoicingCommon):
         }])
 
     def test_caba_with_lock_date(self):
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
 
         tax_waiting_account = self.env['account.account'].create({
             'name': 'TAX_WAIT',
@@ -246,7 +246,7 @@ class TestAccountMoveDateAlgorithm(AccountTestInvoicingCommon):
         are different between post and reconciliation time (caba move creation time).
         Ensure that user groups (accountant rights) do not matter.
         """
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
 
         tax_waiting_account = self.env['account.account'].create({
             'name': 'TAX_WAIT',
@@ -303,7 +303,7 @@ class TestAccountMoveDateAlgorithm(AccountTestInvoicingCommon):
             ('purchase_lock_date', 'in_invoice'),
         ]:
             with self.subTest(lock_date_field=lock_date_field, move_type=move_type):
-                self.env.company[lock_date_field] = '2024-07-31'
+                self.env.company.sudo()[lock_date_field] = '2024-07-31'
                 self.env['account.lock_exception'].create({
                     lock_date_field: fields.Date.to_date('2024-01-01'),
                     'end_datetime': False,

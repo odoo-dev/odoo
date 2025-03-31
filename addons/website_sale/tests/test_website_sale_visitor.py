@@ -50,7 +50,7 @@ class WebsiteSaleVisitorTests(WebsiteSaleCommon):
     def test_dynamic_filter_newest_products(self):
         """Test that a product is not displayed anymore after
         changing it company."""
-        new_company = self.env['res.company'].create({
+        new_company = self.env['res.company'].sudo().create({
             'name': 'Test Company',
         })
 
@@ -80,7 +80,7 @@ class WebsiteSaleVisitorTests(WebsiteSaleCommon):
         """Test that a product is :
         - displayed after visiting it
         - not displayed after changing it company."""
-        new_company = self.env['res.company'].create({
+        new_company = self.env['res.company'].sudo().create({
             'name': 'Test Company',
         })
         public_user = self.env.ref('base.public_user')

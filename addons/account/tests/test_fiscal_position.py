@@ -136,7 +136,7 @@ class TestFiscalPosition(common.TransactionCase):
 
 
     def test_20_fp_one_tax_2m(self):
-        self.env.company.country_id = self.env.ref('base.us')
+        self.env.company.sudo().country_id = self.env.ref('base.us')
         self.env['account.tax.group'].create(
             {'name': 'Test Tax Group', 'company_id': self.env.company.id}
         )
@@ -164,8 +164,8 @@ class TestFiscalPosition(common.TransactionCase):
 
     def test_30_fp_delivery_address(self):
         # Make sure the billing company is from Belgium (within the EU)
-        self.env.company.vat = 'BE0477472701'
-        self.env.company.country_id = self.be
+        self.env.company.sudo().vat = 'BE0477472701'
+        self.env.company.sudo().country_id = self.be
 
         # Reset any existing FP
         self.env['account.fiscal.position'].search([]).auto_apply = False

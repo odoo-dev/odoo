@@ -114,7 +114,7 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
         """Test the price unit of kit with variants"""
         # Check that the correct bom are selected when computing price_unit for COGS
 
-        self.env.company.currency_id = self.env.ref('base.USD')
+        self.env.company.sudo().currency_id = self.env.ref('base.USD')
 
         # Create variant attributes
         self.prod_att_1 = self.env['product.attribute'].create({'name': 'Color'})

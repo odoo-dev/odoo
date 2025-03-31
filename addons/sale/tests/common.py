@@ -70,7 +70,7 @@ class TestSaleCommon(AccountTestInvoicingCommon):
 
         company_data.update({
             # Users
-            'default_user_salesman': cls.env['res.users'].create({
+            'default_user_salesman': cls.env['res.users'].sudo().create({
                 'name': 'default_user_salesman',
                 'login': 'default_user_salesman.comp%s' % company.id,
                 'email': 'default_user_salesman@example.com',

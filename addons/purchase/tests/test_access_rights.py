@@ -111,8 +111,8 @@ class TestPurchaseInvoice(AccountTestInvoicingCommon):
                 }),
             ]})
         company = order.sudo().company_id
-        company.po_double_validation = 'two_step'
-        company.po_double_validation_amount = 0
+        company.sudo().po_double_validation = 'two_step'
+        company.sudo().po_double_validation_amount = 0
         self.purchase_user.write({
             'company_ids': [(4, company.id)],
             'company_id': company.id,

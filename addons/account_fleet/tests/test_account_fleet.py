@@ -1,12 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from freezegun import freeze_time
-from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from .common import TestAccountFleetCommon
 from odoo.tests import tagged
 
 
 @tagged('post_install', '-at_install')
-class TestAccountFleet(AccountTestInvoicingCommon):
+class TestAccountFleet(TestAccountFleetCommon):
 
     @freeze_time('2021-09-15')
     def test_transfer_wizard_vehicle_info_propagation(self):

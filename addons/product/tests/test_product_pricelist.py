@@ -300,7 +300,7 @@ class TestProductPricelist(ProductCommon):
         """Test that the min_quantity has the precision of Product UoM."""
         # Arrange: Change precision digits
         uom_precision = self.env.ref("uom.decimal_product_uom")
-        uom_precision.digits = 3
+        uom_precision.sudo().digits = 3
         pricelist_item = self.customer_pricelist.item_ids[0]
         precise_value = 1.234
 
@@ -313,19 +313,19 @@ class TestProductPricelist(ProductCommon):
     def test_pricelist_sync_on_partners(self):
         ResPartner = self.env['res.partner']
 
-        company_1, company_2 = self.env['res.company'].create([
+        company_1, company_2 = self.env['res.company'].sudo().create([
             {'name': 'company_1'},
             {'name': 'company_2'},
         ])
 
-        test_partner_company = ResPartner.create({
+        test_partner_company = ResPartner.sudo().create({
             'name': 'This company',
             'is_company': True,
         })
         test_partner_company.with_company(company_1).property_product_pricelist = self.business_pricelist.id
         test_partner_company.with_company(company_2).property_product_pricelist = self.customer_pricelist.id
 
-        child_address = ResPartner.create({
+        child_address = ResPartner.sudo().create({
             'name': 'Contact',
             'parent_id': test_partner_company.id,
         })

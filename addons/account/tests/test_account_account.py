@@ -101,7 +101,7 @@ class TestAccountAccount(TestAccountMergeCommon):
     def test_write_on_code_from_branch(self):
         """ Ensure that when writing on account.code from a company, the old code isn't erroneously kept
         on other companies that share the same root_id """
-        branch = self.env['res.company'].create([{
+        branch = self.env['res.company'].sudo().create([{
             'name': "My Test Branch",
             'parent_id': self.company_data['company'].id,
         }])
@@ -132,11 +132,11 @@ class TestAccountAccount(TestAccountMergeCommon):
         # other_company is disjoint.
 
         parent_company = self.company_data['company']
-        child_company_1 = self.env['res.company'].create([{
+        child_company_1 = self.env['res.company'].sudo().create([{
             'name': 'Child Company 1',
             'parent_id': parent_company.id,
         }])
-        child_company_2 = self.env['res.company'].create([{
+        child_company_2 = self.env['res.company'].sudo().create([{
             'name': 'Child Company 2',
             'parent_id': parent_company.id,
         }])
@@ -643,7 +643,7 @@ class TestAccountAccount(TestAccountMergeCommon):
             login='user_that_cannot_access_company_2',
             password='user_that_cannot_access_company_2',
             email='user_that_cannot_access_company_2@test.com',
-            group_ids=self.get_default_groups().ids,
+            groups='account.group_account_manager',
             company_id=self.env.company.id,
         )
 
@@ -678,7 +678,7 @@ class TestAccountAccount(TestAccountMergeCommon):
             login='user_that_cannot_access_company_2',
             password='user_that_cannot_access_company_2',
             email='user_that_cannot_access_company_2@test.com',
-            group_ids=self.get_default_groups().ids,
+            groups='account.group_account_manager,account.group_account_user',
             company_id=self.env.company.id,
         )
 
@@ -859,7 +859,7 @@ class TestAccountAccount(TestAccountMergeCommon):
         self.assertEqual(self.env['account.chart.template'].with_company(company_2).ref('test_account_2'), new_account)
 
     def test_account_code_mapping(self):
-        company_3 = self.env['res.company'].create({'name': 'company_3'})
+        company_3 = self.env['res.company'].sudo().create({'name': 'company_3'})
         account = self.env['account.account'].create({
             'code': 'test1',
             'name': 'Test Account',
@@ -896,7 +896,7 @@ class TestAccountAccount(TestAccountMergeCommon):
     def test_account_code_mapping_create(self):
         """ Similar as above, except test that you can create an account while specifying multiple codes in the code mapping tab. """
 
-        company_3 = self.env['res.company'].create({'name': 'company_3'})
+        company_3 = self.env['res.company'].sudo().create({'name': 'company_3'})
 
         AccountAccount = self.env['account.account'].with_context(
             {'allowed_company_ids': [self.company_data['company'].id, self.company_data_2['company'].id, company_3.id]}
@@ -977,7 +977,7 @@ class TestAccountAccount(TestAccountMergeCommon):
             Ensure that accounts and account groups from a same company tree match
         """
 
-        branch_company = self.env['res.company'].create({
+        branch_company = self.env['res.company'].sudo().create({
             'name': 'Branch Company',
             'parent_id': self.env.company.id,
         })

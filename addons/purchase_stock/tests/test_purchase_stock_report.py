@@ -172,8 +172,8 @@ class TestPurchaseStockReports(TestReportsCommon):
         When a PO is waiting for an approval, its quantities should be included
         in the draft quantity count
         """
-        self.env.company.po_double_validation = 'two_step'
-        self.env.company.po_double_validation_amount = 0
+        self.env.company.sudo().po_double_validation = 'two_step'
+        self.env.company.sudo().po_double_validation_amount = 0
 
         basic_purchase_user = mail_new_test_user(
             self.env,

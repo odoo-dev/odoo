@@ -6,8 +6,8 @@ from odoo.addons.l10n_jo_edi.tests.jo_edi_common import JoEdiCommon
 @tagged('post_install_l10n', 'post_install', '-at_install')
 class TestJoEdiTypes(JoEdiCommon):
     def test_jo_income_invoice(self):
-        self.company.l10n_jo_edi_taxpayer_type = 'income'
-        self.company.l10n_jo_edi_sequence_income_source = '4419618'
+        self.company.sudo().l10n_jo_edi_taxpayer_type = 'income'
+        self.company.sudo().l10n_jo_edi_sequence_income_source = '4419618'
 
         invoice_vals = {
             'name': 'EIN/998833/0',
@@ -33,8 +33,8 @@ class TestJoEdiTypes(JoEdiCommon):
         )
 
     def test_jo_income_refund(self):
-        self.company.l10n_jo_edi_taxpayer_type = 'income'
-        self.company.l10n_jo_edi_sequence_income_source = '4419618'
+        self.company.sudo().l10n_jo_edi_taxpayer_type = 'income'
+        self.company.sudo().l10n_jo_edi_sequence_income_source = '4419618'
 
         invoice_vals = {
             'name': 'EIN00017',
@@ -72,8 +72,8 @@ class TestJoEdiTypes(JoEdiCommon):
         )
 
     def test_jo_sales_invoice(self):
-        self.company.l10n_jo_edi_taxpayer_type = 'sales'
-        self.company.l10n_jo_edi_sequence_income_source = '16683693'
+        self.company.sudo().l10n_jo_edi_taxpayer_type = 'sales'
+        self.company.sudo().l10n_jo_edi_sequence_income_source = '16683693'
 
         invoice_vals = {
             'name': 'TestEIN022',
@@ -99,8 +99,8 @@ class TestJoEdiTypes(JoEdiCommon):
         )
 
     def test_jo_sales_refund(self):
-        self.company.l10n_jo_edi_taxpayer_type = 'sales'
-        self.company.l10n_jo_edi_sequence_income_source = '16683693'
+        self.company.sudo().l10n_jo_edi_taxpayer_type = 'sales'
+        self.company.sudo().l10n_jo_edi_sequence_income_source = '16683693'
 
         invoice_vals = {
             'name': 'TestEIN022',
@@ -132,8 +132,8 @@ class TestJoEdiTypes(JoEdiCommon):
         same test as `test_jo_sales_refund`, but with price divided over 2
         the division would compensate for the USD exchange rate
         """
-        self.company.l10n_jo_edi_taxpayer_type = 'sales'
-        self.company.l10n_jo_edi_sequence_income_source = '16683693'
+        self.company.sudo().l10n_jo_edi_taxpayer_type = 'sales'
+        self.company.sudo().l10n_jo_edi_sequence_income_source = '16683693'
 
         invoice_vals = {
             'name': 'TestEIN022',
@@ -163,8 +163,8 @@ class TestJoEdiTypes(JoEdiCommon):
         )
 
     def test_jo_special_invoice(self):
-        self.company.l10n_jo_edi_taxpayer_type = 'special'
-        self.company.l10n_jo_edi_sequence_income_source = '16683696'
+        self.company.sudo().l10n_jo_edi_taxpayer_type = 'special'
+        self.company.sudo().l10n_jo_edi_sequence_income_source = '16683696'
 
         invoice_vals = {
             'name': 'TestEIN013',
@@ -188,8 +188,8 @@ class TestJoEdiTypes(JoEdiCommon):
         )
 
     def test_jo_special_refund(self):
-        self.company.l10n_jo_edi_taxpayer_type = 'special'
-        self.company.l10n_jo_edi_sequence_income_source = '16683696'
+        self.company.sudo().l10n_jo_edi_taxpayer_type = 'special'
+        self.company.sudo().l10n_jo_edi_sequence_income_source = '16683696'
 
         invoice_vals = {
             'name': 'TestEIN013',
@@ -220,8 +220,8 @@ class TestJoEdiTypes(JoEdiCommon):
         same test as `test_jo_special_refund`, but with price divided over 2
         the division would compensate for the USD exchange rate
         """
-        self.company.l10n_jo_edi_taxpayer_type = 'special'
-        self.company.l10n_jo_edi_sequence_income_source = '16683696'
+        self.company.sudo().l10n_jo_edi_taxpayer_type = 'special'
+        self.company.sudo().l10n_jo_edi_sequence_income_source = '16683696'
 
         invoice_vals = {
             'name': 'TestEIN013',

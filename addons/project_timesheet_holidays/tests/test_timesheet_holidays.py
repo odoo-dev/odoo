@@ -82,7 +82,7 @@ class TestTimesheetHolidays(TestCommonTimesheet):
         holiday.with_user(SUPERUSER_ID).action_refuse()
         self.assertEqual(len(holiday.timesheet_ids), 0, 'Number of linked timesheets should be zero, since the leave is refused.')
 
-        company = self.env['res.company'].create({"name": "new company"})
+        company = self.env['res.company'].sudo().create({"name": "new company"})
         self.empl_employee.write({
             "company_id": company.id,
         })
@@ -225,7 +225,7 @@ class TestTimesheetHolidays(TestCommonTimesheet):
 
     def test_timeoff_task_creation_with_holiday_leave(self):
         """ Test the search method on is_timeoff_task"""
-        company = self.env['res.company'].create({"name": "new company"})
+        company = self.env['res.company'].sudo().create({"name": "new company"})
         self.empl_employee.write({
             "company_id": company.id,
         })

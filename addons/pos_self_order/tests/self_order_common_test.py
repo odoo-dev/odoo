@@ -114,7 +114,7 @@ class SelfOrderCommonTest(odoo.tests.HttpCase):
         })
 
     def _add_tax_to_product_from_different_company(self):
-        new_company = self.env['res.company'].create({
+        new_company = self.env['res.company'].sudo().create({
             'name': 'Test Company',
             'currency_id': self.env.ref('base.USD').id,
             'country_id': self.env.ref('base.us').id,

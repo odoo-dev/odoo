@@ -53,8 +53,8 @@ class BaseTestUi(AccountTestMockOnlineSyncCommon):
             'name': 'Bank Current Account - (test)',
             'account_type': 'asset_cash',
         })
-        self.env.company.expense_account_id = a_expense
-        self.env.company.income_account_id = a_sale
+        self.env.company.sudo().expense_account_id = a_expense
+        self.env.company.sudo().income_account_id = a_sale
 
         IrDefault = self.env['ir.default']
         IrDefault.set('res.partner', 'property_account_receivable_id', a_recv.id, company_id=self.env.company.id)

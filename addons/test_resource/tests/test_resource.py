@@ -1458,7 +1458,7 @@ class TestResource(TestResourceCommon):
         """
             Check that it is possible to switch the company's default calendar
         """
-        self.env.company.resource_calendar_id = self.two_weeks_resource
+        self.env.company.sudo().resource_calendar_id = self.two_weeks_resource
         company_resource = self.env.company.resource_calendar_id
         # Switch two times to be sure to test both cases
         company_resource.switch_calendar_type()
@@ -1469,8 +1469,8 @@ class TestResource(TestResourceCommon):
             Check that we can create a new company
             if the default company calendar is two weeks
         """
-        self.env.company.resource_calendar_id = self.two_weeks_resource
-        self.env['res.company'].create({'name': 'New Company'})
+        self.env.company.sudo().resource_calendar_id = self.two_weeks_resource
+        self.env['res.company'].sudo().create({'name': 'New Company'})
 
     def test_empty_working_hours_for_two_weeks_resource(self):
         resource = self._define_calendar_2_weeks(
@@ -1493,6 +1493,6 @@ class TestResource(TestResourceCommon):
             'calendar_id': False,
         })
 
-        resource.company_id.resource_calendar_id = False
+        resource.company_id.sudo().resource_calendar_id = False
         unavailabilities = resource._get_unavailable_intervals(datetime(2024, 7, 11), datetime(2024, 7, 12))
         self.assertFalse(unavailabilities)

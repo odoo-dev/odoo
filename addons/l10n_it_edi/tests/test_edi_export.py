@@ -44,8 +44,8 @@ class TestItEdiExport(TestItEdi):
         })
 
     def test_vat_not_equals_codice(self):
-        self.company.partner_id.vat = '01698911003'
-        self.company.l10n_it_codice_fiscale = '07149930583'
+        self.company.sudo().partner_id.vat = '01698911003'
+        self.company.sudo().l10n_it_codice_fiscale = '07149930583'
 
         invoice = self.env['account.move'].with_company(self.company).create({
             'move_type': 'out_invoice',
@@ -199,7 +199,7 @@ class TestItEdiExport(TestItEdi):
         self._assert_export_invoice(invoice, 'invoice_below_400_codice_simplified.xml')
 
     def test_invoice_total_400_VAT_simplified(self):
-        self.company.l10n_it_codice_fiscale = '07149930583'
+        self.company.sudo().l10n_it_codice_fiscale = '07149930583'
         invoice = self.env['account.move'].with_company(self.company).create({
             'move_type': 'out_invoice',
             'invoice_date': '2022-03-24',

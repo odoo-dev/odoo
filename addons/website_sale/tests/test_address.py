@@ -72,7 +72,7 @@ class TestCheckoutAddress(WebsiteSaleCommon):
             Have 1 website 1 which company is B
             Have admin on company A
         '''
-        self.company_a, self.company_b, self.company_c = self.env['res.company'].create([
+        self.company_a, self.company_b, self.company_c = self.env['res.company'].sudo().create([
             {'name': 'Company A'},
             {'name': 'Company B'},
             {'name': 'Company C'},
@@ -271,7 +271,7 @@ class TestCheckoutAddress(WebsiteSaleCommon):
             Check that the sale order is updated when you change fiscal position.
             Change fiscal position by modifying address during checkout process.
         """
-        self.env.company.country_id = self.country_us
+        self.env.company.sudo().country_id = self.country_us
         be_address_POST, nl_address_POST = [
             {
                 'name': 'Test name', 'email': 'test@email.com', 'street': 'test', 'phone': '+333333333333333',

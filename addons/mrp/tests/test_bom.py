@@ -149,7 +149,7 @@ class TestBoM(TestMrpCommon):
             'name': 'Manufacturing',
             'code': 'mrp_operation',
             'sequence_code': 'TMP',
-            'sequence_id': self.env['ir.sequence'].create({
+            'sequence_id': self.env['ir.sequence'].sudo().create({
                 'code': 'mrp.production',
                 'name': 'tmp_production_sequence',
             }).id,
@@ -404,7 +404,7 @@ class TestBoM(TestMrpCommon):
         # We set the Product Unit digits to 5.
         # Because float_round(-384.0, 5) = -384.00000000000006
         # And float_round(-384.0, 2) = -384.0
-        precision = self.env.ref('uom.decimal_product_uom')
+        precision = self.env.ref('uom.decimal_product_uom').sudo()
         precision.digits = 5
 
         uom_unit = self.env.ref('uom.product_uom_unit')

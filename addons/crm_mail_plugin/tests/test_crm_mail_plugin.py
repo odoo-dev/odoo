@@ -45,7 +45,7 @@ class TestCrmMailPlugin(TestMailPluginControllerCommon):
         """ Test that creating a record using the mail plugin for a contact belonging to a different company than the
             default company of the user does not result in any issues.
         """
-        company_a, company_b = self.env['res.company'].create([
+        company_a, company_b = self.env['res.company'].sudo().create([
             {'name': 'Company_A'},
             {'name': 'Company_B'},
         ])

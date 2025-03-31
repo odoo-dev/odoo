@@ -341,7 +341,7 @@ class TestLotValuation(TestStockValuationCommon):
     def test_value_multicompanies(self):
         """ Test having multiple layers on different companies give a correct value"""
         c1 = self.env.company
-        c2 = self.env['res.company'].create({
+        c2 = self.env['res.company'].sudo().create({
             'name': 'Test Company',
         })
         self.product1.product_tmpl_id.with_company(c2).categ_id.property_cost_method = 'average'

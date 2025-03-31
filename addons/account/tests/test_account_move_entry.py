@@ -172,7 +172,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
         self.test_move.action_post()
 
         # Set the lock date after the journal entry date.
-        self.test_move.company_id.fiscalyear_lock_date = fields.Date.from_string('2017-01-01')
+        self.test_move.company_id.sudo().fiscalyear_lock_date = fields.Date.from_string('2017-01-01')
 
         # lines[0] = 'counterpart line'
         # lines[1] = 'tax line'
@@ -218,13 +218,13 @@ class TestAccountMove(AccountTestInvoicingCommon):
 
         # You can't lock the fiscal year if there is some unreconciled statement.
         with self.assertRaises(RedirectWarning):
-            self.test_move.company_id.fiscalyear_lock_date = fields.Date.from_string('2017-01-01')
+            self.test_move.company_id.sudo().fiscalyear_lock_date = fields.Date.from_string('2017-01-01')
 
     def test_misc_tax_lock_date_1(self):
         self.test_move.action_post()
 
         # Set the tax lock date after the journal entry date.
-        self.test_move.company_id.tax_lock_date = fields.Date.from_string('2017-01-01')
+        self.test_move.company_id.sudo().tax_lock_date = fields.Date.from_string('2017-01-01')
 
         # lines[0] = 'counterpart line'
         # lines[1] = 'tax line'
@@ -319,7 +319,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
 
     def test_add_followers_on_post(self):
         # Add some existing partners, some from another company
-        company = self.env['res.company'].create({'name': 'Oopo'})
+        company = self.env['res.company'].sudo().create({'name': 'Oopo'})
         company.flush_recordset()
         existing_partners = self.env['res.partner'].create([{
             'name': 'Jean',
@@ -516,7 +516,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
     def test_entry_reverse_storno(self):
         # Test creating journal entries and reverting them
         # while in Storno accounting
-        self.env.company.account_storno = True
+        self.env.company.sudo().account_storno = True
 
         move = self.env['account.move'].create({
             'move_type': 'entry',
@@ -577,8 +577,8 @@ class TestAccountMove(AccountTestInvoicingCommon):
             'code': 'TBASE',
             'account_type': 'asset_current',
         })
-        self.env.company.account_cash_basis_base_account_id = tax_base_amount_account
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().account_cash_basis_base_account_id = tax_base_amount_account
+        self.env.company.sudo().tax_exigibility = True
         tax_tags = defaultdict(dict)
         for line_type, repartition_type in [(l, r) for l in ('invoice', 'refund') for r in ('base', 'tax')]:
             tax_tags[line_type][repartition_type] = self.env['account.account.tag'].create({

@@ -129,8 +129,8 @@ class TestAccountMove(TestAccountMoveStockCommon):
         """Storno accounting uses negative numbers on debit/credit to cancel other moves.
         This test checks that we do the same for the anglosaxon lines when storno is enabled.
         """
-        self.env.company.account_storno = True
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().account_storno = True
+        self.env.company.sudo().anglo_saxon_accounting = True
 
         move = self.env['account.move'].create({
             'move_type': 'out_refund',
@@ -310,7 +310,7 @@ class TestAccountMove(TestAccountMoveStockCommon):
 
     def test_cogs_analytic_accounting(self):
         """Check analytic distribution is correctly propagated to COGS lines"""
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         default_plan = self.env['account.analytic.plan'].create({
             'name': 'Default',
         })

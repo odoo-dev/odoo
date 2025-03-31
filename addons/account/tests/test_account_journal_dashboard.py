@@ -248,7 +248,7 @@ class TestAccountJournalDashboard(TestAccountJournalDashboardCommon):
         self.assertTrue(journal._query_has_sequence_holes())  # gap due to missing sequence, gap warning
 
         moves[2].action_post()
-        self.company_data['company'].write({'fiscalyear_lock_date': gap_date + relativedelta(days=1)})
+        self.company_data['company'].sudo().write({'fiscalyear_lock_date': gap_date + relativedelta(days=1)})
         self.assertFalse(journal._query_has_sequence_holes())  # gap but prior to lock-date, no gap warning
 
         moves[6].button_draft()

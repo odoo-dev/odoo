@@ -1098,8 +1098,8 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
         ])
 
     def test_register_foreign_currency_on_invoice_exchange_writeoff_account(self):
-        self.env.company.tax_exigibility = True
-        self.env.company.account_cash_basis_base_account_id = self.env['account.account'].create({
+        self.env.company.sudo().tax_exigibility = True
+        self.env.company.sudo().account_cash_basis_base_account_id = self.env['account.account'].create({
             'code': 'cash.basis.base.account',
             'name': 'cash_basis_base_account',
             'account_type': 'income',

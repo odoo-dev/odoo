@@ -611,12 +611,12 @@ class TestPurchase(AccountTestInvoicingCommon):
         #         |----> Branch X
         #                   |----> Branch XX
         company = self.env.company
-        branch_x = self.env['res.company'].create({
+        branch_x = self.env['res.company'].sudo().create({
             'name': 'Branch X',
             'country_id': company.country_id.id,
             'parent_id': company.id,
         })
-        branch_xx = self.env['res.company'].create({
+        branch_xx = self.env['res.company'].sudo().create({
             'name': 'Branch XX',
             'country_id': company.country_id.id,
             'parent_id': branch_x.id,
@@ -805,7 +805,7 @@ class TestPurchase(AccountTestInvoicingCommon):
         the price of chosen is the one of the company specified in the purchase order
         """
         company_a = self.env.company
-        company_b = self.env['res.company'].create({'name': 'Saucisson Inc.'})
+        company_b = self.env['res.company'].sudo().create({'name': 'Saucisson Inc.'})
         self.env.company = company_a
 
         self.product_a.write({

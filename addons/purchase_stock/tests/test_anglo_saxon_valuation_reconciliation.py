@@ -291,13 +291,13 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
     def test_reconcile_cash_basis_bill(self):
         ''' Test the generation of the CABA move after bill payment
         '''
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
         cash_basis_base_account = self.env['account.account'].create({
             'code': 'cash.basis.base.account',
             'name': 'cash_basis_base_account',
             'account_type': 'income',
         })
-        self.company_data['company'].account_cash_basis_base_account_id = cash_basis_base_account
+        self.company_data['company'].sudo().account_cash_basis_base_account_id = cash_basis_base_account
 
         cash_basis_transfer_account = self.env['account.account'].create({
             'code': 'cash.basis.transfer.account',
@@ -524,9 +524,9 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         """ Prices modified by discounts and currency exchanges should still yield accurate price
         units when calculated by valuation mechanisms.
         """
-        self.env.company.currency_id = self.env.ref('base.IQD').id
+        self.env.company.sudo().currency_id = self.env.ref('base.IQD').id
         # FIXME: when rounding method is `round_per_line` ?
-        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self.env.company.sudo().tax_calculation_rounding_method = 'round_globally'
         self.test_product_order.standard_price = 500
         self.stock_account_product_categ.property_cost_method = 'average'
         self.env['res.currency.rate'].create({

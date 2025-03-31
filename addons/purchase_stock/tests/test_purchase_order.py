@@ -275,7 +275,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
 
     def test_05_multi_company(self):
         company_a = self.env.user.company_id
-        company_b = self.env['res.company'].create({
+        company_b = self.env['res.company'].sudo().create({
             "name": "Test Company",
             "currency_id": self.env['res.currency'].with_context(active_test=False).search([
                 ('id', '!=', company_a.currency_id.id),
@@ -293,7 +293,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
 
     def test_06_on_time_rate(self):
         company_a = self.env.user.company_id
-        company_b = self.env['res.company'].create({
+        company_b = self.env['res.company'].sudo().create({
             "name": "Test Company",
             "currency_id": self.env['res.currency'].with_context(active_test=False).search([
                 ('id', '!=', company_a.currency_id.id),

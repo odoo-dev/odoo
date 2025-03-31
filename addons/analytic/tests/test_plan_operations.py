@@ -69,7 +69,7 @@ class TestAnalyticPlanOperations(TransactionCase):
         distribution_model._validate_distribution()
 
     def test_validate_company_plans(self):
-        company_2 = self.env['res.company'].create({
+        company_2 = self.env['res.company'].sudo().create({
             'name': 'company_2',
         })
         plan = self.env['account.analytic.plan'].create([{

@@ -27,7 +27,7 @@ class TestAnalyticsReinvoice(TestAnalytics):
             'product_id': reinvoicable_product.id,
             'product_uom_qty': 3,
         })
-        self.user_stock_user.company_id.anglo_saxon_accounting = True
+        self.user_stock_user.company_id.sudo().anglo_saxon_accounting = True
         picking_out.action_confirm()
         picking_out.with_user(self.user_stock_user).button_validate()
 

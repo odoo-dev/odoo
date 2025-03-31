@@ -59,12 +59,12 @@ class TestL10nVNEmvQrCode(AccountTestInvoicingCommon):
 
         # Without company partner city should fail
         self.emv_qr_invoice.currency_id = self.env.ref('base.VND')
-        self.company_data['company'].partner_id.city = False
+        self.company_data['company'].sudo().partner_id.city = False
         with self.assertRaises(UserError, msg="Missing Merchant City."):
             self.emv_qr_invoice._generate_qr_code()
 
         # Without paynow infomation should fail
-        self.company_data['company'].partner_id.city = 'Vietnam'
+        self.company_data['company'].sudo().partner_id.city = 'Vietnam'
         self.emv_qr_invoice.partner_bank_id = self.acc_emv_vn_without_paynow_info
         with self.assertRaises(UserError, msg="The account receiving the payment must have a Proxy type and a Proxy value set."):
             self.emv_qr_invoice._generate_qr_code()
@@ -90,7 +90,7 @@ class TestL10nVNEmvQrCode(AccountTestInvoicingCommon):
         self.assertEqual(result, "aaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAeeeeeeeeeeeEEEEEEEEEEEoooooooooooooooooOOOOOOOOOOOOOOOOOiiiiiIIIIIuuuuuuuuuuuUUUUUUUUUUUyyyyyYYYYYdD")
 
     def test_emv_qr_vals_with_accent_partner(self):
-        self.company_data['company'].partner_id.name = 'áÁéÉóÓíÍúÚýÝđĐ'
+        self.company_data['company'].sudo().partner_id.name = 'áÁéÉóÓíÍúÚýÝđĐ'
         self.emv_qr_invoice.qr_code_method = 'emv_qr'
         unstruct_ref = 'INV/TEST/0002'
         emv_qr_vals = self.emv_qr_invoice.partner_bank_id._get_qr_vals(

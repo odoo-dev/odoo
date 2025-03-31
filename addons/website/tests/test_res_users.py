@@ -93,8 +93,8 @@ class TestWebsiteResUsers(TransactionCase):
             self.assertEqual(user_2.website_id.id, False)
 
     def test_multi_website_multi_company(self):
-        company_1 = self.env['res.company'].create({'name': "Company 1"})
-        company_2 = self.env['res.company'].create({'name': "Company 2"})
+        company_1 = self.env['res.company'].sudo().create({'name': "Company 1"})
+        company_2 = self.env['res.company'].sudo().create({'name': "Company 2"})
         website_1 = self.env['website'].create({'name': "Website 1", 'company_id': company_1.id})
         website_2 = self.env['website'].create({'name': "Website 2", 'company_id': company_2.id})
         # Permit uninvited signup.
@@ -105,7 +105,7 @@ class TestWebsiteResUsers(TransactionCase):
         self._create_and_check_portal_user(True, company_1, company_2, website_1, website_2)
 
     def test_archive_company_linked_to_website(self):
-        company = self.env['res.company'].create({'name': 'Company'})
+        company = self.env['res.company'].sudo().create({'name': 'Company'})
         self.env['website'].create({'name': "Website 1", 'company_id': company.id})
 
         # The company cannot be archived because it has a website linked to it

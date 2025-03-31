@@ -27,7 +27,7 @@ class TestAuthSignupFlowWith2faEnforced(HttpCaseWithUserPortal, HttpCaseWithUser
         """
         # ensure the company has an email, otherwise the test fails in no_demo
         # because there's no source address
-        self.env.company.email = "mycompany@example.com"
+        self.env.company.sudo().email = "mycompany@example.com"
 
         # Get csrf_token
         self.authenticate(None, None)

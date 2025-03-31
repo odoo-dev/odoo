@@ -183,23 +183,23 @@ class TestSaleOrder(SaleCommon):
         self.env['ir.config_parameter'].sudo().set_param('account.use_invoice_terms', True)
 
         # Plain invoice terms
-        self.env.company.terms_type = 'plain'
-        self.env.company.invoice_terms = "Coin coin"
+        self.env.company.sudo().terms_type = 'plain'
+        self.env.company.sudo().invoice_terms = "Coin coin"
         sale_order = self._create_sale_order()
         self.assertEqual(sale_order.note, "<p>Coin coin</p>")
 
         # Html invoice terms (/terms page)
-        self.env.company.terms_type = 'html'
+        self.env.company.sudo().terms_type = 'html'
         sale_order = self._create_sale_order()
         self.assertTrue(sale_order.note.startswith("<p>Terms &amp; Conditions: "))
 
     def test_validity_days(self):
-        self.env.company.quotation_validity_days = 5
+        self.env.company.sudo().quotation_validity_days = 5
         with freeze_time("2020-05-02"):
             sale_order = self._create_sale_order()
 
             self.assertEqual(sale_order.validity_date, fields.Date.today() + timedelta(days=5))
-        self.env.company.quotation_validity_days = 0
+        self.env.company.sudo().quotation_validity_days = 0
         sale_order = self._create_sale_order()
         self.assertFalse(
             sale_order.validity_date,
@@ -284,7 +284,7 @@ class TestSaleOrder(SaleCommon):
         })
 
         # Test Round per Line (default)
-        self.env.company.tax_calculation_rounding_method = 'round_per_line'
+        self.env.company.sudo().tax_calculation_rounding_method = 'round_per_line'
         sale_order = self.env['sale.order'].create({
             'partner_id': self.partner.id,
             'order_line': [
@@ -307,7 +307,7 @@ class TestSaleOrder(SaleCommon):
         self.assertEqual(sale_order.amount_total, 15.42, "")
 
         # Test Round Globally
-        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self.env.company.sudo().tax_calculation_rounding_method = 'round_globally'
         sale_order = self.env['sale.order'].create({
             'partner_id': self.partner.id,
             'order_line': [
@@ -368,7 +368,7 @@ class TestSaleOrder(SaleCommon):
 
     def test_so_company_empty(self):
         """Check emptying company on SO form"""
-        company_2 = self.env['res.company'].create({
+        company_2 = self.env['res.company'].sudo().create({
             'name': 'Company 2'
         })
         self.env = self.env(context=dict(self.env.context, allowed_company_ids=[self.env.company.id, company_2.id]))
@@ -427,12 +427,12 @@ class TestSaleOrder(SaleCommon):
         #         |----> Branch X
         #                   |----> Branch XX
         company = self.env.company
-        branch_x = self.env['res.company'].create({
+        branch_x = self.env['res.company'].sudo().create({
             'name': 'Branch X',
             'country_id': company.country_id.id,
             'parent_id': company.id,
         })
-        branch_xx = self.env['res.company'].create({
+        branch_xx = self.env['res.company'].sudo().create({
             'name': 'Branch XX',
             'country_id': company.country_id.id,
             'parent_id': branch_x.id,
@@ -695,8 +695,8 @@ class TestSalesTeam(SaleCommon):
 
     def test_cannot_assign_tax_of_mismatch_company(self):
         """ Test that sol cannot have assigned tax belonging to a different company from that of the sale order. """
-        company_a = self.env['res.company'].create({'name': 'A'})
-        company_b = self.env['res.company'].create({'name': 'B'})
+        company_a = self.env['res.company'].sudo().create({'name': 'A'})
+        company_b = self.env['res.company'].sudo().create({'name': 'B'})
         tax_group_a = self.env['account.tax.group'].create({'name': 'A', 'company_id': company_a.id})
         tax_group_b = self.env['account.tax.group'].create({'name': 'B', 'company_id': company_b.id})
         country = self.env['res.country'].search([], limit=1)
@@ -734,7 +734,7 @@ class TestSalesTeam(SaleCommon):
             sol.tax_ids = tax_b
 
     def test_assign_tax_multi_company(self):
-        root_company = self.env['res.company'].create({'name': 'B0 company'})
+        root_company = self.env['res.company'].sudo().create({'name': 'B0 company'})
         root_company.write({'child_ids': [
             Command.create({'name': 'B1 company'}),
             Command.create({'name': 'B2 company'}),

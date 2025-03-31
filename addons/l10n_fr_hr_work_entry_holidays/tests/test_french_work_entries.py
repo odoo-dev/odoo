@@ -59,7 +59,7 @@ class TestFrenchWorkEntries(TransactionCase):
                 (0, 0, {'name': 'Wednesday Afternoon', 'dayofweek': '2', 'hour_from': 13, 'hour_to': 17, 'day_period': 'afternoon'}),
             ],
         })
-        self.company.resource_calendar_id = company_calendar
+        self.company.sudo().resource_calendar_id = company_calendar
         self.employee.resource_calendar_id = employee_calendar
         self.employee_contract.resource_calendar_id = employee_calendar
 

@@ -761,7 +761,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
     def test_notification_reply_to_batch(self):
         # overwrite company name to keep it short/simple
         # and not trigger the 68 character reply_to formatting
-        self.env.user.company_id.name = "Forced"
+        self.env.user.company_id.sudo().name = "Forced"
         test_records_sudo = self.env['mail.test.container'].sudo().create([
             {'alias_name': 'a.%s.%d' % (self.env.user.name, index),
              'customer_id': self.customer.id,

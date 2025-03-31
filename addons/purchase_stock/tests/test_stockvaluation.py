@@ -426,7 +426,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         """
         self.env['res.currency.rate'].search([]).unlink()
         usd_currency = self.env.ref('base.USD')
-        self.env.company.currency_id = usd_currency.id
+        self.env.company.sudo().currency_id = usd_currency.id
 
         eur_currency = self.env.ref('base.EUR')
 
@@ -488,7 +488,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         self.assertAlmostEqual(self.product1.value_svl, price_unit_usd_new_rate * 10, delta=0.1)
 
     def test_fifo_anglosaxon_return(self):
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
 
@@ -587,7 +587,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         self.assertEqual(price_diff_entry.credit, 100)
 
     def test_anglosaxon_valuation(self):
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
 
@@ -681,8 +681,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
     def test_standard_valuation_multicurrency(self):
         company = self.env.user.company_id
-        company.anglo_saxon_accounting = True
-        company.currency_id = self.usd_currency
+        company.sudo().anglo_saxon_accounting = True
+        company.sudo().currency_id = self.usd_currency
 
         date_po = '2019-01-01'
 
@@ -773,8 +773,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
             of the bill with the exchange rate at the bill date
         """
         company = self.env.user.company_id
-        company.anglo_saxon_accounting = True
-        company.currency_id = self.usd_currency
+        company.sudo().anglo_saxon_accounting = True
+        company.sudo().currency_id = self.usd_currency
 
         date_po = '1993-07-18'
 
@@ -834,8 +834,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
     def test_valuation_rounding(self):
         company = self.env.user.company_id
-        company.anglo_saxon_accounting = True
-        company.currency_id = self.usd_currency
+        company.sudo().anglo_saxon_accounting = True
+        company.sudo().currency_id = self.usd_currency
 
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
@@ -868,8 +868,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
     def test_valuation_rounding_price_diff(self):
         company = self.env.user.company_id
-        company.anglo_saxon_accounting = True
-        company.currency_id = self.usd_currency
+        company.sudo().anglo_saxon_accounting = True
+        company.sudo().currency_id = self.usd_currency
 
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
@@ -907,8 +907,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         """
 
         company = self.env.user.company_id
-        company.anglo_saxon_accounting = True
-        company.currency_id = self.usd_currency
+        company.sudo().anglo_saxon_accounting = True
+        company.sudo().currency_id = self.usd_currency
 
         date_po = '2019-01-01'
 
@@ -1016,8 +1016,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         """
 
         company = self.env.user.company_id
-        company.anglo_saxon_accounting = True
-        company.currency_id = self.usd_currency
+        company.sudo().anglo_saxon_accounting = True
+        company.sudo().currency_id = self.usd_currency
 
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
@@ -1069,8 +1069,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         This shouldn't create a price difference entry.
         """
         company = self.env.user.company_id
-        company.anglo_saxon_accounting = True
-        company.currency_id = self.usd_currency
+        company.sudo().anglo_saxon_accounting = True
+        company.sudo().currency_id = self.usd_currency
 
         date_po = '2019-01-01'
 
@@ -1152,8 +1152,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         Not for average cost method though, since the PO and invoice have the same currency
         """
         company = self.env.user.company_id
-        company.anglo_saxon_accounting = True
-        company.currency_id = self.usd_currency
+        company.sudo().anglo_saxon_accounting = True
+        company.sudo().currency_id = self.usd_currency
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'average'
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
 
@@ -1323,8 +1323,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         This should create a price difference entry.
         """
         company = self.env.user.company_id
-        company.anglo_saxon_accounting = True
-        company.currency_id = self.usd_currency
+        company.sudo().anglo_saxon_accounting = True
+        company.sudo().currency_id = self.usd_currency
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'average'
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
 
@@ -1457,8 +1457,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         but the rates change happens
         """
         company = self.env.user.company_id
-        company.anglo_saxon_accounting = True
-        company.currency_id = self.usd_currency
+        company.sudo().anglo_saxon_accounting = True
+        company.sudo().currency_id = self.usd_currency
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'average'
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
 
@@ -1559,8 +1559,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         This should create a price difference entry.
         """
         company = self.env.user.company_id
-        company.anglo_saxon_accounting = True
-        company.currency_id = self.usd_currency
+        company.sudo().anglo_saxon_accounting = True
+        company.sudo().currency_id = self.usd_currency
 
         date_po = '2019-01-01'
         date_delivery = '2019-01-08'
@@ -1744,7 +1744,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         Inv: price unit: 100
              discount:    10
         """
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.product1.categ_id.property_cost_method = 'fifo'
         self.product1.categ_id.property_valuation = 'real_time'
 
@@ -1794,7 +1794,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         Inv: price unit: 100
              discount:    10
         """
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.product1.categ_id.property_cost_method = 'fifo'
         self.product1.categ_id.property_valuation = 'real_time'
 
@@ -1842,7 +1842,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         Inv: price unit: 100
              discount:    10
         """
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.product1.categ_id.property_cost_method = 'fifo'
         self.product1.categ_id.property_valuation = 'real_time'
 
@@ -1886,7 +1886,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         """
         Inv: price unit: 100
         """
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         self.product1.categ_id.property_cost_method = 'average'
         self.product1.categ_id.property_valuation = 'real_time'
         self.product1.standard_price = 1.01
@@ -2718,7 +2718,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         one_day_ago = today - timedelta(days=1)
         two_days_ago = today - timedelta(days=2)
 
-        self.env.company.currency_id = usd_currency.id
+        self.env.company.sudo().currency_id = usd_currency.id
 
         self.env['res.currency.rate'].search([]).unlink()
         self.env['res.currency.rate'].create([{
@@ -2905,7 +2905,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         receive the backorder. Check if the valuation layer is correctly created.
         """
         usd_currency = self.env.ref('base.USD')
-        self.env.company.currency_id = usd_currency.id
+        self.env.company.sudo().currency_id = usd_currency.id
         self.product1.categ_id.property_cost_method = 'fifo'
         self.product1.categ_id.property_valuation = 'real_time'
         self.product1.purchase_method = 'purchase'
@@ -2951,7 +2951,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         Ensure that the absence of account_move_id on the layers does not generate an Exception
         """
         usd_currency = self.env.ref('base.USD')
-        self.env.company.currency_id = usd_currency.id
+        self.env.company.sudo().currency_id = usd_currency.id
         self.product1.categ_id.property_cost_method = 'fifo'
         self.product1.categ_id.property_valuation = 'manual_periodic'
         self.product1.purchase_method = 'purchase'
@@ -3028,8 +3028,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         which meant that their value depended on the day the bill was posted (as it is when the price diff amls are created).
         """
         company = self.env.user.company_id
-        company.anglo_saxon_accounting = True
-        company.currency_id = self.usd_currency
+        company.sudo().anglo_saxon_accounting = True
+        company.sudo().currency_id = self.usd_currency
 
         self.product1.categ_id.property_cost_method = 'fifo'
         self.product1.categ_id.property_valuation = 'real_time'
@@ -3133,8 +3133,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
     def test_invoice_first_receipt_later_with_multicurrency_different_dates(self):
         """Ensure sure that use currency rate at bill date rather than the current date when invoice before receipt"""
         company = self.env.user.company_id
-        company.anglo_saxon_accounting = False
-        company.currency_id = self.usd_currency
+        company.sudo().anglo_saxon_accounting = False
+        company.sudo().currency_id = self.usd_currency
 
         self.product1.is_storable = True
         self.product1.purchase_method = 'purchase'
@@ -3332,7 +3332,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         today = fields.Date.today()
         yesterday = today - timedelta(days=1)
 
-        self.env.company.currency_id = usd_currency.id
+        self.env.company.sudo().currency_id = usd_currency.id
 
         self.env['res.currency.rate'].search([]).unlink()
         self.env['res.currency.rate'].create([{
@@ -3713,7 +3713,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         non-standard cost method, consuming the available qty, and then invoicing that product at
         different `price_unit` than the receipt should not create pdiff AccountMoveLines.
         """
-        self.env.company.anglo_saxon_accounting = False
+        self.env.company.sudo().anglo_saxon_accounting = False
         self.product1.categ_id.write({
             'property_valuation': 'manual_periodic',
             'property_cost_method': 'average',

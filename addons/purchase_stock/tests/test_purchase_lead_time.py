@@ -204,7 +204,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
 
     def test_reordering_days_to_purchase(self):
         company = self.env.ref('base.main_company')
-        company2 = self.env['res.company'].create({
+        company2 = self.env['res.company'].sudo().create({
             'name': 'Second Company',
         })
         company.write({'po_lead': 0.00})
@@ -218,7 +218,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
             'name': 'Delhaize'
         })
 
-        self.env.company.days_to_purchase = 2.0
+        self.env.company.sudo().days_to_purchase = 2.0
 
         # Test if the orderpoint is created when opening the replenishment view
         prod = self.env['product.product'].create({

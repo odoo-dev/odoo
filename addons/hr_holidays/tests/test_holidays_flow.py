@@ -226,7 +226,7 @@ class TestHolidaysFlow(TestHrHolidaysCommon):
             'emp': [(6, 0, [self.ref('hr.employee_admin')])],
             'holiday_type': 'Approved'
         }
-        self.env.company.external_report_layout_id = self.env.ref('web.external_layout_standard').id
+        self.env.company.sudo().external_report_layout_id = self.env.ref('web.external_layout_standard').id
         test_reports.try_report_action(self.env.cr, self.env.uid, 'action_hr_holidays_summary_employee', wiz_data=data_dict, context=ctx, our_module='hr_holidays')
 
     def test_sql_constraint_dates(self):

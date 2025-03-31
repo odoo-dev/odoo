@@ -377,7 +377,7 @@ class TestPoSProductsWithTax(TestPoSCommon):
         +---------+----------+-----------+----------+------+----------+------------------+--------+
         """
         tax_21_incl = self.taxes['tax21']
-        tax_21_incl.company_id.tax_calculation_rounding_method = 'round_globally'
+        tax_21_incl.company_id.sudo().tax_calculation_rounding_method = 'round_globally'
 
         product1 = self.create_product(
             name='Product 1',
@@ -423,7 +423,7 @@ class TestPoSProductsWithTax(TestPoSCommon):
         +---------+----------+------+----------+------+---------------------+-----------+---------------------------+---------+--------+--------+
         """
         tax_21_incl = self.taxes['tax21']
-        tax_21_incl.company_id.tax_calculation_rounding_method = 'round_globally'
+        tax_21_incl.company_id.sudo().tax_calculation_rounding_method = 'round_globally'
 
         product1 = self.create_product(
             name='Product 1',
@@ -470,7 +470,7 @@ class TestPoSProductsWithTax(TestPoSCommon):
         +---------+----------+------+----------+------+---------------------+-----------+---------------------------+---------+--------+--------+
         """
         tax_21_incl = self.taxes['tax21']
-        tax_21_incl.company_id.tax_calculation_rounding_method = 'round_globally'
+        tax_21_incl.company_id.sudo().tax_calculation_rounding_method = 'round_globally'
 
         product1 = self.create_product(
             name='Product 1',
@@ -561,12 +561,12 @@ class TestPoSProductsWithTax(TestPoSCommon):
         #         |----> Branch X
         #                   |----> Branch XX
         company = self.config.company_id
-        branch_x = self.env['res.company'].create({
+        branch_x = self.env['res.company'].sudo().create({
             'name': 'Parent Company',
             'country_id': company.country_id.id,
             'parent_id': company.id,
         })
-        branch_xx = self.env['res.company'].create({
+        branch_xx = self.env['res.company'].sudo().create({
             'name': 'Branch XX',
             'country_id': company.country_id.id,
             'parent_id': branch_x.id,

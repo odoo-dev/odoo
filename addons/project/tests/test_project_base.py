@@ -221,7 +221,7 @@ class TestProjectBase(TestProjectCommon):
             If the company of the project is not set, there are no restriction on its partner company-wise.
         """
         company_1 = self.env.company
-        company_2 = self.env['res.company'].create({'name': 'Company 2'})
+        company_2 = self.env['res.company'].sudo().create({'name': 'Company 2'})
         partner = self.env['res.partner'].create({
             'name': 'Partner',
         })

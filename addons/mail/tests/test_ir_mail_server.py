@@ -119,9 +119,9 @@ class TestIrMailServer(MailCommon):
                 if domain_name:
                     self.mail_alias_domain.name = domain_name
                     self.mail_alias_domain.default_from = default_from
-                    self.env.company.alias_domain_id = self.mail_alias_domain
+                    self.env.company.sudo().alias_domain_id = self.mail_alias_domain
                 else:
-                    self.env.company.alias_domain_id = False
+                    self.env.company.sudo().alias_domain_id = False
                 message = self.env["ir.mail_server"].build_email(
                     False, "recipient@example.com", "Subject",
                     "The body of an email",

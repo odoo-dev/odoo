@@ -154,7 +154,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             ('2019-03-31', '2019-02-10', '2019-04-30'),
             ('2019-05-31', '2019-06-15', '2019-06-30'),
         ]:
-            self.invoice.company_id.tax_lock_date = tax_date
+            self.invoice.company_id.sudo().tax_lock_date = tax_date
             with Form(self.invoice) as move_form:
                 move_form.invoice_date = invoice_date
             self.assertEqual(self.invoice.date, fields.Date.to_date(accounting_date))
@@ -858,7 +858,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
 
         # Test 'biggest_tax' rounding
 
-        self.company_data['company'].country_id = self.env.ref('base.us')
+        self.company_data['company'].sudo().country_id = self.env.ref('base.us')
 
         # Add a tag to product_a's default tax
         tax_line_tag = self.env['account.account.tag'].create({
@@ -1997,8 +1997,8 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             'code': 'TBASE',
             'account_type': 'asset_current',
         })
-        self.env.company.account_cash_basis_base_account_id = tax_base_amount_account
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().account_cash_basis_base_account_id = tax_base_amount_account
+        self.env.company.sudo().tax_exigibility = True
         tax_tags = defaultdict(dict)
         for line_type, repartition_type in [(l, r) for l in ('invoice', 'refund') for r in ('base', 'tax')]:
             tax_tags[line_type][repartition_type] = self.env['account.account.tag'].create({
@@ -2121,7 +2121,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             'code': 'NDE',
             'account_type': 'expense',
         })
-        self.env.company.tax_exigibility = True
+        self.env.company.sudo().tax_exigibility = True
         tax_tags = defaultdict(dict)
         for line_type, repartition_type in [(l, r) for l in ('invoice', 'refund') for r in ('base', 'tax')]:
             tax_tags[line_type][repartition_type] = self.env['account.account.tag'].create({
@@ -2265,7 +2265,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
         self.assertFalse(move_form.invoice_date)
 
         # Fiduciary mode enabled, date suggestion
-        self.env.company.quick_edit_mode = "out_and_in_invoices"
+        self.env.company.sudo().quick_edit_mode = "out_and_in_invoices"
 
         # We are June 17th. No Lock date. Bill Date of the most recent Vendor Bill : March 15th
         # ==> Default New Vendor Bill date = March 31st (last day of March)
@@ -2291,7 +2291,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
         # ==> Default New Vendor Bill date = May 31st (last day of the first month not locked)
         self.env['account.move'].search([('state', '!=', 'posted')]).unlink()
         move = self.init_invoice(move_type='in_invoice', invoice_date='2022-04-30', products=self.product_a, post=True)
-        move.company_id.fiscalyear_lock_date = fields.Date.from_string('2022-04-30')
+        move.company_id.sudo().fiscalyear_lock_date = fields.Date.from_string('2022-04-30')
         move_form = Form(self.env['account.move'].with_context(default_move_type='in_invoice'))
         self.assertEqual(move_form.invoice_date.strftime('%Y-%m-%d'), '2022-05-31')
 
@@ -2661,12 +2661,12 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
         #         |----> Branch X
         #                   |----> Branch XX
         company = self.env.company
-        branch_x = self.env['res.company'].create({
+        branch_x = self.env['res.company'].sudo().create({
             'name': 'Branch X',
             'country_id': company.country_id.id,
             'parent_id': company.id,
         })
-        branch_xx = self.env['res.company'].create({
+        branch_xx = self.env['res.company'].sudo().create({
             'name': 'Branch XX',
             'country_id': company.country_id.id,
             'parent_id': branch_x.id,
@@ -2793,7 +2793,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
         """When a separate discount account, make sure that discount lines don't have a tax_id set
         So, when creating a credit note from the invoice, data are coherent (=same amount)"""
         sale_tax = self.company_data['default_tax_sale']
-        self.env.company.account_discount_expense_allocation_id = self.company_data['default_account_expense'].id
+        self.env.company.sudo().account_discount_expense_allocation_id = self.company_data['default_account_expense'].id
         great_account = self.company_data['default_account_revenue'].copy()
         great_account.tax_ids = [Command.set(sale_tax.ids)]
         invoice = self.env['account.move'].create({

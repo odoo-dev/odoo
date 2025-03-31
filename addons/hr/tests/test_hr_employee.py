@@ -25,8 +25,8 @@ class TestHrEmployee(TestHrCommon):
 
     def test_employee_smart_button_multi_company(self):
         partner = self.env['res.partner'].create({'name': 'Partner Test'})
-        company_A = self.env['res.company'].create({'name': 'company_A'})
-        company_B = self.env['res.company'].create({'name': 'company_B'})
+        company_A = self.env['res.company'].sudo().create({'name': 'company_A'})
+        company_B = self.env['res.company'].sudo().create({'name': 'company_B'})
         self.env['hr.employee'].create({
             'name': 'employee_A',
             'work_contact_id': partner.id,
@@ -56,7 +56,7 @@ class TestHrEmployee(TestHrCommon):
 
     def test_employee_resource(self):
         _tz = 'Pacific/Apia'
-        self.res_users_hr_officer.company_id.resource_calendar_id.tz = _tz
+        self.res_users_hr_officer.company_id.sudo().resource_calendar_id.tz = _tz
         Employee = self.env['hr.employee'].with_user(self.res_users_hr_officer)
         employee_form = Form(Employee)
         employee_form.name = 'Raoul Grosbedon'
@@ -67,7 +67,7 @@ class TestHrEmployee(TestHrCommon):
     def test_employee_from_user(self):
         _tz = 'Pacific/Apia'
         _tz2 = 'America/Tijuana'
-        self.res_users_hr_officer.company_id.resource_calendar_id.tz = _tz
+        self.res_users_hr_officer.company_id.sudo().resource_calendar_id.tz = _tz
         self.res_users_hr_officer.tz = _tz2
         Employee = self.env['hr.employee'].with_user(self.res_users_hr_officer)
         employee_form = Form(Employee)
@@ -253,7 +253,7 @@ class TestHrEmployee(TestHrCommon):
             self.assertEqual(employee[field], user[field])
 
     def test_set_user_on_new_employee(self):
-        test_company = self.env['res.company'].create({
+        test_company = self.env['res.company'].sudo().create({
             'name': 'Test User Company',
         })
         self.env['hr.employee'].create({
@@ -290,7 +290,7 @@ class TestHrEmployee(TestHrCommon):
             'login': 'test_other_user',
         })
         test_other_user.partner_id.company_id = self.env.company
-        test_company = self.env['res.company'].create({
+        test_company = self.env['res.company'].sudo().create({
             'name' : 'Test User Company',
         })
         self.env.user.write({'company_ids': test_company.ids, 'company_id': test_company.id})
@@ -351,8 +351,8 @@ class TestHrEmployee(TestHrCommon):
             constraint of one employee per user in one company is triggered, the work_contact_id for the
             existing employee is nor removed, and employees in other companies are not affected.
         """
-        company_A = self.env['res.company'].create({'name': 'company_A'})
-        company_B = self.env['res.company'].create({'name': 'company_B'})
+        company_A = self.env['res.company'].sudo().create({'name': 'company_A'})
+        company_B = self.env['res.company'].sudo().create({'name': 'company_B'})
         user = self.env['res.users'].create({
             'name': 'Test User',
             'login': 'test_user',

@@ -299,7 +299,7 @@ class TestEventSaleMail(TestEventFullCommon):
     def test_event_mail_on_sale_confirmation(self):
         """Test that a mail is sent to the customer when a sale order is confirmed."""
         ticket = self.test_event.event_ticket_ids[0]
-        self.test_event.env.company.partner_id.email = 'test.email@test.example.com'
+        self.test_event.env.company.sudo().partner_id.email = 'test.email@test.example.com'
         order_line_vals = {
             "event_id": self.test_event.id,
             "event_ticket_id": ticket.id,

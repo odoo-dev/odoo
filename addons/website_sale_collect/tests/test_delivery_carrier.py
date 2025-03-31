@@ -22,7 +22,7 @@ class TestDeliveryCarrier(ClickAndCollectCommon, WebsiteSaleStockCommon):
 
     def test_same_company_for_delivery_method_and_warehouse(self):
         self.in_store_dm.company_id = self.company_id
-        self.companyA = self.env['res.company'].create({'name': 'Company A'})
+        self.companyA = self.env['res.company'].sudo().create({'name': 'Company A'})
         self.warehouse_2 = self._create_warehouse(company_id=self.companyA.id)
         with self.assertRaises(ValidationError):
             self.in_store_dm.warehouse_ids = [Command.set([self.warehouse_2.id])]

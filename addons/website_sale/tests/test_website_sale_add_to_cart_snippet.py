@@ -37,7 +37,7 @@ class TestAddToCartSnippet(HttpCase):
 
     def test_configure_product(self):
         # Reset the company country id, which ensure that no country dependant fields are blocking the address form.
-        self.env.company.country_id = self.env.ref('base.us')
+        self.env.company.sudo().country_id = self.env.ref('base.us')
         attribute = self.env['product.attribute'].create({
             'name': 'Color',
             'value_ids': [

@@ -286,7 +286,7 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
 
     def test_send_invalid_edi_user(self):
         # an invalid edi user should not be able to send invoices via peppol
-        self.env.company.account_peppol_proxy_state = 'rejected'
+        self.env.company.sudo().account_peppol_proxy_state = 'rejected'
 
         move = self.create_move(self.valid_partner)
         move.action_post()

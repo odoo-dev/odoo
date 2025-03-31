@@ -111,7 +111,7 @@ class TestVirtualAvailable(TestStockCommon):
         """ Checks we can't change the product's company if this product has
         quant in another company. """
         company1 = self.env.ref('base.main_company')
-        company2 = self.env['res.company'].create({'name': 'Second Company'})
+        company2 = self.env['res.company'].sudo().create({'name': 'Second Company'})
         product = self.env['product.product'].create({
             'name': 'Product [TEST - Change Company]',
             'is_storable': True,
@@ -138,7 +138,7 @@ class TestVirtualAvailable(TestStockCommon):
         """ Checks we can't change the product's company if this product has
         stock move line in another company. """
         company1 = self.env.ref('base.main_company')
-        company2 = self.env['res.company'].create({'name': 'Second Company'})
+        company2 = self.env['res.company'].sudo().create({'name': 'Second Company'})
         product = self.env['product.product'].create({
             'name': 'Product [TEST - Change Company]',
             'type': 'consu',
@@ -201,7 +201,7 @@ class TestVirtualAvailable(TestStockCommon):
 
         # Reset product company to empty
         product.company_id = False
-        company2 = self.env['res.company'].create({'name': 'Second Company'})
+        company2 = self.env['res.company'].sudo().create({'name': 'Second Company'})
         # Assigns to another company: should be not okay because exist quants in defferent company (exclude vendor and customer location)
         with self.assertRaises(UserError):
             product.company_id = company2.id
@@ -343,8 +343,8 @@ class TestVirtualAvailable(TestStockCommon):
 
     def test_domain_locations_only_considers_selected_companies(self):
         product = self.env['product.product'].create({'name': 'Product', 'is_storable': True})
-        company_a = self.env['res.company'].create({'name': 'Company A'})
-        company_b = self.env['res.company'].create({'name': 'Company B'})
+        company_a = self.env['res.company'].sudo().create({'name': 'Company A'})
+        company_b = self.env['res.company'].sudo().create({'name': 'Company B'})
         warehouse_a = self.env['stock.warehouse'].search([('company_id', '=', company_a.id)])
         warehouse_b = self.env['stock.warehouse'].search([('company_id', '=', company_b.id)])
         self.env['stock.quant'].create([

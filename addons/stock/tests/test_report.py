@@ -880,7 +880,7 @@ class TestReports(TestReportsCommon):
         display the right transfers.
         """
         # Configure second warehouse.
-        company_2 = self.env['res.company'].create({'name': 'Aperture Science'})
+        company_2 = self.env['res.company'].sudo().create({'name': 'Aperture Science'})
         wh_2 = self.env['stock.warehouse'].search([('company_id', '=', company_2.id)])
         wh_2_picking_type_in = wh_2.in_type_id
 

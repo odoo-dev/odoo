@@ -127,7 +127,7 @@ class TestUBLDK(TestUBLCommon, TestAccountMoveSendCommon):
     @freeze_time('2017-01-01')
     def test_export_invoice_two_line_foreign_partner_be(self):
         # Set peppol endpoint to have schemeID of 'GLN'
-        self.company_data['company'].partner_id.peppol_endpoint = '0239843188'
+        self.company_data['company'].sudo().partner_id.peppol_endpoint = '0239843188'
         invoice = self.create_post_and_send_invoice(partner=self.partner_b)
         self.assertTrue(invoice.ubl_cii_xml_id)
         self._assert_invoice_attachment(invoice.ubl_cii_xml_id, xpaths=None, expected_file_path="from_odoo/oioubl_out_invoice_foreign_partner_be.xml")
@@ -152,7 +152,7 @@ class TestUBLDK(TestUBLCommon, TestAccountMoveSendCommon):
 
     @freeze_time('2017-01-01')
     def test_oioubl_export_should_still_be_valid_when_currency_has_more_precision_digit(self):
-        self.company_data['company'].currency_id.rounding = 0.001
+        self.company_data['company'].sudo().currency_id.rounding = 0.001
         invoice = self.create_post_and_send_invoice()
         self.assertTrue(invoice.ubl_cii_xml_id)
         self._assert_invoice_attachment(invoice.ubl_cii_xml_id, xpaths=None, expected_file_path="from_odoo/oioubl_out_invoice_partner_dk.xml")
@@ -165,14 +165,14 @@ class TestUBLDK(TestUBLCommon, TestAccountMoveSendCommon):
 
     @freeze_time('2017-01-01')
     def test_oioubl_export_should_raise_an_error_when_company_building_number_is_missing(self):
-        self.env.company.partner_id.street = 'Paradisæblevej'
+        self.env.company.sudo().partner_id.street = 'Paradisæblevej'
         with self.assertRaisesRegex(UserError, "The following partner's street number is missing"):
             self.create_post_and_send_invoice()
 
     @freeze_time('2017-01-01')
     def test_export_invoice_company_and_partner_without_country_code_prefix_in_vat(self):
-        self.company_data['company'].vat = '12345674'
-        self.company_data['company'].partner_id.peppol_endpoint = False
+        self.company_data['company'].sudo().vat = '12345674'
+        self.company_data['company'].sudo().partner_id.peppol_endpoint = False
         self.partner_a.vat = 'DK12345674'
         self.partner_a.peppol_endpoint = False
         invoice = self.create_post_and_send_invoice()

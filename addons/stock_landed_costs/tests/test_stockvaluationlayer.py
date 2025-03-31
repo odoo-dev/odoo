@@ -318,7 +318,7 @@ class TestStockValuationLCAVCO(TestStockValuationLCCommon):
         Confirm PO, receive products, post bill and generate LC
         """
         company = self.env.company
-        self.env.user.company_id = self.env['res.company'].create({
+        self.env.user.company_id = self.env['res.company'].sudo().create({
             'name': 'Another Company',
         })
 
@@ -372,7 +372,7 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
         """In anglo saxon accounting, receive 10@10 and invoice. Then invoice 1@50 as a landed costs
         and create a linked landed costs record.
         """
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
 
         # Create an RFQ for self.product1, 10@10
         rfq = Form(self.env['purchase.order'])
@@ -459,7 +459,7 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
         """In anglo saxon accounting, receive 10@10 and invoice with the addition of 1@50 as a
         landed costs and create a linked landed costs record.
         """
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
 
         # Create an RFQ for self.product1, 10@10
         rfq = Form(self.env['purchase.order'])
@@ -511,7 +511,7 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
         """In continental accounting, receive 10@10 and invoice. Then invoice 1@50 as a landed costs
         and create a linked landed costs record.
         """
-        self.env.company.anglo_saxon_accounting = False
+        self.env.company.sudo().anglo_saxon_accounting = False
 
         # Create an RFQ for self.product1, 10@10
         rfq = Form(self.env['purchase.order'])
@@ -600,7 +600,7 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
         eur_currency = self.env.ref('base.EUR')
         eur_currency.active = True
 
-        company.currency_id = usd_currency
+        company.sudo().currency_id = usd_currency
 
         invoice_date = '2023-01-01'
         accounting_date = '2024-01-31'

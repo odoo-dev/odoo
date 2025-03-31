@@ -159,7 +159,7 @@ class TestAccountJournalAlias(AccountTestInvoicingCommon, MailCommon):
         journal2 = self.company_data_2['default_journal_sale']
         company2 = journal2.company_id
         # have a non ascii company name
-        company2.name = 'ぁ'
+        company2.sudo().name = 'ぁ'
 
         for (aname, jname, jcode, jtype, jcompany), expected_alias_name in zip(
             [
@@ -272,7 +272,7 @@ class TestAccountJournalAlias(AccountTestInvoicingCommon, MailCommon):
             self.assertFalse(journal_alias.alias_name)
 
         # changing type should reset if sale or purchase
-        journal.company_id.write({'name': 'New Company Name'})
+        journal.company_id.sudo().write({'name': 'New Company Name'})
         journal.write({'name': 'Reset Journal', 'type': 'sale'})
         journal_alias_2 = journal.alias_id
         self.assertEqual(journal_alias_2.alias_contact, 'everyone')

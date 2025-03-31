@@ -305,7 +305,7 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
         """Test that the price difference is correctly computed when a subcontracted
         product is resupplied.
         """
-        self.env.company.anglo_saxon_accounting = True
+        self.env.company.sudo().anglo_saxon_accounting = True
         resupply_sub_on_order_route = self.env['stock.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
         (self.comp1 + self.comp2).write({'route_ids': [(6, None, [resupply_sub_on_order_route.id])]})
         product_category_all = self.product_category
@@ -501,10 +501,10 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
             max(Vendor lead time, Manufacturing lead time + DTPMO) + Days to Purchase + Purchase security lead time
         """
         rule = self.env['stock.rule'].search([('action', '=', 'buy')], limit=1)
-        self.env.company.manufacturing_lead = 114514   # should never be used
+        self.env.company.sudo().manufacturing_lead = 114514   # should never be used
 
-        self.env.company.po_lead = 1
-        self.env.company.days_to_purchase = 2
+        self.env.company.sudo().po_lead = 1
+        self.env.company.sudo().days_to_purchase = 2
         # Case 1 Vendor lead time >= Manufacturing lead time + DTPMO
         seller = self.env['product.supplierinfo'].create({
             'product_tmpl_id': self.finished.product_tmpl_id.id,
@@ -528,10 +528,10 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
         while the resupply availability should be based on the calculated dtpmo.
         """
         # should never be used
-        self.env.company.manufacturing_lead = 114514
+        self.env.company.sudo().manufacturing_lead = 114514
         # should be added in all cases
-        self.env.company.po_lead = 5
-        self.env.company.days_to_purchase = 5
+        self.env.company.sudo().po_lead = 5
+        self.env.company.sudo().days_to_purchase = 5
 
         buy_route_id = self.ref('purchase_stock.route_warehouse0_buy')
         (self.finished | self.comp1 | self.comp2).route_ids = [(6, None, [buy_route_id])]
@@ -793,7 +793,7 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
         self.bom.produce_delay = 1
         self.bom.days_to_prepare_mo = 3
         # Security Lead Time for Purchase should always be added
-        self.env.company.po_lead = 2
+        self.env.company.sudo().po_lead = 2
 
         # Add 4 units of each component to subcontractor's location
         subcontractor_location = self.env.company.subcontracting_location_id

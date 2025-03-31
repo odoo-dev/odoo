@@ -87,9 +87,9 @@ class TestSequenceMixin(TestSequenceMixinCommon):
         Test the sequence update behavior when changing the date of a move in quick edit mode.
         The sequence should only be recalculated if a value (year or month) utilized in the sequence is modified.
         """
-        self.env.company.quick_edit_mode = "out_and_in_invoices"
-        self.env.company.fiscalyear_last_day = 30
-        self.env.company.fiscalyear_last_month = '12'
+        self.env.company.sudo().quick_edit_mode = "out_and_in_invoices"
+        self.env.company.sudo().fiscalyear_last_day = 30
+        self.env.company.sudo().fiscalyear_last_month = '12'
 
         bill = self.env['account.move'].create({
             'partner_id': 1,
@@ -137,7 +137,7 @@ class TestSequenceMixin(TestSequenceMixinCommon):
 
     def test_sequence_empty_editable_with_quick_edit_mode(self):
         """ Ensure the names of all but the first moves in a period are empty and editable in quick edit mode """
-        self.env.company.quick_edit_mode = 'in_invoices'
+        self.env.company.sudo().quick_edit_mode = 'in_invoices'
 
         bill_1 = self.env['account.move'].create({
             'partner_id': 1,
@@ -585,9 +585,9 @@ class TestSequenceMixin(TestSequenceMixinCommon):
 
     def test_sequence_staggered_year(self):
         """The sequence is correctly computed when the year is staggered."""
-        self.env.company.quick_edit_mode = "out_and_in_invoices"
-        self.env.company.fiscalyear_last_day = 15
-        self.env.company.fiscalyear_last_month = '4'
+        self.env.company.sudo().quick_edit_mode = "out_and_in_invoices"
+        self.env.company.sudo().fiscalyear_last_day = 15
+        self.env.company.sudo().fiscalyear_last_month = '4'
 
         # First bill in second half of first month of the fiscal year, which is
         # the start of the fiscal year
