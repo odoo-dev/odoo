@@ -27,7 +27,7 @@ import { GoogleMapOption } from "./google_map_option";
  * @typedef {{ isValid: boolean, message?: string }} ApiKeyValidation
  */
 
-class GoogleMapOptionPlugin extends Plugin {
+export class GoogleMapOptionPlugin extends Plugin {
     static id = "googleMapOption";
     static dependencies = ["history", "remove"];
     resources = {
@@ -97,10 +97,22 @@ class GoogleMapOptionPlugin extends Plugin {
         /** @type {string | undefined} */
         let apiKey = await this.googleMapService.getGMapAPIKey();
         const didReconfigure = await this.configureGMapAPI({ apiKey, force: forceReconfigure });
-        apiKey = await this.googleMapService.loadGMapAPI(true, didReconfigure);
+        apiKey = await this.loadGoogleMapAPIFromService(didReconfigure);
         if (apiKey) {
             await this.onGoogleMapsLoaded(editingElement);
         }
+    }
+
+    /**
+     * Load the Google Maps API from the Google Map Service.
+     * This method is set apart so it can be overridden for testing.
+     *
+     * @param {boolean} [shouldRefetch]
+     * @returns {Promise<string|undefined>} A promise that resolves to an API
+     *                                      key if found.
+     */
+    async loadGoogleMapAPIFromService(shouldRefetch) {
+        return this.googleMapService.loadGMapAPI(true, shouldRefetch);
     }
 
     /**
@@ -113,8 +125,10 @@ class GoogleMapOptionPlugin extends Plugin {
      * @returns {Promise<void>}
      */
     async onGoogleMapsLoaded(editingElement) {
-        this.mapsAPI = google.maps;
-        this.placesAPI = google.maps.places;
+        if (window.google) { // This should always be true, except for in tests.
+            this.mapsAPI = google.maps;
+            this.placesAPI = google.maps.places;
+        }
         const place = await this.nearbySearch(editingElement, editingElement.dataset.mapGps);
         if (place?.formatted_address) {
             editingElement.dataset.pinAddress = place.formatted_address;
@@ -194,6 +208,18 @@ class GoogleMapOptionPlugin extends Plugin {
     }
 
     /**
+     * Send a request to the Google Maps API, using the given API key, so as to
+     * get a response which can be used to test the validity of said key.
+     * This method is set apart so it can be overridden for testing.
+     *
+     * @param {string} key
+     * @returns {Promise<{ status: number }>}
+     */
+    async fetchGoogleMap(key) {
+        return await fetch(`https://maps.googleapis.com/maps/api/staticmap?center=belgium&size=10x10&key=${encodeURIComponent(key)}`);
+    }
+
+    /**
      * Send a request to the Google Maps API to test the validity of the given
      * API key. Return an object with the error message if any, and a boolean
      * that is true if the response from the API had a status of 200.
@@ -213,7 +239,7 @@ class GoogleMapOptionPlugin extends Plugin {
     async validateGMapApiKey(key) {
         if (key) {
             try {
-                const response = await fetch(`https://maps.googleapis.com/maps/api/staticmap?center=belgium&size=10x10&key=${encodeURIComponent(key)}`);
+                const response = await this.fetchGoogleMap(key);
                 const isValid = (response.status === 200);
                 return {
                     isValid,
