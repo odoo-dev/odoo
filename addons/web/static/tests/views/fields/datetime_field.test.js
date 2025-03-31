@@ -3,6 +3,7 @@ import { click, edit, queryAll, queryAllProperties, queryAllTexts, resize } from
 import { animationFrame, mockTimeZone } from "@odoo/hoot-mock";
 import {
     clickSave,
+    contains,
     defineModels,
     defineParams,
     fields,
@@ -292,7 +293,7 @@ test("multi edition of DatetimeField in list view: clear date in input", async (
 
     await click(".o_field_datetime input");
     await animationFrame();
-    await edit("", { confirm: "Enter" });
+    await contains(".o_field_datetime input").edit("", { confirm: "Enter" });
     await animationFrame();
 
     expect(".modal").toHaveCount(1);
@@ -444,7 +445,7 @@ test("edit a datetime field in form view with show_seconds option", async () => 
     await click(dateField1);
     await animationFrame();
     expect(".o_time_picker_input").toHaveValue("11:00");
-    await edit("02/08/2017 11:00:00", { confirm: "Enter" });
+    await contains(dateField1).edit("02/08/2017 11:00:00", { confirm: "Enter" });
     await animationFrame();
 
     expect(dateField1).toHaveValue("02/08/2017 11:00", {
@@ -454,7 +455,7 @@ test("edit a datetime field in form view with show_seconds option", async () => 
     await click(dateField2);
     await animationFrame();
     expect(".o_time_picker_input").toHaveValue("11:00:00");
-    await edit("02/08/2017 11:00:30", { confirm: "Enter" });
+    await contains(dateField2).edit("02/08/2017 11:00:30", { confirm: "Enter" });
     await animationFrame();
 
     expect(dateField2).toHaveValue("02/08/2017 11:00:30", {

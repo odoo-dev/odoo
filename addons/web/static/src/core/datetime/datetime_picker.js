@@ -28,6 +28,7 @@ const { DateTime, Info } = luxon;
  * @property {number} [focusedDateIndex=0]
  * @property {boolean} [showWeekNumbers]
  * @property {DaysOfWeekFormat} [daysOfWeekFormat="short"]
+ * @property {String} [dateFormat=localization.dateFormat]
  * @property {DateLimit} [maxDate]
  * @property {PrecisionLevel} [maxPrecision="decades"]
  * @property {DateLimit} [minDate]
@@ -285,6 +286,7 @@ const WEEKS_PER_MONTH = 6;
 export class DateTimePicker extends Component {
     static props = {
         focusedDateIndex: { type: Number, optional: true },
+        dateFormat: { type: String, optional: true },
         showWeekNumbers: { type: Boolean, optional: true },
         daysOfWeekFormat: { type: String, optional: true },
         maxDate: { type: [NULLABLE_DATETIME_PROPERTY, { value: "today" }], optional: true },
@@ -325,6 +327,9 @@ export class DateTimePicker extends Component {
         minPrecision: "days",
         rounding: 5,
         type: "datetime",
+        get dateFormat() {
+            return localization.dateFormat;
+        },
     };
 
     static template = "web.DateTimePicker";
@@ -551,6 +556,18 @@ export class DateTimePicker extends Component {
         ev.preventDefault();
         const { step } = this.activePrecisionLevel;
         this.state.focusDate = this.clamp(this.state.focusDate.minus(step));
+    }
+
+    /**
+     * @param {number} valueIndex
+     * @param {string} newDate
+     */
+    onDateInputChange(valueIndex, newDate) {
+        this.validateAndSelect(
+            DateTime.fromFormat(newDate, this.props.dateFormat),
+            valueIndex,
+            "date"
+        );
     }
 
     /**

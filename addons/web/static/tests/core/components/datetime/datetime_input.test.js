@@ -372,7 +372,7 @@ describe("DateTimeInput (datetime)", () => {
     });
 
     test("enter a datetime value", async () => {
-        expect.assertions(6);
+        expect.assertions(7);
 
         await mountWithCleanup(DateTimeInputComp, {
             props: {
@@ -391,7 +391,7 @@ describe("DateTimeInput (datetime)", () => {
         expect.verifySteps([]);
 
         await contains(".o_datetime_input").click();
-        await edit("08/02/1997 15:45:05");
+        await contains(".o_datetime_input").edit("08/02/1997 15:45:05");
         await animationFrame();
         await click(document.body);
         await animationFrame();
@@ -403,6 +403,7 @@ describe("DateTimeInput (datetime)", () => {
         expect(".o_datetime_input").toHaveValue("08/02/1997 15:45:05");
         expect(getPickerCell("8")[0]).toHaveClass("o_selected");
 
+        expect(".o_date_picker_input").toHaveValue("08/02/1997");
         expect(".o_time_picker_input").toHaveValue("15:45");
     });
 
@@ -491,7 +492,7 @@ describe("DateTimeInput (datetime)", () => {
         expect.verifySteps([]);
 
         await contains(".o_datetime_input").click();
-        await edit("08/02/1997 15:45");
+        await contains(".o_datetime_input").edit("08/02/1997 15:45");
         await animationFrame();
         await click(document.body);
         await animationFrame();
@@ -556,7 +557,7 @@ describe("DateTimeInput (datetime)", () => {
         });
 
         await contains(".o_datetime_input").click();
-        await edit("٠٤ يونيو, ٢٠٢٣ ١١:٣٣:٠٠");
+        await contains(".o_datetime_input").edit("٠٤ يونيو, ٢٠٢٣ ١١:٣٣:٠٠");
         await animationFrame();
         await click(document.body);
         await animationFrame();
@@ -564,7 +565,7 @@ describe("DateTimeInput (datetime)", () => {
         expect(".o_datetime_input").toHaveValue("٠٤ يونيو, ٢٠٢٣ ١١:٣٣:٠٠");
 
         await contains(".o_datetime_input").click();
-        await edit("15 07, 2020 12:30:43");
+        await contains(".o_datetime_input").edit("15 07, 2020 12:30:43");
         await animationFrame();
         await click(document.body);
         await animationFrame();
