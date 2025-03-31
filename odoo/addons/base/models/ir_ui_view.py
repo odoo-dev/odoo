@@ -809,7 +809,7 @@ actual arch.
         """
         if self.inherit_id and self.mode != 'primary':
             return self.inherit_id._check_view_access()
-        if set(self.group_ids.ids) & set(self.env.user._get_group_ids()):
+        if set(self.group_ids.ids) & self.env.all_group_ids:
             return True
         if self.group_ids:
             error = _(
@@ -1332,7 +1332,7 @@ actual arch.
         """
         group_definitions = self.env['res.groups']._get_group_definitions()
 
-        user_group_ids = self.env.user._get_group_ids()
+        user_group_ids = self.env.all_group_ids
 
         # check the read/visibility access
         @functools.cache

@@ -2771,7 +2771,7 @@ class BaseModel(metaclass=MetaModel):
             operation=operation,
         )
 
-        if self.env.user._has_group('base.group_no_one'):
+        if self.env.has_group('base.group_no_one'):
             if field.groups == NO_ACCESS:
                 allowed_groups_msg = _("always forbidden")
             elif not field.groups:
@@ -5479,6 +5479,17 @@ class BaseModel(metaclass=MetaModel):
         allowed_company_ids.insert(0, company_id)
 
         return self.with_context(allowed_company_ids=allowed_company_ids)
+
+    @api.private
+    def with_group(self, group: int | str) -> Self:
+        env = self.env
+        if isinstance(group, str):
+            group_id = env['res.groups']._get_group_definitions().get_id(group)
+        else:
+            group_id = group
+        if env.has_group(group_id):
+            return self
+        return self.with_env(env(additional_group_id=group_id))
 
     @api.private
     def with_context(self, ctx: dict[str, typing.Any] | None = None, /, **overrides) -> Self:

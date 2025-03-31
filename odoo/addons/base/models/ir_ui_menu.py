@@ -66,10 +66,10 @@ class IrUiMenu(models.Model):
             return False
 
     @api.model
-    @api.ormcache('frozenset(self.env.user._get_group_ids())', 'debug')
+    @api.ormcache('frozenset(self.env.all_group_ids)', 'debug')
     def _visible_menu_ids(self, debug=False):
         """ Return the ids of the menu items visible to the user. """
-        group_ids = set(self.env.user._get_group_ids())
+        group_ids = set(self.env.all_group_ids)
         if not debug:
             group_ids.discard(self.env['ir.model.data']._xmlid_to_res_id('base.group_no_one', raise_if_not_found=False))
 

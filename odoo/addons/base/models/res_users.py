@@ -1074,12 +1074,17 @@ class ResUsers(models.Model):
         the current request is in debug mode.
         """
         self.ensure_one()
-        if not (self.env.su or self == self.env.user or self.env.user._has_group('base.group_user')):
+        if self.id == self.env.uid:
+            # XXX maybe we should not change this function?
+            # done right now for testing and compatibility (~900 usages)
+            result = self.env.has_group(group_ext_id)
+        elif self.env.su or self.env.has_group('base_group_user'):
+            result = self._has_group(group_ext_id)
+        else:
             # this prevents RPC calls from non-internal users to retrieve
             # information about other users
             raise AccessError(_("You can ony call user.has_group() with your current user."))
 
-        result = self._has_group(group_ext_id)
         if group_ext_id == 'base.group_no_one':
             result = result and bool(request and request.session.debug)
         return result

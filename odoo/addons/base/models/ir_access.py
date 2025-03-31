@@ -326,7 +326,7 @@ class IrAccess(models.Model):
                 restrictions.append(Domain(parent_field_name, 'any', domain))
 
         # include False in user groups to catch global rules
-        group_ids = {*self.env.user._get_group_ids(), False}
+        group_ids = {*self.env.all_group_ids, False}
         # some domains have been pre-evaluated, evaluate only if needed
         eval_context = None
         for access in self._get_all_access().get(model_name, ()):
@@ -345,6 +345,8 @@ class IrAccess(models.Model):
 
     def _get_access_context(self) -> Iterator:
         """ Return the context values that the evaluation of the access domain depends on. """
+        if group_ids := self.env._all_group_ids:
+            yield group_ids
         yield tuple(self.env.context.get('allowed_company_ids', ()))
 
     def _eval_context(self):
@@ -553,7 +555,7 @@ class IrAccess(models.Model):
             for access in self._get_all_access().get(model._name, ())
             if access.operation in operations
         ]
-        group_ids = set(self.env.user._get_group_ids())
+        group_ids = set(self.env.all_group_ids)
 
         # first check if the permissions fail for any record (aka if searching
         # on (records, permissions) filters out some of the records)

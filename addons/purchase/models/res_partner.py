@@ -8,7 +8,7 @@ class ResPartner(models.Model):
 
     def _compute_purchase_order_count(self):
         self.purchase_order_count = 0
-        if not self.env.user._has_group('purchase.group_purchase_user'):
+        if not self.env.has_group('purchase.group_purchase_user'):
             return
 
         # retrieve all children partners and prefetch 'parent_id' on them
