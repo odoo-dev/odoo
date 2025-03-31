@@ -542,7 +542,6 @@ class ResPartner(models.Model):
         compute='_credit_debit_get', search=_debit_search, string='Total Payable',
         help="Total amount you have to pay to this vendor.",
         groups='account.group_account_invoice,account.group_account_readonly')
-    debit_limit = fields.Monetary('Payable Limit')
     total_invoiced = fields.Monetary(compute='_invoice_total', string="Total Invoiced",
         groups='account.group_account_invoice,account.group_account_readonly')
     currency_id = fields.Many2one('res.currency', compute='_get_company_currency', readonly=True,
@@ -725,7 +724,7 @@ class ResPartner(models.Model):
     @api.model
     def _commercial_fields(self):
         return super(ResPartner, self)._commercial_fields() + \
-            ['debit_limit', 'property_account_payable_id', 'property_account_receivable_id', 'property_account_position_id',
+            ['property_account_payable_id', 'property_account_receivable_id', 'property_account_position_id',
              'property_payment_term_id', 'property_supplier_payment_term_id', 'credit_limit']
 
     def action_view_partner_invoices(self):

@@ -63,6 +63,7 @@ class AccountBankStatement(models.Model):
     currency_id = fields.Many2one(
         comodel_name='res.currency',
         compute='_compute_currency_id',
+        store=True,
     )
 
     journal_id = fields.Many2one(

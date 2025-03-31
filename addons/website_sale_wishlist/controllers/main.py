@@ -11,8 +11,6 @@ class WebsiteSaleWishlist(Controller):
     def add_to_wishlist(self, product_id, **kw):
         product = request.env['product.product'].browse(product_id)
 
-        price = product._get_combination_info_variant()['price']
-
         Wishlist = request.env['product.wishlist']
         if request.website.is_public_user():
             Wishlist = Wishlist.sudo()
@@ -24,7 +22,6 @@ class WebsiteSaleWishlist(Controller):
             request.pricelist.id,
             request.website.currency_id.id,
             request.website.id,
-            price,
             product_id,
             partner_id
         )

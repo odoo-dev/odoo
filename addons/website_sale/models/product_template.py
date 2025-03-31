@@ -135,7 +135,7 @@ class ProductTemplate(models.Model):
             " otherwise.",
     )
 
-    compare_list_price = fields.Monetary(
+    compare_list_price = fields.Float(
         string="Compare to Price",
         help="Add a strikethrough price to your /shop and product pages for comparison purposes."
              "It will not be displayed if pricelists apply.",
