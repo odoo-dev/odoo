@@ -202,8 +202,18 @@ def new_test_user(env, login='', groups='base.group_user', context=None, **kwarg
     if isinstance(groups, str):
         groups = groups.split(',')
 
-    group_ids = [Command.set(kwargs.pop('group_ids', False) or [env.ref(g.strip()).id for g in groups])]
-    create_values = dict(kwargs, login=login, group_ids=group_ids)
+    raise_if_not_found = kwargs.pop('raise_if_not_found', True)
+    group_ids = kwargs.pop('group_ids', False)
+    if not group_ids:
+        group_ids = []
+        for xmlid in groups:
+            group = env.ref(xmlid.strip(), raise_if_not_found=raise_if_not_found)
+            if group:
+                group_ids.append(group.id)
+            else:
+                warnings.warn(f"The test class uses an unknown group: {xmlid}", stacklevel=1)
+
+    create_values = dict(kwargs, login=login, group_ids=[Command.set(group_ids)])
     # automatically generate a name as "Login (groups)" to ease user comprehension
     if not create_values.get('name'):
         create_values['name'] = '%s (%s)' % (login, groups)
@@ -1006,6 +1016,7 @@ class TransactionCase(BaseCase):
                 email='testing@test.com',
                 groups=cls.user_groups,
                 company_id=cls.env.company.id,
+                raise_if_not_found=False,
             )
 
     def setUp(self):
