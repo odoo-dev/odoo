@@ -93,10 +93,11 @@ class AccountTax(models.Model):
 
         # Tax amounts.
         def grouping_function(base_line, tax_data):
-            return {
-                **get_base_line_grouping_key(base_line),
-                'l10n_in_tax_type': tax_data['tax'].l10n_in_tax_type,
-            }
+            if tax_data:
+                return {
+                    **get_base_line_grouping_key(base_line),
+                    'l10n_in_tax_type': tax_data['tax'].l10n_in_tax_type,
+                }
 
         base_lines_aggregated_values = self._aggregate_base_lines_tax_details(base_lines, grouping_function)
         values_per_grouping_key = self._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)

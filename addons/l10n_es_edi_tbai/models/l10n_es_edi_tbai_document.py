@@ -528,16 +528,17 @@ class L10n_Es_Edi_TbaiDocument(models.Model):
         AccountTax = self.env['account.tax']
 
         def tax_details_info_grouping_function(base_line, tax_data):
-            tax = tax_data['tax']
+            if tax_data:
+                tax = tax_data['tax']
 
-            return {
-                'applied_tax_amount': tax.amount,
-                'l10n_es_type': tax.l10n_es_type,
-                'l10n_es_exempt_reason': tax.l10n_es_exempt_reason if tax.l10n_es_type == 'exento' else False,
-                'l10n_es_bien_inversion': tax.l10n_es_bien_inversion,
-                'is_reverse_charge': tax_data['is_reverse_charge'],
-                'tax_scope': tax.tax_scope,
-            }
+                return {
+                    'applied_tax_amount': tax.amount,
+                    'l10n_es_type': tax.l10n_es_type,
+                    'l10n_es_exempt_reason': tax.l10n_es_exempt_reason if tax.l10n_es_type == 'exento' else False,
+                    'l10n_es_bien_inversion': tax.l10n_es_bien_inversion,
+                    'is_reverse_charge': tax_data['is_reverse_charge'],
+                    'tax_scope': tax.tax_scope,
+                }
 
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, tax_details_info_grouping_function)
         values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
@@ -561,7 +562,8 @@ class L10n_Es_Edi_TbaiDocument(models.Model):
 
         # Aggregate the base lines again (with no grouping) to add the base amount to the total.
         def totals_grouping_function(base_line, tax_data):
-            return True
+            if tax_data:
+                return True
 
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, totals_grouping_function)
         values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
@@ -580,16 +582,17 @@ class L10n_Es_Edi_TbaiDocument(models.Model):
         AccountTax = self.env['account.tax']
 
         def tax_details_info_grouping_function(base_line, tax_data):
-            tax = tax_data['tax']
+            if tax_data:
+                tax = tax_data['tax']
 
-            return {
-                'applied_tax_amount': tax.amount,
-                'l10n_es_type': tax.l10n_es_type,
-                'l10n_es_exempt_reason': tax.l10n_es_exempt_reason if tax.l10n_es_type == 'exento' else False,
-                'l10n_es_bien_inversion': tax.l10n_es_bien_inversion,
-                'is_reverse_charge': tax_data['is_reverse_charge'],
-                'tax_scope': tax.tax_scope,
-            }
+                return {
+                    'applied_tax_amount': tax.amount,
+                    'l10n_es_type': tax.l10n_es_type,
+                    'l10n_es_exempt_reason': tax.l10n_es_exempt_reason if tax.l10n_es_type == 'exento' else False,
+                    'l10n_es_bien_inversion': tax.l10n_es_bien_inversion,
+                    'is_reverse_charge': tax_data['is_reverse_charge'],
+                    'tax_scope': tax.tax_scope,
+                }
 
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, tax_details_info_grouping_function)
         values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
@@ -619,7 +622,8 @@ class L10n_Es_Edi_TbaiDocument(models.Model):
 
         # Aggregate the base lines again (with no grouping) to add the base amount to the total.
         def totals_grouping_function(base_line, tax_data):
-            return True
+            if tax_data:
+                return True
 
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, totals_grouping_function)
         values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)

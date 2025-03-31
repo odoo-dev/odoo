@@ -422,7 +422,8 @@ class AccountMove(models.Model):
         AccountTax._round_base_lines_tax_details(base_lines, self.company_id, tax_lines=tax_lines)
 
         def grouping_function(base_line, tax_data):
-            return tax_data['tax']
+            if tax_data:
+                return tax_data['tax']
 
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
         for base_line, aggregated_values in base_lines_aggregated_values:

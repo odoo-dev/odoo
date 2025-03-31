@@ -356,13 +356,14 @@ class SaleOrder(models.Model):
         AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
 
         def grouping_function(base_line, tax_data):
-            return {
-                'taxes': base_line['discount_taxes'],
-                'skip': (
-                    tax_data['tax'] not in base_line['discount_taxes']
-                    or base_line['record'] not in lines
-                ),
-            }
+            if tax_data:
+                return {
+                    'taxes': base_line['discount_taxes'],
+                    'skip': (
+                        tax_data['tax'] not in base_line['discount_taxes']
+                        or base_line['record'] not in lines
+                    ),
+                }
 
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
         values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)

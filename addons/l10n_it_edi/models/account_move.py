@@ -504,39 +504,42 @@ class AccountMove(models.Model):
 
     @api.model
     def _l10n_it_edi_grouping_function_base_lines(self, base_line, tax_data):
-        tax = tax_data['tax']
-        return {
-            'tax_amount_field': -23.0 if tax.amount == -11.5 else tax.amount,
-            'tax_amount_type_field': tax.amount_type,
-            'skip': tax_data['is_reverse_charge'] or self._l10n_it_edi_is_neg_split_payment(tax_data),
-        }
+        if tax_data:
+            tax = tax_data['tax']
+            return {
+                'tax_amount_field': -23.0 if tax.amount == -11.5 else tax.amount,
+                'tax_amount_type_field': tax.amount_type,
+                'skip': tax_data['is_reverse_charge'] or self._l10n_it_edi_is_neg_split_payment(tax_data),
+            }
 
     @api.model
     def _l10n_it_edi_grouping_function_tax_lines(self, base_line, tax_data):
-        tax = tax_data['tax']
+        if tax_data:
+            tax = tax_data['tax']
 
-        if tax._l10n_it_is_split_payment():
-            tax_exigibility_code = 'S'
-        elif tax.tax_exigibility == 'on_payment':
-            tax_exigibility_code = 'D'
-        elif tax.tax_exigibility == 'on_invoice':
-            tax_exigibility_code = 'I'
-        else:
-            tax_exigibility_code = None
+            if tax._l10n_it_is_split_payment():
+                tax_exigibility_code = 'S'
+            elif tax.tax_exigibility == 'on_payment':
+                tax_exigibility_code = 'D'
+            elif tax.tax_exigibility == 'on_invoice':
+                tax_exigibility_code = 'I'
+            else:
+                tax_exigibility_code = None
 
-        return {
-            'tax_amount_field': -23.0 if tax.amount == -11.5 else tax.amount,
-            'l10n_it_exempt_reason': tax.l10n_it_exempt_reason,
-            'invoice_legal_notes': html2plaintext(tax.invoice_legal_notes),
-            'tax_exigibility_code': tax_exigibility_code,
-            'tax_amount_type_field': tax.amount_type,
-            'skip': tax_data['is_reverse_charge'] or self._l10n_it_edi_is_neg_split_payment(tax_data),
-        }
+            return {
+                'tax_amount_field': -23.0 if tax.amount == -11.5 else tax.amount,
+                'l10n_it_exempt_reason': tax.l10n_it_exempt_reason,
+                'invoice_legal_notes': html2plaintext(tax.invoice_legal_notes),
+                'tax_exigibility_code': tax_exigibility_code,
+                'tax_amount_type_field': tax.amount_type,
+                'skip': tax_data['is_reverse_charge'] or self._l10n_it_edi_is_neg_split_payment(tax_data),
+            }
 
     @api.model
     def _l10n_it_edi_grouping_function_total(self, base_line, tax_data):
-        skip = tax_data['is_reverse_charge'] or self._l10n_it_edi_is_neg_split_payment(tax_data)
-        return not skip
+        if tax_data:
+            skip = tax_data['is_reverse_charge'] or self._l10n_it_edi_is_neg_split_payment(tax_data)
+            return not skip
 
     def _l10n_it_edi_get_values(self, pdf_values=None):
         self.ensure_one()

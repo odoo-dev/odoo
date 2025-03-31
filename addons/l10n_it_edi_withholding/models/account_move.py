@@ -70,13 +70,14 @@ class AccountMove(models.Model):
         # Withholding tax amounts.
 
         def grouping_function_withholding(base_line, tax_data):
-            tax = tax_data['tax']
-            return {
-                'tax_amount_field': -23.0 if tax.amount == -11.5 else tax.amount,
-                'l10n_it_withholding_type': tax.l10n_it_withholding_type,
-                'l10n_it_withholding_reason': tax.l10n_it_withholding_reason,
-                'skip': not tax._l10n_it_filter_kind('withholding'),
-            }
+            if tax_data:
+                tax = tax_data['tax']
+                return {
+                    'tax_amount_field': -23.0 if tax.amount == -11.5 else tax.amount,
+                    'l10n_it_withholding_type': tax.l10n_it_withholding_type,
+                    'l10n_it_withholding_reason': tax.l10n_it_withholding_reason,
+                    'skip': not tax._l10n_it_filter_kind('withholding'),
+                }
 
         AccountTax = self.env['account.tax']
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function_withholding)
@@ -97,19 +98,20 @@ class AccountMove(models.Model):
         # Pension fund.
 
         def grouping_function_pension_funds(base_line, tax_data):
-            tax = tax_data['tax']
-            flatten_taxes = base_line['tax_ids'].flatten_taxes_hierarchy()
-            vat_tax = flatten_taxes.filtered(lambda t: t._l10n_it_filter_kind('vat') and t.amount >= 0)[:1]
-            withholding_tax = flatten_taxes.filtered(lambda t: t._l10n_it_filter_kind('withholding') and t.sequence > tax.sequence)[:1]
-            return {
-                'tax_amount_field': -23.0 if tax.amount == -11.5 else tax.amount,
-                'vat_tax_amount_field': -23.0 if vat_tax.amount == -11.5 else vat_tax.amount,
-                'has_withholding': bool(withholding_tax),
-                'l10n_it_pension_fund_type': tax.l10n_it_pension_fund_type,
-                'l10n_it_exempt_reason': vat_tax.l10n_it_exempt_reason,
-                'description': vat_tax.description,
-                'skip': not tax._l10n_it_filter_kind('pension_fund') or tax.l10n_it_pension_fund_type == 'TC07',
-            }
+            if tax_data:
+                tax = tax_data['tax']
+                flatten_taxes = base_line['tax_ids'].flatten_taxes_hierarchy()
+                vat_tax = flatten_taxes.filtered(lambda t: t._l10n_it_filter_kind('vat') and t.amount >= 0)[:1]
+                withholding_tax = flatten_taxes.filtered(lambda t: t._l10n_it_filter_kind('withholding') and t.sequence > tax.sequence)[:1]
+                return {
+                    'tax_amount_field': -23.0 if tax.amount == -11.5 else tax.amount,
+                    'vat_tax_amount_field': -23.0 if vat_tax.amount == -11.5 else vat_tax.amount,
+                    'has_withholding': bool(withholding_tax),
+                    'l10n_it_pension_fund_type': tax.l10n_it_pension_fund_type,
+                    'l10n_it_exempt_reason': vat_tax.l10n_it_exempt_reason,
+                    'description': vat_tax.description,
+                    'skip': not tax._l10n_it_filter_kind('pension_fund') or tax.l10n_it_pension_fund_type == 'TC07',
+                }
 
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function_pension_funds)
         values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
