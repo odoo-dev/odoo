@@ -17,7 +17,6 @@ class PaymentPortal(payment_portal.PaymentPortal):
 
         :param dict kwargs: As the parameters of in payment_pay, with the additional:
             - str donation_options: The options settled in the donation snippet
-            - str donation_descriptions: The descriptions for all prefilled amounts
         :return: The rendered donation form
         :rtype: str
         :raise: werkzeug.exceptions.NotFound if the access token is invalid
@@ -83,11 +82,10 @@ class PaymentPortal(payment_portal.PaymentPortal):
         return tx_sudo._get_processing_values()
 
     def _get_extra_payment_form_values(
-        self, donation_options=None, donation_descriptions=None, is_donation=False, **kwargs
+        self, donation_options=None, is_donation=False, **kwargs
     ):
         rendering_context = super()._get_extra_payment_form_values(
             donation_options=donation_options,
-            donation_descriptions=donation_descriptions,
             is_donation=is_donation,
             **kwargs,
         )
@@ -109,10 +107,11 @@ class PaymentPortal(payment_portal.PaymentPortal):
                 }
 
             countries = request.env['res.country'].sudo().search([])
-            descriptions = request.httprequest.form.getlist('donation_descriptions')
 
             donation_options = json_safe.loads(donation_options) if donation_options else {}
-            donation_amounts = json_safe.loads(donation_options.get('donationAmounts', '[]'))
+            donation_prefilled_options = json_safe.loads(donation_options.get('prefilledOptionsList', '[]'))
+            donation_amounts = [option['value'] for option in donation_prefilled_options]
+            donation_descriptions = request.httprequest.form.getlist('donation_descriptions')
 
             rendering_context.update({
                 'is_donation': True,
@@ -124,7 +123,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
                 'countries': countries,
                 'donation_options': donation_options,
                 'donation_amounts': donation_amounts,
-                'donation_descriptions': descriptions,
+                'donation_descriptions': donation_descriptions,
             })
         return rendering_context
 

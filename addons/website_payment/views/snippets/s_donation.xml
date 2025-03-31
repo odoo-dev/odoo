@@ -2,6 +2,17 @@
 <odoo>
 
 <template id="s_donation_button" name="Donation Button">
+    <!-- Translate descriptions -->
+    <t t-set="description1">A year of cultural awakening.</t>
+    <t t-set="description2">Caring for a baby for 1 month.</t>
+    <t t-set="description3">One year in elementary school.</t>
+    <t t-set="description4">One year in high school.</t>
+    <t t-set="prefilledListData" t-value="[
+        {'value': 10, 'description': description1},
+        {'value': 25, 'description': description2},
+        {'value': 50, 'description': description3},
+        {'value': 100, 'description': description4}
+    ]"/>
     <div class="s_donation"
             data-name="Donation Button"
             data-donation-email="info@yourcompany.example.com"
@@ -9,43 +20,28 @@
             t-att-data-display-options="display_options"
             data-prefilled-options="true"
             data-descriptions="true"
-            data-donation-amounts='["10", "25", "50", "100"]'
             data-minimum-amount="5"
             data-maximum-amount="100"
             data-slider-step="5"
-            data-default-amount="25">
+            data-default-amount="25"
+            t-att-data-prefilled-options-list="json.dumps(prefilledListData)">
         <form class="s_donation_form" action="/donation/pay" method="post" enctype="multipart/form-data">
             <span id="s_donation_description_inputs">
-                <input type="hidden" class="o_translatable_input_hidden d-block mb-1 w-100" name="donation_descriptions" value="A year of cultural awakening."/>
-                <input type="hidden" class="o_translatable_input_hidden d-block mb-1 w-100" name="donation_descriptions" value="Caring for a baby for 1 month."/>
-                <input type="hidden" class="o_translatable_input_hidden d-block mb-1 w-100" name="donation_descriptions" value="One year in elementary school."/>
-                <input type="hidden" class="o_translatable_input_hidden d-block mb-1 w-100" name="donation_descriptions" value="One year in high school."/>
+                <t t-foreach="prefilledListData" t-as="item">
+                    <input type="hidden" class="o_translatable_input_hidden d-block mb-1 w-100" name="donation_descriptions" t-att-value="item['description']"/>
+                </t>
             </span>
-            <div t-if="display_options" class="s_donation_prefilled_buttons my-4">
-                <div class="s_donation_btn_description d-sm-flex align-items-center my-3 o_not_editable o_translate_mode_hidden" contenteditable="false">
-                    <button class="s_donation_btn btn btn-outline-primary btn-lg me-3" type="button" data-donation-value="10">
-                        <span class="s_donation_currency pe-1">$</span>10
-                    </button>
-                    <p class="s_donation_description mt-2 my-sm-auto text-muted fst-italic">A year of cultural awakening.</p>
-                </div>
-                <div class="s_donation_btn_description d-sm-flex align-items-center my-3 o_not_editable o_translate_mode_hidden" contenteditable="false">
-                    <button class="s_donation_btn btn btn-outline-primary btn-lg me-3" type="button" data-donation-value="25">
-                        <span class="s_donation_currency pe-1">$</span>25
-                    </button>
-                    <p class="s_donation_description mt-2 my-sm-auto text-muted fst-italic">Caring for a baby for 1 month.</p>
-                </div>
-                <div class="s_donation_btn_description d-sm-flex align-items-center my-3 o_not_editable o_translate_mode_hidden" contenteditable="false">
-                    <button class="s_donation_btn btn btn-outline-primary btn-lg me-3" type="button" data-donation-value="50">
-                        <span class="s_donation_currency pe-1">$</span>50
-                    </button>
-                    <p class="s_donation_description mt-2 my-sm-auto text-muted fst-italic">One year in elementary school.</p>
-                </div>
-                <div class="s_donation_btn_description d-sm-flex align-items-center my-3 o_not_editable o_translate_mode_hidden" contenteditable="false">
-                    <button class="s_donation_btn btn btn-outline-primary btn-lg me-3" type="button" data-donation-value="100">
-                        <span class="s_donation_currency pe-1">$</span>100
-                    </button>
-                    <p class="s_donation_description mt-2 my-sm-auto text-muted fst-italic">One year in high school.</p>
-                </div>
+            <div t-if="display_options" class="s_donation_prefilled_buttons my-4 o_not_editable" contenteditable="false">
+                <t t-foreach="prefilledListData" t-as="item">
+                    <div class="s_donation_btn_description d-sm-flex align-items-center my-3 o_translate_mode_hidden">
+                        <button class="s_donation_btn btn btn-outline-primary btn-lg me-3"
+                                type="button"
+                                t-att-data-donation-value="item['value']">
+                            <span class="s_donation_currency pe-1">$</span><t t-out="item['value']"/>
+                        </button>
+                        <p class="s_donation_description mt-2 my-sm-auto text-muted fst-italic"><t t-out="item['description']"/></p>
+                    </div>
+                </t>
                 <div class="d-sm-flex align-items-center my-3">
                     <span class="s_donation_btn s_donation_custom_btn btn btn-outline-primary btn-lg">
                         <span class="s_donation_currency pe-1">$</span>

@@ -9,3 +9,10 @@
         background: rgba($o-we-translated-content-color, 0.25) !important;
     }
 }
+
+// TODO AGAU: check that this is in the right place once https://github.com/odoo-dev/odoo/pull/4489 is merged
+html[data-edit_translations="1"] {
+    .o_translate_mode_hidden {
+        display: none !important;
+    }
+}
