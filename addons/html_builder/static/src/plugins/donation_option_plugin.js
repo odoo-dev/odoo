@@ -23,22 +23,25 @@ class DonationOptionPlugin extends Plugin {
     getPrefilledOptions({ editingElement }) {
         const options = [];
         const containerEl = editingElement.querySelector(".s_donation_prefilled_buttons");
-        for (const optionEl of containerEl.querySelectorAll(".s_donation_btn_description")) {
-            const btnEl = optionEl.querySelector(".btn");
-            const descriptionEl = optionEl.querySelector(".s_donation_description");
-            options.push({
-                value: btnEl.dataset.donationValue,
-                description: descriptionEl.innerText,
-            });
+        if (containerEl) {
+            for (const optionEl of containerEl.querySelectorAll(".s_donation_btn_description")) {
+                const btnEl = optionEl.querySelector(".btn");
+                const descriptionEl = optionEl.querySelector(".s_donation_description");
+                options.push({
+                    value: btnEl.dataset.donationValue,
+                    description: descriptionEl.innerText,
+                });
+            }
         }
         return JSON.stringify(options);
     }
 
     applyPrefilledOptions({ editingElement, value }) {
-        this.rebuildPrefilledOptions(editingElement, value);
+        this.rebuildPrefilledOptions(editingElement, JSON.parse(value));
     }
 
     rebuildPrefilledOptions(editingElement, options) {
+        console.log("rebuild with", options);
         const doRebuild = editingElement.dataset.displayOptions;
         editingElement
             .querySelectorAll(".s_donation_prefilled_buttons")
@@ -49,21 +52,19 @@ class DonationOptionPlugin extends Plugin {
             sliderEl?.remove();
         }
         if (doRebuild) {
+            const donateButtonEl = editingElement.querySelector(".s_donation_donate_btn");
             if (layout === "slider" && !sliderEl) {
-                const sliderFragment = editingElement.ownerDocument.createDocumentFragment();
-                sliderFragment.innerHTML = renderToElement("website_payment.donation.slider", {
+                const sliderEl = renderToElement("html_builder.website_payment.donation.slider", {
                     minimum_amount: editingElement.dataset.minimumAmount,
                     maximum_amount: editingElement.dataset.maximumAmount,
                     slider_step: editingElement.dataset.sliderStep,
                 });
-                const donateButtonEl = editingElement.querySelector(".s_donation_donate_btn");
-                donateButtonEl.parentNode.insertBefore(sliderFragment, donateButtonEl);
+                donateButtonEl.parentNode.insertBefore(sliderEl, donateButtonEl);
             }
             const prefilledOptions = editingElement.dataset.prefilledOptions;
             const showDescriptions = prefilledOptions && editingElement.dataset.descriptions;
-            const prefilledButtonsFragment = editingElement.ownerDocument.createDocumentFragment();
-            prefilledButtonsFragment.innerHTML = renderToElement(
-                `website_payment.donation.prefilledButtons${
+            const prefilledButtonsEl = renderToElement(
+                `html_builder.website_payment.donation.prefilledButtons${
                     showDescriptions ? "Descriptions" : ""
                 }`,
                 {
@@ -72,12 +73,12 @@ class DonationOptionPlugin extends Plugin {
                     minimum_amount: editingElement.dataset.minimumAmount,
                 }
             );
-            const descriptionInputsEl = editingElement.getElementById(
-                "s_donation_description_inputs"
+            const descriptionInputsEl = editingElement.querySelector(
+                "#s_donation_description_inputs"
             );
-            descriptionInputsEl.parentNode.insertAfter(
-                prefilledButtonsFragment,
-                descriptionInputsEl
+            descriptionInputsEl.parentNode.insertBefore(
+                prefilledButtonsEl,
+                descriptionInputsEl.nextSibling
             );
         }
     }
