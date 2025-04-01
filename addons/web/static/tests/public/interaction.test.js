@@ -9,6 +9,7 @@ import { patchDynamicContent } from "@web/public/utils";
 import { patch } from "@web/core/utils/patch";
 import { startInteraction } from "./helpers";
 import { Component, onWillDestroy, xml } from "@odoo/owl";
+import { ProtectedPromiseCreator } from "@web/public/protected_promise";
 
 describe.current.tags("interaction_dev");
 
@@ -1093,6 +1094,92 @@ describe("waitFor...", () => {
             expect.verifySteps(["updateContent"]);
             await advanceTime(100);
             expect.verifySteps(["protect", "done", "unprotect", "updateContent"]);
+        });
+
+        test("protectedThen works", async () => {
+            installProtect();
+            class Test extends Interaction {
+                static selector = ".test";
+                start() {
+                    const ProtectedPromise = ProtectedPromiseCreator(this);
+                    const toFulfill = new ProtectedPromise((resolve) => {
+                        setTimeout(() => {
+                            resolve("fulfilled");
+                        }, 150);
+                    });
+                    toFulfill.protectedThen((result) => {
+                        expect.step(result);
+                    });
+                    const toReject = new ProtectedPromise((resolve, reject) => {
+                        setTimeout(() => {
+                            reject("rejected");
+                        }, 150);
+                    });
+                    toReject.protectedThen(
+                        (result) => {
+                            expect.step("fulfilled");
+                        },
+                        (error) => {
+                            expect.step(error);
+                        }
+                    );
+                }
+            }
+            await startInteraction(Test, TemplateTest);
+            expect.verifySteps(["updateContent"]);
+            await advanceTime(150);
+            expect.verifySteps([
+                "protect",
+                "fulfilled",
+                "unprotect",
+                "protect",
+                "rejected",
+                "unprotect",
+            ]);
+        });
+
+        test("protectedCatch works", async () => {
+            installProtect();
+            class Test extends Interaction {
+                static selector = ".test";
+                start() {
+                    const ProtectedPromise = ProtectedPromiseCreator(this);
+                    const toReject = new ProtectedPromise((resolve, reject) => {
+                        setTimeout(() => {
+                            expect.step("timeout");
+                            reject("rejected");
+                        }, 150);
+                    });
+                    toReject.protectedCatch((error) => {
+                        expect.step(error);
+                    });
+                }
+            }
+            await startInteraction(Test, TemplateTest);
+            expect.verifySteps(["updateContent"]);
+            await advanceTime(150);
+            expect.verifySteps(["timeout", "protect", "rejected", "unprotect"]);
+        });
+
+        test("waitFor works with protectedThen", async () => {
+            installProtect();
+            class Test extends Interaction {
+                static selector = ".test";
+                async willStart() {
+                    const toFulfill = new Promise((resolve) => {
+                        setTimeout(() => {
+                            resolve("fulfilled");
+                        }, 150);
+                    });
+                    this.waitFor(toFulfill).protectedThen((result) => {
+                        expect.step(result);
+                    });
+                }
+            }
+            await startInteraction(Test, TemplateTest);
+            expect.verifySteps(["updateContent"]);
+            await advanceTime(150);
+            expect.verifySteps(["protect", "fulfilled", "unprotect", "updateContent"]);
         });
     });
 

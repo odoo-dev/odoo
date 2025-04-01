@@ -2,7 +2,7 @@ import { renderToFragment } from "@web/core/utils/render";
 import { debounce, throttleForAnimation } from "@web/core/utils/timing";
 import { SKIP_IMPLICIT_UPDATE } from "./colibri";
 import { makeAsyncHandler, makeButtonHandler } from "./utils";
-
+import { ProtectedPromiseCreator } from "@web/public/protected_promise";
 /**
  * This is the base class to describe interactions. The Interaction class
  * provides a good integration with the web framework (env/services), a well
@@ -170,7 +170,8 @@ export class Interaction {
      * code has acted.
      */
     waitFor(promise) {
-        const prom = new Promise((resolve, reject) => {
+        const ProtectedPromise = ProtectedPromiseCreator(this);
+        const prom = new ProtectedPromise((resolve, reject) => {
             promise
                 .then((result) => {
                     if (!this.isDestroyed) {
