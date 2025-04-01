@@ -121,13 +121,13 @@ export class ProductLabelSectionAndNoteField extends Component {
         return this.props.record.evalContext.parent.state !== "draft";
     }
 
-        get sectionAndNoteClasses() {
-            return {
-                "fw-bold": this.isSection(),
-                "fst-italic": this.isNote(),
-                "text-warning": !this.productName && this.props.show_label_warning
-            };
-        }
+    get sectionAndNoteClasses() {
+        return {
+            "fw-bold": this.isSection(),
+            "fst-italic": this.isNote(),
+            "text-warning": !this.productName && this.props.show_label_warning
+        };
+    }
 
     isSection(record = null) {
         record = record || this.props.record;

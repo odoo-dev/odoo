@@ -21,4 +21,5 @@ class IrActionsReport(models.Model):
         return self._get_report(report_ref).report_name in (
             'sale.report_saleorder_document',
             'sale.report_saleorder',
+            'sale.report_saleorder_raw',
         )

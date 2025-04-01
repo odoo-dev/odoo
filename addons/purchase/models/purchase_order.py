@@ -562,6 +562,16 @@ class PurchaseOrder(models.Model):
         action['display_name'] = _("Purchase Comparison for %s", self.display_name)
         return action
 
+    def action_open_business_doc(self):
+        self.ensure_one()
+        return {
+            'name': _("Order"),
+            'type': 'ir.actions.act_window',
+            'res_model': 'purchase.order',
+            'res_id': self.id,
+            'views': [(False, 'form')],
+        }
+
     def print_quotation(self):
         self.filtered(lambda po: po.state == 'draft').write({'state': "sent"})
         return self.env.ref('purchase.report_purchase_quotation').report_action(self)

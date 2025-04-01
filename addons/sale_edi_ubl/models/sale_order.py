@@ -8,7 +8,7 @@ class SaleOrder(models.Model):
 
     @api.model
     def _get_record_ubl_builder_from_xml_tree(self, tree):
-        """ Return sale order ubl builder with decording capibily to given tree
+        """ Return sale order ubl builder with decoding capability to given tree
 
         :param xml tree: xml tree to find builder.
         :return class: class object of builder for given tree if found else none.

@@ -157,21 +157,20 @@ class OrderEdiXmlUbl_Bis3(models.AbstractModel):
 
     def _get_order_lines(self, order):
         qty_field = self._get_order_qty_field()
-        def _get_order_line_vals(order_line, order_line_id):
-            return {
-                'id': order_line_id,
-                'quantity': order_line[qty_field],
-                'quantity_unit_code': self._get_uom_unece_code(order_line.product_uom_id),
-                'line_extension_amount': order_line.price_subtotal,
-                'currency_id': order_line.currency_id.name,
-                'currency_dp': self._get_currency_decimal_places(order_line.currency_id),
-                'price': self._get_line_item_price_vals(order_line),
-                'item': self._get_item_vals(order, order_line),
-            }
-
-        return [_get_order_line_vals(line, line_id) for line_id, line in enumerate(
-            order.order_line.filtered(lambda line: line.display_type not in ['line_note', 'line_section'])
-        , 1)]
+        filtered_order_lines = order.order_line.filtered(lambda l: l.display_type not in ['line_note', 'line_section'])
+        order_lines_to_process = []
+        for line_id, line in enumerate(filtered_order_lines, 1):
+            order_lines_to_process.append(({
+                'id': line_id,
+                'quantity': line[qty_field],
+                'quantity_unit_code': self._get_uom_unece_code(line.product_uom_id),
+                'line_extension_amount': line.price_subtotal,
+                'currency_id': line.currency_id.name,
+                'currency_dp': self._get_currency_decimal_places(line.currency_id),
+                'price': self._get_line_item_price_vals(line),
+                'item': self._get_item_vals(order, line),
+            }))
+        return order_lines_to_process
 
     def _export_order_vals(self, order):
         order_lines = self._get_order_lines(order)
