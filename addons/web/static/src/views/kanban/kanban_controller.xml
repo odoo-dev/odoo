@@ -38,7 +38,7 @@
                     </CogMenu>
                 </t>
                 <t t-set-slot="layout-actions">
-                    <div t-if="hasSelectedRecords" class="o_selection_container d-flex gap-1 w-100 w-md-auto">
+                    <div t-if="hasSelectedRecords" class="o_selection_container d-flex gap-1">
                         <SelectionBox root="this.model.root"/>
                         <t t-if="!env.isSmall">
                             <t t-foreach="headerOtherButtons" t-as="button" t-key="button.id" t-if="!evalViewModifier(button.invisible)">

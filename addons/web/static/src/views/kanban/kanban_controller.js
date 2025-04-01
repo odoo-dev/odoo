@@ -440,11 +440,19 @@ export class KanbanController extends Component {
     }
 
     get headerAlwaysButtons() {
-        return this.archInfo.headerButtons.filter((button) => button.display === "always");
+        return this.archInfo.headerButtons.filter(
+            (button) =>
+                button.display === "always" &&
+                !evaluateBooleanExpr(button.invisible, this.props.context)
+        );
     }
 
     get headerOtherButtons() {
-        return this.archInfo.headerButtons.filter((button) => button.display !== "always");
+        return this.archInfo.headerButtons.filter(
+            (button) =>
+                button.display !== "always" &&
+                !evaluateBooleanExpr(button.invisible, this.props.context)
+        );
     }
 
     get canCreate() {
