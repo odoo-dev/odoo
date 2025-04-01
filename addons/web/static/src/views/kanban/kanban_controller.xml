@@ -75,11 +75,9 @@
     </t>
 
     <t t-name="web.KanbanView.Buttons">
-        <t t-if="canCreate and props.showButtons">
-            <button type="button" t-att-disabled="isNewButtonDisabled" class="btn btn-primary o-kanban-button-new" accesskey="c" t-on-click="() => this.createRecord()" data-bounce-button="">
-                New
-            </button>
-        </t>
+        <button t-if="canCreate and props.showButtons" type="button" t-att-disabled="isNewButtonDisabled" class="btn btn-primary o-kanban-button-new" accesskey="c" t-on-click="() => this.createRecord()" data-bounce-button="">
+            New
+        </button>
     </t>
 
 </templates>

@@ -75,19 +75,15 @@
     </t>
 
     <t t-name="web.ListView.Buttons">
-        <t t-if="editedRecord">
-            <button type="button" class="btn btn-primary o_list_button_save" data-hotkey="s" t-on-click.stop="onClickSave">
-                Save
-            </button>
-            <button type="button" class="btn btn-secondary o_list_button_discard" data-hotkey="j" t-on-click.stop="onClickDiscard" t-on-mousedown="onMouseDownDiscard">
-                Discard
-            </button>
-        </t>
-        <t t-elif="canCreate and props.showButtons">
-            <button type="button" class="btn btn-primary o_list_button_add" data-hotkey="c" t-on-click="onClickCreate" data-bounce-button="">
-                New
-            </button>
-        </t>
+        <button t-if="editedRecord" type="button" class="btn btn-primary o_list_button_save" data-hotkey="s" t-on-click.stop="onClickSave">
+            Save
+        </button>
+        <button t-if="editedRecord" type="button" class="btn btn-secondary o_list_button_discard" data-hotkey="j" t-on-click.stop="onClickDiscard" t-on-mousedown="onMouseDownDiscard">
+            Discard
+        </button>
+        <button t-if="!editedRecord and canCreate and props.showButtons" type="button" class="btn btn-primary o_list_button_add" data-hotkey="c" t-on-click="onClickCreate" data-bounce-button="">
+            New
+        </button>
     </t>
 
 </templates>
