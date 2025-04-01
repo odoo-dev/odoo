@@ -228,7 +228,7 @@ test("control panel layout buttons in dialog", async () => {
     });
     expect(`.o_list_view`).toHaveCount(1);
     await contains(".o_data_cell").click();
-    expect(".modal-footer button").toHaveCount(2);
+    expect(".modal-footer button", { visible: true }).toHaveCount(2);
     expect(".o_control_panel_main_buttons button").toHaveCount(0, {
         message: "layout buttons are not replicated in the control panel when inside a dialog",
     });
