@@ -1114,15 +1114,13 @@ test(`list view: action button in controlPanel with display='always' on mobile`,
         queryAllTexts(`div.o_control_panel_breadcrumbs button, div.o_control_panel_actions button`)
     ).toEqual([
         "New",
-        "Toggle Dropdown", // mobile dropdown
         "display",
-        "", // default selection
+        "", // cog menu
     ]);
 
     await clickRecordSelector();
     await contains(".o_control_panel_breadcrumbs .o_cp_action_menus .fa-cog").click();
     expect(queryAllTexts(`.o_popover .o-dropdown-item`)).toEqual([
-        "",
         "default-selection",
         "Export",
         "Duplicate",
@@ -1134,9 +1132,8 @@ test(`list view: action button in controlPanel with display='always' on mobile`,
         queryAllTexts(`div.o_control_panel_breadcrumbs button, div.o_control_panel_actions button`)
     ).toEqual([
         "New",
-        "Toggle Dropdown", // mobile dropdown
         "display",
-        "",
+        "", // cog menu
     ]);
 });
 

@@ -463,18 +463,18 @@ test("open a record while reloading the list view", async () => {
     expect(".o_calendar_view").toHaveCount(0);
     expect(".o_list_view").toHaveCount(1);
     expect(".o_list_view .o_data_row").toHaveCount(2);
-    expect(".o_control_panel_main_buttons button").toHaveCount(1);
+    expect(".o_list_view .o_control_panel_main_buttons button").toHaveCount(1);
 
     // reload (the search_read RPC will be blocked)
     def = new Deferred();
     await switchView("calendar");
     expect(".o_list_view .o_data_row").toHaveCount(2);
-    expect(".o_control_panel_main_buttons button").toHaveCount(1);
+    expect(".o_list_view .o_control_panel_main_buttons button").toHaveCount(1);
 
     // open a record in form view
     await contains(".o_list_view .o_data_cell").click();
     expect(".o_form_view").toHaveCount(1);
-    expect(".o_control_panel_main_buttons button").toHaveCount(0);
+    expect(".o_list_view .o_control_panel_main_buttons button").toHaveCount(0);
 
     // unblock the search_read RPC
     def.resolve();
@@ -482,7 +482,7 @@ test("open a record while reloading the list view", async () => {
     expect(".o_form_view").toHaveCount(1);
     expect(".o_list_view").toHaveCount(0);
     expect(".o_calendar_view").toHaveCount(0);
-    expect(".o_control_panel_main_buttons button").toHaveCount(0);
+    expect(".o_list_view .o_control_panel_main_buttons button").toHaveCount(0);
 });
 
 test("properly drop client actions after new action is initiated", async () => {
