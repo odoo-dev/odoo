@@ -6,7 +6,7 @@ import { useBackgroundOption } from "@html_builder/plugins/background_option/bac
 export class WebsiteBackgroundOption extends BaseOptionComponent {
     static template = "website.WebsiteBackgroundOption";
     static components = {
-        ...BackgroundOption.components,
+        ...super.components,
         ParallaxOption,
     };
     static props = {

@@ -28,6 +28,7 @@
     <t t-if="props.withImages">
         <BackgroundImageOption/>
         <BackgroundPositionOption/>
+        <ImageFilterOption level="2"/>
         <!-- TODO: BackgroundOptimize-->
         <!-- Color filter -->
         <BuilderRow t-if="this.showColorFilter()" label.translate="Color Filter" level="2">

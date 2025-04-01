@@ -15,6 +15,7 @@ export const DEFAULT_IMAGE_QUALITY = "75";
 
 export class ImagePostProcessPlugin extends Plugin {
     static id = "imagePostProcess";
+    static dependencies = ["coreBuilderAction"];
     static shared = ["processImage"];
 
     /**
@@ -223,15 +224,19 @@ export class ImagePostProcessPlugin extends Plugin {
         }
         return [url, newDataset];
     }
-    updateImageAttributes(img, url, newDataset) {
-        img.classList.add("o_modified_image_to_save");
-        img.src = url;
+    updateImageAttributes(el, url, newDataset) {
+        el.classList.add("o_modified_image_to_save");
+        if (el.tagName === "IMG") {
+            el.setAttribute("src", url);
+        } else {
+            this.dependencies.coreBuilderAction.setStyle(el, "background-image-url", url);
+        }
         for (const key in newDataset) {
             const value = newDataset[key];
             if (value) {
-                img.dataset[key] = value;
+                el.dataset[key] = value;
             } else {
-                delete img.dataset[key];
+                delete el.dataset[key];
             }
         }
     }

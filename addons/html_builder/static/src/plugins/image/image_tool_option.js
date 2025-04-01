@@ -3,11 +3,13 @@ import { ImageShapeOption } from "./image_shape_option";
 import { clamp } from "@web/core/utils/numbers";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { getMimetype } from "@html_editor/utils/image";
+import { ImageFilterOption } from "./image_filter_option";
 
 export class ImageToolOption extends BaseOptionComponent {
     static template = "html_builder.ImageToolOption";
     static components = {
         ImageShapeOption,
+        ImageFilterOption,
     };
     static props = {};
     MAX_SUGGESTED_WIDTH = 1920;
@@ -26,7 +28,6 @@ export class ImageToolOption extends BaseOptionComponent {
                     this.state.formats = formats;
                 });
             return {
-                isCustomFilter: editingElement.dataset.glFilter === "custom",
                 showQuality: ["image/jpeg", "image/webp"].includes(getMimetype(editingElement)),
                 formats: [],
             };
