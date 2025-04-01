@@ -764,7 +764,7 @@ class SaleOrder(models.Model):
         self.write({'order_line': command_list})
         return self.env['sale.order.line'] if delete else old_lines[len(reward_vals):]
 
-    def _best_global_discount_already_applied(self, current_reward, new_reward, discountable=None):
+    def _best_global_discount_already_applied(self, current_reward, new_rewards, discountable=None):
         """Determine whether current_reward is better than new_reward.
 
         This function compares the discount amount of two rewards to determine whether the current
@@ -787,9 +787,8 @@ class SaleOrder(models.Model):
         """
         self.ensure_one()
         current_reward.ensure_one()
-        new_reward.ensure_one()
 
-        if current_reward == new_reward:
+        if not new_rewards:
             return True
 
         if discountable is None:  # Only recompute if discountable is not given, not if its zero
@@ -812,9 +811,11 @@ class SaleOrder(models.Model):
                 )
             elif reward.discount_mode == 'percent':
                 return discountable * (reward.discount / 100)
+            return 0
 
         discount_current_reward = compute_discount(current_reward, discountable)
-        discount_new_reward = compute_discount(new_reward, discountable)
+        best_new_reward = max(new_rewards, key=lambda reward: compute_discount(reward, discountable))
+        discount_new_reward = compute_discount(best_new_reward, discountable)
 
         discount_current_bigger_than_discountable = self.currency_id.compare_amounts(
             amount1=discount_current_reward,
@@ -1312,8 +1313,8 @@ class SaleOrder(models.Model):
                 return {'error': _(
                     'This discount (%(discount)s) is not compatible with "%(other_discount)s". '
                     'Please remove it in order to apply this one.',
-                    discount=global_reward.description,
-                    other_discount=applied_global_reward.program_id.reward_ids.description,
+                    discount=global_reward.mapped('description'),
+                    other_discount=applied_global_reward.description
                 )}
         # Check for applicability from the program's triggers/rules.
         # This step should also compute the amount of points to give for that program on that order.
