@@ -101,3 +101,11 @@ class OrderEDIMixin(models.AbstractModel):
         if not attachments:
             raise UserError(_("No attachment was provided"))
         return attachments
+
+    def _get_edi_builders(self):
+        """ Overriden in sale_edi_ubl and purchase_edi_ubl_bis3 to then be called in order_edi_ubl_cii. """
+        return []
+
+    def _get_record_ubl_builder_from_xml_tree(self, tree):
+        """ Overriden in sale_edi_ubl and purchase_edi_ubl_bis3 to then be called in order_edi_ubl_cii. """
+        return None

@@ -1771,14 +1771,6 @@ class SaleOrder(models.Model):
             'amount_paid': self.amount_paid,
         }
 
-    # EDI #
-
-    def _get_edi_builders(self):
-        return []
-
-    def _get_record_ubl_builder_from_xml_tree(self, tree):
-        return None
-
     # PORTAL #
 
     def _has_to_be_signed(self):
