@@ -300,7 +300,7 @@ export class KanbanController extends Component {
 
     get progressBarAggregateFields() {
         const res = [];
-        const { progressAttributes } = this.props.archInfo;
+        const { progressAttributes } = this.archInfo;
         if (progressAttributes && progressAttributes.sumField) {
             res.push(progressAttributes.sumField);
         }
@@ -369,7 +369,7 @@ export class KanbanController extends Component {
                 callback: () => this.model.root.toggleArchiveWithConfirmation(false),
             },
             delete: {
-                isAvailable: () => this.props.archInfo.activeActions.delete,
+                isAvailable: () => this.archInfo.activeActions.delete,
                 sequence: 50,
                 icon: "fa fa-trash-o",
                 description: _t("Delete"),
@@ -394,7 +394,7 @@ export class KanbanController extends Component {
     }
 
     async createRecord() {
-        const { onCreate } = this.props.archInfo;
+        const { onCreate } = this.archInfo;
         const { root } = this.model;
         if (this.canQuickCreate && onCreate === "quick_create") {
             const firstGroup = root.groups.find((group) => !group.isFolded) || root.groups[0];
@@ -417,8 +417,12 @@ export class KanbanController extends Component {
         }
     }
 
+    get archInfo() {
+        return this.props.archInfo;
+    }
+
     get activeActions() {
-        return this.props.archInfo.activeActions;
+        return this.archInfo.activeActions;
     }
 
     multiRecordViewButtonProps(button) {
@@ -436,11 +440,11 @@ export class KanbanController extends Component {
     }
 
     get headerAlwaysButtons() {
-        return this.props.archInfo.headerButtons.filter((button) => button.display === "always");
+        return this.archInfo.headerButtons.filter((button) => button.display === "always");
     }
 
     get headerOtherButtons() {
-        return this.props.archInfo.headerButtons.filter((button) => button.display !== "always");
+        return this.archInfo.headerButtons.filter((button) => button.display !== "always");
     }
 
     get canCreate() {
@@ -448,7 +452,7 @@ export class KanbanController extends Component {
     }
 
     get isNewButtonDisabled() {
-        const { createGroup } = this.props.archInfo.activeActions;
+        const { createGroup } = this.archInfo.activeActions;
         const list = this.model.root;
         return (
             this.model.isReady &&
@@ -460,7 +464,7 @@ export class KanbanController extends Component {
     }
 
     get canQuickCreate() {
-        const { activeActions } = this.props.archInfo;
+        const { activeActions } = this.archInfo;
         if (!activeActions.quickCreate) {
             return false;
         }

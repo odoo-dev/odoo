@@ -75,8 +75,8 @@ export class ListController extends Component {
         this.rootRef = useRef("root");
 
         this.onOpenFormView = this.openRecord.bind(this);
-        this.editable = (!this.props.readonly && this.props.archInfo.editable) || false;
-        this.hasOpenFormViewButton = this.editable ? this.props.archInfo.openFormView : false;
+        this.editable = (!this.props.readonly && this.archInfo.editable) || false;
+        this.hasOpenFormViewButton = this.editable ? this.archInfo.openFormView : false;
         this.model = useState(
             useModelWithSampleData(this.props.Model, this.modelParams, this.modelOptions)
         );
@@ -194,15 +194,15 @@ export class ListController extends Component {
     }
 
     get modelParams() {
-        const { rawExpand } = this.props.archInfo;
+        const { rawExpand } = this.archInfo;
         const { activeFields, fields } = extractFieldsFromArchInfo(
-            this.props.archInfo,
+            this.archInfo,
             this.props.fields
         );
         const groupByInfo = {};
-        for (const fieldName in this.props.archInfo.groupBy.fields) {
-            const fieldNodes = this.props.archInfo.groupBy.fields[fieldName].fieldNodes;
-            const fields = this.props.archInfo.groupBy.fields[fieldName].fields;
+        for (const fieldName in this.archInfo.groupBy.fields) {
+            const fieldNodes = this.archInfo.groupBy.fields[fieldName].fieldNodes;
+            const fields = this.archInfo.groupBy.fields[fieldName].fields;
             groupByInfo[fieldName] = extractFieldsFromArchInfo({ fieldNodes }, fields);
         }
 
@@ -217,11 +217,11 @@ export class ListController extends Component {
             config: modelConfig,
             state: this.props.state?.modelState,
             groupByInfo,
-            limit: this.props.archInfo.limit || this.props.limit,
-            countLimit: this.props.archInfo.countLimit,
-            defaultOrderBy: this.props.archInfo.defaultOrder,
-            groupsLimit: this.props.archInfo.groupsLimit,
-            multiEdit: !this.props.readonly && this.props.archInfo.multiEdit,
+            limit: this.archInfo.limit || this.props.limit,
+            countLimit: this.archInfo.countLimit,
+            defaultOrderBy: this.archInfo.defaultOrder,
+            groupsLimit: this.archInfo.groupsLimit,
+            multiEdit: !this.props.readonly && this.archInfo.multiEdit,
             activeIdsLimit: session.active_ids_limit,
             hooks: {
                 onRecordSaved: this.onRecordSaved.bind(this),
@@ -267,7 +267,7 @@ export class ListController extends Component {
 
     getExportableFields() {
         return unique(
-            this.props.archInfo.columns
+            this.archInfo.columns
                 .filter((col) => col.type === "field")
                 .filter((col) => !col.optional || this.optionalActiveFields[col.name])
                 .filter((col) => !evaluateBooleanExpr(col.column_invisible, this.props.context))
@@ -330,11 +330,11 @@ export class ListController extends Component {
         if (dirty) {
             await record.save();
         }
-        if (this.props.archInfo.openAction) {
+        if (this.archInfo.openAction) {
             this.actionService.doActionButton(
                 {
-                    name: this.props.archInfo.openAction.action,
-                    type: this.props.archInfo.openAction.type,
+                    name: this.archInfo.openAction.action,
+                    type: this.archInfo.openAction.type,
                     resModel: record.resModel,
                     resId: record.resId,
                     resIds: record.resIds,
@@ -353,8 +353,12 @@ export class ListController extends Component {
         }
     }
 
+    get archInfo() {
+        return this.props.archInfo;
+    }
+
     get activeActions() {
-        return this.props.archInfo.activeActions;
+        return this.archInfo.activeActions;
     }
 
     multiRecordViewButtonProps(button) {
@@ -372,15 +376,15 @@ export class ListController extends Component {
     }
 
     get headerAlwaysButtons() {
-        return this.props.archInfo.headerButtons.filter((button) => button.display === "always");
+        return this.archInfo.headerButtons.filter((button) => button.display === "always");
     }
 
     get headerOtherButtons() {
-        return this.props.archInfo.headerButtons.filter((button) => button.display !== "always");
+        return this.archInfo.headerButtons.filter((button) => button.display !== "always");
     }
 
     get canCreate() {
-        return this.props.archInfo.activeActions.create;
+        return this.archInfo.activeActions.create;
     }
 
     async onClickCreate() {
@@ -461,7 +465,7 @@ export class ListController extends Component {
                 callback: () => this.model.root.toggleArchiveWithConfirmation(false),
             },
             delete: {
-                isAvailable: () => this.props.archInfo.activeActions.delete,
+                isAvailable: () => this.archInfo.activeActions.delete,
                 sequence: 50,
                 icon: "fa fa-trash-o",
                 description: _t("Delete"),
@@ -539,7 +543,7 @@ export class ListController extends Component {
                     },
                     isDomainSelected,
                     fields: Object.keys(changes).map((fieldName) => {
-                        const fieldNode = Object.values(this.props.archInfo.fieldNodes).find(
+                        const fieldNode = Object.values(this.archInfo.fieldNodes).find(
                             (fieldNode) => fieldNode.name === fieldName
                         );
                         const label = fieldNode && fieldNode.string;
