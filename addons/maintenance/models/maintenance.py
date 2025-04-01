@@ -239,6 +239,13 @@ class MaintenanceRequest(models.Model):
     schedule_date = fields.Datetime('Scheduled Date', help="Date the maintenance team plans the maintenance.  It should not differ much from the Request Date. ")
     maintenance_team_id = fields.Many2one('maintenance.team', string='Team', required=True, index=True, default=_get_default_team_id,
                                           compute='_compute_maintenance_team_id', store=True, readonly=False, check_company=True)
+    schedule_end_date = fields.Datetime(
+        string="Schedule End Date",
+        compute="_compute_schedule_end_date",
+        store=True,
+        readonly=False,
+        help="maintenance requests to be displayed accurately in the maintenance calendar view"
+    )
     duration = fields.Float(help="Duration in hours.")
     done = fields.Boolean(related='stage_id.done')
     instruction_type = fields.Selection([
@@ -298,6 +305,14 @@ class MaintenanceRequest(models.Model):
         for request in self:
             if request.maintenance_type != 'preventive':
                 request.recurring_maintenance = False
+    
+    @api.depends('schedule_date')  
+    def _compute_schedule_end_date(self):
+        for record in self:
+            if record.schedule_date:
+                record.schedule_end_date = record.schedule_date + relativedelta(hours=1)
+            else:
+                record.schedule_end_date = False
 
     @api.model_create_multi
     def create(self, vals_list):
