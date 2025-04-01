@@ -460,7 +460,12 @@ export function makeActionManager(env, router = _router) {
                         return stateToUrl(controller.state);
                     },
                     onSelected() {
-                        restore(controller.jsId);
+                       const index = controllerStack.findIndex((controller) => controller.jsId);
+                        if (index < 0) {
+                            return;
+                        }else{
+                            restore(controller.jsId);
+                        }
                     },
                 };
             });
