@@ -54,7 +54,6 @@ patch(PosStore.prototype, {
     },
     createNewOrder(data) {
         const order = super.createNewOrder(data);
-
         if (order.table_id) {
             order.setCustomerCount(order.table_id.seats);
         }
@@ -278,7 +277,7 @@ patch(PosStore.prototype, {
         }
 
         if (beforeMergeDetails.length) {
-            const newOrder = this.addNewOrder({ table_id: unmergeTable });
+            const newOrder = await this.addNewOrder({ table_id: unmergeTable });
 
             const courseByLines = {};
             if (beforeMergeCourseDetails?.length) {
@@ -458,16 +457,16 @@ patch(PosStore.prototype, {
         return data;
     },
     //@override
-    addNewOrder(data = {}) {
-        const order = super.addNewOrder(...arguments);
+    async addNewOrder(data = {}) {
+        const order = await super.addNewOrder(...arguments);
         this.addPendingOrder([order.id]);
         return order;
     },
-    createOrderIfNeeded(data) {
+    async createOrderIfNeeded(data) {
         if (this.config.module_pos_restaurant && !data["table_id"]) {
             let order = this.models["pos.order"].find((order) => order.isDirectSale);
             if (!order) {
-                order = this.createNewOrder(data);
+                order = await this.createNewOrder(data);
             }
             return order;
         }
@@ -539,7 +538,7 @@ patch(PosStore.prototype, {
                 currentOrder.update({ table_id: table });
                 this.selectedOrderUuid = currentOrder.uuid;
             } else {
-                this.addNewOrder({ table_id: table });
+                await this.addNewOrder({ table_id: table });
             }
         }
     },
@@ -617,7 +616,7 @@ patch(PosStore.prototype, {
                 }
                 this.showScreen(orders[0].getScreenData().name, props);
             } else {
-                this.addNewOrder({ table_id: table });
+                await this.addNewOrder({ table_id: table });
                 this.showScreen("ProductScreen");
             }
         }

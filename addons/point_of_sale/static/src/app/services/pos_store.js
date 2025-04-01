@@ -449,7 +449,7 @@ export class PosStore extends WithLazyGetterTrap {
         return orderIsDeleted;
     }
     async afterOrderDeletion() {
-        this.setOrder(this.getOpenOrders().at(-1) || this.addNewOrder());
+        this.setOrder(this.getOpenOrders().at(-1) || (await this.addNewOrder()));
     }
 
     async deleteOrders(orders, serverIds = [], ignoreChange = false) {
@@ -542,7 +542,7 @@ export class PosStore extends WithLazyGetterTrap {
         if (!this.config.module_pos_restaurant) {
             this.selectedOrderUuid = openOrders.length
                 ? openOrders[openOrders.length - 1].uuid
-                : this.addNewOrder().uuid;
+                : await this.addNewOrder().uuid;
         }
 
         this.markReady();
@@ -1019,12 +1019,12 @@ export class PosStore extends WithLazyGetterTrap {
     get showCashMoveButton() {
         return Boolean(this.config.cash_control && this.session._has_cash_move_perm);
     }
-    createNewOrder(data = {}) {
+    async createNewOrder(data = {}) {
         const fiscalPosition = this.models["account.fiscal.position"].find(
             (fp) => fp.id === this.config.default_fiscal_position_id?.id
         );
 
-        const order = this.models["pos.order"].create({
+        const tempOrder = {
             session_id: this.session,
             company_id: this.company,
             config_id: this.config,
@@ -1037,9 +1037,11 @@ export class PosStore extends WithLazyGetterTrap {
             sequence_number: 0,
             pos_reference: "",
             ...data,
-        });
-
-        this.getNextOrderRefs(order);
+        };
+        // Get the next order references and merge them into tempOrder
+        await this.getNextOrderRefs(tempOrder);
+        // Now create the actual order with updated references
+        const order = this.models["pos.order"].create(tempOrder);
         order.setPricelist(this.config.pricelist_id);
 
         if (this.config.use_presets) {
@@ -1050,18 +1052,18 @@ export class PosStore extends WithLazyGetterTrap {
 
         return order;
     }
-    addNewOrder(data = {}) {
+    async addNewOrder(data = {}) {
         if (this.getOrder()) {
             this.getOrder().updateSavedQuantity();
         }
-        const order = this.createOrderIfNeeded(data);
+        const order = await this.createOrderIfNeeded(data);
         this.selectedOrderUuid = order.uuid;
         this.searchProductWord = "";
         this.mobile_pane = "right";
         return order;
     }
-    createOrderIfNeeded(data) {
-        return this.createNewOrder(data);
+    async createOrderIfNeeded(data) {
+        return await this.createNewOrder(data);
     }
     async getNextOrderRefs(order) {
         try {

@@ -46,7 +46,6 @@ patch(PosStore.prototype, {
     },
     createNewOrder() {
         const order = super.createNewOrder(...arguments);
-
         if (this.config.module_pos_hr) {
             order.employee_id = this.getCashier();
         }
