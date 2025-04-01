@@ -3,9 +3,9 @@
 
     <t t-name="web.X2ManyField">
         <div t-att-class="className">
-            <div class="o_x2m_control_panel d-empty-none mt-1 mb-4">
+            <div class="o_x2m_control_panel d-flex flex-wrap gap-1 d-empty-none mt-1 mb-4">
                 <t t-if="displayControlPanelButtons">
-                    <div class="d-flex gap-1 me-auto" role="toolbar" aria-label="Control panel buttons" t-ref="buttons">
+                    <div class="o_control_panel_main_buttons d-flex gap-1 me-auto" t-ref="buttons">
                         <t t-foreach="controls" t-as="control" t-key="control_index">
                             <button
                                 t-if="control.type === 'create' and !evalInvisible(control.invisible)"
@@ -28,7 +28,7 @@
                         </t>
                     </div>
                 </t>
-                <div t-if="props.record.data[props.name].count > props.record.data[props.name].limit" class="o_cp_pager" role="search">
+                <div t-if="props.record.data[props.name].count > props.record.data[props.name].limit" class="o_cp_pager d-flex ms-auto" role="search">
                     <Pager t-props="pagerProps"/>
                 </div>
             </div>

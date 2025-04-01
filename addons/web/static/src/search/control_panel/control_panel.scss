@@ -104,16 +104,6 @@
     }
 }
 
-.o_x2m_control_panel {
-    display: flex;
-    flex-flow: row wrap;
-
-    .o_cp_pager {
-        display: flex;
-        margin-left: auto;
-    }
-}
-
 .o_dragged_embedded_action {
     transition: transform 0.5s;
     transform: rotate(2deg);
