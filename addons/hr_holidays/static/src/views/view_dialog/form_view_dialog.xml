@@ -40,7 +40,8 @@
                 t-on-click="() =>this.onClick('action_refuse')"
                 data-hotkey="x">Refuse</button>
         </xpath>
-        <xpath expr="//div" position="inside">
+
+        <xpath expr="." position="inside">
             <div class="ms-auto d-flex gap-1">
                 <button class="btn btn-danger" t-if="canDelete" t-on-click="deleteRecord" data-hotkey="v">
                     Delete Time Off
