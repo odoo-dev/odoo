@@ -1138,7 +1138,7 @@ test("Many2ManyTagsField: save&new in edit mode doesn't close edit window on des
     // Create another record and click save & close
     await contains(".modal input").edit("Pikachu");
 
-    await contains(".modal .o_form_buttons_edit .btn-primary:first").click();
+    await contains(".modal .btn-primary:first").click();
     expect(".modal .o_list_view").toHaveCount(0);
     expect('.o_field_many2many_tags[name="timmy"] .badge').toHaveCount(2);
 });
@@ -1342,7 +1342,7 @@ test("failing many2one quick create in a Many2ManyTagsField on desktop", async (
     expect(".modal .o_field_widget[name=name] input").toHaveValue("new partner");
 
     await contains(".modal .o_field_widget[name=color] input").edit(8);
-    await contains(".modal footer .o_form_buttons_edit button").click();
+    await contains(".modal footer button").click();
 
     expect(".o_field_many2many_tags .badge").toHaveCount(1);
 });
