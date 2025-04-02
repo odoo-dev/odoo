@@ -1,11 +1,10 @@
 /** @odoo-module **/
 
-import { _t } from "@web/core/l10n/translation";
 import { pick } from "@web/core/utils/objects";
-import { clamp } from "@web/core/utils/numbers";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { debounce } from "@web/core/utils/timing";
 import { ObservingCookieWidgetMixin } from "@website/snippets/observing_cookie_mixin";
+import { loadJS } from "@web/core/assets";
 
 const FacebookPageWidget = publicWidget.Widget.extend(ObservingCookieWidgetMixin, {
     selector: '.o_facebook_page',
@@ -23,7 +22,7 @@ const FacebookPageWidget = publicWidget.Widget.extend(ObservingCookieWidgetMixin
         // to s_facebook_page snippet in master.
         this.el.classList.add("o_not_editable");
 
-        const params = pick(this.$el[0].dataset, 'href', 'id', 'height', 'tabs', 'small_header', 'hide_cover');
+        const params = pick(this.$el[0].dataset, 'href', 'id', 'height', 'width', 'tabs', 'small_header', 'hide_cover');
         if (!params.href) {
             return def;
         }
@@ -32,9 +31,18 @@ const FacebookPageWidget = publicWidget.Widget.extend(ObservingCookieWidgetMixin
         }
         delete params.id;
 
-        this._renderIframe(params);
-        this.resizeObserver = new ResizeObserver(debounce(this._renderIframe.bind(this, params), 100));
-        this.resizeObserver.observe(this.el.parentElement);
+        // Dynamically load Facebook SDK
+        this.loadFacebookSDK().then(() => {
+            this.renderFacebookPage(params);
+        });
+
+        const isMobile = window.matchMedia("(max-width: 480px)").matches;
+        if (!isMobile) {
+            this.resizeObserver = new ResizeObserver(
+                debounce(this.handleResize.bind(this, params), 100)
+            );
+            this.resizeObserver.observe(this.el.parentElement);
+        }
 
         return def;
     },
@@ -43,10 +51,7 @@ const FacebookPageWidget = publicWidget.Widget.extend(ObservingCookieWidgetMixin
      */
     destroy: function () {
         this._super.apply(this, arguments);
-        if (this.iframeEl) {
-            this._deactivateEditorObserver();
-            this.iframeEl.remove();
-            this._activateEditorObserver();
+        if (this.resizeObserver) {
             this.resizeObserver.disconnect();
         }
     },
@@ -56,33 +61,72 @@ const FacebookPageWidget = publicWidget.Widget.extend(ObservingCookieWidgetMixin
     //--------------------------------------------------------------------------
 
     /**
-     * Prepare iframe element & replace it with existing iframe.
+     * Dynamically loads the Facebook SDK.
+     *
+     * @private
+     * @returns {Promise}
+     */
+    loadFacebookSDK: function () {
+        if (window.FB) {
+            return Promise.resolve();
+        }
+    
+        return loadJS("https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v22.0")
+            .then(() => {
+                return new Promise((resolve) => {
+                    window.fbAsyncInit = function () {
+                        window.FB.init({
+                            xfbml: true,
+                            version: "v22.0"
+                        });
+                        resolve();
+                    };
+                });
+            })
+            .catch((error) => {
+                throw new Error(`Failed to load Facebook SDK: ${error}`);
+            });
+    },
+
+    /**
+     * Handles element resize and triggers render if needed.
+     * @param {Object} params
+     */
+    handleResize(params) {
+        const currentWidth = this.el.offsetWidth;
+        if (Math.abs(currentWidth - this.previousWidth) > 10) {
+            this.previousWidth = currentWidth;
+            params.width = currentWidth;
+            this.renderFacebookPage(params);
+        }
+    },
+
+    /**
+     * Render Facebook page plugin using Facebook SDK.
      *
      * @private
      * @param {Object} params
-    */
-    _renderIframe(params) {
+     */
+    renderFacebookPage: function (params) {
         this._deactivateEditorObserver();
 
-        params.width = clamp(Math.floor(this.$el.width()), 180, 500);
         if (this.previousWidth !== params.width) {
             this.previousWidth = params.width;
-            const searchParams = new URLSearchParams(params);
-            const src = "https://www.facebook.com/plugins/page.php?" + searchParams;
-            this.iframeEl = Object.assign(document.createElement("iframe"), {
-                scrolling: "no",
-            });
-            // TODO: remove, the "scrolling", "frameborder" and
-            // "allowTransparency" attributes in master as they are deprecated.
-            // Also put the width and height as iframe attribute.
-            this.iframeEl.setAttribute("frameborder", "0");
-            this.iframeEl.setAttribute("allowTransparency", "true");
-            this.iframeEl.setAttribute("style", `width: ${params.width}px; height: ${params.height}px; border: none; overflow: hidden;`);
-            this.iframeEl.setAttribute("aria-label", _t("Facebook"));
-            this.el.replaceChildren(this.iframeEl);
-            this._manageIframeSrc(this.el, src);
-        }
 
+            const fbPage = document.createElement("div");
+            fbPage.classList.add("fb-page");
+            fbPage.setAttribute("data-href", params.href);
+            fbPage.setAttribute("data-tabs",params.tabs);
+            fbPage.setAttribute("data-small-header", params.small_header);
+            fbPage.setAttribute("data-hide-cover", params.hide_cover);
+            fbPage.setAttribute("data-height", params.height);
+            fbPage.setAttribute("data-width", params.width);
+            this.el.replaceChildren(fbPage);
+
+            if (typeof window.FB !== "undefined") {
+                window.FB.XFBML.parse(this.el);
+            }
+        }
         this._activateEditorObserver();
     },
 
