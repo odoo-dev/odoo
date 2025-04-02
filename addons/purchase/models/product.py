@@ -80,6 +80,27 @@ class ProductProduct(models.Model):
                 continue
             product.purchased_product_qty = float_round(purchased_data.get(product.id, 0), precision_rounding=product.uom_id.rounding)
 
+    @api.model
+    def name_search(self, name='', domain=None, operator='ilike', limit=100):
+        """
+        Returns the products in a prioritized sequence for the purchase order line product selection.
+        First, it lists all products that have been invoiced to the specified customer,
+        sorted from the most recent to the oldest invoice date.
+        Afterward, it includes the remaining products in their default order of display.
+        """
+        domain = domain or []
+        if not name and self.env.context.get('partner_id') and self.env.context.get('is_purchase'):
+            product_id =  [item['product_id'] for item in self.env['product.template'].get_prioritized_product_and_time('purchase')[:limit]]
+            prioritized_products = self.browse(product_id)
+            remaining_products = self.search(
+                [('id', 'not in', prioritized_products.ids)] + domain,
+                limit=limit - len(prioritized_products)
+            )
+            products = prioritized_products + remaining_products
+            return [(product.id, product.display_name) for product in products]
+        else:
+            return super().name_search(name, domain, operator, limit)
+
     @api.depends_context('order_id')
     def _compute_is_in_purchase_order(self):
         order_id = self.env.context.get('order_id')

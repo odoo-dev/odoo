@@ -16,6 +16,14 @@
                 t-on-click="onEditConfiguration"
             />
         </xpath>
+        <!-- <xpath expr="//Many2One" position="inside">
+            <t t-set-slot="autoCompleteItem" t-slot-scope="autoCompleteItemScope">
+                <span class="d-flex justify-content-between">
+                    <div t-esc="autoCompleteItemScope.record.display_name"/>
+                    <div t-esc="computeTime()" class="text-muted"/>
+                </span>
+            </t>
+        </xpath> -->
     </t>
 
 </templates>

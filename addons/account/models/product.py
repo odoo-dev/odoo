@@ -269,6 +269,27 @@ class ProductProduct(models.Model):
         for record in self:
             record.tax_string = record.product_tmpl_id._construct_tax_string(record.lst_price)
 
+    @api.model
+    def name_search(self, name='', domain=None, operator='ilike', limit=100):
+        """
+        Returns the products in a prioritized sequence for the purchase order line product selection.
+        First, it lists all products that have been invoiced to the specified customer,
+        sorted from the most recent to the oldest invoice date.
+        Afterward, it includes the remaining products in their default order of display.
+        """
+        domain = domain or []
+        if not name and self.env.context.get('partner_id') and self.env.context.get('move_type') == 'out_invoice':
+            product_id =  [item['product_id'] for item in self.env['product.template'].get_prioritized_product_and_time('sale')[:limit]]
+            prioritized_products = self.browse(product_id)
+            remaining_products = self.search(
+                [('id', 'not in', prioritized_products.ids)] + domain,
+                limit=limit - len(prioritized_products)
+            )
+            products = prioritized_products + remaining_products
+            return [(product.id, product.display_name) for product in products]
+        else:
+            return super().name_search(name, domain, operator, limit)
+
     # -------------------------------------------------------------------------
     # EDI
     # -------------------------------------------------------------------------

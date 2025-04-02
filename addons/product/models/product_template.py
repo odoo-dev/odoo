@@ -567,6 +567,31 @@ class ProductTemplate(models.Model):
             domain = combine([domain, [('product_variant_ids', operator, value)]])
         return domain
 
+    def get_prioritized_product_and_time(self, journal_type=''):
+        partner_id = self.env.context.get('partner_id')
+        query = """
+            SELECT product_id, product_tmpl_id, invoice_date
+            FROM(
+                SELECT DISTINCT ON (p.product_tmpl_id)
+                    aml.product_id,
+                    p.product_tmpl_id,
+                    am.invoice_date
+                FROM account_move am
+                JOIN account_move_line aml ON aml.move_id = am.id
+                JOIN product_product p ON p.id = aml.product_id
+                JOIN account_journal aj ON aj.id = am.journal_id
+                WHERE am.partner_id = %s
+                    AND am.state = 'posted'
+                    AND aj.type = %s
+                ORDER BY p.product_tmpl_id
+            ) sub
+            ORDER BY invoice_date DESC;
+        """
+
+        self.env.cr.execute(query, (partner_id, journal_type))
+        query_result = self.env.cr.dictfetchall()
+        return query_result
+
     @api.model
     def name_search(self, name='', domain=None, operator='ilike', limit=100):
         # Only use the product.product heuristics if there is a search term and the domain
