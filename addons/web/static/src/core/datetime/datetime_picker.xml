@@ -9,7 +9,7 @@
                 >
                     <t t-foreach="month.daysOfWeek" t-as="dayOfWeek" t-key="dayOfWeek[0]">
                         <div
-                            class="o_day_of_week_cell o_text_sm o_cell_md fw-bolder bg-100 border-bottom border-2 d-flex align-items-center justify-content-center"
+                            class="o_day_of_week_cell fs-6 fw-bolder bg-100 border-bottom border-2 d-flex align-items-center justify-content-center"
                             t-att-title="dayOfWeek[1]"
                         >
                             <div class="text-nowrap overflow-hidden" t-esc="props.daysOfWeekFormat === 'narrow' ? dayOfWeek[2] : dayOfWeek[0]"/>
@@ -18,7 +18,7 @@
                     <t t-foreach="month.weeks" t-as="week" t-key="week.number">
                         <t t-if="props.showWeekNumbers ?? !props.range">
                             <div
-                                class="o_week_number_cell o_center o_cell_md o_text_sm bg-100 fw-bolder"
+                                class="o_week_number_cell o_center fs-6 bg-100 fw-bolder"
                                 t-att-class="{ 'border-bottom': !week_last }"
                                 t-esc="week.number"
                             />
@@ -26,7 +26,7 @@
                         <t t-foreach="week.days" t-as="itemInfo" t-key="itemInfo.id">
                             <t t-set="arInfo" t-value="getActiveRangeInfo(itemInfo)" />
                             <div
-                                class="o_date_item_cell o_datetime_button o_center o_cell_md cursor-pointer"
+                                class="o_date_item_cell o_datetime_button o_center cursor-pointer"
                                 t-att-class="{
                                     o_out_of_range: itemInfo.isOutOfRange,
                                     o_selected: arInfo.isSelected,
@@ -121,10 +121,7 @@
                     t-on-click="zoomOut"
                 >
                     <t t-foreach="titles" t-as="title" t-key="title">
-                        <strong
-                            class="o_header_part fs-5"
-                            t-esc="title"
-                        />
+                        <strong class="o_header_part" t-esc="title" />
                     </t>
                 </button>
                 <button
