@@ -248,6 +248,12 @@ class Orderpoint(models.Model):
             orderpoint.route_id = route_id[0].id
         return super()._set_default_route_id()
 
+    @api.model
+    def fields_get(self, allfields=None, attributes=None):
+        res =  super().fields_get(allfields, attributes)
+        if "vendor_id" in res:
+            res["vendor_id"].update({"searchable": False, "groupable": False})
+        return res
 
 class StockLot(models.Model):
     _inherit = 'stock.lot'
