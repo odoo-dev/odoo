@@ -10,6 +10,7 @@ export function addDocument(documentParams) {
     const steps = [];
     for (const values of documentParams) {
         steps.push(...ProductScreen.addOrderline(values.product, values.quantity));
+        // steps.push(...ProductScreen.clickDisplayedProduct(values.product, true, values.quantity));
     }
     steps.push(...[ProductScreen.clickPartnerButton(), ProductScreen.clickCustomer("AAAAAA")]);
     return steps;

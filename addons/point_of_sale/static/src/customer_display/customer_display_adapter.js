@@ -16,7 +16,7 @@ export class CustomerDisplayPosAdapter {
         this.channel = new BroadcastChannel("UPDATE_CUSTOMER_DISPLAY");
     }
 
-    async dispatch(pos) {
+    dispatch(pos) {
         const proxyIP = pos.getDisplayDeviceIP();
         if (proxyIP) {
             fetch(`${deduceUrl(proxyIP)}/hw_proxy/customer_facing_display`, {
@@ -39,15 +39,16 @@ export class CustomerDisplayPosAdapter {
             this.channel.postMessage(JSON.parse(JSON.stringify(this.data)));
 
             // Send customer display data for remote type (different devices/browser)
-            try {
-                await pos.data.call("pos.config", "update_customer_display", [
+
+            pos.data
+                .call("pos.config", "update_customer_display", [
                     [pos.config.id],
                     this.data,
                     pos.config.access_token,
-                ]);
-            } catch (error) {
-                console.info("Failed to update customer display:", error);
-            }
+                ])
+                .catch((error) => {
+                    console.info("Failed to update customer display:", error);
+                });
         }
     }
 
