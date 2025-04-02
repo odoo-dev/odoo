@@ -22,11 +22,13 @@ options.registry.facebookPage = options.Class.extend({
         var defaults = {
             href: '',
             id: '',
-            height: 215,
-            width: 350,
-            tabs: '',
+            height: '700px',
+            width: '500px',
+            tabs: 'timeline',
             small_header: true,
             hide_cover: "true",
+            show_facepile: true,
+            adapt_container_width: true,
         };
         this.fbData = Object.assign({}, defaults, pick(this.$target[0].dataset, ...Object.keys(defaults)));
         if (!this.fbData.href) {
@@ -47,7 +49,7 @@ options.registry.facebookPage = options.Class.extend({
      * @override
      */
     onBuilt() {
-        this.$target[0].querySelector('.o_facebook_page_preview')?.remove();
+        this.$target[0].querySelector('.o_facebook_page_preview')?.remove();    
     },
 
     //--------------------------------------------------------------------------
@@ -95,6 +97,26 @@ options.registry.facebookPage = options.Class.extend({
         return this._markFbElement();
     },
 
+    /**
+     * Updates the Facebook iframe width.
+     */
+    setWidth: function (previewMode, widgetValue, params) {
+        const widthValue = parseFloat(widgetValue);
+        if(widthValue >= 180 && widthValue <=500)
+            this.fbData.width = widthValue;
+        this._updateFrame();
+    },
+
+    /**
+     * Updates the Facebook iframe height.
+    */
+    setHeight: function (previewMode, widgetValue, params) {
+        const heightValue = parseFloat(widgetValue);
+        if(heightValue >= 70)
+            this.fbData.height = heightValue;
+        return this._updateFrame();
+    },
+
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -106,19 +128,22 @@ options.registry.facebookPage = options.Class.extend({
      */
     _markFbElement: function () {
         return this._checkURL().then(() => {
-            // Managing height based on options
-            if (this.fbData.tabs) {
-                this.fbData.height = this.fbData.tabs === 'events' ? 300 : 500;
-            } else if (this.fbData.small_header) {
-                this.fbData.height = 70;
-            } else {
-                this.fbData.height = 150;
-            }
             for (const [key, value] of Object.entries(this.fbData)) {
                 this.$target[0].dataset[key] = value;
             }
         });
     },
+
+    _updateFrame: function() {
+        return this._markFbElement().then(() => {
+            const pageContainer = this.$target[0].querySelector(".fb-page");
+            if (pageContainer) {
+                pageContainer.setAttribute("data-width", this.fbData.width);
+                pageContainer.setAttribute("data-height", this.fbData.height);
+            }
+        });
+    },
+
     /**
      * @override
      */
