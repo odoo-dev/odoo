@@ -4,7 +4,7 @@
     <t t-name="web.ListView">
         <div t-att-class="className" t-ref="root">
             <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''" display="props.display">
-                <t t-set-slot="layout-buttons">
+                <t t-set-slot="control-panel-buttons">
                     <t t-call="{{ props.buttonTemplate }}"/>
                     <t t-if="env.isSmall and headerAlwaysButtons.length">
                         <MultiRecordViewButton t-props="multiRecordViewButtonProps(headerAlwaysButtons[0])"/>
@@ -37,7 +37,7 @@
                         </t>
                     </CogMenu>
                 </t>
-                <t t-set-slot="layout-actions">
+                <t t-set-slot="control-panel-actions">
                     <div t-if="hasSelectedRecords" class="o_selection_container d-flex gap-1">
                         <SelectionBox root="this.model.root"/>
                         <t t-if="!env.isSmall">

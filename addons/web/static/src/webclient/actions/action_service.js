@@ -38,7 +38,7 @@ class BlankComponent extends Component {
     static props = ["onMounted", "withControlPanel", "*"];
     static template = xml`
         <ControlPanel display="{}" t-if="props.withControlPanel and !env.isSmall">
-            <t t-set-slot="layout-buttons">
+            <t t-set-slot="control-panel-buttons">
                 <button class="btn btn-primary invisible"> empty </button>
             </t>
         </ControlPanel>`;

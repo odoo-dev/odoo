@@ -69,7 +69,7 @@ test(`Simple rendering: with search`, async () => {
         static props = ["*"];
         static template = xml`
             <Layout display="props.display">
-                <t t-set-slot="layout-actions">
+                <t t-set-slot="control-panel-actions">
                     <div class="toy_search_bar"/>
                 </t>
                 <div class="toy_content"/>
@@ -153,7 +153,7 @@ test(`Nested layouts`, async () => {
         static props = ["*"];
         static template = xml`
             <Layout className="'toy_b'" display="props.display">
-                <t t-set-slot="layout-actions">
+                <t t-set-slot="control-panel-actions">
                     <div class="toy_b_breadcrumbs"/>
                 </t>
                 <ToyC/>
@@ -175,7 +175,7 @@ test(`Nested layouts`, async () => {
         static props = ["*"];
         static template = xml`
             <Layout className="'toy_a'" display="props.display">
-                <t t-set-slot="layout-actions">
+                <t t-set-slot="control-panel-actions">
                     <div class="toy_a_search"/>
                 </t>
                 <ToyB display="props.display"/>

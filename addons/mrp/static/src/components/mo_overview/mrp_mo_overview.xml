@@ -3,11 +3,11 @@
 
     <div t-name="mrp.MoOverview" class="o_action">
         <Layout display="{ controlPanel: {} }">
-            <t t-set-slot="layout-actions">
+            <t t-set-slot="control-panel-actions">
                 <MoOverviewDisplayFilter showOptions="state.showOptions" limited="isProductionDone" changeDisplay.bind="onChangeDisplay" isProductionDraft="isProductionDraft"/>
             </t>
 
-            <t t-set-slot="layout-buttons">
+            <t t-set-slot="control-panel-buttons">
                 <div class="d-flex gap-1">
                     <button class="btn btn-primary" t-on-click="onPrint">Print</button>
                     <button class="btn btn-primary" t-on-click="onUnfold">Unfold</button>
