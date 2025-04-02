@@ -36,7 +36,7 @@
                 <tbody>
                     <t t-foreach="o.order_line" t-as="order_line">
                         <tr t-att-class="'fw-bold o_line_section' if order_line.display_type == 'line_section' else 'fst-italic o_line_note' if order_line.display_type == 'line_note' else ''">
-                            <t t-if="not order_line.display_type">
+                            <t t-if="not order_line.display_type and not order_line.product_qty == 0">
                                 <td id="product">
                                     <span t-field="order_line.name"/>
                                 </td>
@@ -52,7 +52,7 @@
                                     </span>
                                 </td>
                             </t>
-                            <t t-else="">
+                            <t t-elif="not order_line.product_qty == 0">
                                 <td colspan="99" id="section">
                                     <span t-field="order_line.name"/>
                                 </td>
