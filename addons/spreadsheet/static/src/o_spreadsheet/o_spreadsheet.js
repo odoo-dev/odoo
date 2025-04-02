@@ -18416,7 +18416,13 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         return null;
     }
-    const separatorRegexp = /\w|\.|!|\$/;
+    /**
+      - \p{L} is for any letter (from any language)
+      - \p{N} is for any number
+      - the u flag at the end is for unicode, which enables the `\p{...}` syntax
+     */
+    const unicodeSymbolCharRegexp = /\p{L}|\p{N}|_|\.|!|\$/u;
+    const SYMBOL_CHARS = new Set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.!$");
     /**
      * A "Symbol" is just basically any word-like element that can appear in a
      * formula, which is not a string. So:
@@ -18456,7 +18462,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 };
             }
         }
-        while (chars[0] && chars[0].match(separatorRegexp)) {
+        while (chars[0] && (SYMBOL_CHARS.has(chars[0]) || chars[0].match(unicodeSymbolCharRegexp))) {
             result += chars.shift();
         }
         if (result.length) {
@@ -43778,8 +43784,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.66';
-    __info__.date = '2025-03-26T12:54:26.409Z';
-    __info__.hash = 'e2c1da2';
+    __info__.date = '2025-04-02T15:24:17.987Z';
+    __info__.hash = '1144ba7';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
