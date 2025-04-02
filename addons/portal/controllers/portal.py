@@ -4,7 +4,6 @@ import json
 import math
 import re
 
-import psycopg2
 from werkzeug import urls
 from werkzeug.exceptions import Forbidden
 
@@ -412,6 +411,8 @@ class CustomerPortal(Controller):
             'partner_id': partner_sudo.id,
             'current_partner': current_partner,
             'commercial_partner': current_partner.commercial_partner_id,
+            # To whether display the login field
+            'login_field': request.httprequest.full_path == "/my/account?",
             'is_commercial_address': not current_partner or partner_sudo == commercial_partner,
             # To whether display the login field
             'login_field': request.httprequest.full_path == "/my/account?",
@@ -511,10 +512,12 @@ class CustomerPortal(Controller):
             required_fields or '',
             **extra_form_data,
         )
+
+        # If login_field exists then validate the login
         if form_data.get("login_field"):
-            # Validate login and highlights the problems in the form, if any.
-            login = extra_form_data.get("login", "").strip()
-            self._validate_login_and_update(login, invalid_fields, missing_fields, error_messages)
+            login = form_data.pop("login", "").strip()
+            self._validate_and_update_login(login, invalid_fields, missing_fields, error_messages)
+
         if error_messages:
             return partner_sudo, {
                 'invalid_fields': list(invalid_fields | missing_fields),
@@ -743,36 +746,45 @@ class CustomerPortal(Controller):
 
         return invalid_fields, missing_fields, error_messages
 
-    def _validate_login_and_update(
-        self,
-        login,
-        invalid_fields,
-        missing_fields,
-        error_messages
-    ):
-        """ Validate login and update the user login if necessary.
+    def _validate_and_update_login(self, login, invalid_fields, missing_fields, error_messages):
+        """
+        Validates and updates the user's login ID.
 
-        :param str login: Login to validate and update.
-        :param set invalid_fields: The set of invalid fields.
-        :param set missing_fields: The set of missing fields.
-        :param list error_messages: The list of error messages.
+        - Checks if the login is empty and marks it as missing if so.
+        - Skips update if the login hasn't changed.
+        - Checks if the login is already used by another user on the same or no website.
+            - If taken, marks it as invalid and adds an error message.
+            - If available, updates the user's login and logs them out.
+
+        :params str login: The new login ID provided by the user.
+        :params set invalid_fields: A set to store fields that contain invalid data.
+        :params set missing_fields: A set to store required fields that are missing.
+        :params list error_messages: A list to store error messages for validation failures.
         :return: None
         """
-        old_login = request.env.user.login
+        current_user = request.env.user
+        current_website = self.env["website"].get_current_website()
+
         if not login:
             missing_fields.add("login")
-            error_messages.append(_("Some required fields are empty."))
-        elif old_login != login:
-            try:
-                with request.env.cr.savepoint():
-                    request.env.user.write({"login": login})
-                    if error_messages:
-                        request.env.user.write({"login": old_login})
-                # update session token so the user does not get logged out
-                request.session.session_token = request.env.user._compute_session_token(request.session.sid)
-            except (ValidationError, psycopg2.errors.UniqueViolation):
+            error_messages.append(_("Login ID is required."))
+        elif login == current_user.login:
+            return
+        else:
+            existing_user = request.env["res.users"].sudo().search([
+                ("login", "=", login),
+                ("id", "!=", current_user.id),
+                "|",
+                ("website_id", "=", current_website.id),
+                ("website_id", "=", False)
+            ], limit=1)
+
+            if existing_user:
                 invalid_fields.add("login")
-                error_messages.append(_("The user name %s is already taken. Please choose another one.", login))
+                error_messages.append(_("This username is already taken."))
+            else:
+                current_user.write({"login": login})
+                request.session.session_token = current_user._compute_session_token(request.session.sid)
 
     def _get_vat_validation_fields(self):
         return {'country_id', 'vat'}

@@ -2,6 +2,7 @@ import { rpc } from "@web/core/network/rpc";
 import { debounce } from "@web/core/utils/timing";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { renderToElement } from "@web/core/utils/render";
+import { _t } from "@web/core/l10n/translation";
 
 publicWidget.registry.customerAddress = publicWidget.Widget.extend({
     // /my/address & /my/account
@@ -213,9 +214,9 @@ publicWidget.registry.customerAddress = publicWidget.Widget.extend({
                     errorHeader.appendChild(document.createTextNode(message));
                     return errorHeader;
                 });
-                submitButton.before(
+                submitButton.after(
                     renderToElement("portal.error", {
-                        message: "Please fill in the form correctly.",
+                        message: _t("Please fill in the form correctly.")
                     })
                 );
 
