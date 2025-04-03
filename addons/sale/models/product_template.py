@@ -23,7 +23,7 @@ class ProductTemplate(models.Model):
     sale_line_warn = fields.Selection(
         WARNING_MESSAGE, string="Sales Order Line",
         help=WARNING_HELP, required=True, default="no-message")
-    sale_line_warn_msg = fields.Text(string="Message for Sales Order Line")
+    sale_line_warn_msg = fields.Text(string="sales order line warning")
     expense_policy = fields.Selection(
         selection=[
             ('no', "No"),
