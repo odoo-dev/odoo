@@ -13,14 +13,65 @@ class DonationOptionPlugin extends Plugin {
             }),
         ],
         builder_actions: {
-            setPrefilledOptions: {
+            displayOptions: {
+                getValue: this.getDisplayOptions.bind(this),
+                apply: this.displayOptions.bind(this),
+            },
+            togglePrefilledOptions: {
                 getValue: this.getPrefilledOptions.bind(this),
+                apply: this.togglePrefilledOptions.bind(this),
+            },
+            setPrefilledOptions: {
+                getValue: this.getPrefilledOptionList.bind(this),
                 apply: this.applyPrefilledOptions.bind(this),
+            },
+            selectAmountInput: {
+                getValue: this.getAmountInput.bind(this),
+                apply: this.setAmountInput.bind(this),
+            },
+            setMinimumAmount: {
+                getValue: this.getMinimumAmount.bind(this),
+                apply: this.setMinimumAmount.bind(this),
+            },
+            setMaximumAmount: {
+                getValue: this.getMaximumAmount.bind(this),
+                apply: this.setMaximumAmount.bind(this),
+            },
+            setSliderStep: {
+                getValue: this.getSliderStep.bind(this),
+                apply: this.setSliderStep.bind(this),
             },
         },
     };
 
+    getDisplayOptions({ editingElement }) {
+        return editingElement.dataset.displayOptions;
+    }
+
+    displayOptions({ editingElement, value }) {
+        console.log(...arguments);
+        editingElement.dataset.displayOptions = value;
+        if (!value && editingElement.dataset.customAmount === "slider") {
+            editingElement.dataset.customAmount = "freeAmount";
+        } else if (value && !editingElement.dataset.prefilledOptions) {
+            editingElement.dataset.customAmount = "slider";
+        }
+        this.rebuildPrefilledOptions(editingElement);
+    }
+
     getPrefilledOptions({ editingElement }) {
+        return editingElement.dataset.prefilledOptions;
+    }
+
+    togglePrefilledOptions({ editingElement, value }) {
+        editingElement.dataset.prefilledOptions = value;
+        if (!value && editingElement.dataset.displayOptions) {
+            editingElement.dataset.customAmount = "slider";
+        }
+        this._rebuildPrefilledOptions();
+    }
+
+    getPrefilledOptionList({ editingElement }) {
         const options = [];
         const containerEl = editingElement.querySelector(".s_donation_prefilled_buttons");
         if (containerEl) {
@@ -37,10 +88,62 @@ class DonationOptionPlugin extends Plugin {
     }
 
     applyPrefilledOptions({ editingElement, value }) {
-        this.rebuildPrefilledOptions(editingElement, JSON.parse(value));
+        this.rebuildPrefilledOptions(editingElement, value);
+    }
+
+    getAmountInput({ editingElement }) {
+        return editingElement.dataset.customAmount;
+    }
+
+    setAmountInput({ editingElement, value }) {
+        editingElement.dataset.customAmount = value;
+        this.rebuildPrefilledOptions(editingElement);
+    }
+
+    getMinimumAmount({ editingElement }) {
+        return editingElement.dataset.minimumAmount;
+    }
+
+    setMinimumAmount({ editingElement, value }) {
+        editingElement.dataset.minimumAmount = value;
+        const rangeSliderEl = editingElement.querySelector("#s_donation_range_slider");
+        const amountInputEl = editingElement.querySelector("#s_donation_amount_input");
+        if (rangeSliderEl) {
+            rangeSliderEl.min = value;
+        } else if (amountInputEl) {
+            amountInputEl.min = value;
+        }
+    }
+
+    getMaximumAmount({ editingElement }) {
+        return editingElement.dataset.maximumAmount;
+    }
+
+    setMaximumAmount({ editingElement, value }) {
+        editingElement.dataset.maximumAmount = value;
+        const rangeSliderEl = editingElement.querySelector("#s_donation_range_slider");
+        const amountInputEl = editingElement.querySelector("#s_donation_amount_input");
+        if (rangeSliderEl) {
+            rangeSliderEl.max = value;
+        } else if (amountInputEl) {
+            amountInputEl.max = value;
+        }
+    }
+
+    getSliderStep({ editingElement }) {
+        return editingElement.dataset.sliderStep;
+    }
+
+    setSliderStep({ editingElement, value }) {
+        editingElement.dataset.sliderStep = value;
+        const rangeSliderEl = editingElement.querySelector("#s_donation_range_slider");
+        if (rangeSliderEl) {
+            rangeSliderEl.step = value;
+        }
     }
 
     rebuildPrefilledOptions(editingElement, options) {
+        options = JSON.parse(options || this.getPrefilledOptionList({ editingElement }) || "[]");
         const doRebuild = editingElement.dataset.displayOptions;
         editingElement
             .querySelectorAll(".s_donation_prefilled_buttons")

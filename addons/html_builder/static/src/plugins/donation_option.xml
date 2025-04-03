@@ -2,46 +2,65 @@
 <templates xml:space="preserve">
 
 <t t-name="html_builder.DonationOption">
-<!--    <we-input class="o_we_large" string="Recipient Email" data-select-data-attribute=""-->
-<!--        data-attribute-name="donationEmail"/>-->
-<!--    <we-checkbox string="Display Options"-->
-<!--            data-name="display_options_opt"-->
-<!--            data-display-options="true"-->
-<!--            data-no-preview="true">-->
-<!--    </we-checkbox>-->
-<!--    <we-checkbox string="Pre-filled Options"-->
-<!--            data-name="pre_filled_opt"-->
-<!--            data-toggle-prefilled-options="true"-->
-<!--            data-dependencies="!no_input_opt"-->
-<!--            data-no-preview="true">-->
-<!--    </we-checkbox>-->
-    <!-- TODO AGAU: translate default description -->
-    <BuilderList
-            t-if="this.isActiveItem('pre_filled_opt') || true"
-            action="'setPrefilledOptions'"
-            addItemTitle.translate="Add new pre-filled option"
-            entryShape="{ value: 'number', description: 'text' }"
-            defaultValue="{ value: '50', description: 'Add a description here' }"
-    />
-<!--    <we-checkbox string="Descriptions"-->
-<!--                 class="o_we_sublevel_1"-->
-<!--                 data-toggle-option-description="true"-->
-<!--                 data-dependencies="pre_filled_opt"-->
-<!--                 data-no-preview="true">-->
-<!--    </we-checkbox>-->
-<!--    <we-select string="Custom Amount" data-no-preview="true">-->
-<!--        <we-button data-name="free_amount_opt" data-select-amount-input="freeAmount">Input</we-button>-->
-<!--        <we-button data-name="slider_opt" data-select-amount-input="slider" data-dependencies="display_options_opt">Slider</we-button>-->
-<!--        <we-button data-name="no_input_opt" data-select-amount-input="" data-dependencies="pre_filled_opt">None</we-button>-->
-<!--    </we-select>-->
-<!--    <we-input string="Minimum" class="o_we_sublevel_1"-->
-<!--              data-step="1" data-set-minimum-amount="" data-dependencies="!no_input_opt"/>-->
-<!--    <we-input string="Maximum" class="o_we_sublevel_1"-->
-<!--              data-step="1" data-set-maximum-amount="" data-dependencies="slider_opt"/>-->
-<!--    <we-input string="Step" class="o_we_sublevel_1"-->
-<!--              data-step="1" data-set-slider-step="" data-dependencies="slider_opt"/>-->
-<!--    <we-input string="Default Amount" data-step="1" data-attribute-default-value="25"-->
-<!--        data-select-data-attribute="" data-attribute-name="defaultAmount"/>-->
+    <BuilderRow label.translate="Recipient Email">
+        <BuilderTextInput attributeAction="donationEmail"/>
+    </BuilderRow>
+    <!-- TODO AGAU: noPreview=true -->
+    <BuilderRow label.translate="Display Options">
+        <BuilderCheckbox id="'display_options_opt'" action="'displayOptions'" />
+    </BuilderRow>
+    <!-- TODO AGAU: noPreview=true -->
+    <BuilderRow t-if="!this.isActiveItem('no_input_opt')"
+                label.translate="Pre-filled Options">
+        <BuilderCheckbox id="'pre_filled_opt'" action="'togglePrefilledOptions'"/>
+    </BuilderRow>
+    <t t-if="this.isActiveItem('pre_filled_opt')">
+        <!-- TODO AGAU: re-render BuilderList? -->
+        <!-- TODO AGAU: translate default description -->
+        <t t-set="entryShape" t-value="{ value: 'number' }"/>
+        <t t-set="defaultValue" t-value="{ value: '50' }"/>
+        <t t-if="this.isActiveItem('pre_filled_descriptions_opt')">
+            <t t-set="entryShape.description" t-value="'text'"/>
+            <t t-set="defaultValue.description" t-value="'Add a description here'"/>
+        </t>
+        <BuilderList
+                action="'setPrefilledOptions'"
+                addItemTitle.translate="Add new pre-filled option"
+                entryShape="entryShape"
+                defaultValue="defaultValue"
+        />
+        <!-- TODO AGAU: noPreview=true -->
+        <BuilderRow label.translate="Descriptions" level="1">
+            <BuilderCheckbox id="'pre_filled_descriptions_opt'" dataAttributeAction="'descriptions'"/>
+        </BuilderRow>
+    </t>
+    <!-- TODO AGAU: noPreview=true -->
+    <BuilderRow label.translate="Custom Amount">
+        <BuilderSelect action="'selectAmountInput'">
+            <BuilderSelectItem id="'free_amount_opt'" actionValue="'freeAmount'">Input</BuilderSelectItem>
+            <t t-if="this.isActiveItem('display_options_opt')">
+                <BuilderSelectItem id="'slider_opt'" actionValue="'slider'">Slider</BuilderSelectItem>
+            </t>
+            <t t-if="this.isActiveItem('pre_filled_opt')">
+                <BuilderSelectItem id="'no_input_opt'" actionValue="''">None</BuilderSelectItem>
+            </t>
+        </BuilderSelect>
+    </BuilderRow>
+    <BuilderRow t-if="!this.isActiveItem('no_input_opt')"
+                label.translate="Minimum" level="1">
+        <BuilderNumberInput step="1" action="'setMinimumAmount'"/>
+    </BuilderRow>
+    <t t-if="this.isActiveItem('slider_opt')">
+        <BuilderRow label.translate="Maximum" level="1">
+            <BuilderNumberInput step="1" action="setMaximumAmount"/>
+        </BuilderRow>
+        <BuilderRow label.translate="Step" level="1">
+            <BuilderNumberInput step="1" action="setSliderStep"/>
+        </BuilderRow>
+    </t>
+    <BuilderRow label.translate="Default Amount">
+        <BuilderNumberInput step="1" default="25" dataAttributeAction="'defaultAmount'"/>
+    </BuilderRow>
 </t>
 
 <t t-name="html_builder.website_payment.donation.prefilledButtons">
