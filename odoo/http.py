@@ -1765,7 +1765,7 @@ class Request:
         """
         response = Response(template=template, qcontext=qcontext, **kw)
         if not lazy:
-            return response.render()
+            return response.render()   
         return response
 
     def reroute(self, path, query_string=None):
