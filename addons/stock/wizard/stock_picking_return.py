@@ -129,10 +129,7 @@ class StockReturnPicking(models.TransientModel):
             'uom_id': stock_move.product_id.uom_id.id,
         }
 
-    def _prepare_picking_default_values(self):
-        return self._prepare_picking_default_values_based_on(self.picking_id)
-
-    def _prepare_picking_default_values_based_on(self, picking):
+    def _prepare_return_picking_default_values(self, picking):
         location = picking.location_dest_id
         return_type = picking.picking_type_id.return_picking_type_id
         if return_type and return_type.code == 'incoming':
@@ -148,6 +145,7 @@ class StockReturnPicking(models.TransientModel):
             'origin': _("Return of %(picking_name)s", picking_name=picking.name),
             'location_id': location.id,
             'location_dest_id': location_dest.id,
+            'user_id': False,
         }
         return vals
 
@@ -156,8 +154,7 @@ class StockReturnPicking(models.TransientModel):
             return_move.move_dest_ids.filtered(lambda m: m.state not in ('done', 'cancel'))._do_unreserve()
 
         # create new picking for returned products
-        new_picking = self.picking_id.copy(self._prepare_picking_default_values())
-        new_picking.user_id = False
+        new_picking = self.picking_id.copy(self._prepare_return_picking_default_values(self.picking_id))
         new_picking.message_post_with_source(
             'mail.message_origin_link',
             render_values={'self': new_picking, 'origin': self.picking_id},
@@ -176,8 +173,7 @@ class StockReturnPicking(models.TransientModel):
 
     def _create_exchange(self, return_picking):
         # Create a new picking for exchanged products
-        exchange_picking = return_picking.copy(self._prepare_picking_default_values_based_on(return_picking))
-        exchange_picking.user_id = False
+        exchange_picking = return_picking.copy(self._prepare_return_picking_default_values(return_picking))
         exchange_picking.message_post_with_source(
             'mail.message_origin_link',
             render_values={'self': exchange_picking, 'origin': return_picking},
