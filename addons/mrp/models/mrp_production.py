@@ -1442,8 +1442,6 @@ class MrpProduction(models.Model):
     def action_generate_serial(self):
         self.ensure_one()
         self._set_lot_producing()
-        if self.product_id.tracking == 'serial':
-            self._set_qty_producing(False)
         if self.picking_type_id.auto_print_generated_mrp_lot:
             return self._autoprint_generated_lot(self.lot_producing_id)
 
@@ -2161,6 +2159,8 @@ class MrpProduction(models.Model):
         self._button_mark_done_sanity_checks()
         productions_auto = set()
         for production in self:
+            if production.product_tracking == 'serial' and production.lot_producing_id:
+                production._set_quantities()
             if not float_is_zero(production.qty_producing, precision_rounding=production.product_uom_id.rounding):
                 production.move_raw_ids.filtered(
                     lambda move: move.manual_consumption and not move.picked
