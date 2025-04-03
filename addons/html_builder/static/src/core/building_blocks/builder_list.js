@@ -92,7 +92,13 @@ export class BuilderList extends Component {
     }
 
     formatRawValue(rawValue) {
-        return rawValue ? JSON.parse(rawValue) : [];
+        const items = rawValue ? JSON.parse(rawValue) : [];
+        for (const item of items) {
+            if (!("_id" in item)) {
+                item._id = this.getNextAvailableEntryId(items);
+            }
+        }
+        return items;
     }
 
     addItem() {
@@ -122,15 +128,19 @@ export class BuilderList extends Component {
     }
 
     makeDefaultItem() {
-        const items = this.formatRawValue(this.state?.value);
+        return {
+            ...this.props.defaultValue,
+            _id: this.getNextAvailableEntryId(),
+        };
+    }
+
+    getNextAvailableEntryId(items) {
+        items = items || this.formatRawValue(this.state?.value);
         const biggestId = items
             .map((item) => parseInt(item._id))
             .reduce((acc, id) => (id > acc ? id : acc), -1);
         const nextAvailableId = biggestId + 1;
-        return {
-            ...this.props.defaultValue,
-            _id: nextAvailableId.toString(),
-        };
+        return nextAvailableId.toString();
     }
 
     onInput(e) {
