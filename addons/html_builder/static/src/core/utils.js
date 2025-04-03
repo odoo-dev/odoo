@@ -451,10 +451,11 @@ export function useClickableBuilderComponent() {
         for (const clean of new Set(cleans)) {
             clean(applySpecs);
         }
-        const hasClean = applySpecs.some((applySpec) => applySpec.clean);
-        const shouldClean = _shouldClean(comp, hasClean, isApplied());
         const proms = [];
+        const isAlreadyApplied = isApplied();
         for (const applySpec of applySpecs) {
+            const hasClean = !!applySpec.clean;
+            const shouldClean = _shouldClean(comp, hasClean, isAlreadyApplied);
             if (shouldClean) {
                 proms.push(
                     applySpec.clean?.({
@@ -747,13 +748,13 @@ export function getAllActionsAndOperations(comp) {
     function callOperation(fn, params = {}) {
         const actionsSpecs = getActionsSpecs(getAllActions(), params.userInputValue);
         comp.env.editor.shared.operation.next(() => fn(actionsSpecs), {
-            load: async () => {
-                const hasClean = actionsSpecs.some((applySpec) => applySpec.clean);
-                return Promise.all(
+            load: async () =>
+                Promise.all(
                     actionsSpecs.map(async (applySpec) => {
                         if (!applySpec.load) {
                             return;
                         }
+                        const hasClean = !!applySpec.clean;
                         if (_shouldClean(comp, hasClean, isApplied())) {
                             // The element will be cleaned, do not load
                             return;
@@ -765,8 +766,7 @@ export function getAllActionsAndOperations(comp) {
                         });
                         applySpec.loadResult = result;
                     })
-                );
-            },
+                ),
             ...params.operationParams,
         });
     }
