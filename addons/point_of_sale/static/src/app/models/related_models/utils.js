@@ -21,7 +21,7 @@ export function clone(obj) {
  * Returns a new object with the same keys, but with values transformed by the provided function.
  *
  * @param {Object} obj - The input object whose values will be transformed.
- * @param {Function} fn - A function that takes (key, value, index) and returns a new value.
+ * @param {(k: string, v: *, i: number) => *} fn - A function that takes (key, value, index) and returns a new value.
  * @returns {Object} A new object with the same keys but transformed values.
  *
  * @example

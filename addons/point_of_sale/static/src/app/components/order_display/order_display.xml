@@ -22,7 +22,7 @@
                         </div>
                     </div>
                     <div class="internal-note-container d-flex flex-wrap gap-2 p-2">
-                        <TagsList tags="getInternalNotes()"/>
+                        <TagsList tags="getInternalNotes() or []"/>
                     </div>
                 </div>
                 <t t-set="taxTotals" t-value="order.taxTotals" />

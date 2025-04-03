@@ -142,3 +142,37 @@ export class Counter {
 export function isValidEmail(email) {
     return email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
+
+/**
+ * @param {false | undefined | string} val - Any value to check.
+ * @returns {boolean}
+ */
+export function isStr(val) {
+    return typeof val === "string";
+}
+
+/**
+ * @param {false | undefined | string} a - First value to compare.
+ * @param {false | undefined | string} b - Second value to compare.
+ * @returns {boolean}
+ */
+export function strEqual(a, b) {
+    return (!isStr(a) && !isStr(b)) || a === b;
+}
+
+/**
+ * @param {{ text: string, colorIndex: number }[]} a
+ * @param {{ text: string, colorIndex: number }[]} b
+ * @returns {boolean}
+ */
+export function noteEqual(a, b) {
+    if (a.length !== b.length) {
+        return false;
+    }
+    for (let i = 0; i < a.length; i++) {
+        if (a[i].text !== b[i].text || a[i].colorIndex !== b[i].colorIndex) {
+            return false;
+        }
+    }
+    return true;
+}

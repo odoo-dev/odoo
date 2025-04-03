@@ -40,6 +40,6 @@ export class Orderline extends Component {
         ].join(" ");
     }
     getInternalNotes() {
-        return JSON.parse(this.line.note || "[]");
+        return this.line.note;
     }
 }

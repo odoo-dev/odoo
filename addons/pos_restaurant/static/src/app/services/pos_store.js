@@ -370,51 +370,43 @@ patch(PosStore.prototype, {
             table.uiState.changeCount = qtyChange.changed;
         }
     },
+    /**
+     * TODO JCB: This can be better. Perhaps we can get all the changes for all the printers and count from it.
+     * TODO JCB: Don't forget the `modeUpdate`. That is when the preset is changed.
+     */
     get categoryCount() {
-        const orderChanges = this.getOrderChanges();
-        const linesChanges = orderChanges.orderlines;
-
-        const categories = Object.values(linesChanges).reduce((acc, curr) => {
+        const order = this.getOrder();
+        const [orderPropsChanges, linesChanges] = order.orderChanges;
+        const orderNotes = [];
+        if (orderPropsChanges.length > 0) {
+            orderNotes.push({
+                count: orderPropsChanges.length,
+                name: _t("Message"),
+            });
+        }
+        const byCategory = {};
+        const lineNotesUpdate = { name: _t("note"), count: 0 };
+        for (const lineChanges of linesChanges) {
+            const { product_id } = lineChanges.pos_line_info;
             const categories =
-                this.models["product.product"].get(curr.product_id)?.product_tmpl_id
-                    ?.pos_categ_ids || [];
-
-            for (const category of categories.slice(0, 1)) {
-                if (!acc[category.id]) {
-                    acc[category.id] = {
-                        count: curr.quantity,
-                        name: category.name,
+                this.models["product.product"].get(product_id)?.product_tmpl_id?.pos_categ_ids ??
+                [];
+            for (const categ of categories) {
+                if (!byCategory[categ.id]) {
+                    byCategory[categ.id] = {
+                        name: categ.name,
+                        count: 0,
                     };
-                } else {
-                    acc[category.id].count += curr.quantity;
                 }
+                byCategory[categ.id].count += lineChanges.quantity ?? 0;
             }
-
-            return acc;
-        }, {});
-        const noteCount = ["general_customer_note", "internal_note"].reduce(
-            (count, note) => count + (note in orderChanges ? 1 : 0),
-            0
+            if (lineChanges.note) {
+                lineNotesUpdate.count += 1;
+            }
+        }
+        return [...Object.values(byCategory), ...orderNotes, ...[lineNotesUpdate]].filter(
+            ({ count }) => count !== 0
         );
-
-        const nbNoteChange = Object.keys(orderChanges.noteUpdate).length;
-        if (nbNoteChange) {
-            categories["noteUpdate"] = { count: nbNoteChange, name: _t("Note") };
-        }
-        // Only send modeUpdate if there's already an older mode in progress.
-        const currentOrder = this.getOrder();
-        if (
-            orderChanges.modeUpdate &&
-            Object.keys(currentOrder.last_order_preparation_change.lines).length
-        ) {
-            const displayName = _t(currentOrder.preset_id?.name);
-            categories["modeUpdate"] = { count: 1, name: displayName };
-        }
-
-        return [
-            ...Object.values(categories),
-            ...(noteCount > 0 ? [{ count: noteCount, name: _t("Message") }] : []),
-        ];
     },
     get selectedTable() {
         return this.getOrder()?.table_id;

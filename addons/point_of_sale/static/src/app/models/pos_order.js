@@ -1,17 +1,20 @@
 import { registry } from "@web/core/registry";
 import { Base } from "./related_models";
 import { _t } from "@web/core/l10n/translation";
-import { random5Chars } from "@point_of_sale/utils";
+import { random5Chars, isStr, strEqual, noteEqual } from "@point_of_sale/utils";
 import { computeComboItems } from "./utils/compute_combo_items";
 import { accountTaxHelpers } from "@account/helpers/account_tax";
 import { localization } from "@web/core/l10n/localization";
+import { groupBy } from "@web/core/utils/arrays";
 
 const formatCurrency = registry.subRegistries.formatters.content.monetary[1];
 const { DateTime } = luxon;
 
 export class PosOrder extends Base {
     static pythonModel = "pos.order";
-
+    static preProcessVals(vals, models) {
+        vals.internal_note ??= [];
+    }
     setup(vals) {
         super.setup(vals);
 
@@ -41,9 +44,6 @@ export class PosOrder extends Base {
                     ? vals.last_order_preparation_change
                     : JSON.parse(vals.last_order_preparation_change);
         }
-
-        this.general_customer_note = vals.general_customer_note || "";
-        this.internal_note = vals.internal_note || "";
 
         if (!this.date_order) {
             this.date_order = DateTime.now();
@@ -930,7 +930,7 @@ export class PosOrder extends Base {
         this.general_customer_note = note || "";
     }
     setInternalNote(note) {
-        this.internal_note = note || "";
+        this.internal_note = note;
     }
 
     get orderChange() {
@@ -943,6 +943,84 @@ export class PosOrder extends Base {
 
     get showChange() {
         return !this.currency.isZero(this.orderChange) && this.finalized;
+    }
+
+    get prepOrders() {
+        return this.backLink("<-pos.prep.order.pos_order_id") || [];
+    }
+
+    get prepLinesWithoutPosLine() {
+        return this.prepOrders.flatMap((po) => po.prep_line_ids).filter((pl) => !pl.pos_line_id);
+    }
+
+    get submittedCustomerNote() {
+        return this.prepOrders.filter((po) => isStr(po.customer_note)).at(-1)?.customer_note;
+    }
+
+    get submittedInternalNote() {
+        return this.prepOrders.filter((po) => po.internal_note).at(-1)?.internal_note;
+    }
+
+    get linesChanges() {
+        const linesChanges = [];
+
+        for (const line of this.lines) {
+            const changes = line.lineChanges;
+            if (changes.length === 0) {
+                continue;
+            }
+            linesChanges.push({
+                pos_line_id: line,
+                pos_line_info: {
+                    uuid: line.uuid,
+                    product_id: line.product_id.id,
+                    attribute_value_ids: line.attribute_value_ids.map((v) => v.id),
+                    custom_attribute_value_ids: line.custom_attribute_value_ids.map((v) => v.id),
+                    combo_item_id: line.combo_item_id?.id ?? false,
+                },
+                ...Object.fromEntries(changes),
+            });
+        }
+
+        // Loop over linked `pos.prep.line` records where their `pos_line_id` is deleted,
+        // so that we can include the deleted lines to the list of lines changes.
+        for (const prepLines of Object.values(
+            groupBy(this.prepLinesWithoutPosLine, (line) => line.pos_line_info.uuid)
+        )) {
+            const ProductUnit = this.models["decimal.precision"].find(
+                (dp) => dp.name === "Product Unit"
+            );
+            const submittedQty = prepLines.reduce((acc, pl) => acc + pl.quantity, 0);
+            if (!ProductUnit.isZero(submittedQty)) {
+                linesChanges.push({
+                    quantity: -submittedQty,
+                    pos_line_info: prepLines[0].pos_line_info,
+                });
+            }
+        }
+        return linesChanges;
+    }
+
+    get orderChanges() {
+        const orderPropsChanges = [];
+
+        const newCustomerNote = this.general_customer_note;
+        const newInternalNote = this.internal_note;
+
+        if (!strEqual(newCustomerNote, this.submittedCustomerNote)) {
+            orderPropsChanges.push(["customer_note", newCustomerNote]);
+        }
+
+        if (!noteEqual(newInternalNote, this.submittedInternalNote || [])) {
+            orderPropsChanges.push(["internal_note", newInternalNote]);
+        }
+
+        return [orderPropsChanges, this.linesChanges];
+    }
+
+    get orderHasChanges() {
+        const [propChanges, lines] = this.orderChanges;
+        return propChanges.length + lines.length > 0;
     }
 }
 

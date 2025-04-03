@@ -306,12 +306,13 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
         }
 
         _create(vals, opts = {}) {
+            const ModelRecordClass = modelClasses[this.name];
+            ModelRecordClass.preProcessVals?.(vals, this.models);
             const { connectRecords = true, serverData = false, delaySetup = false } = opts;
             const { rawData, uiState, extraFields, dataToConnect } = this._sanitizeRawData(vals, {
                 serverData,
                 connectRecords,
             });
-            const ModelRecordClass = modelClasses[this.name];
             let record = new ModelRecordClass({
                 model: this,
                 raw: rawData,

@@ -19,9 +19,7 @@ patch(ActionpadWidget.prototype, {
         super.setup();
     },
     get swapButton() {
-        return (
-            this.pos.config.module_pos_restaurant && this.pos.mainScreen.component !== TicketScreen
-        );
+        return this.pos.mainScreen.component !== TicketScreen;
     },
     get hasChangesToPrint() {
         let hasChange = this.pos.getOrderChanges();

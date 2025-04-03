@@ -1,8 +1,7 @@
 /* global waitForWebfonts */
 
 import { Mutex } from "@web/core/utils/concurrency";
-import { markRaw, reactive } from "@odoo/owl";
-import { renderToElement } from "@web/core/utils/render";
+import { reactive } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { deduceUrl, random5Chars, uuidv4, Counter } from "@point_of_sale/utils";
@@ -97,7 +96,6 @@ export class PosStore extends WithLazyGetterTrap {
         this.alert = alert;
         this.sound = env.services["mail.sound_effects"];
         this.notification = notification;
-        this.unwatched = markRaw({});
         this.pushOrderMutex = new Mutex();
 
         // Object mapping the order's name (which contains the uuid) to it's server_id after
@@ -345,15 +343,12 @@ export class PosStore extends WithLazyGetterTrap {
         }
 
         // Create printer with hardware proxy, this will override related model data
-        this.unwatched.printers = [];
-        for (const relPrinter of this.models["pos.printer"].getAll()) {
-            const printer = relPrinter.raw;
-            const HWPrinter = this.createPrinter(printer);
-
-            HWPrinter.config = printer;
-            this.unwatched.printers.push(HWPrinter);
+        for (const printer of this.config.printer_ids) {
+            const hwProxy = this.createPrinter(printer.raw);
+            // TODO: This assignment doesn't seem to be necessary.
+            hwProxy.config = printer.raw;
+            printer.hwProxy = hwProxy;
         }
-        this.config.iface_printers = !!this.unwatched.printers.length;
 
         // Monitor product pricelist
         this.models["product.product"].addEventListener(
@@ -1534,42 +1529,46 @@ export class PosStore extends WithLazyGetterTrap {
     changesToOrder(order, skipped = false, orderPreparationCategories, cancelled = false) {
         return changesToOrder(order, skipped, orderPreparationCategories, cancelled);
     }
-    // Now the printer should work in PoS without restaurant
+    /**
+     * Converts the order changes into pos.prep.order and pos.prep.line records.
+     * Then, the pos.prep.order is sent to each printer asynchronously.
+     *
+     * @param {pos.order} order
+     * @param {*} opts
+     * @return {Promise<void>}
+     */
     async sendOrderInPreparation(order, opts = {}) {
-        if (this.config.printerCategories.size && !opts.byPassPrint) {
-            try {
-                let reprint = false;
-                let orderChange = changesToOrder(
-                    order,
-                    this.config.preparationCategories,
-                    opts.cancelled
-                );
-
-                if (
-                    !orderChange.new.length &&
-                    !orderChange.cancelled.length &&
-                    !orderChange.noteUpdate.length &&
-                    !orderChange.internal_note &&
-                    !orderChange.general_customer_note &&
-                    order.uiState.lastPrint
-                ) {
-                    orderChange = order.uiState.lastPrint;
-                    reprint = true;
-                } else {
-                    order.uiState.lastPrint = orderChange;
-                }
-
-                if (reprint && opts.orderDone) {
-                    return;
-                }
-
-                this.printChanges(order, orderChange, reprint);
-            } catch (e) {
-                console.info("Failed in printing the changes in the order", e);
-            }
+        if (!order.orderHasChanges) {
+            console.log("There are no changes");
+            return;
         }
-        order.updateLastOrderChange();
+
+        const [orderPropsChanges, linesChanges] = order.orderChanges;
+        const lastPrepOrder = order.prepOrders.at(-1);
+
+        // Keep track of the last created prep line to link it to the new line.
+        let lastPrepLine = lastPrepOrder?.prep_line_ids.at(-1);
+
+        const newPrepOrder = this.models["pos.prep.order"].create({
+            pos_order_id: order,
+            prev_prep_order_id: lastPrepOrder,
+            ...Object.fromEntries(orderPropsChanges),
+        });
+        for (const lineVals of linesChanges) {
+            const newPrepLine = this.models["pos.prep.line"].create({
+                ...lineVals,
+                prep_order_id: newPrepOrder,
+                prev_prep_line_id: lastPrepLine,
+            });
+            lastPrepLine = newPrepLine;
+        }
+        for (const printer of this.config.printer_ids) {
+            newPrepOrder.sendChanges(printer);
+        }
     }
+    /**
+     * TODO JCB: Maybe we can remove this?
+     */
     async sendOrderInPreparationUpdateLastChange(o, cancelled = false) {
         if (this.data.network.offline) {
             this.data.network.warningTriggered = false;
@@ -1618,7 +1617,8 @@ export class PosStore extends WithLazyGetterTrap {
     async printChanges(order, orderChange, reprint = false) {
         const unsuccedPrints = [];
 
-        for (const printer of this.unwatched.printers) {
+        // TODO JCB: remove this method
+        for (const printer of []) {
             const { orderData, changes } = this.generateOrderChange(
                 order,
                 orderChange,
@@ -1678,25 +1678,6 @@ export class PosStore extends WithLazyGetterTrap {
                 body: _t("Failed in printing %s changes of the order", failedReceipts),
             });
         }
-    }
-
-    async printOrderChanges(data, printer) {
-        const dataChanges = data.changes?.data;
-        if (dataChanges && dataChanges.some((c) => c.group)) {
-            const groupedData = dataChanges.reduce((acc, c) => {
-                const { name = "", index = -1 } = c.group || {};
-                if (!acc[name]) {
-                    acc[name] = { name, index, data: [] };
-                }
-                acc[name].data.push(c);
-                return acc;
-            }, {});
-            data.changes.groupedData = Object.values(groupedData).sort((a, b) => a.index - b.index);
-        }
-        const receipt = renderToElement("point_of_sale.OrderChangeReceipt", {
-            data: data,
-        });
-        return await printer.printReceipt(receipt);
     }
 
     filterChangeByCategories(categories, currentOrderChange) {

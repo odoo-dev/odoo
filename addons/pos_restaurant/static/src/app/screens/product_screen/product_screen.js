@@ -42,7 +42,7 @@ patch(ProductScreen.prototype, {
         return this.pos.getOrderChanges().nbrOfChanges;
     },
     get swapButton() {
-        return this.pos.config.module_pos_restaurant && this.pos.config.preparationCategories.size;
+        return this.pos.config.preparationCategories.size;
     },
     get displayCategoryCount() {
         return this.pos.categoryCount.slice(0, 3);

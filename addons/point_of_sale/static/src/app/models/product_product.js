@@ -17,6 +17,18 @@ export class ProductProduct extends Base {
             ""
         );
     }
+    get relatedPrepPrinters() {
+        const config = this.models["pos.config"].get(odoo.pos_config_id);
+        if (!config) {
+            return [];
+        }
+        return this.product_tmpl_id.pos_categ_ids.flatMap(
+            (categ) => config.categoryPrintersMap.get(categ.id) ?? []
+        );
+    }
+    get isForPrep() {
+        return this.relatedPrepPrinters.length > 0;
+    }
 }
 
 const ProductProductTemplateProxy = new Proxy(ProductProduct, {

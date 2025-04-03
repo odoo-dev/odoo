@@ -12,12 +12,6 @@ patch(PosOrderline.prototype, {
         orderline.note = this.note;
         return orderline;
     },
-    getDisplayClasses() {
-        return {
-            ...super.getDisplayClasses(),
-            "has-change": this.uiState.hasChange && this.config.module_pos_restaurant,
-        };
-    },
     canBeMergedWith(orderline) {
         if (this.course_id) {
             if (this.course_id.uuid !== orderline.course_id?.uuid) {

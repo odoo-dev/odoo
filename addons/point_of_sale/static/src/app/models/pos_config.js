@@ -27,22 +27,24 @@ export class PosConfig extends Base {
         return this.raw.trusted_config_ids.length > 0;
     }
 
-    get printerCategories() {
-        const set = new Set();
-        for (const relPrinter of this.models["pos.printer"].getAll()) {
-            const printer = relPrinter.raw;
-            for (const id of printer.product_categories_ids) {
-                set.add(id);
-            }
-        }
-        return set;
+    get preparationCategories() {
+        return new Set(this.printer_ids.flatMap((p) => p.product_categories_ids).map((c) => c.id));
     }
 
-    get preparationCategories() {
-        if (this.printerCategories) {
-            return new Set([...this.printerCategories]);
+    /**
+     * Maps the category to the related printers.
+     */
+    get categoryPrintersMap() {
+        const map = new Map();
+        for (const printer of this.models["pos.printer"].getAll()) {
+            for (const posCateg of printer.product_categories_ids) {
+                if (!map.has(posCateg.id)) {
+                    map.set(posCateg.id, []);
+                }
+                map.get(posCateg.id).push(printer);
+            }
         }
-        return new Set();
+        return map;
     }
 }
 

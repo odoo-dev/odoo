@@ -1,5 +1,9 @@
 import { registry } from "@web/core/registry";
-import { constructFullProductName, constructAttributeString } from "@point_of_sale/utils";
+import {
+    constructFullProductName,
+    constructAttributeString,
+    noteEqual,
+} from "@point_of_sale/utils";
 import { Base } from "./related_models";
 import { parseFloat } from "@web/views/fields/parsers";
 import { formatFloat } from "@web/core/utils/numbers";
@@ -11,7 +15,9 @@ import { accountTaxHelpers } from "@account/helpers/account_tax";
 
 export class PosOrderline extends Base {
     static pythonModel = "pos.order.line";
-
+    static preProcessVals(vals, models) {
+        vals.note = vals.note ?? [];
+    }
     setup(vals) {
         super.setup(vals);
         if (!this.product_id) {
@@ -120,7 +126,9 @@ export class PosOrderline extends Base {
 
     // To be overrided
     getDisplayClasses() {
-        return {};
+        return {
+            "has-change": this.lineHasChanges,
+        };
     }
 
     getPackLotLinesToEdit(isAllowOnlyOneLot) {
@@ -309,7 +317,7 @@ export class PosOrderline extends Base {
 
         // only orderlines of the same product can be merged
         return (
-            orderline.getNote() === this.getNote() &&
+            noteEqual(orderline.note, this.note) &&
             this.getProduct().id === orderline.getProduct().id &&
             this.isPosGroupable() &&
             // don't merge discounted orderlines
@@ -706,6 +714,32 @@ export class PosOrderline extends Base {
     }
     isSelected() {
         return this.order_id?.uiState?.selected_orderline_uuid === this.uuid;
+    }
+    get prepLines() {
+        return this.backLink("<-pos.prep.line.pos_line_id") || [];
+    }
+    get submittedQuantity() {
+        return this.prepLines.reduce((acc, pl) => acc + pl.quantity, 0);
+    }
+    get submittedNote() {
+        return this.prepLines.filter((pl) => pl.note).at(-1)?.note;
+    }
+    get lineChanges() {
+        if (!this.product_id.isForPrep) {
+            return [];
+        }
+        const changes = [];
+        const qtyDiff = this.qty - this.submittedQuantity;
+        if (!this.product_id.uom_id.isZero(qtyDiff)) {
+            changes.push(["quantity", qtyDiff]);
+        }
+        if (!noteEqual(this.note, this.submittedNote || [])) {
+            changes.push(["note", this.note]);
+        }
+        return changes;
+    }
+    get lineHasChanges() {
+        return this.lineChanges.length > 0;
     }
 }
 

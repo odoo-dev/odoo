@@ -296,7 +296,7 @@ class PosOrder(models.Model):
     preset_id = fields.Many2one('pos.preset', string='Preset')
     floating_order_name = fields.Char(string='Order Name')
     general_customer_note = fields.Text(string='General Customer Note')
-    internal_note = fields.Text(string='Internal Note')
+    internal_note = fields.Json(string='Internal Note', default=lambda self: [], help='Order internal note is represented by an array of dict with keys "text" and "colorIndex".')
     nb_print = fields.Integer(string='Number of Print', readonly=True, copy=False, default=0)
     pos_reference = fields.Char(string='Receipt Number', readonly=True, copy=False, index=True, help="""
         Human readable reference for this order.
@@ -1394,7 +1394,7 @@ class PosOrderLine(models.Model):
     refunded_orderline_id = fields.Many2one('pos.order.line', 'Refunded Order Line', index='btree_not_null', help='If this orderline is a refund, then the refunded orderline is specified in this field.')
     refunded_qty = fields.Float('Refunded Quantity', compute='_compute_refund_qty', help='Number of items refunded in this orderline.')
     uuid = fields.Char(string='Uuid', readonly=True, default=lambda self: str(uuid4()), copy=False)
-    note = fields.Char('Product Note')
+    note = fields.Json('Internal Note', default=lambda self: [], help="Represented by an array of dict with 'text' and 'colorIndex' keys.")
 
     combo_parent_id = fields.Many2one('pos.order.line', string='Combo Parent', index='btree_not_null') # FIXME rename to parent_line_id
     combo_line_ids = fields.One2many('pos.order.line', 'combo_parent_id', string='Combo Lines') # FIXME rename to child_line_ids

@@ -5,20 +5,20 @@
         <div class="pos-receipt m-0 p-0 pt-5">
             <!-- Receipt Header -->
             <div class="receipt-header text-center">
-                <div class="pos-receipt-title" t-if="data.reprint">
+                <div class="pos-receipt-title" t-if="props.reprint">
                     DUPLICATA !
                 </div>
-                <div class="pos-receipt-title" t-if="data.preset_name">
-                    <t t-esc="data.preset_name"/> <t t-if="data.preset_time">(<t t-esc="data.preset_time"/>)</t>
+                <div class="pos-receipt-title" t-if="props.prepOrder.orderInfo.preset_name">
+                    <t t-esc="props.prepOrder.orderInfo.preset_name"/> <t t-if="props.prepOrder.orderInfo.preset_time">(<t t-esc="props.prepOrder.orderInfo.preset_time"/>)</t>
                 </div>
                 <div style="font-size: 78%;">
-                    <span><t t-esc="data.config_name"/> : <t t-esc="data.time"/></span><br/>
-                    <span>By: <t t-esc="data.employee_name"/></span>
+                    <span><t t-esc="props.prepOrder.orderInfo.config_name"/> : <t t-esc="props.prepOrder.orderInfo.time"/></span><br/>
+                    <span>By: <t t-esc="props.prepOrder.orderInfo.employee_name"/></span>
                 </div>
                 <span class="my-4" style="font-size: 120%;">
-                    <span>Order <strong><t t-esc="data.pos_reference"/></strong></span>
-                    <strong t-if="data.tracking_number" class="fw-light my-3">
-                        # <t t-esc="data.tracking_number"/>
+                    <span>Order <strong><t t-esc="props.prepOrder.orderInfo.pos_reference"/></strong></span>
+                    <strong t-if="props.prepOrder.orderInfo.tracking_number" class="fw-light my-3">
+                        # <t t-esc="props.prepOrder.orderInfo.tracking_number"/>
                     </strong>
                 </span>
             </div>
@@ -26,13 +26,13 @@
 
             <!-- Receipt Body -->
             <div class="pos-receipt-body pb-5">
-                <t t-set="hasDataChanges" t-value="data.changes.data or data.changes.groupedData" />
-                <div t-if="hasDataChanges" class="new-changes w-100">
+                <div class="new-changes w-100">
                     <div class="pos-receipt-title text-center w-100">
-                        <strong t-esc="data.changes.title" />
+                        <strong t-esc="props.title" />
                     </div>
-                    <t t-if="data.changes.groupedData">
-                        <div t-foreach="data.changes.groupedData" t-as="group" t-key="group_index">
+                    <!-- TODO JCB: don't forget the groupedData -->
+                    <!-- <t t-if="props.changes.groupedData">
+                        <div t-foreach="props.changes.groupedData" t-as="group" t-key="group_index">
                             <div style="border-bottom: 1px dashed black;" class="mb-2 pb-1 fw-bold " t-att-class="{'mt-1': !group_first}" t-esc="group.name" />
                             <div t-foreach="group.data" t-as="line" class="ps-2" t-key="change_index">
                                 <t t-call="point_of_sale.OrderChangeReceiptLine" />
@@ -40,22 +40,31 @@
                         </div>
                     </t>
                     <t t-else="">
-                        <div t-foreach="data.changes.data" t-as="line" t-key="change_index">
+                        <div t-foreach="props.changes.data" t-as="line" t-key="change_index">
                             <t t-call="point_of_sale.OrderChangeReceiptLine" />
                         </div>
-                    </t>
+                    </t> -->
+                    <div t-foreach="props.lines" t-as="line" t-key="line.id">
+                        <t t-call="point_of_sale.OrderChangeReceiptLine" />
+                    </div>
                 </div>
-                <div t-if="data.internal_note and !hasDataChanges" class="new-changes w-100" t-att-class="{'mb-3': data.general_customer_note}">
+                <div t-if="'internalNote' in props" class="new-changes w-100" t-att-class="{ 'mb-3': 'customerNote' in props }">
                     <div class="pos-receipt-title text-center w-100">
                         <strong>INTERNAL NOTE</strong>
                     </div>
-                    <div class="text-center" style="font-size: 109%;" t-esc="data.internal_note.split('\n').join(', ')" />
+                    <t t-if="props.prepOrder.prevInternalNote">
+                        <div class="text-center" style="font-size: 109%; white-space: pre; text-decoration: line-through;" t-esc="props.prepOrder.prevInternalNote" />
+                    </t>
+                    <div class="text-center" style="font-size: 109%;" t-esc="props.internalNote" />
                 </div>
-                <div t-if="data.general_customer_note and !hasDataChanges" class="new-changes w-100">
+                <div t-if="'customerNote' in props" class="new-changes w-100">
                     <div class="pos-receipt-title text-center w-100">
                         <strong>CUSTOMER NOTE</strong>
                     </div>
-                    <div class="text-center" style="font-size: 109%;" t-esc="data.general_customer_note.split('\n').join(', ')" />
+                    <t t-if="props.prepOrder.prevCustomerNote">
+                        <div class="text-center" style="font-size: 109%; white-space: pre; text-decoration: line-through;" t-esc="props.prepOrder.prevCustomerNote" />
+                    </t>
+                    <div class="text-center" style="font-size: 109%; white-space: pre;" t-esc="props.customerNote" />
                 </div>
             </div>
         </div>
@@ -64,7 +73,7 @@
     <t t-name="point_of_sale.OrderChangeReceiptLine">
         <div t-attf-class="orderline #{line.isCombo ? 'ms-5 px-2' : 'mx-1'}" style="font-size: 120%;">
             <div class="d-flex medium">
-                <span class="me-3" t-esc="line.quantity"/> <span class="product-name" t-esc="line.display_name"/>
+                <span class="me-3" t-esc="line.getQuantityToShow(props.type)"/> <span class="product-name" t-esc="line.product.name"/>
             </div>
             <div t-if="line.attribute_value_names?.length" class="ms-5" style="font-size: 91%;">
                 <t t-foreach="line.attribute_value_names" t-as="name" t-key="name_index">
@@ -73,8 +82,14 @@
                     </p>
                 </t>
             </div>
-            <div t-if="line.note" class="fst-italic" style="font-size: 91%;">
-                <t t-esc="line.note.split('\n').join(', ')"/><br/>
+            <div class="fst-italic" style="font-size: 91%;">
+                <t t-if="props.type == 'line_note_update'">
+                    <span t-esc="line.prevNote" class="text-decoration-line-through" />
+                    <t t-esc="line.note.map((i) => i.text).join(', ')"/><br/>
+                </t>
+                <t t-else="">
+                    <t t-if="line.prevNote" t-esc="line.prevNote"/><br/>
+                </t>
             </div>
         </div>
     </t>

@@ -72,9 +72,7 @@ export class NoteButton extends Component {
 
     get orderNote() {
         const order = this.pos.getOrder();
-        return this.type === "internal"
-            ? order.internal_note || ""
-            : order.general_customer_note || "";
+        return this.type === "internal" ? order.internal_note : order.general_customer_note || "";
     }
 
     get orderlineNote() {
@@ -102,7 +100,7 @@ export class InternalNoteButton extends NoteButton {
             const defaultNote = this.pos.models["pos.note"].find((note) => note.name === noteName);
             notesArray.push({ text: noteName, colorIndex: defaultNote ? defaultNote.color : 0 });
         }
-        return JSON.stringify(notesArray);
+        return notesArray;
     }
 
     get type() {
@@ -111,9 +109,9 @@ export class InternalNoteButton extends NoteButton {
 
     async onClick() {
         const selectedOrderline = this.pos.getOrder().getSelectedOrderline();
-        const selectedNote = JSON.parse(this.currentNote || "[]");
+        const selectedNote = this.currentNote;
         const payload = await this.openTextInput(selectedNote.map((n) => n.text).join("\n"));
-        const coloredNotes = payload ? this.reframeNotes(payload) : "[]";
+        const coloredNotes = payload ? this.reframeNotes(payload) : [];
         if (selectedOrderline) {
             this.setChanges(selectedOrderline, coloredNotes);
         } else {
@@ -122,7 +120,7 @@ export class InternalNoteButton extends NoteButton {
         return {
             confirmed: typeof payload === "string",
             inputNote: coloredNotes,
-            oldNote: JSON.stringify(selectedNote),
+            oldNote: selectedNote,
         };
     }
     setOrderlineNote(value) {
