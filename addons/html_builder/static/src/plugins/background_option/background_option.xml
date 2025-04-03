@@ -29,7 +29,7 @@
         <BackgroundImageOption/>
         <BackgroundPositionOption/>
         <ImageFilterOption level="2"/>
-        <!-- TODO: BackgroundOptimize-->
+        <ImageFormatOption level="2" computeMaxDisplayWidth="this.computeMaxDisplayWidth"/>
         <!-- Color filter -->
         <BuilderRow t-if="this.showColorFilter()" label.translate="Color Filter" level="2">
             <!-- TODO handle all the attributes -->

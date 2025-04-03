@@ -55,14 +55,7 @@ export class CoreBuilderActionPlugin extends Plugin {
                     return match ? match[1] : "";
                 },
                 apply: (el, value, param) => {
-                    const parts = backgroundImageCssToParts(el.style["background-image"]);
-                    if (value) {
-                        parts.url = `url('${value}')`;
-                    } else {
-                        delete parts.url;
-                    }
-                    // todo: deal with the gradients
-                    setStyle(el, "background-image", backgroundImagePartsToCss(parts), param);
+                    this.dependencies.style.setBackgroundImageUrl(el, value, param);
                 },
             },
             "box-shadow": {

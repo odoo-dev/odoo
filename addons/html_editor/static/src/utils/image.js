@@ -36,15 +36,16 @@ export function backgroundImagePartsToCss(parts) {
  * @returns {string|null} The mimetype of the image.
  */
 export function getMimetype(image) {
-    const src = image.getAttribute("src");
+    const src = getImageSrc(image);
 
     return (
-        image.dataset.computedMimetype ||
+        image.dataset.mimetype ||
         image.dataset.mimetypeBeforeConversion ||
-        (src.endsWith(".png") && "image/png") ||
-        (src.endsWith(".webp") && "image/webp") ||
-        (src.endsWith(".jpg") && "image/jpeg") ||
-        (src.endsWith(".jpeg") && "image/jpeg") ||
+        (src &&
+            ((src.endsWith(".png") && "image/png") ||
+                (src.endsWith(".webp") && "image/webp") ||
+                (src.endsWith(".jpg") && "image/jpeg") ||
+                (src.endsWith(".jpeg") && "image/jpeg"))) ||
         null
     );
 }
@@ -100,9 +101,8 @@ export function getImageSrc(el) {
         return el.dataset.bgSrc;
     }
     const { getComputedStyle } = el.ownerDocument.defaultView;
-    return getBgImageURLFromURL(
-        backgroundImageCssToParts(getComputedStyle(el)["background-image"]).url
-    );
+    const url = backgroundImageCssToParts(getComputedStyle(el)["background-image"]).url;
+    return url && getBgImageURLFromURL(url);
 }
 
 /**

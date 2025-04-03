@@ -15,7 +15,7 @@ export const DEFAULT_IMAGE_QUALITY = "75";
 
 export class ImagePostProcessPlugin extends Plugin {
     static id = "imagePostProcess";
-    static dependencies = ["coreBuilderAction"];
+    static dependencies = ["style"];
     static shared = ["processImage"];
 
     /**
@@ -199,8 +199,8 @@ export class ImagePostProcessPlugin extends Plugin {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // Quality
-        newDataset.computedMimetype = formatMimetype || mimetypeBeforeConversion;
-        const dataURL = canvas.toDataURL(newDataset.computedMimetype, quality / 100);
+        newDataset.mimetype = formatMimetype || mimetypeBeforeConversion;
+        const dataURL = canvas.toDataURL(newDataset.mimetype, quality / 100);
         const newSize = getDataURLBinarySize(dataURL);
         const originalSize = getImageSizeFromCache(originalSrc);
         const isChanged =
@@ -229,7 +229,8 @@ export class ImagePostProcessPlugin extends Plugin {
         if (el.tagName === "IMG") {
             el.setAttribute("src", url);
         } else {
-            this.dependencies.coreBuilderAction.setStyle(el, "background-image-url", url);
+            this.dependencies.style.setBackgroundImageUrl(el, url);
+            newDataset.bgSrc = url;
         }
         for (const key in newDataset) {
             const value = newDataset[key];

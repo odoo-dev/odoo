@@ -3,12 +3,12 @@ import {
     shouldPreventGifTransformation,
 } from "@html_editor/main/media/image_post_process_plugin";
 import { Plugin } from "@html_editor/plugin";
-import { loadImage } from "@html_editor/utils/image_processing";
+import { loadImage, loadImageInfo } from "@html_editor/utils/image_processing";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 
-class ImageOptimizePlugin extends Plugin {
-    static id = "imageOptimize";
+class ImageFormatOptionPlugin extends Plugin {
+    static id = "imageFormatOption";
     static dependencies = ["imagePostProcess"];
     static shared = ["computeAvailableFormats"];
     resources = {
@@ -49,11 +49,12 @@ class ImageOptimizePlugin extends Plugin {
      * @private
      */
     async computeAvailableFormats(img, computeMaxDisplayWidth) {
-        if (!img.dataset.mimetypeBeforeConversion || shouldPreventGifTransformation(img)) {
+        const data = { ...img.dataset, ...(await loadImageInfo(img)) };
+        if (!data.mimetypeBeforeConversion || shouldPreventGifTransformation(img)) {
             return [];
         }
 
-        const maxWidth = await this.getImageWidth(img);
+        const maxWidth = await this.getImageWidth(data.originalSrc, data.width);
         const optimizedWidth = Math.min(maxWidth, computeMaxDisplayWidth?.(img) || 0);
         const widths = {
             128: ["128px", "image/webp"],
@@ -64,7 +65,7 @@ class ImageOptimizePlugin extends Plugin {
         };
         widths[img.naturalWidth] = [_t("%spx", img.naturalWidth), "image/webp"];
         widths[optimizedWidth] = [_t("%spx (Suggested)", optimizedWidth), "image/webp"];
-        const mimetypeBeforeConversion = img.dataset.mimetypeBeforeConversion;
+        const mimetypeBeforeConversion = data.mimetypeBeforeConversion;
         widths[maxWidth] = [_t("%spx (Original)", maxWidth), mimetypeBeforeConversion];
         if (mimetypeBeforeConversion !== "image/webp") {
             // Avoid a key collision by subtracting 0.1 - putting the webp
@@ -79,10 +80,9 @@ class ImageOptimizePlugin extends Plugin {
                 return { id, width: Math.round(width), label, mimetype };
             });
     }
-    async getImageWidth(img) {
-        const getNaturalWidth = () =>
-            loadImage(img.dataset.originalSrc).then((i) => i.naturalWidth);
-        return img.dataset.width ? Math.round(img.dataset.width) : await getNaturalWidth();
+    async getImageWidth(originalSrc, width) {
+        const getNaturalWidth = () => loadImage(originalSrc).then((i) => i.naturalWidth);
+        return width ? Math.round(width) : await getNaturalWidth();
     }
 }
-registry.category("website-plugins").add(ImageOptimizePlugin.id, ImageOptimizePlugin);
+registry.category("website-plugins").add(ImageFormatOptionPlugin.id, ImageFormatOptionPlugin);
