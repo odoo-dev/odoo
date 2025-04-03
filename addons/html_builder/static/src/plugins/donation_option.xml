@@ -3,18 +3,16 @@
 
 <t t-name="html_builder.DonationOption">
     <BuilderRow label.translate="Recipient Email">
-        <BuilderTextInput attributeAction="donationEmail"/>
+        <BuilderTextInput attributeAction="'donationEmail'"/>
     </BuilderRow>
-    <!-- TODO AGAU: noPreview=true -->
-    <BuilderRow label.translate="Display Options">
-        <BuilderCheckbox id="'display_options_opt'" action="'displayOptions'" />
+    <BuilderRow label.translate="Display Options" preview="false">
+        <BuilderCheckbox id="'display_options_opt'" action="'toggleDisplayOptions'" />
     </BuilderRow>
-    <!-- TODO AGAU: noPreview=true -->
     <BuilderRow t-if="!this.isActiveItem('no_input_opt')"
-                label.translate="Pre-filled Options">
-        <BuilderCheckbox id="'pre_filled_opt'" action="'togglePrefilledOptions'"/>
+                label.translate="Pre-filled Options" preview="false">
+        <BuilderCheckbox id="'pre_filled_opt'" action="'togglePrefilledOptions'" />
     </BuilderRow>
-    <t t-if="this.isActiveItem('pre_filled_opt')">
+    <t t-if="this.isActiveItem('no_input_opt') || this.isActiveItem('pre_filled_opt')">
         <!-- TODO AGAU: re-render BuilderList? -->
         <!-- TODO AGAU: translate default description -->
         <t t-set="entryShape" t-value="{ value: 'number' }"/>
@@ -29,20 +27,18 @@
                 entryShape="entryShape"
                 defaultValue="defaultValue"
         />
-        <!-- TODO AGAU: noPreview=true -->
-        <BuilderRow label.translate="Descriptions" level="1">
+        <BuilderRow label.translate="Descriptions" level="1" preview="false">
             <BuilderCheckbox id="'pre_filled_descriptions_opt'" dataAttributeAction="'descriptions'"/>
         </BuilderRow>
     </t>
-    <!-- TODO AGAU: noPreview=true -->
-    <BuilderRow label.translate="Custom Amount">
+    <BuilderRow label.translate="Custom Amount" preview="false">
         <BuilderSelect action="'selectAmountInput'">
-            <BuilderSelectItem id="'free_amount_opt'" actionValue="'freeAmount'">Input</BuilderSelectItem>
+            <BuilderSelectItem id="'free_amount_opt'" actionParam="'freeAmount'">Input</BuilderSelectItem>
             <t t-if="this.isActiveItem('display_options_opt')">
-                <BuilderSelectItem id="'slider_opt'" actionValue="'slider'">Slider</BuilderSelectItem>
+                <BuilderSelectItem id="'slider_opt'" actionParam="'slider'">Slider</BuilderSelectItem>
             </t>
-            <t t-if="this.isActiveItem('pre_filled_opt')">
-                <BuilderSelectItem id="'no_input_opt'" actionValue="''">None</BuilderSelectItem>
+            <t t-if="this.isActiveItem('no_input_opt') || this.isActiveItem('pre_filled_opt')">
+                <BuilderSelectItem id="'no_input_opt'" actionParam="''">None</BuilderSelectItem>
             </t>
         </BuilderSelect>
     </BuilderRow>
@@ -52,10 +48,10 @@
     </BuilderRow>
     <t t-if="this.isActiveItem('slider_opt')">
         <BuilderRow label.translate="Maximum" level="1">
-            <BuilderNumberInput step="1" action="setMaximumAmount"/>
+            <BuilderNumberInput step="1" action="'setMaximumAmount'"/>
         </BuilderRow>
         <BuilderRow label.translate="Step" level="1">
-            <BuilderNumberInput step="1" action="setSliderStep"/>
+            <BuilderNumberInput step="1" action="'setSliderStep'"/>
         </BuilderRow>
     </t>
     <BuilderRow label.translate="Default Amount">

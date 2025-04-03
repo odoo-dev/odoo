@@ -13,12 +13,12 @@ class DonationOptionPlugin extends Plugin {
             }),
         ],
         builder_actions: {
-            displayOptions: {
-                getValue: this.getDisplayOptions.bind(this),
-                apply: this.displayOptions.bind(this),
+            toggleDisplayOptions: {
+                isApplied: this.getDisplayOptions.bind(this),
+                apply: this.toggleDisplayOptions.bind(this),
             },
             togglePrefilledOptions: {
-                getValue: this.getPrefilledOptions.bind(this),
+                isApplied: this.getPrefilledOptions.bind(this),
                 apply: this.togglePrefilledOptions.bind(this),
             },
             setPrefilledOptions: {
@@ -26,7 +26,7 @@ class DonationOptionPlugin extends Plugin {
                 apply: this.applyPrefilledOptions.bind(this),
             },
             selectAmountInput: {
-                getValue: this.getAmountInput.bind(this),
+                isApplied: this.isAmountInputApplied.bind(this),
                 apply: this.setAmountInput.bind(this),
             },
             setMinimumAmount: {
@@ -48,7 +48,7 @@ class DonationOptionPlugin extends Plugin {
         return editingElement.dataset.displayOptions;
     }
 
-    displayOptions({ editingElement, value }) {
+    toggleDisplayOptions({ editingElement, value }) {
         console.log(...arguments);
         editingElement.dataset.displayOptions = value;
         if (!value && editingElement.dataset.customAmount === "slider") {
@@ -68,7 +68,7 @@ class DonationOptionPlugin extends Plugin {
         if (!value && editingElement.dataset.displayOptions) {
             editingElement.dataset.customAmount = "slider";
         }
-        this._rebuildPrefilledOptions();
+        this.rebuildPrefilledOptions(editingElement);
     }
 
     getPrefilledOptionList({ editingElement }) {
@@ -91,12 +91,12 @@ class DonationOptionPlugin extends Plugin {
         this.rebuildPrefilledOptions(editingElement, value);
     }
 
-    getAmountInput({ editingElement }) {
-        return editingElement.dataset.customAmount;
+    isAmountInputApplied({ editingElement, param }) {
+        return editingElement.dataset.customAmount === param.mainParam;
     }
 
-    setAmountInput({ editingElement, value }) {
-        editingElement.dataset.customAmount = value;
+    setAmountInput({ editingElement, param }) {
+        editingElement.dataset.customAmount = param.mainParam;
         this.rebuildPrefilledOptions(editingElement);
     }
 
