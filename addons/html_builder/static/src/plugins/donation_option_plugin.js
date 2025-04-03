@@ -143,7 +143,7 @@ class DonationOptionPlugin extends Plugin {
     }
 
     rebuildPrefilledOptions(editingElement, options) {
-        options = JSON.parse(options || this.getPrefilledOptionList({ editingElement }) || "[]");
+        options = JSON.parse(options || this.getPrefilledOptionList({ editingElement }));
         const doRebuild = editingElement.dataset.displayOptions;
         editingElement
             .querySelectorAll(".s_donation_prefilled_buttons")
