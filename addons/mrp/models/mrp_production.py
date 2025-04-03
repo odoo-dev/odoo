@@ -793,13 +793,13 @@ class MrpProduction(models.Model):
                     Command.delete(move.id) for move in production.move_finished_ids if move.bom_line_id
                 ]
 
-    @api.depends('state', 'product_qty', 'qty_producing')
+    @api.depends('state', 'product_qty', 'qty_producing', 'lot_producing_id')
     def _compute_show_produce(self):
         for production in self:
             state_ok = production.state in ('confirmed', 'progress', 'to_close')
             qty_none_or_all = production.qty_producing in (0, production.product_qty)
-            production.show_produce_all = state_ok and qty_none_or_all
-            production.show_produce = state_ok and not qty_none_or_all
+            production.show_produce_all = state_ok and qty_none_or_all and not (production.product_tracking == 'serial' and production.lot_producing_id)
+            production.show_produce = state_ok and not qty_none_or_all or (production.product_tracking == 'serial' and production.lot_producing_id)
 
     def _search_is_delayed(self, operator, value):
         if operator not in ('in', 'not in'):
@@ -1442,8 +1442,6 @@ class MrpProduction(models.Model):
     def action_generate_serial(self):
         self.ensure_one()
         self._set_lot_producing()
-        if self.product_id.tracking == 'serial':
-            self._set_qty_producing(False)
         if self.picking_type_id.auto_print_generated_mrp_lot:
             return self._autoprint_generated_lot(self.lot_producing_id)
 
@@ -2161,6 +2159,8 @@ class MrpProduction(models.Model):
         self._button_mark_done_sanity_checks()
         productions_auto = set()
         for production in self:
+            if production.product_tracking == 'serial' and production.lot_producing_id:
+                production._set_quantities()
             if not float_is_zero(production.qty_producing, precision_rounding=production.product_uom_id.rounding):
                 production.move_raw_ids.filtered(
                     lambda move: move.manual_consumption and not move.picked
