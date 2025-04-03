@@ -6,15 +6,26 @@ import { registry } from "@web/core/registry";
 
 export class Subscribe extends Interaction {
   static selector = ".js_subscribe";
-  disabledInEditableMode = false;
   dynamicContent = {
-    "click .js_subscribe_btn": "_onSubscribeClick",
+    ".js_subscribe_btn": {
+      "t-on-click": this._onSubscribeClick.bind(this),
+      "t-att-class": (el) => ({ disabled: this.state.isDisabled }),
+    },
+    ".js_subscribe_wrap": {
+      "t-att-class": (el) => ({ "d-none": this.state.isSubscriber }),
+    },
+    ".js_subscribed_wrap": {
+      "t-att-class": (el) => ({ "d-none": !this.state.isSubscriber }),
+    },
+    "input.js_subscribe_value, input.js_subscribe_email": {
+      "t-att-class": (el) => ({ disabled: this.state.isDisabled }),
+    },
   };
 
-  constructor() {
-    super(...arguments);
+  setup() {
+    super.setup();
     this._recaptcha = new ReCaptcha();
-    this.notification = this.bindService("notification");
+    this.state = { isSubscriber: false, isDisabled: false };
   }
 
   async willStart() {
@@ -26,11 +37,6 @@ export class Subscribe extends Interaction {
   }
 
   start() {
-    if (this.editableMode) {
-      // Since there is an editor option to choose whether "Thanks" button
-      // should be visible or not, we should not vary its visibility here.
-      return;
-    }
     const always = this._updateView.bind(this);
     const inputName = this.el.querySelector("input").name;
     return this.waitFor(
@@ -48,41 +54,10 @@ export class Subscribe extends Interaction {
   /**
    * Modifies the elements to have the view of a subscriber/non-subscriber.
    *
-   * @todo should probably be merged with _updateSubscribeControlsStatus
    * @param {Object} data
    */
   _updateView(data) {
-    this._updateSubscribeControlsStatus(!!data.is_subscriber);
-
-    // js_subscribe_email is kept by compatibility (it was the old name of js_subscribe_value)
-    const valueInputEl = this.el.querySelector(
-      "input.js_subscribe_value, input.js_subscribe_email"
-    );
-    valueInputEl.value = data.value || "";
-
-    // Compat: remove d-none for DBs that have the button saved with it.
-    this.el.classList.remove("d-none");
-  }
-
-  /**
-   * Updates the visibility of the subscribe and subscribed buttons.
-   *
-   * @param {boolean} isSubscriber
-   */
-  _updateSubscribeControlsStatus(isSubscriber) {
-    const thanksWrapEl = this.el.querySelector(".js_subscribed_wrap");
-    const subscribeWrapEl = this.el.querySelector(".js_subscribe_wrap");
-    const subscribeBtnEl = this.el.querySelector(".js_subscribe_btn");
-
-    subscribeBtnEl.disabled = isSubscriber;
-    subscribeWrapEl.classList.toggle("d-none", isSubscriber);
-    thanksWrapEl.classList.toggle("d-none", !isSubscriber);
-
-    // js_subscribe_email is kept by compatibility (it was the old name of js_subscribe_value)
-    const valueInputEl = this.el.querySelector(
-      "input.js_subscribe_value, input.js_subscribe_email"
-    );
-    valueInputEl.disabled = isSubscriber;
+    this.state.isSubscriber = !!data.is_subscriber;
   }
 
   _getListId() {
@@ -108,53 +83,66 @@ export class Subscribe extends Interaction {
   async _onSubscribeClick() {
     const inputName = this.el.querySelector("input").name;
     const input = this.el.querySelectorAll(
-      ".js_subscribe_value:visible, .js_subscribe_email:visible"
+      ".js_subscribe_value, .js_subscribe_email"
     ); // js_subscribe_email is kept by compatibility (it was the old name of js_subscribe_value)
-    if (inputName === "email" && input.length && !input.val().match(/.+@.+/)) {
-      this.el
-        .addClass("o_has_error")
-        .find(".form-control")
-        .addClass("is-invalid");
+    if (
+      inputName === "email" &&
+      input.length &&
+      !input[0].value.match(/.+@.+/)
+    ) {
+      this.el.classList.add("o_has_error");
+
+      const formControls = this.el.querySelectorAll(".form-control");
+      formControls.forEach((control) => {
+        control.classList.add("is-invalid");
+      });
+
       return false;
     }
-    this.el
-      .removeClass("o_has_error")
-      .find(".form-control")
-      .removeClass("is-invalid");
-    const tokenObj = await this._recaptcha.getToken(
-      "website_mass_mailing_subscribe"
+
+    this.el.classList.remove("o_has_error");
+    const formControls = this.el.querySelectorAll(".form-control");
+    formControls.forEach((control) => {
+      control.classList.remove("is-invalid");
+    });
+
+    const tokenObj = this.waitFor(
+      this._recaptcha.getToken("website_mass_mailing_subscribe")
     );
     if (tokenObj.error) {
-      this.notification.add(tokenObj.error, {
+      this.services.notification.add(tokenObj.error, {
         type: "danger",
         title: _t("Error"),
         sticky: true,
       });
       return false;
     }
-    rpc("/website_mass_mailing/subscribe", {
-      list_id: this._getListId(),
-      value: input.length ? input.val() : false,
-      subscription_type: inputName,
-      ...(tokenObj.token ? { recaptcha_token_response: tokenObj.token } : {}),
-    }).then((result) => {
-      let toastType = result.toast_type;
-      if (toastType === "success") {
-        this._updateSubscribeControlsStatus(true);
-
-        const popup = this.el.closest(".o_newsletter_modal");
-        if (popup.length) {
-          popup.modal("hide");
-        }
+    this.state.isDisabled = true;
+    const result = await this.waitFor(
+      rpc("/website_mass_mailing/subscribe", {
+        list_id: this._getListId(),
+        value: input.length ? input[0].value : false,
+        subscription_type: inputName,
+        ...(tokenObj.token ? { recaptcha_token_response: tokenObj.token } : {}),
+      })
+    );
+    let toastType = result.toast_type;
+    if (toastType === "success") {
+      this.state.isSubscriber = true;
+      const popup = this.el.closest(".o_newsletter_modal");
+      if (popup?.length) {
+        popup.modal("hide");
       }
-      this.notification.add(result.toast_content, {
-        type: toastType,
-        title: toastType === "success" ? _t("Success") : _t("Error"),
-        sticky: true,
-      });
+    } else {
+      this.state.isDisabled = false;
+    }
+
+    this.services.notification.add(result.toast_content, {
+      type: toastType,
+      title: toastType === "success" ? _t("Success") : _t("Error"),
+      sticky: true,
     });
   }
 }
 
 registry.category("public.interactions").add("website.subscribe", Subscribe);
-

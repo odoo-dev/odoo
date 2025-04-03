@@ -9,15 +9,15 @@ import { registry } from "@web/core/registry";
  *
  * TODO an upgrade script should be made to fix databases and get rid of this.
  */
-export class fixNewsletterListClass extends Interaction {
+export class FixNewsletterListClass extends Interaction {
   static selector =
     ".s_newsletter_subscribe_form:not(.s_subscription_list), .s_newsletter_block";
 
   start() {
-    this.target[0].classList.add("s_newsletter_list");
+    this.el.classList.add("s_newsletter_list");
   }
 }
 
 registry
   .category("public.interactions")
-  .add("website.fix_news_letter_list_class", fixNewsletterListClass);
+  .add("website.fix_news_letter_list_class", FixNewsletterListClass);
