@@ -1,5 +1,6 @@
 import { CommandResult } from "../../o_spreadsheet/cancelled_reason";
-import { helpers } from "@odoo/o-spreadsheet";
+import { init, wasm_buffer_batch_tokenize } from "../../o_spreadsheet/wasm_tokenize";
+import { helpers, tokenize } from "@odoo/o-spreadsheet";
 import { Domain } from "@web/core/domain";
 import { deepCopy } from "@web/core/utils/objects";
 import { OdooCorePlugin } from "@spreadsheet/plugins";
@@ -326,6 +327,52 @@ export class ListCorePlugin extends OdooCorePlugin {
             }
         }
         this.nextId = data.listNextId || getMaxObjectId(this.lists) + 1;
+
+        this.testIt(data);
+    }
+
+    async testIt(data) {
+        const formulas = data.sheets.flatMap(sheet =>  Object.values(sheet.cells).filter(f => !!f));
+        await init();
+
+        console.time("wasm_buffer_batch_tokenize")
+        this.wasmTokenize(formulas);
+        console.timeEnd("wasm_buffer_batch_tokenize")
+
+        console.time("js tokenize")
+        this.jsTokenize(formulas);
+        console.timeEnd("js tokenize")
+    }
+
+    jsTokenize(formulas) {
+        if (!formulas.length) {
+            return [];
+        }
+        return formulas.map(formula => tokenize(formula));
+    }
+
+    wasmTokenize(formulas) {
+        if (!formulas.length) {
+            return [];
+        }
+        debugger
+        const buffer = wasm_buffer_batch_tokenize(formulas)
+        const all_tokens = [];
+        let formula_index = 0;
+        for (let i = 0; i < buffer.length; i++) {
+            let offset_in_formula = 0;
+            const tokens = [];
+            while (buffer[i] !== 0) {
+                const formula = formulas[formula_index];
+                const token_length = buffer[i+1];
+                tokens.push({ type: buffer[i], value: formula.substring(offset_in_formula, offset_in_formula + token_length) });
+                offset_in_formula += token_length;
+                i+=2;
+            }
+            formula_index++;
+            all_tokens.push(tokens);
+        }
+        return all_tokens;
     }
     /**
      * Export the lists
