@@ -125,7 +125,7 @@ describe("DateTimeInput (date)", () => {
         expect(".o_datetime_input").toHaveValue("09 janv., 1997");
 
         await contains(".o_datetime_input").click();
-        await contains(".o_zoom_out").click();
+        await contains(".o_header_part").click();
         await contains(getPickerCell("sept.")).click();
         await contains(getPickerCell("19")).click();
         await animationFrame();
@@ -159,7 +159,7 @@ describe("DateTimeInput (date)", () => {
 
         expect(".o_datetime_input").toHaveValue("09 જાન્યુ, 1997");
 
-        await contains(".o_zoom_out").click();
+        await contains(".o_header_part").click();
         await contains(getPickerCell("સપ્ટે")).click();
         await contains(getPickerCell("19")).click();
         await animationFrame();
@@ -331,7 +331,7 @@ describe("DateTimeInput (datetime)", () => {
 
         await contains(".o_datetime_input").click();
 
-        await contains(".o_zoom_out").click();
+        await contains(".o_header_part").click();
         await contains(getPickerCell("sept.")).click();
         await contains(getPickerCell("1")).click();
 

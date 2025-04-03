@@ -392,7 +392,7 @@ test("date field supports internationalization", async () => {
     const dateViewForm = queryOne(".o_field_date input").value;
     await contains(".o_field_date input").click();
     expect(".o_field_date input").toHaveValue(dateViewForm);
-    expect(".o_zoom_out strong").toHaveText("februar 2017");
+    expect("strong.o_header_part").toHaveText("februar 2017");
 
     await contains(getPickerCell("22")).click();
     const dateEditForm = queryOne(".o_field_date input").value;

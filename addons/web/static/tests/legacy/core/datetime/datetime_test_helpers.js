@@ -188,7 +188,7 @@ export function useTwelveHourClockFormat() {
 }
 
 export function zoomOut() {
-    return click(getFixture(), ".o_zoom_out");
+    return click(getFixture(), ".o_header_part");
 }
 
 const PICKER_ROWS = 6;

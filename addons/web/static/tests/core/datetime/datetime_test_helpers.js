@@ -62,7 +62,7 @@ export function assertDateTimePicker(expectedParams) {
     let todayCells = 0;
     for (let i = 0; i < date.length; i++) {
         const { cells, daysOfWeek, weekNumbers } = date[i];
-        const cellEls = queryAll(`.o_date_picker:nth-child(${i + 1}) .o_date_item_cell`);
+        const cellEls = queryAll(`.o_date_picker > .o_date_item_cell`);
         const pickerRows = cells.length;
         expect(cellEls.length).toBe(pickerRows * PICKER_COLS, {
             message: `picker should have ${
@@ -71,9 +71,7 @@ export function assertDateTimePicker(expectedParams) {
         });
 
         if (daysOfWeek) {
-            const actualDow = queryAllTexts(
-                `.o_date_picker:nth-child(${i + 1}) .o_day_of_week_cell`
-            );
+            const actualDow = queryAllTexts(`.o_date_picker > .o_day_of_week_cell`);
             expect(actualDow).toEqual(daysOfWeek, {
                 message: `picker should display the days of week: ${daysOfWeek
                     .map((dow) => `"${dow}"`)
@@ -82,11 +80,12 @@ export function assertDateTimePicker(expectedParams) {
         }
 
         if (weekNumbers) {
-            expect(
-                queryAllTexts(`.o_date_picker:nth-child(${i + 1}) .o_week_number_cell`).map(Number)
-            ).toEqual(weekNumbers, {
-                message: `picker should display the week numbers (${weekNumbers.join(", ")})`,
-            });
+            expect(queryAllTexts(`.o_date_picker .o_week_number_cell`).map(Number)).toEqual(
+                weekNumbers,
+                {
+                    message: `picker should display the week numbers (${weekNumbers.join(", ")})`,
+                }
+            );
         }
 
         // Date cells
@@ -144,7 +143,7 @@ export function getPickerCell(expr, inBounds = false) {
 }
 
 export async function zoomOut() {
-    click(".o_zoom_out");
+    click(".o_header_part");
     await animationFrame();
 }
 

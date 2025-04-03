@@ -4,7 +4,7 @@
     --DateTimePicker__Day-template-rows: 6;
 
     :not(.o_calendar_sidebar) > & {
-        width: 240px; // size of the calendar
+        width: 250px; // size with enough space for different language (e.g. Vietnamese)
     }
 
     // Header
@@ -56,32 +56,6 @@
     .o_date_item_picker {
         grid-template-rows: repeat(var(--DateTimePicker__Template-rows), 1fr);
         grid-template-columns: repeat(var(--DateTimePicker__Template-columns), 1fr);
-    }
-
-    // Utilities
-
-    .o_date_item_picker .o_datetime_button {
-        &.o_selected,
-        &:hover,
-        &.o_today:not(.o_selected):hover {
-            &:not(.o_select_start):not(.o_select_end) {
-                background: $o-component-active-bg;
-                color: $o-component-active-color;
-            }
-        }
-    }
-
-    .o_center {
-        display: grid;
-        place-items: center;
-    }
-
-    // Compute  spacing  between the two month by compensating buttons size and tables gap
-
-    .o_zoom_out {
-        gap: calc(
-            #{$btn-border-width} * 4 + #{$o-font-size-base} * 2 + #{$input-btn-padding-x} * 4
-        );
     }
 
     .o_date_item_cell {
