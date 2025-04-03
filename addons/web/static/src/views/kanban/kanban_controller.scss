@@ -99,8 +99,7 @@
     --KanbanGroup-padding-bottom: #{$o-kanban-group-padding};
 
     --KanbanRecord-width: #{$o-kanban-default-record-width};
-    --KanbanRecord-margin-v: #{$o-kanban-record-margin};
-    --KanbanRecord-margin-h: #{$o-kanban-record-margin};
+    --KanbanRecord-margin: #{$o-kanban-record-margin};
     --KanbanRecord-padding-v: #{$o-kanban-inside-vgutter};
     --KanbanRecord-padding-h: #{$o-kanban-inside-hgutter};
     --KanbanRecord-gap-v: #{$o-kanban-inner-hmargin};
@@ -139,7 +138,7 @@
     @include media-only(print) {
         --Kanban-gap: #{map-get($spacers, 2)};
         --KanbanGroup-padding-h: 0;
-        --KanbanRecord-margin-h: 0;
+        --KanbanRecord-margin: 0;
     }
 
     @include media-only(print) {
@@ -161,8 +160,8 @@
     }
 
     .o_kanban_quick_create {
-        margin-bottom: calc(var(--KanbanRecord-margin-h) * 2);
-        margin-top: calc(var(--KanbanRecord-margin-h) * 2);
+        margin-bottom: calc(var(--KanbanRecord-margin) * 2);
+        margin-top: calc(var(--KanbanRecord-margin) * 2);
         padding: 8px;
 
         .o_form_view .o_inner_group {
@@ -349,12 +348,12 @@
         min-height: 100%;
 
         @include media-breakpoint-up(md) {
-            --Kanban-padding:  var(--KanbanRecord-margin-v) var(--KanbanRecord-margin-h);
+            --Kanban-padding:  var(--KanbanRecord-margin) var(--KanbanRecord-margin);
         }
 
         .o_kanban_record {
             width: var(--KanbanRecord-width);
-            margin: calc(var(--KanbanRecord-margin-v) * 0.5) var(--KanbanRecord-margin-h);
+            margin: calc(var(--KanbanRecord-margin) * .5);
 
             @include media-breakpoint-down(md) {
                 margin: 0 0 #{-$border-width};

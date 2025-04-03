@@ -502,8 +502,7 @@
     .o_kanban_renderer {
         --Kanban-background: transparent;
         --Kanban-gap: #{map-get($spacers, 2)};
-        --KanbanRecord-margin-v: 0;
-        --KanbanRecord-margin-h: 0;
+        --KanbanRecord-margin: 0;
     }
 
     // Notebooks
