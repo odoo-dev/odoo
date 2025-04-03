@@ -41,7 +41,6 @@ class DonationOptionPlugin extends Plugin {
     }
 
     rebuildPrefilledOptions(editingElement, options) {
-        console.log("rebuild with", options);
         const doRebuild = editingElement.dataset.displayOptions;
         editingElement
             .querySelectorAll(".s_donation_prefilled_buttons")
