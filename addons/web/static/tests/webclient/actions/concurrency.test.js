@@ -20,7 +20,7 @@ import {
     toggleSearchBarMenu,
     webModels,
 } from "@web/../tests/web_test_helpers";
-
+import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { redirect } from "@web/core/utils/urls";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
@@ -749,4 +749,24 @@ test("local state, global state, and race conditions", async () => {
         `{"fromId":1}`, // setup second view instantiated
         `{"fromId":1}`, // setup third view instantiated
     ]);
+});
+
+test.tags("desktop");
+test("prevent trackback of invalid controller restore", async () => {
+    let def;
+    onRpc("web_read", () => def);
+
+    await mountWithCleanup(WebClient);
+
+    await getService("action").doAction(4);
+    await contains(".o_kanban_record").click();
+    await getService("action").doAction(8);
+
+    def = new Deferred();
+    browser.history.back();
+    await contains(".o_control_panel .breadcrumb-item").click();
+
+    def.resolve();
+    await animationFrame();
+    expect(queryAllTexts(".breadcrumb-item, .o_breadcrumb .active")).toEqual(["Partners Action 4"]);
 });

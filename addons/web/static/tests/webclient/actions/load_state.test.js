@@ -1871,4 +1871,34 @@ describe(`legacy urls`, () => {
             ],
         });
     });
+
+    test(`go back with sanket`, async () => {
+        logHistoryInteractions();
+
+
+        await mountWebClient();
+        await getService("action").doAction(4);
+        await contains(".o_kanban_record").click();
+        // await getService("action").doAction(8);
+        await animationFrame(); // pushState is debounced
+        // expect(browser.location.href).toBe("http://example.com/odoo/action-4");
+        // expect.verifySteps(["pushState http://example.com/odoo/action-4"]);
+        // expect(queryAllTexts`.breadcrumb-item, .o_breadcrumb .active`).toEqual([
+        //     "Partners Action 4",
+        // ]);
+        // browser.history.back();
+        browser.history.back();
+        debugger
+        await contains(".o_control_panel .breadcrumb-item").click();
+        // await getService("action").doAction(3, {
+        //     props: { resId: 2 },
+        //     viewType: "form",
+        // });
+
+
+        expect(queryAllTexts`.breadcrumb-item, .o_breadcrumb .active`).toEqual([
+            "Partners Action 4",
+            "Second record",
+        ]);
+    });
 });
