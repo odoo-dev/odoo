@@ -6,6 +6,8 @@ from random import randint
 from odoo import api, fields, models
 from odoo.osv import expression
 from odoo.tools import SQL
+from odoo.tools.translate import _
+from odoo.exceptions import ValidationError
 
 
 class ProjectTags(models.Model):
@@ -23,10 +25,11 @@ class ProjectTags(models.Model):
     project_ids = fields.Many2many('project.project', 'project_project_project_tags_rel', string='Projects', export_string_translation=False)
     task_ids = fields.Many2many('project.task', string='Tasks', export_string_translation=False)
 
-    _name_uniq = models.Constraint(
-        'unique (name)',
-        'A tag with the same name already exists.',
-    )
+    @api.constrains("name")
+    def _check_unique_name_case_insensitive(self):
+        for record in self:
+            if self.search([("id", "!=", record.id), ("name", "=ilike", record.name)]):
+                raise ValidationError(_("A tag with the same name already exists."))
 
     def _get_project_tags_domain(self, domain, project_id):
         # TODO: Remove in master
