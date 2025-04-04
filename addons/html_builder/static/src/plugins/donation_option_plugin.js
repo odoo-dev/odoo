@@ -5,6 +5,7 @@ import { renderToElement } from "@web/core/utils/render";
 
 // TODO: remove data-donation-amounts and #s_donation_description_inputs, move
 //  to data-saved-prefilled-options as an object list (migration)
+// TODO: revert https://github.com/odoo/odoo/pull/63133/commits/d47743753149ad5b014d39b6bcaf6aa0315dbe6f ?
 class DonationOptionPlugin extends Plugin {
     static id = "DonationOption";
     resources = {
