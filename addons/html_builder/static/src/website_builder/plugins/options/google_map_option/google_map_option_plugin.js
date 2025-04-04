@@ -109,14 +109,20 @@ export class GoogleMapOptionPlugin extends Plugin {
         /** @type {string  |undefined} */
         const apiKey = await this.googleMapService.getGMapAPIKey();
         const didReconfigure = await this.configureGMapAPI({ apiKey, force: forceReconfigure });
-        const didLoad = !!(await this.loadGoogleMapAPIFromService(didReconfigure));
-        if (didLoad) {
-            this.mapsAPI = window.google?.maps;
-            this.placesAPI = window.google?.maps.places;
-        }
-        // Try to fail early if there is a configuration issue.
-        const foundPlace = !!(await this.getPlace(editingElement, editingElement.dataset.mapGps));
-        this.isGoogleMapsReady = didLoad && foundPlace;
+        // @TODO mysterious-egg: we don't wait here because sometimes the
+        // promise never resolves. This is because it finds an API key and has
+        // already called `loadJS` with it, `loadJS` will fetch the result from
+        // cache and never actually call the Google API's URL, bypassing its
+        // callback in the process, on which we depend to resolve the promise.
+        this.loadGoogleMapAPIFromService(didReconfigure).then(async response => {
+            if (response) {
+                this.mapsAPI = window.google?.maps;
+                this.placesAPI = window.google?.maps.places;
+            }
+            // Try to fail early if there is a configuration issue.
+            const foundPlace = !!(await this.getPlace(editingElement, editingElement.dataset.mapGps));
+            this.isGoogleMapsReady = !!response && foundPlace;
+        });
     }
 
     /**
@@ -141,10 +147,13 @@ export class GoogleMapOptionPlugin extends Plugin {
      * @returns {Promise<Place | undefined>}
      */
     async getPlace(editingElement, coordinates) {
-        const place = await this.nearbySearch(editingElement, coordinates);
-        if (!place && !this.isGoogleMapsErrorBeingHandled) {
+        const place = await this.nearbySearch(coordinates);
+        if (place?.error && !this.isGoogleMapsErrorBeingHandled) {
+            this.notifyGMapError(editingElement);
+        } else if (!place && !this.isGoogleMapsErrorBeingHandled) {
             // Somehow the search failed but Google didn't trigger an error.
-            // @TODO mysterious-egg should we keep this? Seems radical.
+            // @TODO mysterious-egg should we keep this? Seems radical. Not sure
+            // we even ever get to this in the new flow.
             this.dependencies.remove.removeElement(editingElement);
         } else {
             return place;
@@ -270,12 +279,10 @@ export class GoogleMapOptionPlugin extends Plugin {
     }
 
     /**
-     * @param {Element} editingElement
      * @param {Coordinates} coordinates
-     * @param {boolean} [notify=true]
-     * @returns {Promise<Place|undefined>}
+     * @returns {Promise<Place|{ error: string }|undefined>}
      */
-    async nearbySearch(editingElement, coordinates, notify = true) {
+    async nearbySearch(coordinates) {
         const place = this.gpsMapCache.get(coordinates);
         if (place) {
             return place;
@@ -306,17 +313,13 @@ export class GoogleMapOptionPlugin extends Plugin {
                             this.gpsMapCache.set(coordinates, place);
                             resolve(place);
                         } else if (GMAP_CRITICAL_ERRORS.includes(status)) {
-                            if (notify) {
-                                this.notifyGMapError(editingElement);
-                            }
+                            resolve({ error: status });
+                        } else {
                             resolve();
                         }
                     });
                 } else if (GMAP_CRITICAL_ERRORS.includes(status)) {
-                    if (notify) {
-                        this.notifyGMapError(editingElement);
-                    }
-                    resolve();
+                    resolve({ error: status });
                 } else {
                     resolve();
                 }
