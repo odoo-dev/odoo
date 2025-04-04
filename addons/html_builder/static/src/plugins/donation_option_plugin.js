@@ -3,6 +3,8 @@ import { withSequence } from "@html_editor/utils/resource";
 import { registry } from "@web/core/registry";
 import { renderToElement } from "@web/core/utils/render";
 
+// TODO: remove data-donation-amounts and #s_donation_description_inputs, move
+//  to data-saved-prefilled-options as an object list (migration)
 class DonationOptionPlugin extends Plugin {
     static id = "DonationOption";
     resources = {
@@ -200,13 +202,8 @@ class DonationOptionPlugin extends Plugin {
                     minimum_amount: editingElement.dataset.minimumAmount,
                 }
             );
-            const descriptionInputsEl = editingElement.querySelector(
-                "#s_donation_description_inputs"
-            );
-            descriptionInputsEl.parentNode.insertBefore(
-                prefilledButtonsEl,
-                descriptionInputsEl.nextSibling
-            );
+            const formEl = editingElement.querySelector(".s_donation_form");
+            formEl.insertBefore(prefilledButtonsEl, formEl.firstChild);
         }
     }
 }
