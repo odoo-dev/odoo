@@ -105,8 +105,7 @@ export const SELECTORS = {
     condition: ".o_tree_editor_condition",
     newFilter: ".o_tree_editor_connector_buttons a:nth-child(1)",
     newGroup: ".o_tree_editor_connector_buttons a:nth-child(2)",
-    deleteFilter:
-        ".o_tree_editor_condition > button:nth-child(2),.o_tree_editor_complex_condition > button:nth-child(2)",
+    deleteFilter: "button:has(.fa-trash):visible",
     pathEditor: ".o_tree_editor_condition > div > .o_tree_editor_editor:nth-child(1)",
     operatorEditor: ".o_tree_editor_condition > div > .o_tree_editor_editor:nth-child(2)",
     valueEditor: ".o_tree_editor_condition > div > .o_tree_editor_editor:nth-child(3)",

@@ -3,7 +3,7 @@
 
     <t t-name="web.TreeEditor">
         <div class="o_tree_editor w-100" t-att-class="{ container: !this.props.isSubTree }">
-            <div class="row">
+            <div class="row row-cq">
                 <t t-call="web.TreeEditor.connector">
                     <t t-set="node" t-value="tree"/>
                     <t t-set="ancestors" t-value="[]"/>
@@ -17,7 +17,8 @@
 
     <t t-name="web.TreeEditor.DeleteButton">
         <button
-            class="btn btn-link text-danger fs-4 pt-0 opacity-50"
+            class="btn btn-link text-danger fs-4 py-0 border-0 opacity-50"
+            t-att-class="additionalClass"
             role="button"
             title="Delete filter"
             aria-label="Delete filter"
@@ -39,12 +40,12 @@
     </t>
 
     <t t-name="web.TreeEditor.connector">
-        <div class="o_tree_editor_connector d-flex flex-column gap-1" t-attf-class="{{ 'col-' + (12 - connectorCol) }}">
+        <div class="o_tree_editor_connector d-flex flex-column gap-2 col-cq-12" t-attf-class="{{ 'col-cq-md-' + (12 - connectorCol) }}">
             <t t-set="ancestors" t-value="[...ancestors, node]" />
             <t t-set="connectorCol" t-value="node.negate ? 2 : 1"/>
             <t t-foreach="node.children" t-as="child" t-key="child.type + '_' + child_index">
-                <div class="row">
-                    <div class="o_tree_editor_connector_value d-flex-y" t-attf-class="{{ 'col-' + connectorCol }}">
+                <div class="o_tree_editor_wrap row row-cq gy-2 align-items-baseline">
+                    <div class="o_tree_editor_connector_value text-nowrap d-flex col-cq-12 gx-0 align-items-baseline justify-content-between" t-attf-class="{{ 'col-cq-md-' + connectorCol }}">
                         <t t-if="child_index === 0">
                             <t t-if="node.negate">Where not</t>
                             <t t-else="">Where</t>
@@ -59,6 +60,10 @@
                                 <t t-call="web.TreeEditor.connector.description"/>
                             </span>
                         </t>
+                        <t t-if="!child.children" t-call="web.TreeEditor.DeleteButton">
+                            <t t-set="node" t-value="child"/>
+                            <t t-set="additionalClass" t-value="'d-cq-md-none'"/>
+                        </t>
                     </div>
                     <t t-call="web.TreeEditor.{{ child.type }}">
                         <t t-set="node" t-value="child" />
@@ -67,8 +72,8 @@
                     </t>
                 </div>
             </t>
-            <div class="row o_tree_editor_connector_buttons">
-                <div class="col-12 d-flex justify-content-between">
+            <div class="row row-cq o_tree_editor_connector_buttons">
+                <div class="gx-0 d-flex justify-content-between">
                     <div t-if="!props.readonly" class="d-flex gap-2">
                         <a href="#" role="button" t-on-click="() => this.addNewCondition(node)">New filter</a>
                         <t t-if="displayNewGroup">
@@ -84,30 +89,33 @@
     </t>
 
     <t t-name="web.TreeEditor.condition">
-        <div t-attf-class="{{ 'col-' + (12 - connectorCol) }}">
-            <div class="row">
+        <div class="d-flex col-cq-12" t-attf-class="{{ 'col-cq-md-' + (12 - connectorCol) }}">
+            <div class="row row-cq flex-grow-1">
                 <t t-if="props.readonly">
                     <t t-call="web.TreeEditor.condition:readonly" />
                 </t>
                 <t t-else="">
                     <t t-call="web.TreeEditor.condition:editable" />
                 </t>
+                <t t-if="isTree(node.value)">
+                    <TreeEditor t-props="props"
+                        update="(value) => this.updateLeafValue(node, value)"
+                        slots="{}"
+                        isSubTree="true"
+                        tree="node.value"
+                        resModel="getResModel(node)"
+                    />
+                </t>
             </div>
-            <t t-if="isTree(node.value)">
-                <TreeEditor t-props="props"
-                    update="(value) => this.updateLeafValue(node, value)"
-                    slots="{}"
-                    isSubTree="true"
-                    tree="node.value"
-                    resModel="getResModel(node)"
-                />
+            <t t-call="web.TreeEditor.DeleteButton">
+                <t t-set="additionalClass" t-value="'d-cq-none d-cq-md-block'"/>
             </t>
         </div>
     </t>
 
     <t t-name="web.TreeEditor.condition:readonly">
         <t t-set="description" t-value="getConditionDescription(node)" />
-        <div class="col-12 o_tree_editor_condition d-flex gap-1 border bg-100">
+        <div class="col-cq-12 o_tree_editor_condition d-flex gap-1 border bg-100">
             <div class="fw-bolder text-nowrap" t-esc="description.pathDescription" />
             <div class="fst-italic text-nowrap" t-esc="description.operatorDescription" />
             <t t-if="description.valueDescription">
@@ -128,49 +136,48 @@
         <t t-if="!info.isSupported(value)">
             <div t-attf-class="o_tree_editor_editor #{_classes}">
                 <div class="o_input d-flex align-items-center">
-                    <span class="flex-grow-1 text-truncate" t-esc="info.stringify(value)" />
+                    <span class="flex-gcq-1 text-truncate" t-esc="info.stringify(value)" />
                     <i role="alert" class="fa fa-exclamation-triangle text-warning mx-2" t-att-title="(typeof info.message === 'function') ? info.message(value) : info.message" />
                     <i class="fa fa-times" title="Clear" t-on-click="() => update(info.defaultValue())" />
                 </div>
             </div>
         </t>
         <t t-elif="info.component">
-            <div t-attf-class="o_tree_editor_editor #{_classes}">
+            <div t-attf-class="o_tree_editor_editor flex-grow-1 #{_classes}">
                 <t t-component="info.component" t-props="info.extractProps({ update, value })" />
             </div>
         </t>
     </t>
 
     <t t-name="web.TreeEditor.condition:editable">
-        <div class="col-12 o_tree_editor_condition d-flex justify-content-between">
-            <div class="d-flex gap-2 w-100">
+        <div class="col-cq-12 o_tree_editor_condition d-flex justify-content-between">
+            <div class="row row-cq w-100 align-items-end g-2">
                 <t t-call="web.TreeEditor.Editor">
-                    <t t-set="_classes" t-value="'col col-md-4 pe-0'" />
+                    <t t-set="_classes" t-value="'col-cq-12 col-cq-md'" />
                     <t t-set="info" t-value="getPathEditorInfo()" />
                     <t t-set="value" t-value="node.path" />
                     <t t-set="update" t-value="(path) => this.updatePath(node, path)" />
                 </t>
                 <t t-call="web.TreeEditor.Editor">
-                    <t t-set="_classes" t-value="'col col-md-2 px-3'" />
+                    <t t-set="_classes" t-value="'col-cq-4 col-cq-md-2'" />
                     <t t-set="info" t-value="getOperatorEditorInfo(node)" />
                     <t t-set="value" t-value="[node.operator, node.negate]" />
                     <t t-set="update" t-value="(operator, negate) => this.updateLeafOperator(node, operator, negate)" />
                 </t>
                 <t t-call="web.TreeEditor.Editor">
-                    <t t-set="_classes" t-value="'col ps-0 overflow-hidden'" />
+                    <t t-set="_classes" t-value="'col-cq-8 col-cq-md overflow-hidden'" />
                     <t t-set="info" t-value="getValueEditorInfo(node)" />
                     <t t-set="value" t-value="node.value" />
                     <t t-set="update" t-value="(value) => this.updateLeafValue(node, value)" />
                 </t>
             </div>
-            <t t-call="web.TreeEditor.DeleteButton"/>
         </div>
     </t>
 
     <t t-name="web.TreeEditor.complex_condition">
-        <div class="col-11">
-            <div class="row">
-                <div class="col-12 o_tree_editor_complex_condition d-flex justify-content-between">
+        <div class="col-cq-12 col-cq-md-11">
+            <div class="row row-cq">
+                <div class="col-cq-12 col-cq-md-12 o_tree_editor_complex_condition d-flex justify-content-between">
                     <input class="o_input w-100" t-att-value="node.value" t-att-readonly="props.readonly or !isDebugMode" t-on-change="(ev) => this.updateComplexCondition(node, ev.target.value)" />
                     <t t-call="web.TreeEditor.DeleteButton"/>
                 </div>
