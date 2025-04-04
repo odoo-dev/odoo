@@ -40,6 +40,9 @@ class StockValuationLayer(models.Model):
     price_diff_value = fields.Float('Invoice value correction with invoice currency')
     warehouse_id = fields.Many2one('stock.warehouse', string="Receipt WH", compute='_compute_warehouse_id', search='_search_warehouse_id')
     lot_id = fields.Many2one('stock.lot', 'Lot/Serial Number', check_company=True, index=True)
+    picking_code = fields.Selection(related='stock_move_id.picking_code', string='Picking Type', readonly=True, store=True)
+    is_inventory = fields.Boolean(related='stock_move_id.is_inventory', readonly=True)
+    is_scrap = fields.Boolean(related='stock_move_id.scrapped', readonly=True)
 
     _index = models.Index("(product_id, remaining_qty, stock_move_id, company_id, create_date)")
 
