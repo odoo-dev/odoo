@@ -12,7 +12,11 @@ patch(storeService, {
 /** @type {import("models").Store} */
 const StorePatch = {
     setup() {
+        const fetchStoreDataDebouncedOriginalFn = this._fetchStoreDataDebounced;
         super.setup(...arguments);
+        this._fetchStoreDataDebouncedPatchFn = this._fetchStoreDataDebounced;
+        this._fetchStoreDataDebounced = fetchStoreDataDebouncedOriginalFn;
+        this._lazyfetchParams = [];
         this.activityCounter = 0;
         this.activity_counter_bus_id = 0;
         /** @type {Object[]} */
@@ -48,10 +52,17 @@ const StorePatch = {
         if (this.env.services.lazy_session.rpcDone()) {
             return super._fetchStoreDataRpc(...arguments);
         }
+        this._lazyfetchParams.push(...fetchParams);
         return new Promise((resolve, reject) =>
-            this.env.services.lazy_session.getValue("store_data", resolve, {
-                store_fetch_params: fetchParams,
-            })
+            this.env.services.lazy_session.getValue(
+                "store_data",
+                (storeData) => {
+                    this._fetchStoreDataDebounced = this._fetchStoreDataDebouncedPatchFn;
+                    this._lazyfetchParams = null;
+                    resolve(storeData);
+                },
+                this._lazyfetchParams
+            )
         );
     },
     onStarted() {

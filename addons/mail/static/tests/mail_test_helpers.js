@@ -745,7 +745,7 @@ export function listenStoreFetch(nameOrNames = [], { logParams = [], onRpc: onRp
     });
     onRpc("/web/dataset/call_kw/ir.http/lazy_session_info", async (request) => {
         const { params } = await request.json();
-        return registerSteps(request, params.kwargs.store_fetch_params);
+        return registerSteps(request, params.kwargs.store_data);
     });
 }
 

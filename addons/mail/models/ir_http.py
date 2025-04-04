@@ -11,7 +11,7 @@ class IrHttp(models.AbstractModel):
 
     def lazy_session_info(self, **kwargs):
         res = super().lazy_session_info(**kwargs)
-        if fetch_params := kwargs.get("store_fetch_params"):
+        if fetch_params := kwargs.get("store_data"):
             routing_map = request.env["ir.http"].routing_map()
             map_adapter = routing_map.bind_to_environ(request.httprequest.environ)
             endpoint, _args = map_adapter.match(path_info="/mail/data")

@@ -6,6 +6,7 @@ import {
     mountWithCleanup,
     onRpc,
     patchWithCleanup,
+    serverState,
 } from "@web/../tests/web_test_helpers";
 
 import { registry } from "@web/core/registry";
@@ -173,4 +174,33 @@ test("Call lazy session info after webclient init with action and service", asyn
         "myaction_on_will_start",
         "myaction_on_will_start_after",
     ]);
+});
+
+test("Call lazy session with params", async () => {
+    expect.errors(1);
+    onRpc("lazy_session_info", ({ kwargs }) => {
+        expect(kwargs).toEqual({
+            a: "success",
+            context: {
+                allowed_company_ids: [serverState.companies[0].id],
+                lang: serverState.lang,
+                tz: serverState.timezone,
+                uid: serverState.userId,
+            },
+        });
+        expect.step(`lazy_session_info_${kwargs["a"]}`);
+        return { a: "a", b: "b" };
+    });
+    const serviceRegistry = registry.category("services");
+    serviceRegistry.add("fake_a", {
+        dependencies: ["lazy_session"],
+        start(env, { lazy_session }) {
+            const callback = () => lazy_session.getValue("b", () => {}, "error");
+            lazy_session.getValue("a", callback, "success");
+        },
+    });
+    await mountWithCleanup(WebClient);
+    await animationFrame();
+    expect.verifySteps(["lazy_session_info_success"]);
+    expect.verifyErrors(["Web client ready, you can't call lazy session with params !"]);
 });
