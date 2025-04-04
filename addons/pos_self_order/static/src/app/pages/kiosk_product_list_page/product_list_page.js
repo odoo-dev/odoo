@@ -183,25 +183,74 @@ export class KioskProductListPage extends Component {
             return;
         }
 
-        const picRect = productEl.getBoundingClientRect();
-        const clonedPic = productEl.cloneNode(true);
-        const toOrderRect = toOrder.getBoundingClientRect();
+        const ANIMATION_CONFIG = {
+            flyDuration: "900ms",
+            cartDuration: "200ms",
+            flyEasing: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+            initialScale: ".65",
+            finalScale: "0.05",
+            cartScale: "1.08",
+            rotation: "5deg",
+        };
 
-        clonedPic.classList.add("position-fixed", "z-1");
-        clonedPic.style.top = `${picRect.top}px`;
-        clonedPic.style.left = `${picRect.left}px`;
-        clonedPic.style.width = `${picRect.width}px`;
-        clonedPic.style.height = `${picRect.height}px`;
-        clonedPic.style.transition = "all 400ms cubic-bezier(0.6, 0, 0.9, 1.000)";
+        const cardRect = productEl.getBoundingClientRect();
+        const toOrderRect = toOrder.getBoundingClientRect();
+        const offsetTop = toOrderRect.top - cardRect.top;
+        const offsetLeft = toOrderRect.left - cardRect.left;
+
+        const clonedPic = productEl.cloneNode(true);
+        const initialStyles = {
+            top: `${cardRect.top}px`,
+            left: `${cardRect.left}px`,
+            width: `${cardRect.width}px`,
+            height: `${cardRect.height}px`,
+            transform: "scale(1)",
+            opacity: "1",
+            transition: `all ${ANIMATION_CONFIG.flyDuration} ${ANIMATION_CONFIG.flyEasing}`,
+            pointerEvents: "none",
+        };
+
+        Object.assign(clonedPic.style, initialStyles);
+        clonedPic.classList.add("position-fixed", "shadow-lg", "z-1");
+
+        const infosDiv = clonedPic.querySelector(".product-infos");
+        if (infosDiv) {
+            Object.assign(infosDiv.style, {
+                transform: "scale(0.9)",
+                transition: `all ${ANIMATION_CONFIG.flyDuration} ${ANIMATION_CONFIG.flyEasing}`,
+            });
+        }
 
         document.body.appendChild(clonedPic);
 
         requestAnimationFrame(() => {
-            const offsetTop = toOrderRect.top - picRect.top - picRect.height * 0.5;
-            const offsetLeft = toOrderRect.left - picRect.left - picRect.width * 0.25;
-            clonedPic.style.transform =
-                "translateY(" + offsetTop + "px) translateX(" + offsetLeft + "px) scale(0.5)";
-            clonedPic.style.opacity = "0"; // Fading out the card
+            clonedPic.style.transform = `scale(${ANIMATION_CONFIG.initialScale})`;
+            requestAnimationFrame(() => {
+                clonedPic.style.transform = `
+                    translateY(${offsetTop}px) 
+                    translateX(${offsetLeft}px) 
+                    scale(${ANIMATION_CONFIG.finalScale}) 
+                    rotate(${ANIMATION_CONFIG.rotation})
+                `;
+                clonedPic.style.opacity = "0";
+
+                if (infosDiv) {
+                    infosDiv.style.transform = "scale(0.7)";
+                }
+
+                const cartAnimation = {
+                    transform: `scale(${ANIMATION_CONFIG.cartScale})`,
+                    transition: `transform ${ANIMATION_CONFIG.cartDuration} ${ANIMATION_CONFIG.flyEasing}`,
+                };
+                Object.assign(toOrder.style, cartAnimation);
+
+                setTimeout(() => {
+                    Object.assign(toOrder.style, {
+                        transform: "scale(1)",
+                        transition: `transform ${ANIMATION_CONFIG.cartDuration} ${ANIMATION_CONFIG.flyEasing}`,
+                    });
+                }, parseInt(ANIMATION_CONFIG.cartDuration));
+            });
         });
 
         clonedPic.addEventListener("transitionend", () => {

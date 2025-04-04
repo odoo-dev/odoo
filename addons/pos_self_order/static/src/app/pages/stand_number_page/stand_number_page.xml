@@ -2,23 +2,20 @@
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.StandNumberPage">
         <t t-if="selfOrder.kioskMode">
-
-            <div class="kiosk_stand_page d-flex flex-column vh-100 overflow-hidden bg-secondary"
+            <div class="kiosk_stand_page d-flex flex-column align-items-center flex-grow-1 bg-kiosk overflow-y-auto text-center o-so-fade"
              t-attf-style="background-image:#{selfOrder.kioskBackgroundImage};background-size: cover; background-position: center;">
-                <div class="d-flex flex-column flex-grow-1 overflow-y-auto">
-                      <div class="d-flex flex-column my-auto mx-4 bg-white p-4 rounded-4 border border-light">
-                        <div class="text-center pt-5">
-                            <h1>Get a tracker and enter its number here</h1>
-                            <div class="input-number form-contol form-control-lg text-center">
-                                <span t-esc="state.standNumber || '_ _'" class="display-1"/>
-                            </div>
+                <div class="container-small d-flex flex-column my-auto overflow-y-auto">
+                    <h1 class="mb-4 m-0 fw-bolder">Take a tracker and enter its number</h1>
+                    <div class="d-flex flex-column gap-4">
+                        <div class="input-number form-control form-control-l mx-auto rounded-4 bg-white text-center py-2 py-md-3 shadow-sm">
+                            <span t-attf-class="display-1 fw-bolder {{ state.standNumber ? 'text-primary' : 'opacity-0' }}" t-esc="state.standNumber || '_ _'"/>
                         </div>
-                        <div class="d-flex justify-content-around align-items-center py-4 py-md-5 my-auto">
-                            <Numpad buttons="[1, 2, 3, 4, 5, 6, 7, 8, 9, { value: '', disabled: true }, '0', { value: 'Backspace', text: '⌫' }]" onClick="numberClick.bind(this)" class="'mx-auto my-3 w-75 max-width-325px'"/>
+                        <div class="d-inline-block justify-content-around align-items-center my-auto shadow-sm">
+                            <Numpad buttons="[1, 2, 3, 4, 5, 6, 7, 8, 9, { value: '', disabled: true }, '0', { value: 'Backspace', text: '⌫' }]" onClick="numberClick.bind(this)" class="'numpad-so rounded-4'"/>
                         </div>
-                     </div>
-                 </div>
-                <div class="d-flex justify-content-between p-4 bg-white border-top border-light">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between p-4 w-100 bg-light border-top border-light">
                     <button class="btn btn-secondary btn-lg" t-on-click="() => this.router.back()">Back</button>
                     <button class="btn btn-primary btn-lg" t-att-disabled="!state.standNumber" t-on-click="confirm">Pay</button>
                  </div>
@@ -27,7 +24,7 @@
         <t t-else="">
             <div class="self_order_stand_number d-flex flex-column flex-grow-1 justify-content-between px-3 overflow-y-auto">
                 <div class="text-center pt-5">
-                    <h1>Get a tracker and enter its number here</h1>
+                    <h1>Take a tracker and enter its number</h1>
                     <div class="input-number form-contol form-control-lg text-center">
                         <span t-esc="state.standNumber || '_ _'" class="display-1"/>
                     </div>

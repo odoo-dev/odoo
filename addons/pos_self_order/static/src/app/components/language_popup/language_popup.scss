@@ -1,22 +1,4 @@
-.self_order_language_popup {
-    .modal-dialog {
-        top: 40%;
-        height: auto !important;
-    }
-
-    .image-wrapper {
-        aspect-ratio: 3 / 2;
-        max-width: 64px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-
-        img {
-            max-width: 100%;
-            max-height: 100%;
-        }
-    }
-
-
+.self_order_language_popup img {
+    aspect-ratio: 4/3;
+    max-width: 64px;
 }
