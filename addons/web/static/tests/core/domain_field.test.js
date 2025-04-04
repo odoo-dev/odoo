@@ -849,7 +849,7 @@ test("domain field with 'inDialog' options", async function () {
     await contains(`.modal ${SELECTORS.newFilter}`).click();
     await contains(".modal-footer .btn-primary").click();
     expect(SELECTORS.condition).toHaveCount(1);
-    expect(getConditionText()).toBe("Id is equal 1");
+    expect(getConditionText()).toBe("Id equal 1");
 });
 
 test("invalid value in domain field with 'inDialog' options", async function () {
@@ -1029,11 +1029,11 @@ test("domain field can be foldable", async function () {
     // Fold domain selector
     await contains(".o_field_domain a i").click();
 
-    expect(".o_field_domain .o_facet_values:contains('Color index is equal 2')").toHaveCount(1);
+    expect(".o_field_domain .o_facet_values:contains('Color index equal 2')").toHaveCount(1);
 });
 
 test("add condition in empty foldable domain", async function () {
-    serverState.debug = true;
+    serverState.debug = "true";
     Partner._records[0].foo = '[("id", "=", 1)]';
 
     await mountView({
@@ -1108,7 +1108,7 @@ test("folded domain field with any operator", async function () {
                 </sheet>
             </form>`,
     });
-    expect(`.o_field_domain .o_facet_values`).toHaveText("Company matches ( Id is equal 1 )");
+    expect(`.o_field_domain .o_facet_values`).toHaveText("Company matches ( Id equal 1 )");
 });
 
 test("foldable domain, search_count delayed", async function () {
@@ -1133,7 +1133,7 @@ test("foldable domain, search_count delayed", async function () {
     });
     expect(".o_domain_show_selection_button").toHaveCount(0);
     expect(".o_tree_editor").toHaveCount(0);
-    expect(`.o_field_domain .o_facet_values`).toHaveText("Id is equal 1");
+    expect(`.o_field_domain .o_facet_values`).toHaveText("Id equal 1");
     def.resolve();
     await animationFrame();
     expect(".o_domain_show_selection_button").toHaveCount(1);
