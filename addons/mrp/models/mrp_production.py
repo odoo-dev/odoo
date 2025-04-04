@@ -1594,20 +1594,22 @@ class MrpProduction(models.Model):
             if order.consumption == 'flexible' or not order.bom_id or not order.bom_id.bom_line_ids:
                 continue
             expected_move_values = order._get_moves_raw_values()
+            uom_to_show = dict()
             expected_qty_by_product = defaultdict(float)
             for move_values in expected_move_values:
                 move_product = self.env['product.product'].browse(move_values['product_id'])
                 move_uom = self.env['uom.uom'].browse(move_values['product_uom'])
-                move_product_qty = move_uom._compute_quantity(move_values['product_uom_qty'], move_product.uom_id)
+                if move_product not in uom_to_show:
+                    uom_to_show[move_product] = move_uom
+                move_product_qty = move_uom._compute_quantity(move_values['product_uom_qty'], uom_to_show[move_product])
                 expected_qty_by_product[move_product] += move_product_qty * order.qty_producing / order.product_qty
 
             done_qty_by_product = defaultdict(float)
             for move in order.move_raw_ids:
-                quantity = move.product_uom._compute_quantity(move._get_picked_quantity(), move.product_id.uom_id)
+                quantity = move.product_uom._compute_quantity(move._get_picked_quantity(), uom_to_show[move.product_id]) if move.product_id in expected_qty_by_product else move._get_picked_quantity()
                 rounding = move.product_id.uom_id.rounding
-                # extra lines with non-zero qty picked
                 if move.product_id not in expected_qty_by_product and move.picked and not float_is_zero(quantity, precision_rounding=rounding):
-                    issues.append((order, move.product_id, quantity, 0.0))
+                    issues.append((order, move.product_id, quantity, 0, move.product_uom))
                     continue
                 done_qty_by_product[move.product_id] += quantity if move.picked else 0.0
 
@@ -1615,19 +1617,20 @@ class MrpProduction(models.Model):
             for product, qty_to_consume in expected_qty_by_product.items():
                 quantity = done_qty_by_product.get(product, 0.0)
                 if float_compare(qty_to_consume, quantity, precision_rounding=product.uom_id.rounding) != 0:
-                    issues.append((order, product, quantity, qty_to_consume))
-
+                    moves = order.move_raw_ids.filtered(lambda move: move.product_id == product and move.bom_line_id)
+                    product_uom = moves[0].bom_line_id.product_uom_id if moves else product.uom_id
+                    issues.append((order, product, quantity, qty_to_consume, product_uom))
         return issues
 
     def _action_generate_consumption_wizard(self, consumption_issues):
         ctx = self.env.context.copy()
         lines = []
-        for order, product_id, consumed_qty, expected_qty in consumption_issues:
+        for order, product_id, consumed_qty, expected_qty, product_uom in consumption_issues:
             lines.append((0, 0, {
                 'mrp_production_id': order.id,
                 'product_id': product_id.id,
                 'consumption': order.consumption,
-                'product_uom_id': product_id.uom_id.id,
+                'product_uom_id': product_uom.id,
                 'product_consumed_qty_uom': consumed_qty,
                 'product_expected_qty_uom': expected_qty
             }))
