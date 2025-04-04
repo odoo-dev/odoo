@@ -9,17 +9,9 @@ export class Orderline extends Component {
         line: Object,
         class: { type: Object, optional: true },
         slots: { type: Object, optional: true },
-        showTaxGroupLabels: { type: Boolean, optional: true },
-        showTaxGroup: { type: Boolean, optional: true },
-        mode: { type: String, optional: true }, // display, receipt
-        basic_receipt: { type: Boolean, optional: true },
     };
     static defaultProps = {
         showImage: false,
-        showTaxGroupLabels: false,
-        showTaxGroup: false,
-        mode: "display",
-        basic_receipt: false,
     };
 
     formatCurrency(amount) {

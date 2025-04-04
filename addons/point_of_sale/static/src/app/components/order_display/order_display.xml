@@ -7,10 +7,9 @@
                 <div t-ref="scrollable" class="order-container d-flex flex-column flex-grow-1 overflow-y-auto text-start">
                     <t t-foreach="lines" t-as="line" t-key="line_index">
                         <t t-if="props.slots.default" t-slot="default" line="line" />
-                        <Orderline t-else="" line="line" mode="this.props.mode" />
+                        <Orderline t-else="" line="line" />
                     </t>
-                    <div t-if="order.general_customer_note"
-                        t-attf-class="{{this.props.mode === 'receipt' ? 'mt-1 bg-opacity-75 p-0 ' : 'customer-note w-100 p-2 text-break bg-warning bg-opacity-25 mt-0 text-warning'}}">
+                    <div t-if="order.general_customer_note" class="customer-note w-100 p-2 text-break bg-warning bg-opacity-25 mt-0 text-warning">
                         <div class="flex-wrap w-100 m-0">
                             <div class="ps-1">
                                 <t t-foreach="order.general_customer_note.split('\n')" t-as="subNote" t-key="subNote_index">
@@ -26,7 +25,7 @@
                     </div>
                 </div>
                 <t t-set="taxTotals" t-value="order.taxTotals" />
-                <div t-if="taxTotals and props.mode !== 'receipt'" class="order-summary d-flex flex-column gap-1 p-2 border-bottom fw-bolder lh-sm">
+                <div t-if="taxTotals and props.showTaxTotal" class="order-summary d-flex flex-column gap-1 p-2 border-bottom fw-bolder lh-sm">
                     <div t-if="taxTotals.has_tax_groups" class="tax-info subentry d-flex justify-content-between w-100 fs-6 text-muted ">
                         Taxes
                         <div id="order-widget-taxes">
@@ -42,7 +41,7 @@
             </div>
             <t t-slot="details"/>
         </t>
-        <t t-elif="props.mode !== 'receipt'">
+        <t t-else="">
             <div t-if="!props.slots?.emptyCart" class="d-flex flex-column align-items-center justify-content-center flex-grow-1 rounded-3 gap-3">
                 <CenteredIcon icon="'fa-shopping-cart fa-4x'" text="emptyCartText()" class="'h-unset'"/>
                 <t t-slot="details"/>

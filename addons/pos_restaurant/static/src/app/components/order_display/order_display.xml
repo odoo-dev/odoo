@@ -11,7 +11,7 @@
                 <t t-foreach="order.courses" t-as="course" t-key="course_index">
                     <OrderCourse course="course" course_index="course_index" t-slot-scope="course_scope">
                         <t t-if="props.slots.default" t-slot="default" line="course_scope.line"/>
-                        <Orderline t-else="" line="course_scope.line" mode="this.props.mode"/>
+                        <Orderline t-else="" line="course_scope.line"/>
                     </OrderCourse>
                 </t>
             </t>

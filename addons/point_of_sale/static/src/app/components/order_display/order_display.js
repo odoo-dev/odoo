@@ -12,10 +12,10 @@ export class OrderDisplay extends Component {
     static props = {
         order: Object,
         slots: Object,
-        mode: { type: String, optional: true }, // display, receipt
+        showTaxTotal: { type: Boolean, optional: true },
     };
     static defaultProps = {
-        mode: "display",
+        showTaxTotal: true,
     };
 
     setup() {
