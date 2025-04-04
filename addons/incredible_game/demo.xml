@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="game_character_demo1" model="game.character">
+        <field name="name">Hero</field>
+        <field name="points">120</field>
+        <field name="level">2</field>
+        <field name="strength">15</field>
+    </record>
+    
+    <record id="game_weapon_demo1" model="game.weapon">
+        <field name="name">Sword</field>
+        <field name="damage">25</field>
+    </record>
+</odoo>

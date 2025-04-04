@@ -1,0 +1,63 @@
+<odoo>
+    <record id="game_character_view_form" model="ir.ui.view">
+        <field name="name">game.character.view.form</field>
+        <field name="model">game.character</field>
+        <field name="arch" type="xml">
+            <form string="Game Character">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="points"/>
+                        <field name="level"/>
+                        <field name="strength"/>
+                        <field name="weapon_ids" widget="many2many_tags"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="game_character_view_list" model="ir.ui.view">
+        <field name="name">game.character.view.list</field>
+        <field name="model">game.character</field>
+        <field name="arch" type="xml">
+            <list string="Game Characters">
+                <field name="name"/>
+                <field name="level"/>
+                <field name="points"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="game_weapon_view_form" model="ir.ui.view">
+        <field name="name">game.weapon.view.form</field>
+        <field name="model">game.weapon</field>
+        <field name="arch" type="xml">
+            <form string="Game Weapon">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="damage"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_game_character" model="ir.actions.act_window">
+        <field name="name">Game Characters</field>
+        <field name="res_model">game.character</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="game_character_view_list"/>
+    </record>
+    <record id="action_game_weapon" model="ir.actions.act_window">
+        <field name="name">Game Weapons</field>
+        <field name="res_model">game.weapon</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="game_weapon_view_form"/>
+    </record>
+
+    <menuitem id="menu_game_root" name="Incredible Game"/>
+    <menuitem id="menu_game_character" name="Characters" parent="menu_game_root" action="action_game_character"/>
+    <menuitem id="menu_game_weapon" name="Weapons" parent="menu_game_root" action="action_game_weapon"/>
+</odoo>
