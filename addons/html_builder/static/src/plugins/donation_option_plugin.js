@@ -14,12 +14,14 @@ class DonationOptionPlugin extends Plugin {
         ],
         builder_actions: {
             toggleDisplayOptions: {
-                isApplied: this.getDisplayOptions.bind(this),
-                apply: this.toggleDisplayOptions.bind(this),
+                isApplied: this.isDisplayOptionsShown.bind(this),
+                apply: this.showDisplayOptions.bind(this),
+                clean: this.hideDisplayOptions.bind(this),
             },
             togglePrefilledOptions: {
-                isApplied: this.getPrefilledOptions.bind(this),
-                apply: this.togglePrefilledOptions.bind(this),
+                isApplied: this.isPrefilledOptionsShown.bind(this),
+                apply: this.showPrefilledOptions.bind(this),
+                clean: this.hidePrefilledOptions.bind(this),
             },
             setPrefilledOptions: {
                 getValue: this.getPrefilledOptionList.bind(this),
@@ -44,12 +46,19 @@ class DonationOptionPlugin extends Plugin {
         },
     };
 
-    getDisplayOptions({ editingElement }) {
-        return editingElement.dataset.displayOptions;
+    isDisplayOptionsShown({ editingElement }) {
+        return !!editingElement.dataset.displayOptions;
     }
 
-    toggleDisplayOptions({ editingElement, value }) {
-        console.log(...arguments);
+    showDisplayOptions({ editingElement }) {
+        this.toggleDisplayOptions(editingElement, "true");
+    }
+
+    hideDisplayOptions({ editingElement }) {
+        this.toggleDisplayOptions(editingElement, "");
+    }
+
+    toggleDisplayOptions(editingElement, value) {
         editingElement.dataset.displayOptions = value;
         if (!value && editingElement.dataset.customAmount === "slider") {
             editingElement.dataset.customAmount = "freeAmount";
@@ -59,11 +68,19 @@ class DonationOptionPlugin extends Plugin {
         this.rebuildPrefilledOptions(editingElement);
     }
 
-    getPrefilledOptions({ editingElement }) {
-        return editingElement.dataset.prefilledOptions;
+    isPrefilledOptionsShown({ editingElement }) {
+        return !!editingElement.dataset.prefilledOptions;
     }
 
-    togglePrefilledOptions({ editingElement, value }) {
+    showPrefilledOptions({ editingElement }) {
+        this.togglePrefilledOptions(editingElement, "true");
+    }
+
+    hidePrefilledOptions({ editingElement }) {
+        this.togglePrefilledOptions(editingElement, "");
+    }
+
+    togglePrefilledOptions(editingElement, value) {
         editingElement.dataset.prefilledOptions = value;
         if (!value && editingElement.dataset.displayOptions) {
             editingElement.dataset.customAmount = "slider";
@@ -143,7 +160,15 @@ class DonationOptionPlugin extends Plugin {
     }
 
     rebuildPrefilledOptions(editingElement, options) {
-        options = JSON.parse(options || this.getPrefilledOptionList({ editingElement }));
+        if (options) {
+            editingElement.dataset.savedPrefilledOptions = options;
+        } else {
+            options =
+                editingElement.dataset.savedPrefilledOptions ||
+                this.getPrefilledOptionList({ editingElement });
+        }
+        options = JSON.parse(options);
+
         const doRebuild = editingElement.dataset.displayOptions;
         editingElement
             .querySelectorAll(".s_donation_prefilled_buttons")
