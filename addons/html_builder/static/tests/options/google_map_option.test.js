@@ -65,9 +65,9 @@ describe("API key validation", () => {
              * OR, mock a failed call to Google Maps' nearby search calling the
              * error handler.
              */
-            nearbySearch (editingElement) {
+            async nearbySearch () {
                 if (isFakeValidKey) {
-                    this.notifyGMapError(editingElement);
+                    return { error: "CRITICAL" };
                 } else {
                     return {
                         formatted_address: "9 Rue des Bourlottes, 1367 Grand-Rosière-Hottomont, Belgium",
