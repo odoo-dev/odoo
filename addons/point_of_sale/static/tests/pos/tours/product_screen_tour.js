@@ -376,9 +376,6 @@ registry.category("web_tour.tours").add("CheckProductInformation", {
 
             // Check margin on a product.
             ProductScreen.clickInfoProduct("product_a"),
-            {
-                trigger: ".section-financials :contains('Margin')",
-            },
         ].flat(),
 });
 

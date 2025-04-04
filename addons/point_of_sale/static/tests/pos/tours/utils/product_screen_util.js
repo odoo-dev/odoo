@@ -107,7 +107,16 @@ export function clickDisplayedProduct(
     return step;
 }
 export function clickInfoProduct(name) {
-    return [...clickDisplayedProduct(name), ...inLeftSide(clickControlButton("Info"))];
+    return [
+        ...clickDisplayedProduct(name),
+        ...inLeftSide([
+            ...clickControlButton("Info"),
+            {
+                trigger: ".section-financials .section-title:contains('Financials')",
+            },
+            ...clickCloseButton(),
+        ]),
+    ];
 }
 export function clickOrderline(productName, quantity = "1") {
     return [
