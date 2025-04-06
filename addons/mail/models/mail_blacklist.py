@@ -12,8 +12,13 @@ class MailBlacklist(models.Model):
     _description = 'Mail Blacklist'
     _rec_name = 'email'
 
-    email = fields.Char(string='Email Address', required=True, index='trigram', help='This field is case insensitive.',
-                        tracking=1)
+    email = fields.Char(
+        string='Email Address',
+        required=True,
+        index='trigram',
+        help='This field is case insensitive.',
+        search="_search_email",
+        tracking=1)
     active = fields.Boolean(default=True, tracking=2)
 
     _unique_email = models.Constraint(
@@ -55,17 +60,11 @@ class MailBlacklist(models.Model):
             vals['email'] = tools.email_normalize(vals['email'])
         return super().write(vals)
 
-    def _search(self, domain, *args, **kwargs):
-        """ Override _search in order to grep search on email field and make it
-        lower-case and sanitized """
-        domain = Domain(domain).map_conditions(
-            lambda cond: Domain(cond.field_expr, cond.operator, norm_value)
-            if cond.field_expr == 'email'
-            and isinstance(cond.value, str)
-            and (norm_value := tools.email_normalize(cond.value))
-            else cond
-        )
-        return super()._search(domain, *args, **kwargs)
+    def _search_email(self, operator, value):
+        """ Always normalize the value when searching on email field. """
+        if isinstance(value, str):
+            value = tools.email_normalize(value)
+        return Domain('email', operator, value)
 
     def _add(self, email, message=None):
         normalized = tools.email_normalize(email)

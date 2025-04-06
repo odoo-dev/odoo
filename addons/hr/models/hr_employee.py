@@ -1558,7 +1558,13 @@ class HrEmployee(models.Model):
         except (ValueError, KeyError) as e:
             raise AccessError(self.env._('You do not have access to this document.')) from e
         # the result is expected from this table, so we should link tables
-        return super(HrEmployee, self.sudo())._search([('id', 'in', ids)], order=order)
+        return super()._search([('id', 'in', ids)], order=order, active_test=False, bypass_access=True)
+
+    @api.model
+    def _search_domain(self, domain, **kwargs):
+        if self.browse().has_access('read'):
+            return super()._search_domain(domain, **kwargs)
+        return self.env['hr.employee.public']._search_domain(domain, **kwargs)
 
     @api.model
     def is_onboarding(self, company_ids):

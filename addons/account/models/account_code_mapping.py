@@ -70,6 +70,10 @@ class AccountCodeMapping(models.Model):
             for company in self.env.user.with_context(active_test=True).company_ids.sorted(lambda c: (c.sequence, c.name))
         ]).filtered_domain(remaining_domain)._as_query()
 
+    def _search_domain(self, domain, **kwargs):
+        ids = self._search(domain, **kwargs).get_result_ids()
+        return Domain('id', 'in', ids)
+
     def _compute_account_id(self):
         for record in self:
             record.account_id = record._origin.id // COMPANY_OFFSET

@@ -8,7 +8,7 @@ class SmsTemplate(models.Model):
     _inherit = 'sms.template'
 
     @api.model
-    def _search(self, domain, *args, **kwargs):
+    def _search_domain(self, domain, **kwargs):
         """Context-based hack to filter reference field in a m2o search box to emulate a domain the ORM currently does not support.
 
         As we can not specify a domain on a reference field, we added a context
@@ -18,7 +18,7 @@ class SmsTemplate(models.Model):
         """
         if self.env.context.get('filter_template_on_event'):
             domain = Domain('model', '=', 'event.registration') & Domain(domain)
-        return super()._search(domain, *args, **kwargs)
+        return super()._search_domain(domain, **kwargs)
 
     def unlink(self):
         res = super().unlink()

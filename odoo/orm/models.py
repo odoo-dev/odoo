@@ -4751,66 +4751,43 @@ class BaseModel(metaclass=MetaModel):
 
         :return: a :class:`Query` object that represents the matching records
 
-        This method may be overridden to modify the domain being searched, or to
-        do some post-filtering of the resulting query object. Be careful with
-        the latter option, though, as it might hurt performance. Indeed, by
-        default the returned query object is not actually executed, and it can
-        be injected as a value in a domain in order to generate sub-queries.
+        Overwrite :meth:`_search_domain`. to modify the domain being searched.
+        If required, you may overwrite this method  to do some post-filtering of
+        the resulting query object. Be careful with the latter option, though,
+        as it might hurt performance. Indeed, by default the returned query
+        object is not actually executed, and it can be injected as a value in a
+        domain in order to generate sub-queries.
 
         The `active_test` flag specifies whether to filter only active records.
         The `bypass_access` controls whether or not permissions should be
         checked on the model and record rules should be applied.
         """
-        if self.env.su or bypass_access:
-            sec_domain = Domain.TRUE
-        else:
-            sec_domain = self._access_domain('read')
-            if sec_domain.is_false():
-                raise self._make_access_error_message('read', sec_domain)
-
-        domain = Domain(domain)
-        # inactive records unless they were explicitly asked for
-        if (
-            self._active_name
-            and active_test
-            and self.env.context.get('active_test', True)
-            and not any(leaf.field_expr == self._active_name for leaf in domain.iter_conditions())
-        ):
-            # try to create the domain close to what it will look like after optimization
-            # to avoid reoptimizing it
-            domain = Domain(self._active_name, 'in', OrderedSet((True,))) & domain
+        domain = self._search_domain(Domain(domain), active_test=active_test, bypass_access=bypass_access)
 
         # build the query
-        domain = domain.optimize_full(self)
+        sudo_model = self.with_context(active_test=False).sudo()
+        domain = domain.optimize_full(sudo_model)
         if domain.is_false():
             return self.browse()._as_query()
+        if (
+            domain.is_condition('id', 'any!', Query)
+            and (ids := domain.value._ids) is not None
+        ):
+            # optimization: browse ids and filter using the domain
+            records = self.browse(ids)
+            self.env._add_to_access_cache(records)
+            records = records.filtered_domain(domain)  # XXX not here anymore
+            if order:
+                records = records.with_prefetch().sorted(order)
+            if offset:
+                records = records[offset:]
+            if limit:
+                records = records[:limit]
+            return records._as_query(ordered=bool(order))
+
         query = Query(self)
         if not domain.is_true():
-            query.add_where(domain._to_sql(query.table))
-
-        # security access domain
-        if not sec_domain.is_true():
-            self_sudo = self.sudo().with_context(active_test=False, search_domain=domain)
-            sec_domain = sec_domain.optimize_full(self_sudo)
-            if sec_domain.is_false():
-                return self.browse()._as_query()
-            if (
-                sec_domain.is_condition('id', 'any!', Query)
-                and (ids := sec_domain.value._ids) is not None
-            ):
-                # optimization: browse ids and filter using the domain
-                records = self.browse(ids)
-                self.env._add_to_access_cache(records)
-                records = records.filtered_domain(domain)
-                if order:
-                    records = records.with_prefetch().sorted(order)
-                if offset:
-                    records = records[offset:]
-                if limit:
-                    records = records[:limit]
-                return records._as_query(ordered=bool(order))
-            if not sec_domain.is_true():
-                query.add_where(sec_domain._to_sql(query.table._with_model(self_sudo)))
+            query.add_where(domain._to_sql(query.table._sudo()))
 
         # add order and limits
         if order:
@@ -4824,6 +4801,58 @@ class BaseModel(metaclass=MetaModel):
             query.offset = offset
 
         return query
+
+    @api.model
+    def _search_domain(self, domain: Domain, *, active_test: bool, bypass_access: bool) -> Domain:
+        """Add record rules and global conditions to the domain.
+
+        This method may be overridden to modify the domain being searched.
+
+        The `active_test` flag specifies whether to filter only active records.
+        The `bypass_access` controls whether or not permissions should be
+        checked on the model and record rules should be applied.
+        """
+        if self.env.su or bypass_access:
+            sec_domain = Domain.TRUE
+        else:
+            sec_domain = self._access_domain('read')
+            if sec_domain.is_false():
+                raise self._make_access_error_message('read', sec_domain)
+
+        # inactive records unless they were explicitly asked for
+        if (
+            self._active_name
+            and active_test
+            and self.env.context.get('active_test', True)
+            and not any(leaf.field_expr == self._active_name for leaf in domain.iter_conditions())
+        ):
+            # try to create the domain close to what it will look like after optimization
+            # to avoid reoptimizing it
+            domain = Domain(self._active_name, 'in', OrderedSet((True,))) & domain
+
+        if self.env.su or bypass_access:
+            return domain
+
+        # check access to model
+        self.browse().check_access('read')
+
+        # optimize the user's domain fully before adding record rules
+        domain = domain.optimize_full(self)
+
+        # each field that has compute_sql must be transformed into a custom
+        # domain now to freeze the generated SQL without sudo
+        # XXX do this correctly
+        def freeze_compute_sql(condition):
+            model = self  # XXX
+            field = condition._field(self)
+            if field.compute_sql and not (field.compute_sudo or model.env.su):
+                return Domain.custom(to_sql=self._to_sql, predicate=self._as_predicate)
+            return condition
+        # XXX domain = domain.map_conditions(freeze_compute_sql)
+
+        # add record rules
+        sec_domain = self._access_domain('read')
+        return domain & sec_domain
 
     def _as_query(self, ordered: bool = True) -> Query:
         """ Return a :class:`Query` that corresponds to the recordset ``self``.

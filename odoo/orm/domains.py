@@ -1002,6 +1002,9 @@ class DomainCondition(Domain):
                 parent_domain = DomainCondition(self.field_expr, self.operator, self.value)
                 return DomainCondition(parent_fname, 'any', parent_domain)
 
+            # check field access
+            model.check_field_access(field, 'read')
+
             # handle searchable fields
             if field.search and field.name == self.field_expr:
                 if field.type == 'boolean' and isinstance(domain := _optimize_boolean_in_all(self, model), DomainBool):

@@ -426,6 +426,13 @@ class MailMessage(models.Model):
     # ------------------------------------------------------
 
     @api.model
+    def _search_domain(self, domain, *, active_test=True, bypass_access=False):
+        if not (self.env.su or bypass_access or self.env.user._is_internal()):
+            # Non-employee see only messages with a subtype and not internal
+            domain = self._get_search_domain_share() & domain
+        return super()._search_domain(domain, active_test=active_test, bypass_access=bypass_access)
+
+    @api.model
     def _search(self, domain, offset=0, limit=None, order=None, *, bypass_access=False, **kwargs):
         """ Override that adds specific access rights of mail.message, to remove
         ids uid could not see according to our custom rules. Please refer to
