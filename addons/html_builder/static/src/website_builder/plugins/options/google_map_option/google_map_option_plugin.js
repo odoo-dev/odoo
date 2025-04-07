@@ -36,12 +36,25 @@ export class GoogleMapOptionPlugin extends Plugin {
                 OptionComponent: GoogleMapOption,
                 selector: ".s_google_map",
                 props: {
-                    loadGoogleMaps: this.loadGoogleMaps.bind(this),
+                    getPlace: this.getPlace.bind(this),
                     onPlaceChanged: this.commitPlace.bind(this),
                 },
             },
         ],
         builder_actions: this.getActions(),
+        on_snippet_dropped_handlers: ({ snippetEl }) => this.loadGoogleMaps(snippetEl),
+        normalize_handlers: root => {
+            // This is needed if there is already a Google Maps snippet in the
+            // DOM when starting edition.
+            for (const snippet of root.querySelectorAll(".s_google_map")) {
+                if (!this.isGoogleMapsReady && !this.isGoogleMapsErrorBeingHandled) {
+                    this.loadGoogleMaps(snippet);
+                } else if (!this.mapsAPI) {
+                    this.mapsAPI = google?.maps;
+                    this.placesAPI = google?.maps.places;
+                }
+            }
+        },
         restore_savepoint_handlers: () => {
             // Restart interactions to re-render the map.
             this.dispatchTo("content_manually_updated_handlers");
@@ -86,21 +99,24 @@ export class GoogleMapOptionPlugin extends Plugin {
 
     /**
      * Get the stored API key if any (or open a dialog to ask the user for one),
-     * load and configure the Google Maps API, then use it to set the pin's
-     * initial address.
+     * load and configure the Google Maps API.
      *
      * @param {Element} editingElement
      * @param {boolean} [forceReconfigure=false]
      * @returns {Promise<void>}
      */
     async loadGoogleMaps(editingElement, forceReconfigure = false) {
-        /** @type {string | undefined} */
-        let apiKey = await this.googleMapService.getGMapAPIKey();
+        /** @type {string  |undefined} */
+        const apiKey = await this.googleMapService.getGMapAPIKey();
         const didReconfigure = await this.configureGMapAPI({ apiKey, force: forceReconfigure });
-        apiKey = await this.loadGoogleMapAPIFromService(didReconfigure);
-        if (apiKey) {
-            await this.onGoogleMapsLoaded(editingElement);
+        const didLoad = !!(await this.loadGoogleMapAPIFromService(didReconfigure));
+        if (didLoad) {
+            this.mapsAPI = window.google?.maps;
+            this.placesAPI = window.google?.maps.places;
         }
+        // Try to fail early if there is a configuration issue.
+        const foundPlace = !!(await this.getPlace(editingElement, editingElement.dataset.mapGps));
+        this.isGoogleMapsReady = didLoad && foundPlace;
     }
 
     /**
@@ -116,26 +132,22 @@ export class GoogleMapOptionPlugin extends Plugin {
     }
 
     /**
-     * Try to fail early in the case of a misconfiguration by doing a nearby
-     * search on the coordinates set on the editing element. If it works, set
-     * the result's address as the pin's initial address. Otherwise, remove the
-     * snippet (unless the error is being handled).
+     * Take a set of coordinates and perform a search on them to return a
+     * place's formatted address. If it failed, there must be an issue with the
+     * API so remove the snippet.
      *
      * @param {Element} editingElement
-     * @returns {Promise<void>}
+     * @param {Coordinates} coordinates
+     * @returns {Promise<Place | undefined>}
      */
-    async onGoogleMapsLoaded(editingElement) {
-        if (window.google) { // This should always be true, except for in tests.
-            this.mapsAPI = google.maps;
-            this.placesAPI = google.maps.places;
-        }
-        const place = await this.nearbySearch(editingElement, editingElement.dataset.mapGps);
-        if (place?.formatted_address) {
-            editingElement.dataset.pinAddress = place.formatted_address;
-        }
+    async getPlace(editingElement, coordinates) {
+        const place = await this.nearbySearch(editingElement, coordinates);
         if (!place && !this.isGoogleMapsErrorBeingHandled) {
             // Somehow the search failed but Google didn't trigger an error.
+            // @TODO mysterious-egg should we keep this? Seems radical.
             this.dependencies.remove.removeElement(editingElement);
+        } else {
+            return place;
         }
     }
 
@@ -229,7 +241,6 @@ export class GoogleMapOptionPlugin extends Plugin {
      * the Places API enabled. To deal with that case, we perform a nearby
      * search immediately after validation. If it fails, the error is handled
      * and the dialog is re-opened.
-     * @see onGoogleMapsLoaded
      * @see nearbySearch
      * @see notifyGMapError
      *
