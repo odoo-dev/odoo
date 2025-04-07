@@ -195,11 +195,6 @@ export class ClosePosPopup extends Component {
         if (proxyIP) {
             this.pos.hardwareProxy.deviceControllers.customerDisplay.action({ action: "close" });
         }
-        // If there are orders in the db left unsynced, we try to sync.
-        const syncSuccess = await this.pos.pushOrdersWithClosingPopup();
-        if (!syncSuccess) {
-            return;
-        }
         if (this.pos.config.cash_control) {
             const response = await this.pos.data.call(
                 "pos.session",
@@ -310,7 +305,7 @@ export class ClosePosPopup extends Component {
             cancel: async () => {
                 if (!response.redirect) {
                     const ordersDraft = this.pos.models["pos.order"].filter((o) => !o.finalized);
-                    await this.pos.deleteOrders(ordersDraft, response.open_order_ids);
+                    await this.pos.deleteOrders(ordersDraft);
                     this.closeSession();
                 }
             },
