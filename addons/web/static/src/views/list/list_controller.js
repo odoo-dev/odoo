@@ -56,7 +56,6 @@ export class ListController extends Component {
         allowSelectors: { type: Boolean, optional: true },
         onSelectionChanged: { type: Function, optional: true },
         readonly: { type: Boolean, optional: true },
-        showButtons: { type: Boolean, optional: true },
         Model: Function,
         Renderer: Function,
         buttonTemplate: String,
@@ -66,7 +65,6 @@ export class ListController extends Component {
         allowSelectors: true,
         createRecord: () => {},
         selectRecord: () => {},
-        showButtons: true,
     };
 
     setup() {

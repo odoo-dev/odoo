@@ -52,7 +52,6 @@ export class SelectCreateDialog extends Component {
             display: { searchPanel: false },
             noBreadcrumbs: true,
             noContentHelp,
-            showButtons: false,
             selectRecord: (resId) => this.select([resId]),
             onSelectionChanged: (resIds) => {
                 this.state.resIds = resIds;
