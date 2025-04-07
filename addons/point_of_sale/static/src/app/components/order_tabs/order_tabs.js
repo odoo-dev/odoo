@@ -21,7 +21,7 @@ export class OrderTabs extends Component {
         this.dialog = useService("dialog");
     }
     async newFloatingOrder() {
-        const order = this.pos.addNewOrder();
+        const order = await this.pos.addNewOrder();
         this.pos.showScreen("ProductScreen");
         this.dialog.closeAll();
         return order;

@@ -94,11 +94,11 @@ export class TipScreen extends Component {
             is_tipped: true,
             tip_amount: serverTipLine[0].price_subtotal_incl,
         });
-        this.goNextScreen();
+        await this.goNextScreen();
     }
-    goNextScreen() {
+    async goNextScreen() {
         if (!this.pos.config.module_pos_restaurant) {
-            this.pos.addNewOrder();
+            await this.pos.addNewOrder();
         }
         const { name, props } = this.nextScreen;
         this.pos.showScreen(name, props);

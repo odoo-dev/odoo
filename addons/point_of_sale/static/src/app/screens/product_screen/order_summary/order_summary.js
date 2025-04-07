@@ -30,7 +30,7 @@ export class OrderSummary extends Component {
     }
 
     get currentOrder() {
-        return this.pos.selectedOrder;
+        return this.pos.getOrder();
     }
 
     async editPackLotLines(line) {

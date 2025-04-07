@@ -409,7 +409,7 @@ export class PaymentScreen extends Component {
                     switchScreen = this.currentOrder.uuid === this.pos.selectedOrderUuid;
                     nextScreen = this.pos.defaultScreen;
                     if (switchScreen) {
-                        this.selectNextOrder();
+                        await this.pos.addNewOrder();
                     }
                 }
             }

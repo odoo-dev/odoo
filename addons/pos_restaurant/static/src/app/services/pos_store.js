@@ -13,10 +13,13 @@ patch(PosStore.prototype, {
      * @override
      */
     async setup() {
+        await super.setup(...arguments);
         this.isEditMode = false;
         this.tableSyncing = false;
         this.tableSelectorState = false;
-        await super.setup(...arguments);
+        if (this.config.default_screen === "register") {
+            await this.addNewOrder();
+        }
     },
     get idleTimeout() {
         return [
@@ -52,7 +55,7 @@ patch(PosStore.prototype, {
         }
         return super.defaultScreen;
     },
-    createNewOrder(data) {
+    async createNewOrder(data) {
         const order = super.createNewOrder(data);
 
         if (order.table_id) {
@@ -278,7 +281,7 @@ patch(PosStore.prototype, {
         }
 
         if (beforeMergeDetails.length) {
-            const newOrder = this.addNewOrder({ table_id: unmergeTable });
+            const newOrder = await this.addNewOrder({ table_id: unmergeTable });
 
             const courseByLines = {};
             if (beforeMergeCourseDetails?.length) {
@@ -440,9 +443,9 @@ patch(PosStore.prototype, {
     showDefault() {
         this.showScreen(this.defaultScreen, {}, this.defaultScreen == "ProductScreen");
     },
-    addOrderIfEmpty(forceEmpty) {
+    async addOrderIfEmpty(forceEmpty) {
         if (!this.config.module_pos_restaurant || forceEmpty) {
-            return super.addOrderIfEmpty(...arguments);
+            return await super.addOrderIfEmpty(...arguments);
         }
     },
     //@override
@@ -458,16 +461,16 @@ patch(PosStore.prototype, {
         return data;
     },
     //@override
-    addNewOrder(data = {}) {
+    async addNewOrder(data = {}) {
         const order = super.addNewOrder(...arguments);
         this.addPendingOrder([order.id]);
         return order;
     },
-    createOrderIfNeeded(data) {
+    async createOrderIfNeeded(data) {
         if (this.config.module_pos_restaurant && !data["table_id"]) {
             let order = this.models["pos.order"].find((order) => order.isDirectSale);
             if (!order) {
-                order = this.createNewOrder(data);
+                order = await this.createNewOrder(data);
             }
             return order;
         }
@@ -539,7 +542,7 @@ patch(PosStore.prototype, {
                 currentOrder.update({ table_id: table });
                 this.selectedOrderUuid = currentOrder.uuid;
             } else {
-                this.addNewOrder({ table_id: table });
+                await this.addNewOrder({ table_id: table });
             }
         }
     },
@@ -617,7 +620,7 @@ patch(PosStore.prototype, {
                 }
                 this.showScreen(orders[0].getScreenData().name, props);
             } else {
-                this.addNewOrder({ table_id: table });
+                await this.addNewOrder({ table_id: table });
                 this.showScreen("ProductScreen");
             }
         }

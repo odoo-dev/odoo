@@ -305,7 +305,7 @@ export class TicketScreen extends Component {
             partner === this.props.destinationOrder.getPartner() &&
             !this.pos.doNotAllowRefundAndSales()
                 ? this.props.destinationOrder
-                : this._getEmptyOrder(partner);
+                : await this._getEmptyOrder(partner);
 
         // Add orderline for each toRefundDetail to the destinationOrder.
         const lines = [];
@@ -559,7 +559,7 @@ export class TicketScreen extends Component {
      * @param {Object | null} partner
      * @returns {boolean}
      */
-    _getEmptyOrder(partner) {
+    async _getEmptyOrder(partner) {
         let emptyOrderForPartner = null;
         let emptyOrder = null;
         for (const order of this.pos.models["pos.order"].filter((order) => !order.finalized)) {
@@ -573,7 +573,7 @@ export class TicketScreen extends Component {
                 }
             }
         }
-        return emptyOrderForPartner || emptyOrder || this.pos.addNewOrder();
+        return emptyOrderForPartner || emptyOrder || (await this.pos.addNewOrder());
     }
     _doesOrderHaveSoleItem(order) {
         const orderlines = order.getOrderlines();
