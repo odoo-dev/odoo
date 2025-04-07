@@ -12,9 +12,6 @@ class PurchaseEdiXmlUbl_Bis3(models.AbstractModel):
     def _get_order_qty_field(self):
         return 'product_qty'
 
-    def _get_order_note_field(self):
-        return 'notes'
-
     def _get_dest_address_field(self):
         return 'dest_address_id'
 

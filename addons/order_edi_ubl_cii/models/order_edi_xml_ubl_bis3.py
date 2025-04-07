@@ -185,7 +185,6 @@ class OrderEdiXmlUbl_Bis3(models.AbstractModel):
             or (customer_delivery_address and customer_delivery_address[0])
             or customer
         )
-        note_field = self._get_order_note_field()
 
         vals = {
             'builder': self,
@@ -199,7 +198,7 @@ class OrderEdiXmlUbl_Bis3(models.AbstractModel):
                 'id': order.name,
                 'issue_date': order.create_date.date(),
                 'order_type_code': self._get_order_type_code(),
-                'note': html2plaintext(order[note_field]) if order[note_field] else False,
+                'note': html2plaintext(order.note) if order.note else False,
                 'originator_document_reference': order.origin,
                 'document_currency_code': order.currency_id.name.upper(),
                 'delivery_party_vals': self._get_delivery_party_vals(delivery),
@@ -280,7 +279,7 @@ class OrderEdiXmlUbl_Bis3(models.AbstractModel):
 
         order_values['date_order'] = tree.findtext('./{*}IssueDate')
         order_values[self._get_order_ref()] = tree.findtext('./{*}ID')
-        order_values[self._get_order_note_field()] = self._import_description(tree, xpaths=['./{*}Note'])
+        order_values['note'] = self._import_description(tree, xpaths=['./{*}Note'])
         order_values['origin'] = tree.findtext('./{*}OriginatorDocumentReference/{*}ID')
         order_values['payment_term_id'] = self._import_payment_term_id(order, tree, './/cac:PaymentTerms/cbc:Note')
 

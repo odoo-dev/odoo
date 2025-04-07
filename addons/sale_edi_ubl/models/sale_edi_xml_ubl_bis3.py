@@ -9,9 +9,6 @@ class SaleEdiXmlUbl_Bis3(models.AbstractModel):
     def _get_order_qty_field(self):
         return 'product_uom_qty'
 
-    def _get_order_note_field(self):
-        return 'note'
-
     def _get_dest_address_field(self):
         return 'partner_shipping_id'
 

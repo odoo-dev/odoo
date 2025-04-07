@@ -62,10 +62,6 @@ class OrderEdiCommon(models.AbstractModel):
         """Return the quantity field for the order type"""
         return
 
-    def _get_order_note_field(self):
-        """Return the note field for the order type"""
-        return
-
     def _get_dest_address_field(self):
         """Return the destination address field for the order type"""
         return
