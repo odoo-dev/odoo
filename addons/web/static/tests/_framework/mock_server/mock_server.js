@@ -390,6 +390,10 @@ export class MockServer {
     websockets = [];
 
     constructor() {
+        const t = [];
+        for (let i = 0; i < 100 * 100 * 100; i++) {
+            t.push(Math.random());
+        }
         // Set default routes
         this._onRoute(["/web/action/load"], this.loadAction);
         this._onRoute(["/web/action/load_breadcrumbs"], this.loadActionBreadcrumbs);
