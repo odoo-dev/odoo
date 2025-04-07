@@ -105,7 +105,8 @@ class TestPoSEventSale(TestUi):
             "to_invoice": False,
             "state": "draft",
         }
-        self.env['pos.order'].sync_from_ui([order_data, order_data_2])
+        self.env['pos.order'].create(order_data)
+        self.env['pos.order'].create(order_data_2)
         sale_status = self.env['event.registration'].search([]).mapped("sale_status")
         self.assertEqual(len(sale_status), 2)
         self.assertIn('sold', sale_status)
