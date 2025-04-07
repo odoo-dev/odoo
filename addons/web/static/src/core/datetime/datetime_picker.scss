@@ -7,6 +7,11 @@
         width: 250px; // size with enough space for different language (e.g. Vietnamese)
     }
 
+    // Inputs
+    > .d-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
     // Header
     .o_datetime_picker_header .o_header_part {
         text-transform: none;

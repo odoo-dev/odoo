@@ -78,7 +78,7 @@
             t-attf-style="--DateTimePicker__Day-template-columns: {{ props.showWeekNumbers ?? !props.range ? 8 : 7 }}"
         >
             <t t-if="props.type === 'datetime' and state.precision === 'days'">
-                <div class="d-flex mx-2 gap-5">
+                <div class="d-grid mx-2 gap-5">
                     <t t-foreach="selectedRange" t-as="dateValue" t-key="dateValue_index">
                     <t t-set="dateString" t-value="dateValue_index === 0 ? 'Start date' : 'End date'"/>
                         <input
@@ -91,7 +91,7 @@
                         />
                     </t>
                 </div>
-                <div class="d-flex mx-2 gap-5">
+                <div class="d-grid mx-2 gap-5">
                     <t t-foreach="state.timeValues" t-as="timeValue" t-key="timeValue_index">
                         <TimePicker
                             t-if="props.range || timeValue_index === props.focusedDateIndex"
