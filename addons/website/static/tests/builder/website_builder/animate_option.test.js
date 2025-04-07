@@ -3,8 +3,10 @@ import { contains } from "@web/../tests/web_test_helpers";
 import { defineWebsiteModels, setupWebsiteBuilder } from "../website_helpers";
 import { animationFrame, queryFirst } from "@odoo/hoot-dom";
 import { mockFetch } from "@odoo/hoot-mock";
+import { mockImageRequests } from "../image_test_helpers";
 
 defineWebsiteModels();
+mockImageRequests();
 
 const base64Img =
     "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUA\n        AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO\n            9TXL0Y4OHwAAAABJRU5ErkJggg==";

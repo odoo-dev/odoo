@@ -1,4 +1,8 @@
-import { cropperDataFieldsWithAspectRatio, isGif } from "@html_editor/utils/image_processing";
+import {
+    cropperDataFieldsWithAspectRatio,
+    isGif,
+    loadImageInfo,
+} from "@html_editor/utils/image_processing";
 import { registry } from "@web/core/registry";
 import { Plugin } from "@html_editor/plugin";
 import { ImageToolOption } from "./image_tool_option";
@@ -196,7 +200,7 @@ class ImageToolOptionPlugin extends Plugin {
             img.tagName === "IMG" &&
             !this.isDeviceShape(img) &&
             !this.isAnimatedShape(img) &&
-            this.isImageSupportedForShapes(img) &&
+            (await this.isImageSupportedForShapes(img)) &&
             !(await isImageCorsProtected(img))
         );
     }
@@ -212,8 +216,11 @@ class ImageToolOptionPlugin extends Plugin {
         // todo: to implement while implementing the animated shapes
         return false;
     }
-    isImageSupportedForShapes(img) {
-        return img.dataset.originalId && isImageSupportedForProcessing(getMimetype(img));
+    async isImageSupportedForShapes(img) {
+        const newdataset = await loadImageInfo(img);
+        const dataset = { ...img.dataset, ...newdataset };
+        const mimetype = getMimetype(img, dataset);
+        return dataset.originalId && isImageSupportedForProcessing(mimetype);
     }
 }
 registry.category("website-plugins").add(ImageToolOptionPlugin.id, ImageToolOptionPlugin);

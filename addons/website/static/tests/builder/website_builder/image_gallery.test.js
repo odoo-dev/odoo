@@ -3,8 +3,10 @@ import { contains, dataURItoBlob, onRpc } from "@web/../tests/web_test_helpers";
 import { defineWebsiteModels, dummyBase64Img, setupWebsiteBuilder } from "../website_helpers";
 import { animationFrame, click, queryAll, queryOne, waitFor } from "@odoo/hoot-dom";
 import { MockResponse } from "@web/../lib/hoot/mock/network";
+import { mockImageRequests } from "../image_test_helpers";
 
 defineWebsiteModels();
+mockImageRequests();
 
 test("Add image in gallery", async () => {
     onRpc("/web/dataset/call_kw/ir.attachment/search_read", () => [
@@ -78,20 +80,13 @@ test("Add image in gallery", async () => {
     );
 
     expect(columnImgs).toEqual([["1", "3", "4", "5", "6"], ["2"]]);
-    expect.verifySteps([
-        "get_image_info",
-        "get_image_info",
-        "get_image_info",
-        "get_image_info",
-        "get_image_info",
-    ]);
     expect(":iframe .o_masonry_col img[data-index='6']").toHaveAttribute(
         "data-mimetype",
         "image/webp"
     );
     expect(":iframe .o_masonry_col img[data-index='6']").toHaveAttribute(
         "data-mimetype-before-conversion",
-        "image/png"
+        "image/jpeg"
     );
 });
 

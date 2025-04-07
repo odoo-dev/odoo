@@ -16,8 +16,10 @@ import { contains, onRpc } from "@web/../tests/web_test_helpers";
 import { animationFrame, Deferred, queryText, tick } from "@odoo/hoot-dom";
 import { undo } from "@html_editor/../tests/_helpers/user_actions";
 import { Plugin } from "@html_editor/plugin";
+import { mockImageRequests } from "../image_test_helpers";
 
 defineWebsiteModels();
+mockImageRequests();
 
 const dummySnippet = `
     <section data-name="Dummy Section" data-snippet="s_dummy">

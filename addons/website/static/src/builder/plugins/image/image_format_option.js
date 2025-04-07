@@ -2,6 +2,7 @@ import { BaseOptionComponent, useDomState } from "@html_builder/core/utils";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { getImageSrc, getMimetype } from "@html_editor/utils/image";
 import { clamp } from "@web/core/utils/numbers";
+import { loadImageInfo } from "@html_editor/utils/image_processing";
 
 export class ImageFormatOption extends BaseOptionComponent {
     static template = "html_builder.ImageFormat";
@@ -19,14 +20,20 @@ export class ImageFormatOption extends BaseOptionComponent {
         this.state = useDomState((editingElement) => {
             keepLast
                 .add(
-                    this.env.editor.shared.imageFormatOption.computeAvailableFormats(
-                        editingElement,
-                        this.computeMaxDisplayWidth.bind(this)
-                    )
+                    Promise.all([
+                        this.env.editor.shared.imageFormatOption.computeAvailableFormats(
+                            editingElement,
+                            this.computeMaxDisplayWidth.bind(this)
+                        ),
+                        !getMimetype(editingElement) && loadImageInfo(editingElement),
+                    ])
                 )
-                .then((formats) => {
+                .then(([formats, imageInfo]) => {
                     const hasSrc = !!getImageSrc(editingElement);
                     this.state.formats = hasSrc ? formats : [];
+                    this.state.showQuality = ["image/jpeg", "image/webp"].includes(
+                        imageInfo?.mimetypeBeforeConversion
+                    );
                 });
             return {
                 showQuality: ["image/jpeg", "image/webp"].includes(getMimetype(editingElement)),
