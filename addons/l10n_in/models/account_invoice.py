@@ -621,6 +621,41 @@ class AccountMove(models.Model):
         # TO OVERRIDE
         return False
 
+    def action_post(self):
+        res = super().action_post()
+        self.set_hsn_summary()
+        return res
+
+    def set_hsn_summary(self):
+        for rec in self:
+            if rec.country_code == 'IN':
+                tax_details = rec._l10n_in_prepare_tax_details()
+                tax_details_per_record = tax_details['tax_details_per_record']
+                grouping_lines = rec.invoice_line_ids.grouped(
+                    lambda l: l.display_type == 'product' and (
+                        'global_discount' if l._l10n_in_is_global_discount() else 'lines')
+                )
+                lines = grouping_lines.get('lines', self.env['account.move.line'])
+                for line in lines:
+                    summary = {
+                        'rate': 0.0,
+                        'sgst': 0.0,
+                        'cgst': 0.0,
+                        'igst': 0.0,
+                        'cess': 0.0,
+                    }
+                    line_tax_details = tax_details_per_record.get(line, {}).get('tax_details', {})
+                    for detail in line_tax_details.values():
+                        line_code = detail['line_code']
+                        tax = detail['tax']
+                        tax_amount = detail['tax_amount']
+                        if line_code in ['sgst', 'cgst', 'igst']:
+                            summary['rate'] += tax.amount
+                            summary[line_code] += tax_amount
+                        elif line_code in ['cess', 'state_cess', 'cess_non_advol', 'state_cess_non_advol']:
+                            summary['cess'] += tax_amount
+                    line.l10n_in_hsn_summary = summary
+
     # ------Utils------
     @api.model
     def _l10n_in_prepare_tax_details(self):

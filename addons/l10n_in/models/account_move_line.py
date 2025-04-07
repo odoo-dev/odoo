@@ -37,6 +37,7 @@ class AccountMoveLine(models.Model):
     # withholding related fields
     l10n_in_withhold_tax_amount = fields.Monetary(string="TDS Tax Amount", compute='_compute_l10n_in_withhold_tax_amount')
     l10n_in_tds_tcs_section_id = fields.Many2one(related="account_id.l10n_in_tds_tcs_section_id")
+    l10n_in_hsn_summary = fields.Json(string="HSN Summary")
 
     @api.depends('tax_ids')
     def _compute_l10n_in_withhold_tax_amount(self):
@@ -273,3 +274,6 @@ class AccountMoveLine(models.Model):
                 (section for section, function in gstr_mapping_fun.items() if function(line)),
                 'out_of_scope'
             )
+    def _l10n_in_is_global_discount(self):
+        self.ensure_one()
+        return not self.tax_ids and self.price_subtotal < 0

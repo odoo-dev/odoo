@@ -5,9 +5,6 @@ class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
     # E-Invoice Methods
-    def _l10n_in_is_global_discount(self):
-        self.ensure_one()
-        return not self.tax_ids and self.price_subtotal < 0
 
     def _l10n_in_check_einvoice_validation(self):
         def _group_by_error_code(line):
