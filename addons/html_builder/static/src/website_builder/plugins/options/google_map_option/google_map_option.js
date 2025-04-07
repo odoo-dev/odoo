@@ -1,10 +1,10 @@
-import { useRef, onWillStart, onMounted, onWillDestroy } from "@odoo/owl";
+import { useRef, onMounted, useState, useEffect, onWillDestroy } from "@odoo/owl";
 import { BaseOptionComponent } from "@html_builder/core/utils";
 
-/** @import { Place } from './google_map_option_plugin.js' */
+/** @import { Coordinates, Place } from './google_map_option_plugin.js' */
 /**
  * @typedef {Object} Props
- * @property {function(Element, boolean):Promise<void>} loadGoogleMaps
+ * @property {function(Element, Coordinates):Promise<Place | undefined>} getPlace
  * @property {function(Element, Place)} onPlaceChanged
  */
 
@@ -12,7 +12,7 @@ export class GoogleMapOption extends BaseOptionComponent {
     static template = "html_builder.GoogleMapOption";
     /** @type {Props} */
     static props = {
-        loadGoogleMaps: { type: Function },
+        getPlace: { type: Function },
         onPlaceChanged: { type: Function },
     };
 
@@ -20,13 +20,17 @@ export class GoogleMapOption extends BaseOptionComponent {
         super.setup();
         /** @type {Props} */
         this.props;
+        /** @type {{ getEditingElement: function():Element }} */
+        this.env;
         this.inputRef = useRef("inputRef");
-        /** @type {Element} */
-        this.editingElement = this.env.getEditingElement();
-        onWillStart(async () => {
-            await this.props.loadGoogleMaps(this.editingElement);
-        });
-        onMounted(() => {
+        /** @type {{ formattedAddress: string }} */
+        this.state = useState(({
+            formattedAddress: this.env.getEditingElement().dataset.pinAddress || "",
+        }));
+        useEffect(() => {
+            this.env.getEditingElement().dataset.pinAddress = this.state.formattedAddress;
+        }, () => [ this.state.formattedAddress ]);
+        onMounted(async () => {
             this.initializeAutocomplete(this.inputRef.el);
         });
         onWillDestroy(() => {
@@ -57,6 +61,16 @@ export class GoogleMapOption extends BaseOptionComponent {
                 "place_changed",
                 this.onPlaceChanged.bind(this),
             );
+            if (!this.state.formattedAddress) {
+                const editingElement = this.env.getEditingElement();
+                /** @type {Coordinates} */
+                const coordinates = editingElement.dataset.mapGps;
+                this.props.getPlace(editingElement, coordinates).then(place => {
+                    if (place?.formatted_address) {
+                        this.state.formattedAddress = place.formatted_address;
+                    }
+                });
+            }
         }
     }
 
@@ -68,6 +82,7 @@ export class GoogleMapOption extends BaseOptionComponent {
     onPlaceChanged() {
         /** @type {Place | undefined} */
         const place = this.googleMapsAutocomplete.getPlace();
-        this.props.onPlaceChanged(this.editingElement, place);
+        this.props.onPlaceChanged(this.env.getEditingElement(), place);
+        this.state.formattedAddress = place?.formatted_address || "";
     }
 }
