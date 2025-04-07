@@ -46,6 +46,8 @@ export class DataServiceOptions {
             "calendar.event": ["appointment_resource_ids"],
             "res.partner": ["barcode"],
             "product.uom": ["barcode"],
+            "product.attribute.custom.value": ["uuid"],
+            "pos.pack.operation.lot": ["uuid"],
         };
 
         for (const model in databaseTable) {
@@ -58,9 +60,8 @@ export class DataServiceOptions {
 
         return indexes;
     }
-
     get autoLoadedOrmMethods() {
-        return ["read", "search_read", "create"];
+        return ["read", "search_read"];
     }
 
     get pohibitedAutoLoadedModels() {
@@ -72,6 +73,10 @@ export class DataServiceOptions {
         ];
     }
 
+    get uniqueModels() {
+        return ["pos.session", "res.users", "res.company"];
+    }
+
     get cascadeDeleteModels() {
         return [
             "pos.order.line",
@@ -79,10 +84,6 @@ export class DataServiceOptions {
             "product.attribute.custom.value",
             "pos.pack.operation.lot",
         ];
-    }
-
-    get uniqueModels() {
-        return ["pos.session", "res.users", "res.company"];
     }
 
     get prohibitedAutoLoadedFields() {

@@ -443,6 +443,7 @@ registry.category("web_tour.tours").add("test_down_payment_displayed", {
             PaymentScreen.clickValidate(),
             ReceiptScreen.clickNextOrder(),
             PosSale.settleNthOrder(1),
+            Chrome.endTour(),
             Order.hasLine({
                 productName: "Down Payment",
                 quantity: "1.0",
