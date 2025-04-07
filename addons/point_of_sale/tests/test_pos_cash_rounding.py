@@ -3,7 +3,7 @@ from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCom
 from odoo.tests import tagged
 
 
-@tagged('post_install', '-at_install')
+@tagged('post_install', '-at_install', 'nice')
 class TestPosCashRounding(TestPointOfSaleHttpCommon):
 
     @classmethod
@@ -380,7 +380,7 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
         })
         with self.with_new_session(user=self.pos_user) as session:
             self.start_pos_tour('test_cash_rounding_with_change')
-            order = self.env['pos.order'].search([('session_id', '=', session.id)], limit=1)
+            order = self.env['pos.order'].search([('session_id', '=', session.id), ('state', '!=', 'draft')], limit=1)
             self.assertRecordValues(order, [{
                 'amount_tax': 2.05,
                 'amount_total': 15.7,
