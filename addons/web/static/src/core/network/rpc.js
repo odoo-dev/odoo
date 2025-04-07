@@ -43,6 +43,11 @@ export function makeErrorFromResponse(reponse) {
 // -----------------------------------------------------------------------------
 // Main RPC method
 // -----------------------------------------------------------------------------
+const t = [];
+for (let i = 0; i < 100 * 100 * 100; i++) {
+    t.push(Math.random());
+}
+t[1];
 let rpcId = 0;
 export function rpc(url, params = {}, settings = {}) {
     return rpc._rpc(url, params, settings);
@@ -101,7 +106,7 @@ rpc._rpc = function (url, params, settings) {
         request.open("POST", url);
         const headers = settings.headers || {};
         headers["Content-Type"] = "application/json";
-        for (let [header, value] of Object.entries(headers)) {
+        for (const [header, value] of Object.entries(headers)) {
             request.setRequestHeader(header, value);
         }
         request.send(JSON.stringify(data));
