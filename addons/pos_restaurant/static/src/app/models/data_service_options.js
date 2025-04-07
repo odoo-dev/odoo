@@ -9,6 +9,12 @@ patch(DataServiceOptions.prototype, {
                 key: "uuid",
                 condition: (record) => record.order_id?.canBeRemovedFromIndexedDB,
             },
+            "restaurant.table": {
+                key: "uuid",
+            },
+            "restaurant.floor": {
+                key: "uuid",
+            },
         };
     },
     get cascadeDeleteModels() {

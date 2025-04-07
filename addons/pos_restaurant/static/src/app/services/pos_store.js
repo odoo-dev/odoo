@@ -103,7 +103,6 @@ patch(PosStore.prototype, {
             return false;
         }
         currentOrder.setCustomerCount(guestCount);
-        this.addPendingOrder([currentOrder.id]);
         return true;
     },
     async sendOrderInPreparation(order, opts = {}) {
@@ -366,7 +365,6 @@ patch(PosStore.prototype, {
                 delete order.uiState.unmerge[line.uuid];
             }
 
-            await this.syncAllOrders({ orders: [order, newOrder] });
             return newOrder;
         }
 
@@ -493,14 +491,6 @@ patch(PosStore.prototype, {
         }
         return data;
     },
-    //@override
-    addNewOrder(data = {}) {
-        const order = super.addNewOrder(...arguments);
-        if (this.config.module_pos_restaurant) {
-            this.addPendingOrder([order.id]);
-        }
-        return order;
-    },
     createOrderIfNeeded(data) {
         if (this.config.module_pos_restaurant && !data["table_id"]) {
             let order = this.models["pos.order"].find((order) => order.isDirectSale);
@@ -515,7 +505,6 @@ patch(PosStore.prototype, {
         let currentCourse;
         if (this.config.module_pos_restaurant) {
             const order = this.getOrder();
-            this.addPendingOrder([order.id]);
             if (!order.uiState.booked) {
                 order.setBooked(true);
             }
@@ -573,7 +562,6 @@ patch(PosStore.prototype, {
         return super.getDefaultSearchDetails();
     },
     async setTable(table, orderUuid = null) {
-        this.deviceSync.readDataFromServer();
         let currentOrder = table
             .getOrders()
             .find((order) => (orderUuid ? order.uuid === orderUuid : !order.finalized));

@@ -273,13 +273,15 @@ export default class IndexedDB {
         }
         return this.promises(storeName, arrData, "put");
     }
-    async readAllExceptStores(storeToIgnores = [], options) {
-        const allStoreNames = this.dbStores.map((store) => store[1]);
-        const storeNames =
-            storeToIgnores.length > 0
-                ? allStoreNames.filter((s) => !storeToIgnores.includes(s))
-                : allStoreNames;
-        return this.readAll(storeNames, options);
+    update(storeName, id, data) {
+        const transaction = this.getNewTransaction(storeName, "readonly");
+        transaction.objectStore(storeName).get(id).onsuccess = (event) => {
+            const record = event.target.result;
+            if (record) {
+                const updatedRecord = { ...record, ...data };
+                transaction.objectStore(storeName).put(JSON.parse(JSON.stringify(updatedRecord)));
+            }
+        };
     }
 
     readAll(store = [], retry = 0) {

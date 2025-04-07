@@ -1,12 +1,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.addons.pos_restaurant.tests.test_frontend import TestFrontend
+from odoo.addons.pos_loyalty.tests.test_frontend import TestUi
 from odoo.tests import tagged
 from odoo import Command
 
 
 @tagged("post_install", "-at_install")
-class TestPoSRestaurantLoyalty(TestFrontend):
+class TestPoSRestaurantLoyalty(TestFrontend, TestUi):
     def test_change_table_rewards_stay(self):
         """
         Test that make sure that rewards stay on the order when leaving the table

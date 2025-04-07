@@ -116,29 +116,17 @@ class PosOrder(models.Model):
             coupon_new_id_map[new_id.id] = old_id
 
         # We need a sudo here because this can trigger `_compute_order_count` that require access to `sale.order.line`
-        all_coupons = self.env['loyalty.card'].sudo().browse(coupon_new_id_map.keys()).exists()
-        lines_per_reward_code = defaultdict(lambda: self.env['pos.order.line'])
-        for line in self.lines:
-            if not line.reward_identifier_code:
-                continue
-            lines_per_reward_code[line.reward_identifier_code] |= line
-        for coupon in all_coupons:
-            if coupon.id in coupon_new_id_map:
-                # Coupon existed previously, update amount of points.
-                coupon.points += coupon_data[coupon_new_id_map[coupon.id]]['points']
-            for reward_code in coupon_data[coupon_new_id_map[coupon.id]].get('line_codes', []):
-                lines_per_reward_code[reward_code].coupon_id = coupon
-        # Send creation email
-        new_coupons.with_context(action_no_send_mail=False)._send_creation_communication()
+        all_coupons = self.env['loyalty.card'].sudo().browse(updated_loyalty_cards.ids).exists()
+
         # Reports per program
         report_per_program = {}
         coupon_per_report = defaultdict(list)
         # Important to include the updated gift cards so that it can be printed. Check coupon_report.
         for coupon in new_coupons:
             if coupon.program_id not in report_per_program:
-                report_per_program[coupon.program_id] = coupon.program_id.communication_plan_ids.\
+                report_per_program[coupon.program_id.id] = coupon.program_id.communication_plan_ids.\
                     filtered(lambda c: c.trigger == 'create').pos_report_print_id
-            for report in report_per_program[coupon.program_id]:
+            for report in report_per_program.get(coupon.program_id.id):
                 coupon_per_report[report.id].append(coupon.id)
 
         # Adding loyalty history lines
@@ -161,7 +149,7 @@ class PosOrder(models.Model):
         self.add_loyalty_history_lines(loyalty_points, coupon_updates)
         return {
             'coupon_updates': [{
-                'old_id': coupon_new_id_map[coupon.id],
+                'old_id': coupon.id,
                 'id': coupon.id,
                 'points': coupon.points,
                 'code': coupon.code,

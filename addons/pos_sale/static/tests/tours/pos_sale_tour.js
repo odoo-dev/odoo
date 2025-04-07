@@ -289,6 +289,7 @@ registry.category("web_tour.tours").add("PoSApplyDownpayment", {
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.clickValidate(),
+            Chrome.endTour(),
         ].flat(),
 });
 
@@ -514,6 +515,7 @@ registry.category("web_tour.tours").add("test_down_payment_displayed", {
             PaymentScreen.clickValidate(),
             FeedbackScreen.clickNextOrder(),
             PosSale.settleNthOrder(1),
+            Chrome.endTour(),
             Order.hasLine({
                 productName: "Down Payment",
                 quantity: "1.0",

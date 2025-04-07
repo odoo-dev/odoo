@@ -47,7 +47,7 @@ export class PosOrder extends PosOrderAccounting {
             this.last_order_preparation_change =
                 typeof vals.last_order_preparation_change === "object"
                     ? vals.last_order_preparation_change
-                    : JSON.parse(vals.last_order_preparation_change);
+                    : JSON.parse(vals.last_order_preparation_change.replace(/'/g, '"'));
         }
 
         this.general_customer_note = vals.general_customer_note || "";
@@ -723,7 +723,7 @@ export class PosOrder extends PosOrderAccounting {
     }
 
     get floatingOrderName() {
-        return this.floating_order_name || this.tracking_number.toString() || "";
+        return this.floating_order_name || this.tracking_number?.toString?.() || "";
     }
 
     sortBySequenceAndCategory(a, b) {

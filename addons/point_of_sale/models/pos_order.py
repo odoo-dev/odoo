@@ -1,11 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
-import json
 from datetime import datetime
 from collections import defaultdict
 from uuid import uuid4
-from random import randrange
-from pprint import pformat
+import json
 
 from markupsafe import Markup
 
@@ -28,15 +26,8 @@ class PosOrder(models.Model):
     # This function deals with orders that belong to a closed session. It attempts to find
     # any open session that can be used to capture the order. If no open session is found,
     # an error is raised, asking the user to open a session.
-    def _get_valid_session(self, order):
+    def _get_valid_session(self, closed_session):
         PosSession = self.env['pos.session']
-        closed_session = PosSession.browse(order['session_id'])
-
-        _logger.warning('Session %s (ID: %s) was closed but received order %s (total: %s) belonging to it',
-                        closed_session.name,
-                        closed_session.id,
-                        order['uuid'],
-                        order['amount_total'])
 
         open_session = PosSession.search([
             ('state', 'not in', ('closed', 'closing_control')),
@@ -44,7 +35,6 @@ class PosOrder(models.Model):
         ], limit=1)
 
         if open_session:
-            _logger.warning('Using open session %s for uuid number %s', open_session.name, order['uuid'])
             return open_session
 
         raise UserError(_('No open session available. Please open a new session to capture the order.'))
@@ -322,16 +312,16 @@ class PosOrder(models.Model):
         default=lambda self: self.env.uid,
     )
     amount_difference = fields.Monetary(string='Difference', readonly=True)
-    amount_tax = fields.Monetary(string='Taxes', readonly=True, required=True)
-    amount_total = fields.Monetary(string='Total', readonly=True, required=True)
-    amount_paid = fields.Monetary(string='Paid', required=True)
-    amount_return = fields.Monetary(string='Returned', required=True, readonly=True)
+    amount_tax = fields.Monetary(string='Taxes', readonly=True, required=True, default=0)
+    amount_total = fields.Monetary(string='Total', readonly=True, required=True, default=0)
+    amount_paid = fields.Monetary(string='Paid', required=True, default=0)
+    amount_return = fields.Monetary(string='Returned', required=True, readonly=True, default=0)
     margin = fields.Monetary(string="Margin", compute='_compute_margin')
     margin_percent = fields.Float(string="Margin (%)", compute='_compute_margin', digits=(12, 4))
     is_total_cost_computed = fields.Boolean(compute='_compute_is_total_cost_computed',
         help="Allows to know if all the total cost of the order lines have already been computed")
     lines = fields.One2many('pos.order.line', 'order_id', string='Order Lines', copy=True)
-    company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True, index=True)
+    company_id = fields.Many2one('res.company', string='Company', related="config_id.company_id", store=True, readonly=True, index=True)
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code')
     pricelist_id = fields.Many2one('product.pricelist', string='Pricelist')
     partner_id = fields.Many2one('res.partner', string='Customer', change_default=True, index='btree_not_null')
@@ -440,6 +430,11 @@ class PosOrder(models.Model):
         for order in self:
             if order.session_id:
                 order.config_id = order.session_id.config_id
+
+    @api.constrains('lines')
+    def _ensure_all_refunded_products_are_from_the_same_order(self):
+        if len(self.lines.refunded_orderline_id.order_id) > 1:
+            raise ValidationError(_('Refunded products must be from the same order'))
 
     @api.depends('lines.refund_orderline_ids', 'lines.refunded_orderline_id')
     def _compute_refund_related_fields(self):
@@ -577,12 +572,24 @@ class PosOrder(models.Model):
         if order_to_cancel:
             order_to_cancel.action_pos_order_cancel()
 
+    @api.model
+    def _stringify(val):
+        return val if isinstance(val, str) else json.dumps(val)
+
     @api.model_create_multi
     def create(self, vals_list):
-        for vals in vals_list:
+        for vals in [vals for vals in vals_list if vals.get('session_id')]:
+            if vals.get('last_order_preparation_change'):
+                vals['last_order_preparation_change'] = PosOrder._stringify(vals['last_order_preparation_change'])
             session = self.env['pos.session'].browse(vals['session_id'])
+            if session.state in ['closing_control', 'closed']:
+                vals['session_id'] = self._get_valid_session(session).id
             vals = self._complete_values_from_session(session, vals)
-        return super().create(vals_list)
+        res = super().create(vals_list)
+        for order, vals in zip(res, vals_list):
+            if vals.get('state') == 'paid':
+                order.action_pos_order_paid()
+        return res
 
     def _update_sequence_number(self, session, values):
         # Some localization needs orders to have a sequence number
@@ -611,6 +618,11 @@ class PosOrder(models.Model):
 
     def write(self, vals):
         for order in self:
+            if vals.get('last_order_preparation_change'):
+                vals['last_order_preparation_change'] = PosOrder._stringify(vals['last_order_preparation_change'])
+            pos_session = order.session_id
+            if order.state == 'draft' and (pos_session.state == 'closing_control' or pos_session.state == 'closed'):
+                vals['session_id'] = self._get_valid_session(pos_session).id
             if vals.get('state') and vals['state'] == 'paid' and order.name == '/':
                 session = self.env['pos.session'].browse(vals['session_id']) if not self.session_id and vals.get('session_id') else False
                 vals['name'] = self._compute_order_name(session)
@@ -635,6 +647,8 @@ class PosOrder(models.Model):
                     list_line.append(_("Warning, the paid amount is higher than the total amount. (Difference: %s)", formatLang(self.env, order.amount_paid - order.amount_total, currency_obj=order.currency_id)))
                 if order.nb_print > 0 and any(command[0] in [0, 1] and command[2].get('payment_status') and command[2]['payment_status'] != 'cancelled' for command in vals.get('payment_ids')):
                     raise UserError(_('You cannot change the payment of a printed order.'))
+            if vals.get('state') == 'paid':
+                order.action_pos_order_paid()
 
         if len(list_line) > 0:
             body = _("Payment changes:")
@@ -874,34 +888,14 @@ class PosOrder(models.Model):
         return invoice
 
     def action_pos_order_paid(self):
+        """
+        Action that performs all side effects needed to be done when an order is paid.
+        """
         self.ensure_one()
-
-        # TODO: add support for mix of cash and non-cash payments when both cash_rounding and only_round_cash_method are True
-        if not self.config_id.cash_rounding \
-           or self.config_id.only_round_cash_method \
-           and not any(p.payment_method_id.is_cash_count for p in self.payment_ids):
-            total = self.amount_total
-        else:
-            total = float_round(self.amount_total, precision_rounding=self.config_id.rounding_method.rounding, rounding_method=self.config_id.rounding_method.rounding_method)
-
-        isPaid = float_is_zero(total - self.amount_paid, precision_rounding=self.currency_id.rounding)
-
-        if not isPaid and not self.config_id.cash_rounding:
-            raise UserError(_("Order %s is not fully paid.", self.name))
-        elif not isPaid and self.config_id.cash_rounding:
-            currency = self.currency_id
-            if self.config_id.rounding_method.rounding_method == "HALF-UP":
-                maxDiff = currency.round(self.config_id.rounding_method.rounding / 2)
-            else:
-                maxDiff = currency.round(self.config_id.rounding_method.rounding)
-
-            diff = currency.round(self.amount_total - self.amount_paid)
-            if not abs(diff) <= maxDiff:
-                raise UserError(_("Order %s is not fully paid.", self.name))
-
-        self.write({'state': 'paid'})
-
-        return True
+        if self.to_invoice:
+            self._generate_pos_order_invoice()
+        self._create_order_picking()
+        self._compute_total_cost_in_real_time()
 
     def _prepare_invoice_vals(self):
         """We have orders filtered by company > config > partners > fiscal_positions so it won't make any issue
@@ -1342,11 +1336,6 @@ class PosOrder(models.Model):
             'account.move': self.env['account.move'].sudo()._load_pos_data_read(account_moves, config) if config else [],
         }
 
-    @api.model
-    def _get_refunded_orders(self, order):
-        refunded_orderline_ids = [line[2]['refunded_orderline_id'] for line in order['lines'] if line[0] in [0, 1] and line[2].get('refunded_orderline_id')]
-        return self.env['pos.order.line'].browse(refunded_orderline_ids).mapped('order_id')
-
     def _should_create_picking_real_time(self):
         return not self.session_id.update_stock_at_closing or self._force_create_picking_real_time()
 
@@ -1566,10 +1555,6 @@ class PosOrder(models.Model):
         totalCount = self.search_count(real_domain)
         return {'ordersInfo': list(orders_info.items())[::-1], 'totalCount': totalCount}
 
-    def _send_order(self):
-        # This function is made to be overriden by pos_self_order_preparation_display
-        pass
-
     def _prepare_pos_log(self, body):
         return body
 
@@ -1584,6 +1569,7 @@ class PosPackOperationLot(models.Model):
     order_id = fields.Many2one('pos.order', related="pos_order_line_id.order_id", readonly=False)
     lot_name = fields.Char('Lot Name')
     product_id = fields.Many2one('product.product', related='pos_order_line_id.product_id', readonly=False)
+    uuid = fields.Char(string='Uuid', readonly=True, default=lambda self: str(uuid4()), copy=False)
 
     @api.model
     def _load_pos_data_domain(self, data, config):

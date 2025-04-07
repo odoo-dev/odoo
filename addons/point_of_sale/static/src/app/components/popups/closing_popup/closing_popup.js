@@ -188,10 +188,9 @@ export class ClosePosPopup extends Component {
     }
     async closeSession() {
         this.pos._resetConnectedCashier();
-        // If there are orders in the db left unsynced, we try to sync.
-        const syncSuccess = await this.pos.pushOrdersWithClosingPopup();
-        if (!syncSuccess) {
-            return;
+        const proxyIP = this.pos.getDisplayDeviceIP();
+        if (proxyIP) {
+            this.pos.hardwareProxy.deviceControllers.customerDisplay.action({ action: "close" });
         }
         if (this.pos.config.cash_control) {
             const response = await this.pos.data.call(
@@ -215,6 +214,11 @@ export class ClosePosPopup extends Component {
                 this.pos.session.id,
                 this.state.notes,
             ]);
+            this.pos.data.withoutSyncing(() => {
+                this.pos.session.update({
+                    state: "closing_control",
+                });
+            });
         } catch (error) {
             // We have to handle the error manually otherwise the validation check stops the script.
             // In case of "rescue session", we want to display the next popup with "handleClosingError".
@@ -242,6 +246,7 @@ export class ClosePosPopup extends Component {
                 return this.handleClosingError(response);
             }
             this.pos.session.state = "closed";
+            await this.pos.data.flush();
             this.pos.router.close();
         } catch (error) {
             if (error instanceof ConnectionLostError) {
@@ -302,11 +307,8 @@ export class ClosePosPopup extends Component {
             },
             cancel: async () => {
                 if (!response.redirect) {
-                    const now = DateTime.now();
-                    const ordersDraft = this.pos.models["pos.order"].filter(
-                        (o) => !o.finalized && !(o.preset_time && o.preset_time > now)
-                    );
-                    await this.pos.deleteOrders(ordersDraft, response.open_order_ids);
+                    const ordersDraft = this.pos.models["pos.order"].filter((o) => !o.finalized);
+                    await this.pos.deleteOrders(ordersDraft);
                     this.closeSession();
                 }
             },

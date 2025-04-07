@@ -380,8 +380,9 @@ class PosSession(models.Model):
 
     def action_pos_session_closing_control(self, balancing_account=False, amount_to_balance=0, bank_payment_method_diffs=None):
         bank_payment_method_diffs = bank_payment_method_diffs or {}
+        session_orders = self.get_session_orders()
         for session in self:
-            if any(order.state == 'draft' for order in self.get_session_orders()):
+            if any(order.state == 'draft' and len(order.lines) for order in session_orders):
                 raise UserError(_("You cannot close the POS while there are still draft orders for the day."))
             if session.state == 'closed':
                 raise UserError(_('This session is already closed.'))
@@ -547,11 +548,9 @@ class PosSession(models.Model):
         self.ensure_one()
         # Even if this is called in `post_closing_cash_details`, we need to call this here too for case
         # where cash_control = False
-        open_order_ids = self.get_session_orders().filtered(lambda o: o.state == 'draft').ids
         check_closing_session = self._cannot_close_session(bank_payment_method_diffs)
 
         if check_closing_session:
-            check_closing_session['open_order_ids'] = open_order_ids
             return check_closing_session
 
         self.config_id.close_session_snoozes()
@@ -565,7 +564,6 @@ class PosSession(models.Model):
         if isinstance(validate_result, dict):
             # imbalance accounting entry
             return {
-                'open_order_ids': open_order_ids,
                 'successful': False,
                 'message': validate_result.get('name'),
                 'redirect': True
@@ -600,8 +598,6 @@ class PosSession(models.Model):
         self.ensure_one()
         check_closing_session = self._cannot_close_session()
         if check_closing_session:
-            open_order_ids = self.get_session_orders().filtered(lambda o: o.state == 'draft').ids
-            check_closing_session['open_order_ids'] = open_order_ids
             return check_closing_session
 
         if not self.cash_journal_id:
@@ -657,7 +653,7 @@ class PosSession(models.Model):
         It should return {'successful': False, 'message': str, 'redirect': bool} if we can't close the session
         """
         bank_payment_method_diffs = bank_payment_method_diffs or {}
-        if any(order.state == 'draft' for order in self.get_session_orders()):
+        if any(order.state == 'draft' and len(order.lines) > 0 for order in self.get_session_orders()):
             return {'successful': False, 'message': _("You cannot close the POS while there are still draft orders for the day."), 'redirect': False}
         if self.state == 'closed':
             return {
@@ -1757,7 +1753,7 @@ class PosSession(models.Model):
                 )
 
     def _check_if_no_draft_orders(self):
-        draft_orders = self.get_session_orders().filtered(lambda order: order.state == 'draft')
+        draft_orders = self.get_session_orders().filtered(lambda order: order.state == 'draft' and len(order.lines))
         if draft_orders:
             raise UserError(_(
                     'There are still orders in draft state in the session. '

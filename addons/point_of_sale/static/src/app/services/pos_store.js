@@ -31,8 +31,6 @@ import { SelectionPopup } from "../components/popups/selection_popup/selection_p
 import { user } from "@web/core/user";
 import { normalize } from "@web/core/l10n/utils";
 import { WithLazyGetterTrap } from "@point_of_sale/lazy_getter";
-import { debounce } from "@web/core/utils/timing";
-import DevicesSynchronisation from "../utils/devices_synchronisation";
 import { formatDate, deserializeDateTime } from "@web/core/l10n/dates";
 import { ProductInfoPopup } from "@point_of_sale/app/components/popups/product_info_popup/product_info_popup";
 import { PresetSlotsPopup } from "@point_of_sale/app/components/popups/preset_slots_popup/preset_slots_popup";
@@ -118,9 +116,6 @@ export class PosStore extends WithLazyGetterTrap {
         this.router.popStateCallback = this.handleUrlParams.bind(this);
         this.searchProductDBState = null;
 
-        // Object mapping the order's name (which contains the uuid) to it's server_id after
-        // validation (order paid then sent to the backend).
-        this.validated_orders_name_server_id_map = {};
         this.numpadMode = "quantity";
         this.mobile_pane = "right";
         this.ticket_screen_mobile_pane = "left";
@@ -158,7 +153,6 @@ export class PosStore extends WithLazyGetterTrap {
         await this.initServerData();
 
         this.closeOtherTabs();
-        this.syncAllOrdersDebounced = debounce(this.syncAllOrders, 100);
         this._searchTriggered = false;
 
         if (this.env.debug) {
@@ -374,7 +368,6 @@ export class PosStore extends WithLazyGetterTrap {
     async initServerData() {
         await this.processServerData();
         await this.handleUrlParams();
-        this.data.connectWebSocket("CLOSING_SESSION", this.closingSessionNotification.bind(this));
         const process = await this.afterProcessServerData();
 
         if (this.router.state.current !== "LoginScreen" && !this.config.module_pos_hr) {
@@ -458,16 +451,6 @@ export class PosStore extends WithLazyGetterTrap {
         this.screenState.partnerList.offsetBySearch = {
             "": this.models["res.partner"].length,
         };
-
-        const models = Object.keys(this.models);
-        const dynamicModels = this.data.opts.dynamicModels;
-        const staticModels = models.filter((model) => !dynamicModels.includes(model));
-        const deviceSync = new DevicesSynchronisation(dynamicModels, staticModels, this);
-
-        this.deviceSync = deviceSync;
-        this.data.deviceSync = deviceSync;
-
-        await this.deviceSync.readDataFromServer();
 
         // Check cashier
         this.checkPreviousLoggedCashier();
@@ -748,7 +731,6 @@ export class PosStore extends WithLazyGetterTrap {
         }
 
         const openOrders = this.data.models["pos.order"].filter((order) => !order.finalized);
-        await this.syncAllOrders();
 
         if (!this.config.module_pos_restaurant) {
             if (this.router.state.params.orderUuid) {
@@ -1992,27 +1974,7 @@ export class PosStore extends WithLazyGetterTrap {
     }
     async closePos() {
         this._resetConnectedCashier();
-        // If pos is not properly loaded, we just go back to /web without
-        // doing anything in the order data.
-        if (!this) {
-            this.redirectToBackend();
-        }
-
-        if (this.session.state === "opening_control") {
-            const data = await this.data.call("pos.session", "delete_opening_control_session", [
-                this.session.id,
-            ]);
-
-            if (data.status === "success") {
-                this.redirectToBackend();
-            }
-        }
-
-        // If there are orders in the db left unsynced, we try to sync.
-        const syncSuccess = await this.pushOrdersWithClosingPopup();
-        if (syncSuccess) {
-            this.redirectToBackend();
-        }
+        this.redirectToBackend();
     }
     async selectPricelist(pricelist) {
         await this.getOrder().setPricelist(pricelist);
@@ -2025,10 +1987,6 @@ export class PosStore extends WithLazyGetterTrap {
             }
 
             order.preset_time = data.slot.datetime;
-            if (data.slot.datetime > DateTime.now()) {
-                this.addPendingOrder([order.id]);
-                await this.syncAllOrders({ orders: [order] });
-            }
         }
     }
     async handleSelectNamePreset(order) {
@@ -2449,6 +2407,9 @@ export class PosStore extends WithLazyGetterTrap {
 
     redirectToBackend() {
         window.location = "/odoo/action-point_of_sale.action_client_pos_menu";
+        this.data.flush().then(() => {
+            window.location = "/odoo/action-point_of_sale.action_client_pos_menu";
+        });
     }
 
     getExcludedProductIds() {

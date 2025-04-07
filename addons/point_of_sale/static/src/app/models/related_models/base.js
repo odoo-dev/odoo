@@ -58,10 +58,6 @@ export class Base extends WithLazyGetterTrap {
         this.uiState = uiState;
     }
 
-    isDirty() {
-        return this._dirty;
-    }
-
     formatDateOrTime(field, type = "datetime") {
         if (type === "date") {
             return formatDate(this[field]);
@@ -101,16 +97,5 @@ export class Base extends WithLazyGetterTrap {
 
     backLink(link) {
         return this.model.backLink(this, link);
-    }
-
-    _markDirty() {
-        if (this.models._loadingData || this._dirty) {
-            return;
-        }
-
-        this._dirty = true;
-        this.model.getParentFields().forEach((field) => {
-            this[field.name]?._markDirty?.();
-        });
     }
 }

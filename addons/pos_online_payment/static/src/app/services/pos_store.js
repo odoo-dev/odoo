@@ -16,8 +16,8 @@ patch(PosStore.prototype, {
             if (updatedOrder) {
                 order.state = updatedOrder.state;
             }
-            if (this.getOrder()?.id === id) {
-                this.updateOnlinePaymentsDataWithServer(this.getOrder(), false);
+            if (order.id === id) {
+                this.updateOnlinePaymentsDataWithServer(order, false);
             }
         });
     },

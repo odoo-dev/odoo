@@ -107,20 +107,9 @@ export class RecordStore {
      * @param {Array<Base>} - Map of records by ids.
      */
     getOrderedRecords(model) {
-        return Array.from(this.getRecordIterator(model));
-    }
-
-    /**
-     * Retrieves an iterator over the records in insertion order.
-     * @param model
-     * @returns {*}
-     */
-    getRecordIterator(model) {
-        return this.getRecordsMap(model, "id").values();
-    }
-
-    getFirstRecord(model) {
-        return this.getRecordsMap(model, "id").values().next().value;
+        return Array.from(this.getRecordsMap(model, "id").values()).filter(
+            (r) => r.active !== false
+        );
     }
 
     /**

@@ -614,7 +614,7 @@ class TestPoSBasicConfig(TestPoSCommon):
         ))
 
         # sync orders
-        self.env['pos.order'].sync_from_ui(orders)
+        self.env['pos.order'].create(orders)
 
         self.assertEqual(orders[0]['amount_return'], 0, msg='The amount return should be 0')
         self.assertEqual(orders[1]['amount_return'], 0, msg='The amount return should be 0')
@@ -823,20 +823,7 @@ class TestPoSBasicConfig(TestPoSCommon):
         session = self.pos_session
         order_data = self.create_ui_order_data([(self.product3, 1)])
         amount_paid = order_data['amount_paid']
-        with (
-            self.assertLogs('odoo.addons.point_of_sale.models.pos_order', level='DEBUG') as cm,
-            unittest.mock.patch('odoo.addons.point_of_sale.models.pos_order.randrange', return_value=1996)
-        ):
-            res = self.env['pos.order'].sync_from_ui([order_data])
-            # Basic check for logs on order synchronization
-            order_log_str = self.env['pos.order']._get_order_log_representation(order_data)
-            odoo_order_id = res['pos.order'][0]['id']
-            self.assertEqual(len(cm.output), 4)
-            self.assertEqual(cm.output[0], f"INFO:odoo.addons.point_of_sale.models.pos_order:PoS synchronisation #1996 started for PoS orders references: [{order_log_str}]")
-            self.assertTrue(cm.output[1].startswith(f'DEBUG:odoo.addons.point_of_sale.models.pos_order:PoS synchronisation #1996 processing order {order_log_str} order full data: '))
-            self.assertEqual(cm.output[2], f'INFO:odoo.addons.point_of_sale.models.pos_order:PoS synchronisation #1996 order {order_log_str} created pos.order #{odoo_order_id}')
-            self.assertEqual(cm.output[3], 'INFO:odoo.addons.point_of_sale.models.pos_order:PoS synchronisation #1996 finished')
-            
+
         session.post_closing_cash_details(amount_paid)
         session.close_session_from_ui()
 
@@ -882,7 +869,7 @@ class TestPoSBasicConfig(TestPoSCommon):
 
             order_data = self.create_ui_order_data([(self.product3, pos_data['p_qty'])])
             pos_data['amount_paid'] += order_data['amount_paid']
-            self.env['pos.order'].sync_from_ui([order_data])
+            self.env['pos.order'].create([order_data])
 
             session.post_closing_cash_details(pos_data['amount_paid'])
             session.close_session_from_ui()
@@ -1148,15 +1135,15 @@ class TestPoSBasicConfig(TestPoSCommon):
             return [p['product_variant_ids'][0] for p in available_top_product[:count]]
 
         self.patch(self.env.cr, 'now', lambda: datetime.now() + timedelta(days=1))
-        self.env['pos.order'].sync_from_ui([self.create_ui_order_data([(self.product1, 1)])])
+        self.env['pos.order'].create([self.create_ui_order_data([(self.product1, 1)])])
         self.assertEqual(get_top_product_ids(1), [self.product1.id])
 
         self.patch(self.env.cr, 'now', lambda: datetime.now() + timedelta(days=2))
-        self.env['pos.order'].sync_from_ui([self.create_ui_order_data([(self.product2, 1)])])
+        self.env['pos.order'].create([self.create_ui_order_data([(self.product2, 1)])])
         self.assertEqual(get_top_product_ids(2), [self.product1.id, self.product2.id])
 
         self.patch(self.env.cr, 'now', lambda: datetime.now() + timedelta(days=3))
-        self.env['pos.order'].sync_from_ui([self.create_ui_order_data([(self.product3, 1)])])
+        self.env['pos.order'].create([self.create_ui_order_data([(self.product3, 1)])])
         self.assertEqual(get_top_product_ids(3), [self.product1.id, self.product2.id, self.product3.id])
 
     def test_closing_entry_by_product(self):
@@ -1220,7 +1207,7 @@ class TestPoSBasicConfig(TestPoSCommon):
         ))
 
         # sync orders
-        self.env['pos.order'].sync_from_ui(orders)
+        self.env['pos.order'].create(orders)
         # close the session
         self.pos_session.action_pos_session_validate()
 
@@ -1270,7 +1257,7 @@ class TestPoSBasicConfig(TestPoSCommon):
         ))
 
         # sync orders
-        self.env['pos.order'].sync_from_ui(orders)
+        self.env['pos.order'].create(orders)
         # close the session
         self.pos_session.action_pos_session_validate()
 
@@ -1299,7 +1286,7 @@ class TestPoSBasicConfig(TestPoSCommon):
             [(self.product1, 5), (self.product0, 10)],
             payments=[(self.bank_pm1, 50)]
         ))
-        self.env['pos.order'].sync_from_ui(orders)
+        self.env['pos.order'].create(orders)
         self.pos_session.action_pos_session_validate()
 
         # open new session & create orders
@@ -1313,7 +1300,7 @@ class TestPoSBasicConfig(TestPoSCommon):
             [(self.product4, 1), (self.product2, 5)],
             payments=[(self.bank_pm1, 109.96)]
         ))
-        self.env['pos.order'].sync_from_ui(orders2)
+        self.env['pos.order'].create(orders2)
         self.pos_session.action_pos_session_validate()
 
         pos_orders = self.env['pos.order'].search([])
@@ -1329,171 +1316,3 @@ class TestPoSBasicConfig(TestPoSCommon):
         self.assertEqual(pos_orders.account_move.amount_total, round(sum(pos_orders.mapped('amount_total')), 2))
         self.assertEqual(pos_orders.account_move.payment_state, 'paid')
         self.assertEqual(pos_orders.account_move.state, 'posted')
-
-    def test_double_syncing_same_order(self):
-        """ Test that double syncing the same order doesn't create duplicates records
-        """
-        self.open_new_session()
-
-        # Create an order
-        order_data = self.create_ui_order_data([(self.product1, 1)], payments=[(self.cash_pm1, 10)], customer=self.customer, is_invoiced=True)
-        order_data['access_token'] = '0123456789'
-        res = self.env['pos.order'].sync_from_ui([order_data])
-        order_id = res['pos.order'][0]['id']
-
-        # Sync the same order again
-        res = self.env['pos.order'].sync_from_ui([order_data])
-        self.assertEqual(res['pos.order'][0]['id'], order_id, 'Syncing the same order should not create a new one')
-
-        order = self.env['pos.order'].browse(order_id)
-        self.assertEqual(order.picking_count, 1, 'Order should have one picking')
-        self.assertEqual(len(order.payment_ids), 1, 'Order should have one payment')
-        self.assertEqual(self.env['account.move'].search_count([('pos_order_ids', 'in', order.ids)]), 1, 'Order should have one invoice')
-
-    def test_pos_archived_combination(self):
-        product = self.env['product.template'].create({
-            'name': 'Product Test',
-            'available_in_pos': True,
-            'list_price': 10,
-            'taxes_id': False,
-        })
-
-        attribute_1, attribute_2, attribute_3 = self.env['product.attribute'].create([{
-            'name': 'Attribute 1',
-            'create_variant': 'always',
-            'value_ids': [(0, 0, {
-                'name': 'Value 1',
-            }), (0, 0, {
-                'name': 'Value 2',
-            })],
-        }, {
-            'name': 'Attribute 2',
-            'create_variant': 'always',
-            'value_ids': [(0, 0, {
-                'name': 'Value 1',
-            }), (0, 0, {
-                'name': 'Value 2',
-            })],
-        }, {
-            'name': 'Attribute 3',
-            'create_variant': 'always',
-            'value_ids': [(0, 0, {
-                'name': 'Value 1',
-            }), (0, 0, {
-                'name': 'Value 2',
-            })],
-        }])
-
-        _, _, ptal = self.env['product.template.attribute.line'].create([{
-            'product_tmpl_id': product.id,
-            'attribute_id': attribute_1.id,
-            'value_ids': [(6, 0, attribute_1.value_ids.ids)],
-            'sequence': 3,
-        }, {
-            'product_tmpl_id': product.id,
-            'attribute_id': attribute_2.id,
-            'value_ids': [(6, 0, attribute_2.value_ids.ids)],
-            'sequence': 2,
-        }, {
-            'product_tmpl_id': product.id,
-            'attribute_id': attribute_3.id,
-            'value_ids': [(6, 0, attribute_3.value_ids.ids)],
-            'sequence': 1,
-        }])
-
-        product.write({
-            'attribute_line_ids': [(2, ptal.id)],
-        })
-
-        self.open_new_session()
-        response = self.pos_session.load_data([])
-        product_data = next((item for item in response['product.template'] if item['id'] == product.id), None)
-
-        self.assertEqual(len(product_data['_archived_combinations']), 0, "There should be no archived combinations for the product")
-
-        first_variant = product.product_variant_ids[0]
-        first_variant.write({'active': False})
-
-        response = self.pos_session.load_data([])
-        product_data = next((item for item in response['product.template'] if item['id'] == product.id), None)
-
-        self.assertEqual(len(product_data['_archived_combinations']), 1, "There should be one archived combination for the product")
-        self.assertEqual(len(product_data['_archived_combinations'][0]), 2, "Archived combination should have two values")
-        self.assertTrue(all(value in product_data['_archived_combinations'][0] for value in first_variant.product_template_attribute_value_ids.ids), "Archived combination should match the first variant's attribute values")
-
-    def test_refunded_order_id(self):
-        """
-        An order containing refunded lines from two different orders is no longer allowed,
-        but some legacy records of this kind may still exist.
-        This test ensures that the refunded_order_id is correctly computed in such cases.
-        """
-        current_session = self.open_new_session()
-        orders = list(self._create_orders([
-            {'pos_order_lines_ui_args': [(self.product1, 1)]},
-            {'pos_order_lines_ui_args': [(self.product2, 1)]}
-        ]).values())
-
-        refund_order = self.env['pos.order'].create({
-            'company_id': self.env.company.id,
-            'session_id': current_session.id,
-            'lines': [
-                (0, 0, {
-                    'product_id': self.product1.id,
-                    'price_unit': -10,
-                    'qty': 1,
-                    'tax_ids': [[6, False, []]],
-                    'price_subtotal': -10,
-                    'price_subtotal_incl': -10,
-                    'refunded_orderline_id': orders[0].lines[0].id
-                }),
-                (0, 0, {
-                    'product_id': self.product2.id,
-                    'price_unit': -10,
-                    'qty': 1,
-                    'tax_ids': [[6, False, []]],
-                    'price_subtotal': -10,
-                    'price_subtotal_incl': -10,
-                    'refunded_orderline_id': orders[1].lines[0].id
-                })
-            ],
-            'amount_paid': -10,
-            'amount_total': -10,
-            'amount_tax': 0.0,
-            'amount_return': 0.0,
-        })
-
-        self.assertEqual(refund_order.refunded_order_id, orders[0])
-
-    def test_cannot_archive_journal_linked_to_pos_payment_method(self):
-        """Test that archiving a journal linked to a POS payment method is blocked, and allowed when not linked."""
-
-        test_journal = self.env['account.journal'].create({
-            'name': 'Test POS Journal',
-            'type': 'cash',
-            'code': 'TPJ',
-            'company_id': self.env.company.id,
-        })
-        test_payment_method = self.env['pos.payment.method'].create({
-            'name': 'Test PM',
-            'journal_id': test_journal.id,
-            'receivable_account_id': self.cash_pm1.receivable_account_id.id,
-        })
-
-        with self.assertRaises(ValidationError):
-            test_journal.action_archive()
-
-        # Unlink the payment method and try again (should succeed)
-        test_payment_method.journal_id = False
-        test_journal.action_archive()
-        self.assertFalse(test_journal.active, "Journal should be archived when not linked to a POS payment method.")
-
-    def test_archive_delete_special_product(self):
-        special_product = self.env.ref('point_of_sale.product_product_tip')
-        with self.assertRaisesRegex(UserError, "You cannot archive a product that is set as a special product in a Point of Sale configuration. Please change the configuration first."):
-            special_product.action_archive()
-        with self.assertRaisesRegex(UserError, "You cannot archive a product that is set as a special product in a Point of Sale configuration. Please change the configuration first."):
-            special_product.product_variant_ids[0].action_archive()
-        with self.assertRaisesRegex(UserError, "You cannot archive a product that is set as a special product in a Point of Sale configuration. Please change the configuration first."):
-            special_product.unlink()
-        with self.assertRaisesRegex(UserError, "You cannot archive a product that is set as a special product in a Point of Sale configuration. Please change the configuration first."):
-            special_product.product_variant_ids[0].unlink()

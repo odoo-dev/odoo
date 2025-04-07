@@ -61,8 +61,7 @@ class PosOrder(models.Model):
             return data
 
         AccountTax = self.env['account.tax']
-        pos_orders = self.browse([o['id'] for o in data["pos.order"]])
-        for pos_order in pos_orders:
+        for pos_order in [order for order in self if order.state == 'paid']:
             # TODO: the way to retrieve the sale order in not consistent... is it a bad code or intended?
             used_pos_lines = pos_order.lines.sale_order_origin_id.order_line.pos_order_line_ids
             downpayment_pos_order_lines = pos_order.lines.filtered(lambda line: (
@@ -133,8 +132,7 @@ class PosOrder(models.Model):
                 else:
                     # We make sure that the original picking still has the correct quantity reserved
                     picking.action_assign()
-
-        return data
+        return res
 
     def action_view_sale_order(self):
         self.ensure_one()

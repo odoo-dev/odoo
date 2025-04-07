@@ -65,7 +65,7 @@ export class ConfirmationPage extends Component {
             return this.initOrder(false);
         }
 
-        this.selfOrder.selectedOrderUuid = order.uuid;
+        this.selfOrder.selectedOrderUuid = order?.uuid;
 
         if (
             !order ||

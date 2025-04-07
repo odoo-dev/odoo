@@ -182,7 +182,7 @@ patch(ProductScreen.prototype, {
                 });
 
                 // This will throw an error on creation if not possible (python constraint)
-                this.pos.models["event.registration"].create({
+                const eventRegistraton = this.pos.models["event.registration"].create({
                     ...userData,
                     event_id: event,
                     event_ticket_id: ticket,

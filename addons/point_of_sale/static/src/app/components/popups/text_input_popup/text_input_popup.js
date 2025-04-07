@@ -55,6 +55,7 @@ export class TextInputPopup extends Component {
 
     onKeydown(ev) {
         if (this.props.rows === 1 && ev.key.toUpperCase() === "ENTER") {
+            ev.stopPropagation();
             this.confirm();
         }
     }

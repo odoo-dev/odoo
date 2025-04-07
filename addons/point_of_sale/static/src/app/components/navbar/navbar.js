@@ -17,7 +17,7 @@ import { _t } from "@web/core/l10n/translation";
 import { uuidv4 } from "@point_of_sale/utils";
 import { QrCodeCustomerDisplay } from "@point_of_sale/app/customer_display/customer_display_qr_code_popup";
 import { useAsyncLockedMethod } from "@point_of_sale/app/hooks/hooks";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { session } from "@web/session";
 
 export class Navbar extends Component {
     static template = "point_of_sale.Navbar";
@@ -28,7 +28,6 @@ export class Navbar extends Component {
         Input,
         Dropdown,
         DropdownItem,
-        SyncPopup,
         OrderTabs,
     };
     static props = {};
@@ -50,11 +49,8 @@ export class Navbar extends Component {
         this.openPresetTiming = useAsyncLockedMethod(this.openPresetTiming);
     }
 
-    openLnaPopup() {
-        this.dialog.add(AlertDialog, {
-            title: _t("LNA Permission status"),
-            body: this.pos.lnaState.message,
-        });
+    isDebug() {
+        return odoo.debug || session.test_mode;
     }
 
     handleKeydown(event) {

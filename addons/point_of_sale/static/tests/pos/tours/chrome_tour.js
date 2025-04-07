@@ -115,36 +115,6 @@ registry.category("web_tour.tours").add("ChromeTour", {
         ].flat(),
 });
 
-registry.category("web_tour.tours").add("OrderModificationAfterValidationError", {
-    steps: () =>
-        [
-            Chrome.startPoS(),
-            Dialog.confirm("Open Register"),
-            ProductScreen.clickDisplayedProduct("Test Product", true, "1"),
-            ProductScreen.clickPayButton(),
-            PaymentScreen.clickPaymentMethod("Bank", true, { remaining: "0.0" }),
-            PaymentScreen.clickValidate(),
-            FeedbackScreen.isShown(),
-
-            // Dialog showing the error
-            Dialog.confirm(),
-
-            FeedbackScreen.clickNextOrder(),
-            ProductScreen.isShown(),
-            ProductScreen.selectFloatingOrder(0),
-            PaymentScreen.isShown(),
-            PaymentScreen.clickBack(),
-            ProductScreen.isShown(),
-            {
-                isActive: ["mobile"],
-                ...ProductScreen.back(),
-            },
-
-            // Allow order changes after the error
-            ProductScreen.clickDisplayedProduct("Test Product", true, "2"),
-        ].flat(),
-});
-
 registry.category("web_tour.tours").add("test_tracking_number_closing_session", {
     undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>

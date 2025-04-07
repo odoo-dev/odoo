@@ -871,25 +871,6 @@ registry.category("web_tour.tours").add("test_product_create_update_from_fronten
         ].flat(),
 });
 
-registry.category("web_tour.tours").add("test_draft_orders_not_syncing", {
-    steps: () =>
-        [
-            Chrome.startPoS(),
-            Dialog.confirm("Open Register"),
-            ProductScreen.orderIsEmpty(),
-            ProductScreen.clickDisplayedProduct("Desk Pad"),
-            ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Acme Corporation"),
-            Chrome.createFloatingOrder(),
-            ProductScreen.clickDisplayedProduct("Desk Pad"),
-            ProductScreen.clickPayButton(),
-            PaymentScreen.clickPaymentMethod("Bank"),
-            PaymentScreen.clickValidate(),
-            FeedbackScreen.isShown(),
-            Chrome.endTour(),
-        ].flat(),
-});
-
 registry.category("web_tour.tours").add("test_fiscal_position_tax_group_labels", {
     steps: () =>
         [
