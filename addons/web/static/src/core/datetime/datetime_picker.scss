@@ -15,21 +15,7 @@
     // Day
     .o_selected {
         color: $o-component-active-color;
-        background: $o-component-active-bg;
-    }
-
-    .o_select_start,
-    .o_select_end {
-        --selected-day-color: #{mix(lighten($o-component-active-border, 10%), $o-component-active-bg, 15%)};
-        --percent: calc(100% / sqrt(2));
-        background:
-            #{$o-component-active-bg}
-            radial-gradient(
-                circle,
-                var(--selected-day-color) 0% var(--percent),
-                transparent var(--percent) 100%
-            )
-        ;
+        background: mix(lighten($o-component-active-border, 10%), $o-component-active-bg, 15%);
     }
 
     .o_select_start{
