@@ -3465,7 +3465,7 @@ test(`timezone does not affect drag and drop on desktop`, async () => {
 
     await clickEvent(1);
     expect(`.o_event[data-event-id="1"]`).toHaveText("08:00\nevent 1");
-    expect(`.o_field_widget[name="start"]`).toHaveText("12/09/2016 08:00:00");
+    expect(`.o_field_widget[name="start"]`).toHaveText("Yesterday");
 
     await clickEvent(6);
     expect(`.o_event[data-event-id="6"]`).toHaveText("16:00\nevent 6");
@@ -3480,7 +3480,7 @@ test(`timezone does not affect drag and drop on desktop`, async () => {
 
     await clickEvent(1);
     expect(`.o_event[data-event-id="1"]`).toHaveText("08:00\nevent 1");
-    expect(`.o_field_widget[name="start"]`).toHaveText("12/09/2016 08:00:00");
+    expect(`.o_field_widget[name="start"]`).toHaveText("Yesterday");
 });
 
 test.tags("mobile");
@@ -3512,7 +3512,7 @@ test(`timezone does not affect drag and drop on mobile`, async () => {
 
     await clickEvent(1);
     expect(`.o_event[data-event-id="1"]`).toHaveText("event 1");
-    expect(`.o_field_widget[name="start"]`).toHaveText("12/09/2016 08:00:00");
+    expect(`.o_field_widget[name="start"]`).toHaveText("Yesterday");
     await closeCwPopOver();
 
     await clickEvent(6);
@@ -3529,7 +3529,7 @@ test(`timezone does not affect drag and drop on mobile`, async () => {
 
     await clickEvent(1);
     expect(`.o_event[data-event-id="1"]`).toHaveText("event 1");
-    expect(`.o_field_widget[name="start"]`).toHaveText("12/09/2016 08:00:00");
+    expect(`.o_field_widget[name="start"]`).toHaveText("Yesterday");
 });
 
 test.tags("desktop");

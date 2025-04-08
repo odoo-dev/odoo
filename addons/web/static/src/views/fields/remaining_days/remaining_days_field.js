@@ -51,14 +51,9 @@ export class RemainingDaysField extends Component {
                 return _t("Today");
             case 1:
                 return _t("Tomorrow");
+            default:
+                return this.formattedValue;
         }
-        if (Math.abs(this.diffDays) > 99) {
-            return this.formattedValue;
-        }
-        if (this.diffDays < 0) {
-            return _t("%s days ago", -this.diffDays);
-        }
-        return _t("In %s days", this.diffDays);
     }
 
     get formattedValue() {

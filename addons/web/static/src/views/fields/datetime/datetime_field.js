@@ -9,6 +9,8 @@ import { exprToBoolean } from "@web/core/utils/strings";
 import { formatDate, formatDateTime } from "../formatters";
 import { standardFieldProps } from "../standard_field_props";
 
+const { DateTime } = luxon;
+
 /**
  * @typedef {luxon.DateTime} DateTime
  *
@@ -179,17 +181,39 @@ export class DateTimeField extends Component {
         this.openPicker(valueIndex);
     }
 
+    diffDays(value) {
+        if (!value) {
+            return null;
+        }
+        const today = DateTime.local().startOf("day");
+        const diff = value.startOf("day").diff(today, "days");
+        return Math.floor(diff.days);
+    }
+
     /**
      * @param {number} valueIndex
      */
     getFormattedValue(valueIndex) {
         const value = this.values[valueIndex];
         const { condensed, showSeconds, showTime } = this.props;
-        return value
-            ? this.field.type === "date"
-                ? formatDate(value, { condensed })
-                : formatDateTime(value, { condensed, showSeconds, showTime })
-            : "";
+        const diff = this.diffDays(value);
+
+        switch (diff) {
+            case null:
+                return "";
+            case -1:
+                return _t("Yesterday");
+            case 0:
+                return _t("Today");
+            case 1:
+                return _t("Tomorrow");
+            default:
+                return value
+                    ? this.field.type === "date"
+                        ? formatDate(value, { condensed })
+                        : formatDateTime(value, { condensed, showSeconds, showTime })
+                    : "";
+        }
     }
 
     /**

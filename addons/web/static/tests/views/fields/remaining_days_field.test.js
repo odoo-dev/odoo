@@ -37,8 +37,8 @@ test("RemainingDaysField on a date field in list view", async () => {
     expect(cells[0]).toHaveText("Today");
     expect(cells[1]).toHaveText("Tomorrow");
     expect(cells[2]).toHaveText("Yesterday");
-    expect(cells[3]).toHaveText("In 2 days");
-    expect(cells[4]).toHaveText("3 days ago");
+    expect(cells[3]).toHaveText("10/10/2017");
+    expect(cells[4]).toHaveText("10/05/2017");
     expect(cells[5]).toHaveText("02/08/2018");
     expect(cells[6]).toHaveText("06/08/2017");
     expect(cells[7]).toHaveText("");
@@ -113,17 +113,17 @@ test("RemainingDaysField on a date field in multi edit list view", async () => {
     await edit("10/10/2017", { confirm: "enter" });
     await animationFrame();
     expect(".modal").toHaveCount(1);
-    expect(".modal .o_field_widget").toHaveText("In 2 days", {
-        message: "should have 'In 2 days' value to change",
+    expect(".modal .o_field_widget").toHaveText("10/10/2017", {
+        message: "should have 10/10/2017 value to change",
     });
     await click(".modal .modal-footer .btn-primary");
     await animationFrame();
 
-    expect(".o_data_row:eq(0) .o_data_cell:first").toHaveText("In 2 days", {
-        message: "should have 'In 2 days' as date field value",
+    expect(".o_data_row:eq(0) .o_data_cell:first").toHaveText("10/10/2017", {
+        message: "should have 10/10/2017 as date field value",
     });
-    expect(".o_data_row:eq(1) .o_data_cell:first").toHaveText("In 2 days", {
-        message: "should have 'In 2 days' as date field value",
+    expect(".o_data_row:eq(1) .o_data_cell:first").toHaveText("10/10/2017", {
+        message: "should have 10/10/2017 as date field value",
     });
 });
 
@@ -284,8 +284,8 @@ test("RemainingDaysField on a datetime field in list view in UTC", async () => {
         "Today",
         "Tomorrow",
         "Yesterday",
-        "In 2 days",
-        "3 days ago",
+        "10/10/2017",
+        "10/05/2017",
         "02/08/2018",
         "06/08/2017",
         "",
@@ -325,7 +325,7 @@ test("RemainingDaysField on a datetime field in list view in UTC+6", async () =>
         "Tomorrow",
         "Today",
         "Yesterday",
-        "In 2 days",
+        "10/10/2017",
     ]);
     expect(".o_data_cell .o_field_widget div:first").toHaveAttribute("title", "10/09/2017");
 });
@@ -350,8 +350,8 @@ test("RemainingDaysField on a date field in list view in UTC-6", async () => {
         "Today",
         "Tomorrow",
         "Yesterday",
-        "In 2 days",
-        "3 days ago",
+        "10/10/2017",
+        "10/05/2017",
     ]);
     expect(".o_data_cell .o_field_widget div:first").toHaveAttribute("title", "10/08/2017");
 });
@@ -378,7 +378,7 @@ test("RemainingDaysField on a datetime field in list view in UTC-8", async () =>
         "Today",
         "Tomorrow",
         "Yesterday",
-        "2 days ago",
+        "10/06/2017",
     ]);
 });
 
