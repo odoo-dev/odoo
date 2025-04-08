@@ -2,6 +2,7 @@
 import heapq
 import logging
 from collections import namedtuple
+import operator as py_operator
 
 from ast import literal_eval
 from collections import defaultdict
@@ -18,6 +19,16 @@ from odoo.tools.float_utils import float_compare, float_is_zero
 
 _logger = logging.getLogger(__name__)
 
+PY_OPERATORS = {
+    '<': py_operator.lt,
+    '>': py_operator.gt,
+    '<=': py_operator.le,
+    '>=': py_operator.ge,
+    '=': py_operator.eq,
+    '!=': py_operator.ne,
+    'in': lambda elem, container: elem in container,
+    'not in': lambda elem, container: elem not in container,
+}
 
 class StockQuant(models.Model):
     _name = 'stock.quant'
@@ -112,7 +123,7 @@ class StockQuant(models.Model):
     inventory_date = fields.Date(
         'Scheduled Date', compute='_compute_inventory_date', store=True, readonly=False,
         help="Next date the On Hand Quantity should be counted.")
-    last_count_date = fields.Date(compute='_compute_last_count_date', help='Last time the Quantity was Updated')
+    last_count_date = fields.Date(compute='_compute_last_count_date', search='_search_last_count_date', help='Last time the Quantity was Updated')
     inventory_quantity_set = fields.Boolean(store=True, compute='_compute_inventory_quantity_set', readonly=False)
     is_outdated = fields.Boolean('Quantity has been moved since last count', compute='_compute_is_outdated', search='_search_is_outdated')
     user_id = fields.Many2one(
@@ -178,6 +189,35 @@ class StockQuant(models.Model):
             _update_dict(date_by_quant, (location_dest_id, result_package_id, product_id, lot_id, owner_id), move_line_date)
         for quant in self:
             quant.last_count_date = date_by_quant.get((quant.location_id.id, quant.package_id.id, quant.product_id.id, quant.lot_id.id, quant.owner_id.id))
+
+    def _search_last_count_date(self, operator, value):
+        op = PY_OPERATORS.get(operator)
+        if not op:
+            return NotImplemented
+
+        move_lines = self.env['stock.move.line'].search([('state', '=', 'done'), ('is_inventory', '=', True)])
+        move_lines = move_lines.filtered(lambda ml: ml.date and op(ml.date.date(), value))
+
+        if not move_lines:
+            return [('id', 'in', [])]
+
+        domain = [
+            ('product_id', 'in', move_lines.mapped('product_id').ids),
+            '|',
+                ('lot_id', 'in', move_lines.mapped('lot_id').ids),
+                ('lot_id', '=', False),
+            '|',
+                ('owner_id', 'in', move_lines.mapped('owner_id').ids),
+                ('owner_id', '=', False),
+            ('location_id', 'in', move_lines.mapped('location_id').ids + move_lines.mapped('location_dest_id').ids),
+            '|',
+                '|',
+                    ('package_id', 'in', move_lines.mapped('package_id').ids),
+                    ('package_id', 'in', move_lines.mapped('result_package_id').ids),
+                ('package_id', '=', False),
+        ]
+        quants = self.env['stock.quant'].search(domain).filtered(lambda quant: bool(quant.last_count_date))
+        return [('id', 'in', quants.ids)]
 
     def _search(self, domain, *args, **kwargs):
         domain = Domain(domain).map_conditions(
