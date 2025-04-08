@@ -718,6 +718,7 @@ export class WebsiteSnippetsMenu extends weSnippetEditor.SnippetsMenu {
     }
 }
 
+
 weSnippetEditor.SnippetEditor.include({
     layoutElementsSelector: [
         weSnippetEditor.SnippetEditor.prototype.layoutElementsSelector,

@@ -4,6 +4,12 @@ export const rowSize = 50; // 50px.
 // Maximum number of rows that can be added when dragging a grid item.
 export const additionalRowLimit = 10;
 const defaultGridPadding = 10; // 10px (see `--grid-item-padding-(x|y)` CSS variables).
+// Avoid an unwanted rollback that prevents from deleting the text.
+const avoidRollback = (el) => {
+    for (const node of descendants(el)) {
+        node.ouid = undefined;
+    }
+};
 
 // Avoid an unwanted rollback that prevents from deleting the text.
 const avoidRollback = (el) => {
