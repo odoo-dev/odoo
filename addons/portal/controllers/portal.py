@@ -412,6 +412,10 @@ class CustomerPortal(Controller):
             'partner_id': partner_sudo.id,
             'current_partner': current_partner,
             'commercial_partner': current_partner.commercial_partner_id,
+            'login_field': (
+                # To whether display the login field
+                request.httprequest.full_path == '/my/account?',
+            ),
             'is_commercial_address': not current_partner or partner_sudo == commercial_partner,
             'commercial_address_update_url': (
                 # Only redirect to account update if the logged in user is their own commercial

@@ -403,7 +403,7 @@
                             >
                                 <div name="address_details" class="row">
                                     <t t-call="portal.address_form_fields">
-                                        <t t-set="login_field" t-value="true"/>
+                                    <!-- <t t-set="login_field" t-value="true"/> -->
                                     </t>
                                 </div>
                                 <t t-call="portal.address_footer"/>
