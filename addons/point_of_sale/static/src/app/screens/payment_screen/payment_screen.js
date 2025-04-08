@@ -6,19 +6,19 @@ import { useService } from "@web/core/utils/hooks";
 
 import { AlertDialog, ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { NumberPopup } from "@point_of_sale/app/components/popups/number_popup/number_popup";
-// import { DatePickerPopup } from "@point_of_sale/app/components/popups/date_picker_popup/date_picker_popup";
 import { ConnectionLostError, RPCError } from "@web/core/network/rpc";
 
 import { PaymentScreenPaymentLines } from "@point_of_sale/app/screens/payment_screen/payment_lines/payment_lines";
 import { PaymentScreenStatus } from "@point_of_sale/app/screens/payment_screen/payment_status/payment_status";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
-import { Component, onMounted, useState } from "@odoo/owl";
+import { Component, onMounted } from "@odoo/owl";
 import { Numpad, enhancedButtons } from "@point_of_sale/app/components/numpad/numpad";
 import { ask, makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { handleRPCError } from "@point_of_sale/app/utils/error_handlers";
 import { sprintf } from "@web/core/utils/strings";
 import { serializeDateTime } from "@web/core/l10n/dates";
 import { DateTimeInput } from "@web/core/datetime/datetime_input";
+
 export class PaymentScreen extends Component {
     static template = "point_of_sale.PaymentScreen";
     static components = {
@@ -48,7 +48,6 @@ export class PaymentScreen extends Component {
         this.payment_interface = null;
         this.error = false;
         this.validateOrder = useAsyncLockedMethod(this.validateOrder);
-        this.state = useState({ shippingDate: luxon.DateTime.now(), showShippingDateInput: false });
         onMounted(this.onMounted);
     }
 
@@ -75,14 +74,6 @@ export class PaymentScreen extends Component {
             this.currentOrder.setToInvoice(true);
         }
     }
-
-    // input_focus() {
-    //     if (!state.showShippingDateInput) return;
-    //     nextTick(() => {
-    //         const input = refs.shippingDateInput?.el.querySelector('input');
-    //         input?.click(); // or input?.focus();
-    //     });
-    // }
 
     getNumpadButtons() {
         const colorClassMap = {
@@ -257,33 +248,18 @@ export class PaymentScreen extends Component {
 
         pLine.setAmount(pLine.getAmount() - (tip || 0) + parseFloat(newTip));
     }
-    async toggleShippingDatePicker(date) {
-        this.state.shippingDate = date;
-        this.state.showShippingDateInput = !this.state.showShippingDateInput;
-
-        // if (!this.currentOrder.getShippingDate()) {
-        //     this.dialog.add(DatePickerPopup, {
-        //         title: _t("Select the shipping date"),
-        //         getPayload: (shippingDate) => {
-        //             this.currentOrder.setShippingDate(shippingDate);
-        //         },
-        //     });
-        // } else {
-        //     this.currentOrder.setShippingDate(false);
-        // }
-    }
 
     onClickShiplater() {
         if (!this.currentOrder.getShippingDate()) {
-            this.currentOrder.setShippingDate(serializeDateTime(luxon.DateTime.now()));
+            this.currentOrder.setShippingDate(luxon.DateTime.now().toFormat("yyyy-MM-dd"));
         }
     }
 
-    onChangeShippingDate(date) {
-        this.currentOrder.setShippingDate(serializeDateTime(date));
+    updateShippingDate(date) {
+        this.currentOrder.setShippingDate(date?.toFormat?.("yyyy-MM-dd") || date);
     }
 
-    removeShippingDate() {
+    clearShippingDate() {
         this.currentOrder.setShippingDate(false);
     }
 

@@ -135,18 +135,6 @@
                     t-on-click="openCashbox">
                     <i class="fa fa-archive me-2" />Open Cashbox 
                 </button>
-                <!-- <button t-if="pos.config.ship_later" class="button btn btn-secondary btn-lg d-flex justify-content-between align-items-baseline w-100 lh-lg" t-att-class="{ 'highlight active text-action': currentOrder.getShippingDate() }"
-                    >
-                    <DateTimeInput
-                        type="'date'"
-                        value="state.shippingDate"
-                        onChange.bind="toggleShippingDatePicker" />
-                    <span t-attf-class="{{currentOrder.getShippingDate() ? 'me-auto' : 'mx-auto' }}"><i class="fa fa-clock-o me-2" />Ship Later</span>
-                    <span t-if="currentOrder.getShippingDate()">
-                        <t t-esc="currentOrder.getShippingDate()" />
-                    </span>
-                </button> -->
-
                 <button
                     t-if="pos.config.ship_later"
                     class="button btn btn-secondary btn-lg d-flex justify-content-between align-items-center w-100 lh-lg"
@@ -162,16 +150,14 @@
                             <div style="width: 140px;">
                                 <DateTimeInput
                                     type="'date'"
-                                    value="state.shippingDate"
-                                    onChange.bind="onChangeShippingDate"
+                                    value="currentOrder.shipping_date"
+                                    onChange.bind="updateShippingDate"
                                 />
                             </div>
-                            <i class="fa fa-times-circle text-danger" role="button" t-on-click.stop="removeShippingDate" />
+                            <i class="fa fa-times-circle text-danger" role="button" t-on-click.stop="clearShippingDate" />
                         </div>
                     </div>
                 </button>
-
-
             </div>
         </div>
     </t>
