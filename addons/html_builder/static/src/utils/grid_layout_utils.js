@@ -5,6 +5,13 @@ export const rowSize = 50; // 50px.
 export const additionalRowLimit = 10;
 const defaultGridPadding = 10; // 10px (see `--grid-item-padding-(x|y)` CSS variables).
 
+// Avoid an unwanted rollback that prevents from deleting the text.
+const avoidRollback = (el) => {
+    for (const node of descendants(el)) {
+        node.ouid = undefined;
+    }
+};
+
 /**
  * Returns the grid properties: rowGap, rowSize, columnGap and columnSize.
  *
@@ -81,6 +88,31 @@ export function gridCleanUp(rowEl, columnEl) {
     rowEl.style.removeProperty("position");
 }
 /**
+ * Wraps the content of the container in a row and a column.
+ *
+ * @private
+ * @param {Element} containerEl element with the class "container"
+ */
+export function wrapInrowAndColumn(containerEl) {
+    // If the number of columns is "None", create a column with the content.
+    const rowEl = document.createElement("div");
+    rowEl.classList.add("row");
+
+    const columnEl = document.createElement("div");
+    columnEl.classList.add("col-lg-12");
+
+    const containerChildren = containerEl.children;
+    // Looping backwards because elements are removed, so the indexes are
+    // not lost.
+    for (let i = containerChildren.length - 1; i >= 0; i--) {
+        columnEl.prepend(containerChildren[i]);
+    }
+    avoidRollback(columnEl);
+    rowEl.appendChild(columnEl);
+    containerEl.appendChild(rowEl);
+    return rowEl;
+}
+/**
  * Toggles the row (= child element of containerEl) in grid mode.
  *
  * @private
@@ -89,12 +121,6 @@ export function gridCleanUp(rowEl, columnEl) {
 export function toggleGridMode(containerEl) {
     let rowEl = containerEl.querySelector(":scope > .row");
     const outOfRowEls = [...containerEl.children].filter((el) => !el.classList.contains("row"));
-    // Avoid an unwanted rollback that prevents from deleting the text.
-    const avoidRollback = (el) => {
-        for (const node of descendants(el)) {
-            node.ouid = undefined;
-        }
-    };
     // Keep the text selection.
     const restoreCursor =
         !rowEl || outOfRowEls.length > 0 ? preserveCursor(containerEl.ownerDocument) : () => {};
@@ -114,21 +140,7 @@ export function toggleGridMode(containerEl) {
 
     // If the number of columns is "None", create a column with the content.
     if (!rowEl) {
-        rowEl = document.createElement("div");
-        rowEl.classList.add("row");
-
-        const columnEl = document.createElement("div");
-        columnEl.classList.add("col-lg-12");
-
-        const containerChildren = containerEl.children;
-        // Looping backwards because elements are removed, so the indexes are
-        // not lost.
-        for (let i = containerChildren.length - 1; i >= 0; i--) {
-            columnEl.prepend(containerChildren[i]);
-        }
-        avoidRollback(columnEl);
-        rowEl.appendChild(columnEl);
-        containerEl.appendChild(rowEl);
+        rowEl = wrapInrowAndColumn(containerEl);
     }
     restoreCursor();
 

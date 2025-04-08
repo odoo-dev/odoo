@@ -13,7 +13,6 @@ import unittest
 @tagged('post_install', '-at_install', 'website_snippets')
 class TestSnippets(HttpCase):
 
-    @unittest.skip
     def test_01_empty_parents_autoremove(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'snippet_empty_parent_autoremove', login='admin')
 

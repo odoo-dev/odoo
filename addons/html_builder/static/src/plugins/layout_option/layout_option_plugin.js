@@ -3,6 +3,7 @@ import {
     convertToNormalColumn,
     reloadLazyImages,
     toggleGridMode,
+    wrapInrowAndColumn,
 } from "@html_builder/utils/grid_layout_utils";
 import { isMobileView } from "@html_builder/utils/utils";
 import { Plugin } from "@html_editor/plugin";
@@ -87,7 +88,11 @@ class LayoutOptionPlugin extends Plugin {
                     if (nbColumns === "custom") {
                         return;
                     }
-                    const rowEl = getRow(editingElement);
+                    let rowEl = getRow(editingElement);
+                    // If the number of columns is "None", create a column with the content.
+                    if (!rowEl) {
+                        rowEl = wrapInrowAndColumn(editingElement);
+                    }
                     const columnEls = rowEl.children;
                     const prevNbColumns = getNbColumns(columnEls, isMobileView(this.editable));
 
