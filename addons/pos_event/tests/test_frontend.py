@@ -133,7 +133,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('SellingEventInPosWithChoiceAnswers')
-
         order = self.env['pos.order'].search([], order='id desc', limit=1)
         event_registration = order.lines[0].event_registration_ids
         event_answer_name = event_registration.registration_answer_ids.value_answer_id.mapped('name')
@@ -170,7 +169,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'available_pricelist_ids': [(6, 0, [self.pricelist.id, self.special_pricelist.id])],
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'CheckEventTicketPrice', login="pos_user")
+        self.start_pos_tour('CheckEventTicketPrice')
 
     def test_selling_multislot_event_in_pos(self):
         self.pos_user.write({
@@ -214,7 +213,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.assertEqual(slot_2.seats_available, 2)
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'SellingMultiSlotEventInPos', login="pos_user")
+        self.start_pos_tour('SellingMultiSlotEventInPos')
 
         order = self.env['pos.order'].search([], order='id desc', limit=1)
         self.assertEqual(len(order.lines), 1)
@@ -236,7 +235,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             ],
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_selling_multiple_ticket_saved', login="pos_user")
+        self.start_pos_tour('test_selling_multiple_ticket_saved')
 
         order = self.env['pos.order'].search([], order='id desc', limit=1)
         self.assertTrue(order.lines[0].event_registration_ids)
@@ -276,7 +275,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         }])
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_pos_event_registration_not_mandatory', login="pos_user")
+        self.start_pos_tour('test_pos_event_registration_not_mandatory')
 
         registrations = self.env['event.registration'].search([('event_id', "=", self.test_event_registration_not_mandatory.id)])
         self.assertEqual(len(registrations), 4)

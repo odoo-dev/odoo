@@ -387,8 +387,7 @@ class TestFrontend(TestFrontendCommon):
         self.pos_config.write({'preparation_printer_ids': False})
         self.start_pos_tour('SplitBillScreenTour5Actions')
 
-    def test_pos_restaurant_course(self):
-        self.pos_config.with_user(self.pos_user).open_ui()
+    def test_pos_restaurant_course(self):        self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('test_pos_restaurant_course')
         order = self.pos_config.current_session_id.order_ids
         self.assertEqual(len(order), 1)
@@ -488,7 +487,7 @@ class TestFrontend(TestFrontendCommon):
             'value_ids': [(6, 0, [attribute_2_value.id, attribute_2_value_2.id])],
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour(f"/pos/ui/{self.main_pos_config.id}", 'PreparationPrinterContent', login="pos_user")
+        self.start_pos_tour('PreparationPrinterContent')
 
     def test_course_restaurant_preparation_tour(self):
         self.env['pos.printer'].create({
@@ -561,13 +560,13 @@ class TestFrontend(TestFrontendCommon):
         })
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour(f"/pos/ui/{self.main_pos_config.id}", 'MultiPreparationPrinter', login="pos_user")
+        self.start_pos_tour('MultiPreparationPrinter')
 
     def test_user_on_residual_order(self):
         self.pos_config.write({'preparation_printer_ids': False})
         self.pos_config.with_user(self.pos_admin).open_ui()
         self.start_pos_tour('LeaveResidualOrder', login="pos_admin")
-        self.start_pos_tour('FinishResidualOrder', login="pos_user")
+        self.start_pos_tour('FinishResidualOrder')
         orders = self.env['pos.order'].search([])
         self.assertEqual(orders[0].user_id.id, self.pos_user.id, "Pos user not registered on order")
         self.assertEqual(orders[1].user_id.id, self.pos_admin.id, "Pos admin not registered on order")
@@ -650,7 +649,7 @@ class TestFrontend(TestFrontendCommon):
         })
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour(f"/pos/ui/{self.main_pos_config.id}", 'test_multiple_preparation_printer_different_categories', login="pos_user")
+        self.start_pos_tour('test_multiple_preparation_printer_different_categories')
 
     def test_preset_timing_restaurant(self):
         """
@@ -752,7 +751,7 @@ class TestFrontend(TestFrontendCommon):
             'preparation_printer_ids': [Command.set(pos_printer.ids)],
         })
         self.pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour(f"/pos/ui/{self.pos_config.id}", 'test_combo_preparation_receipt_layout', login="pos_user")
+        self.start_pos_tour('test_combo_preparation_receipt_layout')
 
     def test_tip_after_payment(self):
         self.pos_config.write({'iface_tipproduct': True, 'tip_product_id': self.tip.id})
@@ -763,7 +762,7 @@ class TestFrontend(TestFrontendCommon):
         """
         Tests that when a customer is set, it will be saved and not be reset even if this is the only thing that changed in the order
         """
-        self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'test_customer_alone_saved', login="pos_user")
+        self.start_pos_tour('test_customer_alone_saved')
 
     def test_no_kitchen_confirmation_for_deposit_money(self):
         if not self.env["ir.module.module"].search([("name", "=", "pos_settle_due"), ("state", "=", "installed")]):

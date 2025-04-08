@@ -78,7 +78,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             ]
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PosSettleOrder', login="pos_user")
+        self.start_pos_tour('PosSettleOrder')
 
         #assert that sales order qty are correctly updated
         self.assertEqual(sale_order.order_line.qty_delivered, 3)
@@ -388,7 +388,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.assertEqual(sale_order.amount_total, 60)
 
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_import_lot_groupable_and_non_groupable', login="accountman")
+        self.start_pos_tour('test_import_lot_groupable_and_non_groupable', login="accountman")
 
     def test_customer_notes(self):
         """This test create an order and settle it in the PoS. It also uses multistep delivery
@@ -545,7 +545,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         sale_order.action_confirm()
 
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PosOrderDoesNotRemainInList', login="accountman")
+        self.start_pos_tour('PosOrderDoesNotRemainInList', login="accountman")
 
     def test_settle_draft_order_service_product(self):
         """
@@ -577,9 +577,8 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.assertEqual(sale_order.state, 'draft')
 
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PosSettleDraftOrder', login="accountman")
+        self.start_pos_tour('PosSettleDraftOrder', login="accountman")
         self.assertEqual(sale_order.state, 'sale')
-
     def test_settle_order_change_customer(self):
         """
         When settling an order, the price set on the sol shouldn't reset to
@@ -602,7 +601,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         sale_order.action_confirm()
 
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PosSettleCustomPrice', login="accountman")
+        self.start_pos_tour('PosSettleCustomPrice', login="accountman")
 
     def test_so_with_downpayment(self):
         self.product_a.available_in_pos = True
@@ -630,7 +629,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.main_pos_config.down_payment_product_id = self.env.ref("pos_sale.default_downpayment_product")
         self.main_pos_config.down_payment_product_id.write({'active': True})
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PoSSaleOrderWithDownpayment', login="accountman")
+        self.start_pos_tour('PoSSaleOrderWithDownpayment', login="accountman")
 
     def test_downpayment_with_taxed_product(self):
         tax_1 = self.env['account.tax'].create({
@@ -697,7 +696,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'down_payment_product_id': self.downpayment_product.id,
         })
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PoSDownPaymentLinesPerTax', login="accountman")
+        self.start_pos_tour('PoSDownPaymentLinesPerTax', login="accountman")
 
         # We check the content of the invoice to make sure Product A/B/C only appears only once
         legal_documents = self.env['pos.order'].search([]).account_move._get_invoice_legal_documents('pdf', allow_fallback=True)
@@ -757,7 +756,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         # Apply 10% down payment
         self.main_pos_config.open_ui()
         self.main_pos_config.down_payment_product_id = self.env.ref("pos_sale.default_downpayment_product")
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PoSApplyDownpayment', login="accountman")
+        self.start_pos_tour('PoSApplyDownpayment', login="accountman")
 
         invoice = so._create_invoices(final=True)
         invoice.action_post()
@@ -784,7 +783,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         sale_order.action_confirm()
         self.main_pos_config.write({'ship_later': True})
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PosShipLaterNoDefault', login="accountman")
+        self.start_pos_tour('PosShipLaterNoDefault', login="accountman")
 
     def test_order_sale_team(self):
         self.env['product.product'].create({
@@ -796,7 +795,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         sale_team = self.env['crm.team'].create({'name': 'Test team'})
         self.main_pos_config.write({'crm_team_id': sale_team})
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PosSaleTeam', login="accountman")
+        self.start_pos_tour('PosSaleTeam', login="accountman")
         order = self.env['pos.order'].search([])
         self.assertEqual(len(order), 1)
         self.assertEqual(order.crm_team_id, sale_team)
@@ -831,7 +830,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         })
         sale_order.action_confirm()
         self.main_pos_config.with_user(self.pos_admin).open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PosOrdersListDifferentCurrency', login="pos_admin")
+        self.start_pos_tour('PosOrdersListDifferentCurrency', login="pos_admin")
 
     def test_downpayment_amount_to_invoice(self):
         product_a = self.env['product.product'].create({
@@ -854,7 +853,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         sale_order.action_confirm()
         self.main_pos_config.down_payment_product_id = self.env.ref("pos_sale.default_downpayment_product")
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PoSDownPaymentAmount', login="accountman")
+        self.start_pos_tour('PoSDownPaymentAmount', login="accountman")
         self.assertEqual(sale_order.amount_to_invoice, 80.0, "Downpayment amount not considered!")
         self.assertEqual(sale_order.amount_invoiced, 20.0, "Downpayment amount not considered!")
 
@@ -937,7 +936,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.ship_later = True
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PosSettleOrder4', login="accountman")
+        self.start_pos_tour('PosSettleOrder4', login="accountman")
 
         self.assertEqual(sale_order.picking_ids[0].state, 'cancel')
         self.assertEqual(sale_order.pos_order_line_ids.order_id.picking_ids.state, 'assigned')
@@ -949,7 +948,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             {'name': 'A Test Customer 2', 'sale_warn_msg': 'Cannot afford our services'}
         ])
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PosSaleWarning', login="accountman")
+        self.start_pos_tour('PosSaleWarning', login="accountman")
 
     def test_downpayment_invoice(self):
         """This test check that users that don't have the pos user group can invoice downpayments"""
@@ -1101,13 +1100,12 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.ship_later = True
         self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PosSettleOrderShipLater', login="accountman")
+        self.start_pos_tour('PosSettleOrderShipLater', login="accountman")
 
         self.assertEqual(len(sale_order_single.picking_ids), 1)
         self.assertEqual(sale_order_single.picking_ids.state, "cancel")
         self.assertEqual(len(sale_order_single.pos_order_line_ids.order_id.picking_ids), 1)
         self.assertEqual(sale_order_single.pos_order_line_ids.order_id.picking_ids.state, "assigned")
-
         # The pos order is being shipped later so the qty_delivered should still be 0
         self.assertEqual(sale_order_single.order_line[0].qty_delivered, 0)
 
@@ -1149,7 +1147,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         })
         sale_order.action_confirm()
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PosSettleOrder5', login="accountman")
+        self.start_pos_tour('PosSettleOrder5', login="accountman")
         self.assertEqual(sale_order.order_line.qty_invoiced, 0)
         self.assertEqual(sale_order.order_line.qty_delivered, 0)
 
@@ -1254,7 +1252,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         })
 
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'POSSalePaymentScreenInvoiceOrder', login="accountman")
+        self.start_pos_tour('POSSalePaymentScreenInvoiceOrder', login="accountman")
 
         order = self.env['pos.order'].search([('partner_id', '=', partner_test.id)], limit=1)
         self.assertTrue(order)
@@ -1319,7 +1317,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         })
         sale_order.action_confirm()
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'test_settle_order_with_lot', login="accountman")
+        self.start_pos_tour('test_settle_order_with_lot', login="accountman")
 
     def test_down_payment_displayed(self):
         """
@@ -1682,10 +1680,10 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             })],
         })
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_multiple_lots_sale_order_1', login="accountman")
+        self.start_pos_tour('test_multiple_lots_sale_order_1', login="accountman")
         sale_order.action_confirm()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_multiple_lots_sale_order_2', login="accountman")
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_multiple_lots_sale_order_3', login="accountman")
+        self.start_pos_tour('test_multiple_lots_sale_order_2', login="accountman")
+        self.start_pos_tour('test_multiple_lots_sale_order_3', login="accountman")
         self.main_pos_config.current_session_id.action_pos_session_close()
         picking = sale_order.pos_order_line_ids.order_id.picking_ids
         self.assertEqual(picking.move_ids.quantity, 6)
@@ -1730,7 +1728,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             })]
         })
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_selected_partner_quotation_loading', login="accountman")
+        self.start_pos_tour('test_selected_partner_quotation_loading', login="accountman")
 
     def test_ecommerce_paid_order_is_hidden_in_pos(self):
         """
@@ -1772,7 +1770,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             "The amount_unpaid for the SO should be 0 after a successful transaction."
         )
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_ecommerce_paid_order_is_hidden_in_pos', login="accountman")
+        self.start_pos_tour('test_ecommerce_paid_order_is_hidden_in_pos', login="accountman")
 
     def test_ecommerce_unpaid_order_is_shown_in_pos(self):
         """
@@ -1798,7 +1796,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             sale_order.amount_unpaid, sale_order.amount_total,
             "The amount_unpaid for the SO should not be 0 if there are no transactions."
         )
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_ecommerce_unpaid_order_is_shown_in_pos', login="accountman")
+        self.start_pos_tour('test_ecommerce_unpaid_order_is_shown_in_pos', login="accountman")
 
     def test_backend_settle_refund(self):
         """Make sure that sale orders settled in PoS and refunded in the backend get their invoiced quantity updated correctly."""
@@ -1979,7 +1977,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
 
         sale_order.action_confirm()
         self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_settle_groupable_lot_total_amount', login="accountman")
+        self.start_pos_tour('test_settle_groupable_lot_total_amount', login="accountman")
 
     def test_refund_ship_later_qty_delivered(self):
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
@@ -2155,4 +2153,4 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
                 })
             ]
         })
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_settle_changed_price_with_lots', login="accountman")
+        self.start_pos_tour('test_settle_changed_price_with_lots', login="accountman")
