@@ -7,6 +7,7 @@ from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.osv.expression import AND
 from odoo.tools import float_is_zero
+from datetime import datetime, timedelta
 
 
 class StockPickingBatch(models.Model):
@@ -60,6 +61,7 @@ class StockPickingBatch(models.Model):
               - If manually set then scheduled date for all transfers in batch will automatically update to this date.
               - If not manually changed and transfers are added/removed/updated then this will be their earliest scheduled date
                 but this scheduled date will not be set for all transfers in batch.""")
+    end_date = fields.Datetime('End Date', compute='_compute_end_date', store=True)
     is_wave = fields.Boolean('This batch is a wave')
     show_lots_text = fields.Boolean(compute='_compute_show_lots_text')
     estimated_shipping_weight = fields.Float(
@@ -67,6 +69,11 @@ class StockPickingBatch(models.Model):
     estimated_shipping_volume = fields.Float(
         "shipping_volume", compute='_compute_estimated_shipping_capacity', digits='Product Unit')
     properties = fields.Properties('Properties', definition='picking_type_id.batch_properties_definition', copy=True)
+
+    @api.depends('scheduled_date')
+    def _compute_end_date(self):
+        for batch in self:
+            batch.end_date = batch.scheduled_date + timedelta(hours=1) if batch.scheduled_date else False
 
     @api.depends('description')
     @api.depends_context('add_to_existing_batch')

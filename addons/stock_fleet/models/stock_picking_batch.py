@@ -24,7 +24,6 @@ class StockPickingBatch(models.Model):
         string="Weight %", compute='_compute_capacity_percentage')
     used_volume_percentage = fields.Float(
         string="Volume %", compute='_compute_capacity_percentage')
-    end_date = fields.Datetime('End Date', default=fields.Datetime.now)
 
     # Compute
     @api.depends('vehicle_id')

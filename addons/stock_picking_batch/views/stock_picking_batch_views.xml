@@ -104,7 +104,8 @@
                             <field name="user_id" readonly="state not in ['draft', 'in_progress']"/>
                             <field name="picking_type_id" readonly="state != 'draft'"/>
                             <field name="company_id" groups="base.group_multi_company" readonly="picking_ids" force_save="1"/>
-                            <field name="scheduled_date" readonly="state in ['cancel', 'done']"/>
+                            <field name="scheduled_date" readonly="state in ['cancel', 'done']" widget="daterange"
+                                options="{'end_date_field': 'end_date'}"/>
                             <field name="description"/>
                         </group>
                         <field name="properties" nolabel="1" columns="2" hideAddButton="1"/>
