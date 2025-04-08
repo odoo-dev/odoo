@@ -176,7 +176,7 @@ export class WebsiteBuilder extends Component {
 
     async reloadEditor(param) {
         this.target = param.target || null;
-        await this.reloadIframe(this.state.isEditing, param.url);
+        await this.reloadIframe(this.state.isEditing, param.url, param.selector);
         // trigger an new instance of the builder menu
         this.state.key++;
 
@@ -194,7 +194,7 @@ export class WebsiteBuilder extends Component {
         this.addSystrayItems();
     }
 
-    async reloadIframe(isEditing = true, url) {
+    async reloadIframe(isEditing = true, url, selector) {
         this.ui.block();
         this.setIframeLoaded();
         if (url) {
@@ -215,6 +215,23 @@ export class WebsiteBuilder extends Component {
                 );
             });
             await this.loadAssetsEditBundle();
+            if (selector) {
+                const selectedEl =
+                    this.websiteContent.el.contentWindow.document.querySelector(selector);
+                if (selectedEl) {
+                    setTimeout(() => {
+                        selectedEl.dispatchEvent(
+                            new MouseEvent("pointerup", {
+                                bubbles: true,
+                                cancelable: true,
+                                pointerId: 1,
+                                clientX: 100,
+                                clientY: 100,
+                            })
+                        );
+                    });
+                }
+            }
         }
         this.ui.unblock();
     }
