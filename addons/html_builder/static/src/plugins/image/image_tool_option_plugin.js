@@ -130,9 +130,10 @@ class ImageToolOptionPlugin extends Plugin {
                 },
             },
             replaceMedia: {
-                load: async () => {
+                load: async ({ editingElement }) => {
                     let icon;
                     await this.dependencies.media.openMediaDialog({
+                        node: editingElement,
                         save: (newIcon) => {
                             icon = newIcon;
                         },
