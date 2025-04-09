@@ -667,6 +667,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
             ],
             'product': product,
             'view_track': view_track,
+            'pricelist': request.website.pricelist_id,
         }
 
     @route(['/shop/change_pricelist/<model("product.pricelist"):pricelist>'], type='http', auth="public", website=True, sitemap=False)
