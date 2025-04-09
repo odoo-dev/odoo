@@ -28,8 +28,7 @@ class DynamicSnippetCarouselOptionPlugin extends Plugin {
             selector: this.selector,
         },
         dynamic_snippet_template_updated: this.onTemplateUpdated.bind(this),
-        on_snippet_dropped_handlers: async ({ snippetEl }) =>
-            await this.onSnippetDropped(snippetEl, this.selector, this.modelNameFilter, []),
+        on_snippet_dropped_handlers: this.onSnippetDropped.bind(this),
     };
     onTemplateUpdated({ el, template }) {
         if (el.matches(this.selector)) {
@@ -54,16 +53,15 @@ class DynamicSnippetCarouselOptionPlugin extends Plugin {
             modelNameFilter: this.modelNameFilter,
         };
     }
-    async onSnippetDropped(snippetEl, selector, modelNameFilter, contextualFilterDomain) {
-        if (snippetEl.matches(selector)) {
-            await this.setOptionsDefaultValues(snippetEl, modelNameFilter, contextualFilterDomain);
+    async onSnippetDropped({ snippetEl }) {
+        if (snippetEl.matches(this.selector)) {
+            await this.setOptionsDefaultValues(snippetEl);
         }
     }
-    async setOptionsDefaultValues(snippetEl, modelNameFilter, contextualFilterDomain) {
+    async setOptionsDefaultValues(snippetEl) {
         await this.dependencies.dynamicSnippetOption.setOptionsDefaultValues(
             snippetEl,
-            modelNameFilter,
-            contextualFilterDomain
+            this.modelNameFilter
         );
         setOptionValueIfNotSet(snippetEl, "carouselInterval", "5000");
     }

@@ -22,8 +22,7 @@ class DynamicSnippetOptionPlugin extends Plugin {
             }),
         ],
         builder_actions: this.getActions(),
-        on_snippet_dropped_handlers: async ({ snippetEl }) =>
-            await this.onSnippetDropped(snippetEl, this.selector, this.modelNameFilter, []),
+        on_snippet_dropped_handlers: this.onSnippetDropped.bind(this),
     };
     setup() {
         this.dynamicFiltersCache = new Cache(this._fetchDynamicFilters, JSON.stringify);
@@ -37,12 +36,12 @@ class DynamicSnippetOptionPlugin extends Plugin {
         this.dynamicFiltersCache.invalidate();
         this.dynamicFilterTemplatesCache.invalidate();
     }
-    async onSnippetDropped(snippetEl, selector, modelNameFilter, contextualFilterDomain) {
-        if (snippetEl.matches(selector)) {
-            await this.setOptionsDefaultValues(snippetEl, modelNameFilter, contextualFilterDomain);
+    async onSnippetDropped({ snippetEl }) {
+        if (snippetEl.matches(this.selector)) {
+            await this.setOptionsDefaultValues(snippetEl, this.modelNameFilter);
         }
     }
-    async setOptionsDefaultValues(snippetEl, modelNameFilter, contextualFilterDomain) {
+    async setOptionsDefaultValues(snippetEl, modelNameFilter, contextualFilterDomain = []) {
         const fetchedDynamicFilters = await this.fetchDynamicFilters({
             model_name: modelNameFilter,
             search_domain: contextualFilterDomain,

@@ -22,13 +22,7 @@ class DynamicSnippetProductsOptionPlugin extends Plugin {
             selector: this.selector,
         },
         dynamic_snippet_template_updated: this.onTemplateUpdated.bind(this),
-        on_snippet_dropped_handlers: async ({ snippetEl }) =>
-            await this.onSnippetDropped(
-                snippetEl,
-                this.selector,
-                this.modelNameFilter,
-                getContextualFilterDomain(this.editable)
-            ),
+        on_snippet_dropped_handlers: this.onSnippetDropped.bind(this),
     };
     setup() {
         this.categories = undefined;
@@ -37,8 +31,8 @@ class DynamicSnippetProductsOptionPlugin extends Plugin {
         super.destroy();
         this.categories = undefined;
     }
-    async onSnippetDropped(snippetEl, selector, modelNameFilter, contextualFilterDomain) {
-        if (snippetEl.matches(selector)) {
+    async onSnippetDropped({ snippetEl }) {
+        if (snippetEl.matches(this.selector)) {
             for (const [optionName, value] of [
                 ["productCategoryId", "all"],
                 ["showVariants", true],
@@ -47,8 +41,8 @@ class DynamicSnippetProductsOptionPlugin extends Plugin {
             }
             await this.dependencies.dynamicSnippetCarouselOption.setOptionsDefaultValues(
                 snippetEl,
-                modelNameFilter,
-                contextualFilterDomain
+                this.modelNameFilter,
+                getContextualFilterDomain(this.editable)
             );
         }
     }

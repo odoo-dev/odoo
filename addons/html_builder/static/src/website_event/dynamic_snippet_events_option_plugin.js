@@ -17,16 +17,14 @@ class DynamicSnippetEventsOptionPlugin extends Plugin {
             },
             selector: this.selector,
         },
-        on_snippet_dropped_handlers: async ({ snippetEl }) =>
-            await this.onSnippetDropped(snippetEl, this.selector, this.modelNameFilter, []),
+        on_snippet_dropped_handlers: this.onSnippetDropped.bind(this),
     };
-    async onSnippetDropped(snippetEl, selector, modelNameFilter, contextualFilterDomain) {
-        if (snippetEl.matches(selector)) {
+    async onSnippetDropped({ snippetEl }) {
+        if (snippetEl.matches(this.selector)) {
             setOptionValueIfNotSet(snippetEl, "numberOfRecords", 3);
             await this.dependencies.dynamicSnippetOption.setOptionsDefaultValues(
                 snippetEl,
-                modelNameFilter,
-                contextualFilterDomain
+                this.modelNameFilter
             );
         }
     }
