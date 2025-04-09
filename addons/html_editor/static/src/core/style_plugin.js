@@ -15,6 +15,6 @@ export class StylePlugin extends Plugin {
         } else {
             delete parts.url;
         }
-        el.styles["background-image"] = backgroundImagePartsToCss(parts);
+        el.style["background-image"] = backgroundImagePartsToCss(parts);
     }
 }
