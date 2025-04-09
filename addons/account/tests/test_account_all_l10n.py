@@ -2,6 +2,7 @@
 import logging
 import time
 
+import odoo.sql_db
 from odoo.tests import standalone
 from odoo.addons.account.models.chart_template import AccountChartTemplate
 from unittest.mock import patch
@@ -34,7 +35,14 @@ def test_all_l10n(env):
         '!', ('name', '=like', 'l10n_hk_hr%'),  #failling for obscure reason
     ])
     with patch.object(AccountChartTemplate, 'try_loading', try_loading_patch):
-        l10n_mods.button_immediate_install()
+        module_t0 = time.time()
+        module_cursor_query_count = env.cr.sql_log_count
+        for mod in l10n_mods:
+            mod.button_immediate_install()
+        _logger.info("Module %s loaded in %.2fs, %s queries",
+            mod.name, time.time() - module_t0,
+            env.cr.sql_log_count - module_cursor_query_count,
+        )
 
     # In all_l10n tests we need to verify demo data
     demo_failures = env['ir.demo_failure'].search([])
@@ -71,6 +79,7 @@ def test_all_l10n(env):
     logger = logging.getLogger('odoo.loading')
     logger.runbot('ANALYZE took %s seconds', time.time() - start)  # not sure this one is usefull
     for (template_code, _template), company in zip(not_loaded_codes, companies):
+        t0 = time.time()
         env.user.company_ids += company
         env.user.company_id = company
         _logger.info('Testing COA: %s (company: %s)', template_code, company.name)
@@ -80,3 +89,8 @@ def test_all_l10n(env):
         except Exception:
             _logger.error("Error when creating COA %s", template_code, exc_info=True)
             env.cr.rollback()
+
+        _logger.info("Code %s try_loading took %.2fs, %s queries",
+            template_code, time.time() - t0,
+            env.cr.sql_log_count - module_cursor_query_count,
+        )
