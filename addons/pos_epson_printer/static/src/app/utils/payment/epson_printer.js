@@ -62,6 +62,11 @@ export class EpsonPrinter extends BasePrinter {
         const res = await fetch(this.address, {
             method: "POST",
             body: img,
+            headers: {
+                SOAPAction: "",
+                "If-Modified-Since": "Thu, 01 Jan 1970 00:00:00 GMT",
+                "Content-type": "text/xml; charset=UTF-8",
+            },
         });
         const body = await res.text();
         const parser = new DOMParser();
