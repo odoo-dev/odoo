@@ -834,7 +834,7 @@ class PropertiesDefinition(Field):
 
     def _validate_properties_definition(self, properties_definition, env):
         """Raise an error if the property definition is not valid."""
-        allowed_keys = self._allowed_keys(env) + env["base"]._allowed_keys_properties_definition()
+        allowed_keys = self._allowed_keys(env) + env["base"]._additional_allowed_keys_properties_definition()
 
         env["base"]._validate_properties_definition(properties_definition, self)
 

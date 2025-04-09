@@ -4738,7 +4738,7 @@ class BaseModel(metaclass=MetaModel):
     def _validate_properties_definition(self, properties_definition, field):
         """Allow to validate additional properties attributes."""
 
-    def _allowed_keys_properties_definition(self):
+    def _additional_allowed_keys_properties_definition(self):
         """Allow to add more allowed key for properties."""
         return ()
 
