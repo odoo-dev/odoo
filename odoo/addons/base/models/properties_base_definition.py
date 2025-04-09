@@ -30,8 +30,11 @@ class PropertiesBaseDefinition(models.Model):
                 _("The definition needs to be linked to a properties field.")
             )
 
+    def _get_record_for_properties(self, model_name, field_name):
+        return self.browse(self._get_record_id_for_properties(model_name, field_name))
+
     @ormcache('model_name', 'field_name')
-    def _get_or_create_record(self, model_name, field_name):
+    def _get_record_id_for_properties(self, model_name, field_name):
         definition_record = self.sudo().search(
             [
                 ("properties_field_id.model", "=", model_name),
@@ -48,4 +51,4 @@ class PropertiesBaseDefinition(models.Model):
                     .id,
                 },
             )
-        return definition_record
+        return definition_record.id

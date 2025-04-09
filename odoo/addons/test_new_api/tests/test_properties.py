@@ -124,7 +124,7 @@ class PropertiesCase(TestPropertiesMixin):
             self.env['res.partner'].with_user(self.test_user).create({
                 'name': 'test', 'properties': [{'name': 'test', 'type': 'char', 'definition_changed': True}]})
 
-        definition_record = self.env['properties.base.definition']._get_or_create_record('res.partner', 'properties')
+        definition_record = self.env['properties.base.definition']._get_record_for_properties('res.partner', 'properties')
         self.assertEqual(definition_record.properties_definition, [])
 
         record_0 = self.env['res.partner'].create([{'properties': [{'name': 'test', 'type': 'char', 'definition_changed': True, 'value': 'test'}], 'name': 'test'}, {'name': 'test'}])[0]

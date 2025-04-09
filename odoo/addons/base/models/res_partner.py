@@ -16,7 +16,7 @@ from werkzeug import urls
 
 from odoo import api, fields, models, tools, _, Command
 from odoo.exceptions import RedirectWarning, UserError, ValidationError
-from odoo.osv import expression
+from odoo.fields import Domain
 
 import typing
 if typing.TYPE_CHECKING:
@@ -306,14 +306,14 @@ class ResPartner(models.Model):
     properties_base_definition_id = fields.Many2one("properties.base.definition", compute="_compute_properties_base_definition_id", search="_search_properties_base_definition_id")
 
     def _compute_properties_base_definition_id(self):
-        self.properties_base_definition_id = self.env['properties.base.definition'].sudo()._get_or_create_record('res.partner', 'properties')
+        self.properties_base_definition_id = self.env['properties.base.definition'].sudo()._get_record_for_properties('res.partner', 'properties')
 
     def _search_properties_base_definition_id(self, operator, value):
-        properties_base_definition_id = self.env['properties.base.definition'].sudo()._get_or_create_record('res.partner', 'properties').id
+        properties_base_definition_id = self.env['properties.base.definition'].sudo()._get_record_id_for_properties('res.partner', 'properties')
         if not isinstance(value, (list, tuple)):
             value = (value,)
         value = properties_base_definition_id in value
-        return expression.TRUE_DOMAIN if operator in ('=', 'in') else expression.FALSE_DOMAIN
+        return Domain.TRUE if operator in ('=', 'in') else Domain.FALSE
 
     # hack to allow using plain browse record in qweb views, and used in ir.qweb.field.contact
     self: ResPartner = fields.Many2one(comodel_name='res.partner', compute='_compute_get_ids')
@@ -816,7 +816,7 @@ class ResPartner(models.Model):
                 vals['company_name'] = False
 
             # Needed to add the default properties values
-            vals['properties_base_definition_id'] = self.env['properties.base.definition'].sudo()._get_or_create_record('res.partner', 'properties').id
+            vals['properties_base_definition_id'] = self.env['properties.base.definition']._get_record_id_for_properties('res.partner', 'properties')
         partners = super().create(vals_list)
 
         if self.env.context.get('_partners_skip_fields_sync'):
