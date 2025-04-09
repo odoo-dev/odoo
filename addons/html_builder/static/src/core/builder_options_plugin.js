@@ -18,6 +18,7 @@ export class BuilderOptionsPlugin extends Plugin {
     static shared = [
         "getContainers",
         "updateContainers",
+        "deactivateContainers",
         "getPageContainers",
         "getRemoveDisabledReason",
         "getCloneDisabledReason",
@@ -113,6 +114,12 @@ export class BuilderOptionsPlugin extends Plugin {
 
         this.lastContainers = newContainers;
         this.dependencies.history.setStepExtra("optionSelection", this.target);
+        this.dispatchTo("change_current_options_containers_listeners", this.lastContainers);
+    }
+
+    deactivateContainers() {
+        this.target = null;
+        this.lastContainers = [];
         this.dispatchTo("change_current_options_containers_listeners", this.lastContainers);
     }
 
