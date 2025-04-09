@@ -53,7 +53,7 @@ class ImageFilterOptionPlugin extends Plugin {
                     const filterOptions = JSON.parse(img.dataset.filterOptions || "{}");
                     filterOptions[filterProperty] =
                         filterProperty === "filterColor" ? normalizeColor(value) : value;
-                    return await this.dependencies.imagePostProcess.processImage(img, {
+                    return this.dependencies.imagePostProcess.processImage(img, {
                         filterOptions: JSON.stringify(filterOptions),
                     });
                 },

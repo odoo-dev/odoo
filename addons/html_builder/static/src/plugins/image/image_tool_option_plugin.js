@@ -56,7 +56,7 @@ class ImageToolOptionPlugin extends Plugin {
                     const newDataset = Object.fromEntries(
                         cropperDataFieldsWithAspectRatio.map((field) => [field, undefined])
                     );
-                    return await this.dependencies.imagePostProcess.processImage(img, newDataset);
+                    return this.dependencies.imagePostProcess.processImage(img, newDataset);
                 },
                 apply: ({ loadResult: updateImageAttributes }) => {
                     updateImageAttributes();
