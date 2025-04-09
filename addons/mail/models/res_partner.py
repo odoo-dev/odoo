@@ -214,7 +214,7 @@ class Partner(models.Model):
 
     def _to_store(self, store: Store, /, *, fields=None, main_user_by_partner=None):
         if fields is None:
-            fields = ["active", "avatar_128", "email", "im_status", "is_company", "name", "user"]
+            fields = ["active", "avatar_128", "email", "im_status", "is_company", "name", "user", "tz"]
         if not self.env.user._is_internal() and "email" in fields:
             fields.remove("email")
         for partner in self:

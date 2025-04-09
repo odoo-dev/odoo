@@ -28,23 +28,28 @@
                             <span class="fw-bolder cursor-pointer opacity-75 opacity-100-hover o-hover-text-underline" t-esc="thread.parent_channel_id.displayName" t-on-click="() => this.thread.parent_channel_id.open()"/>
                             <i class="oi oi-chevron-right o-xsmaller mx-1"/>
                         </div>
-                        <AutoresizeInput
-                            className="'o-mail-Discuss-threadName fw-bolder flex-shrink-1 text-dark py-0 fs-4'"
-                            enabled="thread.is_editable or thread.channel_type === 'chat'"
-                            onValidate.bind="renameThread"
-                            value="thread.displayName"
-                        />
-                        <t t-if="thread.allowDescription and (thread.is_editable or (!thread.is_editable and thread.description))">
-                            <div class="flex-shrink-0 mx-1 py-2 border-start"/>
-                            <t t-set="autogrowDescriptionPlaceholder">Add a description</t>
+                        <div class="d-flex flex-column flex-grow-1">
                             <AutoresizeInput
-                                className="'o-mail-Discuss-threadDescription flex-shrink-1 text-muted small pt-1'"
-                                enabled="thread.is_editable"
-                                onValidate.bind="updateThreadDescription"
-                                placeholder="thread.is_editable ? autogrowDescriptionPlaceholder : ''"
-                                value="thread.description or ''"
+                                className="'o-mail-Discuss-threadName fw-bolder flex-shrink-1 text-dark py-0 fs-4'"
+                                enabled="thread.is_editable or thread.channel_type === 'chat'"
+                                onValidate.bind="renameThread"
+                                value="thread.displayName"
                             />
-                        </t>
+                            <t t-if="thread.allowDescription and (thread.is_editable or (!thread.is_editable and thread.description))">
+                                <div class="flex-shrink-0 mx-1 py-2 border-start"/>
+                                <t t-set="autogrowDescriptionPlaceholder">Add a description</t>
+                                <AutoresizeInput
+                                    className="'o-mail-Discuss-threadDescription flex-shrink-1 text-muted small pt-1'"
+                                    enabled="thread.is_editable"
+                                    onValidate.bind="updateThreadDescription"
+                                    placeholder="thread.is_editable ? autogrowDescriptionPlaceholder : ''"
+                                    value="thread.description or ''"
+                                />
+                            </t>
+                            <span t-if="thread.isDiffZone" class="text-muted px-1">
+                                <t t-esc="thread.localTime" />
+                            </span>
+                        </div>
                     </div>
                     <div class="o-mail-Discuss-headerActions flex-shrink-0 d-flex align-items-center ms-1">
                         <span t-if="partitionedActions.quick.length" class="o-mail-Discuss-headerActionsGroup btn-group border border-dark">

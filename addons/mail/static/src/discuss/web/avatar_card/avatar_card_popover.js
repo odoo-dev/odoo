@@ -2,6 +2,7 @@ import { useService } from "@web/core/utils/hooks";
 import { Component, onWillStart } from "@odoo/owl";
 import { useOpenChat } from "@mail/core/web/open_chat_hook";
 
+const { DateTime } = luxon;
 export class AvatarCardPopover extends Component {
     static template = "mail.AvatarCardPopover";
 
@@ -20,7 +21,7 @@ export class AvatarCardPopover extends Component {
     }
 
     get fieldNames() {
-        return ["name", "email", "phone", "im_status", "share", "partner_id"];
+        return ["name", "email", "phone", "im_status", "share", "tz", "partner_id"];
     }
 
     get email() {
@@ -29,6 +30,15 @@ export class AvatarCardPopover extends Component {
 
     get phone() {
         return this.user.phone;
+    }
+
+    get tz() {
+        return this.user.tz;
+    }
+
+    get localTime() {
+        const userTz = this.user.tz;
+        return DateTime.now().setZone(userTz).toLocaleString(DateTime.TIME_SIMPLE)+" "+userTz;
     }
 
     get showViewProfileBtn() {
