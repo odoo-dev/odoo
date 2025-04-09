@@ -233,7 +233,13 @@ class SaleOrderLine(models.Model):
             if project_only_sol_count == 1:
                 values['name'] = "%s - [%s] %s" % (values['name'], self.product_id.default_code, self.product_id.name) if self.product_id.default_code else "%s - %s" % (values['name'], self.product_id.name)
             values.update(self._timesheet_create_project_account_vals(self.order_id.project_id))
-            project = self.env['project.project'].create(values)
+
+            if self.order_id.project_id:
+                project = self.order_id.project_id
+                values.pop('name', None)
+                project.write(values)
+            else:
+                project = self.env['project.project'].create(values)
 
         # Avoid new tasks to go to 'Undefined Stage'
         if not project.type_ids:

@@ -1129,7 +1129,7 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
             {'order_id': so.id, 'product_id': self.product_order_service4.id, 'sequence': 4}, # service_tracking: 'project_only'
         ])
         so.action_confirm()
-        self.assertEqual(len(so.order_line.project_id | so.order_line.task_id.project_id), 3, "Three projects should be linked to the SO.")
+        self.assertEqual(len(so.order_line.project_id | so.order_line.task_id.project_id), 2, "Two projects should be linked to the SO.")
         self.assertFalse(sol_no_project.project_id, "`sol_no_project` should not generate any project.")
         self.assertEqual(
             so.project_id,
