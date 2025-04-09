@@ -1609,7 +1609,6 @@ export class PosStore extends WithLazyGetterTrap {
     }
     async sendOrderInPreparationUpdateLastChange(o, cancelled = false) {
         if (this.data.network.offline) {
-            this.data.network.warningTriggered = false;
             throw new ConnectionLostError();
         }
         await this.sendOrderInPreparation(o, { cancelled });

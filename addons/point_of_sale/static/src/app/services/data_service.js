@@ -10,6 +10,7 @@ import { getOnNotified, uuidv4 } from "@point_of_sale/utils";
 import { browser } from "@web/core/browser/browser";
 import { ConnectionLostError, RPCError } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
+import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
 const { DateTime } = luxon;
 const INDEXED_DB_VERSION = 1;
@@ -35,8 +36,9 @@ export class PosData extends Reactive {
         this.channels = [];
 
         this.network = {
-            warningTriggered: false,
-            offline: !navigator.onLine,
+            get offline() {
+                return !navigator.onLine;
+            },
             loading: true,
             unsyncData: [],
         };
@@ -44,16 +46,17 @@ export class PosData extends Reactive {
         this.initializeWebsocket();
         await this.intializeDataRelation();
         browser.addEventListener("online", () => {
-            if (this.network.offline) {
-                this.network.offline = false;
-                this.network.warningTriggered = false;
-            }
-
             this.syncData();
         });
 
         browser.addEventListener("offline", () => {
-            this.network.offline = true;
+            this.env.services.dialog.add(AlertDialog, {
+                title: _t("Connection Lost"),
+                body: _t(
+                    "Until the connection is reestablished, Odoo Point of Sale will operate with limited functionality."
+                ),
+                confirmLabel: _t("Continue with limited functionality"),
+            });
         });
 
         this.bus.addEventListener("connect", this.reconnectWebSocket.bind(this));
