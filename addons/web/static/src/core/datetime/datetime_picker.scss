@@ -4,7 +4,11 @@
     --DateTimePicker__Day-template-rows: 6;
 
     :not(.o_calendar_sidebar) > & {
-        width: 250px; // size with enough space for different language (e.g. Vietnamese)
+        // We need to compute the width to avoid decimals pixels (to avoid flickerin on hover).
+        // To do so, we know that we have 7 or 8 columns (week number or not) and we multiply
+        // by 5. This ratio has been chosen to have enough space for different language (e.g. Vietnamese)
+        // Finally, we have to take into account the gaps.
+        width: calc(5px * 7 * 8 + (2 * #{map-get($spacers, 2)}));
     }
 
     // Inputs
