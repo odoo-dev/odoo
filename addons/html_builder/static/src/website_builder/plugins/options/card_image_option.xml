@@ -86,17 +86,7 @@
         </BuilderRow>
 
         <!-- Alignment -->
-        <BuilderRow
-            t-if="!(isActiveItem('card_img_default_ratio_option') || state.hasSquareRatio || state.hasShape)"
-            label.translate="Alignment" level="1">
-            <BuilderRange
-                styleAction="'--card-img-ratio-align'"
-                action="'alignCoverImage'"
-                actionParam="state.imageToWrapperRatio gt 1 ? 'horizontal' : 'vertical'"
-                min="0"
-                max="100"
-                unit="'%'"/>
-        </BuilderRow>
+        <CardImageAlignmentOption label.translate="Alignment" level="1"/>
     </t>
 </t>
 

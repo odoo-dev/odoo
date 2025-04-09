@@ -3,6 +3,7 @@ import { registry } from "@web/core/registry";
 import { CardOption } from "./card_option";
 import { CARD_PARENT_HANDLERS } from "@html_builder/website_builder/plugins/options/utils";
 import { WebsiteBackgroundOption } from "./background_option";
+import { CarouselCardsItemOption } from "./carousel_cards_item_option";
 
 class CardOptionPlugin extends Plugin {
     static id = "cardOption";
@@ -35,6 +36,11 @@ class CardOptionPlugin extends Plugin {
                     withShapes: true,
                     withColorCombinations: true,
                 },
+            },
+            {
+                OptionComponent: CarouselCardsItemOption,
+                selector: ".s_carousel_cards_item",
+                applyTo: ":scope > .s_carousel_cards_card",
             },
         ],
         mark_color_level_selector_params: [
