@@ -9,6 +9,8 @@ import { user } from "@web/core/user";
 import { Deferred } from "@web/core/utils/concurrency";
 import { isMobileOS } from "@web/core/browser/feature_detection";
 
+const { DateTime } = luxon;
+
 /**
  * @typedef SuggestedRecipient
  * @property {string} email
@@ -419,6 +421,15 @@ export class Thread extends Record {
             );
         }
         return this.name;
+    }
+
+    get userTimeZone() {
+        return this.correspondent.persona.tz || "";
+    }
+
+    get localTime() {
+        const userTz = this.userTimeZone;
+        return DateTime.now().setZone(userTz).toLocaleString(DateTime.TIME_SIMPLE) + " " + userTz;
     }
 
     get correspondents() {
