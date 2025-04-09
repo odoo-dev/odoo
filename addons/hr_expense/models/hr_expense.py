@@ -1578,7 +1578,7 @@ class HrExpense(models.Model):
         for employee_sudo, expenses_sudo in self.sudo().grouped('employee_id').items():
             multiple_expenses_name = _("Expenses of %(employee)s", employee=employee_sudo.name)
             move_ref = expenses_sudo.name if len(expenses_sudo) == 1 else multiple_expenses_name
-            currency = expenses_sudo.currency_id if len(expenses_sudo.currency_id) == 1 else expenses_sudo.company_currency_id
+            currency = expenses_sudo.company_currency_id
             return_vals.append({
             **expenses_sudo._prepare_move_vals(),
                 'ref': move_ref,
