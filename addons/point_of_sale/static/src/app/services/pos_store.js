@@ -442,15 +442,20 @@ export class PosStore extends WithLazyGetterTrap {
                 return false;
             }
         }
+        await this.afterOrderDeletion(order);
         const orderIsDeleted = await this.deleteOrders([order]);
         if (orderIsDeleted) {
             order.uiState.displayed = false;
-            await this.afterOrderDeletion();
+            // await this.afterOrderDeletion();
         }
         return orderIsDeleted;
     }
-    async afterOrderDeletion() {
-        this.setOrder(this.getOpenOrders().at(-1) || (await this.addNewOrder()));
+    async afterOrderDeletion(order) {
+        this.setOrder(
+            this.getOpenOrders()
+                .filter((o) => o.id != order.id)
+                .at(-1) || (await this.addNewOrder())
+        );
     }
 
     async deleteOrders(orders, serverIds = [], ignoreChange = false) {
@@ -1130,14 +1135,14 @@ export class PosStore extends WithLazyGetterTrap {
         order.tracking_number = trackingNumber;
         return true;
     }
-    // selectNextOrder() {
-    //     const orders = this.models["pos.order"].filter((order) => !order.finalized);
-    //     if (orders.length > 0) {
-    //         this.selectedOrderUuid = orders[0].uuid;
-    //     } else {
-    //         return this.addNewOrder();
-    //     }
-    // }
+    async selectNextOrder() {
+        const orders = this.models["pos.order"].filter((order) => !order.finalized);
+        if (orders.length > 0) {
+            this.selectedOrderUuid = orders[0].uuid;
+        } else {
+            return await this.addNewOrder();
+        }
+    }
 
     addPendingOrder(orderIds, remove = false) {
         if (remove) {
