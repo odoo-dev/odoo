@@ -166,7 +166,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
                 amount=amount,
                 computation_key=f'down_payment,{self.id}',
                 grouping_function=grouping_function,
-            )
+            )['base_lines']
 
             # Update the sale order.
             order._create_down_payment_section_line_if_needed()

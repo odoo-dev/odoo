@@ -521,14 +521,180 @@ class SaleOrder(models.Model):
                 (remaining_amount_per_line[line] / line.price_total)
         return discountable, discountable_per_tax
 
+    def _prepare_loyalty_discount_so_lines(self, base_lines, reward, coupon, consumed_points):
+        self.ensure_one()
+        AccountTax = self.env['account.tax']
+        has_multiple_tax_combinations = len(set(base_line['tax_ids'] for base_line in base_lines if base_line['tax_ids'])) > 1
+        reward_identifier_code = _generate_random_reward_code()
+        reward_product = reward.discount_line_product_id
+        reward_program = reward.program_id
+        sequence = max(self.order_line.mapped('sequence') or 10) + 1
+
+        common_so_line_values = {
+            'product_id': reward_product.id,
+            'reward_id': reward.id,
+            'coupon_id': coupon.id,
+            'reward_identifier_code': reward_identifier_code,
+            'points_cost': 0.0,
+        }
+
+        if not base_lines:
+            if not reward_program.is_payment_program and any(line.reward_id.program_id.is_payment_program for line in self.order_line):
+                return [{
+                    **common_so_line_values,
+                    'name': _("TEMPORARY DISCOUNT LINE"),
+                    'product_uom_qty': 0.0,
+                    'tax_ids': [Command.clear()],
+                    'price_unit': 0.0,
+                    'points_cost': 0.0,
+                    'sequence': sequence,
+                }]
+            raise UserError(_("There is nothing to discount"))
+
+        so_line_values_list = []
+        for base_line in base_lines:
+
+            if reward_program.is_payment_program:
+                so_line_description = reward.description
+            elif has_multiple_tax_combinations:
+                so_line_description = self.env._(
+                    "Discount %(reward_description)s%%"
+                    "- On products with the following taxes %(taxes)s",
+                    reward_description=reward.description,
+                    taxes=", ".join(base_line['tax_ids'].mapped('name')),
+                )
+            else:
+                so_line_description = self.env._(
+                    "Discount %(reward_description)",
+                    reward_description=reward.description,
+                )
+
+            so_line_values_list.append({
+                **common_so_line_values,
+                'name': so_line_description,
+                'price_unit': base_line['price_unit'],
+                'product_uom_qty': base_line['quantity'],
+                'tax_ids': [Command.set(base_line['tax_ids'].ids)],
+                'extra_tax_data': AccountTax._export_base_line_extra_tax_data(base_line),
+                'sequence': sequence,
+            })
+            sequence += 1
+
+        return so_line_values_list
+
     def _get_reward_values_discount(self, reward, coupon, **kwargs):
         self.ensure_one()
         assert reward.reward_type == 'discount'
 
+        AccountTax = self.env['account.tax']
         reward_applies_on = reward.discount_applicability
         reward_product = reward.discount_line_product_id
         reward_program = reward.program_id
         reward_currency = reward.currency_id
+        current_points = self._get_real_points_for_coupon(coupon)
+        conversion_rate = self.env['res.currency']._get_conversion_rate(
+            from_currency=reward_currency,
+            to_currency=self.currency_id,
+            company=self.company_id,
+            date=fields.Date.today(),  # TODO: should be context_today imo, to check with Sale Team
+        )
+        discount_amount = reward.discount * conversion_rate
+        computation_key = f'loyalty_reward,{reward.id}'
+
+        if reward.discount_max_amount:
+            max_discount = reward_currency._convert(
+                from_amount=reward.discount_max_amount,
+                to_currency=self.currency_id,
+                company=self.company_id,
+                date=fields.Date.today(),
+            )
+        else:
+            max_discount = None
+
+        # Determine the base lines on which perform the computation.
+        discount_base_lines = []
+        if reward_applies_on == 'order':
+            excluded_order_lines = self._get_no_effect_on_threshold_lines()
+
+            def exclude_function(base_line, tax_data):
+                return base_line['record'] in excluded_order_lines and not base_line['record'].reward_id
+
+            def grouping_function(base_line):
+                return {'product_id': reward_product}
+
+            # Apply the reward on the current order.
+            order_lines = self.order_line.filtered(lambda x: not x.display_type)
+            base_lines = [line._prepare_base_line_for_taxes_computation() for line in order_lines]
+            AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
+            AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
+
+            # TODO: computation_key, what can I use to split the base lines? reward_identifier_code ?
+            if reward.discount_mode == 'per_point' and reward_program.is_payment_program:
+                results = AccountTax._prepare_loyalty_reward_lines_per_point(
+                    base_lines=base_lines,
+                    company=self.company_id,
+                    points=current_points,
+                    discount_per_point=discount_amount,
+                    computation_key=computation_key,
+                    grouping_function=grouping_function,
+                    exclude_function=exclude_function,
+                    max_discount=max_discount,
+                    is_payment_program=True,
+                )
+                discount_base_lines = results['base_lines']
+                consumed_points = results['consumed_points'] / conversion_rate
+            elif reward.discount_mode == 'per_point' and not reward_program.is_payment_program:
+                # Rewards cannot be partially offered to customers
+                # TODO: Not sure about the computation we make here...
+                available_points = current_points // reward.required_points * reward.required_points
+
+                results = AccountTax._prepare_loyalty_discount_reward_lines_per_point(
+                    base_lines=base_lines,
+                    company=self.company_id,
+                    points=available_points,
+                    discount_per_point=discount_amount,
+                    computation_key=computation_key,
+                    grouping_function=grouping_function,
+                    exclude_function=exclude_function,
+                    max_discount=max_discount,
+                )
+                discount_base_lines = results['base_lines']
+                consumed_points = results['consumed_points'] / conversion_rate
+            elif reward.discount_mode == 'per_order':
+                results = AccountTax._prepare_loyalty_discount_reward_lines_per_order(
+                    base_lines=base_lines,
+                    company=self.company_id,
+                    discount_amount=discount_amount,
+                    computation_key=computation_key,
+                    grouping_function=grouping_function,
+                    exclude_function=exclude_function,
+                    max_discount=max_discount,
+                )
+                discount_base_lines = results['base_lines']
+                consumed_points = reward.required_points
+            elif reward.discount_mode == 'percent':
+                results = AccountTax._prepare_loyalty_discount_reward_lines_percent(
+                    base_lines=base_lines,
+                    company=self.company_id,
+                    percentage=discount_amount,
+                    computation_key=computation_key,
+                    grouping_function=grouping_function,
+                    exclude_function=exclude_function,
+                    max_discount=max_discount,
+                )
+                discount_base_lines = results['base_lines']
+                consumed_points = reward.required_points
+
+            if reward.clear_wallet:
+                consumed_points = current_points
+
+        # return self._prepare_loyalty_discount_so_lines(discount_base_lines, reward, coupon, consumed_points)
+
+
+
+
+
+
         sequence = max(
             self.order_line.filtered(lambda x: not x.is_reward_line).mapped('sequence'),
             default=10

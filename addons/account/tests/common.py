@@ -1289,7 +1289,7 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
             company=self.env.company,
             amount_type=amount_type,
             amount=amount,
-        )
+        )['base_lines']
         new_document = copy.deepcopy(document)
         new_document['lines'] += base_lines
         AccountTax._add_tax_details_in_base_lines(new_document['lines'], self.env.company)
@@ -1342,7 +1342,7 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
             amount_type=amount_type,
             amount=amount,
             computation_key='down_payment',
-        )
+        )['base_lines']
         new_document = copy.deepcopy(document)
         new_document['lines'] = base_lines
         AccountTax._add_tax_details_in_base_lines(new_document['lines'], self.env.company)

@@ -150,7 +150,7 @@ class SaleOrderDiscount(models.TransientModel):
             amount=amount,
             computation_key=f'global_discount,{self.id}',
             grouping_function=grouping_function,
-        )
+        )['discount_base_lines']
         order.order_line = [
             Command.create(values)
             for values in self._prepare_global_discount_so_lines(global_discount_base_lines)
