@@ -136,7 +136,7 @@ class Binary(http.Controller):
                         assets_params=assets_params,
                     )
                     # check if the version matches. If not, redirect to the last version
-                    if not debug_assets and unique != ANY_UNIQUE and unique != bundle.get_version(asset_type):
+                    if not debug_assets and unique != ANY_UNIQUE and unique != bundle.get_checksum(asset_type):
                         return request.redirect(bundle.get_link(asset_type))
                     if css and bundle.stylesheets:
                         attachment = env['ir.attachment'].sudo().browse(bundle.css().id)

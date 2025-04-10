@@ -198,7 +198,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
         self.assertEqual(len(self._any_ira_for_bundle('min.js')), 1,
                          "there should be one minified attachment associated to this bundle")
 
-        version0 = bundle0.get_version('js')
+        version0 = bundle0.get_checksum('js')
         ira0 = self._any_ira_for_bundle('min.js')
         date0 = ira0.create_date
 
@@ -208,7 +208,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
         self.assertEqual(len(self._any_ira_for_bundle('min.js')), 1,
                          "there should be one minified attachment associated to this bundle")
 
-        version1 = bundle1.get_version('js')
+        version1 = bundle1.get_checksum('js')
         ira1 = self._any_ira_for_bundle('min.js')
         date1 = ira1.create_date
 
@@ -218,24 +218,19 @@ class TestJavascriptAssetsBundle(FileTouchable):
                          "the date of creation of the ir.attachment should not change because the bundle is unchanged")
 
     def test_03_date_invalidation(self):
-        """ Checks that a bundle is invalidated when one of its assets' modification date is changed.
+        """ Checks that a bundle is not invalidated when one of its assets' modification date is changed.
         """
         bundle0 = self._get_asset(self.jsbundle_name, debug_assets=True)
         bundle0.js()
-        last_modified0 = bundle0.get_checksum('js')
-        version0 = bundle0.get_version('js')
+        version0 = bundle0.get_checksum('js')
 
         path = file_path('test_assetsbundle/static/src/js/test_jsfile1.js')
         bundle1 = self._get_asset(self.jsbundle_name, debug_assets=True)
 
         with self._touch(path):
             bundle1.js()
-            last_modified1 = bundle1.get_checksum('js')
-            version1 = bundle1.get_version('js')
-            self.assertNotEqual(last_modified0, last_modified1,
-                                "the creation date of the ir.attachment should change because the bundle has changed.")
-            self.assertNotEqual(version0, version1,
-                                "the version must should because the bundle has changed.")
+            version1 = bundle1.get_checksum('js')
+            self.assertEqual(version0, version1, "the version should not change, because the bundle has not changed.")
 
             # check if the previous attachment is correctly cleaned
             self.assertEqual(len(self._any_ira_for_bundle('js')), 1,
@@ -248,7 +243,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
         bundle0 = self._get_asset(self.jsbundle_name)
         bundle0.js()
         files0 = bundle0.files
-        version0 = bundle0.get_version('js')
+        version0 = bundle0.get_checksum('js')
 
         self.assertEqual(len(self._any_ira_for_bundle('min.js')), 1,
                          "there should be one minified attachment associated to this bundle")
@@ -262,7 +257,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
         bundle1 = self._get_asset(self.jsbundle_name)
         bundle1.js()
         files1 = bundle1.files
-        version1 = bundle1.get_version('js')
+        version1 = bundle1.get_checksum('js')
 
         self.assertNotEqual(files0, files1,
                             "the list of files should be different because a file has been added to the bundle")
@@ -325,7 +320,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
 
         self.assertEqual(len(self._any_ira_for_bundle('min.css')), 1)
 
-        version0 = bundle0.get_version('css')
+        version0 = bundle0.get_checksum('css')
         ira0 = self._any_ira_for_bundle('min.css')
         date0 = ira0.create_date
 
@@ -334,7 +329,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
 
         self.assertEqual(len(self._any_ira_for_bundle('min.css')), 1)
 
-        version1 = bundle1.get_version('css')
+        version1 = bundle1.get_checksum('css')
         ira1 = self._any_ira_for_bundle('min.css')
         date1 = ira1.create_date
 
@@ -348,7 +343,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
         bundle0 = self._get_asset(self.cssbundle_name)
         bundle0.css()
         files0 = bundle0.files
-        version0 = bundle0.get_version('css')
+        version0 = bundle0.get_checksum('css')
 
         self.assertEqual(len(self._any_ira_for_bundle('min.css')), 1)
 
@@ -361,7 +356,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
         bundle1 = self._get_asset(self.cssbundle_name)
         bundle1.css()
         files1 = bundle1.files
-        version1 = bundle1.get_version('css')
+        version1 = bundle1.get_checksum('css')
 
         self.assertNotEqual(files0, files1)
         self.assertNotEqual(version0, version1)
@@ -441,7 +436,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
 
         self.assertEqual(len(self._any_ira_for_bundle('min.css')), 1)
 
-        ltr_version0 = ltr_bundle0.get_version('css')
+        ltr_version0 = ltr_bundle0.get_checksum('css')
         ltr_ira0 = self._any_ira_for_bundle('min.css')
         self.assertTrue(ltr_ira0)
 
@@ -450,7 +445,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
 
         self.assertEqual(len(self._any_ira_for_bundle('min.css')), 1)
 
-        ltr_version1 = ltr_bundle1.get_version('css')
+        ltr_version1 = ltr_bundle1.get_checksum('css')
         ltr_ira1 = self._any_ira_for_bundle('min.css')
         self.assertTrue(ltr_ira1)
 
@@ -461,7 +456,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
 
         self.assertEqual(len(self._any_ira_for_bundle('min.css', rtl=True)), 1)
 
-        rtl_version0 = rtl_bundle0.get_version('css')
+        rtl_version0 = rtl_bundle0.get_checksum('css')
         self._any_ira_for_bundle('min.css', rtl=True)
 
         rtl_bundle1 = self._get_asset(self.cssbundle_name, rtl=True, debug_assets=False)
@@ -469,7 +464,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
 
         self.assertEqual(len(self._any_ira_for_bundle('min.css', rtl=True)), 1)
 
-        rtl_version1 = rtl_bundle1.get_version('css')
+        rtl_version1 = rtl_bundle1.get_checksum('css')
         rtl_ira1 = self._any_ira_for_bundle('min.css', rtl=True)
 
         self.assertEqual(rtl_version0, rtl_version1)
@@ -484,17 +479,15 @@ class TestJavascriptAssetsBundle(FileTouchable):
         self.assertEqual(len(css_bundles), 2)
 
     def test_17_css_bundle_date_invalidation(self):
-        """ Checks that both css bundles are invalidated when one of its assets' modification date is changed
+        """ Checks that both css bundles remain valid
         """
         ltr_bundle0 = self._get_asset(self.cssbundle_name, debug_assets=True)
         ltr_bundle0.css()
-        ltr_last_modified0 = ltr_bundle0.get_checksum('css')
-        ltr_version0 = ltr_bundle0.get_version('css')
+        ltr_version0 = ltr_bundle0.get_checksum('css')
 
         rtl_bundle0 = self._get_asset(self.cssbundle_name, rtl=True, debug_assets=True)
         rtl_bundle0.css()
-        rtl_last_modified0 = rtl_bundle0.get_checksum('css')
-        rtl_version0 = rtl_bundle0.get_version('css')
+        rtl_version0 = rtl_bundle0.get_checksum('css')
 
         # Touch test_cssfile1.css
         # Note: No lang specific context given while calling _get_asset so it will load assets for en_US
@@ -503,20 +496,16 @@ class TestJavascriptAssetsBundle(FileTouchable):
 
         with self._touch(path):
             ltr_bundle1.css()
-            ltr_last_modified1 = ltr_bundle1.get_checksum('css')
-            ltr_version1 = ltr_bundle1.get_version('css')
+            ltr_version1 = ltr_bundle1.get_checksum('css')
             ltr_ira1 = self._any_ira_for_bundle('css')
-            self.assertNotEqual(ltr_last_modified0, ltr_last_modified1)
-            self.assertNotEqual(ltr_version0, ltr_version1)
+            self.assertEqual(ltr_version0, ltr_version1)
 
             rtl_bundle1 = self._get_asset(self.cssbundle_name, rtl=True, debug_assets=True)
 
             rtl_bundle1.css()
-            rtl_last_modified1 = rtl_bundle1.get_checksum('css')
-            rtl_version1 = rtl_bundle1.get_version('css')
+            rtl_version1 = rtl_bundle1.get_checksum('css')
             rtl_ira1 = self._any_ira_for_bundle('css', rtl=True)
-            self.assertNotEqual(rtl_last_modified0, rtl_last_modified1)
-            self.assertNotEqual(rtl_version0, rtl_version1)
+            self.assertEqual(rtl_version0, rtl_version1)
 
             # Checks rtl and ltr bundles are different
             self.assertNotEqual(ltr_ira1.id, rtl_ira1.id)
@@ -535,12 +524,12 @@ class TestJavascriptAssetsBundle(FileTouchable):
         ltr_bundle0 = self._get_asset(self.cssbundle_name)
         ltr_bundle0.css()
         ltr_files0 = ltr_bundle0.files
-        ltr_version0 = ltr_bundle0.get_version('css')
+        ltr_version0 = ltr_bundle0.get_checksum('css')
 
         rtl_bundle0 = self._get_asset(self.cssbundle_name, rtl=True)
         rtl_bundle0.css()
         rtl_files0 = rtl_bundle0.files
-        rtl_version0 = rtl_bundle0.get_version('css')
+        rtl_version0 = rtl_bundle0.get_checksum('css')
 
         css_bundles = self.env['ir.attachment'].search([
             ('url', '=like', f'/web/assets/%/{self.cssbundle_name}%.min.css'),
@@ -556,7 +545,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
         ltr_bundle1 = self._get_asset(self.cssbundle_name)
         ltr_bundle1.css()
         ltr_files1 = ltr_bundle1.files
-        ltr_version1 = ltr_bundle1.get_version('css')
+        ltr_version1 = ltr_bundle1.get_checksum('css')
         ltr_ira1 = self._any_ira_for_bundle('min.css')
 
         self.assertNotEqual(ltr_files0, ltr_files1)
@@ -565,7 +554,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
         rtl_bundle1 = self._get_asset(self.cssbundle_name, rtl=True)
         rtl_bundle1.css()
         rtl_files1 = rtl_bundle1.files
-        rtl_version1 = rtl_bundle1.get_version('css')
+        rtl_version1 = rtl_bundle1.get_checksum('css')
         rtl_ira1 = self._any_ira_for_bundle('min.css', rtl=True)
 
         self.assertNotEqual(rtl_files0, rtl_files1)
@@ -752,75 +741,6 @@ class TestAssetsBundleInBrowser(HttpCase):
             "a + b + c + d === 10 ? console.log('test successful') : console.log('error')",
             login="admin",
         )
-
-
-class TestAssetsBundleWithIRAMock(FileTouchable):
-    def setUp(self):
-        super(TestAssetsBundleWithIRAMock, self).setUp()
-        self.stylebundle_name = 'test_assetsbundle.bundle3'
-        self.counter = counter = Counter()
-
-        # patch methods 'create' and 'unlink' of model 'ir.attachment'
-        origin_create = IrAttachment.create
-        origin_unlink = AssetsBundle._unlink_attachments
-
-        @api.model_create_multi
-        def create(self, vals_list):
-            counter.update(['create'] * len(vals_list))
-            return origin_create(self, vals_list)
-
-        def unlink(self, attachments):
-            counter.update(['unlink'])
-            return origin_unlink(self, attachments)
-
-        self.patch(IrAttachment, 'create', create)
-        self.patch(AssetsBundle, '_unlink_attachments', unlink)
-
-    def _get_asset(self, debug_assets=True):
-        with patch.object(type(self.env['ir.asset']), '_get_installed_addons_list', Mock(return_value=self.installed_modules)):
-            return self.env['ir.qweb']._get_asset_bundle(self.stylebundle_name, debug_assets=debug_assets)
-
-    def _bundle(self, bundle, should_create, should_unlink, reason=''):
-        self.counter.clear()
-        bundle.css()
-        if should_create:
-            self.assertEqual(self.counter['create'], 2, f'An attachment should have been created {reason}')
-        else:
-            self.assertEqual(self.counter['create'], 0, f'No attachment should have been created {reason}')
-
-        if should_unlink:
-            self.assertEqual(self.counter['unlink'], 2, f'An attachment should have been unlink {reason}')
-        else:
-            self.assertEqual(self.counter['unlink'], 0, f'No attachment should have been unlink {reason}')
-
-    def test_01_debug_mode_assets(self):
-        """ Checks that the ir.attachments records created for compiled assets in debug mode
-        are correctly invalidated.
-        """
-        # Compile for the first time
-        self._bundle(self._get_asset(), True, False, '(First access)')
-
-        # Compile a second time, without changes
-        self._bundle(self._get_asset(), False, False, '(Second access, no change)')
-
-        # Touch the file and compile a third time
-        path = file_path('test_assetsbundle/static/src/scss/test_file1.scss')
-        t = time.time() + 5
-        asset = self._get_asset()
-        with self._touch(path, t):
-            self._bundle(asset, True, True)
-
-            # Because we are in the same transaction since the beginning of the test, the first asset
-            # created and the second one have the same write_date, but the file's last modified date
-            # has really been modified. If we do not update the write_date to a posterior date, we are
-            # not able to reproduce the case where we compile this bundle again without changing
-            # anything.
-            self.env['ir.attachment'].flush_model(['checksum', 'write_date'])
-            self.cr.execute("update ir_attachment set write_date=clock_timestamp() + interval '10 seconds' where id = (select max(id) from ir_attachment)")
-            self.env['ir.attachment'].invalidate_model(['write_date'])
-
-            # Compile a fourth time, without changes
-            self._bundle(self._get_asset(), False, False)
 
 
 @tagged('assets_manifest')

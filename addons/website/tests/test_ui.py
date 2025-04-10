@@ -324,13 +324,13 @@ class TestUi(HttpCaseWithWebsiteUser):
 
         base_website_bundle = self.env['ir.qweb']._get_asset_bundle(asset_bundle_xmlid, assets_params={'website_id': website_default.id})
         self.assertNotIn(custom_url, [f['url'] for f in base_website_bundle.files])
-        base_website_css_version = base_website_bundle.get_version('css')
-        base_website_js_version = base_website_bundle.get_version('js')
+        base_website_css_version = base_website_bundle.get_checksum('css')
+        base_website_js_version = base_website_bundle.get_checksum('js')
 
         new_website_bundle_modified = self.env['ir.qweb']._get_asset_bundle('website.assets_wysiwyg', assets_params={'website_id': new_website.id})
         self.assertIn(custom_url, [f['url'] for f in new_website_bundle_modified.files])
-        self.assertEqual(new_website_bundle_modified.get_version('css'), base_website_css_version)
-        self.assertNotEqual(new_website_bundle_modified.get_version('js'), base_website_js_version, "js version for new website should now have been changed")
+        self.assertEqual(new_website_bundle_modified.get_checksum('css'), base_website_css_version)
+        self.assertNotEqual(new_website_bundle_modified.get_checksum('js'), base_website_js_version, "js version for new website should now have been changed")
 
         url_params = url_encode({'path': '/@/'})
         self.start_tour(f'/website/force/{website_default.id}?{url_params}', "generic_website_editor", login="website_user")

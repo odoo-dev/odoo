@@ -135,7 +135,7 @@ class TestWebAssetsCursors(HttpCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.bundle_name = 'web.assets_frontend'
-        cls.bundle_version = cls.env['ir.qweb']._get_asset_bundle(cls.bundle_name).get_version('css')
+        cls.bundle_version = cls.env['ir.qweb']._get_asset_bundle(cls.bundle_name).get_checksum('css')
 
     def setUp(self):
         super().setUp()

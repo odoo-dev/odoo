@@ -37,8 +37,8 @@ class TestQweb(TransactionCaseWithUserDemo):
         qweb = self.env['ir.qweb']
         bundle = qweb._get_asset_bundle(asset_bundle_xmlid, css=True, js=True, assets_params={'website_id': website.id})
 
-        asset_version_js = bundle.get_version('js')
-        asset_version_css = bundle.get_version('css')
+        asset_version_js = bundle.get_checksum('js')
+        asset_version_css = bundle.get_checksum('css')
         css_url, js_url = bundle.get_links()[-2:]
 
         html = html.strip()

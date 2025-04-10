@@ -1,5 +1,7 @@
 from contextlib import closing
 from collections import OrderedDict
+from typing import Literal
+
 from lxml import etree
 from subprocess import Popen, PIPE
 import hashlib
@@ -30,7 +32,7 @@ from odoo.tools.misc import file_open, file_path
 
 _logger = logging.getLogger(__name__)
 
-ANY_UNIQUE = '_' * 7
+ANY_UNIQUE = '_' * 64
 EXTENSIONS = (".js", ".css", ".scss", ".sass", ".less", ".xml")
 
 class CompileError(RuntimeError): pass
@@ -122,18 +124,12 @@ class AssetsBundle(object):
         return self.external_assets + response
 
     def get_link(self, asset_type):
-        unique = self.get_version(asset_type) if not self.is_debug_assets else 'debug'
+        unique = self.get_checksum(asset_type) if not self.is_debug_assets else 'debug'
         extension = asset_type if self.is_debug_assets else f'min.{asset_type}'
         return self.get_asset_url(unique=unique, extension=extension)
 
-    def get_version(self, asset_type):
-        return self.get_checksum(asset_type)[0:7]
-
     def get_checksum(self, asset_type):
-        """
-        Not really a full checksum.
-        We compute a SHA512/256 on the rendered bundle + combined linked files last_modified date
-        """
+        assets: list[WebAsset]
         if asset_type not in self._checksum_cache:
             if asset_type == 'css':
                 assets = self.stylesheets
@@ -142,9 +138,11 @@ class AssetsBundle(object):
             else:
                 raise ValueError(f'Asset type {asset_type} not known')
 
-            unique_descriptor = ','.join(asset.unique_descriptor for asset in assets)
-
-            self._checksum_cache[asset_type] = hashlib.sha512(unique_descriptor.encode()).hexdigest()[:64]
+            h = hashlib.sha512()
+            for asset in assets:
+                h.update(asset.unique_descriptor.encode())
+                h.update(b'\n')
+            self._checksum_cache[asset_type] = h.hexdigest()[:64]
         return self._checksum_cache[asset_type]
 
     def get_asset_url(self, unique=ANY_UNIQUE, extension='%', ignore_params=False):
@@ -215,7 +213,7 @@ class AssetsBundle(object):
                                else: the url contains a version equal to that of the self.get_version(type)
                                 => web/assets/self.get_version(type)/name.extension.
         """
-        unique = ANY_UNIQUE if ignore_version else self.get_version('css' if self.is_css(extension) else 'js')
+        unique = ANY_UNIQUE if ignore_version else self.get_checksum('css' if self.is_css(extension) else 'js')
         url_pattern = self.get_asset_url(
             unique=unique,
             extension=extension,
@@ -285,7 +283,7 @@ class AssetsBundle(object):
             'application/json' if extension in ['js.map', 'css.map'] else
             'application/javascript'
         )
-        unique = self.get_version('css' if self.is_css(extension) else 'js')
+        unique = self.get_checksum('css' if self.is_css(extension) else 'js')
         url = self.get_asset_url(
             unique=unique,
             extension=extension,
@@ -581,34 +579,32 @@ css_error_message {
         """
         if self.stylesheets:
             compiled = ""
-            for atype in (SassStylesheetAsset, ScssStylesheetAsset, LessStylesheetAsset):
-                assets = [asset for asset in self.stylesheets if isinstance(asset, atype)]
+            for atype in PreprocessedCSS.__subclasses__():
+                assets = [asset.get_source() for asset in self.stylesheets if isinstance(asset, atype)]
                 if assets:
-                    source = '\n'.join([asset.get_source() for asset in assets])
-                    compiled += self.compile_css(assets[0].compile, source)
+                    compiled += self.compile_css(atype.compile, '\n'.join(assets))
 
             if self.autoprefix:
                 compiled = self.autoprefix_css(compiled)
 
             # We want to run rtlcss on normal css, so merge it in compiled
             if self.rtl:
-                stylesheet_assets = [asset for asset in self.stylesheets if not isinstance(asset, (SassStylesheetAsset, ScssStylesheetAsset, LessStylesheetAsset))]
+                stylesheet_assets = [asset for asset in self.stylesheets if not isinstance(asset, PreprocessedCSS)]
                 compiled += '\n'.join([asset.get_source() for asset in stylesheet_assets])
                 compiled = self.run_rtlcss(compiled)
 
             if not self.css_errors and old_attachments:
                 self._unlink_attachments(old_attachments)
-                old_attachments = None
 
             fragments = self.rx_css_split.split(compiled)
-            at_rules = fragments.pop(0)
-            if at_rules:
+            fragments.reverse()
+            if at_rules := fragments.pop():
                 # Sass and less moves @at-rules to the top in order to stay css 2.1 compatible
                 self.stylesheets.insert(0, StylesheetAsset(self, inline=at_rules))
+            assets_index = {asset.id: asset for asset in self.stylesheets}
             while fragments:
-                asset_id = fragments.pop(0)
-                asset = next(asset for asset in self.stylesheets if asset.id == asset_id)
-                asset._content = fragments.pop(0)
+                asset_id = fragments.pop()
+                assets_index[asset_id]._content = fragments.pop()
 
         return '\n'.join(asset.minify() for asset in self.stylesheets)
 
@@ -713,6 +709,9 @@ css_error_message {
         return error
 
 
+HASH_CACHE = {}
+
+
 class WebAsset(object):
     _content = None
     _filename = None
@@ -733,14 +732,18 @@ class WebAsset(object):
         _logger.error(msg)  # log it in the python console in all cases.
         return msg
 
-    @func.lazy_property
-    def id(self):
-        if self._id is None: self._id = str(uuid.uuid4())
-        return self._id
+    def _hash(self):
+        if self._filename:
+            k = (self._filename, self.last_modified)
+            if not (h := HASH_CACHE.get(k)):
+                h = HASH_CACHE[k] = hashlib.sha512(self.content.encode()).hexdigest()
+        else:
+            h = hashlib.sha512(self.content.encode()).hexdigest()
+        return h
 
     @func.lazy_property
-    def unique_descriptor(self):
-        return f'{self.url or self.inline},{self.last_modified}'
+    def unique_descriptor(self) -> str:
+        return f'{self.url or self.inline},{self._hash()}'
 
     @func.lazy_property
     def name(self):
@@ -814,7 +817,7 @@ class JavascriptAsset(WebAsset):
 
     @property
     def bundle_version(self):
-        return self.bundle.get_version('js')
+        return self.bundle.get_checksum('js')
 
     @property
     def is_transpiled(self):
@@ -887,7 +890,7 @@ class XMLAsset(WebAsset):
 
     @property
     def bundle_version(self):
-        return self.bundle.get_version('js')
+        return self.bundle.get_checksum('js')
 
     def with_header(self, content=None):
         if content is None:
@@ -926,14 +929,18 @@ class StylesheetAsset(WebAsset):
         super().__init__(*args, **kw)
 
     @property
+    def id(self):
+        return self._hash()[:32]
+
+    @property
     def bundle_version(self):
-        return self.bundle.get_version('css')
+        return self.bundle.get_checksum('css')
 
     @func.lazy_property
-    def unique_descriptor(self):
+    def unique_descriptor(self) -> str:
         direction = (self.rtl and 'rtl') or 'ltr'
         autoprefixed = (self.autoprefix and 'autoprefixed') or ''
-        return f'{self.url or self.inline},{self.last_modified},{direction},{autoprefixed}'
+        return f'{self.url or self.inline},{self._hash()},{direction},{autoprefixed}'
 
     def _fetch_content(self):
         try:
@@ -963,7 +970,7 @@ class StylesheetAsset(WebAsset):
 
     def get_source(self):
         content = self.inline or self._fetch_content()
-        return "/*! %s */\n%s" % (self.id, content)
+        return f"/*! {self.id} */\n{content}"
 
     def minify(self):
         # remove existing sourcemaps, make no sense after re-mini
@@ -979,11 +986,13 @@ class StylesheetAsset(WebAsset):
 class PreprocessedCSS(StylesheetAsset):
     rx_import = None
 
-    def get_command(self):
+    @classmethod
+    def get_command(cls):
         raise NotImplementedError
 
-    def compile(self, source):
-        command = self.get_command()
+    @classmethod
+    def compile(cls, source):
+        command = cls.get_command()
         try:
             compiler = Popen(command, stdin=PIPE, stdout=PIPE,
                              stderr=PIPE, encoding='utf-8')
@@ -1023,9 +1032,10 @@ class SassStylesheetAsset(PreprocessedCSS):
             content = self.rx_indent.sub(fix_indent, content)
         except StopIteration:
             pass
-        return "/*! %s */\n%s" % (self.id, content)
+        return f"/*! {self.id} */\n{content}"
 
-    def get_command(self):
+    @classmethod
+    def get_command(cls):
         try:
             sass = misc.find_in_path('sass')
         except IOError:
@@ -1035,35 +1045,35 @@ class SassStylesheetAsset(PreprocessedCSS):
 
 
 class ScssStylesheetAsset(PreprocessedCSS):
-    @property
-    def bootstrap_path(self):
+    @classmethod
+    def bootstrap_path(cls):
         return file_path('web/static/lib/bootstrap/scss')
 
     precision = 8
-    output_style = 'expanded'
+    output_style: Literal['expanded'] = 'expanded'
 
-    def compile(self, source):
+    @classmethod
+    def compile(cls, source):
         if libsass is None:
             return super().compile(source)
 
+        bootstrap_path = cls.bootstrap_path()
         def scss_importer(path, prev):
             *parent_path, file = os.path.split(path)
             try:
                 parent_path = file_path(os.path.join(*parent_path))
             except FileNotFoundError:
-                parent_path = file_path(os.path.join(self.bootstrap_path, *parent_path))
+                parent_path = file_path(os.path.join(bootstrap_path, *parent_path))
             return [(os.path.join(parent_path, file),)]
 
         try:
             profiler.force_hook()
             return libsass.compile(
                 string=source,
-                include_paths=[
-                    self.bootstrap_path,
-                ],
+                include_paths=[bootstrap_path],
                 importers=[(0, scss_importer)],
-                output_style=self.output_style,
-                precision=self.precision,
+                output_style=cls.output_style,
+                precision=cls.precision,
             )
         except libsass.CompileError as e:
             raise CompileError(e.args[0])
@@ -1077,7 +1087,8 @@ class ScssStylesheetAsset(PreprocessedCSS):
 
 
 class LessStylesheetAsset(PreprocessedCSS):
-    def get_command(self):
+    @classmethod
+    def get_command(cls):
         try:
             if os.name == 'nt':
                 lessc = misc.find_in_path('lessc.cmd')

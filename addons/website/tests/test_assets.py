@@ -69,11 +69,11 @@ class TestWebsiteAssets(odoo.tests.HttpCase):
     def test_02_t_cache_invalidation(self):
         self.authenticate(None, None)
         page = self.url_open('/').text # add to cache
-        public_assets_links = re.findall(r'(/web/assets/\d+/\w{7}/web.assets_frontend\..+)"/>', page)
+        public_assets_links = re.findall(r'(/web/assets/\d+/[0-9a-f]+/web.assets_frontend\..+)"/>', page)
         self.assertTrue(public_assets_links)
         self.authenticate('admin', 'admin')
         page = self.url_open('/').text
-        admin_assets_links = re.findall(r'(/web/assets/\d+/\w{7}/web.assets_frontend\..+)"/>', page)
+        admin_assets_links = re.findall(r'(/web/assets/\d+/[0-9a-f]+/web.assets_frontend\..+)"/>', page)
         self.assertTrue(admin_assets_links)
 
         self.assertEqual(public_assets_links, admin_assets_links)
@@ -89,7 +89,7 @@ class TestWebsiteAssets(odoo.tests.HttpCase):
         self.assertNotEqual(write_dates, snippets.mapped('write_date'))
 
         page = self.url_open('/').text
-        new_admin_assets_links = re.findall(r'(/web/assets/\d+/\w{7}/web.assets_frontend\..+)"/>', page)
+        new_admin_assets_links = re.findall(r'(/web/assets/\d+/[0-9a-f]+/web.assets_frontend\..+)"/>', page)
         self.assertTrue(new_admin_assets_links)
 
         self.assertEqual(public_assets_links, admin_assets_links)
@@ -98,7 +98,7 @@ class TestWebsiteAssets(odoo.tests.HttpCase):
         self.authenticate(None, None)
         page = self.url_open('/').text
 
-        new_public_assets_links = re.findall(r'(/web/assets/\d+/\w{7}/web.assets_frontend\..+)"/>', page)
+        new_public_assets_links = re.findall(r'(/web/assets/\d+/[0-9a-f]+/web.assets_frontend\..+)"/>', page)
         self.assertEqual(new_admin_assets_links, new_public_assets_links, "t-cache should have been invalidated for public user too")
 
     def test_invalid_unlink(self):
@@ -125,11 +125,11 @@ class TestWebsiteAssets(odoo.tests.HttpCase):
 
         website_bundle = self.env['ir.qweb']._get_asset_bundle(asset_bundle_xmlid, assets_params={'website_id': website_default.id})
         self.assertIn(custom_url, [f['url'] for f in website_bundle.files])
-        base_website_css_version = website_bundle.get_version('css')
+        base_website_css_version = website_bundle.get_checksum('css')
 
         no_website_bundle = self.env['ir.qweb']._get_asset_bundle(asset_bundle_xmlid)
         self.assertNotIn(custom_url, [f['url'] for f in no_website_bundle.files])
-        self.assertNotEqual(no_website_bundle.get_version('css'), base_website_css_version)
+        self.assertNotEqual(no_website_bundle.get_checksum('css'), base_website_css_version)
 
         website_attach = website_bundle.css()
         self.assertTrue(website_attach.exists())
@@ -233,7 +233,7 @@ class TestWebAssets(odoo.tests.HttpCase):
         # when searching for an attachment, if the unique a wildcard, we want to ensute that we don't match a website one when seraching a no website one.
         # this test should also wheck that the clean_attachement does not erase a website_attachement after generating a base attachment
         website_id = self.env['website'].search([], limit=1, order='id asc').id
-        unique = self.env['ir.qweb']._get_asset_bundle('web.assets_frontend').get_version('js')
+        unique = self.env['ir.qweb']._get_asset_bundle('web.assets_frontend').get_checksum('js')
         base_url = self.env['ir.asset']._get_asset_bundle_url('web.assets_frontend.min.js', '%', {})
         base_url_versioned = self.env['ir.asset']._get_asset_bundle_url('web.assets_frontend.min.js', unique, {})
         website_url = self.env['ir.asset']._get_asset_bundle_url('web.assets_frontend.min.js', '%', {'website_id': website_id})

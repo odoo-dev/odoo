@@ -1,7 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import os
-from glob import glob
+from glob import iglob
 from logging import getLogger
+from operator import itemgetter
+
 from werkzeug import urls
 
 import odoo
@@ -42,11 +44,6 @@ def is_wildcard_glob(path):
     """Determine whether a path is a wildcarded glob eg: "/web/file[14].*"
     or a genuine single file path "/web/myfile.scss"""
     return '*' in path or '[' in path or ']' in path or '?' in path
-
-
-def _glob_static_file(pattern):
-    files = glob(pattern, recursive=True)
-    return sorted((file, os.path.getmtime(file)) for file in files if file.rsplit('.', 1)[-1] in ASSET_EXTENSIONS)
 
 
 class IrAsset(models.Model):
@@ -203,10 +200,6 @@ class IrAsset(models.Model):
 
         It is nested inside `_get_asset_paths` since we need the current
         list of addons, extensions and asset_paths.
-
-        :param directive: string
-        :param target: string or None or False
-        :param path_def: string
         """
         if directive == INCLUDE_DIRECTIVE:
             # recursively call this function for each INCLUDE_DIRECTIVE directive.
@@ -316,7 +309,7 @@ class IrAsset(models.Model):
     def _get_paths(self, path_def, installed):
         """
         Returns a list of tuple (path, full_path, modified) matching a given glob (path_def).
-        The glob can only occur in the static direcory of an installed addon.
+        The glob can only occur in the static directory of an installed addon.
 
         If the path_def matches a (list of) file, the result will contain the full_path
         and the modified time.
@@ -332,7 +325,6 @@ class IrAsset(models.Model):
 
         :param path_def: the definition (glob) of file paths to match
         :param installed: the list of installed addons
-        :param extensions: a list of extensions that found files must match
         :returns: a list of tuple: (path, full_path, modified)
         """
         paths = None
@@ -341,7 +333,7 @@ class IrAsset(models.Model):
         addon = path_parts[0]
         addon_manifest = odoo.modules.module._get_manifest_cached(addon)
 
-        safe_path = True
+        safe_path = False
         if addon_manifest:
             if addon not in installed:
                 # Assert that the path is in the installed addons
@@ -352,15 +344,12 @@ class IrAsset(models.Model):
             # "/mymodule/../myothermodule" is forbidden
             static_prefix = os.sep.join([addons_path, addon, 'static', ''])
             if full_path.startswith(static_prefix):
-                paths_with_timestamps = _glob_static_file(full_path)
-                paths = [
-                    (fs2web(absolute_path[len(addons_path):]), absolute_path, timestamp)
-                    for absolute_path, timestamp in paths_with_timestamps
-                ]
-            else:
-                safe_path = False
-        else:
-            safe_path = False
+                safe_path = True
+                paths = sorted((
+                    (fs2web(absolute_path[len(addons_path):]), absolute_path, os.path.getmtime(absolute_path))
+                    for absolute_path in iglob(full_path, recursive=True)
+                    if absolute_path.rsplit('.', 1)[-1] in ASSET_EXTENSIONS
+                ), key=itemgetter(1, 2))
 
         if not paths and not can_aggregate(path_def):  # http:// or /web/content
             paths = [(path_def, EXTERNAL_ASSET, -1)]
