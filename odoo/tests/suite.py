@@ -304,12 +304,12 @@ class OdooSuite(TestSuite):
         _mro = [
             kls for kls in cls.__mro__
             if issubclass(kls, TransactionCase)
-            and kls != TransactionCase
+            # and kls != TransactionCase
             and 'setUpCommonData' in kls.__dict__
         ]
 
         previous_install_kls = None
-        def _get_install_class(kls, depends, new_key: Tuple[PartialTestOrderKeyData, ...]) -> Type[TransactionCase]:
+        def _get_install_class(kls, depends, new_key: Tuple[PartialTestOrderKeyData, ...]) -> TestOrderKeyData:
             nonlocal previous_install_kls
             # We need to call setUpCommonData from the closest class which changes the dependencies.
             # The class must be a subclass of the common class and a subclass of the previously installed
@@ -318,18 +318,16 @@ class OdooSuite(TestSuite):
                 kkls for kkls in cls.__mro__
                 if issubclass(kkls, kls) and (
                     not previous_install_kls or issubclass(kkls, previous_install_kls)
-                )
+                ) and kkls is not cls
             ]
-            install_kls = kls_to_check.pop(0)
-            while kls_to_check:
-                kls_key = self._get_test_order_key(kls_to_check[0])
-                # kls_key without install class
+            for kkls in reversed(kls_to_check):
+                kls_key = self._get_test_order_key(kkls)
                 kls_key = tuple(o[:2] for o in kls_key)
-                if new_key[:len(kls_key)] != kls_key:
-                    break
-                install_kls = kls_to_check.pop(0)
-            previous_install_kls = install_kls
-            return (kls, depends, install_kls)
+                if depends == kls_key[:len(depends)]:
+                    previous_install_kls = kkls
+                    return (kls, new_key, kkls)
+            previous_install_kls = cls
+            return (kls, new_key, cls)
 
         def _get_attrs(kls) -> PartialTestOrderKeyData:
             method = kls.__dict__['setUpCommonData']
@@ -343,7 +341,7 @@ class OdooSuite(TestSuite):
 
         # If the test does not inherit from TransactionCase, the following is empty.
         k = tuple(_get_attrs(kls) for kls in reversed(_mro))
-        k = tuple(_get_install_class(kls, depends, k) for kls, depends in k)
+        k = tuple(_get_install_class(d[0], k[:idx + 1], d[1]) for idx, d in enumerate(k))
         self._order_key_cache[cls] = k
         return k
 
@@ -449,8 +447,9 @@ class OdooSuite(TestSuite):
         test_class = type(test)
         is_new_class = previous_test_class != test_class
         with ExitStack() as stack:
-            if is_new_class and issubclass(test_class, TransactionCase):
+            if is_new_class:
                 self._setup_common_data(previous_test_class, test_class, result)
+            if is_new_class and issubclass(test_class, TransactionCase):
                 if test_class._commonDataFailed:
                     return
                 # If we have a cursor, we have common data, in which case
