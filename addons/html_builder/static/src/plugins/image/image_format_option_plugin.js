@@ -17,9 +17,17 @@ class ImageFormatOptionPlugin extends Plugin {
     getActions() {
         return {
             setImageFormat: {
-                isApplied: ({ editingElement, param: { width, mimetype } }) =>
-                    editingElement.dataset.resizeWidth === String(width) &&
-                    editingElement.dataset.formatMimetype === mimetype,
+                isApplied: ({ editingElement, param: { width, mimetype, isOriginal } }) => {
+                    const isOriginalUntouched =
+                        (!editingElement.dataset.resizeWidth ||
+                            !editingElement.dataset.formatMimetype) &&
+                        isOriginal;
+                    return (
+                        isOriginalUntouched ||
+                        (editingElement.dataset.resizeWidth === String(width) &&
+                            editingElement.dataset.formatMimetype === mimetype)
+                    );
+                },
                 load: async ({ editingElement: img, param: { width, mimetype } }) =>
                     this.dependencies.imagePostProcess.processImage(img, {
                         resizeWidth: width,
@@ -66,7 +74,7 @@ class ImageFormatOptionPlugin extends Plugin {
         widths[img.naturalWidth] = [_t("%spx", img.naturalWidth), "image/webp"];
         widths[optimizedWidth] = [_t("%spx (Suggested)", optimizedWidth), "image/webp"];
         const mimetypeBeforeConversion = data.mimetypeBeforeConversion;
-        widths[maxWidth] = [_t("%spx (Original)", maxWidth), mimetypeBeforeConversion];
+        widths[maxWidth] = [_t("%spx (Original)", maxWidth), mimetypeBeforeConversion, true];
         if (mimetypeBeforeConversion !== "image/webp") {
             // Avoid a key collision by subtracting 0.1 - putting the webp
             // above the original format one of the same size.
@@ -75,9 +83,9 @@ class ImageFormatOptionPlugin extends Plugin {
         return Object.entries(widths)
             .filter(([width]) => width <= maxWidth)
             .sort(([v1], [v2]) => v1 - v2)
-            .map(([width, [label, mimetype]]) => {
+            .map(([width, [label, mimetype, isOriginal]]) => {
                 const id = `${width}-${mimetype}`;
-                return { id, width: Math.round(width), label, mimetype };
+                return { id, width: Math.round(width), label, mimetype, isOriginal };
             });
     }
     async getImageWidth(originalSrc, width) {
