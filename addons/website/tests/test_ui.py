@@ -363,7 +363,6 @@ class TestUi(HttpCaseWithWebsiteUser):
         """
         self.start_tour("/", "public_user_editor", login=None)
 
-    @unittest.skip
     def test_07_snippet_version(self):
         website_snippets = self.env.ref('website.snippets')
         view_ids = self.env['ir.ui.view'].create([{
