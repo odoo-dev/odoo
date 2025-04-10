@@ -1,6 +1,5 @@
 import { Plugin } from "@html_editor/plugin";
 import { CSS_SHORTHANDS, applyNeededCss, areCssValuesEqual } from "@html_builder/utils/utils_css";
-import { backgroundImageCssToParts, backgroundImagePartsToCss } from "@html_editor/utils/image";
 
 export function withoutTransition(editingElement, callback) {
     if (editingElement.classList.contains("o_we_force_no_transition")) {
