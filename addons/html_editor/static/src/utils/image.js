@@ -100,7 +100,6 @@ export function getImageSrc(el) {
     if (el.dataset.bgSrc) {
         return el.dataset.bgSrc;
     }
-    const { getComputedStyle } = el.ownerDocument.defaultView;
     const url = backgroundImageCssToParts(getComputedStyle(el)["background-image"]).url;
     return url && getBgImageURLFromURL(url);
 }
