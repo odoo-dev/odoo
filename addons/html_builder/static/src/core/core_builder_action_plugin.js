@@ -48,16 +48,6 @@ export class CoreBuilderActionPlugin extends Plugin {
 
     getStyleActions() {
         const styleActions = {
-            "background-image-url": {
-                getValue: (el) => {
-                    const value = getStyleValue(el, "background-image");
-                    const match = value.match(/url\(([^)]+)\)/);
-                    return match ? match[1] : "";
-                },
-                apply: (el, value, param) => {
-                    this.dependencies.style.setBackgroundImageUrl(el, value, param);
-                },
-            },
             "box-shadow": {
                 getValue: (el, styleName) => {
                     const value = getStyleValue(el, styleName);
