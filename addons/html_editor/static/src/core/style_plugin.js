@@ -5,10 +5,7 @@ export class StylePlugin extends Plugin {
     static id = "style";
     static shared = ["setBackgroundImageUrl"];
 
-    setBackgroundImageUrl(el, value, ...args) {
-        if (this.delegateTo("set_background_image_url_delegates", el, value, ...args)) {
-            return;
-        }
+    setBackgroundImageUrl(el, value) {
         const parts = backgroundImageCssToParts(el.style["background-image"]);
         if (value) {
             parts.url = `url('${value}')`;
