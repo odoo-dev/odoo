@@ -219,7 +219,7 @@ export class PropertiesField extends Component {
     }
 
     // for overrides
-    get propertyDefinitionProps() {
+    get additionalPropertyDefinitionProps() {
         return {};
     }
 
@@ -916,7 +916,7 @@ export class PropertiesField extends Component {
             isNewlyCreated: isNewlyCreated,
             propertyIndex: propertyIndex,
             propertiesSize: propertiesList.length,
-            ...this.propertyDefinitionProps,
+            ...this.additionalPropertyDefinitionProps,
         });
     }
 
