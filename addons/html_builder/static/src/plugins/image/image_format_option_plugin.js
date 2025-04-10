@@ -53,8 +53,6 @@ class ImageFormatOptionPlugin extends Plugin {
     /**
      * Returns a list of valid formats for a given image or an empty list if
      * there is no mimetypeBeforeConversion data attribute on the image.
-     *
-     * @private
      */
     async computeAvailableFormats(img, computeMaxDisplayWidth) {
         const data = { ...img.dataset, ...(await loadImageInfo(img)) };
