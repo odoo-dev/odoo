@@ -7,6 +7,7 @@ import { Powerbox } from "./powerbox";
 import { withSequence } from "@html_editor/utils/resource";
 import { omit, pick } from "@web/core/utils/objects";
 import { baseContainerGlobalSelector } from "@html_editor/utils/base_container";
+import { user } from "@web/core/user";
 
 /** @typedef { import("@html_editor/core/selection_plugin").EditorSelection } EditorSelection */
 /** @typedef { import("@html_editor/core/user_command_plugin").UserCommand } UserCommand */
@@ -133,7 +134,7 @@ export class PowerboxPlugin extends Plugin {
         },
     };
 
-    setup() {
+    async setup() {
         /** @type {import("@html_editor/core/overlay_plugin").Overlay} */
         this.overlay = this.dependencies.overlay.createOverlay(Powerbox);
 
@@ -148,6 +149,10 @@ export class PowerboxPlugin extends Plugin {
             applyCommand: this.applyCommand.bind(this),
         };
         this.powerboxCommands = this.makePowerboxCommands();
+        const userHasAccess = await user.hasGroup("base.group_sanitize_override");
+        if (!userHasAccess) {
+            this.powerboxCommands = this.powerboxCommands.filter(cmd => cmd.title !== "Media");
+        }
         this.addDomListener(this.editable.ownerDocument, "keydown", this.onKeyDown);
     }
 

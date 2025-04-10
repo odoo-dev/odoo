@@ -86,7 +86,7 @@ class Message(models.Model):
     # content
     subject = fields.Char('Subject')
     date = fields.Datetime('Date', default=fields.Datetime.now)
-    body = fields.Html('Contents', default='', sanitize_style=True)
+    body = fields.Html('Contents', default='', sanitize_style=True, sanitize_overridable=True)
     preview = fields.Char(
         'Preview', compute='_compute_preview',
         help='The text-only beginning of the body used as email preview.')

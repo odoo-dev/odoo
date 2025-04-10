@@ -81,7 +81,7 @@ class MailComposer(models.TransientModel):
     body = fields.Html(
         'Contents',
         render_engine='qweb', render_options={'post_process': True},
-        sanitize_style=True,
+        sanitize_style=True, sanitize_overridable=True,
         compute='_compute_body', readonly=False, store=True)
     parent_id = fields.Many2one(
         'mail.message', 'Parent Message', ondelete='set null')
