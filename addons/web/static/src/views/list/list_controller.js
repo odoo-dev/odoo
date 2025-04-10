@@ -191,6 +191,26 @@ export class ListController extends Component {
         this.deleteRecordsWithConfirmation = useDeleteRecords(this.model);
     }
 
+    get defaultButtons() {
+        return [
+            {
+                id: "save",
+                template: "web.ListView.Buttons.Save",
+                isDisplayed: () => this.editedRecord,
+            },
+            {
+                id: "discard",
+                template: "web.ListView.Buttons.Discard",
+                isDisplayed: () => this.editedRecord,
+            },
+            {
+                id: "new",
+                template: "web.ListView.Buttons.New",
+                isDisplayed: () => !this.editedRecord && this.canCreate && !this.env.inDialog,
+            },
+        ];
+    }
+
     get modelParams() {
         const { rawExpand } = this.archInfo;
         const { activeFields, fields } = extractFieldsFromArchInfo(
@@ -373,20 +393,11 @@ export class ListController extends Component {
         };
     }
 
-    get headerAlwaysButtons() {
-        return this.archInfo.headerButtons.filter(
-            (button) =>
-                button.display === "always" &&
-                !evaluateBooleanExpr(button.invisible, this.props.context)
+    get visibleHeaderButtons() {
+        const visibleButtons = this.archInfo.headerButtons.filter(
+            (button) => !this.evalViewModifier(button.invisible)
         );
-    }
-
-    get headerOtherButtons() {
-        return this.archInfo.headerButtons.filter(
-            (button) =>
-                button.display !== "always" &&
-                !evaluateBooleanExpr(button.invisible, this.props.context)
-        );
+        return Object.groupBy(visibleButtons, ({ display }) => display);
     }
 
     get canCreate() {

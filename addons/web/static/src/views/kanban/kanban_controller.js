@@ -212,6 +212,16 @@ export class KanbanController extends Component {
         this.deleteRecordsWithConfirmation = useDeleteRecords(this.model);
     }
 
+    get defaultButtons() {
+        return [
+            {
+                id: "new",
+                template: "web.KanbanView.Buttons.New",
+                isDisplayed: () => this.canCreate && !this.env.inDialog,
+            },
+        ];
+    }
+
     get actionMenuItems() {
         const { actionMenus } = this.props.info;
         const staticActionItems = Object.entries(this.getStaticActionMenuItems())
@@ -437,20 +447,11 @@ export class KanbanController extends Component {
         };
     }
 
-    get headerAlwaysButtons() {
-        return this.archInfo.headerButtons.filter(
-            (button) =>
-                button.display === "always" &&
-                !evaluateBooleanExpr(button.invisible, this.props.context)
+    get visibleHeaderButtons() {
+        const visibleButtons = this.archInfo.headerButtons.filter(
+            (button) => !this.evalViewModifier(button.invisible)
         );
-    }
-
-    get headerOtherButtons() {
-        return this.archInfo.headerButtons.filter(
-            (button) =>
-                button.display !== "always" &&
-                !evaluateBooleanExpr(button.invisible, this.props.context)
-        );
+        return Object.groupBy(visibleButtons, ({ display }) => display);
     }
 
     get canCreate() {
