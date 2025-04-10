@@ -155,8 +155,12 @@ def load_module_graph(
     loading_cursor_query_count = env.cr.sql_log_count
 
     models_updated = set()
-
-    for index, package in enumerate(graph, 1):
+    import traceback
+    traceback.print_stack()
+    print(update_module)
+    with odoo.tools.profiler.Profiler(db=env.cr.dbname, description='Loading'):
+     for index, package in enumerate(graph, 1):
+      with odoo.tools.profiler.ExecutionContext(package=package.name):
         module_name = package.name
         module_id = package.id
 
@@ -169,7 +173,7 @@ def load_module_graph(
 
         needs_update = update_module and package.state in ("to install", "to upgrade")
         module_log_level = logging.DEBUG
-        if needs_update:
+        if package.state in ("to install", "to upgrade"):
             module_log_level = logging.INFO
         _logger.log(module_log_level, 'Loading module %s (%d/%d)', module_name, index, module_count)
 

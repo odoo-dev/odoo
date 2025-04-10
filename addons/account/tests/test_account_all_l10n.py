@@ -35,14 +35,7 @@ def test_all_l10n(env):
         '!', ('name', '=like', 'l10n_hk_hr%'),  #failling for obscure reason
     ])
     with patch.object(AccountChartTemplate, 'try_loading', try_loading_patch):
-        module_t0 = time.time()
-        module_cursor_query_count = env.cr.sql_log_count
-        for mod in l10n_mods:
-            mod.button_immediate_install()
-        _logger.info("Module %s loaded in %.2fs, %s queries",
-            mod.name, time.time() - module_t0,
-            env.cr.sql_log_count - module_cursor_query_count,
-        )
+        l10n_mods.button_immediate_install()
 
     # In all_l10n tests we need to verify demo data
     demo_failures = env['ir.demo_failure'].search([])
