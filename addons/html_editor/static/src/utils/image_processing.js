@@ -17,7 +17,6 @@ const modifierFields = [
     "originalSrc",
     "resizeWidth",
     "aspectRatio",
-    "bgSrc",
     "mimetypeBeforeConversion",
 ];
 
@@ -162,10 +161,6 @@ export async function activateCropper(image, aspectRatio, dataset) {
 export async function loadImageInfo(el, attachmentSrc = "") {
     const newDataset = {};
     const elSrc = getImageSrc(el);
-    // todo: do we really need bgSrc as we can retrieve it from the element?
-    if (el.tagName !== "IMG" && elSrc && el.dataset.bgSrc !== elSrc) {
-        newDataset.bgSrc = elSrc;
-    }
 
     const src = attachmentSrc || elSrc;
     // If there is a marked originalSrc, the data is already loaded.

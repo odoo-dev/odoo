@@ -122,7 +122,6 @@ const BACKGROUND_IMAGE_ATTRIBUTES = new Set([
     "resizeWidth",
     "glFilter",
     "quality",
-    "bgSrc",
     "filterOptions",
     "mimetypeBeforeConversion",
 ]);

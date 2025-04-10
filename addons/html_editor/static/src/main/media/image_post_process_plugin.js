@@ -230,7 +230,6 @@ export class ImagePostProcessPlugin extends Plugin {
             el.setAttribute("src", url);
         } else {
             this.dependencies.style.setBackgroundImageUrl(el, url);
-            newDataset.bgSrc = url;
         }
         for (const key in newDataset) {
             const value = newDataset[key];

@@ -331,7 +331,6 @@ export class MediaPlugin extends Plugin {
             parts.url = `url('${newAttachmentSrc}')`;
             const combined = backgroundImagePartsToCss(parts);
             el.style["background-image"] = combined;
-            delete el.dataset.bgSrc;
         } else {
             el.setAttribute("src", newAttachmentSrc);
         }

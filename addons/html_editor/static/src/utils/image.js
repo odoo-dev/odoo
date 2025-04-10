@@ -97,9 +97,6 @@ export function getImageSrc(el) {
     if (el.tagName === "IMG") {
         return el.getAttribute("src");
     }
-    if (el.dataset.bgSrc) {
-        return el.dataset.bgSrc;
-    }
     const url = backgroundImageCssToParts(getComputedStyle(el)["background-image"]).url;
     return url && getBgImageURLFromURL(url);
 }
