@@ -525,9 +525,9 @@ class StockMove(models.Model):
             if move.product_id.lot_valuated:
                 vals = []
                 for lot_id, qty in quantities.items():
-                    vals.append(move.product_id._prepare_in_svl_vals(qty, abs(unit_cost[lot_id]), lot=lot_id))
+                    vals.append(move.product_id._prepare_in_svl_vals(qty, unit_cost[lot_id], lot=lot_id))
             else:
-                vals = [move.product_id._prepare_in_svl_vals(sum(quantities.values()), abs(unit_cost[self.env['stock.lot']]))]
+                vals = [move.product_id._prepare_in_svl_vals(sum(quantities.values()), unit_cost[self.env['stock.lot']])]
             for val in vals:
                 val.update(move._prepare_common_svl_vals())
                 if forced_quantity:
