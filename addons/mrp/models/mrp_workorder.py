@@ -760,6 +760,34 @@ class MrpWorkorder(models.Model):
             'costs_hour': self.workcenter_id.costs_hour
         })
 
+    def action_open_label_layout(self):
+        view = self.env.ref('stock.product_label_layout_form_picking')
+        return {
+            'name': _('Choose Labels Layout'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'product.label.layout',
+            'views': [(view.id, 'form')],
+            'target': 'new',
+            'context': {
+                'default_product_ids': self.move_finished_ids.product_id.ids,
+                'default_move_ids': self.move_finished_ids.ids,
+                'default_move_quantity': 'move'},
+        }
+
+    def action_open_label_type(self):
+        move_line_ids = self.move_finished_ids.mapped('move_line_ids')
+        if self.env.user.has_group('stock.group_production_lot') and move_line_ids.lot_id:
+            view = self.env.ref('stock.picking_label_type_form')
+            return {
+                'name': _('Choose Type of Labels To Print'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'picking.label.type',
+                'views': [(view.id, 'form')],
+                'target': 'new',
+                'context': {'default_production_ids': self.ids},
+            }
+        return self.action_open_label_layout()
+
     def button_scrap(self):
         self.ensure_one()
         return {
