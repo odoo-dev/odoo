@@ -1,5 +1,7 @@
 import { BaseOptionComponent, useDomState } from "@html_builder/core/utils";
-import { getImageSrc } from "@html_editor/utils/image";
+import { shouldPreventGifTransformation } from "@html_editor/main/media/image_post_process_plugin";
+import { loadImageInfo } from "@html_editor/utils/image_processing";
+import { KeepLast } from "@web/core/utils/concurrency";
 
 export class ImageFilterOption extends BaseOptionComponent {
     static template = "html_builder.ImageFilterOption";
@@ -11,10 +13,23 @@ export class ImageFilterOption extends BaseOptionComponent {
     };
     setup() {
         super.setup();
-        this.state = useDomState((editingElement) => ({
-            isCustomFilter: editingElement.dataset.glFilter === "custom",
-            // When a div does not have a background-image, it does not have "src" .
-            showFilter: !!getImageSrc(editingElement),
-        }));
+        const keepLast = new KeepLast();
+        this.state = useDomState((editingElement) => {
+            keepLast
+                .add(
+                    loadImageInfo(editingElement).then((data) => ({
+                        ...editingElement.dataset,
+                        ...data,
+                    }))
+                )
+                .then((data) => {
+                    this.state.showFilter =
+                        data.mimetypeBeforeConversion && !shouldPreventGifTransformation(data);
+                });
+            return {
+                isCustomFilter: editingElement.dataset.glFilter === "custom",
+                showFilter: false,
+            };
+        });
     }
 }
