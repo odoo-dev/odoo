@@ -9,8 +9,9 @@ class IrModelFields(models.Model):
     _inherit = 'ir.model.fields'
 
     tracking = fields.Integer(
-        string="Enable Ordered Tracking",
-        help="If set every modification done to this field is tracked. Value is used to order tracking values.",
+        string="Tracking Order",
+        help="Set a positive number to enable the tracking.\n"
+        "If several fields are tracked on the same records, they will be displayed in the chatter according to this order.",
     )
 
     def _reflect_field_params(self, field, model_id):
@@ -18,12 +19,21 @@ class IrModelFields(models.Model):
         on field, either an integer giving the sequence. Default sequence is
         set to 100. """
         vals = super()._reflect_field_params(field, model_id)
-        tracking = getattr(field, 'tracking', None)
-        if tracking is True:
-            tracking = 100
-        elif tracking is False:
-            tracking = None
-        vals['tracking'] = tracking
+        field_record = self.search([
+            ('model_id', '=', model_id),
+            ('name', '=', field.name),
+            ('state', '!=', 'manual'),
+        ], limit=1)
+
+        if field_record and field_record.tracking:
+            vals['tracking'] = field_record.tracking
+        else:
+            tracking = getattr(field, 'tracking', None)
+            if tracking is True:
+                tracking = 100
+            elif tracking is False:
+                tracking = None
+            vals['tracking'] = tracking
         return vals
 
     def _instanciate_attrs(self, field_data):

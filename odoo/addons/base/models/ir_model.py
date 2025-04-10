@@ -1035,7 +1035,7 @@ class IrModelFields(models.Model):
         translate_only = all(self._fields[field_name].translate for field_name in vals)
         if vals and self and not translate_only:
             for item in self:
-                if item.state != 'manual':
+                if item.state != 'manual' and set(vals.keys()) - {"tracking"}:
                     raise UserError(_('Properties of base fields cannot be altered in this manner! '
                                       'Please modify them through Python code, '
                                       'preferably through a custom addon!'))
