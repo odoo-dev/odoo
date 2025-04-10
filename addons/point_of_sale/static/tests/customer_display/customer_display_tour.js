@@ -23,6 +23,7 @@ const ORDER_IS_FINALIZED =
     '{"lines":[{"productName":"Letter Tray","price":"$ 2,972.75","qty":"1.00","unit":"Units","unitPrice":"$ 2,972.75","customerNote":"","internalNote":"[]","comboParent":"","packLotLines":[],"price_without_discount":"$ 2,972.75","isSelected":false,"imageSrc":"/web/image/product.product/855/image_128"}],"finalized":true,"amount":"2,972.75","paymentLines":[{"name":"Cash","amount":"2,972.75"}],"change":0,"onlinePaymentData":{}}';
 const NEW_ORDER =
     '{"lines":[],"finalized":false,"amount":"0.00","paymentLines":[],"change":0,"onlinePaymentData":{}}';
+const device_uuid = "kd7kw";
 
 registry.category("web_tour.tours").add("CustomerDisplayTour", {
     steps: () =>
@@ -30,7 +31,9 @@ registry.category("web_tour.tours").add("CustomerDisplayTour", {
             {
                 trigger: "div:contains('Welcome.')",
                 run: () => {
-                    window.customerDisplayChannel = new BroadcastChannel("UPDATE_CUSTOMER_DISPLAY");
+                    window.customerDisplayChannel = new BroadcastChannel(
+                        `UPDATE_CUSTOMER_DISPLAY-${device_uuid}`
+                    );
                     postMessage(ADD_PRODUCT, "add product").run();
                 },
             },

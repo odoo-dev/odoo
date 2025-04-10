@@ -43,12 +43,13 @@ export const CustomerDisplayDataService = {
                 }
             }, 1000);
         } else {
-            new BroadcastChannel("UPDATE_CUSTOMER_DISPLAY").onmessage = (event) => {
+            new BroadcastChannel(`UPDATE_CUSTOMER_DISPLAY-${session.device_uuid}`).onmessage = (
+                event
+            ) => {
                 Object.assign(data, event.data);
             };
-
             getOnNotified(bus_service, session.access_token)(
-                "UPDATE_CUSTOMER_DISPLAY",
+                `UPDATE_CUSTOMER_DISPLAY-${session.device_uuid}`,
                 (payload) => {
                     Object.assign(data, payload);
                 }

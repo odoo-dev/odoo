@@ -1,6 +1,6 @@
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { useService } from "@web/core/utils/hooks";
-import { isDisplayStandalone, isMobileOS } from "@web/core/browser/feature_detection";
+import { isDisplayStandalone } from "@web/core/browser/feature_detection";
 
 import { CashierName } from "@point_of_sale/app/components/navbar/cashier_name/cashier_name";
 import { ProxyStatus } from "@point_of_sale/app/components/navbar/proxy_status/proxy_status";
@@ -21,6 +21,8 @@ import { PresetSlotsPopup } from "@point_of_sale/app/components/popups/preset_sl
 import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { openProxyCustomerDisplay } from "@point_of_sale/customer_display/utils";
+import { random5Chars } from "@point_of_sale/utils";
+import { QrCodeCustomerDisplay } from "@point_of_sale/customer_display/customer_display_qr_code_popup/customer_display_qr_code_popup";
 
 const { DateTime } = luxon;
 
@@ -110,7 +112,8 @@ export class Navbar extends Component {
         this.pos.scanning = !this.pos.scanning;
     }
     get customerFacingDisplayButtonIsShown() {
-        return !isMobileOS();
+        // return !isMobileOS();
+        return true;
     }
     get showCashMoveButton() {
         return this.pos.showCashMoveButton;
@@ -142,11 +145,18 @@ export class Navbar extends Component {
                 this.notification
             );
         } else {
-            this.pos.local_customer_display_windowRef = window.open(
-                `/pos_customer_display/${this.pos.config.id}/${this.pos.config.access_token}`,
-                "newWindow",
-                "width=800,height=600,left=200,top=200"
-            );
+            const device_uuid = random5Chars();
+            const customer_display_url = `/pos_customer_display/${this.pos.config.id}/${this.pos.config.access_token}?device_uuid=${device_uuid}`;
+            localStorage.setItem("device_uuid", device_uuid);
+
+            if (this.ui.isSmall) {
+                this.dialog.add(QrCodeCustomerDisplay, {
+                    qrCodeURL: customer_display_url,
+                    session: this.pos.session,
+                });
+                return;
+            }
+            window.open(customer_display_url, "newWindow", "width=800,height=600,left=200,top=200");
             this.notification.add(_t("PoS Customer Display opened in a new window"));
         }
     }

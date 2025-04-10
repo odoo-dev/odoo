@@ -19,6 +19,7 @@ class PosCustomerDisplay(http.Controller):
                     },
                     **request.env["ir.http"].get_frontend_session_info(),
                     **pos_config_sudo._get_customer_display_data(),
+                    "device_uuid": kw.get("device_uuid"),
                 },
             },
         )

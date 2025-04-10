@@ -13,7 +13,9 @@ export class CustomerDisplayPosAdapter {
 
     setup() {
         this.data = {};
-        this.channel = new BroadcastChannel("UPDATE_CUSTOMER_DISPLAY");
+        this.channel = new BroadcastChannel(
+            `UPDATE_CUSTOMER_DISPLAY-${localStorage.getItem("device_uuid")}`
+        );
     }
 
     dispatch(pos) {
@@ -35,16 +37,13 @@ export class CustomerDisplayPosAdapter {
                 console.log("Failed to send data to customer display");
             });
         } else {
-            // Send customer display data for local type (same device/browser)
             this.channel.postMessage(JSON.parse(JSON.stringify(this.data)));
-
-            // Send customer display data for remote type (different devices/browser)
-
             pos.data
                 .call("pos.config", "update_customer_display", [
                     [pos.config.id],
                     this.data,
                     pos.config.access_token,
+                    localStorage.getItem("device_uuid"),
                 ])
                 .catch((error) => {
                     console.info("Failed to update customer display:", error);

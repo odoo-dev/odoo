@@ -1388,7 +1388,8 @@ class TestUi(TestPointOfSaleHttpCommon):
             self.assertEqual(len(warning_outputs), 1, "Exactly one warning should be logged")
 
     def test_customer_display(self):
-        self.start_tour(f"/pos_customer_display/{self.main_pos_config.id}/{self.main_pos_config.access_token}", 'CustomerDisplayTour', login="pos_user")
+        device_uuid = 'kd7kw'
+        self.start_tour(f"/pos_customer_display/{self.main_pos_config.id}/{self.main_pos_config.access_token}?device_uuid={device_uuid}", 'CustomerDisplayTour', login="pos_user", watch=True, step_delay=600)
 
     def test_refund_few_quantities(self):
         """ Test to check that refund works with quantities of less than 0.5 """

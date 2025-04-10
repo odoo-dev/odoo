@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="point_of_sale.QrCodeCustomerDisplay">
+        <Dialog>
+            <div class="text-center">
+                <img id="CustomerDisplayqrCode" t-att-src="qrCode" alt="Customer QR Code"
+                    class="img-fluid mb-3" style="max-width: 200px; width: 50%;" />
+                
+                <div class="small mb-3">
+                    <t t-set="customerDisplayURL" t-value="getCustomerDisplayURL"/>
+                    <a t-att-href="customerDisplayURL" target="_blank">
+                        <t t-esc="customerDisplayURL"/>
+                    </a>
+                    <i class="fa fa-clone ms-2"
+                    t-on-click="() => this.onClickCopyURL(props.qrCodeURL)" 
+                    role="img" aria-label="Copy URL"></i>
+                </div>
+            </div>
+        </Dialog>
+    </t>
+</templates>
