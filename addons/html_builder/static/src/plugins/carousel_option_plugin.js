@@ -4,7 +4,8 @@ import { registry } from "@web/core/registry";
 
 export class CarouselOptionPlugin extends Plugin {
     static id = "carouselOption";
-    static dependencies = ["clone", "history"];
+    static dependencies = ["clone", "history", "remove", "builder-options"];
+    static shared = ["slide", "addSlide", "removeSlide"];
 
     resources = {
         builder_options: [
@@ -69,6 +70,28 @@ export class CarouselOptionPlugin extends Plugin {
         this.dependencies["builder-options"].updateContainers(
             editingElement.querySelector(".carousel-item.active")
         );
+    }
+
+    async removeSlide(editingCarouselElement) {
+        const toRemoveCarouselItemEl =
+            editingCarouselElement.querySelector(".carousel-item.active");
+        const toRemoveIndicatorEl = editingCarouselElement.querySelector(
+            ".carousel-indicators > .active"
+        );
+        const itemsEls = [...editingCarouselElement.querySelectorAll(".carousel-item")];
+
+        if (itemsEls.length > 1) {
+            // Slide to the previous item
+            await this.slide("prev", editingCarouselElement);
+
+            // Remove the carousel item and the indicator
+            this.dependencies.remove.removeElement(toRemoveCarouselItemEl);
+            this.dependencies.remove.removeElement(toRemoveIndicatorEl);
+
+            this.dependencies["builder-options"].updateContainers(
+                editingCarouselElement.querySelector(".carousel-item.active")
+            );
+        }
     }
 
     /**
