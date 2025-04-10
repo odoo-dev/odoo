@@ -15,7 +15,6 @@ import { renderToElement } from "@web/core/utils/render";
 import { TimeoutPopup } from "@pos_self_order/app/components/timeout_popup/timeout_popup";
 import { constructFullProductName, deduceUrl, random5Chars } from "@point_of_sale/utils";
 import { getOrderLineValues, computeInitialComboPrice } from "./card_utils";
-
 import {
     getTaxesAfterFiscalPosition,
     getTaxesValues,
