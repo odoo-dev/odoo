@@ -384,6 +384,7 @@
                                     <field name="country_id"/>
                                 </div>
                                 <field name="email" class="text-truncate"/>
+                                <field name="properties" widget="properties"/>
                                 <footer><div/></footer>
                             </main>
                         </t>
