@@ -683,6 +683,8 @@
                                 <field name="price_subtotal"/>
                                 <field name="display_type"/>
                                 <field name="currency_id"/>
+                                <field name="sequence" invisible="1"/>
+                                <!-- FIXME: here -->
                                 <control>
                                     <create name="add_product_control" string="Add product"/>
                                     <create name="add_section_control" string="Add section" context="{'default_display_type': 'line_section'}"/>

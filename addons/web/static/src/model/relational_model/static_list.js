@@ -70,6 +70,11 @@ export class StaticList extends DataPoint {
         this.handleField = Object.keys(this.activeFields).find(
             (fieldName) => this.activeFields[fieldName].isHandle
         );
+        const DEFAULT_HANDLE_FIELD = "sequence";
+        if (!this.handleField && DEFAULT_HANDLE_FIELD in this.fields) {
+            this.handleField = DEFAULT_HANDLE_FIELD;
+        }
+
     }
 
     // -------------------------------------------------------------------------

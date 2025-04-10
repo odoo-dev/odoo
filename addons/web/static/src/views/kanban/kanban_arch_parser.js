@@ -160,6 +160,14 @@ export class KanbanArchParser {
         }
         const cardClassName = (!isLegacyArch && cardDoc.getAttribute("class")) || "";
 
+        const DEFAULT_HANDLE_FIELD = "sequence";
+        if (!handleField) {
+            const fields = Object.values(fieldNodes).map((node) => node.name);
+            if (fields.includes(DEFAULT_HANDLE_FIELD)) {
+                handleField = DEFAULT_HANDLE_FIELD;
+            }
+        }
+
         if (!defaultOrder.length && handleField) {
             const handleFieldSort = `${handleField}, id`;
             defaultOrder = stringToOrderBy(handleFieldSort);
