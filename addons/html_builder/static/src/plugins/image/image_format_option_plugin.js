@@ -50,7 +50,7 @@ class ImageFormatOptionPlugin extends Plugin {
      */
     async computeAvailableFormats(img, computeMaxDisplayWidth) {
         const data = { ...img.dataset, ...(await loadImageInfo(img)) };
-        if (!data.mimetypeBeforeConversion || shouldPreventGifTransformation(img)) {
+        if (!data.mimetypeBeforeConversion || shouldPreventGifTransformation(data)) {
             return [];
         }
 
