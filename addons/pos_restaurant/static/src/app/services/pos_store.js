@@ -778,19 +778,19 @@ patch(PosStore.prototype, {
         return true;
     },
     async printCourseTicket(course) {
-        try {
-            const changes = {
-                new: [],
-                cancelled: [],
-                noteUpdate: course.lines.map((line) => ({ product_id: line.getProduct().id })),
-                noteUpdateTitle: _t("Course %s fired", "" + course.index),
-                printNoteUpdateData: false,
-            };
-            this.getOrder().uiState.lastPrint = changes;
-            await this.printChanges(this.getOrder(), changes, false);
-        } catch (e) {
-            console.error("Unable to print course", e);
-        }
+        // try {
+        //     const changes = {
+        //         new: [],
+        //         cancelled: [],
+        //         noteUpdate: course.lines.map((line) => ({ product_id: line.getProduct().id })),
+        //         noteUpdateTitle: _t("Course %s fired", "" + course.index),
+        //         printNoteUpdateData: false,
+        //     };
+        //     this.getOrder().uiState.lastPrint = changes;
+        //     await this.printChanges(this.getOrder(), changes, false);
+        // } catch (e) {
+        //     console.error("Unable to print course", e);
+        // }
     },
     async transferLinesToCourse() {
         const order = this.getOrder();

@@ -31,7 +31,8 @@ patch(ActionpadWidget.prototype, {
     },
     async submitOrder() {
         await this.pos.sendOrderInPreparationUpdateLastChange(this.currentOrder);
-        this.pos.showDefault();
+        // TODO JCB: Restore. Should go to floorplan after submitting the changes.
+        // this.pos.showDefault();
     },
     hasQuantity(order) {
         if (!order) {

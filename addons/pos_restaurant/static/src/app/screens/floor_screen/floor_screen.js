@@ -1034,7 +1034,7 @@ export class FloorScreen extends Component {
         }
         const table_ids = floor.table_ids;
         for (const table of table_ids) {
-            changeCount += this.getChangeCount(table) || 0;
+            changeCount += this.getChangeCount(table).changes || 0;
         }
 
         return changeCount;
