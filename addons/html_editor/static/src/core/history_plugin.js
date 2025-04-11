@@ -436,12 +436,15 @@ export class HistoryPlugin extends Plugin {
                             record.target.className.split &&
                             record.target.className.split(" ")) ||
                         [];
+                    // Actually means classes changed (added or removed)
                     const excludedClasses = [];
+                    // Push removed classes to list.
                     for (const klass of classBefore) {
                         if (!classAfter.includes(klass)) {
                             excludedClasses.push(klass);
                         }
                     }
+                    // Push added classes to list.
                     for (const klass of classAfter) {
                         if (!classBefore.includes(klass)) {
                             excludedClasses.push(klass);
@@ -449,11 +452,18 @@ export class HistoryPlugin extends Plugin {
                     }
                     if (
                         excludedClasses.length &&
+                        // In case of a mix of system classes and other ones, mutation records
+                        // will go through (and system classes will not be ignored).
+                        // When reverting or applying mutations, system classes
+                        // are excluded when about to apply the oldValue/value to class (see getAttributeValue).
                         excludedClasses.every((c) => this.mutationFilteredClasses.has(c))
                     ) {
                         continue;
                     }
                 }
+                // The first time we see an attribute record for a given node, we compare oldValue
+                // with the current value of the attribute. If they are the same, we skip
+                // the record and all the next ones for this attribute.
                 if (
                     typeof attributeCache.get(record.target)[record.attributeName] === "undefined"
                 ) {
@@ -585,6 +595,8 @@ export class HistoryPlugin extends Plugin {
                         const mutation = {
                             type: "add",
                         };
+                        // !!!!!
+                        // this.nodeToIdMap.get(record.target) gets checked a hundred times, wtf
                         if (!record.nextSibling && this.nodeToIdMap.get(record.target)) {
                             mutation.append = this.nodeToIdMap.get(record.target);
                         } else if (record.nextSibling && this.nodeToIdMap.get(record.nextSibling)) {
@@ -597,7 +609,7 @@ export class HistoryPlugin extends Plugin {
                         ) {
                             mutation.after = this.nodeToIdMap.get(record.previousSibling);
                         } else {
-                            return false;
+                            return false; // a callback no one reads the return value of... returns false
                         }
                         mutation.id = this.nodeToIdMap.get(added);
                         mutation.node = this.serializeNode(added, mutatedNodes);
@@ -992,6 +1004,7 @@ export class HistoryPlugin extends Plugin {
                 case "attributes": {
                     const node = this.idToNodeMap.get(mutation.id);
                     if (node) {
+                        // This removes system classes, if present
                         let value = this.getAttributeValue(
                             mutation.attributeName,
                             mutation.oldValue
