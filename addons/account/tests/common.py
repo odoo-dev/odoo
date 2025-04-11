@@ -29,8 +29,7 @@ class AccountTestInvoicingCommon(ProductCommon):
 
     @data_depends(
         'collect_company_accounting_data', 'setup_armageddon_tax',
-        '_create_product', 'copy_account', 'skip_common_data', 'country_code',
-        'chart_template',
+        '_create_product', 'copy_account', 'skip_common_data',
     )
     @classmethod
     def setUpCommonData(cls):
@@ -190,6 +189,7 @@ class AccountTestInvoicingCommon(ProductCommon):
         })
         return data
 
+    @data_depends('country_code', 'chart_template')
     @classmethod
     def setup_independent_company(cls, **kwargs):
         if cls.env.registry.loaded:

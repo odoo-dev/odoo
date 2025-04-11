@@ -331,12 +331,18 @@ class OdooSuite(TestSuite):
 
         def _get_attrs(kls) -> PartialTestOrderKeyData:
             method = kls.__dict__['setUpCommonData']
-            def _get_attr(attr):
-                return tuple(
+            def _get_attr(attr: str, seen_attributes: set):
+                if attr in seen_attributes:
+                    exit('Infinite loop in _get_attr')
+                data = tuple(
                     kls.__dict__[attr] for kls in cls.__mro__ if attr in kls.__dict__
                 )
+                d = data + tuple(itertools.chain(
+                    *(_get_attr(depend, {*seen_attributes, attr}) for d in data if hasattr(d, '_data_depends') for depend in d._data_depends)
+                ))
+                return d
             if hasattr(method, '_data_depends'):
-                return (kls, tuple(itertools.chain(*(_get_attr(attr) for attr in method._data_depends))))
+                return (kls, tuple(itertools.chain(*(_get_attr(attr, set()) for attr in method._data_depends))))
             return (kls, tuple())
 
         # If the test does not inherit from TransactionCase, the following is empty.

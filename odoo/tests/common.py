@@ -2406,7 +2406,7 @@ def data_depends(*attrs):
     The dependencies should be either class attributes or class methods.
     """
     def depends_decorator(method):
-        assert method.__name__ == 'setUpCommonData', '@data_depends should only be used on setUpCommonData'
+        # assert method.__name__ == 'setUpCommonData', '@data_depends should only be used on setUpCommonData'
         assert isinstance(method, classmethod), '@data_depends should be used before @classmethod'
         method._data_depends = tuple(attrs)
         return method
