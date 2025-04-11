@@ -111,7 +111,7 @@ export class ChatHub extends Component {
         return true;
     }
 
-    get displayChatHub() {
+    displayChatHub(cw) {
         return this.isShown || this.ui.isSmall;
     }
 
