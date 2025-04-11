@@ -89,7 +89,7 @@
             </div>
             <div class="o-mail-Discuss-main d-flex overflow-hidden flex-grow-1" t-ref="main">
                 <t t-if="ui.isSmall" t-call="mail.Discuss.loading"/>
-                <div class="o-mail-Discuss-core overflow-auto d-flex flex-grow-1 w-100" t-ref="core">
+                <div class="o-mail-Discuss-core overflow-auto d-flex flex-grow-1 w-100" t-att-class="{ 'o-mailbox': thread?.model === 'mail.box' }" t-ref="core">
                     <t name="core-content">
                         <t t-if="thread">
                             <div class="o-mail-Discuss-threadContainer d-flex flex-column flex-grow-1">

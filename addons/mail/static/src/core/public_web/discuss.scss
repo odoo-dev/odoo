@@ -6,6 +6,10 @@
 
 .o-mail-Discuss-core {
     background-color: $body-bg;
+
+    &.o-mailbox {
+        background-color: darken($body-bg, 2%);
+    }
 }
 
 .o-mail-Discuss-selfAvatar {
