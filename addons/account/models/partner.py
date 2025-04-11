@@ -138,7 +138,7 @@ class AccountFiscalPosition(models.Model):
                 if similar_fpos_count:
                     raise ValidationError(_("A fiscal position with a foreign VAT already exists in this region."))
 
-    @api.onchange('country_id', 'country_group_id', 'foreign_vat')
+    @api.onchange('country_id', 'foreign_vat')
     def _onchange_foreign_vat(self):
         self.foreign_vat, _country_code = self.env['res.partner']._run_vat_checks(self.country_id, self.foreign_vat, validation=False)
 
@@ -201,7 +201,7 @@ class AccountFiscalPosition(models.Model):
                 vals['zip_from'], vals['zip_to'] = self._convert_zip_values(zip_from or rec.zip_from, zip_to or rec.zip_to)
         return super(AccountFiscalPosition, self).write(vals)
 
-    def _local_fp_exists_for_extra_eu(self):
+    def _eu_fiscalpos_exists(self):
         # OVERRIDE
         fp_exists = self.search([
             *self._check_company_domain(self.env.company),

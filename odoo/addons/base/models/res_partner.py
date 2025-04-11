@@ -660,8 +660,8 @@ class ResPartner(models.Model):
         assert validation in (False, 'error', 'setnull')
         return vat, country and country.code or ''
 
-    def _local_fp_exists_for_extra_eu(self):
-        """ Hook used for the _get_required_valid implementation (as base_vat does not depend on account anymore)"""
+    def _eu_fiscalpos_exists(self):
+        """ Hook used for the _get_required_valid implementation"""
         self.ensure_one()
         return False
 

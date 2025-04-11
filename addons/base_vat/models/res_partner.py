@@ -732,7 +732,7 @@ class ResPartner(models.Model):
         eu_countries = self.env.ref('base.europe').country_ids
         if (
             company and self.with_company(company).perform_vies_validation
-            and (company.country_id in eu_countries or self.with_company(company)._local_fp_exists_for_extra_eu())
+            and (company.country_id in eu_countries or self.with_company(company)._eu_fiscalpos_exists())
         ):
             vat_required_valid = vat_required_valid and self.vies_valid
         return vat_required_valid

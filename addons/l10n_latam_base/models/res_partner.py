@@ -28,7 +28,7 @@ class ResPartner(models.Model):
         super(ResPartner, partners_vat)._check_vat(validation=validation)
         (self - partners_vat)._run_check_identification(validation=validation)
 
-    @api.onchange('l10n_latam_identification_type_id')
+    @api.onchange('vat', 'country_id', 'l10n_latam_identification_type_id')
     def _onchange_vat(self):
         super()._onchange_vat()
 
