@@ -829,12 +829,9 @@ class PropertiesDefinition(Field):
     def convert_to_write(self, value, record):
         return value
 
-    def _allowed_keys(self, env):
-        return self.ALLOWED_KEYS
-
     def _validate_properties_definition(self, properties_definition, env):
         """Raise an error if the property definition is not valid."""
-        allowed_keys = self._allowed_keys(env) + env["base"]._additional_allowed_keys_properties_definition()
+        allowed_keys = self.ALLOWED_KEYS + env["base"]._additional_allowed_keys_properties_definition()
 
         env["base"]._validate_properties_definition(properties_definition, self)
 
