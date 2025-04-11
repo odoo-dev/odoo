@@ -417,7 +417,6 @@ class TestUi(HttpCaseWithWebsiteUser):
 
         self.start_tour(self.env['website'].get_client_action_url('/'), 'snippet_version_2', login='admin')
 
-    @unittest.skip
     def test_08_website_style_custo(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'website_style_edition', login='admin')
 
