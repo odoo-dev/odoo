@@ -678,6 +678,9 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
             self.http_request_key = None
         self.addCleanup(reset_http_key)  # this should avoid to have a request executing during teardown
 
+    def mandatory_request_route(self, route):
+        return route == "/websocket"
+
     def check_test_cursor(self, operation):
         if odoo.modules.module.current_test != self:
             message = f"Trying to open a test cursor for {self.canonical_tag} while already in a test {odoo.modules.module.current_test.canonical_tag}"
@@ -692,6 +695,10 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
             raise BadRequest(message)
         http_request_key = request.httprequest.cookies.get(TEST_CURSOR_COOKIE_NAME)
         if not http_request_key:
+            if self.mandatory_request_route(request.httprequest.path):
+                message = f'Using a test cursor without specified test on request {request.httprequest.path} in {module.current_test.canonical_tag} as been ignored since cookie is mandatory for this path'
+                _logger.info(message)
+                raise BadRequest(message)
             if operation == '__init__':  # main difference with master, don't fail if no cookie is defined_check
                 message = f'Opening a test cursor without specified test on request {request.httprequest.path} in {module.current_test.canonical_tag}'
                 _logger.info(message)
@@ -1560,11 +1567,11 @@ which leads to stray network requests and inconsistencies."""
         """, 'awaitPromise': True})
         # wait for the screenshot or whatever
         wait(self._responses.values(), 10)
+        self.navigate_to('about:blank', wait_stop=True)
         self._logger.info('Deleting cookies and clearing local storage')
+        self._websocket_request('Storage.clearDataForOrigin', params={'origin': HOST, 'storageTypes': 'local_storage, session_storage'})
         self._websocket_request('Network.clearBrowserCache')
         self._websocket_request('Network.clearBrowserCookies')
-        self._websocket_request('Runtime.evaluate', params={'expression': 'try {localStorage.clear(); sessionStorage.clear();} catch(e) {}'})
-        self.navigate_to('about:blank', wait_stop=True)
         # hopefully after navigating to about:blank there's no event left
         self._frames.clear()
         # wait for the clearing requests to finish in case the browser is re-used
@@ -1927,7 +1934,6 @@ class HttpCase(TransactionCase):
         finally:
             # clear browser to make it stop sending requests, in case we call
             # the method several times in a test method
-            self.browser.delete_cookie('session_id', domain=HOST)
             self.browser.clear()
             self._wait_remaining_requests()
             self.http_request_key = self.canonical_tag
