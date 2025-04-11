@@ -292,6 +292,15 @@ class ResPartner(models.Model):
 
     # hack to allow using plain browse record in qweb views, and used in ir.qweb.field.contact
     self: ResPartner = fields.Many2one(comodel_name='res.partner', compute='_compute_get_ids')
+    application_statistics = fields.Json(string="Stats", compute="_compute_application_statistics")
+
+    def _compute_application_statistics(self):
+        result = self._get_stat_info()
+        for p in self:
+            p.application_statistics = result.get(p.id, [])
+
+    def _get_stat_info(self):
+        return defaultdict(list)
 
     _check_name = models.Constraint(
         "CHECK( (type='contact' AND name IS NOT NULL) or (type!='contact') )",

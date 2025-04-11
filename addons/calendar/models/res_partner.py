@@ -3,7 +3,7 @@
 from collections import defaultdict
 from datetime import datetime
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.tools import SQL
 
 
@@ -112,3 +112,10 @@ class ResPartner(models.Model):
             for partner in event.partner_ids:
                 event_by_partner_id[partner.id] |= event
         return dict(event_by_partner_id)
+
+    def _get_stat_info(self):
+        data_list = super()._get_stat_info()
+        for partner in self.filtered('meeting_count'):
+            stat_info = {'iconClass': 'fa-calendar', 'value': partner.meeting_count, 'label': _('Meetings')}
+            data_list[partner.id].append(stat_info)
+        return data_list

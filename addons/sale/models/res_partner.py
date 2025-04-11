@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.osv import expression
 
 
@@ -102,3 +102,12 @@ class ResPartner(models.Model):
             ('partner_shipping_id', 'in', self.ids),
         ]).unlink()
         return super().unlink()
+
+    def _get_stat_info(self):
+        data_list = super()._get_stat_info()
+        if not self.env.user.has_group('sales_team.group_sale_salesman'):
+            return data_list
+        for partner in self.filtered('sale_order_count'):
+            stat_info = {'iconClass': 'fa-usd', 'value': partner.sale_order_count, 'label': _('Sale Orders')}
+            data_list[partner.id].append(stat_info)
+        return data_list
