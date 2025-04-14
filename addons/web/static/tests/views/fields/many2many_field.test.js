@@ -1900,3 +1900,28 @@ test("`this` inside rendererProps should reference the component", async () => {
     await contains(".o_field_x2many_list_row_add a").click();
     expect.verifySteps(["onAdd", "selectCreate"]);
 });
+
+test("highlight search in many2many", async () => {
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `<form><field name="p" widget="many2many_tags"/></form>`,
+    });
+    await contains(".o_field_widget[name=p] input").edit("rec", { confirm: false });
+    await runAllTimers();
+    expect(`.o-autocomplete.dropdown li span`).toHaveCount(2);
+    expect(`.o-autocomplete.dropdown li:eq(0) span`).toHaveInnerHTML(`
+        first
+        <b class="text-primary fw-bold">
+            rec
+        </b>
+        ord
+    `);
+    expect(`.o-autocomplete.dropdown li:eq(1) span`).toHaveInnerHTML(`
+        second
+        <b class="text-primary fw-bold">
+            rec
+        </b>
+        ord
+    `);
+});

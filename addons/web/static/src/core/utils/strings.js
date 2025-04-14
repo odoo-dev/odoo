@@ -146,7 +146,58 @@ export function odoomark(text) {
             )
             .replaceAll(brEx, `<br/>`)
             .replaceAll(tabEx, `&nbsp;&nbsp;&nbsp;&nbsp;`)
-        );
+    );
+}
+
+/**
+ * Returns a markuped version of the input value where
+ * the query is highlighted using the input classes and
+ * a b tag if it is part of the value
+ *
+ * @param {string} query
+ * @param {string} value
+ * @param {string} classes
+ * @returns {string}
+ */
+export function highlightText(query, value, classes) {
+    const container = document.createElement("span");
+    container.innerHTML = odoomark(value).toString();
+
+    const regex = new RegExp(`(${escapeRegExp(query)})`, "ig");
+
+    function highlightNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const parts = node.textContent.split(regex);
+            if (parts.length <= 1) {
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < parts.length; i++) {
+                const part = parts[i];
+                if (i % 2) {
+                    const b = document.createElement("b");
+                    b.className = classes;
+                    b.textContent = part;
+                    fragment.appendChild(b);
+                } else {
+                    fragment.appendChild(document.createTextNode(part));
+                }
+            }
+            node.replaceWith(fragment);
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            const children = Array.from(node.childNodes);
+            for (let i = 0; i < children.length; i++) {
+                highlightNode(children[i]);
+            }
+        }
+    }
+
+    if (query.length) {
+        highlightNode(container);
+    }
+
+    return markup(`<span>${container.innerHTML}</span>`);
 }
 
 /* eslint-disable */

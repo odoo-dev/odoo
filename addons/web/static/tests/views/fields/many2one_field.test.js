@@ -3919,3 +3919,28 @@ test("search typeahead", async () => {
         "Search more...",
     ]);
 });
+
+test("highlight search in many2one", async () => {
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `<form><field name="trululu"/></form>`,
+    });
+    await contains(".o_field_widget[name=trululu] input").edit("rec", { confirm: false });
+    await runAllTimers();
+    expect(`.o-autocomplete.dropdown li span`).toHaveCount(2);
+    expect(`.o-autocomplete.dropdown li:eq(0) span`).toHaveInnerHTML(`
+        first
+        <b class="text-primary fw-bold">
+            rec
+        </b>
+        ord
+    `);
+    expect(`.o-autocomplete.dropdown li:eq(1) span`).toHaveInnerHTML(`
+        second
+        <b class="text-primary fw-bold">
+            rec
+        </b>
+        ord
+    `);
+});
