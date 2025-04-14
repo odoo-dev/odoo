@@ -116,7 +116,48 @@ export const assets = {
         delay: 5000,
         extraDelay: 2500,
     },
-
+    /**
+     *
+     * @param result
+     * @return {{cssLibs: [], jsLibs: []}}
+     * @private
+     */
+    _processBundle(result) {
+        const cssLibs = [];
+        const jsLibs = [];
+        for (const { src, type } of Object.values(result)) {
+            if (type === "link" && src) {
+                cssLibs.push(src);
+            } else if (type === "script" && src) {
+                jsLibs.push(src);
+            }
+        }
+        return { cssLibs, jsLibs };
+    },
+    /**
+     *
+     * @param {string} bundleName Name of the bundle containing the list of files
+     * @param {Map<string, Promise<BundleFileNames | void>>} cacheMap
+     * @return {Promise<{cssLibs: [], jsLibs: []} | *>}
+     * @private
+     */
+    _getBundleRPC(bundleName, cacheMap) {
+        const url = new URL(`/web/bundle/${bundleName}`, location.origin);
+        for (const [key, value] of Object.entries(session.bundle_params || {})) {
+            url.searchParams.set(key, value);
+        }
+        return fetch(url)
+            .then(async (response) => {
+                if (response.bodyUsed) {
+                    return { cssLibs: [], jsLibs: [] };
+                }
+                return assets._processBundle(await response.json());
+            })
+            .catch((reason) => {
+                cacheMap.delete(bundleName);
+                throw new AssetsLoadingError(`The loading of ${url} failed`, { cause: reason });
+            });
+    },
     /**
      * Get the files information as descriptor object from a public asset template.
      *
@@ -130,30 +171,7 @@ export const assets = {
         if (cacheMap.has(bundleName)) {
             return cacheMap.get(bundleName);
         }
-        const url = new URL(`/web/bundle/${bundleName}`, location.origin);
-        for (const [key, value] of Object.entries(session.bundle_params || {})) {
-            url.searchParams.set(key, value);
-        }
-        const promise = fetch(url)
-            .then(async (response) => {
-                const cssLibs = [];
-                const jsLibs = [];
-                if (!response.bodyUsed) {
-                    const result = await response.json();
-                    for (const { src, type } of Object.values(result)) {
-                        if (type === "link" && src) {
-                            cssLibs.push(src);
-                        } else if (type === "script" && src) {
-                            jsLibs.push(src);
-                        }
-                    }
-                }
-                return { cssLibs, jsLibs };
-            })
-            .catch((reason) => {
-                cacheMap.delete(bundleName);
-                throw new AssetsLoadingError(`The loading of ${url} failed`, { cause: reason });
-            });
+        const promise = assets._getBundleRPC(bundleName, cacheMap);
         cacheMap.set(bundleName, promise);
         return promise;
     },

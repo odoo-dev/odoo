@@ -70,9 +70,31 @@ class IrHttp(models.AbstractModel):
             'session_info': self.session_info(),
         }
 
+    def _lazy_bundles_name(self):
+        return []
+
+    def get_bundle(self, bundle_name, **bundle_params):
+        if 'lang' in bundle_params:
+            request.update_context(lang=request.env['res.lang']._get_code(bundle_params['lang']))
+
+        debug = bundle_params.get('debug', request.session.debug)
+        files = request.env['ir.qweb']._get_asset_nodes(bundle_name, debug=debug, js=True, css=True)
+        data = [{
+            'type': tag,
+            'src': attrs.get('src') or attrs.get('data-src') or attrs.get('href'),
+        } for tag, attrs in files]
+        return data
+
     @api.model
     def lazy_session_info(self):
-        return {}
+        return {
+            "bundles": {
+                bundle_name: self.get_bundle(
+                    bundle_name=bundle_name,
+                    bundle_params={}
+                ) for bundle_name in self._lazy_bundles_name()
+            }
+        }
 
     def session_info(self):
         user = self.env.user
@@ -126,6 +148,7 @@ class IrHttp(models.AbstractModel):
             'groups': {
                 'base.group_allow_export': user.has_group('base.group_allow_export') if session_uid else False,
             },
+            'lazy_bundles_name': self._lazy_bundles_name(),
         }
         if request.session.debug:
             session_info['bundle_params']['debug'] = request.session.debug

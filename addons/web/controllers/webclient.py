@@ -111,14 +111,5 @@ class WebClient(http.Controller):
         """
         Request the definition of a bundle, including its javascript and css bundled assets
         """
-        if 'lang' in bundle_params:
-            request.update_context(lang=request.env['res.lang']._get_code(bundle_params['lang']))
-
-        debug = bundle_params.get('debug', request.session.debug)
-        files = request.env["ir.qweb"]._get_asset_nodes(bundle_name, debug=debug, js=True, css=True)
-        data = [{
-            "type": tag,
-            "src": attrs.get("src") or attrs.get("data-src") or attrs.get('href'),
-        } for tag, attrs in files]
-
+        data = request.env['ir.http'].get_bundle(bundle_name=bundle_name, bundle_params=bundle_params)
         return request.make_json_response(data)
