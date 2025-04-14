@@ -95,14 +95,34 @@ class ResPartner(models.Model):
     # Field representing whether vies_valid is relevant for selecting a fiscal position on this partner
     perform_vies_validation = fields.Boolean(compute='_compute_perform_vies_validation')
     # We put on inverse because a compute with a dependency to itself is not well managed in the ORM (it should be triggered first)
-    country_id = fields.Many2one(inverse="_inverse_vat", store=True)
-    vat = fields.Char(inverse="_inverse_vat", store=True)
+    #country_id = fields.Many2one(inverse="_inverse_vat", store=True)
+    #vat = fields.Char(inverse="_inverse_vat", store=True) # TODO: clean out _inverse_vat method
+    formatted_vat = fields.Char(compute="_compute_formatted_vat", inverse="_inverse_formatted_vat") # the vat field is the sanitized vat
+
+    @api.depends('vat', 'country_id')
+    def _compute_formatted_vat(self):
+        for partner in self:
+            if country := partner.country_id:
+                vat = partner.vat
+                # TODO: run_vat_checks for real country_code
+                stdnum_vat_fix_func = getattr(stdnum.util.get_cc_module(country.code, 'vat'), 'format', None)
+                if stdnum_vat_fix_func:
+                    vat = stdnum_vat_fix_func(vat)
+                    print(country.name, vat)
+                partner.formatted_vat = vat
+
+    def _inverse_formatted_vat(self):
+        for partner in self:
+            vat, _country_code = self._run_vat_checks(partner.country_id, partner.formatted_vat)
+            import pdb; pdb.set_trace()
+            if vat != partner.vat:
+                partner.vat = vat
 
     @api.model
     def _run_vat_checks(self, country, vat, partner_name='', validation='error'):
         """
         OVERRIDE
-         Returns vat, country.
+         Returns vat, country_code
           validation: if vat is not valid, then it raises when validation is error and returns '' when validation is setnull
           partner_name: is for providing a good error message
         """
