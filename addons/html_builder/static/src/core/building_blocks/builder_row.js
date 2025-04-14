@@ -18,8 +18,9 @@ export class BuilderRow extends Component {
         slots: { type: Object, optional: true },
         level: { type: Number, optional: true },
         expand: { type: Boolean, optional: true },
+        vertical: { type: Boolean, optional: true },
     };
-    static defaultProps = { expand: false };
+    static defaultProps = { expand: false, vertical: false };
 
     setup() {
         useBuilderComponent();
@@ -47,8 +48,11 @@ export class BuilderRow extends Component {
         );
     }
 
-    getLevelClass() {
-        return this.props.level ? `o_we_sublevel_${this.props.level}` : "";
+    getAdditionalClasses() {
+        const additionalClasses = [];
+        this.props.level && additionalClasses.push(`o_we_sublevel_${this.props.level}`);
+        this.props.vertical && additionalClasses.push("flex-column");
+        return additionalClasses.join(" ");
     }
 
     toggleCollapseContent() {
