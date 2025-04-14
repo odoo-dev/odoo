@@ -8,6 +8,7 @@
     "data": [
         "report/loyalty_report_templates.xml",
         "report/loyalty_report.xml",
+        "data/ir_cron.xml",
         "data/mail_template_data.xml",
         "data/loyalty_data.xml",
         "wizard/loyalty_card_update_balance_views.xml",

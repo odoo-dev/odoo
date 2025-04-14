@@ -103,6 +103,28 @@
                             </div>
                             <field name="payment_program_discount_product_id" groups="base.group_no_one" invisible="program_type not in ('gift_card', 'ewallet')"/>
                             <field name="mail_template_id" invisible="program_type not in ('gift_card', 'ewallet')"/>
+                            <field name="currency_id"/>
+                            <field name="currency_symbol" invisible="1"/>
+                            <field name="pricelist_ids"
+                                   widget="many2many_tags"
+                                   invisible="program_type in ('gift_card', 'ewallet')"
+                                   groups="product.group_product_pricelist"/>
+                            <field name="portal_point_name" invisible="program_type in ('loyalty', 'gift_card', 'ewallet')" string="Points Unit" groups="base.group_no_one"/>
+                            <field name="portal_point_name" invisible="program_type in ('gift_card', 'ewallet') or program_type != 'loyalty'" string="Points Unit"/>
+                            <field name="portal_visible" invisible="1"/>
+                            <field name="portal_visible" groups="base.group_no_one" string="Show points Unit" invisible="program_type in ('gift_card', 'ewallet')"/>
+                            <field name="trigger" invisible="1"/>
+                            <field name="trigger" string="Program trigger" groups="base.group_no_one" widget="selection" readonly="1" force_save="1"/>
+                            <field name="applies_on" invisible="1"/>
+                            <field name="applies_on" string="Use points on" groups="base.group_no_one" widget="radio" force_save="1" readonly="program_type != 'loyalty'"/>
+                            <label for="expire_after" invisible="program_type != 'loyalty'"/>
+                            <span invisible="program_type != 'loyalty'">
+                                <field name="expire_after" class="oe_inline"/>days
+                            </span>
+                        </group>
+                        <group>
+                            <field name="date_from" invisible="program_type in ('gift_card', 'ewallet')"/>
+                            <field name="date_to" invisible="program_type in ('gift_card', 'ewallet')"/>
                             <label for="limit_usage" invisible="program_type in ('gift_card', 'ewallet')"/>
                             <span invisible="program_type in ('gift_card', 'ewallet')">
                                 <field name="limit_usage" class="oe_inline"/>
