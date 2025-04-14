@@ -10,7 +10,7 @@
                         <field name="name" />
                         <field name="printer_type" widget="radio"/>
                         <field name="epson_printer_ip" invisible="printer_type != 'epson_epos'"/>
-                        <field name="product_categories_ids" />
+                        <field name="product_categories_ids" widget="many2many_tags"/>
                     </group>
                     <group>
                         <div style="display:flex; justify-content:flex-end; align-items:flex-start; height:100%;">

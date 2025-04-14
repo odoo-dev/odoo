@@ -25,7 +25,7 @@ class HrEmployee(models.Model):
     @api.model
     def _load_pos_data_read(self, records, config):
         read_records = super()._load_pos_data_read(records, config)
-        manager_ids = records.filtered(lambda emp: config.group_pos_manager_id.id in emp.user_id.all_group_ids.ids).ids
+        manager_ids = records.filtered(lambda emp: self.env.ref('point_of_sale.group_pos_manager').id in emp.user_id.all_group_ids.ids).ids
 
         employees_barcode_pin = records.get_barcodes_and_pin_hashed()
         bp_per_employee_id = {bp_e['id']: bp_e for bp_e in employees_barcode_pin}

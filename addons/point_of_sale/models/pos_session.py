@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from collections import defaultdict
 from datetime import timedelta
 from itertools import groupby, starmap
@@ -18,7 +19,7 @@ class PosSession(models.Model):
     _name = 'pos.session'
     _order = 'id desc'
     _description = 'Point of Sale Session'
-    _inherit = ['mail.thread', 'mail.activity.mixin', "pos.bus.mixin", 'pos.load.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'pos.bus.mixin', 'pos.load.mixin']
 
     POS_SESSION_STATE = [
         ('opening_control', 'Opening Control'),  # method action_pos_session_open
@@ -27,8 +28,7 @@ class PosSession(models.Model):
         ('closed', 'Closed & Posted'),
     ]
 
-    company_id = fields.Many2one('res.company', related='config_id.company_id', string="Company", readonly=True)
-
+    company_id = fields.Many2one('res.company', related='config_id.company_id', string="Company")
     config_id = fields.Many2one(
         'pos.config', string='Point of Sale',
         required=True,
@@ -38,23 +38,20 @@ class PosSession(models.Model):
         'res.users', string='Opened By',
         required=True,
         index=True,
-        readonly=False,
+        readonly=True,
         default=lambda self: self.env.uid,
         ondelete='restrict')
-    currency_id = fields.Many2one('res.currency', related='config_id.currency_id', string="Currency", readonly=False)
+    currency_id = fields.Many2one('res.currency', related='config_id.currency_id', string="Currency")
     start_at = fields.Datetime(string='Opening Date', readonly=True)
-    stop_at = fields.Datetime(string='Closing Date', readonly=True, copy=False)
-
+    stop_at = fields.Datetime(string='Closing Date', readonly=True)
     state = fields.Selection(
         POS_SESSION_STATE, string='Status',
         required=True, readonly=True,
         index=True, copy=False, default='opening_control')
-
     opening_notes = fields.Text(string="Opening Notes")
     closing_notes = fields.Text(string="Closing Notes")
     cash_control = fields.Boolean(compute='_compute_cash_control', string='Has Cash Control')
     cash_journal_id = fields.Many2one('account.journal', compute='_compute_cash_journal', string='Cash Journal', store=True)
-
     cash_register_balance_end_real = fields.Monetary(
         string="Ending Balance",
         readonly=True)
@@ -64,17 +61,13 @@ class PosSession(models.Model):
     cash_register_balance_end = fields.Monetary(
         compute='_compute_cash_balance',
         string="Theoretical Closing Balance",
-        help="Opening balance summed to all cash transactions.",
-        readonly=True)
+        help="Opening balance summed to all cash transactions.")
     cash_register_difference = fields.Monetary(
         compute='_compute_cash_balance',
         string='Before Closing Difference',
-        help="Difference between the theoretical closing balance and the real closing balance.",
-        readonly=True)
-
+        help="Difference between the theoretical closing balance and the real closing balance.")
     # Total Cash In/Out
     cash_real_transaction = fields.Monetary(string='Transaction', readonly=True)
-
     order_ids = fields.One2many('pos.order', 'session_id', string='Orders')
     order_count = fields.Integer(compute='_compute_order_count')
     statement_line_ids = fields.One2many('account.bank.statement.line', 'pos_session_id', string='Cash Lines', readonly=True)
@@ -88,8 +81,8 @@ class PosSession(models.Model):
     move_id = fields.Many2one('account.move', string='Journal Entry', index=True)
     payment_method_ids = fields.Many2many('pos.payment.method', related='config_id.payment_method_ids', string='Payment Methods')
     total_payments_amount = fields.Float(compute='_compute_total_payments_amount', string='Total Payments Amount')
-    is_in_company_currency = fields.Boolean('Is Using Company Currency', compute='_compute_is_in_company_currency')
-    update_stock_at_closing = fields.Boolean('Stock should be updated at closing')
+    is_in_company_currency = fields.Boolean('Use Company Currency', compute='_compute_is_in_company_currency')
+    update_stock_at_closing = fields.Boolean('Is Stock updated at closing?')
     bank_payment_ids = fields.One2many('account.payment', 'pos_session_id', 'Bank Payments', help='Account payments representing aggregated and bank split payments.')
 
     def write(self, vals):
@@ -137,6 +130,9 @@ class PosSession(models.Model):
 
     @api.model
     def _load_pos_data_models(self, config):
+        """
+        Return the list of models that will be loaded in the frontend.
+        """
         return ['pos.config', 'pos.preset', 'resource.calendar.attendance', 'pos.order', 'pos.order.line', 'pos.pack.operation.lot', 'pos.payment', 'pos.payment.method', 'pos.printer',
             'pos.category', 'pos.bill', 'res.company', 'account.tax', 'account.tax.group', 'product.template', 'product.product', 'product.attribute', 'product.attribute.custom.value',
             'product.template.attribute.line', 'product.template.attribute.value', 'product.combo', 'product.combo.item', 'res.users', 'res.partner', 'product.uom',
@@ -157,7 +153,6 @@ class PosSession(models.Model):
     def load_data(self, models_to_load):
         response = {}
         response['pos.session'] = self._load_pos_data_search_read(response, self.config_id)
-
         for model in self._load_pos_data_models(self.config_id):
             if models_to_load and model not in models_to_load:
                 continue
@@ -172,19 +167,14 @@ class PosSession(models.Model):
 
     def load_data_params(self):
         response = {}
-        fields = self._load_pos_data_fields(self.config_id)
-        response['pos.session'] = {
-            'fields': fields,
-            'relations': self._load_pos_data_relations('pos.session', fields)
-        }
-
-        for model in self._load_pos_data_models(self.config_id):
+        models_to_load = self._load_pos_data_models(self.config_id)
+        models_to_load.insert(0, 'pos.session')
+        for model in models_to_load:
             fields = self.env[model]._load_pos_data_fields(self.config_id)
             response[model] = {
                 'fields': fields,
                 'relations': self._load_pos_data_relations(model, fields)
             }
-
         return response
 
     def filter_local_data(self, models_to_filter):
@@ -244,7 +234,7 @@ class PosSession(models.Model):
         for session in self:
             cash_payment_method = session.payment_method_ids.filtered('is_cash_count')[:1]
             if cash_payment_method:
-                total_cash_payment = 0.0
+                # total_cash_payment = 0.0
                 captured_cash_payments_domain = Domain.AND([session._get_captured_payments_domain(), [('payment_method_id', '=', cash_payment_method.id)]])
                 result = self.env['pos.payment']._read_group(captured_cash_payments_domain, aggregates=['amount:sum'])
                 total_cash_payment = result[0][0] or 0.0
@@ -274,9 +264,29 @@ class PosSession(models.Model):
 
     @api.depends('picking_ids', 'picking_ids.state')
     def _compute_picking_count(self):
+        # Group pickings by session
+        pickings_data = self.env['stock.picking']._read_group(
+            [('pos_session_id', 'in', self.ids)],
+            ['pos_session_id', 'state'],
+            ['__count']
+        )
+
+        picking_counts = {}
+        failed_pickings = set()
+        for session, state, count in pickings_data:
+            picking_counts[session.id] = picking_counts.get(session.id, 0) + count
+            if state != 'done':
+                failed_pickings.add(session.id)
+
         for session in self:
-            session.picking_count = self.env['stock.picking'].search_count([('pos_session_id', 'in', session.ids)])
-            session.failed_pickings = bool(self.env['stock.picking'].search([('pos_session_id', 'in', session.ids), ('state', '!=', 'done')], limit=1))
+            session.picking_count = picking_counts.get(session.id, 0)
+            session.failed_pickings = session.id in failed_pickings
+
+    # @api.depends('picking_ids', 'picking_ids.state')
+    # def _compute_picking_count(self):
+    #     for session in self:
+    #         session.picking_count = self.env['stock.picking'].search_count([('pos_session_id', 'in', session.ids)])
+    #         session.failed_pickings = bool(self.env['stock.picking'].search([('pos_session_id', 'in', session.ids), ('state', '!=', 'done')], limit=1))
 
     def action_stock_picking(self):
         self.ensure_one()
@@ -290,17 +300,13 @@ class PosSession(models.Model):
     def _compute_cash_control(self):
         # Only one cash register is supported by point_of_sale.
         for session in self:
-            if session.cash_journal_id:
-                session.cash_control = session.config_id.cash_control
-            else:
-                session.cash_control = False
+            session.cash_control = session.cash_journal_id and session.config_id.cash_control or False
 
-    @api.depends('config_id', 'payment_method_ids')
+    @api.depends('payment_method_ids')
     def _compute_cash_journal(self):
         # Only one cash register is supported by point_of_sale.
         for session in self:
-            cash_journal = session.payment_method_ids.filtered('is_cash_count')[:1].journal_id
-            session.cash_journal_id = cash_journal
+            session.cash_journal_id = session.payment_method_ids.filtered('is_cash_count')[:1].journal_id
 
     @api.constrains('config_id')
     def _check_pos_config(self):
@@ -365,12 +371,10 @@ class PosSession(models.Model):
 
     def action_pos_session_open(self):
         # we only open sessions that haven't already been opened
-        for session in self.filtered(lambda session: session.state == 'opening_control'):
-            values = {}
+        for session in self.filtered(lambda s: s.state == 'opening_control'):
             if session.config_id.cash_control and not session.rescue:
                 last_session = self.search([('config_id', '=', session.config_id.id), ('id', '!=', session.id)], limit=1)
                 session.cash_register_balance_start = last_session.cash_register_balance_end_real  # defaults to 0 if lastsession is empty
-            session.write(values)
         return True
 
     def get_session_orders(self):
@@ -419,7 +423,7 @@ class PosSession(models.Model):
         record = self.ensure_one()
         if self.env.user.has_group('point_of_sale.group_pos_user'):
             record = record.sudo()
-        data = {}
+        # data = {}
         if self.get_session_orders().filtered(lambda o: o.state != 'cancel') or self.sudo().statement_line_ids:
             self.cash_real_transaction = sum(self.sudo().statement_line_ids.mapped('amount'))
             if self.state == 'closed':
@@ -540,7 +544,7 @@ class PosSession(models.Model):
 
         If successful, it returns {'successful': True}
         Otherwise, it returns {'successful': False, 'message': str, 'redirect': bool}.
-        'redirect' is a boolean used to know whether we redirect the user to the back end or not.
+        'redirect' is a boolean used to know whether we redirect the user to the backend or not.
         When necessary, error (i.e. UserError, AccessError) is raised which should redirect the user to the back end.
         """
         bank_payment_method_diffs = dict(bank_payment_method_diff_pairs or [])
@@ -1653,7 +1657,7 @@ class PosSession(models.Model):
         }
 
     def _get_captured_payments_domain(self):
-        return [('session_id', 'in', self.ids), ('pos_order_id.state', 'in', ['paid', 'invoiced', 'done'])]
+        return [('session_id', 'in', self.ids), ('pos_order_id.state', 'in', ['paid', 'done'])]
 
     def open_frontend_cb(self):
         """Open the pos interface with config_id as an extra argument.
@@ -1722,7 +1726,7 @@ class PosSession(models.Model):
             'views': [
                 (self.env.ref('point_of_sale.view_pos_order_tree_no_session_id').id, 'list'),
                 (self.env.ref('point_of_sale.view_pos_pos_form').id, 'form'),
-                ],
+            ],
             'type': 'ir.actions.act_window',
             'domain': [('session_id', 'in', self.ids)],
         }

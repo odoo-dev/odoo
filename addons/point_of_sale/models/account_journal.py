@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-# Copyright (C) 2004-2008 PC Solutions (<http://pcsol.be>). All Rights Reserved
+
 from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError
 
@@ -44,7 +43,7 @@ class AccountJournal(models.Model):
         )
 
     @api.model
-    def _ensure_company_account_journal(self):
+    def _ensure_company_pos_journal(self):
         journal = self.search([
             ('code', '=', 'POSS'),
             ('company_id', '=', self.env.company.id),

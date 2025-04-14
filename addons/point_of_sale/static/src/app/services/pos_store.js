@@ -1225,7 +1225,6 @@ export class PosStore extends WithLazyGetterTrap {
             session_id: this.session,
             company_id: this.company,
             config_id: this.config,
-            picking_type_id: this.pickingType,
             user_id: this.user,
             access_token: uuidv4(),
             ticket_code: random5Chars(),
@@ -2020,7 +2019,7 @@ export class PosStore extends WithLazyGetterTrap {
         });
     }
     editPartnerContext(partner) {
-        return {};
+        return {'target': 'new'};     // This context is used to open the parent company form view in the POS - method: open_commercial_entity.
     }
     /**
      * @param {import("@point_of_sale/app/models/res_partner").ResPartner?} partner leave undefined to create a new partner

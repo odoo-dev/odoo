@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from typing import List, Tuple
+from typing import List
 import random
 
 from odoo import api, fields, models, _
@@ -59,9 +58,8 @@ class PosCategory(models.Model):
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_session_open(self):
-        if self.search_count([('id', 'in', self.ids)]):
-            if self.env['pos.session'].sudo().search_count([('state', '!=', 'closed')]):
-                raise UserError(_('You cannot delete a point of sale category while a session is still opened.'))
+        if self.env['pos.session'].search_count([('state', '!=', 'closed')], limit=1):
+            raise UserError(_('You cannot delete a point of sale category while a session is still opened.'))
 
     @api.depends('has_image')
     def _compute_has_image(self):

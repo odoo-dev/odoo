@@ -1,12 +1,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+
 from collections import defaultdict
-from odoo.tools import SQL, is_html_empty
+from datetime import date
 from itertools import groupby
 from operator import itemgetter
-from datetime import date
+
+from odoo import api, fields, models, _
+
+from odoo.exceptions import UserError
 from odoo.fields import Domain
+from odoo.tools import SQL, is_html_empty
 
 
 class ProductTemplate(models.Model):
@@ -21,7 +24,7 @@ class ProductTemplate(models.Model):
             return 1
         return max_sequence + 1
 
-    available_in_pos = fields.Boolean(string='Available in POS', help='Check if you want this product to appear in the Point of Sale.', default=False)
+    available_in_pos = fields.Boolean(string='Available in POS', help='Check if you want this product to appear in the Point of Sale.')
     to_weight = fields.Boolean(string='To Weigh With Scale', help="Check if the product should be weighted using the hardware scale integration.")
     pos_categ_ids = fields.Many2many(
         'pos.category', string='Point of Sale Category',
@@ -283,8 +286,8 @@ class ProductTemplate(models.Model):
     @api.ondelete(at_uninstall=False)
     def _unlink_except_open_session(self):
         product_ctx = dict(self.env.context or {}, active_test=False)
-        if self.with_context(product_ctx).search_count([('id', 'in', self.ids), ('available_in_pos', '=', True)]):
-            if self.env['pos.session'].sudo().search_count([('state', '!=', 'closed')]):
+        if self.env['pos.session'].sudo().search_count([('state', '!=', 'closed')]):
+            if self.with_context(product_ctx).search_count([('id', 'in', self.ids), ('available_in_pos', '=', True)]):
                 raise UserError(_(
                     "To delete a product, make sure all point of sale sessions are closed.\n\n"
                     "Deleting a product available in a session would be like attempting to snatch a hamburger from a customer’s hand mid-bite; chaos will ensue as ketchup and mayo go flying everywhere!",
@@ -317,9 +320,9 @@ class ProductTemplate(models.Model):
     def _check_combo_inclusions(self):
         for product in self:
             if not product.available_in_pos:
-                combo_name = self.env['product.combo.item'].sudo().search([('product_id', 'in', product.product_variant_ids.ids)], limit=1).combo_id.name
-                if combo_name:
-                    raise UserError(_('You must first remove this product from the %s combo', combo_name))
+                combos = self.env['product.combo.item'].sudo().search([('product_id', 'in', product.product_variant_ids.ids)]).combo_id
+                if combos:
+                    raise UserError(_('You must first remove this product from the following combos: \n- %s', '\n- '.join(combos.mapped('name'))))
 
     def get_product_info_pos(self, price, quantity, pos_config_id, product_variant_id=False):
         self.ensure_one()

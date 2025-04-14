@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from odoo import api, models, fields, _
 from odoo.exceptions import UserError
 
@@ -22,13 +23,14 @@ class ProductProduct(models.Model):
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_active_pos_session(self):
-        product_ctx = dict(self.env.context or {}, active_test=False)
-        if self.env['pos.session'].sudo().search_count([('state', '!=', 'closed')]):
-            if self.with_context(product_ctx).search_count([('id', 'in', self.ids), ('product_tmpl_id.available_in_pos', '=', True)]):
-                raise UserError(_(
-                    "To delete a product, make sure all point of sale sessions are closed.\n\n"
-                    "Deleting a product available in a session would be like attempting to snatch a hamburger from a customer’s hand mid-bite; chaos will ensue as ketchup and mayo go flying everywhere!",
-                ))
+        self.product_tmpl_id._unlink_except_open_session()
+        # product_ctx = dict(self.env.context or {}, active_test=False)
+        # if self.env['pos.session'].sudo().search_count([('state', '!=', 'closed')]):
+        #     if self.with_context(product_ctx).search_count([('id', 'in', self.ids), ('product_tmpl_id.available_in_pos', '=', True)]):
+        #         raise UserError(_(
+        #             "To delete a product, make sure all point of sale sessions are closed.\n\n"
+        #             "Deleting a product available in a session would be like attempting to snatch a hamburger from a customer’s hand mid-bite; chaos will ensue as ketchup and mayo go flying everywhere!",
+        #         ))
 
     @api.model
     def _load_pos_data_read(self, records, config):

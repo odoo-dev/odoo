@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
@@ -12,7 +13,8 @@ class ResPartner(models.Model):
         help="The number of point of sales orders related to this customer",
         groups="point_of_sale.group_pos_user",
     )
-    pos_order_ids = fields.One2many('pos.order', 'partner_id', readonly=True)
+    # TODO: need to remove pos_order_ids field as it is not used anymore
+    # pos_order_ids = fields.One2many('pos.order', 'partner_id', readonly=True)
     pos_contact_address = fields.Char('PoS Address', compute='_compute_pos_contact_address')
     invoice_emails = fields.Char(compute='_compute_invoice_emails', readonly=True)
     fiscal_position_id = fields.Many2one(
@@ -78,6 +80,7 @@ class ResPartner(models.Model):
         ]
 
     def _compute_pos_order(self):
+        # TODO: need to check why count and data is mismatched from v16
         # retrieve all children partners and prefetch 'parent_id' on them
         all_partners = self.with_context(active_test=False).search_fetch(
             [('id', 'child_of', self.ids)],

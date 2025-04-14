@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
@@ -25,7 +24,6 @@ class StockPicking(models.Model):
             'location_dest_id': location_dest_id,
             'state': 'draft',
         }
-
 
     @api.model
     def _create_picking_from_pos_order_lines(self, location_dest_id, lines, picking_type, partner=False):

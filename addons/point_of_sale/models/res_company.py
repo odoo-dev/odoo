@@ -1,3 +1,5 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
 from odoo.fields import Domain
@@ -13,19 +15,16 @@ class ResCompany(models.Model):
             ], default='real', string="Update quantities in stock",
             help="At the session closing: A picking is created for the entire session when it's closed\n In real time: Each order sent to the server create its own picking")
     point_of_sale_use_ticket_qr_code = fields.Boolean(
-        string='Self-service invoicing',
+        string='Self-service Invoicing',
         default=True,
         help="Print information on the receipt to allow the customer to easily access the invoice anytime, from Odoo's portal.")
-    point_of_sale_ticket_unique_code = fields.Boolean(
-        string='Generate a code on ticket',
-        help="Add a 5-digit code on the receipt to allow the user to request the invoice for an order on the portal.")
     point_of_sale_ticket_portal_url_display_mode = fields.Selection([
             ('qr_code', 'QR code'),
             ('url', 'URL'),
             ('qr_code_and_url', 'QR code + URL'),
         ], default='qr_code_and_url',
         string='Print',
-        help="Choose how the URL to the portal will be print on the receipt.",
+        help="Select the way the customer can obtain the invoice, which will be printed on the receipt.",
         required=True)
 
     @api.model
@@ -37,8 +36,7 @@ class ResCompany(models.Model):
         return [
             'id', 'currency_id', 'email', 'website', 'company_registry', 'vat', 'name', 'phone', 'partner_id',
             'country_id', 'state_id', 'tax_calculation_rounding_method', 'nomenclature_id', 'point_of_sale_use_ticket_qr_code',
-            'point_of_sale_ticket_unique_code', 'point_of_sale_ticket_portal_url_display_mode', 'street', 'city', 'zip',
-            'account_fiscal_country_id',
+            'point_of_sale_ticket_portal_url_display_mode', 'street', 'city', 'zip', 'account_fiscal_country_id',
         ]
 
     @api.constrains('fiscalyear_lock_date', 'tax_lock_date', 'sale_lock_date', 'hard_lock_date')

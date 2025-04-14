@@ -27,7 +27,6 @@ def format_epson_certified_domain(serial_number):
 
 class PosPrinter(models.Model):
     _name = 'pos.printer'
-
     _description = 'Point of Sale Printer'
     _inherit = ['pos.load.mixin']
 
