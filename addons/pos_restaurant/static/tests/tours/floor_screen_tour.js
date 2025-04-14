@@ -217,7 +217,7 @@ registry.category("web_tour.tours").add("TableMergeUnmergeTour", {
             inLeftSide(ProductScreen.orderLineHas("Coca-Cola", "1")),
             ProductScreen.clickOrderButton(),
             {
-                ...Dialog.confirm(),
+                ...Dialog.cancel(),
                 content: "Acknowledge printing error (test does not use a printer).",
             },
             ProductScreen.orderlinesHaveNoChange(),
@@ -229,7 +229,7 @@ registry.category("web_tour.tours").add("TableMergeUnmergeTour", {
             inLeftSide(ProductScreen.orderLineHas("Minute Maid", "1")),
             ProductScreen.clickOrderButton(),
             {
-                ...Dialog.confirm(),
+                ...Dialog.cancel(),
                 content: "Acknowledge printing error (test does not use a printer).",
             },
             ProductScreen.orderlinesHaveNoChange(),
@@ -247,7 +247,7 @@ registry.category("web_tour.tours").add("TableMergeUnmergeTour", {
             ProductScreen.orderlineIsToOrder("Minute Maid"),
             ProductScreen.clickOrderButton(),
             {
-                ...Dialog.confirm(),
+                ...Dialog.cancel(),
                 content: "Acknowledge printing error (test does not use a printer).",
             },
             ProductScreen.orderlinesHaveNoChange(),
