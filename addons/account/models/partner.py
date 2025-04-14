@@ -201,15 +201,6 @@ class AccountFiscalPosition(models.Model):
                 vals['zip_from'], vals['zip_to'] = self._convert_zip_values(zip_from or rec.zip_from, zip_to or rec.zip_to)
         return super(AccountFiscalPosition, self).write(vals)
 
-    def _eu_fiscalpos_exists(self):
-        # OVERRIDE
-        fp_exists = self.search([
-            *self._check_company_domain(self.env.company),
-            ('foreign_vat', '!=', False),
-            ('country_id', '=', self.country_id.id),
-        ], limit=1)
-        return fp_exists and True or False
-
     def _get_fpos_ranking_functions(self, partner):
         """Get comparison functions to rank fiscal positions.
 
@@ -717,6 +708,10 @@ class ResPartner(models.Model):
     @api.depends_context('company')
     def _compute_show_credit_limit(self):
         self.show_credit_limit = self.env.company.account_use_credit_limit
+
+    def _eu_fiscalpos_exists(self):
+        # OVERRIDE
+        return self.country_id and self.country_id.has_foreign_fiscal_position
 
     def _get_suggested_invoice_edi_format(self):
         # TO OVERRIDE
