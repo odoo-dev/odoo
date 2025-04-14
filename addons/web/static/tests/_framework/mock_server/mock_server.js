@@ -696,6 +696,7 @@ export class MockServer {
                 action.target ??= "current";
                 action.view_ids ||= [];
                 action.view_mode ??= "list,form";
+                action.cache = true;
                 for (const embeddedAction of this.actions) {
                     if (
                         embeddedAction.type === ACTION_TYPES.embedded &&

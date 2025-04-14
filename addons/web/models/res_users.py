@@ -1,7 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models
+import os
+from odoo import api, fields, models
 from odoo.fields import Domain
+import binascii
 from odoo.http import request
 
 SKIP_CAPTCHA_LOGIN = object()
@@ -9,6 +11,15 @@ SKIP_CAPTCHA_LOGIN = object()
 
 class ResUsers(models.Model):
     _inherit = "res.users"
+
+    @api.depends('password')
+    def _compute_idb_secret(self):
+        for user in self:
+            user.idb_secret = binascii.hexlify(os.urandom(16)).decode().strip()
+
+    idb_secret = fields.Char(string="IndexedDB secret",
+        help="Key to encrypting the user's browser cache.",
+        compute=_compute_idb_secret, readonly=False, store=True, copy=False)
 
     @api.model
     def name_search(self, name='', domain=None, operator='ilike', limit=100):

@@ -467,8 +467,8 @@ test("Cache: can cache a simple orm call", async () => {
 
     const { services } = await makeMockEnv();
 
-    expect(await services.orm.cached.read("res.partner", [1], [])).toEqual({ name: 123 });
-    expect(await services.orm.cached.read("res.partner", [1], [])).toEqual({ name: 123 });
-    expect(await services.orm.cached.read("res.partner", [1], [])).toEqual({ name: 123 });
+    expect(await services.orm.cached().read("res.partner", [1], [])).toEqual({ name: 123 });
+    expect(await services.orm.cached().read("res.partner", [1], [])).toEqual({ name: 123 });
+    expect(await services.orm.cached().read("res.partner", [1], [])).toEqual({ name: 123 });
     expect.verifySteps(["Fetch"]);
 });

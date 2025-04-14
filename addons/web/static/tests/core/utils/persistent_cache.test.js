@@ -15,10 +15,15 @@ test("RamCache: can cache a simple call", async () => {
     // Each next call will retrive the ram cache independently, without executing the fallback
     const persistentCache = new PersistentCache("mockRpc", 1);
     const persistentCacheRead = (number) =>
-        persistentCache.read("table", "key", () => {
-            expect.step("fallback");
-            return Promise.resolve({ test: number });
-        });
+        persistentCache.read(
+            "table",
+            "key",
+            () => {
+                expect.step("fallback");
+                return Promise.resolve({ test: number });
+            },
+            {}
+        );
     expect(await persistentCacheRead(123)).toEqual({ test: 123 });
     expect(await persistentCacheRead(456)).toEqual({ test: 123 });
     expect(await persistentCacheRead(789)).toEqual({ test: 123 });
@@ -31,8 +36,8 @@ test("RamCache: ram is set with promises", async () => {
 
     // If two identical calls are made in succession, only one fallback will be made.
     // The second call will get the result of the first call (or a promise if the first call is not yet finish).
-    const promFirst = persistentCache.read("table", "key", () => def);
-    const promsSecond = persistentCache.read("table", "key", () => def);
+    const promFirst = persistentCache.read("table", "key", () => def, {});
+    const promsSecond = persistentCache.read("table", "key", () => def, {});
 
     // Only one record in cache
     expect(Object.keys(persistentCache.ramCache.ram.table).length).toBe(1);
@@ -57,7 +62,7 @@ test("PersistentCache: can cache a simple call", async () => {
     const persistentCache = new PersistentCache("mockRpc", 1);
 
     expect(
-        await persistentCache.read("table", "key", () => Promise.resolve({ test: 123 }))
+        await persistentCache.read("table", "key", () => Promise.resolve({ test: 123 }), {})
     ).toEqual({
         test: 123,
     });
@@ -76,10 +81,15 @@ test("PersistentCache: can cache a simple call", async () => {
 
     // we return the disk cache value.
     expect(
-        await persistentCache.read("table", "key", () => {
-            expect.step("Fallback");
-            return Promise.resolve(def);
-        })
+        await persistentCache.read(
+            "table",
+            "key",
+            () => {
+                expect.step("Fallback");
+                return Promise.resolve(def);
+            },
+            {}
+        )
     ).toEqual({ test: 123 });
     expect.verifySteps(["Fallback"]);
 

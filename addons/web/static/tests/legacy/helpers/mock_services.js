@@ -58,6 +58,7 @@ export function patchRPCWithCleanup(mockRPC = () => {}) {
                 Promise.resolve(mockRPC(...arguments))
                     .then((result) => {
                         rpcBus.trigger("RPC:RESPONSE", { data, settings, result });
+                        settings.cached?.onFinish?.(result);
                         resolve(result);
                     })
                     .catch((error) => {
