@@ -71,7 +71,8 @@ class IrHttp(models.AbstractModel):
         }
 
     def _lazy_bundles_name(self):
-        return []
+        bundles = ['web.assets_backend_lazy_dark' if request.cookies.get('color_scheme') == 'dark' else 'web.assets_backend_lazy']
+        return bundles + ['web.fullcalendar_lib', 'web.chartjs_lib']
 
     def get_bundle(self, bundle_name, **bundle_params):
         if 'lang' in bundle_params:

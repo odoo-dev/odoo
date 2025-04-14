@@ -10,6 +10,9 @@ CONTEXT_KEYS = ['editable', 'edit_translations', 'translatable']
 class IrHttp(models.AbstractModel):
     _inherit = 'ir.http'
 
+    def _lazy_bundles_name(self):
+        return super()._lazy_bundles_name() + ['web_editor.backend_assets_wysiwyg']
+
     @classmethod
     def _get_web_editor_context(cls):
         """ Check for ?editable and stuff in the query-string """
