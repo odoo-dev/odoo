@@ -230,7 +230,8 @@ export class LinkPlugin extends Plugin {
             { sequence: 50 }
         );
         this.addDomListener(this.editable, "click", (ev) => {
-            if (ev.target.tagName === "A" && ev.target.isContentEditable) {
+            const linkEl = ev.target.closest("a");
+            if (linkEl) {
                 if (ev.ctrlKey || ev.metaKey) {
                     window.open(ev.target.href, "_blank");
                 }
