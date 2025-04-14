@@ -7,6 +7,7 @@ import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { isIosApp } from "@web/core/browser/feature_detection";
+import { getLazySessionValue } from "@web/core/user";
 const { DateTime } = luxon;
 
 export class ActivityMenu extends Component {
@@ -16,7 +17,6 @@ export class ActivityMenu extends Component {
 
     setup() {
         this.ui = useService("ui");
-        this.lazySession = useService("lazy_session");
         this.employee = false;
         this.state = useState({
             checkedIn: false,
@@ -26,7 +26,7 @@ export class ActivityMenu extends Component {
         this.dropdown = useDropdownState();
         onWillStart(()=> {
             // access lazy session but do no wait for it, to prevent from delaying the whole webclient
-            this.lazySession.getValue("attendance_user_data", (employee) => {
+            getLazySessionValue("attendance_user_data", (employee) => {
                 if (employee) {
                     this.employee = employee;
                     this._searchReadEmployeeFill();

@@ -26,7 +26,6 @@ declare module "services" {
     import { actionService } from "@web/webclient/actions/action_service";
     import { profilingService } from "@web/webclient/debug/profiling/profiling_service";
     import { menuService } from "@web/webclient/menus/menu_service";
-    import { lazySession } from "@web/webclient/session_service";
     import { demoDataService } from "@web/webclient/settings_form_view/widgets/demo_data_service";
     import { userInviteService } from "@web/webclient/settings_form_view/widgets/user_invite_service";
     import { shareTargetService } from "@web/webclient/share_target/share_target_service";
@@ -49,7 +48,6 @@ declare module "services" {
         file_upload: typeof fileUploadService;
         hotkey: typeof hotkeyService;
         http: typeof httpService;
-        lazy_session: typeof lazySession;
         localization: typeof localizationService;
         menu: typeof menuService;
         name: typeof nameService;

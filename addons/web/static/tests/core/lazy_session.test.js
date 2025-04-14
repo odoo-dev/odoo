@@ -1,5 +1,5 @@
 import { Component, onMounted, onWillStart, xml } from "@odoo/owl";
-import { expect, test } from "@odoo/hoot";
+import { beforeEach, expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import {
     getService,
@@ -10,7 +10,9 @@ import {
 
 import { registry } from "@web/core/registry";
 import { WebClient } from "@web/webclient/webclient";
-import { useService } from "@web/core/utils/hooks";
+import { getLazySessionValue, resetLazySessionValue } from "@web/core/user";
+
+beforeEach(() => resetLazySessionValue());
 
 test("Only call once session info data when services calls lazy session", async () => {
     patchWithCleanup(WebClient.prototype, {
@@ -26,10 +28,9 @@ test("Only call once session info data when services calls lazy session", async 
 
     const serviceRegistry = registry.category("services");
     serviceRegistry.add("fake_a", {
-        dependencies: ["lazy_session"],
-        start(env, { lazy_session }) {
+        start() {
             expect.step("service_a_before");
-            lazy_session.getValue("a", (value) => {
+            getLazySessionValue("a", (value) => {
                 expect(value).toBe("a");
                 expect.step("session_a_after_lazy");
             });
@@ -37,10 +38,9 @@ test("Only call once session info data when services calls lazy session", async 
         },
     });
     serviceRegistry.add("fake_b", {
-        dependencies: ["lazy_session"],
-        start(env, { lazy_session }) {
+        start() {
             expect.step("service_b_before");
-            lazy_session.getValue("b", (value) => {
+            getLazySessionValue("b", (value) => {
                 expect(value).toBe("b");
                 expect.step("session_b_after_lazy");
             });
@@ -79,10 +79,9 @@ test("Only call once lazy session info data on action", async () => {
         static props = ["*"];
         setup() {
             expect.step("myaction_before");
-            this.lazySession = useService("lazy_session");
             onWillStart(() => {
                 expect.step("myaction_on_will_start");
-                this.lazySession.getValue("a", (value) => {
+                getLazySessionValue("a", (value) => {
                     expect(value).toEqual("a");
                     expect.step("myaction_on_will_start_after");
                 });
@@ -128,12 +127,11 @@ test("Call lazy session info after webclient init with action and service", asyn
     });
     const serviceRegistry = registry.category("services");
     serviceRegistry.add("fake_a", {
-        dependencies: ["lazy_session"],
-        start(env, { lazy_session }) {
+        start() {
             expect.step("service_before");
-            lazy_session.getValue("a", (value) => {
+            getLazySessionValue("a", (value) => {
                 expect(value).toBe("a");
-                expect.step("session_after_lazy");
+                expect.step("service_after_lazy");
             });
             expect.step("service_after");
         },
@@ -144,10 +142,9 @@ test("Call lazy session info after webclient init with action and service", asyn
         static props = ["*"];
         setup() {
             expect.step("myaction_before");
-            this.lazySession = useService("lazy_session");
             onWillStart(() => {
                 expect.step("myaction_on_will_start");
-                this.lazySession.getValue("b", (value) => {
+                getLazySessionValue("b", (value) => {
                     expect(value).toEqual("b");
                     expect.step("myaction_on_will_start_after");
                 });
@@ -168,7 +165,7 @@ test("Call lazy session info after webclient init with action and service", asyn
         "service_after",
         "web_client_mounted",
         "load_session_info", // <= only do it once after webclient is mounted
-        "session_after_lazy",
+        "service_after_lazy",
         "myaction_before",
         "myaction_on_will_start",
         "myaction_on_will_start_after",

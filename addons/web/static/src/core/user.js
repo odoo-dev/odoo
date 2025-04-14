@@ -1,10 +1,11 @@
 import { browser } from "@web/core/browser/browser";
 import { pyToJsLocale } from "@web/core/l10n/utils/locales";
-import { rpc } from "@web/core/network/rpc";
+import { rpc, rpcBus } from "@web/core/network/rpc";
 import { Cache } from "@web/core/utils/cache";
 import { session } from "@web/session";
 import { ensureArray } from "./utils/arrays";
 import { cookie } from "@web/core/browser/cookie";
+import { deepCopy } from "@web/core/utils/objects";
 import { EventBus } from "@odoo/owl";
 
 // This file exports an object containing user-related information and functions
@@ -268,3 +269,36 @@ if (user.login && user.login !== "__system__") {
     ];
     setLastConnectedUsers(lastConnectedUsers);
 }
+
+let resolveWebClientReady;
+let lazyConfigPromise;
+let webClientReadyPromise;
+
+export function resetLazySessionValue() {
+    lazyConfigPromise = null;
+    resolveWebClientReady = null;
+    webClientReadyPromise = new Promise((r) => (resolveWebClientReady = r));
+    rpcBus.addEventListener("WEB_CLIENT_READY", resolveWebClientReady, { once: true });
+}
+resetLazySessionValue();
+
+export const getLazySessionValue = (key, callback) => {
+    if (!lazyConfigPromise) {
+        lazyConfigPromise = (async () => {
+            await webClientReadyPromise;
+            const model = "ir.http";
+            const method = "lazy_session_info";
+            return rpc(
+                `/web/dataset/call_kw/${model}/${method}`,
+                {
+                    model,
+                    method,
+                    args: [],
+                    kwargs: { context: user?.context ?? {} },
+                },
+                { silent: true }
+            );
+        })();
+    }
+    lazyConfigPromise.then((config) => callback(deepCopy(config)[key]));
+};

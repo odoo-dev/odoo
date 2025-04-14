@@ -58,6 +58,7 @@ export class WebClient extends Component {
             // the chat window and dialog services listen to 'web_client_ready' event in
             // order to initialize themselves:
             this.env.bus.trigger("WEB_CLIENT_READY");
+            rpcBus.trigger("WEB_CLIENT_READY");
         });
         useExternalListener(window, "click", this.onGlobalClick, { capture: true });
         onWillStart(this.registerServiceWorker);
