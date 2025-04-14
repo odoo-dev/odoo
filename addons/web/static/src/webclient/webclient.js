@@ -10,6 +10,13 @@ import { NavBar } from "./navbar/navbar";
 import { Component, onMounted, onWillStart, useExternalListener, useState } from "@odoo/owl";
 import { router, routerBus } from "@web/core/browser/router";
 import { browser } from "@web/core/browser/browser";
+import { rpc } from "@web/core/network/rpc";
+import { deepCopy } from "@web/core/utils/objects";
+import { user } from "@web/core/user";
+
+let resolveWebClientReady;
+let lazyConfigPromise;
+const webClientReadyPromise = new Promise((r) => (resolveWebClientReady = r));
 
 export class WebClient extends Component {
     static template = "web.WebClient";
@@ -57,6 +64,7 @@ export class WebClient extends Component {
             // the chat window and dialog services listen to 'web_client_ready' event in
             // order to initialize themselves:
             this.env.bus.trigger("WEB_CLIENT_READY");
+            resolveWebClientReady();
         });
         useExternalListener(window, "click", this.onGlobalClick, { capture: true });
         onWillStart(this.registerServiceWorker);
@@ -162,3 +170,24 @@ export class WebClient extends Component {
         }
     }
 }
+
+export const getLazySessionValue = (key, callback) => {
+    if (!lazyConfigPromise) {
+        lazyConfigPromise = async () => {
+            await webClientReadyPromise;
+            const model = "ir.http";
+            const method = "lazy_session_info";
+            return rpc(
+                `/web/dataset/call_kw/${model}/${method}`,
+                {
+                    model,
+                    method,
+                    args: [[]],
+                    kwargs: { context: user?.context ?? {} },
+                },
+                { silent: true }
+            );
+        };
+    }
+    lazyConfigPromise.then((config) => callback(deepCopy(config)[key]));
+};
