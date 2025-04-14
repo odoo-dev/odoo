@@ -410,11 +410,11 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         """
         date_po_and_delivery = '2022-03-02'
         self.product_a.write({
-            'categ_id': self.stock_account_product_categ,
+            'categ_id': self.stock_account_product_categ.id,
             'is_storable': True,
         })
         self.product_b.write({
-            'categ_id': self.stock_account_product_categ,
+            'categ_id': self.stock_account_product_categ.id,
             'is_storable': True,
         })
         purchase_order = self.env['purchase.order'].create({
@@ -454,7 +454,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         # create purchase
         self.product_a.write({
             'standard_price': 27.0,
-            'categ_id': self.stock_account_product_categ,
+            'categ_id': self.stock_account_product_categ.id,
             'is_storable': True,
         })
 
