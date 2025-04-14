@@ -33,7 +33,7 @@ const makeSteps = (steps = []) => [
         // Makes sure the dirty flag does not happen after a setTimeout or
         // something like that.
         content: "Click elsewhere and wait for a few ms",
-        trigger: ":iframe #wrap",
+        trigger: ":iframe body",
         async run(actions) {
             // TODO: use actions.click(); instead
             this.anchor.click();
