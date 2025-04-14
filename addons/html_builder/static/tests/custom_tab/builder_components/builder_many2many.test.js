@@ -55,5 +55,5 @@ test("many2many: find tag, select tag, unselect tag", async () => {
         `<div class="test-options-target o-paragraph" data-test="[{&quot;id&quot;:2,&quot;name&quot;:&quot;Second&quot;}]">b</div>`
     );
     expect("table tr").toHaveCount(1);
-    expect("table input").toHaveValue("Second");
+    expect("table textarea").toHaveValue("Second");
 });

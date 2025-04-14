@@ -16,12 +16,18 @@ export class BuilderMany2Many extends Component {
         model: String,
         m2oField: { type: String, optional: true },
         fields: { type: Array, element: String, optional: true },
+        fieldsToDisplayInDropdown: { type: Array, element: String, optional: true },
+        fieldsToDisplayInSelectedList: { type: Array, element: String, optional: true },
+        selectedListMultiline: { type: Boolean, optional: true },
         domain: { type: Array, optional: true },
         limit: { type: Number, optional: true },
     };
     static defaultProps = {
         ...BuilderComponent.defaultProps,
         fields: [],
+        fieldsToDisplayInDropdown: ["name"],
+        fieldsToDisplayInSelectedList: ["name"],
+        selectedListMultiline: false,
         domain: [],
         limit: 10,
     };

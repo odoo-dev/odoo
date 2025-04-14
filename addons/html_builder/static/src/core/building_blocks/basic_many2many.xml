@@ -6,13 +6,18 @@
 </t>
 
 <t t-name="html_builder.BasicMany2Many">
-    <div>
-        <table>
+    <div class="w-100">
+        <table class="w-100">
             <tr t-foreach="props.selection" t-as="entry" t-key="entry.id">
                 <td>
-                    <input type="text" disabled="" t-att-value="entry.name"/>
+                    <textarea class="o_text_area_select w-100" type="text" style="field-sizing: content" disabled=""
+                        t-att-value="Object.entries(entry)
+                        .filter(( keyValuePair ) => props.fieldsToDisplayInSelectedList.includes(keyValuePair[0]))
+                        .map(( keyValuePair ) => keyValuePair[1])
+                        .join(props.selectedListMultiline ? '\n' : ' ')"
+                    />
                 </td>
-                <td>
+                <td class="w-0">
                     <button class="o_we_link o_we_text_danger fa fa-fw fa-minus" t-on-click="() => this.unselect(entry.id)"/>
                 </td>
             </tr>
@@ -26,7 +31,11 @@
                 <t t-foreach="state.searchResults" t-as="entry" t-key="entry.id">
                     <t t-if="!props.selection.some((sel) => sel.id == entry.id)">
                      <DropdownItem onSelected="() => this.select(entry)">
-                         <div t-out="entry.name"/>
+                         <t t-foreach="Object.entries(entry)" t-as="fields" t-key="fields[0]">
+                            <t t-if="props.fieldsToDisplayInDropdown.includes(fields[0])">
+                                <div t-out="fields[1]"/>
+                            </t>
+                         </t>
                      </DropdownItem>
                     </t>
                 </t>

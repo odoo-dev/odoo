@@ -67,5 +67,5 @@ test.tags("focus required")("basic many2many: find tag, select tag, unselect tag
     await contains("button.fa-minus").click();
     expect(selection).toEqual([{ id: 2, name: "Second" }]);
     expect("table tr").toHaveCount(1);
-    expect("table input").toHaveValue("Second");
+    expect("table textarea").toHaveValue("Second");
 });

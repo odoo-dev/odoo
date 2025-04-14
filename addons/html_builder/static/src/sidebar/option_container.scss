@@ -47,7 +47,7 @@
         width: 2em;
     }
 
-    input {
+    input, .o_text_area_select {
         border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
         border-radius: $o-we-sidebar-content-field-border-radius;
         background-color: $o-we-sidebar-content-field-input-bg;

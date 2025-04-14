@@ -73,10 +73,10 @@ test("model many2many: find tag, select tag, unselect tag", async () => {
     await contains("button.fa-minus").click();
     expect(modelEdit.get("rel")).toEqual([{ id: 2, name: "Second" }]);
     expect("table tr").toHaveCount(1);
-    expect("table input").toHaveValue("Second");
+    expect("table textarea").toHaveValue("Second");
 
     await contains(".o-snippets-tabs button").click();
     await contains(":iframe .test-options-target").click();
     expect("table tr").toHaveCount(1);
-    expect("table input").toHaveValue("Second");
+    expect("table textarea").toHaveValue("Second");
 });

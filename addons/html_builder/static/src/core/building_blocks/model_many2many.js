@@ -14,6 +14,9 @@ export class ModelMany2Many extends Component {
         recordId: Number,
         m2oField: String,
         fields: { type: Array, element: String, optional: true },
+        fieldsToDisplayInDropdown: { type: Array, element: String, optional: true },
+        fieldsToDisplayInSelectedList: { type: Array, element: String, optional: true },
+        selectedListMultiline: { type: Boolean, optional: true },
         domain: { type: Array, optional: true },
         limit: { type: Number, optional: true },
         createAction: { type: String, optional: true },
@@ -23,6 +26,9 @@ export class ModelMany2Many extends Component {
     };
     static defaultProps = {
         fields: [],
+        fieldsToDisplayInDropdown: ["name"],
+        fieldsToDisplayInSelectedList: ["name"],
+        selectedListMultiline: false,
         domain: [],
         limit: 10,
     };

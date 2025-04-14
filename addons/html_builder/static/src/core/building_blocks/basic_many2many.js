@@ -25,6 +25,9 @@ export class BasicMany2Many extends Component {
         ...basicContainerBuilderComponentProps,
         model: String,
         fields: { type: Array, element: String, optional: true },
+        fieldsToDisplayInDropdown: { type: Array, element: String, optional: true },
+        fieldsToDisplayInSelectedList: { type: Array, element: String, optional: true },
+        selectedListMultiline: { type: Boolean, optional: true },
         domain: { type: Array, optional: true },
         limit: { type: Number, optional: true },
         selection: { type: Array, element: Object },
@@ -33,6 +36,9 @@ export class BasicMany2Many extends Component {
     };
     static defaultProps = {
         fields: [],
+        fieldsToDisplayInDropdown: ["name"],
+        fieldsToDisplayInSelectedList: ["name"],
+        selectedListMultiline: false,
         domain: [],
         limit: 10,
     };
