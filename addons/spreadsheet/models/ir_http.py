@@ -6,6 +6,9 @@ from odoo import models
 class IrHttp(models.AbstractModel):
     _inherit = 'ir.http'
 
+    def _bundles_name(self):
+        return super()._bundles_name() + ['spreadsheet.o_spreadsheet']
+
     def session_info(self):
         """
         Override this method to enable the 'Insert in spreadsheet' button in the

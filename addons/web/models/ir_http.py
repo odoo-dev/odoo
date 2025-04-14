@@ -70,6 +70,22 @@ class IrHttp(models.AbstractModel):
             'session_info': self.session_info(),
         }
 
+    def _bundles_name(self):
+        bundles = ['web.assets_backend_lazy_dark' if request.cookies.get('color_scheme') == 'dark' else 'web.assets_backend_lazy']
+        return bundles + ['web.fullcalendar_lib', 'web.chartjs_lib']
+
+    def get_bundle(self, bundle_name, **bundle_params):
+        if 'lang' in bundle_params:
+            request.update_context(lang=request.env['res.lang']._get_code(bundle_params['lang']))
+
+        debug = bundle_params.get('debug', request.session.debug)
+        files = request.env['ir.qweb']._get_asset_nodes(bundle_name, debug=debug, js=True, css=True)
+        data = [{
+            'type': tag,
+            'src': attrs.get('src') or attrs.get('data-src') or attrs.get('href'),
+        } for tag, attrs in files]
+        return data
+
     @api.model
     def lazy_session_info(self):
         return {}
@@ -94,6 +110,12 @@ class IrHttp(models.AbstractModel):
         is_internal_user = user._is_internal()
         session_info = {
             "uid": session_uid,
+            "bundles": {
+                bundle_name: self.get_bundle(
+                    bundle_name=bundle_name,
+                    bundle_params={}
+                ) for bundle_name in self._bundles_name()
+            },
             "is_system": user._is_system() if session_uid else False,
             "is_admin": user._is_admin() if session_uid else False,
             "is_public": user._is_public(),
