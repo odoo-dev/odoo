@@ -72,8 +72,22 @@ class IrHttp(models.AbstractModel):
             'session_info': self.session_info(),
         }
 
+    def get_bundle(self, bundle_name, **bundle_params):
+        if 'lang' in bundle_params:
+            request.update_context(lang=request.env['res.lang']._get_code(bundle_params['lang']))
+
+        debug = bundle_params.get('debug', request.session.debug)
+        files = request.env['ir.qweb']._get_asset_nodes(bundle_name, debug=debug, js=True, css=True)
+        data = [{
+            'type': tag,
+            'src': attrs.get('src') or attrs.get('data-src') or attrs.get('href'),
+        } for tag, attrs in files]
+        return data
+
     def lazy_session_info(self, **kwargs):
-        return {}
+        return {
+            "bundles": {}
+        }
 
     def session_info(self):
         user = self.env.user
