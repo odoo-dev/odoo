@@ -131,6 +131,7 @@ class AccountTax(models.Model):
     amount = fields.Float(required=True, digits=(16, 4), default=0.0, tracking=True)
     description = fields.Html(string='Description', translate=html_translate)
     invoice_label = fields.Char(string='Label on Invoices', translate=True)
+    tax_label = fields.Char(compute='_compute_tax_label')
     price_include = fields.Boolean(
         compute='_compute_price_include',
         search='_search_price_include',
@@ -670,6 +671,11 @@ class AccountTax(models.Model):
                 if record.country_id != record.company_id._accessible_branches()[:1].account_fiscal_country_id:
                     name += ' (%s)' % record.country_code
             record.display_name = name
+
+    @api.depends('name', 'invoice_label')
+    def _compute_tax_label(self):
+        for tax in self:
+            tax.tax_label = tax.invoice_label or tax.name
 
     @api.onchange('amount')
     def onchange_amount(self):
