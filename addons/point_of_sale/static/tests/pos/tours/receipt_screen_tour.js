@@ -216,3 +216,31 @@ registry.category("web_tour.tours").add("point_of_sale.test_printed_receipt_tour
             }, "Basic receipt doesn't have price"),
         ].flat(),
 });
+
+registry.category("web_tour.tours").add("receiptLayoutTour", {
+    checkDelay: 50,
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.addOrderline("Desk Pad", "1", "5"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Cash"),
+            PaymentScreen.clickValidate(),
+
+            ReceiptScreen.receiptIsThere(),
+            {
+                content: "receipt should use the 'boxes' layout format",
+                trigger: ".receipt-screen .pos-receipt.pos-receipt-boxes-layout",
+            },
+            {
+                content: "receipt should have header text",
+                trigger:
+                    ".receipt-screen .pos-receipt .pos-receipt-header:has(h2:contains('Because boring receipts are so outdated'))",
+            },
+            {
+                content: "receipt should not display a logo",
+                trigger: ".receipt-screen .pos-receipt:not(:contains('.pos-receipt-logo'))",
+            },
+        ].flat(),
+});
