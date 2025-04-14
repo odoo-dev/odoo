@@ -78,6 +78,14 @@ registry.category("web_tour.tours").add('configurator_translation', {
                 translatedTerms["Save"] = "Save_Parseltongue";
             }
         }
+    }, {
+        content: "Click on the menu", // TODO to remove after merge?
+        trigger: "button[title='Home Menu']",
+        run: "click",
+    }, {
+        content: "Click on the website anchor", // TODO to remove after merge?
+        trigger: "a[href='/odoo/website']",
+        run: "click",
     },
     ...clickOnEditAndWaitEditMode(),
     {
