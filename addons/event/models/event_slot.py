@@ -28,6 +28,7 @@ class EventSlot(models.Model):
     end_hour = fields.Float("Ending Hour", required=True, default=12.0, help="Expressed in the event timezone.")
     start_datetime = fields.Datetime("Start Datetime", compute="_compute_datetimes", store=True)
     end_datetime = fields.Datetime("End Datetime", compute="_compute_datetimes", store=True)
+    slot_mail_ids = fields.One2many("event.mail.slot", "event_slot_id", string="Mail Schedule", copy=True)
 
     # Registrations
     is_sold_out = fields.Boolean(
@@ -140,14 +141,15 @@ class EventSlot(models.Model):
             slot.seats_taken = slot.seats_reserved + slot.seats_used
 
     def unlink(self):
-        """ Archive the slot instead of deleting it if it's linked to existing registrations.
-        This allows an easier slots management from the calendar view (can unlink a slot without validation errors).
-        The slot cannot be registered to anymore and its related registrations are also archived as
-        they're now considered unrelevant.
+        """ Archive the slot instead of deleting it if it's linked to existing
+        registrations from a direct relation or from its related slot tickets.
+        Archive the related slot tickets to prevent any further registrations.
+        Also archive the existing registrations and scheduled mailings as they're not relevant anymore.
         """
         slots_w_registrations = self.filtered(lambda slot: slot.registration_ids)
-        slots_w_registrations.action_archive()
         slots_w_registrations.registration_ids.action_archive()
+        slots_w_registrations.slot_mail_ids.action_archive()
+        slots_w_registrations.action_archive()
         return super(EventSlot, self - slots_w_registrations).unlink()
 
     @staticmethod
