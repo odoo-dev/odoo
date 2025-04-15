@@ -22,15 +22,15 @@
             >
                 Search more...
             </a>
-            <a
-                t-if="!!state.nameToCreate"
-                t-on-click="() => this.create(state.nameToCreate)"
-                class="'o-dropdown-item dropdown-item o-navigable o_we_m2o_create'"
-            >
-                Create "<t t-out="state.nameToCreate"/>"
-            </a>
+            <SelectMany2XCreate t-if="!!state.nameToCreate" name="state.nameToCreate" create="this.props.create"/>
         </t>
     </SelectMenu>
+</t>
+
+<t t-name="html_builder.SelectMany2XCreate">
+    <a t-on-click="create" class="'o-dropdown-item dropdown-item o-navigable o_we_m2o_create'">
+        Create "<t t-out="props.name"/>"
+    </a>
 </t>
 
 </templates>
