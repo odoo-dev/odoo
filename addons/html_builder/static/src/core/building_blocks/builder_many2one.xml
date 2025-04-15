@@ -12,6 +12,7 @@
             select="select.bind(this)"
             unselect="props.allowUnselect ? unselect.bind(this) : undefined"
             defaultMessage="props.defaultMessage"
+            create="props.createAction ? create.bind(this) : undefined"
         />
     </BuilderComponent>
 </t>

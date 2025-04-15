@@ -20,6 +20,7 @@ export class BuilderMany2One extends Component {
         id: { type: String, optional: true },
         allowUnselect: { type: Boolean, optional: true },
         defaultMessage: { type: String, optional: true },
+        createAction: { type: String, optional: true },
     };
     static defaultProps = {
         ...BuilderComponent.defaultProps,
@@ -51,6 +52,15 @@ export class BuilderMany2One extends Component {
             useDependencyDefinition(this.props.id, {
                 getValue: () => this.domState.selected && JSON.stringify(this.domState.selected),
             });
+        }
+
+        if (this.props.createAction) {
+            this.createAction = this.env.editor.shared.builderActions.getAction(
+                this.props.createAction
+            );
+            this.createOperation = this.env.editor.shared.history.makePreviewableOperation(
+                this.createAction.apply
+            );
         }
     }
     callApply(applySpecs) {
@@ -84,5 +94,12 @@ export class BuilderMany2One extends Component {
     unselect() {
         this.selectedToApply = null;
         this.callOperation(this.applyOperation.commit);
+    }
+    create(name) {
+        const args = { editingElement: this.env.getEditingElement(), value: name };
+        this.env.editor.shared.operation.next(() => this.createOperation.commit(args), {
+            load: () =>
+                this.createAction.load?.(args).then((loadResult) => (args.loadResult = loadResult)),
+        });
     }
 }

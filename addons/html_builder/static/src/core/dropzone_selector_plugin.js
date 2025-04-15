@@ -44,10 +44,6 @@ export class DropZoneSelectorPlugin extends Plugin {
                 exclude: ".s_col_no_resize.row > div, .s_col_no_resize",
                 dropNear: ".row.o_grid_mode > div",
             },
-            {
-                selector: ".s_group",
-                dropNear: "p, h1, h2, h3, blockquote, .card",
-            },
         ],
     };
 }
