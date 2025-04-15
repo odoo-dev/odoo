@@ -620,7 +620,6 @@ class TestUi(HttpCaseWithWebsiteUser):
     def test_website_media_dialog_insert_media(self):
         self.start_tour("/", "website_media_dialog_insert_media", login="admin")
 
-    @unittest.skip
     def test_website_text_font_size(self):
         self.start_tour('/@/', 'website_text_font_size', login='admin', timeout=300)
 
