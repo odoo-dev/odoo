@@ -112,7 +112,6 @@ class TestUiHtmlEditor(HttpCaseWithUserDemo):
         self.assertIn("rumbler", page.view_id.with_context(lang='en_US').arch)
         self.assertIn("rommelpot", page.view_id.with_context(lang='pa_GB').arch)
 
-    @unittest.skip
     def test_html_editor_multiple_templates(self):
         Website = self.env['website']
         View = self.env['ir.ui.view']
