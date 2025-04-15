@@ -18,7 +18,7 @@
                             <t t-set="ewaybill_states" t-value="('generated', 'cancel')"/>
                             <table class="border-bottom border-dark">
                                 <tr class="d-flex justify-content-between align-items-center px-4 py-3">
-                                    <td style="width: 8rem;">
+                                    <td t-if="doc.company_id.logo" style="width: 8rem;">
                                         <img t-att-src="image_data_uri(doc.company_id.logo)"
                                              style="max-width: 8rem; height: auto;"
                                              alt="Company Logo"
