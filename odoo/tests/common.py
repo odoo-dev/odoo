@@ -673,6 +673,7 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
     def setUp(self):
         super().setUp()
         self.http_request_key = self.canonical_tag
+        self.http_request_strict_check = False  # by default, don't be to strict"
 
         def reset_http_key():
             self.http_request_key = None
@@ -687,7 +688,7 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
             _logger.error(message)
             raise BadRequest(message)
         request = odoo.http.request
-        if not request:
+        if not request or isinstance(request, Mock):
             return
         if not self.http_request_key:
             message = f'Using a test cursor without http_request_key, most likely between two tests on request {request.httprequest.path} in {module.current_test.canonical_tag}'
@@ -695,8 +696,11 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
             raise BadRequest(message)
         http_request_key = request.httprequest.cookies.get(TEST_CURSOR_COOKIE_NAME)
         if not http_request_key:
-            if self.mandatory_request_route(request.httprequest.path):
-                message = f'Using a test cursor without specified test on request {request.httprequest.path} in {module.current_test.canonical_tag} as been ignored since cookie is mandatory for this path'
+            if self.http_request_strict_check or self.mandatory_request_route(request.httprequest.path):
+                reason = 'for this path'
+                if self.http_request_strict_check:
+                    reason = 'after a browser_js call'
+                message = f'Using a test cursor without specified test on request {request.httprequest.path} in {module.current_test.canonical_tag} as been ignored since cookie is mandatory {reason}'
                 _logger.info(message)
                 raise BadRequest(message)
             if operation == '__init__':  # main difference with master, don't fail if no cookie is defined_check
@@ -1684,7 +1688,14 @@ class Transport(xmlrpclib.Transport):
     def request(self, *args, **kwargs):
         self.cr.flush()
         self.cr.clear()
-        return super().request(*args, **kwargs)
+        test = module.current_test
+        if test:
+            check = test.http_request_strict_check
+            test.http_request_strict_check = False
+        res = super().request(*args, **kwargs)
+        if test:
+            test.http_request_strict_check = check
+        return res
 
 
 class HttpCase(TransactionCase):
@@ -1881,6 +1892,7 @@ class HttpCase(TransactionCase):
         try:
             self.http_request_key = self.canonical_tag + '_browser_js'
             self.authenticate(login, login)
+            self.http_request_strict_check = True
             # Flush and clear the current transaction.  This is useful in case
             # we make requests to the server, as these requests are made with
             # test cursors, which uses different caches than this transaction.
