@@ -676,7 +676,6 @@ class TestUi(HttpCaseWithWebsiteUser):
 
         self.start_tour('/', 'website_no_dirty_page', login='admin')
 
-    @unittest.skip
     def test_interaction_lifecycle(self):
         self.env['ir.asset'].create({
             'name': 'wysiwyg_patch_start_and_destroy',
