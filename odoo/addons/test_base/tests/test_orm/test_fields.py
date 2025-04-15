@@ -3,6 +3,7 @@ import io
 from collections import OrderedDict
 from contextlib import contextmanager
 from datetime import date, datetime
+from decimal import Decimal
 from unittest.mock import patch
 
 import psycopg2
@@ -1059,7 +1060,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         self.env.flush_all()
         self.cr.execute('SELECT monetary FROM test_orm_mixed WHERE id=%s', [record.id])
         value = self.cr.fetchone()[0]
-        self.assertEqual(value, samount, msg)
+        self.assertEqual(value, Decimal(str(samount)), msg)
 
     def test_20_monetary(self):
         """ test monetary fields """
@@ -1117,7 +1118,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
             monetary_related.ids,
         )
         [total] = self.env.cr.fetchone()
-        self.assertEqual(total, .33)
+        self.assertEqual(float(total), .33)
 
     def test_20_like(self):
         """ test filtered_domain() on char fields. """
