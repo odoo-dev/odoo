@@ -68,7 +68,7 @@ export class AutoComplete extends Component {
         this.state = useState({
             navigationRev: 0,
             optionsRev: 0,
-            open: false,
+            open: !this.props.dropdown,
             activeSourceOption: null,
             value: this.props.value,
         });
@@ -104,7 +104,7 @@ export class AutoComplete extends Component {
         this.hotkey = useService("hotkey");
         this.hotkeysToRemove = [];
 
-        onWillUpdateProps((nextProps) => {
+        onWillUpdateProps(async (nextProps) => {
             if (this.props.value !== nextProps.value || this.forceValFromProp) {
                 this.forceValFromProp = false;
                 if (!this.inEdition) {
@@ -112,6 +112,9 @@ export class AutoComplete extends Component {
                     this.inputRef.el.value = nextProps.value;
                 }
                 this.close();
+            }
+            if (this.isOpened && this.sources != nextProps.sources) {
+                await this.loadSources(this.usedInputForSources, nextProps.sources);
             }
         });
 
@@ -171,25 +174,28 @@ export class AutoComplete extends Component {
     }
 
     close() {
-        this.state.open = false;
-        this.state.activeSourceOption = null;
+        if (this.props.dropdown) {
+            this.state.open = false;
+            this.state.activeSourceOption = null;
+        }
     }
 
     cancel() {
         if (this.inputRef.el.value.length) {
             if (this.props.autoSelect) {
                 this.inputRef.el.value = this.props.value;
-                this.props.onCancel();
             }
         }
+        this.props.onCancel();
         this.close();
     }
 
-    async loadSources(useInput) {
+    async loadSources(useInput, sources = this.props.sources) {
+        this.usedInputForSources = useInput;
         this.sources = [];
         this.state.activeSourceOption = null;
         const proms = [];
-        for (const pSource of this.props.sources) {
+        for (const pSource of sources) {
             const source = this.makeSource(pSource);
             this.sources.push(source);
 
@@ -256,7 +262,7 @@ export class AutoComplete extends Component {
             this.inputRef.el.value = "";
         }
 
-        this.forceValFromProp = true;
+        this.forceValFromProp = !option.notAValue;
         this.props.onSelect(option, {
             ...params,
             input: this.inputRef.el,
@@ -346,8 +352,10 @@ export class AutoComplete extends Component {
     }
 
     onInputFocus(ev) {
-        this.inputRef.el.setSelectionRange(0, this.inputRef.el.value.length);
-        this.props.onFocus(ev);
+        if (!this.root.el.contains(ev.relatedTarget)) {
+            this.inputRef.el.setSelectionRange(0, this.inputRef.el.value.length);
+            this.props.onFocus(ev);
+        }
     }
 
     get autoCompleteRootClass() {
@@ -456,7 +464,13 @@ export class AutoComplete extends Component {
     }
 
     externalClose(ev) {
-        if (this.isOpened && !this.root.el.contains(ev.target)) {
+        if (
+            this.isOpened &&
+            !(
+                this.root.el.contains(ev.target) ||
+                (this.props.dropdown && ev.target.contains(this.root.el))
+            )
+        ) {
             this.cancel();
         }
     }
