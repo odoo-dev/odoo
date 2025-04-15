@@ -65,3 +65,5 @@ tour.register("snippet_version", {
     trigger: 'body',
 }]);
 });
+
+// jst for test
