@@ -3,6 +3,8 @@
 import logging
 import os
 
+from collections import defaultdict
+
 from odoo import _, api, fields, models, SUPERUSER_ID
 from odoo.addons.event.tools.esc_label_tools import print_event_attendees, setup_printer, layout_96x82
 from odoo.tools import email_normalize, email_normalize_all, formataddr
@@ -95,11 +97,16 @@ class EventRegistration(models.Model):
         'Barcode should be unique',
     )
 
-    # @api.constrains('state', 'event_id', 'event_ticket_id')
-    # def _check_seats_availability(self):
-    #     registrations_confirmed = self.filtered(lambda registration: registration.state in ('open', 'done'))
-    #     registrations_confirmed.event_id._check_seats_availability()
-    #     registrations_confirmed.event_ticket_id._check_seats_availability()
+    @api.constrains('active', 'state', 'event_id', 'event_slot_id', 'event_ticket_id')
+    def _check_seats_availability(self):
+        tocheck = self.filtered(lambda registration: registration.state in ('open', 'done') and registration.active)
+        for event, registrations in tocheck.grouped('event_id').items():
+            classified = defaultdict(lambda: self.env['event.registration'])
+            for reg in registrations:
+                classified[(reg.event_slot_id, reg.event_ticket_id)] += reg
+            event._verify_seats_availability(
+                [(key[0], key[1], 0) for key, regs in classified.items()],
+            )
 
     def default_get(self, fields):
         ret_vals = super().default_get(fields)
@@ -243,8 +250,6 @@ class EventRegistration(models.Model):
         all_partner_ids = set(values['partner_id'] for values in vals_list if values.get('partner_id'))
         all_event_ids = set(values['event_id'] for values in vals_list if values.get('event_id'))
         for values in vals_list:
-            event = self.env['event.event'].browse(values['event_id'])
-            event._verify_seats_availability(slot_id=values.get('event_slot_id'), ticket_id=values.get('event_ticket_id'))
             if not values.get('phone'):
                 continue
 
@@ -257,48 +262,25 @@ class EventRegistration(models.Model):
                 related_country = self.env.company.country_id
             values['phone'] = self._phone_format(number=values['phone'], country=related_country) or values['phone']
 
-        registrations = super(EventRegistration, self).create(vals_list)
+        registrations = super().create(vals_list)
         registrations._update_mail_schedulers()
         return registrations
 
     def write(self, vals):
-        if any(field in ['active', 'state', 'event_id', 'event_slot_id', 'event_ticket_id'] for field in vals):
-            self._verify_seats_availability()
         confirming = vals.get('state') in {'open', 'done'}
         to_confirm = (self.filtered(lambda registration: registration.state in {'draft', 'cancel'})
                       if confirming else None)
-        ret = super(EventRegistration, self).write(vals)
+        ret = super().write(vals)
         if confirming:
             to_confirm._update_mail_schedulers()
 
         return ret
-
-    def _verify_seats_availability(self):
-        """ Check event, slot and ticket seats availability for the registrations.
-        Raise Validation Error if not enough seats available.
-        """
-        regs_by_event = self._read_group([], groupby=['event_id'], aggregates=["id:recordset"])
-        for (event, regs) in regs_by_event:
-            grouped_regs = regs._read_group(
-                domain=[],
-                groupby=['event_slot_id', 'event_ticket_id']
-            )
-            for (slot, ticket) in grouped_regs:
-                event._verify_seats_availability(slot_id=slot.id, ticket_id=ticket.id)
 
     def _compute_display_name(self):
         """ Custom display_name in case a registration is nott linked to an attendee
         """
         for registration in self:
             registration.display_name = registration.name or f"#{registration.id}"
-
-    def action_unarchive(self):
-        res = super().action_unarchive()
-        # Necessary triggers as changing registration states cannot be used as triggers for the
-        # Event(Ticket) models constraints.
-        if unarchived := self.filtered(self._active_name):
-            unarchived._verify_seats_availability()
-        return res
 
     # ------------------------------------------------------------
     # ACTIONS / BUSINESS

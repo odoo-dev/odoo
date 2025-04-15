@@ -572,87 +572,6 @@ class EventEvent(models.Model):
                     slots="\n".join(f"- {slot.name}" for slot in slots_outside_event_bounds)
                 ))
 
-    # @api.constrains('seats_max', 'seats_limited', 'registration_ids')
-    # def _check_seats_availability(self, minimal_availability=0):
-    #     sold_out_events = []
-    #     for event in self:
-    #         if event.seats_limited and event.seats_max and event.seats_available < minimal_availability:
-    #             sold_out_events.append(_(
-    #                 '- "%(event_name)s": Missing %(nb_too_many)i seats.',
-    #                 event_name=event.name,
-    #                 nb_too_many=minimal_availability - event.seats_available,
-    #             ))
-    #     if sold_out_events:
-    #         raise ValidationError(_('There are not enough seats available for:')
-    #                               + '\n%s\n' % '\n'.join(sold_out_events))
-
-    def _verify_seats_availability(self, slot_id=False, ticket_id=False, minimal_availability=0):
-        """ Check the number of seats available for the event.
-        :slot_id: for the specified slot if specified.
-        :ticket_id: for the specified ticket if specified.
-        :minimal_availability: A minimal availability can be specified to ensure there is
-                               at least this number of seats left. Useful in the sale flow.
-        Raises:
-            ValidationError: If the event / slot / ticket / slot ticket do not have enough seats available.
-        """
-        sold_out_records = []
-        slot_tickets_nb_registrations = {
-            (slot.id, ticket.id): count
-            for (slot, ticket, count) in self.env['event.registration']._read_group(
-                domain=[('event_id', 'in', self.ids), ('state', 'in', ['open', 'done']), ('active', '=', True)],
-                groupby=['event_slot_id', 'event_ticket_id'],
-                aggregates=['__count']
-            )
-        }
-        for event in self:
-            slot = False
-            ticket = False
-            if slot_id:
-                slot = self.env['event.slot'].browse(slot_id)
-            if ticket_id:
-                ticket = self.env['event.event.ticket'].browse(ticket_id)
-            # Event / slot seats_max
-            if event.seats_limited and event.seats_max:
-                # TODO: ne fonctionne pas parce que ça verifie les valeurs avant le write et on ne sait pas
-                # cb de registrations sont impactée, on pourrait vouloir write sur 6 registrations
-                if slot and slot.seats_available < minimal_availability:
-                    sold_out_records.append(_(
-                        '- the slot "%(slot_name)s" (%(event_name)s): Missing %(nb_too_many)i seats.',
-                        slot_name=slot.name,
-                        event_name=event.name,
-                        nb_too_many=minimal_availability - slot.seats_available,
-                    ))
-                # TODO: same
-                elif event.seats_available < minimal_availability:
-                    sold_out_records.append(_(
-                        '- the event "%(event_name)s": Missing %(nb_too_many)i seats.',
-                        event_name=event.name,
-                        nb_too_many=minimal_availability - event.seats_available,
-                    ))
-            # Ticket seats_max
-            if ticket and ticket.seats_max:
-                if slot:
-                    # TODO: same
-                    slot_ticket_seats_available = ticket.seats_max - slot_tickets_nb_registrations.get((slot.id, ticket.id), 0)
-                    if slot_ticket_seats_available <= minimal_availability:
-                        sold_out_records.append(_(
-                            '- the slot ticket "%(slot_ticket_name)s" (%(event_name)s): Missing %(nb_too_many)i seats.',
-                            slot_ticket_name=f'{ticket.name} - {slot.name}',
-                            event_name=event.name,
-                            nb_too_many=minimal_availability - slot_ticket_seats_available,
-                        ))
-                # TODO: same
-                elif ticket.seats_available <= minimal_availability:
-                    sold_out_records.append(_(
-                        '- the ticket "%(ticket_name)s" (%(event_name)s): Missing %(nb_too_many)i seats.',
-                        ticket_name=ticket.name,
-                        event_name=event.name,
-                        nb_too_many=minimal_availability - ticket.seats_available,
-                    ))
-        if sold_out_records:
-            raise ValidationError(_('There are not enough seats available for:\n%(sold_out_records)s\n',
-                                    sold_out_records='\n'.join(sold_out_records)))
-
     @api.constrains('date_begin', 'date_end')
     def _check_closing_date(self):
         for event in self:
@@ -720,6 +639,84 @@ class EventEvent(models.Model):
     def _set_tz_context(self):
         self.ensure_one()
         return self.with_context(tz=self.date_tz or 'UTC')
+
+    def _get_seats_availability(self, slot_tickets):
+        """ Get availabilities for given combinations of slot / ticket. Returns
+        a list following input order. None denotes no limit. """
+        self.ensure_one()
+        if not (all(len(item) == 2 for item in slot_tickets)):
+            raise ValueError('Input should be a list of tuples containing slot, ticket')
+
+        slot_tickets_nb_registrations = {
+            (slot.id, ticket.id): count
+            for (slot, ticket, count) in self.env['event.registration']._read_group(
+                domain=[('event_id', 'in', self.ids), ('state', 'in', ['open', 'done']), ('active', '=', True)],
+                groupby=['event_slot_id', 'event_ticket_id'],
+                aggregates=['__count']
+            )
+        }
+
+        availabilities = []
+        for slot, ticket in slot_tickets:
+            available = None
+            # event is constrained: max stands for either each slot, either global (no slots)
+            if self.seats_max:
+                if slot:
+                    available = slot.seats_available
+                else:
+                    available = self.seats_available
+            # ticket is constrained: max standard for either each slot / ticket, either global (no slots)
+            if available != 0 and ticket and ticket.seats_max:
+                if slot:
+                    ticket_available = ticket.seats_max - slot_tickets_nb_registrations.get((slot.id, ticket.id), 0)
+                else:
+                    ticket_available = ticket.seats_available
+                available = ticket_available if available == None else min(available, ticket_available)
+            availabilities.append(available)
+        return availabilities
+
+    def _verify_seats_availability(self, slot_tickets):
+        """ Check event seats availability, for combinations of slot / ticket.
+
+        :slot_tickets: a list of tuples(slot, ticket, count). SLot and ticket
+          are optional, depending on event configuration. If count is 0
+          it is a simple check current values do not overflow limit. If count
+          is given, it serves as a check there are enough remaining seats.
+
+        Raises:
+            ValidationError: if the event / slot / ticket do not have enough
+            available seats
+        """
+        self.ensure_one()
+        if not (all(len(item) == 3 for item in slot_tickets)):
+            raise ValueError('Input should be a list of tuples containing slot, ticket, count')
+
+        sold_out = []
+        availabilities = self._get_seats_availability([(item[0], item[1]) for item in slot_tickets])
+        for (slot, ticket, count), available in zip(slot_tickets, availabilities, strict=True):
+            if available is None:  # unconstrained
+                continue
+            if available < count:
+                if slot and ticket:
+                    name = f'{ticket.name} - {slot.name}'
+                elif slot:
+                    name = slot.name
+                elif ticket:
+                    name = ticket.name
+                else:
+                    name = self.name
+                sold_out.append((name, count - available))
+
+        if sold_out:
+            info = []  # note: somehow using list comprehension make translate.py crash in default lang
+            for item in sold_out:
+                info.append(_('%(slot_name)s: missing %(count)s seats', slot_name=item[0], count=item[1]))
+            raise ValidationError(
+                _('There are not enough seats available for %(event_name)s:\n%(sold_out_info)s',
+                  event_name=self.name,
+                  sold_out_info='\n'.join(info),
+                )
+            )
 
     # ------------------------------------------------------------
     # ACTIONS
