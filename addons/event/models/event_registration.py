@@ -95,11 +95,11 @@ class EventRegistration(models.Model):
         'Barcode should be unique',
     )
 
-    @api.constrains('state', 'event_id', 'event_ticket_id')
-    def _check_seats_availability(self):
-        registrations_confirmed = self.filtered(lambda registration: registration.state in ('open', 'done'))
-        registrations_confirmed.event_id._check_seats_availability()
-        registrations_confirmed.event_ticket_id._check_seats_availability()
+    # @api.constrains('state', 'event_id', 'event_ticket_id')
+    # def _check_seats_availability(self):
+    #     registrations_confirmed = self.filtered(lambda registration: registration.state in ('open', 'done'))
+    #     registrations_confirmed.event_id._check_seats_availability()
+    #     registrations_confirmed.event_ticket_id._check_seats_availability()
 
     def default_get(self, fields):
         ret_vals = super().default_get(fields)
@@ -243,6 +243,8 @@ class EventRegistration(models.Model):
         all_partner_ids = set(values['partner_id'] for values in vals_list if values.get('partner_id'))
         all_event_ids = set(values['event_id'] for values in vals_list if values.get('event_id'))
         for values in vals_list:
+            event = self.env['event.event'].browse(values['event_id'])
+            event._verify_seats_availability(slot_id=values.get('event_slot_id'), ticket_id=values.get('event_ticket_id'))
             if not values.get('phone'):
                 continue
 
@@ -260,6 +262,8 @@ class EventRegistration(models.Model):
         return registrations
 
     def write(self, vals):
+        if any(field in ['active', 'state', 'event_id', 'event_slot_id', 'event_ticket_id'] for field in vals):
+            self._verify_seats_availability()
         confirming = vals.get('state') in {'open', 'done'}
         to_confirm = (self.filtered(lambda registration: registration.state in {'draft', 'cancel'})
                       if confirming else None)
@@ -268,6 +272,19 @@ class EventRegistration(models.Model):
             to_confirm._update_mail_schedulers()
 
         return ret
+
+    def _verify_seats_availability(self):
+        """ Check event, slot and ticket seats availability for the registrations.
+        Raise Validation Error if not enough seats available.
+        """
+        regs_by_event = self._read_group([], groupby=['event_id'], aggregates=["id:recordset"])
+        for (event, regs) in regs_by_event:
+            grouped_regs = regs._read_group(
+                domain=[],
+                groupby=['event_slot_id', 'event_ticket_id']
+            )
+            for (slot, ticket) in grouped_regs:
+                event._verify_seats_availability(slot_id=slot.id, ticket_id=ticket.id)
 
     def _compute_display_name(self):
         """ Custom display_name in case a registration is nott linked to an attendee
@@ -280,8 +297,7 @@ class EventRegistration(models.Model):
         # Necessary triggers as changing registration states cannot be used as triggers for the
         # Event(Ticket) models constraints.
         if unarchived := self.filtered(self._active_name):
-            unarchived.event_id._check_seats_availability()
-            unarchived.event_ticket_id._check_seats_availability()
+            unarchived._verify_seats_availability()
         return res
 
     # ------------------------------------------------------------

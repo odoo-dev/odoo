@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError, UserError
+from odoo.exceptions import UserError
 from odoo.tools.misc import formatLang
 
 
@@ -117,20 +117,20 @@ class EventEventTicket(models.Model):
                 raise UserError(_('The stop date cannot be earlier than the start date. '
                                   'Please check ticket %(ticket_name)s', ticket_name=ticket.name))
 
-    @api.constrains('registration_ids', 'seats_max')
-    def _check_seats_availability(self, minimal_availability=0):
-        sold_out_tickets = []
-        for ticket in self:
-            if ticket.seats_max and ticket.seats_available < minimal_availability:
-                sold_out_tickets.append(_(
-                    '- the ticket "%(ticket_name)s" (%(event_name)s): Missing %(nb_too_many)i seats.',
-                    ticket_name=ticket.name,
-                    event_name=ticket.event_id.name,
-                    nb_too_many=minimal_availability - ticket.seats_available,
-                ))
-        if sold_out_tickets:
-            raise ValidationError(_('There are not enough seats available for:')
-                                  + '\n%s\n' % '\n'.join(sold_out_tickets))
+    # @api.constrains('registration_ids', 'seats_max')
+    # def _check_seats_availability(self, minimal_availability=0):
+    #     sold_out_tickets = []
+    #     for ticket in self:
+    #         if ticket.seats_max and ticket.seats_available < minimal_availability:
+    #             sold_out_tickets.append(_(
+    #                 '- the ticket "%(ticket_name)s" (%(event_name)s): Missing %(nb_too_many)i seats.',
+    #                 ticket_name=ticket.name,
+    #                 event_name=ticket.event_id.name,
+    #                 nb_too_many=minimal_availability - ticket.seats_available,
+    #             ))
+    #     if sold_out_tickets:
+    #         raise ValidationError(_('There are not enough seats available for:')
+    #                               + '\n%s\n' % '\n'.join(sold_out_tickets))
 
     @api.depends('seats_max', 'seats_available')
     @api.depends_context('name_with_seats_availability')
