@@ -111,6 +111,7 @@ class CalendarAttendee(models.Model):
         self._notify_attendees(
             self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False),
             force_send=True,
+            notify_author=True,
         )
 
     def _notify_attendees(self, mail_template, notify_author=False, force_send=False):
