@@ -33,8 +33,13 @@ class EventRegistration(models.Model):
     # event
     event_id = fields.Many2one(
         'event.event', string='Event', required=True, tracking=True, index=True)
+    is_multi_slots = fields.Boolean(string="Is Event Multi Slots", related="event_id.is_multi_slots")
+    event_slot_id = fields.Many2one(
+        "event.slot", string="Slot", ondelete='restrict', tracking=True, index="btree_not_null",
+        domain="[('event_id', '=', event_id)]", compute="_compute_event_slot_id", store=True, readonly=False)
     event_ticket_id = fields.Many2one(
         'event.event.ticket', string='Ticket Type', ondelete='restrict', tracking=True, index='btree_not_null')
+    event_tickets_count = fields.Integer("Event tickets count", compute="_compute_event_tickets_count")
     active = fields.Boolean(default=True)
     barcode = fields.Char(string='Barcode', default=lambda self: self._get_random_barcode(), readonly=True, copy=False)
     # utm informations
@@ -54,8 +59,8 @@ class EventRegistration(models.Model):
     date_closed = fields.Datetime(
         string='Attended Date', compute='_compute_date_closed',
         readonly=False, store=True)
-    event_begin_date = fields.Datetime(string="Event Start Date", related='event_id.date_begin', readonly=True)
-    event_end_date = fields.Datetime(string="Event End Date", related='event_id.date_end', readonly=True)
+    event_begin_date = fields.Datetime("Event Start Date", compute="_compute_datetimes")
+    event_end_date = fields.Datetime("Event End Date", compute="_compute_datetimes")
     event_date_range = fields.Char("Date Range", compute="_compute_date_range")
     event_organizer_id = fields.Many2one(string='Event Organizer', related='event_id.organizer_id', readonly=True)
     event_user_id = fields.Many2one(string='Event Responsible', related='event_id.user_id', readonly=True)
@@ -145,6 +150,16 @@ class EventRegistration(models.Model):
                     fnames={'company_name'},
                 ).get('company_name') or False
 
+    @api.depends("event_id", "event_slot_id")
+    def _compute_datetimes(self):
+        for registration in self:
+            if registration.event_id.is_multi_slots:
+                registration.event_begin_date = registration.event_slot_id.start_datetime
+                registration.event_end_date = registration.event_slot_id.end_datetime
+                continue
+            registration.event_begin_date = registration.event_id.date_begin
+            registration.event_end_date = registration.event_id.date_end
+
     @api.depends('state')
     def _compute_date_closed(self):
         for registration in self:
@@ -154,10 +169,25 @@ class EventRegistration(models.Model):
                 else:
                     registration.date_closed = False
 
-    @api.depends("event_id", "partner_id")
+    @api.depends("event_id", "event_slot_id", "partner_id")
     def _compute_date_range(self):
         for registration in self:
-            registration.event_date_range = registration.event_id._get_date_range_str(registration.partner_id.lang)
+            registration.event_date_range = registration.event_id._get_date_range_str(
+                slot_datetime=registration.event_slot_id and registration.event_slot_id.start_datetime,
+                lang_code=registration.partner_id.lang
+            )
+
+    @api.depends('event_id', 'event_id.event_ticket_ids')
+    def _compute_event_tickets_count(self):
+        for registration in self:
+            registration.event_tickets_count = len(registration.event_id.event_ticket_ids)
+
+    @api.depends('event_id')
+    def _compute_event_slot_id(self):
+        """ Resets the selected slot if the event is changed in the attendee form. """
+        for registration in self:
+            if registration.event_id != registration.event_slot_id.event_id:
+                registration.event_slot_id = False
 
     @api.constrains('event_id', 'event_ticket_id')
     def _check_event_ticket(self):

@@ -108,7 +108,8 @@ class EventEvent(models.Model):
     seats_max = fields.Integer(
         string='Maximum Attendees',
         compute='_compute_seats_max', readonly=False, store=True,
-        help="For each event you can define a maximum registration of seats(number of attendees), above this numbers the registrations are not accepted.")
+        help="For each event you can define a maximum registration of seats(number of attendees), above this number the registrations are not accepted. "
+        "If the event has multiple slots, this maximum number is applied per slot.")
     seats_limited = fields.Boolean('Limit Attendees', required=True, compute='_compute_seats_limited',
                                    precompute=True, readonly=False, store=True)
     seats_reserved = fields.Integer(
@@ -155,6 +156,13 @@ class EventEvent(models.Model):
     is_ongoing = fields.Boolean('Is Ongoing', compute='_compute_is_ongoing', search='_search_is_ongoing')
     is_one_day = fields.Boolean(compute='_compute_field_is_one_day')
     is_finished = fields.Boolean(compute='_compute_is_finished', search='_search_is_finished')
+    # Slots
+    is_multi_slots = fields.Boolean("Is Multi Slots", default=False,
+        help="Allow multiple time slots."
+        "The communications, the maximum number of attendees and the maximum number of tickets registrations"
+        "are defined for each time slot instead of the whole event.")
+    slot_ids = fields.One2many("event.slot", "event_id", "Slots", copy=True)
+    slot_count = fields.Integer("Slots Count", compute="_compute_slot_count")
     # Location and communication
     address_id = fields.Many2one(
         'res.partner', string='Venue', default=lambda self: self.env.company.partner_id.id,
@@ -253,7 +261,7 @@ class EventEvent(models.Model):
             else:
                 event.kanban_state_label = event.stage_id.legend_done
 
-    @api.depends('seats_max', 'registration_ids.state', 'registration_ids.active')
+    @api.depends('is_multi_slots', 'seats_max', 'slot_ids', 'registration_ids.state', 'registration_ids.active')
     def _compute_seats(self):
         """ Determine available, reserved, used and taken seats. """
         # initialize fields to 0
@@ -281,8 +289,9 @@ class EventEvent(models.Model):
         # compute seats_available and expected
         for event in self:
             event.update(results.get(event._origin.id or event.id, base_vals))
-            if event.seats_max > 0:
-                event.seats_available = event.seats_max - (event.seats_reserved + event.seats_used)
+            seats_max = event.seats_max * event.slot_count if event.is_multi_slots else event.seats_max
+            if seats_max > 0:
+                event.seats_available = seats_max - (event.seats_reserved + event.seats_used)
 
             event.seats_taken = event.seats_reserved + event.seats_used
 
@@ -385,6 +394,11 @@ class EventEvent(models.Model):
             if not event.date_tz:
                 event.date_tz = self.env.user.tz or 'UTC'
 
+    @api.depends("slot_ids")
+    def _compute_slot_count(self):
+        for event in self:
+            event.slot_count = len(event.slot_ids)
+
     @api.depends('address_id')
     def _compute_address_search(self):
         for event in self:
@@ -405,13 +419,16 @@ class EventEvent(models.Model):
 
     # seats
 
-    @api.depends('event_type_id')
+    @api.depends('event_type_id', 'seats_limited')
     def _compute_seats_max(self):
         """ Update event configuration from its event type. Depends are set only
         on event_type_id itself, not its sub fields. Purpose is to emulate an
         onchange: if event type is changed, update event configuration. Changing
         event type content itself should not trigger this method. """
         for event in self:
+            if not event.seats_limited:
+                event.seats_max = 0  # resets seats_max to unlimited
+                continue
             if not event.event_type_id:
                 event.seats_max = event.seats_max or 0
             else:
@@ -534,6 +551,27 @@ class EventEvent(models.Model):
         """Reset url field as it should only be used for events with no physical location."""
         self.filtered('address_id').event_url = ''
 
+    @api.constrains("is_multi_slots", "date_begin", "date_end")
+    def _check_slots_dates(self):
+        for event in self:
+            if not event.is_multi_slots:
+                continue
+            slots_outside_event_bounds = event.slot_ids.filtered(lambda slot:
+                not (event.date_begin <= slot.start_datetime <= event.date_end) or
+                not (event.date_begin <= slot.end_datetime <= event.date_end)
+            )
+            if slots_outside_event_bounds:
+                raise ValidationError(_(
+                    "The event slots cannot be scheduled outside of the event time range.\n\n"
+                    "Event:\n"
+                    "%(event_start)s - %(event_end)s\n\n"
+                    "Slots:\n"
+                    "%(slots)s",
+                    event_start=format_datetime(self.env, event.date_begin, tz=event.date_tz, dt_format='medium'),
+                    event_end=format_datetime(self.env, event.date_end, tz=event.date_tz, dt_format='medium'),
+                    slots="\n".join(f"- {slot.name}" for slot in slots_outside_event_bounds)
+                ))
+
     @api.constrains('seats_max', 'seats_limited', 'registration_ids')
     def _check_seats_availability(self, minimal_availability=0):
         sold_out_events = []
@@ -630,10 +668,11 @@ class EventEvent(models.Model):
         if first_ended_stage:
             self.write({'stage_id': first_ended_stage.id})
 
-    def _get_date_range_str(self, lang_code=False):
+    def _get_date_range_str(self, slot_datetime=False, lang_code=False):
         self.ensure_one()
+        datetime = slot_datetime or self.date_begin
         today_tz = pytz.utc.localize(fields.Datetime.now()).astimezone(pytz.timezone(self.date_tz))
-        event_date_tz = pytz.utc.localize(self.date_begin).astimezone(pytz.timezone(self.date_tz))
+        event_date_tz = pytz.utc.localize(datetime).astimezone(pytz.timezone(self.date_tz))
         diff = (event_date_tz.date() - today_tz.date())
         if diff.days <= 0:
             return _('today')
@@ -645,7 +684,7 @@ class EventEvent(models.Model):
             return _('next week')
         if event_date_tz.month == (today_tz + relativedelta(months=+1)).month:
             return _('next month')
-        return _('on %(date)s', date=format_date(self.env, self.date_begin, lang_code=lang_code, date_format='medium'))
+        return _('on %(date)s', date=format_date(self.env, datetime, lang_code=lang_code, date_format='medium'))
 
     def _get_external_description(self):
         """
@@ -662,8 +701,9 @@ class EventEvent(models.Model):
         description += textwrap.shorten(html_to_inner_content(self.description), 1900)
         return description
 
-    def _get_ics_file(self):
+    def _get_ics_file(self, slot_id=False):
         """ Returns iCalendar file for the event invitation.
+            :param slot_id: If a slot id is given, schedule with the given slot datetimes
             :returns a dict of .ics file content for each event
         """
         result = {}
@@ -673,10 +713,14 @@ class EventEvent(models.Model):
         for event in self:
             cal = vobject.iCalendar()
             cal_event = cal.add('vevent')
+            start, end = event.date_begin, event.date_end
+            if slot_id:
+                slot = self.env['event.slot'].sudo().browse(slot_id)
+                start, end = slot.start_datetime, slot.end_datetime
 
             cal_event.add('created').value = fields.Datetime.now().replace(tzinfo=pytz.timezone('UTC'))
-            cal_event.add('dtstart').value = event.date_begin.astimezone(pytz.timezone(event.date_tz))
-            cal_event.add('dtend').value = event.date_end.astimezone(pytz.timezone(event.date_tz))
+            cal_event.add('dtstart').value = start.astimezone(pytz.timezone(event.date_tz))
+            cal_event.add('dtend').value = end.astimezone(pytz.timezone(event.date_tz))
             cal_event.add('summary').value = event.name
             cal_event.add('description').value = event._get_external_description()
             if event.address_id:
