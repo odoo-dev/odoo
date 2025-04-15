@@ -242,9 +242,11 @@ class AccountBankStatementLine(models.Model):
                 extra_clause,
             ))
             pending_items = self
+            current_running_balance = float(current_running_balance)
             for st_line_id, amount, is_anchor, balance_start, state in self.env.cr.fetchall():
+                amount = float(amount)
                 if is_anchor:
-                    current_running_balance = balance_start
+                    current_running_balance = float(balance_start)
                 if state == 'posted':
                     current_running_balance += amount
                 if record_by_id.get(st_line_id):

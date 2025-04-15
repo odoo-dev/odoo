@@ -903,7 +903,7 @@ class AccountMoveLine(models.Model):
                 GROUP BY part.credit_move_id, curr.decimal_places
             ''', [aml_ids, aml_ids])
             amounts_map = {
-                (line_id, flag): (amount, amount_currency)
+                (line_id, flag): (float(amount), float(amount_currency))
                 for line_id, flag, amount, amount_currency in self.env.cr.fetchall()
             }
         else:

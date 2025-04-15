@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import typing
+from decimal import Decimal
 from operator import attrgetter
 from xmlrpc.client import MAXINT  # TODO change this
 
@@ -57,6 +58,7 @@ class Integer(Field[int]):
         return ''
 
 
+# XXX future: separate Numeric[Field[Decimal]] type and Monetary[Field[Decimal]]
 class Float(Field[float]):
     """ Encapsulates a :class:`float`.
 
@@ -115,6 +117,10 @@ class Float(Field[float]):
         return ('numeric', 'numeric') if self._digits is not None else \
                ('float8', 'double precision')
 
+    @property
+    def is_decimal(self) -> bool:
+        return self._digits is not None
+
     def get_digits(self, env: Environment) -> tuple[int, int] | None:
         if isinstance(self._digits, str):
             precision = env['decimal.precision'].precision_get(self._digits)
@@ -128,27 +134,45 @@ class Float(Field[float]):
         return self.get_digits(env)
 
     def convert_to_column(self, value, record, values=None, validate=True):
+        digits = self.get_digits(record.env)
+        if isinstance(value, Decimal) and not self.company_dependent:
+            if digits:
+                value = round(value, digits[1])
+            return value
         value_float = value = float(value or 0.0)
-        if digits := self.get_digits(record.env):
-            _precision, scale = digits
+        if digits:
+            scale = digits[1]
             value_float = float_round(value, precision_digits=scale)
             value = float_repr(value_float, precision_digits=scale)
         if self.company_dependent:
             return value_float
-        return value
+        return Decimal(str(value)) if self.is_decimal else value
 
     def convert_to_cache(self, value, record, validate=True):
         # apply rounding here, otherwise value in cache may be wrong!
-        value = float(value or 0.0)
+        if value is None or value is False:
+            return None
         digits = self.get_digits(record.env)
-        return float_round(value, precision_digits=digits[1]) if digits else value
+        if self.is_decimal:
+            if isinstance(value, float):
+                value = Decimal(str(value))
+            elif not isinstance(value, Decimal):
+                value = Decimal(value)
+            if digits:
+                # XXX should we use value.quantize?
+                value = round(value, digits[1])
+            return value
+        value = float(value or 0.0)
+        if digits:
+            value = float_round(value, precision_digits=digits[1])
+        return value
 
     def convert_to_record(self, value, record):
-        return value or 0.0
+        return float(value or 0.0)
 
     def convert_to_export(self, value, record):
         if value or value == 0.0:
-            return value
+            return float(value)
         return ''
 
     round = staticmethod(float_round)
@@ -214,7 +238,19 @@ class Monetary(Field[float]):
         assert self.get_currency_field(model) in model._fields, \
             "Field %s with unknown currency_field %r" % (self, self.get_currency_field(model))
 
+    def convert_to_column(self, value, record, values=None, validate=True):
+        if value is None or value is False:
+            return None
+        if isinstance(value, float):
+            value = Decimal(str(value))
+        elif not isinstance(value, Decimal):
+            value = Decimal(value)
+        return value
+
     def convert_to_column_insert(self, value, record, values=None, validate=True):
+        value = self.convert_to_column(value, record, values, validate)
+        if value is None:
+            return value
         # retrieve currency from values or record
         currency_field_name = self.get_currency_field(record)
         currency_field = record._fields[currency_field_name]
@@ -233,14 +269,19 @@ class Monetary(Field[float]):
             currency = record[:1].sudo().with_context(prefetch_fields=False)[currency_field_name]
             currency = currency.with_env(record.env)
 
-        value = float(value or 0.0)
         if currency:
-            return float_repr(currency.round(value), currency.decimal_places)
+            value = currency.round(value)
+            assert isinstance(value, Decimal)
         return value
 
     def convert_to_cache(self, value, record, validate=True):
-        # cache format: float
-        value = float(value or 0.0)
+        # cache format: Decimal | None
+        if value is None or value is False:
+            return None
+        if isinstance(value, float):
+            # round the value before converting to decimal
+            value = str(value)
+        value = Decimal(value or '0')
         if value and validate:
             # FIXME @rco-odoo: currency may not be already initialized if it is
             # a function or related field!
@@ -260,15 +301,15 @@ class Monetary(Field[float]):
         return value
 
     def convert_to_record(self, value, record):
-        return value or 0.0
+        return float(value or 0.0)
 
     def convert_to_read(self, value, record, use_display_name=True):
-        return value
+        return float(value)
 
     def convert_to_write(self, value, record):
         return value
 
     def convert_to_export(self, value, record):
         if value or value == 0.0:
-            return value
+            return float(value)
         return ''

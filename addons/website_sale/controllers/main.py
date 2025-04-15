@@ -397,7 +397,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
                     conversion_rate=conversion_rate,
                 )
             )
-            available_min_price, available_max_price = request.env.execute_query(sql)[0]
+            available_min_price, available_max_price = map(float(request.env.execute_query(sql)[0]))
 
             if min_price or max_price:
                 # The if/else condition in the min_price / max_price value assignment
