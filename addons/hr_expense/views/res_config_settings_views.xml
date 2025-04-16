@@ -38,7 +38,7 @@
                                 <field name="module_hr_expense_extract" widget="upgrade_boolean"/>
                             </setting>
                             <setting string="Expense Card" company_dependent="True"
-                                     help="Create prepaid virtual and physical cards for both one-time and recurring expenses, integrated into Odoo though Stripe Issuing.">
+                                     help="Create prepaid virtual and physical cards for both one-time and recurring expenses, integrated into Odoo through Stripe Issuing.">
                                 <field name="module_hr_expense_stripe" widget="upgrade_boolean"/>
                                 <div class="content-group" invisible="not module_hr_expense_stripe" name="expenses_stripe_issuing_container">
                                     <div class="text-warning mt16 mb4">
