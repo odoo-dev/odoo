@@ -1,6 +1,7 @@
 import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { CarouselItemHeaderMiddleButtons } from "./carousel_item_header_buttons";
 
 export class CarouselOptionPlugin extends Plugin {
     static id = "carouselOption";
@@ -21,6 +22,18 @@ export class CarouselOptionPlugin extends Plugin {
                 applyTo: ".s_carousel_intro",
             },
         ],
+        builder_header_middle_buttons: {
+            Component: CarouselItemHeaderMiddleButtons,
+            selector:
+                ".s_carousel .carousel-item, .s_quotes_carousel .carousel-item, .s_carousel_intro .carousel-item, .s_carousel_cards .carousel-item",
+            props: {
+                slide: (direction, editingElement) =>
+                    this.slide(direction, editingElement.closest(".carousel")),
+                addSlide: (editingElement) => this.addSlide(editingElement.closest(".carousel")),
+                removeSlide: (editingElement) =>
+                    this.removeSlide(editingElement.closest(".carousel")),
+            },
+        },
         builder_actions: this.getActions(),
         on_cloned_handlers: this.onCloned.bind(this),
         on_will_clone_handlers: this.onWillClone.bind(this),
@@ -88,6 +101,7 @@ export class CarouselOptionPlugin extends Plugin {
             this.dependencies.remove.removeElement(toRemoveCarouselItemEl);
             this.dependencies.remove.removeElement(toRemoveIndicatorEl);
 
+            this.dependencies.history.addStep();
             this.dependencies["builder-options"].updateContainers(
                 editingCarouselElement.querySelector(".carousel-item.active")
             );
@@ -286,11 +300,13 @@ export class CarouselOptionPlugin extends Plugin {
             indicatorEls.forEach((indicatorEl, i) => {
                 indicatorEl.classList.toggle("active", i === newItemPosition);
             });
-            const activeImageEl = editingCarouselElement.querySelector(".carousel-item.active img");
-            this.dependencies["builder-options"].updateContainers(activeImageEl);
             editingCarouselElement.classList.add("slide");
             // Prevent the carousel from automatically sliding afterwards.
             carouselInstance["pause"]();
+
+            const activeImageEl = editingCarouselElement.querySelector(".carousel-item.active img");
+            this.dependencies.history.addStep();
+            this.dependencies["builder-options"].updateContainers(activeImageEl);
         }
     }
 }
