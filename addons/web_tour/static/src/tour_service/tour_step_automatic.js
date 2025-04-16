@@ -23,20 +23,20 @@ export class TourStepAutomatic extends TourStep {
         if (["body", "html"].includes(tagName) || !tagName) {
             return;
         }
-        const snapshot = initialElement.cloneNode(true);
         const mutations = await waitForStable(initialElement, delay);
+        const visible = !/:(hidden|visible)\b/.test(this.trigger);
+        const element = hoot.queryFirst(this.trigger, { visible });
         let reason;
-        if (!hoot.isVisible(initialElement)) {
-            reason = `Initial element is no longer visible`;
-        } else if (!initialElement.isEqualNode(snapshot)) {
-            reason =
-                `Initial element has changed:\n` +
-                JSON.stringify(serializeChanges(snapshot, initialElement), null, 2);
-        } else if (mutations.length) {
-            const changes = [...new Set(mutations.map(serializeMutation))];
-            reason =
-                `Initial element has mutated ${mutations.length} times:\n` +
-                JSON.stringify(changes, null, 2);
+        if (element !== initialElement) {
+            if (!element.isEqualNode(initialElement)) {
+                reason =
+                    `Initial element has changed :\n` +
+                    JSON.stringify(serializeChanges(element, initialElement), null, 2);
+            } else {
+                reason =
+                    `The found element is similar to the initial element: \n` +
+                    JSON.stringify(serializeMutation(mutations));
+            }
         }
         if (reason) {
             throw new Error(
