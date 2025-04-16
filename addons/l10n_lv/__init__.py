@@ -1,5 +1,7 @@
 from odoo import api, SUPERUSER_ID
 
+from . import models
+
 def load_translations(cr, registry):
     """Load template translations."""
     env = api.Environment(cr, SUPERUSER_ID, {})

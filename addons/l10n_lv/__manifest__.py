@@ -1,6 +1,6 @@
 {
     'name': "Latvia - Accounting",
-    'version': '1.0.0',
+    'version': '1.0.1',
     'description': """
         Chart of Accounts (COA) Template for Latvia's Accounting.
         This module also includes:
@@ -11,9 +11,10 @@
 
         author is Allegro IT (visit for more information https://www.allegro.lv)
         co-author is Chick.Farm (visit for more information https://www.myacc.cloud)
+        updated and maintained by Odoo S.A.
     """,
     'license': 'LGPL-3',
-    'author': "Allegro IT, Chick.Farm",
+    'author': "Allegro IT, Chick.Farm, Odoo S.A.",
     'website': "https://allegro.lv",
     'category': 'Accounting/Localizations/Account Charts',
     'depends': [
@@ -31,6 +32,7 @@
         'data/account_tax_template_data.xml',
         'data/account_fiscal_position_template_data.xml',
         'data/account_chart_template_load.xml',
+        'views/account_tax_views.xml',
     ],
     'demo': [
         'demo/demo_company.xml',
