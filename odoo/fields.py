@@ -4262,7 +4262,8 @@ class _RelationalMulti(_Relational):
             Comodel._active_name
             and self.context.get('active_test', record.env.context.get('active_test', True))
         ):
-            corecords = corecords.filtered(Comodel._active_name).with_prefetch(prefetch_ids)
+            # Set prefetch_ids to value for the filtered call to avoid perf bottleneck in expand_ids
+            corecords = corecords.with_prefetch(value).filtered(Comodel._active_name).with_prefetch(prefetch_ids)
         return corecords
 
     def convert_to_record_multi(self, values, records):
@@ -4275,7 +4276,8 @@ class _RelationalMulti(_Relational):
             Comodel._active_name
             and self.context.get('active_test', records.env.context.get('active_test', True))
         ):
-            corecords = corecords.filtered(Comodel._active_name).with_prefetch(prefetch_ids)
+            # Set prefetch_ids to ids for the filtered call to avoid perf bottleneck in expand_ids
+            corecords = corecords.with_prefetch(ids).filtered(Comodel._active_name).with_prefetch(prefetch_ids)
         return corecords
 
     def convert_to_read(self, value, record, use_display_name=True):
