@@ -118,6 +118,14 @@ class PosConfig(models.Model):
                     'type': 'binary',
                 }) for image_name in ['landing_01.jpg', 'landing_02.jpg', 'landing_03.jpg']]
 
+            if not vals.get('self_ordering_image_background_ids'):
+                vals['self_ordering_image_background_ids'] = [(0, 0, {
+                    'name': "background.jpg",
+                    'datas': base64.b64encode(file_open(opj("pos_self_order/static/img", "kiosk_background.jpg"), "rb").read()),
+                    'res_model': 'pos.config',
+                    'type': 'binary',
+                })]
+
         return True
 
     def _prepare_self_order_custom_btn(self):
