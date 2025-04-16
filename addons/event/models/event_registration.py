@@ -3,6 +3,8 @@
 import logging
 import os
 
+from collections import defaultdict
+
 from odoo import _, api, fields, models, SUPERUSER_ID
 from odoo.addons.event.tools.esc_label_tools import print_event_attendees, setup_printer, layout_96x82
 from odoo.tools import email_normalize, email_normalize_all, formataddr
@@ -95,11 +97,16 @@ class EventRegistration(models.Model):
         'Barcode should be unique',
     )
 
-    @api.constrains('state', 'event_id', 'event_ticket_id')
+    @api.constrains('active', 'state', 'event_id', 'event_slot_id', 'event_ticket_id')
     def _check_seats_availability(self):
-        registrations_confirmed = self.filtered(lambda registration: registration.state in ('open', 'done'))
-        registrations_confirmed.event_id._check_seats_availability()
-        registrations_confirmed.event_ticket_id._check_seats_availability()
+        tocheck = self.filtered(lambda registration: registration.state in ('open', 'done') and registration.active)
+        for event, registrations in tocheck.grouped('event_id').items():
+            classified = defaultdict(lambda: self.env['event.registration'])
+            for reg in registrations:
+                classified[reg.event_slot_id, reg.event_ticket_id] += reg
+            event._verify_seats_availability(
+                [(key[0], key[1], 0) for key, regs in classified.items()],
+            )
 
     def default_get(self, fields):
         ret_vals = super().default_get(fields)
@@ -255,7 +262,7 @@ class EventRegistration(models.Model):
                 related_country = self.env.company.country_id
             values['phone'] = self._phone_format(number=values['phone'], country=related_country) or values['phone']
 
-        registrations = super(EventRegistration, self).create(vals_list)
+        registrations = super().create(vals_list)
         registrations._update_mail_schedulers()
         return registrations
 
@@ -263,7 +270,7 @@ class EventRegistration(models.Model):
         confirming = vals.get('state') in {'open', 'done'}
         to_confirm = (self.filtered(lambda registration: registration.state in {'draft', 'cancel'})
                       if confirming else None)
-        ret = super(EventRegistration, self).write(vals)
+        ret = super().write(vals)
         if confirming:
             to_confirm._update_mail_schedulers()
 
@@ -274,15 +281,6 @@ class EventRegistration(models.Model):
         """
         for registration in self:
             registration.display_name = registration.name or f"#{registration.id}"
-
-    def action_unarchive(self):
-        res = super().action_unarchive()
-        # Necessary triggers as changing registration states cannot be used as triggers for the
-        # Event(Ticket) models constraints.
-        if unarchived := self.filtered(self._active_name):
-            unarchived.event_id._check_seats_availability()
-            unarchived.event_ticket_id._check_seats_availability()
-        return res
 
     # ------------------------------------------------------------
     # ACTIONS / BUSINESS

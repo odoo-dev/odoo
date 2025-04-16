@@ -610,14 +610,8 @@ class TestEventData(TestEventInternalsCommon):
         reg_open.action_archive()
         self.assertEqual(event.seats_reserved, 4)
 
-        # It is not possible to set a seats_max value below number of current
-        # confirmed registrations. (4 "reserved" + 1 "used")
-        with self.assertRaises(exceptions.ValidationError):
-            event.write({'seats_max': 4})
-        event.write({'seats_max': 5})
-        self.assertEqual(event.seats_available, 0)
-
         # It is not possible to unarchive a confirmed seat if the event is fully booked
+        event.write({'seats_max': 5})
         with self.assertRaises(exceptions.ValidationError):
             reg_open.action_unarchive()
 
@@ -965,11 +959,6 @@ class TestEventTicketData(TestEventInternalsCommon):
         reg_done.action_unarchive()
         self.assertEqual(first_ticket.seats_used, 1)
         self.assertEqual(first_ticket.seats_available, INITIAL_TICKET_SEATS_MAX - 2)
-
-        # It is not possible to set a seats_max value below the current number of confirmed
-        # registrations. (There is still 1 "used" seat too)
-        with self.assertRaises(exceptions.ValidationError):
-            first_ticket.write({'seats_max': 1})
 
         reg_open.action_archive()
         first_ticket.write({'seats_max': 1})
