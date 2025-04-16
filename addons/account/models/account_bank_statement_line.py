@@ -567,6 +567,8 @@ class AccountBankStatementLine(models.Model):
 
         rate_journal2foreign_curr = journal_amount and abs(transaction_amount) / abs(journal_amount)
         rate_comp2journal_curr = company_amount and abs(journal_amount) / abs(company_amount)
+        if not balance:
+            balance = currency._convert(amount_currency, company_currency)
 
         if currency == transaction_currency:
             trans_amount_currency = amount_currency
