@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Product Tags -->
+    <record id="product_tag_form_view_inherit_website_sale" model="ir.ui.view">
+        <field name="name">product.tag.form.inherit.point.of.sale</field>
+        <field name="model">product.tag</field>
+        <field name="inherit_id" ref="product.product_tag_form_view"/>
+        <field name="arch" type="xml">
+            <field name="visible_to_customers" position="after">
+                <field name="description" invisible="not visible_to_customers"/>
+            </field>
+        </field>
+    </record>
+
+    <menuitem id="pos_menu_products_tag_action" action="product.product_tag_action"
+              parent="point_of_sale.pos_menu_products_configuration" sequence="3"/>
+
+</odoo>
