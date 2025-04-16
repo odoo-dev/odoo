@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 
 export class CarouselOptionPlugin extends Plugin {
     static id = "carouselOption";
-    static dependencies = ["clone"];
+    static dependencies = ["clone", "history"];
 
     resources = {
         builder_options: [
@@ -34,8 +34,13 @@ export class CarouselOptionPlugin extends Plugin {
                 apply: () => {},
             },
             slideCarousel: {
-                load: async ({ editingElement, direction: direction }) =>
-                    this.slide(direction, editingElement),
+                load: async ({ editingElement, direction: direction }) => {
+                    await this.slide(direction, editingElement);
+                    this.dependencies.history.addStep();
+                    this.dependencies["builder-options"].updateContainers(
+                        editingElement.querySelector(".carousel-item.active")
+                    );
+                },
                 apply: () => {},
             },
             toggleControllers: {
@@ -59,6 +64,10 @@ export class CarouselOptionPlugin extends Plugin {
         this.dependencies.clone.cloneElement(activeCarouselItem);
 
         await this.slide("next", editingElement);
+        this.dependencies.history.addStep();
+        this.dependencies["builder-options"].updateContainers(
+            editingElement.querySelector(".carousel-item.active")
+        );
     }
 
     /**
