@@ -1,10 +1,12 @@
 import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { CarouselItemHeaderMiddleButtons } from "./carousel_item_header_buttons";
 
 export class CarouselOptionPlugin extends Plugin {
     static id = "carouselOption";
-    static dependencies = ["clone"];
+    static dependencies = ["clone", "history", "remove", "builder-options"];
+    static shared = ["slide", "addSlide", "removeSlide"];
 
     resources = {
         builder_options: [
@@ -20,11 +22,24 @@ export class CarouselOptionPlugin extends Plugin {
                 applyTo: ".s_carousel_intro",
             },
         ],
+        builder_header_middle_buttons: {
+            Component: CarouselItemHeaderMiddleButtons,
+            selector:
+                ".s_carousel .carousel-item, .s_quotes_carousel .carousel-item, .s_carousel_intro .carousel-item, .s_carousel_cards .carousel-item",
+            props: {
+                slideCarousel: (direction, editingElement) =>
+                    this.slideCarousel(editingElement.closest(".carousel"), direction),
+                addSlide: (editingElement) => this.addSlide(editingElement.closest(".carousel")),
+                removeSlide: (editingElement) =>
+                    this.removeSlide(editingElement.closest(".carousel")),
+            },
+        },
         builder_actions: this.getActions(),
         on_cloned_handlers: this.onCloned.bind(this),
         on_will_clone_handlers: this.onWillClone.bind(this),
         on_add_element_handlers: this.onAddElement.bind(this),
         normalize_handlers: this.normalize.bind(this),
+        on_reorder_items_handlers: this.reorderCarouselItems.bind(this),
     };
 
     getActions() {
@@ -35,7 +50,7 @@ export class CarouselOptionPlugin extends Plugin {
             },
             slideCarousel: {
                 load: async ({ editingElement, direction: direction }) =>
-                    this.slide(direction, editingElement),
+                    this.slideCarousel(editingElement, direction),
                 apply: () => {},
             },
             toggleControllers: {
@@ -58,7 +73,42 @@ export class CarouselOptionPlugin extends Plugin {
         const activeCarouselItem = editingElement.querySelector(".carousel-item.active");
         this.dependencies.clone.cloneElement(activeCarouselItem);
 
-        await this.slide("next", editingElement);
+        await this.slide(editingElement, "next");
+        this.dependencies.history.addStep();
+        this.dependencies["builder-options"].updateContainers(
+            editingElement.querySelector(".carousel-item.active")
+        );
+    }
+
+    async removeSlide(editingCarouselElement) {
+        const toRemoveCarouselItemEl =
+            editingCarouselElement.querySelector(".carousel-item.active");
+        const toRemoveIndicatorEl = editingCarouselElement.querySelector(
+            ".carousel-indicators > .active"
+        );
+        const itemsEls = [...editingCarouselElement.querySelectorAll(".carousel-item")];
+
+        if (itemsEls.length > 1) {
+            // Slide to the previous item
+            await this.slide(editingCarouselElement, "prev");
+
+            // Remove the carousel item and the indicator
+            this.dependencies.remove.removeElement(toRemoveCarouselItemEl);
+            this.dependencies.remove.removeElement(toRemoveIndicatorEl);
+
+            this.dependencies.history.addStep();
+            this.dependencies["builder-options"].updateContainers(
+                editingCarouselElement.querySelector(".carousel-item.active")
+            );
+        }
+    }
+
+    async slideCarousel(editingElement, direction) {
+        await this.slide(editingElement, direction);
+        this.dependencies.history.addStep();
+        this.dependencies["builder-options"].updateContainers(
+            editingElement.querySelector(".carousel-item.active")
+        );
     }
 
     /**
@@ -71,7 +121,7 @@ export class CarouselOptionPlugin extends Plugin {
      * @param {Element} editingElement the carousel element.
      * @returns {Promise}
      */
-    slide(direction, editingElement) {
+    slide(editingElement, direction) {
         editingElement.addEventListener("slide.bs.carousel", () => {
             this.slideTimestamp = window.performance.now();
         });
@@ -201,6 +251,65 @@ export class CarouselOptionPlugin extends Plugin {
                 activeIndicatorEl.classList.add("active");
                 activeIndicatorEl.setAttribute("aria-current", "true");
             }
+        }
+    }
+
+    reorderCarouselItems({ elementToReorder, position, optionName }) {
+        if (optionName === "Carousel") {
+            const editingCarouselElement = elementToReorder.closest(".s_carousel");
+            const itemsEls = [...editingCarouselElement.querySelectorAll(".carousel-item")];
+
+            // reorder carousel items
+            const oldPosition = itemsEls.indexOf(elementToReorder);
+            if (oldPosition === 0 && position === "prev") {
+                position = "last";
+            } else if (oldPosition === itemsEls.length - 1 && position === "next") {
+                position = "first";
+            }
+            itemsEls.splice(oldPosition, 1);
+            switch (position) {
+                case "first":
+                    itemsEls.unshift(elementToReorder);
+                    break;
+                case "prev":
+                    itemsEls.splice(Math.max(oldPosition - 1, 0), 0, elementToReorder);
+                    break;
+                case "next":
+                    itemsEls.splice(oldPosition + 1, 0, elementToReorder);
+                    break;
+                case "last":
+                    itemsEls.push(elementToReorder);
+                    break;
+            }
+
+            // replace the carousel-inner element by one with reordered carousel items
+            const carouselInnerEl = editingCarouselElement.querySelector(".carousel-inner");
+            const newCarouselInnerEl = document.createElement("div");
+            newCarouselInnerEl.classList.add("carousel-inner");
+            newCarouselInnerEl.append(...itemsEls);
+            carouselInnerEl.replaceWith(newCarouselInnerEl);
+
+            // slide to the reordered target carousel item and update indicators
+            const newItemPosition = itemsEls.indexOf(elementToReorder);
+            editingCarouselElement.classList.remove("slide");
+            const carouselInstance = window.Carousel.getOrCreateInstance(editingCarouselElement, {
+                ride: false,
+                pause: true,
+            });
+            carouselInstance.to(newItemPosition);
+            const indicatorEls = editingCarouselElement.querySelectorAll(
+                ".carousel-indicators > *"
+            );
+            indicatorEls.forEach((indicatorEl, i) => {
+                indicatorEl.classList.toggle("active", i === newItemPosition);
+            });
+            editingCarouselElement.classList.add("slide");
+            // Prevent the carousel from automatically sliding afterwards.
+            carouselInstance["pause"]();
+
+            const activeImageEl = editingCarouselElement.querySelector(".carousel-item.active img");
+            this.dependencies.history.addStep();
+            this.dependencies["builder-options"].updateContainers(activeImageEl);
         }
     }
 }

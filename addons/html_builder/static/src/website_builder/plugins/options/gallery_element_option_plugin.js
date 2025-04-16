@@ -30,7 +30,6 @@ export class GalleryElementOptionPlugin extends Plugin {
                         : "GalleryImageList";
 
                     // Carousel and gallery image list are both managed by the same handler
-                    // remember to implement the handler for carousel when it's created
                     this.dispatchTo("on_reorder_items_handlers", {
                         elementToReorder: editingElement,
                         position: position,
