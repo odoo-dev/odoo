@@ -540,7 +540,7 @@ class Properties(Field):
                 'string': 'Partner',
                 'type': 'many2one',
                 'comodel': 'test_new_api.partner',
-                'value': [1337, 'Bob'],
+                'value': 1337,
             }]
 
             Output dict:
@@ -823,7 +823,7 @@ class PropertiesDefinition(Field):
 
             self._validate_properties_definition(value, record.env)
 
-        return json.dumps(record._convert_to_cache_properties_definition(value))
+        return json.dumps(value)
 
     def convert_to_cache(self, value, record, validate=True):
         # any format -> cache format (list of dicts or None)
@@ -846,7 +846,7 @@ class PropertiesDefinition(Field):
 
             self._validate_properties_definition(value, record.env)
 
-        return record._convert_to_column_properties_definition(value)
+        return value
 
     def convert_to_record(self, value, record):
         # cache format -> record format (list of dicts)

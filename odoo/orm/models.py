@@ -4747,14 +4747,6 @@ class BaseModel(metaclass=MetaModel):
         """Allow to add more allowed key for properties."""
         return ()
 
-    def _convert_to_cache_properties_definition(self, value):
-        """Allow to patch `convert_to_cache` of the properties definition."""
-        return value
-
-    def _convert_to_column_properties_definition(self, value):
-        """Allow to patch `convert_to_column` of the properties definition."""
-        return value
-
     def _load_records_write(self, values):
         self.ensure_one()
         to_write = {}  # Deferred the write to avoid using the old definition if it changed
