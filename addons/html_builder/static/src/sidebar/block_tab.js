@@ -86,7 +86,7 @@ export class BlockTab extends Component {
                 });
 
                 if (snippetEl) {
-                    this.processDroppedSnippet(snippetEl);
+                    await this.processDroppedSnippet(snippetEl);
                 }
                 this.state.ongoingInsertion = false;
             },
@@ -137,7 +137,7 @@ export class BlockTab extends Component {
         });
 
         if (selectedSnippetEl) {
-            this.processDroppedSnippet(selectedSnippetEl);
+            await this.processDroppedSnippet(selectedSnippetEl);
         } else {
             this.cancelDragAndDrop();
         }
@@ -286,7 +286,7 @@ export class BlockTab extends Component {
                 dropzoneEl.classList.remove("invisible");
                 this.onDropZoneOut();
             },
-            onDragEnd: ({ x, y, helper, dropzone }) => {
+            onDragEnd: async ({ x, y, helper, dropzone }) => {
                 // Undo the preview if any.
                 this.cancelSnippetPreview?.();
 
@@ -313,7 +313,7 @@ export class BlockTab extends Component {
                     this.shared.dropzone.removeDropzones();
 
                     if (!isSnippetGroup) {
-                        this.processDroppedSnippet(snippetEl);
+                        await this.processDroppedSnippet(snippetEl);
                     } else {
                         this.shared.operation.next(
                             async () => {
