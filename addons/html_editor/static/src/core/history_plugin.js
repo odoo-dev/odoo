@@ -358,11 +358,8 @@ export class HistoryPlugin extends Plugin {
             records = records.filter(callback);
         }
 
-        // Save the first attribute in a cache to compare only the first
-        // attribute record of node to its latest state.
-        const attributeCache = new Map();
         const filteredRecords = [];
-
+        const visitedAttributes = new Map();
         for (const record of records) {
             if (record.type === "attributes") {
                 // Skip the attributes change on the dom.
@@ -375,8 +372,21 @@ export class HistoryPlugin extends Plugin {
                 if (this.mutationFilteredAttributes.has(record.attributeName)) {
                     continue;
                 }
-                // @todo @phoenix test attributeCache
-                attributeCache.set(record.target, attributeCache.get(record.target) || {});
+                // Add attribute set to node if not already present.
+                if (!visitedAttributes.has(record.target)) {
+                    visitedAttributes.set(record.target, new Set());
+                }
+                // Visit each attribute of a node only once. We are only interested in
+                // the oldValue of the first mutation record.
+                if (visitedAttributes.get(record.target).has(record.attributeName)) {
+                    continue;
+                }
+                visitedAttributes.get(record.target).add(record.attributeName);
+                // Discard non-op.
+                const oldValue = record.oldValue === undefined ? null : record.oldValue; // not sure this is necessary...
+                if (oldValue === record.target.getAttribute(record.attributeName)) {
+                    continue;
+                }
                 // @todo @phoenix add test for mutationFilteredClasses.
                 if (record.attributeName === "class") {
                     const classBefore = (record.oldValue && record.oldValue.split(" ")) || [];
@@ -409,19 +419,6 @@ export class HistoryPlugin extends Plugin {
                     ) {
                         continue;
                     }
-                }
-                // The first time we see an attribute record for a given node, we compare oldValue
-                // with the current value of the attribute. If they are the same, we skip
-                // the record and all the next ones for this attribute.
-                if (
-                    typeof attributeCache.get(record.target)[record.attributeName] === "undefined"
-                ) {
-                    const oldValue = record.oldValue === undefined ? null : record.oldValue;
-                    attributeCache.get(record.target)[record.attributeName] =
-                        oldValue !== record.target.getAttribute(record.attributeName);
-                }
-                if (!attributeCache.get(record.target)[record.attributeName]) {
-                    continue;
                 }
             } else if (record.type === "childList" && this.isSameTextContentMutation(record)) {
                 continue;
