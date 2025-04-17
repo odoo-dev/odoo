@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="report_printer_view" model="ir.ui.view">
+            <field name="name">report.printer.form</field>
+            <field name="model">report.printer</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="name"/>
+                        <field name="printer_mode" widget="radio" options="{'horizontal': true}"/>
+                        <field name="printer_email" invisible="printer_mode != 'email'" required="printer_mode == 'email'" placeholder="test@epson.com"/>
+                        <field name="printer_ip" invisible="printer_mode != 'ip'" required="printer_mode == 'ip'" placeholder="192.168.1.2"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="report_printer_list_view" model="ir.ui.view">
+            <field name="name">report.printer.list</field>
+            <field name="model">report.printer</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="name"/>
+                    <field name="printer_mode"/>
+                    <field name="printer_email"/>
+                    <field name="printer_ip"/>
+                </list>
+            </field>
+        </record>
+    </data>
+</odoo>

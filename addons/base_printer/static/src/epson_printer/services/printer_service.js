@@ -1,4 +1,4 @@
-import { loadAllImages } from "@point_of_sale/utils";
+import { loadAllImages } from "@base_printer/epson_printer/utils/utils";
 
 import { Reactive } from "@web/core/utils/reactive";
 

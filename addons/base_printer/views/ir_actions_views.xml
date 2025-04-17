@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ir_actions_report_form_inherit_epson_printer" model="ir.ui.view">
+        <field name="name">ir.actions.report.form.inherit.epson.printer</field>
+        <field name="model">ir.actions.report</field>
+        <field name="inherit_id" ref="base.act_report_xml_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='advanced']" position="replace">
+                <page name="advanced" string="Advanced Properties">
+                    <group>
+                        <group>
+                            <field name="attachment_use"/>
+                            <field name="attachment"/>
+                        </group>
+                        <group name="printers">
+                            <field name="is_printer_linked" widget="boolean_toggle"/>
+                            <field name="linked_printer_ids" widget="many2many_tags" invisible="not is_printer_linked" options="{'no_quick_create': True}"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
