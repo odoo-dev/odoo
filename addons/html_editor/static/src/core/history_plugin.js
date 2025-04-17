@@ -396,39 +396,39 @@ export class HistoryPlugin extends Plugin {
                     continue;
                 }
                 // @todo @phoenix add test for mutationFilteredClasses.
-                if (record.attributeName === "class") {
-                    const classBefore = (record.oldValue && record.oldValue.split(" ")) || [];
-                    const classAfter =
-                        (record.target.className &&
-                            record.target.className.split &&
-                            record.target.className.split(" ")) ||
-                        [];
-                    // Actually means classes changed (added or removed)
-                    // Symmetric difference between sets
-                    const excludedClasses = [];
-                    // Push removed classes to list.
-                    for (const klass of classBefore) {
-                        if (!classAfter.includes(klass)) {
-                            excludedClasses.push(klass);
-                        }
-                    }
-                    // Push added classes to list.
-                    for (const klass of classAfter) {
-                        if (!classBefore.includes(klass)) {
-                            excludedClasses.push(klass);
-                        }
-                    }
-                    if (
-                        excludedClasses.length &&
-                        // In case of a mix of system classes and other ones, mutation records
-                        // will go through (and system classes will not be ignored).
-                        // When reverting or applying mutations, system classes
-                        // are excluded when about to apply the oldValue/value to class (see getAttributeValue).
-                        excludedClasses.every((c) => this.mutationFilteredClasses.has(c))
-                    ) {
-                        continue;
-                    }
-                }
+                // if (record.attributeName === "class") {
+                //     const classBefore = (record.oldValue && record.oldValue.split(" ")) || [];
+                //     const classAfter =
+                //         (record.target.className &&
+                //             record.target.className.split &&
+                //             record.target.className.split(" ")) ||
+                //         [];
+                //     // Actually means classes changed (added or removed)
+                //     // Symmetric difference between sets
+                //     const excludedClasses = [];
+                //     // Push removed classes to list.
+                //     for (const klass of classBefore) {
+                //         if (!classAfter.includes(klass)) {
+                //             excludedClasses.push(klass);
+                //         }
+                //     }
+                //     // Push added classes to list.
+                //     for (const klass of classAfter) {
+                //         if (!classBefore.includes(klass)) {
+                //             excludedClasses.push(klass);
+                //         }
+                //     }
+                //     if (
+                //         excludedClasses.length &&
+                //         // In case of a mix of system classes and other ones, mutation records
+                //         // will go through (and system classes will not be ignored).
+                //         // When reverting or applying mutations, system classes
+                //         // are excluded when about to apply the oldValue/value to class (see getAttributeValue).
+                //         excludedClasses.every((c) => this.mutationFilteredClasses.has(c))
+                //     ) {
+                //         continue;
+                //     }
+                // }
             } else if (record.type === "childList" && this.isSameTextContentMutation(record)) {
                 continue;
             }
@@ -600,7 +600,9 @@ export class HistoryPlugin extends Plugin {
         const addedClasses = setDifference(classesAfter, classesBefore);
         const removedClasses = setDifference(classesBefore, classesAfter);
         for (const cls of addedClasses) {
-            // @todo should filter ignored classes here?
+            if (this.mutationFilteredClasses.has(cls)) {
+                continue;
+            }
             this.currentStep.mutations.push({
                 type: "classList",
                 id: nodeId,
@@ -609,7 +611,9 @@ export class HistoryPlugin extends Plugin {
             });
         }
         for (const cls of removedClasses) {
-            // @todo should filter ignored classes here?
+            if (this.mutationFilteredClasses.has(cls)) {
+                continue;
+            }
             this.currentStep.mutations.push({
                 type: "classList",
                 id: nodeId,
