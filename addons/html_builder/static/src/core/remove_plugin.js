@@ -44,7 +44,7 @@ export class RemovePlugin extends Plugin {
             getButtons: this.getActiveOverlayButtons.bind(this),
         }),
     };
-    static shared = ["removeElement"];
+    static shared = ["removeElement", "removeElementAndUpdateContainers"];
 
     setup() {
         this.overlayTarget = null;
@@ -64,13 +64,13 @@ export class RemovePlugin extends Plugin {
             title: _t("Remove"),
             disabledReason,
             handler: () => {
-                this.removeElement(this.overlayTarget);
+                this.removeElementAndUpdateContainers(this.overlayTarget);
             },
         });
         return buttons;
     }
 
-    isEmptyAndRemovable(el, optionsTargetEls) {
+    isEmptyAndRemovable(el) {
         const childrenEls = [...el.children];
         // Consider a <figure> element as empty if it only contains a
         // <figcaption> element (e.g. when its image has just been
@@ -88,6 +88,10 @@ export class RemovePlugin extends Plugin {
                     el.matches(layoutElementsSelector)
                 ));
 
+        const optionsTargetEls = this.dependencies["builder-options"]
+            .computeContainers(el)
+            .map((e) => e.element);
+
         return (
             isEmpty &&
             !el.classList.contains("oe_structure") &&
@@ -99,10 +103,16 @@ export class RemovePlugin extends Plugin {
         );
     }
 
+    removeElementAndUpdateContainers(el) {
+        const elementToSelect = this.removeElement(el);
+        this.dependencies.history.addStep();
+        this.dependencies["builder-options"].updateContainers(elementToSelect);
+    }
+
     removeElement(el) {
-        this.updateContainers(el);
-        this.removeCurrentTarget(el);
+        const elementToSelect = this.removeCurrentTarget(el);
         this.dispatchTo("after_remove_handlers", el);
+        return elementToSelect;
     }
 
     removeCurrentTarget(toRemoveEl) {
@@ -145,9 +155,10 @@ export class RemovePlugin extends Plugin {
             }
         }
 
+        let nextElementToSelect;
         if (previousSiblingEl || nextSiblingEl) {
             // Activate the previous or next visible siblings if any.
-            this.updateContainers(previousSiblingEl || nextSiblingEl);
+            nextElementToSelect = previousSiblingEl || nextSiblingEl;
         } else {
             // Remove potential ancestors (like when removing the last column of
             // a snippet).
@@ -161,10 +172,11 @@ export class RemovePlugin extends Plugin {
                 }
                 parentEl = nextParentEl;
             }
-            this.updateContainers(parentEl);
+            nextElementToSelect = parentEl;
+
             optionsTargetEls = this.getOptionsContainersElements();
             if (this.isEmptyAndRemovable(parentEl, optionsTargetEls)) {
-                this.removeCurrentTarget(parentEl);
+                nextElementToSelect = this.removeCurrentTarget(parentEl);
             }
         }
 
@@ -174,6 +186,7 @@ export class RemovePlugin extends Plugin {
             .forEach((el) => (el.style.display = "none"));
         this.editable.querySelectorAll(".o_table_handler").forEach((el) => el.remove());
 
+        return nextElementToSelect;
         // TODO:
         // - trigger snippet_removed
         //   - display message in the editor if no snippets,
@@ -184,9 +197,5 @@ export class RemovePlugin extends Plugin {
 
     getOptionsContainersElements() {
         return this.dependencies["builder-options"].getContainers().map((option) => option.element);
-    }
-
-    updateContainers(el) {
-        this.dependencies["builder-options"].updateContainers(el);
     }
 }

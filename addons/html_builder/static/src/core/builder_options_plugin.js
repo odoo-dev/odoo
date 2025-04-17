@@ -16,6 +16,7 @@ export class BuilderOptionsPlugin extends Plugin {
         "overlayButtons",
     ];
     static shared = [
+        "computeContainers",
         "getContainers",
         "updateContainers",
         "deactivateContainers",

@@ -90,3 +90,34 @@ test("Container fallback to a valid ancestor if target dissapear", async () => {
     expectOptionContainerToInclude(editor, queryOne(":iframe .test-ancestor"));
     expect("[data-action-id='ancestorAction']").toHaveCount(1);
 });
+
+test("Remove element, undo should restore the selection to the removed element", async () => {
+    addActionOption({
+        customAction: {
+            apply: ({ editingElement }) => {
+                editingElement.remove();
+            },
+        },
+    });
+    addOption({
+        selector: ".test-options-target",
+        template: xml`<BuilderButton action="'customAction'">Test</BuilderButton>`,
+        title: "child",
+    });
+    const { getEditor } = await setupWebsiteBuilder(`
+        <div class="test-ancestor">
+            Hey I'm an ancestor
+            <div class="test-options-target target1">
+                Homepage
+            </div>
+        </div>
+
+    `);
+    const editor = getEditor();
+
+    await contains(":iframe .target1").click();
+    expectOptionContainerToInclude(editor, queryOne(":iframe .target1"));
+    await contains("[data-container-title='child'] button.fa-trash").click();
+    await contains(".o-snippets-top-actions .fa-undo").click();
+    expectOptionContainerToInclude(editor, queryOne(":iframe .target1"));
+});

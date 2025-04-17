@@ -23,7 +23,7 @@ const imageRelatedStyles = [
 
 class CardImageOptionPlugin extends Plugin {
     static id = "cardImageOption";
-    static dependencies = ["remove"];
+    static dependencies = ["remove", "history", "builder-options"];
     resources = {
         builder_actions: {
             setCoverImagePosition: {
@@ -40,9 +40,11 @@ class CardImageOptionPlugin extends Plugin {
             removeCoverImage: {
                 apply: ({ editingElement }) => {
                     const imageWrapper = editingElement.querySelector(".o_card_img_wrapper");
-                    this.dependencies.remove.removeElement(imageWrapper);
+                    const elementToSelect = this.dependencies.remove.removeElement(imageWrapper);
                     editingElement.classList.remove(...imageRelatedClasses);
                     imageRelatedStyles.forEach((prop) => editingElement.style.removeProperty(prop));
+                    this.dependencies.history.addStep();
+                    this.dependencies["builder-options"].updateContainers(elementToSelect);
                 },
             },
             addCoverImage: {

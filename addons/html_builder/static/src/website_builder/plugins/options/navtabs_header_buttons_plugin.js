@@ -63,7 +63,7 @@ class NavTabsOptionPlugin extends Plugin {
 
         this.showTab(nextActiveLinkEl, nextActivePaneEl);
         this.dependencies.remove.removeElement(activeLinkEl.parentElement);
-        this.dependencies.remove.removeElement(activePaneEl);
+        this.dependencies.remove.removeElementAndUpdateContainers(activePaneEl);
     }
 
     onNormalize(root) {
