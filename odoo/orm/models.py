@@ -18,6 +18,8 @@
           - relational (one2many, many2one, many2many)
           - functional
 
+        # Runbot
+
 """
 from __future__ import annotations
 
