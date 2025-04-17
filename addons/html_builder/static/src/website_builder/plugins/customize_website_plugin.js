@@ -6,6 +6,8 @@ import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { isColorGradient, isCSSColor } from "@web/core/utils/colors";
+import { Deferred } from "@web/core/utils/concurrency";
+import { debounce } from "@web/core/utils/timing";
 
 export class CustomizeWebsitePlugin extends Plugin {
     static id = "customizeWebsite";
@@ -29,6 +31,21 @@ export class CustomizeWebsitePlugin extends Plugin {
     activeTemplateViews = {};
     pendingViewRequests = new Set();
     pendingAssetRequests = new Set();
+    /**
+     * @typedef {{
+     *  isViewData: boolean,
+     *  shouldReset: boolean,
+     *  toEnable: Set<string>,
+     *  toDisable: Set<string>,
+     *  def: Deferred,
+     * }} pendingThemeRequest
+     */
+    /**
+     * @type pendingThemeRequest[]
+     */
+    pendingThemeRequests = [];
+    variablesToCustomize = {};
+    colorsToCustomize = {};
     resolves = {};
     getActions() {
         return {
@@ -261,7 +278,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                     const records = [...(param.views || []), ...(param.assets || [])];
                     return records.every((v) => this.getConfigKey(v));
                 },
-                apply: (action) => this.toggleConfig(action, true),
+                apply: async (action) => this.toggleConfig(action, true),
                 clean: (action) => this.toggleConfig(action, false),
             },
             selectTemplate: {
@@ -274,7 +291,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                     }
                     return true;
                 },
-                apply: (action) => this.toggleTemplate(action, true),
+                apply: async (action) => this.toggleTemplate(action, true),
                 clean: (action) => this.toggleTemplate(action, false),
             },
         };
@@ -294,17 +311,28 @@ export class CustomizeWebsitePlugin extends Plugin {
         }
         return finalValue;
     }
-    async customizeWebsiteVariables(variables = {}, nullValue) {
-        if (!Object.keys(variables).length) {
+    async customizeWebsiteVariables(variables = {}, nullValue = "null", clean = false) {
+        this.variablesToCustomize = Object.assign(this.variablesToCustomize, variables);
+        if (!Object.keys(this.variablesToCustomize).length) {
             return;
         }
+        if (clean) {
+            for (const variable in variables) {
+                this.variablesToCustomize[variable] = nullValue;
+            }
+        }
+        await this.debouncedSCSSVariablesCusto(nullValue);
+        await this.reloadBundles();
+    }
+    debouncedSCSSVariablesCusto = debounce(async (nullValue) => {
+        const variables = this.variablesToCustomize;
+        this.variablesToCustomize = {};
         await this.makeSCSSCusto(
             "/website/static/src/scss/options/user_values.scss",
             variables,
             nullValue
         );
-        await this.reloadBundles();
-    }
+    }, 0);
     async customizeWebsiteColors(colors = {}, { colorType, nullValue } = {}) {
         const baseURL = "/website/static/src/scss/options/colors/";
         colorType = colorType ? colorType + "_" : "";
@@ -321,16 +349,23 @@ export class CustomizeWebsitePlugin extends Plugin {
                 }
             }
         }
-        await this.makeSCSSCusto(url, finalColors, nullValue);
+        this.colorsToCustomize = Object.assign(this.colorsToCustomize, finalColors);
+        await this.debouncedSCSSColorsCusto(url, nullValue);
         await this.reloadBundles();
     }
+    debouncedSCSSColorsCusto = debounce(async (url, nullValue) => {
+        const colors = this.colorsToCustomize;
+        this.colorsToCustomize = {};
+        await this.makeSCSSCusto(url, colors, nullValue);
+    }, 0);
     async makeSCSSCusto(url, values, defaultValue = "null") {
         Object.keys(values).forEach((key) => {
             values[key] = values[key] || defaultValue;
         });
         await this.services.orm.call("web_editor.assets", "make_scss_customization", [url, values]);
     }
-    async reloadBundles() {
+    reloadBundles = debounce(this._reloadBundles.bind(this), 0);
+    async _reloadBundles() {
         const bundles = await rpc("/website/theme_customize_bundle_reload");
         const allLinksIframeEls = [];
         const proms = [];
@@ -422,16 +457,15 @@ export class CustomizeWebsitePlugin extends Plugin {
         const updateAssets = this.toggleTheme(action, "assets", apply);
         // step 2: customize vars
         const updateVars = action.param.vars
-            ? this.customizeWebsiteVariables(action.param.vars)
+            ? this.customizeWebsiteVariables(action.param.vars, "null", !apply)
             : Promise.resolve();
-
         await Promise.all([updateViews, updateAssets, updateVars]);
         if (this.isDestroyed) {
             return true;
         }
     }
 
-    toggleTheme(action, paramName, apply) {
+    async toggleTheme(action, paramName, apply) {
         if (!action.param[paramName]) {
             return;
         }
@@ -475,12 +509,57 @@ export class CustomizeWebsitePlugin extends Plugin {
                 prepareRecord(record, !apply);
             }
         }
-        return rpc("/website/theme_customize_data", {
-            is_view_data: isViewData,
-            enable: [...toEnable],
-            disable: [...toDisable],
-            reset_view_arch: shouldReset,
-        });
+        return this.customizeThemeData(isViewData, shouldReset, toEnable, toDisable);
+    }
+    /**
+     * Aggregates all sets of records `toEnable` / `toDisable` according to
+     * whether you are enabling/disabling view data and whether it should reset
+     * the arch, so that a RPC call is only done once per tick and per pair
+     * view/reset.
+     *
+     * @param {boolean} isViewData
+     * @param {boolean} shouldReset
+     * @param {Set<string>} toEnable
+     * @param {Set<string>} toDisable
+     * @returns {Promise} deferred function
+     */
+    async customizeThemeData(isViewData, shouldReset, toEnable, toDisable) {
+        const def = new Deferred();
+        this.pendingThemeRequests.push({ isViewData, shouldReset, toEnable, toDisable, def });
+        setTimeout(() => {
+            let aggregatedToEnable = new Set();
+            let aggregatedToDisable = new Set();
+            const defs = [];
+            for (const req of this.pendingThemeRequests) {
+                if (req.isViewData === isViewData && req.shouldReset === shouldReset) {
+                    // Synchronize with the last request: if a view was enabled
+                    // first and then disabled (or the other way around), the
+                    // final state should be disabled (or enabled).
+                    aggregatedToEnable = aggregatedToEnable.difference(req.toDisable);
+                    aggregatedToDisable = aggregatedToDisable.difference(req.toEnable);
+                    // Now aggregate.
+                    aggregatedToEnable = aggregatedToEnable.union(req.toEnable);
+                    aggregatedToDisable = aggregatedToDisable.union(req.toDisable);
+                    defs.push(req.def);
+                }
+            }
+            this.pendingThemeRequests = this.pendingThemeRequests.filter(
+                (req) => req.isViewData !== isViewData || req.shouldReset !== shouldReset
+            );
+            if (!aggregatedToEnable.size && !aggregatedToDisable.size) {
+                return;
+            } else {
+                rpc("/website/theme_customize_data", {
+                    is_view_data: isViewData,
+                    enable: [...aggregatedToEnable],
+                    disable: [...aggregatedToDisable],
+                    reset_view_arch: shouldReset,
+                })
+                    .then(() => Promise.all(defs.map((def) => def.resolve())))
+                    .catch(() => Promise.all(defs.map((def) => def.reject())));
+            }
+        }, 0);
+        return def;
     }
 
     getConfigKey(key) {
