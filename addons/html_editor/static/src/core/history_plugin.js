@@ -180,6 +180,8 @@ export class HistoryPlugin extends Plugin {
         this.observer = new MutationObserver(this.handleNewRecords.bind(this));
         this._cleanups.push(() => this.observer.disconnect());
         this.clean();
+        // @todo REMOVE ME
+        window.historyPlugin = this;
     }
 
     clean() {
