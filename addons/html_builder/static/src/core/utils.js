@@ -316,7 +316,7 @@ export function useSelectableItemComponent(id, { getLabel = () => {} } = {}) {
             env.selectableContext.removeSelectableItem(selectableItem);
         });
         onWillStart(async () => {
-            await Promise.resolve();
+            await onReady;
             state.isActive = isSelectableActive();
         });
     }
@@ -366,6 +366,9 @@ function usePrepareAction(getAllActions) {
             resolve();
         });
         onWillUpdateProps(async ({ actionParam, actionValue }) => {
+            onReady = new Promise((r) => {
+                resolve = r;
+            });
             // TODO: should we support updating actionId?
             await Promise.all(
                 asyncActions.map((obj) =>

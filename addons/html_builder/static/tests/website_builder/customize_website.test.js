@@ -64,7 +64,7 @@ test("click on BuilderButton with action “websiteConfig”", async () => {
     await contains("[data-class-action='a']").click();
 
     await contains("[data-action-param*='test_template_1']").click();
-    expect.verifySteps(["theme_customize_data", "websiteSave"]);
+    expect.verifySteps(["websiteSave", "theme_customize_data"]);
 });
 
 test("click on BuilderSelectItem with action “websiteConfig”", async () => {
