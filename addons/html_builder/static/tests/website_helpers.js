@@ -10,7 +10,15 @@ import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
 import { defineMailModels, startServer } from "@mail/../tests/mail_test_helpers";
 import { after, before, describe } from "@odoo/hoot";
-import { advanceTime, animationFrame, click, queryOne, tick, waitFor } from "@odoo/hoot-dom";
+import {
+    advanceTime,
+    animationFrame,
+    click,
+    queryOne,
+    tick,
+    waitFor,
+    waitForNone,
+} from "@odoo/hoot-dom";
 import {
     contains,
     defineModels,
@@ -483,4 +491,13 @@ export async function insertStructureSnippet(editor, snippetName) {
  */
 export function getDragHelper() {
     return document.body.querySelector(".o_draggable_dragging .o_snippet_thumbnail");
+}
+
+/**
+ * Waits for the loading element added by the mutex to be removed, indicating
+ * that the operation is over.
+ */
+export async function waitForEndOfOperation() {
+    await waitForNone(":iframe .o_loading_screen", { timeout: 600 });
+    await animationFrame();
 }

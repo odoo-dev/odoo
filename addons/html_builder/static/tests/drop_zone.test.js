@@ -1,7 +1,7 @@
 import { describe, expect, test } from "@odoo/hoot";
 import { contains } from "@web/../tests/web_test_helpers";
 import { setupHTMLBuilder } from "./helpers";
-import { confirmAddSnippet } from "./website_helpers";
+import { confirmAddSnippet, waitForEndOfOperation } from "./website_helpers";
 
 describe.current.tags("desktop");
 
@@ -26,6 +26,7 @@ test("drop beside dropzone inserts the snippet", async () => {
     await drop();
     await confirmAddSnippet();
     expect(".o_add_snippet_dialog").toHaveCount(0);
+    await waitForEndOfOperation();
     expect(contentEl)
         .toHaveInnerHTML(`<section class="s_test" data-snippet="s_test" data-name="Test">
     <div class="test_a o-paragraph">

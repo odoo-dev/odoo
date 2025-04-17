@@ -9,6 +9,7 @@ import {
     getSnippetStructure,
     setupWebsiteBuilder,
     setupWebsiteBuilderWithDummySnippet,
+    waitForEndOfOperation,
     waitForSnippetDialog,
 } from "../website_helpers";
 
@@ -383,6 +384,8 @@ test("insert snippet structure", async () => {
 
     await contains(previewSelector).click();
     expect(".o_add_snippet_dialog").toHaveCount(0);
+    await waitForEndOfOperation();
+
     expect(editableContent).toHaveInnerHTML(
         `<section class="o_colored_level"><p>Text</p></section>${
             snippetsDescription({ withName: true, withColoredLevelClass: true })[0].content
@@ -439,6 +442,8 @@ test("Drag & drop snippet structure", async () => {
 
     await contains(previewSelector).click();
     expect(".o_add_snippet_dialog").toHaveCount(0);
+    await waitForEndOfOperation();
+
     expect(editableContent).toHaveInnerHTML(
         `${
             snippetsDescription({ withName: true, withColoredLevelClass: true })[0].content
@@ -462,5 +467,7 @@ test("Cancel snippet drag & drop over sidebar", async () => {
     await moveTo(".o-website-builder_sidebar button[data-action=save]");
     await drop(getDragHelper());
     expect(".o_add_snippet_dialog").toHaveCount(0);
+    await waitForEndOfOperation();
+
     expect(editableContent).toHaveInnerHTML("");
 });

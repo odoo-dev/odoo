@@ -1,6 +1,11 @@
 import { expect, test } from "@odoo/hoot";
 import { contains } from "@web/../tests/web_test_helpers";
-import { defineWebsiteModels, getDragHelper, setupWebsiteBuilder } from "../website_helpers";
+import {
+    defineWebsiteModels,
+    getDragHelper,
+    setupWebsiteBuilder,
+    waitForEndOfOperation,
+} from "../website_helpers";
 
 defineWebsiteModels();
 
@@ -22,6 +27,7 @@ test("Drag & drop a 'Button' snippet in a <div> should put it inside a <p>", asy
     expect(".o-website-builder_sidebar .fa-undo").not.toBeEnabled();
 
     await drop(getDragHelper());
+    await waitForEndOfOperation();
     expect(contentEl).toHaveInnerHTML(
         `<div><p>\ufeff<a class="btn btn-primary" href="#">\ufeffButton\ufeff</a>\ufeff</p><p>Text</p></div>`
     );
@@ -50,6 +56,7 @@ test("Drag & drop a 'Button' snippet should align the button style with the butt
     expect(".o-website-builder_sidebar .fa-undo").not.toBeEnabled();
 
     await drop(getDragHelper());
+    await waitForEndOfOperation();
     expect(contentEl).toHaveInnerHTML(
         `<a href="http://test.com" class="btn btn-fill-secondary mb-2" style="line-height: 50px;"> ButtonStyled </a> <a class="btn mb-2 btn-fill-secondary" href="#"> Button </a>`
     );
@@ -86,6 +93,7 @@ test("Drag & drop a 'Button' snippet over a dropzone should preview it correctly
     expect(".o-website-builder_sidebar .fa-undo").not.toBeEnabled();
 
     await drop(getDragHelper());
+    await waitForEndOfOperation();
     expect(contentEl).toHaveInnerHTML(
         `<a href="http://test.com" class="btn btn-fill-secondary"> ButtonStyled </a>
          <p style="padding-bottom: 50px;"><a href="http://test.com" class="btn btn-fill-secondary"> ButtonStyled in a p </a></p>

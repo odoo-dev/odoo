@@ -1,6 +1,11 @@
 import { expect, test } from "@odoo/hoot";
 import { contains, onRpc } from "@web/../tests/web_test_helpers";
-import { defineWebsiteModels, getDragHelper, setupWebsiteBuilder } from "../website_helpers";
+import {
+    defineWebsiteModels,
+    getDragHelper,
+    setupWebsiteBuilder,
+    waitForEndOfOperation,
+} from "../website_helpers";
 
 defineWebsiteModels();
 
@@ -32,11 +37,14 @@ test("Drag & drop an 'Image' snippet opens the dialog to select an image", async
     expect(".o-website-builder_sidebar .fa-undo").not.toBeEnabled();
 
     await drop(getDragHelper());
+    await new Promise((resolve) => setTimeout(resolve, 600));
     expect(".o_select_media_dialog").toHaveCount(1);
     expect(".o-website-builder_sidebar .fa-undo").not.toBeEnabled();
 
     await contains(".o_select_media_dialog img[title='logo']").click();
     expect(".o_select_media_dialog").toHaveCount(0);
+    await waitForEndOfOperation();
+
     expect(":iframe div img[src='/web/static/img/logo2.png']").toHaveCount(1);
     expect(":iframe img").toHaveCount(1);
     expect(".o-website-builder_sidebar .fa-undo").toBeEnabled();
@@ -59,11 +67,14 @@ test("Drag & drop an 'Image' snippet does not add a step in the history if we ca
     expect(".o-website-builder_sidebar .fa-undo").not.toBeEnabled();
 
     await drop(getDragHelper());
+    await new Promise((resolve) => setTimeout(resolve, 600));
     expect(".o_select_media_dialog").toHaveCount(1);
     expect(".o-website-builder_sidebar .fa-undo").not.toBeEnabled();
 
     await contains(".o_select_media_dialog button.btn-close").click();
     expect(".o_select_media_dialog").toHaveCount(0);
+    await waitForEndOfOperation();
+
     expect(contentEl).toHaveInnerHTML(`<div><p>Text</p></div>`);
     expect(".o-website-builder_sidebar .fa-undo").not.toBeEnabled();
 });

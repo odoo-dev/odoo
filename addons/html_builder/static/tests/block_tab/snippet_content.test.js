@@ -2,7 +2,7 @@ import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, click, queryAll, queryAllTexts } from "@odoo/hoot-dom";
 import { contains } from "@web/../tests/web_test_helpers";
 import { setupHTMLBuilder } from "../helpers";
-import { getDragHelper } from "../website_helpers";
+import { getDragHelper, waitForEndOfOperation } from "../website_helpers";
 
 describe.current.tags("desktop");
 
@@ -57,6 +57,8 @@ test("Drag & drop inner content block", async () => {
     expect(".o-website-builder_sidebar .fa-undo").not.toBeEnabled();
 
     await drop(getDragHelper());
+    await waitForEndOfOperation();
+
     expect(contentEl).toHaveInnerHTML(
         `<div>\ufeff<a class="btn btn-primary" href="#" data-snippet="s_button" data-name="Button A">\ufeffButton A\ufeff</a>\ufeff<p>Text</p></div>`
     );
@@ -78,6 +80,8 @@ test("Drag & drop inner content block + undo/redo", async () => {
     ).drag();
     await moveTo(":iframe .oe_drop_zone");
     await drop(getDragHelper());
+    await waitForEndOfOperation();
+
     expect(contentEl).toHaveInnerHTML(
         `<div>\ufeff<a class="btn btn-primary" href="#" data-snippet="s_button" data-name="Button A">\ufeffButton A\ufeff</a>\ufeff<p>Text</p></div>`
     );
@@ -106,6 +110,8 @@ test("Drag inner content and drop it outside of a dropzone", async () => {
 
     await moveTo(builderEl);
     await drop(getDragHelper());
+    await waitForEndOfOperation();
+
     expect(contentEl).toHaveInnerHTML(`<div><p>Text</p></div>`);
 });
 

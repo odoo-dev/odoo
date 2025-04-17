@@ -8,6 +8,7 @@ import {
     defineWebsiteModels,
     setupWebsiteBuilder,
     setupWebsiteBuilderWithSnippet,
+    waitForEndOfOperation,
 } from "./website_helpers";
 import { click, waitFor } from "@odoo/hoot-dom";
 import { xml } from "@odoo/owl";
@@ -30,6 +31,7 @@ test("dropping a new snippet starts its interaction", async () => {
         `.o-snippets-menu #snippet_groups .o_snippet[data-snippet-group='text'] .o_snippet_thumbnail_area`
     ).click();
     await confirmAddSnippet("s_title");
+    await waitForEndOfOperation();
     expect.verifySteps(["refresh"]);
 });
 

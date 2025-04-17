@@ -6,7 +6,7 @@ import { _t } from "@web/core/l10n/translation";
 import { closest } from "@web/core/utils/ui";
 import { useDragAndDrop } from "@html_editor/utils/drag_and_drop";
 import { getCSSVariableValue } from "@html_builder/utils/utils_css";
-import { scrollToWindow } from "@html_builder/utils/utils";
+import { scrollTo } from "@html_builder/utils/scrolling";
 import { Snippet } from "./snippet";
 import { CustomInnerSnippet } from "./custom_inner_snippet";
 
@@ -343,9 +343,7 @@ export class BlockTab extends Component {
      */
     async processDroppedSnippet(snippetEl) {
         this.updateDroppedSnippet(snippetEl);
-        // TODO Fix in modal,... => use web_editor scrollTo so we have extra
-        // offset + scrollable
-        scrollToWindow(snippetEl, { behavior: "smooth", offset: 50 });
+        await scrollTo(snippetEl, { extraOffset: 50 });
         // Build the snippet.
         for (const onSnippetDropped of this.resources["on_snippet_dropped_handlers"] || []) {
             const cancel = await onSnippetDropped({ snippetEl });
