@@ -71,7 +71,7 @@ const storeServicePatch = {
         return m1.persona.name?.localeCompare(m2.persona.name) || m1.id - m2.id;
     },
     /** @param {number[]} partnerIds */
-    async startChat(partnerIds) {
+    async startChat(partnerIds, name) {
         const partners_to = [...new Set([this.self.id, ...partnerIds])];
         if (partners_to.length === 1) {
             const chat = await this.joinChat(partners_to[0], true);
@@ -83,7 +83,7 @@ const storeServicePatch = {
             const chat = await this.joinChat(correspondentId, true);
             chat.open({ focus: true, bypassCompact: true });
         } else {
-            await this.createGroupChat({ partners_to });
+            await this.createGroupChat({ partners_to, name });
         }
     },
 };
