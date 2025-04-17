@@ -1039,7 +1039,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
         self.pos_config.open_ui()
         pos_session = self.pos_config.current_session_id
         untax, atax = self.compute_tax(self.test_product3, 10.0)
-        product5_order = {
+        product3_order = {
             'amount_paid': untax + atax,
             'amount_return': 0,
             'amount_tax': atax,
@@ -1066,7 +1066,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
             'last_order_preparation_change': '{}',
             'user_id': self.env.uid
         }
-        self.PosOrder.sync_from_ui([product5_order])
+        self.PosOrder.sync_from_ui([product3_order])
 
         # delete tax
         dummy_50_perc_tax.unlink()
@@ -1245,7 +1245,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
         # sell product thru pos
         self.pos_config.open_ui()
         pos_session = self.pos_config.current_session_id
-        product5_order = {
+        product3_order = {
             'amount_paid': 750,
             'amount_return': 10,
             'amount_tax': 0,
@@ -1278,7 +1278,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
             'to_invoice': True
         }
 
-        pos_order_id = self.PosOrder.sync_from_ui([product5_order])['pos.order'][0]['id']
+        pos_order_id = self.PosOrder.sync_from_ui([product3_order])['pos.order'][0]['id']
         pos_order = self.PosOrder.search([('id', '=', pos_order_id)])
 
         # assert account_move amount_residual is 300
@@ -1364,7 +1364,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
         current_session = self.pos_config.current_session_id
         current_session.company_id.account_default_pos_receivable_account_id = self.partner1.property_account_receivable_id
 
-        product5_order = {
+        product3_order = {
             'amount_paid': 750,
             'amount_tax': 0,
             'amount_return':0,
@@ -1397,7 +1397,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
             'to_invoice': True
         }
 
-        pos_order_id = self.PosOrder.sync_from_ui([product5_order])['pos.order'][0]['id']
+        pos_order_id = self.PosOrder.sync_from_ui([product3_order])['pos.order'][0]['id']
         pos_order = self.PosOrder.search([('id', '=', pos_order_id)])
         self.assertEqual(pos_order.account_move.amount_residual, 0)
 
@@ -1725,6 +1725,15 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
 
         self.assertFalse(loaded_data['pos.config'][0]['pricelist_id'], False)
 
+        # merged similar test_no_default_pricelist test from TestPointOfSale
+        new_config = self.env["pos.config"].create({
+            "name": "usd config",
+            "available_pricelist_ids": [(6, 0, [self.public_pricelist.id])]
+        })
+        # make sure this doesn't pick a pricelist as default
+        self.assertEqual(new_config.pricelist_id, self.env['product.pricelist'],
+                         "POS config incorrectly has pricelist %s" % new_config.pricelist_id.display_name)
+
     def test_refund_rounding_backend(self):
         rouding_method = self.env['account.cash.rounding'].create({
             'name': 'Rounding up',
@@ -2030,6 +2039,36 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
         product_form.type = "consu"
         product = product_form.save()
         self.assertFalse(product.combo_ids)
+
+    def test_product_combo_variants(self):
+        product_combo = self.env["product.combo"].create({
+            "name": "Magic Product combo",
+            "combo_item_ids": [
+                Command.create({
+                    "product_id": self.test_product3.id,
+                    "extra_price": 0,
+                }),
+            ],
+        })
+        # Add attribute and values, simulating variant creation
+        original_product_id = self.test_product3.id
+        product3_template = self.test_product3.product_tmpl_id
+        product3_template.with_context(create_product_product=True).write({
+            'attribute_line_ids': [(0, 0, {
+                'attribute_id': self.always_color_attribute.id,
+                'value_ids': [(6, 0, self.always_color_attribute.value_ids.ids)],
+            })],
+        })
+        # Check that original product should not be in combo anymore (replace by variants)
+        self.assertTrue(original_product_id not in product_combo.combo_item_ids.mapped('product_id').ids,
+                        "Original product should not be in combo")
+
+    def test_pos_bill_digits(self):
+        coin = self.env["pos.bill"].create({
+            "name": "0.005 not rounded",
+            "value": 0.005
+        })
+        self.assertEqual(coin.value, 0.005)
 
     def test_change_is_deducted_from_cash(self):
         self.pos_config.open_ui()
