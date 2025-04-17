@@ -1492,7 +1492,7 @@ class BaseModel(metaclass=MetaModel):
         for name in fields_list:
             # 1. look up context
             key = 'default_' + name
-            if key in self._context:
+            if key in self._context and not name in ir_defaults:
                 defaults[name] = self._context[key]
                 continue
 
