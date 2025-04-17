@@ -7,7 +7,7 @@
     'category': 'Sales/Point of Sale',
     'sequence': 40,
     'summary': 'Handle checkouts and payments for shops and restaurants.',
-    'depends': ['resource', 'stock_account', 'barcodes', 'web_editor', 'digest', 'phone_validation', 'partner_autocomplete'],
+    'depends': ['resource', 'stock_account', 'barcodes', 'web_editor', 'digest', 'phone_validation', 'partner_autocomplete', 'base_printer'],
     'uninstall_hook': 'uninstall_hook',
     'data': [
         'security/point_of_sale_security.xml',
@@ -104,8 +104,6 @@
             'point_of_sale/static/src/app/services/data_service.js',
             'point_of_sale/static/src/app/utils/numbers.js',
 
-            'point_of_sale/static/src/app/utils/html-to-image.js',
-            'point_of_sale/static/src/app/services/render_service.js',
             'point_of_sale/static/tests/unit/**/*',
 
             'point_of_sale/static/src/app/components/odoo_logo/*',
@@ -178,6 +176,7 @@
             # report download utils
             'web/static/src/webclient/actions/reports/utils.js',
             # PoS files
+            'base_printer/static/src/epson_printer/**/*',
             'point_of_sale/static/src/**/*',
             ('remove', 'point_of_sale/static/src/backend/**/*'),
             ('remove', 'point_of_sale/static/src/customer_display/**/*'),
