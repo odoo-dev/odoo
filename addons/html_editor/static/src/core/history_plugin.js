@@ -347,6 +347,9 @@ export class HistoryPlugin extends Plugin {
      * @returns { MutationRecord[] } processed records
      */
     processNewRecords(records) {
+        // IDEA: add a pre-processor step, that returns a difference data type
+        // (with classList mutations, and not read-only).
+        // Besides splitting class mutations, oldValue is fixed.
         records = this.filterMutationRecords(records);
         if (!records.length) {
             return [];
@@ -448,35 +451,13 @@ export class HistoryPlugin extends Plugin {
                 }
                 // @todo @phoenix add test for mutationFilteredClasses.
                 if (record.attributeName === "class") {
-                    const classBefore = (record.oldValue && record.oldValue.split(" ")) || [];
-                    const classAfter =
-                        (record.target.className &&
-                            record.target.className.split &&
-                            record.target.className.split(" ")) ||
-                        [];
-                    // Actually means classes changed (added or removed)
-                    // Symmetric difference between sets
-                    const excludedClasses = [];
-                    // Push removed classes to list.
-                    for (const klass of classBefore) {
-                        if (!classAfter.includes(klass)) {
-                            excludedClasses.push(klass);
-                        }
-                    }
-                    // Push added classes to list.
-                    for (const klass of classAfter) {
-                        if (!classBefore.includes(klass)) {
-                            excludedClasses.push(klass);
-                        }
-                    }
-                    if (
-                        excludedClasses.length &&
-                        // In case of a mix of system classes and other ones, mutation records
-                        // will go through (and system classes will not be ignored).
-                        // When reverting or applying mutations, system classes
-                        // are excluded when about to apply the oldValue/value to class (see getAttributeValue).
-                        excludedClasses.every((c) => this.mutationFilteredClasses.has(c))
-                    ) {
+                    const { addedClasses, removedClasses } = this.splitClassMutations(record);
+                    const changedClasses = [...addedClasses, ...removedClasses];
+                    // In case of a mix of system classes and other ones, mutation records
+                    // will go through (and system classes will not be ignored).
+                    // When reverting or applying mutations, system classes
+                    // are excluded when about to apply the oldValue/value to class (see getAttributeValue).
+                    if (changedClasses.every((cls) => this.mutationFilteredClasses.has(cls))) {
                         continue;
                     }
                 }
@@ -487,6 +468,25 @@ export class HistoryPlugin extends Plugin {
         }
         // @todo @phoenix allow an option to filter mutation records.
         return filteredRecords;
+    }
+
+    /**
+     * @param {MutationRecord} record
+     * @returns { { addedClasses: Set<string>, removedClasses: Set<string> } }
+     */
+    splitClassMutations(record) {
+        // oldValue can be null, or have extra spaces
+        const oldValue = record.oldValue?.split(" ").filter(Boolean);
+        const classesBefore = new Set(oldValue);
+        const classesAfter = new Set(record.target.classList);
+        const setDifference = (setA, setB) => {
+            const diff = new Set(setA);
+            setB.forEach((item) => diff.delete(item));
+            return diff;
+        };
+        const addedClasses = setDifference(classesAfter, classesBefore);
+        const removedClasses = setDifference(classesBefore, classesAfter);
+        return { addedClasses, removedClasses };
     }
 
     /**
@@ -566,8 +566,18 @@ export class HistoryPlugin extends Plugin {
                     break;
                 }
                 case "attributes": {
+                    const nodeId = this.nodeToIdMap.get(record.target);
                     if (record.attributeName === "class") {
-                        this.stageClassListRecord(record);
+                        const { addedClasses, removedClasses } = this.splitClassMutations(record);
+                        const stageClassListRecord = (cls, operation) =>
+                            this.currentStep.mutations.push({
+                                type: "classList",
+                                id: nodeId,
+                                className: cls,
+                                operation,
+                            });
+                        addedClasses.forEach((cls) => stageClassListRecord(cls, "add"));
+                        removedClasses.forEach((cls) => stageClassListRecord(cls, "remove"));
                     } else {
                         this.currentStep.mutations.push({
                             type: "attributes",
@@ -670,43 +680,6 @@ export class HistoryPlugin extends Plugin {
             },
         };
         this.currentStep.mutations.push(customMutation);
-    }
-
-    /**
-     * @param {MutationRecord} record
-     */
-    stageClassListRecord(record) {
-        const nodeId = this.nodeToIdMap.get(record.target);
-        // oldValue can be null, or have extra spaces
-        const oldValue = record.oldValue?.split(" ").filter(Boolean);
-        const classesBefore = new Set(oldValue);
-        const classesAfter = new Set(record.target.classList);
-        // @todo: replace by Set.difference() once it becomes widely available
-        const setDifference = (setA, setB) => {
-            const diff = new Set(setA);
-            setB.forEach((item) => diff.delete(item));
-            return diff;
-        };
-        const addedClasses = setDifference(classesAfter, classesBefore);
-        const removedClasses = setDifference(classesBefore, classesAfter);
-        for (const cls of addedClasses) {
-            // @todo should filter ignored classes here?
-            this.currentStep.mutations.push({
-                type: "classList",
-                id: nodeId,
-                className: cls,
-                operation: "add",
-            });
-        }
-        for (const cls of removedClasses) {
-            // @todo should filter ignored classes here?
-            this.currentStep.mutations.push({
-                type: "classList",
-                id: nodeId,
-                className: cls,
-                operation: "remove",
-            });
-        }
     }
 
     /**
@@ -982,7 +955,12 @@ export class HistoryPlugin extends Plugin {
                 case "classList": {
                     const node = this.idToNodeMap.get(mutation.id);
                     if (node) {
-                        node.classList[mutation.operation](mutation.className);
+                        if (mutation.operation === "remove") {
+                            node.classList.remove(mutation.className);
+                        } else if (!this.mutationFilteredClasses.has(mutation.className)) {
+                            // Asymmetric treatment of system classes: they get removed, but not added
+                            node.classList.add(mutation.className);
+                        }
                     }
                     break;
                 }
@@ -1061,7 +1039,8 @@ export class HistoryPlugin extends Plugin {
                     if (node) {
                         if (mutation.operation === "add") {
                             node.classList.remove(mutation.className);
-                        } else if (mutation.operation === "remove") {
+                        } else if (!this.mutationFilteredClasses.has(mutation.className)) {
+                            // Asymmetric treatment of system classes: they get removed, but not added
                             node.classList.add(mutation.className);
                         }
                     }
@@ -1275,6 +1254,7 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
+     * @todo: no more need for this
      * @param { string } attributeName
      * @param { string } value
      */
