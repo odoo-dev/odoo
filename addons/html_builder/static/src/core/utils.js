@@ -504,10 +504,11 @@ export function useClickableBuilderComponent() {
             const shouldClean = _shouldClean(comp, hasClean, isAlreadyApplied);
             if (shouldClean) {
                 proms.push(
-                    applySpec.clean?.({
+                    applySpec.clean({
                         editingElement: applySpec.editingElement,
                         param: applySpec.actionParam,
                         value: applySpec.actionValue,
+                        loadResult: applySpec.loadOnClean ? applySpec.loadResult : null,
                         dependencyManager: comp.env.dependencyManager,
                         selectableContext: comp.env.selectableContext,
                     })
@@ -757,6 +758,7 @@ export function getAllActionsAndOperations(comp) {
                     apply: action.apply,
                     clean: action.clean,
                     load: action.load,
+                    loadOnClean: action.loadOnClean,
                 });
             }
         }
@@ -822,7 +824,7 @@ export function getAllActionsAndOperations(comp) {
                             return;
                         }
                         const hasClean = !!applySpec.clean;
-                        if (_shouldClean(comp, hasClean, isApplied())) {
+                        if (!applySpec.loadOnClean && _shouldClean(comp, hasClean, isApplied())) {
                             // The element will be cleaned, do not load
                             return;
                         }
@@ -882,7 +884,7 @@ function _shouldClean(comp, hasClean, isApplied) {
     const shouldClean = shouldToggle && isApplied;
     return comp.props.inverseAction ? !shouldClean : shouldClean;
 }
-function convertParamToObject(param) {
+export function convertParamToObject(param) {
     if (param === undefined) {
         param = {};
     } else if (param instanceof Array || param instanceof Function || !(param instanceof Object)) {
