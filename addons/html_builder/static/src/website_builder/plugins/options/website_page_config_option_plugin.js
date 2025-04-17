@@ -1,8 +1,8 @@
+import { after, SNIPPET_SPECIFIC_NEXT } from "@html_builder/utils/option_sequence";
 import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import { rgbToHex } from "@web/core/utils/colors";
 import { withSequence } from "@html_editor/utils/resource";
-import { after, SNIPPET_SPECIFIC_NEXT } from "@html_builder/utils/option_sequence";
 import { FOOTER_SCROLL_TO } from "./footer_option_plugin";
 
 export const TOP_MENU_VISIBILITY = SNIPPET_SPECIFIC_NEXT;

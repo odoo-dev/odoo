@@ -1,8 +1,8 @@
+import { VerticalAlignmentOption } from "@html_builder/plugins/vertical_alignment_option";
 import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
 import { registry } from "@web/core/registry";
 import { AddProductOption } from "./add_product_option";
-import { VerticalAlignmentOption } from "../vertical_alignment_option";
 
 class PriceListCafePlugin extends Plugin {
     static id = "priceList";
