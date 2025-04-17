@@ -25,10 +25,6 @@ class ImageSnippetOptionPlugin extends Plugin {
                 },
             });
             onClose.then(() => {
-                // If no image was selected, remove the placeholder.
-                if (!isImageSelected) {
-                    snippetEl.remove();
-                }
                 resolve();
             });
         });
