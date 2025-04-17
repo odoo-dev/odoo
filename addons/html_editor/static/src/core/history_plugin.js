@@ -46,6 +46,12 @@ import { withSequence } from "@html_editor/utils/resource";
  * // todo change oldValue to attributeOldValue
  * @property { string } oldValue
  *
+ * @typedef { Object } HistoryMutationClassList
+ * @property { "classList" } type
+ * @property { string } id
+ * @property { string } className
+ * @property { "add"|"remove" } operation
+ *
  * @typedef { Object } HistoryMutationAdd
  * @property { "add" } type
  * // todo change id to nodeId
@@ -72,7 +78,7 @@ import { withSequence } from "@html_editor/utils/resource";
  * // todo change previousId to previousNodeId
  * @property { string } previousId
  *
- * @typedef { HistoryMutationCharacterData | HistoryMutationAttributes | HistoryMutationAdd | HistoryMutationRemove } HistoryMutation
+ * @typedef { HistoryMutationCharacterData | HistoryMutationAttributes | HistoryMutationClassList | HistoryMutationAdd | HistoryMutationRemove } HistoryMutation
  *
  * @typedef { Object } PreviewableOperation
  * @property { Function } apply
@@ -398,6 +404,7 @@ export class HistoryPlugin extends Plugin {
                             record.target.className.split(" ")) ||
                         [];
                     // Actually means classes changed (added or removed)
+                    // Symmetric difference between sets
                     const excludedClasses = [];
                     // Push removed classes to list.
                     for (const klass of classBefore) {
@@ -511,19 +518,23 @@ export class HistoryPlugin extends Plugin {
                     break;
                 }
                 case "attributes": {
-                    this.currentStep.mutations.push({
-                        type: "attributes",
-                        id: this.nodeToIdMap.get(record.target),
-                        attributeName: record.attributeName,
-                        value: record.target.getAttribute(record.attributeName),
-                        oldValue: record.oldValue,
-                    });
-                    this.dispatchTo("attribute_change_handlers", {
-                        target: record.target,
-                        attributeName: record.attributeName,
-                        oldValue: record.oldValue,
-                        value: record.target.getAttribute(record.attributeName),
-                    });
+                    if (record.attributeName === "class") {
+                        this.stageClassListRecord(record);
+                    } else {
+                        this.currentStep.mutations.push({
+                            type: "attributes",
+                            id: this.nodeToIdMap.get(record.target),
+                            attributeName: record.attributeName,
+                            value: record.target.getAttribute(record.attributeName),
+                            oldValue: record.oldValue,
+                        });
+                        this.dispatchTo("attribute_change_handlers", {
+                            target: record.target,
+                            attributeName: record.attributeName,
+                            oldValue: record.oldValue,
+                            value: record.target.getAttribute(record.attributeName),
+                        });
+                    }
                     break;
                 }
                 case "childList": {
@@ -568,6 +579,43 @@ export class HistoryPlugin extends Plugin {
                     break;
                 }
             }
+        }
+    }
+
+    /**
+     * @param {MutationRecord} record
+     */
+    stageClassListRecord(record) {
+        const nodeId = this.nodeToIdMap.get(record.target);
+        // oldValue can be null, or have extra spaces
+        const oldValue = record.oldValue?.split(" ").filter(Boolean);
+        const classesBefore = new Set(oldValue);
+        const classesAfter = new Set(record.target.classList);
+        // @todo: replace by Set.difference() once it becomes widely available
+        const setDifference = (setA, setB) => {
+            const diff = new Set(setA);
+            setB.forEach((item) => diff.delete(item));
+            return diff;
+        };
+        const addedClasses = setDifference(classesAfter, classesBefore);
+        const removedClasses = setDifference(classesBefore, classesAfter);
+        for (const cls of addedClasses) {
+            // @todo should filter ignored classes here?
+            this.currentStep.mutations.push({
+                type: "classList",
+                id: nodeId,
+                className: cls,
+                operation: "add",
+            });
+        }
+        for (const cls of removedClasses) {
+            // @todo should filter ignored classes here?
+            this.currentStep.mutations.push({
+                type: "classList",
+                id: nodeId,
+                className: cls,
+                operation: "remove",
+            });
         }
     }
 
@@ -828,6 +876,13 @@ export class HistoryPlugin extends Plugin {
                     }
                     break;
                 }
+                case "classList": {
+                    const node = this.idToNodeMap.get(mutation.id);
+                    if (node) {
+                        node.classList[mutation.operation](mutation.className);
+                    }
+                    break;
+                }
                 case "attributes": {
                     const node = this.idToNodeMap.get(mutation.id);
                     if (node) {
@@ -893,10 +948,23 @@ export class HistoryPlugin extends Plugin {
                     }
                     break;
                 }
+                case "classList": {
+                    // @todo: handle system classes
+                    const node = this.idToNodeMap.get(mutation.id);
+                    if (node) {
+                        if (mutation.operation === "add") {
+                            node.classList.remove(mutation.className);
+                        } else if (mutation.operation === "remove") {
+                            node.classList.add(mutation.className);
+                        }
+                    }
+                    break;
+                }
                 case "attributes": {
                     const node = this.idToNodeMap.get(mutation.id);
                     if (node) {
                         // This removes system classes, if present
+                        // No longer needed
                         let value = this.getAttributeValue(
                             mutation.attributeName,
                             mutation.oldValue
