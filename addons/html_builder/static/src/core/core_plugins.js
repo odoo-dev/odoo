@@ -6,6 +6,7 @@ import { BuilderOverlayPlugin } from "./builder_overlay/builder_overlay_plugin";
 import { CachedModelPlugin } from "./cached_model_plugin";
 import { ClonePlugin } from "./clone_plugin";
 import { CoreBuilderActionPlugin } from "./core_builder_action_plugin";
+import { CompositeActionPlugin } from "./composite_action_plugin";
 import { CustomizeTabPlugin } from "./customize_tab_plugin";
 import { DisableSnippetsPlugin } from "./disable_snippets_plugin";
 import { DragAndDropPlugin } from "./drag_and_drop_plugin";
@@ -48,6 +49,7 @@ export const CORE_PLUGINS = [
     DropZoneSelectorPlugin,
     CachedModelPlugin,
     CoreBuilderActionPlugin,
+    CompositeActionPlugin,
     CustomizeTabPlugin,
     VersionControlPlugin,
 ];
