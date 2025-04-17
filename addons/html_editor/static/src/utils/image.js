@@ -102,7 +102,11 @@ export function getImageSrc(el) {
     }
     const url = backgroundImageCssToParts(getComputedStyle(el)["background-image"]).url;
     // Cache the this value as getComputedStyle can eat performance
-    el.dataset.bgSrc = url;
+    if (url) {
+        el.dataset.bgSrc = url;
+    } else {
+        delete el.dataset.bgSrc;
+    }
     return url && getBgImageURLFromURL(url);
 }
 
