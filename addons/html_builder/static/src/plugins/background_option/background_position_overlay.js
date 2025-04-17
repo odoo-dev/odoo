@@ -1,4 +1,4 @@
-import { scrollToWindow } from "@html_builder/utils/utils";
+import { scrollTo } from "@html_builder/utils/scrolling";
 import { Component, onMounted, onWillStart, onWillUnmount, useEffect, useRef } from "@odoo/owl";
 
 export class BackgroundPositionOverlay extends Component {
@@ -57,7 +57,7 @@ export class BackgroundPositionOverlay extends Component {
                 rect.top >= 0 &&
                 rect.bottom <= this.props.editingElement.ownerDocument.defaultView.innerHeight;
             if (!isEditingElEntirelyVisible) {
-                await scrollToWindow(this.props.editingElement, { behavior: "smooth", offset: 50 });
+                await scrollTo(this.props.editingElement, { extraOffset: 50 });
             }
         });
         onMounted(() => {

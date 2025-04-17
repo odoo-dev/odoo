@@ -12,6 +12,7 @@ import {
     invisibleEl,
     setupWebsiteBuilder,
     waitForSnippetDialog,
+    waitForEndOfOperation,
 } from "./website_helpers";
 
 defineWebsiteModels();
@@ -82,6 +83,7 @@ test("Add an element on the invisible elements tab", async () => {
     await contains(
         ".o_add_snippet_dialog .o_add_snippet_iframe:iframe .o_snippet_preview_wrap"
     ).click();
+    await waitForEndOfOperation();
     expect(".o_we_invisible_el_panel .o_we_invisible_entry:contains('Test') .fa-eye").toHaveCount(
         1
     );

@@ -5,6 +5,7 @@ import {
     defineWebsiteModels,
     insertCategorySnippet,
     setupWebsiteBuilder,
+    waitForEndOfOperation,
 } from "../website_helpers";
 
 defineWebsiteModels();
@@ -17,7 +18,11 @@ describe("Popup options: empty page before edit", () => {
     });
     test("dropping the popup snippet automatically displays it", async () => {
         await insertCategorySnippet({ group: "content", snippet: "s_popup" });
-        expect(":iframe .s_popup .modal").toBeVisible();
+        expect(".o_add_snippet_dialog").toHaveCount(0);
+        await waitForEndOfOperation();
+        // Check if the popup is visible.
+        expect(":iframe .s_popup .modal").toHaveClass("show");
+        expect(":iframe .s_popup .modal").toHaveStyle({ display: "block" });
     });
 });
 describe("Popup options: popup in page before edit", () => {
