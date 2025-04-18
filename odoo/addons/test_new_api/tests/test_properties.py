@@ -848,7 +848,7 @@ class PropertiesCase(TestPropertiesMixin):
             # 1 query to read the field
             # 1 query to read the definition
             # 2 queries to check if the many2one still exists / display_name
-            self.assertTrue(self.message_2.read(['attributes'])[0]['attributes'][0].get('value') is None)
+            self.assertIs(self.message_2.read(['attributes'])[0]['attributes'][0].get('value'), None)
 
         # remove the partner, and use the read method
         self.message_2.attributes = [{
