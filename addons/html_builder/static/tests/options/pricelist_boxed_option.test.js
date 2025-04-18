@@ -1,5 +1,5 @@
 import { expect, test } from "@odoo/hoot";
-import { queryAll } from "@odoo/hoot-dom";
+import { queryAll, waitFor } from "@odoo/hoot-dom";
 import { contains } from "@web/../tests/web_test_helpers";
 import { defineWebsiteModels, setupWebsiteBuilderWithSnippet } from "../website_helpers";
 
@@ -8,6 +8,7 @@ defineWebsiteModels();
 test("toggle price list description items", async () => {
     await setupWebsiteBuilderWithSnippet("s_pricelist_boxed");
     await contains(":iframe .s_pricelist_boxed_section").click();
+    await waitFor("[data-action-id='togglePriceListDescription']");
     expect(
         "[data-action-id='togglePriceListDescription'] .o-checkbox .form-check-input:checked"
     ).toHaveCount(1);

@@ -18,6 +18,7 @@ import { BuilderMany2One } from "./building_blocks/builder_many2one";
 import { BuilderUrlPicker } from "./building_blocks/builder_urlpicker";
 import { ModelMany2Many } from "./building_blocks/model_many2many";
 import { Plugin } from "@html_editor/plugin";
+import { Img } from "./img";
 
 export class BuilderComponentPlugin extends Plugin {
     static id = "builderComponents";
@@ -44,6 +45,7 @@ export class BuilderComponentPlugin extends Plugin {
             ModelMany2Many,
             BuilderDateTimePicker,
             BuilderUrlPicker,
+            Img,
         },
     };
 

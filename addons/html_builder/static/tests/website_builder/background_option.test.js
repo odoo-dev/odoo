@@ -1,7 +1,7 @@
 import { BackgroundOption } from "@html_builder/plugins/background_option/background_option";
 import { BackgroundPositionOverlay } from "@html_builder/plugins/background_option/background_position_overlay";
 import { expect, test } from "@odoo/hoot";
-import { waitFor } from "@odoo/hoot-dom";
+import { animationFrame, waitFor } from "@odoo/hoot-dom";
 import { contains, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { addOption, defineWebsiteModels, setupWebsiteBuilder } from "../website_helpers";
 
@@ -12,6 +12,7 @@ test("show and leave the 'BackgroundShapeComponent'", async () => {
     await contains(":iframe section").click();
     await contains("button[data-action-id='toggleBgShape']").click();
     await contains("button.o_pager_nav_angle").click();
+    await animationFrame();
     expect("button[data-action-id='toggleBgShape']").toBeVisible();
 });
 

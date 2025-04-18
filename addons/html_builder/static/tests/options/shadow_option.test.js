@@ -1,5 +1,5 @@
 import { expect, test } from "@odoo/hoot";
-import { queryAllTexts, queryAllValues } from "@odoo/hoot-dom";
+import { queryAllTexts, queryAllValues, waitFor } from "@odoo/hoot-dom";
 import { xml } from "@odoo/owl";
 import { contains } from "@web/../tests/web_test_helpers";
 import { addOption, defineWebsiteModels, setupWebsiteBuilder } from "../website_helpers";
@@ -13,6 +13,7 @@ test("edit box-shadow with ShadowOption", async () => {
     });
     await setupWebsiteBuilder(`<div class="test-options-target">b</div>`);
     await contains(":iframe .test-options-target").click();
+    await waitFor(".hb-row");
     expect(queryAllTexts(".hb-row .hb-row-label")).toEqual(["Shadow"]);
     expect(":iframe .test-options-target").toHaveOuterHTML(
         '<div class="test-options-target o-paragraph">b</div>'

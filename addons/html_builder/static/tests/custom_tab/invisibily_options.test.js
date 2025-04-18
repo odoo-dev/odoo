@@ -1,5 +1,5 @@
 import { expect, test } from "@odoo/hoot";
-import { queryOne } from "@odoo/hoot-dom";
+import { animationFrame, queryOne } from "@odoo/hoot-dom";
 import { contains, onRpc } from "@web/../tests/web_test_helpers";
 import {
     defineWebsiteModels,
@@ -52,12 +52,14 @@ test("show/hide a section", async () => {
 test("click on 'Hide on Mobile' then on 'Hide on desktop'", async () => {
     await setupWebsiteBuilder(websiteContent);
     await contains(":iframe .col-lg-3").click();
+    await animationFrame();
     await contains("button[data-action-id='toggleDeviceVisibility']:last").click();
     expect("button[data-action-id='toggleDeviceVisibility']:first").not.toHaveClass("active");
     expect("button[data-action-id='toggleDeviceVisibility']:last").toHaveClass("active");
 
     await contains("button[data-action-id='toggleDeviceVisibility']").click();
     await contains(".o_we_invisible_el_panel .o_we_invisible_entry").click();
+    await animationFrame();
     expect("button[data-action-id='toggleDeviceVisibility']:first").toHaveClass("active");
     expect("button[data-action-id='toggleDeviceVisibility']:last").not.toHaveClass("active");
 });

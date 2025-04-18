@@ -3,6 +3,7 @@ import { addOption, defineWebsiteModels, setupWebsiteBuilder } from "../website_
 import { contains, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { BorderConfigurator } from "@html_builder/plugins/border_configurator_option";
 import { xml } from "@odoo/owl";
+import { waitFor } from "@odoo/hoot-dom";
 
 defineWebsiteModels();
 
@@ -43,6 +44,7 @@ test("hasBorder is true when multiple-value border starts by 0", async () => {
         loadIframeBundles: true,
     });
     await contains(":iframe section").click();
+    await waitFor(".options-container [data-label=Border]");
     expect(".options-container [data-label=Border] input").toHaveValue("0");
     expect(".options-container [data-label=Border] .o_we_color_preview").not.toBeVisible();
     await contains(".options-container [data-label=Border] input").edit("0 3 4 4", {

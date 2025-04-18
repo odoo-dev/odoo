@@ -5,10 +5,11 @@ import {
     useSelectableItemComponent,
 } from "../utils";
 import { BuilderComponent } from "./builder_component";
+import { Img } from "../img";
 
 export class BuilderButton extends Component {
     static template = "html_builder.BuilderButton";
-    static components = { BuilderComponent };
+    static components = { BuilderComponent, Img };
     static props = {
         ...clickableBuilderComponentProps,
 

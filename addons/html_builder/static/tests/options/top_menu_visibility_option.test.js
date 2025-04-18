@@ -1,8 +1,8 @@
+import { redo, undo } from "@html_editor/../tests/_helpers/user_actions";
 import { expect, test } from "@odoo/hoot";
+import { queryOne, waitFor } from "@odoo/hoot-dom";
 import { contains } from "@web/../tests/web_test_helpers";
 import { defineWebsiteModels, setupWebsiteBuilder } from "../website_helpers";
-import { undo, redo } from "@html_editor/../tests/_helpers/user_actions";
-import { animationFrame, queryOne } from "@odoo/hoot-dom";
 
 defineWebsiteModels();
 
@@ -16,7 +16,7 @@ test("TopMenuVisibility option should appear", async () => {
             </header>`,
     });
     await contains(":iframe #wrapwrap > header").click();
-    await animationFrame();
+    await waitFor("[data-label='Header Position']");
     expect("[data-label='Header Position']").toBeVisible();
 });
 
