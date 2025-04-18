@@ -19,9 +19,20 @@ export const GRAY_PARAMS = {
     HUE: "gray-hue",
 };
 
+export const OPTION_POSITIONS = {
+    COLORS: 10,
+    SETTINGS: 20,
+    PARAGRAPH: 30,
+    HEADINGS: 40,
+    BUTTON: 50,
+    LINK: 60,
+    INPUT: 70,
+    ADVANCED: 80,
+};
+
 export class ThemeTabPlugin extends Plugin {
     static id = "themeTab";
-    static dependencies = ["customizeWebsite"];
+    static dependencies = ["customizeWebsite", "googleMapsOption"];
 
     grayParams = {};
     grays = reactive({});
@@ -31,53 +42,54 @@ export class ThemeTabPlugin extends Plugin {
         builder_actions: this.getActions(),
         theme_options: [
             withSequence(
-                10,
+                OPTION_POSITIONS.COLORS,
                 this.getThemeOptionBlock("theme-colors", _t("Colors"), {
                     OptionComponent: ThemeColorsOption,
                 })
             ),
             withSequence(
-                20,
+                OPTION_POSITIONS.SETTINGS,
                 this.getThemeOptionBlock("website-settings", _t("Website"), {
                     template: "html_builder.ThemeWebsiteSettingsOption",
                 })
             ),
             withSequence(
-                30,
+                OPTION_POSITIONS.PARAGRAPH,
                 this.getThemeOptionBlock("theme-paragraph", _t("Paragraph"), {
                     template: "html_builder.ThemeParagraphOption",
                 })
             ),
             withSequence(
-                40,
+                OPTION_POSITIONS.HEADINGS,
                 this.getThemeOptionBlock("theme-headings", _t("Headings"), {
                     template: "html_builder.ThemeHeadingsOption",
                 })
             ),
             withSequence(
-                50,
+                OPTION_POSITIONS.BUTTON,
                 this.getThemeOptionBlock("theme-button", _t("Button"), {
                     template: "html_builder.ThemeButtonOption",
                 })
             ),
             withSequence(
-                60,
+                OPTION_POSITIONS.LINK,
                 this.getThemeOptionBlock("theme-link", _t("Link"), {
                     template: "html_builder.ThemeLinkOption",
                 })
             ),
             withSequence(
-                70,
+                OPTION_POSITIONS.INPUT,
                 this.getThemeOptionBlock("theme-input", _t("Input Fields"), {
                     template: "html_builder.ThemeInputOption",
                 })
             ),
             withSequence(
-                80,
+                OPTION_POSITIONS.ADVANCED,
                 this.getThemeOptionBlock("theme-advanced", _t("Advanced"), {
                     OptionComponent: ThemeAdvancedOption,
                     props: {
                         grays: this.grays,
+                        configureGMapsAPI: this.dependencies.googleMapsOption.configureGMapsAPI,
                     },
                 })
             ),

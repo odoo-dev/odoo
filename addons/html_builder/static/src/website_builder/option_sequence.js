@@ -65,6 +65,3 @@ if (__DETECT_ERROR_WEBSITE_4__ !== END) {
     console.error("Wrong count in website split after specific end");
 }
 export { GRID_IMAGE, ANIMATE, TEXT_HIGHLIGHT };
-
-// TODO Website Themes tab
-// TODO Mass mailing
