@@ -1,6 +1,6 @@
 import { defineWebsiteModels, setupWebsiteBuilder } from "../website_helpers";
 import { expect, test } from "@odoo/hoot";
-import { animationFrame, clear, click, fill } from "@odoo/hoot-dom";
+import { animationFrame, clear, click, fill, waitFor } from "@odoo/hoot-dom";
 import { contains } from "@web/../tests/web_test_helpers";
 
 defineWebsiteModels();
@@ -52,6 +52,7 @@ test("Ensure order of operations when clicking very fast on two options", async 
         </div>`
     );
     await contains(":iframe .s_rating").click();
+    await waitFor("[data-label='Icon']");
     expect("[data-label='Icon'] .btn-primary.dropdown-toggle").toHaveText("Stars");
     expect(":iframe .s_rating").not.toHaveAttribute("data-active-custom-icon");
     await click(".options-container [data-action-id='customIcon']");

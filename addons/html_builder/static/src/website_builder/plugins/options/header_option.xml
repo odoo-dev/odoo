@@ -12,7 +12,7 @@
                     vars: {'header-link-style': 'default', 'header-template': 'default'},
                 }"
             >
-                <img style="width:150px;" src="/website/static/src/img/snippets_options/header_template_default.svg"/>
+                <Img attrs="{style:'width:150px;'}" src="'/website/static/src/img/snippets_options/header_template_default.svg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Hamburger menu"
@@ -21,7 +21,7 @@
                     vars: {'header-link-style': 'default', 'header-template': 'hamburger'},
                 }"
             >
-                <img style="width:150px;" src="/website/static/src/img/snippets_options/header_template_hamburger.svg"/>
+                <Img attrs="{style:'width:150px;'}" src="'/website/static/src/img/snippets_options/header_template_hamburger.svg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Rounded box menu"
@@ -30,7 +30,7 @@
                     vars: {'header-link-style': 'pills', 'header-template': 'boxed'},
                 }"
             >
-                <img style="width:150px;" src="/website/static/src/img/snippets_options/header_template_boxed.svg"/>
+                <Img attrs="{style:'width:150px;'}" src="'/website/static/src/img/snippets_options/header_template_boxed.svg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Stretch menu"
@@ -39,7 +39,7 @@
                     vars: {'header-link-style': 'default', 'header-template': 'stretch'},
                 }"
             >
-                <img style="width:150px;" src="/website/static/src/img/snippets_options/header_template_stretch.svg"/>
+                <Img attrs="{style:'width:150px;'}" src="'/website/static/src/img/snippets_options/header_template_stretch.svg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Vertical"
@@ -48,7 +48,7 @@
                     vars: {'header-link-style': 'default', 'header-template': 'vertical'},
                 }"
             >
-                <img style="width:150px;" src="/website/static/src/img/snippets_options/header_template_vertical.svg"/>
+                <Img attrs="{style:'width:150px;'}" src="'/website/static/src/img/snippets_options/header_template_vertical.svg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Menu with Search bar"
@@ -57,7 +57,7 @@
                     vars: {'header-link-style': 'default', 'header-template': 'search'},
                 }"
             >
-                <img style="width:150px;" src="/website/static/src/img/snippets_options/header_template_search.svg"/>
+                <Img attrs="{style:'width:150px;'}" src="'/website/static/src/img/snippets_options/header_template_search.svg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Menu - Sales 1"
@@ -66,7 +66,7 @@
                     vars: {'header-link-style': 'default', 'header-template': 'sales_one'},
                 }"
             >
-                <img style="width:150px;" src="/website/static/src/img/snippets_options/header_template_sales_one.svg"/>
+                <Img attrs="{style:'width:150px;'}" src="'/website/static/src/img/snippets_options/header_template_sales_one.svg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Menu - Sales 2"
@@ -75,7 +75,7 @@
                     vars: {'header-link-style': 'default', 'header-template': 'sales_two'},
                 }"
             >
-                <img style="width:150px;" src="/website/static/src/img/snippets_options/header_template_sales_two.svg"/>
+                <Img attrs="{style:'width:150px;'}" src="'/website/static/src/img/snippets_options/header_template_sales_two.svg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Menu - Sales 3"
@@ -84,7 +84,7 @@
                     vars: {'header-link-style': 'default', 'header-template': 'sales_three'},
                 }"
             >
-                <img style="width:150px;" src="/website/static/src/img/snippets_options/header_template_sales_three.svg"/>
+                <Img attrs="{style:'width:150px;'}" src="'/website/static/src/img/snippets_options/header_template_sales_three.svg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Menu - Sales "
@@ -93,7 +93,7 @@
                     vars: {'header-link-style': 'default', 'header-template': 'sales_four'},
                 }"
             >
-                <img style="width:150px;" src="/website/static/src/img/snippets_options/header_template_sales_four.svg"/>
+                <Img attrs="{style:'width:150px;'}" src="'/website/static/src/img/snippets_options/header_template_sales_four.svg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem
                 id="'header_sidebar_opt'"
@@ -103,7 +103,7 @@
                     vars: {'header-link-style': 'default', 'header-template': 'sidebar'},
                 }"
             >
-                <img style="width:150px;" src="/website/static/src/img/snippets_options/header_template_sidebar.svg"/>
+                <Img attrs="{style:'width:150px;'}" src="'/website/static/src/img/snippets_options/header_template_sidebar.svg'"/>
             </BuilderSelectItem>
 
         </BuilderSelect>
@@ -121,7 +121,8 @@
                 classAction="'o_header_standard'"
                 className="'o_we_img_animate'"
             >
-                <img src="/website/static/src/img/snippets_options/header_effect_standard.png" style="--animate-src: '/website/static/src/img/snippets_options/header_effect_standard.gif';"/><span>Standard</span>
+                <Img src="'/website/static/src/img/snippets_options/header_effect_standard.png'" attrs="{style:`--animate-src: '/website/static/src/img/snippets_options/header_effect_standard.gif';`}"/>
+                <span>Standard</span>
             </BuilderSelectItem>
             <BuilderSelectItem
                 id="'header_effect_scroll_opt'"
@@ -130,7 +131,8 @@
                 classAction="''"
                 className="'o_we_img_animate'"
             >
-                <img src="/website/static/src/img/snippets_options/header_effect_scroll.png" style="--animate-src: '/website/static/src/img/snippets_options/header_effect_scroll.gif';"/><span>Scroll</span>
+                <Img src="'/website/static/src/img/snippets_options/header_effect_scroll.png'" attrs="{style:`--animate-src: '/website/static/src/img/snippets_options/header_effect_scroll.gif';`}"/>
+                <span>Scroll</span>
             </BuilderSelectItem>
             <BuilderSelectItem
                 id="'header_effect_fixed_opt'"
@@ -139,7 +141,8 @@
                 classAction="'o_header_fixed'"
                 className="'o_we_img_animate'"
             >
-                <img src="/website/static/src/img/snippets_options/header_effect_fixed.png" style="--animate-src: '/website/static/src/img/snippets_options/header_effect_fixed.gif';"/><span>Fixed</span>
+                <Img src="'/website/static/src/img/snippets_options/header_effect_fixed.png'" attrs="{style:`--animate-src: '/website/static/src/img/snippets_options/header_effect_fixed.gif';`}"/>
+                <span>Fixed</span>
             </BuilderSelectItem>
             <BuilderSelectItem
                 id="'header_effect_disappears_opt'"
@@ -148,7 +151,8 @@
                 classAction="'o_header_disappears'"
                 className="'o_we_img_animate'"
             >
-                <img src="/website/static/src/img/snippets_options/header_effect_disappears.png" style="--animate-src: '/website/static/src/img/snippets_options/header_effect_disappears.gif';"/><span>Disappears</span>
+                <Img src="'/website/static/src/img/snippets_options/header_effect_disappears.png'" attrs="{style:`--animate-src: '/website/static/src/img/snippets_options/header_effect_disappears.gif';`}"/>
+                <span>Disappears</span>
             </BuilderSelectItem>
             <BuilderSelectItem
                 id="'header_effect_fade_out_opt'"
@@ -157,7 +161,8 @@
                 classAction="'o_header_fade_out'"
                 className="'o_we_img_animate'"
             >
-                <img src="/website/static/src/img/snippets_options/header_effect_fade_out.png" style="--animate-src: '/website/static/src/img/snippets_options/header_effect_fade_out.gif';"/><span>Fade Out</span>
+                <Img src="'/website/static/src/img/snippets_options/header_effect_fade_out.png'" attrs="{style:`--animate-src: '/website/static/src/img/snippets_options/header_effect_fade_out.gif';`}"/>
+                <span>Fade Out</span>
             </BuilderSelectItem>
         </BuilderSelect>
     </BuilderRow>
@@ -175,7 +180,7 @@
                         resetViewArch: true,
                     }"
                 >
-                    <img src="/website/static/src/img/snippets_options/header_extra_element_text.svg"/>
+                    <Img src="'/website/static/src/img/snippets_options/header_extra_element_text.svg'"/>
                 </BuilderButton>
                 <t t-set="language_ids" t-value="env.services.website.currentWebsite.language_ids || []"/>
                 <BuilderButton 
@@ -212,7 +217,7 @@
                         resetViewArch: true,
                     }"                    
                 >
-                    <img src="/website/static/src/img/snippets_options/header_extra_element_social.svg"/>
+                    <Img src="'/website/static/src/img/snippets_options/header_extra_element_social.svg'"/>
                 </BuilderButton>
                 <BuilderButton
                     title.translate="Show/hide button"
@@ -222,7 +227,7 @@
                         resetViewArch: true,
                     }" 
                 >
-                    <img src="/website/static/src/img/snippets_options/header_extra_element_cta.svg"/>
+                    <Img src="'/website/static/src/img/snippets_options/header_extra_element_cta.svg'"/>
                 </BuilderButton>
                 <BuilderButton
                     title.translate="Show/hide logo"
@@ -232,7 +237,7 @@
                         resetViewArch: true,
                     }" 
                 >
-                    <img src="/website/static/src/img/snippets_options/header_extra_element_logo.svg"/>
+                    <Img src="'/website/static/src/img/snippets_options/header_extra_element_logo.svg'"/>
                 </BuilderButton>
             </div>
         </div>

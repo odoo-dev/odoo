@@ -2,7 +2,7 @@ import { WebsiteBuilder } from "@html_builder/website_preview/website_builder_ac
 import { setContent } from "@html_editor/../tests/_helpers/selection";
 import { insertText } from "@html_editor/../tests/_helpers/user_actions";
 import { expect, test } from "@odoo/hoot";
-import { animationFrame, click, queryAllTexts, queryOne } from "@odoo/hoot-dom";
+import { animationFrame, click, queryAllTexts, queryOne, waitFor } from "@odoo/hoot-dom";
 import { contains, onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import {
     defineWebsiteModels,
@@ -107,6 +107,7 @@ test("Clicking on the 'BLOCKS' or 'THEME' tab should deactivate the options", as
     await setupWebsiteBuilderWithSnippet("s_banner");
 
     await contains(":iframe .s_banner").click();
+    await animationFrame();
     expect(".oe_overlay").toHaveCount(1);
     expect(".o-snippets-tabs button:contains('CUSTOMIZE')").toHaveClass("active");
     expect(".o_customize_tab .options-container").toHaveCount(1);
@@ -118,6 +119,7 @@ test("Clicking on the 'BLOCKS' or 'THEME' tab should deactivate the options", as
     expect(".o_customize_tab .options-container").toHaveCount(0);
 
     await contains(":iframe .s_banner").click();
+    await waitFor(".o_customize_tab .options-container");
     expect(".oe_overlay").toHaveCount(1);
     expect(".o-snippets-tabs button:contains('CUSTOMIZE')").toHaveClass("active");
     expect(".o_customize_tab .options-container").toHaveCount(1);

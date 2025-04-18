@@ -63,6 +63,7 @@ test("Add image in gallery", async () => {
         `
     );
     await contains(":iframe .first_img").click();
+    await waitFor("[data-action-id='addImage']");
     expect("[data-action-id='addImage']").toHaveCount(1);
     await contains("[data-action-id='addImage']").click();
     // We use "click" instead of contains.click because contains wait for the image to be visible.
@@ -131,6 +132,7 @@ test("Change gallery layout", async () => {
         `
     );
     await contains(":iframe .first_img").click();
+    await waitFor("[data-label='Mode']");
     expect("[data-label='Mode']").toHaveCount(1);
     expect(queryOne("[data-label='Mode'] .dropdown-toggle").textContent).toBe("Masonry");
     await contains("[data-label='Mode'] .dropdown-toggle").click();

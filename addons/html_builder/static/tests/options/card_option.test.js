@@ -16,6 +16,7 @@ const simpleCardHtml = `
 test("set card width", async () => {
     await setupWebsiteBuilder(simpleCardHtml);
     await contains(":iframe .s_card").click();
+    await waitFor("[data-action-id='setCardWidth']");
     expect("[data-action-id='setCardWidth']").toHaveCount(1);
     expect(queryOne(":iframe .s_card").style.maxWidth).toBeEmpty();
     // Default value for range input is 100%
@@ -28,6 +29,7 @@ test("set card width", async () => {
 test("set card aligment", async () => {
     await setupWebsiteBuilder(simpleCardHtml);
     await contains(":iframe .s_card").click();
+    await waitFor("[data-action-id='setCardWidth'] input");
     expect("[data-action-id='setCardWidth'] input").toHaveValue(100);
     // Alignment option not available when card width is 100%
     expect("[data-label='Alignment']").toHaveCount(0);
@@ -64,6 +66,7 @@ const cardWithImageHtml = `
 test("remove/add cover image", async () => {
     await setupWebsiteBuilder(cardWithImageHtml);
     await contains(":iframe .s_card").click();
+    await waitFor("[data-action-id='removeCoverImage']");
     // Button to remove cover image is available
     expect("[data-action-id='removeCoverImage']").toHaveCount(1);
     // Button to add cover image is not available
@@ -85,6 +88,7 @@ test("remove/add cover image", async () => {
 test("set cover image position", async () => {
     await setupWebsiteBuilder(cardWithImageHtml);
     await contains(":iframe .s_card").click();
+    await waitFor("[data-action-id='setCoverImagePosition']");
     // As per html content: image is on top
     expect(":iframe .s_card").toHaveClass("o_card_img_top");
     expect(":iframe .s_card .o_card_img").toHaveClass("card-img-top");
@@ -191,6 +195,7 @@ test("set cover image width", async () => {
     // Width option not available when image is on top
     expect("[data-label='Width']").toHaveCount(0);
     // Set image position to left
+    await waitFor("[data-action-id='setCoverImagePosition']");
     await click("[data-action-id='setCoverImagePosition'][title='Left']");
     await waitFor("[data-label='Width']");
     // Width option is now available
@@ -204,6 +209,7 @@ test("set cover image width", async () => {
 test("cover image set to wide aspect ratio can be vertically aligned", async () => {
     await setupWebsiteBuilder(cardWithImageHtml);
     await contains(":iframe .s_card").click();
+    await waitFor("[data-action-id='alignCoverImage']");
     expect("[data-label='Alignment'] [data-action-id='alignCoverImage'").toHaveCount(1);
     await setInputRange("[data-action-id='alignCoverImage'] input", 50);
     expect(":iframe .s_card .o_card_img_wrapper").toHaveClass("o_card_img_adjust_v");
