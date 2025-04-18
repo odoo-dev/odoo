@@ -978,11 +978,11 @@ registerWebsitePreviewTour("website_form_nested_forms", {
 },
 () => [
     {
-        trigger: ".o_website_preview.editor_enable.editor_has_snippets",
+        trigger: ".o-website-builder_sidebar .o_snippets_container .o_snippet",
         noPrepend: true,
     },
     {
-        trigger: `#oe_snippets .oe_snippet[name="Form"].o_we_draggable .oe_snippet_thumbnail:not(.o_we_already_dragging)`,
+        trigger: ".o-website-builder_sidebar .o_snippet[name='Form'].o_draggable .o_snippet_thumbnail:not(.o_we_ongoing_insertion)",
         content: "Try to drag the form into another form",
         run: "drag_and_drop :iframe .o_customer_address_fill a",
     },
