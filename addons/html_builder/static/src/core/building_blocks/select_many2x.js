@@ -11,7 +11,10 @@ export class SelectMany2X extends Component {
         fields: { type: Array, element: String, optional: true },
         domain: { type: Array, optional: true },
         limit: { type: Number, optional: true },
-        selected: { type: Array, element: { type: Object, shape: { id: Number, "*": true } } },
+        selected: {
+            type: Array,
+            element: { type: Object, shape: { id: [Number, String], "*": true } },
+        },
         select: Function,
         closeOnEnterKey: { type: Boolean, optional: true },
         message: { type: String, optional: true },
