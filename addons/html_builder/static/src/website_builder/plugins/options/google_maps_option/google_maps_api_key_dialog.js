@@ -8,7 +8,7 @@ import { Component, useState, useRef } from "@odoo/owl";
  */
 
 export class GoogleMapsApiKeyDialog extends Component {
-    static template = "website.s_google_map_modal";
+    static template = "website.GoogleMapsApiKeyDialog";
     static components = { Dialog };
     static props = {
         validateGMapsApiKey: Function,

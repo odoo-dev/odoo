@@ -1,5 +1,4 @@
-<!-- TODO remove html_builder from name -->
-<t t-name="website.html_builder.s_google_map_modal">
+<t t-name="website.GoogleMapsApiKeyDialog">
     <Dialog title="props.title" size="'md'" modalRef="modalRef">
         <p>Use Google Map on your website (Contact Us page, snippets, etc).</p>
         <div class="row mb-0">
