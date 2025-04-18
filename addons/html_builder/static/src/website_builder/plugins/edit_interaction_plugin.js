@@ -5,8 +5,8 @@ export class EditInteractionPlugin extends Plugin {
     static id = "edit_interaction";
 
     resources = {
-        normalize_handlers: this.restartInteractions.bind(this),
-        content_manually_updated_handlers: this.restartInteractions.bind(this),
+        normalize_handlers: this.refreshInteractions.bind(this),
+        content_manually_updated_handlers: this.refreshInteractions.bind(this),
         before_save_handlers: () => this.stopInteractions(),
         on_will_clone_handlers: ({ originalEl }) => {
             this.stopInteractions(originalEl);
@@ -20,6 +20,7 @@ export class EditInteractionPlugin extends Plugin {
 
     setup() {
         this.websiteEditService = undefined;
+        this.areInteractionsStartedInEditMode = false;
 
         window.parent.document.addEventListener(
             "transfer_website_edit_service",
@@ -45,6 +46,15 @@ export class EditInteractionPlugin extends Plugin {
             throw new Error("website edit service not loaded");
         }
         this.websiteEditService.update(element, true);
+        this.areInteractionsStartedInEditMode = true;
+    }
+
+    refreshInteractions(element) {
+        if (this.areInteractionsStartedInEditMode) {
+            this.websiteEditService.refresh(element);
+        } else {
+            this.restartInteractions(element);
+        }
     }
 
     stopInteractions(element) {
