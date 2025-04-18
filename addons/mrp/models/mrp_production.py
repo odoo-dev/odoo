@@ -63,7 +63,7 @@ class MrpProduction(models.Model):
         'product.product', 'Product',
         domain="[('type', '=', 'consu')]",
         compute='_compute_product_id', store=True, copy=True, precompute=True,
-        readonly=False, required=True, check_company=True)
+        readonly=False, check_company=True)
     product_variant_attributes = fields.Many2many('product.template.attribute.value', related='product_id.product_template_attribute_value_ids')
     valid_product_template_attribute_line_ids = fields.Many2many(related='product_tmpl_id.valid_product_template_attribute_line_ids')
     never_product_template_attribute_value_ids = fields.Many2many(
@@ -87,7 +87,7 @@ class MrpProduction(models.Model):
     allowed_uom_ids = fields.Many2many('uom.uom', compute='_compute_allowed_uom_ids')
     product_uom_id = fields.Many2one(
         'uom.uom', 'Unit', domain="[('id', 'in', allowed_uom_ids)]",
-        readonly=False, required=True, compute='_compute_uom_id', store=True, copy=True, precompute=True)
+        readonly=False, compute='_compute_uom_id', store=True, copy=True, precompute=True)
     lot_producing_id = fields.Many2one(
         'stock.lot', string='Lot/Serial Number', copy=False,
         domain="[('product_id', '=', product_id)]", check_company=True)
