@@ -48,10 +48,10 @@ export class LinkPopover extends Component {
         { style: "outline,rounded-circle", label: _t("Outline + Rounded") },
     ];
     borderData = [
-        { style: "solid", type: "━━━", label: _t("Solid") },
-        { style: "dashed", type: "╌╌╌", label: _t("Dashed") },
-        { style: "dotted", type: "┄┄┄", label: _t("Dotted") },
-        { style: "double", type: "═══", label: _t("Double") },
+        { style: "solid", label: "━━━" },
+        { style: "dashed", label: "╌╌╌" },
+        { style: "dotted", label: "┄┄┄" },
+        { style: "double", label: "═══" },
     ];
     setup() {
         console.warn("link popover props");
@@ -65,6 +65,9 @@ export class LinkPopover extends Component {
         const labelEqualsUrl =
             textContent === this.props.linkElement.href ||
             textContent + "/" === this.props.linkElement.href;
+        const computedStyle = document.defaultView.getComputedStyle(this.props.linkElement);
+        console.log("this.props.linkElement : ", this.props.linkElement);
+        console.log("computedStyle : ", computedStyle);
         this.state = useState({
             editing: this.props.linkElement.href ? false : true,
             url: this.props.linkElement.href || "",
@@ -81,20 +84,23 @@ export class LinkPopover extends Component {
             type:
                 this.props.type ||
                 this.props.linkElement.className
-                    .match(/btn(-[a-z0-9_-]*)(primary|secondary)/)
+                    .match(/btn(-[a-z0-9_-]*)(primary|secondary|custom)/)
                     ?.pop() ||
                 "",
             buttonSize: this.props.linkElement.className.match(/btn-(sm|lg)/)?.[1] || "",
             buttonStyle: this.initButtonStyle(this.props.linkElement.className),
-            borderSize: this.props.linkElement.className.match(/border-([a-z0-9_-]+)/)?.[1] || "",
-            currentCustomTextColor:
-                this.props.linkElement.className.match(/text-([a-z0-9_-]+)/)?.[1] || "", // todo probably not working parce current color
-            currentCustomBgColor:
-                this.props.linkElement.className.match(/bg-([a-z0-9_-]+)/)?.[1] || "", // todo probably not working parce current color
-            currentCustomBorderColor:
-                this.props.linkElement.className.match(/border-([a-z0-9_-]+)/)?.[1] || "", // todo probably not working parce current color
+            customTextColor: computedStyle.color || "#714B67",
+            customFillColor: computedStyle.backgroundColor || "#ffffff",
+            customBorderSize: computedStyle.borderWidth.replace("px", "") || "1",
+            customBorderColor: computedStyle.borderColor || "#714B67",
+            customBorderStyle: computedStyle.borderStyle || "solid",
             isImage: this.props.isImage,
         });
+        console.log("this.state.customTextColor : ", this.state.customTextColor);
+        console.log("this.state.customBgColor : ", this.state.customFillColor);
+        console.log("this.state.customBorderSize : ", this.state.customBorderSize);
+        console.log("this.state.customBorderColor : ", this.state.customBorderColor);
+        console.log("this.state.customBorderStyle : ", this.state.customBorderStyle);
 
         this.editingWrapper = useRef("editing-wrapper");
         useAutofocus({
@@ -129,6 +135,7 @@ export class LinkPopover extends Component {
         this.props.onApply(this.state.url, this.state.label, this.classes);
     }
     onClickEdit() {
+        console.log("resetPreview");
         this.state.editing = true;
         this.state.url = this.props.linkElement.href;
 
@@ -200,12 +207,14 @@ export class LinkPopover extends Component {
      * link preview in the popover
      */
     resetPreview() {
+        console.log("resetPreview");
         this.state.previewIcon = { type: "fa", value: "fa-globe" };
         this.state.urlTitle = this.state.url || _t("No URL specified");
         this.state.urlDescription = "";
         this.state.linkPreviewName = "";
     }
     async loadAsyncLinkPreview() {
+        console.log("loadAsyncLinkPreview");
         let url;
         if (this.state.url === "") {
             this.resetPreview();

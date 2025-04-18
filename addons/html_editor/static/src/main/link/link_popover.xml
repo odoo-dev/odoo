@@ -34,23 +34,23 @@
                         </div>
                         <div t-if="state.type === 'custom'" class="d-flex mb-1">
                             <label>Text Color</label>
-                            <button class="o_we_color_preview" t-att-data-color="this.state.currentCustomTextColor" t-attf-style="background-color: {{this.state.currentCustomTextColor}}"/>
+                            <button class="o_we_color_preview" t-att-data-color="this.state.customTextColor" t-attf-style="background-color: {{this.state.customTextColor}}"/>
                         </div>
                         <div t-if="state.type === 'custom'" class="d-flex mb-1">
                             <label>Fill Color</label>
-                            <button class="o_we_color_preview" t-att-data-color="this.state.currentCustomFillColor" t-attf-style="background-color: {{this.state.currentCustomFillColor}}"/>
+                            <button class="o_we_color_preview" t-att-data-color="this.state.customFillColor" t-attf-style="background-color: {{this.state.customFillColor}}"/>
                         </div>
                         <div t-if="state.type === 'custom'" class="d-flex mb-1">
                             <label>Border</label>
-                            <input t-ref="boderSize" class="form-control form-control-sm" t-model="state.borderSize" title="Border Size" t-on-keydown="onKeydownEnter"/>
+                            <input t-ref="customBoderSize" class="form-control form-control-sm" t-model="state.customBorderSize" title="Border Size" t-on-keydown="onKeydownEnter"/>px
                             <select name="link_style_border" class="form-select form-select-sm link-style" t-on-change="(ev)=>this.state.border = ev.target.value">
                                 <t t-foreach="this.borderData" t-as="borderData" t-key="borderData.type">
-                                    <option t-att-value="borderData.size" t-att-selected="state.border === borderData.type">
+                                    <option t-att-value="borderData.style" t-att-selected="state.customBorderStyle === borderData.style">
                                         <span t-esc="borderData.label"/>
                                     </option>
                                 </t>
                             </select>
-                            <button class="o_we_color_preview" t-att-data-color="this.state.currentCustomBorderColor" t-attf-style="background-color: {{this.state.currentCustomBorderColor}}"/>
+                            <button class="o_we_color_preview" t-att-data-color="this.state.customBorderColor" t-attf-style="background-color: {{this.state.customBorderColor}}"/>
                         </div>
                         <div t-if="state.type !== ''" class="input-group mb-1">
                             <label>Size</label>
