@@ -74,6 +74,15 @@ registry.category("services").add("website_edit", {
             }
         };
 
+        const refresh = (target) => {
+            publicInteractions.isRefreshing = true;
+            try {
+                update(target, true);
+            } finally {
+                publicInteractions.isRefreshing = false;
+            }
+        };
+
         const stop = (target) => {
             publicInteractions.stopInteractions(target);
         };
@@ -94,6 +103,7 @@ registry.category("services").add("website_edit", {
                         historyCallbacks.ignoreDOMMutations(() => {
                             super.setupInteraction();
                         });
+                        this.interaction.setupConfigurationSnapshot();
                     },
                     destroyInteraction() {
                         historyCallbacks.ignoreDOMMutations(() => {
@@ -131,6 +141,33 @@ registry.category("services").add("website_edit", {
                     },
                 }),
                 patch(Interaction.prototype, {
+                    setupConfigurationSnapshot() {
+                        // Track configuration values.
+                        this.configurationSnapshot = this.getConfigurationSnapshot();
+                    },
+                    getConfigurationSnapshot() {
+                        // Naive generalise implementation of a snapshot that
+                        // would impact the behavior of an interaction.
+                        // To be overloaded by edit-mode interactions that need
+                        // something more specific.
+                        // TODO Sort keys to improve comparison.
+                        const dataset = { ...this.el.dataset };
+                        const style = [...this.el.attributeStyleMap.entries()].filter(
+                            ([property, value]) => property.startsWith("animation")
+                        );
+                        if (Object.keys(dataset).length || style.length) {
+                            return JSON.stringify({ dataset, style });
+                        }
+                        return NaN; // So that it is different from itself
+                    },
+                    shouldStop() {
+                        const snapshot = this.getConfigurationSnapshot();
+                        if (snapshot === this.configurationSnapshot) {
+                            return false;
+                        }
+                        this.configurationSnapshot = snapshot;
+                        return true;
+                    },
                     insert(...args) {
                         const el = args[0];
                         super.insert(...args);
@@ -140,6 +177,17 @@ registry.category("services").add("website_edit", {
                         // parent node, you do not want the inserted node to be
                         // reinserted upon undo of the option's action.
                         el.dataset.skipHistoryHack = "true";
+                    },
+                }),
+                patch(publicInteractions.constructor.prototype, {
+                    shouldStop(el, interaction) {
+                        if (super.shouldStop(el, interaction)) {
+                            if (this.isRefreshing) {
+                                return interaction.interaction.shouldStop();
+                            }
+                            return true;
+                        }
+                        return false;
                     },
                 })
             );
@@ -171,6 +219,7 @@ registry.category("services").add("website_edit", {
         const websiteEditService = {
             isEditingTranslations,
             update,
+            refresh,
             stop,
             installPatches,
             uninstallPatches,
