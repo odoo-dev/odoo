@@ -174,6 +174,7 @@ export class SnippetModel extends Reactive {
                     name: snippetEl.children[0].dataset.snippet,
                     content: snippetEl.children[0],
                     viewId: parseInt(snippetEl.dataset.oeSnippetId),
+                    key: snippetEl.dataset.oeSnippetKey,
                     thumbnailSrc: escape(snippetEl.dataset.oeThumbnail),
                     imagePreviewSrc: snippetEl.dataset.oImagePreview,
                     isCustom: false,
