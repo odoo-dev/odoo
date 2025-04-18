@@ -10,7 +10,7 @@
             fields="props.fields"
             selected="domState.selected"
             select="select.bind(this)"
-            unselect="props.allowUnselect ? unselect.bind(this) : undefined"
+            unselect="props.allowUnselect ? select.bind(this, undefined) : undefined"
             defaultMessage="props.defaultMessage"
         />
     </BuilderComponent>
