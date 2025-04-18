@@ -7,5 +7,4 @@ class L10nSaVatGroup(models.Model):
 
     name = fields.Char(required=True)
     vat = fields.Char("Tax ID", required=True)
-    address = fields.Char()
     partner_ids = fields.One2many("res.partner", "l10n_sa_vat_group_id", domain=[("ref_company_ids", "!=", False), ("country_id.code", "=", "SA")])

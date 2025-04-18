@@ -16,7 +16,6 @@
                         <group>
                             <group name="left">
                                 <field name="vat"/>
-                                <field name="address"/>
                             </group>
                         </group>
                         <notebook>
@@ -41,7 +40,6 @@
                 <list edit="false">
                     <field name="name"/>
                     <field name="vat"/>
-                    <field name="address"/>
                 </list>
             </field>
         </record>

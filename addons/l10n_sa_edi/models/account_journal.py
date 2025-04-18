@@ -95,6 +95,13 @@ class AccountJournal(models.Model):
         self.ensure_one()
         return self.sudo().l10n_sa_production_csid_json
 
+    def _l10n_sa_get_name_and_vat(self):
+        """
+            Helper function retrieve the name and the vat number of the tax unit being registerd.
+        """
+        self.ensure_one()
+        return self.company_id.display_name, self.company_id.vat
+
     # ====== CSR Generation =======
 
     def _l10n_sa_csr_required_fields(self):
@@ -294,15 +301,16 @@ class AccountJournal(models.Model):
         def _get_node(xpath_str):
             return root.xpath(xpath_str, namespaces=ns_map)[0]
 
+        name, vat = self._l10n_sa_get_name_and_vat()
         # Update the Company VAT number in the test invoice
         vat_el = _get_node('//cbc:CompanyID')
-        vat_el.text = self.company_id.vat
+        vat_el.text = vat
 
         # Update the Company Name in the test invoice
         name_nodes = ['cac:PartyName/cbc:Name', 'cac:PartyLegalEntity/cbc:RegistrationName', 'cac:Contact/cbc:Name']
         for node in name_nodes:
             comp_name_el = _get_node('//cac:AccountingSupplierParty/cac:Party/' + node)
-            comp_name_el.text = self.company_id.display_name
+            comp_name_el.text = name
 
         return etree.tostring(root)
 

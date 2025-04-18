@@ -7,7 +7,7 @@
             <field name="inherit_id" ref="l10n_sa_edi.view_account_journal_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='l10n_sa_serial_number']" position="before">
-                    <field name="partner_id"/>
+                    <field name="partner_id" groups="base.group_no_one"/>
                 </xpath>
             </field>
         </record>
