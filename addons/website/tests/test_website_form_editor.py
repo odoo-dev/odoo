@@ -70,7 +70,6 @@ class TestWebsiteFormEditor(HttpCaseWithUserPortal):
         self.assertIn('Test1&#34;&#39;', mail.body_html, 'The single quotes and double quotes characters should be visible on the received mail')
         self.assertIn('Test2`\\', mail.body_html, 'The backtick and backslash characters should be visible on the received mail')
 
-    @unittest.skip
     def test_website_form_nested_forms(self):
         self.start_tour('/my/account', 'website_form_nested_forms', login='admin')
 
