@@ -352,6 +352,9 @@ export class LinkPlugin extends Plugin {
      * @param {HTMLElement} [linkElement]
      */
     openLinkTools(linkElement, type) {
+        console.warn("link plugins config :");
+        console.log(this.config);
+        console.log("allowCustomStyle : ", this.config.allowCustomStyle);
         this.overlay.close();
         if (!this.isLinkAllowedOnSelection()) {
             return this.services.notification.add(
@@ -475,6 +478,7 @@ export class LinkPlugin extends Plugin {
             canUpload: this.config.allowFile,
             onUpload: this.config.onAttachmentChange,
             type: this.type || "",
+            allowCustomStyle: this.config.allowCustomStyle,
         };
         this.overlay.open({ props });
     }

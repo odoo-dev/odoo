@@ -69,6 +69,7 @@ export class Builder extends Component {
         const Plugins = [...mainPlugins, ...CORE_PLUGINS, ...(this.props.Plugins || [])];
         // TODO: maybe do a different config for the translate mode and the
         // "regular" mode.
+        console.log("Editor config", this.props.config);
         this.editor = new Editor(
             {
                 Plugins,
@@ -129,6 +130,7 @@ export class Builder extends Component {
                     this.snippetModel.saveSnippet(snippetEl, cleanForSaveHandlers),
                 getShared: () => this.editor.shared,
                 updateInvisibleElementsPanel: () => this.updateInvisibleEls(),
+                allowCustomStyle: true,
             },
             this.env.services
         );

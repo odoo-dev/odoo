@@ -24,31 +24,55 @@
                         <div class="input-group">
                             <select name="link_type" class="form-select form-select-sm" t-att-class="{'mb-1': state.type !==  ''}" t-on-change="(ev)=>this.state.type = ev.target.value">
                                 <t t-foreach="this.colorsData" t-as="colorData" t-key="colorData.type">
-                                    <t t-if="colorData.type !== 'custom'">
+                                    <t t-if="props.allowCustomStyle">
                                         <option t-att-value="colorData.type" t-att-selected="state.type === colorData.type" t-attf-class="o_btn_preview">
                                             <span t-esc="colorData.label"/>
                                         </option>
                                     </t>
                                 </t>
                             </select>
-                            <div t-if="state.type !== 'custom' and state.type !==  ''" class="input-group mb-1">
-                                    <select name="link_style_size" class="form-select form-select-sm link-style" t-on-change="(ev)=>this.state.buttonSize = ev.target.value">
-                                        <t t-foreach="this.buttonSizesData" t-as="buttonSizesData" t-key="buttonSizesData.size">
-                                            <option t-att-value="buttonSizesData.size" t-att-selected="state.buttonSize === buttonSizesData.size">
-                                                <span t-esc="buttonSizesData.label"/>
-                                            </option>
-                                        </t>
-                                    </select>
-                                    <select name="link_style_shape" class="form-select form-select-sm link-style ms-1" t-on-change="(ev)=>this.state.buttonStyle = ev.target.value">
-                                        <t t-foreach="this.buttonStylesData" t-as="buttonStylesData" t-key="buttonStylesData.style">
-                                            <option t-att-value="buttonStylesData.style" t-att-selected="state.buttonStyle === buttonStylesData.style">
-                                                <span t-esc="buttonStylesData.label"/>
-                                            </option>
-                                        </t>
-                                    </select>
-                            </div>
-                            <button class="o_we_apply_link btn btn-sm btn-primary" t-att-class="{'ms-1': state.type ===  ''}" t-on-click="onClickApply">Apply</button>
                         </div>
+                        <div t-if="state.type === 'custom'" class="d-flex mb-1">
+                            <label>Text Color</label>
+                            <button class="o_we_color_preview" t-att-data-color="this.state.currentCustomTextColor" t-attf-style="background-color: {{this.state.currentCustomTextColor}}"/>
+                        </div>
+                        <div t-if="state.type === 'custom'" class="d-flex mb-1">
+                            <label>Fill Color</label>
+                            <button class="o_we_color_preview" t-att-data-color="this.state.currentCustomFillColor" t-attf-style="background-color: {{this.state.currentCustomFillColor}}"/>
+                        </div>
+                        <div t-if="state.type === 'custom'" class="d-flex mb-1">
+                            <label>Border</label>
+                            <input t-ref="boderSize" class="form-control form-control-sm" t-model="state.borderSize" title="Border Size" t-on-keydown="onKeydownEnter"/>
+                            <select name="link_style_border" class="form-select form-select-sm link-style" t-on-change="(ev)=>this.state.border = ev.target.value">
+                                <t t-foreach="this.borderData" t-as="borderData" t-key="borderData.type">
+                                    <option t-att-value="borderData.size" t-att-selected="state.border === borderData.type">
+                                        <span t-esc="borderData.label"/>
+                                    </option>
+                                </t>
+                            </select>
+                            <button class="o_we_color_preview" t-att-data-color="this.state.currentCustomBorderColor" t-attf-style="background-color: {{this.state.currentCustomBorderColor}}"/>
+                        </div>
+                        <div t-if="state.type !== ''" class="input-group mb-1">
+                            <label>Size</label>
+                            <select name="link_style_size" class="form-select form-select-sm link-style" t-on-change="(ev)=>this.state.buttonSize = ev.target.value">
+                                <t t-foreach="this.buttonSizesData" t-as="buttonSizesData" t-key="buttonSizesData.size">
+                                    <option t-att-value="buttonSizesData.size" t-att-selected="state.buttonSize === buttonSizesData.size">
+                                        <span t-esc="buttonSizesData.label"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                        <div t-if="state.type !== ''" class="input-group mb-1">
+                            <label>Shape</label>
+                            <select name="link_style_shape" class="form-select form-select-sm link-style ms-1" t-on-change="(ev)=>this.state.buttonStyle = ev.target.value">
+                                <t t-foreach="this.buttonStylesData" t-as="buttonStylesData" t-key="buttonStylesData.style">
+                                    <option t-att-value="buttonStylesData.style" t-att-selected="state.buttonStyle === buttonStylesData.style">
+                                        <span t-esc="buttonStylesData.label"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                        <button class="o_we_apply_link btn btn-sm btn-primary" t-att-class="{'ms-1': state.type ===  ''}" t-on-click="onClickApply">Apply</button>
                     </div>
 
                     <div t-if="!this.ui.isSmall and state.url" class="col o_link_dialog_preview" style="max-width: 125px;border-left: 1px solid var(--border-color);">

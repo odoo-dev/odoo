@@ -21,6 +21,7 @@ export class LinkPopover extends Component {
         canEdit: { type: Boolean, optional: true },
         canUpload: { type: Boolean, optional: true },
         onUpload: { type: Function, optional: true },
+        allowCustomStyle: { type: Boolean, optional: true },
     };
     static defaultProps = {
         canEdit: true,
@@ -46,7 +47,16 @@ export class LinkPopover extends Component {
         { style: "outline", label: _t("Outline") },
         { style: "outline,rounded-circle", label: _t("Outline + Rounded") },
     ];
+    borderData = [
+        { style: "solid", type: "━━━", label: _t("Solid") },
+        { style: "dashed", type: "╌╌╌", label: _t("Dashed") },
+        { style: "dotted", type: "┄┄┄", label: _t("Dotted") },
+        { style: "double", type: "═══", label: _t("Double") },
+    ];
     setup() {
+        console.warn("link popover props");
+        console.log(this.props);
+        console.log("allowCustomStyle : ", this.props.allowCustomStyle);
         this.ui = useService("ui");
         this.notificationService = useService("notification");
         this.uploadService = useService("uploadLocalFiles");
@@ -72,9 +82,17 @@ export class LinkPopover extends Component {
                 this.props.type ||
                 this.props.linkElement.className
                     .match(/btn(-[a-z0-9_-]*)(primary|secondary)/)
-                    ?.pop() || "",
+                    ?.pop() ||
+                "",
             buttonSize: this.props.linkElement.className.match(/btn-(sm|lg)/)?.[1] || "",
             buttonStyle: this.initButtonStyle(this.props.linkElement.className),
+            borderSize: this.props.linkElement.className.match(/border-([a-z0-9_-]+)/)?.[1] || "",
+            currentCustomTextColor:
+                this.props.linkElement.className.match(/text-([a-z0-9_-]+)/)?.[1] || "", // todo probably not working parce current color
+            currentCustomBgColor:
+                this.props.linkElement.className.match(/bg-([a-z0-9_-]+)/)?.[1] || "", // todo probably not working parce current color
+            currentCustomBorderColor:
+                this.props.linkElement.className.match(/border-([a-z0-9_-]+)/)?.[1] || "", // todo probably not working parce current color
             isImage: this.props.isImage,
         });
 
