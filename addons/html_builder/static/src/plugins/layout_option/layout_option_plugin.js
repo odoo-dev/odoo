@@ -13,7 +13,7 @@ import { LAYOUT, LAYOUT_COLUMN, LAYOUT_GRID } from "@html_builder/website_builde
 
 class LayoutOptionPlugin extends Plugin {
     static id = "LayoutOption";
-    static dependencies = ["clone"];
+    static dependencies = ["clone", "selection"];
     resources = {
         builder_options: [
             withSequence(LAYOUT, {
@@ -46,6 +46,7 @@ class LayoutOptionPlugin extends Plugin {
             const rowEl = getRow(el);
             return !!(rowEl && rowEl.classList.contains("o_grid_mode"));
         };
+        const selectionPlugin = this.dependencies.selection;
         return {
             setGridLayout: {
                 apply: ({ editingElement }) => {
@@ -89,14 +90,33 @@ class LayoutOptionPlugin extends Plugin {
                     if (nbColumns === "custom") {
                         return;
                     }
-                    const rowEl = getRow(editingElement);
-                    const columnEls = rowEl.children;
-                    const prevNbColumns = getNbColumns(columnEls, isMobileView(this.editable));
+
+                    let rowEl = getRow(editingElement);
+                    let columnEls, prevNbColumns;
+                    if (!rowEl) {
+                        // If there is no row, create one and wrap the content
+                        // in a column.
+                        const cursors = selectionPlugin.preserveSelection();
+                        rowEl = document.createElement("div");
+                        const columnEl = document.createElement("div");
+                        rowEl.classList.add("row");
+                        columnEl.classList.add("col-lg-12");
+                        columnEl.append(...editingElement.children);
+                        rowEl.append(columnEl);
+                        editingElement.append(rowEl);
+                        cursors.restore();
+
+                        columnEls = [columnEl];
+                        prevNbColumns = 0;
+                    } else {
+                        columnEls = rowEl.children;
+                        prevNbColumns = getNbColumns(columnEls, isMobileView(this.editable));
+                    }
 
                     if (nbColumns === prevNbColumns) {
                         return;
                     }
-                    this.resizeColumns(columnEls, nbColumns);
+                    this.resizeColumns(columnEls, nbColumns || 1);
 
                     const itemsDelta = nbColumns - rowEl.children.length;
                     if (itemsDelta > 0) {
@@ -104,6 +124,16 @@ class LayoutOptionPlugin extends Plugin {
                             const lastEl = rowEl.lastElementChild;
                             this.dependencies.clone.cloneElement(lastEl);
                         }
+                    }
+
+                    // If "None" columns was chosen, unwrap the content from
+                    // the column and the row and remove them.
+                    if (nbColumns === 0) {
+                        const cursors = selectionPlugin.preserveSelection();
+                        const columnEl = editingElement.querySelector(".row > div");
+                        editingElement.append(...columnEl.children);
+                        rowEl.remove();
+                        cursors.restore();
                     }
                 },
                 isApplied: ({ editingElement, value }) => {

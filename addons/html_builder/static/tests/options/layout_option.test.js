@@ -33,3 +33,22 @@ test("switch to mobile mode should update number of columns", async () => {
     await contains("button[data-action='mobile']").click();
     expect("[data-label='Layout'] .dropdown-toggle").toHaveText("1");
 });
+
+test("Changing the number of columns to 'None' (0)", async () => {
+    await setupWebsiteBuilderWithSnippet(["s_text_image", "s_text_block"]);
+    await contains(":iframe .s_text_image").click();
+    await contains("[data-label='Layout'] .dropdown").click();
+    expect("[data-action-id='changeColumnCount'][data-action-value='0']").toHaveCount(0);
+
+    await contains(":iframe .s_text_block").click();
+    expect(":iframe .s_text_block .row").toHaveCount(0);
+    expect("[data-label='Layout'] .dropdown:contains(None)").toHaveCount(1);
+
+    await contains("[data-label='Layout'] .dropdown").click();
+    await contains("[data-action-id='changeColumnCount'][data-action-value='1']").click();
+    expect(":iframe .s_text_block .container > .row:only-child > .col-lg-12").toHaveCount(1);
+
+    await contains("[data-label='Layout'] .dropdown").click();
+    await contains("[data-action-id='changeColumnCount'][data-action-value='0']").click();
+    expect(":iframe .s_text_block .row").toHaveCount(0);
+});

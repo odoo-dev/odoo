@@ -13,6 +13,7 @@ export class SelectNumberColumn extends BaseOptionComponent {
             return {
                 isCustomColumn:
                     columnEls && areColsCustomized(columnEls, isMobileView(editingElement)),
+                canHaveZeroColumns: editingElement.matches(".s_allow_columns"),
             };
         });
     }
