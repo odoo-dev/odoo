@@ -79,6 +79,54 @@ registry.category("services").add("google_maps", {
                 }
                 return gMapsAPILoading;
             },
-        };
-    },
+            /**
+             * Send a request to the Google Maps API to test the validity of the given
+             * API key. Return an object with the error message if any, and a boolean
+             * that is true if the response from the API had a status of 200.
+             *
+             * Note: The response will be 200 so long as the API key has billing, Static
+             * API and Javascript API enabled. However, for our purposes, we also need
+             * the Places API enabled. To deal with that case, we perform a nearby
+             * search immediately after validation. If it fails, the error is handled
+             * and the dialog is re-opened.
+             * @see nearbySearch
+             * @see notifyGMapsError
+             *
+             * @param {string} key
+             * @returns {Promise<ApiKeyValidation>}
+             */
+            async validateGMapsApiKey(key) {
+                if (key) {
+                    try {
+                        const response = await this.fetchGoogleMaps(key);
+                        const isValid = (response.status === 200);
+                        return {
+                            isValid,
+                            message: isValid
+                                ? undefined
+                                : _t("Invalid API Key. The following error was returned by Google: %(error)s", { error: await response.text() }),
+                        };
+                    } catch {
+                        return {
+                            isValid: false,
+                            message: _t("Check your connection and try again"),
+                        };
+                    }
+                } else {
+                    return { isValid: false };
+                }
+            },
+            /**
+             * Send a request to the Google Maps API, using the given API key, so as to
+             * get a response which can be used to test the validity of said key.
+             * This method is set apart so it can be overridden for testing.
+             *
+             * @param {string} key
+             * @returns {Promise<{ status: number }>}
+             */
+            async fetchGoogleMaps(key) {
+                return await fetch(`https://maps.googleapis.com/maps/api/staticmap?center=belgium&size=10x10&key=${encodeURIComponent(key)}`);
+            },
+        }
+    }
 });

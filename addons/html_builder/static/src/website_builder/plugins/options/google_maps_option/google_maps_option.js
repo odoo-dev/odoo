@@ -1,19 +1,19 @@
-/* global google */
-
 import { useRef, onMounted, useState, useEffect, onWillDestroy } from "@odoo/owl";
 import { BaseOptionComponent } from "@html_builder/core/utils";
 
 /** @import { Coordinates, Place } from './google_maps_option_plugin.js' */
 /**
  * @typedef {Object} Props
+ * @property {function():object} getMapsAPI
  * @property {function(Element, Coordinates):Promise<Place | undefined>} getPlace
- * @property {function(Element, Place)} onPlaceChanged
+ * @property {function(Element, Place):void} onPlaceChanged
  */
 
 export class GoogleMapsOption extends BaseOptionComponent {
     static template = "html_builder.GoogleMapsOption";
     /** @type {Props} */
     static props = {
+        getMapsAPI: { type: Function },
         getPlace: { type: Function },
         onPlaceChanged: { type: Function },
     };
@@ -40,7 +40,7 @@ export class GoogleMapsOption extends BaseOptionComponent {
         });
         onWillDestroy(() => {
             if (this.autocompleteListener) {
-                google.maps.event.removeListener(this.autocompleteListener);
+                this.props.getMapsAPI().event.removeListener(this.autocompleteListener);
             }
             // Without this, the Google library injects elements inside the
             // DOM but does not remove them once the option is closed.
@@ -56,15 +56,12 @@ export class GoogleMapsOption extends BaseOptionComponent {
      * @param {Element} inputEl
      */
     initializeAutocomplete(inputEl) {
-        if (
-            !this.googleMapsAutocomplete &&
-            typeof google === "object" &&
-            typeof google.maps === "object"
-        ) {
-            this.googleMapsAutocomplete = new google.maps.places.Autocomplete(inputEl, {
+        if (!this.googleMapsAutocomplete && this.props.getMapsAPI()) {
+            const mapsAPI = this.props.getMapsAPI();
+            this.googleMapsAutocomplete = new mapsAPI.places.Autocomplete(inputEl, {
                 types: ["geocode"],
             });
-            this.autocompleteListener = google.maps.event.addListener(
+            this.autocompleteListener = mapsAPI.event.addListener(
                 this.googleMapsAutocomplete,
                 "place_changed",
                 this.onPlaceChanged.bind(this)
