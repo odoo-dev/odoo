@@ -52,10 +52,6 @@ export class GoogleMapsOptionPlugin extends Plugin {
                 }
             }
         },
-        restore_savepoint_handlers: () => {
-            // Restart interactions to re-render the map.
-            this.dispatchTo("content_manually_updated_handlers");
-        },
     };
 
     setup() {
@@ -106,19 +102,17 @@ export class GoogleMapsOptionPlugin extends Plugin {
         /** @type {string  |undefined} */
         const apiKey = await this.googleMapsService.getGMapsAPIKey();
         const didReconfigure = await this.configureGMapsAPI({ apiKey, force: forceReconfigure });
-        // @TODO mysterious-egg: we don't wait here because sometimes the
-        // promise never resolves. This is because it finds an API key and has
-        // already called `loadJS` with it, `loadJS` will fetch the result from
-        // cache and never actually call the Google API's URL, bypassing its
-        // callback in the process, on which we depend to resolve the promise.
         const didLoad = !!(await this.loadGoogleMapsAPIFromService(didReconfigure));
         if (didLoad) {
             this.mapsAPI = google.maps;
             this.placesAPI = google.maps.places;
+            // Try to fail early if there is a configuration issue.
+            const foundPlace = !!(await this.getPlace(
+                editingElement,
+                editingElement.dataset.mapGps
+            ));
+            this.isGoogleMapsReady = didLoad && foundPlace;
         }
-        // Try to fail early if there is a configuration issue.
-        const foundPlace = !!(await this.getPlace(editingElement, editingElement.dataset.mapGps));
-        this.isGoogleMapsReady = didLoad && foundPlace;
         // @TODO mysterious-egg: this would not be needed if we didn't duplicate
         // the API loading:
         if (didReconfigure) {
@@ -126,6 +120,8 @@ export class GoogleMapsOptionPlugin extends Plugin {
             window.top.refetchGoogleMaps = true;
             // Restart interactions to re-render the map.
             this.dispatchTo("content_manually_updated_handlers");
+        } else if (!didLoad) {
+            this.dependencies.remove.removeElement(editingElement);
         }
     }
 
