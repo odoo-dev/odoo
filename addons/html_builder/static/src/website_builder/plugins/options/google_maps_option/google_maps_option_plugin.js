@@ -30,6 +30,7 @@ import { GoogleMapsOption } from "./google_maps_option";
 export class GoogleMapsOptionPlugin extends Plugin {
     static id = "googleMapsOption";
     static dependencies = ["history", "remove"];
+    static shared = ["configureGMapsAPI"];
     resources = {
         builder_options: [
             {

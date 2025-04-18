@@ -6,6 +6,7 @@ export class ThemeAdvancedOption extends BaseOptionComponent {
     static template = "html_builder.ThemeAdvancedOption";
     static props = {
         grays: Object,
+        configureGMapsAPI: Function,
     };
 
     setup() {
@@ -17,6 +18,6 @@ export class ThemeAdvancedOption extends BaseOptionComponent {
         this.dialog.add(EditHeadBodyDialog);
     }
     configureApiKey() {
-        // TODO After GMap options are merged.
+        this.props.configureGMapsAPI("", true);
     }
 }
