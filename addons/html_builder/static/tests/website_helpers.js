@@ -153,6 +153,7 @@ export async function setupWebsiteBuilder(
             // See loadAssetsEditBundle override in WebsiteBuilder patch.
             this.websiteEditService = {
                 update: () => {},
+                refresh: () => {},
                 stop: () => {},
             };
         },
