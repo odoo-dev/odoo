@@ -1,5 +1,5 @@
 import { renderToElement } from "@web/core/utils/render";
-import { descendants, preserveCursor } from "@web_editor/js/editor/odoo-editor/src/utils/utils";
+
 export const rowSize = 50; // 50px.
 // Maximum number of rows that can be added when dragging a grid item.
 export const additionalRowLimit = 10;
@@ -100,19 +100,16 @@ export function gridCleanUp(rowEl, columnEl) {
  *
  * @private
  * @param {Element} containerEl element with the class "container"
+ * @param {Function} preserveSelection called to preserve the text selection
+ *   when needed
  */
-export function toggleGridMode(containerEl) {
+export function toggleGridMode(containerEl, preserveSelection) {
     let rowEl = containerEl.querySelector(":scope > .row");
     const outOfRowEls = [...containerEl.children].filter((el) => !el.classList.contains("row"));
-    // Avoid an unwanted rollback that prevents from deleting the text.
-    const avoidRollback = (el) => {
-        for (const node of descendants(el)) {
-            node.ouid = undefined;
-        }
-    };
+
     // Keep the text selection.
-    const restoreCursor =
-        !rowEl || outOfRowEls.length > 0 ? preserveCursor(containerEl.ownerDocument) : () => {};
+    const restoreSelection =
+        !rowEl || outOfRowEls.length > 0 ? preserveSelection().restore : () => {};
 
     // For the snippets having elements outside of the row (and therefore not in
     // a column), create a column and put these elements in it so they can also
@@ -123,7 +120,6 @@ export function toggleGridMode(containerEl) {
         for (let i = outOfRowEls.length - 1; i >= 0; i--) {
             columnEl.prepend(outOfRowEls[i]);
         }
-        avoidRollback(columnEl);
         rowEl.prepend(columnEl);
     }
 
@@ -141,11 +137,10 @@ export function toggleGridMode(containerEl) {
         for (let i = containerChildren.length - 1; i >= 0; i--) {
             columnEl.prepend(containerChildren[i]);
         }
-        avoidRollback(columnEl);
         rowEl.appendChild(columnEl);
         containerEl.appendChild(rowEl);
     }
-    restoreCursor();
+    restoreSelection();
 
     // Converting the columns to grid and getting back the number of rows.
     const columnEls = rowEl.children;
