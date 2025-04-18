@@ -569,7 +569,6 @@ class TestUi(HttpCaseWithWebsiteUser):
             'websiteIdMapping': json.dumps({'Test Website': website.id})
         })
 
-    @unittest.skip
     def test_26_website_media_dialog_icons(self):
         self.env.ref('website.default_website').write({
             'social_twitter': 'https://twitter.com/Odoo',
@@ -579,6 +578,7 @@ class TestUi(HttpCaseWithWebsiteUser):
             'social_github': 'https://github.com/odoo',
             'social_instagram': 'https://www.instagram.com/explore/tags/odoo/',
             'social_tiktok': 'https://www.tiktok.com/@odoo',
+            'social_discord': 'https://discord.com/servers/discord-town-hall-169256939211980800',
         })
         self.start_tour("/", 'website_media_dialog_icons', login='admin')
 
