@@ -30,7 +30,6 @@ export class BuilderMany2Many extends Component {
         this.applyOperation = this.env.editor.shared.history.makePreviewableAsyncOperation(
             this.callApply.bind(this)
         );
-        this.selectionToApply = undefined;
         this.state = useState({
             searchModel: undefined,
         });
@@ -75,7 +74,7 @@ export class BuilderMany2Many extends Component {
                 applySpec.apply({
                     editingElement: applySpec.editingElement,
                     param: applySpec.actionParam,
-                    value: this.selectionToApply,
+                    value: applySpec.actionValue,
                     loadResult: applySpec.loadResult,
                     dependencyManager: this.env.dependencyManager,
                 })
@@ -84,7 +83,8 @@ export class BuilderMany2Many extends Component {
         return proms;
     }
     setSelection(newSelection) {
-        this.selectionToApply = JSON.stringify(newSelection);
-        this.callOperation(this.applyOperation.commit);
+        this.callOperation(this.applyOperation.commit, {
+            userInputValue: JSON.stringify(newSelection),
+        });
     }
 }

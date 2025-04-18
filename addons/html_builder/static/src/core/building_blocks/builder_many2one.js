@@ -34,7 +34,6 @@ export class BuilderMany2One extends Component {
         this.applyOperation = this.env.editor.shared.history.makePreviewableAsyncOperation(
             this.callApply.bind(this)
         );
-        this.selectedToApply = undefined;
         const getAction = this.env.editor.shared.builderActions.getAction;
         const actionWithGetValue = getAllActions().find(
             ({ actionId }) => getAction(actionId).getValue
@@ -56,11 +55,10 @@ export class BuilderMany2One extends Component {
     callApply(applySpecs) {
         const proms = [];
         for (const applySpec of applySpecs) {
-            if (!this.selectedToApply && applySpec.clean) {
+            if (applySpec.clean && applySpec.actionValue === undefined) {
                 applySpec.clean({
                     editingElement: applySpec.editingElement,
                     param: applySpec.actionParam,
-                    value: this.selectedToApply,
                     dependencyManager: this.env.dependencyManager,
                 });
             } else {
@@ -68,7 +66,7 @@ export class BuilderMany2One extends Component {
                     applySpec.apply({
                         editingElement: applySpec.editingElement,
                         param: applySpec.actionParam,
-                        value: this.selectedToApply,
+                        value: applySpec.actionValue,
                         loadResult: applySpec.loadResult,
                         dependencyManager: this.env.dependencyManager,
                     })
@@ -78,11 +76,8 @@ export class BuilderMany2One extends Component {
         return Promise.all(proms);
     }
     select(newSelected) {
-        this.selectedToApply = newSelected && JSON.stringify(newSelected);
-        this.callOperation(this.applyOperation.commit);
-    }
-    unselect() {
-        this.selectedToApply = null;
-        this.callOperation(this.applyOperation.commit);
+        this.callOperation(this.applyOperation.commit, {
+            userInputValue: newSelected && JSON.stringify(newSelected),
+        });
     }
 }
