@@ -54,7 +54,7 @@ class LayoutOptionPlugin extends Plugin {
                     if (isGrid(editingElement)) {
                         return;
                     }
-                    toggleGridMode(editingElement);
+                    toggleGridMode(editingElement, selectionPlugin.preserveSelection);
                 },
                 isApplied: ({ editingElement }) => isGrid(editingElement),
             },
