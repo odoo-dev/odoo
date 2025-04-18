@@ -15,6 +15,7 @@ export class OrderReceipt extends Component {
         data: Object,
         formatCurrency: Function,
         basic_receipt: { type: Boolean, optional: true },
+        isFromTicketScreen: { type: Boolean, optional: true },
     };
     static defaultProps = {
         basic_receipt: false,
