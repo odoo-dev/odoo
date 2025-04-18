@@ -49,6 +49,10 @@ export class BuilderOptionsPlugin extends Plugin {
         this.builderHeaderMiddleButtons = this.getResource("builder_header_middle_buttons").map(
             (headerMiddleButton) => ({ ...headerMiddleButton, id: uniqueId() })
         );
+        this.builderContatinerTitle = this.getResource("container_title").map((containerTitle) => ({
+            ...containerTitle,
+            id: uniqueId(),
+        }));
         // doing this manually instead of using addDomListener. This is because
         // addDomListener will ignore all events from protected targets. But in
         // our case, we still want to update the containers.
@@ -100,10 +104,12 @@ export class BuilderOptionsPlugin extends Plugin {
                 const previousOptions = this.lastContainers.flatMap((c) => [
                     ...c.options,
                     ...c.headerMiddleButtons,
+                    c.containerTitle,
                 ]);
                 const newOptions = newContainers.flatMap((c) => [
                     ...c.options,
                     ...c.headerMiddleButtons,
+                    c.containerTitle,
                 ]);
                 const areSameOptions =
                     newOptions.length === previousOptions.length &&
@@ -148,6 +154,7 @@ export class BuilderOptionsPlugin extends Plugin {
         };
         const elementToOptions = mapElementsToOptions(this.builderOptions);
         const elementToHeaderMiddleButtons = mapElementsToOptions(this.builderHeaderMiddleButtons);
+        const elementToContatinerTitle = mapElementsToOptions(this.builderContatinerTitle);
 
         // Find the closest element with no options that should still have the
         // overlay buttons.
@@ -168,6 +175,9 @@ export class BuilderOptionsPlugin extends Plugin {
                 element,
                 options,
                 headerMiddleButtons: elementToHeaderMiddleButtons.get(element) || [],
+                containerTitle: elementToContatinerTitle.get(element)
+                    ? elementToContatinerTitle.get(element)[0]
+                    : {},
                 hasOverlayOptions: this.hasOverlayOptions(element),
                 isRemovable: isRemovable(element),
                 removeDisabledReason: this.getRemoveDisabledReason(element),

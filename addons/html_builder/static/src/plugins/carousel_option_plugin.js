@@ -34,6 +34,11 @@ export class CarouselOptionPlugin extends Plugin {
                     this.removeSlide(editingElement.closest(".carousel")),
             },
         },
+        container_title: {
+            selector:
+                ".s_carousel .carousel-item, .s_quotes_carousel .carousel-item, .s_carousel_intro .carousel-item, .s_carousel_cards .carousel-item",
+            getTitleExtraInfo: (editingElement) => this.getTitleExtraInfo(editingElement),
+        },
         builder_actions: this.getActions(),
         on_cloned_handlers: this.onCloned.bind(this),
         on_will_clone_handlers: this.onWillClone.bind(this),
@@ -67,6 +72,14 @@ export class CarouselOptionPlugin extends Plugin {
                 },
             },
         };
+    }
+
+    getTitleExtraInfo(editingElement) {
+        const itemsEls = [...editingElement.parentElement.children];
+        const activeIndex = itemsEls.indexOf(editingElement);
+
+        const updatedText = ` (${activeIndex + 1}/${itemsEls.length})`;
+        return updatedText;
     }
 
     async addSlide(editingElement) {

@@ -27,9 +27,11 @@ export class OptionsContainer extends BaseOptionComponent {
         isClonable: false,
         cloneDisabledReason: { type: String, optional: true },
         containerTopButtons: { type: Array },
+        containerTitle: { type: Object, optional: true },
         headerMiddleButtons: { type: Array, optional: true },
     };
     static defaultProps = {
+        containerTitle: {},
         headerMiddleButtons: [],
     };
 
@@ -81,7 +83,11 @@ export class OptionsContainer extends BaseOptionComponent {
         for (const option of this.props.options) {
             title = option.title || title;
         }
-        return title || getSnippetName(this.env.getEditingElement());
+        const titleExtraInfo = this.props.containerTitle.getTitleExtraInfo
+            ? this.props.containerTitle.getTitleExtraInfo(this.props.editingElement)
+            : "";
+
+        return (title || getSnippetName(this.env.getEditingElement())) + titleExtraInfo;
     }
 
     selectElement() {
