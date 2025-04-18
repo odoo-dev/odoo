@@ -820,7 +820,6 @@ class Base(models.AbstractModel):
 
         result = defaultdict(lambda: dict.fromkeys(progress_bar['colors'], 0))
         domain = AND([domain, [(progress_bar['field'], 'in', list(progress_bar['colors']))]])
-
         for main_group, field_value, count in self._read_group(
             domain, [group_by, progress_bar['field']], ['__count'],
         ):

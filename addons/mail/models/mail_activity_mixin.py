@@ -281,7 +281,12 @@ class MailActivityMixin(models.AbstractModel):
             today_utc=pytz.utc.localize(datetime.utcnow()),
             tz=tz,
         )
-        alias = query.left_join(self._table, "id", sql_join, "res_id", "last_activity_state")
+
+        join_key = f"{self._table}__last_activity_state"
+        if join_key not in query._joins:
+            alias = query.left_join(self._table, "id", sql_join, "res_id", "last_activity_state")
+        else:
+            alias = join_key
 
         return SQL.identifier(alias, 'activity_state')
 
