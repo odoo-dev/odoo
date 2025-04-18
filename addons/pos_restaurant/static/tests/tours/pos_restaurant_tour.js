@@ -330,3 +330,25 @@ registry.category("web_tour.tours").add("PoSPaymentSyncTour3", {
             ProductScreen.orderlinesHaveNoChange(),
         ].flat(),
 });
+
+registry.category("web_tour.tours").add("test_remove_ordered_item", {
+    test: true,
+    steps: () =>
+        [
+            Dialog.confirm("Open session"),
+            FloorScreen.clickTable("5"),
+            ProductScreen.isShown(),
+            ProductScreen.clickDisplayedProduct("Minute Maid"),
+            ProductScreen.clickOrderButton(),
+            ProductScreen.orderlinesHaveNoChange(),
+            ProductScreen.addInternalNote("Test Note"),
+            ProductScreen.selectedOrderlineHas("Minute Maid", "1.0"),
+            ProductScreen.clickNumpad("⌫"),
+            ProductScreen.selectedOrderlineHas("Minute Maid", "0.0"),
+            ProductScreen.clickNumpad("⌫"),
+            ProductScreen.orderIsEmpty(),
+            ProductScreen.clickDisplayedProduct("Test Multi Category Product"),
+            ProductScreen.clickOrderButton(),
+            ProductScreen.totalAmountIs("2.20"),
+        ].flat(),
+});

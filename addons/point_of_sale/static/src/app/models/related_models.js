@@ -948,7 +948,7 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
                                 .map((r) => models[params.relation]?.get(r))
                                 .filter(Boolean);
                             if (existingRecords.length) {
-                                record[field] = [["set", ...existingRecords]];
+                                record[field] = [["set", ...existingRecords.map((r) => r.id)]];
                             } else {
                                 record[field] = [];
                             }

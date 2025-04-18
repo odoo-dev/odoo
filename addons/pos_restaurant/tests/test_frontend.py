@@ -328,3 +328,8 @@ class TestFrontend(TestFrontendCommon):
     def test_15_pos_refund_qty(self):
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('RefundQtyTour')
+
+    def test_remove_ordered_item(self):
+        self.pos_config.write({'printer_ids': False})
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.start_pos_tour('test_remove_ordered_item')
