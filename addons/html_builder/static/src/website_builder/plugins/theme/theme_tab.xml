@@ -10,6 +10,7 @@
                     snippetModel="optionsContainer.snippetModel"
                     editingElement="optionsContainer.element"
                     options="optionsContainer.options"
+                    containerTitle="optionsContainer.containerTitle"
                     headerMiddleButtons="optionsContainer.headerMiddleButtons"
                     isRemovable="optionsContainer.isRemovable"
                     isClonable="optionsContainer.isClonable"
