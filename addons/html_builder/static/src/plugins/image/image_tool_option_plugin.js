@@ -11,6 +11,7 @@ import { IMAGE_TOOL, ALIGNMENT_STYLE_PADDING } from "@html_builder/utils/option_
 class ImageToolOptionPlugin extends Plugin {
     static id = "imageToolOption";
     static dependencies = ["history", "userCommand", "imagePostProcess", "imageCrop", "media"];
+    static shared = ["canHaveHoverEffect"];
     resources = {
         builder_options: [
             withSequence(IMAGE_TOOL, {
@@ -24,12 +25,6 @@ class ImageToolOptionPlugin extends Plugin {
             }),
         ],
         builder_actions: this.getActions(),
-        is_hoverable_predicates: (el) => {
-            if (el.tagName !== "IMG") {
-                return true;
-            }
-            return this.canHaveHoverEffect(el);
-        },
     };
     getActions() {
         return {
@@ -165,6 +160,7 @@ class ImageToolOptionPlugin extends Plugin {
     }
     async canHaveHoverEffect(img) {
         return (
+            img.tagName === "IMG" &&
             !this.isDeviceShape(img) &&
             !this.isAnimatedShape(img) &&
             this.isImageSupportedForShapes(img) &&

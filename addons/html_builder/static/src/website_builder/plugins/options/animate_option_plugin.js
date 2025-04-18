@@ -7,6 +7,7 @@ import { ANIMATE } from "@html_builder/website_builder/option_sequence";
 
 class AnimateOptionPlugin extends Plugin {
     static id = "animateOption";
+    static dependencies = ["imageToolOption"];
     resources = {
         builder_options: [
             withSequence(ANIMATE, {
@@ -17,7 +18,7 @@ class AnimateOptionPlugin extends Plugin {
                 props: {
                     getDirectionsItems: this.getDirectionsItems.bind(this),
                     getEffectsItems: this.getEffectsItems.bind(this),
-                    canHaveHoverEffect: this.canHaveHoverEffect.bind(this),
+                    canHaveHoverEffect: this.dependencies.imageToolOption.canHaveHoverEffect,
                 },
                 // todo: to implement
                 // textSelector: ".o_animated_text",
@@ -28,13 +29,6 @@ class AnimateOptionPlugin extends Plugin {
         normalize_handlers: this.normalize.bind(this),
         clean_for_save_handlers: this.cleanForSave.bind(this),
     };
-    async canHaveHoverEffect(editingElement) {
-        return (
-            await Promise.all(
-                this.getResource("is_hoverable_predicates").map((p) => p(editingElement))
-            )
-        ).every(Boolean);
-    }
 
     setup() {
         this.scrollingElement = getScrollingElement(this.document);
