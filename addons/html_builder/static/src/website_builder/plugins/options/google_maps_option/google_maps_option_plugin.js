@@ -1,5 +1,3 @@
-/* global google */
-
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { renderToElement } from "@web/core/utils/render";
@@ -29,45 +27,30 @@ import { GoogleMapsOption } from "./google_maps_option";
 
 export class GoogleMapsOptionPlugin extends Plugin {
     static id = "googleMapsOption";
-    static dependencies = ["history", "remove"];
-    static shared = ["configureGMapsAPI"];
+    static dependencies = ["history", "edit_interaction"];
+    static shared = [
+        "configureGMapsAPI",
+        "initializeGoogleMaps",
+        "shouldRefetchApiKey",
+        "shouldNotRefetchApiKey",
+    ];
     resources = {
         builder_options: [
             {
                 OptionComponent: GoogleMapsOption,
                 selector: ".s_google_map",
                 props: {
+                    getMapsAPI: this.getMapsAPI.bind(this),
                     getPlace: this.getPlace.bind(this),
                     onPlaceChanged: this.commitPlace.bind(this),
                 },
             },
         ],
         builder_actions: this.getActions(),
-        normalize_handlers: async (root) => {
-            for (const snippet of root.querySelectorAll(".s_google_map")) {
-                if (!this.isGoogleMapsReady && !this.isGoogleMapsErrorBeingHandled) {
-                    await this.loadGoogleMaps(snippet);
-                } else if (!this.mapsAPI) {
-                    this.mapsAPI = google.maps;
-                    this.placesAPI = google.maps.places;
-                }
-            }
-        },
-        restore_savepoint_handlers: () => {
-            // Restart interactions to re-render the map.
-            this.dispatchTo("content_manually_updated_handlers");
-        },
     };
 
     setup() {
         this.websiteService = this.services.website;
-        // @TODO mysterious-egg: the `google_map service` is a duplicate of the
-        // `website_map_service`, but without the dependency on public
-        // interactions. These are used only to restart the interactions once
-        // the API is loaded. We do this in the plugin instead. Once
-        // `html_builder` replaces `website`, we should be able to remove
-        // `website_map_service` since only google_map service will be used.
-        this.googleMapsService = this.services.google_maps;
         this.dialog = this.services.dialog;
         this.orm = this.services.orm;
         this.notification = this.services.notification;
@@ -95,51 +78,20 @@ export class GoogleMapsOptionPlugin extends Plugin {
         };
     }
 
-    /**
-     * Get the stored API key if any (or open a dialog to ask the user for one),
-     * load and configure the Google Maps API.
-     *
-     * @param {Element} editingElement
-     * @param {boolean} [forceReconfigure=false]
-     * @returns {Promise<void>}
-     */
-    async loadGoogleMaps(editingElement, forceReconfigure = false) {
-        /** @type {string  |undefined} */
-        const apiKey = await this.googleMapsService.getGMapsAPIKey();
-        const didReconfigure = await this.configureGMapsAPI({ apiKey, force: forceReconfigure });
-        // @TODO mysterious-egg: we don't wait here because sometimes the
-        // promise never resolves. This is because it finds an API key and has
-        // already called `loadJS` with it, `loadJS` will fetch the result from
-        // cache and never actually call the Google API's URL, bypassing its
-        // callback in the process, on which we depend to resolve the promise.
-        const didLoad = !!(await this.loadGoogleMapsAPIFromService(didReconfigure));
-        if (didLoad) {
-            this.mapsAPI = google.maps;
-            this.placesAPI = google.maps.places;
-        }
-        // Try to fail early if there is a configuration issue.
-        const foundPlace = !!(await this.getPlace(editingElement, editingElement.dataset.mapGps));
-        this.isGoogleMapsReady = didLoad && foundPlace;
-        // @TODO mysterious-egg: this would not be needed if we didn't duplicate
-        // the API loading:
-        if (didReconfigure) {
-            // Make sure to reload the API in the iframe with the new API key.
-            window.top.refetchGoogleMaps = true;
-            // Restart interactions to re-render the map.
-            this.dispatchTo("content_manually_updated_handlers");
-        }
+    getMapsAPI() {
+        return this.mapsAPI;
     }
 
-    /**
-     * Load the Google Maps API from the Google Map Service.
-     * This method is set apart so it can be overridden for testing.
-     *
-     * @param {boolean} [shouldRefetch]
-     * @returns {Promise<string|undefined>} A promise that resolves to an API
-     *                                      key if found.
-     */
-    async loadGoogleMapsAPIFromService(shouldRefetch) {
-        return this.googleMapsService.loadGMapsAPI(true, shouldRefetch);
+    async initializeGoogleMaps(editingElement, mapsAPI) {
+        if (mapsAPI) {
+            this.mapsAPI = mapsAPI;
+            this.placesAPI = mapsAPI.places;
+        }
+        // Try to fail early if there is a configuration issue.
+        return (
+            !!this.placesAPI &&
+            !!(await this.getPlace(editingElement, editingElement.dataset.mapGps))
+        );
     }
 
     /**
@@ -157,9 +109,7 @@ export class GoogleMapsOptionPlugin extends Plugin {
             this.notifyGMapsError(editingElement);
         } else if (!place && !this.isGoogleMapsErrorBeingHandled) {
             // Somehow the search failed but Google didn't trigger an error.
-            // @TODO mysterious-egg should we keep this? Seems radical. Not sure
-            // we even ever get to this in the new flow.
-            this.dependencies.remove.removeElement(editingElement);
+            this.undoInitialize?.();
         } else {
             return place;
         }
@@ -185,7 +135,7 @@ export class GoogleMapsOptionPlugin extends Plugin {
                 editingElement.dataset.mapGps = coordinates;
                 editingElement.dataset.pinAddress = place.formatted_address;
                 // Restart interactions to re-render the map.
-                this.dispatchTo("content_manually_updated_handlers");
+                this.dispatchTo("content_manually_updated_handlers", editingElement);
                 this.dependencies.history.addStep();
             }
         }
@@ -198,15 +148,10 @@ export class GoogleMapsOptionPlugin extends Plugin {
      *
      * @param {Object} param
      * @param {string} [param.apiKey]
-     * @param {boolean} [param.force] set to true to open the API Key dialog
-     *                                even if the provided API key is valid.
      * @returns {Promise<boolean>} true if a new API key was written to db.
      */
-    async configureGMapsAPI({ apiKey, force }) {
-        const apiKeyValidation = await this.validateGMapsApiKey(apiKey);
-        if (!force && apiKeyValidation.isValid) {
-            return false;
-        }
+    async configureGMapsAPI(apiKey) {
+        this.undoInitialize = this.dependencies.history.makeSavePoint();
         /** @type {number} */
         const websiteId = this.websiteService.currentWebsite.id;
 
@@ -218,14 +163,13 @@ export class GoogleMapsOptionPlugin extends Plugin {
                 GoogleMapsApiKeyDialog,
                 {
                     originalApiKey: apiKey,
-                    originalApiKeyValidation: apiKeyValidation,
                     onSave: async (newApiKey) => {
                         await this.orm.write("website", [websiteId], {
                             google_maps_api_key: newApiKey,
                         });
+                        this.shouldRefetchApiKey = false;
                         isInvalidated = true;
                     },
-                    validateGMapsApiKey: this.validateGMapsApiKey.bind(this),
                 },
                 {
                     onClose: () => resolve(isInvalidated),
@@ -233,63 +177,6 @@ export class GoogleMapsOptionPlugin extends Plugin {
             );
         });
         return didReconfigure;
-    }
-
-    /**
-     * Send a request to the Google Maps API, using the given API key, so as to
-     * get a response which can be used to test the validity of said key.
-     * This method is set apart so it can be overridden for testing.
-     *
-     * @param {string} key
-     * @returns {Promise<{ status: number }>}
-     */
-    async fetchGoogleMaps(key) {
-        return await fetch(
-            `https://maps.googleapis.com/maps/api/staticmap?center=belgium&size=10x10&key=${encodeURIComponent(
-                key
-            )}`
-        );
-    }
-
-    /**
-     * Send a request to the Google Maps API to test the validity of the given
-     * API key. Return an object with the error message if any, and a boolean
-     * that is true if the response from the API had a status of 200.
-     *
-     * Note: The response will be 200 so long as the API key has billing, Static
-     * API and Javascript API enabled. However, for our purposes, we also need
-     * the Places API enabled. To deal with that case, we perform a nearby
-     * search immediately after validation. If it fails, the error is handled
-     * and the dialog is re-opened.
-     * @see nearbySearch
-     * @see notifyGMapsError
-     *
-     * @param {string} key
-     * @returns {Promise<ApiKeyValidation>}
-     */
-    async validateGMapsApiKey(key) {
-        if (key) {
-            try {
-                const response = await this.fetchGoogleMaps(key);
-                const isValid = response.status === 200;
-                return {
-                    isValid,
-                    message: isValid
-                        ? undefined
-                        : _t(
-                              "Invalid API Key. The following error was returned by Google: %(error)s",
-                              { error: await response.text() }
-                          ),
-                };
-            } catch {
-                return {
-                    isValid: false,
-                    message: _t("Check your connection and try again"),
-                };
-            }
-        } else {
-            return { isValid: false };
-        }
     }
 
     /**
@@ -352,8 +239,6 @@ export class GoogleMapsOptionPlugin extends Plugin {
      * re-opens the configuration dialog. For good measure, this also removes
      * the related snippet entirely as this is what is done in case of critical
      * error.
-     *
-     * @param {Element} editingElement
      */
     notifyGMapsError(editingElement) {
         // TODO this should be better to detect all errors. This is random.
@@ -370,15 +255,23 @@ export class GoogleMapsOptionPlugin extends Plugin {
                 ),
                 { type: "danger", sticky: true }
             );
-            // Try again.
-            this.loadGoogleMaps(editingElement, true).then(() => {
-                this.isGoogleMapsErrorBeingHandled = false;
-            });
-
-            // @TODO mysterious-egg: should we still do this, which was just
-            // done as a result of reporting a critical error?
-            setTimeout(() => this.dependencies.remove.removeElement(editingElement));
+            // Try again: invalidate the API key then restart interactions.
+            this.orm
+                .write("website", [this.websiteService.currentWebsite.id], {
+                    google_maps_api_key: "",
+                })
+                .then(() => {
+                    this.wasApiKeyInvalidated = true;
+                    this.isGoogleMapsErrorBeingHandled = false;
+                    this.dependencies.edit_interaction.restartInteractions(editingElement);
+                });
         }
+    }
+    shouldRefetchApiKey() {
+        return this.wasApiKeyInvalidated || false;
+    }
+    shouldNotRefetchApiKey() {
+        this.wasApiKeyInvalidated = false;
     }
 }
 

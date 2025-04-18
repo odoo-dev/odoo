@@ -4,6 +4,8 @@ import { registry } from "@web/core/registry";
 export class EditInteractionPlugin extends Plugin {
     static id = "edit_interaction";
 
+    static shared = ["restartInteractions"];
+
     resources = {
         normalize_handlers: this.refreshInteractions.bind(this),
         content_manually_updated_handlers: this.refreshInteractions.bind(this),

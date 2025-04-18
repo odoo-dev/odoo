@@ -215,6 +215,20 @@ registry.category("services").add("website_edit", {
                 }
             );
         };
+        const callShared = (pluginName, methodName, args = []) => {
+            if (!Array.isArray(args)) {
+                args = [args];
+            }
+            if (shared[pluginName]) {
+                if (shared[pluginName][methodName]) {
+                    return shared[pluginName][methodName](...args);
+                } else {
+                    console.error(`Method "${methodName}" not found on plugin "${pluginName}".`);
+                }
+            } else {
+                console.error(`Plugin "${pluginName}" not found.`);
+            }
+        };
 
         const websiteEditService = {
             isEditingTranslations,
@@ -224,6 +238,7 @@ registry.category("services").add("website_edit", {
             installPatches,
             uninstallPatches,
             applyAction,
+            callShared,
         };
 
         // Transfer the iframe website_edit service to the EditInteractionPlugin
