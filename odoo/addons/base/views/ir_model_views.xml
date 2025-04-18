@@ -323,7 +323,7 @@
                                 </group>
                                 <group string="Advanced Properties" groups="base.group_no_one">
                                     <field name="related"/>
-                                    <field name="depends" required="compute not in [False, '']"/>
+                                    <field name="depends" required="compute not in [False, ''] and store == True"/>
                                     <field name="compute" widget="code" options="{'mode': 'python'}"/>
                                 </group>
                                 <div groups="base.group_no_one">
