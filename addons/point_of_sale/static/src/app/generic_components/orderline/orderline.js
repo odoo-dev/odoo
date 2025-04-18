@@ -22,6 +22,10 @@ export class Orderline extends Component {
                 packLotLines: { type: Array, optional: true },
                 price_without_discount: { type: String, optional: true },
                 taxGroupLabels: { type: String, optional: true },
+
+                // TODO: remove this, but debug mode fails otherwise
+                so_reference: { type: String, optional: true },
+                details: { type: String, optional: true },
             },
         },
         showTaxGroupLabels: { type: Boolean, optional: true },

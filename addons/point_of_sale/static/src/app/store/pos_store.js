@@ -2112,17 +2112,25 @@ export class PosStore extends Reactive {
                 return false;
             }
         }
+        this.qrPaymentData = {
+            name: payment.name || "FIXME",
+            amount: this.env.utils.formatCurrency(payment.amount),
+            qrCode: qr,
+        };
         return await ask(
             this.env.services.dialog,
             {
-                title: payment.name,
+                title: payment.name || "name",
                 line: payment,
                 order: payment.pos_order_id,
                 qrCode: qr,
             },
             {},
             QRPopup
-        );
+        ).then((result) => {
+            delete this.qrPaymentData;
+            return result;
+        });
     }
 
     get isTicketScreenShown() {

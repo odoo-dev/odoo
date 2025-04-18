@@ -48,7 +48,7 @@ export class Chrome extends Component {
         }
         this.customerDisplayChannel = new BroadcastChannel("UPDATE_CUSTOMER_DISPLAY");
         effect(
-            batched(({ selectedOrder, scale }) => {
+            batched(({ selectedOrder, scale, qrPaymentData }) => {
                 if (selectedOrder) {
                     const scaleData = scale.product
                         ? {
@@ -60,17 +60,17 @@ export class Chrome extends Component {
                               tare: scale.tareWeightString,
                           }
                         : null;
-                    this.sendOrderToCustomerDisplay(selectedOrder, scaleData);
+                    this.sendOrderToCustomerDisplay(selectedOrder, scaleData, qrPaymentData);
                 }
             }),
             [this.pos]
         );
     }
 
-    sendOrderToCustomerDisplay(selectedOrder, scaleData) {
+    sendOrderToCustomerDisplay(selectedOrder, scaleData, qrPaymentData) {
         const customerDisplayData = selectedOrder.getCustomerDisplayData();
         customerDisplayData.scaleData = scaleData;
-
+        customerDisplayData.qrPaymentData = owl.toRaw(qrPaymentData);
         if (this.pos.config.customer_display_type === "local") {
             this.customerDisplayChannel.postMessage(customerDisplayData);
         }
