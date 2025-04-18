@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 from markupsafe import Markup
 
@@ -53,7 +53,8 @@ class MailActivitySchedule(models.TransientModel):
     plan_id = fields.Many2one('mail.activity.plan', domain="[('id', 'in', plan_available_ids)]",
                               compute='_compute_plan_id', store=True, readonly=False)
     plan_has_user_on_demand = fields.Boolean(related="plan_id.has_user_on_demand")
-    plan_schedule_line_ids = fields.One2many(compute='_compute_plan_schedule_line_ids', comodel_name='mail.activity.schedule.line', inverse_name='activity_schedule_id')
+    plan_schedule_line_ids = fields.One2many('mail.activity.schedule.line', 'activity_schedule_id',
+                                             string='Schedule Lines', compute='_compute_plan_schedule_line_ids')
     plan_on_demand_user_id = fields.Many2one(
         'res.users', 'Assigned To',
         help='Choose assignation for activities with on demand assignation.',
@@ -158,14 +159,70 @@ class MailActivitySchedule(models.TransientModel):
     def _compute_plan_date(self):
         self.plan_date = fields.Date.context_today(self)
 
-    @api.depends('plan_date', 'plan_id')
+    @api.depends('plan_date', 'plan_id', 'plan_on_demand_user_id', 'res_model', 'res_ids')
     def _compute_plan_schedule_line_ids(self):
         self.plan_schedule_line_ids = False
         for scheduler in self:
-            if not scheduler.plan_id.template_ids:
-                continue
-            line_values = scheduler._get_summary_lines(scheduler.plan_id.template_ids)
-            scheduler.plan_schedule_line_ids = [(0, 0, values) for values in line_values]
+            schedule_line_values_list = []
+            for template in scheduler.plan_id.template_ids:
+                schedule_line_values = {
+                    'line_description': template.summary or template.activity_type_id.name,
+                }
+
+                # try to determine responsible user, light re-coding of '_determine_responsible' but
+                # we don't always have a target record here
+                responsible_user = False
+                res_ids = scheduler._evaluate_res_ids()
+                if template.responsible_id:
+                    responsible_user = template.responsible_id
+                elif template.responsible_type == 'on_demand':
+                    responsible_user = scheduler.plan_on_demand_user_id
+                elif scheduler.res_model and res_ids and len(res_ids) == 1:
+                    record = self.env[scheduler.res_model].browse(res_ids)
+                    if record.exists():
+                        responsible_user = template._determine_responsible(
+                            scheduler.plan_on_demand_user_id,
+                            record,
+                        )['responsible']
+
+                if responsible_user:
+                    schedule_line_values['responsible_user_id'] = responsible_user.id
+
+                activity_date_deadline = False
+                if scheduler.plan_date:
+                    activity_date_deadline = template._get_date_deadline(scheduler.plan_date)
+                    schedule_line_values['line_date_deadline'] = activity_date_deadline
+
+                # append main line before handling next activities
+                schedule_line_values_list.append(schedule_line_values)
+
+                activity_type = template.activity_type_id
+                if activity_type.triggered_next_type_id:
+                    next_activity = activity_type.triggered_next_type_id
+                    schedule_line_values = {
+                        'line_description': next_activity.summary or next_activity.name,
+                        'responsible_user_id': next_activity.default_user_id or False
+                    }
+                    if activity_date_deadline:
+                        schedule_line_values['line_date_deadline'] = next_activity.with_context(
+                            activity_previous_deadline=activity_date_deadline
+                        )._get_date_deadline()
+
+                    schedule_line_values_list.append(schedule_line_values)
+                elif activity_type.suggested_next_type_ids:
+                    for suggested in activity_type.suggested_next_type_ids:
+                        schedule_line_values = {
+                            'line_description': suggested.summary or suggested.name,
+                            'responsible_user_id': suggested.default_user_id or False,
+                        }
+                        if activity_date_deadline:
+                            schedule_line_values['line_date_deadline'] = suggested.with_context(
+                                activity_previous_deadline=activity_date_deadline
+                            )._get_date_deadline()
+
+                        schedule_line_values_list.append(schedule_line_values)
+
+                scheduler.plan_schedule_line_ids = [(5,)] + [(0, 0, values) for values in schedule_line_values_list]
 
     @api.depends('res_model')
     def _compute_activity_type_id(self):
@@ -406,48 +463,15 @@ class MailActivitySchedule(models.TransientModel):
     def _plan_filter_activity_templates_to_schedule(self):
         return self.plan_id.template_ids
 
-    def _get_summary_lines(self, templates):
-        self.ensure_one()
-        line_values = []
-        for template in templates:
-            newline = {
-                'line': template.summary or template.activity_type_id.name,
-                'summary_user_id': template.responsible_id or False,
-            }
-            if self.plan_date:
-                newline['summary_date_deadline'] = template._get_date_deadline(self.plan_date)
-            line_values.append(newline)
-            activity_type = template.activity_type_id
-
-            # Triggered next activities
-            if activity_type.triggered_next_type_id:
-                newline = {
-                    'line': activity_type.triggered_next_type_id.summary or activity_type.triggered_next_type_id.name,
-                    'summary_user_id': activity_type.triggered_next_type_id.default_user_id or False
-                }
-                if self.plan_date:
-                    newline['summary_date_deadline'] = activity_type.triggered_next_type_id._get_date_deadline() + (self.plan_date - fields.Date.context_today(self))
-                line_values.append(newline)
-            # Suggested next activities
-            elif activity_type.suggested_next_type_ids:
-                for suggested in activity_type.suggested_next_type_ids:
-                    newline = {
-                        'line': suggested.summary or suggested.name,
-                        'summary_user_id': suggested.default_user_id or False,
-                    }
-                    if self.plan_date:
-                        newline['summary_date_deadline'] = suggested._get_date_deadline() + (self.plan_date - fields.Date.context_today(self))
-                    line_values.append(newline)
-        return line_values
-
 
 class MailActivityScheduleSummary(models.TransientModel):
     _name = 'mail.activity.schedule.line'
     _description = 'Mail Activity Schedule Line'
-    _order = 'id desc'
+    _order = 'line_date_deadline asc, id asc'
     _rec_name = 'activity_schedule_id'
-    activity_schedule_id = fields.Many2one('mail.activity.schedule', required=True, ondelete='cascade')
 
-    line = fields.Char()
-    summary_date_deadline = fields.Date()
-    summary_user_id = fields.Many2one('res.users')
+    activity_schedule_id = fields.Many2one('mail.activity.schedule', string="Activity Schedule",
+                                           required=True, ondelete='cascade')
+    line_description = fields.Char("Line Description")
+    line_date_deadline = fields.Date("Date Deadline")
+    responsible_user_id = fields.Many2one('res.users', string="Responsible User")

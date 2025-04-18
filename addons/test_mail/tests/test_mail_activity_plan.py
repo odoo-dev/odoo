@@ -253,20 +253,22 @@ class TestActivitySchedule(ActivityScheduleCase):
         for template, expected_names in zip(test_plan.template_ids, expected_next_activities, strict=True):
             self.assertEqual(template.next_activity_ids.mapped('name'), expected_names)
         # Test the plan summary
-        with self.subTest(test_case='Check plan summary'):
+        with self.subTest(test_case='Check plan summary'), \
+             freeze_time(self.reference_now):
             form = self._instantiate_activity_schedule_wizard(self.test_records[0])
             form.plan_id = test_plan
             expected_values = [
-                {'line': 'TestAct1', 'date': datetime.date(2025, 4, 17)},
-                {'line': 'TestAct2', 'date': datetime.date(2025, 5, 8)},
-                {'line': 'TestAct2', 'date': datetime.date(2025, 4, 17)},
-                {'line': 'TestAct1', 'date': datetime.date(2025, 4, 19)},
-                {'line': 'TestAct3', 'date': datetime.date(2025, 4, 17)},
-                {'line': 'TestAct3', 'date': datetime.date(2025, 4, 17)},
+                {'description': 'TestAct1', 'deadline': datetime.date(2023, 9, 30)},
+                {'description': 'TestAct2', 'deadline': datetime.date(2023, 10, 21)},
+                {'description': 'TestAct2', 'deadline': datetime.date(2023, 9, 30)},
+                {'description': 'TestAct1', 'deadline': datetime.date(2023, 10, 2)},
+                {'description': 'TestAct3', 'deadline': datetime.date(2023, 9, 30)},
+                {'description': 'TestAct3', 'deadline': datetime.date(2023, 9, 30)},
             ]
             for line, expected in zip(form.plan_schedule_line_ids._records, expected_values):
-                self.assertEqual(line['line'], expected['line'])
-                self.assertEqual(line['summary_date_deadline'], expected['date'])
+                with self.subTest(line=line, expected_values=expected):
+                    self.assertEqual(line['line_description'], expected['description'])
+                    self.assertEqual(line['line_date_deadline'], expected['deadline'])
 
     @users('employee')
     def test_plan_schedule(self):
@@ -281,21 +283,21 @@ class TestActivitySchedule(ActivityScheduleCase):
                 self.assertFalse(form.plan_schedule_line_ids)
                 form.plan_id = self.plan_onboarding
                 expected_values = [
-                    {'line': 'Plan training', 'date': datetime.date(2023,9,27)},
-                    {'line': 'Training', 'date': datetime.date(2023,10,14)},
+                    {'description': 'Plan training', 'deadline': datetime.date(2023, 9, 27)},
+                    {'description': 'Training', 'deadline': datetime.date(2023, 10, 14)},
                 ]
                 for line, expected in zip(form.plan_schedule_line_ids._records, expected_values):
-                    self.assertEqual(line['line'], expected['line'])
-                    self.assertEqual(line['summary_date_deadline'], expected['date'])
+                    self.assertEqual(line['line_description'], expected['description'])
+                    self.assertEqual(line['line_date_deadline'], expected['deadline'])
                 self.assertTrue(form._get_modifier('plan_on_demand_user_id', 'invisible'))
                 form.plan_id = self.plan_party
                 expected_values = [
-                    {'line': 'Book a place', 'date': datetime.date(2023,9,29)},
-                    {'line': 'Invite special guest', 'date': datetime.date(2023,10,7)},
+                    {'description': 'Book a place', 'deadline': datetime.date(2023, 9, 29)},
+                    {'description': 'Invite special guest', 'deadline': datetime.date(2023, 10, 7)},
                 ]
                 for line, expected in zip(form.plan_schedule_line_ids._records, expected_values):
-                    self.assertEqual(line['line'], expected['line'])
-                    self.assertEqual(line['summary_date_deadline'], expected['date'])
+                    self.assertEqual(line['line_description'], expected['description'])
+                    self.assertEqual(line['line_date_deadline'], expected['deadline'])
                 self.assertFalse(form._get_modifier('plan_on_demand_user_id', 'invisible'))
                 with self._mock_activities():
                     form.save().action_schedule_plan()
@@ -320,12 +322,12 @@ class TestActivitySchedule(ActivityScheduleCase):
                 deadline_1 = plan_date + relativedelta(days=-1)
                 deadline_2 = plan_date + relativedelta(days=7)
                 expected_values = [
-                    {'line': 'Book a place', 'date': deadline_1},
-                    {'line': 'Invite special guest', 'date': deadline_2},
+                    {'description': 'Book a place', 'deadline': deadline_1},
+                    {'description': 'Invite special guest', 'deadline': deadline_2},
                 ]
                 for line, expected in zip(form.plan_schedule_line_ids._records, expected_values):
-                    self.assertEqual(line['line'], expected['line'])
-                    self.assertEqual(line['summary_date_deadline'], expected['date'])
+                    self.assertEqual(line['line_description'], expected['description'])
+                    self.assertEqual(line['line_date_deadline'], expected['deadline'])
                 with self._mock_activities():
                     form.save().action_schedule_plan()
 

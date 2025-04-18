@@ -23,14 +23,13 @@
                                 <field name="plan_on_demand_user_id" widget="many2one_avatar_user"
                                        invisible="not plan_has_user_on_demand" string="Responsible"/>
                             </group>
-                            <group class="px-0">
-                                <label for="plan_schedule_line_ids" class="o_form_label mb-n2"
-                                       string="Plan Summary" colspan="2"/>
-                                <field name="plan_schedule_line_ids" colspan="2" nolabel="1" class="text-muted mt-n2 small">
-                                    <list edit="0" no_open="1" class="table-borderless">
-                                        <field name="summary_user_id" nolabel="1" widget="many2one_avatar_user_noname" width="30px"/>
-                                        <field name="line" nolabel="1"/>
-                                        <field name="summary_date_deadline" nolabel="1"/>
+                            <group>
+                                <label for="plan_schedule_line_ids" string="Plan Summary" class="o_form_label mb-n2" colspan="2"/>
+                                <field name="plan_schedule_line_ids" nolabel="1" class="text-muted mt-n2 small" colspan="2">
+                                    <list edit="0" no_open="1" class="o_mail_activity_schedule_summary">
+                                        <field name="responsible_user_id" nolabel="1" widget="many2one_avatar_user" width="22px"/>
+                                        <field name="line_description" nolabel="1"/>
+                                        <field name="line_date_deadline" nolabel="1"/>
                                     </list>
                                 </field>
                             </group>

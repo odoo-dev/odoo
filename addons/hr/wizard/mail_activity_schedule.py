@@ -27,28 +27,6 @@ class MailActivitySchedule(models.TransientModel):
         for wizard in self:
             wizard.plan_department_filterable = wizard.res_model == 'hr.employee'
 
-    @api.depends('plan_date', 'plan_id')
-    def _compute_plan_schedule_line_ids(self):
-        if not self.env.context.get('sort_by_responsible', False) and self.env.context.get('active_model', False) != 'hr.employee':
-            return super()._compute_plan_schedule_line_ids()
-        self.plan_schedule_line_ids = False
-        responsible_value_to_label = dict(
-            self.env['mail.activity.plan.template']._fields['responsible_type']._description_selection(self.env)
-        )
-        for scheduler in self:
-            templates_by_responsible_type = scheduler.plan_id.template_ids.grouped('responsible_type')
-            line_values = []
-            for key, templates in templates_by_responsible_type.items():
-                # todo guce postfreeze: line should be Name (Role)
-                line_values.append({
-                    'line': responsible_value_to_label[key],
-                })
-                line_values_part = scheduler._get_summary_lines(templates)
-                for line in line_values_part:
-                    line['line'] = ' - ' + line['line']
-                line_values += line_values_part
-            scheduler.plan_schedule_line_ids = [(0, 0, values) for values in line_values]
-
     @api.depends('res_model_id', 'res_ids')
     def _compute_department_id(self):
         for wizard in self:
