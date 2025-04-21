@@ -83,9 +83,10 @@ class BarcodeNomenclature(models.Model):
         return match
 
     def parse_barcode(self, barcode):
-        if re.match(r'^urn:', barcode):
-            return self.parse_uri(barcode)
-        return self.parse_nomenclature_barcode(barcode)
+        if isinstance(barcode, str):
+            if re.match(r'^urn:', barcode):
+                return self.parse_uri(barcode)
+            return self.parse_nomenclature_barcode(barcode)
 
     def parse_nomenclature_barcode(self, barcode):
         """ Attempts to interpret and parse a barcode.
