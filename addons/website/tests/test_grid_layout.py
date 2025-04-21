@@ -7,7 +7,6 @@ import unittest
 @odoo.tests.common.tagged('post_install', '-at_install')
 class TestWebsiteGridLayout(odoo.tests.HttpCase):
 
-    @unittest.skip
     def test_01_replace_grid_image(self):
         create_image_attachment(self.env, '/web/image/website.s_banner_default_image', 's_banner_default_image.jpg')
         create_image_attachment(self.env, '/web/image/website.s_banner_default_image', 's_banner_default_image2.jpg')

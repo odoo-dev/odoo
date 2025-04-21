@@ -20,7 +20,7 @@ registerWebsitePreviewTour('website_replace_grid_image', {
     ...clickOnSnippet(snippet),
     {
         content: "Toggle to grid mode",
-        trigger: '.o_we_user_value_widget[data-name="grid_mode"]',
+        trigger: "[data-action-id='setGridLayout']",
         run: "click",
     },
     {
@@ -35,7 +35,7 @@ registerWebsitePreviewTour('website_replace_grid_image', {
     },
     {
         content: "Add new image column",
-        trigger: '.o_we_user_value_widget[data-add-element="image"]',
+        trigger: "[data-action-id='addElImage']",
         run: "click",
     },
     {
