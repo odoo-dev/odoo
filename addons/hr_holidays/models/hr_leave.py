@@ -889,6 +889,27 @@ Attempting to double-book your time off won't magically make your vacation 2x be
             self = self.with_context(employee_id=employee_id)
         return super().onchange(values, field_names, fields_spec)
 
+    @api.onchange('request_unit_hours', 'request_hour_from', 'request_hour_to')
+    def onchange_custom_hours(self):
+        if not self.request_unit_hours or not self.request_date_from:
+            return
+
+        weekday = str(self.request_date_from.weekday())
+        attendances = self.resource_calendar_id.attendance_ids.filtered(lambda att: att.dayofweek == weekday)
+
+        if not attendances:
+            return
+
+        if self.request_hour_from:
+            hour_from = float(self.request_hour_from)
+            if not any(att.hour_from <= hour_from for att in attendances):
+                raise UserError(_("The 'From' hour must fall within office working hours."))
+
+        if self.request_hour_to:
+            hour_to = float(self.request_hour_to)
+            if not any(att.hour_to >= hour_to for att in attendances):
+                raise UserError(_("The 'To' hour must fall within office working hours."))
+
     def add_follower(self, employee_id):
         employee = self.env['hr.employee'].browse(employee_id)
         if employee.user_id:
