@@ -306,7 +306,7 @@
 	            <!-- checkbox, select, radio possible values -->
 	            <BuilderSelectItem t-foreach="state.conditionValueList" t-as="record" t-key="record.value"
 	                dataAttributeActionValue="record.value"
-	                t-out="record.textContent"
+	                t-out="record.display_name"
 	            />   
 	        </BuilderSelect>
 	        <BuilderSelect t-if="state.conditionValueList and domStateDependency.isRecordField"
@@ -319,7 +319,7 @@
                 />   
 	        </BuilderSelect>
 	        <BuilderTextInput t-if="isTextConditionValueVisible"
-	            id="'hidden_condition_additional_text'" dataAttributeAction="'visibilityCondition'"
+	            attributeAction="'visibilityCondition'" id="'hidden_condition_additional_text'" dataAttributeAction="'visibilityCondition'"
 	        />
 	        <BuilderDateTimePicker t-if="domStateDependency.isFormDateTime and !['set', '!set'].includes(domState.elDataset.visibilityComparator)"
 	            id="'hidden_condition_additional_datetime'" dataAttributeAction="'visibilityCondition'" type="'datetime'"
