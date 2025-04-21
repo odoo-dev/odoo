@@ -51,70 +51,57 @@ const selectFieldByLabel = (label) => {
         run: "click",
     }];
 };
-const selectButtonByText = function (text) {
-    return [
-        {
-            content: "Open the select",
-            trigger:
-                "div[data-container-title='Field'] div[data-label='Visibility'] button.btn-primary",
-            run: "click",
-        },
-        {
-            content: "Click on the option",
-            trigger: `.o_popover div[role="menuitem"]:contains("${text}")`,
-            run: "click",
-        },
-    ];
+const selectButtonByText = function (text, dropdownContent) {
+    return [{
+        content: "Open the select",
+        trigger: `.o_customize_tab button:contains("${text}")`,
+        run: "click",
+    },
+    {
+        content: "Click on the option",
+        trigger: `.o_popover div.dropdown-item:contains("${dropdownContent}")`,
+        run: "click",
+    }];
 };
-const selectButtonByData = function (data) {
-    return [
-        {
-            content: "Open the select",
-            trigger: "div[data-label='Type'] button.btn-primary",
-            run: "click",
-        },
-        {
-            content: "Click on the option",
-            trigger: `.o_popover [${data}]`,
-            run: "click",
-        },
-    ];
+const selectButtonByData = function (text, data, name) {
+    return [{
+        content: "Open the select",
+        trigger: `.o_customize_tab button:contains('${text}')`,
+        run: "click",
+    }, {
+        content: "Click on the option",
+        trigger: `.o_popover div[${data}][data-action-value="${name}"]`,
+        run: "click",
+    }];
 };
-const addField = function (
-    name,
-    type,
-    label,
-    required,
-    isCustom,
-    display = { visibility: VISIBLE, condition: "" }
-) {
-    const data = isCustom ? `data-action-value="${name}"` : `data-existing-field="${name}"`;
+const addField = function (name, type, label, required, isCustom,
+                           display = {visibility: VISIBLE, condition: ""}) {
+    const data = isCustom ? "data-action-id='customField'" : "data-action-id='existingField'";
     const ret = [
-        {
-            trigger: ":iframe .s_website_form_field",
-        },
-        {
-            content: "Select form",
-            trigger: ":iframe section.s_website_form",
-            run: "click",
-        },
-        {
-            content: "Add field",
-            trigger: "[data-container-title=Form] button:contains('+ Field')",
-            run: "click",
-        },
-        ...selectButtonByData(data),
-        {
-            content: "Wait for field to load",
-            trigger: `:iframe .s_website_form_field[data-type="${name}"],:iframe .s_website_form_input[name="${name}"]`, //custom or existing field
-        },
-        ...selectButtonByText(display.visibility),
-    ];
-    let testText = ":iframe .s_website_form_field";
+    {
+        trigger: ":iframe .s_website_form_field",
+    },
+    {
+        content: "Select form",
+        trigger: ':iframe section.s_website_form',
+        run: "click",
+    }, {
+        content: "Add field",
+        trigger: ".o_customize_tab button[title='Add a new field at the end']",
+        run: "click",
+    },
+    ...selectButtonByData("Text", data, name),
+    {
+        content: "Wait for field to load",
+        trigger: `:iframe .s_website_form_field[data-type="${name}"],:iframe .s_website_form_input[name="${name}"]`, //custom or existing field
+    },
+    ...selectButtonByText("Always Visible", display.visibility),
+];
+    let testText = ':iframe .s_website_form_field';
     if (display.condition) {
         ret.push({
             content: "Set the visibility condition",
-            trigger: 'we-input[data-attribute-name="visibilityCondition"] input',
+            trigger: ".o_customize_tab div[data-attribute-action='visibilityCondition'] input",
             run: `edit ${display.condition} && press Tab`,
         });
     }
@@ -122,7 +109,7 @@ const addField = function (
         testText += ".s_website_form_required";
         ret.push({
             content: "Mark the field as required",
-            trigger: "div[data-action-id='toggleRequired'] .form-switch input",
+            trigger: ".o_customize_tab div[data-action-id='toggleRequired'] input[type='checkbox']",
             run: "click",
         });
     }
@@ -130,7 +117,7 @@ const addField = function (
         testText += `:has(label:contains(${label}))`;
         ret.push({
             content: "Change the label text",
-            trigger: "div[data-action-id='setLabelText'] input",
+            trigger: ".o_customize_tab div[data-action-id='setLabelText'] input",
             run: `edit ${label} && press Tab`,
         });
     }
@@ -159,21 +146,17 @@ registerWebsitePreviewTour("website_form_editor_tour", {
     edition: true,
 }, () => [
     // Drop a form builder snippet and configure it
-    {
-        content: "Drop the form snippet",
-        trigger: '#oe_snippets .oe_snippet .oe_snippet_thumbnail[data-snippet=s_website_form]',
-        run: "drag_and_drop :iframe #wrap",
-    },
+    ...insertSnippet({id: "s_title_form", name: "Contact & Forms", groupName: "Contact & Forms"}),
     {
         trigger: ":iframe .s_website_form_field",
     },
     {
         content: "Select form by clicking on an input field",
-        trigger: ':iframe section.s_website_form input',
+        trigger: ":iframe .s_website_form_field .s_website_form_input",
         run: "click",
     }, {
         content: "Verify that the form editor appeared",
-        trigger: '.o_we_customize_panel .snippet-option-WebsiteFormEditor',
+        trigger: ".o_customize_tab div[data-container-title='Form']",
     },
     goBackToBlocks(),
     {
@@ -181,16 +164,16 @@ registerWebsitePreviewTour("website_form_editor_tour", {
     },
     {
         content: "Select form by clicking on a text area",
-        trigger: ':iframe section.s_website_form textarea',
+        trigger: ":iframe .s_website_form_field textarea.s_website_form_input",
         run: "click",
     },
     {
         content: "Verify that the form editor appeared",
-        trigger: '.o_we_customize_panel .snippet-option-WebsiteFormEditor',
+        trigger: ".o_customize_tab div[data-container-title='Form']",
     },
     {
         content: "Rename and leave the field label",
-        trigger: 'we-input[data-set-label-text] input',
+        trigger: '.o_customize_tab div[data-action-id="setLabelText"] input',
         run: "edit Renamed && click body",
     },
     goBackToBlocks(),
@@ -202,7 +185,7 @@ registerWebsitePreviewTour("website_form_editor_tour", {
         trigger: ':iframe section.s_website_form',
         run: "click",
     },
-    ...selectButtonByText('Send an E-mail'),
+    ...selectButtonByText('Send an E-mail', 'Send an E-mail'),
     {
         content: "Form has a model name",
         trigger: ':iframe section.s_website_form form[data-model_name="mail.mail"]',
@@ -213,46 +196,64 @@ registerWebsitePreviewTour("website_form_editor_tour", {
         run: "click",
     }, {
         content: 'Change the label position of the phone field',
-        trigger: 'we-button[data-select-label-position="right"]',
+        trigger: ".o_customize_tab div[data-label='Position'] button[data-action-value='right']",
         run: "click",
     },
     ...addCustomField("char", "text", "Conditional Visibility Check 1", false),
     ...addCustomField("char", "text", "Conditional Visibility Check 2", false),
-    ...selectButtonByData("data-set-visibility='conditional'"),
-    ...selectButtonByData("data-set-visibility-dependency='Conditional Visibility Check 1'"),
+    ...selectButtonByData("Always Visible", "data-action-id='setVisibility'", "conditional"),
+    ...selectButtonByData(
+        "Your Name",
+        "data-action-id='setVisibilityDependency'",
+        "Conditional Visibility Check 1"
+    ),
     ...addCustomField("char", "text", "Conditional Visibility Check 2", false),
     ...selectFieldByLabel("Conditional Visibility Check 1"),
-    ...selectButtonByData("data-set-visibility='conditional'"),
+    ...selectButtonByData("Always Visible", "data-action-id='setVisibility'", "conditional"),
+    {
+        content: "Open list of the visibility selector of Conditional Visibility Check 1",
+        trigger: ".o_customize_tab button:contains('Your Name')",
+        run: "click",
+    },
     {
         content: "Check that 'Conditional Visibility Check 2' is not in the list of the visibility selector of Conditional Visibility Check 1",
-        trigger: "we-select[data-name='hidden_condition_opt']:not(:has(we-button[data-set-visibility-dependency='Conditional Visibility Check 2']))",
+        trigger: ".o_popover div:not(:has([data-action-value='Conditional Visibility Check 2']))",
     },
     ...addCustomField("char", "text", "Conditional Visibility Check 3", false),
     ...addCustomField("char", "text", "Conditional Visibility Check 4", false),
-    ...selectButtonByData("data-set-visibility='conditional'"),
-    ...selectButtonByData("data-set-visibility-dependency='Conditional Visibility Check 3'"),
+    ...selectButtonByData("Always Visible", "data-action-id='setVisibility'", "conditional"),
+    ...selectButtonByData(
+        "Your Name",
+        "data-action-id='setVisibilityDependency'",
+        "Conditional Visibility Check 3"
+    ),
     {
         content: "Change the label of 'Conditional Visibility Check 4' and change it to 'Conditional Visibility Check 3'",
-        trigger: 'we-input[data-set-label-text] input',
+        trigger: ".o_customize_tab div[data-action-id='setLabelText'] input",
         // TODO: remove && click body
         run: "edit Conditional Visibility Check 3 && click body",
     },
     {
         content: "Check that the conditional visibility of the renamed field is removed",
-        trigger: "we-customizeblock-option.snippet-option-WebsiteFieldEditor we-select:contains('Visibility'):has(we-toggler:contains('Always Visible'))",
+        trigger: ".o_customize_tab div[data-container-title='Field'] button:contains('None')",
     },
     ...addCustomField("char", "text", "Conditional Visibility Check 5", false),
     ...addCustomField("char", "text", "Conditional Visibility Check 6", false),
-    ...selectButtonByData("data-set-visibility='conditional'"),
+    ...selectButtonByData("Always Visible", "data-action-id='setVisibility'", "conditional"),
     {
         content: "Change the label of 'Conditional Visibility Check 6' and change it to 'Conditional Visibility Check 5'",
-        trigger: 'we-input[data-set-label-text] input',
+        trigger: ".o_customize_tab div[data-action-id='setLabelText'] input",
         // TODO: remove && click body
         run: "edit Conditional Visibility Check 5 && click body",
     },
     {
+        content: "Open list of the visibility selector of Conditional Visibility Check 1",
+        trigger: ".o_customize_tab button:contains('Your Name')",
+        run: "click",
+    },
+    {
         content: "Check that 'Conditional Visibility Check 5' is not in the list of the renamed field",
-        trigger: "we-customizeblock-option.snippet-option-WebsiteFieldEditor we-select[data-name='hidden_condition_opt']:not(:has(we-button:contains('Conditional Visibility Check 5')))",
+        trigger: ".o_popover div:not(:has([data-action-value='Conditional Visibility Check 5']))",
     },
     ...addExistingField('email_cc', 'text', 'Test conditional visibility', false, {visibility: CONDITIONALVISIBILITY, condition: 'odoo'}),
     {
@@ -263,18 +264,22 @@ registerWebsitePreviewTour("website_form_editor_tour", {
     ...addCustomField("char", "text", "dependent", false, {visibility: CONDITIONALVISIBILITY}),
     ...addCustomField("selection", "radio", "dependency", false),
     ...selectFieldByLabel("dependent"),
-    ...selectButtonByData('data-set-visibility-dependency="dependency"'),
+    ...selectButtonByData(
+        "Your Name",
+        "data-action-id='setVisibilityDependency'",
+        "dependency"
+    ),
     ...selectFieldByLabel("dependency"),
-    ...selectButtonByData('data-custom-field="char"'),
+    ...selectButtonByData("Radio Buttons", "data-action-id='customField'", "char"),
     ...selectFieldByLabel("dependent"),
     {
         content: "Open the select",
-        trigger: 'we-select:has(we-button[data-set-visibility="visible"]) we-toggler',
+        trigger: ".o_customize_tab button:contains('Always Visible')",
         run: "click",
     },
     {
         content: "Check that the field no longer has conditional visibility",
-        trigger: "we-select we-button[data-set-visibility='visible'].active",
+        trigger: ".o_popover div[data-action-value='visible'].active",
     },
 
     ...addExistingField('date', 'text', 'Test Date', true),

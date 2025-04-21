@@ -319,7 +319,7 @@
                 />   
 	        </BuilderSelect>
 	        <BuilderTextInput t-if="isTextConditionValueVisible"
-	            id="'hidden_condition_additional_text'" dataAttributeAction="'visibilityCondition'"
+	            attributeAction="'visibilityCondition'" id="'hidden_condition_additional_text'" dataAttributeAction="'visibilityCondition'"
 	        />
 	        <BuilderDateTimePicker t-if="domStateDependency.isFormDateTime and !['set', '!set'].includes(domState.elDataset.visibilityComparator)"
 	            id="'hidden_condition_additional_datetime'" dataAttributeAction="'visibilityCondition'" type="'datetime'"
