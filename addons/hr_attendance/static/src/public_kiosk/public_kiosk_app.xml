@@ -114,7 +114,7 @@
 
 <t t-name="hr_attendance.public_kiosk_app">
     <MainComponentsContainer/>
-    <CardLayout fromTrialMode="this.props.fromTrialMode" companyImageUrl="this.companyImageUrl" kioskReturn.bind="kioskReturn">
+    <CardLayout activeDisplay="state.active_display" fromTrialMode="this.props.fromTrialMode" companyImageUrl="this.companyImageUrl" kioskReturn.bind="kioskReturn">
         <t t-if="this.state.active_display === 'settings'">
             <t t-call="hr_attendance.PublicKiosksSettingScreen"/>
         </t>

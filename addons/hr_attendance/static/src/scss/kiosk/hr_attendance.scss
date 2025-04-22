@@ -21,6 +21,8 @@
         --bs-root-font-size: #{$o-attendance-font-size-root-4k};
         --root-font-size: #{$o-attendance-font-size-root-4k};
     }
+
+    --homeMenu-bg-color: #28a745;
 }
 
 .o_hr_attendance_kiosk_mode {
@@ -98,6 +100,14 @@
         attachment: fixed;
         color: var(--homeMenu-bg-color, #{$o-gray-200});
         image: var(--homeMenu-bg-image, url("/hr_attendance/static/img/background-light.svg"));
+    }
+    // &.greet:before {
+    .o_hr_attendance_kiosk_card {
+        // position: absolute;
+        // top: 0; right: 0; bottom: 0; left: 0;
+        background-color: $o-success;
+        // content: ' ';
+        // opacity: 0.5;
     }
 }
 

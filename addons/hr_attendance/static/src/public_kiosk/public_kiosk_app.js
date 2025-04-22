@@ -235,6 +235,7 @@ export async function createPublicKioskAttendance(document, kiosk_backend_info) 
         translateFn: _t,
         translatableAttributes: ["data-tooltip"],
     });
+    window.kiosk = app;
     return app.mount(document.body);
 }
 export default { kioskAttendanceApp, createPublicKioskAttendance };

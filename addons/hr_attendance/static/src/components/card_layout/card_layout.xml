@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="hr_attendance.CardLayout">
-    <div class="o_attendance_background d-flex flex-column h-100">
+    <div t-attf-class="o_attendance_background d-flex flex-column h-100 {{this.props.activeDisplay}}">
         <t t-if="env.isSmall">
             <div class="p-2 d-flex justify-content-between">
                 <button
