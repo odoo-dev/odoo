@@ -375,6 +375,8 @@ form: module.record_id""" % (xml_id,)
             # updating a record created by another module
             record = self.env['ir.model.data']._load_xmlid(xid)
             if not record and not (foreign_record_to_create := nodeattr2bool(rec, 'forcecreate')):  # Allow foreign records if explicitely stated
+                if self.noupdate and self.mode == 'init' and not nodeattr2bool(rec, 'forcecreate', True):
+                    _logger.warning("Risky Skipping creation of %r ", xid)
                 if self.noupdate and not nodeattr2bool(rec, 'forcecreate', True):
                     # if it doesn't exist and we shouldn't create it, skip it
                     return None
