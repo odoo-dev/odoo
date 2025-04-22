@@ -11,6 +11,7 @@ export const HIDE_FOOTER = after(FOOTER_SCROLL_TO);
 class WebsitePageConfigOptionPlugin extends Plugin {
     static id = "websitePageConfigOptionPlugin";
     static dependencies = ["history"];
+    static shared = ["getActions"];
     resources = {
         builder_actions: this.getActions(),
         builder_options: [

@@ -13,6 +13,7 @@ export class CustomizeWebsitePlugin extends Plugin {
     static shared = [
         "customizeWebsiteColors",
         "customizeWebsiteVariables",
+        "getActions",
         "loadTemplateKey",
         "makeSCSSCusto",
         "toggleTemplate",
@@ -456,7 +457,7 @@ export class CustomizeWebsitePlugin extends Plugin {
             }
             for (const item of action.selectableContext.items) {
                 for (const a of item.getActions()) {
-                    if (a.actionId === "websiteConfig") {
+                    if (a.actionId === "websiteConfig" || a.actionId === "customizeHeader") {
                         for (const record of a.actionParam[paramName] || []) {
                             // disable all
                             prepareRecord(record, true);

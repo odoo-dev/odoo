@@ -4,7 +4,7 @@
 
 <t t-name="website.headerTemplateOption">
     <BuilderRow label.translate="Template">
-        <BuilderSelect action="'websiteConfig'">
+        <BuilderSelect action="'customizeHeader'">
             <BuilderSelectItem
                 title.translate="Default"
                 actionParam="{

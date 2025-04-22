@@ -16,7 +16,7 @@ export const HEADER_BORDER = after(HEADER_ELEMENT);
 
 class HeaderOptionPlugin extends Plugin {
     static id = "headerOption";
-    static dependencies = ["coreBuilderAction", "customizeWebsite", "shadowOption"];
+    static dependencies = ["coreBuilderAction", "customizeWebsite", "shadowOption", "websitePageConfigOptionPlugin"];
 
     resources = {
         builder_options: [
@@ -54,6 +54,9 @@ class HeaderOptionPlugin extends Plugin {
         const styleAction = this.dependencies.coreBuilderAction.getStyleAction();
         const { setShadowMode, setShadow } = this.dependencies.shadowOption.getActions();
         const withHistoryFromLoad = this.dependencies.customizeWebsite.withHistoryFromLoad;
+        const { websiteConfig } = this.dependencies.customizeWebsite.getActions();
+        const { setWebsiteHeaderVisibility } = this.dependencies.websitePageConfigOptionPlugin.getActions();
+
         return {
             styleActionHeader: withHistoryFromLoad({
                 ...styleAction,
@@ -101,6 +104,14 @@ class HeaderOptionPlugin extends Plugin {
                 },
                 apply: () => {},
             }),
+            customizeHeader: {
+                ...websiteConfig,
+                apply: (action) => {
+                    const value = action.param.vars["header-template"] !== "boxed" ? "regular" : "overTheContent";
+                    setWebsiteHeaderVisibility.apply({...action, value});
+                    return websiteConfig.apply(action);
+                },
+            }
         };
     }
 }
