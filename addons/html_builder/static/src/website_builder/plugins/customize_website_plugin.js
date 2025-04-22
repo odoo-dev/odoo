@@ -111,7 +111,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                 load: async () => {
                     // Retrieve the website id to check by default the website checkbox in
                     // the dialog box 'action_view_base_language_install'
-                    const websiteId = this.service.website.currentWebsite.id;
+                    const websiteId = this.services.website.currentWebsite.id;
                     const save = await new Promise((resolve) => {
                         this.services.dialog.add(ConfirmationDialog, {
                             body: _t(
