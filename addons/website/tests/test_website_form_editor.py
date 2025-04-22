@@ -47,7 +47,6 @@ class TestWebsiteFormEditor(HttpCaseWithUserPortal):
             self.env.company.email,
             'The email was not edited, the form should still have been sent to the company email')
 
-    @unittest.skip
     def test_website_form_conditional_required_checkboxes(self):
         self.start_tour('/', 'website_form_conditional_required_checkboxes', login="admin")
 

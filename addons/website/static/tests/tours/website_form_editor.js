@@ -51,52 +51,65 @@ const selectFieldByLabel = (label) => {
     }];
 };
 const selectButtonByText = function (text) {
-    return [{
-        content: "Open the select",
-        trigger: `we-select:has(we-button:contains("${text}")) we-toggler`,
-        run: "click",
-    },
-    {
-        content: "Click on the option",
-        trigger: `we-select we-button:contains("${text}")`,
-        run: "click",
-    }];
+    return [
+        {
+            content: "Open the select",
+            trigger:
+                "div[data-container-title='Field'] div[data-label='Visibility'] button.btn-primary",
+            run: "click",
+        },
+        {
+            content: "Click on the option",
+            trigger: `.o_popover div[role="menuitem"]:contains("${text}")`,
+            run: "click",
+        },
+    ];
 };
 const selectButtonByData = function (data) {
-    return [{
-        content: "Open the select",
-        trigger: `we-select:has(we-button[${data}]) we-toggler`,
-        run: "click",
-    }, {
-        content: "Click on the option",
-        trigger: `we-select we-button[${data}]`,
-        run: "click",
-    }];
+    return [
+        {
+            content: "Open the select",
+            trigger: "div[data-label='Type'] button.btn-primary",
+            run: "click",
+        },
+        {
+            content: "Click on the option",
+            trigger: `.o_popover [${data}]`,
+            run: "click",
+        },
+    ];
 };
-const addField = function (name, type, label, required, isCustom,
-                           display = {visibility: VISIBLE, condition: ""}) {
-    const data = isCustom ? `data-custom-field="${name}"` : `data-existing-field="${name}"`;
+const addField = function (
+    name,
+    type,
+    label,
+    required,
+    isCustom,
+    display = { visibility: VISIBLE, condition: "" }
+) {
+    const data = isCustom ? `data-action-value="${name}"` : `data-existing-field="${name}"`;
     const ret = [
-    {
-        trigger: ":iframe .s_website_form_field",
-    },
-    {
-        content: "Select form",
-        trigger: ':iframe section.s_website_form',
-        run: "click",
-    }, {
-        content: "Add field",
-        trigger: 'we-button[data-add-field]',
-        run: "click",
-    },
-    ...selectButtonByData(data),
-    {
-        content: "Wait for field to load",
-        trigger: `:iframe .s_website_form_field[data-type="${name}"],:iframe .s_website_form_input[name="${name}"]`, //custom or existing field
-    },
-    ...selectButtonByText(display.visibility),
-];
-    let testText = ':iframe .s_website_form_field';
+        {
+            trigger: ":iframe .s_website_form_field",
+        },
+        {
+            content: "Select form",
+            trigger: ":iframe section.s_website_form",
+            run: "click",
+        },
+        {
+            content: "Add field",
+            trigger: "[data-container-title=Form] button:contains('+ Field')",
+            run: "click",
+        },
+        ...selectButtonByData(data),
+        {
+            content: "Wait for field to load",
+            trigger: `:iframe .s_website_form_field[data-type="${name}"],:iframe .s_website_form_input[name="${name}"]`, //custom or existing field
+        },
+        ...selectButtonByText(display.visibility),
+    ];
+    let testText = ":iframe .s_website_form_field";
     if (display.condition) {
         ret.push({
             content: "Set the visibility condition",
@@ -105,10 +118,10 @@ const addField = function (name, type, label, required, isCustom,
         });
     }
     if (required) {
-        testText += '.s_website_form_required';
+        testText += ".s_website_form_required";
         ret.push({
             content: "Mark the field as required",
-            trigger: 'we-button[data-name="required_opt"] we-checkbox',
+            trigger: "div[data-action-id='toggleRequired'] .form-switch input",
             run: "click",
         });
     }
@@ -116,14 +129,16 @@ const addField = function (name, type, label, required, isCustom,
         testText += `:has(label:contains(${label}))`;
         ret.push({
             content: "Change the label text",
-            trigger: 'we-input[data-set-label-text] input',
+            trigger: "div[data-action-id='setLabelText'] input",
             run: `edit ${label} && press Tab`,
         });
     }
-    if (type !== 'checkbox' && type !== 'radio' && type !== 'select') {
-        let inputType = type === 'textarea' ? type : `input[type="${type}"]`;
+    if (type !== "checkbox" && type !== "radio" && type !== "select") {
+        const inputType = type === "textarea" ? type : `input[type="${type}"]`;
         const nameAttribute = isCustom && label ? getQuotesEncodedName(label) : name;
-        testText += `:has(${inputType}[name="${CSS.escape(nameAttribute)}"]${required ? "[required]" : ""})`;
+        testText += `:has(${inputType}[name="${CSS.escape(nameAttribute)}"]${
+            required ? "[required]" : ""
+        })`;
     }
     ret.push({
         content: "Check the resulting field",
@@ -829,137 +844,161 @@ registerWebsitePreviewTour('website_form_contactus_edition_no_email', {
     },
 ]));
 
-registerWebsitePreviewTour('website_form_conditional_required_checkboxes', {
-    url: '/',
-    edition: true,
-}, () => [
-    // Create a form with two checkboxes: the second one required but
-    // invisible when the first one is checked. Basically this should allow
-    // to have: both checkboxes are visible by default but the form can
-    // only be sent if one of the checkbox is checked.
+registerWebsitePreviewTour(
+    "website_form_conditional_required_checkboxes",
     {
-        content: "Add the form snippet",
-        trigger: '#oe_snippets .oe_snippet .oe_snippet_thumbnail[data-snippet=s_website_form]',
-        run: "drag_and_drop :iframe #wrap",
+        url: "/",
+        edition: true,
     },
-    {
-        trigger: ":iframe .s_website_form_field",
-    },
-    {
-        content: "Select the form by clicking on an input field",
-        trigger: ':iframe section.s_website_form input',
-        async run(actions) {
-            await actions.click();
-
-            // The next steps will be about removing non essential required
-            // fields. For the robustness of the test, check that amount
-            // of field stays the same.
-            const requiredFields = this.anchor.closest("[data-snippet]").querySelectorAll(".s_website_form_required");
-            if (requiredFields.length !== NB_NON_ESSENTIAL_REQUIRED_FIELDS_IN_DEFAULT_FORM) {
-                console.error('The amount of required fields seems to have changed');
-            }
+    () => [
+        // Create a form with two checkboxes: the second one required but
+        // invisible when the first one is checked. Basically this should allow
+        // to have: both checkboxes are visible by default but the form can
+        // only be sent if one of the checkbox is checked.
+        ...insertSnippet({
+            id: "s_title_form",
+            name: "Title - Form",
+            groupName: "Contact & Forms",
+        }),
+        {
+            trigger: ":iframe .s_website_form_field",
         },
-    },
-    ...((function () {
-        const steps = [];
-        for (let i = 0; i < NB_NON_ESSENTIAL_REQUIRED_FIELDS_IN_DEFAULT_FORM; i++) {
-            steps.push({
-                content: "Select required field to remove",
-                trigger: ':iframe .s_website_form_required .s_website_form_input',
-                run: "click",
-            });
-            steps.push({
-                content: "Remove required field",
-                trigger: ':iframe .oe_overlay .oe_snippet_remove',
-                run: "click",
-            });
-        }
-        return steps;
-    })()),
-    ...addCustomField('boolean', 'checkbox', 'Checkbox 1', false),
-    ...addCustomField('boolean', 'checkbox', 'Checkbox 2', true, {visibility: CONDITIONALVISIBILITY}),
-    {
-        content: "Open condition item select",
-        trigger: 'we-select[data-name="hidden_condition_opt"] we-toggler',
-        run: "click",
-    }, {
-        content: "Choose first checkbox as condition item",
-        trigger: 'we-button[data-set-visibility-dependency="Checkbox 1"]',
-        run: "click",
-    }, {
-        content: "Open condition comparator select",
-        trigger: 'we-select[data-attribute-name="visibilityComparator"] we-toggler',
-        run: "click",
-    }, {
-        content: "Choose 'not equal to' comparator",
-        trigger: 'we-button[data-select-data-attribute="!selected"]',
-        run: "click",
-    },
-    ...clickOnSave(),
+        {
+            content: "Select the form by clicking on an input field",
+            trigger: ":iframe section.s_website_form input",
+            async run(actions) {
+                await actions.click();
 
-    // Check that the resulting form behavior is correct
-    {
-        content: "Wait for page reload",
-        trigger: 'body:not(.editor_enable) :iframe [data-snippet="s_website_form"]',
-        run: function (actions) {
-            // The next steps will be about removing non essential required
-            // fields. For the robustness of the test, check that amount
-            // of field stays the same.
-            const essentialFields = this.anchor.querySelectorAll(".s_website_form_model_required");
-            if (essentialFields.length !== ESSENTIAL_FIELDS_VALID_DATA_FOR_DEFAULT_FORM.length) {
-                console.error('The amount of model-required fields seems to have changed');
-            }
+                // The next steps will be about removing non essential required
+                // fields. For the robustness of the test, check that amount
+                // of field stays the same.
+                const requiredFields = this.anchor
+                    .closest("[data-snippet]")
+                    .querySelectorAll(".s_website_form_required");
+                if (requiredFields.length !== NB_NON_ESSENTIAL_REQUIRED_FIELDS_IN_DEFAULT_FORM) {
+                    console.error("The amount of required fields seems to have changed");
+                }
+            },
         },
-    },
-    {
-        content: "Wait the form is loaded before fill it",
-        trigger: ":iframe form:contains(checkbox 2)",
-    },
-    ...essentialFieldsForDefaultFormFillInSteps,
-    {
-        content: 'Try sending empty form',
-        trigger: ':iframe .s_website_form_send',
-        run: "click",
-    }, {
-        content: 'Check the form could not be sent',
-        trigger: ':iframe #s_website_form_result.text-danger',
-    }, {
-        content: 'Check the first checkbox',
-        trigger: ':iframe input[type="checkbox"][name="Checkbox 1"]',
-        run: "click",
-    }, {
-        content: 'Check the second checkbox is now hidden',
-        trigger: ':iframe .s_website_form:has(input[type="checkbox"][name="Checkbox 2"]:not(:visible))',
-    }, {
-        content: 'Try sending the form',
-        trigger: ':iframe .s_website_form_send',
-        run: "click",
-    }, {
-        content: "Check the form was sent (success page without form)",
-        trigger: ':iframe body:not(:has([data-snippet="s_website_form"])) .fa-paper-plane',
-    }, {
-        content: "Go back to the form",
-        trigger: ':iframe a.navbar-brand.logo',
-        run: "click",
-    },
-    {
-        content: "Wait the form is loaded before fill it",
-        trigger: ":iframe form:contains(checkbox 2)",
-    },
-    ...essentialFieldsForDefaultFormFillInSteps,
-    {
-        content: 'Check the second checkbox',
-        trigger: ':iframe input[type="checkbox"][name="Checkbox 2"]',
-        run: "click",
-    }, {
-        content: 'Try sending the form again',
-        trigger: ':iframe .s_website_form_send',
-        run: "click",
-    }, {
-        content: "Check the form was again sent (success page without form)",
-        trigger: ':iframe body:not(:has([data-snippet="s_website_form"])) .fa-paper-plane',
-    }
-]);
+        ...(function () {
+            const steps = [];
+            for (let i = 0; i < NB_NON_ESSENTIAL_REQUIRED_FIELDS_IN_DEFAULT_FORM; i++) {
+                steps.push({
+                    content: "Select required field to remove",
+                    trigger: ":iframe .s_website_form_required .s_website_form_input",
+                    run: "click",
+                });
+                steps.push({
+                    content: "Remove required field",
+                    trigger: ".o_overlay_options .oe_snippet_remove",
+                    run: "click",
+                });
+            }
+            return steps;
+        })(),
+        ...addCustomField("boolean", "checkbox", "Checkbox 1", false),
+        ...addCustomField("boolean", "checkbox", "Checkbox 2", true, {
+            visibility: CONDITIONALVISIBILITY,
+        }),
+        {
+            content: "Open condition item select",
+            trigger: "[data-container-title='Field'] #hidden_condition_opt",
+            run: "click",
+        },
+        {
+            content: "Choose first checkbox as condition item",
+            trigger: ".o_popover div[role='menuitem'][data-action-value='Checkbox 1']",
+            run: "click",
+        },
+        {
+            content: "Open condition comparator select",
+            trigger: "[data-container-title='Field'] #hidden_condition_no_text_opt",
+            run: "click",
+        },
+        {
+            content: "Choose 'not equal to' comparator",
+            trigger: ".o_popover div[role='menuitem']:contains('not equal to')",
+            run: "click",
+        },
+        ...clickOnSave(),
+
+        // Check that the resulting form behavior is correct
+        {
+            content: "Wait for page reload",
+            trigger: 'body:not(.editor_enable) :iframe [data-snippet="s_website_form"]',
+            run: function (actions) {
+                // The next steps will be about removing non essential required
+                // fields. For the robustness of the test, check that amount
+                // of field stays the same.
+                const essentialFields = this.anchor.querySelectorAll(
+                    ".s_website_form_model_required"
+                );
+                if (
+                    essentialFields.length !== ESSENTIAL_FIELDS_VALID_DATA_FOR_DEFAULT_FORM.length
+                ) {
+                    console.error("The amount of model-required fields seems to have changed");
+                }
+            },
+        },
+        {
+            content: "Wait the form is loaded before fill it",
+            trigger: ":iframe form:contains(checkbox 2)",
+        },
+        ...essentialFieldsForDefaultFormFillInSteps,
+        {
+            content: "Try sending empty form",
+            trigger: ":iframe .s_website_form_send",
+            run: "click",
+        },
+        {
+            content: "Check the form could not be sent",
+            trigger: ":iframe #s_website_form_result.text-danger",
+        },
+        {
+            content: "Check the first checkbox",
+            trigger: ":iframe input[type='checkbox'][name='Checkbox 1']",
+            run: "click",
+        },
+        {
+            content: "Check the second checkbox is now hidden",
+            trigger:
+                ":iframe .s_website_form:has(input[type='checkbox'][name='Checkbox 2']:not(:visible))",
+        },
+        {
+            content: "Try sending the form",
+            trigger: ":iframe .s_website_form_send",
+            run: "click",
+        },
+        {
+            content: "Check the form was sent (success page without form)",
+            trigger: ':iframe body:not(:has([data-snippet="s_website_form"])) .fa-paper-plane',
+        },
+        {
+            content: "Go back to the form",
+            trigger: ":iframe a.navbar-brand.logo",
+            run: "click",
+        },
+        {
+            content: "Wait the form is loaded before fill it",
+            trigger: ":iframe form:contains(checkbox 2)",
+        },
+        ...essentialFieldsForDefaultFormFillInSteps,
+        {
+            content: "Check the second checkbox",
+            trigger: ':iframe input[type="checkbox"][name="Checkbox 2"]',
+            run: "click",
+        },
+        {
+            content: "Try sending the form again",
+            trigger: ":iframe .s_website_form_send",
+            run: "click",
+        },
+        {
+            content: "Check the form was again sent (success page without form)",
+            trigger: ':iframe body:not(:has([data-snippet="s_website_form"])) .fa-paper-plane',
+        },
+    ]
+);
 
 registerWebsitePreviewTour('website_form_contactus_change_random_option', {
     url: '/contactus',
