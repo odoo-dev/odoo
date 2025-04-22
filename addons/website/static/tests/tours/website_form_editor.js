@@ -1099,47 +1099,50 @@ registerWebsitePreviewTour("website_form_editable_content", {
     ...clickOnSave(),
 ]);
 
-registerWebsitePreviewTour("website_form_special_characters", {
-    url: "/",
-    edition: true,
-}, () => [
+registerWebsitePreviewTour(
+    "website_form_special_characters",
     {
-        trigger: ".o_website_preview.editor_enable.editor_has_snippets",
+        url: "/",
+        edition: true,
     },
-    {
-        trigger: `#oe_snippets .oe_snippet[name="Form"].o_we_draggable .oe_snippet_thumbnail:not(.o_we_ongoing_insertion)`,
-        run: "drag_and_drop :iframe #wrap",
-    },
-    {
-        trigger: ":iframe .s_website_form_field",
-    },
-    {
-        content: "Select form by clicking on an input field",
-        trigger: ":iframe section.s_website_form input",
-        run: "click",
-    },
-    ...addCustomField("char", "text", `Test1"'`, false),
-    ...addCustomField("char", "text", 'Test2`\\', false),
-    ...clickOnSave(),
-    ...essentialFieldsForDefaultFormFillInSteps,
-    {
-        content: "Complete 'Your Question' field",
-        trigger: ":iframe textarea[name='description']",
-        run: "edit test",
-    }, {
-        content: "Complete the first added field",
-        trigger: `:iframe input[name="${CSS.escape("Test1&quot;'")}"]`,
-        run: "edit test1",
-    }, {
-        content: "Complete the second added field",
-        trigger: `:iframe input[name="${CSS.escape("Test2`\\")}"]`,
-        run: "edit test2",
-    }, {
-        content: "Click on 'Submit'",
-        trigger: ":iframe a.s_website_form_send",
-        run: "click",
-    }, {
-        content: "Check the form was again sent (success page without form)",
-        trigger: ":iframe body:not(:has([data-snippet='s_website_form'])) .fa-paper-plane",
-    },
-]);
+    () => [
+        ...insertSnippet({
+            id: "s_title_form",
+            name: "Title - Form",
+            groupName: "Contact & Forms",
+        }),
+        {
+            content: "Select form by clicking on an input field",
+            trigger: ":iframe section.s_website_form input",
+            run: "click",
+        },
+        ...addCustomField("char", "text", `Test1"'`, false),
+        ...addCustomField("char", "text", 'Test2`\\', false),
+        ...clickOnSave(),
+        ...essentialFieldsForDefaultFormFillInSteps,
+        {
+            content: "Complete 'Your Question' field",
+            trigger: ":iframe textarea[name='description']",
+            run: "edit test",
+        },
+        {
+            content: "Complete the first added field",
+            trigger: `:iframe input[name="${CSS.escape("Test1&quot;'")}"]`,
+            run: "edit test1",
+        },
+        {
+            content: "Complete the second added field",
+            trigger: `:iframe input[name="${CSS.escape("Test2`\\")}"]`,
+            run: "edit test2",
+        },
+        {
+            content: "Click on 'Submit'",
+            trigger: ":iframe a.s_website_form_send",
+            run: "click",
+        },
+        {
+            content: "Check the form was again sent (success page without form)",
+            trigger: ":iframe body:not(:has([data-snippet='s_website_form'])) .fa-paper-plane",
+        },
+    ]
+);
