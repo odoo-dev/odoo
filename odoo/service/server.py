@@ -1012,15 +1012,24 @@ class PreforkServer(CommonServer):
 
         if config['http_enable']:
             # listen to socket
-            _logger.info('HTTP service (werkzeug) running on %s:%s', self.interface, self.port)
             family = socket.AF_INET
             if ':' in self.interface:
                 family = socket.AF_INET6
-            self.socket = socket.socket(family, socket.SOCK_STREAM)
-            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.socket.setblocking(0)
-            self.socket.bind((self.interface, self.port))
-            self.socket.listen(8 * self.population)
+
+            # systemd socket activation
+            if os.environ.get('LISTEN_FDS') == '1' and os.environ.get('LISTEN_PID') == str(os.getpid()):
+                _logger.info('HTTP service (werkzeug) running through socket activation')
+                SD_LISTEN_FDS_START = 3
+                self.socket = socket.fromfd(SD_LISTEN_FDS_START, family, socket.SOCK_STREAM)
+
+            # default
+            else:
+                _logger.info('HTTP service (werkzeug) running on %s:%s', self.interface, self.port)
+                self.socket = socket.socket(family, socket.SOCK_STREAM)
+                self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                self.socket.setblocking(0)
+                self.socket.bind((self.interface, self.port))
+                self.socket.listen(8 * self.population)
 
     def stop(self, graceful=True):
         if self.long_polling_pid is not None:
