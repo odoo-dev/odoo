@@ -730,7 +730,7 @@ class Meeting(models.Model):
         current_attendees = self.filtered('active').attendee_ids
         if 'partner_ids' in values:
             # we send to all partners and not only the new ones
-            (current_attendees - previous_attendees)._send_mail_to_attendees(
+            (current_attendees - previous_attendees).with_context(mail_notify_author=True)._send_mail_to_attendees(
                 self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False)
             )
         if not self.env.context.get('is_calendar_event_new') and 'start' in values:
@@ -738,7 +738,8 @@ class Meeting(models.Model):
             # Only notify on future events
             if start_date and start_date >= fields.Datetime.now():
                 (current_attendees & previous_attendees).with_context(
-                    calendar_template_ignore_recurrence=not update_recurrence
+                    calendar_template_ignore_recurrence=not update_recurrence,
+                    mail_notify_author=True
                 )._send_mail_to_attendees(
                     self.env.ref('calendar.calendar_template_meeting_changedate', raise_if_not_found=False)
                 )
@@ -916,7 +917,7 @@ class Meeting(models.Model):
         email = self.env.user.email
         if email:
             for meeting in self:
-                meeting.attendee_ids._send_mail_to_attendees(
+                meeting.attendee_ids.with_context(mail_notify_author=True)._send_mail_to_attendees(
                     self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False)
                 )
         return True

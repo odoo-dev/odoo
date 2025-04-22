@@ -1120,6 +1120,7 @@ class MailCase(MockEmail):
                     n.res_partner_id == partner and
                     n.notification_type == ntype
                 )
+                breakpoint()
                 self.assertEqual(len(partner_notif), 1,
                                  f'Mail: not found notification for {partner} (type: {ntype}, message: {message.id})')
                 self.assertEqual(partner_notif.author_id, partner_notif.mail_message_id.author_id)

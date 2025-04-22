@@ -46,7 +46,10 @@ class TestEventNotifications(TransactionCase, MailCase, CronMixinCase):
 
 
     def test_message_invite_self(self):
-        with self.assertNoNotifications():
+        with self.assertSinglePostNotifications([{'partner': self.partner, 'type': 'inbox'}], {
+            'message_type': 'user_notification',
+            'subtype': 'mail.mt_note',
+        }):
             self.event.with_user(self.user).partner_ids = self.partner
 
     def test_message_inactive_invite(self):
@@ -64,11 +67,14 @@ class TestEventNotifications(TransactionCase, MailCase, CronMixinCase):
 
     def test_message_datetime_changed(self):
         self.event.partner_ids = self.partner
-        "Invitation to Presentation of the new Calendar"
-        with self.assertSinglePostNotifications([{'partner': self.partner, 'type': 'inbox'}], {
+        
+        # Define the expected notification structure correctly
+        with self.assertPostNotifications([{
+            'content': '',  # Content to match in the message body
             'message_type': 'user_notification',
             'subtype': 'mail.mt_note',
-        }):
+            'notif': [{'partner': self.partner, 'type': 'inbox'}]  # List of recipients
+        }]):
             self.event.start = fields.Datetime.now() + relativedelta(days=1)
 
     def test_message_date_changed(self):
@@ -78,10 +84,20 @@ class TestEventNotifications(TransactionCase, MailCase, CronMixinCase):
             'stop_date': fields.Date.today() + relativedelta(days=8),
         })
         self.event.partner_ids = self.partner
-        with self.assertSinglePostNotifications([{'partner': self.partner, 'type': 'inbox'}], {
-            'message_type': 'user_notification',
-            'subtype': 'mail.mt_note',
-        }):
+        with self.assertPostNotifications([{
+                'message_type': 'user_notification',
+                'subtype': 'mail.mt_note',
+                'notif': [
+                    {'partner': self.partner, 'type': 'inbox', 'status': 'sent'}
+                ]}], [
+                    {
+                'message_type': 'user_notification',
+                'subtype': 'mail.mt_note',
+                'notif': [
+                    {'partner': self.event.user_id.partner_id, 'type': 'inbox', 'status': 'sent'},
+                ]}
+                ]
+        ):
             self.event.start_date += relativedelta(days=-1)
 
     def test_message_date_changed_past(self):
