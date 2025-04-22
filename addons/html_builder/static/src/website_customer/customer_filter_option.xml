@@ -17,8 +17,7 @@
                     views: ['website_customer.opt_tag_list'],
                 }"/>
         </BuilderRow>
-                <!-- TODO: get google_maps_api_key in Plugin or Component -->
-        <BuilderRow label.translate="Show Map" t-if="google_maps_api_key">
+        <BuilderRow label.translate="Show Map" t-if="hasGoogleMapsApiKey">
             <BuilderCheckbox action="'websiteConfig'" actionParam="{
                     views: ['website_customer.opt_country'],
                 }"/>
