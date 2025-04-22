@@ -20,6 +20,7 @@ test("dropping a new snippet starts its interaction", async () => {
         setup() {
             super.setup();
             this.websiteEditService.update = () => expect.step("update");
+            this.websiteEditService.refresh = () => expect.step("refresh");
         },
     });
     await openBuilderSidebar();
@@ -29,7 +30,7 @@ test("dropping a new snippet starts its interaction", async () => {
         `.o-snippets-menu #snippet_groups .o_snippet[data-snippet-group='text'] .o_snippet_thumbnail_area`
     ).click();
     await confirmAddSnippet("s_title");
-    expect.verifySteps(["update"]);
+    expect.verifySteps(["refresh"]);
 });
 
 test("replacing a snippet starts the interaction of the new snippet", async () => {
@@ -40,6 +41,7 @@ test("replacing a snippet starts the interaction of the new snippet", async () =
         setup() {
             super.setup();
             this.websiteEditService.update = () => expect.step("update");
+            this.websiteEditService.refresh = () => expect.step("refresh");
         },
     });
     await openBuilderSidebar();
@@ -48,7 +50,7 @@ test("replacing a snippet starts the interaction of the new snippet", async () =
     await click(`:iframe [data-snippet="s_text_block"]`);
     await contains(".btn.o_snippet_replace").click();
     await confirmAddSnippet("s_title");
-    expect.verifySteps(["update"]);
+    expect.verifySteps(["refresh"]);
 });
 
 test("ensure order of operations when hovering an option", async () => {
