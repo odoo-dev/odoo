@@ -27,7 +27,7 @@ describe("Operation", () => {
                 expect.step(`apply ${data}`);
             }
 
-            operation.nextWithLoad(apply, { load, cancellable: true });
+            operation.next(apply, { load, cancellable: true });
             return {
                 resolve,
             };
@@ -67,7 +67,7 @@ describe("Operation", () => {
                 expect.step(`apply ${data}`);
             }
 
-            operation.nextWithLoad(apply, { load, cancellable: true });
+            operation.next(apply, { load, cancellable: true });
             return {
                 resolve,
             };
