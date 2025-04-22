@@ -15,7 +15,27 @@ export class HighlightPlugin extends Plugin {
     static id = "highlight";
     static dependencies = ["history", "selection", "split", "format"];
     resources = {
-        toolbar_groups: [withSequence(50, { id: "websiteDecoration" })],
+        toolbar_groups: [
+            withSequence(50, { id: "websiteDecoration" }),
+            withSequence(1, { id: "high" }),
+        ],
+        user_commands: [
+            {
+                id: "circle",
+                icon: "fa-circle",
+                run: () => this._applyHighlight("circle_1"),
+            },
+            {
+                id: "square",
+                icon: "fa-square",
+                run: () => this._applyHighlight("diagonal"),
+            },
+            {
+                id: "wavy",
+                icon: "fa-square",
+                run: () => this._applyHighlight("wavy"),
+            },
+        ],
         toolbar_items: [
             {
                 id: "highlight",
@@ -27,6 +47,24 @@ export class HighlightPlugin extends Plugin {
                     previewHighlight: this.previewHighlight.bind(this),
                     applyHighlightResetPreview: this.resetHighlightPreview.bind(this),
                 },
+            },
+            {
+                id: "highlight2",
+                namespaces: ["compact", "expanded"],
+                groupId: "high",
+                commandId: "circle",
+            },
+            {
+                id: "highlight3",
+                namespaces: ["compact", "expanded"],
+                groupId: "high",
+                commandId: "square",
+            },
+            {
+                id: "highlight4",
+                namespaces: ["compact", "expanded"],
+                groupId: "high",
+                commandId: "wavy",
             },
         ],
         clean_for_save_handlers: ({ root }) => {
