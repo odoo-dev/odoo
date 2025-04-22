@@ -718,4 +718,46 @@ describe("unobserved mutations", () => {
             expect(p.className).toBe("a c");
         });
     });
+    describe("attributes", () => {
+        test("unobserved attribute mutations should not affect history", async () => {
+            const { editor } = await setupEditor(`<p>test</p>`);
+            /** @type {HTMLElement} */
+            const p = editor.editable.querySelector("p");
+            withAddStep(editor, () => p.setAttribute("data-test", "a"));
+            editor.shared.history.ignoreDOMMutations(() => p.setAttribute("data-test", "b"));
+            withAddStep(editor, () => p.setAttribute("data-test", "c"));
+            editor.shared.history.undo();
+            expect(p.getAttribute("data-test")).toBe("a");
+        });
+        test("multiple unobserved attribute mutations", async () => {
+            const { editor } = await setupEditor(`<p>test</p>`);
+            /** @type {HTMLElement} */
+            const p = editor.editable.querySelector("p");
+            withAddStep(editor, () => p.setAttribute("data-test", "a"));
+            editor.shared.history.ignoreDOMMutations(() => p.setAttribute("data-test", "b"));
+            editor.shared.history.ignoreDOMMutations(() => p.setAttribute("data-test", "c"));
+            withAddStep(editor, () => p.setAttribute("data-test", "d"));
+            editor.shared.history.undo();
+            expect(p.getAttribute("data-test")).toBe("a");
+        });
+        test("setting an attribute as first observed step", async () => {
+            const { editor } = await setupEditor(`<p>test</p>`);
+            /** @type {HTMLElement} */
+            const p = editor.editable.querySelector("p");
+            editor.shared.history.ignoreDOMMutations(() => p.setAttribute("data-test", "a"));
+            withAddStep(editor, () => p.setAttribute("data-test", "b"));
+            editor.shared.history.undo();
+            expect(p.getAttribute("data-test")).toBe(null);
+        });
+        test("attribute with no value", async () => {
+            const { editor } = await setupEditor(`<p>test</p>`);
+            /** @type {HTMLElement} */
+            const p = editor.editable.querySelector("p");
+            withAddStep(editor, () => p.setAttribute("data-test", ""));
+            editor.shared.history.ignoreDOMMutations(() => p.setAttribute("data-test", "a"));
+            withAddStep(editor, () => p.setAttribute("data-test", "b"));
+            editor.shared.history.undo();
+            expect(p.getAttribute("data-test")).toBe("");
+        });
+    });
 });
