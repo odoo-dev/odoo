@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="group_purchase_alternatives" model="res.groups">
+        <field name="name">Manage Purchase Alternatives</field>
+    </record>
+
+    <record id="base.group_user" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('purchase_alternative.group_purchase_alternatives'))]"/>
+    </record>
+
+</odoo>
