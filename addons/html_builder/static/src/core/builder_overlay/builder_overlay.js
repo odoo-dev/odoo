@@ -69,10 +69,12 @@ export class BuilderOverlay {
             return;
         }
 
+        const openModalEl = this.overlayTarget.querySelector(".modal.show");
+        const overlayTarget = openModalEl ? openModalEl : this.overlayTarget;
         // TODO transform
         const iframeRect = this.iframe.getBoundingClientRect();
         const overlayContainerRect = this.overlayContainer.getBoundingClientRect();
-        const targetRect = this.overlayTarget.getBoundingClientRect();
+        const targetRect = overlayTarget.getBoundingClientRect();
         Object.assign(this.overlayElement.style, {
             width: `${targetRect.width}px`,
             height: `${targetRect.height}px`,
