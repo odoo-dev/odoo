@@ -292,9 +292,6 @@ export class HistoryPlugin extends Plugin {
     }
 
     enableObserver() {
-        if (this.enableObserverCallbacks.size > 0) {
-            return;
-        }
         this.observer.observe(this.editable, {
             childList: true,
             subtree: true,
@@ -304,6 +301,7 @@ export class HistoryPlugin extends Plugin {
             characterDataOldValue: true,
         });
     }
+
     /**
      * Disable the mutation observer.
      *
@@ -313,11 +311,15 @@ export class HistoryPlugin extends Plugin {
     disableObserver() {
         const enableObserver = () => {
             this.enableObserverCallbacks.delete(enableObserver);
-            this.enableObserver();
+            if (this.enableObserverCallbacks.size > 0) {
+                return;
+            }
+            this.handleObserverRecords();
+            this.isObserverDisabled = false;
         };
         this.enableObserverCallbacks.add(enableObserver);
         this.handleObserverRecords();
-        this.observer.disconnect();
+        this.isObserverDisabled = true;
         return enableObserver;
     }
 
@@ -354,8 +356,43 @@ export class HistoryPlugin extends Plugin {
         if (!records.length) {
             return [];
         }
+        if (this.isObserverDisabled) {
+            this.storeLastObservedState(records);
+            return [];
+        }
         this.stageRecords(records);
         return records;
+    }
+
+    /**
+     * @param { MutationRecord[] } records
+     */
+    storeLastObservedState(records) {
+        this.lastObservedState ||= new Map();
+        records
+            .filter(({ type }) => type === "attributes")
+            .filter(({ attributeName }) => attributeName !== "class") // not handled for now
+            .forEach(({ target, attributeName, oldValue }) => {
+                if (!this.lastObservedState.has(target)) {
+                    this.lastObservedState.set(target, new Map());
+                }
+                const attrMap = this.lastObservedState.get(target);
+                if (!attrMap.has(attributeName)) {
+                    attrMap.set(attributeName, oldValue);
+                }
+            });
+    }
+
+    readLastObservedValue(node, attributeName) {
+        const attrMap = this.lastObservedState?.get(node);
+        if (!attrMap || !attrMap.has(attributeName)) {
+            return;
+        }
+        const lastObservedValue = attrMap.get(attributeName);
+        // Assumes that the observer is active and next mutation's oldValue
+        // can be trusted
+        attrMap.delete(attributeName);
+        return lastObservedValue;
     }
 
     dispatchContentUpdated() {
@@ -579,17 +616,28 @@ export class HistoryPlugin extends Plugin {
                         addedClasses.forEach((cls) => stageClassListRecord(cls, "add"));
                         removedClasses.forEach((cls) => stageClassListRecord(cls, "remove"));
                     } else {
+                        const { target, attributeName } = record;
+                        const lastObservedValue = this.readLastObservedValue(target, attributeName);
+                        // Obs: null is a valid value for oldValue (meaning non-existing)
+                        const oldValue =
+                            lastObservedValue === undefined ? record.oldValue : lastObservedValue;
+                        // This should be done in a posterior filter phase
+                        const newValue = target.getAttribute(attributeName);
+                        if (oldValue === newValue) {
+                            // No-op
+                            break;
+                        }
                         this.currentStep.mutations.push({
                             type: "attributes",
                             id: this.nodeToIdMap.get(record.target),
                             attributeName: record.attributeName,
-                            value: record.target.getAttribute(record.attributeName),
-                            oldValue: record.oldValue,
+                            value: newValue,
+                            oldValue: oldValue,
                         });
                         this.dispatchTo("attribute_change_handlers", {
                             target: record.target,
                             attributeName: record.attributeName,
-                            oldValue: record.oldValue,
+                            oldValue: record.oldValue, // @todo adjust oldValue here too?
                             value: record.target.getAttribute(record.attributeName),
                         });
                     }
