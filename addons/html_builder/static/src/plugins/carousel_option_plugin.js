@@ -54,9 +54,9 @@ export class CarouselOptionPlugin extends Plugin {
                 apply: async ({ editingElement }) => this.addSlide(editingElement),
             },
             slideCarousel: {
-                load: async ({ editingElement, direction: direction }) =>
+                preview: false,
+                apply: async ({ editingElement, direction: direction }) =>
                     this.slideCarousel(editingElement, direction),
-                apply: () => {},
             },
             toggleControllers: {
                 apply: ({ editingElement }) => {

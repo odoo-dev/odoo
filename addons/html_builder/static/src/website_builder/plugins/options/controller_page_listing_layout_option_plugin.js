@@ -51,7 +51,7 @@ class ControllerPageListingLayoutOptionPlugin extends Plugin {
                     },
                     getValue: () => this.layout,
                     isApplied: ({ value }) => this.layout === value,
-                    load: async ({ editingElement: el, value }) => {
+                    apply: async ({ editingElement: el, value }) => {
                         const params = {
                             layout_mode: value,
                             view_id: el.dataset.viewId,
@@ -64,7 +64,6 @@ class ControllerPageListingLayoutOptionPlugin extends Plugin {
                             rpc("/website/save_session_layout_mode", params),
                         ]);
                     },
-                    apply: () => {},
                 },
             },
         ];
