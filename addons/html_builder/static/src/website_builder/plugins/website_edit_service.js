@@ -201,8 +201,8 @@ registry.category("services").add("website_edit", {
         const applyAction = (actionId, spec) => {
             const action = shared.builderActions.getAction(actionId);
             shared.operation.nextWithLoad(
-                () => {
-                    action.apply(spec);
+                async () => {
+                    await action.apply(spec);
                     shared.history.addStep();
                 },
                 {

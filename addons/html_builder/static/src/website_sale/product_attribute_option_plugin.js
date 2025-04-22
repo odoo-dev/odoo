@@ -21,7 +21,7 @@ class ProductAttributeOptionPlugin extends Plugin {
                 isApplied: ({ editingElement: el, value }) =>
                     value === this.getProductAttributeDisplay(el),
                 getValue: ({ editingElement: el }) => this.getProductAttributeDisplay(el),
-                load: async ({ editingElement: el, value }) => {
+                apply: async ({ editingElement: el, value }) => {
                     const attributeID = parseInt(
                         el.closest("[data-attribute_id]").dataset.attribute_id
                     );
@@ -30,7 +30,6 @@ class ProductAttributeOptionPlugin extends Plugin {
                         display_type: value,
                     });
                 },
-                apply: () => {},
             },
         };
     }

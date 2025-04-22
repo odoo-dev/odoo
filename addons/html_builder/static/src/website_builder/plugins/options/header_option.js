@@ -80,17 +80,18 @@ class HeaderOptionPlugin extends Plugin {
             }),
             setShadowModeHeader: withHistoryFromLoad({
                 ...setShadowMode,
-                load: ({ value: shadowMode }) => {
+                preview: false,
+                apply: ({ value: shadowMode }) => {
                     const defaultShadow =
                         shadowMode === "none" ? "none" : getDefaultShadow(shadowMode);
                     return this.dependencies.customizeWebsite.customizeWebsiteVariables({
                         "menu-box-shadow": defaultShadow,
                     });
                 },
-                apply: () => {},
             }),
             setShadowHeader: withHistoryFromLoad({
                 ...setShadow,
+                preview: false,
                 load: ({ editingElement, param: { mainParam: attributeName }, value }) => {
                     const shadow = getCurrentShadow(editingElement);
                     shadow[attributeName] = value;
@@ -99,7 +100,6 @@ class HeaderOptionPlugin extends Plugin {
                         "menu-box-shadow": shadowToString(shadow),
                     });
                 },
-                apply: () => {},
             }),
         };
     }

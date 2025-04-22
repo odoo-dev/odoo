@@ -87,7 +87,8 @@ export class CustomizeWebsitePlugin extends Plugin {
                 },
             }),
             switchTheme: {
-                load: async () => {
+                preview: false,
+                apply: async () => {
                     const save = await new Promise((resolve) => {
                         this.services.dialog.add(ConfirmationDialog, {
                             body: _t(
@@ -105,10 +106,10 @@ export class CustomizeWebsitePlugin extends Plugin {
                     // TODO doAction in savePlugin.save ?
                     this.services.action.doAction("website.theme_install_kanban_action", {});
                 },
-                apply: () => {},
             },
             addLanguage: {
-                load: async () => {
+                preview: false,
+                apply: async () => {
                     // Retrieve the website id to check by default the website checkbox in
                     // the dialog box 'action_view_base_language_install'
                     const websiteId = this.services.website.currentWebsite.id;
@@ -132,7 +133,6 @@ export class CustomizeWebsitePlugin extends Plugin {
                         url_return: "[land]",
                     });
                 },
-                apply: () => {},
             },
             customizeBodyBgType: {
                 isApplied: ({ value }) => {
@@ -214,7 +214,8 @@ export class CustomizeWebsitePlugin extends Plugin {
                 },
             },
             removeFont: {
-                load: async ({ param }) => {
+                preview: false,
+                apply: async ({ param }) => {
                     // TODO
                     const getAction = this.dependencies.builderActions.getAction;
                     await getAction("customizeWebsiteVariable").load({
@@ -223,9 +224,9 @@ export class CustomizeWebsitePlugin extends Plugin {
                         },
                     });
                 },
-                apply: () => {},
             },
             customizeButtonStyle: this.withHistoryFromLoad({
+                preview: false,
                 isApplied: ({ param, value }) => {
                     const getAction = this.dependencies.builderActions.getAction;
                     const currentValue = getAction("customizeButtonStyle").getValue({ param });
@@ -239,7 +240,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                     const isFlat = getCSSVariableValue(`btn-${which}-flat`, style);
                     return isFlat === "true" ? "flat" : isOutline === "true" ? "outline" : "fill";
                 },
-                load: async ({ param: { mainParam: which, nullValue }, value }) => {
+                apply: async ({ param: { mainParam: which, nullValue }, value }) => {
                     await this.customizeWebsiteVariables(
                         {
                             [`btn-${which}-outline`]: value === "outline" ? "true" : "false",

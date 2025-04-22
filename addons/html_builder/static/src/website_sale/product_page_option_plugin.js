@@ -156,13 +156,12 @@ class ProductPageOptionPlugin extends Plugin {
                 isApplied: ({ value }) =>
                     (parseInt(this.productPageGrid?.dataset.grid_columns) || 1) === value,
                 getValue: () => parseInt(this.productPageGrid?.dataset.grid_columns) || 1,
-                load: async ({ value }) => {
+                apply: async ({ value }) => {
                     this.productPageGrid.dataset.grid_columns = value;
                     await rpc("/shop/config/website", {
                         product_page_grid_columns: value,
                     });
                 },
-                apply: () => {},
             },
             productReplaceMainImage: {
                 apply: ({ editingElement: productDetailMainEl }) => {
@@ -175,7 +174,7 @@ class ProductPageOptionPlugin extends Plugin {
             },
             productAddExtraImage: {
                 reload: {},
-                load: async ({ editingElement: el }) => {
+                apply: async ({ editingElement: el }) => {
                     // Prompts the user for images, then saves the new images.
                     if (this.model === "product.template") {
                         this.notification.add(
@@ -200,11 +199,10 @@ class ProductPageOptionPlugin extends Plugin {
                         onClose.then(resolve);
                     });
                 },
-                apply: () => {},
             },
             productRemoveAllExtraImages: {
                 reload: {},
-                load: async ({ editingElement: el }) =>
+                apply: async ({ editingElement: el }) =>
                     // Removes all extra-images from the product.
                     await rpc(`/shop/product/clear-images`, {
                         model: this.model,
@@ -212,7 +210,6 @@ class ProductPageOptionPlugin extends Plugin {
                         product_template_id: this.productTemplateID,
                         combination_ids: this.getSelectedVariantValues(el),
                     }),
-                apply: () => {},
             },
         };
     }
