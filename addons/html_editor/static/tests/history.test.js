@@ -696,3 +696,26 @@ describe("custom mutation", () => {
         expect.verifySteps(["custom apply", "custom revert", "custom apply", "custom revert"]);
     });
 });
+
+describe("unobserved mutations", () => {
+    const withAddStep = (editor, callback) => {
+        callback();
+        editor.shared.history.addStep();
+    };
+
+    describe("classes", () => {
+        test("unobserved class mutations should not be affected by undo/redo", async () => {
+            const { editor } = await setupEditor(`<p>test</p>`);
+            /** @type {HTMLElement} */
+            const p = editor.editable.querySelector("p");
+            withAddStep(editor, () => p.classList.add("a"));
+            editor.shared.history.ignoreDOMMutations(() => p.classList.add("b"));
+            withAddStep(editor, () => p.classList.add("c"));
+            editor.shared.history.undo();
+            expect(p.className).toBe("a b");
+            editor.shared.history.ignoreDOMMutations(() => p.classList.remove("b"));
+            editor.shared.history.redo();
+            expect(p.className).toBe("a c");
+        });
+    });
+});
