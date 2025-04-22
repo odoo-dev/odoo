@@ -1833,6 +1833,30 @@ class WebsiteSale(payment_portal.PaymentPortal):
             request.env['website.track'].sudo().search(domain).unlink()
         return {}
 
+    @route('/shop/categories', type='jsonrpc', auth='public', website=True)
+    def get_shop_categories(self, filter_id):
+        dynamic_filter = request.env['website.snippet.filter'].sudo().search(
+            [('id', '=', filter_id)] + request.website.website_domain(),
+        )
+        values = dynamic_filter._prepare_values()
+        for val in values:
+            val['website_ribbon_id'] = val['website_ribbon_id'].id \
+                if val['website_ribbon_id'] else ''
+        return values
+
+    @route('/shop/ribbons', type='jsonrpc', auth='public')
+    def get_shop_ribbons(self):
+        return self.env['product.ribbon'].sudo().search_read(
+            domain=[('assign', '=', 'manual')],
+            fields=['id', 'name', 'bg_color', 'text_color', 'style', 'position'],
+        )
+
+    @route('/snippets/category/set_image', type='jsonrpc', auth='public')
+    def set_category_image(self, category_id, media):
+        image_ids = request.env['ir.attachment'].browse(i['id'] for i in media)
+        category = request.env['product.public.category'].browse(category_id)
+        category.write({'cover_image': image_ids[0].datas})
+
     @staticmethod
     def _populate_currency_and_pricelist(kwargs):
         website = request.website

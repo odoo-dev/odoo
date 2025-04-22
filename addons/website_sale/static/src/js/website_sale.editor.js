@@ -570,6 +570,8 @@ options.registry.WebsiteSaleProductPage = options.Class.extend({
         let productTemplate = this.$target[0].querySelector('[data-oe-model="product.template"]');
         this.productProductID = productProduct ? productProduct.dataset.oeId : null;
         this.productTemplateID = productTemplate ? productTemplate.dataset.oeId : null;
+        this.recordId = this.productTemplateID;
+        this.recordModel = 'product.template';
         this.mode = "product.template";
         if (this.productProductID) {
             this.mode = "product.product"

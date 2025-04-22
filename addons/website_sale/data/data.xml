@@ -100,6 +100,12 @@
             <field name="sort">["create_date desc"]</field>
             <field name="action_id" ref="website.action_website"/>
         </record>
+        <record id="dynamic_snippet_all_categories_filter" model="ir.filters">
+            <field name="name">All Ecommerce Cateogries</field>
+            <field name="model_id">product.public.category</field>
+            <field name="user_ids" eval="False"/>
+            <field name="action_id" ref="website.action_website"/>
+        </record>
         <!-- Action Server for Dynamic Filter -->
         <record id="dynamic_snippet_latest_sold_products_action" model="ir.actions.server">
             <field name="name">Recently Sold Products</field>
@@ -189,6 +195,12 @@ response = DynamicFilter._get_products('alternative_products', product_template_
             <field name="limit" eval="16"/>
             <field name="name">Alternative Products</field>
             <field name="product_cross_selling">True</field>
+        </record>
+        <record id="dynamic_filter_all_categories" model="website.snippet.filter">
+            <field name="filter_id" ref="website_sale.dynamic_snippet_all_categories_filter"/>
+            <field name="field_names">id,name,cover_image,website_ribbon_id</field>
+            <field name="limit" eval="16"/>
+            <field name="name">All Ecommerce Cateogriess</field>
         </record>
 
         <function model="ir.model.fields" name="formbuilder_whitelist">

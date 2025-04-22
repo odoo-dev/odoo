@@ -26,7 +26,7 @@ class ProductPublicCategory(models.Model):
     sequence = fields.Integer(default=_default_sequence, index=True)
 
     parent_id = fields.Many2one(
-        string="Parent Category",
+        string="Parent",
         comodel_name='product.public.category',
         ondelete='cascade',
         index=True,
@@ -54,7 +54,7 @@ class ProductPublicCategory(models.Model):
     )
 
     website_description = fields.Html(
-        string="Category Description",
+        string="Description",
         sanitize_attributes=False,
         sanitize_form=False,
         sanitize_overridable=True,
@@ -66,6 +66,16 @@ class ProductPublicCategory(models.Model):
         sanitize_attributes=False,
         sanitize_form=False,
         translate=html_translate,
+    )
+
+    website_ribbon_id = fields.Many2one(
+        comodel_name='product.ribbon',
+        string="Category Ribbon",
+        help="The ribbon displayed on the category list snippet.",
+    )
+
+    cover_image = fields.Image(
+        string="Cover Image"
     )
 
     # === COMPUTE METHODS === #
