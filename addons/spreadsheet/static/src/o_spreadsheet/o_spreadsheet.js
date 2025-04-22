@@ -2371,6 +2371,15 @@
         }
         return rows;
     }
+    function getNextSheetName(names, baseName = "Sheet") {
+        let i = 1;
+        let name = `${baseName}${i}`;
+        while (names.includes(name)) {
+            name = `${baseName}${i}`;
+            i++;
+        }
+        return name;
+    }
 
     /*
      * https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
@@ -6078,10 +6087,13 @@
         sequence: 20,
         action: (env) => {
             const sheetIdFrom = env.model.getters.getActiveSheetId();
+            const sheetNameFrom = env.model.getters.getSheetName(sheetIdFrom);
             const sheetIdTo = env.model.uuidGenerator.smallUuid();
+            const sheetNameTo = env.model.getters.getDuplicateSheetName(sheetNameFrom);
             env.model.dispatch("DUPLICATE_SHEET", {
                 sheetId: sheetIdFrom,
                 sheetIdTo,
+                sheetNameTo,
             });
             env.model.dispatch("ACTIVATE_SHEET", { sheetIdFrom, sheetIdTo });
         },
@@ -27414,6 +27426,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         initialMessages = dropCommands(initialMessages, "SORT_CELLS");
         initialMessages = dropCommands(initialMessages, "SET_DECIMAL");
         initialMessages = fixChartDefinitions(data, initialMessages);
+        initialMessages = fixTranslatedDuplicateSheetName(data, initialMessages);
         return initialMessages;
     }
     /**
@@ -27514,6 +27527,38 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         return messages;
     }
+    function fixTranslatedDuplicateSheetName(data, initialMessages) {
+        const sheetNames = {};
+        for (const sheet of data.sheets || []) {
+            sheetNames[sheet.id] = sheet.name;
+        }
+        const messages = [];
+        for (const message of initialMessages) {
+            if (message.type === "REMOTE_REVISION") {
+                const commands = [];
+                for (const cmd of message.commands) {
+                    switch (cmd.type) {
+                        case "DUPLICATE_SHEET":
+                            cmd.sheetNameTo = getDuplicateSheetName(sheetNames[cmd.sheetId], Object.values(sheetNames));
+                            break;
+                        case "CREATE_SHEET":
+                        case "RENAME_SHEET":
+                            sheetNames[cmd.sheetId] = cmd.name || getNextSheetName(Object.values(sheetNames));
+                            break;
+                    }
+                    commands.push(cmd);
+                }
+                messages.push({
+                    ...message,
+                    commands,
+                });
+            }
+            else {
+                messages.push(message);
+            }
+        }
+        return initialMessages;
+    }
     // -----------------------------------------------------------------------------
     // Helpers
     // -----------------------------------------------------------------------------
@@ -27557,6 +27602,16 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             ...createEmptyWorkbookData(),
             sheets: [createEmptyExcelSheet(INITIAL_SHEET_ID, "Sheet1")],
         };
+    }
+    function getDuplicateSheetName(nameToDuplicate, names) {
+        let i = 1;
+        const baseName = `Copy of ${nameToDuplicate}`;
+        let name = baseName.toString();
+        while (names.includes(name)) {
+            name = `${baseName} (${i})`;
+            i++;
+        }
+        return name;
     }
 
     /**
@@ -30506,7 +30561,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     return this.checkValidations(cmd, this.checkSheetName, this.checkSheetPosition);
                 }
                 case "DUPLICATE_SHEET": {
-                    return this.sheets[cmd.sheetIdTo] ? 12 /* CommandResult.DuplicatedSheetId */ : 0 /* CommandResult.Success */;
+                    return this.sheets[cmd.sheetIdTo] ||
+                        this.orderedSheetIds.map(this.getSheetName.bind(this)).includes(cmd.sheetNameTo)
+                        ? 12 /* CommandResult.DuplicatedSheetId */
+                        : 0 /* CommandResult.Success */;
                 }
                 case "MOVE_SHEET":
                     const currentIndex = this.orderedSheetIds.indexOf(cmd.sheetId);
@@ -30592,7 +30650,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     this.showSheet(cmd.sheetId);
                     break;
                 case "DUPLICATE_SHEET":
-                    this.duplicateSheet(cmd.sheetId, cmd.sheetIdTo);
+                    this.duplicateSheet(cmd.sheetId, cmd.sheetIdTo, cmd.sheetNameTo);
                     break;
                 case "DELETE_SHEET":
                     this.deleteSheet(this.sheets[cmd.sheetId]);
@@ -30816,14 +30874,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             return dimension === "COL" ? this.getNumberCols(sheetId) : this.getNumberRows(sheetId);
         }
         getNextSheetName(baseName = "Sheet") {
-            let i = 1;
             const names = this.orderedSheetIds.map(this.getSheetName.bind(this));
-            let name = `${baseName}${i}`;
-            while (names.includes(name)) {
-                name = `${baseName}${i}`;
-                i++;
-            }
-            return name;
+            return getNextSheetName(names, baseName);
         }
         getSheetSize(sheetId) {
             return {
@@ -31051,9 +31103,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         showSheet(sheetId) {
             this.history.update("sheets", sheetId, "isVisible", true);
         }
-        duplicateSheet(fromId, toId) {
+        duplicateSheet(fromId, toId, toName) {
             const sheet = this.getSheet(fromId);
-            const toName = this.getDuplicateSheetName(sheet.name);
             const newSheet = deepCopy(sheet);
             newSheet.id = toId;
             newSheet.name = toName;
@@ -31380,6 +31431,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         "getSheetZone",
         "getPaneDivisions",
         "checkElementsIncludeAllNonFrozenHeaders",
+        "getDuplicateSheetName",
     ];
 
     /**
@@ -43778,8 +43830,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.66';
-    __info__.date = '2025-03-26T12:54:26.409Z';
-    __info__.hash = 'e2c1da2';
+    __info__.date = '2025-04-22T08:34:27.475Z';
+    __info__.hash = 'c1d9141';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
