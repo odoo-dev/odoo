@@ -397,6 +397,29 @@ function useReloadAction(getAllActions) {
     return { reload };
 }
 
+export function useHasPreview(getAllActions) {
+    const comp = useComponent();
+    const reload = useReloadAction(getAllActions).reload;
+    const getAction = comp.env.editor.shared.builderActions.getAction;
+
+    let hasPreview = true;
+    for (const descr of getAllActions()) {
+        if (descr.actionId) {
+            const action = getAction(descr.actionId);
+            if (action.preview === false) {
+                hasPreview = false;
+            }
+        }
+    }
+
+    return (
+        hasPreview &&
+        !reload &&
+        (comp.props.preview === true ||
+            (comp.props.preview === undefined && comp.env.weContext.preview !== false))
+    );
+}
+
 export function useClickableBuilderComponent() {
     useBuilderComponent();
     const comp = useComponent();
@@ -410,10 +433,7 @@ export function useClickableBuilderComponent() {
     const inheritedActionIds =
         comp.props.inheritedActions || comp.env.weContext.inheritedActions || [];
 
-    const hasPreview =
-        !reload &&
-        (comp.props.preview === true ||
-            (comp.props.preview === undefined && comp.env.weContext.preview !== false));
+    const hasPreview = useHasPreview(getAllActions);
     const operationWithReload = useOperationWithReload(callApply, reload);
 
     const operation = {
@@ -604,10 +624,7 @@ export function useInputBuilderComponent({
         return rawValue !== undefined ? formatRawValue(rawValue) : "";
     }
 
-    const shouldPreview =
-        !reload &&
-        (comp.props.preview === true ||
-            (comp.props.preview === undefined && comp.env.weContext.preview !== false));
+    const shouldPreview = useHasPreview(getAllActions);
     function preview(userInputValue) {
         if (shouldPreview) {
             callOperation(applyOperation.preview, {
