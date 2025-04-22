@@ -16,7 +16,7 @@ export class CustomizeWebsitePlugin extends Plugin {
         "loadTemplateKey",
         "makeSCSSCusto",
         "toggleTemplate",
-        "withHistoryFromLoad",
+        "withCustomHistory",
         "populateCache",
     ];
 
@@ -32,7 +32,7 @@ export class CustomizeWebsitePlugin extends Plugin {
     resolves = {};
     getActions() {
         return {
-            customizeWebsiteVariable: this.withHistoryFromLoad({
+            customizeWebsiteVariable: this.withCustomHistory({
                 isApplied: ({ param: { mainParam: variable } = {}, value }) => {
                     const currentValue = this.getWebsiteVariableValue(variable);
                     return currentValue === `'${value}'`;
@@ -41,7 +41,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                     const currentValue = this.getWebsiteVariableValue(variable);
                     return currentValue;
                 },
-                load: async ({ param: { mainParam: variable, nullValue = "null" }, value }) => {
+                apply: async ({ param: { mainParam: variable, nullValue = "null" }, value }) => {
                     await this.customizeWebsiteVariables(
                         {
                             [variable]: value,
@@ -50,7 +50,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                     );
                 },
             }),
-            customizeWebsiteColor: this.withHistoryFromLoad({
+            customizeWebsiteColor: this.withCustomHistory({
                 getValue: ({ param: { mainParam: color, colorType, gradientColor } }) => {
                     const style = this.document.defaultView.getComputedStyle(
                         this.document.documentElement
@@ -63,7 +63,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                     }
                     return getCSSVariableValue(color, style);
                 },
-                load: async ({ param: { mainParam: color, colorType, gradientColor }, value }) => {
+                apply: async ({ param: { mainParam: color, colorType, gradientColor }, value }) => {
                     if (gradientColor) {
                         let colorValue = "";
                         let gradientValue = "";
@@ -225,7 +225,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                     });
                 },
             },
-            customizeButtonStyle: this.withHistoryFromLoad({
+            customizeButtonStyle: this.withCustomHistory({
                 preview: false,
                 isApplied: ({ param, value }) => {
                     const getAction = this.dependencies.builderActions.getAction;
@@ -489,28 +489,26 @@ export class CustomizeWebsitePlugin extends Plugin {
         }
         return this.activeRecords[key];
     }
-    withHistoryFromLoad(action) {
-        const loadFn = action.load;
-        const load = async ({ editingElement, param, value }) => {
-            const oldValue = action.getValue({ editingElement, param });
-            await loadFn({ editingElement, param, value });
-            return oldValue;
-        };
-        const apply = ({ editingElement, param, value, loadResult: oldValue }) => {
-            const blockedLoad = (v) => {
+    withCustomHistory(action) {
+        const applyFn = action.apply;
+        const apply = async (arg) => {
+            const oldValue = action.getValue(arg);
+            const { value } = arg;
+            const blockedApply = (v) => {
                 this.services.ui.block({ delay: 2500 });
-                loadFn({ editingElement, param, value: v })
+                return applyFn({ ...arg, value: v })
                     .then(() => {
                         this.dispatchTo("trigger_dom_updated");
                     })
                     .finally(() => this.services.ui.unblock());
             };
+            await blockedApply(value);
             this.dependencies.history.addCustomMutation({
-                apply: () => blockedLoad(value),
-                revert: () => blockedLoad(oldValue),
+                apply: () => blockedApply(value),
+                revert: () => blockedApply(oldValue),
             });
         };
-        return { ...action, load, apply };
+        return { preview: false, ...action, apply };
     }
 
     async loadTemplateKey(key) {

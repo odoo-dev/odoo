@@ -3,7 +3,7 @@
 
 <t t-name="html_builder.CarouselOption">
     <BuilderRow label.translate="Slide">
-        <BuilderButton preview="false" title.translate="Add Slide"  action="'addSlide'">Add Slide</BuilderButton>
+        <BuilderButton title.translate="Add Slide"  action="'addSlide'">Add Slide</BuilderButton>
     </BuilderRow>
     <BuilderRow label.translate="Style">
         <BuilderSelect>
@@ -11,7 +11,7 @@
             <BuilderSelectItem classAction="'s_carousel_controllers_indicators_outside'">Indicators outside</BuilderSelectItem>
         </BuilderSelect>
     </BuilderRow>
-    
+
     <BuilderRow label.translate="Invert colors" level="1">
         <BuilderCheckbox classAction="'carousel-dark'"/>
     </BuilderRow>

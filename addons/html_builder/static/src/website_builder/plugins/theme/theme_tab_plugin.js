@@ -156,10 +156,10 @@ export class ThemeTabPlugin extends Plugin {
     }
     getActions() {
         return {
-            customizeGray: this.dependencies.customizeWebsite.withHistoryFromLoad({
+            customizeGray: this.dependencies.customizeWebsite.withCustomHistory({
                 getValue: ({ param: { mainParam: grayParamName } }) =>
                     this.grayParams[grayParamName],
-                load: async ({ param: { mainParam: grayParamName }, value }) => {
+                apply: async ({ param: { mainParam: grayParamName }, value }) => {
                     // Gray parameters are used *on the JS side* to compute the grays that
                     // will be saved in the database. We indeed need those grays to be
                     // computed here for faster previews so this allows to not duplicate

@@ -53,9 +53,9 @@ class HeaderOptionPlugin extends Plugin {
     getActions() {
         const styleAction = this.dependencies.coreBuilderAction.getStyleAction();
         const { setShadowMode, setShadow } = this.dependencies.shadowOption.getActions();
-        const withHistoryFromLoad = this.dependencies.customizeWebsite.withHistoryFromLoad;
+        const withCustomHistory = this.dependencies.customizeWebsite.withCustomHistory;
         return {
-            styleActionHeader: withHistoryFromLoad({
+            styleActionHeader: withCustomHistory({
                 ...styleAction,
                 getValue: (...args) => {
                     const { param } = args[0];
@@ -65,7 +65,7 @@ class HeaderOptionPlugin extends Plugin {
                     }
                     return value;
                 },
-                load: async ({ param, value }) => {
+                apply: async ({ param, value }) => {
                     const styleName = param.mainParam;
 
                     if (styleName === "border-color") {
@@ -78,7 +78,7 @@ class HeaderOptionPlugin extends Plugin {
                     });
                 },
             }),
-            setShadowModeHeader: withHistoryFromLoad({
+            setShadowModeHeader: withCustomHistory({
                 ...setShadowMode,
                 preview: false,
                 apply: ({ value: shadowMode }) => {
@@ -89,10 +89,10 @@ class HeaderOptionPlugin extends Plugin {
                     });
                 },
             }),
-            setShadowHeader: withHistoryFromLoad({
+            setShadowHeader: withCustomHistory({
                 ...setShadow,
                 preview: false,
-                load: ({ editingElement, param: { mainParam: attributeName }, value }) => {
+                apply: ({ editingElement, param: { mainParam: attributeName }, value }) => {
                     const shadow = getCurrentShadow(editingElement);
                     shadow[attributeName] = value;
 
