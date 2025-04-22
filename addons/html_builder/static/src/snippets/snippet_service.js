@@ -73,7 +73,11 @@ export class SnippetModel extends Reactive {
     }
 
     getSnippet(category, id) {
-        return this.snippetsByCategory[category].filter((snippet) => snippet.id === id)[0];
+        return this.snippetsByCategory[category].find((snippet) => snippet.id === id);
+    }
+
+    getSnippetByName(category, name) {
+        return this.snippetsByCategory[category].find((snippet) => snippet.name === name);
     }
 
     installSnippetModule(snippet) {
