@@ -112,6 +112,28 @@ test("prevent preview of a specific action", async () => {
     await contains("[data-action-id='customAction']").click();
     expect.verifySteps(["customAction"]);
 });
+
+test("prevent preview of a specific action (2)", async () => {
+    addActionOption({
+        customAction: {
+            preview: false,
+            apply: () => {
+                expect.step(`customAction`);
+            },
+        },
+    });
+    addOption({
+        selector: ".test-options-target",
+        template: xml`<BuilderButton action="'customAction'"/>`,
+    });
+    await setupWebsiteBuilder(`<div class="test-options-target">b</div>`);
+    await contains(":iframe .test-options-target").click();
+    expect(".options-container").toBeDisplayed();
+    await contains("[data-action-id='customAction']").hover();
+    expect.verifySteps([]);
+    await contains("[data-action-id='customAction']").click();
+    expect.verifySteps(["customAction"]);
+});
 test("should toggle when not in a BuilderButtonGroup", async () => {
     addOption({
         selector: ".test-options-target",

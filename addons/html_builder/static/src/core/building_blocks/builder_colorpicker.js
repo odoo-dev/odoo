@@ -7,6 +7,7 @@ import {
     getAllActionsAndOperations,
     useBuilderComponent,
     useDomState,
+    useHasPreview,
 } from "../utils";
 import { isColorGradient } from "@web/core/utils/colors";
 
@@ -65,10 +66,8 @@ export function useColorPickerBuilderComponent() {
             },
         });
     };
-    if (
-        comp.props.preview === false ||
-        (comp.env.weContext.preview === false && comp.props.preview !== true)
-    ) {
+    const hasPreview = useHasPreview(getAllActions);
+    if (!hasPreview) {
         onPreview = () => {};
     }
     return {
