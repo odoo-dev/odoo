@@ -1,0 +1,15 @@
+//------------------------------------------------------------------------------
+// Website Text Highlight Effects
+//------------------------------------------------------------------------------
+
+[data-highlight-text] {
+    position: relative;
+    --text-highlight-color: currentColor;
+
+    > * {
+        text-decoration: none;
+    }
+    svg {
+        z-index: -1;
+    }
+}

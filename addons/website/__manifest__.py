@@ -222,6 +222,7 @@
             ('remove', 'website/static/src/snippets/**/options.js'),
             'website/static/src/libs/zoomodoo/zoomodoo.scss',
             'website/static/src/scss/website.scss',
+            'website/static/src/scss/website_common.scss',
             'website/static/src/scss/website_controller_page.scss',
             'website/static/src/scss/website.ui.scss',
             'website/static/src/libs/zoomodoo/zoomodoo.js',
@@ -455,6 +456,9 @@
             # Don't include dark mode files in light mode
             ('remove', 'website/static/src/components/dialog/*.dark.scss'),
         ],
+        'html_builder.assets': [
+            'website/static/src/scss/website_common.scss',
+        ]
     },
     'configurator_snippets': {
         'homepage': ['s_cover', 's_text_image', 's_numbers'],

@@ -74,6 +74,7 @@
             ('include', 'html_builder.assets'),
         ],
         'web.assets_frontend': [
+            'html_builder/static/src/utils/highlight_utils.js',
             'html_builder/static/src/interactions/**/*',
             ('remove', 'html_builder/static/src/interactions/**/*.edit.*'),
         ],
