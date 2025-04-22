@@ -1,0 +1,24 @@
+<odoo>
+    <data>
+          <template id="web_client.playground" name="Web Core Playground">
+            <html>
+                <head>
+                    <link type="image/x-icon" rel="shortcut icon" href="/web/static/img/favicon.ico"/>
+                <script type="text/javascript">
+                    var odoo = {
+                        csrf_token: "<t t-nocache="The csrf token must always be up to date." t-esc="request.csrf_token(None)"/>",
+                        debug: "<t t-esc="debug"/>",
+                    };
+                    // Block to avoid leaking variables in the script scope
+                    {
+                        odoo.__session_info__ = <t t-out="json.dumps(session_info)"/>;
+                    }
+                </script>
+                    <t t-call-assets="web_client.assets"/>
+
+                </head>
+                <body/>
+            </html>
+          </template>
+    </data>
+</odoo>
