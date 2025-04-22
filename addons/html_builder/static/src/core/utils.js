@@ -455,7 +455,7 @@ export function useClickableBuilderComponent() {
         revert: () => {
             // The `next` will cancel the previous operation, which will revert
             // the operation in case of a preview.
-            comp.env.editor.shared.operation.nextWithLoad();
+            comp.env.editor.shared.operation.next();
         },
     };
 
@@ -811,7 +811,7 @@ export function getAllActionsAndOperations(comp) {
     }
     function callOperation(fn, params = {}) {
         const actionsSpecs = getActionsSpecs(getAllActions(), params.userInputValue);
-        comp.env.editor.shared.operation.nextWithLoad(() => fn(actionsSpecs), {
+        comp.env.editor.shared.operation.next(() => fn(actionsSpecs), {
             load: async () =>
                 Promise.all(
                     actionsSpecs.map(async (applySpec) => {

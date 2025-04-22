@@ -24,14 +24,14 @@ export class Operation {
     }
 
     /**
-     * Allows to execute a (non-async) function in the mutex.
+     * Allows to execute a function in the mutex.
      * See `OperationParams.load` to make it async.
      *
      * @param {Function} fn the function
      * @param {OperationParams} params
      * @returns {Promise<void>}
      */
-    nextWithLoad(
+    next(
         fn,
         {
             load = () => Promise.resolve(),
@@ -90,31 +90,6 @@ export class Operation {
                     Promise.all([cancelLoadPromise, cancelTimePromise]),
                     applyOperation(),
                 ]);
-            } finally {
-                removeLoadingElement();
-            }
-        });
-    }
-
-    /**
-     * Allows to execute a function (async or not) in the mutex.
-     *
-     * @param {Function} fn the function
-     * @param {OperationParams} params
-     * @returns {Promise<void>}
-     */
-    next(fn, { withLoadingEffect = true, loadingEffectDelay = 500 } = {}) {
-        return this.mutex.exec(async () => {
-            const removeLoadingElement = this.addLoadingElement(
-                withLoadingEffect,
-                loadingEffectDelay
-            );
-            try {
-                // Do the operation only if the iframe has not been reloaded and
-                // still has a browsing context.
-                if (this.editableDocument.defaultView) {
-                    await fn();
-                }
             } finally {
                 removeLoadingElement();
             }

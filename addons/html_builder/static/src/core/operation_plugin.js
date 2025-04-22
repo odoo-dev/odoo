@@ -7,24 +7,10 @@ import { useComponent } from "@odoo/owl";
 export class OperationPlugin extends Plugin {
     static id = "operation";
     static dependencies = ["history"];
-    static shared = ["nextWithLoad", "next"];
+    static shared = ["next"];
 
     setup() {
         this.operation = new Operation(this.document);
-    }
-
-    /**
-     * Executes a non-async function in the mutex.
-     * Note: if async code needs to be executed, it should be provided in the
-     * params `load` key.
-     * This function should only be called/needed by builder components.
-     *
-     * @param {Function} fn the non-async function
-     * @param {OperationParams} params
-     * @returns {Promise<void>}
-     */
-    nextWithLoad(fn, params) {
-        return this.operation.nextWithLoad(fn, params);
     }
 
     /**
