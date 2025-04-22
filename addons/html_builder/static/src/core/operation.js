@@ -68,23 +68,27 @@ export class Operation {
                 withLoadingEffect,
                 loadingEffectDelay
             );
+            const applyOperation = async () => {
+                const loadResult = await load();
+
+                if (isCancel) {
+                    return;
+                }
+                this.previousLoadResolve = null;
+
+                // Cancel the operation if the iframe has been reloaded
+                // and does not have a browsing context anymore.
+                if (!this.editableDocument.defaultView) {
+                    return;
+                }
+
+                await fn?.(loadResult);
+            };
+
             try {
                 await Promise.race([
                     Promise.all([cancelLoadPromise, cancelTimePromise]),
-                    load().then((loadResult) => {
-                        if (isCancel) {
-                            return;
-                        }
-                        this.previousLoadResolve = null;
-
-                        // Cancel the operation if the iframe has been reloaded
-                        // and does not have a browsing context anymore.
-                        if (!this.editableDocument.defaultView) {
-                            return;
-                        }
-
-                        fn?.(loadResult);
-                    }),
+                    applyOperation(),
                 ]);
             } finally {
                 removeLoadingElement();

@@ -31,7 +31,7 @@ export class BuilderMany2One extends Component {
         useBuilderComponent();
         const { getAllActions, callOperation } = getAllActionsAndOperations(this);
         this.callOperation = callOperation;
-        this.applyOperation = this.env.editor.shared.history.makePreviewableOperation(
+        this.applyOperation = this.env.editor.shared.history.makePreviewableAsyncOperation(
             this.callApply.bind(this)
         );
         this.selectedToApply = undefined;
@@ -54,6 +54,7 @@ export class BuilderMany2One extends Component {
         }
     }
     callApply(applySpecs) {
+        const proms = [];
         for (const applySpec of applySpecs) {
             if (!this.selectedToApply && applySpec.clean) {
                 applySpec.clean({
@@ -63,15 +64,18 @@ export class BuilderMany2One extends Component {
                     dependencyManager: this.env.dependencyManager,
                 });
             } else {
-                applySpec.apply({
-                    editingElement: applySpec.editingElement,
-                    param: applySpec.actionParam,
-                    value: this.selectedToApply,
-                    loadResult: applySpec.loadResult,
-                    dependencyManager: this.env.dependencyManager,
-                });
+                proms.push(
+                    applySpec.apply({
+                        editingElement: applySpec.editingElement,
+                        param: applySpec.actionParam,
+                        value: this.selectedToApply,
+                        loadResult: applySpec.loadResult,
+                        dependencyManager: this.env.dependencyManager,
+                    })
+                );
             }
         }
+        return Promise.all(proms);
     }
     select(newSelected) {
         this.selectedToApply = newSelected && JSON.stringify(newSelected);

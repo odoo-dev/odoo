@@ -27,7 +27,7 @@ export class BuilderMany2Many extends Component {
         this.fields = useService("field");
         const { getAllActions, callOperation } = getAllActionsAndOperations(this);
         this.callOperation = callOperation;
-        this.applyOperation = this.env.editor.shared.history.makePreviewableOperation(
+        this.applyOperation = this.env.editor.shared.history.makePreviewableAsyncOperation(
             this.callApply.bind(this)
         );
         this.selectionToApply = undefined;
@@ -69,15 +69,19 @@ export class BuilderMany2Many extends Component {
         }
     }
     callApply(applySpecs) {
+        const proms = [];
         for (const applySpec of applySpecs) {
-            applySpec.apply({
-                editingElement: applySpec.editingElement,
-                param: applySpec.actionParam,
-                value: this.selectionToApply,
-                loadResult: applySpec.loadResult,
-                dependencyManager: this.env.dependencyManager,
-            });
+            proms.push(
+                applySpec.apply({
+                    editingElement: applySpec.editingElement,
+                    param: applySpec.actionParam,
+                    value: this.selectionToApply,
+                    loadResult: applySpec.loadResult,
+                    dependencyManager: this.env.dependencyManager,
+                })
+            );
         }
+        return proms;
     }
     setSelection(newSelection) {
         this.selectionToApply = JSON.stringify(newSelection);
