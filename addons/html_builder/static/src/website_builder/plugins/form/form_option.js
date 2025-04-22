@@ -65,6 +65,5 @@ export class FormOption extends BaseOptionComponent {
         if (dataForValues) {
             this.dataForEmailTo = dataForValues["email_to"];
         }
-        this.defaultEmailToValue = "info@yourcompany.example.com";
     }
 }

@@ -195,7 +195,6 @@ export class FormOptionPlugin extends Plugin {
                 },
                 // TODO clear ? if field is a boolean ?
                 getValue: ({ editingElement: el, param }) => {
-                    // TODO Convert
                     const value = el.querySelector(
                         `.s_website_form_dnone input[name="${param.fieldName}"]`
                     )?.value;
@@ -533,6 +532,7 @@ export class FormOptionPlugin extends Plugin {
             this._fetchAuthorizedFields.bind(this),
             ({ cacheKey }) => cacheKey
         );
+        this.defaultEmailToValue = "info@yourcompany.example.com";
     }
     destroy() {
         super.destroy();
