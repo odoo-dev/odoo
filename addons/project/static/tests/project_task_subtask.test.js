@@ -95,6 +95,7 @@ beforeEach(() => {
                 <field name="child_ids"/>
                 <field name="user_ids"/>
                 <field name="state"/>
+                <field name="sequence"/>
                 <templates>
                     <t t-name="card">
                         <div>
@@ -216,13 +217,15 @@ test("project.task (kanban): check subtask creation", async () => {
             expect.step(`${model}/${method}`);
         }
         if (model === "project.task" && method === "create") {
-            const [{ display_name, parent_id }] = args[0];
+            const [{ display_name, parent_id, sequence }] = args[0];
             expect(display_name).toBe("New Subtask");
             expect(parent_id).toBe(1);
+            expect(sequence).toBe(16);
             const newSubtaskId = MockServer.env["project.task"].create({
                 name: display_name,
                 parent_id,
                 state: "01_in_progress",
+                sequence: sequence,
             });
             MockServer.env["project.task"].write(parent_id, {
                 child_ids: [Command.link(newSubtaskId)],
@@ -234,7 +237,7 @@ test("project.task (kanban): check subtask creation", async () => {
         type: "kanban",
     });
     checkSteps = true;
-
+    ProjectTask._records[6].sequence = 15
     expect(queryOne(".subtask_list_button").parentNode).toHaveText("1/4");
     await click(".subtask_list_button");
     await animationFrame();
@@ -243,6 +246,7 @@ test("project.task (kanban): check subtask creation", async () => {
     await click(".subtask_create_input input");
     await edit("New Subtask", { confirm: "enter" });
     await animationFrame();
+    delete ProjectTask._records[6].sequence
     expect(".subtask_list_row").toHaveCount(4, {
         message:
             "The subtasks list should now display the subtask created on the card, thus we are looking for 4 in total",

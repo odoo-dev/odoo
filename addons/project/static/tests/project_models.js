@@ -18,6 +18,7 @@ export class ProjectTask extends models.Model {
 
     name = fields.Char();
     parent_id = fields.Many2one({ relation: "project.task" });
+    sequence = fields.Integer({ default:10})
     child_ids = fields.One2many({
         relation: "project.task",
         relation_field: "parent_id",
