@@ -23,22 +23,20 @@ TOTP_RATE_LIMITS = {
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
-    def write(self, vals):
-        res = super().write(vals)
-
-        if 'totp_secret' in vals:
-            if vals.get('totp_secret'):
-                self._notify_security_setting_update(
-                    _("Security Update: 2FA Activated"),
-                    _("Two-factor authentication has been activated on your account"),
-                    suggest_2fa=False,
-                )
-            else:
-                self._notify_security_setting_update(
-                    _("Security Update: 2FA Deactivated"),
-                    _("Two-factor authentication has been deactivated on your account"),
-                    suggest_2fa=False,
-                )
+    def _set_new_totp_secret(self, secret, counter=False):
+        res = super()._set_new_totp_secret(secret, counter)
+        if secret:
+            self._notify_security_setting_update(
+                _("Security Update: 2FA Activated"),
+                _("Two-factor authentication has been activated on your account"),
+                suggest_2fa=False,
+            )
+        else:
+            self._notify_security_setting_update(
+                _("Security Update: 2FA Deactivated"),
+                _("Two-factor authentication has been deactivated on your account"),
+                suggest_2fa=False,
+            )
 
         return res
 
@@ -96,7 +94,7 @@ class ResUsers(models.Model):
 
     def action_totp_invite(self):
         invite_template = self.env.ref('auth_totp_mail.mail_template_totp_invite')
-        users_to_invite = self.sudo().filtered(lambda user: not user.totp_secret)
+        users_to_invite = self.sudo().filtered(lambda user: not user.totp_enabled)
         for user in users_to_invite:
             email_values = {
                 'email_from': self.env.user.email_formatted,

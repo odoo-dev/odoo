@@ -12,7 +12,7 @@ class TestNotifySecurityUpdateTotp(MailCommon):
     def test_security_update_totp_enabled_disabled(self):
         recipients = [self.env.user.email_formatted]
         with self.mock_mail_gateway():
-            self.env.user.write({'totp_secret': 'test'})
+            self.env.user._set_new_totp_secret('test')
 
         self.assertSentEmail(
             '"YourTestCompany" <your.company@example.com>',
@@ -21,7 +21,7 @@ class TestNotifySecurityUpdateTotp(MailCommon):
         )
 
         with self.mock_mail_gateway():
-            self.env.user.write({'totp_secret': False})
+            self.env.user._set_new_totp_secret(None)
 
         self.assertSentEmail(
             '"YourTestCompany" <your.company@example.com>',

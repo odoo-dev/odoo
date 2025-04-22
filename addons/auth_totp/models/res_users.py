@@ -23,7 +23,7 @@ compress = functools.partial(re.sub, r'\s', '')
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
-    totp_secret = fields.Char(copy=False, groups=fields.NO_ACCESS, compute='_compute_totp_secret', inverse='_inverse_token')
+    totp_secret = fields.Char(copy=False, groups=fields.NO_ACCESS, compute='_compute_totp_secret')
     totp_last_counter = fields.Integer(copy=False, groups=fields.NO_ACCESS)
     totp_enabled = fields.Boolean(string="Two-factor authentication", compute='_compute_totp_enabled', search='_totp_enable_search')
     totp_trusted_device_ids = fields.One2many('auth_totp.device', 'user_id', string="Trusted Devices")
@@ -53,8 +53,9 @@ class ResUsers(models.Model):
 
     @api.depends('totp_secret')
     def _compute_totp_enabled(self):
-        for r, v in zip(self, self.sudo()):
-            r.totp_enabled = bool(v.totp_secret)
+        self.env.cr.execute("SELECT totp_secret FROM res_users WHERE id = ANY(%s)", [self.ids])
+        for user, (secret,) in zip(self, self.env.cr.fetchall()):
+            user.totp_enabled = bool(secret)
 
     def _rpc_api_keys_only(self):
         # 2FA enabled means we can't allow password-based RPC
@@ -67,7 +68,8 @@ class ResUsers(models.Model):
     def _check_credentials(self, credentials, env):
         if credentials['type'] == 'totp':
             sudo = self.sudo()
-            key = base64.b32decode(sudo.totp_secret)
+            self.env.cr.execute("SELECT totp_secret FROM res_users WHERE id = %s", [self.id])
+            key = base64.b32decode(self.env.cr.fetchone()[0])
             match = TOTP(key).match(credentials['token'])
             if match is None:
                 _logger.info("2FA check: FAIL for %s %r", self, sudo.login)
@@ -97,8 +99,7 @@ class ResUsers(models.Model):
             _logger.info("2FA enable: REJECT CODE for %s %r", self, self.login)
             return False
 
-        self.sudo().totp_secret = secret
-        self.sudo().totp_last_counter = match
+        self._set_new_totp_secret(secret, match)
         if request:
             self.env.flush_all()
             # update session token so the user does not get logged out (cache cleared by change)
@@ -116,7 +117,7 @@ class ResUsers(models.Model):
             return False
 
         self.revoke_all_devices()
-        self.sudo().write({'totp_secret': False})
+        self._set_new_totp_secret(None)
 
         if request and self == self.env.user:
             self.env.flush_all()
@@ -173,19 +174,19 @@ class ResUsers(models.Model):
         self.env.user._revoke_all_devices()
         return super().change_password(old_passwd, new_passwd)
 
+    def _set_new_totp_secret(self, secret, counter=False):
+        if counter:
+            # Allow removing multiple totp at once
+            # But do not share the same secret for multiple users
+            self.ensure_one()
+
+        self.sudo().totp_last_counter = counter
+        self.env.cr.execute("UPDATE res_users SET totp_secret = %s WHERE id=%s", (secret, self.id))
+        self.invalidate_recordset(["totp_secret"])
+
     def _compute_totp_secret(self):
         for user in self:
-            if not user.id:
-                user.totp_secret = user._origin.totp_secret
-                continue
-            self.env.cr.execute('SELECT totp_secret FROM res_users WHERE id=%s', (user.id,))
-            user.totp_secret = self.env.cr.fetchone()[0]
-
-    def _inverse_token(self):
-        self.sudo().totp_last_counter = False
-        for user in self:
-            secret = user.totp_secret if user.totp_secret else None
-            self.env.cr.execute('UPDATE res_users SET totp_secret = %s WHERE id=%s', (secret, user.id))
+            user.totp_secret = ''
 
     def _totp_enable_search(self, operator, value):
         value = not value if operator == '!=' else value
