@@ -1,5 +1,6 @@
+import { undo } from "@html_editor/../tests/_helpers/user_actions";
 import { expect, test } from "@odoo/hoot";
-import { click, hover, press } from "@odoo/hoot-dom";
+import { click, Deferred, hover, press, tick } from "@odoo/hoot-dom";
 import { xml } from "@odoo/owl";
 import { contains } from "@web/../tests/web_test_helpers";
 import {
@@ -114,6 +115,47 @@ test("apply custom action", async () => {
         "load",
         "apply rgb(255, 0, 0)",
     ]);
+});
+
+test("apply custom async action", async () => {
+    const def = new Deferred();
+    addActionOption({
+        customAction: {
+            getValue: () => "",
+            apply: async ({ editingElement }) => {
+                await def;
+                editingElement.classList.add("applied");
+            },
+        },
+    });
+    addOption({
+        selector: ".test-options-target",
+        template: xml`
+            <BuilderColorPicker action="'customAction'"/>
+            <BuilderButton classAction="'test'" preview="false"/>
+            `,
+    });
+    const { getEditor } = await setupWebsiteBuilder(`<div class="test-options-target">b</div>`);
+    const editor = getEditor();
+    await contains(":iframe .test-options-target").click();
+    await contains(".we-bg-options-container .o_we_color_preview").click();
+    await contains(".o-overlay-item [data-color='#FF0000']").click();
+    await contains("[data-class-action='test']").click();
+    expect(":iframe .test-options-target").not.toHaveClass("test");
+    expect(":iframe .test-options-target").not.toHaveClass("applied");
+
+    def.resolve();
+    await tick();
+    expect(":iframe .test-options-target").toHaveClass("test");
+    expect(":iframe .test-options-target").toHaveClass("applied");
+
+    undo(editor);
+    expect(":iframe .test-options-target").not.toHaveClass("test");
+    expect(":iframe .test-options-target").toHaveClass("applied");
+
+    undo(editor);
+    expect(":iframe .test-options-target").not.toHaveClass("test");
+    expect(":iframe .test-options-target").not.toHaveClass("applied");
 });
 
 test("should revert preview on escape", async () => {

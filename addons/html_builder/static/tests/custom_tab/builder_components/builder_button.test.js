@@ -1,6 +1,7 @@
 import { BaseOptionComponent, useDomState } from "@html_builder/core/utils";
+import { undo } from "@html_editor/../tests/_helpers/user_actions";
 import { describe, expect, test } from "@odoo/hoot";
-import { animationFrame, click, hover, runAllTimers } from "@odoo/hoot-dom";
+import { animationFrame, click, Deferred, hover, runAllTimers } from "@odoo/hoot-dom";
 import { xml } from "@odoo/owl";
 import { contains } from "@web/../tests/web_test_helpers";
 import {
@@ -652,6 +653,46 @@ test("do not load when an operation is cleaned", async () => {
     await contains("[data-action-id='customAction']").click();
     await contains("[data-action-id='customAction']").click();
     expect.verifySteps(["load", "apply", "clean"]);
+});
+
+test("click on BuilderButton with async action", async () => {
+    const def = new Deferred();
+    addActionOption({
+        customAction: {
+            isApplied: ({ editingElement }) => editingElement.classList.contains("applied"),
+            apply: async ({ editingElement }) => {
+                await def;
+                editingElement.classList.add("applied");
+            },
+        },
+    });
+    addOption({
+        selector: ".test-options-target",
+        template: xml`
+                <BuilderButton action="'customAction'" preview="false"/>
+                <BuilderButton classAction="'test'" preview="false"/>
+            `,
+    });
+    const { getEditor } = await setupWebsiteBuilder(`<div class="test-options-target">b</div>`);
+    const editor = getEditor();
+    await contains(":iframe .test-options-target").click();
+    await contains("[data-action-id='customAction']").click();
+    await contains("[data-class-action='test']").click();
+    expect(":iframe .test-options-target").not.toHaveClass("test");
+    expect(":iframe .test-options-target").not.toHaveClass("applied");
+
+    def.resolve();
+    await animationFrame();
+    expect(":iframe .test-options-target").toHaveClass("test");
+    expect(":iframe .test-options-target").toHaveClass("applied");
+
+    undo(editor);
+    expect(":iframe .test-options-target").not.toHaveClass("test");
+    expect(":iframe .test-options-target").toHaveClass("applied");
+
+    undo(editor);
+    expect(":iframe .test-options-target").not.toHaveClass("test");
+    expect(":iframe .test-options-target").not.toHaveClass("applied");
 });
 
 class SubTestOption extends BaseOptionComponent {

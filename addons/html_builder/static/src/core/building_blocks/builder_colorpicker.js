@@ -16,17 +16,23 @@ export function useColorPickerBuilderComponent() {
     const { getAllActions, callOperation } = getAllActionsAndOperations(comp);
     const getAction = comp.env.editor.shared.builderActions.getAction;
     const state = useDomState(getState);
-    const applyOperation = comp.env.editor.shared.history.makePreviewableOperation((applySpecs) => {
-        for (const applySpec of applySpecs) {
-            applySpec.apply({
-                editingElement: applySpec.editingElement,
-                param: applySpec.actionParam,
-                value: applySpec.actionValue,
-                loadResult: applySpec.loadResult,
-                dependencyManager: comp.env.dependencyManager,
-            });
+    const applyOperation = comp.env.editor.shared.history.makePreviewableAsyncOperation(
+        (applySpecs) => {
+            const proms = [];
+            for (const applySpec of applySpecs) {
+                proms.push(
+                    applySpec.apply({
+                        editingElement: applySpec.editingElement,
+                        param: applySpec.actionParam,
+                        value: applySpec.actionValue,
+                        loadResult: applySpec.loadResult,
+                        dependencyManager: comp.env.dependencyManager,
+                    })
+                );
+            }
+            return Promise.all(proms);
         }
-    });
+    );
     function getState(editingElement) {
         // if (!editingElement || !editingElement.isConnected) {
         //     // TODO try to remove it. We need to move hook in BuilderComponent

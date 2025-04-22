@@ -3,6 +3,7 @@ import { Plugin } from "../plugin";
 import { childNodes, descendants, getCommonAncestor } from "../utils/dom_traversal";
 import { hasTouch } from "@web/core/browser/feature_detection";
 import { withSequence } from "@html_editor/utils/resource";
+import { Deferred } from "@web/core/utils/concurrency";
 
 /**
  * @typedef { import("./selection_plugin").EditorSelection } EditorSelection
@@ -114,6 +115,7 @@ export class HistoryPlugin extends Plugin {
         "getHistorySteps",
         "getNodeById",
         "makePreviewableOperation",
+        "makePreviewableAsyncOperation",
         "makeSavePoint",
         "makeSnapshotStep",
         "redo",
@@ -1129,6 +1131,44 @@ export class HistoryPlugin extends Plugin {
             },
             revert: () => {
                 revertOperation();
+                revertOperation = () => {};
+                this.isPreviewing = false;
+            },
+        };
+    }
+
+    /**
+     * Creates a set of functions to preview, apply, and revert an async operation.
+     * @param {Function} operation
+     * @returns {PreviewableOperation}
+     */
+    makePreviewableAsyncOperation(operation) {
+        let revertOperation = () => {};
+
+        return {
+            preview: async (...args) => {
+                revertOperation();
+                const def = new Deferred();
+                const revertSavePoint = this.makeSavePoint();
+                revertOperation = async () => {
+                    await def;
+                    revertSavePoint();
+                };
+                this.isPreviewing = true;
+                await operation(...args);
+                def.resolve();
+                // The operation should be similar than in the 'commit'
+                // (normalize etc...) hence the 'addStep'.
+                this.addStep();
+            },
+            commit: async (...args) => {
+                revertOperation();
+                this.isPreviewing = false;
+                await operation(...args);
+                this.addStep();
+            },
+            revert: async () => {
+                await revertOperation();
                 revertOperation = () => {};
                 this.isPreviewing = false;
             },
