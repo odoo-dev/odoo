@@ -67,10 +67,13 @@ export class LinkPopover extends Component {
                     ?.pop() ||
                 "",
             isImage: this.props.isImage,
+            isVisible: true,
         });
 
         this.editingWrapper = useRef("editing-wrapper");
         this.inputRef = useRef(this.state.isImage || "label");
+        this.timeoutID = undefined;
+
         useEffect(
             (el) => {
                 if (el) {
@@ -98,6 +101,16 @@ export class LinkPopover extends Component {
             // Listen to pointerdown outside the iframe
             useExternalListener(document, "pointerdown", onPointerDown);
         }
+
+        const onKeydownLinkElement = (ev) => {
+            if (
+                ev.target.contains(this.props.linkElement) ||
+                this.props.linkElement.contains(ev.target)
+            ) {
+                this.hidePopover();
+            }
+        };
+        useExternalListener(this.props.document, "keydown", onKeydownLinkElement);
     }
 
     onChange() {
@@ -156,6 +169,20 @@ export class LinkPopover extends Component {
     onClickReplaceTitle() {
         this.state.label = this.state.urlTitle;
         this.onClickApply();
+    }
+
+    onClickForceEditMode(ev) {
+        if (this.props.linkElement.href) {
+            const currentUrl = new URL(this.props.linkElement.href);
+            if (
+                window.location.hostname === currentUrl.hostname &&
+                !currentUrl.pathname.startsWith("/@/")
+            ) {
+                ev.preventDefault();
+                currentUrl.pathname = `/@${currentUrl.pathname}`;
+                browser.open(currentUrl);
+            }
+        }
     }
 
     /**
@@ -288,6 +315,14 @@ export class LinkPopover extends Component {
                     : internalMetadata.title.text.trim();
             }
         }
+    }
+
+    hidePopover() {
+        this.state.isVisible = false;
+        clearTimeout(this.timeoutID);
+        this.timeoutID = setTimeout(() => {
+            this.state.isVisible = true;
+        }, 1000);
     }
 
     get classes() {

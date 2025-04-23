@@ -1,7 +1,7 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="html_editor.linkPopover">
-        <div class="o-we-linkpopover d-flex bg-white overflow-auto shadow" t-on-keydown="onKeydown">
+        <div class="o-we-linkpopover d-flex bg-white overflow-auto shadow" t-att-class="{'d-none':!state.isVisible}" t-on-keydown="onKeydown">
             <div t-if="state.editing" class="container-fluid d-flex vertical-center p-2" t-ref="editing-wrapper">
                 <div t-if="state.isImage" class="col p-2" style="max-width: 250px;">
                     <div class="input-group mb-1">
@@ -58,7 +58,7 @@
                         </span>
                         <div class="ms-1 w-100">
                             <div class="d-flex">
-                                <a href="#" target="_blank" t-attf-href="{{state.url}}" class="o_we_url_link fw-bold flex-grow-1 text-truncate" style="max-width: 160px;" t-attf-title="{{state.urlTitle}}">
+                                <a href="#" target="_blank" t-on-click="onClickForceEditMode" t-attf-href="{{state.url}}" class="o_we_url_link fw-bold flex-grow-1 text-truncate" style="max-width: 160px;" t-attf-title="{{state.urlTitle}}">
                                     <t t-esc="state.urlTitle"/>
                                 </a>
                                 <div class="flex-grow-1 d-flex justify-content-end">
