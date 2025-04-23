@@ -2074,7 +2074,7 @@ class IrModelAccess(models.Model):
     def _get_allowed_models(self, mode='read'):
         assert mode in ('read', 'write', 'create', 'unlink'), 'Invalid access mode'
 
-        group_ids = self.env.user._get_group_ids()
+        group_ids = (self.env.user or self.env.transaction.default_env.user)._get_group_ids()
         self.flush_model()
         rows = self.env.execute_query(SQL("""
             SELECT m.model
