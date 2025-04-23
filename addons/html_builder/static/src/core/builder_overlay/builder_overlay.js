@@ -24,8 +24,9 @@ export const sizingGrid = {
 };
 
 export class BuilderOverlay {
-    constructor(overlayTarget, { iframe, overlayContainer, addStep, hasOverlayOptions }) {
-        this.addStep = addStep;
+    constructor(overlayTarget, { iframe, overlayContainer, history, hasOverlayOptions, next }) {
+        this.history = history;
+        this.next = next;
         this.hasOverlayOptions = hasOverlayOptions;
         this.iframe = iframe;
         this.overlayContainer = overlayContainer;
@@ -464,6 +465,16 @@ export class BuilderOverlay {
         ev.preventDefault();
         const pointerDownTime = ev.timeStamp;
 
+        // Lock the mutex.
+        let sizingResolve;
+        this.next(
+            async () => {
+                await new Promise((resolve) => (sizingResolve = () => resolve()));
+            },
+            { withLoadingEffect: false }
+        );
+        const cancelSizing = this.history.makeSavePoint();
+
         const handleEl = ev.currentTarget;
         const isGridHandle = handleEl.classList.contains("o_grid_handle");
         this.isMobile = isMobileView(this.overlayTarget);
@@ -580,10 +591,22 @@ export class BuilderOverlay {
                 this.overlayTarget.classList.add(gColClass.substring(2));
             }
 
+            // Cancel the sizing if the element was not resized (to not have
+            // mutations).
+            const wasResized = !directions.every((dir) => dir.initialIndex === dir.currentIndex);
+            if (wasResized) {
+                this.history.addStep();
+            } else {
+                cancelSizing();
+            }
+
+            // Free the mutex.
+            sizingResolve();
+
             // If no resizing happened and if the pointer was down less than
             // 500 ms, we assume that the user wanted to click on the element
             // behind the handle.
-            if (directions.every((dir) => dir.initialIndex === dir.currentIndex)) {
+            if (!wasResized) {
                 const pointerUpTime = ev.timeStamp;
                 const pointerDownDuration = pointerUpTime - pointerDownTime;
                 if (pointerDownDuration < 500) {
@@ -595,16 +618,15 @@ export class BuilderOverlay {
                     // Check if it has native JS `click` function
                     const toBeClickedEl = sameCoordinatesEls.find(
                         (el) =>
-                            !this.overlayContainer.contains(el) && typeof el.click === "function"
+                            !this.overlayContainer.contains(el) &&
+                            !el.matches(".o_loading_screen") &&
+                            typeof el.click === "function"
                     );
                     if (toBeClickedEl) {
                         toBeClickedEl.click();
                     }
                 }
-                return;
             }
-
-            this.addStep();
         };
 
         window.addEventListener("pointermove", onSizingMove);
