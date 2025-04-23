@@ -5,69 +5,42 @@ export function useCachedModel() {
 }
 
 export class ModelEdit {
-    constructor(editableEl) {
-        this.editableEl = editableEl;
-        // Keeps track of initial model values to handle browsing back in the
-        // history beyond init.
-        this.initialValues = {};
-    }
-    setRecord(model, recordId) {
-        if (this.model) {
-            // Reused
-            if (model !== this.model || recordId !== this.recordId) {
-                throw new Error(
-                    `Incompatible record: ${model} ${recordId} vs ${this.model} ${this.recordId}`
-                );
-            }
-            return;
-        }
+    constructor(history, model, recordId) {
+        this.values = {};
+        this.history = history;
         this.model = model;
         this.recordId = recordId;
-        this.selector = `[data-res-model="${this.model}"][data-res-id="${this.recordId}"]`;
-    }
-    getPropertyName(field) {
-        return `_Edit${field[0].toUpperCase()}${field.slice(1)}`;
     }
     has(field) {
-        return field in this.initialValues;
+        return field in this.values;
     }
     get(field) {
-        const jsonValue = this.editableEl.querySelector(this.selector).dataset[
-            this.getPropertyName(field)
-        ];
-        if (!jsonValue) {
-            return this.initialValues[field];
-        }
-        return JSON.parse(jsonValue);
+        return JSON.parse(this.values[field].current);
     }
     init(field, value) {
-        this.initialValues[field] = value;
-        this.set(field, value);
+        value = JSON.stringify(value);
+        this.values[field] = { initial: value, current: value };
     }
     set(field, value) {
-        const propertyName = this.getPropertyName(field);
-        const textValue = JSON.stringify(value);
-        for (const el of this.editableEl.querySelectorAll(this.selector)) {
-            el.dataset[propertyName] = textValue;
-        }
+        const previous = this.values[field].current;
+        value = JSON.stringify(value);
+        this.history.applyCustomMutation({
+            apply: () => {
+                this.values[field].current = value;
+            },
+            revert: () => {
+                this.values[field].current = previous;
+            },
+        });
     }
     collect(inventory) {
         const records = inventory[this.model] || {};
         const record = records[this.recordId] || {};
-        for (const field of Object.keys(this.initialValues)) {
-            const textInitialValue = JSON.stringify(this.initialValues[field]);
-            const propertyName = this.getPropertyName(field);
-            const el = this.editableEl.querySelector(this.selector);
-            if (el) {
-                const textValue = el.dataset[propertyName];
-                if (textValue !== textInitialValue) {
-                    inventory[this.model] = records;
-                    records[this.recordId] = record;
-                    record[field] = JSON.parse(textValue);
-                    for (const el of this.editableEl.querySelectorAll(this.selector)) {
-                        delete el.dataset[propertyName];
-                    }
-                }
+        for (const field of Object.keys(this.values)) {
+            if (this.values[field].initial !== this.values[field].current) {
+                inventory[this.model] = records;
+                records[this.recordId] = record;
+                record[field] = JSON.parse(this.values[field].current);
             }
         }
     }

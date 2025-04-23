@@ -5,6 +5,7 @@ import { ModelEdit } from "./cached_model_utils";
 export class CachedModelPlugin extends Plugin {
     static id = "cachedModel";
     static shared = ["ormRead", "ormSearchRead", "useModelEdit"];
+    static dependencies = ["history"];
     resources = {
         before_save_handlers: this.savePendingRecords.bind(this),
     };
@@ -17,11 +18,10 @@ export class CachedModelPlugin extends Plugin {
             ({ model, domain, fields }) => this.services.orm.searchRead(model, domain, fields),
             JSON.stringify
         );
-        this.modelEditCache = new Cache(({ model, recordId }) => {
-            const modelEdit = new ModelEdit(this.editable);
-            modelEdit.setRecord(model, recordId);
-            return modelEdit;
-        }, JSON.stringify);
+        this.modelEditCache = new Cache(
+            ({ model, recordId }) => new ModelEdit(this.dependencies.history, model, recordId),
+            JSON.stringify
+        );
     }
     destroy() {
         this.ormReadCache.invalidate();
