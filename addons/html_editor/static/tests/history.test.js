@@ -754,6 +754,26 @@ describe("unobserved mutations", () => {
             editor.shared.history.redo();
             expect(p.className).toBe("a c");
         });
+        test("no-op class removal should not be added to history", async () => {
+            const { editor } = await setupEditor(`<p>test</p>`);
+            /** @type {HTMLElement} */
+            const p = editor.editable.querySelector("p");
+            withAddStep(editor, () => p.classList.add("a"));
+            editor.shared.history.ignoreDOMMutations(() => p.classList.add("b"));
+            withAddStep(editor, () => p.classList.remove("b")); // no-op from a history perspective
+            editor.shared.history.undo();
+            expect(p.className).toBe("");
+        });
+        test("no-op class addition should not be added to history", async () => {
+            const { editor } = await setupEditor(`<p class="a b">test</p>`);
+            /** @type {HTMLElement} */
+            const p = editor.editable.querySelector("p");
+            withAddStep(editor, () => p.classList.remove("a"));
+            editor.shared.history.ignoreDOMMutations(() => p.classList.remove("b"));
+            withAddStep(editor, () => p.classList.add("b")); // no-op from a history perspective
+            editor.shared.history.undo();
+            expect(p.className).toBe("b a");
+        });
     });
     describe("attributes", () => {
         test("unobserved attribute mutations should not affect history", async () => {
@@ -795,6 +815,16 @@ describe("unobserved mutations", () => {
             withAddStep(editor, () => p.setAttribute("data-test", "b"));
             editor.shared.history.undo();
             expect(p.getAttribute("data-test")).toBe("");
+        });
+        test("no-op attribute change should not be added to history", async () => {
+            const { editor } = await setupEditor(`<p data-test="a">test</p>`);
+            /** @type {HTMLElement} */
+            const p = editor.editable.querySelector("p");
+            withAddStep(editor, () => p.setAttribute("data-test", "b"));
+            editor.shared.history.ignoreDOMMutations(() => p.setAttribute("data-test", "c"));
+            withAddStep(editor, () => p.setAttribute("data-test", "b")); // no-op from a history perspective
+            editor.shared.history.undo();
+            expect(p.getAttribute("data-test")).toBe("a");
         });
     });
 });
