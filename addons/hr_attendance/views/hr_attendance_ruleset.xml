@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="hr_attendance_ruleset_view_search" model="ir.ui.view">
+        <field name="name">hr.attendance.ruleset.search</field>
+        <field name="model">hr.attendance.ruleset</field>
+        <field name="arch" type="xml">
+            <search string="Attendance Rulesets">
+                <field name="name" string="Ruleset Name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="country_id"/>
+                <separator/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Company" name="groupby_company" domain="[]" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                    <filter string="Country" name="groupby_country" domain="[]" context="{'group_by': 'country_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="hr_attendance_ruleset_view_list" model="ir.ui.view">
+        <field name="name">hr.attendance.ruleset.list</field>
+        <field name="model">hr.attendance.ruleset</field>
+        <field name="arch" type="xml">
+            <list string="Attendance Rulesets">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="country_id" optional="show"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="hr_attendance_ruleset_view_form" model="ir.ui.view">
+        <field name="name">hr.attendance.ruleset.form</field>
+        <field name="model">hr.attendance.ruleset</field>
+        <field name="arch" type="xml">
+            <form string="Attendance Ruleset">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" placeholder="e.g., Standard Belgian Overtime Rules"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="active" widget="boolean_toggle"/>
+                            <field name="country_id"/>
+                            <field name="sequence"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Attendance Rules" name="attendance_rules">
+                            <field name="rule_ids" context="{'default_ruleset_id': active_id}">
+                                <list string="Attendance Rules" editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name" required="1"/>
+                                    <field name="condition_type" required="1"/>
+                                    <field name="threshold_hours"
+
+                                           optional="show"/>
+                                    <field name="compensation_type" required="1"/>
+                                    <field name="pay_rate_multiplier"
+                                           column_invisible="parent.compensation_type != 'pay'"
+                                           optional="show"/>
+                                    <field name="time_off_allocation_rate"
+                                           column_invisible="parent.compensation_type != 'time_off'"
+                                           optional="show"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                    <field name="company_id" invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="hr_attendance_ruleset_action" model="ir.actions.act_window">
+        <field name="name">Attendance Rulesets</field>
+        <field name="res_model">hr.attendance.ruleset</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="hr_attendance_ruleset_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Attendance Ruleset.
+            </p><p>
+                Attendance rulesets group together individual rules for calculating overtime or applying specific pay rates based on attendance times. Assign a ruleset to an employee's contract.
+            </p>
+        </field>
+    </record>
+
+    <menuitem
+        id="hr_attendance_ruleset_menu"
+        name="Attendance Rulesets"
+        action="hr_attendance_ruleset_action"
+        parent="hr_attendance.menu_hr_attendance_configuration"
+        sequence="30"/>
+    <record id="hr_attendance_rule_view_search" model="ir.ui.view">
+        <field name="name">hr.attendance.rule.search</field>
+        <field name="model">hr.attendance.rule</field>
+        <field name="arch" type="xml">
+            <search string="Attendance Rules">
+                <field name="name" string="Rule Name"/>
+                <field name="ruleset_id"/>
+                <field name="condition_type"/>
+                <field name="compensation_type"/>
+                <separator/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                 <separator/>
+                <filter string="Pays Overtime" name="filter_pay" domain="[('compensation_type', '=', 'pay')]"/>
+                <filter string="Allocates Time Off" name="filter_time_off" domain="[('compensation_type', '=', 'time_off')]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Ruleset" name="groupby_ruleset" domain="[]" context="{'group_by': 'ruleset_id'}"/>
+                    <filter string="Condition Type" name="groupby_condition" domain="[]" context="{'group_by': 'condition_type'}"/>
+                    <filter string="Compensation Type" name="groupby_compensation" domain="[]" context="{'group_by': 'compensation_type'}"/>
+                    <filter string="Active" name="groupby_active" domain="[]" context="{'group_by': 'active'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="hr_attendance_rule_view_list" model="ir.ui.view">
+        <field name="name">hr.attendance.rule.list</field>
+        <field name="model">hr.attendance.rule</field>
+        <field name="arch" type="xml">
+            <list string="Attendance Rules">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="ruleset_id"/>
+                <field name="condition_type"/>
+                <field name="compensation_type"/>
+                 <field name="pay_rate_multiplier" invisible="compensation_type != 'pay'" optional="show"/>
+                <field name="time_off_allocation_rate" invisible="compensation_type != 'time_off'" optional="show"/>
+                <field name="active" widget="boolean_toggle"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="hr_attendance_rule_view_form" model="ir.ui.view">
+        <field name="name">hr.attendance.rule.form</field>
+        <field name="model">hr.attendance.rule</field>
+        <field name="arch" type="xml">
+            <form string="Attendance Rule">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="active"/>
+                     <group>
+                         <group>
+                             <field name="name" placeholder="e.g., Daily Overtime > 8h Weekdays"/>
+                             <field name="ruleset_id" required="1" options="{'no_create': True}"/>
+                             <field name="company_id" groups="base.group_multi_company" invisible="1"/> </group>
+                         <group>
+                             <field name="active" widget="boolean_toggle"/>
+                             <field name="sequence"/>
+                         </group>
+                     </group>
+
+                    <group string="Condition">
+                        <field name="condition_type"/>
+                        <field name="threshold_hours"
+                               invisible="condition_type not in ('daily_threshold', 'weekly_threshold')"
+                               required="condition_type in ('daily_threshold', 'weekly_threshold')"
+                               help="Number of hours after which this rule applies (e.g., 8 for daily, 40 for weekly)."/>
+                    </group>
+
+                    <group string="Applicability &amp; Time Constraints">
+                         <group string="Applicable Days">
+                            <div>
+                                <field name="apply_monday" style="margin-right: 5px;"/>
+                                <label for="apply_monday" string="Mon" style="margin-right: 15px;"/>
+                                <field name="apply_tuesday" style="margin-right: 5px;"/>
+                                <label for="apply_tuesday" string="Tue" style="margin-right: 15px;"/>
+                                <field name="apply_wednesday" style="margin-right: 5px;"/>
+                                <label for="apply_wednesday" string="Wed" style="margin-right: 15px;"/>
+                                <field name="apply_thursday" style="margin-right: 5px;"/>
+                                <label for="apply_thursday" string="Thu" style="margin-right: 15px;"/>
+                             </div>
+                             <div>
+                                <field name="apply_friday" style="margin-right: 5px;"/>
+                                <label for="apply_friday" string="Fri" style="margin-right: 15px;"/>
+                                <field name="apply_saturday" style="margin-right: 5px;"/>
+                                <label for="apply_saturday" string="Sat" style="margin-right: 15px;"/>
+                                <field name="apply_sunday" style="margin-right: 5px;"/>
+                                <label for="apply_sunday" string="Sun"/>
+                             </div>
+                         </group>
+                         <group string="Time &amp; Holidays">
+                             <field name="apply_on_holidays" help="Should this rule apply to time worked on public holidays?"/>
+                             <label for="time_from" string="Time Range"/>
+                             <div class="o_row">
+                                 <field name="time_from" widget="float_time" placeholder="HH:MM"/>
+                                 <span> - </span>
+                                 <field name="time_to" widget="float_time" placeholder="HH:MM"/>
+                             </div>
+                             <span class="text-muted" invisible="not time_from or not time_to">
+                                  Rule applies to work performed within this time window (e.g., 22:00 - 06:00 for night shift). Uses 24h format.
+                              </span>
+                         </group>
+                    </group>
+
+                    <group string="Compensation Outcome">
+                        <field name="compensation_type"/>
+                        <field name="pay_rate_multiplier"
+                               invisible="compensation_type != 'pay'"
+                               required="compensation_type == 'pay'"
+                               help="Multiplier for the employee's standard hourly rate (e.g., 1.5 for 150%)."/>
+                        <field name="time_off_allocation_rate"
+                               invisible="compensation_type != 'time_off'"
+                               required="compensation_type == 'time_off'"
+                               help="Time off hours granted per hour of overtime worked (e.g., 1.0 for 1:1 allocation)."/>
+                    </group>
+
+                     <group string="Context" name="context_info" groups="base.group_no_one"> <field name="company_id" readonly="1"/>
+                        <field name="country_id" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="hr_attendance_rule_action" model="ir.actions.act_window">
+        <field name="name">Attendance Rules</field>
+        <field name="res_model">hr.attendance.rule</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="hr_attendance_rule_view_search"/>
+        <field name="context">{'search_default_active': 1}</field> <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Attendance Rule.
+            </p><p>
+                Attendance rules define specific conditions (like exceeding daily hours, working on a weekend) and the corresponding compensation (pay rate multiplier or time off allocation). These rules belong to a Ruleset.
+            </p>
+        </field>
+    </record>
+
+</odoo>
