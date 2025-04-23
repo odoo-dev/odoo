@@ -256,6 +256,7 @@ describe("prevent system classes to be set from history", () => {
         static id = "testRenderClasses";
         resources = {
             system_classes: ["x"],
+            system_attributes: ["data-x"],
         };
     }
     const Plugins = [...MAIN_PLUGINS, TestSystemClassesPlugin];
@@ -284,6 +285,42 @@ describe("prevent system classes to be set from history", () => {
                 redo(editor);
             },
             contentAfter: `<p class="y">a[]</p>`,
+            config: { Plugins: Plugins },
+        });
+    });
+
+    // While in the test above the addition of class "x" does not persist after an undo/redo,
+    // in this test it does...
+    test("system class with char mutation", async () => {
+        await testEditor({
+            contentBefore: `<p>a[]</p>`,
+            stepFunction: async (editor) => {
+                const p = editor.editable.querySelector("p");
+                p.className = "x";
+                p.textContent = "b";
+                editor.shared.selection.setCursorEnd(p);
+                addStep(editor);
+                undo(editor);
+                redo(editor);
+            },
+            contentAfter: `<p class="x">b[]</p>`,
+            config: { Plugins: Plugins },
+        });
+    });
+
+    // @todo: move to different describe/suite
+    test("system attributes", async () => {
+        await testEditor({
+            contentBefore: `<p>a[]</p>`,
+            stepFunction: async (editor) => {
+                const p = editor.editable.querySelector("p");
+                p.setAttribute("data-x", "1");
+                p.setAttribute("data-y", "1");
+                addStep(editor);
+                undo(editor);
+                redo(editor);
+            },
+            contentAfter: `<p data-x="1" data-y="1">a[]</p>`,
             config: { Plugins: Plugins },
         });
     });
