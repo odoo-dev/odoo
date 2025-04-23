@@ -36,6 +36,28 @@ import {
 import { _t } from "@web/core/l10n/translation";
 import { exprToBoolean } from "@web/core/utils/strings";
 
+/**
+ * @typedef {import('@web/model/relational_model/dynamic_list').DynamicList} DynamicList
+ * @typedef {import('@web/model/relational_model/group').Group} Group
+ * @typedef {import('@web/model/relational_model/record').Record} RelationalRecord
+ * @typedef {import('@web/model/relational_model/relational_model').RelationalModel} RelationalModel
+ * @typedef {import('@web/model/relational_model/static_list').StaticList} StaticList
+ * @typedef {import("../view").ViewProps} ViewProps
+ *
+ * @typedef {{
+ *  name: string;
+ *  type: string;
+ *  attrs: Record<string, string>;
+ *  [key: string]: unknown;
+ * }} Column
+ *
+ * @typedef {"up" | "down" | "left" | "right"} Direction
+ *
+ * @typedef {ViewProps & {
+ *  list: DynamicList | StaticList;
+ * }} ListRendererProps
+ */
+
 const formatters = registry.category("formatters");
 
 const DEFAULT_GROUP_PAGER_COLSPAN = 1;
@@ -58,13 +80,14 @@ function containsActiveElement(parent) {
 }
 
 /**
- * @param {HTMLElement} cell
+ * @param {HTMLTableCellElement} cell
  * @param {number} index
  */
 function getElementToFocus(cell, index) {
     return getTabableElements(cell).at(index) || cell;
 }
 
+/** @extends Component<ListRendererProps, OdooEnv> */
 export class ListRenderer extends Component {
     static template = "web.ListRenderer";
     static rowsTemplate = "web.ListRenderer.Rows";
@@ -134,7 +157,9 @@ export class ListRenderer extends Component {
             this.activeRowId = activeRow ? activeRow.dataset.id : null;
         });
         this.optionalActiveFields = this.props.optionalActiveFields || {};
+        /** @type {Column[]} */
         this.allColumns = [];
+        /** @type {Column[]} */
         this.columns = [];
         this.editedRecord = null;
         onWillRender(() => {
@@ -245,6 +270,9 @@ export class ListRenderer extends Component {
         });
     }
 
+    /**
+     * @param {DynamicList | StaticList} list
+     */
     getActiveColumns(list) {
         return this.allColumns.filter((col) => {
             if (list.isGrouped && col.widget === "handle") {
@@ -286,6 +314,9 @@ export class ListRenderer extends Component {
         }
     }
 
+    /**
+     * @param {Group} group
+     */
     async addInGroup(group) {
         const left = await this.props.list.leaveEditMode({ canAbandon: false });
         if (left) {
@@ -293,6 +324,10 @@ export class ListRenderer extends Component {
         }
     }
 
+    /**
+     * @param {Column[]} allColumns
+     * @param {DynamicList | StaticList} list
+     */
     processAllColumn(allColumns, list) {
         return allColumns.flatMap((column) => {
             if (column.type === "field" && list.fields[column.name].type === "properties") {
@@ -303,6 +338,10 @@ export class ListRenderer extends Component {
         });
     }
 
+    /**
+     * @param {Column} column
+     * @param {DynamicList | StaticList} list
+     */
     getPropertyFieldColumns(column, list) {
         return Object.values(list.fields)
             .filter(
@@ -336,6 +375,10 @@ export class ListRenderer extends Component {
             });
     }
 
+    /**
+     * @param {RelationalRecord} record
+     * @param {Column} column
+     */
     getFieldProps(record, column) {
         return {
             readonly:
@@ -375,6 +418,10 @@ export class ListRenderer extends Component {
         return nbCols;
     }
 
+    /**
+     * @param {Column} column
+     * @param {RelationalRecord} record
+     */
     canUseFormatter(column, record) {
         if (column.widget) {
             return false;
@@ -387,6 +434,9 @@ export class ListRenderer extends Component {
         return true;
     }
 
+    /**
+     * @param {RelationalRecord} record
+     */
     isRecordReadonly(record) {
         if (record.isNew) {
             return false;
@@ -686,7 +736,11 @@ export class ListRenderer extends Component {
         return classNames.join(" ");
     }
 
-    getColumns(record) {
+    /**
+     *
+     * @param {RelationalRecord} _record
+     */
+    getColumns(_record) {
         return this.columns;
     }
 
@@ -715,11 +769,13 @@ export class ListRenderer extends Component {
 
     /**
      * Returns the classnames to apply to the row representing the given record.
-     * @param {Record} record
-     * @returns {string}
+     * @param {RelationalRecord} record
      */
     getRowClass(record) {
-        // classnames coming from decorations
+        /**
+         * Classnames coming from decorations
+         * @type {string[]}
+         */
         const classNames = this.props.archInfo.decorations
             .filter((decoration) =>
                 evaluateBooleanExpr(decoration.condition, record.evalContextWithVirtualIds)
@@ -741,6 +797,10 @@ export class ListRenderer extends Component {
         return classNames.join(" ");
     }
 
+    /**
+     * @param {Column} column
+     * @param {RelationalRecord} record
+     */
     getCellClass(column, record) {
         if (column.relatedPropertyField && !(column.name in record.data)) {
             return "";
@@ -802,6 +862,10 @@ export class ListRenderer extends Component {
         return classNames.join(" ");
     }
 
+    /**
+     * @param {Column} column
+     * @param {RelationalRecord} record
+     */
     isCellReadonly(column, record) {
         return !!(
             this.isRecordReadonly(record) ||
@@ -810,6 +874,10 @@ export class ListRenderer extends Component {
         );
     }
 
+    /**
+     * @param {Column} column
+     * @param {RelationalRecord} record
+     */
     getCellTitle(column, record) {
         // Because we freeze the column sizes, it may happen that we have to shorten field values.
         // In order for the user to have access to the complete value in those situations, we put
@@ -823,6 +891,10 @@ export class ListRenderer extends Component {
         return column.attrs && column.attrs.class;
     }
 
+    /**
+     * @param {Column} column
+     * @param {RelationalRecord} record
+     */
     getFormattedValue(column, record) {
         const fieldName = column.name;
         if (column.options.enable_formatting === false) {
@@ -831,6 +903,10 @@ export class ListRenderer extends Component {
         return getFormattedValue(record, fieldName, column);
     }
 
+    /**
+     * @param {string} invisible
+     * @param {RelationalRecord} record
+     */
     evalInvisible(invisible, record) {
         return evaluateBooleanExpr(invisible, record.evalContextWithVirtualIds);
     }
@@ -859,6 +935,9 @@ export class ListRenderer extends Component {
         return this.isX2Many && this.canCreate;
     }
 
+    /**
+     * @param {RelationalRecord} record
+     */
     displayDeleteIcon(record) {
         return !evaluateBooleanExpr(this.deleteControl.invisible, record.evalContext);
     }
@@ -973,6 +1052,11 @@ export class ListRenderer extends Component {
         }
     }
 
+    /**
+     * @param {RelationalRecord} record
+     * @param {Column} column
+     * @param {PointerEvent} ev
+     */
     onButtonCellClicked(record, column, ev) {
         if (!ev.target.closest("button")) {
             this.onCellClicked(record, column, ev);
@@ -980,8 +1064,8 @@ export class ListRenderer extends Component {
     }
 
     /**
-     * @param {Object} record
-     * @param {Object} column
+     * @param {RelationalRecord} record
+     * @param {Column} column
      * @param {PointerEvent} ev
      */
     async onCellClicked(record, column, ev, newWindow) {
@@ -1031,6 +1115,10 @@ export class ListRenderer extends Component {
         }
     }
 
+    /**
+     * @param {RelationalRecord} record
+     * @param {PointerEvent} ev
+     */
     onRemoveCellClicked(record, ev) {
         const element = ev.target.closest(".o_list_record_remove");
         if (element.dataset.clicked) {
@@ -1041,6 +1129,9 @@ export class ListRenderer extends Component {
         this.onDeleteRecord(record, ev);
     }
 
+    /**
+     * @param {RelationalRecord} record
+     */
     async onDeleteRecord(record) {
         if (this.editedRecord && this.editedRecord !== record) {
             const left = await this.props.list.leaveEditMode();
@@ -1056,7 +1147,7 @@ export class ListRenderer extends Component {
     /**
      * @param {HTMLTableCellElement} cell
      * @param {boolean} cellIsInGroupRow
-     * @param {"up"|"down"|"left"|"right"} direction
+     * @param {Direction} direction
      */
     findFocusFutureCell(cell, cellIsInGroupRow, direction) {
         const row = cell.parentElement;
@@ -1115,7 +1206,10 @@ export class ListRenderer extends Component {
         return futureCell && getElementToFocus(futureCell);
     }
 
-    isInlineEditable(record) {
+    /**
+     * @param {RelationalRecord} _record
+     */
+    isInlineEditable(_record) {
         // /!\ the keyboard navigation works under the hypothesis that all or
         // none records are editable.
         return !!this.props.editable;
@@ -1123,8 +1217,8 @@ export class ListRenderer extends Component {
 
     /**
      * @param {KeyboardEvent} ev
-     * @param { import('@web/model/relational_model/group').Group | null } group
-     * @param { import('@web/model/relational_model/record').Record | null } record
+     * @param {Group | null} group
+     * @param {RelationalRecord | null} record
      */
     onCellKeydown(ev, group = null, record = null) {
         if (this.props.list.model.useSampleModel) {
@@ -1149,12 +1243,18 @@ export class ListRenderer extends Component {
 
         if (handled) {
             this.lastCreatingAction = false;
-            this.tableRef.el.querySelector("tbody").classList.add("o_keyboard_navigation");
+            for (const tbody of this.tableRef.el.getElementsByTagName("tbody")) {
+                tbody.classList.add("o_keyboard_navigation");
+            }
             ev.preventDefault();
             ev.stopPropagation();
         }
     }
 
+    /**
+     * @param {HTMLElement} row
+     * @param {HTMLTableCellElement} cell
+     */
     findNextFocusableOnRow(row, cell) {
         const children = [...row.children];
         const index = children.indexOf(cell);
@@ -1178,6 +1278,10 @@ export class ListRenderer extends Component {
         return null;
     }
 
+    /**
+     * @param {HTMLElement} row
+     * @param {HTMLTableCellElement} cell
+     */
     findPreviousFocusableOnRow(row, cell) {
         const children = [...row.children];
         const index = children.indexOf(cell);
@@ -1201,6 +1305,10 @@ export class ListRenderer extends Component {
         return null;
     }
 
+    /**
+     * @param {RelationalRecord} record
+     * @param {Direction} direction
+     */
     expandCheckboxes(record, direction) {
         const { records } = this.props.list;
         if (!record && direction === "down") {
@@ -1240,6 +1348,12 @@ export class ListRenderer extends Component {
         return true;
     }
 
+    /**
+     * @param {string} hotkey
+     * @param {HTMLTableCellElement} cell
+     * @param {Group} group
+     * @param {RelationalRecord} record
+     */
     applyCellKeydownMultiEditMode(hotkey, cell, group, record) {
         const { list } = this.props;
         const row = cell.parentElement;
@@ -1293,6 +1407,12 @@ export class ListRenderer extends Component {
         return false;
     }
 
+    /**
+     * @param {string} hotkey
+     * @param {HTMLElement} _cell
+     * @param {Group} group
+     * @param {RelationalRecord} record
+     */
     applyCellKeydownEditModeGroup(hotkey, _cell, group, record) {
         const { editable } = this.props;
         const groupIndex = group.list.records.indexOf(record);
@@ -1312,7 +1432,13 @@ export class ListRenderer extends Component {
         return false;
     }
 
-    applyCellKeydownEditModeStayOnRow(hotkey, cell, group, record) {
+    /**
+     * @param {string} hotkey
+     * @param {HTMLTableCellElement} cell
+     * @param {Group} _group
+     * @param {RelationalRecord} _record
+     */
+    applyCellKeydownEditModeStayOnRow(hotkey, cell, _group, _record) {
         let toFocus;
         const row = cell.parentElement;
 
@@ -1335,8 +1461,8 @@ export class ListRenderer extends Component {
     /**
      * @param {string} hotkey
      * @param {HTMLTableCellElement} cell
-     * @param { import('@web/model/relational_model/group').Group | null } group
-     * @param { import('@web/model/relational_model/record').Record } record
+     * @param {Group | null} group
+     * @param {RelationalRecord | null} record
      * @returns {boolean} true if some behavior has been taken
      */
     onCellKeydownEditMode(hotkey, cell, group, record) {
@@ -1493,10 +1619,8 @@ export class ListRenderer extends Component {
     /**
      * @param {string} hotkey
      * @param {HTMLTableCellElement} cell
-     * @param { import('@web/model/relational_model/group').Group
-     *  | null
-     * } group
-     * @param { import('@web/model/relational_model/record').Record | null } record
+     * @param {Group | null} group
+     * @param {RelationalRecord | null} record
      * @returns {boolean} true if some behavior has been taken
      */
     onCellKeydownReadOnlyMode(hotkey, cell, group, record) {
@@ -1636,6 +1760,9 @@ export class ListRenderer extends Component {
         return this.props.noContentHelp && (model.useSampleModel || !model.hasData());
     }
 
+    /**
+     * @param {Group} group
+     */
     showGroupPager(group) {
         return !group.isFolded && group.list.limit < group.list.count;
     }
@@ -1660,13 +1787,20 @@ export class ListRenderer extends Component {
         );
     }
 
-    async onGroupHeaderClicked(ev, group) {
+    /**
+     * @param {PointerEvent} _ev
+     * @param {Group} group
+     */
+    async onGroupHeaderClicked(_ev, group) {
         const left = await this.props.list.leaveEditMode();
         if (left) {
             this.toggleGroup(group);
         }
     }
 
+    /**
+     * @param {Group} group
+     */
     toggleGroup(group) {
         group.toggle();
     }
@@ -1683,7 +1817,11 @@ export class ListRenderer extends Component {
         return list.toggleSelection();
     }
 
-    toggleRecordSelection(record, ev) {
+    /**
+     * @param {RelationalRecord} record
+     * @param {PointerEvent} _ev
+     */
+    toggleRecordSelection(record, _ev) {
         if (!this.canSelectRecord) {
             return;
         }
@@ -1696,6 +1834,9 @@ export class ListRenderer extends Component {
         this.lastCheckedRecord = record;
     }
 
+    /**
+     * @param {RelationalRecord} record
+     */
     toggleRangeSelection(record) {
         const { records } = this.props.list;
         const recordIndex = records.indexOf(record);
@@ -1707,6 +1848,9 @@ export class ListRenderer extends Component {
         }
     }
 
+    /**
+     * @param {string} fieldName
+     */
     async toggleOptionalField(fieldName) {
         this.optionalActiveFields[fieldName] = !this.optionalActiveFields[fieldName];
         this.saveOptionalActiveFields(
@@ -1715,6 +1859,9 @@ export class ListRenderer extends Component {
         this.render();
     }
 
+    /**
+     * @param {string} groupId
+     */
     toggleOptionalFieldGroup(groupId) {
         const fieldNames = this.allColumns
             .filter(
@@ -1740,6 +1887,9 @@ export class ListRenderer extends Component {
         this.render();
     }
 
+    /**
+     * @param {PointerEvent} ev
+     */
     onGlobalClick(ev) {
         if (!this.editedRecord) {
             return; // there's no row in edition
@@ -1771,6 +1921,9 @@ export class ListRenderer extends Component {
         return Boolean(odoo.debug);
     }
 
+    /**
+     * @param {Column} column
+     */
     makeTooltip(column) {
         return getTooltipInfo({
             viewMode: "list",
@@ -1793,6 +1946,10 @@ export class ListRenderer extends Component {
         }
     }
 
+    /**
+     * @param {RelationalRecord} record
+     * @param {TouchEvent} ev
+     */
     onRowTouchStart(record, ev) {
         if (!this.props.allowSelectors) {
             return;
@@ -1808,13 +1965,21 @@ export class ListRenderer extends Component {
             }, this.constructor.LONG_TOUCH_THRESHOLD);
         }
     }
-    onRowTouchEnd(record) {
+
+    /**
+     * @param {RelationalRecord} _record
+     */
+    onRowTouchEnd(_record) {
         const elapsedTime = Date.now() - this.touchStartMs;
         if (elapsedTime < this.constructor.LONG_TOUCH_THRESHOLD) {
             this.resetLongTouchTimer();
         }
     }
-    onRowTouchMove(record) {
+
+    /**
+     * @param {RelationalRecord} _record
+     */
+    onRowTouchMove(_record) {
         this.resetLongTouchTimer();
     }
 
@@ -1874,6 +2039,9 @@ export class ListRenderer extends Component {
         }
     }
 
+    /**
+     * @param {MouseEvent} ev
+     */
     ignoreEventInSelectionMode(ev) {
         const { list } = this.props;
         if (this.env.isSmall && list.selection && list.selection.length) {
@@ -1883,6 +2051,10 @@ export class ListRenderer extends Component {
         }
     }
 
+    /**
+     * @param {RelationalRecord} record
+     * @param {PointerEvent} ev
+     */
     onClickCapture(record, ev) {
         const { list } = this.props;
         if (this.env.isSmall && list.selection && list.selection.length) {
