@@ -17,8 +17,8 @@ export class ImagePostProcessPlugin extends Plugin {
     static id = "imagePostProcess";
     static dependencies = ["style"];
     static shared = ["processImage"];
-    static resources = {
-        system_attributes: ["bg-src"],
+    resources = {
+        system_attributes: ["data-bg-src"],
     };
 
     /**
