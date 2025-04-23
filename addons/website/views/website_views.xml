@@ -351,13 +351,13 @@
             parent="menu_site"
             sequence="10"
             name="Homepage"
-            action="website.website_preview"/>
+            action="website_preview"/>
 
         <menuitem id="menu_edit_menu"
             parent="menu_site"
             sequence="20"
             name="Menu Editor"
-            action="website.website_preview"/>
+            action="website_preview"/>
 
         <menuitem id="menu_content"
             parent="menu_site"
@@ -373,25 +373,25 @@
             parent="menu_current_page"
             sequence="10"
             name="Properties"
-            action="website.website_preview"/>
+            action="website_preview"/>
 
         <menuitem id="menu_optimize_seo"
             parent="menu_current_page"
             name="Optimize SEO"
             sequence="20"
-            action="website.website_preview"/>
+            action="website_preview"/>
 
         <menuitem id="menu_ace_editor"
             parent="menu_current_page"
             sequence="30"
             name="HTML / CSS Editor"
-            action="website.website_preview"/>
+            action="website_preview"/>
 
         <menuitem id="custom_menu_edit_menu"
             parent="menu_current_page"
             name="Edit Menu"
             sequence="40"
-            action="website.website_preview"/>
+            action="website_preview"/>
 
         <menuitem id="menu_reporting"
             name="Reporting"
