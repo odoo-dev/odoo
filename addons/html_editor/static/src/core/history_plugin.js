@@ -84,7 +84,7 @@ import { withSequence } from "@html_editor/utils/resource";
  * @property { "classList" } type
  * @property { Node } target
  * @property { string } className
- * @property { "add"|"remove" } operation
+ * @property { "add" | "remove" | "no-op" } operation
  *
  * @typedef { MutationRecord | MutationRecordClassList } HistoryMutationRecord
  *
@@ -357,9 +357,6 @@ export class HistoryPlugin extends Plugin {
      * @returns { HistoryMutationRecord[] } processed records
      */
     processNewRecords(records) {
-        // IDEA: add a pre-processor step, that returns a difference data type
-        // (with classList mutations, and not read-only).
-        // Besides splitting class mutations, oldValue is fixed.
         records = this.filterMutationRecords(records);
         let transformedRecords = this.transformMutationRecords(records);
         transformedRecords = this.filterClassListRecords(transformedRecords);
@@ -369,6 +366,7 @@ export class HistoryPlugin extends Plugin {
         } else {
             transformedRecords = transformedRecords.map((record) => this.fixMutationRecord(record));
         }
+        transformedRecords = this.filterOutNoOpRecords(transformedRecords);
         if (!transformedRecords.length) {
             return [];
         }
@@ -381,17 +379,29 @@ export class HistoryPlugin extends Plugin {
      */
     storeLastObservedState(records) {
         this.lastObservedState ||= new Map();
-        records
-            .filter(({ type }) => type === "attributes")
-            .forEach(({ target, attributeName, oldValue }) => {
-                if (!this.lastObservedState.has(target)) {
-                    this.lastObservedState.set(target, new Map());
-                }
-                const attrMap = this.lastObservedState.get(target);
+        for (const record of records) {
+            if (!this.lastObservedState.has(record.target)) {
+                this.lastObservedState.set(record.target, {
+                    attributes: new Map(),
+                    classes: new Map(),
+                });
+            }
+            // @todo: handle characterData mutations
+            if (record.type === "attributes") {
+                const { target, attributeName, oldValue } = record;
+                const attrMap = this.lastObservedState.get(target).attributes;
                 if (!attrMap.has(attributeName)) {
                     attrMap.set(attributeName, oldValue);
                 }
-            });
+            } else if (record.type === "classList") {
+                const { target, className, operation } = record;
+                const classMap = this.lastObservedState.get(target).classes;
+                if (!classMap.has(className)) {
+                    const classWasPresent = operation === "remove";
+                    classMap.set(className, classWasPresent);
+                }
+            }
+        }
     }
 
     /**
@@ -400,18 +410,29 @@ export class HistoryPlugin extends Plugin {
     fixMutationRecord(record) {
         if (record.type === "attributes") {
             const { target, attributeName } = record;
-            const lastObservedValue = this.readLastObservedValue(target, attributeName);
+            const lastObservedValue = this.readLastObservedAttributeValue(target, attributeName);
             // Obs: null is a valid value for oldValue (meaning non-existing)
             if (lastObservedValue === undefined) {
                 return record;
             }
             return { type: "attributes", target, attributeName, oldValue: lastObservedValue };
+        } else if (record.type === "classList") {
+            const { target, className, operation } = record;
+            const classWasPresent = this.readLastObservedClassValue(target, className);
+            if (classWasPresent === undefined) {
+                return record;
+            }
+            const isNoOp =
+                (classWasPresent && operation === "add") ||
+                (!classWasPresent && operation === "remove");
+            const fixedOperation = isNoOp ? "no-op" : operation;
+            return { type: "classList", target, className, operation: fixedOperation };
         }
         return record;
     }
 
-    readLastObservedValue(node, attributeName) {
-        const attrMap = this.lastObservedState?.get(node);
+    readLastObservedAttributeValue(node, attributeName) {
+        const attrMap = this.lastObservedState?.get(node)?.attributes;
         if (!attrMap || !attrMap.has(attributeName)) {
             return;
         }
@@ -422,12 +443,27 @@ export class HistoryPlugin extends Plugin {
         return lastObservedValue;
     }
 
-    filterNoOpRecords(records) {
+    readLastObservedClassValue(node, className) {
+        const classMap = this.lastObservedState?.get(node)?.classes;
+        if (!classMap || !classMap.has(className)) {
+            return;
+        }
+        const classWasPresent = classMap.get(className);
+        classMap.delete(className);
+        return classWasPresent;
+    }
+
+    /**
+     * @param {HistoryMutationRecord[]} records
+     */
+    filterOutNoOpRecords(records) {
         return records.filter((record) => {
             if (record.type === "attributes") {
                 const newValue = record.target.getAttribute(record.attributeName);
                 const oldValue = record.oldValue === undefined ? null : record.oldValue; // not sure this is necessary...
                 return oldValue !== newValue;
+            } else if (record.type === "classList") {
+                return record.operation !== "no-op";
             }
             return true;
         });
