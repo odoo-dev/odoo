@@ -28,7 +28,7 @@ export function backgroundImageCssToParts(css) {
  * @returns {string} CSS 'background-image' property value
  */
 export function backgroundImagePartsToCss(parts) {
-    return [parts.url, parts.gradient].filter(Boolean).join(", ") || "none";
+    return [parts.url, parts.gradient].filter(Boolean).join(", ") || "";
 }
 
 /**
