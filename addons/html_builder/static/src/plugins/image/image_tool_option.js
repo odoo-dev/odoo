@@ -10,4 +10,5 @@ export class ImageToolOption extends BaseOptionComponent {
         ImageFilterOption,
         ImageFormatOption,
     };
+    static props = {};
 }
