@@ -59,10 +59,7 @@ describe("Image format/optimize", () => {
 
         const img = queryFirst(":iframe .test-options-target img");
         expect(":iframe .test-options-target img").toHaveAttribute("data-original-id", "1");
-        expect(":iframe .test-options-target img").toHaveAttribute(
-            "data-computed-mimetype",
-            "image/webp"
-        );
+        expect(":iframe .test-options-target img").toHaveAttribute("data-mimetype", "image/webp");
         expect(img.src.startsWith("data:image/webp;base64,")).toBe(true);
         await waitFor("[data-label='Format']");
         expect(queryFirst("[data-label='Format'] .dropdown").textContent).toMatch(/800px/);
