@@ -152,9 +152,12 @@ registry.category("services").add("website_edit", {
                         // something more specific.
                         // TODO Sort keys to improve comparison.
                         const dataset = { ...this.el.dataset };
-                        const style = [...this.el.attributeStyleMap.entries()].filter(
-                            ([property, value]) => property.startsWith("animation")
-                        );
+                        const style = {};
+                        for (const property of this.el.style) {
+                            if (property.startsWith("animation")) {
+                                style[property] = this.el.style[property];
+                            }
+                        }
                         if (Object.keys(dataset).length || style.length) {
                             return JSON.stringify({ dataset, style });
                         }
