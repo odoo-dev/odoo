@@ -26,7 +26,9 @@ export class DependencyManager extends EventBus {
     add(id, value, ignored = false) {
         // In case the dependency is added after a dependent try to get it
         // an event is scheduled to notify the dependent about it.
-        this.triggerDependencyUpdated();
+        if (!ignored || !(id in this.dependenciesMap)) {
+            this.triggerDependencyUpdated();
+        }
         this.dependencies.push([id, value, ignored]);
         this.dirty = true;
     }
