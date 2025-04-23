@@ -292,9 +292,11 @@ export class LinkPopover extends Component {
 
     get classes() {
         if (!this.state.type) {
-            return "";
+            return this.props.linkElement.className;
         }
-        return `btn btn-fill-${this.state.type}`;
+        return [`btn btn-fill-${this.state.type}`, this.props.linkElement.className]
+            .join(" ")
+            .trim();
     }
 
     async uploadFile() {

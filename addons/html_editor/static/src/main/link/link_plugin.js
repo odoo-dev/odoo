@@ -218,6 +218,15 @@ export class LinkPlugin extends Plugin {
             icon: "fa-square",
         }),
 
+        popovers: [
+            withSequence(50, {
+                name: "LinkPopover",
+                class: LinkPopover,
+                instance: null,
+                selected: true,
+            }),
+        ],
+
         /** Handlers */
         beforeinput_handlers: withSequence(5, this.onBeforeInput.bind(this)),
         input_handlers: this.onInputDeleteNormalizeLink.bind(this),
@@ -233,14 +242,10 @@ export class LinkPlugin extends Plugin {
         split_element_block_overrides: this.handleSplitBlock.bind(this),
         insert_line_break_element_overrides: this.handleInsertLineBreak.bind(this),
     };
+
     setup() {
-        this.overlay = this.dependencies.overlay.createOverlay(
-            LinkPopover,
-            {
-                closeOnPointerdown: false,
-            },
-            { sequence: 50 }
-        );
+        this.initializePopovers();
+        this.overlay = this.getActiveOverlay();
         this.addDomListener(this.editable, "click", (ev) => {
             const linkEl = ev.target.closest("a");
             if (linkEl) {
@@ -508,8 +513,12 @@ export class LinkPlugin extends Plugin {
             onUpload: this.config.onAttachmentChange,
             type: this.type || "",
         };
+
+        this.dispatchTo("popover_selector_handlers", props);
+        this.overlay = this.getActiveOverlay();
         this.overlay.open({ props });
     }
+
     /**
      * close the link tool
      *
@@ -638,6 +647,13 @@ export class LinkPlugin extends Plugin {
                 if (closestLinkElement !== this.linkInDocument) {
                     this.openLinkTools(closestLinkElement);
                 }
+            } else if (
+                closestLinkElement &&
+                (closestLinkElement.getAttribute("role") === "menuitem" ||
+                    closestLinkElement.classList.contains("nav-link")) &&
+                !closestLinkElement.dataset.bsToggle
+            ) {
+                this.openLinkTools(closestLinkElement);
             } else {
                 this.linkInDocument = null;
                 this.closeLinkTools();
@@ -934,6 +950,28 @@ export class LinkPlugin extends Plugin {
         blockToSplit = targetNode;
         splitOrLineBreakCallback({ ...params, targetNode, targetOffset, blockToSplit });
         return true;
+    }
+
+    initializePopovers() {
+        this.getResource("popovers").map((popover) => {
+            if (!popover.instance) {
+                popover.instance = this.dependencies.overlay.createOverlay(
+                    popover.class,
+                    {
+                        closeOnPointerdown: false,
+                    },
+                    { sequence: 50 }
+                );
+            }
+        });
+    }
+
+    /**
+     * Overlays are checked from first to last
+     * The last should always be LinkPopover since it is always selected.
+     */
+    getActiveOverlay() {
+        return this.getResource("popovers").find((elem) => elem.selected).instance;
     }
 }
 
