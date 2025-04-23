@@ -80,6 +80,14 @@ import { withSequence } from "@html_editor/utils/resource";
  *
  * @typedef { HistoryMutationCharacterData | HistoryMutationAttributes | HistoryMutationClassList | HistoryMutationAdd | HistoryMutationRemove } HistoryMutation
  *
+ * @typedef {Object} MutationRecordClassList
+ * @property { "classList" } type
+ * @property { Node } target
+ * @property { string } className
+ * @property { "add"|"remove" } operation
+ *
+ * @typedef { MutationRecord | MutationRecordClassList } HistoryMutationRecord
+ *
  * @typedef { Object } PreviewableOperation
  * @property { Function } apply
  * @property { Function } preview
@@ -346,32 +354,35 @@ export class HistoryPlugin extends Plugin {
 
     /**
      * @param { MutationRecord[] } records
-     * @returns { MutationRecord[] } processed records
+     * @returns { HistoryMutationRecord[] } processed records
      */
     processNewRecords(records) {
         // IDEA: add a pre-processor step, that returns a difference data type
         // (with classList mutations, and not read-only).
         // Besides splitting class mutations, oldValue is fixed.
         records = this.filterMutationRecords(records);
-        if (!records.length) {
-            return [];
-        }
+        let transformedRecords = this.transformMutationRecords(records);
+        transformedRecords = this.filterClassListRecords(transformedRecords);
         if (this.isObserverDisabled) {
-            this.storeLastObservedState(records);
+            this.storeLastObservedState(transformedRecords);
+            return [];
+        } else {
+            transformedRecords = transformedRecords.map((record) => this.fixMutationRecord(record));
+        }
+        if (!transformedRecords.length) {
             return [];
         }
-        this.stageRecords(records);
-        return records;
+        this.stageRecords(transformedRecords);
+        return transformedRecords;
     }
 
     /**
-     * @param { MutationRecord[] } records
+     * @param { HistoryMutationRecord[] } records
      */
     storeLastObservedState(records) {
         this.lastObservedState ||= new Map();
         records
             .filter(({ type }) => type === "attributes")
-            .filter(({ attributeName }) => attributeName !== "class") // not handled for now
             .forEach(({ target, attributeName, oldValue }) => {
                 if (!this.lastObservedState.has(target)) {
                     this.lastObservedState.set(target, new Map());
@@ -381,6 +392,22 @@ export class HistoryPlugin extends Plugin {
                     attrMap.set(attributeName, oldValue);
                 }
             });
+    }
+
+    /**
+     * @param { HistoryMutationRecord } record
+     */
+    fixMutationRecord(record) {
+        if (record.type === "attributes") {
+            const { target, attributeName } = record;
+            const lastObservedValue = this.readLastObservedValue(target, attributeName);
+            // Obs: null is a valid value for oldValue (meaning non-existing)
+            if (lastObservedValue === undefined) {
+                return record;
+            }
+            return { type: "attributes", target, attributeName, oldValue: lastObservedValue };
+        }
+        return record;
     }
 
     readLastObservedValue(node, attributeName) {
@@ -393,6 +420,17 @@ export class HistoryPlugin extends Plugin {
         // can be trusted
         attrMap.delete(attributeName);
         return lastObservedValue;
+    }
+
+    filterNoOpRecords(records) {
+        return records.filter((record) => {
+            if (record.type === "attributes") {
+                const newValue = record.target.getAttribute(record.attributeName);
+                const oldValue = record.oldValue === undefined ? null : record.oldValue; // not sure this is necessary...
+                return oldValue !== newValue;
+            }
+            return true;
+        });
     }
 
     dispatchContentUpdated() {
@@ -450,13 +488,112 @@ export class HistoryPlugin extends Plugin {
     }
     /**
      * @param { MutationRecord[] } records
+     * @returns { MutationRecord[] }
      */
     filterMutationRecords(records) {
         this.dispatchTo("before_filter_mutation_record_handlers", records);
         for (const callback of this.getResource("savable_mutation_record_predicates")) {
             records = records.filter(callback);
         }
+        records = this.filterAttributeMutationRecords(records);
+        records = records.filter((record) => !this.isSameTextContentMutation(record));
+        records = this.filterOutIntermediateStateMutationRecords(records);
+        return records;
+    }
 
+    /**
+     * @param { MutationRecord[] } records
+     */
+    filterAttributeMutationRecords(records) {
+        return records.filter((record) => {
+            if (record.type !== "attributes") {
+                return true;
+            }
+            // Skip the attributes change on the dom.
+            if (record.target === this.editable) {
+                return false;
+            }
+            if (record.attributeName === "contenteditable") {
+                return false;
+            }
+            if (this.mutationFilteredAttributes.has(record.attributeName)) {
+                return false;
+            }
+            return true;
+        });
+    }
+
+    /**
+     * @param { MutationRecord[] } records
+     */
+    filterOutIntermediateStateMutationRecords(records) {
+        /** @type {Map<Node, Set<string>>} */
+        const visitedAttributes = new Map();
+        return records.filter((record) => {
+            // For now only attribute mutations are filtered, but the same could
+            // be done for characterData mutations.
+            if (record.type !== "attributes") {
+                return true;
+            }
+            // Add attributes Set to node if not already present.
+            if (!visitedAttributes.has(record.target)) {
+                visitedAttributes.set(record.target, new Set());
+            }
+            // Visit each attribute of a node only once. We are only interested in
+            // the oldValue of the first mutation record.
+            if (visitedAttributes.get(record.target).has(record.attributeName)) {
+                return false;
+            }
+            // Mark attribute as visited.
+            visitedAttributes.get(record.target).add(record.attributeName);
+            return true;
+        });
+    }
+
+    /**
+     * @param { MutationRecord[] } records
+     * @returns { HistoryMutationRecord[] }
+     */
+    transformMutationRecords(records) {
+        const transformedRecords = [];
+        for (const record of records) {
+            if (record.type === "attributes" && record.attributeName === "class") {
+                const { addedClasses, removedClasses } = this.splitClassMutations(record);
+                /** @type {(className: string, operation: string) => MutationRecordClassList } */
+                const toClassListRecord = (className, operation) => ({
+                    type: "classList",
+                    target: record.target,
+                    className,
+                    operation,
+                });
+                addedClasses.forEach((className) =>
+                    transformedRecords.push(toClassListRecord(className, "add"))
+                );
+                removedClasses.forEach((className) =>
+                    transformedRecords.push(toClassListRecord(className, "remove"))
+                );
+            } else {
+                transformedRecords.push(record);
+            }
+        }
+        return transformedRecords;
+    }
+
+    /**
+     * @param { HistoryMutationRecord[] } records
+     * @returns { HistoryMutationRecord[] }
+     */
+    filterClassListRecords(records) {
+        return records.filter((record) => {
+            if (record.type === "classList") {
+                // Filter out system classes.
+                return !this.mutationFilteredClasses.has(record.className);
+            }
+            return true;
+        });
+    }
+
+    temp(records) {
         const filteredRecords = [];
         const visitedAttributes = new Map();
         for (const record of records) {
@@ -568,7 +705,7 @@ export class HistoryPlugin extends Plugin {
         this.currentStep.selection = this.serializeSelection(selection);
     }
     /**
-     * @param { MutationRecord[] } records
+     * @param { HistoryMutationRecord[] } records
      */
     stageRecords(records) {
         this.setIdOnRecords(records);
@@ -602,45 +739,29 @@ export class HistoryPlugin extends Plugin {
                     });
                     break;
                 }
+                case "classList": {
+                    this.currentStep.mutations.push({
+                        type: "classList",
+                        id: this.nodeToIdMap.get(record.target),
+                        className: record.className,
+                        operation: record.operation,
+                    });
+                    break;
+                }
                 case "attributes": {
-                    const nodeId = this.nodeToIdMap.get(record.target);
-                    if (record.attributeName === "class") {
-                        const { addedClasses, removedClasses } = this.splitClassMutations(record);
-                        const stageClassListRecord = (cls, operation) =>
-                            this.currentStep.mutations.push({
-                                type: "classList",
-                                id: nodeId,
-                                className: cls,
-                                operation,
-                            });
-                        addedClasses.forEach((cls) => stageClassListRecord(cls, "add"));
-                        removedClasses.forEach((cls) => stageClassListRecord(cls, "remove"));
-                    } else {
-                        const { target, attributeName } = record;
-                        const lastObservedValue = this.readLastObservedValue(target, attributeName);
-                        // Obs: null is a valid value for oldValue (meaning non-existing)
-                        const oldValue =
-                            lastObservedValue === undefined ? record.oldValue : lastObservedValue;
-                        // This should be done in a posterior filter phase
-                        const newValue = target.getAttribute(attributeName);
-                        if (oldValue === newValue) {
-                            // No-op
-                            break;
-                        }
-                        this.currentStep.mutations.push({
-                            type: "attributes",
-                            id: this.nodeToIdMap.get(record.target),
-                            attributeName: record.attributeName,
-                            value: newValue,
-                            oldValue: oldValue,
-                        });
-                        this.dispatchTo("attribute_change_handlers", {
-                            target: record.target,
-                            attributeName: record.attributeName,
-                            oldValue: record.oldValue, // @todo adjust oldValue here too?
-                            value: record.target.getAttribute(record.attributeName),
-                        });
-                    }
+                    this.currentStep.mutations.push({
+                        type: "attributes",
+                        id: this.nodeToIdMap.get(record.target),
+                        attributeName: record.attributeName,
+                        oldValue: record.oldValue,
+                        value: record.target.getAttribute(record.attributeName),
+                    });
+                    this.dispatchTo("attribute_change_handlers", {
+                        target: record.target,
+                        attributeName: record.attributeName,
+                        oldValue: record.oldValue, // @todo oldValue has been adjusted. Should it?
+                        value: record.target.getAttribute(record.attributeName),
+                    });
                     break;
                 }
                 case "childList": {
