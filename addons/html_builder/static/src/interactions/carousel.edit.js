@@ -2,8 +2,7 @@ import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
 export class CarouselEdit extends Interaction {
-    static selector =
-        "section:not(.s_carousel_intro_wrapper, .s_carousel_cards_wrapper) > .carousel";
+    static selector = "section > .carousel";
     // Prevent enabling the carousel overlay when clicking on the carousel
     // controls (indeed we want it to change the carousel slide then enable
     // the slide overlay) + See "CarouselItem" option.
@@ -13,7 +12,14 @@ export class CarouselEdit extends Interaction {
             "t-on-keydown": this.onControlKeyDown,
             "t-att-class": () => ({ o_we_no_overlay: true }),
         },
+        ".carousel-control-prev, .carousel-control-next": {
+            "t-att-data-bs-slide": () => undefined,
+        },
+        ".carousel-indicators > *": {
+            "t-att-data-bs-slide-to": () => undefined,
+        },
     };
+
     /**
      * Slides the carousel when clicking on the carousel controls. This handler
      * allows to put the sliding in the mutex, to avoid race conditions.
@@ -59,6 +65,17 @@ export class CarouselEdit extends Interaction {
         if (["ArrowLeft", "ArrowRight"].includes(ev.code)) {
             ev.preventDefault();
             ev.stopPropagation();
+        }
+    }
+
+    destroy() {
+        const editTranslations = this.services.website_edit.isEditingTranslations();
+        if (!editTranslations) {
+            // Restore the carousel controls.
+            const indicatorEls = this.el.querySelectorAll(".carousel-indicators > *");
+            indicatorEls.forEach((indicatorEl, i) =>
+                indicatorEl.setAttribute("data-bs-slide-to", i)
+            );
         }
     }
 }
