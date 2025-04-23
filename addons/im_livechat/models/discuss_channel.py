@@ -23,6 +23,11 @@ class DiscussChannel(models.Model):
     livechat_channel_id = fields.Many2one('im_livechat.channel', 'Channel', index='btree_not_null')
     livechat_operator_id = fields.Many2one('res.partner', string='Operator', index='btree_not_null')
     channel_member_history_ids = fields.One2many('im_livechat.channel.member.history', 'channel_id')
+    livechat_agent_history_ids = fields.One2many("im_livechat.channel.member.history", compute="_compute_livechat_member_histories")
+    livechat_agent_ids = fields.Many2many("res.partner", compute="_compute_livechat_member_histories")
+    livechat_bot_history_ids = fields.One2many("im_livechat.channel.member.history", compute="_compute_livechat_member_histories")
+    livechat_customer_partner_history_ids = fields.One2many("im_livechat.channel.member.history", compute="_compute_livechat_member_histories")
+    livechat_customer_guest_history_ids = fields.One2many("im_livechat.channel.member.history", compute="_compute_livechat_member_histories")
     chatbot_current_step_id = fields.Many2one('chatbot.script.step', string='Chatbot Current Step')
     chatbot_message_ids = fields.One2many('chatbot.message', 'discuss_channel_id', string='Chatbot Messages')
     country_id = fields.Many2one('res.country', string="Country", help="Country of the visitor of the channel")
@@ -64,6 +69,27 @@ class DiscussChannel(models.Model):
             channel.livechat_is_escalated = len(channel.channel_member_history_ids.filtered(
                 lambda h: h.livechat_member_type == "agent")
             ) > 1
+
+    @api.depends("channel_member_history_ids.livechat_member_type")
+    def _compute_livechat_member_histories(self):
+        for channel in self:
+            channel.livechat_agent_history_ids = self.channel_member_history_ids.filtered(
+                lambda h: h.livechat_member_type == "agent"
+            )
+            channel.livechat_bot_history_ids = self.channel_member_history_ids.filtered(
+                lambda h: h.livechat_member_type == "bot"
+            )
+            channel.livechat_customer_partner_history_ids = (
+                self.channel_member_history_ids.filtered(
+                    lambda h: h.livechat_member_type == "visitor" and h.partner_id
+                )
+            )
+            channel.livechat_customer_guest_history_ids = (
+                self.channel_member_history_ids.filtered(
+                    lambda h: h.livechat_member_type == "visitor" and h.guest_id
+                )
+            )
+            channel.livechat_agent_ids = channel.livechat_agent_history_ids.partner_id
 
     def _sync_field_names(self):
         return super()._sync_field_names() + ["livechat_operator_id"]
