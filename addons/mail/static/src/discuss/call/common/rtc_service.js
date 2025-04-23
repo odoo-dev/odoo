@@ -349,6 +349,7 @@ export class Rtc extends Record {
             audioTrack: undefined,
             cameraTrack: undefined,
             screenTrack: undefined,
+            frontFacingMode: false,
             /**
              * callback to properly end the audio monitoring.
              * If set it indicates that we are currently monitoring the local
@@ -637,6 +638,11 @@ export class Rtc extends Record {
         if (!isActiveCall) {
             await this.joinCall(channel, { audio, camera });
         }
+    }
+
+    async toggleCameraFacingMode() {
+        this.state.frontFacingMode = this.state.frontFacingMode ? false : true;
+        await this.toggleVideo("camera", true);
     }
 
     async toggleDeafen() {
@@ -1678,12 +1684,24 @@ export class Rtc extends Record {
         let sourceStream;
         try {
             if (type === "camera") {
-                if (this.state.sourceCameraStream) {
-                    sourceStream = this.state.sourceCameraStream;
-                } else {
+                const shouldCreateNewStream =
+                    !this.state.sourceCameraStream ||
+                    (this.state.sourceCameraStream &&
+                        this.lastUsedFacingMode !== this.state.frontFacingMode);
+                if (shouldCreateNewStream) {
+                    if (this.state.sourceCameraStream) {
+                        closeStream(this.state.sourceCameraStream);
+                        this.state.sourceCameraStream = null;
+                    }
                     sourceStream = await browser.navigator.mediaDevices.getUserMedia({
-                        video: CAMERA_CONFIG,
+                        video: {
+                            ...CAMERA_CONFIG,
+                            facingMode: this.state.frontFacingMode ? "user" : "environment",
+                        },
                     });
+                    this.lastUsedFacingMode = this.state.frontFacingMode;
+                } else {
+                    sourceStream = this.state.sourceCameraStream;
                 }
             }
             if (type === "screen") {

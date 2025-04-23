@@ -45,6 +45,21 @@ callActionsRegistry
         select: (component) => component.rtc.toggleVideo("camera"),
         sequence: 30,
     })
+    .add("rotate camera", {
+        condition: (component) => component.rtc.selfSession?.is_camera_on,
+        available: (component) => !component.rtc?.isRemote,
+        name: (component) => {
+            if (component.rtc?.isRemote) {
+                return _t("Camera is unavailable outside the call tab.");
+            }
+            return _t("Rotate camera");
+        },
+        isActive: (component) => component.rtc.selfSession?.is_camera_on,
+        icon: "fa-video-camera",
+        activeClass: "text-success",
+        select: (component) => component.rtc.toggleCameraFacingMode(),
+        sequence: 30,
+    })
     .add("raise-hand", {
         condition: (component) => component.rtc,
         name: (component) =>
@@ -130,8 +145,8 @@ function transformAction(component, id, action) {
         },
         activeClass: action.activeClass,
         /**  Action to execute when this action is selected */
-        select() {
-            action.select(component);
+        select(options = {}) {
+            action.select(component, options);
         },
         /** Determines the order of this action (smaller first) */
         get sequence() {
