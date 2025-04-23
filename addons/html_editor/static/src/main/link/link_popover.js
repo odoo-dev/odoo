@@ -73,6 +73,7 @@ export class LinkPopover extends Component {
 
         this.editingWrapper = useRef("editing-wrapper");
         this.inputRef = useRef(this.state.isImage || "label");
+
         useEffect(
             (el) => {
                 if (el) {
@@ -110,6 +111,10 @@ export class LinkPopover extends Component {
     }
     onClickApply() {
         this.state.editing = false;
+        this.applyDeducedUrl();
+        this.props.onApply(this.state.url, this.state.label, this.classes);
+    }
+    applyDeducedUrl() {
         if (this.state.label === "") {
             this.state.label = this.state.url;
         }
@@ -118,10 +123,12 @@ export class LinkPopover extends Component {
             ? this.correctLink(deducedUrl)
             : this.correctLink(this.state.url);
         this.loadAsyncLinkPreview();
-        this.props.onApply(this.state.url, this.state.label, this.classes);
     }
     onClickEdit() {
         this.state.editing = true;
+        this.updateUrlAndLabel();
+    }
+    updateUrlAndLabel() {
         this.state.url = this.props.linkElement.href;
 
         const textContent = cleanZWChars(this.props.linkElement.textContent);
@@ -161,6 +168,20 @@ export class LinkPopover extends Component {
     onClickReplaceTitle() {
         this.state.label = this.state.urlTitle;
         this.onClickApply();
+    }
+
+    onClickForceEditMode(ev) {
+        if (this.props.linkElement.href) {
+            const currentUrl = new URL(this.props.linkElement.href);
+            if (
+                browser.location.hostname === currentUrl.hostname &&
+                !currentUrl.pathname.startsWith("/@/")
+            ) {
+                ev.preventDefault();
+                currentUrl.pathname = `/@${currentUrl.pathname}`;
+                browser.open(currentUrl);
+            }
+        }
     }
 
     /**
@@ -297,9 +318,9 @@ export class LinkPopover extends Component {
 
     get classes() {
         if (!this.state.type) {
-            return "";
+            return this.props.linkElement.className;
         }
-        return `btn btn-fill-${this.state.type}`;
+        return `btn btn-fill-${this.state.type} ${this.props.linkElement.className}`.trim();
     }
 
     async uploadFile() {
