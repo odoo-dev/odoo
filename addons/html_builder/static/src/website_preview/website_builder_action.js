@@ -183,7 +183,78 @@ export class WebsiteBuilder extends Component {
             deleteQueryParam("edit_translations", this.websiteService.contentWindow, true);
         }
         this.preparePublicRootReady();
+        this.setupClickListener();
         this.resolveIframeLoaded();
+    }
+
+    setupClickListener() {
+        // The clicks on the iframe are listened, so that links with external
+        // redirections can be opened in the top window.
+        this.websiteContent.el.contentDocument.addEventListener("click", (ev) => {
+            const isEditing = this.websiteContext.edition || this.websiteContext.translation;
+            if (!isEditing) {
+                // Forward clicks to close backend client action's navbar
+                // dropdowns.
+                this.websiteContent.el.dispatchEvent(new MouseEvent("click", ev));
+                /* TODO ?
+            } else {
+                // When in edit mode, prevent the default behaviours of clicks
+                // as to avoid DOM changes not handled by the editor.
+                // (Such as clicking on a link that triggers navigating to
+                // another page.)
+                if (!ev.target.closest("#oe_manipulators")) {
+                    ev.preventDefault();
+                }
+                */
+            }
+            const linkEl = ev.target.closest("[href]");
+            if (!linkEl) {
+                return;
+            }
+
+            const { href, target /*, classList*/ } = linkEl;
+            /* TODO ? If to be done, most likely in a plugin
+            if (classList.contains('o_add_language')) {
+                ev.preventDefault();
+                const searchParams = new URLSearchParams(href);
+                this.action.doAction('base.action_view_base_language_install', {
+                    target: 'new',
+                    additionalContext: {
+                        params: {
+                            website_id: this.websiteId,
+                            url_return: searchParams.get("url_return"),
+                        },
+                    },
+                });
+            } else if (classList.contains('js_change_lang') && isEditing) {
+                ev.preventDefault();
+                const lang = linkEl.dataset['url_code'];
+                // The "edit_translations" search param coming from keep_query
+                // is removed, and the hash is added.
+                const destinationUrl = new URL(href, window.location);
+                destinationUrl.searchParams.delete('edit_translations');
+                destinationUrl.hash = this.websiteService.contentWindow.location.hash;
+                this.websiteService.bus.trigger('LEAVE-EDIT-MODE', {
+                    onLeave: () => {
+                        this.websiteService.goToWebsite({ path: destinationUrl.toString(), lang });
+                    },
+                    reloadIframe: false,
+                });
+            } else
+            */
+            if (href && target !== "_blank" && !isEditing) {
+                if (isTopWindowURL(linkEl)) {
+                    ev.preventDefault();
+                    browser.location.assign(href);
+                } else if (
+                    this.websiteContent.el.contentWindow.location.pathname !==
+                    new URL(href).pathname
+                ) {
+                    // This scenario triggers a navigation inside the iframe.
+                    this.websiteService.websiteRootInstance = undefined;
+                }
+            }
+        });
     }
 
     get path() {
@@ -301,16 +372,27 @@ function deleteQueryParam(param, target = window, adaptBrowserUrl = false) {
  * @param pathname {string} path of the route.
  */
 function isTopWindowURL({ host, pathname }) {
-    const backendRoutes = ["/web", "/web/session/logout", "/odoo"];
-    return (
-        host !== window.location.host ||
-        (pathname &&
-            (backendRoutes.includes(pathname) ||
-                pathname.startsWith("/@/") ||
-                pathname.startsWith("/odoo/") ||
-                pathname.startsWith("/web/content/") ||
-                pathname.startsWith("/document/share/")))
-    );
+    for (const fn of registry.category("isTopWindowURL").getAll()) {
+        if (fn({ host, pathname })) {
+            return true;
+        }
+    }
+    return false;
 }
+
+registry
+    .category("isTopWindowURL")
+    .add("html_builder.website_builder_action", ({ host, pathname }) => {
+        const backendRoutes = ["/web", "/web/session/logout", "/odoo"];
+        return (
+            host !== window.location.host ||
+            (pathname &&
+                (backendRoutes.includes(pathname) ||
+                    pathname.startsWith("/@/") ||
+                    pathname.startsWith("/odoo/") ||
+                    pathname.startsWith("/web/content/") ||
+                    pathname.startsWith("/document/share/")))
+        );
+    });
 
 registry.category("actions").add("website_preview", WebsiteBuilder);
