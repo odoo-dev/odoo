@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.tests.common import TransactionCase
@@ -6,7 +5,7 @@ from odoo.tests import Form
 from odoo import Command
 
 
-class TestPurchaseRequisitionSale(TransactionCase):
+class TestPurchaseAlternativeSale(TransactionCase):
 
     @classmethod
     def setUpClass(cls):
@@ -27,7 +26,7 @@ class TestPurchaseRequisitionSale(TransactionCase):
             'service_to_purchase': True,
         })
 
-    def test_01_purchase_requisition_services(self):
+    def test_01_purchase_alternative_services(self):
         """ Create an alternative RFQ for a RFQ automatically genrated from a sale order containing a service that
             has the "service_to_purchase" activated.
         """
@@ -48,7 +47,7 @@ class TestPurchaseRequisitionSale(TransactionCase):
 
         # Create an alternative RFQ for another vendor
         action = purchase_order.action_create_alternative()
-        alt_po_wizard = Form(self.env['purchase.requisition.create.alternative'].with_context(**action['context']))
+        alt_po_wizard = Form(self.env['purchase.alternative.create'].with_context(**action['context']))
         alt_po_wizard.partner_id = self.vendor_2
         alt_po_wizard.copy_products = True
         alt_po_wizard = alt_po_wizard.save()
