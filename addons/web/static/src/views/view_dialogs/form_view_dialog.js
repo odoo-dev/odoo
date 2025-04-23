@@ -98,7 +98,8 @@ export class FormViewDialog extends Component {
             };
         }
 
-        onMounted(() => {
+        onMounted(async () => {
+            await new Promise((resolve) => setTimeout(() => requestAnimationFrame(resolve)));
             if (this.modalRef.el.querySelector(".modal-footer").childElementCount > 1) {
                 const defaultButton = this.modalRef.el.querySelector(
                     ".modal-footer button.o-default-button"
