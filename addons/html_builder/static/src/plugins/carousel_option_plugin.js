@@ -2,6 +2,7 @@ import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { CarouselItemHeaderMiddleButtons } from "./carousel_item_header_buttons";
+import { renderToElement } from "@web/core/utils/render";
 
 export class CarouselOptionPlugin extends Plugin {
     static id = "carouselOption";
@@ -20,6 +21,11 @@ export class CarouselOptionPlugin extends Plugin {
                 template: "html_builder.CarouselBottomControllersOption",
                 selector: "section",
                 applyTo: ".s_carousel_intro",
+            },
+            {
+                template: "html_builder.CarouselCardsOption",
+                selector: "section",
+                applyTo: ".s_carousel_cards",
             },
         ],
         builder_header_middle_buttons: {
@@ -42,7 +48,7 @@ export class CarouselOptionPlugin extends Plugin {
         builder_actions: this.getActions(),
         on_cloned_handlers: this.onCloned.bind(this),
         on_will_clone_handlers: this.onWillClone.bind(this),
-        on_add_element_handlers: this.onAddElement.bind(this),
+        on_snippet_dropped_handlers: this.onSnippetDropped.bind(this),
         normalize_handlers: this.normalize.bind(this),
         on_reorder_items_handlers: this.reorderCarouselItems.bind(this),
     };
@@ -71,7 +77,28 @@ export class CarouselOptionPlugin extends Plugin {
                     );
                 },
             },
+            toggleCardImg: {
+                apply: ({ editingElement }) => this.toggleCardImg(editingElement),
+                clean: ({ editingElement: el }) => {
+                    const carouselEl = el.closest(".carousel");
+                    carouselEl.querySelectorAll("figure").forEach((el) => el.remove());
+                },
+                isApplied: ({ editingElement }) => {
+                    const carouselEl = editingElement.closest(".carousel");
+                    const cardImgEl = carouselEl.querySelector(".o_card_img_wrapper");
+                    return !!cardImgEl;
+                },
+            },
         };
+    }
+
+    toggleCardImg(editingElement) {
+        const carouselEl = editingElement.closest(".carousel");
+        const cardEls = carouselEl.querySelectorAll(".card");
+        for (const cardEl of cardEls) {
+            const imageWrapperEl = renderToElement("html_builder.s_carousel_cards.imageWrapper");
+            cardEl.insertAdjacentElement("afterbegin", imageWrapperEl);
+        }
     }
 
     getTitleExtraInfo(editingElement) {
@@ -176,11 +203,7 @@ export class CarouselOptionPlugin extends Plugin {
     }
 
     onWillClone({ originalEl }) {
-        if (
-            originalEl.matches(
-                ".s_carousel_wrapper:not(.s_carousel_intro_wrapper, .s_carousel_cards_wrapper) .carousel-item"
-            )
-        ) {
+        if (originalEl.matches(".carousel-item")) {
             const editingCarousel = originalEl.closest(".carousel");
 
             const indicatorsEl = editingCarousel.querySelector(".carousel-indicators");
@@ -201,30 +224,30 @@ export class CarouselOptionPlugin extends Plugin {
     onCloned({ cloneEl }) {
         if (
             cloneEl.matches(
-                ".s_carousel_wrapper:not(.s_carousel_intro_wrapper, .s_carousel_cards_wrapper)"
+                ".s_carousel_wrapper, .s_carousel_intro_wrapper, .s_carousel_cards_wrapper"
             )
         ) {
             this.assignUniqueID(cloneEl);
         }
-        if (
-            cloneEl.matches(
-                ".s_carousel_wrapper:not(.s_carousel_intro_wrapper, .s_carousel_cards_wrapper) .carousel-item"
-            )
-        ) {
+        if (cloneEl.matches(".carousel-item")) {
             // Need to remove editor data from the clone so it gets its own.
             cloneEl.classList.remove("active");
         }
     }
 
-    onAddElement({ elementToAdd }) {
-        if (elementToAdd.matches(".s_carousel_wrapper")) {
-            this.assignUniqueID(elementToAdd);
+    onSnippetDropped({ snippetEl }) {
+        if (
+            snippetEl.matches(
+                ".s_carousel_wrapper, .s_carousel_intro_wrapper, .s_carousel_cards_wrapper"
+            )
+        ) {
+            this.assignUniqueID(snippetEl);
         }
     }
 
     assignUniqueID(editingElement) {
         const id = "myCarousel" + Date.now();
-        editingElement.querySelector(".s_carousel").setAttribute("id", id);
+        editingElement.querySelector(".carousel").setAttribute("id", id);
         editingElement.querySelectorAll("[data-bs-target]").forEach((el) => {
             el.setAttribute("data-bs-target", "#" + id);
         });
