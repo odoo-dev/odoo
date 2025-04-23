@@ -590,6 +590,16 @@ export class StaticList extends DataPoint {
                     this.count++;
                     break;
                 }
+                case SET: {
+                    const ids = command[2];
+                    const updateCommandsToKeep = this._commands.filter(
+                        (c) => c[0] === x2ManyCommands.UPDATE && ids.includes(c[1])
+                    );
+                    this._commands = [x2ManyCommands.set(ids)].concat(updateCommandsToKeep);
+                    this._currentIds = [...ids];
+                    this.count = this._currentIds.length;
+                    break;
+                }
             }
         }
 

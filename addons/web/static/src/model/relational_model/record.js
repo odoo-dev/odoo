@@ -2,7 +2,6 @@ import { markRaw, markup, toRaw } from "@odoo/owl";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
-import { x2ManyCommands } from "@web/core/orm_service";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { escape } from "@web/core/utils/strings";
 import { DataPoint } from "./datapoint";
@@ -488,17 +487,22 @@ export class Record extends DataPoint {
         }
         const context = getFieldContext(this, fieldName);
         if (!resId && displayName !== undefined) {
-            const pair = await this.model.orm.call(resModel, "name_create", [displayName], { context });
+            const pair = await this.model.orm.call(resModel, "name_create", [displayName], {
+                context,
+            });
             return pair && createMany2OneValue(pair);
         }
         if (resId && displayName === undefined) {
             const fieldSpec = { display_name: {} };
             if (this.activeFields[fieldName].related) {
-                Object.assign(fieldSpec, getFieldsSpec(
-                    this.activeFields[fieldName].related.activeFields,
-                    this.activeFields[fieldName].related.fields,
-                    getBasicEvalContext(this.config),
-                ));
+                Object.assign(
+                    fieldSpec,
+                    getFieldsSpec(
+                        this.activeFields[fieldName].related.activeFields,
+                        this.activeFields[fieldName].related.fields,
+                        getBasicEvalContext(this.config)
+                    )
+                );
             }
             const kwargs = {
                 context,
@@ -910,7 +914,7 @@ export class Record extends DataPoint {
     }
 
     async _preprocessX2manyChanges(changes) {
-        for (const [fieldName, value] of Object.entries(changes)) {
+        for (const [fieldName, commands] of Object.entries(changes)) {
             if (
                 this.fields[fieldName].type !== "one2many" &&
                 this.fields[fieldName].type !== "many2many"
@@ -918,15 +922,7 @@ export class Record extends DataPoint {
                 continue;
             }
             const list = this.data[fieldName];
-            for (const command of value) {
-                switch (command[0]) {
-                    case x2ManyCommands.SET:
-                        await list._replaceWith(command[2]);
-                        break;
-                    default:
-                        await list._applyCommands([command]);
-                }
-            }
+            await list._applyCommands(commands);
             changes[fieldName] = list;
         }
     }
@@ -1285,7 +1281,12 @@ export class Record extends DataPoint {
             if (this.fields[fieldName].type === "many2one") {
                 const curVal = toRaw(this.data[fieldName]);
                 const nextVal = changes[fieldName];
-                if (curVal && nextVal && curVal.id === nextVal.id && curVal.display_name === nextVal.display_name) {
+                if (
+                    curVal &&
+                    nextVal &&
+                    curVal.id === nextVal.id &&
+                    curVal.display_name === nextVal.display_name
+                ) {
                     delete changes[fieldName];
                 }
             }
