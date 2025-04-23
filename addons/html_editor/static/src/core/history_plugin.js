@@ -50,7 +50,8 @@ import { withSequence } from "@html_editor/utils/resource";
  * @property { "classList" } type
  * @property { string } id
  * @property { string } className
- * @property { "add"|"remove" } operation
+ * @property { boolean } value
+ * @property { boolean } oldValue
  *
  * @typedef { Object } HistoryMutationAdd
  * @property { "add" } type
@@ -84,9 +85,17 @@ import { withSequence } from "@html_editor/utils/resource";
  * @property { "classList" } type
  * @property { Node } target
  * @property { string } className
- * @property { "add" | "remove" | "no-op" } operation
+ * @property { boolean } oldValue
+ * @property { boolean } newValue
  *
- * @typedef { MutationRecord | MutationRecordClassList } HistoryMutationRecord
+ * @typedef {Object} MutationRecordAttributes
+ * @property { "attributes" } type
+ * @property { Node } target
+ * @property { string } attributeName
+ * @property { string } oldValue
+ * @property { string } newValue
+ *
+ * @typedef { MutationRecord | MutationRecordClassList | MutationRecordAttributes } HistoryMutationRecord
  *
  * @typedef { Object } PreviewableOperation
  * @property { Function } apply
@@ -204,6 +213,9 @@ export class HistoryPlugin extends Plugin {
         this.observer = new MutationObserver(this.handleNewRecords.bind(this));
         this.enableObserverCallbacks = new Set();
         this._cleanups.push(() => this.observer.disconnect());
+        // @todo: Map or WeakMap?
+        /** @type { Map<Node, { attributes: Map<string, string>, classes: Map<string, boolean> }> } */
+        this.lastObservedState = new Map();
         this.clean();
         // @todo REMOVE ME
         window.historyPlugin = this;
@@ -353,120 +365,29 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
-     * @param { MutationRecord[] } records
-     * @returns { HistoryMutationRecord[] } processed records
+     * @param { MutationRecord[] } mutationRecords
+     * @returns { HistoryMutationRecord[] }
      */
-    processNewRecords(records) {
-        records = this.filterMutationRecords(records);
-        let transformedRecords = this.transformMutationRecords(records);
-        transformedRecords = this.filterClassListRecords(transformedRecords);
+    processNewRecords(mutationRecords) {
+        mutationRecords = this.filterMutationRecords(mutationRecords);
+        /** @type {HistoryMutationRecord[]} */
+        let records = mutationRecords
+            .flatMap((record) => this.transformRecord(record))
+            .filter((record) => !this.isSystemClassOrAttributeRecord(record))
+            .map((record) => this.resolveHistoricalValue(record));
         if (this.isObserverDisabled) {
-            this.storeLastObservedState(transformedRecords);
-            return [];
-        } else {
-            transformedRecords = transformedRecords.map((record) => this.fixMutationRecord(record));
-        }
-        transformedRecords = this.filterOutNoOpRecords(transformedRecords);
-        if (!transformedRecords.length) {
             return [];
         }
-        this.stageRecords(transformedRecords);
-        return transformedRecords;
+        records = records.filter((record) => !this.isNoOpRecord(record));
+        this.stageRecords(records);
+        return records;
     }
 
     /**
-     * @param { HistoryMutationRecord[] } records
+     * @param {HistoryMutationRecord} param0
      */
-    storeLastObservedState(records) {
-        this.lastObservedState ||= new Map();
-        for (const record of records) {
-            if (!this.lastObservedState.has(record.target)) {
-                this.lastObservedState.set(record.target, {
-                    attributes: new Map(),
-                    classes: new Map(),
-                });
-            }
-            // @todo: handle characterData mutations
-            if (record.type === "attributes") {
-                const { target, attributeName, oldValue } = record;
-                const attrMap = this.lastObservedState.get(target).attributes;
-                if (!attrMap.has(attributeName)) {
-                    attrMap.set(attributeName, oldValue);
-                }
-            } else if (record.type === "classList") {
-                const { target, className, operation } = record;
-                const classMap = this.lastObservedState.get(target).classes;
-                if (!classMap.has(className)) {
-                    const classWasPresent = operation === "remove";
-                    classMap.set(className, classWasPresent);
-                }
-            }
-        }
-    }
-
-    /**
-     * @param { HistoryMutationRecord } record
-     */
-    fixMutationRecord(record) {
-        if (record.type === "attributes") {
-            const { target, attributeName } = record;
-            const lastObservedValue = this.readLastObservedAttributeValue(target, attributeName);
-            // Obs: null is a valid value for oldValue (meaning non-existing)
-            if (lastObservedValue === undefined) {
-                return record;
-            }
-            return { type: "attributes", target, attributeName, oldValue: lastObservedValue };
-        } else if (record.type === "classList") {
-            const { target, className, operation } = record;
-            const classWasPresent = this.readLastObservedClassValue(target, className);
-            if (classWasPresent === undefined) {
-                return record;
-            }
-            const isNoOp =
-                (classWasPresent && operation === "add") ||
-                (!classWasPresent && operation === "remove");
-            const fixedOperation = isNoOp ? "no-op" : operation;
-            return { type: "classList", target, className, operation: fixedOperation };
-        }
-        return record;
-    }
-
-    readLastObservedAttributeValue(node, attributeName) {
-        const attrMap = this.lastObservedState?.get(node)?.attributes;
-        if (!attrMap || !attrMap.has(attributeName)) {
-            return;
-        }
-        const lastObservedValue = attrMap.get(attributeName);
-        // Assumes that the observer is active and next mutation's oldValue
-        // can be trusted
-        attrMap.delete(attributeName);
-        return lastObservedValue;
-    }
-
-    readLastObservedClassValue(node, className) {
-        const classMap = this.lastObservedState?.get(node)?.classes;
-        if (!classMap || !classMap.has(className)) {
-            return;
-        }
-        const classWasPresent = classMap.get(className);
-        classMap.delete(className);
-        return classWasPresent;
-    }
-
-    /**
-     * @param {HistoryMutationRecord[]} records
-     */
-    filterOutNoOpRecords(records) {
-        return records.filter((record) => {
-            if (record.type === "attributes") {
-                const newValue = record.target.getAttribute(record.attributeName);
-                const oldValue = record.oldValue === undefined ? null : record.oldValue; // not sure this is necessary...
-                return oldValue !== newValue;
-            } else if (record.type === "classList") {
-                return record.operation !== "no-op";
-            }
-            return true;
-        });
+    isNoOpRecord({ type, oldValue, newValue }) {
+        return ["attributes", "classList"].includes(type) && oldValue === newValue;
     }
 
     dispatchContentUpdated() {
@@ -532,6 +453,8 @@ export class HistoryPlugin extends Plugin {
             records = records.filter(callback);
         }
         records = this.filterAttributeMutationRecords(records);
+        // @todo: this removes mutation records that change the node reference.
+        // Fix this!
         records = records.filter((record) => !this.isSameTextContentMutation(record));
         records = this.filterOutIntermediateStateMutationRecords(records);
         return records;
@@ -552,143 +475,72 @@ export class HistoryPlugin extends Plugin {
             if (record.attributeName === "contenteditable") {
                 return false;
             }
-            if (this.mutationFilteredAttributes.has(record.attributeName)) {
-                return false;
-            }
             return true;
         });
     }
 
     /**
+     * @todo: handle characterData mutations
+     *
      * @param { MutationRecord[] } records
      */
     filterOutIntermediateStateMutationRecords(records) {
         /** @type {Map<Node, Set<string>>} */
-        const visitedAttributes = new Map();
-        return records.filter((record) => {
-            // For now only attribute mutations are filtered, but the same could
-            // be done for characterData mutations.
-            if (record.type !== "attributes") {
-                return true;
-            }
-            // Add attributes Set to node if not already present.
-            if (!visitedAttributes.has(record.target)) {
-                visitedAttributes.set(record.target, new Set());
-            }
-            // Visit each attribute of a node only once. We are only interested in
-            // the oldValue of the first mutation record.
-            if (visitedAttributes.get(record.target).has(record.attributeName)) {
-                return false;
-            }
-            // Mark attribute as visited.
-            visitedAttributes.get(record.target).add(record.attributeName);
-            return true;
-        });
-    }
-
-    /**
-     * @param { MutationRecord[] } records
-     * @returns { HistoryMutationRecord[] }
-     */
-    transformMutationRecords(records) {
-        const transformedRecords = [];
-        for (const record of records) {
-            if (record.type === "attributes" && record.attributeName === "class") {
-                const { addedClasses, removedClasses } = this.splitClassMutations(record);
-                /** @type {(className: string, operation: string) => MutationRecordClassList } */
-                const toClassListRecord = (className, operation) => ({
-                    type: "classList",
-                    target: record.target,
-                    className,
-                    operation,
-                });
-                addedClasses.forEach((className) =>
-                    transformedRecords.push(toClassListRecord(className, "add"))
-                );
-                removedClasses.forEach((className) =>
-                    transformedRecords.push(toClassListRecord(className, "remove"))
-                );
-            } else {
-                transformedRecords.push(record);
-            }
-        }
-        return transformedRecords;
-    }
-
-    /**
-     * @param { HistoryMutationRecord[] } records
-     * @returns { HistoryMutationRecord[] }
-     */
-    filterClassListRecords(records) {
-        return records.filter((record) => {
-            if (record.type === "classList") {
-                // Filter out system classes.
-                return !this.mutationFilteredClasses.has(record.className);
-            }
-            return true;
-        });
-    }
-
-    temp(records) {
+        const nodeToAttributes = new Map();
         const filteredRecords = [];
-        const visitedAttributes = new Map();
         for (const record of records) {
-            if (record.type === "attributes") {
-                // Skip the attributes change on the dom.
-                if (record.target === this.editable) {
-                    continue;
-                }
-                if (record.attributeName === "contenteditable") {
-                    continue;
-                }
-                if (this.mutationFilteredAttributes.has(record.attributeName)) {
-                    continue;
-                }
-                // Add attribute set to node if not already present.
-                if (!visitedAttributes.has(record.target)) {
-                    visitedAttributes.set(record.target, new Set());
-                }
-                // Visit each attribute of a node only once. We are only interested in
-                // the oldValue of the first mutation record.
-                if (visitedAttributes.get(record.target).has(record.attributeName)) {
-                    continue;
-                }
-                visitedAttributes.get(record.target).add(record.attributeName);
-                // Discard non-op.
-                const oldValue = record.oldValue === undefined ? null : record.oldValue; // not sure this is necessary...
-                if (oldValue === record.target.getAttribute(record.attributeName)) {
-                    continue;
-                }
-                // @todo @phoenix add test for mutationFilteredClasses.
-                if (record.attributeName === "class") {
-                    const { addedClasses, removedClasses } = this.splitClassMutations(record);
-                    const changedClasses = [...addedClasses, ...removedClasses];
-                    // In case of a mix of system classes and other ones, mutation records
-                    // will go through (and system classes will not be ignored).
-                    // When reverting or applying mutations, system classes
-                    // are excluded when about to apply the oldValue/value to class (see getAttributeValue).
-                    if (changedClasses.every((cls) => this.mutationFilteredClasses.has(cls))) {
-                        continue;
-                    }
-                }
-            } else if (record.type === "childList" && this.isSameTextContentMutation(record)) {
+            if (record.type !== "attributes") {
+                filteredRecords.push(record);
                 continue;
             }
-            filteredRecords.push(record);
+            // Add entry for current target if not already present.
+            if (!nodeToAttributes.has(record.target)) {
+                nodeToAttributes.set(record.target, new Set());
+            }
+            const visitedAttributes = nodeToAttributes.get(record.target);
+            // Keep only the first mutation record for each attribute.
+            if (!visitedAttributes.has(record.attributeName)) {
+                filteredRecords.push(record);
+                visitedAttributes.add(record.attributeName);
+            }
         }
-        // @todo @phoenix allow an option to filter mutation records.
         return filteredRecords;
     }
 
     /**
-     * @param {MutationRecord} record
-     * @returns { { addedClasses: Set<string>, removedClasses: Set<string> } }
+     * Class attribute records are expanded into multiple classList records.
+     * Attribute records have their oldValue normalized and newValue added to it.
+     * @todo: expand childList mutations to add/remove records.
+     *
+     * @param { MutationRecord } record
+     * @returns { HistoryMutationRecord | HistoryMutationRecord[] }
      */
-    splitClassMutations(record) {
-        // oldValue can be null, or have extra spaces
+    transformRecord(record) {
+        if (record.type === "attributes") {
+            if (record.attributeName === "class") {
+                return this.splitClassMutationRecord(record);
+            }
+            const oldValue = record.oldValue === undefined ? null : record.oldValue;
+            const newValue = record.target.getAttribute(record.attributeName);
+            const { type, target, attributeName } = record;
+            return { type, target, attributeName, oldValue, newValue };
+        }
+        return record;
+    }
+
+    /**
+     * Breaks down a class attribute mutation into individual class
+     * addition/removal records for more precise history tracking.
+     *
+     * @param { MutationRecord } record of type "attributes" with attributeName === "class"
+     * @returns { MutationRecordClassList[]}
+     */
+    splitClassMutationRecord(record) {
+        // oldValue can be nullish, or have extra spaces
         const oldValue = record.oldValue?.split(" ").filter(Boolean);
         const classesBefore = new Set(oldValue);
         const classesAfter = new Set(record.target.classList);
+        // @todo: use Set.prototype.difference when it becomes widely available
         const setDifference = (setA, setB) => {
             const diff = new Set(setA);
             setB.forEach((item) => diff.delete(item));
@@ -696,7 +548,90 @@ export class HistoryPlugin extends Plugin {
         };
         const addedClasses = setDifference(classesAfter, classesBefore);
         const removedClasses = setDifference(classesBefore, classesAfter);
-        return { addedClasses, removedClasses };
+
+        /** @type {(className: string, operation: string) => MutationRecordClassList } */
+        const createClassRecord = (className, isAdded) => ({
+            type: "classList",
+            target: record.target,
+            className,
+            newValue: isAdded,
+            oldValue: !isAdded,
+        });
+        // Generate records for each class change
+        return [
+            ...[...addedClasses].map((cls) => createClassRecord(cls, true)),
+            ...[...removedClasses].map((cls) => createClassRecord(cls, false)),
+        ];
+    }
+
+    /**
+     * @param { HistoryMutationRecord } record
+     */
+    isSystemClassOrAttributeRecord(record) {
+        if (record.type === "attributes") {
+            return this.mutationFilteredAttributes.has(record.attributeName);
+        }
+        if (record.type === "classList") {
+            return this.mutationFilteredClasses.has(record.className);
+        }
+        return false;
+    }
+
+    /**
+     * Ensures mutation records have the correct historical "oldValue" by
+     * checking against the last observed state.
+     *
+     * When the observer is disabled, it stores the `oldValue` for a given
+     * node-attribute/class as the last observed value (only if it not already
+     * stored).
+     *
+     * When enabled, it updates records with the last observed state and removes
+     * its entry (prevents reuse).
+     *
+     * When the observer is disabled, multiple related DOM operations might
+     * happen in sequence. By only storing the first value encountered for each
+     * node-attribute/class, we capture the state as it was before any
+     * modifications in the disabled observer sequence began.
+     *
+     * When the observer is enabled, after updating a record with the last
+     * observed state, it removes the entry to prevent reuse. Without removing
+     * the entry, the same historical value might be incorrectly applied to
+     * future mutation records targeting the same attribute/class of the same
+     * element, which would create incorrect history entries.
+     *
+     * @param {HistoryMutationRecord} record
+     * @returns {HistoryMutationRecord}
+     */
+    resolveHistoricalValue(record) {
+        if (!["attributes", "classList"].includes(record.type)) {
+            // @todo: handle characterData mutations
+            return record;
+        }
+
+        // Add entry for current target if not already present.
+        if (!this.lastObservedState.has(record.target)) {
+            this.lastObservedState.set(record.target, {
+                attributes: new Map(),
+                classList: new Map(),
+            });
+        }
+        const stateMap = this.lastObservedState.get(record.target)[record.type];
+        const key = record.type === "attributes" ? record.attributeName : record.className;
+        if (this.isObserverDisabled) {
+            // Only store it if not already stored.
+            if (!stateMap.has(key)) {
+                stateMap.set(key, record.oldValue);
+            }
+            return record;
+        }
+        if (stateMap.has(key)) {
+            const lastObservedValue = stateMap.get(key);
+            // Remove entry, so it won't be used again.
+            stateMap.delete(key);
+            // Update record.
+            return { ...record, oldValue: lastObservedValue };
+        }
+        return record;
     }
 
     /**
@@ -780,7 +715,8 @@ export class HistoryPlugin extends Plugin {
                         type: "classList",
                         id: this.nodeToIdMap.get(record.target),
                         className: record.className,
-                        operation: record.operation,
+                        oldValue: record.oldValue,
+                        value: record.newValue,
                     });
                     break;
                 }
@@ -790,13 +726,13 @@ export class HistoryPlugin extends Plugin {
                         id: this.nodeToIdMap.get(record.target),
                         attributeName: record.attributeName,
                         oldValue: record.oldValue,
-                        value: record.target.getAttribute(record.attributeName),
+                        value: record.newValue,
                     });
                     this.dispatchTo("attribute_change_handlers", {
                         target: record.target,
                         attributeName: record.attributeName,
                         oldValue: record.oldValue, // @todo oldValue has been adjusted. Should it?
-                        value: record.target.getAttribute(record.attributeName),
+                        value: record.newValue,
                     });
                     break;
                 }
@@ -1159,20 +1095,13 @@ export class HistoryPlugin extends Plugin {
                 }
                 case "classList": {
                     const node = this.idToNodeMap.get(mutation.id);
-                    if (node) {
-                        if (mutation.operation === "remove") {
-                            node.classList.remove(mutation.className);
-                        } else if (!this.mutationFilteredClasses.has(mutation.className)) {
-                            // Asymmetric treatment of system classes: they get removed, but not added
-                            node.classList.add(mutation.className);
-                        }
-                    }
+                    node?.classList.toggle(mutation.className, mutation.value);
                     break;
                 }
                 case "attributes": {
                     const node = this.idToNodeMap.get(mutation.id);
                     if (node) {
-                        let value = this.getAttributeValue(mutation.attributeName, mutation.value);
+                        let value = mutation.value;
                         for (const cb of this.getResource("attribute_change_processors")) {
                             value = cb(
                                 {
@@ -1239,27 +1168,14 @@ export class HistoryPlugin extends Plugin {
                     break;
                 }
                 case "classList": {
-                    // @todo: handle system classes
                     const node = this.idToNodeMap.get(mutation.id);
-                    if (node) {
-                        if (mutation.operation === "add") {
-                            node.classList.remove(mutation.className);
-                        } else if (!this.mutationFilteredClasses.has(mutation.className)) {
-                            // Asymmetric treatment of system classes: they get removed, but not added
-                            node.classList.add(mutation.className);
-                        }
-                    }
+                    node?.classList.toggle(mutation.className, mutation.oldValue);
                     break;
                 }
                 case "attributes": {
                     const node = this.idToNodeMap.get(mutation.id);
                     if (node) {
-                        // This removes system classes, if present
-                        // No longer needed
-                        let value = this.getAttributeValue(
-                            mutation.attributeName,
-                            mutation.oldValue
-                        );
+                        let value = mutation.oldValue;
                         for (const cb of this.getResource("attribute_change_processors")) {
                             value = cb(
                                 {
@@ -1458,20 +1374,6 @@ export class HistoryPlugin extends Plugin {
         );
     }
 
-    /**
-     * @todo: no more need for this
-     * @param { string } attributeName
-     * @param { string } value
-     */
-    getAttributeValue(attributeName, value) {
-        if (typeof value === "string" && attributeName === "class") {
-            value = value
-                .split(" ")
-                .filter((c) => !this.mutationFilteredClasses.has(c))
-                .join(" ");
-        }
-        return value;
-    }
     /**
      * @param { Node } node
      * @param { string } attributeName
