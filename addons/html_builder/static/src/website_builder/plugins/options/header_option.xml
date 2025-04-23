@@ -206,8 +206,39 @@
             </BuilderSelectItem>
 
         </BuilderSelect>
-        <!-- TODO content width, width, background ? -->
     </BuilderRow>
+
+    <!-- Header Content Width - Options -->
+    <BuilderRow label.translate="Content Width"
+        t-if="!isActiveItem('header_sidebar_opt')"
+    >
+        <BuilderButtonGroup action="'websiteConfig'">
+            <BuilderButton title.translate="Small"
+                iconImg="'/website/static/src/img/snippets_options/content_width_small.svg'"
+                actionParam="{ views: ['website.header_width_small'] }"
+            />
+            <BuilderButton title.translate="Regular"
+                iconImg="'/website/static/src/img/snippets_options/content_width_normal.svg'"
+                actionParam="{ views: [] }"
+            />
+            <BuilderButton title.translate="Full"
+                iconImg="'/website/static/src/img/snippets_options/content_width_full.svg'"
+                actionParam="{ views: ['website.header_width_full'] }"
+            />
+        </BuilderButtonGroup>
+    </BuilderRow>
+
+    <!-- Header Sidebar Template - Options -->
+    <BuilderRow label.translate="Width" level="1"
+        t-if="isActiveItem('header_sidebar_opt')"
+    >
+        <BuilderNumberInput action="'customizeWebsiteVariable'"
+            actionParam="'sidebar-width'"
+            unit="'px'"
+            saveUnit="'rem'"
+        />
+    </BuilderRow>
+    <!-- TODO background ? -->
 </t>
 
 <t t-name="website.headerScrollEffectOption">
