@@ -1,9 +1,7 @@
 import { cropperDataFieldsWithAspectRatio, isGif } from "@html_editor/utils/image_processing";
 import { registry } from "@web/core/registry";
 import { Plugin } from "@html_editor/plugin";
-import { normalizeColor } from "@html_builder/utils/utils_css";
 import { ImageToolOption } from "./image_tool_option";
-import { defaultImageFilterOptions } from "@html_editor/main/media/image_post_process_plugin";
 import { isImageCorsProtected, getMimetype } from "@html_editor/utils/image";
 import { withSequence } from "@html_editor/utils/resource";
 import { IMAGE_TOOL, ALIGNMENT_STYLE_PADDING } from "@html_builder/utils/option_sequence";
