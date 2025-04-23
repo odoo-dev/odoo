@@ -35,6 +35,7 @@ export class ModelMany2Many extends Component {
             searchModel: undefined,
         });
         this.modelEdit = undefined;
+        // This `useDomState` is here to get update from history when undo/redo
         this.domState = useDomState((el) => {
             if (!this.modelEdit) {
                 return { selection: [] };
