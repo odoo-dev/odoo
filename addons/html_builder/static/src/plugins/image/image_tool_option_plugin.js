@@ -147,6 +147,20 @@ class ImageToolOptionPlugin extends Plugin {
                     editingElement.replaceWith(newImage);
                 },
             },
+            alt: {
+                getValue: ({ editingElement: imgEl }) => imgEl.alt,
+                apply: ({ editingElement: imgEl, value }) => {
+                    const trimmedValue = value.trim();
+                    if (trimmedValue) {
+                        imgEl.alt = trimmedValue;
+                        if (imgEl.getAttribute("role") === "presentation") {
+                            imgEl.removeAttribute("role");
+                        }
+                    } else {
+                        imgEl.removeAttribute("alt");
+                    }
+                },
+            },
         };
     }
     async canHaveHoverEffect(img) {
