@@ -2,6 +2,7 @@
 from collections import defaultdict
 from datetime import timedelta
 from itertools import groupby, starmap
+import logging
 from markupsafe import Markup
 
 from odoo import api, fields, models, _, Command
@@ -10,6 +11,9 @@ from odoo.tools import float_is_zero, float_compare, plaintext2html, split_every
 from odoo.tools.constants import PREFETCH_MAX
 from odoo.service.common import exp_version
 from odoo.osv.expression import AND
+
+
+_logger = logging.getLogger(__name__)
 
 
 class PosSession(models.Model):
@@ -1943,23 +1947,24 @@ class PosSession(models.Model):
     def _get_closed_orders(self):
         return self.order_ids.filtered(lambda o: o.state not in ['draft', 'cancel'])
 
-
-class ProcurementGroup(models.Model):
-    _inherit = 'procurement.group'
-
     @api.model
-    def _run_scheduler_tasks(self, use_new_cursor=False, company_id=False):
-        super(ProcurementGroup, self)._run_scheduler_tasks(use_new_cursor=use_new_cursor, company_id=company_id)
-        self.env['pos.session']._alert_old_session()
-        if 'scheduler_task_done' in self._context:
-            task_done = self._context.get('scheduler_task_done', {'task_done': 0})['task_done'] + 1
-            self._context['scheduler_task_done']['task_done'] = task_done
-        else:
-            task_done = self._get_scheduler_tasks_to_do()
-        if use_new_cursor:
-            self.env['ir.cron']._notify_progress(done=task_done, remaining=self._get_scheduler_tasks_to_do() - task_done)
-            self.env.cr.commit()
+    def scheduler_run_alert_old_sessions(self, use_new_cursor=False):
+        """
+        This scheduler checks for POS sessions older than 7 days that are still open
+        and schedules a reminder to close them.
+        """
+        try:
+            total_task = 1
+            task_done = 0
 
-    @api.model
-    def _get_scheduler_tasks_to_do(self):
-        return super()._get_scheduler_tasks_to_do() + 1
+            self._alert_old_session()
+            task_done += 1
+
+            if use_new_cursor:
+                self.env['ir.cron']._notify_progress(done=task_done, remaining=total_task - task_done)
+                self.env.cr.commit()
+
+            _logger.info("POS session alert scheduler completed. Task done: %s", task_done)
+        except Exception:
+            _logger.exception("Error during POS old session alert scheduler")
+            raise
