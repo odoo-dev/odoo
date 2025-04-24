@@ -246,6 +246,7 @@ class Base(models.AbstractModel):
                 if not field_spec or 'fields' not in field_spec:
                     continue
 
+                env_ = self.with_context(field_spec.get('context')).env
                 for values in values_list:
                     old_values = values[field_name]
                     next_values = []
@@ -255,11 +256,11 @@ class Base(models.AbstractModel):
                             continue
 
                         if property_.get('type') == 'many2one' and property_.get('comodel') and property_.get('value'):
-                            record = self.env[property_['comodel']].with_context(field_spec.get('context')).browse(property_['value'][0])
+                            record = env_[property_['comodel']].browse(property_['value'][0])
                             property_['value'] = record.web_read(spec['fields']) if 'fields' in spec else property_['value']
 
                         if property_.get('type') == 'many2many' and property_.get('comodel') and property_.get('value'):
-                            records = self.env[property_['comodel']].with_context(field_spec.get('context')).browse([r[0] for r in property_['value']])
+                            records = env_[property_['comodel']].browse([r[0] for r in property_['value']])
                             property_['value'] = records.web_read(spec['fields']) if 'fields' in spec else property_['value']
 
                         next_values.append(property_)

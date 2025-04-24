@@ -1343,6 +1343,13 @@ class IrModelFields(models.Model):
         field = self._get(model_name, field_name)
         return [(sel.value, sel.name) for sel in field.selection_ids]
 
+    def _validate_properties_definition(self, properties_definition, field):
+        """Allow to validate additional properties attributes."""
+
+    def _additional_allowed_keys_properties_definition(self):
+        """Allow to add more allowed key for properties."""
+        return ()
+
 
 class IrModelInherit(models.Model):
     _name = 'ir.model.inherit'
