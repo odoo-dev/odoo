@@ -22,11 +22,24 @@ class ResConfigSettings(models.TransientModel):
     # This module is not installable yet, but will be in the following weeks
     module_hr_expense_stripe = fields.Boolean(string='Link your stripe issuing account to manage company credit cards for your employees through Odoo')
 
-    expense_journal_id = fields.Many2one('account.journal', related='company_id.expense_journal_id', readonly=False, check_company=True, domain="[('type', '=', 'purchase')]")
-    company_expense_allowed_payment_method_line_ids = fields.Many2many(
-        comodel_name='account.payment.method.line',
+    employee_paid_expense_journal_id = fields.Many2one(
+        'account.journal',
+        related='company_id.employee_paid_expense_journal_id',
+        readonly=False,
         check_company=True,
-        related='company_id.company_expense_allowed_payment_method_line_ids',
+        domain="[('type', '=', 'purchase')]"
+    )
+    company_paid_expense_journal_id = fields.Many2one(
+        'account.journal',
+        related='company_id.company_paid_expense_journal_id',
+        readonly=False,
+        check_company=True,
+        domain="[('type', 'in', ('bank', 'cash', 'credit'))]",
+    )
+    company_expense_allowed_payment_method_ids = fields.Many2many(
+        comodel_name='account.payment.method',
+        related='company_id.company_expense_allowed_payment_method_ids',
+        domain="[('payment_type', '=', 'outbound')]",
         readonly=False,
     )
 
