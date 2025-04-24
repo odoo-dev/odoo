@@ -4,11 +4,14 @@ import { subTaskDeleteConfirmationMessage } from "@project/views/project_task_fo
 import { ProjectTaskTemplateDropdown } from "../components/project_task_template_dropdown";
 
 export class ProjectTaskListController extends ListController {
-    static template = "project.ProjectTaskListView";
     static components = {
         ...ListController.components,
         ProjectTaskTemplateDropdown,
     };
+
+    get defaultButtons() {
+        return super.defaultButtons.filter((button) => button.id !== "new");
+    }
 
     get deleteConfirmationDialogProps() {
         const deleteConfirmationDialogProps = super.deleteConfirmationDialogProps;

@@ -9,6 +9,10 @@ export class ProjectTaskKanbanController extends KanbanController {
         ProjectTaskTemplateDropdown,
     };
 
+    get defaultButtons() {
+        return super.defaultButtons.filter((button) => button.id !== "new");
+    }
+
     setup() {
         super.setup();
         this.hideKanbanStagesNocontent = this.props.context.hide_kanban_stages_nocontent;
