@@ -64,7 +64,7 @@ export class Builder extends Component {
 
         const mainPlugins = removePlugins(
             [...MAIN_PLUGINS],
-            ["PowerButtonsPlugin", "DoubleClickImagePreviewPlugin"]
+            ["PowerButtonsPlugin", "DoubleClickImagePreviewPlugin", "SeparatorPlugin", "StarPlugin"]
         );
         const Plugins = [...mainPlugins, ...CORE_PLUGINS, ...(this.props.Plugins || [])];
         // TODO: maybe do a different config for the translate mode and the
