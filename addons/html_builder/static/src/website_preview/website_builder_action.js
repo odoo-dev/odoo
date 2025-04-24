@@ -34,6 +34,7 @@ export class WebsiteBuilder extends Component {
         this.dialog = useService("dialog");
         this.websiteService = useService("website");
         this.ui = useService("ui");
+        this.websiteService.websiteRootInstance = undefined;
 
         this.websiteContent = useRef("iframe");
         useSubEnv({
@@ -304,6 +305,7 @@ export class WebsiteBuilder extends Component {
         this.ui.block();
         this.preparePublicRootReady();
         this.setIframeLoaded();
+        this.websiteService.websiteRootInstance = undefined;
         if (url) {
             this.websiteContent.el.contentWindow.location = url;
         } else {
@@ -324,6 +326,7 @@ export class WebsiteBuilder extends Component {
             "PUBLIC-ROOT-READY",
             (event) => {
                 this.websiteContent.el.setAttribute("is-ready", "true");
+                this.websiteService.websiteRootInstance = event.detail.rootInstance;
                 deferred.resolve();
             },
             { once: true }
