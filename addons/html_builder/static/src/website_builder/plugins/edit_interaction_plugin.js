@@ -47,7 +47,7 @@ export class EditInteractionPlugin extends Plugin {
         if (!this.websiteEditService) {
             throw new Error("website edit service not loaded");
         }
-        this.websiteEditService.update(element, true);
+        this.websiteEditService.update(element, "edit");
         this.areInteractionsStartedInEditMode = true;
     }
 
