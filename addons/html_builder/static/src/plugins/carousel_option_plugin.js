@@ -237,8 +237,8 @@ export class CarouselOptionPlugin extends Plugin {
         });
     }
     normalize(root) {
-        const carousel = root.closest(".s_carousel");
-        const allCarousels = [...root.querySelectorAll(".s_carousel")];
+        const carousel = root.closest(".carousel");
+        const allCarousels = [...root.querySelectorAll(".carousel")];
         if (carousel) {
             allCarousels.push(carousel);
         }
@@ -269,7 +269,7 @@ export class CarouselOptionPlugin extends Plugin {
 
     reorderCarouselItems({ elementToReorder, position, optionName }) {
         if (optionName === "Carousel") {
-            const editingCarouselElement = elementToReorder.closest(".s_carousel");
+            const editingCarouselElement = elementToReorder.closest(".carousel");
             const itemsEls = [...editingCarouselElement.querySelectorAll(".carousel-item")];
 
             // reorder carousel items
