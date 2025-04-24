@@ -485,7 +485,9 @@ class AccountPaymentRegister(models.TransientModel):
             ('type', 'in', ('bank', 'cash', 'credit')),
         ])
         for wizard in self:
-            wizard.available_journal_ids = journals.filtered(lambda j: j._is_payment_method_available(wizard.payment_method_id.code))
+            wizard.available_journal_ids = journals.filtered(
+                'outstanding_payment_account_id'
+            ).filtered(lambda j: j._is_payment_method_available(wizard.payment_method_id.code))
 
     @api.depends('can_edit_wizard', 'journal_id')
     def _compute_available_partner_bank_ids(self):

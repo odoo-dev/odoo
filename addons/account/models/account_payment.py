@@ -512,7 +512,7 @@ class AccountPayment(models.Model):
     @api.depends('payment_type', 'payment_method_id')
     def _compute_available_journal_ids(self):
         """
-        Get all journals that fit the payment method domain.
+        Get all journals that have an outstanding account and fit the payment method domain.
         """
         journals = self.env['account.journal'].search([
             '|',
@@ -521,7 +521,9 @@ class AccountPayment(models.Model):
             ('type', 'in', ('bank', 'cash', 'credit')),
         ])
         for pay in self:
-            pay.available_journal_ids = journals.filtered(lambda j: j._is_payment_method_available(pay.payment_method_id.code))
+            pay.available_journal_ids = journals.filtered(
+                'outstanding_payment_account_id'
+            ).filtered(lambda j: j._is_payment_method_available(pay.payment_method_id.code))
 
     def _get_payment_method_codes_to_exclude(self):
         # can be overriden to exclude payment methods based on the payment characteristics
@@ -842,7 +844,7 @@ class AccountPayment(models.Model):
         return payments
 
     def _get_outstanding_account(self, payment_type):
-        account_ref = 'account_journal_payment_debit_account_id' if payment_type == 'inbound' else 'account_journal_payment_credit_account_id'
+        account_ref = 'account_journal_outstanding_payment_account_id'
         chart_template = self.with_context(allowed_company_ids=self.company_id.root_id.ids).env['account.chart.template']
         outstanding_account = (
             chart_template.ref(account_ref, raise_if_not_found=False)

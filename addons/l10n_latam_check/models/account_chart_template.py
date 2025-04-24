@@ -41,30 +41,38 @@ class AccountChartTemplate(models.AbstractModel):
 
     @template(model='account.payment.method')
     def _get_latam_check_payment_methods(self, template_code):
-        return {
-            "own_checks": {
-                'name': _('Own Checks'),
-                'code': 'own_checks',
-                'payment_type': 'outbound',
-            },
-            "new_third_party_checks": {
-                'name': _('New Third Party Checks'),
-                'code': 'new_third_party_checks',
-                'payment_type': 'inbound',
-            },
-            "in_third_party_checks": {
-                'name': _('Existing Third Party Checks'),
-                'code': 'in_third_party_checks',
-                'payment_type': 'inbound',
-            },
-            "out_third_party_checks": {
-                'name': _('Existing Third Party Checks'),
-                'code': 'out_third_party_checks',
-                'payment_type': 'outbound',
-            },
-            "return_third_party_checks": {
-                'name': _('Return Third Party Checks'),
-                'code': 'return_third_party_checks',
-                'payment_type': 'outbound',
-            },
-        }
+        if self.env.company.country_id.code in self._get_third_party_checks_country_codes():
+            return {
+                "own_checks": {
+                    'name': _('Own Checks'),
+                    'code': 'own_checks',
+                    'payment_type': 'outbound',
+                },
+                "new_third_party_checks": {
+                    'name': _('New Third Party Checks'),
+                    'code': 'new_third_party_checks',
+                    'payment_type': 'inbound',
+                },
+                "in_third_party_checks": {
+                    'name': _('Existing Third Party Checks'),
+                    'code': 'in_third_party_checks',
+                    'payment_type': 'inbound',
+                },
+                "out_third_party_checks": {
+                    'name': _('Existing Third Party Checks'),
+                    'code': 'out_third_party_checks',
+                    'payment_type': 'outbound',
+                },
+                "return_third_party_checks": {
+                    'name': _('Return Third Party Checks'),
+                    'code': 'return_third_party_checks',
+                    'payment_type': 'outbound',
+                },
+            }
+
+    @template(model='account.journal')
+    def _get_account_journal(self, template_code):
+        if self.env.company.country_id.code in self._get_third_party_checks_country_codes():
+            journals = super()._get_account_journal(template_code)
+            journals['bank']['outstanding_payment_account_id'] = 'base_outstanding_payments'
+            return journals
