@@ -291,7 +291,6 @@ class TestUiTranslate(odoo.tests.HttpCase):
 @odoo.tests.common.tagged('post_install', '-at_install')
 class TestUi(HttpCaseWithWebsiteUser):
 
-    @unittest.skip
     def test_01_admin_tour_homepage(self):
         self.start_tour("/odoo", 'homepage', login='admin')
 
