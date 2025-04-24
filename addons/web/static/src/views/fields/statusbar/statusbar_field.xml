@@ -22,7 +22,7 @@
                     t-att-disabled="props.isDisabled"
                     aria-label="More..."
                 >
-                    ...
+                    <i class="fa fa-ellipsis-h" />
                 </button>
                 <t t-set-slot="content">
                     <t t-call="web.StatusBarField.Dropdown">
