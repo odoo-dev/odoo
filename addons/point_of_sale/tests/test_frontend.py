@@ -145,7 +145,21 @@ class TestUi(TestPointOfSaleHttpCommon):
         """ Assert the negative amount of a negative-quantity orderline
             with zero-amount product with fixed tax.
         """
-
+        # pos_config = self.env['pos.config'].create({
+        #     'name': 'Shop 1',
+        #     'module_pos_restaurant': False,
+        #     'payment_method_ids': [
+        #         Command.create({
+        #             'name': 'Bank 1',
+        #             'receivable_account_id': self.env.company.account_default_pos_receivable_account_id.id,
+        #             'is_cash_count': False,
+        #             'split_transactions': False,
+        #             'company_id': self.env.company.id,
+        #         })
+        #     ]
+        # })
+        # breakpoint()
+        # self.main_pos_config = pos_config
         tax_received_account = self.env['account.account'].create({
             'name': 'TAX_BASE',
             'code': 'TBASE',
