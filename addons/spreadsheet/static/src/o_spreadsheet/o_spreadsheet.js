@@ -22148,7 +22148,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     position: absolute;
     top: 0;
     left: ${HEADER_WIDTH}px;
-    right: 0;
+    right: ${SCROLLBAR_WIDTH}px;
     height: ${HEADER_HEIGHT}px;
     &.o-dragging {
       cursor: grabbing;
@@ -22319,9 +22319,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     position: absolute;
     top: ${HEADER_HEIGHT}px;
     left: 0;
-    right: 0;
+    bottom: ${SCROLLBAR_WIDTH}px;
     width: ${HEADER_WIDTH}px;
-    height: calc(100% - ${HEADER_HEIGHT + SCROLLBAR_WIDTH}px);
     &.o-dragging {
       cursor: grabbing;
     }
@@ -43801,8 +43800,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.68';
-    __info__.date = '2025-04-25T08:10:32.128Z';
-    __info__.hash = '682d48e';
+    __info__.date = '2025-04-28T09:16:05.438Z';
+    __info__.hash = '20380f9';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
