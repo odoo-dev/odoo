@@ -238,6 +238,26 @@ export class SelectionPlugin extends Plugin {
                 this.onKeyDownArrows(ev);
             }
         });
+
+        this.hasSelectionInEditableDocument = true;
+        if (this.document !== document) {
+            this.addDomListener(
+                this.document,
+                "pointerdown",
+                () => {
+                    this.hasSelectionInEditableDocument = true;
+                },
+                { capture: true }
+            );
+            this.addDomListener(
+                document,
+                "pointerdown",
+                () => {
+                    this.hasSelectionInEditableDocument = false;
+                },
+                { capture: true }
+            );
+        }
     }
 
     selectAll() {
@@ -442,6 +462,8 @@ export class SelectionPlugin extends Plugin {
             documentSelection: documentSelection,
             editableSelection: editableSelection,
             documentSelectionIsInEditable: documentSelectionIsInEditable,
+            currentSelectionIsInEditable:
+                documentSelectionIsInEditable && this.hasSelectionInEditableDocument,
         };
 
         Object.defineProperty(selectionData, "deepEditableSelection", {

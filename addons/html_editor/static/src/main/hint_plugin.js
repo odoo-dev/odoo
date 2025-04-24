@@ -27,7 +27,7 @@ export class HintPlugin extends Plugin {
                     text: this.config.placeholder,
                     target: (selectionData, editable) => {
                         if (
-                            selectionData.documentSelectionIsInEditable ||
+                            selectionData.currentSelectionIsInEditable ||
                             childNodes(editable).length !== 1
                         ) {
                             return;

@@ -69,13 +69,14 @@ export class EditorOverlay extends Component {
             );
         }
 
+        const editableDocument = this.props.editable.ownerDocument;
         if (this.props.closeOnPointerdown) {
-            const editableDocument = this.props.editable.ownerDocument;
             useExternalListener(editableDocument, "pointerdown", this.props.close);
-            // Listen to pointerdown outside the iframe
-            if (editableDocument !== document) {
-                useExternalListener(document, "pointerdown", this.props.close);
-            }
+        }
+
+        // Listen to pointerdown outside the iframe
+        if (editableDocument !== document) {
+            useExternalListener(document, "pointerdown", this.props.close);
         }
 
         if (this.props.hasAutofocus) {

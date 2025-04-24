@@ -107,9 +107,9 @@ export class PowerButtonsPlugin extends Plugin {
 
     updatePowerButtons() {
         this.powerButtonsContainer.classList.add("d-none");
-        const { editableSelection, documentSelectionIsInEditable } =
+        const { editableSelection, currentSelectionIsInEditable } =
             this.dependencies.selection.getSelectionData();
-        if (!documentSelectionIsInEditable) {
+        if (!currentSelectionIsInEditable) {
             return;
         }
         const block = closestBlock(editableSelection.anchorNode);

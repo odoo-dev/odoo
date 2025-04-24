@@ -336,7 +336,7 @@ export class ToolbarPlugin extends Plugin {
 
     shouldBeVisible(selectionData) {
         const inEditable =
-            selectionData.documentSelectionIsInEditable &&
+            selectionData.currentSelectionIsInEditable &&
             !selectionData.documentSelectionIsProtected &&
             !selectionData.documentSelectionIsProtecting;
         if (!inEditable) {
@@ -358,10 +358,11 @@ export class ToolbarPlugin extends Plugin {
         return this.getFilterTraverseNodes().length;
     }
 
-    shouldPreventClosing(selectionData) {
-        const preventClosing = selectionData.documentSelection?.anchorNode?.closest?.(
-            "[data-prevent-closing-overlay]"
-        );
+    shouldPreventClosing() {
+        // Should check in the document with overlays.
+        const preventClosing = document
+            .getSelection()
+            ?.anchorNode?.closest?.("[data-prevent-closing-overlay]");
         return preventClosing?.dataset?.preventClosingOverlay === "true";
     }
 
