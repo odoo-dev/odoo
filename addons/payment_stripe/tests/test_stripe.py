@@ -3,8 +3,10 @@
 import unittest
 from unittest.mock import patch
 
+from datetime import timedelta
 from werkzeug.urls import url_encode, url_join
 
+from odoo import fields
 from odoo.tests import tagged
 from odoo.tools import mute_logger
 
@@ -164,3 +166,23 @@ class StripeTest(StripeCommon, PaymentHttpCommon):
             call_args = mock.call_args.kwargs['payload'].keys()
             for payload_param in ('account', 'return_url', 'refresh_url', 'type'):
                 self.assertIn(payload_param, call_args)
+
+    def test_check_mandate_start_date(self):
+        now = fields.Datetime.now()
+        tx = self._create_transaction('direct', tokenize=True)
+        
+        with patch.object(type(tx), '_get_mandate_values', return_value={
+            'amount': 100.0,
+            'MRR': 100.0,
+            'start_datetime': now - timedelta(days=10),
+            'end_datetime': now + timedelta(days=180),
+            'recurrence_unit': 'month',
+            'recurrence_duration': 1,
+        }):
+            tx._get_mandate_values()
+            mandate_options = tx._stripe_prepare_mandate_options()
+            start_date_key = next((key for key in mandate_options.keys() if key.endswith('[start_date]')), None)
+            self.assertTrue(
+                mandate_options[start_date_key] >= now.timestamp(),
+                f"Stripe mandate should start at least {now}"
+            )
