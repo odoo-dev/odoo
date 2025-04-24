@@ -93,11 +93,12 @@
         </BuilderRow>
 
         <BuilderRow label.translate="Product Tags Filter" level="1">
-            <BuilderCheckbox actionParam="{views: ['website_sale.filter_products_tags']}"/>
+            <BuilderCheckbox id="'o_wsale_tags_filter_opt'" actionParam="{views: ['website_sale.filter_products_tags']}"/>
         </BuilderRow>
 
+        <t t-set="CollapsibleSidebarViews" t-value="['website_sale.products_categories_list_collapsible', 'website_sale.products_attributes_collapsible']"/>
         <BuilderRow label.translate="Collapsible Sidebar" level="1">
-            <BuilderCheckbox actionParam="{views: ['website_sale.products_categories_list_collapsible', 'website_sale.products_attributes_collapsible']}"/>
+            <BuilderCheckbox id="'collapsible_sidebar'" actionParam="{views: CollapsibleSidebarViews}"/>
         </BuilderRow>
     </t>
 
