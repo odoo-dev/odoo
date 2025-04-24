@@ -21,12 +21,8 @@ export class GalleryElementOptionPlugin extends Plugin {
         return {
             setGalleryElementPosition: {
                 apply: ({ editingElement, value: position }) => {
-                    const carouselOptionName =
-                        editingElement.parentNode.parentNode.classList.contains("s_carousel_intro")
-                            ? "CarouselIntro"
-                            : "Carousel";
                     const optionName = editingElement.classList.contains("carousel-item")
-                        ? carouselOptionName
+                        ? "Carousel"
                         : "GalleryImageList";
 
                     // Carousel and gallery image list are both managed by the same handler
