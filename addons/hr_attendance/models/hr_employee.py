@@ -47,8 +47,6 @@ class HrEmployee(models.Model):
         compute='_compute_hours_last_month', groups="hr.group_hr_user")
     overtime_ids = fields.One2many(
         'hr.attendance.overtime', 'employee_id', groups="hr_attendance.group_hr_attendance_officer,hr.group_hr_user")
-    total_overtime = fields.Float(
-        compute='_compute_total_overtime', compute_sudo=True, groups="hr_attendance.group_hr_attendance_officer,hr.group_hr_user")
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -76,23 +74,6 @@ class HrEmployee(models.Model):
         old_officers.sudo()._clean_attendance_officers()
 
         return res
-
-    @api.depends('overtime_ids.duration', 'attendance_ids', 'attendance_ids.overtime_status')
-    def _compute_total_overtime(self):
-        mapped_validated_overtimes = dict(self.env['hr.attendance']._read_group(
-            domain=[('overtime_status', '=', 'approved')],
-            groupby=['employee_id'],
-            aggregates=['validated_overtime_hours:sum']
-        ))
-
-        mapped_overtime_adjustments = dict(self.env['hr.attendance.overtime']._read_group(
-            domain=[('adjustment', '=', True)],
-            groupby=['employee_id'],
-            aggregates=['duration:sum']
-        ))
-
-        for employee in self:
-            employee.total_overtime = mapped_validated_overtimes.get(employee, 0) + mapped_overtime_adjustments.get(employee, 0)
 
     def _compute_hours_last_month(self):
         """

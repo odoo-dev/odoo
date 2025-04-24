@@ -11,3 +11,4 @@ from . import res_company
 from . import res_users
 from . import hr_attendance_rule
 from . import hr_attendance_ruleset
+from . import hr_attendance_analysis_line

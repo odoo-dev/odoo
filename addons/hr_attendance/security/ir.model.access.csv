@@ -7,3 +7,4 @@ access_hr_attendance_user,hr.attendance.user,model_hr_attendance,group_hr_attend
 access_hr_attendance_overtime_user,hr.attendance.overtime.user,model_hr_attendance_overtime,group_hr_attendance_own_reader,1,0,0,0
 access_hr_attendance_ruleset,hr.attendance.ruleset.user,model_hr_attendance_ruleset,group_hr_attendance_manager,1,1,1,1
 access_hr_attendance_rule,hr.attendance.rule.user,model_hr_attendance_rule,group_hr_attendance_manager,1,1,1,1
+access_hr_attendance_analysis_line,hr.attendance.analysis.line.user,model_hr_attendance_analysis_line,group_hr_attendance_manager,1,1,1,1

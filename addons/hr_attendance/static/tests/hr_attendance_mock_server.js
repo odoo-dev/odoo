@@ -13,7 +13,6 @@ patch(MockServer.prototype, {
                 "employee_name": "Mitchell Admin",
                 "employee_avatar": false,
                 "hours_today": 0.0019,
-                "total_overtime": 0,
                 "last_attendance_worked_hours": 0.0019,
                 "last_check_in": "2023-10-02 07:54:31",
                 "attendance_state": "checked_out",
@@ -23,7 +22,6 @@ patch(MockServer.prototype, {
                     "check_in": "2023-10-02 07:54:31",
                     "check_out": "2023-10-02 07:54:38"
                 },
-                "overtime_today": 0,
                 "use_pin": false
             })
         }

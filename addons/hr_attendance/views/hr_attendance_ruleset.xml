@@ -54,23 +54,11 @@
                     </group>
                     <notebook>
                         <page string="Attendance Rules" name="attendance_rules">
-                            <field name="rule_ids" context="{'default_ruleset_id': active_id}">
-                                <list string="Attendance Rules" editable="bottom">
+                            <field name="rule_ids">
+                                <list string="Attendance Rules">
                                     <field name="sequence" widget="handle"/>
-                                    <field name="name" required="1"/>
+                                    <field name="name"/>
                                     <field name="condition_type" required="1"/>
-                                    <field name="threshold_hours"
-
-                                           optional="show"/>
-                                    <field name="compensation_type" required="1"/>
-                                    <field name="pay_rate_multiplier"
-                                           column_invisible="parent.compensation_type != 'pay'"
-                                           optional="show"/>
-                                    <field name="time_off_allocation_rate"
-                                           column_invisible="parent.compensation_type != 'time_off'"
-                                           optional="show"/>
-                                    <field name="active" widget="boolean_toggle"/>
-                                    <field name="company_id" invisible="1"/>
                                 </list>
                             </field>
                         </page>
@@ -98,8 +86,9 @@
         id="hr_attendance_ruleset_menu"
         name="Attendance Rulesets"
         action="hr_attendance_ruleset_action"
-        parent="hr_attendance.menu_hr_attendance_configuration"
+        parent="hr_attendance.menu_configuration_attendance_global"
         sequence="30"/>
+
     <record id="hr_attendance_rule_view_search" model="ir.ui.view">
         <field name="name">hr.attendance.rule.search</field>
         <field name="model">hr.attendance.rule</field>
@@ -150,7 +139,6 @@
         <field name="arch" type="xml">
             <form string="Attendance Rule">
                 <sheet>
-                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="active"/>
                      <group>
                          <group>
                              <field name="name" placeholder="e.g., Daily Overtime > 8h Weekdays"/>

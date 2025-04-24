@@ -38,15 +38,10 @@ class HrAttendance(http.Controller):
                 **HrAttendance._get_user_attendance_data(employee),
                 'employee_name': employee.name,
                 'employee_avatar': employee.image_256 and image_data_uri(employee.image_256),
-                'total_overtime': float_round(employee.total_overtime, precision_digits=2),
                 'kiosk_delay': employee.company_id.attendance_kiosk_delay * 1000,
                 'attendance': {'check_in': employee.last_attendance_id.check_in,
                                'check_out': employee.last_attendance_id.check_out},
-                'overtime_today': request.env['hr.attendance.overtime'].sudo().search([
-                    ('employee_id', '=', employee.id), ('date', '=', datetime.date.today()),
-                    ('adjustment', '=', False)]).duration or 0,
                 'use_pin': employee.company_id.attendance_kiosk_use_pin,
-                'display_overtime': employee.company_id.hr_attendance_display_overtime
             }
         return response
 

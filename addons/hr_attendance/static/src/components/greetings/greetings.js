@@ -21,10 +21,6 @@ export class KioskGreetings extends Component {
         this.kiosk_delay = setTimeout(() => {
             this.props.kioskReturn(true)
         }, this.props.employeeData.kiosk_delay)
-        if (this.props.employeeData.display_overtime){
-            this.overtimeToday = this.formatFloatTime(this.props.employeeData.overtime_today);
-            this.totalOvertime = this.formatFloatTime(this.props.employeeData.total_overtime);
-        }
         onWillDestroy(() => clearTimeout(this.kiosk_delay));
     }
 }
