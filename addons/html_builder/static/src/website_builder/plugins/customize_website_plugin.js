@@ -52,7 +52,7 @@ export class CustomizeWebsitePlugin extends Plugin {
             customizeWebsiteVariable: this.withCustomHistory({
                 isApplied: ({ param: { mainParam: variable } = {}, value }) => {
                     const currentValue = this.getWebsiteVariableValue(variable);
-                    return currentValue === `'${value}'`;
+                    return currentValue === value;
                 },
                 getValue: ({ param: { mainParam: variable } }) => {
                     const currentValue = this.getWebsiteVariableValue(variable);
@@ -75,7 +75,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                     if (gradientColor) {
                         const gradientValue = this.getWebsiteVariableValue(gradientColor);
                         if (gradientValue) {
-                            return gradientValue.substring(1, gradientValue.length - 1); // Unquote
+                            return gradientValue;
                         }
                     }
                     return getCSSVariableValue(color, style);
@@ -196,12 +196,6 @@ export class CustomizeWebsitePlugin extends Plugin {
                     value,
                     loadResult: { imageSrc, oldImageSrc, oldValue },
                 }) => {
-                    if (oldImageSrc) {
-                        oldImageSrc = oldImageSrc.substring(1, oldImageSrc.length - 1); // Unquote
-                    }
-                    if (oldValue !== "NONE") {
-                        oldValue = oldValue.substring(1, oldValue.length - 1); // Unquote
-                    }
                     const getAction = this.dependencies.builderActions.getAction;
                     this.dependencies.history.addCustomMutation({
                         apply: () => {
@@ -308,6 +302,10 @@ export class CustomizeWebsitePlugin extends Plugin {
         while (tempValue) {
             finalValue = tempValue;
             tempValue = getCSSVariableValue(tempValue.replaceAll("'", ""), style);
+        }
+        // Unquote value
+        if (finalValue.startsWith(`'`)) {
+            finalValue = finalValue.substring(1, finalValue.length - 1);
         }
         return finalValue;
     }
