@@ -1,4 +1,4 @@
-import { Component, markup } from "@odoo/owl";
+import { Component, markup, onMounted, onPatched, onWillUnmount } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { InputConfirmationDialog } from "./input_confirmation_dialog";
@@ -13,6 +13,23 @@ export class SnippetViewer extends Component {
 
     setup() {
         this.dialog = useService("dialog");
+
+        this.websiteService = useService("website");
+        this.websiteEditService = this.websiteService.websiteRootInstance.bindService("website_edit");
+      
+        const updatePreview = () => {
+            const iframeDocument = document.querySelector("iframe.o_add_snippet_iframe").contentDocument;
+            this.websiteEditService.update(iframeDocument.body, "preview");
+        };
+
+        onMounted(updatePreview);
+        onPatched(updatePreview);
+
+        onWillUnmount(() => {
+            const iframeDocument = document.querySelector("iframe.o_add_snippet_iframe").contentDocument;
+            this.websiteEditService.stop(iframeDocument.body);
+        });
+
     }
 
     onClickRename(snippet) {

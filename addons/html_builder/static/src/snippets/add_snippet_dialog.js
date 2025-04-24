@@ -1,10 +1,9 @@
-import { Component, onMounted, onWillDestroy, onWillUnmount, onWillRender, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, onWillDestroy, onWillRender, useRef, useState } from "@odoo/owl";
 import { loadBundle } from "@web/core/assets";
 import { isBrowserFirefox } from "@web/core/browser/feature_detection";
 import { Dialog } from "@web/core/dialog/dialog";
 import { localization } from "@web/core/l10n/localization";
 import { SnippetViewer } from "./snippet_viewer";
-import { useService } from "@web/core/utils/hooks";
 
 export class AddSnippetDialog extends Component {
     static template = "html_builder.AddSnippetDialog";
@@ -32,12 +31,6 @@ export class AddSnippetDialog extends Component {
             },
             snippetModel: this.props.snippetModel,
         };
-        this.websiteService = useService("website");
-        this.websiteEditService = this.websiteService.websiteRootInstance.bindService("website_edit");
-        onWillUnmount(() => {
-            const iframeDocument = this.iframeRef.el.contentDocument;
-            this.websiteEditService.stop(iframeDocument.body);
-        });
 
         let root;
         onMounted(async () => {
@@ -64,7 +57,6 @@ export class AddSnippetDialog extends Component {
                 js: false,
             });
             this.state.showIframe = true;
-            this.websiteEditService.update(iframeDocument.body, "preview");
         });
 
         onWillRender(() => {
