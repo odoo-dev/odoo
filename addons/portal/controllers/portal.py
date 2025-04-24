@@ -425,8 +425,6 @@ class CustomerPortal(Controller):
             'current_partner': current_partner,
             'commercial_partner': current_partner.commercial_partner_id,
             'is_commercial_address': not current_partner or partner_sudo == commercial_partner,
-            # To whether display the login field
-            'login_field': request.httprequest.full_path == "/my/account?",
             'commercial_address_update_url': (
                 # Only redirect to account update if the logged in user is their own commercial
                 # partner.
@@ -526,9 +524,10 @@ class CustomerPortal(Controller):
                 required_fields or '',
                 **extra_form_data,
             )
-            if form_data.get("login_field"):
+            login = extra_form_data.get('login', '')
+            if login:
+                login = login.strip()
                 # Validate login and highlights the problems in the form, if any.
-                login = extra_form_data.get("login", "").strip()
                 self._validate_login_and_update(login, invalid_fields, missing_fields, error_messages)
             if error_messages:
                 return partner_sudo, {
