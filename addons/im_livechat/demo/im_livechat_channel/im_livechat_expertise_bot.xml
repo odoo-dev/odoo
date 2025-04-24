@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="im_livechat_expertise_channel_data" model="im_livechat.channel">
+            <field name="name">Expertise.com</field>
+            <field name="default_message">Hello, how may I help you?</field>
+        </record>
+        <record id="expertise_bot_operator_partner_demo" model="res.partner">
+            <field name="name">Expertise Odoo</field>
+            <field name="image_1920" type="base64" file="mail/static/src/img/odoobot.png"/>
+            <field name="active">True</field>
+        </record>
+        <record id="chatbot_script_expertise_bot_demo" model="chatbot.script">
+            <field name="title">Expertise</field>
+            <field name="image_1920" type="base64" file="mail/static/src/img/odoobot.png"/>
+            <field name="operator_partner_id" ref="expertise_bot_operator_partner_demo"/>
+        </record>
+        <record id="chatbot_script_discuss_expertise_demo" model="im_livechat.expertise">
+            <field name="name">Discuss</field>
+            <field name="user_ids" eval="[(4, ref('base.user_admin'))]"/>
+        </record>
+        <record id="chatbot_script_livechat_expertise_demo" model="im_livechat.expertise">
+            <field name="name">Livechat</field>
+            <field name="user_ids" eval="[(4, ref('base.user_admin'))]"/>
+        </record>
+        <record id="chatbot_script_expertise_step_exertise_demo" model="chatbot.script.step">
+            <field name="message">Welcome!</field>
+            <field name="sequence">1</field>
+            <field name="step_type">text</field>
+            <field name="chatbot_script_id" ref="chatbot_script_expertise_bot_demo"/>
+        </record>
+        <record id="chatbot_script_expertise_step_dispatch_demo" model="chatbot.script.step">
+            <field name="message">What module you are interested?</field>
+            <field name="sequence">2</field>
+            <field name="step_type">question_selection</field>
+            <field name="chatbot_script_id" ref="chatbot_script_expertise_bot_demo"/>
+        </record>
+        <record id="chatbot_script_expertise_step_dispatch_answer_discuss_demo" model="chatbot.script.answer">
+            <field name="name">Discuss</field>
+            <field name="sequence">1</field>
+            <field name="script_step_id" ref="chatbot_script_expertise_step_dispatch_demo"/>
+        </record>
+        <record id="chatbot_script_expertise_step_dispatch_answer_livechat_demo" model="chatbot.script.answer">
+            <field name="name">Livechat</field>
+            <field name="sequence">2</field>
+            <field name="script_step_id" ref="chatbot_script_expertise_step_dispatch_demo"/>
+        </record>
+        <record id="chatbot_script_expertise_step_dispatch_answer_mix_demo" model="chatbot.script.answer">
+            <field name="name">Discuss and Livechat</field>
+            <field name="sequence">3</field>
+            <field name="script_step_id" ref="chatbot_script_expertise_step_dispatch_demo"/>
+        </record>
+
+        <!-- Step for experties 'Discuss' -->
+        <record id="chatbot_script_expertise_step_discuss_demo" model="chatbot.script.step">
+            <field name="message">Hmmm, let me check if I can find someone who knows discuss well...</field>
+            <field name="sequence">3</field>
+            <field name="step_type">text</field>
+            <field name="chatbot_script_id" ref="chatbot_script_expertise_bot_demo"/>
+            <field name="triggering_answer_ids" eval="[(4, ref('chatbot_script_expertise_step_dispatch_answer_discuss_demo'))]"/>
+        </record>
+        <record id="chatbot_script_expertise_step_discuss_forward_operator_demo" model="chatbot.script.step">
+            <field name="sequence">4</field>
+            <field name="step_type">forward_operator</field>
+            <field name="chatbot_script_id" ref="chatbot_script_expertise_bot_demo"/>
+            <field name="triggering_answer_ids" eval="[(4, ref('chatbot_script_expertise_step_dispatch_answer_discuss_demo'))]"/>
+            <field name="operator_expertise_ids" eval="[(4, ref('chatbot_script_discuss_expertise_demo'))]"/>
+        </record>
+
+        <!-- Steps for expertise 'Livechat' -->
+        <record id="chatbot_script_expertise_step_livechat_demo" model="chatbot.script.step">
+            <field name="message">Hmmm, let me check if I can find someone who knows livechat well...</field>
+            <field name="sequence">5</field>
+            <field name="step_type">text</field>
+            <field name="chatbot_script_id" ref="chatbot_script_expertise_bot_demo"/>
+            <field name="triggering_answer_ids" eval="[(4, ref('chatbot_script_expertise_step_dispatch_answer_livechat_demo'))]"/>
+        </record>
+        <record id="chatbot_script_expertise_step_livechat_forward_operator_demo" model="chatbot.script.step">
+            <field name="sequence">6</field>
+            <field name="step_type">forward_operator</field>
+            <field name="chatbot_script_id" ref="chatbot_script_expertise_bot_demo"/>
+            <field name="triggering_answer_ids" eval="[(4, ref('chatbot_script_expertise_step_dispatch_answer_livechat_demo'))]"/>
+            <field name="operator_expertise_ids" eval="[(4, ref('chatbot_script_livechat_expertise_demo'))]"/>
+        </record>
+
+        <!-- Steps for expertise 'Discuss and Livechat' -->
+        <record id="chatbot_script_expertise_step_mix_demo" model="chatbot.script.step">
+            <field name="message">Hmmm, let me check if I can find someone who knows discuss and livechat well...</field>
+            <field name="sequence">7</field>
+            <field name="step_type">text</field>
+            <field name="chatbot_script_id" ref="chatbot_script_expertise_bot_demo"/>
+            <field name="triggering_answer_ids" eval="[(4, ref('chatbot_script_expertise_step_dispatch_answer_mix_demo'))]"/>
+        </record>
+        <record id="chatbot_script_expertise_step_mix_forward_operator_demo" model="chatbot.script.step">
+            <field name="sequence">8</field>
+            <field name="step_type">forward_operator</field>
+            <field name="chatbot_script_id" ref="chatbot_script_expertise_bot_demo"/>
+            <field name="triggering_answer_ids" eval="[(4, ref('chatbot_script_expertise_step_dispatch_answer_mix_demo'))]"/>
+            <field name="operator_expertise_ids" eval="[(4, ref('chatbot_script_discuss_expertise_demo')),(4, ref('chatbot_script_livechat_expertise_demo'))]"/>
+        </record>
+    </data>
+</odoo>
