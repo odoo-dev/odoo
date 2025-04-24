@@ -106,6 +106,7 @@ class HrAttendance(models.Model):
                     check_out=format_time(self.env, attendance.check_out, time_format=None, tz=tz, lang_code=self.env.lang),
                 )
 
+
     @api.depends('employee_id')
     def _compute_is_manager(self):
         have_manager_right = self.env.user.has_group('hr_attendance.group_hr_attendance_manager')
@@ -221,6 +222,7 @@ class HrAttendance(models.Model):
                 check_out_day_start = attendance._get_day_start_and_day(attendance.employee_id, attendance.check_out)
                 attendances_emp[attendance.employee_id].add(check_out_day_start)
         return attendances_emp
+
     def _get_rule_active_intervals(self, rule, week_start_local, week_end_local, tz):
         """
         Helper: Generates Intervals when a specific rule is active during a week.
@@ -365,6 +367,39 @@ class HrAttendance(models.Model):
 
         return gross_interval - lunch_intervals
 
+    def _get_weeks_to_process(self):
+        """
+        Identifies unique weeks that need processing based on the attendance records
+        in self
+
+        This method considers the week of the check_in dates.
+
+        Returns:
+            dict: {employee_id (int): set(week_start_date (datetime.date), ...), ...}
+                  Maps employee ID to a set of week start dates affected by the attendances.
+        """
+        weeks_map = defaultdict(lambda: defaultdict(lambda: self.env['hr.attendance']))
+        all_attendances = self.env['hr.attendance']._read_group(domain=[('employee_id', 'in', self.employee_id),
+                                                                        ('check_out', '!=', False)],
+                                                                groupby=['employee_id', 'check_in:week'],
+                                                                aggregates=['id:recordset'])
+        if not self:
+            return weeks_map
+
+        for attendance in self.filtered(lambda a: a.check_out):
+            employee = attendance.employee_id
+            attendance_date = attendance.check_in.date()
+            current_weekday = attendance_date.weekday()
+            days_to_subtract = (current_weekday + 7) % 7
+
+            week_start_check_in = attendance_date - timedelta(days=days_to_subtract)
+            weeks_map[employee.id][week_start_check_in] += attendance
+
+
+
+        return weeks_map
+
+
     # --- Placeholder for the New Rule Processing Logic ---
     def _process_attendance_rules(self):
         """
@@ -373,6 +408,12 @@ class HrAttendance(models.Model):
         """
         if not self:
             return
+
+        weeks_to_process = self._get_weeks_to_process()
+
+        for employee, weeks in weeks_to_process.items():
+            for week, attendances in weeks.items():
+                print('jeje')
 
         # 1. Identify Scope (Employees and Date Range)
         employees = self.employee_id
