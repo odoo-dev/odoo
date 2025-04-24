@@ -1,4 +1,13 @@
-import { Component, onWillUpdateProps, useEffect, useRef, useState } from "@odoo/owl";
+import {
+    Component,
+    onWillUpdateProps,
+    useEffect,
+    useExternalListener,
+    useRef,
+    useState,
+} from "@odoo/owl";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 
 /**
  * A notebook component that will render only the current page and allow
@@ -49,7 +58,25 @@ import { Component, onWillUpdateProps, useEffect, useRef, useState } from "@odoo
  * @extends Component
  */
 
+function isElementInViewport(el) {
+    const rect = el.getBoundingClientRect();
+    const width = window.innerWidth || document.documentElement.clientWidth;
+    const height = window.innerHeight || document.documentElement.clientHeight;
+    return (
+        Math.round(rect.top) >= 0 &&
+        Math.round(rect.left) >= 0 &&
+        Math.round(rect.right) <= width &&
+        Math.round(rect.bottom) <= height
+    );
+}
+
+const show = (...els) => els.forEach((el) => el.classList.remove("d-none"));
+
 export class Notebook extends Component {
+    static components = {
+        Dropdown,
+        DropdownItem,
+    };
     static template = "web.Notebook";
     static defaultProps = {
         className: "",
@@ -68,7 +95,9 @@ export class Notebook extends Component {
     };
 
     setup() {
+        this.rootRef = useRef("root");
         this.activePane = useRef("activePane");
+        this.hiddenTabsToggle = useRef("hiddenTabsToggle");
         this.pages = this.computePages(this.props);
         this.state = useState({ currentPage: null });
         this.state.currentPage = this.computeActivePage(this.props.defaultPage, true);
@@ -76,6 +105,7 @@ export class Notebook extends Component {
             () => {
                 this.props.onPageUpdate(this.state.currentPage);
                 this.activePane.el?.classList.add("show");
+                this.adjustVisibleNavItems();
             },
             () => [this.state.currentPage]
         );
@@ -85,6 +115,9 @@ export class Notebook extends Component {
             this.pages = this.computePages(nextProps);
             this.state.currentPage = this.computeActivePage(nextProps.defaultPage, activateDefault);
         });
+
+        this.hiddenTabs = [];
+        useExternalListener(window, "resize", () => this.adjustVisibleNavItems());
     }
 
     get navItems() {
@@ -94,6 +127,29 @@ export class Notebook extends Component {
     get page() {
         const page = this.pages.find((e) => e[0] === this.state.currentPage)[1];
         return page.Component && page;
+    }
+
+    adjustVisibleNavItems() {
+        const itemEls = [...this.rootRef.el.querySelectorAll("li.nav-item")];
+        const selectedIndex = itemEls.findIndex((el) =>
+            el.firstElementChild.classList.contains("active")
+        );
+        show(...itemEls, this.hiddenTabsToggle.el);
+        this.hiddenTabs = [];
+        for (let i = 0; i < itemEls.length; i++) {
+            if (!isElementInViewport(itemEls[i])) {
+                let indexToHide = i;
+                if (i === selectedIndex) {
+                    indexToHide = i - 1;
+                }
+                itemEls[indexToHide].classList.add("d-none");
+                const link = itemEls[indexToHide].firstElementChild;
+                this.hiddenTabs.push({ name: link.name, string: link.textContent });
+            }
+        }
+        if (!this.hiddenTabs.length) {
+            this.hiddenTabsToggle.el.classList.add("d-none");
+        }
     }
 
     activatePage(pageIndex) {

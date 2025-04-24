@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.Notebook">
-        <div t-attf-class="o_notebook d-flex w-100 {{ props.orientation === 'horizontal' ? 'horizontal flex-column' : 'vertical flex-row' }} {{ props.className }}" t-if="state.currentPage">
+        <div t-ref="root" t-attf-class="o_notebook d-flex w-100 {{ props.orientation === 'horizontal' ? 'horizontal flex-column' : 'vertical flex-row' }} {{ props.className }}" t-if="state.currentPage">
             <div class="o_notebook_headers" t-att-class="{ 'm-0': props.orientation === 'vertical' }">
                 <ul t-attf-class="nav nav-tabs {{ props.orientation === 'horizontal' ? 'flex-row flex-nowrap' : 'flex-column p-0' }}">
                     <li t-foreach="navItems" t-as="navItem" t-key="navItem[0]" class="nav-item flex-nowrap" t-if="navItem[1].isVisible" t-attf-class="{{ navItem[1].isDisabled ? 'disabled' : '' }}">
@@ -11,6 +11,26 @@
                             <t t-esc="navItem[1].title" />
                         </a>
                     </li>
+                    <Dropdown>
+                        <button
+                            t-ref="hiddenTabsToggle"
+                            type="button"
+                            class="nav-link dropdown-toggle o_arrow_button o_first"
+                            aria-label="More..."
+                        >
+                            <i class="fa fa-ellipsis-h" />
+                        </button>
+                        <t t-set-slot="content">
+                            <t t-foreach="hiddenTabs" t-as="tab" t-key="tab.name">
+                                <DropdownItem
+                                    class="''"
+                                    onSelected="() => this.activatePage(tab.name)"
+                                >
+                                    <span t-esc="tab.string" />
+                                </DropdownItem>
+                            </t>
+                        </t>
+                    </Dropdown>
                 </ul>
             </div>
             <div class="o_notebook_content tab-content">
