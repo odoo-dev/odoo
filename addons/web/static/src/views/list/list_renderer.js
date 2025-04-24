@@ -1220,7 +1220,7 @@ export class ListRenderer extends Component {
      * @param {Group | null} group
      * @param {RelationalRecord | null} record
      */
-    async onCellKeydown(ev, group = null, record = null) {
+    onCellKeydown(ev, group = null, record = null) {
         if (this.props.list.model.useSampleModel) {
             return;
         }
@@ -1238,7 +1238,7 @@ export class ListRenderer extends Component {
         }
 
         const handled = this.editedRecord
-            ? await this.onCellKeydownEditMode(hotkey, closestCell, group, record)
+            ? this.onCellKeydownEditMode(hotkey, closestCell, group, record)
             : this.onCellKeydownReadOnlyMode(hotkey, closestCell, group, record); // record is supposed to be not null here
 
         if (handled) {
@@ -1413,13 +1413,13 @@ export class ListRenderer extends Component {
      * @param {Group} group
      * @param {RelationalRecord} record
      */
-    async applyCellKeydownEditModeGroup(hotkey, _cell, group, record) {
+    applyCellKeydownEditModeGroup(hotkey, _cell, group, record) {
         const { editable } = this.props;
         const groupIndex = group.list.records.indexOf(record);
         const isLastOfGroup = groupIndex === group.list.records.length - 1;
-        const isDirty = this.lastIsDirty || (await record.isDirty());
-        const isEnterBehavior = hotkey === "enter" && (isDirty || !record.canBeAbandoned);
-        const isTabBehavior = hotkey === "tab" && isDirty && !record.canBeAbandoned;
+        const isDirty = record.dirty || this.lastIsDirty;
+        const isEnterBehavior = hotkey === "enter" && (!record.canBeAbandoned || isDirty);
+        const isTabBehavior = hotkey === "tab" && !record.canBeAbandoned && isDirty;
         if (
             isLastOfGroup &&
             this.canCreate &&
@@ -1463,9 +1463,9 @@ export class ListRenderer extends Component {
      * @param {HTMLTableCellElement} cell
      * @param {Group | null} group
      * @param {RelationalRecord | null} record
-     * @returns {Promise<boolean>} true if some behavior has been taken
+     * @returns {boolean} true if some behavior has been taken
      */
-    async onCellKeydownEditMode(hotkey, cell, group, record) {
+    onCellKeydownEditMode(hotkey, cell, group, record) {
         const { cycleOnTab, list } = this.props;
         const row = cell.parentElement;
         const applyMultiEditBehavior = record && record.selected && list.model.multiEdit;
@@ -1482,7 +1482,7 @@ export class ListRenderer extends Component {
             return true;
         }
 
-        if (group && (await this.applyCellKeydownEditModeGroup(hotkey, cell, group, record))) {
+        if (group && this.applyCellKeydownEditModeGroup(hotkey, cell, group, record)) {
             return true;
         }
 
@@ -1491,9 +1491,8 @@ export class ListRenderer extends Component {
                 const index = list.records.indexOf(record);
                 const lastIndex = topReCreate ? 0 : list.records.length - 1;
                 if (index === lastIndex) {
-                    const isDirty = await record.isDirty();
                     if (this.displayRowCreates) {
-                        if (record.isNew && !isDirty) {
+                        if (record.isNew && !record.dirty) {
                             list.leaveEditMode();
                             return false;
                         }
@@ -1503,11 +1502,11 @@ export class ListRenderer extends Component {
                     } else if (
                         this.canCreate &&
                         !record.canBeAbandoned &&
-                        (this.lastIsDirty || isDirty)
+                        (record.dirty || this.lastIsDirty)
                     ) {
                         this.add({ group });
                     } else if (cycleOnTab) {
-                        if (await record.isAbandonable()) {
+                        if (record.canBeAbandoned) {
                             list.leaveEditMode();
                         }
                         const futureRecord = list.records[0];
@@ -1531,7 +1530,7 @@ export class ListRenderer extends Component {
                 const index = list.records.indexOf(record);
                 if (index === 0) {
                     if (cycleOnTab) {
-                        if (await record.isAbandonable()) {
+                        if (record.canBeAbandoned) {
                             list.leaveEditMode();
                         }
                         const futureRecord = list.records[list.records.length - 1];
@@ -1571,11 +1570,7 @@ export class ListRenderer extends Component {
                             list.enterEditMode(futureRecord);
                         }
                     });
-                } else if (
-                    this.lastIsDirty ||
-                    this.displayRowCreates ||
-                    !(await record.isAbandonable())
-                ) {
+                } else if (this.lastIsDirty || !record.canBeAbandoned || this.displayRowCreates) {
                     this.add({ group });
                 } else {
                     futureRecord = list.records.at(0);
