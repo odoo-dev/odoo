@@ -5,6 +5,8 @@ import {
     onWillDestroy,
     onWillStart,
     onWillUpdateProps,
+    reactive,
+    toRaw,
     useComponent,
     useEffect,
     useEnv,
@@ -13,6 +15,7 @@ import {
     useSubEnv,
 } from "@odoo/owl";
 import { useBus } from "@web/core/utils/hooks";
+import { effect } from "@web/core/utils/reactive";
 import { useDebounced } from "@web/core/utils/timing";
 
 export function useDomState(getState, { checkEditingElement = true, onReady } = {}) {
@@ -222,8 +225,11 @@ export function useSelectableComponent(id, { onItemChange } = {}) {
     useBuilderComponent();
     const selectableItems = [];
     const refreshCurrentItemDebounced = useDebounced(refreshCurrentItem, 0, { immediate: true });
-    let currentSelectedItem;
     const env = useEnv();
+
+    const state = reactive({
+        currentSelectedItem: null,
+    });
 
     function refreshCurrentItem() {
         let currentItem;
@@ -234,8 +240,8 @@ export function useSelectableComponent(id, { onItemChange } = {}) {
                 itemPriority = selectableItem.priority;
             }
         }
-        if (currentItem && currentItem !== currentSelectedItem) {
-            currentSelectedItem = currentItem;
+        if (currentItem && currentItem !== toRaw(state.currentSelectedItem)) {
+            state.currentSelectedItem = currentItem;
             env.dependencyManager.triggerDependencyUpdated();
         }
         if (currentItem) {
@@ -253,8 +259,8 @@ export function useSelectableComponent(id, { onItemChange } = {}) {
     onMounted(refreshCurrentItem);
     useBus(env.editorBus, "DOM_UPDATED", refreshCurrentItem);
     function cleanSelectedItem(...args) {
-        if (currentSelectedItem) {
-            currentSelectedItem.clean(...args);
+        if (state.currentSelectedItem) {
+            state.currentSelectedItem.clean(...args);
         }
     }
 
@@ -271,11 +277,9 @@ export function useSelectableComponent(id, { onItemChange } = {}) {
                 }
             },
             update: refreshCurrentItemDebounced,
-            getSelectedItem: () => {
-                refreshCurrentItem();
-                return currentSelectedItem;
-            },
             items: selectableItems,
+            refreshCurrentItem: () => refreshCurrentItem(),
+            getSelectableState: () => state,
         },
     });
 }
@@ -299,8 +303,13 @@ export function useSelectableItemComponent(id, { getLabel = () => {} } = {}) {
     const env = useEnv();
 
     let isSelectableActive = isApplied;
+    let state;
     if (env.selectableContext) {
-        isSelectableActive = () => env.selectableContext.getSelectedItem() === selectableItem;
+        const selectableState = env.selectableContext.getSelectableState();
+        isSelectableActive = () => {
+            env.selectableContext.refreshCurrentItem();
+            return toRaw(selectableState.currentSelectedItem) === selectableItem;
+        };
 
         const selectableItem = {
             isApplied,
@@ -311,14 +320,27 @@ export function useSelectableItemComponent(id, { getLabel = () => {} } = {}) {
         };
 
         env.selectableContext.addSelectableItem(selectableItem);
+        state = useState({
+            isActive: false,
+        });
+        effect(
+            ({ currentSelectedItem }) => {
+                state.isActive = toRaw(currentSelectedItem) === selectableItem;
+            },
+            [selectableState]
+        );
+        env.selectableContext.refreshCurrentItem();
         onMounted(env.selectableContext.update);
         onWillDestroy(() => {
             env.selectableContext.removeSelectableItem(selectableItem);
         });
-        onWillStart(async () => {
-            await onReady;
-            state.isActive = isSelectableActive();
-        });
+    } else {
+        state = useDomState(
+            () => ({
+                isActive: isSelectableActive(),
+            }),
+            { onReady }
+        );
     }
 
     if (id) {
@@ -332,13 +354,6 @@ export function useSelectableItemComponent(id, { getLabel = () => {} } = {}) {
             { onReady }
         );
     }
-
-    const state = useDomState(
-        () => ({
-            isActive: isSelectableActive(),
-        }),
-        { onReady }
-    );
 
     return { state, operation };
 }
