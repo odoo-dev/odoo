@@ -8,7 +8,12 @@ class NavTabsStyleOptionPlugin extends Plugin {
         builder_options: [
             withSequence(50, {
                 template: "html_builder.NavTabsStyleOption",
-                selector: "section",
+                selector: ".s_tabs",
+                applyTo: ".s_tabs_main",
+            }),
+            withSequence(50, {
+                template: "html_builder.NavTabsImagesStyleOption",
+                selector: ".s_tabs_images",
                 applyTo: ".s_tabs_main",
             }),
         ],
@@ -86,9 +91,13 @@ class NavTabsStyleOptionPlugin extends Plugin {
                 },
             },
             setDirection: {
-                isApplied: ({ editingElement, value }) =>
-                    this.getNavEl(editingElement).classList.contains("flex-sm-column") ===
-                    (value === "vertical"),
+                isApplied: ({ editingElement, value }) => {
+                    const classList = this.getNavEl(editingElement).classList;
+                    const containsFlexColumn =
+                        classList.contains("flex-sm-column") ||
+                        classList.contains("flex-md-column");
+                    return value === "vertical" ? containsFlexColumn : !containsFlexColumn;
+                },
                 apply: ({ editingElement, value }) => {
                     this.applyDirection(editingElement, value);
                 },
@@ -97,18 +106,27 @@ class NavTabsStyleOptionPlugin extends Plugin {
     }
 
     applyDirection(editingElement, direction) {
+        // s_tabs_images use flex-md classes, while s_tabs use flex-sm classes
+        const isTabsImages = editingElement
+            .closest(".s_tabs_common")
+            .classList.contains("s_tabs_images");
+
         const isVertical = direction === "vertical";
         const navEl = this.getNavEl(editingElement);
 
         editingElement.classList.toggle("row", isVertical);
         editingElement.classList.toggle("s_col_no_resize", isVertical);
         editingElement.classList.toggle("s_col_no_bgcolor", isVertical);
-        navEl.classList.toggle("flex-sm-column", isVertical);
+        navEl.classList.toggle(isTabsImages ? "flex-md-column" : "flex-sm-column", isVertical);
         editingElement
             .querySelectorAll(".s_tabs_nav > .nav-link")
             .forEach((linkEl) => linkEl.classList.toggle("py-2", isVertical));
-        editingElement.querySelector(".s_tabs_nav").classList.toggle("col-sm-3", isVertical);
-        editingElement.querySelector(".s_tabs_content").classList.toggle("col-sm-9", isVertical);
+        editingElement
+            .querySelector(".s_tabs_nav")
+            .classList.toggle(isTabsImages ? "col-md-3" : "col-sm-3", isVertical);
+        editingElement
+            .querySelector(".s_tabs_content")
+            .classList.toggle(isTabsImages ? "col-md-9" : "col-sm-9", isVertical);
 
         // Clean incompatible leftover classes in vertical mode.
         // See "Fill and Justify" and "Alignment" options.

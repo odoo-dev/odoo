@@ -9,7 +9,7 @@ class NavTabsOptionPlugin extends Plugin {
     resources = {
         builder_header_middle_buttons: {
             Component: NavTabsHeaderMiddleButtons,
-            selector: "section.s_tabs",
+            selector: "section.s_tabs, section.s_tabs_images",
             props: {
                 addItem: (editingElement) => this.addItem(editingElement),
                 removeItem: (editingElement) => this.removeItem(editingElement),
