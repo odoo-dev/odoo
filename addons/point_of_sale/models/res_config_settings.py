@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
+from odoo.tools.translate import _
 
 import logging
 
@@ -118,6 +120,17 @@ class ResConfigSettings(models.TransientModel):
     pos_orderlines_sequence_in_cart_by_category = fields.Boolean(related='pos_config_id.orderlines_sequence_in_cart_by_category', readonly=False)
     pos_basic_receipt = fields.Boolean(related='pos_config_id.basic_receipt', readonly=False)
     pos_fallback_nomenclature_id = fields.Many2one(related='pos_config_id.fallback_nomenclature_id', domain="[('id', '!=', barcode_nomenclature_id)]", readonly=False)
+
+    @api.constrains('module_pos_preparation_display')
+    def _check_preparation_display_enabled(self):
+        active_sessions = self.env['pos.session'].search_count([
+        ('state', '!=', 'closed'),
+        ('config_id.module_pos_restaurant', '=', True)
+        ])
+        if active_sessions > 0:
+            raise ValidationError(_(
+                "You cannot disable the preparation display while there are active POS restaurant sessions."
+            ))
 
     def open_payment_method_form(self):
         bank_journal = self.env['account.journal'].search([('type', '=', 'bank'), ('company_id', 'in', self.env.company.parent_ids.ids)], limit=1)
