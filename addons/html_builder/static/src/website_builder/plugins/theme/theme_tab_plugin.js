@@ -1,11 +1,12 @@
 import { BuilderFontFamilyPicker } from "@html_builder/website_builder/builder_fontfamilypicker";
 import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
-import { _t } from "@web/core/l10n/translation";
-import { registry } from "@web/core/registry";
 import { ThemeColorsOption } from "./theme_colors_option";
 import { ThemeAdvancedOption } from "./theme_advanced_option";
 import { getCSSVariableValue } from "@html_builder/utils/utils_css";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { _t } from "@web/core/l10n/translation";
+import { registry } from "@web/core/registry";
 import {
     convertCSSColorToRgba,
     convertRgbaToCSSColor,
@@ -32,7 +33,7 @@ export const OPTION_POSITIONS = {
 
 export class ThemeTabPlugin extends Plugin {
     static id = "themeTab";
-    static dependencies = ["customizeWebsite", "googleMapsOption"];
+    static dependencies = ["builderActions", "customizeWebsite", "googleMapsOption"];
 
     grayParams = {};
     grays = reactive({});
@@ -167,6 +168,8 @@ export class ThemeTabPlugin extends Plugin {
             : 100;
     }
     getActions() {
+        const getAction = this.dependencies.builderActions.getAction;
+        const dialogService = this.services.dialog;
         return {
             customizeGray: this.dependencies.customizeWebsite.withCustomHistory({
                 getValue: ({ param: { mainParam: grayParamName } }) =>
@@ -192,6 +195,27 @@ export class ThemeTabPlugin extends Plugin {
                     });
                 },
             }),
+            get changeColorPalette() {
+                const customizeWebsiteVariable = getAction("customizeWebsiteVariable");
+                return {
+                    ...customizeWebsiteVariable,
+                    apply: async (action) => {
+                        const confirmed = await new Promise((resolve) => {
+                            dialogService.add(ConfirmationDialog, {
+                                body: _t(
+                                    "Changing the color palette will reset all your color customizations, are you sure you want to proceed?"
+                                ),
+                                confirm: () => resolve(true),
+                                cancel: () => resolve(false),
+                            });
+                        });
+                        if (!confirmed) {
+                            return;
+                        }
+                        await customizeWebsiteVariable.apply(action);
+                    },
+                };
+            },
         };
     }
     buildGray(id) {

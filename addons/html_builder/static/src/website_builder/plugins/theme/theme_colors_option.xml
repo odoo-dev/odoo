@@ -46,7 +46,7 @@
                     <div class="d-flex flex-column h-100">
                         <div class="d-flex flex-column h-100 justify-content-between">
                             <span class="font-italic">Palette</span>
-                            <BuilderSelect action="'customizeWebsiteVariable'" actionParam="'color-palettes-name'">
+                            <BuilderSelect action="'changeColorPalette'" actionParam="'color-palettes-name'">
                                 <t t-set-slot="fixedButton">
                                     <img class="p-2 h-100" src="/website/static/src/img/snippets_options/palette.svg"/>
                                 </t>
