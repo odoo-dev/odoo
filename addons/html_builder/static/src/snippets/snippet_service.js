@@ -178,7 +178,7 @@ export class SnippetModel extends Reactive {
                     thumbnailSrc: escape(snippetEl.dataset.oeThumbnail),
                     imagePreviewSrc: snippetEl.dataset.oImagePreview,
                     isCustom: false,
-
+                    label: snippetEl.dataset.oLabel,
                     isDisabled: false,
                     forbidSanitize: false,
                 };
