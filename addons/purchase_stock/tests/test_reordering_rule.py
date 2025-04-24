@@ -93,7 +93,9 @@ class TestReorderingRule(TransactionCase):
         customer_picking = picking_form.save()
         customer_picking.action_confirm()
         # Run scheduler
-        self.env['procurement.group'].run_scheduler()
+        self.env['procurement.group'].run_scheduler_orderpoints()
+        self.env['procurement.group'].run_scheduler_reservations()
+        self.env['procurement.group'].run_scheduler_clean_quants()
 
         # Check purchase order created or not
         purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.partner.id), ('state', '!=', 'cancel')])
@@ -179,7 +181,9 @@ class TestReorderingRule(TransactionCase):
         self.assertEqual(self.product_01.with_context(location=subloc_2.id).virtual_available, -10)
 
         # Run scheduler
-        self.env['procurement.group'].run_scheduler()
+        self.env['procurement.group'].run_scheduler_orderpoints()
+        self.env['procurement.group'].run_scheduler_reservations()
+        self.env['procurement.group'].run_scheduler_clean_quants()
 
         # Check purchase order created or not
         purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.partner.id)])
@@ -795,7 +799,9 @@ class TestReorderingRule(TransactionCase):
         # run the scheduler to test the use case where the user is always the SUPERUSER
         # we invalidate the cache to force a recompute of the qty_to_order_computed in batch
         (orderpoint | dummy).invalidate_recordset()
-        self.env['procurement.group'].run_scheduler()
+        self.env['procurement.group'].run_scheduler_orderpoints()
+        self.env['procurement.group'].run_scheduler_reservations()
+        self.env['procurement.group'].run_scheduler_clean_quants()
         self.assertRecordValues(po_line, [{"name": "[A] produit en français", "product_qty": 20.0}])
         self.assertEqual(len(po_line.order_id.order_line), 1)
         # the moves_dest_ids are not expected to be merged since the scheduler is excuted by robodoo in en_US rather fr_FR
@@ -1227,7 +1233,9 @@ class TestReorderingRule(TransactionCase):
             'product_max_qty': 5,
         })
         # run the scheduler
-        self.env['procurement.group'].run_scheduler()
+        self.env['procurement.group'].run_scheduler_orderpoints()
+        self.env['procurement.group'].run_scheduler_reservations()
+        self.env['procurement.group'].run_scheduler_clean_quants()
         # check that the PO line is created
         po_line = self.env['purchase.order.line'].search([('product_id', '=', product.id)])
         self.assertEqual(len(po_line), 1, 'There should be only one PO line')
@@ -1305,7 +1313,9 @@ class TestReorderingRule(TransactionCase):
             'product_max_qty': 10,
         })
         # run the scheduler
-        self.env['procurement.group'].run_scheduler()
+        self.env['procurement.group'].run_scheduler_orderpoints()
+        self.env['procurement.group'].run_scheduler_reservations()
+        self.env['procurement.group'].run_scheduler_clean_quants()
         # check that the PO line is created
         po_line = self.env['purchase.order.line'].search([('product_id', '=', product.id)])
         self.assertEqual(len(po_line), 1, 'There should be only one PO line')

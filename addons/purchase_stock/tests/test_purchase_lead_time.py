@@ -183,7 +183,9 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
             self.t_shirt, 10, self.uom_unit, self.warehouse_1.lot_stock_id,
             self.t_shirt.name, '/', self.env.company, order_2_values)
         ])
-        self.env['procurement.group'].run_scheduler()
+        self.env['procurement.group'].run_scheduler_orderpoints()
+        self.env['procurement.group'].run_scheduler_reservations()
+        self.env['procurement.group'].run_scheduler_clean_quants()
         self.assertEqual(len(purchase_order.order_line), 1, 'line with same custom value should be merged')
         self.assertEqual(purchase_order.order_line[0].product_qty, 15, 'line with same custom value should be merged and qty should be update')
 
@@ -277,7 +279,9 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
                 'location_dest_id': self.ref('stock.stock_location_customers'),
             })
         delivery_moves._action_confirm()
-        self.env['procurement.group'].run_scheduler()
+        self.env['procurement.group'].run_scheduler_orderpoints()
+        self.env['procurement.group'].run_scheduler_reservations()
+        self.env['procurement.group'].run_scheduler_clean_quants()
         po_line = self.env['purchase.order.line'].search([('product_id', '=', product.id)])
         expected_date_order = fields.Date.today() + timedelta(days=2)
         self.assertEqual(fields.Date.to_date(po_line.order_id.date_order), expected_date_order)
@@ -289,7 +293,9 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
 
         self.mock_date.today.return_value = fields.Date.today() + timedelta(days=2)
         orderpoint._compute_qty()
-        self.env['procurement.group'].run_scheduler()
+        self.env['procurement.group'].run_scheduler_orderpoints()
+        self.env['procurement.group'].run_scheduler_reservations()
+        self.env['procurement.group'].run_scheduler_clean_quants()
         po_line02 = self.env['purchase.order.line'].search([('product_id', '=', product.id)])
         self.assertEqual(po_line02, po_line, 'The orderpoint execution should not create a new POL')
         self.assertEqual(fields.Date.to_date(po_line.order_id.date_order), expected_date_order, 'The Order Deadline should not change')
@@ -313,7 +319,9 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
             'product_tmpl_id': self.product_1.product_tmpl_id.id,
         })
 
-        self.env['procurement.group'].run_scheduler()
+        self.env['procurement.group'].run_scheduler_orderpoints()
+        self.env['procurement.group'].run_scheduler_reservations()
+        self.env['procurement.group'].run_scheduler_clean_quants()
         purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.partner_1.id)])
 
         today = datetime.combine(fields.Datetime.now(), time(12))

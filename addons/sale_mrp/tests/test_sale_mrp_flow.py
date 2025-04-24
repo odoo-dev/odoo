@@ -315,7 +315,9 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
 
         # Check quantity, unit of measure and state of manufacturing order.
         # -----------------------------------------------------------------
-        self.env['procurement.group'].run_scheduler()
+        self.env['procurement.group'].run_scheduler_orderpoints()
+        self.env['procurement.group'].run_scheduler_reservations()
+        self.env['procurement.group'].run_scheduler_clean_quants()
         mnf_product_a = self.env['mrp.production'].search([('product_id', '=', product_a.id)])
 
         self.assertTrue(mnf_product_a, 'Manufacturing order not created.')

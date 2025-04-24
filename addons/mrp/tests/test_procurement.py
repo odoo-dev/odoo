@@ -762,7 +762,9 @@ class TestProcurement(TestMrpCommon):
             'product_max_qty': 2,
         }])
 
-        self.env['procurement.group'].run_scheduler()
+        self.env['procurement.group'].run_scheduler_orderpoints()
+        self.env['procurement.group'].run_scheduler_reservations()
+        self.env['procurement.group'].run_scheduler_clean_quants()
 
         mos = self.env['mrp.production'].search([('product_id', '=', finished.id)], order='origin')
         self.assertRecordValues(mos, [
