@@ -758,16 +758,22 @@ export class HistoryPlugin extends Plugin {
                         };
                         // !!!!!
                         // this.nodeToIdMap.get(record.target) gets checked a hundred times, wtf
+                        // !!! all these checks are done record-wise, not node-wise.
+                        // They could be done only once for the record, and then
+                        // each node staged separately at the end.
                         if (!record.nextSibling && this.nodeToIdMap.get(record.target)) {
                             mutation.append = this.nodeToIdMap.get(record.target);
                         } else if (record.nextSibling && this.nodeToIdMap.get(record.nextSibling)) {
                             mutation.before = this.nodeToIdMap.get(record.nextSibling);
                         } else if (!record.previousSibling && this.nodeToIdMap.get(record.target)) {
+                            // !!! Applying these mutations would revert the order of added nodes.
+                            // This "prepend" type does not seem to be used anywhere.
                             mutation.prepend = this.nodeToIdMap.get(record.target);
                         } else if (
                             record.previousSibling &&
                             this.nodeToIdMap.get(record.previousSibling)
                         ) {
+                            // !!! same here, applying these mutations would revert the order of added nodes.
                             mutation.after = this.nodeToIdMap.get(record.previousSibling);
                         } else {
                             return false; // a callback no one reads the return value of... returns false
@@ -1138,6 +1144,7 @@ export class HistoryPlugin extends Plugin {
                     } else if (mutation.before && this.idToNodeMap.get(mutation.before)) {
                         this.idToNodeMap.get(mutation.before).before(node);
                     } else if (mutation.after && this.idToNodeMap.get(mutation.after)) {
+                        // !!! this would revert the order of added nodes.
                         this.idToNodeMap.get(mutation.after).after(node);
                     } else {
                         continue;
@@ -1193,6 +1200,7 @@ export class HistoryPlugin extends Plugin {
                     break;
                 }
                 case "remove": {
+                    // !!! also known as "nodeToAdd"
                     let nodeToRemove = this.idToNodeMap.get(mutation.id);
                     if (!nodeToRemove) {
                         nodeToRemove = this.unserializeNode(mutation.node);
@@ -1202,6 +1210,7 @@ export class HistoryPlugin extends Plugin {
                     }
                     if (mutation.nextId && this.idToNodeMap.get(mutation.nextId)?.isConnected) {
                         const node = this.idToNodeMap.get(mutation.nextId);
+                        // !!! this would revert the order of added nodes.
                         node && node.before(nodeToRemove);
                     } else if (
                         mutation.previousId &&
@@ -1210,6 +1219,7 @@ export class HistoryPlugin extends Plugin {
                         const node = this.idToNodeMap.get(mutation.previousId);
                         node && node.after(nodeToRemove);
                     } else {
+                        // !!! this would revert the order of added nodes.
                         const node = this.idToNodeMap.get(mutation.parentId);
                         node && node.append(nodeToRemove);
                     }
