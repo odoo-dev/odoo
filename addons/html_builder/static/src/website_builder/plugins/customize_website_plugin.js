@@ -127,8 +127,10 @@ export class CustomizeWebsitePlugin extends Plugin {
                 },
             },
             addLanguage: {
+                reload: {},
                 preview: false,
                 apply: async () => {
+                    const def = new Deferred();
                     // Retrieve the website id to check by default the website checkbox in
                     // the dialog box 'action_view_base_language_install'
                     const websiteId = this.services.website.currentWebsite.id;
@@ -144,13 +146,14 @@ export class CustomizeWebsitePlugin extends Plugin {
                     if (!save) {
                         return;
                     }
-                    // TODO not reload in savePlugin.save ?
                     await this.dependencies.savePlugin.save(/* not in translation */);
                     // TODO doAction in savePlugin.save ?
-                    this.services.action.doAction("base.action_view_base_language_install", {
+                    await this.services.action.doAction("base.action_view_base_language_install", {
                         website_id: websiteId,
                         url_return: "[land]",
+                        onClose: def.resolve,
                     });
+                    return def;
                 },
             },
             customizeBodyBgType: {
