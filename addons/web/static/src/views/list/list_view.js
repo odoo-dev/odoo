@@ -12,8 +12,6 @@ export const listView = {
     ArchParser: ListArchParser,
     Model: RelationalModel,
 
-    buttonTemplate: "web.ListView.Buttons",
-
     canOrderByCount: true,
 
     props: (genericProps, view) => {
@@ -25,7 +23,6 @@ export const listView = {
             readonly: genericProps.readonly || !archInfo.activeActions?.edit,
             Model: view.Model,
             Renderer: view.Renderer,
-            buttonTemplate: view.buttonTemplate,
             archInfo,
         };
     },

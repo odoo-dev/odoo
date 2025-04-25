@@ -10,6 +10,16 @@ export default class SlideChannelPartnerListController extends ListController {
         this.channelId = this.props.context.default_channel_id || false;
     }
 
+    get staticControlPanelButtons() {
+        return {
+            ...super.staticControlPanelButtons,
+            enroll: {
+                isAvailable: () => this.channelId,
+                template: "website_slides.SlideChannelPartnerListView.Buttons.Enroll",
+            },
+        };
+    }
+
     /**
      * Method opening the wizard to enroll new slide channel partners.
      * Reloads the model afterwards to see new attendees.

@@ -10,6 +10,15 @@ export class TransifexCodeTranslationListController extends ListController {
         this.orm = useService("orm");
     }
 
+    get staticControlPanelButtons() {
+        return {
+            ...super.staticControlPanelButtons,
+            reload: {
+                template: "transifex.CodeTranslationListView.Buttons.Reload",
+            },
+        };
+    }
+
     async onClickReloadCodeTranslations() {
         await this.orm.call("transifex.code.translation", "reload", [], {});
         browser.location.reload();
@@ -19,5 +28,4 @@ export class TransifexCodeTranslationListController extends ListController {
 registry.category("views").add("transifex_code_translation_tree", {
     ...listView,
     Controller: TransifexCodeTranslationListController,
-    buttonTemplate: "transifex.CodeTranslationListView.Buttons",
 });

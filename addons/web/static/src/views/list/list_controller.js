@@ -24,6 +24,10 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { SelectionBox } from "@web/views/view_components/selection_box";
 import { useExportRecords, useDeleteRecords } from "@web/views/view_hook";
+import {
+    CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE,
+    CONTROL_PANEL_BUTTONS_HEADER_SEQUENCE,
+} from "@web/search/control_panel/control_panel";
 
 import {
     Component,
@@ -58,7 +62,6 @@ export class ListController extends Component {
         readonly: { type: Boolean, optional: true },
         Model: Function,
         Renderer: Function,
-        buttonTemplate: String,
         archInfo: Object,
     };
     static defaultProps = {
@@ -191,24 +194,53 @@ export class ListController extends Component {
         this.deleteRecordsWithConfirmation = useDeleteRecords(this.model);
     }
 
-    get defaultButtons() {
-        return [
-            {
-                id: "save",
+    get staticControlPanelButtons() {
+        return {
+            save: {
+                isAvailable: () => this.editedRecord,
+                sequence: 10,
                 template: "web.ListView.Buttons.Save",
-                isDisplayed: () => this.editedRecord,
             },
-            {
-                id: "discard",
+            discard: {
+                isAvailable: () => this.editedRecord,
+                sequence: 20,
                 template: "web.ListView.Buttons.Discard",
-                isDisplayed: () => this.editedRecord,
             },
-            {
-                id: "new",
+            new: {
+                isAvailable: () => !this.editedRecord && this.canCreate && !this.env.inDialog,
+                sequence: 30,
                 template: "web.ListView.Buttons.New",
-                isDisplayed: () => !this.editedRecord && this.canCreate && !this.env.inDialog,
             },
-        ];
+        };
+    }
+
+    get controlPanelButtons() {
+        const staticButtons = Object.entries(this.staticControlPanelButtons).map(
+            ([key, button]) => ({ id: key, ...button })
+        );
+        const alwaysHeaderButtons = this.archInfo.headerButtons
+            .filter((button) => button.display === "always")
+            .map((button) => ({
+                id: button.id,
+                idAvailable: () => !this.evalViewModifier(button.invisible),
+                sequence: CONTROL_PANEL_BUTTONS_HEADER_SEQUENCE,
+                template: "web.ListView.Buttons.MultiRecord",
+                props: this.multiRecordViewButtonProps(button),
+            }));
+        return [...staticButtons, ...alwaysHeaderButtons]
+            .filter((button) => button.isAvailable === undefined || button.isAvailable())
+            .sort(
+                (btn1, btn2) =>
+                    (btn1.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE) -
+                    (btn2.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE)
+            );
+    }
+
+    get selectionButtons() {
+        const selectionHeaderButtons = this.archInfo.headerButtons
+            .filter((button) => button.display === "selection")
+            .filter((button) => !this.evalViewModifier(button.invisible));
+        return selectionHeaderButtons;
     }
 
     get modelParams() {
@@ -391,13 +423,6 @@ export class ListController extends Component {
             title: button.title,
             attrs: button.attrs,
         };
-    }
-
-    get visibleHeaderButtons() {
-        const visibleButtons = this.archInfo.headerButtons.filter(
-            (button) => !this.evalViewModifier(button.invisible)
-        );
-        return Object.groupBy(visibleButtons, ({ display }) => display);
     }
 
     get canCreate() {

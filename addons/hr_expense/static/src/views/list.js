@@ -25,6 +25,28 @@ export class ExpenseListController extends ExpenseDocumentUpload(ListController)
         });
     }
 
+    get staticControlPanelButtons() {
+        return {
+            upload: {
+                sequence: 1,
+                template: "hr_expense.ListButtons.Upload",
+            },
+            ...super.staticControlPanelButtons,
+            submit: {
+                isAvailable: () => !this.env.isSmall && this.displaySubmit(),
+                template: "hr_expense.ListButtons.Submit",
+            },
+            approve: {
+                isAvailable: () => !this.env.isSmall && this.displayApprove(),
+                template: "hr_expense.ListButtons.Approve",
+            },
+            post: {
+                isAvailable: () => !this.env.isSmall && this.displayPost(),
+                template: "hr_expense.ListButtons.PostEntries",
+            },
+        };
+    }
+
     displaySubmit() {
         const records = this.model.root.selection;
         return records.length && records.every(record => record.data.state === 'draft');
@@ -77,14 +99,12 @@ export class ExpenseDashboardListRenderer extends ExpenseListRenderer {
 
 registry.category('views').add('hr_expense_tree', {
     ...listView,
-    buttonTemplate: 'hr_expense.ListButtons',
     Controller: ExpenseListController,
     Renderer: ExpenseListRenderer,
 });
 
 registry.category('views').add('hr_expense_dashboard_tree', {
     ...listView,
-    buttonTemplate: 'hr_expense.ListButtons',
     Controller: ExpenseListController,
     Renderer: ExpenseDashboardListRenderer,
 });

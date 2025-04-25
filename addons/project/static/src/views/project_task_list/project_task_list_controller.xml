@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="project.ProjectTaskListView.Buttons" t-inherit="web.ListView.Buttons" t-inherit-mode="primary">
-        <xpath expr="." position="inside">
-            <ProjectTaskTemplateDropdown 
-                projectId="props.context.default_project_id"
-                onCreate="() =&gt; this.onClickCreate()"
-                newButtonClasses="'btn btn-primary o_list_button_add'"
-                context="props.context"
-            />
-        </xpath>
+    <t t-name="project.ProjectTaskListView.Buttons.TemplateDropdown">
+        <ProjectTaskTemplateDropdown 
+            projectId="props.context.default_project_id"
+            onCreate="() =&gt; this.onClickCreate()"
+            newButtonClasses="'btn btn-primary o_list_button_add'"
+            context="props.context"
+        />
     </t>
 </templates>

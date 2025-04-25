@@ -6,4 +6,13 @@ export class FileUploadListController extends ListController {
         ...ListController.components,
         DocumentFileUploader,
     };
+
+    get staticControlPanelButtons() {
+        return {
+            ...super.staticControlPanelButtons,
+            upload: {
+                template: "account.FileuploadListView.Buttons.Upload",
+            },
+        };
+    }
 };

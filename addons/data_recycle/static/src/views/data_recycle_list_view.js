@@ -3,6 +3,19 @@ import { registry } from '@web/core/registry';
 import { listView } from '@web/views/list/list_view';
 
 export class DataRecycleListController extends DataCleaningCommonListController {
+    get staticControlPanelButtons() {
+        return {
+            ...super.staticControlPanelButtons,
+            validate: {
+                isAvailable: () => this.hasSelectedRecords,
+                template: "DataRecycle.buttons.Validate",
+            },
+            unselect: {
+                isAvailable: () => this.hasSelectedRecords,
+                template: "DataRecycle.buttons.Unselect",
+            },
+        };
+    }
     /**
      * Validate all the records selected
      */
@@ -17,6 +30,5 @@ export class DataRecycleListController extends DataCleaningCommonListController 
 registry.category('views').add('data_recycle_list', {
     ...listView,
     Controller: DataRecycleListController,
-    buttonTemplate: 'DataRecycle.buttons',
 });
 

@@ -54,13 +54,10 @@
         </t>
     </t>
 
-    <t t-name="loyalty.LoyaltyCardListView.buttons" t-inherit-mode="primary" t-inherit="web.ListView.Buttons">
-        <xpath expr="." position="inside">
-            <t t-set="supportedProgramTypes" t-value="['coupons', 'gift_card', 'ewallet']"/>
-            <button t-if="supportedProgramTypes.includes(props.context.program_type)" type="button" class="btn btn-primary o_loyalty_card_list_button_generate" t-attf-data-tooltip="Generate {{props.context.program_item_name}}"
-                t-on-click.stop.prevent="() => this.actionService.doAction('loyalty.loyalty_generate_wizard_action', { additionalContext: this.props.context, onClose: () => {this.model.load()} })">
-                Generate <t t-esc="props.context.program_item_name"/>
-            </button>
-        </xpath>
+    <t t-name="loyalty.LoyaltyCardListView.buttons.Generate">
+        <button type="button" class="btn btn-primary o_loyalty_card_list_button_generate" t-attf-data-tooltip="Generate {{props.context.program_item_name}}"
+            t-on-click.stop.prevent="() => this.actionService.doAction('loyalty.loyalty_generate_wizard_action', { additionalContext: this.props.context, onClose: () => {this.model.load()} })">
+            Generate <t t-esc="props.context.program_item_name"/>
+        </button>
     </t>
 </odoo>

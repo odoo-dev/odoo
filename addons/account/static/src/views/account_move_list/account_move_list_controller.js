@@ -11,6 +11,15 @@ export class AccountMoveListController extends FileUploadListController {
         AccountFileUploader,
     };
 
+    get staticControlPanelButtons() {
+        return {
+            ...super.staticControlPanelButtons,
+            upload: {
+                template: "account.AccountMoveListView.Buttons.Upload",
+            },
+        };
+    }
+
     setup() {
         super.setup();
         this.orm = useService("orm");

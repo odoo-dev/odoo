@@ -21,6 +21,9 @@ import { Component, useState, onMounted, useRef, useEffect } from "@odoo/owl";
 
 const STICKY_CLASS = "o_mobile_sticky";
 
+export const CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE = 1000;
+export const CONTROL_PANEL_BUTTONS_HEADER_SEQUENCE = 10000;
+
 /**
  * @typedef EmbeddedAction
  * @property {number} id

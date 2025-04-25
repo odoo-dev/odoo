@@ -1,22 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="hr_expense.ListButtons" t-inherit="web.ListView.Buttons" t-inherit-mode="primary">
-        <xpath expr="." position="inside">
-            <input type="file" name="ufile" class="d-none" t-ref="fileInput" multiple="1" accept="*" t-on-change="onChangeFileInput"/>
-            <button type="button" class="o_button_upload_expense btn btn-primary" t-on-click.prevent="uploadDocument">
-                <t t-if="env.isSmall">Scan</t>
-                <t t-else="">Upload</t>
-            </button>
-            <button t-if="!env.isSmall and displaySubmit()" class="btn btn-secondary" t-on-click="() => this.onClick('action_submit')">
-                Submit
-            </button>
-            <button t-if="!env.isSmall and displayApprove()" class="btn btn-secondary" t-on-click="() => this.onClick('action_approve')">
-                Approve
-            </button>
-            <button t-if="!env.isSmall and displayPost()" class="btn btn-secondary" t-on-click="() => this.onClick('action_post')">
-                Post Entries
-            </button>
-        </xpath>
+    <t t-name="hr_expense.ListButtons.Upload">
+        <input type="file" name="ufile" class="d-none" t-ref="fileInput" multiple="1" accept="*" t-on-change="onChangeFileInput"/>
+        <button type="button" class="o_button_upload_expense btn btn-primary" t-on-click.prevent="uploadDocument">
+            <t t-if="env.isSmall">Scan</t>
+            <t t-else="">Upload</t>
+        </button>
+    </t>
+
+    <t t-name="hr_expense.ListButtons.Submit">
+        <button class="btn btn-secondary" t-on-click="() => this.onClick('action_submit')">
+            Submit
+        </button>
+    </t>
+
+    <t t-name="hr_expense.ListButtons.Approve">
+        <button class="btn btn-secondary" t-on-click="() => this.onClick('action_approve')">
+            Approve
+        </button>
+    </t>
+
+    <t t-name="hr_expense.ListButtons.PostEntries">
+        <button class="btn btn-secondary" t-on-click="() => this.onClick('action_post')">
+            Post Entries
+        </button>
     </t>
 
     <t t-name="hr_expense.ListView" t-inherit="web.ListView" t-inherit-mode="primary">

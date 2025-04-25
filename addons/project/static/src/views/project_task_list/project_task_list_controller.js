@@ -9,8 +9,12 @@ export class ProjectTaskListController extends ListController {
         ProjectTaskTemplateDropdown,
     };
 
-    get defaultButtons() {
-        return super.defaultButtons.filter((button) => button.id !== "new");
+    get staticControlPanelButtons() {
+        return {
+            templateDropdown: {
+                template: "project.ProjectTaskListView.Buttons.TemplateDropdown",
+            },
+        };
     }
 
     get deleteConfirmationDialogProps() {

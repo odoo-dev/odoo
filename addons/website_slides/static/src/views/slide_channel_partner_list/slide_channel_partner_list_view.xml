@@ -2,12 +2,10 @@
 
 <templates xml:space="preserve">
 
-    <t t-name="website_slides.SlideChannelPartnerListView.Buttons" t-inherit="web.ListView.Buttons" t-inherit-mode="primary">
-        <xpath expr="." position="inside">
-            <button t-if="channelId" type="button" class="btn btn-primary" t-on-click="_openEnrollWizard">
-                New
-            </button>
-        </xpath>
+    <t t-name="website_slides.SlideChannelPartnerListView.Buttons.Enroll">
+        <button type="button" class="btn btn-primary" t-on-click="_openEnrollWizard">
+            New
+        </button>
     </t>
 
 </templates>
