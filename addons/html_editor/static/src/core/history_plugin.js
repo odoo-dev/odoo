@@ -385,8 +385,11 @@ export class HistoryPlugin extends Plugin {
     /**
      * @param {HistoryMutationRecord} param0
      */
-    isNoOpRecord({ type, oldValue, newValue }) {
-        return ["attributes", "classList"].includes(type) && oldValue === newValue;
+    isNoOpRecord({ type, oldValue, newValue, addedNodes, removedNodes }) {
+        return (
+            (["attributes", "classList"].includes(type) && oldValue === newValue) ||
+            (type === "childList" && !addedNodes.length && !removedNodes.length)
+        );
     }
 
     dispatchContentUpdated() {
@@ -602,7 +605,7 @@ export class HistoryPlugin extends Plugin {
      * @returns {HistoryMutationRecord}
      */
     resolveHistoricalValue(record) {
-        if (!["attributes", "classList"].includes(record.type)) {
+        if (!["attributes", "classList", "childList"].includes(record.type)) {
             // @todo: handle characterData mutations
             return record;
         }
@@ -612,25 +615,72 @@ export class HistoryPlugin extends Plugin {
             this.lastObservedState.set(record.target, {
                 attributes: new Map(),
                 classList: new Map(),
+                childList: new Map(),
             });
         }
+
         const stateMap = this.lastObservedState.get(record.target)[record.type];
-        const key = record.type === "attributes" ? record.attributeName : record.className;
-        if (this.isObserverDisabled) {
-            // Only store it if not already stored.
-            if (!stateMap.has(key)) {
-                stateMap.set(key, record.oldValue);
+        if (["attributes", "classList"].includes(record.type)) {
+            const key = record.type === "attributes" ? record.attributeName : record.className;
+            if (this.isObserverDisabled) {
+                // Only store it if not already stored.
+                if (!stateMap.has(key)) {
+                    stateMap.set(key, record.oldValue);
+                }
+                return record;
+            }
+            if (stateMap.has(key)) {
+                const lastObservedValue = stateMap.get(key);
+                // Remove entry, so it won't be used again.
+                stateMap.delete(key);
+                // Update record.
+                return { ...record, oldValue: lastObservedValue };
             }
             return record;
-        }
-        if (stateMap.has(key)) {
-            const lastObservedValue = stateMap.get(key);
-            // Remove entry, so it won't be used again.
-            stateMap.delete(key);
+        } else {
+            // ChildList mutations
+            if (this.isObserverDisabled) {
+                for (const node of record.addedNodes) {
+                    // @todo: refactor this so that these lines are not duplicated
+                    if (!stateMap.has(node)) {
+                        stateMap.set(node, false);
+                    }
+                }
+                for (const node of record.removedNodes) {
+                    if (!stateMap.has(node)) {
+                        stateMap.set(node, true);
+                    }
+                }
+                return record;
+            }
+            const addedNodes = [];
+            for (const node of record.addedNodes) {
+                if (stateMap.has(node)) {
+                    const lastObservedValue = stateMap.get(node);
+                    // Remove entry, so it won't be used again.
+                    stateMap.delete(node);
+                    if (lastObservedValue === true) {
+                        continue;
+                    }
+                }
+                addedNodes.push(node);
+            }
+            const removedNodes = [];
+            for (const node of record.removedNodes) {
+                if (stateMap.has(node)) {
+                    const lastObservedValue = stateMap.get(node);
+                    // Remove entry, so it won't be used again.
+                    stateMap.delete(node);
+                    if (lastObservedValue === false) {
+                        continue;
+                    }
+                }
+                removedNodes.push(node);
+            }
             // Update record.
-            return { ...record, oldValue: lastObservedValue };
+            const { type, target, nextSibling, previousSibling } = record;
+            return { type, target, addedNodes, removedNodes, nextSibling, previousSibling };
         }
-        return record;
     }
 
     /**
