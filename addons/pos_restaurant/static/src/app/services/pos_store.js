@@ -16,6 +16,7 @@ patch(PosStore.prototype, {
         this.isEditMode = false;
         this.tableSyncing = false;
         this.tableSelectorState = false;
+        this.isSubmittingOrder = false;
         await super.setup(...arguments);
     },
     get idleTimeout() {
@@ -504,6 +505,19 @@ patch(PosStore.prototype, {
         }
 
         return result;
+    },
+    async submitOrder() {
+        if (!this.isSubmittingOrder) {
+            try {
+                this.isSubmittingOrder = true;
+                const order = this.getOrder();
+                await this.sendOrderInPreparationUpdateLastChange(order);
+                this.addPendingOrder([order.id]);
+                this.showDefault();
+            } finally {
+                this.isSubmittingOrder = false;
+            }
+        }
     },
     async getServerOrders() {
         if (this.config.module_pos_restaurant) {
