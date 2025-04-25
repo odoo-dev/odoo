@@ -29,8 +29,13 @@ export class ImageToolOption extends BaseOptionComponent {
                 isCustomFilter: editingElement.dataset.glFilter === "custom",
                 showQuality: ["image/jpeg", "image/webp"].includes(getMimetype(editingElement)),
                 formats: [],
+                hasHref: this.hasHref(editingElement),
             };
         });
+    }
+    hasHref(editingElement) {
+        const parentEl = searchSupportedParentLinkEl(editingElement);
+        return parentEl.tagName === "A" && parentEl.hasAttribute("href");
     }
     computeMaxDisplayWidth(img) {
         const window = img.ownerDocument.defaultView;
@@ -71,4 +76,9 @@ export class ImageToolOption extends BaseOptionComponent {
         // depending on breakpoints. We still keep a margin safety.
         return Math.round(Math.min(displayWidth * 1.5, this.MAX_SUGGESTED_WIDTH));
     }
+}
+
+export function searchSupportedParentLinkEl(editingElement) {
+    const parentEl = editingElement.parentElement;
+    return parentEl.matches("figure") ? parentEl.parentElement : parentEl;
 }
