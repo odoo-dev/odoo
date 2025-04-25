@@ -9,6 +9,8 @@ import { isColorGradient, isCSSColor } from "@web/core/utils/colors";
 import { Deferred } from "@web/core/utils/concurrency";
 import { debounce } from "@web/core/utils/timing";
 
+export const NO_IMAGE_SELECTION = Symbol.for("NoImageSelection");
+
 export class CustomizeWebsitePlugin extends Plugin {
     static id = "customizeWebsite";
     static dependencies = ["builderActions", "history", "savePlugin"];
@@ -183,10 +185,14 @@ export class CustomizeWebsitePlugin extends Plugin {
                     } else {
                         imageSrc =
                             historyImageSrc || (await getAction("replaceBgImage").load({ el }));
-                        await this.customizeWebsiteVariables({
-                            "body-image-type": `'${value}'`,
-                            "body-image": `'${imageSrc}'`,
-                        });
+                        if (imageSrc) {
+                            await this.customizeWebsiteVariables({
+                                "body-image-type": `'${value}'`,
+                                "body-image": `'${imageSrc}'`,
+                            });
+                        } else {
+                            imageSrc = NO_IMAGE_SELECTION;
+                        }
                     }
                     return { imageSrc, oldImageSrc, oldValue };
                 },
@@ -196,6 +202,9 @@ export class CustomizeWebsitePlugin extends Plugin {
                     value,
                     loadResult: { imageSrc, oldImageSrc, oldValue },
                 }) => {
+                    if (imageSrc === NO_IMAGE_SELECTION) {
+                        return;
+                    }
                     const getAction = this.dependencies.builderActions.getAction;
                     this.dependencies.history.addCustomMutation({
                         apply: () => {
