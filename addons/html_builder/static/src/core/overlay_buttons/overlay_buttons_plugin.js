@@ -145,6 +145,7 @@ export class OverlayButtonsPlugin extends Plugin {
             this.refreshButtons();
             this.overlay.open({
                 target: optionWithOverlayButtons.element,
+                closeOnPointerdown: false,
                 props: {
                     state: this.state,
                 },
