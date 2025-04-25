@@ -634,7 +634,15 @@ export class LinkPlugin extends Plugin {
             }
         } else {
             const closestLinkElement = closestElement(selection.anchorNode, "A");
-            if (closestLinkElement && closestLinkElement.isContentEditable) {
+            if (
+                closestLinkElement &&
+                (closestLinkElement.isContentEditable ||
+                    // In the website's navbar menu items, the link itself is not editable, but the
+                    // span inside it is editable.
+                    // As a result, the link popover does not open when clicking on the menu items.
+                    // To address this, we added a check to ensure that the link popover opens properly.
+                    closestLinkElement.querySelector("[contenteditable='true']"))
+            ) {
                 if (closestLinkElement !== this.linkInDocument) {
                     this.openLinkTools(closestLinkElement);
                 }
