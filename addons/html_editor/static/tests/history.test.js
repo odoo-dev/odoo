@@ -828,3 +828,17 @@ describe("unobserved mutations", () => {
         });
     });
 });
+
+describe("mutations order", () => {
+    test("should revert mutations in the correct order", async () => {
+        const { el, editor } = await setupEditor(`<p>[]<br></p>`);
+        const p = el.querySelector("p");
+        p.replaceChildren(editor.document.createTextNode("a"), editor.document.createTextNode("b"));
+        editor.shared.history.addStep();
+        expect(getContent(el)).toBe(`<p>[]ab</p>`);
+        p.replaceChildren();
+        editor.shared.history.addStep();
+        editor.shared.history.undo();
+        expect(getContent(el)).toBe(`<p>[]ab</p>`);
+    });
+});

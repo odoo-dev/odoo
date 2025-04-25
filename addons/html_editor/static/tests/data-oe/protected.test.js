@@ -262,9 +262,10 @@ test("should protect disconnected nodes", async () => {
     const lastStep = editor.shared.history.getHistorySteps().at(-1);
     expect(lastStep.mutations.length).toBe(1);
     expect(lastStep.mutations[0].type).toBe("remove");
-    expect(plugins.get("history").unserializeNode(lastStep.mutations[0].node).outerHTML).toBe(
-        `<div contenteditable="false" data-oe-protected="true"></div>`
-    );
+    expect(lastStep.mutations[0].serializedNodes.length).toBe(1);
+    expect(
+        plugins.get("history").unserializeNode(lastStep.mutations[0].serializedNodes[0]).outerHTML
+    ).toBe(`<div contenteditable="false" data-oe-protected="true"></div>`);
 });
 
 test("should not crash when changing attributes and removing a protecting anchor", async () => {
@@ -279,7 +280,10 @@ test("should not crash when changing attributes and removing a protecting anchor
     expect(lastStep.mutations.length).toBe(2);
     expect(lastStep.mutations[0].type).toBe("attributes");
     expect(lastStep.mutations[1].type).toBe("remove");
-    expect(plugins.get("history").unserializeNode(lastStep.mutations[1].node).outerHTML).toBe(
+    expect(lastStep.mutations[1].serializedNodes.length).toBe(1);
+    expect(
+        plugins.get("history").unserializeNode(lastStep.mutations[1].serializedNodes[0]).outerHTML
+    ).toBe(
         `<div contenteditable="false" data-attr="other" data-oe-protected="true"><p>a</p></div>`
     );
 });
@@ -430,7 +434,8 @@ test("moving a protected node at an unprotected location, only remove should be 
     const lastStep = historySteps.at(-1);
     expect(lastStep.mutations.length).toBe(1);
     expect(lastStep.mutations[0].type).toBe("add");
-    expect(historyPlugin.idToNodeMap.get(lastStep.mutations[0].id)).toBe(a);
+    expect(lastStep.mutations[0].nodeIds.length).toBe(1);
+    expect(historyPlugin.idToNodeMap.get(lastStep.mutations[0].nodeIds[0])).toBe(a);
     expect(getContent(el)).toBe(
         unformat(`
             <div data-oe-protected="true" contenteditable="false">
@@ -466,7 +471,8 @@ test("moving an unprotected node at a protected location, only add should be ign
     const lastStep = historySteps.at(-1);
     expect(lastStep.mutations.length).toBe(1);
     expect(lastStep.mutations[0].type).toBe("remove");
-    expect(historyPlugin.idToNodeMap.get(lastStep.mutations[0].id)).toBe(a);
+    expect(lastStep.mutations[0].nodeIds.length).toBe(1);
+    expect(historyPlugin.idToNodeMap.get(lastStep.mutations[0].nodeIds[0])).toBe(a);
     expect(getContent(el)).toBe(
         unformat(`
             <div data-oe-protected="true" contenteditable="false">
