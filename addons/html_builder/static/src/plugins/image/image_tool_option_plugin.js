@@ -2,7 +2,7 @@ import { cropperDataFieldsWithAspectRatio, isGif } from "@html_editor/utils/imag
 import { registry } from "@web/core/registry";
 import { Plugin } from "@html_editor/plugin";
 import { normalizeColor } from "@html_builder/utils/utils_css";
-import { ImageToolOption } from "./image_tool_option";
+import { ImageToolOption, searchSupportedParentLinkEl } from "./image_tool_option";
 import { defaultImageFilterOptions } from "@html_editor/main/media/image_post_process_plugin";
 import { isImageCorsProtected, getMimetype } from "@html_editor/utils/image";
 import { withSequence } from "@html_editor/utils/resource";
@@ -142,6 +142,67 @@ class ImageToolOptionPlugin extends Plugin {
                     editingElement.replaceWith(newImage);
                 },
             },
+            setLink: {
+                preview: false,
+                apply: ({ editingElement }) => {
+                    const parentEl = searchSupportedParentLinkEl(editingElement);
+                    if (parentEl.tagName !== "A") {
+                        const wrapperEl = document.createElement("a");
+                        editingElement.after(wrapperEl);
+                        wrapperEl.appendChild(editingElement);
+                    } else {
+                        const fragment = document.createDocumentFragment();
+                        fragment.append(...parentEl.childNodes);
+                        parentEl.replaceWith(fragment);
+                    }
+                },
+                isApplied: ({ editingElement }) => {
+                    const parentEl = searchSupportedParentLinkEl(editingElement);
+                    return parentEl.tagName === "A";
+                },
+            },
+            setUrl: {
+                preview: false,
+                apply: ({ editingElement, value }) => {
+                    const linkEl = searchSupportedParentLinkEl(editingElement);
+                    let url = value;
+                    if (!url) {
+                        // As long as there is no URL, the image is not considered a link.
+                        linkEl.removeAttribute("href");
+                        return;
+                    }
+                    if (
+                        !url.startsWith("/") &&
+                        !url.startsWith("#") &&
+                        !/^([a-zA-Z]*.):.+$/gm.test(url)
+                    ) {
+                        // We permit every protocol (http:, https:, ftp:, mailto:,...).
+                        // If none is explicitly specified, we assume it is a http.
+                        url = "http://" + url;
+                    }
+                    linkEl.setAttribute("href", url);
+                },
+                getValue: ({ editingElement }) => {
+                    const linkEl = searchSupportedParentLinkEl(editingElement);
+                    return linkEl.getAttribute("href");
+                },
+            },
+            setNewWindow: {
+                preview: false,
+                apply: ({ editingElement, value }) => {
+                    const linkEl = searchSupportedParentLinkEl(editingElement);
+                    linkEl.setAttribute("target", "_blank");
+                },
+                clean: ({ editingElement }) => {
+                    const linkEl = searchSupportedParentLinkEl(editingElement);
+                    linkEl.removeAttribute("target");
+                },
+                isApplied: ({ editingElement }) => {
+                    const linkEl = searchSupportedParentLinkEl(editingElement);
+                    return linkEl.getAttribute("target") === "_blank";
+                },
+            },
+
             alt: {
                 getValue: ({ editingElement: imgEl }) => imgEl.alt,
                 apply: ({ editingElement: imgEl, value }) => {
