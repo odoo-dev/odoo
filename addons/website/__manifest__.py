@@ -283,7 +283,6 @@
             ('prepend', 'website/static/src/scss/secondary_variables.scss'),
         ],
         'web.assets_tests': [
-            'website/static/tests/tour_utils/focus_blur_snippets_options.js',
             'website/static/tests/tour_utils/lifecycle_dep_interaction.js',
             'website/static/tests/tours/**/*',
         ],
