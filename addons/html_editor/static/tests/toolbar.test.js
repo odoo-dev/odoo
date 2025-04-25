@@ -840,6 +840,15 @@ test("toolbar should close on open link popover", async () => {
     expect(".o-we-toolbar").toHaveCount(0);
 });
 
+test.tags("desktop", "iframe");
+test("toolbar should close on open link popover (iframe)", async () => {
+    await setupEditor("<p>[a]</p>", { props: { iframe: true } });
+    expect(".o-we-toolbar").toHaveCount(1);
+    await click(".o-we-toolbar .fa-link");
+    await waitForNone(".o-we-toolbar");
+    expect(".o-we-toolbar").toHaveCount(0);
+});
+
 test.tags("desktop");
 test("toolbar should close on edit link from preview", async () => {
     await setupEditor(`<p><a href="#">[a]</a></p>`);
@@ -921,6 +930,16 @@ test("toolbar shouldn't be visible if can_display_toolbar === false", async () =
     expect(".o-we-toolbar").toHaveCount(1);
     setContent(el, "<p>test[<img>]</p>");
     await animationFrame();
+    expect(".o-we-toolbar").toHaveCount(0);
+});
+
+test.tags("desktop", "iframe");
+test("toolbar should close when clicked outside the iframe", async () => {
+    await setupEditor("<p>[a]</p>", { props: { iframe: true } });
+    expect(".o-we-toolbar").toHaveCount(1);
+    // click outside the iframe
+    await click(".o-main-components-container");
+    await waitForNone(".o-we-toolbar");
     expect(".o-we-toolbar").toHaveCount(0);
 });
 
