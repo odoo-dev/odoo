@@ -338,6 +338,16 @@ class PosSession(models.Model):
                 'login_number_seq_id': login_number_seq.id
             })
 
+    def get_order_refs(self, login_number, ref_prefix, tracking_prefix, sequence_num):
+        YY = fields.Datetime.now().strftime('%y')
+        LL = f"{login_number % 100:02}"
+        SSS = f"{self.id:03}"
+        F = 0  # -> means server-generated pos_reference
+        OOOO = f"{sequence_num:04}"
+        order_ref = f"{ref_prefix} {YY}{LL}-{SSS}-{F}{OOOO}" if ref_prefix else f"{YY}{LL}-{SSS}-{F}{OOOO}"
+
+        return order_ref, sequence_num, tracking_prefix + f"{sequence_num:03}"
+
     def get_next_order_refs(self, login_number=0, ref_prefix=None, tracking_prefix=''):
         """
         Generates a consistent set of tracking_number, sequence_number and pos_reference for a new pos.order.
@@ -349,16 +359,13 @@ class PosSession(models.Model):
         """
         self.ensure_one()
 
-        sequence_num = int(self.order_seq_id._next())
+        seq_num = int(self.order_seq_id._next())
+        seq_num_next = int(self.order_seq_id.number_next_actual)
 
-        YY = fields.Datetime.now().strftime('%y')
-        LL = f"{login_number % 100:02}"
-        SSS = f"{self.id:03}"
-        F = 0  # -> means server-generated pos_reference
-        OOOO = f"{sequence_num:04}"
-        order_ref = f"{ref_prefix} {YY}{LL}-{SSS}-{F}{OOOO}" if ref_prefix else f"{YY}{LL}-{SSS}-{F}{OOOO}"
-
-        return order_ref, sequence_num, tracking_prefix + f"{sequence_num:03}"
+        return {
+            "current": self.get_order_refs(login_number, ref_prefix, tracking_prefix, seq_num),
+            "next": self.get_order_refs(login_number, ref_prefix, tracking_prefix, seq_num_next),
+        }
 
     @api.model_create_multi
     def create(self, vals_list):

@@ -22,7 +22,7 @@ class PosSelfOrderController(http.Controller):
         pos_reference = order.get('pos_reference')
         tracking_number = order.get('tracking_number')
         if not (sequence_number and pos_reference and tracking_number):
-            pos_reference, sequence_number, tracking_number = pos_session.get_next_order_refs(ref_prefix=ref_prefix, tracking_prefix=tracking_prefix)
+            pos_reference, sequence_number, tracking_number = pos_session.get_next_order_refs(ref_prefix=ref_prefix, tracking_prefix=tracking_prefix)["current"]
 
         if 'picking_type_id' in order:
             del order['picking_type_id']

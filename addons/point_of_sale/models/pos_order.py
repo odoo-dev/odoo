@@ -505,7 +505,7 @@ class PosOrder(models.Model):
         values.setdefault('fiscal_position_id', session.config_id.default_fiscal_position_id.id)
         values.setdefault('company_id', session.config_id.company_id.id)
         if values.get('tracking_number') is None and values.get('pos_reference') is None and values.get('sequence_number') is None:
-            pos_reference, sequence_number, tracking_number = session.get_next_order_refs()
+            pos_reference, sequence_number, tracking_number = session.get_next_order_refs()["current"]
             values['pos_reference'] = pos_reference
             values['sequence_number'] = sequence_number
             values['tracking_number'] = tracking_number

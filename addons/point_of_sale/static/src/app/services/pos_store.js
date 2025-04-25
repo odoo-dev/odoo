@@ -137,6 +137,7 @@ export class PosStore extends WithLazyGetterTrap {
         this.scale = pos_scale;
 
         this.orderCounter = new Counter(0);
+        this.nextActualOrderRefs = this.getNextOrderRefsLocal(_t("Order"));
 
         // FIXME POSREF: the hardwareProxy needs the pos and the pos needs the hardwareProxy. Maybe
         // the hardware proxy should just be part of the pos service?
@@ -1050,6 +1051,7 @@ export class PosStore extends WithLazyGetterTrap {
         const fiscalPosition = this.models["account.fiscal.position"].find(
             (fp) => fp.id === this.config.default_fiscal_position_id?.id
         );
+        const [pos_reference, sequence_number, tracking_number] = this.nextActualOrderRefs;
 
         const order = this.models["pos.order"].create({
             session_id: this.session,
@@ -1060,9 +1062,9 @@ export class PosStore extends WithLazyGetterTrap {
             access_token: uuidv4(),
             ticket_code: random5Chars(),
             fiscal_position_id: fiscalPosition,
-            tracking_number: "",
-            sequence_number: 0,
-            pos_reference: "",
+            tracking_number,
+            sequence_number,
+            pos_reference,
             ...data,
         });
 
@@ -1092,11 +1094,14 @@ export class PosStore extends WithLazyGetterTrap {
     }
     async getNextOrderRefs(order) {
         try {
-            const [pos_reference, sequence_number, tracking_number] = await this.data.call(
-                "pos.session",
-                "get_next_order_refs",
-                [[this.session.id], parseInt(odoo.login_number, 10), null, ""]
-            );
+            const nextOrderRefs = await this.data.call("pos.session", "get_next_order_refs", [
+                [this.session.id],
+                parseInt(odoo.login_number, 10),
+                null,
+                "",
+            ]);
+            const [pos_reference, sequence_number, tracking_number] = nextOrderRefs.current;
+            this.nextActualOrderRefs = nextOrderRefs.next;
             order.pos_reference = pos_reference;
             order.sequence_number = sequence_number;
             order.tracking_number = tracking_number;
@@ -1107,7 +1112,12 @@ export class PosStore extends WithLazyGetterTrap {
                 error instanceof ConnectionAbortedError ||
                 error instanceof RPCError
             ) {
-                return this.getNextOrderRefsLocal(_t("Order"), order);
+                const [pos_reference, sequence_number, tracking_number] =
+                    this.getNextOrderRefsLocal(_t("Order"));
+                order.pos_reference = pos_reference;
+                order.sequence_number = sequence_number;
+                order.tracking_number = tracking_number;
+                return true;
             } else {
                 throw error;
             }
@@ -1119,7 +1129,7 @@ export class PosStore extends WithLazyGetterTrap {
      * Return value of this method is used when the client is offline.
      * Side-effect: increments the order counter.
      */
-    getNextOrderRefsLocal(refPrefix, order) {
+    getNextOrderRefsLocal(refPrefix) {
         const sequenceNumber = this.orderCounter.next();
         const trackingNumber = sequenceNumber.toString().padStart(3, "0");
         const YY = new Date().getFullYear().toString().slice(-2);
@@ -1128,10 +1138,7 @@ export class PosStore extends WithLazyGetterTrap {
         const F = "1";
         const OOOO = sequenceNumber.toString().padStart(4, "0");
         const posReference = `${refPrefix} ${YY}${LL}-${SSS}-${F}${OOOO}`;
-        order.pos_reference = posReference;
-        order.sequence_number = sequenceNumber;
-        order.tracking_number = trackingNumber;
-        return true;
+        return [posReference, sequenceNumber, trackingNumber];
     }
     selectNextOrder() {
         const orders = this.models["pos.order"].filter((order) => !order.finalized);
