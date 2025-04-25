@@ -503,6 +503,14 @@ export class CustomizeWebsitePlugin extends Plugin {
                             // disable all
                             prepareRecord(record, true);
                         }
+                    } else if (a.actionId === 'composite' || a.actionId === "reloadComposite"){
+                        for ( const itemAction of a.actionParam.mainParam){
+                            if (itemAction.action === "websiteConfig"){
+                                for (const record of itemAction.actionParam[paramName] || []){
+                                    prepareRecord(record, true)
+                                }
+                            }
+                        }
                     }
                 }
             }
