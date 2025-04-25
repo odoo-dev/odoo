@@ -6,6 +6,9 @@ const card_parent_handlers =
     ".s_three_columns .row > div, .s_comparisons .row > div, .s_cards_grid .row > div, .s_cards_soft .row > div, .s_product_list .row > div, .s_newsletter_centered .row > div, .s_company_team_spotlight .row > div, .s_comparisons_horizontal .row > div, .s_company_team_grid .row > div, .s_company_team_card .row > div, .s_carousel_cards_item";
 const special_cards_selector = `.s_card.s_timeline_card, div:is(${card_parent_handlers}) > .s_card`;
 
+const so_snippet_addition_drop_in =
+    ":not(p).oe_structure:not(.oe_structure_solo), :not(.o_mega_menu):not(p)[data-oe-type=html], :not(p).oe_structure.oe_structure_solo:not(:has(> section:not(.s_snippet_group), > div:not(.o_hook_drop_zone)))";
+
 // TODO need to split by addons
 
 export class DropZoneSelectorPlugin extends Plugin {
@@ -17,16 +20,18 @@ export class DropZoneSelectorPlugin extends Plugin {
                 dropIn: ".accordion:has(> .accordion-item)",
             },
             {
-                selector: "section, .parallax, .s_hr", // TODO check extend so_snippet_addition_selector
-                dropIn: ":not(p).oe_structure:not(.oe_structure_solo), :not(.o_mega_menu):not(p)[data-oe-type=html], :not(p).oe_structure.oe_structure_solo:not(:has(> section:not(.s_snippet_group), > div:not(.o_hook_drop_zone)))",
+                plugin: this,
+                get selector() {
+                    return this.plugin.getResource("so_snippet_addition_selector").join(", ");
+                },
+                dropIn: so_snippet_addition_drop_in,
             },
             {
                 selector: `${so_content_addition_selector}, .s_card`, // TODO check extend so_content_addition_selector
                 exclude: `${special_cards_selector}`,
                 dropNear: `p, h1, h2, h3, ul, ol, div:not(.o_grid_item_image) > img, div:not(.o_grid_item_image) > a, .btn, ${so_content_addition_selector}, .s_card:not(${special_cards_selector})`,
                 dropIn: "nav",
-                excludeNearParent:
-                    ":not(p).oe_structure:not(.oe_structure_solo), :not(.o_mega_menu):not(p)[data-oe-type=html], :not(p).oe_structure.oe_structure_solo:not(:has(> section:not(.s_snippet_group), > div:not(.o_hook_drop_zone)))", // TODO not duplicate
+                excludeNearParent: so_snippet_addition_drop_in,
             },
             {
                 selector: ".s_website_form_field",
@@ -45,6 +50,7 @@ export class DropZoneSelectorPlugin extends Plugin {
                 dropNear: ".row.o_grid_mode > div",
             },
         ],
+        so_snippet_addition_selector: ["section", ".parallax", ".s_hr"],
     };
 }
 
