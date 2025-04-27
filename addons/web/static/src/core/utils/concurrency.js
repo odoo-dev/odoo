@@ -12,7 +12,7 @@ export function delay(wait) {
 
 /**
  * KeepLast is a concurrency primitive that manages a list of tasks, and only
- * keeps the last task active.
+ * keeps the last task active..
  *
  * @template T
  */
@@ -103,13 +103,12 @@ export class Mutex {
                 };
             });
         }
-        const always = () => {
-            return Promise.resolve(action()).finally(() => {
+        const always = () =>
+            Promise.resolve(action()).finally(() => {
                 if (--this._queueSize === 0) {
                     this._unlock();
                 }
             });
-        };
         this._lock = this._lock.then(always, always);
         return this._lock;
     }
