@@ -11,4 +11,3 @@ class ReportPrinter(models.Model):
     printer_email = fields.Char(string="Printer Eamil Address")
     printer_ip = fields.Char(string="Printer IP Address")
     company_id = fields.Many2one("res.company", string="Company", default=lambda self: self.env.company)
-    report_id = fields.Many2one("ir.actions.report", string="Associated Report")

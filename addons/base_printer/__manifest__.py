@@ -17,7 +17,7 @@ Ideal for POS and self-ordering systems.
     ],
     'assets': {
         'web.assets_backend': [
-            'base_printer/static/src/backend/printer_report_action.js',
+            'base_printer/static/src/**/*',
         ],
         'web.assets_unit_tests': [
             'base_printer/static/src/epson_printer/utils/utils.js',

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="point_of_sale.print_lable">
+        <div class="d-flex justify-content-center align-items-center"
+            style="font-size: 30px; color: #000000; width: 512px">
+            <div class="d-flex justify-content-center align-items-center border border-dark rounded p-2"
+                t-att-style="'width: ' + this.labelSize.width + 'px; height: ' + this.labelSize.height + 'px;'">
+    
+                <t t-if="this.props.label_template === '2x7'">
+                    <div class="d-flex flex-column align-content-between" t-att-style="'px; font-size: 14px; color: #000;'">
+                        <div class="fw-bold mb-1" style="font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            <t t-if="this.props.product?.default_code">[<t t-out="this.props.product.default_code"/>] </t>
+                            <t t-out="this.props.product?.name"/>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-between">
+                            <div class="d-flex flex-column align-items-center justify-content-center">
+                                <div t-if="this.props.product?.default_code" class="mb-1" style="font-size: 12px;">
+                                    <t t-out="this.props.product.default_code"/>
+                                </div>
+                                <img t-att-src="'/report/barcode/Code128/' + this.props.product.barcode"
+                                    t-att-style="'width: ' + this.barcodeSize.width + 'px; height: ' + this.barcodeSize.height + 'px;'"
+                                    alt="Barcode"/>
+                                <div style="font-size: 12px;" class="mt-1">
+                                    <t t-out="this.props.product.barcode"/>
+                                </div>
+                            </div>
+                            <div class="text-end fw-bold ms-2" style="font-size: 24px; align-self: center; white-space: nowrap;">
+                                <t t-out="this.props.product.price"/>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+
+                <!-- 4x7 -->
+                <t t-if="this.props.label_template === '4x7'">
+                    <div class="text-center w-100">
+                        <div t-att-style="'font-size: ' + this.fontSize + 'px;'">
+                            <t t-out="this.props.product?.display_name"/>
+                        </div>
+                        <img t-if="this.props.product?.barcode"
+                            t-att-src="'/report/barcode/Code128/' + this.props.product.barcode"
+                            t-att-style="'width: ' + this.barcodeSize.width + 'px; height: ' + this.barcodeSize.height + 'px;'"
+                            alt="Barcode"/>
+                        <div t-if="this.props.product?.barcode" t-out="this.props.product.barcode"/>
+                        <div class="fw-bold" t-out="this.props.product.price"/>
+                    </div>
+                </t>
+
+                <!-- 4x12 -->
+                <t t-if="this.props.label_template === '4x12'">
+                    <div class="text-start w-100">
+                        <strong t-out="this.props.product?.display_name"/>
+                        <img t-if="this.props.product?.barcode"
+                            t-att-src="'/report/barcode/Code128/' + this.props.product.barcode"
+                            t-att-style="'width: ' + this.barcodeSize.width + 'px; height: ' + this.barcodeSize.height + 'px;'"
+                            alt="Barcode"/>
+                        <div class="text-end fw-bold" t-out="this.props.product.price"/>
+                    </div>
+                </t>
+
+                <!-- 4x12_no_price -->
+                <t t-if="this.props.label_template === '4x12_no_price'">
+                    <div class="text-start w-100">
+                        <strong t-out="this.props.product?.display_name"/>
+                        <img t-if="this.props.product?.barcode"
+                            t-att-src="'/report/barcode/Code128/' + this.props.product.barcode"
+                            t-att-style="'width: ' + this.barcodeSize.width + 'px; height: ' + this.barcodeSize.height + 'px;'"
+                            alt="Barcode"/>
+                    </div>
+                </t>
+
+                <!-- Dymo -->
+                <t t-if="this.props.label_template === 'dymo'">
+                    <div class="w-100">
+                        <div>
+                            <span t-out="this.props.product?.display_name"/>
+                        </div>
+                        <div t-if="this.props.product?.barcode" class="text-center">
+                            <img t-att-src="'/report/barcode/Code128/' + this.props.product.barcode"
+                                t-att-style="'width: ' + this.barcodeSize.width + 'px; height: ' + this.barcodeSize.height + 'px;'"
+                                alt="Barcode"/>
+                            <div t-if="this.props.product?.barcode" t-out="this.props.product.barcode"/>
+                        </div>
+                        <div class="text-end fw-bold" t-out="this.props.product?.price"/>
+                    </div>
+                </t>
+
+            </div>
+        </div>
+    </t>
+</templates>
