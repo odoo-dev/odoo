@@ -5,13 +5,34 @@ import zipfile
 import base64
 import json
 import re
+import os
 
 from collections import defaultdict
 
 from odoo import api, fields, models, _, tools
-from odoo.exceptions import ValidationError, MissingError
+from odoo.tools.mimetypes import get_extension
+from odoo.exceptions import ValidationError, MissingError, UserError
 
 from odoo.addons.spreadsheet.utils.validate_data import fields_in_spreadsheet, menus_xml_ids_in_spreadsheet
+
+XLSX_EXTENSIONS = ['.xls', '.xlsx', '.xlsm', '.xlsb', '.xlt', '.xltx', '.xltm']
+
+SUPPORTED_PATHS = (
+    "[Content_Types].xml",
+    "xl/sharedStrings.xml",
+    "xl/styles.xml",
+    "xl/workbook.xml",
+    "_rels/",
+    "xl/_rels",
+    "xl/charts/",
+    "xl/drawings/",
+    "xl/externalLinks/",
+    "xl/pivotTables/",
+    "xl/tables/",
+    "xl/theme/",
+    "xl/worksheets/",
+    "xl/media",
+)
 
 
 class SpreadsheetMixin(models.AbstractModel):
@@ -26,6 +47,30 @@ class SpreadsheetMixin(models.AbstractModel):
     spreadsheet_data = fields.Text(compute='_compute_spreadsheet_data', inverse='_inverse_spreadsheet_data')
     spreadsheet_file_name = fields.Char(compute='_compute_spreadsheet_file_name')
     thumbnail = fields.Binary()
+
+    def is_excel_file(self, filename: str) -> bool:
+        extenstion = get_extension(filename)
+        return extenstion.lower() in XLSX_EXTENSIONS
+
+    def _get_spreadsheet_vals(self, vals):
+        if "spreadsheet_binary_data" in vals:
+            if self.is_excel_file(vals.get("spreadsheet_file_name")):
+                unzipped, _ = self._unzip_xlsx(base64.b64decode(vals["spreadsheet_binary_data"]))
+                vals["spreadsheet_data"] = json.dumps(unzipped)
+                vals["spreadsheet_binary_data"] = False
+        if vals.get("name") and not vals.get("spreadsheet_file_name"):
+            vals["spreadsheet_file_name"] = f"{vals['name']}.osheet.json"
+        return vals
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            vals = self._get_spreadsheet_vals(vals)
+        return super().create(vals_list)
+
+    def write(self, vals):
+        vals = self._get_spreadsheet_vals(vals)
+        return super().write(vals)
 
     @api.constrains("spreadsheet_binary_data")
     def _check_spreadsheet_data(self):
@@ -72,6 +117,53 @@ class SpreadsheetMixin(models.AbstractModel):
                     ),
                 )
 
+    def _unzip_xlsx(self, raw_file):
+        file = io.BytesIO(raw_file)
+        if not zipfile.is_zipfile(file):
+            raise UserError(_("The file is not a xlsx file"))
+
+        unzipped_size = 0
+        with zipfile.ZipFile(file) as input_zip:
+            if len(input_zip.infolist()) > 1000:
+                raise UserError(_("The xlsx file is too big"))
+
+            if "[Content_Types].xml" not in input_zip.namelist() or \
+                    not any(name.startswith("xl/") for name in input_zip.namelist()):
+                raise UserError(_("The xlsx file is corrupted"))
+
+            unzipped = {}
+            attachments = []
+            for info in input_zip.infolist():
+                if not (info.filename.endswith((".xml", ".xml.rels")) or "media/image" in info.filename) or\
+                        not info.filename.startswith(SUPPORTED_PATHS):
+                    # Don't extract files others than xmls or unsupported xmls
+                    continue
+
+                unzipped_size += info.file_size
+                if unzipped_size > 50 * 1000 * 1000:  # 50MB
+                    raise UserError(_("The xlsx file is too big"))
+
+                if info.filename.endswith((".xml", ".xml.rels")):
+                    unzipped[info.filename] = input_zip.read(info.filename).decode()
+                elif "media/image" in info.filename:
+                    image_file = input_zip.read(info.filename)
+                    attachment = self._upload_image_file(image_file, info.filename)
+                    attachments.append(attachment)
+                    unzipped[info.filename] = {
+                        "imageSrc": "/web/image/" + str(attachment.id),
+                    }
+        return unzipped, attachments
+
+    def _upload_image_file(self, image_file, filename):
+        attachment_model = self.env['ir.attachment']
+        attachment = attachment_model.create({
+            'name': filename,
+            'datas': base64.encodebytes(image_file),
+            'res_model': "documents.document",
+        })
+        attachment._post_add_create()
+        return attachment
+
     @api.depends("spreadsheet_binary_data")
     def _compute_spreadsheet_data(self):
         attachments = self.env['ir.attachment'].with_context(bin_size=False).search([
@@ -97,10 +189,6 @@ class SpreadsheetMixin(models.AbstractModel):
     def _compute_spreadsheet_file_name(self):
         for spreadsheet in self:
             spreadsheet.spreadsheet_file_name = f"{spreadsheet.display_name}.osheet.json"
-
-    @api.onchange('spreadsheet_binary_data')
-    def _onchange_data_(self):
-        self._check_spreadsheet_data()
 
     @api.readonly
     @api.model

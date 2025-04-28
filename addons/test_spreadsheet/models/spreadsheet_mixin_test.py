@@ -1,4 +1,4 @@
-from odoo import models
+from odoo import models, fields
 
 
 class SpreadsheetTest(models.Model):
@@ -7,3 +7,15 @@ class SpreadsheetTest(models.Model):
     _description = 'Dummy Spreadsheet'
     _name = 'spreadsheet.test'
     _inherit = ['spreadsheet.mixin']
+
+    name = fields.Char()
+
+    def action_open_spreadsheet(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'fake_action',
+            'params': {
+                'spreadsheet_id': self.id,
+            }
+        }
