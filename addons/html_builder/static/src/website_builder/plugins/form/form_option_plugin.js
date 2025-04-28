@@ -140,6 +140,7 @@ export class FormOptionPlugin extends Plugin {
             selector: ".s_website_form",
             excludeAncestor: "form",
         },
+        so_content_addition_selector: [".s_website_form"],
     };
     getActions() {
         return {

@@ -1,7 +1,5 @@
 import { Plugin } from "@html_editor/plugin";
 
-// TODO s_website_form, s_searchbar_input were added by extending xpath.
-const so_content_addition_selector = `blockquote, .s_alert, .o_facebook_page, .s_share, .s_social_media, .s_rating, .s_hr, .s_google_map, .s_map, .s_countdown, .s_chart, .s_text_highlight, .s_progress_bar, .s_badge, .s_embed_code, .s_donation, .s_add_to_cart, .s_online_appointment, .o_snippet_drop_in_only, .s_image, .s_cta_badge, .s_accordion, .s_website_form, .s_searchbar_input, .s_rental_search, .s_card`;
 const card_parent_handlers =
     ".s_three_columns .row > div, .s_comparisons .row > div, .s_cards_grid .row > div, .s_cards_soft .row > div, .s_product_list .row > div, .s_newsletter_centered .row > div, .s_company_team_spotlight .row > div, .s_comparisons_horizontal .row > div, .s_company_team_grid .row > div, .s_company_team_card .row > div, .s_carousel_cards_item";
 const special_cards_selector = `.s_card.s_timeline_card, div:is(${card_parent_handlers}) > .s_card`;
@@ -27,9 +25,19 @@ export class DropZoneSelectorPlugin extends Plugin {
                 dropIn: so_snippet_addition_drop_in,
             },
             {
-                selector: `${so_content_addition_selector}, .s_card`, // TODO check extend so_content_addition_selector
+                plugin: this,
+                get selector() {
+                    return [
+                        ...this.plugin.getResource("so_content_addition_selector"),
+                        ".s_card",
+                    ].join(", ");
+                },
                 exclude: `${special_cards_selector}`,
-                dropNear: `p, h1, h2, h3, ul, ol, div:not(.o_grid_item_image) > img, div:not(.o_grid_item_image) > a, .btn, ${so_content_addition_selector}, .s_card:not(${special_cards_selector})`,
+                get dropNear() {
+                    return `p, h1, h2, h3, ul, ol, div:not(.o_grid_item_image) > img, div:not(.o_grid_item_image) > a, .btn, ${this.plugin
+                        .getResource("so_content_addition_selector")
+                        .join(", ")}, .s_card:not(${special_cards_selector})`;
+                },
                 dropIn: "nav",
                 excludeNearParent: so_snippet_addition_drop_in,
             },
@@ -51,6 +59,30 @@ export class DropZoneSelectorPlugin extends Plugin {
             },
         ],
         so_snippet_addition_selector: ["section", ".parallax", ".s_hr"],
+        so_content_addition_selector: [
+            "blockquote",
+            ".s_alert",
+            ".o_facebook_page",
+            ".s_share",
+            ".s_social_media",
+            ".s_rating",
+            ".s_hr",
+            ".s_google_map",
+            ".s_map",
+            ".s_countdown",
+            ".s_chart",
+            ".s_text_highlight",
+            ".s_progress_bar",
+            ".s_badge",
+            ".s_embed_code",
+            ".s_donation",
+            ".s_add_to_cart",
+            ".s_online_appointment",
+            ".o_snippet_drop_in_only",
+            ".s_image",
+            ".s_cta_badge",
+            ".s_accordion",
+        ],
     };
 }
 
