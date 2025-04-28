@@ -10,6 +10,7 @@ class RatingOptionPlugin extends Plugin {
             template: "html_builder.RatingOption",
             selector: ".s_rating",
         },
+        so_content_addition_selector: [".s_rating"],
         builder_actions: this.getActions(),
     };
     getActions() {

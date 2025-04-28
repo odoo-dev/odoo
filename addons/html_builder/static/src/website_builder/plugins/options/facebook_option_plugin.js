@@ -14,6 +14,7 @@ class FacebookOptionPlugin extends Plugin {
                 selector: ".o_facebook_page",
             },
         ],
+        so_content_addition_selector: [".o_facebook_page"],
         builder_actions: {
             dataAttributeListAction: {
                 isApplied: ({ editingElement, param: { mainParam } = {}, value }) =>

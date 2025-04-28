@@ -17,6 +17,7 @@ class accordionOptionPlugin extends Plugin {
                 selector: ".s_accordion .accordion-item",
             }),
         ],
+        so_content_addition_selector: [".s_accordion"],
         builder_actions: this.getActions(),
     };
 

@@ -18,6 +18,7 @@ class ChartOptionPlugin extends Plugin {
                 },
             },
         ],
+        so_content_addition_selector: [".s_chart"],
         builder_actions: this.getActions(),
     };
 

@@ -12,6 +12,7 @@ class ProgressBarOptionPlugin extends Plugin {
             cleanForSave: this.cleanForSave.bind(this),
         },
         builder_actions: this.getActions(),
+        so_content_addition_selector: [".s_progress_bar"],
     };
 
     cleanForSave(editingEl) {

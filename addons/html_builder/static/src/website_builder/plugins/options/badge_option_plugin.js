@@ -11,6 +11,7 @@ class BadgeOptionPlugin extends Plugin {
                 selector: ".s_badge",
             }),
         ],
+        so_content_addition_selector: [".s_badge"],
     };
 }
 registry.category("website-plugins").add(BadgeOptionPlugin.id, BadgeOptionPlugin);

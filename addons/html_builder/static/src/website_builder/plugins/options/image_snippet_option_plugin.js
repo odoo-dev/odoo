@@ -6,6 +6,7 @@ class ImageSnippetOptionPlugin extends Plugin {
     static dependencies = ["media"];
     resources = {
         on_snippet_dropped_handlers: this.onSnippetDropped.bind(this),
+        so_content_addition_selector: [".s_image"],
     };
 
     async onSnippetDropped({ snippetEl }) {

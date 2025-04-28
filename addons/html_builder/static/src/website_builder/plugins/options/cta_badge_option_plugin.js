@@ -10,6 +10,7 @@ class CTABadgeOptionPlugin extends Plugin {
                 selector: ".s_cta_badge",
             },
         ],
+        so_content_addition_selector: [".s_cta_badge"],
     };
 }
 registry.category("website-plugins").add(CTABadgeOptionPlugin.id, CTABadgeOptionPlugin);
