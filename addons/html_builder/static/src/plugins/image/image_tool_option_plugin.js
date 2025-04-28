@@ -2,11 +2,16 @@ import { cropperDataFieldsWithAspectRatio, isGif } from "@html_editor/utils/imag
 import { registry } from "@web/core/registry";
 import { Plugin } from "@html_editor/plugin";
 import { normalizeColor } from "@html_builder/utils/utils_css";
-import { ImageToolOption, searchSupportedParentLinkEl } from "./image_tool_option";
+import { ImageToolOption } from "./image_tool_option";
+import { ReplaceMediaOption, searchSupportedParentLinkEl } from "./replace_media_option";
 import { defaultImageFilterOptions } from "@html_editor/main/media/image_post_process_plugin";
 import { isImageCorsProtected, getMimetype } from "@html_editor/utils/image";
 import { withSequence } from "@html_editor/utils/resource";
-import { IMAGE_TOOL, ALIGNMENT_STYLE_PADDING } from "@html_builder/utils/option_sequence";
+import {
+    REPLACE_MEDIA,
+    IMAGE_TOOL,
+    ALIGNMENT_STYLE_PADDING,
+} from "@html_builder/utils/option_sequence";
 
 class ImageToolOptionPlugin extends Plugin {
     static id = "imageToolOption";
@@ -14,6 +19,12 @@ class ImageToolOptionPlugin extends Plugin {
     static shared = ["canHaveHoverEffect"];
     resources = {
         builder_options: [
+            withSequence(REPLACE_MEDIA, {
+                OptionComponent: ReplaceMediaOption,
+                selector: "img, .media_iframe_video, span.fa, i.fa",
+                exclude:
+                    "[data-oe-xpath], a[href^='/website/social/'] > i.fa, a[class*='s_share_'] > i.fa",
+            }),
             withSequence(IMAGE_TOOL, {
                 OptionComponent: ImageToolOption,
                 selector: "img",
