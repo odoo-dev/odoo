@@ -9,7 +9,7 @@
                 <pivot string="Livechat Support Statistics" sample="1" display_quantity="1">
                     <field name="has_call" type="measure" invisible="1"/>
                     <field name="call_duration_hour" type="measure" widget="float_time"/>
-                    <field name="partner_id" type="row"/>
+                    <field name="partner_name" type="row"/>
                     <field name="percentage_of_calls" type="measure" widget="percentage"/>
                     <field name="time_to_answer" type="measure"/>
                     <field name="duration" type="measure"/>
