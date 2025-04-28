@@ -1,8 +1,11 @@
 import { Builder } from "@html_builder/builder";
+import { Img } from "@html_builder/core/img";
 import { SetupEditorPlugin } from "@html_builder/core/setup_editor_plugin";
 import { LocalOverlayContainer } from "@html_editor/local_overlay_container";
 import { Plugin } from "@html_editor/plugin";
+import { withSequence } from "@html_editor/utils/resource";
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
+import { after } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-dom";
 import { Component, onMounted, useRef, useState, useSubEnv, xml } from "@odoo/owl";
 import {
@@ -15,8 +18,17 @@ import { isBrowserFirefox } from "@web/core/browser/feature_detection";
 import { registry } from "@web/core/registry";
 import { uniqueId } from "@web/core/utils/functions";
 import { getWebsiteSnippets } from "./snippets_getter.hoot";
-import { after } from "@odoo/hoot";
-import { withSequence } from "@html_editor/utils/resource";
+
+export function patchWithCleanupImg() {
+    const defaultImg =
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z9DwHwAGBQKA3H7sNwAAAABJRU5ErkJggg==";
+    patchWithCleanup(Img, {
+        template: xml`<img t-att-data-src="props.src" ta-att-data-alt="props.alt" t-att-class="props.class" t-att-style="props.style" t-att="props.attrs" src="${defaultImg}"/>`,
+    });
+    patchWithCleanup(Img.prototype, {
+        loadImage: () => {},
+    });
+}
 
 function getSnippetView(snippets) {
     const { snippet_groups, snippet_custom, snippet_structure, snippet_content } = snippets;
@@ -111,6 +123,8 @@ class BuilderContainer extends Component {
 export async function setupHTMLBuilder(content = "", { snippetContent, dropzoneSelectors } = {}) {
     defineMailModels(); // fuck this shit
     defineModels([IrUiView]);
+
+    patchWithCleanupImg();
 
     // const snippetsDescription = { name: "Test", groupName: "a", content: snippetContentStr };
     // [{ name: "Test", groupName: "a", content: snippetContentStr }];
