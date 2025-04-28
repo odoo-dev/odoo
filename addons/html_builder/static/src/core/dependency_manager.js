@@ -14,7 +14,7 @@ export class DependencyManager extends EventBus {
     }
     update() {
         this.dependenciesMap = {};
-        for (const [id, value, ignored] of this.dependencies.reverse()) {
+        for (const [id, value, ignored] of this.dependencies.slice().reverse()) {
             if (ignored && id in this.dependenciesMap) {
                 continue;
             }
