@@ -1571,6 +1571,7 @@ test(`save a record with an invisible required field`, async () => {
     expect.verifySteps(["onchange", "web_save"]);
 });
 
+test.tags("desktop");
 test("multi_edit: edit a required field with invalid value and click 'Ok' of alert dialog", async () => {
     Foo._fields.foo.required = true;
 
@@ -1608,6 +1609,7 @@ test("multi_edit: edit a required field with invalid value and click 'Ok' of ale
     expect.verifySteps([]);
 });
 
+test.tags("desktop");
 test(`multi_edit: edit a required field with invalid value and dismiss alert dialog`, async () => {
     Foo._fields.foo = fields.Char({ required: true });
 
@@ -10867,6 +10869,7 @@ test(`editable list view: multi edition cannot call onchanges`, async () => {
     expect.verifySteps(["write", "web_read"]);
 });
 
+test.tags("desktop");
 test(`editable list view: multi edition error and cancellation handling`, async () => {
     await mountView({
         resModel: "foo",
@@ -11192,6 +11195,45 @@ test(`multi edit list view: mousedown on "Discard" with invalid field`, async ()
 
     await contains(`.o_dialog .modal-footer .btn-primary`).click(); // click OK
     expect(`.o_data_row:eq(0) .o_data_cell`).toHaveText("10");
+});
+
+test.tags("desktop");
+test(`multi edit: invalid field and urgent save`, async () => {
+    onRpc("web_save", () => {
+        throw new Error("should not save");
+    });
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list multi_edit="1">
+                <field name="foo" required="1"/>
+                <field name="int_field"/>
+            </list>
+        `,
+    });
+    expect(queryAllTexts(".o_data_cell")).toEqual([
+        "yop",
+        "10",
+        "blip",
+        "9",
+        "gnap",
+        "17",
+        "blip",
+        "-4",
+    ]);
+
+    // select two records
+    await contains(`.o_data_row:eq(0) .o_list_record_selector input`).click();
+    await contains(`.o_data_row:eq(1) .o_list_record_selector input`).click();
+
+    // edit first record and unset foo
+    await contains(`.o_data_row:eq(0) .o_data_cell`).click();
+    await contains(`.o_data_row:eq(0) .o_data_cell input`).edit("");
+    expect(`.o_dialog`).toHaveCount(1);
+
+    // provoke an urgent save
+    await unload();
 });
 
 test.tags("desktop");
@@ -11559,6 +11601,7 @@ test(`editable readonly list view: navigation in grouped list`, async () => {
     expect.verifySteps(["resId: 3"]);
 });
 
+test.tags("desktop");
 test(`editable readonly list view: single edition does not behave like a multi-edition`, async () => {
     await mountView({
         resModel: "foo",
@@ -13041,10 +13084,10 @@ test(`editing then pressing TAB in editable grouped list`, async () => {
 
     // open two groups
     await contains(`.o_group_header:eq(0)`).click();
-    expect(`.o_data_row`).toHaveCount(1, { message: "first group contains 1 rows" });
+    expect(`.o_data_row`).toHaveCount(1, { message: "first group contains 1 row" });
 
     await contains(`.o_group_header:eq(1)`).click();
-    expect(`.o_data_row`).toHaveCount(4, { message: "first group contains 3 row" });
+    expect(`.o_data_row`).toHaveCount(4, { message: "second group contains 3 rows" });
 
     // select and edit last row of first group
     await contains(`.o_data_row:eq(0) .o_data_cell`).click();
@@ -13759,6 +13802,7 @@ test(`removing a groupby while adding a line from list`, async () => {
     expect(`.o_selected_row`).toHaveCount(0);
 });
 
+test.tags("desktop");
 test("cell-level keyboard navigation in editable grouped list", async () => {
     Foo._records[0].bar = false;
     Foo._records[1].bar = false;

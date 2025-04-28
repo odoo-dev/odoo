@@ -487,7 +487,7 @@ export class Record extends DataPoint {
             this._unsetRequiredFields.clear();
             for (const fieldName of unsetRequiredFields) {
                 this._unsetRequiredFields.add(fieldName);
-                this._setInvalidField(fieldName);
+                this._invalidFields.add(fieldName);
             }
         }
         const isValid = !this._invalidFields.size;
@@ -528,17 +528,22 @@ export class Record extends DataPoint {
         }
         const context = getFieldContext(this, fieldName);
         if (!resId && displayName !== undefined) {
-            const pair = await this.model.orm.call(resModel, "name_create", [displayName], { context });
+            const pair = await this.model.orm.call(resModel, "name_create", [displayName], {
+                context,
+            });
             return pair && createMany2OneValue(pair);
         }
         if (resId && displayName === undefined) {
             const fieldSpec = { display_name: {} };
             if (this.activeFields[fieldName].related) {
-                Object.assign(fieldSpec, getFieldsSpec(
-                    this.activeFields[fieldName].related.activeFields,
-                    this.activeFields[fieldName].related.fields,
-                    getBasicEvalContext(this.config),
-                ));
+                Object.assign(
+                    fieldSpec,
+                    getFieldsSpec(
+                        this.activeFields[fieldName].related.activeFields,
+                        this.activeFields[fieldName].related.fields,
+                        getBasicEvalContext(this.config)
+                    )
+                );
             }
             const kwargs = {
                 context,
@@ -1357,7 +1362,12 @@ export class Record extends DataPoint {
             if (this.fields[fieldName].type === "many2one") {
                 const curVal = toRaw(this.data[fieldName]);
                 const nextVal = changes[fieldName];
-                if (curVal && nextVal && curVal.id === nextVal.id && curVal.display_name === nextVal.display_name) {
+                if (
+                    curVal &&
+                    nextVal &&
+                    curVal.id === nextVal.id &&
+                    curVal.display_name === nextVal.display_name
+                ) {
                     delete changes[fieldName];
                 }
             }

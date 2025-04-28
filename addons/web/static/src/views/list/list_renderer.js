@@ -1419,7 +1419,7 @@ export class ListRenderer extends Component {
         const isLastOfGroup = groupIndex === group.list.records.length - 1;
         const isDirty = record.dirty || this.lastIsDirty;
         const isEnterBehavior = hotkey === "enter" && (!record.canBeAbandoned || isDirty);
-        const isTabBehavior = hotkey === "tab" && !record.canBeAbandoned && isDirty;
+        const isTabBehavior = hotkey === "tab" && isDirty;
         if (
             isLastOfGroup &&
             this.canCreate &&
@@ -1469,6 +1469,7 @@ export class ListRenderer extends Component {
         const { cycleOnTab, list } = this.props;
         const row = cell.parentElement;
         const applyMultiEditBehavior = record && record.selected && list.model.multiEdit;
+        const isDirty = record.dirty || this.lastIsDirty;
         const topReCreate = this.props.editable === "top" && record.isNew;
 
         if (
@@ -1492,18 +1493,14 @@ export class ListRenderer extends Component {
                 const lastIndex = topReCreate ? 0 : list.records.length - 1;
                 if (index === lastIndex) {
                     if (this.displayRowCreates) {
-                        if (record.isNew && !record.dirty) {
+                        if (record.isNew && !isDirty) {
                             list.leaveEditMode();
                             return false;
                         }
                         // add a line
                         const { context } = this.controls[0];
                         this.add({ context });
-                    } else if (
-                        this.canCreate &&
-                        !record.canBeAbandoned &&
-                        (record.dirty || this.lastIsDirty)
-                    ) {
+                    } else if (this.canCreate && isDirty) {
                         this.add({ group });
                     } else if (cycleOnTab) {
                         if (record.canBeAbandoned) {
