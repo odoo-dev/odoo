@@ -15,7 +15,14 @@ import {
 
 class ImageToolOptionPlugin extends Plugin {
     static id = "imageToolOption";
-    static dependencies = ["history", "userCommand", "imagePostProcess", "imageCrop", "media"];
+    static dependencies = [
+        "history",
+        "userCommand",
+        "imagePostProcess",
+        "imageCrop",
+        "media",
+        "builder-options",
+    ];
     static shared = ["canHaveHoverEffect"];
     resources = {
         builder_options: [
@@ -151,6 +158,8 @@ class ImageToolOptionPlugin extends Plugin {
                         return;
                     }
                     editingElement.replaceWith(newImage);
+                    this.dependencies.history.addStep();
+                    this.dependencies["builder-options"].updateContainers(newImage);
                 },
             },
             setLink: {
