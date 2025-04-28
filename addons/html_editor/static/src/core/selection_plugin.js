@@ -246,6 +246,10 @@ export class SelectionPlugin extends Plugin {
             };
             const unFocusEditable = (ev) => {
                 if (this.focusEditableDocument) {
+                    // autofocus trigger when you close a popover (like color picker)
+                    if (ev.target.tagName === "IFRAME") {
+                        return;
+                    }
                     const preventClosing = ev.target?.closest?.("[data-prevent-closing-overlay]");
                     if (preventClosing?.dataset?.preventClosingOverlay === "true") {
                         return;
