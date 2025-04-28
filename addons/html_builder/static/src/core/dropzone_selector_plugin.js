@@ -33,12 +33,12 @@ export class DropZoneSelectorPlugin extends Plugin {
                     ].join(", ");
                 },
                 exclude: `${special_cards_selector}`,
+                dropIn: "nav",
                 get dropNear() {
                     return `p, h1, h2, h3, ul, ol, div:not(.o_grid_item_image) > img, div:not(.o_grid_item_image) > a, .btn, ${this.plugin
                         .getResource("so_content_addition_selector")
                         .join(", ")}, .s_card:not(${special_cards_selector})`;
                 },
-                dropIn: "nav",
                 excludeNearParent: so_snippet_addition_drop_in,
             },
             {
@@ -61,34 +61,9 @@ export class DropZoneSelectorPlugin extends Plugin {
         so_snippet_addition_selector: ["section", ".parallax", ".s_hr"],
         so_content_addition_selector: [
             "blockquote",
-            ".s_alert",
-            ".o_facebook_page",
-            ".s_share",
-            ".s_social_media",
-            ".s_rating",
-            ".s_hr",
-            ".s_google_map",
-            ".s_map",
-            ".s_countdown",
-            ".s_chart",
             ".s_text_highlight",
-            ".s_progress_bar",
-            ".s_badge",
-            ".s_embed_code",
-            ".s_donation",
-            ".s_add_to_cart",
-            ".s_online_appointment",
+            ".s_donation", // TODO: move to plugin
             ".o_snippet_drop_in_only",
-            ".s_image",
-            ".s_cta_badge",
-            ".s_accordion",
         ],
     };
 }
-
-/** TODO add xpath
- * <xpath expr:"//div[@id='so_content_addition']" position="attributes">
-    <attribute name="selector" add=".s_progress_bar" separator:","/>
-    <attribute name="dropNear" add=".s_progress_bar" separator:","/>
-</xpath>
- */

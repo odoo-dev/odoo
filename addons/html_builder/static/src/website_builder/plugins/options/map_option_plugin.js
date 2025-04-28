@@ -12,6 +12,7 @@ class MapOptionPlugin extends Plugin {
                 selector: ".s_map",
             },
         ],
+        so_content_addition_selector: [".s_map"],
         builder_actions: this.getActions(),
     };
 

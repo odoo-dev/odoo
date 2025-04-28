@@ -12,6 +12,7 @@ class AddToCartOptionPlugin extends Plugin {
                 selector: ".s_add_to_cart",
             },
         ],
+        so_content_addition_selector: [".s_add_to_cart"],
         builder_actions: {
             productToCartAction: {
                 apply: ({ editingElement, value }) => {

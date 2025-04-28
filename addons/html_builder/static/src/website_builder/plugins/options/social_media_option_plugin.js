@@ -124,6 +124,7 @@ class SocialMediaOptionPlugin extends Plugin {
                 selector: ".s_social_media",
             }),
         ],
+        so_content_addition_selector: [".s_share", ".s_social_media"],
         builder_actions: {
             deleteSocialMediaLink: {
                 apply: ({ editingElement }) => {

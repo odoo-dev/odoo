@@ -13,6 +13,7 @@ class CountdownOptionPlugin extends Plugin {
                 cleanForSave: this.cleanForSave.bind(this),
             }),
         ],
+        so_content_addition_selector: [".s_countdown"],
         builder_actions: {
             // TODO AGAU: update after merging generalized restart interactions
             //  remove this and xml BuilderContext

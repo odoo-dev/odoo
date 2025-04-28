@@ -15,6 +15,7 @@ class EmbedCodeOptionPlugin extends Plugin {
                 selector: ".s_embed_code",
             }),
         ],
+        so_content_addition_selector: [".s_embed_code"],
         builder_actions: this.getActions(),
         clean_for_save_handlers: this.cleanForSave.bind(this),
     };

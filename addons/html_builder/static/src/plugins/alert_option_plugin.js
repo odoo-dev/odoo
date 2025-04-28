@@ -40,6 +40,7 @@ class AlertOptionPlugin extends Plugin {
                 selector: ".s_alert",
             }),
         ],
+        so_content_addition_selector: [".s_alert"],
     };
 }
 registry.category("website-plugins").add(AlertOptionPlugin.id, AlertOptionPlugin);

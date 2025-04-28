@@ -46,6 +46,7 @@ export class GoogleMapsOptionPlugin extends Plugin {
                 },
             },
         ],
+        so_content_addition_selector: [".s_google_map"],
         builder_actions: this.getActions(),
     };
 

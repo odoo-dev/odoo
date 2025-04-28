@@ -15,6 +15,7 @@ class SeparatorOptionPlugin extends Plugin {
             selector: ".s_hr",
             dropNear: "p, h1, h2, h3, blockquote, .s_hr",
         },
+        so_content_addition_selector: [".s_hr"],
     };
 }
 registry.category("website-plugins").add(SeparatorOptionPlugin.id, SeparatorOptionPlugin);
