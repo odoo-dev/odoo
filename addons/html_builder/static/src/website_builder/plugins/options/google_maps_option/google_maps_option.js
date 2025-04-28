@@ -36,7 +36,7 @@ export class GoogleMapsOption extends BaseOptionComponent {
             () => [this.state.formattedAddress]
         );
         onMounted(async () => {
-            this.initializeAutocomplete(this.inputRef.el);
+            await this.initializeAutocomplete(this.inputRef.el);
         });
         onWillDestroy(() => {
             if (this.autocompleteListener) {
@@ -55,13 +55,16 @@ export class GoogleMapsOption extends BaseOptionComponent {
      *
      * @param {Element} inputEl
      */
-    initializeAutocomplete(inputEl) {
+    async initializeAutocomplete(inputEl) {
         if (!this.googleMapsAutocomplete && this.props.getMapsAPI()) {
             const mapsAPI = this.props.getMapsAPI();
-            this.googleMapsAutocomplete = new mapsAPI.places.Autocomplete(inputEl, {
-                types: ["geocode"],
+            const { Autocomplete } = await mapsAPI.importLibrary("places");
+            this.googleMapsAutocomplete = new Autocomplete(inputEl, {
+                types: ["geocode", "establishment"],
+                fields: ["geometry", "formatted_address"],
             });
-            this.autocompleteListener = mapsAPI.event.addListener(
+            const { event } = await mapsAPI.importLibrary("core");
+            event.addListener(
                 this.googleMapsAutocomplete,
                 "place_changed",
                 this.onPlaceChanged.bind(this)
@@ -71,8 +74,10 @@ export class GoogleMapsOption extends BaseOptionComponent {
                 /** @type {Coordinates} */
                 const coordinates = editingElement.dataset.mapGps;
                 this.props.getPlace(editingElement, coordinates).then((place) => {
-                    if (place?.formatted_address) {
-                        this.state.formattedAddress = place.formatted_address;
+                    const formattedAddress =
+                        place?.formatted_address || place?.Eg?.formattedAddress;
+                    if (formattedAddress) {
+                        this.state.formattedAddress = formattedAddress;
                     }
                 });
             }
@@ -88,6 +93,7 @@ export class GoogleMapsOption extends BaseOptionComponent {
         /** @type {Place | undefined} */
         const place = this.googleMapsAutocomplete.getPlace();
         this.props.onPlaceChanged(this.env.getEditingElement(), place);
-        this.state.formattedAddress = place?.formatted_address || "";
+        const formattedAddress = place?.formatted_address || place?.Eg?.formattedAddress;
+        this.state.formattedAddress = formattedAddress || "";
     }
 }

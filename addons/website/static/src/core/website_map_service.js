@@ -16,13 +16,13 @@ registry.category("services").add("website_map", {
         const promiseKeys = {};
         const promiseKeysResolves = {};
         let lastKey;
-        window.odoo_gmap_api_post_load = (async function odoo_gmap_api_post_load() {
-            for (const el of document.querySelectorAll("section.s_google_map")) {
-                publicInteractions.stopInteractions(el);
-                publicInteractions.startInteractions(el);
-            }
-            promiseKeysResolves[lastKey]?.();
-        }).bind(this);
+        // window.odoo_gmap_api_post_load = (async function odoo_gmap_api_post_load() {
+        //     for (const el of document.querySelectorAll("section.s_google_map")) {
+        //         publicInteractions.stopInteractions(el);
+        //         publicInteractions.startInteractions(el);
+        //     }
+        //     promiseKeysResolves[lastKey]?.();
+        // }).bind(this);
         return {
             /**
              * @param {boolean} [refetch=false]
@@ -55,11 +55,38 @@ registry.category("services").add("website_map", {
                                 promiseKeys[key] = new Promise((resolve) => {
                                     promiseKeysResolves[key] = resolve;
                                 });
-                                await loadJS(
-                                    `https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&callback=odoo_gmap_api_post_load&key=${encodeURIComponent(
-                                        key
-                                    )}`
-                                );
+                                (g => {
+                                    var h, a, k, p = "The Google Maps JavaScript API",
+                                        c = "google",
+                                        l = "importLibrary",
+                                        q = "__ib__",
+                                        m = document,
+                                        b = window;
+                                    b = b[c] || (b[c] = {});
+                                    var d = b.maps || (b.maps = {}), 
+                                    r = new Set, 
+                                    e = new URLSearchParams, 
+                                    u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); 
+                                    for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), 
+                                    g[k]); e.set("callback", c + ".maps." + q); 
+                                    a.src = `https://maps.${c}apis.com/maps/api/js?` + e;
+                                    d[q] = f;
+                                    a.onerror = () => h = n(Error(p + " could not load.")); 
+                                    var script = m.querySelector("script[nonce]");
+                                    a.nonce = script ? script.nonce : "";
+                                    m.head.append(a) }));
+                                    d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n))
+                                })({
+                                    key: key,
+                                    v: "weekly",
+                                });
+                                for (const el of document.querySelectorAll(
+                                    "section.s_google_map"
+                                )) {
+                                    publicInteractions.stopInteractions(el);
+                                    publicInteractions.startInteractions(el);
+                                }
+                                promiseKeysResolves[lastKey]?.();
                             }
                             await promiseKeys[key];
                             resolve(key);
