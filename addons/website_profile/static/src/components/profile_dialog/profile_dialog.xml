@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="website_profile.ProfileDialog" t-inherit="web.ConfirmationDialog" t-inherit-mode="primary">
+        <xpath expr="//p[@t-out='props.body']" position="replace">
+            <form method="POST" action="" t-ref="form">
+                <input type="hidden" name="csrf_token" t-att-value="csrf_token"/>
+                <label for="name">Nom :</label>
+                <input id="name" name="name" type="text" t-model="state.name" required="true"/>
+                <br/>
+                <label for="email">Email :</label>
+                <input id="email" name="email" type="email" t-model="state.email" required="true"/>
+                <br/>
+                <textarea t-ref="description" name="description" class="form-control"
+                      placeholder="Write a few words about yourself..."/>
+<!--                <Wysiwyg></Wysiwyg>-->
+            </form>
+        </xpath>
+    </t>
+
+</templates>

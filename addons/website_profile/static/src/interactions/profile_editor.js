@@ -46,6 +46,7 @@ export class ProfileEditor extends Interaction {
             resizable: true,
             userGeneratedContent: true,
         };
+        console.log('this.services.website_page.context', this.services.website_page.context);
 
         if (this.textareaEl.attributes.placeholder) {
             this.options.placeholder = this.textareaEl.attributes.placeholder.value;

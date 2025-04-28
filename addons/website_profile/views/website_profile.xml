@@ -104,8 +104,7 @@
                             <h1 class="o_card_people_name">
                                 <span t-field="user.name"/><small t-if="user.karma == 0"> (not verified)</small>
                             </h1>
-                            <a class="btn btn-primary d-none d-md-inline-block" t-if="(request.env.user == user and user.karma != 0) or request.env.user._is_admin()"
-                                data-bs-toggle="modal" data-bs-target="#o_wprofile_edit_profile_modal">
+                            <a class="btn o_wprofile_editor_dialog btn-primary d-none d-md-inline-block" t-if="(request.env.user == user and user.karma != 0) or request.env.user._is_admin()">
                                 <i class="fa fa-pencil me-2"/>EDIT PROFILE
                             </a>
                         </div>
