@@ -14,9 +14,9 @@
     padding: 0 !important;
 
     .o_we_cell {
-        fill: $o-we-fg-lighter;
+        fill: $o-hb-fg-lighter;
         fill-opacity: .1;
-        stroke: $o-we-bg-darkest;
+        stroke: $o-hb-bg-darkest;
         stroke-opacity: .2;
         stroke-width: 1px;
         filter: drop-shadow(-1px -1px 0px rgba(255, 255, 255, 0.3));
@@ -49,19 +49,19 @@
 
 .o_we_drag_helper {
     padding: 0;
-    border: $o-we-handle-border-width * 2 solid $o-we-accent;
-    border-radius: $o-we-item-border-radius;
+    border: $o-hb-handle-border-width * 2 solid $o-hb-accent;
+    border-radius: $o-hb-item-border-radius;
 }
 
 // Highlight of the grid items padding.
 @keyframes highlightPadding {
     from {
-        border: solid rgba($o-we-handles-accent-color, 0.2);
+        border: solid rgba($o-hb-handles-accent-color, 0.2);
         border-width: var(--grid-item-padding-y) var(--grid-item-padding-x);
     }
 
     to {
-        border: solid rgba($o-we-handles-accent-color, 0);
+        border: solid rgba($o-hb-handles-accent-color, 0);
         border-width: var(--grid-item-padding-y) var(--grid-item-padding-x);
     }
 }

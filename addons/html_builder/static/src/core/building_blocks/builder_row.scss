@@ -1,7 +1,7 @@
 .o_we_collapse_toggler {
     @include o-position-absolute($top: 0, $left: 0);
-    width: $o-we-sidebar-content-indent;
-    height: $o-we-sidebar-content-field-height;
+    width: $o-hb-sidebar-content-indent;
+    height: $o-hb-sidebar-content-field-height;
     display: flex;
     align-items: center;
     justify-content: center;

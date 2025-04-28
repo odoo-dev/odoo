@@ -36,6 +36,9 @@
             # need to load it here for html_builder.
             'website/static/src/xml/website.cookies_bar.xml',
         ],
+        'web._assets_primary_variables': [
+            'html_builder/static/src/builder.variables.scss',
+        ],
         # this bundle is lazy loaded when the editor is ready
         'html_builder.assets': [
             ('include', 'web._assets_helpers'),

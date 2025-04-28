@@ -1,14 +1,15 @@
 .oe_drop_zone {
-    background: $o-we-dropzone-bg-color;
+    height: 10px;
+    background: $o-hb-dropzone-bg-color;
     animation: dropZoneInsert 1s linear 0s infinite alternate;
 
     &.oe_insert {
         position: relative;
         width: 100%;
         border-radius: $border-radius-lg;
-        outline: $o-we-dropzone-border-width dashed $o-we-dropzone-accent-color;
-        outline-offset: -$o-we-dropzone-border-width;
-        z-index: 2000; // TODO use $o-we-overlay-zindex instead
+        outline: $o-hb-dropzone-border-width dashed $o-hb-dropzone-accent-color;
+        outline-offset: -$o-hb-dropzone-border-width;
+        z-index: 2000; // TODO use $o-hb-overlay-zindex instead
     }
 
     &.o_dropzone_highlighted {
@@ -19,16 +20,16 @@
 
 .oe_drop_zone:not(.oe_grid_zone) {
     &.oe_insert {
-        min-width: $o-we-dropzone-size;
-        height: $o-we-dropzone-size;
-        min-height: $o-we-dropzone-size;
-        margin: (-$o-we-dropzone-size/2) 0;
+        min-width: $o-hb-dropzone-size;
+        height: $o-hb-dropzone-size;
+        min-height: $o-hb-dropzone-size;
+        margin: (-$o-hb-dropzone-size/2) 0;
         padding: 0;
 
         &.oe_vertical {
-            width: $o-we-dropzone-size;
+            width: $o-hb-dropzone-size;
             float: left;
-            margin: 0 (-$o-we-dropzone-size/2);
+            margin: 0 (-$o-hb-dropzone-size/2);
         }
     }
 
@@ -39,9 +40,9 @@
         padding: 15px;
         margin: 0px;
         backdrop-filter: blur(15px);
-        background-color: rgba($o-we-bg-lighter, 0.15);
+        background-color: rgba($o-hb-bg-lighter, 0.15);
         color: white;
-        outline-color: $o-we-bg-lighter;
+        outline-color: $o-hb-bg-lighter;
         z-index: 1999; // TODO
 
         > p {

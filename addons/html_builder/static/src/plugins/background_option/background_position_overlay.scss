@@ -17,7 +17,7 @@
             @include button-variant($o-brand-primary, $o-brand-primary);
         }
         .btn-secondary {
-            @include button-variant($o-we-color-danger, $o-we-color-danger);
+            @include button-variant($o-hb-color-danger, $o-hb-color-danger);
         }
     }
 

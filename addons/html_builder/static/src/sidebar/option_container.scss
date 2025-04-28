@@ -1,13 +1,13 @@
 .options-container {
     .btn {
-        color: $o-we-fg-light;
+        color: $o-hb-fg-light;
         font-size: 12px;
         padding: 1px 6px;
         border: none;
 
         &.active {
-            color: $o-we-fg-lighter;
-            background-color: $o-we-bg-light !important;
+            color: $o-hb-fg-lighter;
+            background-color: $o-hb-bg-light !important;
 
         }
 
@@ -17,7 +17,7 @@
     }
 
     .btn-primary {
-        background-color: $o-we-bg-lightest !important;
+        background-color: $o-hb-bg-lightest !important;
     }
 
     .btn-primary.o_we_bg_danger {
@@ -48,14 +48,14 @@
     }
 
     input {
-        border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
-        border-radius: $o-we-sidebar-content-field-border-radius;
-        background-color: $o-we-sidebar-content-field-input-bg;
+        border: $o-hb-sidebar-content-field-border-width solid $o-hb-sidebar-content-field-border-color;
+        border-radius: $o-hb-sidebar-content-field-border-radius;
+        background-color: $o-hb-sidebar-content-field-input-bg;
         color: inherit;
-        padding: 0 $o-we-sidebar-content-field-clickable-spacing;
+        padding: 0 $o-hb-sidebar-content-field-clickable-spacing;
 
         &:focus {
-            border-color: $o-we-sidebar-content-field-input-border-color;
+            border-color: $o-hb-sidebar-content-field-input-border-color;
         }
     }
 }

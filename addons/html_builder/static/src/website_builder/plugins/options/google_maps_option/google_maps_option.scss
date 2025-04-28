@@ -1,15 +1,15 @@
 .pac-container { // Google Maps' Autocomplete
-    z-index: $zindex-modal-backdrop; // > $o-we-zindex
-    width: ceil($o-we-sidebar-width * 0.9) !important;
-    font-size: $o-we-sidebar-font-size;
-    margin-left: -$o-we-sidebar-width/2;
-    border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-dropdown-border-color;
+    z-index: $zindex-modal-backdrop; // > $o-hb-zindex
+    width: ceil($o-hb-sidebar-width * 0.9) !important;
+    font-size: $o-hb-sidebar-font-size;
+    margin-left: -$o-hb-sidebar-width/2;
+    border: $o-hb-sidebar-content-field-border-width solid $o-hb-sidebar-content-field-dropdown-border-color;
     border-top: none;
-    border-radius: $o-we-item-border-radius;
+    border-radius: $o-hb-item-border-radius;
     overflow: hidden;
-    background-color: $o-we-sidebar-content-field-dropdown-bg;
-    box-shadow: $o-we-sidebar-content-field-dropdown-shadow;
-    margin-top: $o-we-sidebar-content-field-dropdown-spacing;
+    background-color: $o-hb-sidebar-content-field-dropdown-bg;
+    box-shadow: $o-hb-sidebar-content-field-dropdown-shadow;
+    margin-top: $o-hb-sidebar-content-field-dropdown-spacing;
     transform: translate(41px);
 
     &:after {
@@ -18,17 +18,17 @@
 
     .pac-item {
         @include o-text-overflow(block);
-        line-height: $o-we-sidebar-content-field-dropdown-item-height;
-        color: $o-we-sidebar-content-field-clickable-color;
-        padding: 0 1em 0 (2 * $o-we-sidebar-content-field-control-item-spacing + $o-we-sidebar-content-field-control-item-size);
-        border-top: $o-we-sidebar-content-field-border-width solid lighten($o-we-sidebar-content-field-dropdown-border-color, 15%);
-        border-radius: $o-we-sidebar-content-field-border-radius;
-        background-color: $o-we-sidebar-content-field-clickable-bg;
-        color: $o-we-sidebar-content-field-clickable-color;
-        font-size: $o-we-sidebar-font-size;
+        line-height: $o-hb-sidebar-content-field-dropdown-item-height;
+        color: $o-hb-sidebar-content-field-clickable-color;
+        padding: 0 1em 0 (2 * $o-hb-sidebar-content-field-control-item-spacing + $o-hb-sidebar-content-field-control-item-size);
+        border-top: $o-hb-sidebar-content-field-border-width solid lighten($o-hb-sidebar-content-field-dropdown-border-color, 15%);
+        border-radius: $o-hb-sidebar-content-field-border-radius;
+        background-color: $o-hb-sidebar-content-field-clickable-bg;
+        color: $o-hb-sidebar-content-field-clickable-color;
+        font-size: $o-hb-sidebar-font-size;
 
         &:hover, &:focus, &.pac-item-selected {
-            background-color: $o-we-sidebar-content-field-dropdown-item-bg-hover;
+            background-color: $o-hb-sidebar-content-field-dropdown-item-bg-hover;
             cursor: pointer;
         }
 

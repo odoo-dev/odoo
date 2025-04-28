@@ -117,7 +117,7 @@
             &:hover {
                 box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.2);
                 &::after {
-                    outline: 6px solid $o-we-handles-accent-color;
+                    outline: 6px solid $o-hb-handles-accent-color;
                 }
             }
             &.o_snippet_preview_install {
@@ -140,8 +140,8 @@
                     transform: scale(3.33);
                     width: max-content;
                     font-size: 14px;
-                    font-family: $o-we-font-family;
-                    background-color: $o-we-color-info;
+                    font-family: $o-hb-font-family;
+                    background-color: $o-hb-color-info;
                     transition: 0.3s;
                 }
             }
@@ -163,7 +163,7 @@
                 > * {
                 color: rgba(0, 0, 0, 0.6);
                 font-size: 50px;
-                font-family: $o-we-font-family;
+                font-family: $o-hb-font-family;
                 }
                 .btn:hover {
                 color: rgba(0, 0, 0, 0.8);
