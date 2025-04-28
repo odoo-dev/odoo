@@ -131,8 +131,8 @@ class SocialMediaOptionPlugin extends Plugin {
                 },
             },
             toggleRecordedSocialMediaLink: {
-                isApplied: ({ editingElement, param: { domPosition } }) => !!domPosition,
-                apply: ({ editingElement, param: { media, elementAfter } }) => {
+                isApplied: ({ editingElement, params: { domPosition } }) => !!domPosition,
+                apply: ({ editingElement, params: { media, elementAfter } }) => {
                     const el = this.newLinkElement(
                         editingElement.querySelector(":scope > a"),
                         media
@@ -143,13 +143,13 @@ class SocialMediaOptionPlugin extends Plugin {
                         editingElement.append(el);
                     }
                 },
-                clean: ({ editingElement, param: { domPosition } }) => {
+                clean: ({ editingElement, params: { domPosition } }) => {
                     editingElement.querySelector(`a:nth-of-type(${domPosition})`).remove();
                 },
             },
             editRecordedSocialMediaLink: {
-                getValue: ({ param: { mainParam } }) => this.recordedSocialMedia.get(mainParam),
-                apply: ({ param: { mainParam }, value }) => {
+                getValue: ({ params: { mainParam } }) => this.recordedSocialMedia.get(mainParam),
+                apply: ({ params: { mainParam }, value }) => {
                     this.recordedSocialMediaAreEdited = true;
                     const oldValue = this.recordedSocialMedia.get(mainParam);
                     this.dependencies.history.applyCustomMutation({
@@ -159,7 +159,7 @@ class SocialMediaOptionPlugin extends Plugin {
                 },
             },
             editSocialMediaLink: {
-                apply: ({ editingElement, param: { mainParam }, value }) => {
+                apply: ({ editingElement, params: { mainParam }, value }) => {
                     if (!value) {
                         editingElement.remove();
                     }

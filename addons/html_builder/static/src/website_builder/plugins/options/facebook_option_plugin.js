@@ -16,15 +16,15 @@ class FacebookOptionPlugin extends Plugin {
         ],
         builder_actions: {
             dataAttributeListAction: {
-                isApplied: ({ editingElement, param: { mainParam } = {}, value }) =>
+                isApplied: ({ editingElement, params: { mainParam } = {}, value }) =>
                     (editingElement.dataset[mainParam]?.split(",") || []).includes(value),
-                apply: ({ editingElement, param: { mainParam } = {}, value }) => {
+                apply: ({ editingElement, params: { mainParam } = {}, value }) => {
                     editingElement.dataset[mainParam] = [
                         ...(editingElement.dataset[mainParam]?.split(",") || []),
                         value,
                     ].join(",");
                 },
-                clean: ({ editingElement, param: { mainParam } = {}, value }) => {
+                clean: ({ editingElement, params: { mainParam } = {}, value }) => {
                     editingElement.dataset[mainParam] = (
                         editingElement.dataset[mainParam]?.split(",") || []
                     )
