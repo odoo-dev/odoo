@@ -4,6 +4,7 @@ import { VersionControlPlugin } from "@html_builder/core/version_control_plugin"
 import { EditInteractionPlugin } from "@html_builder/website_builder/plugins/edit_interaction_plugin";
 import { WebsiteSessionPlugin } from "@html_builder/website_builder/plugins/website_session_plugin";
 import { WebsiteBuilder } from "@html_builder/website_preview/website_builder_action";
+import { WebsiteSystrayItem } from "@html_builder/website_preview/website_systray_item";
 import { setContent } from "@html_editor/../tests/_helpers/selection";
 import { insertText } from "@html_editor/../tests/_helpers/user_actions";
 import { Plugin } from "@html_editor/plugin";
@@ -34,8 +35,8 @@ import { isBrowserFirefox } from "@web/core/browser/feature_detection";
 import { registry } from "@web/core/registry";
 import { uniqueId } from "@web/core/utils/functions";
 import { WebClient } from "@web/webclient/webclient";
+import { patchWithCleanupImg } from "./helpers";
 import { getWebsiteSnippets } from "./snippets_getter.hoot";
-import { WebsiteSystrayItem } from "@html_builder/website_preview/website_systray_item";
 
 class Website extends models.Model {
     _name = "website";
@@ -202,6 +203,8 @@ export async function setupWebsiteBuilder(
             },
         });
     }
+
+    patchWithCleanupImg();
 
     const iframe = queryOne("iframe[data-src^='/website/force/1']");
     if (isBrowserFirefox()) {
