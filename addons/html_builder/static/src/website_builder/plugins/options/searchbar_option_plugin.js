@@ -18,6 +18,7 @@ class SearchbarOptionPlugin extends Plugin {
             },
         ],
         builder_actions: this.getActions(),
+        so_content_addition_selector: [".s_searchbar_input"],
         searchbar_option_order_by_items: {
             label: _t("Name (A-Z)"),
             orderBy: "name asc",
