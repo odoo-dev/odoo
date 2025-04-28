@@ -7,7 +7,7 @@
         <BuilderSelect id="'mega_menu_template_opt'" action="'selectTemplate'">
             <BuilderSelectItem
                 title.translate="Multi Menus"
-                actionParam="{
+                actionParams="{
                     view: `${templatePrefix}s_mega_menu_multi_menus`,
                     templateClass: 's_mega_menu_multi_menus',
                 }">
@@ -15,7 +15,7 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Image Menu"
-                actionParam="{
+                actionParams="{
                     view: `${templatePrefix}s_mega_menu_menu_image_menu`,
                     templateClass: 's_mega_menu_menu_image_menu',
                 }">
@@ -23,7 +23,7 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Odoo Menu"
-                actionParam="{
+                actionParams="{
                     view: `${templatePrefix}s_mega_menu_odoo_menu`,
                     templateClass: 's_mega_menu_odoo_menu',
                 }">
@@ -31,7 +31,7 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Little Icons"
-                actionParam="{
+                actionParams="{
                     view: `${templatePrefix}s_mega_menu_little_icons`,
                     templateClass: 's_mega_menu_little_icons',
                 }">
@@ -39,7 +39,7 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Big Icons Subtitles"
-                actionParam="{
+                actionParams="{
                     view: `${templatePrefix}s_mega_menu_big_icons_subtitles`,
                     templateClass: 's_mega_menu_big_icons_subtitles',
                 }">
@@ -47,7 +47,7 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Images Subtitles"
-                actionParam="{
+                actionParams="{
                     view: `${templatePrefix}s_mega_menu_images_subtitles`,
                     templateClass: 's_mega_menu_images_subtitles',
                 }">
@@ -55,7 +55,7 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Logos"
-                actionParam="{
+                actionParams="{
                     view: `${templatePrefix}s_mega_menu_menus_logos`,
                     templateClass: 's_mega_menu_menus_logos',
                 }">
@@ -63,7 +63,7 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Thumbnails"
-                actionParam="{
+                actionParams="{
                     view: `${templatePrefix}s_mega_menu_thumbnails`,
                     templateClass: 's_mega_menu_thumbnails',
                 }">
@@ -71,7 +71,7 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Cards"
-                actionParam="{
+                actionParams="{
                     view: `${templatePrefix}s_mega_menu_cards`,
                     templateClass: 's_mega_menu_cards',
                 }">

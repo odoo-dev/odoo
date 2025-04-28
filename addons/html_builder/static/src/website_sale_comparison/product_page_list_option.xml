@@ -5,7 +5,7 @@
     <BuilderButton id="'button_add_to_cart_opt'" position="after">
         <BuilderButton title.translate="Compare" icon="'fa-exchange'"
             action="'websiteConfig'"
-            actionParam="{views:['website_sale_comparison.add_to_compare']}"
+            actionParams="{views:['website_sale_comparison.add_to_compare']}"
         />
     </BuilderButton>
 </t>

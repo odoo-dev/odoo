@@ -21,13 +21,13 @@
             </BuilderButtonGroup>
         </BuilderRow>
         <BuilderRow label.translate="Author" level="1" preview="false">
-            <BuilderCheckbox id="'author_opt'" action="'customizeTemplate'" actionParam="'blog_posts_post_author_active'"/>
+            <BuilderCheckbox id="'author_opt'" action="'customizeTemplate'" actionParams="'blog_posts_post_author_active'"/>
         </BuilderRow>
         <BuilderRow label.translate="Teaser" level="1" preview="false" t-if="!!showTeaserOption()">
-            <BuilderCheckbox id="'teaser_opt'" action="'customizeTemplate'" actionParam="'blog_posts_post_teaser_active'"/>
+            <BuilderCheckbox id="'teaser_opt'" action="'customizeTemplate'" actionParams="'blog_posts_post_teaser_active'"/>
         </BuilderRow>
         <BuilderRow label.translate="Date" level="1" preview="false" t-if="!!showDateOption()">
-            <BuilderCheckbox id="'date_opt'" action="'customizeTemplate'" actionParam="'blog_posts_post_date_active'"/>
+            <BuilderCheckbox id="'date_opt'" action="'customizeTemplate'" actionParams="'blog_posts_post_date_active'"/>
         </BuilderRow>
         <!-- TODO noWidgetRefresh="true" => refreshInteraction="false" ? -->
         <BuilderRow label.translate="Hover Effect" level="1" t-if="templateKeyState.templateKey === 'website_blog.dynamic_filter_template_blog_post_big_picture'">

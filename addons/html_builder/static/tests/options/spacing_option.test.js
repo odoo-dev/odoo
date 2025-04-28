@@ -11,11 +11,11 @@ test("Use the 'Spacing (Y, X)' option", async () => {
     expect(":iframe .s_banner .row").toHaveStyle({ "row-gap": "0px" });
     expect(":iframe .s_banner .row").toHaveStyle({ "column-gap": "0px" });
 
-    await contains("[data-label='Spacing (Y, X)'] [data-action-param='row-gap'] input").edit(10);
+    await contains("[data-label='Spacing (Y, X)'] [data-action-params='row-gap'] input").edit(10);
     expect(":iframe .s_banner .row").toHaveStyle({ "row-gap": "10px" });
     expect(":iframe .s_banner .row").toHaveStyle({ "column-gap": "0px" });
 
-    await contains("[data-label='Spacing (Y, X)'] [data-action-param='column-gap'] input").edit(20);
+    await contains("[data-label='Spacing (Y, X)'] [data-action-params='column-gap'] input").edit(20);
     expect(":iframe .s_banner .row").toHaveStyle({ "row-gap": "10px" });
     expect(":iframe .s_banner .row").toHaveStyle({ "column-gap": "20px" });
 });

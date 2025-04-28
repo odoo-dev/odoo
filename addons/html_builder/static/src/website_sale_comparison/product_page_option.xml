@@ -5,7 +5,7 @@
     <BuilderRow id="'o_we_actions_opt'" position="inside">
         <BuilderButton title.translate="Compare"
             action="'websiteConfig'"
-            actionParam="{views:['website_sale_comparison.product_add_to_compare']}"
+            actionParams="{views:['website_sale_comparison.product_add_to_compare']}"
         >
             <i class="fa fa-fw fa-exchange"/>
             Compare
@@ -14,9 +14,9 @@
     <BuilderRow id="'o_we_actions_opt'" position="after">
         <BuilderRow label.translate="Specification">
             <BuilderSelect action="'websiteConfig'">
-                <BuilderSelectItem actionParam="{views:[]}">None</BuilderSelectItem>
-                <BuilderSelectItem actionParam="{views:['website_sale_comparison.product_attributes_body']}">Bottom of Page</BuilderSelectItem>
-                <BuilderSelectItem actionParam="{views:['website_sale_comparison.accordion_specs_item']}">In accordion</BuilderSelectItem>
+                <BuilderSelectItem actionParams="{views:[]}">None</BuilderSelectItem>
+                <BuilderSelectItem actionParams="{views:['website_sale_comparison.product_attributes_body']}">Bottom of Page</BuilderSelectItem>
+                <BuilderSelectItem actionParams="{views:['website_sale_comparison.accordion_specs_item']}">In accordion</BuilderSelectItem>
             </BuilderSelect>
         </BuilderRow>
     </BuilderRow>

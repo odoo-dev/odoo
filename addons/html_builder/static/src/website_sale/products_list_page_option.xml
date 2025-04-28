@@ -4,8 +4,8 @@
 <t t-name="website_sale.ProductsListPageOption">
 <BuilderRow label.translate="Layout">
     <BuilderSelect action="'websiteConfig'">
-        <BuilderSelectItem id="'grid_view_opt'" actionParam="{views: []}">Grid</BuilderSelectItem>
-        <BuilderSelectItem actionParam="{views: ['website_sale.products_list_view']}">List</BuilderSelectItem>
+        <BuilderSelectItem id="'grid_view_opt'" actionParams="{views: []}">Grid</BuilderSelectItem>
+        <BuilderSelectItem actionParams="{views: ['website_sale.products_list_view']}">List</BuilderSelectItem>
     </BuilderSelect>
 </BuilderRow>
 
@@ -33,19 +33,19 @@
 
 <BuilderRow label.translate="Style" level="1">
     <BuilderSelect action="'websiteConfig'">
-        <BuilderSelectItem classAction="''" actionParam="{views: []}">Default</BuilderSelectItem>
-        <BuilderSelectItem classAction="'o_wsale_design_cards'" actionParam="{views: ['website_sale.products_design_card']}">Cards</BuilderSelectItem>
-        <BuilderSelectItem classAction="'o_wsale_design_thumbs'" actionParam="{views: ['website_sale.products_design_thumbs']}">Thumbnails</BuilderSelectItem>
-        <BuilderSelectItem classAction="'o_wsale_design_grid'" actionParam="{views: ['website_sale.products_design_grid']}">Grid</BuilderSelectItem>
+        <BuilderSelectItem classAction="''" actionParams="{views: []}">Default</BuilderSelectItem>
+        <BuilderSelectItem classAction="'o_wsale_design_cards'" actionParams="{views: ['website_sale.products_design_card']}">Cards</BuilderSelectItem>
+        <BuilderSelectItem classAction="'o_wsale_design_thumbs'" actionParams="{views: ['website_sale.products_design_thumbs']}">Thumbnails</BuilderSelectItem>
+        <BuilderSelectItem classAction="'o_wsale_design_grid'" actionParams="{views: ['website_sale.products_design_grid']}">Grid</BuilderSelectItem>
     </BuilderSelect>
 </BuilderRow>
 
 <BuilderRow label.translate="Images Size" level="1">
     <BuilderSelect action="'websiteConfig'">
-        <BuilderSelectItem classAction="'o_wsale_context_thumb_4_3'" actionParam="{views: ['website_sale.products_thumb_4_3']}">Landscape (4/3)</BuilderSelectItem>
-        <BuilderSelectItem classAction="''" actionParam="{views: []}">Default (1/1)</BuilderSelectItem>
-        <BuilderSelectItem classAction="'o_wsale_context_thumb_4_5'" actionParam="{views: ['website_sale.products_thumb_4_5']}">Portrait (4/5)</BuilderSelectItem>
-        <BuilderSelectItem classAction="'o_wsale_context_thumb_2_3'" actionParam="{views: ['website_sale.products_thumb_2_3']}">Vertical (2/3)</BuilderSelectItem>
+        <BuilderSelectItem classAction="'o_wsale_context_thumb_4_3'" actionParams="{views: ['website_sale.products_thumb_4_3']}">Landscape (4/3)</BuilderSelectItem>
+        <BuilderSelectItem classAction="''" actionParams="{views: []}">Default (1/1)</BuilderSelectItem>
+        <BuilderSelectItem classAction="'o_wsale_context_thumb_4_5'" actionParams="{views: ['website_sale.products_thumb_4_5']}">Portrait (4/5)</BuilderSelectItem>
+        <BuilderSelectItem classAction="'o_wsale_context_thumb_2_3'" actionParams="{views: ['website_sale.products_thumb_2_3']}">Vertical (2/3)</BuilderSelectItem>
     </BuilderSelect>
 </BuilderRow>
 
@@ -53,13 +53,13 @@
     <BuilderButtonGroup action="'websiteConfig'">
         <BuilderButton
             classAction="''"
-            actionParam="{views: []}"
+            actionParams="{views: []}"
             iconImg="'/website/static/src/img/snippets_options/content_width_normal.svg'">
         </BuilderButton>
         <BuilderButton
             id="'thumb_cover'"
             classAction="'o_wsale_context_thumb_cover'"
-            actionParam="{views: ['website_sale.products_thumb_cover']}"
+            actionParams="{views: ['website_sale.products_thumb_cover']}"
             iconImg="'/website/static/src/img/snippets_options/content_width_full.svg'">
         </BuilderButton>
     </BuilderButtonGroup>
@@ -67,44 +67,44 @@
 
 <BuilderContext action="'websiteConfig'">
     <BuilderRow label.translate="Search Bar">
-        <BuilderCheckbox actionParam="{views: ['website_sale.search']}"/>
+        <BuilderCheckbox actionParams="{views: ['website_sale.search']}"/>
     </BuilderRow>
 
     <BuilderRow label.translate="Product Description">
-        <BuilderCheckbox actionParam="{views: ['website_sale.products_description']}"/>
+        <BuilderCheckbox actionParams="{views: ['website_sale.products_description']}"/>
     </BuilderRow>
 
     <BuilderRow label.translate="Categories">
-        <BuilderButton id="'categories_opt'" actionParam="{views: ['website_sale.products_categories']}">Left</BuilderButton>
-        <BuilderButton id="'categories_opt_top'" actionParam="{views: ['website_sale.products_categories_top']}">Top</BuilderButton>
+        <BuilderButton id="'categories_opt'" actionParams="{views: ['website_sale.products_categories']}">Left</BuilderButton>
+        <BuilderButton id="'categories_opt_top'" actionParams="{views: ['website_sale.products_categories_top']}">Top</BuilderButton>
     </BuilderRow>
 
     <BuilderRow t-if="this.isActiveItem('categories_opt')" label.translate="Collapse Category Recursive" level="1">
-        <BuilderCheckbox id="'collapse_category_recursive'" actionParam="{views: ['website_sale.option_collapse_products_categories']}"/>
+        <BuilderCheckbox id="'collapse_category_recursive'" actionParams="{views: ['website_sale.option_collapse_products_categories']}"/>
     </BuilderRow>
 
     <BuilderRow label.translate="Attributes">
-        <BuilderButton id="'attributes_opt'" actionParam="{views: ['website_sale.products_attributes']}">Left</BuilderButton>
-        <BuilderButton id="'attributes_opt_top'" actionParam="{views: ['website_sale.products_attributes_top']}">Top</BuilderButton>
+        <BuilderButton id="'attributes_opt'" actionParams="{views: ['website_sale.products_attributes']}">Left</BuilderButton>
+        <BuilderButton id="'attributes_opt_top'" actionParams="{views: ['website_sale.products_attributes_top']}">Top</BuilderButton>
     </BuilderRow>
     <t t-if="this.isActiveItem('attributes_opt') or this.isActiveItem('attributes_opt_top')">
         <BuilderRow label.translate="Price Filter" level="1">
-            <BuilderCheckbox actionParam="{views: ['website_sale.filter_products_price']}"/>
+            <BuilderCheckbox actionParams="{views: ['website_sale.filter_products_price']}"/>
         </BuilderRow>
 
         <BuilderRow label.translate="Product Tags Filter" level="1">
-            <BuilderCheckbox actionParam="{views: ['website_sale.filter_products_tags']}"/>
+            <BuilderCheckbox actionParams="{views: ['website_sale.filter_products_tags']}"/>
         </BuilderRow>
 
         <BuilderRow label.translate="Collapsible Sidebar" level="1">
-            <BuilderCheckbox actionParam="{views: ['website_sale.products_categories_list_collapsible', 'website_sale.products_attributes_collapsible']}"/>
+            <BuilderCheckbox actionParams="{views: ['website_sale.products_categories_list_collapsible', 'website_sale.products_attributes_collapsible']}"/>
         </BuilderRow>
     </t>
 
 
     <BuilderRow label.translate="Top Bar">
-        <BuilderButton actionParam="{views: ['website_sale.sort']}">Sort by</BuilderButton>
-        <BuilderButton actionParam="{views: ['website_sale.add_grid_or_list_option']}">Layout</BuilderButton>
+        <BuilderButton actionParams="{views: ['website_sale.sort']}">Sort by</BuilderButton>
+        <BuilderButton actionParams="{views: ['website_sale.add_grid_or_list_option']}">Layout</BuilderButton>
     </BuilderRow>
 </BuilderContext>
 
@@ -119,7 +119,7 @@
 <BuilderRow label.translate="Buttons">
     <BuilderButton title.translate="Add to Cart" icon="'fa-shopping-cart'"
         action="'websiteConfig'"
-        actionParam="{views: ['website_sale.products_add_to_cart']}"
+        actionParams="{views: ['website_sale.products_add_to_cart']}"
         id="'button_add_to_cart_opt'"
     />
 </BuilderRow>

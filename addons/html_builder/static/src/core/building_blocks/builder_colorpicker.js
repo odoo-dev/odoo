@@ -24,7 +24,7 @@ export function useColorPickerBuilderComponent() {
                 proms.push(
                     applySpec.apply({
                         editingElement: applySpec.editingElement,
-                        param: applySpec.actionParam,
+                        param: applySpec.actionParams,
                         value: applySpec.actionValue,
                         loadResult: applySpec.loadResult,
                         dependencyManager: comp.env.dependencyManager,
@@ -42,8 +42,8 @@ export function useColorPickerBuilderComponent() {
         const actionWithGetValue = getAllActions().find(
             ({ actionId }) => getAction(actionId).getValue
         );
-        const { actionId, actionParam } = actionWithGetValue;
-        const actionValue = getAction(actionId).getValue({ editingElement, param: actionParam });
+        const { actionId, actionParams } = actionWithGetValue;
+        const actionValue = getAction(actionId).getValue({ editingElement, param: actionParams });
         return {
             selectedColor: actionValue || "#FFFFFF00",
         };

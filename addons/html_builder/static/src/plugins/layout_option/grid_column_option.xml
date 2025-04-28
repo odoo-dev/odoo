@@ -3,8 +3,8 @@
 
 <t t-name="html_builder.GridColumnsOption">
     <BuilderRow t-if="this.state.isGridMode" label.translate="Padding (Y, X)">
-        <BuilderNumberInput action="'setGridColumnsPadding'" actionParam="'--grid-item-padding-y'" unit="'px'"/>
-        <BuilderNumberInput action="'setGridColumnsPadding'" actionParam="'--grid-item-padding-x'" unit="'px'"/>
+        <BuilderNumberInput action="'setGridColumnsPadding'" actionParams="'--grid-item-padding-y'" unit="'px'"/>
+        <BuilderNumberInput action="'setGridColumnsPadding'" actionParams="'--grid-item-padding-x'" unit="'px'"/>
     </BuilderRow>
 </t>
 

@@ -17,7 +17,7 @@
     </xpath>
     <xpath expr="//BuilderRow[*[@id=&quot;'template_opt'&quot;]]" position="after">
         <BuilderRow label.translate="Show time" preview="false">
-            <BuilderCheckbox id="'time_opt'" action="'customizeTemplate'" actionParam="'events_event_time_active'"/>
+            <BuilderCheckbox id="'time_opt'" action="'customizeTemplate'" actionParams="'events_event_time_active'"/>
         </BuilderRow>
     </xpath>
 </t>

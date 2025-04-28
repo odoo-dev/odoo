@@ -9,17 +9,17 @@
                 <BuilderButton
                     id="'card_img_top_option'"
                     classAction="'o_card_img_top'"
-                    actionParam="'card-img-top'"
+                    actionParams="'card-img-top'"
                     iconImg="'/website/static/src/img/snippets_options/pos_top.svg'"
                     title.translate="Top"/>
                 <BuilderButton
                     classAction="'o_card_img_horizontal flex-lg-row'"
-                    actionParam="'rounded-start'"
+                    actionParams="'rounded-start'"
                     iconImg="'/website/static/src/img/snippets_options/pos_left.svg'"
                     title.translate="Left"/>
                 <BuilderButton
                     classAction="'o_card_img_horizontal flex-lg-row-reverse'"
-                    actionParam="'rounded-end'"
+                    actionParams="'rounded-end'"
                     iconImg="'/website/static/src/img/snippets_options/pos_right.svg'"
                     title.translate="Right"/>
             </BuilderButtonGroup>

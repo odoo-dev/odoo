@@ -63,7 +63,7 @@ class FooterOptionPlugin extends Plugin {
                     for (const item of selectableContext.items) {
                         for (const a of item.getActions()) {
                             if (a.actionId === "websiteConfigFooter") {
-                                possibleValues.add(a.actionParam.view);
+                                possibleValues.add(a.actionParams.view);
                             }
                         }
                     }

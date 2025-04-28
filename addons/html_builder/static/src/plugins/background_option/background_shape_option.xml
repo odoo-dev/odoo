@@ -14,13 +14,13 @@
     </BuilderRow>
 
     <BuilderRow label.translate="Flip" level="2" t-if="isActiveItem('toggle_bg_shape_id')">
-        <BuilderButton icon="'oi-arrows-h'" preview="false" action="'flipShape'" actionParam="'x'"/>
-        <BuilderButton icon="'oi-arrows-v'" preview="false" action="'flipShape'" actionParam="'y'"/>
+        <BuilderButton icon="'oi-arrows-h'" preview="false" action="'flipShape'" actionParams="'x'"/>
+        <BuilderButton icon="'oi-arrows-v'" preview="false" action="'flipShape'" actionParams="'y'"/>
     </BuilderRow>
 
     <BuilderRow label.translate="Colors" level="2">
         <t t-foreach="getDefaultColorNames()" t-as="colorName" t-key="colorName_index">
-            <BuilderColorPicker action="'backgroundShapeColor'" actionParam="colorName"/>
+            <BuilderColorPicker action="'backgroundShapeColor'" actionParams="colorName"/>
         </t>
         <!-- TODO handle all the attributes -->
         <BuilderColorPicker styleAction="'background-color'" applyTo="':scope > .o_we_shape'"/>

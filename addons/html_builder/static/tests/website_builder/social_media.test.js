@@ -19,7 +19,7 @@ test("add social medias", async () => {
     const facebookLinkSelector = ":iframe a[href='/website/social/facebook']";
     expect(facebookLinkSelector).toHaveCount(0);
     const toggleFacebookSelector =
-        "td:has([data-action-param='facebook']) + td [data-action-id='toggleRecordedSocialMediaLink'] input[type=checkbox]";
+        "td:has([data-action-params='facebook']) + td [data-action-id='toggleRecordedSocialMediaLink'] input[type=checkbox]";
     await contains(toggleFacebookSelector).click();
     expect(facebookLinkSelector).toHaveCount(1);
     await contains(toggleFacebookSelector).click();
@@ -42,14 +42,14 @@ test("reorder social medias", async () => {
 
     await click(":iframe h4");
 
-    await contains("td:has([data-action-param='facebook']) + td input[type=checkbox]").click();
+    await contains("td:has([data-action-params='facebook']) + td input[type=checkbox]").click();
     await contains("button[data-action-id='addSocialMediaLink']").click();
     await contains("div[data-action-id='editSocialMediaLink'] input").fill("/first");
     await contains("button[data-action-id='addSocialMediaLink']").click();
 
     // we don't know the order for the ones received from the server
-    expect("tr [data-action-param='facebook'] input").toHaveValue("https://fb.com/odoo");
-    expect("tr [data-action-param='twitter'] input").toHaveValue("https://x.com/odoo");
+    expect("tr [data-action-params='facebook'] input").toHaveValue("https://fb.com/odoo");
+    expect("tr [data-action-params='twitter'] input").toHaveValue("https://x.com/odoo");
     expect("tr:nth-child(3) input[type=text]").toHaveValue("https://www.example.com/first");
     expect("tr:nth-child(4) input[type=text]").toHaveValue("https://www.example.com");
 
@@ -58,7 +58,7 @@ test("reorder social medias", async () => {
     expect(":iframe a:nth-of-type(2)").toHaveAttribute("href", "https://www.example.com/first");
     expect(":iframe a:nth-of-type(3)").toHaveAttribute("href", "https://www.example.com");
 
-    await contains("td:has(+td [data-action-param='facebook']) button.o_drag_handle").dragAndDrop(
+    await contains("td:has(+td [data-action-params='facebook']) button.o_drag_handle").dragAndDrop(
         "tr:last-child"
     );
 
@@ -153,7 +153,7 @@ test("save social medias", async () => {
 
     await click(":iframe h4");
 
-    await contains("div[data-action-param='facebook'] input").edit("https://facebook.com/Odoo");
+    await contains("div[data-action-params='facebook'] input").edit("https://facebook.com/Odoo");
 
     let writeCalled = false;
     onRpc("website", "write", ({ args }) => {

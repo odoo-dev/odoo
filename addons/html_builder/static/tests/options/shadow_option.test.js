@@ -31,18 +31,18 @@ test("edit box-shadow with ShadowOption", async () => {
         '<div class="test-options-target o-paragraph shadow" style="box-shadow: rgba(0, 0, 0, 0.15) 0px 8px 16px 0px !important;">b</div>'
     );
 
-    await contains('[data-action-param="offsetX"] input').fill(10);
-    await contains('[data-action-param="offsetY"] input').fill(2, { clean: true });
+    await contains('[data-action-params="offsetX"] input').fill(10);
+    await contains('[data-action-params="offsetY"] input').fill(2, { clean: true });
     expect(":iframe .test-options-target").toHaveOuterHTML(
         '<div class="test-options-target o-paragraph shadow" style="box-shadow: rgba(0, 0, 0, 0.15) 10px 82px 16px 0px !important;">b</div>'
     );
 
-    await contains('[data-action-param="blur"] input').fill(3);
+    await contains('[data-action-params="blur"] input').fill(3);
     expect(":iframe .test-options-target").toHaveOuterHTML(
         '<div class="test-options-target o-paragraph shadow" style="box-shadow: rgba(0, 0, 0, 0.15) 10px 82px 163px 0px !important;">b</div>'
     );
 
-    await contains('[data-action-param="spread"] input').fill(4);
+    await contains('[data-action-params="spread"] input').fill(4);
     expect(":iframe .test-options-target").toHaveOuterHTML(
         '<div class="test-options-target o-paragraph shadow" style="box-shadow: rgba(0, 0, 0, 0.15) 10px 82px 163px 4px !important;">b</div>'
     );

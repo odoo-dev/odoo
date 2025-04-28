@@ -32,9 +32,9 @@ test("can call 2 separate actions with composite action", async () => {
         template: xml`
             <BuilderButton
                     action="'composite'"
-                    actionParam="[
-                        { action: 'action1', actionParam: { mainParam: 'class1' } },
-                        { action: 'action2', actionParam: { mainParam: 'class2' } },
+                    actionParams="[
+                        { action: 'action1', actionParams: { mainParam: 'class1' } },
+                        { action: 'action2', actionParams: { mainParam: 'class2' } },
                     ]">
                 Click
             </BuilderButton>`,
@@ -69,9 +69,9 @@ test("can call the same action twice with composite action", async () => {
         template: xml`
             <BuilderButton
                     action="'composite'"
-                    actionParam="[
-                        { action: 'action1', actionParam: { mainParam: 'class1' } },
-                        { action: 'action1', actionParam: { mainParam: 'class2' } },
+                    actionParams="[
+                        { action: 'action1', actionParams: { mainParam: 'class1' } },
+                        { action: 'action1', actionParams: { mainParam: 'class2' } },
                     ]">
                 Click
             </BuilderButton>`,

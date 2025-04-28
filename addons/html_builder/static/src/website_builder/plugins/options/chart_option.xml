@@ -44,7 +44,7 @@
                     <th>
                         <BuilderTextInput
                             action="'updateDatasetLabel'"
-                            actionParam="dataset.key"
+                            actionParams="dataset.key"
                             style="domState.isPieChart ? '' : ('border: 2px solid ' + props.getColor(dataset.backgroundColor) || props.getColor(dataset.borderColor))"/>
                     </th>
                 </t>
@@ -62,7 +62,7 @@
         <tbody>
             <tr t-foreach="domState.data.labels" t-as="label" t-key="label_index">
                 <th>
-                    <BuilderTextInput action="'updateLabelName'" actionParam="label_index"/>
+                    <BuilderTextInput action="'updateLabelName'" actionParams="label_index"/>
                 </th>
 
                 <t t-foreach="domState.data.datasets" t-as="dataset" t-key="dataset.key">
@@ -71,7 +71,7 @@
                     <td>
                         <BuilderNumberInput
                             action="'updateDatasetValue'"
-                            actionParam="{ datasetKey: dataset.key, valueIndex: label_index }"
+                            actionParams="{ datasetKey: dataset.key, valueIndex: label_index }"
                             style="domState.isPieChart ? ('border: 2px solid ' + backgroundColor || borderColor) : ''"/>
                     </td>
                 </t>
@@ -79,7 +79,7 @@
                 <td>
                     <BuilderButton t-if="domState.data.labels.length > 1"
                         action="'removeRow'"
-                        actionParam="label_index"
+                        actionParams="label_index"
                         className="'o_builder_matrix_remove_row visually-hidden-focusable text-danger fa fa-fw fa-minus'"
                         title.translate="Remove Row"
                         type="' '"
@@ -100,7 +100,7 @@
                     <td>
                         <BuilderButton t-if="domState.data.datasets.length > 1"
                             action="'removeColumn'"
-                            actionParam="dataset.key"
+                            actionParams="dataset.key"
                             className="'o_builder_matrix_remove_col visually-hidden-focusable text-danger fa fa-fw fa-minus'"
                             title.translate="Remove Column"
                             type="' '"
@@ -118,7 +118,7 @@
         <BuilderColorPicker
             getUsedCustomColors.bind="getColorPalette"
             action="'colorChange'"
-            actionParam="{
+            actionParams="{
                 type: 'backgroundColor',
                 datasetIndex: state.currentCell.datasetIndex,
                 dataIndex: state.currentCell.dataIndex,
@@ -131,7 +131,7 @@
         <BuilderColorPicker
             getUsedCustomColors.bind="getColorPalette"
             action="'colorChange'"
-            actionParam="{
+            actionParams="{
                 type: 'borderColor',
                 datasetIndex: state.currentCell.datasetIndex,
                 dataIndex: state.currentCell.dataIndex,
@@ -140,11 +140,11 @@
     </BuilderRow>
     <BuilderRow t-if="isActiveItem('bar_chart_opt') or isActiveItem('horizontal_bar_chart_opt') or isActiveItem('line_chart_opt')"
                 label.translate="Min Axis">
-        <BuilderNumberInput step="1" action="'setMinMax'" actionParam="'min'"/>
+        <BuilderNumberInput step="1" action="'setMinMax'" actionParams="'min'"/>
     </BuilderRow>
     <BuilderRow t-if="isActiveItem('bar_chart_opt') or isActiveItem('horizontal_bar_chart_opt') or isActiveItem('line_chart_opt')"
                 label.translate="Max Axis">
-        <BuilderNumberInput step="1" action="'setMinMax'" actionParam="'max'"/>
+        <BuilderNumberInput step="1" action="'setMinMax'" actionParams="'max'"/>
     </BuilderRow>
     <BuilderRow label.translate="Border Width">
         <BuilderNumberInput dataAttributeAction="'borderWidth'" default="2" unit="'px'" saveUnit="''" min="0"/>

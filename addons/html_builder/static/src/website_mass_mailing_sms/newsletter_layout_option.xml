@@ -5,7 +5,7 @@
     <xpath expr="//BuilderSelect[@action=&quot;'selectNewsletterTemplate'&quot;]/BuilderSelectItem[@id=&quot;'form_opt'&quot;]" position="before">
         <BuilderSelectItem
             title.translate="SMS Subscription"
-            actionParam="{
+            actionParams="{
                 view: `website_mass_mailing_sms.s_newsletter_block_sms_template`,
                 attribute: `sms`,
             }">

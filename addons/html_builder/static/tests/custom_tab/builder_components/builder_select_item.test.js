@@ -31,7 +31,7 @@ test("call a specific action with some params and value (BuilderSelectItem)", as
         selector: ".test-options-target",
         template: xml`
                     <BuilderSelect>
-                        <BuilderSelectItem action="'customAction'" actionParam="'myParam'" actionValue="'myValue'">MyAction</BuilderSelectItem>
+                        <BuilderSelectItem action="'customAction'" actionParams="'myParam'" actionValue="'myValue'">MyAction</BuilderSelectItem>
                     </BuilderSelect>`,
     });
     await setupWebsiteBuilder(`<div class="test-options-target">b</div>`);
@@ -319,8 +319,8 @@ test("isApplied shouldn't be called when the element is removed from the DOM", a
         selector: ".test",
         template: xml`
                 <BuilderSelect action="'customAction'">
-                    <BuilderSelectItem actionParam="'0'">0</BuilderSelectItem>
-                    <BuilderSelectItem actionParam="'1'">1</BuilderSelectItem>
+                    <BuilderSelectItem actionParams="'0'">0</BuilderSelectItem>
+                    <BuilderSelectItem actionParams="'1'">1</BuilderSelectItem>
                 </BuilderSelect>`,
     });
     await setupWebsiteBuilder(`<div class="test">Test</div>`);

@@ -87,7 +87,7 @@ describe("HTML builder tests", () => {
         const newPropDeferred = new Deferred();
         let prepareDeferred = new Promise((r) => r());
         class TestOption extends BaseOptionComponent {
-            static template = xml`<BuilderCheckbox action="'customAction'" actionParam="state.param"/>`;
+            static template = xml`<BuilderCheckbox action="'customAction'" actionParams="state.param"/>`;
             static props = {};
             setup() {
                 super.setup();

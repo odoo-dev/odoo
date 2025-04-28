@@ -6,14 +6,14 @@ export class CompositeActionPlugin extends Plugin {
     static dependencies = ["builderActions"];
 
     compositeAction = {
-        prepare: async ({ actionParam: { mainParam: actions }, actionValue }) => {
+        prepare: async ({ actionParams: { mainParam: actions }, actionValue }) => {
             const proms = [];
             for (const actionDef of actions) {
                 const action = this.dependencies.builderActions.getAction(actionDef.action);
                 if (action.prepare) {
                     const actionDescr = { actionId: actionDef.action };
-                    if (actionDef.actionParam) {
-                        actionDescr.actionParam = convertParamToObject(actionDef.actionParam);
+                    if (actionDef.actionParams) {
+                        actionDescr.actionParams = convertParamToObject(actionDef.actionParams);
                     }
                     if (actionDef.actionValue || actionValue) {
                         actionDescr.actionValue = actionDef.actionValue || actionValue;
@@ -49,7 +49,7 @@ export class CompositeActionPlugin extends Plugin {
             if (actionDef) {
                 const actionDescr = this.getActionDescription({
                     editingElement,
-                    actionParam: actionDef.actionParam,
+                    actionParams: actionDef.actionParams,
                 });
                 return actionGetValue(actionDescr);
             }
@@ -165,7 +165,7 @@ export class CompositeActionPlugin extends Plugin {
     };
 
     getActionDescription(action) {
-        const { action: actionId, actionParam, actionValue, value, loadResult } = action;
+        const { action: actionId, actionParams, actionValue, value, loadResult } = action;
         const actionDescr = {};
         const forwardedSpecs = [
             "editingElement",
@@ -178,8 +178,8 @@ export class CompositeActionPlugin extends Plugin {
                 actionDescr[spec] = action[spec];
             }
         }
-        if (actionParam) {
-            actionDescr.param = convertParamToObject(actionParam);
+        if (actionParams) {
+            actionDescr.param = convertParamToObject(actionParams);
         }
         if (actionValue || value) {
             actionDescr.value = actionValue || value;

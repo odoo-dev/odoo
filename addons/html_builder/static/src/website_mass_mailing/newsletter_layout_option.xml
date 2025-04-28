@@ -6,7 +6,7 @@
         <BuilderSelect action="'selectNewsletterTemplate'">
             <BuilderSelectItem
                 title.translate="Email Subscription"
-                actionParam="{
+                actionParams="{
                     view: `website_mass_mailing.s_newsletter_block_default_template`,
                     attribute: `email`,
                 }">
@@ -15,7 +15,7 @@
             <BuilderSelectItem
                 title.translate="Form Subscription"
                 id="'form_opt'"
-                actionParam="{
+                actionParams="{
                     view: `website_mass_mailing.s_newsletter_block_form_template`,
                     attribute: `form`,
                 }">

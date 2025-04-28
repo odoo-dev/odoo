@@ -5,7 +5,7 @@
     <BuilderRow label.translate="Product">
         <BuilderButton
             action="'addItem'"
-            actionParam="`${props.productSelector}:last-of-type`"
+            actionParams="`${props.productSelector}:last-of-type`"
             preview="false"
             className="'o_we_bg_brand_primary'"
             applyTo="props.applyTo">

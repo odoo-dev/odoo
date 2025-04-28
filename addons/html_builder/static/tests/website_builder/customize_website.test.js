@@ -18,8 +18,8 @@ test("BuilderButton with action “websiteConfig” are correctly displayed", as
     addOption({
         selector: ".test-options-target",
         template: xml`
-            <BuilderButton action="'websiteConfig'" actionParam="{views: ['test_template_1']}">1</BuilderButton>
-            <BuilderButton action="'websiteConfig'" actionParam="{views: ['test_template_2']}">2</BuilderButton>`,
+            <BuilderButton action="'websiteConfig'" actionParams="{views: ['test_template_1']}">1</BuilderButton>
+            <BuilderButton action="'websiteConfig'" actionParams="{views: ['test_template_2']}">2</BuilderButton>`,
     });
     await setupWebsiteBuilder(`<div class="test-options-target">b</div>`);
     await contains(":iframe .test-options-target").click();
@@ -28,8 +28,8 @@ test("BuilderButton with action “websiteConfig” are correctly displayed", as
     def.resolve();
     await animationFrame();
     expect(".o-tab-content > .o_customize_tab").toHaveCount(1);
-    expect("[data-action-param*='test_template_1']").not.toHaveClass("active");
-    expect("[data-action-param*='test_template_2']").toHaveClass("active");
+    expect("[data-action-params*='test_template_1']").not.toHaveClass("active");
+    expect("[data-action-params*='test_template_2']").toHaveClass("active");
     expect.verifySteps(["theme_customize_data_get"]);
 });
 
@@ -54,8 +54,8 @@ test("click on BuilderButton with action “websiteConfig”", async () => {
     addOption({
         selector: ".test-options-target",
         template: xml`
-            <BuilderButton action="'websiteConfig'" actionParam="{views: ['test_template_1']}">1</BuilderButton>
-            <BuilderButton action="'websiteConfig'" actionParam="{views: ['test_template_2']}">2</BuilderButton>
+            <BuilderButton action="'websiteConfig'" actionParams="{views: ['test_template_1']}">1</BuilderButton>
+            <BuilderButton action="'websiteConfig'" actionParams="{views: ['test_template_2']}">2</BuilderButton>
             <BuilderButton classAction="'a'">a</BuilderButton>`,
     });
     await setupWebsiteBuilder(`<div class="test-options-target">b</div>`);
@@ -63,7 +63,7 @@ test("click on BuilderButton with action “websiteConfig”", async () => {
     expect.verifySteps(["theme_customize_data_get"]);
     await contains("[data-class-action='a']").click();
 
-    await contains("[data-action-param*='test_template_1']").click();
+    await contains("[data-action-params*='test_template_1']").click();
     expect.verifySteps(["websiteSave", "theme_customize_data"]);
 });
 
@@ -89,8 +89,8 @@ test("click on BuilderSelectItem with action “websiteConfig”", async () => {
         selector: ".test-options-target",
         template: xml`
             <BuilderSelect action="'websiteConfig'">
-                <BuilderSelectItem actionParam="{views: ['test_template_1']}">1</BuilderSelectItem>
-                <BuilderSelectItem actionParam="{views: ['test_template_2']}">2</BuilderSelectItem>
+                <BuilderSelectItem actionParams="{views: ['test_template_1']}">1</BuilderSelectItem>
+                <BuilderSelectItem actionParams="{views: ['test_template_2']}">2</BuilderSelectItem>
             </BuilderSelect>`,
     });
     await setupWebsiteBuilder(`<div class="test-options-target">b</div>`);
@@ -98,7 +98,7 @@ test("click on BuilderSelectItem with action “websiteConfig”", async () => {
     expect.verifySteps(["theme_customize_data_get"]);
 
     await contains(".options-container .dropdown-toggle").click();
-    await contains("[data-action-param*='test_template_1']").click();
+    await contains("[data-action-params*='test_template_1']").click();
     expect.verifySteps(["theme_customize_data"]);
 });
 
@@ -114,7 +114,7 @@ test("use isActiveItem base on BuilderButton with 'websiteConfig'", async () => 
     addOption({
         selector: ".test-options-target",
         template: xml`
-            <BuilderButton id="'a'" action="'websiteConfig'" actionParam="{views: ['test_template_1']}">1</BuilderButton>
+            <BuilderButton id="'a'" action="'websiteConfig'" actionParams="{views: ['test_template_1']}">1</BuilderButton>
             <div t-if="isActiveItem('a')" class="test">a</div>`,
     });
     await setupWebsiteBuilder(`<div class="test-options-target">b</div>`);
@@ -124,7 +124,7 @@ test("use isActiveItem base on BuilderButton with 'websiteConfig'", async () => 
     def.resolve();
     await animationFrame();
     expect(".o-tab-content > .o_customize_tab").toHaveCount(1);
-    expect("[data-action-param*='test_template_1']").toHaveClass("active");
+    expect("[data-action-params*='test_template_1']").toHaveClass("active");
     expect(".test").toHaveCount(1);
     expect.verifySteps(["theme_customize_data_get"]);
 });
@@ -141,7 +141,7 @@ test("use isActiveItem base on BuilderCheckbox with 'websiteConfig'", async () =
     addOption({
         selector: ".test-options-target",
         template: xml`
-            <BuilderCheckbox id="'a'" action="'websiteConfig'" actionParam="{views: ['test_template_1']}"/>
+            <BuilderCheckbox id="'a'" action="'websiteConfig'" actionParams="{views: ['test_template_1']}"/>
             <div t-if="isActiveItem('a')" class="test">a</div>`,
     });
     await setupWebsiteBuilder(`<div class="test-options-target">b</div>`);
@@ -151,7 +151,7 @@ test("use isActiveItem base on BuilderCheckbox with 'websiteConfig'", async () =
     def.resolve();
     await animationFrame();
     expect(".o-tab-content > .o_customize_tab").toHaveCount(1);
-    expect("[data-action-param*='test_template_1'] .form-check-input:checked").toHaveCount(1);
+    expect("[data-action-params*='test_template_1'] .form-check-input:checked").toHaveCount(1);
     expect(".test").toHaveCount(1);
     expect.verifySteps(["theme_customize_data_get"]);
 });
@@ -173,7 +173,7 @@ test("click on BuilderCheckbox with action “websiteConfig”", async () => {
     addOption({
         selector: ".test-options-target",
         template: xml`
-            <BuilderCheckbox action="'websiteConfig'" actionParam="{views: ['!test_template_1', 'test_template_2']}"/>
+            <BuilderCheckbox action="'websiteConfig'" actionParams="{views: ['!test_template_1', 'test_template_2']}"/>
         `,
     });
     await setupWebsiteBuilder(`<div class="test-options-target">b</div>`);
@@ -204,8 +204,8 @@ test("use isActiveItem base on BuilderSelectItem with websiteConfig", async () =
         template: xml`
             <BuilderRow label.translate="Test">
                 <BuilderSelect action="'websiteConfig'">
-                    <BuilderSelectItem actionParam="{views: ['test_template_1']}">a</BuilderSelectItem>
-                    <BuilderSelectItem id="'test'" actionParam="{views: []}">b</BuilderSelectItem>
+                    <BuilderSelectItem actionParams="{views: ['test_template_1']}">a</BuilderSelectItem>
+                    <BuilderSelectItem id="'test'" actionParams="{views: []}">b</BuilderSelectItem>
                 </BuilderSelect>
                 <div class="my-test" t-if="this.isActiveItem('test')">test</div>
             </BuilderRow>`,
@@ -222,6 +222,6 @@ test("use isActiveItem base on BuilderSelectItem with websiteConfig", async () =
     await contains("[data-label='Test'] .dropdown-toggle").click();
     expect(".o-dropdown-item:visible").toHaveCount(2);
 
-    await contains("[data-action-param*='test_template_1']").click();
+    await contains("[data-action-params*='test_template_1']").click();
     expect.verifySteps(["theme_customize_data_get", "theme_customize_data"]);
 });

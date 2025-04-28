@@ -5,7 +5,7 @@
     <BuilderRow id="'show_empty_opt'" position="inside">
         <BuilderButton title.translate="Show/hide empty wishlist" icon="'fa-heart'"
             className="'flex-grow-1'"
-            actionParam="{views: ['!website_sale_wishlist.header_hide_empty_wishlist_link']}"
+            actionParams="{views: ['!website_sale_wishlist.header_hide_empty_wishlist_link']}"
         />
     </BuilderRow>
 </t>

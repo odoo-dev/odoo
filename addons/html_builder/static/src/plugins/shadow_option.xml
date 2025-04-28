@@ -11,20 +11,20 @@
     </BuilderRow>
     <BuilderContext t-if="!this.isActiveItem('no_shadow')" action="props.setShadowAction">
         <BuilderRow label.translate="Color" level="1">
-            <BuilderColorPicker actionParam="'color'"/>
+            <BuilderColorPicker actionParams="'color'"/>
         </BuilderRow>
 
         <BuilderRow label.translate="Offset (X, Y)" level="1">
-            <BuilderNumberInput actionParam="'offsetX'" unit="'px'"/>
-            <BuilderNumberInput actionParam="'offsetY'" unit="'px'"/>
+            <BuilderNumberInput actionParams="'offsetX'" unit="'px'"/>
+            <BuilderNumberInput actionParams="'offsetY'" unit="'px'"/>
         </BuilderRow>
 
         <BuilderRow label.translate="Blur" level="1">
-            <BuilderNumberInput actionParam="'blur'" unit="'px'"/>
+            <BuilderNumberInput actionParams="'blur'" unit="'px'"/>
         </BuilderRow>
 
         <BuilderRow label.translate="Spread" level="1">
-            <BuilderNumberInput actionParam="'spread'" unit="'px'"/>
+            <BuilderNumberInput actionParams="'spread'" unit="'px'"/>
         </BuilderRow>
     </BuilderContext>
 </t>

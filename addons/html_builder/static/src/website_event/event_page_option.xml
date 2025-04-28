@@ -11,11 +11,10 @@
 <t t-name="website_event.EventMainPageOption">
     <BuilderRow label.translate="Cover Position">
         <BuilderSelect action="'websiteConfig'">
-            <BuilderSelectItem actionParam="{views: []}">Inside content</BuilderSelectItem>
-            <BuilderSelectItem actionParam="{views: ['website_event.opt_event_description_cover_top']}">Top</BuilderSelectItem>
-            <BuilderSelectItem actionParam="{views: ['website_event.opt_event_description_cover_hidden']}">Hidden (visitor only)</BuilderSelectItem>
+            <BuilderSelectItem actionParams="{views: []}">Inside content</BuilderSelectItem>
+            <BuilderSelectItem actionParams="{views: ['website_event.opt_event_description_cover_top']}">Top</BuilderSelectItem>
+            <BuilderSelectItem actionParams="{views: ['website_event.opt_event_description_cover_hidden']}">Hidden (visitor only)</BuilderSelectItem>
         </BuilderSelect>
     </BuilderRow>
 </t>
 </templates>
-

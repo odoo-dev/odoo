@@ -4,21 +4,21 @@
 <t t-name="html_builder.RatingOption">
     <BuilderRow label.translate="Icon">
         <BuilderSelect>
-            <BuilderSelectItem action="'setIcons'" actionParam="'fa-star'">Stars</BuilderSelectItem>
-            <BuilderSelectItem action="'setIcons'" actionParam="'fa-thumbs-up'">Thumbs</BuilderSelectItem>
-            <BuilderSelectItem action="'setIcons'" actionParam="'fa-circle'">Circles</BuilderSelectItem>
-            <BuilderSelectItem action="'setIcons'" actionParam="'fa-square'">Squares</BuilderSelectItem>
-            <BuilderSelectItem action="'setIcons'" actionParam="'fa-heart'">Hearts</BuilderSelectItem>
-            <BuilderSelectItem action="'setIcons'" actionParam="'custom'">Custom</BuilderSelectItem>
+            <BuilderSelectItem action="'setIcons'" actionParams="'fa-star'">Stars</BuilderSelectItem>
+            <BuilderSelectItem action="'setIcons'" actionParams="'fa-thumbs-up'">Thumbs</BuilderSelectItem>
+            <BuilderSelectItem action="'setIcons'" actionParams="'fa-circle'">Circles</BuilderSelectItem>
+            <BuilderSelectItem action="'setIcons'" actionParams="'fa-square'">Squares</BuilderSelectItem>
+            <BuilderSelectItem action="'setIcons'" actionParams="'fa-heart'">Hearts</BuilderSelectItem>
+            <BuilderSelectItem action="'setIcons'" actionParams="'custom'">Custom</BuilderSelectItem>
         </BuilderSelect>
     </BuilderRow>
     <BuilderRow label.translate="&#8985; Active">
         <BuilderColorPicker applyTo="'.s_rating_active_icons'" styleAction="'color'"/>
-        <BuilderButton action="'customIcon'" actionParam="'customActiveIcon'" preview="false"><i class="fa fa-fw fa-refresh me-1"/> Replace Icon</BuilderButton>
+        <BuilderButton action="'customIcon'" actionParams="'customActiveIcon'" preview="false"><i class="fa fa-fw fa-refresh me-1"/> Replace Icon</BuilderButton>
     </BuilderRow>
     <BuilderRow label.translate="&#8985; Inactive">
         <BuilderColorPicker applyTo="'.s_rating_inactive_icons'" styleAction="'color'"/>
-        <BuilderButton action="'customIcon'" actionParam="'customInactiveIcon'" preview="false"><i class="fa fa-fw fa-refresh me-1"/> Replace Icon</BuilderButton>
+        <BuilderButton action="'customIcon'" actionParams="'customInactiveIcon'" preview="false"><i class="fa fa-fw fa-refresh me-1"/> Replace Icon</BuilderButton>
     </BuilderRow>
     <BuilderRow label.translate="Score">
         <BuilderNumberInput action="'activeIconsNumber'" min="0"/>

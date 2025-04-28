@@ -12,7 +12,7 @@
                         <BuilderTextInput
                             t-if="item.media"
                             action="'editRecordedSocialMediaLink'"
-                            actionParam="item.media"
+                            actionParams="item.media"
                             placeholder="`https://${item.media}.com/your-page`"
                         />
                         <BuilderTextInput
@@ -27,7 +27,7 @@
                         <BuilderCheckbox
                             t-if="item.media"
                             action="'toggleRecordedSocialMediaLink'"
-                            actionParam="item.domPosition ? { domPosition: item.domPosition } : { media: item.media, elementAfter: item.nextLink }"
+                            actionParams="item.domPosition ? { domPosition: item.domPosition } : { media: item.media, elementAfter: item.nextLink }"
                         />
                         <div t-else="" style="margin: 0 3px">
                             <BuilderButton

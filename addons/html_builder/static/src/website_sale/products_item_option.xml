@@ -49,16 +49,16 @@
         <t t-if="state.ribbonEditMode">
             <BuilderContext action="'modifyRibbon'">
                 <BuilderRow label.translate="Name" level="1">
-                    <BuilderTextInput actionParam="'name'" />
+                    <BuilderTextInput actionParams="'name'" />
                 </BuilderRow>
                 <BuilderRow label.translate="Background" level="1">
-                    <BuilderColorPicker actionParam="'bg_color'" />
+                    <BuilderColorPicker actionParams="'bg_color'" />
                 </BuilderRow>
                 <BuilderRow label.translate="Text" level="1">
-                    <BuilderColorPicker actionParam="'text_color'" />
+                    <BuilderColorPicker actionParams="'text_color'" />
                 </BuilderRow>
                 <BuilderRow label.translate="Position" level="1">
-                    <BuilderSelect actionParam="'position'">
+                    <BuilderSelect actionParams="'position'">
                         <BuilderSelectItem actionValue="'left'">Left</BuilderSelectItem>
                         <BuilderSelectItem actionValue="'right'">Right</BuilderSelectItem>
                     </BuilderSelect>

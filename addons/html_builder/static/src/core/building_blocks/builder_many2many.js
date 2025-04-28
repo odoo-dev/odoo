@@ -38,10 +38,10 @@ export class BuilderMany2Many extends Component {
             const actionWithGetValue = getAllActions().find(
                 ({ actionId }) => getAction(actionId).getValue
             );
-            const { actionId, actionParam } = actionWithGetValue;
+            const { actionId, actionParams } = actionWithGetValue;
             const actionValue = getAction(actionId).getValue({
                 editingElement: el,
-                param: actionParam,
+                param: actionParams,
             });
             return {
                 selection: JSON.parse(actionValue || "[]"),
@@ -73,7 +73,7 @@ export class BuilderMany2Many extends Component {
             proms.push(
                 applySpec.apply({
                     editingElement: applySpec.editingElement,
-                    param: applySpec.actionParam,
+                    param: applySpec.actionParams,
                     value: applySpec.actionValue,
                     loadResult: applySpec.loadResult,
                     dependencyManager: this.env.dependencyManager,

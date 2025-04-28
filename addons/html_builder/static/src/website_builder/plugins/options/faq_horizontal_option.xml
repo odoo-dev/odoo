@@ -5,7 +5,7 @@
     <BuilderRow label.translate="Topics">
         <BuilderButton
             action="'addItem'"
-            actionParam="'.s_faq_horizontal_entry:last-of-type'"
+            actionParams="'.s_faq_horizontal_entry:last-of-type'"
             preview="false"
             className="'o_we_bg_success'">
             Add New

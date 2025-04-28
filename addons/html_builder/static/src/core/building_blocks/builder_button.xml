@@ -5,7 +5,7 @@
     <BuilderComponent>
         <button type="button" class="btn" t-att-style="this.props.style ?? 'min-width: min-content;'"
             t-att-data-action-id="info.actionId"
-            t-att-data-action-param="info.actionParam"
+            t-att-data-action-params="info.actionParams"
             t-att-data-action-value="info.actionValue"
             t-att-data-class-action="info.classAction"
             t-att-data-style-action="info.styleAction"

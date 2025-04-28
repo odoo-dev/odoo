@@ -22,8 +22,8 @@ export class NewsletterLayoutOptionPlugin extends Plugin {
         const getAction = this.dependencies.builderActions.getAction;
         return {
             selectNewsletterTemplate: {
-                prepare: async ({ actionParam }) => {
-                    await getAction("selectTemplate").prepare({ actionParam: actionParam });
+                prepare: async ({ actionParams }) => {
+                    await getAction("selectTemplate").prepare({ actionParams: actionParams });
                 },
                 isApplied: ({ editingElement, param: { attribute } }) => {
                     const parentEl = editingElement.parentElement;

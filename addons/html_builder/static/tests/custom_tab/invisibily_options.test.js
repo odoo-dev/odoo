@@ -37,7 +37,7 @@ test("show/hide a section", async () => {
     await setupWebsiteBuilderWithSnippet("s_text_image");
     await contains(":iframe section").click();
     await contains(
-        "[data-action-id='toggleDeviceVisibility'][data-action-param='no_desktop']"
+        "[data-action-id='toggleDeviceVisibility'][data-action-params='no_desktop']"
     ).click();
     expect(":iframe section").toHaveClass("d-lg-none o_snippet_desktop_invisible");
     expect(":iframe section").not.toHaveClass("o_snippet_override_invisible");

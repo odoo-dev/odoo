@@ -5,7 +5,7 @@
     <BuilderRow label.translate="Connector">
         <BuilderSelect>
             <t t-foreach="connectorOptionParams" t-as="connectorOptionParam" t-key="connectorOptionParam_index">
-                <BuilderSelectItem action="'changeConnector'" id="getConnectorId(connectorOptionParam.key)" actionParam="connectorOptionParam.key"><t t-out="connectorOptionParam.param"/></BuilderSelectItem>
+                <BuilderSelectItem action="'changeConnector'" id="getConnectorId(connectorOptionParam.key)" actionParams="connectorOptionParam.key"><t t-out="connectorOptionParam.param"/></BuilderSelectItem>
             </t>
         </BuilderSelect>
         <BuilderColorPicker

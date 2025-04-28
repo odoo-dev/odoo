@@ -5,7 +5,7 @@
     <BuilderRow label.translate="Milestones">
         <BuilderButton
             action="'addItem'"
-            actionParam="'.s_timeline_list_row'"
+            actionParams="'.s_timeline_list_row'"
             actionValue="'beforebegin'"
             preview="false"
             className="'o_we_bg_brand_primary'">

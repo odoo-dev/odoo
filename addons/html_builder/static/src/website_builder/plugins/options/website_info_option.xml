@@ -4,7 +4,7 @@
     <t t-name="website.InfoPageOption">
         <BuilderContext action="'websiteConfig'">
             <BuilderRow label.translate="Odoo Information">
-                <BuilderCheckbox actionParam="{views: ['website.show_website_info']}" />
+                <BuilderCheckbox actionParams="{views: ['website.show_website_info']}" />
             </BuilderRow>
         </BuilderContext>
     </t>

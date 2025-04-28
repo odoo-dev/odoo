@@ -5,7 +5,7 @@
     <BuilderRow id="'o_we_actions_opt'" position="inside">
         <BuilderButton title.translate="Wishlist"
             action="'websiteConfig'"
-            actionParam="{views:['website_sale_wishlist.product_add_to_wishlist']}"
+            actionParams="{views:['website_sale_wishlist.product_add_to_wishlist']}"
         >
             <i class="fa fa-fw fa-heart"/>
             Wishlist

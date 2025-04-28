@@ -3,7 +3,7 @@
 
 <t t-name="website_sale_loyalty.couponOption">
     <BuilderRow label.translate="Show Discount in Subtotal">
-        <BuilderCheckbox action="'websiteConfig'" actionParam="{views: ['website_sale_loyalty.cart_discount']}"/>
+        <BuilderCheckbox action="'websiteConfig'" actionParams="{views: ['website_sale_loyalty.cart_discount']}"/>
     </BuilderRow>
 </t>
 

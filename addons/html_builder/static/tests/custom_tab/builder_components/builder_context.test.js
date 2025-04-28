@@ -21,7 +21,7 @@ test("should pass the context", async () => {
     addOption({
         selector: ".test-options-target",
         template: xml`
-            <BuilderContext action="'customAction'" actionParam="'myParam'">
+            <BuilderContext action="'customAction'" actionParams="'myParam'">
                 <BuilderButton actionValue="'myValue'">MyAction</BuilderButton>
             </BuilderContext>
         `,

@@ -392,7 +392,7 @@ test("no need to define 'isApplied' method for custom action if the widget alrea
         template: xml`
         <BuilderRow label.translate="Type">
             <BuilderSelect>
-                <BuilderSelectItem classAction="'alert-info'" action="'alertIcon'" actionParam="'fa-info-circle'">Info</BuilderSelectItem>
+                <BuilderSelectItem classAction="'alert-info'" action="'alertIcon'" actionParams="'fa-info-circle'">Info</BuilderSelectItem>
             </BuilderSelect>
         </BuilderRow>
     `,

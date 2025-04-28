@@ -6,7 +6,7 @@
         <BuilderRange
             styleAction="'--card-img-ratio-align'"
             action="'alignCoverImage'"
-            actionParam="state.imageToWrapperRatio gt 1 ? 'horizontal' : 'vertical'"
+            actionParams="state.imageToWrapperRatio gt 1 ? 'horizontal' : 'vertical'"
             min="0"
             max="100"
             unit="'%'"/>

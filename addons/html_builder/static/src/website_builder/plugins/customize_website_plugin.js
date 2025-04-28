@@ -275,7 +275,7 @@ export class CustomizeWebsitePlugin extends Plugin {
             }),
             websiteConfig: {
                 reload: {},
-                prepare: async ({ actionParam }) => this.loadConfigKey(actionParam),
+                prepare: async ({ actionParams }) => this.loadConfigKey(actionParams),
                 getPriority: ({ param }) => {
                     const records = [...(param.views || []), ...(param.assets || [])];
                     return records.length;
@@ -288,8 +288,8 @@ export class CustomizeWebsitePlugin extends Plugin {
                 clean: (action) => this.toggleConfig(action, false),
             },
             selectTemplate: {
-                prepare: async ({ actionParam }) => {
-                    await this.loadTemplateKey(actionParam.view);
+                prepare: async ({ actionParams }) => {
+                    await this.loadTemplateKey(actionParams.view);
                 },
                 isApplied: ({ editingElement, param: { templateClass } }) => {
                     if (templateClass) {
@@ -416,12 +416,12 @@ export class CustomizeWebsitePlugin extends Plugin {
     // -------------------------------------------------------------------------
     // customize website action
     // -------------------------------------------------------------------------
-    loadConfigKey(actionParam) {
+    loadConfigKey(actionParams) {
         const promises = [];
         for (const paramName of ["views", "assets"]) {
-            if (actionParam[paramName]) {
+            if (actionParams[paramName]) {
                 promises.push(
-                    ...actionParam[paramName].map((record) => {
+                    ...actionParams[paramName].map((record) => {
                         if (record.startsWith("!")) {
                             record = record.substring(1);
                         }
@@ -502,14 +502,14 @@ export class CustomizeWebsitePlugin extends Plugin {
             for (const item of action.selectableContext.items) {
                 for (const a of item.getActions()) {
                     if (a.actionId === "websiteConfig") {
-                        for (const record of a.actionParam[paramName] || []) {
+                        for (const record of a.actionParams[paramName] || []) {
                             // disable all
                             prepareRecord(record, true);
                         }
                     } else if (a.actionId === 'composite' || a.actionId === "reloadComposite"){
-                        for ( const itemAction of a.actionParam.mainParam){
+                        for ( const itemAction of a.actionParams.mainParam){
                             if (itemAction.action === "websiteConfig"){
-                                for (const record of itemAction.actionParam[paramName] || []){
+                                for (const record of itemAction.actionParams[paramName] || []){
                                     prepareRecord(record, true)
                                 }
                             }

@@ -25,7 +25,7 @@ test("call a specific action with some params and value", async () => {
     });
     addOption({
         selector: ".test-options-target",
-        template: xml`<BuilderButton action="'customAction'" actionParam="'myParam'" actionValue="'myValue'">MyAction</BuilderButton>`,
+        template: xml`<BuilderButton action="'customAction'" actionParams="'myParam'" actionValue="'myValue'">MyAction</BuilderButton>`,
     });
     await setupWebsiteBuilder(`<div class="test-options-target">b</div>`);
     await contains(":iframe .test-options-target").click();
@@ -220,7 +220,7 @@ test("clean should provide the next action value", async () => {
         template: xml`
                     <BuilderButtonGroup>
                         <BuilderButton classAction="'c1'" action="'customAction'"/>
-                        <BuilderButton classAction="'c2'" action="'customAction'" actionParam="'param2'" actionValue="'value2'"/>
+                        <BuilderButton classAction="'c2'" action="'customAction'" actionParams="'param2'" actionValue="'value2'"/>
                     </BuilderButtonGroup>`,
     });
     await setupWebsiteBuilder(`<div class="test-options-target">b</div>`);
@@ -409,10 +409,10 @@ describe("inherited actions", () => {
             selector: ".test-options-target",
             template: xml`
                 <BuilderButtonGroup>
-                    <BuilderButton action="'customAction1'" actionParam="'myParam1'" actionValue="'myValue1'"  classAction="'class1'" id="'c1'">MyAction1</BuilderButton>
-                    <BuilderButton action="'customAction2'" actionParam="'myParam2'" actionValue="'myValue2'">MyAction2</BuilderButton>
+                    <BuilderButton action="'customAction1'" actionParams="'myParam1'" actionValue="'myValue1'"  classAction="'class1'" id="'c1'">MyAction1</BuilderButton>
+                    <BuilderButton action="'customAction2'" actionParams="'myParam2'" actionValue="'myValue2'">MyAction2</BuilderButton>
                 </BuilderButtonGroup>
-                <BuilderButton action="'customAction3'" actionParam="'myParam3'" actionValue="'myValue3'" inheritedActions="['c1']" >MyAction2</BuilderButton>
+                <BuilderButton action="'customAction3'" actionParams="'myParam3'" actionValue="'myValue3'" inheritedActions="['c1']" >MyAction2</BuilderButton>
             `,
         });
         await setupWebsiteBuilder(`<div class="test-options-target class1">a</div>`);
@@ -440,11 +440,11 @@ describe("inherited actions", () => {
             selector: ".test-options-target",
             template: xml`
                 <BuilderButtonGroup>
-                    <BuilderButton action="'customAction1'" actionParam="'myParam1'" actionValue="'myValue1'"  classAction="'class1'" id="'c1'">MyAction1</BuilderButton>
-                    <BuilderButton action="'customAction2'" actionParam="'myParam2'" actionValue="'myValue2'">MyAction2</BuilderButton>
+                    <BuilderButton action="'customAction1'" actionParams="'myParam1'" actionValue="'myValue1'"  classAction="'class1'" id="'c1'">MyAction1</BuilderButton>
+                    <BuilderButton action="'customAction2'" actionParams="'myParam2'" actionValue="'myValue2'">MyAction2</BuilderButton>
                 </BuilderButtonGroup>
-                <BuilderButton action="'customAction3'" actionParam="'myParam3'" actionValue="'myValue3'"  id="'c3'">MyAction1</BuilderButton>
-                <BuilderButton action="'customAction4'" actionParam="'myParam4'" actionValue="'myValue4'" inheritedActions="['c1', 'c3']" >MyAction2</BuilderButton>
+                <BuilderButton action="'customAction3'" actionParams="'myParam3'" actionValue="'myValue3'"  id="'c3'">MyAction1</BuilderButton>
+                <BuilderButton action="'customAction4'" actionParams="'myParam4'" actionValue="'myValue4'" inheritedActions="['c1', 'c3']" >MyAction2</BuilderButton>
             `,
         });
         await setupWebsiteBuilder(`<div class="test-options-target class1">a</div>`);
@@ -477,11 +477,11 @@ describe("inherited actions", () => {
             selector: ".test-options-target",
             template: xml`
                 <BuilderButtonGroup>
-                    <BuilderButton action="'customAction1'" actionParam="'myParam1'" actionValue="'myValue1'"  classAction="'class1'" id="'c1'">MyAction1</BuilderButton>
-                    <BuilderButton action="'customAction2'" actionParam="'myParam2'" actionValue="'myValue2'">MyAction2</BuilderButton>
+                    <BuilderButton action="'customAction1'" actionParams="'myParam1'" actionValue="'myValue1'"  classAction="'class1'" id="'c1'">MyAction1</BuilderButton>
+                    <BuilderButton action="'customAction2'" actionParams="'myParam2'" actionValue="'myValue2'">MyAction2</BuilderButton>
                 </BuilderButtonGroup>
                 <BuilderContext inheritedActions="['c1']">
-                    <BuilderButton action="'customAction3'" actionParam="'myParam3'" actionValue="'myValue3'">MyAction2</BuilderButton>
+                    <BuilderButton action="'customAction3'" actionParams="'myParam3'" actionValue="'myValue3'">MyAction2</BuilderButton>
                 </BuilderContext>
             `,
         });

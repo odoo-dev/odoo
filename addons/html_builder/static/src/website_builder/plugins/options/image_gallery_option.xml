@@ -8,21 +8,21 @@
     </BuilderRow>
     <BuilderRow label.translate="Mode" t-if="!this.state.isSlideShow">
         <BuilderSelect>
-            <BuilderSelectItem id="'image_gallery_grid_id'" action="'setImageGalleryLayout'" actionParam="'grid'">Grid</BuilderSelectItem>
-            <BuilderSelectItem id="'image_gallery_masonry_id'" action="'setImageGalleryLayout'" actionParam="'masonry'">Masonry</BuilderSelectItem>
-            <BuilderSelectItem action="'setImageGalleryLayout'" actionParam="'nomode'">Float</BuilderSelectItem>
+            <BuilderSelectItem id="'image_gallery_grid_id'" action="'setImageGalleryLayout'" actionParams="'grid'">Grid</BuilderSelectItem>
+            <BuilderSelectItem id="'image_gallery_masonry_id'" action="'setImageGalleryLayout'" actionParams="'masonry'">Masonry</BuilderSelectItem>
+            <BuilderSelectItem action="'setImageGalleryLayout'" actionParams="'nomode'">Float</BuilderSelectItem>
         </BuilderSelect>
     </BuilderRow>
     <BuilderRow
         t-if="!this.state.isSlideShow"
         label.translate="Images Spacing">
-        <BuilderRange action="'setClassRange'" actionParam="['o_spc-none','o_spc-small','o_spc-medium','o_spc-big']" max="3"/>
+        <BuilderRange action="'setClassRange'" actionParams="['o_spc-none','o_spc-small','o_spc-medium','o_spc-big']" max="3"/>
     </BuilderRow>
 
     <BuilderRow label.translate="Columns" t-if="isActiveItem('image_gallery_grid_id') || isActiveItem('image_gallery_masonry_id')">
         <BuilderSelect>
             <t t-foreach="[1,2,3,4,6,12]" t-as="column" t-key="column">
-                <BuilderSelectItem action="'setImageGalleryColumns'" actionParam="column"><t t-esc="column"/></BuilderSelectItem>
+                <BuilderSelectItem action="'setImageGalleryColumns'" actionParams="column"><t t-esc="column"/></BuilderSelectItem>
             </t>
         </BuilderSelect>
     </BuilderRow>

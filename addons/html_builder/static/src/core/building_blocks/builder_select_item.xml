@@ -7,7 +7,7 @@
             t-attf-class="d-flex flex-column cursor-pointer o-dropdown-item dropdown-item o-navigable #{ props.className }"
             t-att-class="{'active': this.state.isActive}"
             t-att-data-action-id="info.actionId"
-            t-att-data-action-param="info.actionParam"
+            t-att-data-action-params="info.actionParams"
             t-att-data-action-value="info.actionValue"
             t-att-data-class-action="info.classAction"
             t-att-data-style-action="info.styleAction"

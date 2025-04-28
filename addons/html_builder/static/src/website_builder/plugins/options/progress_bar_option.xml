@@ -7,10 +7,10 @@
     </BuilderRow>
     <BuilderRow label.translate="Label">
         <BuilderSelect>
-            <BuilderSelectItem action="'display'" actionParam="'inline'" classAction="'s_progress_bar_label_inline'">Display Inside</BuilderSelectItem>
-            <BuilderSelectItem action="'display'" actionParam="'below'" classAction="'s_progress_bar_label_below'">Display Below</BuilderSelectItem>
-            <BuilderSelectItem action="'display'" actionParam="'after'" classAction="'s_progress_bar_label_after'">Display After</BuilderSelectItem>
-            <BuilderSelectItem action="'display'" actionParam="'none'" classAction="'s_progress_bar_label_hidden'">Hide</BuilderSelectItem>
+            <BuilderSelectItem action="'display'" actionParams="'inline'" classAction="'s_progress_bar_label_inline'">Display Inside</BuilderSelectItem>
+            <BuilderSelectItem action="'display'" actionParams="'below'" classAction="'s_progress_bar_label_below'">Display Below</BuilderSelectItem>
+            <BuilderSelectItem action="'display'" actionParams="'after'" classAction="'s_progress_bar_label_after'">Display After</BuilderSelectItem>
+            <BuilderSelectItem action="'display'" actionParams="'none'" classAction="'s_progress_bar_label_hidden'">Hide</BuilderSelectItem>
         </BuilderSelect>
     </BuilderRow>
     <BuilderRow label.translate="Colors">

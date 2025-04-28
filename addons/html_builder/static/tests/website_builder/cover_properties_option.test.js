@@ -76,8 +76,8 @@ test("Add image as cover", async () => {
     `);
 
     await contains(":iframe h1").click();
-    expect("[data-action-id='setCoverBackground'][data-action-param]").toHaveCount(1);
-    await contains("[data-action-id='setCoverBackground'][data-action-param]").click();
+    expect("[data-action-id='setCoverBackground'][data-action-params]").toHaveCount(1);
+    await contains("[data-action-id='setCoverBackground'][data-action-params]").click();
     // We use "click" instead of contains.click because contains wait for the image to be visible.
     // In this test we don't want to wait ~800ms for the image to be visible but we can still click on it
     await click("img.o_we_attachment_highlight");

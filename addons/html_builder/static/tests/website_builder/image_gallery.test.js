@@ -137,7 +137,7 @@ test("Change gallery layout", async () => {
     expect(queryOne("[data-label='Mode'] .dropdown-toggle").textContent).toBe("Masonry");
     await contains("[data-label='Mode'] .dropdown-toggle").click();
 
-    await contains("[data-action-param='grid']").click();
+    await contains("[data-action-params='grid']").click();
     await waitFor(":iframe .o_grid");
     expect(":iframe .o_grid").toHaveCount(1);
     expect(":iframe .o_masonry_col").toHaveCount(0);
@@ -170,7 +170,7 @@ test("Change gallery restore the container to the cloned equivalent image", asyn
     await contains(":iframe .first_img").click();
     await contains("[data-label='Mode'] button").click();
 
-    await contains("[data-action-param='grid']").click();
+    await contains("[data-action-params='grid']").click();
     await waitFor(":iframe .o_grid");
 
     // The container include the new image equivalent to the old selected image

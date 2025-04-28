@@ -7,14 +7,14 @@
         <BuilderSelect action="'reloadComposite'">
             <BuilderSelectItem
                 title.translate="Default"
-                actionParam="[
+                actionParams="[
                     {
                         action: 'setWebsiteHeaderVisibility',
                         actionValue: 'regular',
                     },
                     { 
                         action: 'websiteConfig', 
-                        actionParam: {   
+                        actionParams: {   
                             views: ['website.template_header_default'], 
                             vars: {'header-link-style': 'default', 'header-template': 'default'} 
                         } 
@@ -25,14 +25,14 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Hamburger menu"
-                actionParam="[
+                actionParams="[
                     {
                         action: 'setWebsiteHeaderVisibility',
                         actionValue: 'regular',
                     },    
                     { 
                         action: 'websiteConfig', 
-                        actionParam: { 
+                        actionParams: { 
                             views: ['website.template_header_hamburger', 'website.no_autohide_menu'], 
                             vars: {'header-link-style': 'default', 'header-template': 'hamburger'} 
                         } 
@@ -43,14 +43,14 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Rounded box menu"
-                actionParam="[
+                actionParams="[
                     {
                         action: 'setWebsiteHeaderVisibility',
                         actionValue: 'overTheContent',
                     },
                     { 
                         action: 'websiteConfig', 
-                        actionParam: { 
+                        actionParams: { 
                             views: ['website.header_navbar_pills_style','website.template_header_boxed'], 
                             vars: {'header-link-style': 'pills', 'header-template': 'boxed'} 
                         } 
@@ -61,14 +61,14 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Stretch menu"
-                actionParam="[
+                actionParams="[
                     {
                         action: 'setWebsiteHeaderVisibility',
                         actionValue: 'regular',
                     },
                     { 
                         action: 'websiteConfig', 
-                        actionParam: { 
+                        actionParams: { 
                             views: ['website.template_header_stretch'], 
                             vars: {'header-link-style': 'default', 'header-template': 'stretch'} 
                         } 
@@ -79,14 +79,14 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Vertical"
-                actionParam="[
+                actionParams="[
                     {
                         action: 'setWebsiteHeaderVisibility',
                         actionValue: 'regular',
                     },    
                     { 
                         action: 'websiteConfig', 
-                        actionParam: { 
+                        actionParams: { 
                             views: ['website.template_header_vertical'], 
                             vars: {'header-link-style': 'default', 'header-template': 'vertical'} 
                         } 
@@ -97,14 +97,14 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Menu with Search bar"
-                actionParam="[
+                actionParams="[
                     {
                         action: 'setWebsiteHeaderVisibility',
                         actionValue: 'regular',
                     },
                     { 
                         action: 'websiteConfig', 
-                        actionParam: { 
+                        actionParams: { 
                             views: ['website.template_header_search'], 
                             vars: {'header-link-style': 'default', 'header-template': 'search'} 
                         } 
@@ -115,14 +115,14 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Menu - Sales 1"
-                actionParam="[
+                actionParams="[
                     {
                         action: 'setWebsiteHeaderVisibility',
                         actionValue: 'regular',
                     },
                     { 
                         action: 'websiteConfig', 
-                        actionParam: { 
+                        actionParams: { 
                             views: ['website.template_header_sales_one'], 
                             vars: {'header-link-style': 'default', 'header-template': 'sales_one'} 
                         } 
@@ -133,14 +133,14 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Menu - Sales 2"
-                actionParam="[
+                actionParams="[
                     {
                         action: 'setWebsiteHeaderVisibility',
                         actionValue: 'regular',
                     },
                     { 
                         action: 'websiteConfig', 
-                        actionParam: { 
+                        actionParams: { 
                             views: ['website.template_header_sales_two'], 
                             vars: {'header-link-style': 'default', 'header-template': 'sales_two'} 
                         } 
@@ -151,14 +151,14 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Menu - Sales 3"
-                actionParam="[
+                actionParams="[
                     {
                         action: 'setWebsiteHeaderVisibility',
                         actionValue: 'regular',
                     },
                     { 
                         action: 'websiteConfig', 
-                        actionParam: { 
+                        actionParams: { 
                             views: ['website.template_header_sales_three'], 
                             vars: {'header-link-style': 'default', 'header-template': 'sales_three'} 
                         } 
@@ -169,14 +169,14 @@
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Menu - Sales "
-                actionParam="[
+                actionParams="[
                     {
                         action: 'setWebsiteHeaderVisibility',
                         actionValue: 'regular',
                     },
                     { 
                         action: 'websiteConfig', 
-                        actionParam: { 
+                        actionParams: { 
                             views: ['website.template_header_sales_four'], 
                             vars: {'header-link-style': 'default', 'header-template': 'sales_four'} 
                         } 
@@ -188,14 +188,14 @@
             <BuilderSelectItem
                 id="'header_sidebar_opt'"
                 title.translate="Sidebar"
-                actionParam="[
+                actionParams="[
                     {
                         action: 'setWebsiteHeaderVisibility',
                         actionValue: 'regular',
                     },
                     { 
                         action: 'websiteConfig', 
-                        actionParam: { 
+                        actionParams: { 
                             views: ['website.template_header_sidebar', 'website.no_autohide_menu'], 
                             vars: {'header-link-style': 'default', 'header-template': 'sidebar'} 
                         } 
@@ -215,15 +215,15 @@
         <BuilderButtonGroup action="'websiteConfig'">
             <BuilderButton title.translate="Small"
                 iconImg="'/website/static/src/img/snippets_options/content_width_small.svg'"
-                actionParam="{ views: ['website.header_width_small'] }"
+                actionParams="{ views: ['website.header_width_small'] }"
             />
             <BuilderButton title.translate="Regular"
                 iconImg="'/website/static/src/img/snippets_options/content_width_normal.svg'"
-                actionParam="{ views: [] }"
+                actionParams="{ views: [] }"
             />
             <BuilderButton title.translate="Full"
                 iconImg="'/website/static/src/img/snippets_options/content_width_full.svg'"
-                actionParam="{ views: ['website.header_width_full'] }"
+                actionParams="{ views: ['website.header_width_full'] }"
             />
         </BuilderButtonGroup>
     </BuilderRow>
@@ -233,7 +233,7 @@
         t-if="isActiveItem('header_sidebar_opt')"
     >
         <BuilderNumberInput action="'customizeWebsiteVariable'"
-            actionParam="'sidebar-width'"
+            actionParams="'sidebar-width'"
             unit="'px'"
             saveUnit="'rem'"
         />
@@ -247,7 +247,7 @@
             <BuilderSelectItem
                 id="'header_visibility_standard_opt'"
                 label.translate="Standard"
-                actionParam="{ views: ['website.header_visibility_standard'], vars: {'header-scroll-effect': 'standard'} }"
+                actionParams="{ views: ['website.header_visibility_standard'], vars: {'header-scroll-effect': 'standard'} }"
                 classAction="'o_header_standard'"
                 className="'o_we_img_animate'"
             >
@@ -257,7 +257,7 @@
             <BuilderSelectItem
                 id="'header_effect_scroll_opt'"
                 label.translate="Scroll"
-                actionParam="{ views: [], vars: {'header-scroll-effect': 'scroll'} }"
+                actionParams="{ views: [], vars: {'header-scroll-effect': 'scroll'} }"
                 classAction="''"
                 className="'o_we_img_animate'"
             >
@@ -267,7 +267,7 @@
             <BuilderSelectItem
                 id="'header_effect_fixed_opt'"
                 label.translate="Fixed"
-                actionParam="{ views: ['website.header_visibility_fixed'], vars: {'header-scroll-effect': 'fixed'} }"
+                actionParams="{ views: ['website.header_visibility_fixed'], vars: {'header-scroll-effect': 'fixed'} }"
                 classAction="'o_header_fixed'"
                 className="'o_we_img_animate'"
             >
@@ -277,7 +277,7 @@
             <BuilderSelectItem
                 id="'header_effect_disappears_opt'"
                 label.translate="Disappears"
-                actionParam="{ views: ['website.header_visibility_disappears'], vars: {'header-scroll-effect': 'disappears'} }"
+                actionParams="{ views: ['website.header_visibility_disappears'], vars: {'header-scroll-effect': 'disappears'} }"
                 classAction="'o_header_disappears'"
                 className="'o_we_img_animate'"
             >
@@ -287,7 +287,7 @@
             <BuilderSelectItem
                 id="'header_effect_fade_out_opt'"
                 label.translate="Fade Out"
-                actionParam="{ views: ['website.header_visibility_fade_out'], vars: {'header-scroll-effect': 'fade-out'} }"
+                actionParams="{ views: ['website.header_visibility_fade_out'], vars: {'header-scroll-effect': 'fade-out'} }"
                 classAction="'o_header_fade_out'"
                 className="'o_we_img_animate'"
             >
@@ -305,7 +305,7 @@
                 <BuilderButton
                     title.translate="Show/hide text element"
                     className="'flex-grow-1 me-1'"
-                    actionParam="{
+                    actionParams="{
                         views: ['website.header_text_element'],
                         resetViewArch: true,
                     }"
@@ -317,7 +317,7 @@
                     t-if="language_ids.length > 1"
                     title.translate="Show/hide language selector"
                     className="'flex-grow-1 me-1 fa fa-flag'"
-                    actionParam="{
+                    actionParams="{
                         views: ['website.header_language_selector'],
                         resetViewArch: true,
                     }"
@@ -326,14 +326,14 @@
                 <BuilderButton
                     title.translate="Show/hide search bar"
                     className="'fa fa-search flex-grow-1 me-1'"
-                    actionParam="{
+                    actionParams="{
                         views: ['website.header_search_box'],
                         resetViewArch: true,
                     }"/>
                 <BuilderButton
                     title.translate="Show/hide sign in button"
                     className="'fa fa-sign-in flex-grow-1'"
-                    actionParam="{
+                    actionParams="{
                         views: ['portal.user_sign_in'],
                         resetViewArch: true,
                     }"/>
@@ -342,7 +342,7 @@
                 <BuilderButton
                     title.translate="Show/hide social links"
                     className="'flex-grow-1 me-1'"
-                    actionParam="{
+                    actionParams="{
                         views: ['website.header_social_links'],
                         resetViewArch: true,
                     }"                    
@@ -352,7 +352,7 @@
                 <BuilderButton
                     title.translate="Show/hide button"
                     className="'flex-grow-1 me-1'"
-                    actionParam="{
+                    actionParams="{
                         views: ['website.header_call_to_action'],
                         resetViewArch: true,
                     }" 
@@ -362,7 +362,7 @@
                 <BuilderButton
                     title.translate="Show/hide logo"
                     className="'flex-grow-1'"
-                    actionParam="{
+                    actionParams="{
                         views: ['website.option_header_brand_name', 'website.option_header_brand_logo'],
                         resetViewArch: true,
                     }" 

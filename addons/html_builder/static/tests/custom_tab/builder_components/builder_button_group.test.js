@@ -31,7 +31,7 @@ test("change the editingElement of sub widget through `applyTo` prop", async () 
     await hover("[data-action-id='customAction']");
     expect.verifySteps(["customAction a o-paragraph"]);
 });
-test("should propagate actionParam in the context", async () => {
+test("should propagate actionParams in the context", async () => {
     addBuilderAction({
         customAction: {
             apply: ({ param: { mainParam: testParam } }) => {
@@ -42,7 +42,7 @@ test("should propagate actionParam in the context", async () => {
     addBuilderOption({
         selector: ".test-options-target",
         template: xml`
-                    <BuilderButtonGroup actionParam="'myParam'">
+                    <BuilderButtonGroup actionParams="'myParam'">
                         <BuilderButton action="'customAction'"/>
                     </BuilderButtonGroup>`,
     });
