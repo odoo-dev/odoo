@@ -241,6 +241,7 @@ export function useSelectableComponent(id, { onItemChange } = {}) {
         if (currentItem) {
             onItemChange?.(currentItem);
         }
+        isDirty = false;
     }
 
     if (id) {
@@ -258,21 +259,27 @@ export function useSelectableComponent(id, { onItemChange } = {}) {
         }
     }
 
+    let isDirty = true;
+
     useSubEnv({
         selectableContext: {
             cleanSelectedItem,
             addSelectableItem: (item) => {
                 selectableItems.push(item);
+                isDirty = true;
             },
             removeSelectableItem: (item) => {
                 const index = selectableItems.indexOf(item);
                 if (index !== -1) {
                     selectableItems.splice(index, 1);
                 }
+                isDirty = true;
             },
             update: refreshCurrentItemDebounced,
             getSelectedItem: () => {
-                refreshCurrentItem();
+                if (isDirty) {
+                    refreshCurrentItem();
+                }
                 return currentSelectedItem;
             },
             items: selectableItems,

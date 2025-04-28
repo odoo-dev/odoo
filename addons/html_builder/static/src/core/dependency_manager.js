@@ -6,7 +6,6 @@ export class DependencyManager extends EventBus {
         super();
         this.dependencies = [];
         this.dependenciesMap = {};
-        this.count = 0;
         this.dirty = false;
         this.triggerDependencyUpdated = batched(() => {
             this.trigger("dependency-updated");
@@ -14,7 +13,7 @@ export class DependencyManager extends EventBus {
     }
     update() {
         this.dependenciesMap = {};
-        for (const [id, value, ignored] of this.dependencies.reverse()) {
+        for (const [id, value, ignored] of this.dependencies.slice().reverse()) {
             if (ignored && id in this.dependenciesMap) {
                 continue;
             }
@@ -41,8 +40,11 @@ export class DependencyManager extends EventBus {
     }
 
     removeByValue(value) {
+        const l = this.dependencies.length;
         this.dependencies = this.dependencies.filter(([, v]) => v !== value);
-        this.dirty = true;
-        this.triggerDependencyUpdated();
+        if (this.dependencies.length !== l) {
+            this.dirty = true;
+            this.triggerDependencyUpdated();
+        }
     }
 }
