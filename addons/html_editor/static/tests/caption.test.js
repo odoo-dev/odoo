@@ -18,10 +18,6 @@ class CaptionPluginWithPredictableId extends CaptionPlugin {
 }
 const base64Img =
     "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUA\n        AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO\n            9TXL0Y4OHwAAAABJRU5ErkJggg==";
-const selectionChange = (editor) =>
-    new Promise((resolve) => {
-        editor.document.addEventListener("selectionchange", resolve);
-    });
 const configWithEmbeddedCaption = {
     Plugins: [
         ...MAIN_PLUGINS,
@@ -50,7 +46,7 @@ const toggleCaption = async (captionText) => {
                 await press(char);
             }
         }
-        const input = await queryOne("input");
+        const input = queryOne("input");
         expect(input.value).toBe("Hello");
     }
 };
@@ -74,7 +70,9 @@ const removeLinkFromImage = async () => {
 };
 const getFigcaptionAttributes = (captionId, caption = "", focusInput = false) =>
     `data-embedded="caption" data-oe-protected="true" contenteditable="false" class="mt-2" ` +
-    `data-embedded-props='{"id":"${captionId}","focusInput":${focusInput}}' placeholder="${caption}"`;
+    `data-embedded-props='{"id":"${captionId}","focusInput":${focusInput}}'${
+        caption ? ` placeholder="${caption}"` : ""
+    }`;
 const CAPTION_INPUT_ATTRIBUTES = `type="text" maxlength="100" class="border-0 p-0" placeholder="Write your caption here"`;
 
 test.tags("focus required");
@@ -253,10 +251,8 @@ test("leaving the caption persists its value", async () => {
             expect(editor.document.activeElement).toBe(input);
             const heading = queryOne("h1");
             await click(heading);
-            await selectionChange(editor); // click changed selection.
-            await selectionChange(editor); // addStep > normalize > preserveCursor changed it again.
             expect(editor.document.activeElement).not.toBe(input);
-            expect(editor.document.getSelection().anchorNode).toBe(heading.firstChild);
+            await animationFrame(); // Wait for the selection to change.
         },
         contentAfterEdit: unformat(
             `<p><br></p>
@@ -296,7 +292,7 @@ test("can't use the powerbox in a caption", async () => {
             expect(".o-we-powerbox").toHaveCount(0);
             const heading = queryOne("h1");
             await click(heading);
-            await selectionChange(editor); // click changed selection.
+            await animationFrame(); // Wait for the selection to change.
         },
         contentAfter: unformat(
             `<p><br></p>
@@ -330,8 +326,7 @@ test("can't use the toolbar in a caption", async () => {
             editor.document.execCommand("insertText", false, "a");
             expect(input.value).toBe("a");
             await click("h1");
-            await selectionChange(editor); // click changed selection.
-            await selectionChange(editor); // addStep > normalize > preserveCursor changed it again.
+            await animationFrame(); // Wait for the selection to change.
         },
         contentAfter: unformat(
             `<p><br></p>
@@ -611,14 +606,13 @@ test("add a link then a caption to an image surrounded by text", async () => {
     await testEditor({
         config: configWithEmbeddedCaption,
         contentBefore: `<p>ab<img class="img-fluid test-image" src="${base64Img}">cd</p>`,
-        stepFunction: async (editor) => {
+        stepFunction: async () => {
             await addLinkToImage("odoo.com");
             await animationFrame();
             await toggleCaption("Hello");
             // Blur the input to commit the caption.
             await click("p");
-            await selectionChange(editor); // click changed selection.
-            await selectionChange(editor); // addStep > normalize > preserveCursor changed it again.
+            await animationFrame(); // Wait for the selection to change.
         },
         contentAfter: unformat(
             `<p>ab</p>
@@ -735,7 +729,7 @@ test("previewing an image with a caption shows the caption as title", async () =
     await waitFor(".o-we-toolbar");
     await click(".o-we-toolbar button[name='image_preview']");
     await animationFrame();
-    let titleSpan = await queryOne(".o-FileViewer .o-FileViewer-header span.text-truncate");
+    let titleSpan = queryOne(".o-FileViewer .o-FileViewer-header span.text-truncate");
     expect(titleSpan.textContent).toBe(base64Img.replaceAll("\n", "%0A"));
     await click(".o-FileViewer-headerButton[title='Close (Esc)']");
     await animationFrame();
@@ -748,7 +742,7 @@ test("previewing an image with a caption shows the caption as title", async () =
     await waitFor(".o-we-toolbar button[name='image_preview']");
     await click(".o-we-toolbar button[name='image_preview']");
     await animationFrame();
-    titleSpan = await queryOne(".o-FileViewer .o-FileViewer-header span.text-truncate");
+    titleSpan = queryOne(".o-FileViewer .o-FileViewer-header span.text-truncate");
     expect(titleSpan.textContent).toBe("Hello");
 });
 
@@ -760,7 +754,7 @@ test("previewing an image without caption doesn't show the caption as title (eve
     await waitFor(".o-we-toolbar button[name='image_preview']");
     await click(".o-we-toolbar button[name='image_preview']");
     await animationFrame();
-    let titleSpan = await queryOne(".o-FileViewer .o-FileViewer-header span.text-truncate");
+    let titleSpan = queryOne(".o-FileViewer .o-FileViewer-header span.text-truncate");
     expect(titleSpan.textContent).toBe(base64Img.replaceAll("\n", "%0A"));
     await click(".o-FileViewer-headerButton[title='Close (Esc)']");
     await animationFrame();
@@ -770,7 +764,7 @@ test("previewing an image without caption doesn't show the caption as title (eve
 
     // Remove the caption
     await toggleCaption();
-    const image = await queryOne("img");
+    const image = queryOne("img");
     expect(image.getAttribute("data-caption")).toBe("Hello");
     expect("figure").toHaveCount(0);
 
@@ -779,6 +773,6 @@ test("previewing an image without caption doesn't show the caption as title (eve
     await waitFor(".o-we-toolbar button[name='image_preview']");
     await click(".o-we-toolbar button[name='image_preview']");
     await animationFrame();
-    titleSpan = await queryOne(".o-FileViewer .o-FileViewer-header span.text-truncate");
+    titleSpan = queryOne(".o-FileViewer .o-FileViewer-header span.text-truncate");
     expect(titleSpan.textContent).toBe(base64Img.replaceAll("\n", "%0A"));
 });

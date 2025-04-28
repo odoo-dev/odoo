@@ -3,7 +3,7 @@ import {
     getEmbeddedProps,
     StateChangeManager,
 } from "@html_editor/others/embedded_component_utils";
-import { Component, useEffect, useState, useRef, onMounted } from "@odoo/owl";
+import { Component, useState, useRef, onMounted } from "@odoo/owl";
 
 export class EmbeddedCaptionComponent extends Component {
     static template = "html_editor.EmbeddedCaption";
@@ -22,8 +22,7 @@ export class EmbeddedCaptionComponent extends Component {
         super.setup();
         this.image = this.props.editable.querySelector(`img[data-caption-id="${this.props.id}"]`);
         this.state = useState({
-            caption: this.image.getAttribute("data-caption") || "",
-            lastCaption: this.image.getAttribute("data-caption") || "",
+            caption: "",
             host: this.props.host,
         });
         this.captionInput = useRef("captionInput");
@@ -32,27 +31,14 @@ export class EmbeddedCaptionComponent extends Component {
                 this.captionInput.el.focus();
             });
         }
-        useEffect(
-            () => {
-                // Adapt the figcaption element's placeholder to the new caption
-                // for screen reader users.
-                this.captionInput.el?.parentElement.setAttribute("placeholder", this.state.caption);
-                if (this.state.caption !== this.image.getAttribute("data-caption")) {
-                    this.image.setAttribute("data-caption", this.state.caption);
-                    this.props.addHistoryStep();
-                    this.captionInput.el.focus();
-                }
-            },
-            () => [this.state.caption]
-        );
-        // Ensure synchronicity between the state and the attribute.
+        // Ensure the state, the attribute and the placeholder are in sync.
+        // We update without adding a history step because it will be added by
+        // the plugin.
+        this.updateCaption(this.image.getAttribute("data-caption"), false);
         this.observer = new MutationObserver((mutations) => {
             for (const mutation of mutations) {
                 if (mutation.type === "attributes" && mutation.attributeName === "data-caption") {
-                    const captionAttribute = this.image.getAttribute("data-caption");
-                    if (captionAttribute !== this.state.caption) {
-                        this.state.caption = captionAttribute || "";
-                    }
+                    this.updateCaption(this.image.getAttribute("data-caption"));
                 }
             }
         });
@@ -63,8 +49,29 @@ export class EmbeddedCaptionComponent extends Component {
         this.observer.disconnect();
     }
 
+    updateCaption(caption = "", addHistoryStep = true) {
+        if (caption !== this.state.caption) {
+            this.state.caption = caption;
+            const figcaption = this.image.parentElement.querySelector("figcaption");
+            if (figcaption && figcaption.getAttribute("placeholder") !== caption) {
+                // Adapt the figcaption element's placeholder to the new caption
+                // for screen reader users.
+                figcaption.setAttribute("placeholder", caption);
+            }
+            if (caption !== this.image.getAttribute("data-caption")) {
+                this.image.setAttribute("data-caption", caption);
+            }
+            if (addHistoryStep) {
+                this.props.addHistoryStep();
+            }
+        }
+    }
+
     onInputBlur() {
-        this.state.caption = this.captionInput.el.value;
+        // This is triggered before the selection changes. Wait before updating
+        // so when the history step triggers a normalization, it restores that
+        // new selection and not the old one.
+        setTimeout(() => this.updateCaption(this.captionInput.el.value));
     }
 
     onInputKeyup(ev) {
