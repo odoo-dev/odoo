@@ -73,7 +73,7 @@
             ('remove', 'website_event/static/src/snippets/**/options.js'),
         ],
         'html_builder.assets': [
-            'website_event/static/src/plugins/**/*',
+            # 'website_event/static/src/plugins/**/*',
         ],
         'website.assets_wysiwyg': [
             'website_event/static/src/snippets/s_events/options.js',

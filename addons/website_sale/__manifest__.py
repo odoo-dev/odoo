@@ -156,7 +156,7 @@
             'website_sale/static/src/scss/kanban_record.scss',
         ],
         'html_builder.assets': [
-            'website_sale/static/src/plugins/**/*',
+            # 'website_sale/static/src/plugins/**/*',
         ],
         'website.assets_wysiwyg': [
             'website_sale/static/src/scss/website_sale.editor.scss',
