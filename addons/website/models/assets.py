@@ -7,6 +7,7 @@ import requests
 from werkzeug.urls import url_parse
 
 from odoo import api, models
+from odoo.fields import Domain
 
 
 class Web_EditorAssets(models.AbstractModel):
@@ -160,18 +161,10 @@ class Web_EditorAssets(models.AbstractModel):
         return res.with_context(website_id=website.id).filtered(lambda x: x.website_id == website)
 
     @api.model
-    def _get_custom_asset(self, custom_url):
-        """
-        See web_editor.Web_EditorAssets._get_custom_asset
-        Extend to only return the views related to the current website.
-        """
-        if self.env.user.has_group('website.group_website_designer'):
-            # TODO: Remove me in master, see commit message, ACL added right to
-            #       unlink to designer but not working without -u in stable
-            self = self.sudo()
-        website = self.env['website'].get_current_website()
-        res = super()._get_custom_asset(custom_url)
-        return res.with_context(website_id=website.id).filter_duplicate()
+    def _get_custom_asset(self, custom_url, _domain=None, _order=None):
+        _domain = Domain('website_id', 'in', (False, self.env.context.get('website_id', False)))
+        _order = "website_id asc, id"
+        return super()._get_custom_asset(custom_url, _domain=_domain, _order=_order)
 
     @api.model
     def _add_website_id(self, values):

@@ -5,6 +5,7 @@ import base64
 import re
 
 from odoo import api, models
+from odoo.fields import Domain
 from odoo.tools import misc
 from odoo.addons.base.models.assetsbundle import EXTENSIONS
 
@@ -200,10 +201,11 @@ class Web_EditorAssets(models.AbstractModel):
         return self.env["ir.attachment"].search([("url", op, custom_url)])
 
     @api.model
-    def _get_custom_asset(self, custom_url):
+    def _get_custom_asset(self, custom_url, _domain=None, _order=None):
         """
         Fetch the ir.asset record related to the given customized asset (the
         inheriting view which replace the original asset by the customized one).
+        Remove duplicate record per key.
 
         Params:
             custom_url (str): the URL of the customized asset
@@ -212,7 +214,16 @@ class Web_EditorAssets(models.AbstractModel):
             ir.asset()
         """
         url = custom_url[1:] if custom_url.startswith(('/', '\\')) else custom_url
-        return self.env['ir.asset'].search([('path', 'like', url)])
+        domain = (_domain or Domain(True)) & Domain('path', 'like', url)
+        keys = set()
+        most_specific = []
+        for record in self.env['ir.asset'].search(domain=domain, order=_order or "id"):
+            if record.key in keys:
+                continue
+            most_specific.append(record)
+            if record.key:
+                keys.add(record.key)
+        return self.env['ir.asset'].union(*most_specific)
 
     @api.model
     def _save_asset_attachment_hook(self):

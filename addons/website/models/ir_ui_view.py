@@ -441,6 +441,12 @@ class IrUiView(models.Model):
                 return False
         return True
 
+    @api.readonly
+    @api.model
+    def render_public_asset(self, template, values=None):
+        # to get the specific asset for access checking
+        return super(IrUiView, self.with_context(website_id=request and request.website.id)).render_public_asset(template, values=values)
+
     def _render_template(self, template, values=None):
         """ Render the template. If website is enabled on request, then extend rendering context with website values. """
         view = self._get(template).sudo()

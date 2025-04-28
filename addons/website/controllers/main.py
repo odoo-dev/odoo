@@ -6,7 +6,6 @@ import logging
 import re
 import requests
 import werkzeug.urls
-import werkzeug.utils
 import werkzeug.wrappers
 import zipfile
 
@@ -26,6 +25,7 @@ from odoo.exceptions import AccessError, UserError
 from odoo.http import request, SessionExpiredException
 from odoo.osv import expression
 from odoo.tools import OrderedSet, escape_psql, html_escape as escape, py_to_js_locale
+from odoo.fields import Domain
 from odoo.addons.base.models.ir_http import EXTENSION_TO_WEB_MIMETYPES
 from odoo.addons.base.models.ir_qweb import QWebException
 from odoo.addons.portal.controllers.portal import pager as portal_pager
@@ -983,8 +983,16 @@ class Website(Home):
     def _get_customize_data(self, keys, is_view_data):
         model = 'ir.ui.view' if is_view_data else 'ir.asset'
         Model = request.env[model].with_context(active_test=False)
-        domain = expression.AND([[("key", "in", keys)], request.website.website_domain()])
-        return Model.search(domain).filter_duplicate()
+        domain = Domain("key", "in", keys) & Domain('website_id', 'in', (False, Model.env.context.get('website_id', False)))
+        check_keys = set()
+        most_specific = []
+        for record in Model.search(domain, order="website_id desc, id"):
+            if record.key in check_keys:
+                continue
+            most_specific.append(record)
+            if record.key:
+                check_keys.add(record.key)
+        return Model.union(*most_specific)
 
     @http.route(['/website/theme_customize_data_get'], type='jsonrpc', auth='user', website=True, readonly=True)
     def theme_customize_data_get(self, keys, is_view_data):
