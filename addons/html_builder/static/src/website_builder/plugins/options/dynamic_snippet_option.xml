@@ -16,7 +16,7 @@
             <t t-foreach="filteredTemplates" t-as="template" t-key="template.key">
                 <t t-if="template.thumb">
                     <BuilderSelectItem actionParam="template">
-                        <img t-att-src="template.thumb" t-att-alt="template.name"/>
+                        <Img src="template.thumb" alt="'template.name'"/>
                     </BuilderSelectItem>
                 </t>
                 <t t-else="">

@@ -29,7 +29,7 @@
                                             <div class="o_we_shape" t-attf-style="background-image: {{this.getShapeUrl(shape[0])}};"/>
                                         </t>
                                         <t t-else="" >
-                                            <img t-att-src="this.getShapeUrl(shape[0])" />
+                                            <Img src="this.getShapeUrl(shape[0])"/>
                                         </t>
                                         <span t-if="shape[1].imgSize" class="o_we_shape_animated_label">
                                             <i class="fa fa-expand"></i>

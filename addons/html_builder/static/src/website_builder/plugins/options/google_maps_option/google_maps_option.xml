@@ -35,34 +35,34 @@
     <BuilderRow label.translate="&#8985; Style" preview="false" t-if="this.isActiveItem('roadmap_opt')">
         <BuilderSelect dataAttributeAction="'mapColor'">
             <BuilderSelectItem dataAttributeActionValue="">
-                <img src="/website/static/src/snippets/s_google_map/img/thumbs/map-default.jpg"/>
+                <Img src="'/website/static/src/snippets/s_google_map/img/thumbs/map-default.jpg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem dataAttributeActionValue="'lightMonoMap'">
-                <img src="/website/static/src/snippets/s_google_map/img/thumbs/map-lightMono.jpg"/>
+                <Img src="'/website/static/src/snippets/s_google_map/img/thumbs/map-lightMono.jpg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem dataAttributeActionValue="'cupertinoMap'">
-                <img src="/website/static/src/snippets/s_google_map/img/thumbs/map-cupertino.jpg"/>
+                <Img src="'/website/static/src/snippets/s_google_map/img/thumbs/map-cupertino.jpg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem dataAttributeActionValue="'retroMap'">
-                <img src="/website/static/src/snippets/s_google_map/img/thumbs/map-retro.jpg"/>
+                <Img src="'/website/static/src/snippets/s_google_map/img/thumbs/map-retro.jpg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem dataAttributeActionValue="'cobaltMap'">
-                <img src="/website/static/src/snippets/s_google_map/img/thumbs/map-cobalt.jpg"/>
+                <Img src="'/website/static/src/snippets/s_google_map/img/thumbs/map-cobalt.jpg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem dataAttributeActionValue="'flatMap'">
-                <img src="/website/static/src/snippets/s_google_map/img/thumbs/map-flat.jpg"/>
+                <Img src="'/website/static/src/snippets/s_google_map/img/thumbs/map-flat.jpg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem dataAttributeActionValue="'blueMap'">
-                <img src="/website/static/src/snippets/s_google_map/img/thumbs/map-blue.jpg"/>
+                <Img src="'/website/static/src/snippets/s_google_map/img/thumbs/map-blue.jpg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem dataAttributeActionValue="'lillaMap'">
-                <img src="/website/static/src/snippets/s_google_map/img/thumbs/map-lilla.jpg"/>
+                <Img src="'/website/static/src/snippets/s_google_map/img/thumbs/map-lilla.jpg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem dataAttributeActionValue="'carMap'">
-                <img src="/website/static/src/snippets/s_google_map/img/thumbs/map-caramello.jpg"/>
+                <Img src="'/website/static/src/snippets/s_google_map/img/thumbs/map-caramello.jpg'"/>
             </BuilderSelectItem>
             <BuilderSelectItem dataAttributeActionValue="'bwMap'">
-                <img src="/website/static/src/snippets/s_google_map/img/thumbs/map-bw.jpg"/>
+                <Img src="'/website/static/src/snippets/s_google_map/img/thumbs/map-bw.jpg"/>
             </BuilderSelectItem>
         </BuilderSelect>
     </BuilderRow>
