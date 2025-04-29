@@ -157,13 +157,7 @@ export class ToolbarPlugin extends Plugin {
         },
         toolbar_namespaces: withSequence(100, {
             id: "compact",
-            isApplied: () => {
-                // Button count in expanded namespace
-                this.buttonCount ||= this.buttonGroups
-                    .flatMap((g) => g.buttons)
-                    .filter((b) => b.namespaces.includes("expanded")).length;
-                return !this.isToolbarExpanded && this.buttonCount >= BUTTON_COUNT_THRESHOLD;
-            },
+            isApplied: () => this.shouldDisplayCompactToolbar(),
         }),
     };
 
@@ -282,6 +276,19 @@ export class ToolbarPlugin extends Plugin {
         const buttons = this.getButtons();
         /** @type {ToolbarGroup[]} */
         const groups = this.getResource("toolbar_groups");
+        const resolveNamespaces = (group, button) => {
+            const namespaces = button.namespaces || group.namespaces || ["expanded"];
+            // Every button in compact namespace is also in expanded namespace,
+            // except for the ellipsis button.
+            if (
+                namespaces.includes("compact") &&
+                !namespaces.includes("expanded") &&
+                button.id !== "expand_toolbar"
+            ) {
+                namespaces.push("expanded");
+            }
+            return namespaces;
+        };
 
         return groups.map((group) => ({
             ...omit(group, "namespaces"),
@@ -289,7 +296,7 @@ export class ToolbarPlugin extends Plugin {
                 .filter((button) => button.groupId === group.id)
                 .map((button) => ({
                     ...button,
-                    namespaces: button.namespaces || group.namespaces || ["expanded"],
+                    namespaces: resolveNamespaces(group, button),
                 })),
         }));
     }
@@ -365,6 +372,43 @@ export class ToolbarPlugin extends Plugin {
             "[data-prevent-closing-overlay]"
         );
         return preventClosing?.dataset?.preventClosingOverlay === "true";
+    }
+
+    // This function assumes that buttons in compact namespace are a subset of
+    // buttons in expanded namespace, except for the ellipsis button.
+    shouldDisplayCompactToolbar() {
+        if (this.isToolbarExpanded) {
+            return false;
+        }
+        this.expandedButtons ||= this.buttonGroups
+            .flatMap((g) => g.buttons)
+            .filter((b) => b.namespaces.includes("expanded"));
+        // Always display expanded toolbar if there are not too many buttons.
+        if (this.expandedButtons.length < BUTTON_COUNT_THRESHOLD) {
+            return false;
+        }
+        const compactToolbarIsSmaller = (buttons) => {
+            const compactButtons = buttons.filter((b) => b.namespaces.includes("compact"));
+            return compactButtons.length + 1 < buttons.length; // +1 for ellipsis button
+        };
+        // Compare sizes between compact and expanded toolbars considering
+        // only buttons that are always available.
+        this.alwaysAvailableExpandedButtons ||= this.expandedButtons.filter(
+            (b) => b.isAvailable === undefined
+        );
+        this.compacToolbarIsAlwaysSmaller ||= compactToolbarIsSmaller(
+            this.alwaysAvailableExpandedButtons
+        );
+        if (this.compacToolbarIsAlwaysSmaller) {
+            return true;
+        }
+
+        // Compare sizes taking into account the availability of buttons.
+        const { editableSelection } = this.dependencies.selection.getSelectionData();
+        const availableButtons = this.expandedButtons.filter(
+            (b) => b.isAvailable === undefined || b.isAvailable(editableSelection)
+        );
+        return compactToolbarIsSmaller(availableButtons);
     }
 
     updateNamespace() {
