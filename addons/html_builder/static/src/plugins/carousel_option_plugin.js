@@ -114,8 +114,7 @@ export class CarouselOptionPlugin extends Plugin {
         this.dependencies.clone.cloneElement(activeCarouselItem);
 
         await this.slide(editingElement, "next");
-        this.dependencies.history.addStep();
-        this.dependencies["builder-options"].updateContainers(
+        this.dependencies["builder-options"].updateContainersTarget(
             editingElement.querySelector(".carousel-item.active")
         );
     }
@@ -136,8 +135,7 @@ export class CarouselOptionPlugin extends Plugin {
             this.dependencies.remove.removeElement(toRemoveCarouselItemEl);
             this.dependencies.remove.removeElement(toRemoveIndicatorEl);
 
-            this.dependencies.history.addStep();
-            this.dependencies["builder-options"].updateContainers(
+            this.dependencies["builder-options"].updateContainersTarget(
                 editingCarouselElement.querySelector(".carousel-item.active")
             );
         }
@@ -146,7 +144,7 @@ export class CarouselOptionPlugin extends Plugin {
     async slideCarousel(editingElement, direction) {
         await this.slide(editingElement, direction);
         this.dependencies.history.addStep();
-        this.dependencies["builder-options"].updateContainers(
+        this.dependencies["builder-options"].updateContainersTarget(
             editingElement.querySelector(".carousel-item.active")
         );
     }
@@ -344,8 +342,7 @@ export class CarouselOptionPlugin extends Plugin {
             carouselInstance["pause"]();
 
             const activeImageEl = editingCarouselElement.querySelector(".carousel-item.active img");
-            this.dependencies.history.addStep();
-            this.dependencies["builder-options"].updateContainers(activeImageEl);
+            this.dependencies["builder-options"].updateContainersTarget(activeImageEl);
         }
     }
 }

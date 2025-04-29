@@ -48,9 +48,8 @@ export class ReplacePlugin extends Plugin {
             newSnippet.querySelectorAll(".s_dialog_preview").forEach((el) => el.remove());
             // TODO find a way to wait for the images to load before updating or
             // to trigger a refresh once the images are loaded afterwards.
-            // If not possible, call updateContainers with nothing.
-            this.dependencies.history.addStep();
-            this.dependencies["builder-options"].updateContainers(newSnippet);
+            // If not possible, call updateContainersTarget with nothing.
+            this.dependencies["builder-options"].updateContainersTarget(newSnippet);
             // TODO post snippet drop (onBuild,...)
         }
     }

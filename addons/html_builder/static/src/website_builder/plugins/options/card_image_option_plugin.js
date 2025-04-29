@@ -43,8 +43,7 @@ class CardImageOptionPlugin extends Plugin {
                     const elementToSelect = this.dependencies.remove.removeElement(imageWrapper);
                     editingElement.classList.remove(...imageRelatedClasses);
                     imageRelatedStyles.forEach((prop) => editingElement.style.removeProperty(prop));
-                    this.dependencies.history.addStep();
-                    this.dependencies["builder-options"].updateContainers(elementToSelect);
+                    this.dependencies["builder-options"].updateContainersTarget(elementToSelect);
                 },
             },
             addCoverImage: {

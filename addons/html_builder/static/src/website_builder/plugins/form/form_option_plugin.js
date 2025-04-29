@@ -294,13 +294,13 @@ export class FormOptionPlugin extends Plugin {
                     const messageEl = el.parentElement.querySelector(".s_website_form_end_message");
                     messageEl.classList.add("o_builder_form_show_message");
                     el.classList.add("o_builder_form_show_message");
-                    this.dependencies["builder-options"].updateContainers(messageEl);
+                    this.dependencies["builder-options"].updateContainersTarget(messageEl);
                 },
                 clean: ({ editingElement: el }) => {
                     const messageEl = el.parentElement.querySelector(".s_website_form_end_message");
                     messageEl.classList.remove("o_builder_form_show_message");
                     el.classList.remove("o_builder_form_show_message");
-                    this.dependencies["builder-options"].updateContainers(el);
+                    this.dependencies["builder-options"].updateContainersTarget(el);
                 },
                 isApplied: ({ editingElement: el, value }) =>
                     el.classList.contains("o_builder_form_show_message"),
@@ -762,7 +762,7 @@ export class FormOptionPlugin extends Plugin {
             ".s_website_form_submit, .s_website_form_recaptcha"
         );
         locationEl.insertAdjacentElement("beforebegin", fieldEl);
-        this.dependencies["builder-options"].updateContainers(fieldEl);
+        this.dependencies["builder-options"].updateContainersTarget(fieldEl);
     }
     addFieldAfterField(fieldEl) {
         const formEl = fieldEl.closest("form");
@@ -773,7 +773,7 @@ export class FormOptionPlugin extends Plugin {
         field.formatInfo.mark = getMark(formEl);
         const newFieldEl = renderField(field);
         fieldEl.insertAdjacentElement("afterend", newFieldEl);
-        this.dependencies["builder-options"].updateContainers(newFieldEl);
+        this.dependencies["builder-options"].updateContainersTarget(newFieldEl);
     }
     /**
      * To be used in load for any action that uses getActiveField or

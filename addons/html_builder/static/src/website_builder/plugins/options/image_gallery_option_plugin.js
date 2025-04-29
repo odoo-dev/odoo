@@ -97,10 +97,7 @@ class ImageGalleryOption extends Plugin {
 
     restoreSelection(imageToSelect) {
         if (imageToSelect && !this.dependencies.history.getIsPreviewing()) {
-            // We want to update the container to the equivalent cloned image.
-            // This has to be done in the new step so we manually add a step
-            this.dependencies.history.addStep();
-            this.dependencies["builder-options"].updateContainers(imageToSelect);
+            this.dependencies["builder-options"].updateContainersTarget(imageToSelect);
         }
     }
 
@@ -151,7 +148,7 @@ class ImageGalleryOption extends Plugin {
                 const activeImageEl = editingGalleryElement.querySelector(
                     ".carousel-item.active img"
                 );
-                this.dependencies["builder-options"].updateContainers(activeImageEl);
+                this.dependencies["builder-options"].updateContainersTarget(activeImageEl);
             }
         }
     }
@@ -328,7 +325,7 @@ class ImageGalleryOption extends Plugin {
     onCarouselSlid(ev) {
         // When the carousel slides, update the builder options to select the active image
         const activeImageEl = ev.target.querySelector(".carousel-item.active img");
-        this.dependencies["builder-options"].updateContainers(activeImageEl);
+        this.dependencies["builder-options"].updateContainersTarget(activeImageEl);
     }
 
     async processImages(editingElement, newImages = []) {
