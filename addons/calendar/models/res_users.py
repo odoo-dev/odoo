@@ -69,8 +69,9 @@ class Users(models.Model):
         """ Forbid the calendar default privacy update from different users for keeping private events secured. """
         privacy_update = 'calendar_default_privacy' in vals
         default_user = self.env.ref('base.default_user', raise_if_not_found=False)
-        if default_user and privacy_update and any(user not in [default_user, self.env.user] for user in self):
-            raise AccessError(_("You are not allowed to change the calendar default privacy of another user due to privacy constraints."))
+        if default_user and privacy_update and not self.env.user._is_admin():
+            if any(user not in [default_user, self.env.user] for user in self):
+                raise AccessError(_("You are not allowed to change the calendar default privacy of another user due to privacy constraints."))
         res = super().write(vals)
         return res
 
