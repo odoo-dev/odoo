@@ -123,7 +123,7 @@ import { _t } from "@web/core/l10n/translation";
 /** Delay in ms for toolbar open after keyup, double click or triple click. */
 const DELAY_TOOLBAR_OPEN = 300;
 /** Button count under which the toolbar opens directly in its extended form. */
-const BUTTON_COUNT_THRESHOLD = 7;
+const BUTTON_COUNT_THRESHOLD = 1;
 
 /**
  * @typedef { Object } ToolbarShared
