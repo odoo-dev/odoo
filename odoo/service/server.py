@@ -17,7 +17,6 @@ import sys
 import threading
 import time
 from collections import deque
-import contextlib
 from io import BytesIO
 
 import psutil
