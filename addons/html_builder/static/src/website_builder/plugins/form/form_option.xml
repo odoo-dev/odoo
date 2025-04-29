@@ -154,15 +154,9 @@
             <BuilderButton title.translate="Hide" actionValue="'none'">
                 <i class="fa fa-eye-slash"/>
             </BuilderButton>
-            <BuilderButton title.translate="Top" actionValue="'top'">
-                <img src="/website/static/src/img/snippets_options/pos_top.svg"/>
-            </BuilderButton>
-            <BuilderButton title.translate="Left" actionValue="'left'">
-                <img src="/website/static/src/img/snippets_options/pos_left.svg"/>
-            </BuilderButton>
-            <BuilderButton title.translate="Right" actionValue="'right'">
-                <img src="/website/static/src/img/snippets_options/pos_right.svg"/>
-            </BuilderButton>
+            <BuilderButton title.translate="Top" actionValue="'top'" iconImg="'/website/static/src/img/snippets_options/pos_top.svg'"/>
+            <BuilderButton title.translate="Left" actionValue="'left'" iconImg="'/website/static/src/img/snippets_options/pos_left.svg'"/>
+            <BuilderButton title.translate="Right" actionValue="'right'" iconImg="'/website/static/src/img/snippets_options/pos_right.svg'"/>
         </BuilderButtonGroup>
     </BuilderRow>
     <BuilderRow label.translate="Description">

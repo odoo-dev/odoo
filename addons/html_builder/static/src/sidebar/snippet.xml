@@ -12,7 +12,7 @@
          t-on-mouseout="onInstallableHover">
         <div class="o_snippet_thumbnail">
             <button t-if="!snippet.isInstallable" class="o_snippet_thumbnail_area" t-on-click="props.onClickHandler" title="Insert snippet"/>
-            <img t-if="snippet.isDisabled" src="/html_builder/static/img/snippet_disabled.svg" class="o_snippet_undroppable"/>
+            <Img t-if="snippet.isDisabled" src="'/html_builder/static/img/snippet_disabled.svg'" class="'o_snippet_undroppable'"/>
             <div class="o_snippet_thumbnail_img" t-attf-style="background-image: url({{snippet.thumbnailSrc}});"/>
             <span class="o_snippet_thumbnail_title" t-esc="snippet.title"/>
             <button t-if="snippet.isInstallable" class="o_install_btn visually-hidden-focusable btn btn-primary border-0 w-100" t-on-click="() => props.snippetModel.installSnippetModule(snippet)">Install</button>
