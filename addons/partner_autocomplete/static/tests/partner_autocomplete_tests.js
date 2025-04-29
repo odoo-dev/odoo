@@ -59,11 +59,6 @@ const clearbitSuggestions = [
 
 
 QUnit.module('partner_autocomplete', {
-    async before() {
-        // Load the lib before the tests to prevent them from
-        // failing because of the delay.
-        await loadJS("/partner_autocomplete/static/lib/jsvat.js");
-    },
     beforeEach() {
         target = getFixture();
 
