@@ -122,6 +122,8 @@ import { _t } from "@web/core/l10n/translation";
 
 /** Delay in ms for toolbar open after keyup, double click or triple click. */
 const DELAY_TOOLBAR_OPEN = 300;
+/** Button count under which the toolbar opens directly in its extended form. */
+const BUTTON_COUNT_THRESHOLD = 7;
 
 /**
  * @typedef { Object } ToolbarShared
@@ -155,7 +157,13 @@ export class ToolbarPlugin extends Plugin {
         },
         toolbar_namespaces: withSequence(100, {
             id: "compact",
-            isApplied: () => !this.isToolbarExpanded,
+            isApplied: () => {
+                // Button count in expanded namespace
+                this.buttonCount ||= this.buttonGroups
+                    .flatMap((g) => g.buttons)
+                    .filter((b) => b.namespaces.includes("expanded")).length;
+                return !this.isToolbarExpanded && this.buttonCount >= BUTTON_COUNT_THRESHOLD;
+            },
         }),
     };
 
