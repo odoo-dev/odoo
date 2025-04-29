@@ -203,7 +203,7 @@ class PosSession(models.Model):
     def filter_local_data(self, models_to_filter):
         response = {}
         for model, ids in models_to_filter.items():
-            response[model] = self.env[model].browse(ids)._unrelevant_records()
+            response[model] = self.env[model].browse(ids).with_context(pos_config=self.config_id.id)._unrelevant_records()
 
         return response
 
