@@ -8,7 +8,7 @@ const MegaMenuDropdownEdit = (I) => class extends I {
             ...this.dynamicContent[".o_mega_menu_toggle"],
             "t-on-shown.bs.dropdown": () => {
                 // Focus the mega menu to show its options. Pointerup is
-                // listened to in BuilderOptionsPlugin to call updateContainers.
+                // listened to in BuilderOptionsPlugin to call updateContainersTarget.
                 document
                     .querySelector(".o_mega_menu")
                     .dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));

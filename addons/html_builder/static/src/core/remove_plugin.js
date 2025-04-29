@@ -105,8 +105,7 @@ export class RemovePlugin extends Plugin {
 
     removeElementAndUpdateContainers(el) {
         const elementToSelect = this.removeElement(el);
-        this.dependencies.history.addStep();
-        this.dependencies["builder-options"].updateContainers(elementToSelect);
+        this.dependencies["builder-options"].updateContainersTarget(elementToSelect);
     }
 
     removeElement(el) {

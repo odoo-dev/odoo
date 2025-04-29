@@ -83,7 +83,7 @@ export class InvisibleElementsPanel extends Component {
 
             this.shared.disableSnippets.disableUndroppableSnippets();
             if (show) {
-                this.shared["builder-options"].updateContainers(snippetEl);
+                this.shared["builder-options"].updateContainersTarget(snippetEl);
             } else {
                 this.shared["builder-options"].deactivateContainers();
             }

@@ -158,8 +158,7 @@ class ImageToolOptionPlugin extends Plugin {
                         return;
                     }
                     editingElement.replaceWith(newImage);
-                    this.dependencies.history.addStep();
-                    this.dependencies["builder-options"].updateContainers(newImage);
+                    this.dependencies["builder-options"].updateContainersTarget(newImage);
                 },
             },
             setLink: {

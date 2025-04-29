@@ -18,14 +18,14 @@ export class BuilderOptionsPlugin extends Plugin {
     static shared = [
         "computeContainers",
         "getContainers",
-        "updateContainers",
+        "updateContainersTarget",
         "deactivateContainers",
         "getPageContainers",
         "getRemoveDisabledReason",
         "getCloneDisabledReason",
     ];
     resources = {
-        step_added_handlers: () => this.updateContainers(),
+        step_added_handlers: () => this._updateContainers(),
         clean_for_save_handlers: this.cleanForSave.bind(this),
         post_undo_handlers: this.restoreContainer.bind(this),
         post_redo_handlers: this.restoreContainer.bind(this),
@@ -63,7 +63,8 @@ export class BuilderOptionsPlugin extends Plugin {
         this.lastContainers = [];
         if (this.config.initialTarget) {
             const el = this.editable.querySelector(this.config.initialTarget);
-            this.updateContainers(el);
+            this.updateContainersTarget(el);
+            this._updateContainers();
         }
     }
 
@@ -72,10 +73,15 @@ export class BuilderOptionsPlugin extends Plugin {
     }
 
     onClick(ev) {
-        this.updateContainers(ev.target);
+        this.updateContainersTarget(ev.target);
+        this._updateContainers();
     }
 
-    updateContainers(target) {
+    updateContainersTarget(target) {
+        this.target = target;
+    }
+
+    _updateContainers() {
         if (this.dependencies.history.getIsCurrentStepModified()) {
             console.warn(
                 "Should not have any mutations in the current step when you update the container selection"
@@ -83,9 +89,6 @@ export class BuilderOptionsPlugin extends Plugin {
         }
         if (this.dependencies.history.getIsPreviewing()) {
             return;
-        }
-        if (target) {
-            this.target = target;
         }
         if (!this.target || !this.target.isConnected) {
             this.lastContainers = this.lastContainers.filter((c) => c.element.isConnected);
@@ -236,7 +239,8 @@ export class BuilderOptionsPlugin extends Plugin {
 
     restoreContainer(revertedStep) {
         if (revertedStep && revertedStep.extraStepInfos.optionSelection) {
-            this.updateContainers(revertedStep.extraStepInfos.optionSelection);
+            this.updateContainersTarget(revertedStep.extraStepInfos.optionSelection);
+            this._updateContainers();
         }
     }
     getRemoveDisabledReason(el) {
