@@ -69,6 +69,7 @@
         'views/snippets/s_mega_menu/multi_menus.xml',
         'views/snippets/s_mega_menu/odoo_menu.xml',
         'views/snippets/s_mega_menu/thumbnails.xml',
+        'views/snippets/s_sale_order.xml',
     ],
     'demo': [
         'data/demo.xml',
@@ -133,6 +134,8 @@
             'website_sale/static/src/js/product_list/*',
             'website_sale/static/src/js/product_template_attribute_line/*',
             'website_sale/static/src/js/quantity_buttons/*',
+            'website_sale/static/src/snippets/s_sale_order/000.js',
+            'website_sale/static/src/snippets/s_sale_order/000.xml',
 
             # Location selector components are defined in `delivery` to share the codebase with the
             # backend.
@@ -157,6 +160,7 @@
             'website_sale/static/src/js/website_sale.editor.js',
             'website_sale/static/src/js/website_sale_form_editor.js',
             'website_sale/static/src/js/editor/snippets.options.js',
+            'website_sale/static/src/snippets/s_sale_order/options.js'
         ],
         'website.assets_editor': [
             'website_sale/static/src/js/systray_items/*.js',

@@ -61,6 +61,7 @@ options.registry.facebookPage = options.Class.extend({
      * @param {String} optionName the name of the option to toggle
      */
     toggleOption: function (previewMode, widgetValue, params) {
+        debugger;
         let optionName = params.optionName;
         if (optionName.startsWith('tab.')) {
             optionName = optionName.replace('tab.', '');
@@ -123,6 +124,7 @@ options.registry.facebookPage = options.Class.extend({
      * @override
      */
     _computeWidgetState: function (methodName, params) {
+        debugger;
         const optionName = params.optionName;
         switch (methodName) {
             case 'toggleOption': {

@@ -10,6 +10,7 @@
 
             <!-- Snippet groups -->
             <snippets id="snippet_groups" string="Categories">
+                <!-- <t snippet-group="crm" t-snippet="website.s_snippet_group" string="CRM" /> -->
                 <t snippet-group="custom" t-snippet="website.s_snippet_group" string="Custom"
                     t-thumbnail="/website/static/src/img/snippets_thumbs/s_media_list.svg"/>
                 <t snippet-group="intro" t-snippet="website.s_snippet_group" string="Intro"

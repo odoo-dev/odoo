@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<template xml:space="preserve">
+  <t t-name="website_sale.sale_order_data">
+      <div class="container">
+        <div class="row">
+          <t t-foreach="sale_orders" t-as="order" t-key="order.id">
+            <div class="col-12 col-md-6 col-lg-4 my-2">
+              <div class="card" t-att-data-order-state="order.state">
+                <div class="card-body">
+                  <h5 class="card-title">
+                    Order #<t t-esc="order.name"/>
+                  </h5>
+                  <p class="card-text">
+                    Customer: <t t-esc="order.partner_id"/>
+                  </p>
+                  <p class="card-text">
+                    Status: <span class="badge badge-primary" t-esc="order.state"/>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </t>
+        </div>
+      </div>
+  </t>
+</template>

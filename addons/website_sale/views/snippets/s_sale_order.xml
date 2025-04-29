@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+<template id="sale_order_snippet" inherit_id="website.snippets" name="Sale Order Snipper">
+        <xpath expr="//t[@id='installed_snippets_hook']" position="after">
+            <t snippet-group="sale" t-snippet="website.s_snippet_group" string="Sale Order" />
+        </xpath>
+        <xpath expr="//snippets[@id='snippet_structure']" position="inside">
+            <t t-snippet="website_sale.s_sale_order_items_template" string="Sale Order" group="sale"/>
+        </xpath>
+</template>
+
+<template id="s_sale_order_items_template" name="Sale Orders">
+    <section class="s_sale_order_items" data-show-confirmed="false">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-md-6 col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Order #S00001</h5>
+                            <p class="card-text">Customer: Mitchell Admin</p>
+                            <p class="card-text">Status: Sale</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>
+
+<template id="s_sale_order_options" inherit_id="website.snippet_options">
+        <xpath expr="." position="inside">
+            <div data-js="SaleOrderOption" data-selector=".s_sale_order_items" data-select-data-attribute="true" data-attribute-name="show-confirmed">
+                <we-checkbox string="Confirm Orders"
+                        data-option-name="confirm_orders"
+                        data-toggle-option="true"
+                        data-no-preview="true" />
+                <we-select string="Layout" data-attribute-name="layout">
+                    <we-button data-select-class="card-view" data-no-preview="true">Card</we-button>
+                    <we-button data-select-class="list-view" data-no-preview="true">List</we-button>
+                </we-select>
+            </div>
+        </xpath>
+</template>
+
+</odoo>
