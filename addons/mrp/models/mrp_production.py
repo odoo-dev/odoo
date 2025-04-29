@@ -2042,6 +2042,16 @@ class MrpProduction(models.Model):
         self.workorder_ids._action_confirm()
 
     def button_mark_done(self):
+        def _get_amounts_for_backorder(self):
+            amounts = {}
+            for production in self:
+                if production.bom_id.enable_batch_size:
+                    batch_size = production.bom_id.batch_size
+                    product_qty = production._get_quantity_to_backorder()
+                    remaining_qty = [min(batch_size, product_qty - i) for i in range(0, int(product_qty), int(batch_size))]
+                    amounts[production] = [production.qty_producing] + remaining_qty
+            return amounts if amounts else False
+
         res = self.pre_button_mark_done()
         if res is not True:
             return res
@@ -2054,8 +2064,7 @@ class MrpProduction(models.Model):
             productions_to_backorder = self.env['mrp.production']
         productions_not_to_backorder = productions_not_to_backorder.with_context(no_procurement=True)
         self.workorder_ids.button_finish()
-
-        backorders = productions_to_backorder and productions_to_backorder._split_productions()
+        backorders = productions_to_backorder and productions_to_backorder._split_productions(amounts=_get_amounts_for_backorder(self))
         backorders = backorders - productions_to_backorder
 
         productions_not_to_backorder._post_inventory(cancel_backorder=True)

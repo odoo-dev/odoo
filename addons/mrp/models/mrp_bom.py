@@ -90,6 +90,8 @@ class MrpBom(models.Model):
         string="Days to prepare Manufacturing Order", default=0,
         help="Create and confirm Manufacturing Orders this many days in advance, to have enough time to replenish components or manufacture semi-finished products.\n"
              "Note that security lead times will also be considered when appropriate.")
+    batch_size = fields.Float('Batch Size', default=1, help="If set, automatically generated manufacturing orders will never exceed that amount for this product.")
+    enable_batch_size = fields.Boolean(default=False)
 
     _qty_positive = models.Constraint(
         'check (product_qty > 0)',

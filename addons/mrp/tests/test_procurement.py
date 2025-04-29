@@ -1005,3 +1005,40 @@ class TestProcurement(TestMrpCommon):
 
         # Check the generated MO
         self.assertEqual(mo.product_qty, 45)
+
+    def test_check_mo_split_with_batch_size_on_mto(self):
+        """ Check the MO is split automatically with the correct product_qty when we apply
+            a batch size in BoM and run the procurement using a MTO, MTSO, or replenishment."""
+        picking_type_out = self.env.ref('stock.picking_type_out')
+        vendor = self.env['res.partner'].create({
+            'name': 'Roger'
+        })
+        # This needs to be tried with MTO route activated
+        mto_route = self.env['stock.route'].browse(self.ref('stock.route_warehouse0_mto'))
+        mto_route.action_unarchive()
+        mto_route.rule_ids.procure_method = "make_to_order"
+        # Define products requested for this BoM.
+        self.product_4.route_ids = [(4, self.ref('stock.route_warehouse0_mto')), (4, self.ref('mrp.route_warehouse0_manufacture'))]
+        self.bom_1.update({
+            'product_qty': 1.0,
+            'enable_batch_size': True,
+            'batch_size': 5.0,
+        })
+        procurement_group = self.env['procurement.group'].create({
+            'move_type': 'direct',
+            'partner_id': vendor.id
+        })
+        # Create initial procurement that will generate the initial move and its picking.
+        values = {
+            'group_id': procurement_group,
+            'warehouse_id': picking_type_out.warehouse_id,
+            'partner_id': vendor
+        }
+        self.env['procurement.group'].run([self.env['procurement.group'].Procurement(
+            self.product_4, 10, self.uom_unit, vendor.property_stock_customer,
+            self.product_4.name, '/', self.env.company, values)
+        ])
+        manufacturing_orders = self.env['mrp.production'].search([('product_id', '=', self.product_4.id)])
+        self.assertTrue(manufacturing_orders, 'No manufacturing order created.')
+        self.assertEqual(len(manufacturing_orders), 2, 'A new 2 MO should have been created with the 5 qty.')
+        self.assertEqual(manufacturing_orders.mapped('product_qty'), [5.0, 5.0], 'The manufacturing orders qty should be the 5.0.')

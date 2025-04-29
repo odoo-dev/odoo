@@ -160,6 +160,12 @@
                                                       Also note that purchase security lead times will be added when appropriate."
                                                 class="oe_link pt-0"/>
                                     </div>
+                                    <label for="batch_size"/>
+                                    <div class="d-flex">
+                                        <field name="enable_batch_size" no_label="1"/>
+                                        <field name="batch_size" class="w-50" invisible="not enable_batch_size" required="enable_batch_size"/>
+                                        <field name="product_uom_id" groups="uom.group_uom" readonly="1" invisible="not enable_batch_size"/>
+                                    </div>
                                 </group>
                             </group>
                         </page>

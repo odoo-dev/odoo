@@ -887,6 +887,31 @@ class TestMrpProductionBackorder(TestMrpCommon):
         self.assertRecordValues(mo_ask, [{'state': 'done', 'qty_produced': qty_produced, 'mrp_production_backorder_count': 1, 'priority': '0'}])
         self.assertRecordValues(mo_never, [{'state': 'done', 'qty_produced': qty_produced, 'mrp_production_backorder_count': 1, 'priority': '0'}])
 
+    def test_check_mo_split_with_batch_on_backorder(self):
+        """ Check the MO is split automatically with the correct product_qty when we apply
+            a batch size in BoM and create a backorder."""
+        self.bom_1.update({
+            'product_qty': 1.0,
+            'enable_batch_size': True,
+            'batch_size': 5.0,
+        })
+        mo = self.env['mrp.production'].create({
+            'product_qty': 10,
+            'bom_id': self.bom_1.id,
+            'priority': '1',
+        })
+        mo.picking_type_id.create_backorder = "always"
+        mo.action_confirm()
+        with Form(mo) as mo_form:
+            mo_form.qty_producing = 2.0
+        mo = mo_form.save()
+        action = mo.button_mark_done()
+        backorder_form = Form(self.env['mrp.production.backorder'].with_context(**action['context']))
+        backorder_form.save().action_backorder()
+        self.assertRecordValues(mo, [{'state': 'done', 'qty_produced': 2.0, 'mrp_production_backorder_count': 2, 'priority': '0'}])
+        backorders = mo.procurement_group_id.mrp_production_ids - mo
+        self.assertEqual(backorders.mapped('product_qty'), [5.0, 3.0])
+
 
 class TestMrpWorkorderBackorder(TransactionCase):
     @classmethod

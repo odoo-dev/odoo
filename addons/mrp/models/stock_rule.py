@@ -278,7 +278,17 @@ class ProcurementGroup(models.Model):
                         procurement.location_id, procurement.name,
                         procurement.origin, procurement.company_id, values))
             else:
-                procurements_without_kit.append(procurement)
+                bom_id = self.env['mrp.bom']._bom_find(procurement.product_id).get(procurement.product_id)
+                if bom_id and bom_id.enable_batch_size and bom_id.batch_size < procurement.product_qty:
+                    # split the procurement
+                    batch_size = bom_id.batch_size
+                    product_qty = procurement.product_qty
+                    while product_qty > 0:
+                        new_product_qty = min(batch_size, product_qty)
+                        procurements_without_kit.append(procurement._replace(product_qty=new_product_qty))
+                        product_qty -= new_product_qty
+                else:
+                    procurements_without_kit.append(procurement)
         return super(ProcurementGroup, self).run(procurements_without_kit, raise_user_error=raise_user_error)
 
     def _get_moves_to_assign_domain(self, company_id):
