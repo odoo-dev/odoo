@@ -117,8 +117,8 @@ $o-font-family-monospace: o-add-unicode-support-font((SFMono-Regular, Menlo, Mon
 $o-headings-font-family: o-add-unicode-support-font(("SF Pro Display", $o-system-fonts)) !default;
 
 // Font colors
-$o-main-text-color: $o-gray-700 !default;
-$o-main-color-muted: rgba($o-main-text-color, $o-opacity-muted) !default;
+$o-main-text-color: $o-gray-800 !default;
+$o-main-color-muted: rgba($o-gray-700, $o-opacity-muted) !default;
 $o-main-headings-color: $o-gray-900 !default;
 $o-main-link-color: darken($o-brand-primary, 5%) !default;
 $o-main-favorite-color: #f3cc00 !default;
