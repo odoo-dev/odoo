@@ -1,7 +1,8 @@
-import { DependencyManager } from "../core/plugins/dependency_manager";
+import { DependencyManager } from "../core/dependency_manager";
 import { useSubEnv } from "@odoo/owl";
 import { SIZES, MEDIAS_BREAKPOINTS } from "@web/core/ui/ui_service";
 import { _t } from "@web/core/l10n/translation";
+import { isVisible } from "@web/core/utils/ui";
 
 /**
  * Checks if the view of the targeted element is mobile.
@@ -68,6 +69,18 @@ export function isElementInViewport(el) {
 }
 
 /**
+ * Checks if the element is visible while editing. Checks the current state of
+ * the element itself (@see isVisible for the limits) and that it doesn't have a
+ * `data-invisible` ancestor.
+ *
+ * @param {HTMLElement} el
+ * @returns {Boolean}
+ */
+export function isElementVisible(el) {
+    return isVisible(el) && !el.closest("[data-invisible='1']");
+}
+
+/**
  * Gets all the elements matching an option selector/exclude starting from the
  * root element.
  *
@@ -96,30 +109,43 @@ export function useOptionsSubEnv(getEditingElements) {
     });
 }
 
-/**
- * Ensures that `element` will be visible in its `scrollable`.
- *
- * @param {HTMLElement} element
- * @param {object} options
- * @param {string} [options.behavior] "smooth", "instant", "auto" <=> undefined
- *        @url https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollTo#behavior
- * @param {number} [options.offset] applies a vertical offset
- */
-export function scrollToWindow(element, { behavior, offset } = {}) {
-    const window = element.ownerDocument.defaultView;
-    const top = element.getBoundingClientRect().top + window.scrollY - offset;
-
-    const prom = new Promise((resolve) => {
-        window.addEventListener("scrollend", () => resolve(), { once: true });
-    });
-    window.scrollTo({ top, behavior });
-    return prom;
-}
-
 export function getValueFromVar(value) {
     const match = value.match(/var\(--([a-zA-Z0-9-_]+)\)/);
     if (match) {
         return match[1];
     }
     return value;
+}
+
+/**
+ * Converts a value to a ratio.
+ *
+ * @param {string} value
+ */
+export function toRatio(value) {
+    const inputValueAsNumber = Number(value);
+    const ratio = inputValueAsNumber >= 0 ? 1 + inputValueAsNumber : 1 / (1 - inputValueAsNumber);
+    return `${ratio.toFixed(2)}x`;
+}
+
+/**
+ * Returns the list of selector, exclude and applyTo on which an option is
+ * applied.
+ * @param {Array<Object>} builderOptions - All the builder options
+ * @param {Class} optionClass - The applied option
+ */
+export function getSelectorParams(builderOptions, optionClass) {
+    const selectorParams = [];
+    const optionClassName = optionClass.name;
+    for (const builderOption of builderOptions) {
+        const { OptionComponent } = builderOption;
+        if (
+            OptionComponent &&
+            (OptionComponent.name === optionClassName ||
+                OptionComponent.prototype instanceof optionClass)
+        ) {
+            selectorParams.push(builderOption);
+        }
+    }
+    return selectorParams;
 }

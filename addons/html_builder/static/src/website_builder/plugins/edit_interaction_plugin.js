@@ -4,33 +4,59 @@ import { registry } from "@web/core/registry";
 export class EditInteractionPlugin extends Plugin {
     static id = "edit_interaction";
 
+    static shared = ["restartInteractions"];
+
     resources = {
-        update_interactions: this.startInteractions.bind(this),
-        on_remove_handlers: this.stopInteractions.bind(this),
+        normalize_handlers: this.refreshInteractions.bind(this),
+        content_manually_updated_handlers: this.refreshInteractions.bind(this),
+        before_save_handlers: () => this.stopInteractions(),
+        on_will_clone_handlers: ({ originalEl }) => {
+            this.stopInteractions(originalEl);
+        },
+        on_cloned_handlers: ({ originalEl }) => {
+            this.restartInteractions(originalEl);
+            // The clonedEl is implicitly started because it is a newly
+            // inserted content.
+        },
     };
 
     setup() {
         this.websiteEditService = undefined;
+        this.areInteractionsStartedInEditMode = false;
 
         window.parent.document.addEventListener(
             "transfer_website_edit_service",
             this.updateEditInteraction.bind(this),
             { once: true }
         );
-        window.parent.document.dispatchEvent(new CustomEvent("edit_interaction_plugin_loaded"));
+        const event = new CustomEvent("edit_interaction_plugin_loaded");
+        event.shared = this.config.getShared();
+        window.parent.document.dispatchEvent(event);
+    }
+    destroy() {
+        this.websiteEditService?.uninstallPatches?.();
+        this.stopInteractions();
     }
 
     updateEditInteraction({ detail: { websiteEditService } }) {
         this.websiteEditService = websiteEditService;
-        const targetEl = this.document.querySelector("#wrapwrap");
-        this.startInteractions(targetEl);
+        this.websiteEditService.installPatches();
     }
 
-    startInteractions(element) {
+    restartInteractions(element) {
         if (!this.websiteEditService) {
             throw new Error("website edit service not loaded");
         }
-        this.websiteEditService.update(element, true);
+        this.websiteEditService.update(element, "edit");
+        this.areInteractionsStartedInEditMode = true;
+    }
+
+    refreshInteractions(element) {
+        if (this.areInteractionsStartedInEditMode) {
+            this.websiteEditService.refresh(element);
+        } else {
+            this.restartInteractions(element);
+        }
     }
 
     stopInteractions(element) {

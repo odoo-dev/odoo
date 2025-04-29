@@ -1,21 +1,20 @@
-import { Component } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
-import { defaultBuilderComponents } from "../core/default_builder_components";
-import {
-    useVisibilityObserver,
-    useApplyVisibility,
-    useIsActiveItem,
-    useGetItemValue,
-} from "../core/building_blocks/utils";
-import { getSnippetName, useOptionsSubEnv } from "@html_builder/utils/utils";
-import { BorderConfigurator } from "@html_builder/plugins/border_configurator";
+import { BorderConfigurator } from "@html_builder/plugins/border_configurator_option";
 import { ShadowOption } from "@html_builder/plugins/shadow_option";
-import { useOperation } from "../core/plugins/operation_plugin";
+import { getSnippetName, useOptionsSubEnv } from "@html_builder/utils/utils";
+import { onWillStart, onWillUpdateProps, useState } from "@odoo/owl";
+import { user } from "@web/core/user";
+import { useService } from "@web/core/utils/hooks";
+import { useOperation } from "../core/operation_plugin";
+import {
+    BaseOptionComponent,
+    useApplyVisibility,
+    useGetItemValue,
+    useVisibilityObserver,
+} from "../core/utils";
 
-export class OptionsContainer extends Component {
+export class OptionsContainer extends BaseOptionComponent {
     static template = "html_builder.OptionsContainer";
     static components = {
-        ...defaultBuilderComponents,
         BorderConfigurator,
         ShadowOption,
     };
@@ -24,26 +23,71 @@ export class OptionsContainer extends Component {
         options: { type: Array },
         editingElement: true, // HTMLElement from iframe
         isRemovable: false,
+        removeDisabledReason: { type: String, optional: true },
         isClonable: false,
+        cloneDisabledReason: { type: String, optional: true },
         containerTopButtons: { type: Array },
+        containerTitle: { type: Object, optional: true },
         headerMiddleButtons: { type: Array, optional: true },
     };
     static defaultProps = {
+        containerTitle: {},
         headerMiddleButtons: [],
     };
 
     setup() {
-        this.notification = useService("notification");
         useOptionsSubEnv(() => [this.props.editingElement]);
-        this.isActiveItem = useIsActiveItem();
+        super.setup();
+        this.notification = useService("notification");
         this.getItemValue = useGetItemValue();
         useVisibilityObserver("content", useApplyVisibility("root"));
 
         this.callOperation = useOperation();
+        this.state = useState({
+            isUpToDate: this.env.editor.shared.versionControl.hasAccessToOutdatedEl(
+                this.props.editingElement
+            ),
+        });
+
+        this.hasGroup = {};
+        onWillStart(async () => {
+            await this.updateAccessGroup(this.props.options);
+        });
+        onWillUpdateProps(async (nextProps) => {
+            await this.updateAccessGroup(nextProps.options);
+        });
+    }
+
+    async updateAccessGroup(options) {
+        const proms = [];
+        const groups = [...new Set(options.flatMap((o) => o.groups || []))];
+        for (const group of groups) {
+            proms.push(
+                user.hasGroup(group).then((result) => {
+                    this.hasGroup[group] = result;
+                })
+            );
+        }
+        await Promise.all(proms);
+    }
+
+    hasAccess(groups) {
+        if (!groups) {
+            return true;
+        }
+        return groups.every((group) => this.hasGroup[group]);
     }
 
     get title() {
-        return getSnippetName(this.env.getEditingElement());
+        let title;
+        for (const option of this.props.options) {
+            title = option.title || title;
+        }
+        const titleExtraInfo = this.props.containerTitle.getTitleExtraInfo
+            ? this.props.containerTitle.getTitleExtraInfo(this.props.editingElement)
+            : "";
+
+        return (title || getSnippetName(this.env.getEditingElement())) + titleExtraInfo;
     }
 
     selectElement() {
@@ -71,7 +115,9 @@ export class OptionsContainer extends Component {
     // Actions of the buttons in the title bar.
     removeElement() {
         this.callOperation(() => {
-            this.env.editor.shared.remove.removeElement(this.props.editingElement);
+            this.env.editor.shared.remove.removeElementAndUpdateContainers(
+                this.props.editingElement
+            );
         });
     }
 
@@ -81,5 +127,16 @@ export class OptionsContainer extends Component {
                 scrollToClone: true,
             });
         });
+    }
+
+    // Version control
+    replaceElementWithNewVersion() {
+        this.callOperation(() => {
+            this.env.editor.shared.versionControl.replaceWithNewVersion(this.props.editingElement);
+        });
+    }
+    accessOutdated() {
+        this.env.editor.shared.versionControl.giveAccessToOutdatedEl(this.props.editingElement);
+        this.state.isUpToDate = true;
     }
 }

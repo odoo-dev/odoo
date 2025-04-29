@@ -2,6 +2,7 @@ import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, click, queryAll, queryAllTexts } from "@odoo/hoot-dom";
 import { contains } from "@web/../tests/web_test_helpers";
 import { setupHTMLBuilder } from "../helpers";
+import { getDragHelper, waitForEndOfOperation } from "../website_helpers";
 
 describe.current.tags("desktop");
 
@@ -21,19 +22,21 @@ const dropzoneSelectors = [
     },
 ];
 
-test("display inner content snippet", async () => {
+test("Display inner content snippet", async () => {
     await setupHTMLBuilder("<div><p>Text</p></div>", {
         snippetContent,
         dropzoneSelectors,
     });
-    const snippetInnerContentSelector = `.o-snippets-menu [data-category="snippet_content"]`;
+    const snippetInnerContentSelector = ".o-snippets-menu #snippet_content .o_snippet";
     expect(snippetInnerContentSelector).toHaveCount(2);
     expect(queryAllTexts(snippetInnerContentSelector)).toEqual(["Button A", "Button B"]);
-    const imgSrc = queryAll(`${snippetInnerContentSelector} img`).map((img) => img.dataset.src);
-    expect(imgSrc).toEqual(["buttonA.svg", "buttonB.svg"]);
+    const thumbnailImgUrls = queryAll(
+        `${snippetInnerContentSelector} .o_snippet_thumbnail_img`
+    ).map((thumbnail) => thumbnail.style.backgroundImage);
+    expect(thumbnailImgUrls).toEqual(['url("buttonA.svg")', 'url("buttonB.svg")']);
 });
 
-test("drag & drop inner content block", async () => {
+test("Drag & drop inner content block", async () => {
     const { contentEl } = await setupHTMLBuilder("<div><p>Text</p></div>", {
         snippetContent,
         dropzoneSelectors,
@@ -41,25 +44,28 @@ test("drag & drop inner content block", async () => {
     expect(contentEl).toHaveInnerHTML(`<div><p>Text</p></div>`);
     expect(".o-website-builder_sidebar .fa-undo").not.toBeEnabled();
 
-    const { moveTo, drop } = await contains(".o-website-builder_sidebar [name='Button A']").drag();
-    await animationFrame(); // TODO we should remove it maybe bug utils hoot
+    const { moveTo, drop } = await contains(
+        ".o-website-builder_sidebar [name='Button A'] .o_snippet_thumbnail"
+    ).drag();
     expect(":iframe .oe_drop_zone:nth-child(1)").toHaveCount(1);
     expect(":iframe .oe_drop_zone:nth-child(3)").toHaveCount(1);
 
     expect(".o-website-builder_sidebar .fa-undo").not.toBeEnabled();
 
-    await moveTo(contentEl.querySelector(".oe_drop_zone"));
-    expect(":iframe .oe_drop_zone.o_dropzone_highlighted:nth-child(1)").toHaveCount(1);
+    await moveTo(":iframe .oe_drop_zone");
+    expect(":iframe .oe_drop_zone.invisible:nth-child(1)").toHaveCount(1);
     expect(".o-website-builder_sidebar .fa-undo").not.toBeEnabled();
 
-    await drop(contentEl.querySelector(".oe_drop_zone"));
+    await drop(getDragHelper());
+    await waitForEndOfOperation();
+
     expect(contentEl).toHaveInnerHTML(
         `<div>\ufeff<a class="btn btn-primary" href="#" data-snippet="s_button" data-name="Button A">\ufeffButton A\ufeff</a>\ufeff<p>Text</p></div>`
     );
     expect(".o-website-builder_sidebar .fa-undo").toBeEnabled();
 });
 
-test("drag & drop inner content block + undo/redo", async () => {
+test("Drag & drop inner content block + undo/redo", async () => {
     const { contentEl } = await setupHTMLBuilder("<div><p>Text</p></div>", {
         snippetContent,
         dropzoneSelectors,
@@ -68,8 +74,14 @@ test("drag & drop inner content block + undo/redo", async () => {
     expect(".o-website-builder_sidebar .fa-undo").not.toBeEnabled();
     expect(".o-website-builder_sidebar .fa-repeat").not.toBeEnabled();
 
-    const { drop } = await contains(".o-website-builder_sidebar [name='Button A']").drag();
-    await drop(contentEl.querySelector(".oe_drop_zone"));
+    await click(".o-website-builder_sidebar .fa-undo");
+    const { moveTo, drop } = await contains(
+        ".o-website-builder_sidebar [name='Button A'] .o_snippet_thumbnail"
+    ).drag();
+    await moveTo(":iframe .oe_drop_zone");
+    await drop(getDragHelper());
+    await waitForEndOfOperation();
+
     expect(contentEl).toHaveInnerHTML(
         `<div>\ufeff<a class="btn btn-primary" href="#" data-snippet="s_button" data-name="Button A">\ufeffButton A\ufeff</a>\ufeff<p>Text</p></div>`
     );
@@ -83,17 +95,31 @@ test("drag & drop inner content block + undo/redo", async () => {
     expect(".o-website-builder_sidebar .fa-repeat").toBeEnabled();
 });
 
-test("drag inner content & drop in outside of a dropzone", async () => {
+test("Drag inner content and drop it outside of a dropzone", async () => {
     const { contentEl, builderEl } = await setupHTMLBuilder("<div><p>Text</p></div>", {
         snippetContent,
         dropzoneSelectors,
     });
     expect(contentEl).toHaveInnerHTML(`<div><p>Text</p></div>`);
 
-    const { drop } = await contains(".o-website-builder_sidebar [name='Button A']").drag();
+    const { moveTo, drop } = await contains(
+        ".o-website-builder_sidebar [name='Button A'] .o_snippet_thumbnail"
+    ).drag();
     expect(":iframe .oe_drop_zone:nth-child(1)").toHaveCount(1);
     expect(":iframe .oe_drop_zone:nth-child(3)").toHaveCount(1);
 
-    await drop(builderEl);
+    await moveTo(builderEl);
+    await drop(getDragHelper());
+    await waitForEndOfOperation();
+
     expect(contentEl).toHaveInnerHTML(`<div><p>Text</p></div>`);
+});
+
+test("A snippet should appear disabled if there is nowhere to drop it", async () => {
+    const { contentEl } = await setupHTMLBuilder("", {
+        snippetContent,
+        dropzoneSelectors,
+    });
+    expect(contentEl).toHaveInnerHTML("");
+    expect(".o_block_tab .o_snippet.o_disabled").toHaveCount(2);
 });

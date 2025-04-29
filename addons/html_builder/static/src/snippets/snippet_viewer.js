@@ -1,4 +1,4 @@
-import { Component, markup } from "@odoo/owl";
+import { Component, markup, onMounted, onPatched, onWillUnmount, onWillPatch, useRef } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { InputConfirmationDialog } from "./input_confirmation_dialog";
@@ -13,6 +13,26 @@ export class SnippetViewer extends Component {
 
     setup() {
         this.dialog = useService("dialog");
+        this.content = useRef("content");
+        
+        this.websiteService = useService("website");
+        this.innerWebsiteEditService = this.websiteService.websiteRootInstance?.bindService("website_edit");
+      
+        const updatePreview = () => {
+            if (this.innerWebsiteEditService){
+                this.innerWebsiteEditService.update(this.content.el, "preview");
+            } 
+        };
+        const stopPreview = () => {
+            if (this.innerWebsiteEditService){
+                this.innerWebsiteEditService.stop(this.content.el);
+            }
+        }
+        onMounted(updatePreview);
+        onPatched(updatePreview);
+
+        onWillPatch(stopPreview);
+        onWillUnmount(stopPreview);
     }
 
     onClickRename(snippet) {
@@ -49,7 +69,7 @@ export class SnippetViewer extends Component {
 
     onClick(snippet) {
         if (snippet.moduleId) {
-            this.props.snippetModel.installModule(snippet);
+            this.props.snippetModel.installSnippetModule(snippet);
         } else {
             this.props.selectSnippet(snippet);
         }
@@ -64,9 +84,12 @@ export class SnippetViewer extends Component {
     }
 
     getSelectedSnippets() {
-        const snippetStructures = this.props.snippetModel.snippetStructures;
+        const snippetStructures = this.props.snippetModel.snippetStructures.filter(
+            (snippet) => !snippet.isExcluded && !snippet.isDisabled
+        );
         if (this.props.state.search) {
-            const strMatches = (str) => str.toLowerCase().includes(this.props.state.search);
+            const strMatches = (str) =>
+                str.toLowerCase().includes(this.props.state.search.toLowerCase());
             return snippetStructures.filter(
                 (snippet) => strMatches(snippet.title) || strMatches(snippet.keyWords || "")
             );

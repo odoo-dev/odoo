@@ -5,7 +5,7 @@ import {
     getAllActionsAndOperations,
     useBuilderComponent,
     useDomState,
-} from "./utils";
+} from "../utils";
 import { BuilderComponent } from "./builder_component";
 import { BasicMany2Many } from "./basic_many2many";
 
@@ -18,14 +18,8 @@ export class BuilderMany2Many extends Component {
         fields: { type: Array, element: String, optional: true },
         domain: { type: Array, optional: true },
         limit: { type: Number, optional: true },
-        id: { type: String, optional: true },
     };
-    static defaultProps = {
-        ...BuilderComponent.defaultProps,
-        fields: [],
-        domain: [],
-        limit: 10,
-    };
+    static defaultProps = BuilderComponent.defaultProps;
     static components = { BuilderComponent, BasicMany2Many };
 
     setup() {
@@ -33,10 +27,9 @@ export class BuilderMany2Many extends Component {
         this.fields = useService("field");
         const { getAllActions, callOperation } = getAllActionsAndOperations(this);
         this.callOperation = callOperation;
-        this.applyOperation = this.env.editor.shared.history.makePreviewableOperation(
+        this.applyOperation = this.env.editor.shared.history.makePreviewableAsyncOperation(
             this.callApply.bind(this)
         );
-        this.selectionToApply = undefined;
         this.state = useState({
             searchModel: undefined,
         });
@@ -67,23 +60,31 @@ export class BuilderMany2Many extends Component {
                 fieldNames: [props.m2oField],
             });
             this.state.searchModel = modelData[props.m2oField].relation;
+            if (!this.state.searchModel) {
+                throw new Error(`m2oField ${props.m2oField} is not a relation field`);
+            }
         } else {
             this.state.searchModel = props.model;
         }
     }
     callApply(applySpecs) {
+        const proms = [];
         for (const applySpec of applySpecs) {
-            applySpec.apply({
-                editingElement: applySpec.editingElement,
-                param: applySpec.actionParam,
-                value: this.selectionToApply,
-                loadResult: applySpec.loadResult,
-                dependencyManager: this.env.dependencyManager,
-            });
+            proms.push(
+                applySpec.apply({
+                    editingElement: applySpec.editingElement,
+                    param: applySpec.actionParam,
+                    value: applySpec.actionValue,
+                    loadResult: applySpec.loadResult,
+                    dependencyManager: this.env.dependencyManager,
+                })
+            );
         }
+        return proms;
     }
     setSelection(newSelection) {
-        this.selectionToApply = JSON.stringify(newSelection);
-        this.callOperation(this.applyOperation.commit);
+        this.callOperation(this.applyOperation.commit, {
+            userInputValue: JSON.stringify(newSelection),
+        });
     }
 }

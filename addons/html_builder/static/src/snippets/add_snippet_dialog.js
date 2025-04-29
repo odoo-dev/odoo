@@ -1,4 +1,4 @@
-import { Component, onMounted, onWillDestroy, onWillRender, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, onWillRender, useRef, useState } from "@odoo/owl";
 import { loadBundle } from "@web/core/assets";
 import { isBrowserFirefox } from "@web/core/browser/feature_detection";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -65,7 +65,7 @@ export class AddSnippetDialog extends Component {
             }
         });
 
-        onWillDestroy(() => {
+        onWillUnmount(() => {
             root.destroy();
         });
     }

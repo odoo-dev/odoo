@@ -19,6 +19,9 @@
             <BuilderButton action="'faResize'" actionParam="'fa-5x'" title.translate="Size 5x">5x</BuilderButton>
         </BuilderButtonGroup>
     </BuilderRow>
+
+    <!-- TODO: check if that (should?) work in mass mailing -->
+    <BorderConfigurator label.translate="Border"/>
 </t>
 
 </templates>

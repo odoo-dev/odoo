@@ -10,10 +10,10 @@ import {
     dummyBase64Img,
     addPlugin,
     addActionOption,
+    waitForSnippetDialog,
 } from "../website_helpers";
 import { contains, onRpc } from "@web/../tests/web_test_helpers";
-import { animationFrame } from "@odoo/hoot-mock";
-import { Deferred, queryText, tick } from "@odoo/hoot-dom";
+import { animationFrame, Deferred, queryText, tick } from "@odoo/hoot-dom";
 import { undo } from "@html_editor/../tests/_helpers/user_actions";
 import { Plugin } from "@html_editor/plugin";
 
@@ -47,6 +47,7 @@ test("Use the sidebar 'remove' buttons", async () => {
         ".o_customize_tab .options-container > div:contains('Image') button.oe_snippet_remove";
 
     await contains(":iframe .col-lg-7 img").click();
+    await animationFrame();
     expect(removeSectionSelector).toHaveCount(1);
     expect(removeColumnSelector).toHaveCount(1);
     expect(removeImageSelector).toHaveCount(1);
@@ -68,6 +69,7 @@ test("Use the sidebar 'clone' buttons", async () => {
         ".o_customize_tab .options-container > div:contains('Column') button.oe_snippet_clone";
 
     await contains(":iframe .col-lg-7").click();
+    await animationFrame();
     expect(cloneSectionSelector).toHaveCount(1);
     expect(cloneColumnSelector).toHaveCount(1);
 
@@ -139,11 +141,13 @@ test("Use the sidebar 'save snippet' buttons", async () => {
         ".o_customize_tab .options-container > div:contains('Button') button.oe_snippet_save";
 
     // Check that there is no custom section.
-    const customGroupSelector = "div[data-category='snippet_groups'] span:contains('Custom')";
+    const customGroupSelector =
+        ".o-snippets-menu #snippet_groups .o_snippet[data-snippet-group='custom'] .o_snippet_thumbnail_area";
     expect(".o-snippets-menu div:contains('Custom Inner Content')").toHaveCount(0);
     expect(customGroupSelector).toHaveCount(0);
 
     await contains(":iframe .btn").click();
+    await animationFrame();
     expect(saveSectionSelector).toHaveCount(1);
     expect(saveColumnSelector).toHaveCount(0);
     expect(saveButtonSelector).toHaveCount(1);
@@ -165,7 +169,7 @@ test("Use the sidebar 'save snippet' buttons", async () => {
     ).toHaveCount(1);
     expect(customGroupSelector).toHaveCount(1);
     await contains(customGroupSelector).click();
-    await animationFrame();
+    await waitForSnippetDialog();
     expect(
         ".o_add_snippet_dialog .o_add_snippet_iframe:iframe span:contains('Custom Dummy Section')"
     ).toHaveCount(1);
@@ -192,6 +196,7 @@ test("Use the sidebar 'create anchor' buttons", async () => {
 
     // Section with title should have the title as anchor.
     await contains(":iframe section.first").click();
+    await animationFrame();
     expect(anchorSelector).toHaveCount(1);
     await contains(anchorSelector).click();
     expect(notificationContentSelector).toHaveCount(1);
@@ -202,13 +207,16 @@ test("Use the sidebar 'create anchor' buttons", async () => {
 
     // Section without title should have the `data-name` as anchor.
     await contains(":iframe section.second").click();
+    await animationFrame();
     await contains(anchorSelector).click();
+    await animationFrame();
     expect(queryText(notificationContentSelector)).toInclude("#Dummy-Section");
     await contains(notificationCloseSelector).click();
     expect(":iframe section.second").toHaveAttribute("id", "Dummy-Section");
 
     // Same data-name should be suffixed by a number.
     await contains(":iframe section.third").click();
+    await animationFrame();
     await contains(anchorSelector).click();
     expect(queryText(notificationContentSelector)).toInclude("#Dummy-Section2");
     expect(":iframe section.third").toHaveAttribute("id", "Dummy-Section2");
@@ -236,6 +244,7 @@ test("Clicking on the options container title selects the corresponding element"
     await setupWebsiteBuilder(dummySnippet);
 
     await contains(":iframe .col-lg-7").click();
+    await animationFrame();
     expect(".o_customize_tab .options-container").toHaveCount(2);
     expect(".oe_overlay.oe_active").toHaveRect(":iframe .col-lg-7");
 
@@ -303,27 +312,29 @@ test("applying option container button should wait for actions in progress", asy
     });
 
     const { getEditableContent, getEditor } = await setupWebsiteBuilder(`
-        <div class="test-options-target">plop</div>
+        <div class="test-options-target o-paragraph">plop</div>
     `);
     const editor = getEditor();
     const editable = getEditableContent();
 
     await contains(":iframe .test-options-target").click();
     await contains("[data-action-id='customAction']").click();
-    expect(editable).toHaveInnerHTML(`<div class="test-options-target">plop</div>`);
+    expect(editable).toHaveInnerHTML(`<div class="test-options-target o-paragraph">plop</div>`);
 
     await contains(".test_button").click();
-    expect(editable).toHaveInnerHTML(`<div class="test-options-target">plop</div>`);
+    expect(editable).toHaveInnerHTML(`<div class="test-options-target o-paragraph">plop</div>`);
 
     customActionDef.resolve();
     await tick();
     expect(editable).toHaveInnerHTML(
-        `<div class="test-options-target customAction overlayButton">plop</div>`
+        `<div class="test-options-target o-paragraph customAction overlayButton">plop</div>`
     );
 
     undo(editor);
-    expect(editable).toHaveInnerHTML(`<div class="test-options-target customAction">plop</div>`);
+    expect(editable).toHaveInnerHTML(
+        `<div class="test-options-target customAction o-paragraph">plop</div>`
+    );
 
     undo(editor);
-    expect(editable).toHaveInnerHTML(`<div class="test-options-target">plop</div>`);
+    expect(editable).toHaveInnerHTML(`<div class="test-options-target o-paragraph">plop</div>`);
 });
