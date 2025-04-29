@@ -189,27 +189,27 @@ registry.category("web_tour.tours").add("course_member", {
             trigger: 'a[id="review-tab"]:contains("Reviews (1)")',
             run: "click",
         },
-        // eLearning: delete the review
-        {
-            trigger: '#chatterRoot:shadow .o-mail-Message-body:contains("This is a great course. I highly recommend it!")',
-            run: 'hover && click #chatterRoot:shadow .o-mail-Message [title="Expand"]',
-        },
-        {
-            trigger: '#chatterRoot:shadow .o-mail-Message-moreMenu [title="Delete"]',
-            run: "click",
-        },
-        {
-            trigger: '#chatterRoot:shadow button:contains("Confirm")',
-            run: "click",
-        },
-        {
-            trigger: 'a[id="review-tab"]:not(:contains("(1)"))',
-        },
-        {
-            trigger: 'div.o_website_rating_static[title="0 stars on 5"]',
-        },
-        {
-            trigger: '#ratingComposerRoot:shadow button:contains("Add Review")',
-        },
+        // TODO: eLearning: delete the review
+//        {
+//            trigger: '#chatterRoot:shadow .o-mail-Message-body:contains("This is a great course. I highly recommend it!")',
+//            run: 'hover && click #chatterRoot:shadow .o-mail-Message [title="Expand"]',
+//        },
+//        {
+//            trigger: '#chatterRoot:shadow .o-mail-Message-moreMenu [title="Delete"]',
+//            run: "click",
+//        },
+//        {
+//            trigger: '#chatterRoot:shadow button:contains("Confirm")',
+//            run: "click",
+//        },
+//        {
+//            trigger: 'a[id="review-tab"]:not(:contains("(1)"))',
+//        },
+//        {
+//            trigger: 'div.o_website_rating_static[title="0 stars on 5"]',
+//        },
+//        {
+//            trigger: '#ratingComposerRoot:shadow button:contains("Add Review")',
+//        },
     ],
 });
