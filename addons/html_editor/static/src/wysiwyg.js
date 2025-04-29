@@ -4,6 +4,8 @@ import { Toolbar } from "./main/toolbar/toolbar";
 import { useChildRef, useSpellCheck } from "@web/core/utils/hooks";
 import { LocalOverlayContainer } from "./local_overlay_container";
 import { uniqueId } from "@web/core/utils/functions";
+import { CORE_PLUGINS } from "./plugin_sets";
+import { ToolbarPlugin } from "./main/toolbar/toolbar_plugin";
 
 /**
  * @typedef { import("./editor").EditorConfig } EditorConfig
@@ -107,6 +109,7 @@ export class Wysiwyg extends Component {
     getEditorConfig() {
         return {
             ...this.props.config,
+            Plugins: [...CORE_PLUGINS, ToolbarPlugin], // for testing
             // TODO ABD TODO @phoenix: check if there is too much info in the wysiwyg env.
             // i.e.: env has X because of parent component,
             // embedded component descendant sometimes uses X from env which is set conditionally:

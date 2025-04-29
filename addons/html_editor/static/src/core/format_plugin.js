@@ -55,6 +55,12 @@ export class FormatPlugin extends Plugin {
     resources = {
         user_commands: [
             {
+                id: "bug",
+                description: _t("Bug"),
+                icon: "fa-bug",
+                run: () => {},
+            },
+            {
                 id: "formatBold",
                 description: _t("Toggle bold"),
                 icon: "fa-bold",
@@ -140,6 +146,11 @@ export class FormatPlugin extends Plugin {
                 namespaces: ["compact", "expanded"],
                 commandId: "formatStrikethrough",
                 isActive: isFormatted(this, "strikeThrough"),
+            },
+            {
+                id: "bug",
+                groupId: "decoration",
+                commandId: "bug",
             },
             withSequence(20, {
                 id: "remove_format",
