@@ -64,7 +64,9 @@
             domain="[['is_company', '=', true], ['contact_address_complete', 'not in', ['', null]]]"
         />
     </BuilderRow>
-    <BuilderButton action="'storeLocatorMapUpdateSrc'" actionParam="force" preview="false">Refresh Geolocalizaion</BuilderButton>
+    <BuilderRow>
+        <BuilderButton action="'storeLocatorMapUpdateSrc'" actionParam="force" preview="false">Refresh Geolocalizaion</BuilderButton>
+    </BuilderRow>
 </t>
 
 </templates>
