@@ -35,17 +35,22 @@ registerWebsitePreviewTour('test_custom_snippet', {
     },
     {
         content: "Save custom snippet",
-        trigger: ".snippet-option-SnippetSave we-button",
+        trigger: "button.oe_snippet_save",
         run: "click",
     },
     {
-        content: "Confirm reload",
-        trigger: ".modal-dialog button:contains('Save and Reload')",
+        content: "Confirm Save",
+        trigger: ".modal-dialog button:contains('Save')",
+        run: "click",
+    },
+    {
+        content: "Click on Blocks",
+        trigger: ".o-snippets-tabs button[data-name='blocks']",
         run: "click",
     },
     {
         content: "Click on the Custom category block",
-        trigger: "#oe_snippets .oe_snippet[name='Custom'].o_we_draggable .oe_snippet_thumbnail",
+        trigger: ".o-snippets-menu .o_snippet[name='Custom'].o_draggable .o_snippet_thumbnail_area",
         run: "click",
     },
     {
@@ -54,22 +59,22 @@ registerWebsitePreviewTour('test_custom_snippet', {
     },
     {
         content: "Rename custom snippet",
-        trigger: ":iframe .o_custom_snippet_wrap > .o_custom_snippet_edit > button",
+        trigger: ":iframe .o_snippet_preview_wrap[data-snippet-id^='s_banner_'] + .o_custom_snippet_edit > button.fa-pencil",
         run: "click",
     },
     {
         content: "Set name",
-        trigger: ".o_rename_custom_snippet_dialog input[id='customSnippetName']",
+        trigger: ".modal-dialog input#inputConfirmation",
         run: "edit Bruce Banner",
     },
     {
         content: "Confirm rename",
-        trigger: ".o_rename_custom_snippet_dialog footer .btn-primary",
+        trigger: ".modal-dialog footer .btn-primary",
         run: "click",
     },
     {
         content: "Click on the 'Bruce Banner' snippet",
-        trigger: ":iframe .o_snippet_preview_wrap[data-snippet-id^='s_banner_']:has(section[data-name='Bruce Banner'])",
+        trigger: ":iframe .o_snippet_preview_wrap[data-snippet-id^='s_banner_'] section[data-name='Bruce Banner']",
         run: "click",
     },
     {
@@ -82,12 +87,12 @@ registerWebsitePreviewTour('test_custom_snippet', {
     },
     {
         content: "Click on the Custom category block",
-        trigger: "#oe_snippets .oe_snippet[name='Custom'].o_we_draggable .oe_snippet_thumbnail",
+        trigger: ".o-snippets-menu .o_snippet[name='Custom'].o_draggable .o_snippet_thumbnail_area",
         run: "click",
     },
     {
         content: "Delete custom snippet",
-        trigger: ":iframe .o_custom_snippet_wrap > .o_custom_snippet_edit > button + button",
+        trigger: ":iframe .o_snippet_preview_wrap + .o_custom_snippet_edit > button + button.fa-trash",
         run: "click",
     },
     {
@@ -97,6 +102,6 @@ registerWebsitePreviewTour('test_custom_snippet', {
     },
     {
         content: "Ensure custom snippet disappeared",
-        trigger: ":iframe .o_add_snippets_preview:not(:has(section[data-name='Bruce Banner']))",
+        trigger: ":iframe .o_add_snippets_preview:not(:has([data-name='Bruce Banner']))",
     },
 ]);
