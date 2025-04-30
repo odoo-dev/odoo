@@ -16,7 +16,8 @@ export const sizingY = {
 };
 export const sizingX = {
     selector: ".row > div",
-    exclude: ".s_col_no_resize.row > div, .s_col_no_resize",
+    exclude:
+        ".s_col_no_resize.row > div, .s_col_no_resize, .s_dynamic, .s_dynamic_snippet_content, .s_dynamic_snippet_title",
 };
 export const sizingGrid = {
     selector: ".row > div",
