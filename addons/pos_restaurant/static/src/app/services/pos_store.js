@@ -313,6 +313,12 @@ patch(PosStore.prototype, {
         }
         return super.addLineToCurrentOrder(vals, opts, configure);
     },
+    async submitOrder() {
+        const order = this.getOrder();
+        await this.sendOrderInPreparationUpdateLastChange(order);
+        this.addPendingOrder([order.id]);
+        this.showDefault();
+    },
     async getServerOrders() {
         if (this.config.module_pos_restaurant) {
             const tableIds = [].concat(

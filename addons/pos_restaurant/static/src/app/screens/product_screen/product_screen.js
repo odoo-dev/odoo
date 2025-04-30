@@ -3,6 +3,7 @@ import { SWITCHSIGN, DECIMAL } from "@point_of_sale/app/components/numpad/numpad
 import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product_screen";
 import { useBus } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
+import { useAsyncLockedMethod } from "@point_of_sale/app/hooks/hooks";
 
 patch(ProductScreen.prototype, {
     /**
@@ -12,6 +13,7 @@ patch(ProductScreen.prototype, {
         super.setup(...arguments);
         this.state.tableBuffer = "";
         this.state.isValidBuffer = true;
+        this.submitOrder = useAsyncLockedMethod(this.submitOrder);
         useBus(this.numberBuffer, "buffer-update", ({ detail: value }) => {
             this.checkIsValid(value);
         });
@@ -48,9 +50,7 @@ patch(ProductScreen.prototype, {
         return this.pos.categoryCount.slice(0, 3);
     },
     async submitOrder() {
-        await this.pos.sendOrderInPreparationUpdateLastChange(this.currentOrder);
-        this.pos.addPendingOrder([this.currentOrder.id]);
-        this.pos.showScreen(this.pos.defaultScreen, {}, this.pos.defaultScreen == "ProductScreen");
+        this.pos.submitOrder();
     },
     get primaryReviewButton() {
         return (

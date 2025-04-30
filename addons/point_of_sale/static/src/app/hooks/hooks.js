@@ -85,13 +85,16 @@ export function useAsyncLockedMethod(method) {
     let called = false;
     return async (...args) => {
         if (called) {
+            console.log("Already called");
             return;
         }
         try {
+            console.log("Calling method");
             called = true;
             return await method.call(component, ...args);
         } finally {
             called = false;
+            console.log("Method call finished");
         }
     };
 }
