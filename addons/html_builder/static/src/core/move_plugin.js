@@ -20,7 +20,9 @@ const moveUpOrDown = {
         ".s_product_catalog_dish",
         ".s_timeline_list_row",
         ".s_timeline_row",
-        "s_timeline_images_row",
+        ".s_timeline_images_row",
+        ".s_website_form_field",
+        ".s_website_form_submit",
     ].join(", "),
 };
 
