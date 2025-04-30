@@ -145,7 +145,7 @@ export function odoomark(text) {
                 `<span class="o_tag position-relative d-inline-flex align-items-center mw-100 o_badge badge rounded-pill lh-1 text-white bg-primary">$1</span>`
             )
             .replaceAll(brEx, `<br/>`)
-            .replaceAll(tabEx, `&nbsp;&nbsp;&nbsp;&nbsp;`)
+            .replaceAll(tabEx, `<span style="margin-left: 2em"></span>`)
     );
 }
 
@@ -159,45 +159,18 @@ export function odoomark(text) {
  * @param {string} classes
  * @returns {string}
  */
-export function highlightText(query, value, classes) {
-    const container = document.createElement("span");
-    container.innerHTML = odoomark(value).toString();
-
-    const regex = new RegExp(`(${escapeRegExp(query)})`, "ig");
-
-    function highlightNode(node) {
-        if (node.nodeType === Node.TEXT_NODE) {
-            const parts = node.textContent.split(regex);
-            if (parts.length <= 1) {
-                return;
-            }
-
-            const fragment = document.createDocumentFragment();
-            for (let i = 0; i < parts.length; i++) {
-                const part = parts[i];
-                if (i % 2) {
-                    const b = document.createElement("b");
-                    b.className = classes;
-                    b.textContent = part;
-                    fragment.appendChild(b);
-                } else {
-                    fragment.appendChild(document.createTextNode(part));
-                }
-            }
-            node.replaceWith(fragment);
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-            const children = Array.from(node.childNodes);
-            for (let i = 0; i < children.length; i++) {
-                highlightNode(children[i]);
-            }
-        }
+export function highlightText(query, text, classes) {
+    if (!query) {
+        return odoomark(text);
     }
 
-    if (query.length) {
-        highlightNode(container);
-    }
+    const regex = new RegExp(`(${query})+(?=(?:[^>]*<[^<]*>)*[^<>]*$)`, "ig");
+    return markup(
+        odoomark(text)
+            .toString()
+            .replaceAll(regex, `<span class="${classes}">$1</span>`)
+    )
 
-    return markup(`<span>${container.innerHTML}</span>`);
 }
 
 /* eslint-disable */
