@@ -4,10 +4,17 @@ import { registry } from "@web/core/registry";
 import { getScrollingElement } from "@web/core/utils/scrolling";
 import { AnimateOption } from "./animate_option";
 import { ANIMATE } from "@website/builder/option_sequence";
+import { _t } from "@web/core/l10n/translation";
+import { AnimateText } from "./animate_text";
 
 class AnimateOptionPlugin extends Plugin {
     static id = "animateOption";
     static dependencies = ["imageToolOption"];
+    animateOptionProps = {
+        getDirectionsItems: this.getDirectionsItems.bind(this),
+        getEffectsItems: this.getEffectsItems.bind(this),
+        canHaveHoverEffect: this.dependencies.imageToolOption.canHaveHoverEffect,
+    };
     resources = {
         builder_options: [
             withSequence(ANIMATE, {
@@ -15,19 +22,28 @@ class AnimateOptionPlugin extends Plugin {
                 selector: ".o_animable, section .row > div, img, .fa, .btn, .o_animated_text",
                 exclude:
                     "[data-oe-xpath], .o_not-animable, .s_col_no_resize.row > div, .s_col_no_resize",
-                props: {
-                    getDirectionsItems: this.getDirectionsItems.bind(this),
-                    getEffectsItems: this.getEffectsItems.bind(this),
-                    canHaveHoverEffect: this.dependencies.imageToolOption.canHaveHoverEffect,
-                },
+                props: this.animateOptionProps,
                 // todo: to implement
                 // textSelector: ".o_animated_text",
             }),
+        ],
+        toolbar_items: [
+            {
+                id: "animateText",
+                groupId: "websiteDecoration",
+                description: _t("Animate Text"),
+                Component: AnimateText,
+                props: {
+                    ...this.config.getAnimateTextConfig(),
+                    animateOptionProps: { ...this.animateOptionProps, requireAnimation: true },
+                },
+            },
         ],
         system_classes: ["o_animating"],
         builder_actions: this.getActions(),
         normalize_handlers: this.normalize.bind(this),
         clean_for_save_handlers: this.cleanForSave.bind(this),
+        unsplittable_node_predicates: (node) => node.classList?.contains("o_animated_text"),
     };
 
     setup() {
