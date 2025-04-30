@@ -29,6 +29,7 @@ export class ImageToolOption extends BaseOptionComponent {
                 isCustomFilter: editingElement.dataset.glFilter === "custom",
                 showQuality: ["image/jpeg", "image/webp"].includes(getMimetype(editingElement)),
                 formats: [],
+                isImageAnimated: editingElement.classList.contains("o_animate"),
             };
         });
     }
