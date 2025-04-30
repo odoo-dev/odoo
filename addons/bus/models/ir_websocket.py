@@ -64,6 +64,11 @@ class IrWebsocket(models.AbstractModel):
         Modules can override this method to add custom behavior."""
 
     def _subscribe(self, og_data):
+        if og_data.get("check_missed_notification"):
+            # sudo - bus.bus: checking if a notification still exists in order to
+            # detect missed notification during disconnect is allowed.
+            if self.env["bus.bus"].sudo().search_count([("id", "=", og_data["last"])]) == 0:
+                wsrequest.ws.send("bus/has_missed_notifications")
         data = self._prepare_subscribe_data(og_data["channels"], og_data["last"])
         dispatch.subscribe(data["channels"], data["last"], self.env.registry.db_name, wsrequest.ws)
         self._after_subscribe_data(data)

@@ -68,6 +68,7 @@ export class WebsocketWorker {
         this.firstSubscribeDeferred = new Deferred();
         this.lastNotificationId = 0;
         this.messageWaitQueue = [];
+        this.hasAlreadySubscribed = false;
         this._forceUpdateChannels = debounce(this._forceUpdateChannels, 300);
         this._debouncedUpdateChannels = debounce(this._updateChannels, 300);
         this._debouncedSendToServer = debounce(this._sendToServer, 300);
@@ -361,8 +362,12 @@ export class WebsocketWorker {
     _onWebsocketMessage(messageEv) {
         const notifications = JSON.parse(messageEv.data);
         this._logDebug("_onWebsocketMessage", notifications);
-        this.lastNotificationId = notifications[notifications.length - 1].id;
-        this.broadcast("notification", notifications);
+        if (notifications[0].message.type === "bus/has_missed_notifications") {
+            this.broadcast("outdated");
+        } else {
+            this.lastNotificationId = notifications.at(-1).id;
+            this.broadcast("notification", notifications);
+        }
     }
 
     _logDebug(title, ...args) {
@@ -500,8 +505,13 @@ export class WebsocketWorker {
             this.lastChannelSubscription = allTabsChannelsString;
             this._sendToServer({
                 event_name: "subscribe",
-                data: { channels: allTabsChannels, last: this.lastNotificationId },
+                data: {
+                    channels: allTabsChannels,
+                    last: this.lastNotificationId,
+                    check_missed_notification: this.hasAlreadySubscribed,
+                },
             });
+            this.hasAlreadySubscribed = true;
             this.firstSubscribeDeferred.resolve();
         }
     }

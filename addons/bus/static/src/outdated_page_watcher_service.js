@@ -1,47 +1,18 @@
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
-import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 
-const { DateTime } = luxon;
 export class OutdatedPageWatcherService {
-    constructor(env, services) {
-        this.setup(env, services);
-    }
-
     /**
      * @param {import("@web/env").OdooEnv}
      * @param {Partial<import("services").Services>} services
      */
-    setup(env, { bus_service, multi_tab, notification }) {
-        this.notification = notification;
-        this.lastNotificationId = null;
-        /** @deprecated */
-        this.lastDisconnectDt = null;
-        this.closeNotificationFn;
-        bus_service.addEventListener("disconnect", () => {
-            this.lastNotificationId = bus_service.lastNotificationId;
-            this.lastDisconnectDt = DateTime.now();
-        });
-        bus_service.addEventListener("reconnect", async () => {
-            if (!multi_tab.isOnMainTab()) {
-                return;
-            }
-            const hasMissedNotifications = await rpc(
-                "/bus/has_missed_notifications",
-                { last_notification_id: this.lastNotificationId },
-                { silent: true }
-            );
-            if (hasMissedNotifications) {
-                this.showOutdatedPageNotification();
-                multi_tab.setSharedValue("bus.has_missed_notifications", Date.now());
-            }
-        });
-        multi_tab.bus.addEventListener("shared_value_updated", ({ detail: { key } }) => {
-            if (key === "bus.has_missed_notifications") {
-                this.showOutdatedPageNotification();
-            }
-        });
+    constructor(env, services) {
+        this.notification = services.notification;
+        services.bus_service.subscribe(
+            "bus/has_missed_notifications",
+            this.showOutdatedPageNotification.bind(this)
+        );
     }
 
     showOutdatedPageNotification() {
@@ -65,7 +36,7 @@ export class OutdatedPageWatcherService {
 }
 
 export const outdatedPageWatcherService = {
-    dependencies: ["bus_service", "multi_tab", "notification"],
+    dependencies: ["bus_service", "notification"],
     start(env, services) {
         return new OutdatedPageWatcherService(env, services);
     },

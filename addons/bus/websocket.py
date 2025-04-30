@@ -201,6 +201,7 @@ _command_uid = count(0)
 class ControlCommand(IntEnum):
     CLOSE = 0
     DISPATCH = 1
+    SEND = 2
 
 
 DATA_OP = {Opcode.TEXT, Opcode.BINARY}
@@ -364,6 +365,14 @@ class Websocket:
         will start in the subsequent iteration of the event loop.
         """
         self._send_control_command(ControlCommand.CLOSE, {'code': code, 'reason': reason})
+
+    def send(self, event_type, payload=None):
+        """Enqueue a message to be sent through the websocket. The message
+        will be sent with the same format than bus notifications."""
+        message = {"type": event_type}
+        if payload:
+            message["payload"] = payload
+        self._send_control_command(ControlCommand.SEND, [{"message": message}])
 
     @classmethod
     def onopen(cls, func):
@@ -724,6 +733,8 @@ class Websocket:
                 self._dispatch_bus_notifications()
             case ControlCommand.CLOSE:
                 self._disconnect(data['code'], data.get('reason'))
+            case ControlCommand.SEND:
+                self._send(data)
 
     def _dispatch_bus_notifications(self):
         """
