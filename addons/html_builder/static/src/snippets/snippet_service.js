@@ -156,9 +156,9 @@ export class SnippetModel extends Reactive {
                 this.orm.silent
                     .call("ir.ui.view", "render_public_asset", [this.snippetsName, {}], { context })
                     .then((html) => {
-                        const snippetsDocument = new DOMParser().parseFromString(html, "text/html");
-                        this.computeSnippetTemplates(snippetsDocument);
-                        this.setSnippetName(snippetsDocument);
+                        this.snippetsDocument = new DOMParser().parseFromString(html, "text/html");
+                        this.computeSnippetTemplates(this.snippetsDocument);
+                        this.setSnippetName(this.snippetsDocument);
                         resolve();
                     });
             });
@@ -274,6 +274,13 @@ export class SnippetModel extends Reactive {
             return;
         }
         snippet.title = newName;
+        for (const snippetEl of this.snippetsDocument.body.querySelectorAll("snippets#snippet_custom > *")) {
+            if (snippetEl.getAttribute("data-oe-snippet-key") === snippet.key) {
+                snippetEl.setAttribute("name", newName);
+                snippetEl.children[0].dataset["name"] = newName;
+            }
+        }
+
         await this.orm.call("ir.ui.view", "rename_snippet", [], {
             name: newName,
             view_id: snippet.viewId,
