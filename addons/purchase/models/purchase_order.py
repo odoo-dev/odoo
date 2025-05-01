@@ -12,7 +12,7 @@ from odoo import api, Command, fields, models, _
 from odoo.osv import expression
 from odoo.tools import format_amount, format_date, formatLang, groupby, OrderedSet, SQL
 from odoo.tools.float_utils import float_is_zero, float_repr
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError
 
 
 class PurchaseOrder(models.Model):
@@ -548,8 +548,8 @@ class PurchaseOrder(models.Model):
         self.locked = True
 
     def button_unlock(self):
-        if self.lock_confirmed_po == 'lock':
-            raise UserError(_("Unlocking the order is not allowed as 'Lock Confirmed Orders' is enabled."))
+        if not self.env.user.has_group('purchase.group_purchase_manager'):
+            raise AccessError(_('You are not allowed to unlock this purchase order. Only a purchase manager can do it.'))
         self.locked = False
 
     def _prepare_supplier_info(self, partner, line, price, currency):
