@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+<template id="s_sale_order_items_template" name="Sale Orders">
+    <section class="s_sale_order_items">
+        <div class="container my-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Order #S00085</h5>
+                    <p class="card-text">Customer: Mitchell Admin</p>
+                    <p class="card-text">Status: Sale</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>
+
+<template id="s_sale_order_options" inherit_id="website.snippet_options">
+        <xpath expr="." position="inside">
+            <div data-js="SaleOrderOption" data-selector=".s_sale_order_items">
+                <we-checkbox string="Confirm Orders"
+                        data-attribute-name="confirmOrders"
+                        data-select-data-attribute="false|true"
+                        data-no-preview="true" />
+                <we-select string="Layout" data-no-preview="true" data-attribute-name="layout" data-attribute-default-value="card">
+                    <we-button title="Card" data-select-data-attribute="card">Card</we-button>
+                    <we-button title="List" data-select-data-attribute="list">List</we-button>
+                </we-select>
+            </div>
+        </xpath>
+</template>
+
+</odoo>

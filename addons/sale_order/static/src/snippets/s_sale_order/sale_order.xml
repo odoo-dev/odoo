@@ -1,0 +1,93 @@
+<templates xml:space="preserve">
+
+<t t-name="sale_order.sale_order_card">
+  <t t-if="saleOrders.length != 0">
+    <div class="container">
+      <div class="row">
+        <t t-foreach="saleOrders" t-as="order" t-key="order.id">
+          <div class="col-12 col-md-6 col-lg-4 my-8">
+            <div class="card m-2 shadow-sm" t-att-data-order-state="order.state">
+                <h5 class="card-header">
+                  Order No. <t t-esc="order.name"/>
+                </h5>
+              <div class="card-body">
+                <p class="card-text">
+                  Customer: <t t-esc="order.partner_id"/>
+                </p>
+                <p class="card-text">
+                  Status:
+                  <span class="badge"
+                     t-att-class="{
+                       'bg-success': order.state == 'sale',
+                       'bg-warning': order.state == 'draft',
+                       'bg-secondary': order.state != 'sale' and order.state != 'draft'
+                     }">
+                 <t t-esc="order.state"/>
+               </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </t>
+      </div>
+      <div class="text-center my-4">
+        <button id="load_more_btn" class="btn btn-primary">Load More</button>
+      </div>
+    </div>
+  </t>
+  <t t-else="">
+    <div class="container my-4">
+      <div class="alert alert-info" role="alert">
+        No Sale Orders found.
+      </div>
+    </div>
+  </t>
+</t>
+
+<t t-name="sale_order.sale_order_list">
+  <t t-if="saleOrders.length != 0">
+    <div class="container">
+      <div class="table-responsive shadow-sm">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Order No.</th>
+              <th>Customer</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <t t-foreach="saleOrders" t-as="order" t-key="order.id">
+              <tr t-att-data-order-state="order.state">
+                <td><t t-esc="order.name"/></td>
+                <td><t t-esc="order.partner_id"/></td>
+                <td>
+                  <span class="badge"
+                        t-att-class="{
+                          'bg-success': order.state == 'sale',
+                          'bg-warning': order.state == 'draft',
+                          'bg-secondary': order.state != 'sale' and order.state != 'draft'
+                        }">
+                    <t t-esc="order.state"/>
+                  </span>
+                </td>
+              </tr>
+            </t>
+          </tbody>
+        </table>
+      </div>
+      <div class="text-center my-4">
+        <button id="load_more_btn" class="btn btn-primary">Load More</button>
+      </div>
+    </div>
+  </t>
+  <t t-else="">
+    <div class="container my-4">
+      <div class="alert alert-info" role="alert">
+        No Sale Orders found.
+      </div>
+    </div>
+  </t>
+</t>
+
+</templates>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+<template id="snippet" inherit_id="website.snippets" name="Sale Order Snippet">
+        <xpath expr="//t[@id='installed_snippets_hook']" position="after">
+            <t snippet-group="sale" t-snippet="website.s_snippet_group" string="Sale Order" />
+        </xpath>
+        <xpath expr="//snippets[@id='snippet_structure']" position="inside">
+            <t t-snippet="sale_order.s_sale_order_items_template" string="Sale Order" group="sale"/>
+        </xpath>
+</template>
+
+</odoo>
