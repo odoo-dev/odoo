@@ -36,8 +36,6 @@ class WebsiteSaleLoyaltyTestUi(TestSaleCommon, HttpCase):
         cls.env.ref('website.default_website').company_id = cls.env.company
         cls.public_category = cls.env['product.public.category'].create({'name': 'Public Category'})
 
-    # TODO master-mysterious-egg fix error
-    @unittest.skip("prepare mysterious-egg for merging")
     def test_01_admin_shop_sale_loyalty_tour(self):
         if self.env['ir.module.module']._get('payment_custom').state != 'installed':
             self.skipTest("Transfer provider is not installed")
