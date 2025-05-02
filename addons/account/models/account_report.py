@@ -358,11 +358,16 @@ class AccountReportLine(models.Model):
     )
     parent_id = fields.Many2one(string="Parent Line", comodel_name='account.report.line', ondelete='set null', index='btree_not_null')
     children_ids = fields.One2many(string="Child Lines", comodel_name='account.report.line', inverse_name='parent_id')
-    groupby = fields.Char(string="Group By", help="Comma-separated list of fields from account.move.line (Journal Item). When set, this line will generate sublines grouped by those keys.")
-    user_groupby = fields.Char(
-        string="User Group By",
-        compute='_compute_user_groupby', store=True, readonly=False, precompute=True,
+    groupby = fields.Char(
+        string="Group By",
+        inverse="_inverse_groupby",
         help="Comma-separated list of fields from account.move.line (Journal Item). When set, this line will generate sublines grouped by those keys.",
+    )
+    user_groupby_ids = fields.One2many(
+        comodel_name='account.report.user.groupby',
+        inverse_name='report_line_id',
+        string="User Group By",
+        readonly=False,
     )
     sequence = fields.Integer(string="Sequence")
     code = fields.Char(string="Code", help="Unique identifier for this line.")
@@ -381,6 +386,26 @@ class AccountReportLine(models.Model):
         'unique (report_id, code)',
         'A report line with the same code already exists.',
     )
+
+    def user_groupby_ids_to_str(self):
+        self.ensure_one()
+
+        if not self.user_groupby_ids:
+            return False
+
+        return ','.join(self.user_groupby_ids.mapped('name'))
+
+    def _inverse_groupby(self):
+        self.user_groupby_ids.unlink()
+        if not self.groupby:
+            return
+
+        for sequence, expr in enumerate(self.groupby.split(',')):
+            self.env['account.report.user.groupby'].create({
+                'name': expr.strip(),
+                'sequence': sequence,
+                'report_line_id': self.id,
+            })
 
     @api.depends('parent_id.hierarchy_level')
     def _compute_hierarchy_level(self):
@@ -403,23 +428,13 @@ class AccountReportLine(models.Model):
             if report_line.parent_id:
                 report_line.horizontal_split_side = report_line.parent_id.horizontal_split_side
 
-    @api.depends('groupby', 'expression_ids.engine')
-    def _compute_user_groupby(self):
-        for report_line in self:
-            if not report_line.id and not report_line.user_groupby:
-                report_line.user_groupby = report_line.groupby
-            try:
-                report_line._validate_groupby()
-            except UserError:
-                report_line.user_groupby = report_line.groupby
-
     @api.constrains('parent_id')
     def _validate_groupby_no_child(self):
         for report_line in self:
-            if report_line.parent_id.groupby or report_line.parent_id.user_groupby:
+            if report_line.parent_id.groupby or report_line.parent_id.user_groupby_ids:
                 raise ValidationError(_("A line cannot have both children and a groupby value (line '%s').", report_line.parent_id.name))
 
-    @api.constrains('groupby', 'user_groupby')
+    @api.constrains('groupby')
     def _validate_groupby(self):
         self.expression_ids._validate_engine()
 
@@ -641,7 +656,7 @@ class AccountReportExpression(models.Model):
     @api.constrains('engine', 'report_line_id')
     def _validate_engine(self):
         for expression in self:
-            if expression.engine == 'aggregation' and (expression.report_line_id.groupby or expression.report_line_id.user_groupby):
+            if expression.engine == 'aggregation' and (expression.report_line_id.groupby or expression.report_line_id.user_groupby_ids):
                 raise ValidationError(_(
                     "Groupby feature isn't supported by aggregation engine. Please remove the groupby value on '%s'",
                     expression.report_line_id.display_name,
@@ -912,6 +927,60 @@ class AccountReportColumn(models.Model):
     figure_type = fields.Selection(string="Figure Type", selection=FIGURE_TYPE_SELECTION_VALUES, default="monetary", required=True)
     blank_if_zero = fields.Boolean(string="Blank if Zero", help="When checked, 0 values will not show in this column.")
     custom_audit_action_id = fields.Many2one(string="Custom Audit Action", comodel_name="ir.actions.act_window")
+
+
+class AccountReportUserGroupby(models.Model):
+    _name = 'account.report.user.groupby'
+    _description = "User defined expressions for 'Group By'"
+    _order = 'sequence, id'
+
+    name = fields.Char(
+        required=True,
+    )
+    report_line_id = fields.Many2one(
+        'account.report.line',
+        string="Report Line",
+        required=True,
+        readonly=True,
+        ondelete='cascade',
+    )
+    sequence = fields.Integer(
+        "Sequence",
+        required=True,
+        copy=False,
+    )
+    field_id = fields.Many2one(
+        'ir.model.fields',
+        string="Field",
+        domain=[
+            ('model_id', '=', 'account.move.line'),
+            ('store', '=', True),
+            ('ttype', 'in', (
+                'boolean',
+                'char',
+                'date',
+                'integer',
+                'float',
+                'many2one',
+                'many2one_reference',
+            )),
+        ],
+        compute='_compute_field_id', store=True, readonly=False,
+        ondelete='cascade',
+    )
+
+    @api.depends('name')
+    def _compute_field_id(self):
+        for user_groupby in self:
+            user_groupby.field_id = self.env['ir.model.fields'].search([
+                ('model', '=', 'account.move.line'),
+                ('name', '=', user_groupby.name),
+            ])
+
+    @api.onchange('field_id')
+    def _onchange_field_id(self):
+        if self.name != self.field_id.name:
+            self.name = self.field_id.name
 
 
 class AccountReportExternalValue(models.Model):
