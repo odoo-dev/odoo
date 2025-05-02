@@ -332,8 +332,6 @@ class TestWebsiteSaleCoupon(HttpCase, WebsiteSaleCommon):
 
         self.assertEqual(len(order.applied_coupon_ids), 0, "The coupon should've been removed from the order as more than 4 days")
 
-    # TODO master-mysterious-egg fix error
-    @unittest.skip("prepare mysterious-egg for merging")
     def test_02_apply_discount_code_program_multi_rewards(self):
         """
             Check the triggering of a promotion program based on a promo code with multiple rewards
