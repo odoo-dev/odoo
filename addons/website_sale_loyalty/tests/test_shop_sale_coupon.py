@@ -216,8 +216,6 @@ class WebsiteSaleLoyaltyTestUi(TestSaleCommon, HttpCase):
         self.assertEqual(len(gift_card_program.coupon_ids), 2, 'There should be two coupons, one with points, one without')
         self.assertEqual(len(gift_card_program.coupon_ids.filtered('points')), 1, 'There should be two coupons, one with points, one without')
 
-    # TODO master-mysterious-egg fix error
-    @unittest.skip("prepare mysterious-egg for merging")
     def test_03_admin_shop_ewallet_tour(self):
         self.env['product.product'].create({
             'name': "TEST - Gift Card",
