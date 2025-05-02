@@ -142,8 +142,6 @@ class WebsiteSaleLoyaltyTestUi(TestSaleCommon, HttpCase):
         self.env.ref("website_sale.reduction_code").write({"active": True})
         self.start_tour("/", 'shop_sale_loyalty', login="admin")
 
-    # TODO master-mysterious-egg fix error
-    @unittest.skip("prepare mysterious-egg for merging")
     def test_02_admin_shop_gift_card_tour(self):
         gift_card = self.env['product.product'].create({
             'name': 'TEST - Gift Card',
