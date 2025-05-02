@@ -78937,6 +78937,62 @@ function addSheetProperties(sheet) {
     `;
 }
 
+// THE EDITS IN THIS FILE SHOULD BE EXTENSIONS TO o_spreadsheet
+function createCSV(rows) {
+    let csv = "";
+    const numCols = rows[0].length;
+    for (const row in rows) {
+        for (let c = 0; c < numCols; c++) {
+            csv += `"${(rows[row][c] || '').toString()}"${c < (numCols - 1) ? ',' : ''}`;
+        }
+        csv += '\n';
+    }
+    return csv;
+    // return rows.map(row =>
+    //     row.map(cell => `"${(cell || '').toString()}"`).join(',')
+    // ).join('\n');
+}
+
+function columnLabelToIndex(label) {
+    return label.toUpperCase().split('').reduce((acc, char) => acc * 26 + (char.charCodeAt(0) - 64), 0) - 1;
+}
+
+function getRowsFromSheet(sheet) {
+    const cells = sheet.cells || {};
+    const rows = [];
+
+    for (const cellKey in cells) {
+        const cell = cells[cellKey];
+        const match = cellKey.match(/^([A-Z]+)(\d+)$/i);
+        if (!match) continue;
+        const [, colLabel, rowStr] = match;
+        const rowIndex = parseInt(rowStr, 10) - 1;
+        const colIndex = columnLabelToIndex(colLabel); // e.g., A=0, B=1, Z=25, AA=26...
+
+        if (!rows[rowIndex]) rows[rowIndex] = [];
+        rows[rowIndex][colIndex] = cell ?? "";
+    }
+
+    return rows;
+};
+
+/**
+ * Return the spreadsheet data in CSV file format
+ */
+function getCSV(data) {
+    const files = [];
+    const names = [];
+    for (const sheet of data.sheets) {
+        names.push(sheet.name);
+        const rows = getRowsFromSheet(sheet);
+        files.push(createCSV(rows));
+    }
+    return {
+        names: names,
+        files: files,
+    }
+}
+
 /**
  * Return the spreadsheet data in the Office Open XML file format.
  * See ECMA-376 standard.
@@ -79770,6 +79826,12 @@ class Model extends EventBus {
         // @ts-ignore For testing purposes only
         this.config.mode = mode;
         this.trigger("update");
+    }
+
+    exportCSV(){
+        this.dispatch("EVALUATE_CELLS");
+        let data = this.exportData();
+        return getCSV(data);
     }
     /**
      * Exports the current model data into a list of serialized XML files
