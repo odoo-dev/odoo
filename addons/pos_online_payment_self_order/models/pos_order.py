@@ -9,6 +9,26 @@ class PosOrder(models.Model):
     _inherit = 'pos.order'
 
     use_self_order_online_payment = fields.Boolean(compute='_compute_use_self_order_online_payment', store=True, readonly=True)
+    has_online_payment_method = fields.Boolean(
+        compute="_compute_has_online_payment_method",
+        search="_search_has_online_payment_method"
+    )
+
+    @api.depends('config_id.payment_method_ids')
+    def _compute_has_online_payment_method(self):
+        for order in self:
+            method = order.config_id._get_cashier_online_payment_method()
+            order.has_online_payment_method = bool(method)
+
+    def _search_has_online_payment_method(self, operator, value):
+        if operator not in ('=', '!='):
+            return NotImplemented
+
+        config_ids = self.env['pos.config'].search([]).filtered(
+            lambda c: bool(c._get_cashier_online_payment_method()) == value if operator == '=' else bool(c._get_cashier_online_payment_method()) != value
+        ).ids
+
+        return [('config_id', 'in', config_ids)] if config_ids else [('id', '=', 0)]
 
     def get_order_to_print(self):
         self.ensure_one()
