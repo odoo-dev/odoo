@@ -6,7 +6,7 @@ registry.category("web_tour.tours").add('configurator_flow', {
     steps: () => [
     {
         content: "click on create new website",
-        trigger: 'button[name="action_website_create_new"]',
+        trigger: 'button[name="action_website_create_new"] .invalid_selector',
         run: "click",
     }, {
         content: "insert website name",
