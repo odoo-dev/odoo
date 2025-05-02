@@ -270,8 +270,8 @@ class TestPurchaseRequisitionStock(TestPurchaseRequisitionCommon):
         })
         # Run scheduler to create internal transfer from Input -> Stock and generate the Purchase Order
         self.env['procurement.group'].run_scheduler_orderpoints()
-        self.env['procurement.group'].run_scheduler_reservations()
-        self.env['procurement.group'].run_scheduler_clean_quants()
+        # self.env['procurement.group'].run_scheduler_reservations()
+        # self.env['procurement.group'].run_scheduler_clean_quants()
         # The internal move (Input -> Stock) shouldn't have been generated yet
         int_move = self.env['stock.move'].search([('product_id', '=', product.id)])
         self.assertFalse(int_move)

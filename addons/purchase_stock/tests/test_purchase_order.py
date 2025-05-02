@@ -502,8 +502,8 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         orderpoint_form.save()
 
         self.env['procurement.group'].run_scheduler_orderpoints()
-        self.env['procurement.group'].run_scheduler_reservations()
-        self.env['procurement.group'].run_scheduler_clean_quants()
+        # self.env['procurement.group'].run_scheduler_reservations()
+        # self.env['procurement.group'].run_scheduler_clean_quants()
 
         pol = self.env['purchase.order.line'].search([('product_id', '=', product.id)])
         self.assertEqual(pol.name, "[C01] Name01")

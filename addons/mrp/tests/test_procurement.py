@@ -763,8 +763,6 @@ class TestProcurement(TestMrpCommon):
         }])
 
         self.env['procurement.group'].run_scheduler_orderpoints()
-        self.env['procurement.group'].run_scheduler_reservations()
-        self.env['procurement.group'].run_scheduler_clean_quants()
 
         mos = self.env['mrp.production'].search([('product_id', '=', finished.id)], order='origin')
         self.assertRecordValues(mos, [

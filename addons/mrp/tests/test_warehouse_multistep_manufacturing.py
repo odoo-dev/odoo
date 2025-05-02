@@ -407,8 +407,6 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         })
 
         self.env['procurement.group'].run_scheduler_orderpoints()
-        self.env['procurement.group'].run_scheduler_reservations()
-        self.env['procurement.group'].run_scheduler_clean_quants()
         mo = self.env['mrp.production'].search([('product_id', '=', finished_product.id)])
         pickings = mo.picking_ids
         self.assertEqual(len(pickings), 1)
@@ -478,8 +476,8 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         rr_form.save()
 
         self.env['procurement.group'].run_scheduler_orderpoints()
-        self.env['procurement.group'].run_scheduler_reservations()
-        self.env['procurement.group'].run_scheduler_clean_quants()
+        # self.env['procurement.group'].run_scheduler_reservations()
+        # self.env['procurement.group'].run_scheduler_clean_quants()
 
         pickings_component = self.env['stock.picking'].search(
             [('product_id', '=', self.wood_product.id)])
@@ -529,8 +527,8 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         rr_form.save()
 
         self.env['procurement.group'].run_scheduler_orderpoints()
-        self.env['procurement.group'].run_scheduler_reservations()
-        self.env['procurement.group'].run_scheduler_clean_quants()
+        # self.env['procurement.group'].run_scheduler_reservations()
+        # self.env['procurement.group'].run_scheduler_clean_quants()
 
         mo = self.env['mrp.production'].search([('product_id', '=', self.finished_product.id)])
         mo_form = Form(mo)
@@ -622,8 +620,8 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
             'bom_id': bom_2.id,
         })
         self.env['procurement.group'].run_scheduler_orderpoints()
-        self.env['procurement.group'].run_scheduler_reservations()
-        self.env['procurement.group'].run_scheduler_clean_quants()
+        # self.env['procurement.group'].run_scheduler_reservations()
+        # self.env['procurement.group'].run_scheduler_clean_quants()
         mo = self.env['mrp.production'].search([('product_id', '=', self.finished_product.id)])
         self.assertEqual(len(mo), 1)
         self.assertEqual(mo.product_qty, 1.0)
@@ -811,8 +809,8 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         })
 
         self.env['procurement.group'].run_scheduler_orderpoints()
-        self.env['procurement.group'].run_scheduler_reservations()
-        self.env['procurement.group'].run_scheduler_clean_quants()
+        # self.env['procurement.group'].run_scheduler_reservations()
+        # self.env['procurement.group'].run_scheduler_clean_quants()
 
         mo = self.env['mrp.production'].search([('product_id', '=', demo.id)])
         mo.action_confirm()
