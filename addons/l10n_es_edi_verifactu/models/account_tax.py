@@ -6,13 +6,14 @@ class AccountTax(models.Model):
 
     # TODO: move to l10n_es?
     def _l10n_es_get_sujeto_tax_types(self):
-        return ('sujeto', 'sujeto_isp', 'sujeto_agricultura')
+        return ['sujeto', 'sujeto_isp', 'sujeto_agricultura']
 
-    def _l10n_es_edi_verifactu_get_tax_details_functions(self, simplified_invoice=False):
+    def _l10n_es_edi_verifactu_get_tax_details_functions(self, company, simplified_invoice=False):
         def full_filter_invl_to_apply(line):
             return any(t != 'ignore' for t in line.tax_ids.flatten_taxes_hierarchy().mapped('l10n_es_type'))
 
         oss_tag = self.env.ref('l10n_eu_oss.tag_oss', raise_if_not_found=False)
+        company_in_simplified_regime = company.l10n_es_edi_verifactu_special_vat_regime == 'simplified'
 
         def grouping_key_generator(base_line, tax_values):
             tax = tax_values['tax_repartition_line'].tax_id
@@ -37,7 +38,7 @@ class AccountTax(models.Model):
             if VAT or IGIC:
                 is_oss = oss_tag and oss_tag in tax_values['tax_repartition_line'].tag_ids
                 export_exempts = l10n_es_exempt_reason == 'E2'
-                if VAT and simplified_invoice:
+                if VAT and company_in_simplified_regime and simplified_invoice:
                     regimen_key = '20'
                 if VAT and with_recargo:
                     regimen_key = '18'

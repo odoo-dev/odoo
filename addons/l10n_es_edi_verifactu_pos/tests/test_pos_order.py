@@ -68,7 +68,7 @@ class TestL10nEsEdiVerifactuPosOrder(TestL10nEsEdiVerifactuCommon, TestPoSCommon
             name_patch = mock.patch(name_function_path, return_value=name)
 
         # In case the Veri*Factu document is created for the invoice of the pos order:
-        # We have to fix the record identifier related fields on created invoice
+        # We have to fix the record identifier related fields on the created invoice
         prepare_invoice_vals_patch = nullcontext()
         if account_move:
             prepare_invoice_vals_function_path = 'odoo.addons.point_of_sale.models.pos_order.PosOrder._prepare_invoice_vals'
@@ -124,8 +124,6 @@ class TestL10nEsEdiVerifactuPosOrder(TestL10nEsEdiVerifactuCommon, TestPoSCommon
                }
             record_identifier = order.l10n_es_edi_verifactu_document_ids.record_identifier
             self.assertDictEqual(record_identifier, expected_record_identifier | record_identifier)
-            record_identifier = order._l10n_es_edi_verifactu_record_identifier()
-            self.assertDictEqual(record_identifier, expected_record_identifier | record_identifier)
 
     def test_error_above_simplified_limit(self):
         with self.with_pos_session() as session:
@@ -154,11 +152,15 @@ class TestL10nEsEdiVerifactuPosOrder(TestL10nEsEdiVerifactuCommon, TestPoSCommon
                     'date_order': '2024-12-30 00:00:00',
                 })
 
+        self.assertRecordValues(order, [{
+            'l10n_es_edi_verifactu_state': 'accepted',
+            'l10n_es_edi_verifactu_qr_code': '/report/barcode/?barcode_type=QR&value=https%3A%2F%2Fprewww2.aeat.es%2Fwlpl%2FTIKE-CONT%2FValidarQR%3Fnif%3DA39200019%26numserie%3DINV%252F2019%252F00026%26fecha%3D30-12-2024%26importe%3D121.00&barLevel=M&width=180&height=180',
+        }])
+
         self.assertRecordValues(order.l10n_es_edi_verifactu_document_ids, [{
-            'res_id': order.id,
-            'res_model': order._name,
+            'pos_order_id': order.id,
+            'move_id': False,
             'document_type': 'submission',
-            'response_time': self.fakenow,
             'response_csv': 'A-YDSW8NLFLANWPM',
             'state': 'accepted',
             'errors': False,
@@ -190,16 +192,18 @@ class TestL10nEsEdiVerifactuPosOrder(TestL10nEsEdiVerifactuCommon, TestPoSCommon
         invoice = order.account_move
         self.assertTrue(invoice)
         simplified_partner = order.config_id.simplified_partner_id
-        self.assertTrue(order.partner_id == simplified_partner)
         self.assertTrue(invoice.partner_id == simplified_partner)
 
+        self.assertRecordValues(order, [{
+            'partner_id': simplified_partner.id,
+            'l10n_es_edi_verifactu_document_ids': [],
+            'l10n_es_edi_verifactu_qr_code': invoice.l10n_es_edi_verifactu_qr_code,
+        }])
         # The Veri*Factu document was created for the invoice and not the document
-        self.assertFalse(order.l10n_es_edi_verifactu_document_ids)
         self.assertRecordValues(invoice.l10n_es_edi_verifactu_document_ids, [{
-            'res_id': invoice.id,
-            'res_model': invoice._name,
+            'pos_order_id': False,
+            'move_id': invoice.id,
             'document_type': 'submission',
-            'response_time': self.fakenow,
             'response_csv': 'A-YDSW8NLFLANWPM',
             'state': 'accepted',
             'errors': False,
@@ -229,13 +233,15 @@ class TestL10nEsEdiVerifactuPosOrder(TestL10nEsEdiVerifactuCommon, TestPoSCommon
                 })
 
         # The Veri*Factu document was created for the invoice and not the document
-        self.assertFalse(order.l10n_es_edi_verifactu_document_ids)
         invoice = order.account_move
+        self.assertRecordValues(order, [{
+            'l10n_es_edi_verifactu_document_ids': [],
+            'l10n_es_edi_verifactu_qr_code': invoice.l10n_es_edi_verifactu_qr_code,
+        }])
         self.assertRecordValues(invoice.l10n_es_edi_verifactu_document_ids, [{
-            'res_id': invoice.id,
-            'res_model': invoice._name,
+            'pos_order_id': False,
+            'move_id': invoice.id,
             'document_type': 'submission',
-            'response_time': self.fakenow,
             'response_csv': 'A-YDSW8NLFLANWPM',
             'state': 'accepted',
             'errors': False,

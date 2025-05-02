@@ -3,7 +3,7 @@ from cryptography.hazmat.primitives import hashes
 from datetime import datetime, timedelta
 from lxml import etree
 from pytz import timezone
-from werkzeug.urls import url_quote_plus
+from werkzeug.urls import url_quote_plus, url_encode
 
 import hashlib
 import math
@@ -46,7 +46,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
       * handles the sending of the XML to the AEAT
       * stores information extracted from the received response
 
-    The main function to generate Veri*Factu Documents is `mark_records_for_next_batch`:
+    The main function to generate Veri*Factu Documents is `_mark_records_for_next_batch`:
       1. It generates the documents (submission or cancellation)
          * The documents form a chain in generation order by including a reference to the preceding document.
          * The function handles the correct chaining.
@@ -63,7 +63,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
     """
     _name = 'l10n_es_edi_verifactu.document'
     _description = "Veri*Factu Document"
-    _order = 'response_time DESC NULLS FIRST, create_date DESC, id DESC'
+    _order = 'create_date DESC, id DESC'
 
     company_id = fields.Many2one(
         string="Company",
@@ -71,16 +71,9 @@ class L10nEsEdiVerifactuDocument(models.Model):
         required=True,
         readonly=True,
     )
-    # `res_model` and `res_id` are used to link the object the document was created from
-    res_model = fields.Char(
-        string="Origin Model",
-        required=True,
-        readonly=True,
-    )
-    res_id = fields.Many2oneReference(
-        string="Origin ID",
-        model_field='res_model',
-        required=True,
+    move_id = fields.Many2one(
+        string="Journal Entry",
+        comodel_name='account.move',
         readonly=True,
     )
     chain_index = fields.Integer(
@@ -128,12 +121,6 @@ class L10nEsEdiVerifactuDocument(models.Model):
         copy=False,
         readonly=True,
     )
-    response_time = fields.Datetime(
-        string="Time of Response",
-        help="The date and time on which we received the response.",
-        copy=False,
-        readonly=True,
-    )
     state = fields.Selection(
         string="Status",
         selection=[
@@ -168,30 +155,72 @@ class L10nEsEdiVerifactuDocument(models.Model):
         }
         return self.env['account.move.send']._format_error_html(error)
 
-    def _create_for_record(self, record, cancellation=False, previous_record_identifier=None):
+    @api.model
+    def _check_record_values(self, vals):
+        errors = []
+
+        company = vals['company']
+
+        company_values = company._l10n_es_edi_verifactu_get_values()
+        company_NIF = company_values['NIF']
+        if not company_NIF or len(company_NIF) != 9:  # NIFType
+            errors.append(_("The NIF '%(company_NIF)s' of the company is not exactly 9 characters long.",
+                            company_NIF=company_NIF))
+
+        name = vals['name']
+        if not name or len(name) > 60:
+            errors.append(_("The name of the record is not between 1 and 60 characters long: %(name)s.",
+                            name=name))
+
+        certificate = company.sudo()._l10n_es_edi_verifactu_get_certificate()
+        if not certificate:
+            errors.append(_("There is no certificate configured for Veri*Factu on the company."))
+
+        invoice_date = vals['invoice_date']
+        if not invoice_date:
+            errors.append(_("The invoice date is missing."))
+
+        move_type = vals['move_type']
+        if move_type not in ['out_invoice', 'out_refund']:
+            errors.append(_("The record has to be an invoice or a credit note."))
+
+        tax_details = vals['tax_details']
+        sujeto_tax_types = self.env['account.tax']._l10n_es_get_sujeto_tax_types()
+        ignored_tax_types = ['ignore', 'retencion']
+        supported_tax_types = sujeto_tax_types + ignored_tax_types + ['no_sujeto', 'no_sujeto_loc', 'recargo', 'exento']
+        tax_type_description = self.env['account.tax']._fields['l10n_es_type'].get_description(self.env)
+        for tax_detail in tax_details['tax_details'].values():
+            tax_type = tax_detail['l10n_es_type']
+            verifactu_tax_type = tax_detail['l10n_es_edi_verifactu_tax_type']
+            if tax_type not in supported_tax_types:
+                # tax_type in ('no_deducible', 'dua')
+                # The remaining tax types are purchase taxes (for vendor bills).
+                errors.append(_("A tax with value '%(tax_type)s' as %(field)s is not supported.",
+                                field=tax_type_description['string'],
+                                tax_type=dict(tax_type_description['selection'])[tax_type]))
+            elif tax_type in ('no_sujeto', 'no_sujeto_loc') and verifactu_tax_type == '01':
+                tax_percentage = tax_detail['amount']
+                tax_amount = tax_detail['tax_amount']
+                if float_round(tax_percentage, precision_digits=2) or float_round(tax_amount, precision_digits=2):
+                    errors.append(_("No Sujeto VAT taxes must have 0 amount."))
+
+        return errors
+
+    def _create_for_record(self, record_values, previous_record_identifier=None):
         """Note: In case we succesfully create an XML we delete all linked documents that failed the XML creation."""
-        record.ensure_one()
-        company = record.company_id
+        company = record_values['company']
+        document_vals = record_values['document_vals']
+        generation_errors = record_values['errors']
 
-        render_info = self._render_xml_node(
-            record, cancellation=cancellation, previous_record_identifier=previous_record_identifier,
-        )
-
-        document_vals = {
-            'res_id': record.id,
-            'res_model': record._name,
-            'company_id': company.id,
-            'document_type': 'cancellation' if cancellation else 'submission',
-        }
-
-        generation_errors = render_info['errors']
+        xml = None
         if generation_errors:
-            xml = None
             error_title = _("The Veri*Factu document could not be created")
             document_vals['errors'] = self._format_errors(error_title, generation_errors)
         else:
-            render_vals = render_info['render_vals']
-            xml = etree.tostring(render_info['xml_node'], xml_declaration=False, encoding='UTF-8')
+            xml_node, render_vals = self._render_xml_node(
+                record_values, previous_record_identifier=previous_record_identifier,
+            )
+            xml = etree.tostring(xml_node, xml_declaration=False, encoding='UTF-8')
             document_vals.update({
                 'record_identifier': render_vals['record_identifier'],
                 'chain_index': company._l10n_es_edi_verifactu_get_next_chain_index(),
@@ -200,6 +229,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
         document = self.create(document_vals)
 
         if xml:
+            record = record_values['record']
             document.xml_attachment_id = self.env['ir.attachment'].create({
                 'raw': xml,
                 'name': document.xml_attachment_filename,
@@ -207,21 +237,27 @@ class L10nEsEdiVerifactuDocument(models.Model):
                 'res_model': record._name,
                 'mimetype': 'application/xml',
             })
-            record.l10n_es_edi_verifactu_document_ids.filtered(lambda rd: not rd.xml_attachment_id).unlink()
+            record_values['documents'].filtered(lambda rd: not rd.xml_attachment_id).unlink()
 
         return document
 
-    def mark_records_for_next_batch(self, records, cancellation=False):
-        """Create Veri*Factu documents for `records`.
+    def _mark_records_for_next_batch(self, record_values_list):
+        """Create Veri*Factu documents for input `record_values_list`.
         Return a dictionary (record -> document) containing all the created documents.
-        In case we already have documents waiting to be send for a record it is skipped (no new document is created).
+        In case we already have documents waiting to be sent for a record it is skipped (no new document is created).
         The documents are also created in case the XML generation fails; to inspect the errors.
         Such documents are deleted in case the XML generation succeeds for a record at a later time (see `_create_for_record`).
+        :param list record_values_list: list of record values dictionaries (to be passed to `_create_for_record`)
         """
         result = {}
-        if not records:
-            return result
-        for company, company_records in records.grouped(lambda r: r.company_id).items():
+
+        # Group the records per company
+        grouped_record_values_list = {}
+        for record_values in record_values_list:
+            company = record_values['company']
+            grouped_record_values_list.setdefault(company, []).append(record_values)
+
+        for company, company_record_values_list in grouped_record_values_list.items():
             # We chain all the created documents per company in generation order.
             # Thus we can not generate multiple documents for the same company at the same time.
             # We use `company.l10n_es_edi_verifactu_chain_sequence_id` to
@@ -236,16 +272,15 @@ class L10nEsEdiVerifactuDocument(models.Model):
             previous_document = self.env['l10n_es_edi_verifactu.document'].search(
                 [('chain_index', '!=', False)], order='chain_index asc', limit=1,
             )
-            for record in company_records:
-                waiting_documents = record.l10n_es_edi_verifactu_document_ids.filtered(lambda rd: not rd.state)
-                if waiting_documents:
+            for record_values in record_values_list:
+                if record_values['documents']._filter_waiting():
                     continue
                 document = self.env['l10n_es_edi_verifactu.document']._create_for_record(
-                    record, cancellation=cancellation, previous_record_identifier=previous_document.record_identifier
+                    record_values, previous_record_identifier=previous_document.record_identifier,
                 )
                 if document.state != 'error':
                     previous_document = document
-                result[record] = document
+                result[record_values['record']] = document
         self.env['l10n_es_edi_verifactu.document'].trigger_next_batch()
         return result
 
@@ -326,21 +361,14 @@ class L10nEsEdiVerifactuDocument(models.Model):
         info = {
             'errors': [],
             'response': None,
-            'response_time': False,
         }
 
-        response = None
         try:
-            response = self._soap_request(xml)
+            info['response'] = self._soap_request(xml)
         except requests.exceptions.RequestException as exception:
             exception_traceback = ''.join(traceback.format_exception(exception))
             info['errors'].append(_("Sending the document to the AEAT failed: %s", exception_traceback))
             return info
-
-        info.update({
-            'response': response,
-            'response_time': fields.Datetime.to_string(fields.Datetime.now()),
-        })
 
         try:
             parse_info = self._parse_response(info['response'])
@@ -585,7 +613,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
             document.errors = errors_html
 
             # All other values can be stored directly on the document
-            keys = ['response_csv', 'response_time', 'state']
+            keys = ['response_csv', 'state']
             for key in keys:
                 new_value = response_info.get(key, False)
                 if new_value or document[key]:
@@ -633,7 +661,6 @@ class L10nEsEdiVerifactuDocument(models.Model):
             # Add some information from the batch level in any case.
             response_info.update({
                 'waiting_time_seconds': info.get('waiting_time_seconds', False),
-                'response_time': info.get('response_time', False),
                 'response_csv': info.get('response_csv', False),
             })
 
@@ -683,7 +710,6 @@ class L10nEsEdiVerifactuDocument(models.Model):
             'vals': vals,
             'previous_record_identifier': previous_record_identifier,
         }
-        errors = render_vals['errors']
 
         company_values = company._l10n_es_edi_verifactu_get_values()
         generation_time_string = fields.Datetime.now(timezone('Europe/Madrid')).astimezone(timezone('Europe/Madrid')).isoformat()
@@ -701,65 +727,48 @@ class L10nEsEdiVerifactuDocument(models.Model):
             self._render_vals_SistemaInformatico,
         ]
         for function in render_vals_functions:
-            new_render_vals, new_errors = function(vals)
-            errors.extend(new_errors)
-            if not new_errors:
-                render_vals.update(new_render_vals)
+            new_render_vals = function(vals)
+            render_vals.update(new_render_vals)
 
         self._update_render_vals_with_chaining_info(render_vals)
 
         record_identifier = self._extract_record_identifiers(render_vals)
         render_vals['record_identifier'] = record_identifier
 
-        return render_vals, errors
+        return render_vals
 
     @api.model
     def _get_tipos(self, vals):
-        errors = []
+        move_type = vals['move_type']
+        is_simplified = vals['is_simplified']
+
         result = {
             'TipoFactura': None,
             'TipoRectificativa': None,
         }
-        move_type = vals['move_type']
-        is_simplified = vals['is_simplified']
         if move_type == 'out_invoice':
             result['TipoFactura'] = 'F2' if is_simplified else 'F1'
-        elif move_type == 'out_refund':
+        else:
+            # move_type == 'out_refund':
             result.update({
                 'TipoFactura': 'R5' if is_simplified else 'R1',
                 'TipoRectificativa': 'I',
             })
-        else:
-            errors.append(_("The record has to be an invoice or a credit note."))
-        return result, errors
+        return result
 
     @api.model
     def _render_vals_operation(self, vals):
         render_vals = {}
-        errors = []
 
         company = vals['company']
         cancellation = vals['cancellation']
-        invoice_date = vals['invoice_date']
+        invoice_date = self._format_date_fecha_type(vals['invoice_date'])
         is_simplified = vals['is_simplified']
         name = vals['name']
         partner = vals['partner']
 
         company_values = company._l10n_es_edi_verifactu_get_values()
         company_NIF = company_values['NIF']
-        if not company_NIF or len(company_NIF) != 9:  # NIFType
-            errors.append(_("The NIF '%(company_NIF)s' of the company is not exactly 9 characters long.",
-                            company_NIF=company_NIF))
-
-        if not name or len(name) > 60:
-            errors.append(_("The name of the record is not between 1 and 60 characters long: %(name)s.",
-                            name=name))
-
-        if not invoice_date:
-            invoice_date = 'NO_DISPONIBLE'
-            errors.append(_("The invoice date is missing."))
-        else:
-            invoice_date = self._format_date_fecha_type(invoice_date)
 
         render_vals.update({
             'company_NIF': company_NIF,
@@ -768,7 +777,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
         })
 
         if cancellation:
-            return render_vals, errors
+            return render_vals
 
         simplified_partner = self.env.ref('l10n_es.partner_simplified', raise_if_not_found=False)
         partner_is_simplified_partner = simplified_partner and partner == simplified_partner
@@ -784,8 +793,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
         if delivery_date:
             delivery_date = self._format_date_fecha_type(delivery_date)
 
-        tipos, tipos_errors = self._get_tipos(vals)
-        errors.extend(tipos_errors)
+        tipos = self._get_tipos(vals)
 
         render_vals.update({
             'tipo_factura': tipos['TipoFactura'],
@@ -796,12 +804,9 @@ class L10nEsEdiVerifactuDocument(models.Model):
             'sin_identif_destinatario_art61d': 'S' if is_simplified and partner_is_simplified_partner else None,
         })
 
-        refunded_record = vals['refunded_record']
-        refunded_record_identifier = refunded_record and refunded_record._l10n_es_edi_verifactu_record_identifier()
-        if refunded_record and not refunded_record_identifier:
-            # TODO: could also be cancellation without prior registration
-            errors.append(_("There is no record identifier yet for the refunded record."))
-        elif refunded_record:
+        refunded_document = vals['refunded_document']
+        if refunded_document:
+            refunded_record_identifier = refunded_document.record_identifier
             render_vals.update({
                 'refunded_record': {
                     'IDEmisorFactura': refunded_record_identifier['IDEmisorFactura'],
@@ -810,13 +815,12 @@ class L10nEsEdiVerifactuDocument(models.Model):
                 },
             })
 
-        return render_vals, errors
+        return render_vals
 
     @api.model
     def _render_vals_previous_submissions(self, vals):
         # See "Sistemas Informáticos de Facturación y Sistemas VERI*FACTU" Version 1.0.0 - "Validaciones" p. 22 f.
         render_vals = {}
-        errors = []
 
         verifactu_state = vals['verifactu_state']
         submission_rejected_before = vals['rejected_before']
@@ -847,13 +851,12 @@ class L10nEsEdiVerifactuDocument(models.Model):
                 'rechazo_previo': previously_rejected_state,
             }
 
-        return render_vals, errors
+        return render_vals
 
     @api.model
     def _render_vals_monetary_amounts(self, vals):
-        errors = []
         if vals['cancellation']:
-            return {}, errors
+            return {}
 
         sujeto_tax_types = self.env['account.tax']._l10n_es_get_sujeto_tax_types()
 
@@ -902,7 +905,6 @@ class L10nEsEdiVerifactuDocument(models.Model):
 
             calificacion_operacion = None  # Reported if not tax-exempt;
             recargo_equivalencia = {}
-            tax_type = tax_detail['l10n_es_type']
             if tax_type in sujeto_tax_types:
                 calificacion_operacion = 'S2' if tax_type == 'sujeto_isp' else 'S1'
                 if tax_detail['with_recargo']:
@@ -916,15 +918,9 @@ class L10nEsEdiVerifactuDocument(models.Model):
                     })
             elif tax_type in ('no_sujeto', 'no_sujeto_loc'):
                 calificacion_operacion = 'N2' if tax_type == 'no_sujeto_loc' else 'N1'
-            elif tax_type == 'exento':
-                pass  # exempt_reason set already
             else:
-                # tax_type in ('no_deducible', 'dua')
-                # The remaining tax types are purchase taxes (for vendor bills).
-                tax_type_description = self.env['account.tax']._fields['l10n_es_type'].get_description(self.env)
-                errors.append(_("A tax with value '%(tax_type)s' as %(field)s is not supported.",
-                                field=tax_type_description['string'],
-                                tax_type=dict(tax_type_description['selection'])[tax_type]))
+                # tax_type == 'exento' (see `_check_record_values`)
+                pass  # exempt_reason set already
 
             recargo_percentage = recargo_equivalencia.get('tax_percentage')
             recargo_amount = recargo_equivalencia.get('tax_amount')
@@ -943,8 +939,6 @@ class L10nEsEdiVerifactuDocument(models.Model):
             #     No se puede informar de los campos TipoImpositivo (excepto con ClaveRegimen 17),
             #     CuotaRepercutida (excepto con ClaveRegimen 17), TipoRecargoEquivalencia y CuotaRecargoEquivalencia.
             if calificacion_operacion in ('N1', 'N2') and verifactu_tax_type == '01':
-                if float_round(tax_percentage, precision_digits=2) or float_round(tax_amount, precision_digits=2):
-                    errors.append(_("No Sujeto VAT taxes must have 0 amount."))
                 tax_percentage = None
                 tax_amount = None
 
@@ -973,7 +967,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
             'total_amount': self._format_number_ImporteSgn12_2(total_amount),
         }
 
-        return render_vals, errors
+        return render_vals
 
     @api.model
     def _get_db_identifier(self):
@@ -982,8 +976,6 @@ class L10nEsEdiVerifactuDocument(models.Model):
 
     @api.model
     def _render_vals_SistemaInformatico(self, vals):
-        errors = []
-
         spanish_companies_on_db_count = self.env['res.company'].search_count([
             ('account_fiscal_country_id.code', '=', 'ES'),
         ], limit=2)
@@ -1002,19 +994,13 @@ class L10nEsEdiVerifactuDocument(models.Model):
             },
         }
 
-        return render_vals, errors
+        return render_vals
 
     @api.model
     def _render_vals_dsig(self, vals):
-        errors = []
         company = vals['company']
 
-        # Ensure a certificate is available.
         certificate = company.sudo()._l10n_es_edi_verifactu_get_certificate()
-        if not certificate:
-            errors.append(_("There is no certificate configured for Veri*Factu on the company."))
-            return {'dsig': {}}, errors
-
         _cert_private, cert_public = certificate.sudo()._get_key_pair()
         sigpolicy = {
             'url': 'https://sede.administracion.gob.es/politica_de_firma_anexo_1.pdf',
@@ -1022,7 +1008,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
         }
         render_vals = get_xades_template_render_values(sigpolicy, cert_public)
 
-        return render_vals, errors
+        return render_vals
 
     def _extract_record_identifiers(self, render_vals):
         """Return a dictionary that includes:
@@ -1097,27 +1083,10 @@ class L10nEsEdiVerifactuDocument(models.Model):
         return _sha256(string)
 
     @api.model
-    def _render_xml_node(self, record, cancellation=False, previous_record_identifier=None):
-        record.ensure_one()
-
-        render_info = {
-            'render_vals': None,
-            'xml_node': None,
-            'errors': [],
-        }
-
-        record_values, errors = record._l10n_es_edi_verifactu_get_record_values(cancellation)
-        if errors:
-            render_info['errors'] = errors
-            return render_info
-
-        render_vals, errors = self._render_vals(
-            record_values, previous_record_identifier=previous_record_identifier
+    def _render_xml_node(self, record_values, previous_record_identifier=None):
+        render_vals = self._render_vals(
+            record_values, previous_record_identifier=previous_record_identifier,
         )
-        render_info['render_vals'] = render_vals
-        if errors:
-            render_info['errors'] = errors
-            return render_info
 
         # Render
         xml = self.env['ir.qweb']._render('l10n_es_edi_verifactu.verifactu_registro_factura', render_vals)
@@ -1126,17 +1095,29 @@ class L10nEsEdiVerifactuDocument(models.Model):
         # Sign the rendered XML (modify <ds:Signature> node appropriately)
         company = render_vals['company']
         certificate = company.sudo()._l10n_es_edi_verifactu_get_certificate()
-        if not certificate:
-            errors.append(_("There is no certificate configured for Veri*Factu on the company."))
-            render_info['errors'] = errors
-            return render_info
-
         cert_private, _cert_public = certificate.sudo()._get_key_pair()
         signature_node = xml_node.find('*/ds:Signature', namespaces=NS_MAP)
         sign_xades(signature_node, cert_private)
 
-        render_info['xml_node'] = xml_node
-        return render_info
+        return xml_node, render_vals
+
+    def _filter_waiting(self):
+        return self.filtered(lambda doc: not doc.state and doc.xml_attachment_id)
+
+    def _get_last(self, document_type):
+        return self.filtered(lambda doc: doc.document_type == document_type).sorted()[:1]
+
+    def _get_state(self):
+        last_registered_document = self.filtered(lambda doc: doc.state in ('registered_with_errors', 'accepted')).sorted()[:1]
+        if last_registered_document:
+            cancellation = last_registered_document.document_type == 'cancellation'
+            return 'cancelled' if cancellation else last_registered_document.state
+
+        rejected_document = self.filtered(lambda doc: doc.state == 'rejected')[:1]
+        if rejected_document:
+            return 'rejected'
+
+        return False
 
     @api.model
     def _batch_record_xmls(self, xml_list, incident=False):
@@ -1145,8 +1126,8 @@ class L10nEsEdiVerifactuDocument(models.Model):
         company = self.env.company
         company_values = company._l10n_es_edi_verifactu_get_values()
         company_NIF = company_values['NIF']
-        if not company_NIF or len(company_NIF) != 9:  # NIFType
-            errors.append(('company_NIF', company_NIF))
+
+        # TODO: check company NIF
 
         render_vals = {
             'sender_name': company_values['name'],
@@ -1164,63 +1145,19 @@ class L10nEsEdiVerifactuDocument(models.Model):
         batch_xml = etree.tostring(batch_xml_node, xml_declaration=True, encoding='UTF-8')
         return batch_xml, errors
 
-    @api.model
-    def _get_qr_code_img_url(self, record):
-        record.ensure_one()
-        record_identifier = record._l10n_es_edi_verifactu_record_identifier()
-        if not record_identifier:
+    def _get_qr_code_img_url(self):
+        self.ensure_one()
+        record_identifier = self.record_identifier
+        if not record_identifier or self.document_type != 'submission':
+            # We take the values from the record identifier.
+            # And only the 'submission' has all the necessary values ('ImporteTotal').
             return False
-        url = url_quote_plus(
-            f"{record.company_id._l10n_es_edi_verifactu_get_endpoints()['QR']}?"
-            f"nif={record_identifier['IDEmisorFactura']}&"
-            f"numserie={record_identifier['NumSerieFactura']}&"
-            f"fecha={record_identifier['FechaExpedicionFactura']}&"
-            f"importe={record_identifier['ImporteTotal']}"
-        )
+        endpoint_url = self.company_id._l10n_es_edi_verifactu_get_endpoints()['QR']
+        url_params = url_encode({
+            'nif': record_identifier['IDEmisorFactura'],
+            'numserie': record_identifier['NumSerieFactura'],
+            'fecha': record_identifier['FechaExpedicionFactura'],
+            'importe': record_identifier['ImporteTotal'],
+        })
+        url = url_quote_plus(f"{endpoint_url}?{url_params}")
         return f'/report/barcode/?barcode_type=QR&value={url}&barLevel=M&width=180&height=180'
-
-    @api.model
-    def _analyze_record_documents(self, record):
-        record.ensure_one()
-
-        last_sent_document = False
-        last_succesful_document = False
-        last_erroneous_document = False  # only after `last_succesful_document`
-        last_rejected_cancellation = False  # only after `last_succesful_document`
-        last_rejected_submission = False  # only after `last_succesful_document`
-        for document in record.l10n_es_edi_verifactu_document_ids.sorted():
-            is_submission = document.document_type == 'submission'
-            is_cancellation = document.document_type == 'cancellation'
-            if not is_submission and not is_cancellation:
-                continue
-            if not last_sent_document and document.response_time and document.state:
-                last_sent_document = document
-            if not last_erroneous_document and document.state != 'accepted':
-                last_erroneous_document = document
-            if not last_rejected_cancellation and is_cancellation and document.state == 'rejected':
-                last_rejected_cancellation = document
-            if not last_rejected_submission and is_submission and document.state == 'rejected':
-                last_rejected_submission = document
-            if document.state in ('registered_with_errors', 'accepted'):
-                last_succesful_document = document
-                # We must have found `last_sent_document` already.
-                # We do not care about erroneous / rejected documents before the last succesful one.
-                break
-
-        state = False
-        if last_succesful_document:
-            if last_succesful_document.document_type == 'cancellation':
-                state = 'cancelled'
-            else:
-                state = last_succesful_document.state
-        elif last_sent_document:
-            state = last_sent_document.state
-
-        return {
-            'last_sent_document': last_sent_document,
-            'last_succesful_document': last_succesful_document,
-            'last_erroneous_document': last_erroneous_document,  # only after `last_succesful_document`
-            'last_rejected_submission': last_rejected_submission,  # only after `last_succesful_document`
-            'last_rejected_cancellation': last_rejected_cancellation,  # only after `last_succesful_document`
-            'state': state,
-        }

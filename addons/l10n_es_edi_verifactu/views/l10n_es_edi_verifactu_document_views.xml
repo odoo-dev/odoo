@@ -18,7 +18,6 @@
                             <group name="right_column">
                                 <field name="state"/>
                                 <field name="response_csv"/>
-                                <field name="response_time"/>
                             </group>
                             <group name="bottom" colspan="2">
                                 <field name="errors"/>

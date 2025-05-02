@@ -31,6 +31,12 @@ class ResCompany(models.Model):
         copy=False,
         help="The Datetime at which the next submission to the AEAT can be made."
     )
+    l10n_es_edi_verifactu_special_vat_regime = fields.Selection(
+        string="Special VAT Regime",
+        selection=[
+            ('simplified', "Simplified Regime"),
+        ],
+    )
 
     def _l10n_es_edi_verifactu_get_endpoints(self):
         """
@@ -79,5 +85,4 @@ class ResCompany(models.Model):
                 'implementation': 'no_gap',
                 'company_id': self.id,
             })
-            self.flush_model(['l10n_es_edi_verifactu_chain_sequence_id'])
         return self.l10n_es_edi_verifactu_chain_sequence_id.next_by_id()

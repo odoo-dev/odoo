@@ -75,7 +75,7 @@ class TestL10nEsEdiVerifactuXml(TestL10nEsEdiVerifactuCommon):
         })
         invoice.action_post()
 
-        document = self.env['l10n_es_edi_verifactu.document']._create_for_record(invoice)
+        document = invoice._l10n_es_edi_verifactu_create_document()
         response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
         with self._mock_request(response):
             batch_xml, _info = document._send_as_batch()
@@ -93,7 +93,7 @@ class TestL10nEsEdiVerifactuXml(TestL10nEsEdiVerifactuCommon):
         credit_note.invoice_date = '2019-02-11'
         credit_note.action_post()
 
-        document = self.env['l10n_es_edi_verifactu.document']._create_for_record(credit_note)
+        document = credit_note._l10n_es_edi_verifactu_create_document()
         response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
         with self._mock_request(response):
             batch_xml, _info = document._send_as_batch()
@@ -119,7 +119,7 @@ class TestL10nEsEdiVerifactuXml(TestL10nEsEdiVerifactuCommon):
         })
         invoice.action_post()
 
-        document = self.env['l10n_es_edi_verifactu.document']._create_for_record(invoice)
+        document = invoice._l10n_es_edi_verifactu_create_document()
         response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
         with self._mock_request(response):
             batch_xml, _info = document._send_as_batch()
@@ -147,8 +147,8 @@ class TestL10nEsEdiVerifactuXml(TestL10nEsEdiVerifactuCommon):
         invoice.action_post()
         self.assertEqual(invoice.amount_total, 1090.0)
 
-        document = self.env['l10n_es_edi_verifactu.document']._create_for_record(invoice)
-        expected_qr_code_url = '/report/barcode/?barcode_type=QR&value=https%3A%2F%2Fprewww2.aeat.es%2Fwlpl%2FTIKE-CONT%2FValidarQR%3Fnif%3D59962470K%26numserie%3DINV%2F2019%2F00001%26fecha%3D30-01-2019%26importe%3D1100.00&barLevel=M&width=180&height=180'
+        document = invoice._l10n_es_edi_verifactu_create_document()
+        expected_qr_code_url = '/report/barcode/?barcode_type=QR&value=https%3A%2F%2Fprewww2.aeat.es%2Fwlpl%2FTIKE-CONT%2FValidarQR%3Fnif%3D59962470K%26numserie%3DINV%252F2019%252F00001%26fecha%3D30-01-2019%26importe%3D1100.00&barLevel=M&width=180&height=180'
         self.assertEqual(invoice.l10n_es_edi_verifactu_qr_code, expected_qr_code_url)
 
         response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
@@ -171,7 +171,7 @@ class TestL10nEsEdiVerifactuXml(TestL10nEsEdiVerifactuCommon):
         })
         invoice.action_post()
 
-        document = self.env['l10n_es_edi_verifactu.document']._create_for_record(invoice)
+        document = invoice._l10n_es_edi_verifactu_create_document()
         response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
         with self._mock_request(response):
             batch_xml, _info = document._send_as_batch()
@@ -222,14 +222,14 @@ class TestL10nEsEdiVerifactuXml(TestL10nEsEdiVerifactuCommon):
             'Huella': 'FA5DC48A0640BEB02A05160FD30020D1EA67FC1B400800ECDD9FC785E137C864',
         }
 
-        document0 = self.env['l10n_es_edi_verifactu.document']._create_for_record(
-            invoices[0], previous_record_identifier=previous_record_identifier,
+        document0 = invoices[0]._l10n_es_edi_verifactu_create_document(
+            previous_record_identifier=previous_record_identifier,
         )
-        document1 = self.env['l10n_es_edi_verifactu.document']._create_for_record(
-            invoices[1], cancellation=True, previous_record_identifier=document0.record_identifier,
+        document1 = invoices[1]._l10n_es_edi_verifactu_create_document(
+            cancellation=True, previous_record_identifier=document0.record_identifier,
         )
-        document2 = self.env['l10n_es_edi_verifactu.document']._create_for_record(
-            invoices[2], previous_record_identifier=document1.record_identifier,
+        document2 = invoices[2]._l10n_es_edi_verifactu_create_document(
+            previous_record_identifier=document1.record_identifier,
         )
         documents = self.env['l10n_es_edi_verifactu.document'].browse([
             document0.id, document1.id, document2.id,
@@ -254,7 +254,7 @@ class TestL10nEsEdiVerifactuXml(TestL10nEsEdiVerifactuCommon):
         })
         invoice.action_post()
 
-        document = self.env['l10n_es_edi_verifactu.document']._create_for_record(invoice, cancellation=True)
+        document = invoice._l10n_es_edi_verifactu_create_document(cancellation=True)
         response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
         with self._mock_request(response):
             batch_xml, _info = document._send_as_batch()
@@ -273,7 +273,7 @@ class TestL10nEsEdiVerifactuXml(TestL10nEsEdiVerifactuCommon):
         })
         invoice.action_post()
 
-        document = self.env['l10n_es_edi_verifactu.document']._create_for_record(invoice)
+        document = invoice._l10n_es_edi_verifactu_create_document()
         response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
         with self._mock_request(response):
             batch_xml, _info = document._send_as_batch()
