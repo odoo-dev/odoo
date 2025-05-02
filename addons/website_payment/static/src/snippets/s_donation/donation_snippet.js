@@ -44,13 +44,15 @@ export class DonationSnippet extends Interaction {
     start() {
         const prefilledButtonEls = this.el.querySelectorAll(".s_donation_btn, .s_range_bubble");
         for (const prefilledButtonEl of prefilledButtonEls) {
+            // Remove existing currency
+            prefilledButtonEl.querySelector(".s_donation_currency")?.remove();
             const insertBefore = this.currency.position === "before";
             const currencyEl = document.createElement("span");
             currencyEl.innerText = this.currency.symbol;
             currencyEl.classList.add("s_donation_currency", insertBefore ? "pe-1" : "ps-1");
             this.insert(currencyEl, prefilledButtonEl, insertBefore ? "afterbegin" : "beforeend");
         }
-
+        
         const customButtonEl = this.el.querySelector("#s_donation_amount_input");
         if (customButtonEl) {
             this.registerCleanup(() => { customButtonEl.style.maxWidth = "" });

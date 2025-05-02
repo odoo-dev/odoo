@@ -112,8 +112,17 @@ registerWebsitePreviewTour(
             trigger: ":iframe .s_donation_donate_btn",
             run: "click",
         },
-        changeOption("Donation", "we-toggler"),
-        changeOption("Donation", '[data-name="slider_opt"]'),
+        // TODO Uncomment this when we have .s_donation option (when https://github.com/odoo-dev/odoo/pull/4240 is merged)
+        // {
+        //     content: "Click on the 'Custom Amount' option button",
+        //     trigger: '[data-container-title="Donation Button"] [data-label="Custom Amount"] button.dropdown-toggle',
+        //     run: "click",
+        // },
+        // {
+        //     content: "Change the custom amount input to slider",
+        //     trigger: '[data-action-id="selectAmountInput"][data-action-param="slider"]',
+        //     run: "click",
+        // },
         ...clickOnSave(),
         {
             content: "Click on $10 button",
