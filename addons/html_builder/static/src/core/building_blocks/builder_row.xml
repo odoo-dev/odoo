@@ -5,7 +5,7 @@
     <BuilderComponent>
         <div class="hb-row d-flex position-relative px-2" t-att-class="this.getLevelClass()" t-ref="root" t-att-data-label="props.label" t-attf-class="{{props.slots.collapse &amp;&amp; state.expanded ? 'active' : '' }}">
             <button t-ref="collapse"
-                    t-if="props.slots.collapse"
+                    t-if="props.slots.collapse &amp;&amp; state.hasCollapseContent"
                     class="o_hb_collapse_toggler ms-n1 btn border-0 text-white" t-att-class="{ 'active': state.expanded }"
                     title="Toggle more options"
                     t-on-click="toggleCollapseContent"
@@ -40,7 +40,16 @@
                 <t t-slot="default" toggleCollapseContent="() => this.toggleCollapseContent()"/>
             </div>
         </div>
-        <div t-if="props.slots.collapse" t-att-class="{ 'd-none': !state.expanded }" t-ref="collapse-content" t-att-id="collapseContentId">
+        <div t-if="props.slots.collapse"
+             class="hb-row-collapse-content pt-4 px-2 pb-3 border border-white border-opacity-25"
+             t-att-class="{ 'd-none': !state.expanded }"
+             t-ref="collapse-content"
+             t-att-id="collapseContentId">
+            <button
+                t-if="state.expanded"
+                class="btn btn-sm btn-close position-absolute top-0 end-0 me-2 mt-2"
+                aria-label="Close"
+                t-on-click="hideCollapseContent"/>
             <t t-slot="collapse"/>
         </div>
     </BuilderComponent>
