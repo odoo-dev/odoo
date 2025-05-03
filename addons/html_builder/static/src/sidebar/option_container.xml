@@ -7,7 +7,7 @@
          t-on-mouseenter="onMouseEnter" t-on-mouseleave="onMouseLeave">
         <div class="options-container-header d-flex align-items-center pt-2 px-2 pb-1">
 
-            <i class="fa fa-level-up fa-flip-horizontal me-1"/>
+            <i class="fa fa-level-up fa-flip-horizontal text-info me-1"/>
 
             <span class="me-auto text-white text-uppercase" t-out="title" role="button" t-on-click="selectElement"/>
 

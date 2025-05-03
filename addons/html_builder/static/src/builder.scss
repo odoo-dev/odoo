@@ -4,6 +4,10 @@
     font-size: $o-hb-font-size;
     font-family: $o-hb-font-family;
 
+    &.o-snippets-menu-blocks {
+        background-color: $o-hb-bg-darker;
+    }
+
     // Components
     .btn {
         --btn-font-size: 1em;
@@ -56,7 +60,6 @@
     height: $o-hb-sidebar-content-field-colorpicker-size;
     border: $o-hb-sidebar-content-field-border-width solid $o-hb-bg-darkest;
     border-radius: 10rem;
-    margin-right: auto;
     cursor: pointer;
 
     &::after {

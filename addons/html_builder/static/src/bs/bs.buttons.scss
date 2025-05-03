@@ -20,12 +20,12 @@
     &.btn-secondary {
         @include button-variant(
             $background: rgba($o-hb-bg-light, .6),
-            $border: $o-hb-bg-light,
-            $color: $o-hb-fg-darker,
+            $border: $o-hb-bg-lighter,
+            $color: $o-hb-fg-dark,
             $hover-background: $o-hb-bg-lighter,
             $hover-border: $o-hb-fg-darker,
             $hover-color: $o-hb-fg-lighter,
-            $active-background: $o-hb-bg-light,
+            $active-background: $o-hb-bg-darker,
             $active-border: rgba($o-hb-color-accent, .3),
             $active-color: $o-hb-color-accent,
             $disabled-background: transparent,
@@ -37,8 +37,8 @@
     @each $-name, $-color in $o-hb-colors {
         &.btn-#{$-name} {
             --btn-color: #{$-color};
-            --btn-border-color: #{rgba($-color, .05)};
-            --btn-bg: #{rgba($-color, .05)};
+            --btn-border-color: #{rgba($-color, .12)};
+            --btn-bg: #{rgba($-color, .06)};
 
             --btn-hover-color: #{$-color};
             --btn-hover-bg: #{rgba($-color, .05)};

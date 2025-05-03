@@ -8,7 +8,7 @@
         <div t-ref="root" class="o-dropdown-wrapper" style="overflow: hidden;">
             <div t-att-class="'d-none ' + props.className" t-ref="content"><WithIgnoreItem><t t-slot="default" /></WithIgnoreItem></div>
             <Dropdown state="this.dropdown">
-                <button class="btn btn-secondary text-end o-dropdown-caret" t-ref="button" t-att-id="props.id"
+                <button class="btn btn-secondary text-end o-dropdown-caret transition-none" t-ref="button" t-att-id="props.id"
                     style="width: 100%; overflow: hidden; text-overflow: ellipsis;">
                     <t t-slot="fixedButton"/>
                 </button>

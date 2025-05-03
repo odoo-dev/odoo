@@ -10,8 +10,8 @@
 
     // POC: Shouldn't be here
     .btn {
-        --btn-padding-y: #{map-get($spacers, 1)};
-        --btn-padding-x: #{map-get($spacers, 1) * 1.5};
+        --btn-padding-y: 0.15rem;
+        --btn-padding-x: 0.375rem;
     }
 
     div:has(> input):not(table.o_social_media_list div) {
@@ -29,7 +29,7 @@
         border-radius: $o-hb-sidebar-content-field-border-radius;
         background-color: $o-hb-sidebar-content-field-input-bg;
         color: $o-hb-fg-lighter;
-        padding: 0 $o-hb-sidebar-content-field-clickable-spacing;
+        padding: 0.15rem $o-hb-sidebar-content-field-clickable-spacing;
 
         &:focus {
             border-color: $o-hb-sidebar-content-field-input-border-color;

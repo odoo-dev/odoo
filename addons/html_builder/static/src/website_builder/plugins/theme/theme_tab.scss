@@ -1,0 +1,10 @@
+.o_theme_tab {
+    .options-container-header {
+        font-size: $o-hb-font-size-lg;
+
+        // POC only: should be handled elsewhere
+        i.fa.fa-level-up {
+            display: none;
+        }
+    }
+}

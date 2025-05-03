@@ -35,13 +35,7 @@ $o-hb-zindex: $o-hb-overlay-zindex + 1 !default;
 }
 
 .o_block_tab {
-    background-color: $o-hb-sidebar-blocks-content-bg;
     z-index: 1;
-
-    .o_snippets_container {
-        background-color: $o-hb-bg-darker;
-    }
-
 
     .o_snippets_container, .o_snippets_container_header {
         padding: $o-hb-sidebar-blocks-content-spacing 0;

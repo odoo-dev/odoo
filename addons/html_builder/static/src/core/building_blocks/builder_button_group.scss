@@ -1,0 +1,16 @@
+.o-hb-btn-group {
+    flex: 0 1 100%;
+
+    .btn {
+        z-index: 0;
+
+        &.active, &.hover {
+            z-index: 1;
+        }
+    }
+
+    > :not(.btn-check:first-child) + .btn,
+    > .btn-group:not(:first-child) {
+        margin-left: calc(var(--border-width) * -1);
+    }
+}

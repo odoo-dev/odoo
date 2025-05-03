@@ -2,7 +2,7 @@
     min-height: $o-hb-row-min-height;
     margin-bottom: $o-hb-row-margin-bottom;
     align-items: center;
-    color: $o-hb-fg-darker;
+    color: $o-hb-fg-dark;
 
     &:hover, &.active {
         color: $o-hb-fg-lighter;
@@ -14,11 +14,11 @@
 
     .hb-row-label {
         min-width: 0;
-        flex: 1 1 50%;
+        flex: 0 1 44%;
     }
 
     .hb-row-content {
-        flex: 0 1 50%;
+        flex: 0 1 56%;
         align-items: center;
         gap: map-get($spacers, 1);
     }

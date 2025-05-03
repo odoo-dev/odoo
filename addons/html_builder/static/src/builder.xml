@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="html_builder.Builder">
-    <div class="h-100 o-snippets-menu d-flex flex-column" t-ref="builder_sidebar">
+    <div class="h-100 o-snippets-menu d-flex flex-column" t-att-class="{'o-snippets-menu-blocks': state.activeTab === 'blocks'}" t-ref="builder_sidebar">
         <div class="o-snippets-top">
             <div class="o-snippets-top-actions d-flex justify-content-between flex-shrink-0 py-2 pe-2">
                 <div class="d-flex">
@@ -24,15 +24,15 @@
                 </div>
             </div>
             <div class="o-snippets-tabs d-grid gap-1 px-2 mb-1">
-                <button data-name="blocks" class="btn btn-success px-0" t-att-class="{'active pe-none': state.activeTab === 'blocks'}" t-on-click="() => this.onTabClick('blocks')" t-att-disabled="props.isTranslation">
+                <button data-name="blocks" class="btn px-0" t-att-class="{'btn-success active pe-none': state.activeTab === 'blocks'}" t-on-click="() => this.onTabClick('blocks')" t-att-disabled="props.isTranslation">
                      <i class="oi oi-plus me-1" role="img"/>
                     <span class="text-white">Add</span>
                 </button>
-                <button data-name="customize" class="btn btn-info px-0" t-att-class="{'active pe-none': state.activeTab === 'customize'}" t-on-click="() => this.onTabClick('customize')">
+                <button data-name="customize" class="btn px-0" t-att-class="{' btn-info active pe-none': state.activeTab === 'customize'}" t-on-click="() => this.onTabClick('customize')">
                     <i class="oi oi-settings-adjust me-1" role="img"/>
                     <span class="text-white">Edit</span>
                 </button>
-                <button data-name="theme" class="btn btn-global px-0" t-att-class="{'active pe-none': state.activeTab === 'theme'}" t-on-click="() => this.onTabClick('theme')" t-att-disabled="props.isTranslation">
+                <button data-name="theme" class="btn px-0" t-att-class="{'btn-global active pe-none': state.activeTab === 'theme'}" t-on-click="() => this.onTabClick('theme')" t-att-disabled="props.isTranslation">
                     <i class="fa fa-cog me-1" role="img"/>
                     <span class="text-white">Theme</span>
                 </button>
