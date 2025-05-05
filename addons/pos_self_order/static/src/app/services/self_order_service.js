@@ -101,7 +101,8 @@ export class SelfOrder extends Reactive {
                         this.confirmationPage(
                             "order",
                             this.config.self_ordering_mode,
-                            order.access_token
+                            order.access_token,
+                            true
                         );
                     }
                 } else {
@@ -252,7 +253,7 @@ export class SelfOrder extends Reactive {
             newLine.delete();
         }
     }
-    async confirmationPage(screen_mode, device, access_token) {
+    async confirmationPage(screen_mode, device, access_token, print = false) {
         if (!access_token) {
             throw new Error("No access token provided for confirmation page");
         }
@@ -261,7 +262,7 @@ export class SelfOrder extends Reactive {
             orderAccessToken: access_token || this.currentOrder.access_token,
             screenMode: screen_mode,
         });
-        if (device === "kiosk") {
+        if (device === "kiosk" && print) {
             this.printKioskChanges(access_token);
         }
     }
@@ -295,6 +296,7 @@ export class SelfOrder extends Reactive {
             return;
         }
 
+        //TODO-manv: here should we set an attribute `paid_at_kiosk` to the order if paymentMethods.length !== 0
         order = await this.sendDraftOrderToServer();
 
         if (!order) {
