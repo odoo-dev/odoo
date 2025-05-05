@@ -198,6 +198,8 @@ class HrEmployee(models.Model):
         'A user cannot be linked to multiple employees in the same company.',
     )
 
+    hidden_for_onboarding = fields.Boolean()
+
     @api.model
     def check_field_access_rights(self, operation, field_names):
         # DISCLAIMER: Dirty hack to avoid having to create a bridge module to override only a
