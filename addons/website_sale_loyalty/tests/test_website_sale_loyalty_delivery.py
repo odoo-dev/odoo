@@ -132,8 +132,6 @@ class TestWebsiteSaleDelivery(HttpCase, WebsiteSaleCommon):
             'product_id': delivery_product2.id,
         }])
 
-    # TODO master-mysterious-egg fix error
-    @unittest.skip("prepare mysterious-egg for merging")
     def test_shop_sale_gift_card_keep_delivery(self):
         # Get admin user and set his preferred shipping method to normal delivery
         # This test also tests that we can indeed pay delivery fees with gift cards/ewallet
