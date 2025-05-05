@@ -140,8 +140,6 @@ class TestWebsiteSaleDelivery(HttpCase, WebsiteSaleCommon):
         self.partner_admin.property_delivery_carrier_id = self.normal_delivery
         self.start_tour("/", 'shop_sale_loyalty_delivery', login='admin')
 
-    # TODO master-mysterious-egg fix error
-    @unittest.skip("prepare mysterious-egg for merging")
     def test_shipping_discount(self):
         """
         Check display of shipping discount promotion on checkout,
