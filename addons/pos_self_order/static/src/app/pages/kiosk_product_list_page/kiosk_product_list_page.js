@@ -53,28 +53,24 @@ export class KioskProductListPage extends Component {
 
         onMounted(() => {
             // Ensure the selected category is visible
-            const container = this.categoryListRef.el;
-            const selected = container.querySelector(".selected");
-
-            if (container && selected) {
-                const containerLeft = container.scrollLeft;
-                const containerRight = containerLeft + container.clientWidth;
-
-                const selectedLeft = selected.offsetLeft + 50;
-                const selectedRight = selectedLeft + selected.offsetWidth + 50;
-
-                if (selectedLeft < containerLeft) {
-                    container.scrollLeft = selectedLeft;
-                } else if (selectedRight > containerRight) {
-                    container.scrollLeft = selectedRight - container.clientWidth;
-                }
-            }
-
-            this.initCategoriesDragToScroll(this.categoryListRef.el, this.categoryListRef);
-            this.initCategoriesDragToScroll(
-                this.subCategoryContainerRef.el,
-                this.subCategoryListRef
-            );
+            // const container = this.categoryListRef.el;
+            // const selected = container.querySelector(".selected");
+            // if (container && selected) {
+            //     const containerLeft = container.scrollLeft;
+            //     const containerRight = containerLeft + container.clientWidth;
+            //     const selectedLeft = selected.offsetLeft + 50;
+            //     const selectedRight = selectedLeft + selected.offsetWidth + 50;
+            //     if (selectedLeft < containerLeft) {
+            //         container.scrollLeft = selectedLeft;
+            //     } else if (selectedRight > containerRight) {
+            //         container.scrollLeft = selectedRight - container.clientWidth;
+            //     }
+            // }
+            // this.initCategoriesDragToScroll(this.categoryListRef.el, this.categoryListRef);
+            // this.initCategoriesDragToScroll(
+            //     this.subCategoryContainerRef.el,
+            //     this.subCategoryListRef
+            // );
         });
 
         onWillUnmount(() => {
@@ -157,10 +153,11 @@ export class KioskProductListPage extends Component {
     }
 
     get products() {
-        if (this.selectedCategory.child_ids?.length > 0) {
-            return this.selectedCategory.associatedProducts;
-        }
-        return this.selfOrder.productByCategIds[this.selectedCategory.id] || [];
+        // if (this.selectedCategory.child_ids?.length > 0) {
+        //     return this.selectedCategory.associatedProducts;
+        // }
+        // return this.selfOrder.productByCategIds[this.selectedCategory.id] || [];
+        return Object.values(this.selfOrder.productByCategIds).flat();
     }
 
     selectProduct(product, target) {

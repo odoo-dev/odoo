@@ -878,11 +878,12 @@ export class SelfOrder extends Reactive {
     }
 
     displayCategoryPage() {
-        if (!this.kioskMode) {
-            return;
-        }
+        return false;
+        // if (!this.kioskMode) {
+        //     return;
+        // }
 
-        return this.getAvailableCategories().length > 1;
+        // return this.getAvailableCategories().length > 1;
     }
 
     get kioskBackgroundImage() {
