@@ -1,5 +1,6 @@
 import base64
 
+from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec, padding, rsa
 from cryptography.hazmat.primitives.serialization import Encoding
@@ -157,6 +158,25 @@ class CertificateKey(models.Model):
             formatting=formatting
         )
 
+    def _verify(self, signed_message, signature, hashing_algorithm='sha256', formatting='encodebytes'):
+        """  Return the verification of the signature """
+        self.ensure_one()
+
+        if not self.public:
+            raise UserError(_("Make sure to use a public key to verify the signature of documents."))
+
+        pem_key = self.with_context(bin_size=False).pem_key
+        if self.loading_error:
+            raise UserError(self.name + " - " + self.loading_error)
+
+        return self._verify_with_key(
+            signed_message,
+            signature,
+            pem_key,
+            signature_algorithm=hashing_algorithm,
+            formatting=formatting,
+        )
+
     def _get_public_key_numbers_bytes(self, formatting='encodebytes'):
         ''' Get the public key's public numbers bytes.
 
@@ -234,6 +254,30 @@ class CertificateKey(models.Model):
             )
         ).decode()
 
+    def _encrypt(self, message, hashing_algorithm='sha256'):
+        self.ensure_one()
+        if not isinstance(message, bytes):
+            message = message.encode()
+
+        if not self.public:
+            raise UserError(_("A public key is required to encrypt data."))
+        if hashing_algorithm not in STR_TO_HASH:
+            raise UserError(f"Unsupported hashing algorithm '{hashing_algorithm}'. Currently supported: sha1 and sha256.")  # pylint: disable=missing-gettext
+
+        public_key = serialization.load_pem_public_key(base64.b64decode(self.pem_key))
+        if not isinstance(public_key, rsa.RSAPublicKey):
+            raise UserError(
+                _("Unsupported asymmetric cryptography algorithm '%s'. Currently supported for encryption: RSA.", type(public_key))
+            )
+        return public_key.encrypt(
+            message,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None,
+            )
+        )
+
     @api.model
     def _sign_with_key(self, message, pem_key, pwd=None, hashing_algorithm='sha256', formatting='encodebytes'):
         ''' Compute and return the message's signature for a given private key.
@@ -280,6 +324,51 @@ class CertificateKey(models.Model):
             raise UserError(_("Unsupported asymmetric cryptography algorithm '%s'. Currently supported for signature: EC and RSA.", type(private_key)))
 
         return _get_formatted_value(signature, formatting=formatting)
+
+    @api.model
+    def _verify_with_key(self, signed_message, signature, pem_key, signature_algorithm='sha256', formatting='encodebytes'):
+        """  Return the verification of the signature """
+
+        if not isinstance(signed_message, bytes):
+            signed_message = signed_message.encode('utf-8')
+
+        if not isinstance(pem_key, bytes):
+            pem_key = pem_key.encode('utf-8')
+
+        if signature_algorithm not in STR_TO_HASH:
+            raise UserError(f"Unsupported signature algorithm '{signature_algorithm}'. Currently supported: sha1 and sha256.")  # pylint: disable=missing-gettext
+
+        try:
+            public_key = serialization.load_pem_public_key(base64.b64decode(pem_key))
+        except ValueError:
+            raise UserError(_("The public key could not be loaded."))
+
+        if isinstance(public_key, ec.EllipticCurvePublicKey):
+            try:
+                public_key.verify(
+                    signature,
+                    signed_message,
+                    ec.ECDSA(STR_TO_HASH[signature_algorithm])
+                )
+                return True
+            except InvalidSignature:
+                return False
+        elif isinstance(public_key, rsa.RSAPublicKey):
+            try:
+                public_key.verify(
+                    signature,
+                    signed_message,
+                    padding.PKCS1v15(),
+                    STR_TO_HASH[signature_algorithm],
+                )
+                return True
+            except InvalidSignature:
+                return False
+        else:
+            raise UserError(_(
+                "Unsupported asymmetric cryptography algorithm '%s'. Currently supported for signature: EC and RSA.",
+                type(public_key),
+            ))
 
     @api.model
     def _numbers_public_key_bytes_with_key(self, pem_key, formatting='encodebytes'):
