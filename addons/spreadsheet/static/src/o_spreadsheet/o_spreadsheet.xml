@@ -699,7 +699,7 @@
 
   <t t-name="o-spreadsheet-RowResizer" owl="1">
     <div
-      class="o-row-resizer"
+      class="o-row-resizer overflow-hidden"
       t-on-mousemove.self="onMouseMove"
       t-on-mouseleave="onMouseLeave"
       t-on-mousedown.self.prevent="select"
@@ -727,44 +727,40 @@
           <div class="dragging-resizer" t-if="state.isResizing"/>
         </div>
       </t>
-      <div
-        t-if="env.model.getters.getHiddenRowsGroups(sheetId).length"
-        class="pe-none overflow-hidden flex-shrink-0 position-relative h-100">
-        <t t-set="viewportZone" t-value="env.model.getters.getActiveMainViewport()"/>
+      <t t-set="viewportZone" t-value="env.model.getters.getActiveMainViewport()"/>
+      <t
+        t-foreach="env.model.getters.getHiddenRowsGroups(sheetId)"
+        t-as="hiddenItem"
+        t-key="hiddenItem_index">
         <t
-          t-foreach="env.model.getters.getHiddenRowsGroups(sheetId)"
-          t-as="hiddenItem"
-          t-key="hiddenItem_index">
-          <t
-            t-if="env.model.getters.isVisibleInViewport(sheetId, viewportZone.left, hiddenItem[0]-1)">
-            <div
-              class="o-unhide pe-auto"
-              t-att-data-index="hiddenItem_index"
-              t-att-data-direction="'up'"
-              t-attf-style="top:{{unhideStyleValue(hiddenItem[0]) - 17}}px;"
-              t-on-click="() => this.unhide(hiddenItem)">
-              <t t-call="o-spreadsheet-Icon.TRIANGLE_UP"/>
-            </div>
-          </t>
-          <t
-            t-if="env.model.getters.isVisibleInViewport(sheetId,viewportZone.left, hiddenItem[hiddenItem.length-1]+1)">
-            <div
-              class="o-unhide pe-auto"
-              t-att-data-index="hiddenItem_index"
-              t-att-data-direction="'down'"
-              t-attf-style="top:{{unhideStyleValue(hiddenItem[0]) + 3}}px;"
-              t-on-click="() => this.unhide(hiddenItem)">
-              <t t-call="o-spreadsheet-Icon.TRIANGLE_DOWN"/>
-            </div>
-          </t>
+          t-if="env.model.getters.isVisibleInViewport(sheetId, viewportZone.left, hiddenItem[0]-1)">
+          <div
+            class="o-unhide"
+            t-att-data-index="hiddenItem_index"
+            t-att-data-direction="'up'"
+            t-attf-style="top:{{unhideStyleValue(hiddenItem[0]) - 17}}px;"
+            t-on-click="() => this.unhide(hiddenItem)">
+            <t t-call="o-spreadsheet-Icon.TRIANGLE_UP"/>
+          </div>
         </t>
-      </div>
+        <t
+          t-if="env.model.getters.isVisibleInViewport(sheetId,viewportZone.left, hiddenItem[hiddenItem.length-1]+1)">
+          <div
+            class="o-unhide"
+            t-att-data-index="hiddenItem_index"
+            t-att-data-direction="'down'"
+            t-attf-style="top:{{unhideStyleValue(hiddenItem[0]) + 3}}px;"
+            t-on-click="() => this.unhide(hiddenItem)">
+            <t t-call="o-spreadsheet-Icon.TRIANGLE_DOWN"/>
+          </div>
+        </t>
+      </t>
     </div>
   </t>
 
   <t t-name="o-spreadsheet-ColResizer" owl="1">
     <div
-      class="o-col-resizer d-flex"
+      class="o-col-resizer overflow-hidden"
       t-on-mousemove.self="onMouseMove"
       t-on-mouseleave="onMouseLeave"
       t-on-mousedown.self.prevent="select"
@@ -792,38 +788,33 @@
           <div class="dragging-resizer" t-if="state.isResizing"/>
         </div>
       </t>
-      <div
-        t-if="env.model.getters.getHiddenColsGroups(sheetId).length"
-        class="pe-none overflow-hidden flex-shrink-0 position-relative w-100">
-        <t t-set="viewportZone" t-value="env.model.getters.getActiveMainViewport()"/>
-        <t
-          t-foreach="env.model.getters.getHiddenColsGroups(sheetId)"
-          t-as="hiddenItem"
-          t-key="hiddenItem_index">
-          <t
-            t-if="env.model.getters.isVisibleInViewport(sheetId, hiddenItem[0]-1, viewportZone.top)">
-            <div
-              class="o-unhide pe-auto"
-              t-att-data-index="hiddenItem_index"
-              t-att-data-direction="'left'"
-              t-attf-style="left:{{unhideStyleValue(hiddenItem[0]) - 17}}px; margin-right:6px;"
-              t-on-click="() => this.unhide(hiddenItem)">
-              <t t-call="o-spreadsheet-Icon.TRIANGLE_LEFT"/>
-            </div>
-          </t>
-          <t
-            t-if="env.model.getters.isVisibleInViewport(sheetId, hiddenItem[hiddenItem.length-1]+1, viewportZone.top)">
-            <div
-              class="o-unhide pe-auto"
-              t-att-data-index="hiddenItem_index"
-              t-att-data-direction="'right'"
-              t-attf-style="left:{{unhideStyleValue(hiddenItem[0]) + 3}}px;"
-              t-on-click="() => this.unhide(hiddenItem)">
-              <t t-call="o-spreadsheet-Icon.TRIANGLE_RIGHT"/>
-            </div>
-          </t>
+      <t t-set="viewportZone" t-value="env.model.getters.getActiveMainViewport()"/>
+      <t
+        t-foreach="env.model.getters.getHiddenColsGroups(sheetId)"
+        t-as="hiddenItem"
+        t-key="hiddenItem_index">
+        <t t-if="env.model.getters.isVisibleInViewport(sheetId, hiddenItem[0]-1, viewportZone.top)">
+          <div
+            class="o-unhide"
+            t-att-data-index="hiddenItem_index"
+            t-att-data-direction="'left'"
+            t-attf-style="left:{{unhideStyleValue(hiddenItem[0]) - 17}}px; margin-right:6px;"
+            t-on-click="() => this.unhide(hiddenItem)">
+            <t t-call="o-spreadsheet-Icon.TRIANGLE_LEFT"/>
+          </div>
         </t>
-      </div>
+        <t
+          t-if="env.model.getters.isVisibleInViewport(sheetId, hiddenItem[hiddenItem.length-1]+1, viewportZone.top)">
+          <div
+            class="o-unhide"
+            t-att-data-index="hiddenItem_index"
+            t-att-data-direction="'right'"
+            t-attf-style="left:{{unhideStyleValue(hiddenItem[0]) + 3}}px;"
+            t-on-click="() => this.unhide(hiddenItem)">
+            <t t-call="o-spreadsheet-Icon.TRIANGLE_RIGHT"/>
+          </div>
+        </t>
+      </t>
     </div>
   </t>
 
@@ -3258,7 +3249,7 @@ https://fontawesome.com/license -->
   </t>
 </odoo>
 <!--
-  __info__.version = '16.0.69';
-  __info__.date = '2025-05-02T12:50:11.210Z';
-  __info__.hash = '51188e8';
+  __info__.version = '16.0.65';
+  __info__.date = '2025-05-05T09:24:15.310Z';
+  __info__.hash = 'bc68020';
 -->
