@@ -162,8 +162,6 @@ class TestWebsiteSaleDelivery(HttpCase, WebsiteSaleCommon):
         })
         self.start_tour("/", 'check_shipping_discount', login="admin")
 
-    # TODO master-mysterious-egg fix error
-    @unittest.skip("prepare mysterious-egg for merging")
     def test_update_shipping_after_discount(self):
         """
         Verify that after applying a discount code, any `free_over` shipping gets recalculated.
