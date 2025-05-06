@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template name="Employee Details" id="s_employee_details">
+    <section class="s_employee_details pt48 pb48">
+        <div class="container">
+            <h3>Employee Details</h3>
+            <p class="lead">Find the details what you want</p>
+            <h3 class="text-center"> Your Employees details will be displayed here. </h3>
+        </div>
+    </section>
+</template>
+<template id="s_employee_details_options" inherit_id="website.snippet_options">
+    <xpath expr="." position="inside">
+        <div data-selector=".s_employee_details" data-js="EmployeeDetails">
+            <we-row>
+                <we-many2one string="Department Filter"
+                                data-model="hr.department"
+                                data-no-preview="true"
+                                data-select-data-attribute=""
+                                data-attribute-name="departmentId"
+                                data-name="department_opt"
+                                data-default-message="All Departments"
+                />
+                <we-button data-select-data-attribute=""
+                           data-attribute-name="departmentId"
+                           data-no-preview="true"
+                           class="align-self-end fa fa-fw fa-times">
+                </we-button>
+            </we-row>
+            <we-select string="Layout" data-no-preview="true" data-attribute-default-value="card" data-attribute-name="layout">
+                <we-button data-select-data-attribute="card" data-attribute-name="layout"> Card </we-button>
+                <we-button data-select-data-attribute="list" data-attribute-name="layout"> List </we-button>
+            </we-select>
+        </div>
+    </xpath>
+</template>
+
+</odoo>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="snippets" inherit_id="website.snippets">
+        <xpath expr="//snippets[@id='snippet_groups']" position="inside">
+            <t snippet-group="employees" t-snippet="website.s_snippet_group" string="Employees"
+                t-thumbnail="/website/static/src/img/snippets_thumbs/s_company_team.svg"/>
+        </xpath>
+        <xpath expr="//snippets[@id='snippet_structure']" position="inside">
+            <t t-snippet="website_hr_employee.s_employee_details" string="Employee details" group="employees">
+                <keywords>employee, hr, agents, manager, developer</keywords>
+            </t>
+        </xpath>
+    </template>
+</odoo>

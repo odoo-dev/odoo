@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="website_hr_employee.s_employee_details_dynamic_card">
+        <div class="s_employee_details_dynamic_card pt48 pb48">
+            <div class="container">
+                <h3>Employee Details</h3>
+                <p class="lead">Find the details what you want</p>
+                <div class="row s_nb_column_fixed">
+                    <div t-if="records and records.length > 0" class="row">
+                            <t t-foreach="records" t-as="employee" t-key="employee.id">
+                                <div class="col-lg-6 pt32 pb32" >
+                                    <div class="row s_col_no_resize s_col_no_bgcolor">
+                                        <div class="col-lg-3 pb24 o_not_editable">
+                                            <img  t-att-src="'data:image/png;base64,' + employee.image_1920"
+                                            onerror="this.src='/website_hr_employee/static/src/img/profile_image.png';"
+                                            class="img-fluid rounded-circle o_editable_media w-lg-100 w-25 mx-lg-auto"/>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <h4 class="h5-fs employee-name" t-out="employee.name"/>
+                                            <p class="text-muted mb-3 employee-job-position" t-out="employee.job_title"/>
+                                            <p class="employee-department" t-out="employee.department_id[1]"/>
+                                            <p class="employee-email-address" t-out="employee.work_email"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                    </div>
+                    <div t-else="">
+                        <h3 class="text-center">
+                            Nothing to display
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="website_hr_employee.s_employee_details_dynamic_list">
+        <div class="s_employee_details_dynamic_list pt48 pb48">
+            <div class="container">
+                <h3>Employee Details</h3>
+                <p class="lead">Find the details what you want</p>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Profile Image</th>
+                                <th>Name</th>
+                                <th>Job Position</th>
+                                <th>Department</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody t-if="records and records.length > 0">
+                            <t t-foreach="records" t-as="employee" t-key="employee.id">
+                                <tr>
+                                    <td class="w-25"><img  t-att-src="'data:image/png;base64,' + employee.image_1920"
+                                        onerror="this.src='/website_hr_employee/static/src/img/profile_image.png';"
+                                        class="img-fluid rounded-circle o_editable_media w-lg-50 w-100 mx-lg-auto"/></td>
+                                    <td class="employee-name" t-out="employee.name"/>
+                                    <td class="employee-job-position" t-out="employee.job_title"/>
+                                    <td class="employee-department" t-out="employee.department_id[1]"/>
+                                    <td class="employee-email-address" t-out="employee.work_email"/>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tbody t-else="">
+                            <tr>
+                                <td colspan="4">
+                                    <h3 class="text-center">
+                                        Nothing to display
+                                    </h3>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
