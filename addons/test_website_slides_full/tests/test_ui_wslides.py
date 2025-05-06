@@ -137,8 +137,6 @@ class TestUi(TestUICommon):
             ]
         })
 
-    # TODO master-mysterious-egg fix error
-    @unittest.skip("prepare mysterious-egg for merging")
     @users("portal")
     def test_course_certification_employee(self):
         # use proper environment to test user dependent computes
