@@ -67,6 +67,30 @@ class AccountMove(models.Model):
             else:
                 move.l10n_in_state_id = False
 
+    @api.model
+    def _l10n_in_error_logger_entry(self, service_name, message, request_url, company=False):
+        if not company:
+            company = self.env.company
+        self.sudo().env['ir.logging'].create({
+            'name': f"l10n_in_{service_name}",
+            'type': 'client',
+            'dbname': self.env._cr.dbname,
+            'level': 'ERROR',
+            'message': message,
+            'path': request_url,
+            'func': self.env.user.id,
+            'line': f"{company.id}-{company.vat}",
+        })
+
+    @api.autovacuum
+    def _l10n_in_gc_error_logger(self):
+        self._cr.execute("""
+            DELETE FROM ir_logging
+                  WHERE create_date < (NOW() AT TIME ZONE 'UTC' - INTERVAL '7 DAYS') # TODO Check with JVA
+                    AND name ILIKE 'l10n_in_%'
+        """)
+        _logger.info("GC'd %d l10n_in error logger entries", self._cr.rowcount)
+
     def _get_name_invoice_report(self):
         if self.country_code == 'IN':
             # TODO: remove the view mode check in master, only for stable releases
