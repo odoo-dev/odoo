@@ -338,6 +338,9 @@ class configmanager(object):
             group.add_option("--workers", dest="workers", my_default=0,
                              help="Specify the number of workers, 0 disable prefork mode.",
                              type="int")
+            group.add_option("--gevent-workers", dest="gevent_workers", my_default=1,
+                             help="Specify the number of gevent workers.",
+                             type="int")
             group.add_option("--limit-memory-soft", dest="limit_memory_soft", my_default=2048 * 1024 * 1024,
                              help="Maximum allowed virtual memory per worker (in bytes), when reached the worker be "
                              "reset after the current request (default 2048MiB).",
@@ -514,7 +517,7 @@ class configmanager(object):
         ]
 
         posix_keys = [
-            'workers',
+            'workers', 'gevent_workers',
             'limit_memory_hard', 'limit_memory_hard_gevent', 'limit_memory_soft', 'limit_memory_soft_gevent',
             'limit_time_cpu', 'limit_time_real', 'limit_request', 'limit_time_real_cron'
         ]
