@@ -95,7 +95,7 @@
             <sum1:FechaHoraHusoGenRegistro t-out="generation_time_string"/>
             <sum1:TipoHuella t-out="tipo_huella"/>
             <sum1:Huella t-out="huella"/>
-            <t t-call="l10n_es_edi_verifactu.verifactu_signature_xades"/>
+            <!-- <t t-call="l10n_es_edi_verifactu.verifactu_signature_xades"/> -->
         </sum1:RegistroAlta>
     </template>
 
@@ -116,7 +116,7 @@
             <sum1:FechaHoraHusoGenRegistro t-out="generation_time_string"/>
             <sum1:TipoHuella t-out="tipo_huella"/>
             <sum1:Huella t-out="huella"/>
-            <t t-call="l10n_es_edi_verifactu.verifactu_signature_xades"/>
+            <!-- <t t-call="l10n_es_edi_verifactu.verifactu_signature_xades"/> -->
         </sum1:RegistroAnulacion>
     </template>
 

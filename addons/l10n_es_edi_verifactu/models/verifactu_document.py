@@ -1092,12 +1092,12 @@ class L10nEsEdiVerifactuDocument(models.Model):
         xml = self.env['ir.qweb']._render('l10n_es_edi_verifactu.verifactu_registro_factura', render_vals)
         xml_node = cleanup_xml_node(xml, remove_blank_nodes=False, indent_space='    ')
 
-        # Sign the rendered XML (modify <ds:Signature> node appropriately)
-        company = render_vals['company']
-        certificate = company.sudo()._l10n_es_edi_verifactu_get_certificate()
-        cert_private, _cert_public = certificate.sudo()._get_key_pair()
-        signature_node = xml_node.find('*/ds:Signature', namespaces=NS_MAP)
-        sign_xades(signature_node, cert_private)
+        # # Sign the rendered XML (modify <ds:Signature> node appropriately)
+        # company = render_vals['company']
+        # certificate = company.sudo()._l10n_es_edi_verifactu_get_certificate()
+        # cert_private, _cert_public = certificate.sudo()._get_key_pair()
+        # signature_node = xml_node.find('*/ds:Signature', namespaces=NS_MAP)
+        # sign_xades(signature_node, cert_private)
 
         return xml_node, render_vals
 
