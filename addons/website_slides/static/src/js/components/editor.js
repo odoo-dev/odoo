@@ -1,40 +1,30 @@
-import { WebsiteEditorComponent } from '@website/components/editor/editor';
-import { WebsiteTranslator } from '@website/components/translator/translator';
+import { EditWebsiteSystrayItem } from "@html_builder/website_preview/edit_website_systray_item";
 import { patch } from "@web/core/utils/patch";
 
-patch(WebsiteEditorComponent.prototype, {
-    /**
-     * @override
-     */
-    publicRootReady() {
+patch(EditWebsiteSystrayItem.prototype, {
+    isSlidePage() {
         const { pathname, search } = this.websiteService.contentWindow.location;
-        if (pathname.includes('slides') && search.includes('fullscreen=1')) {
-            this.websiteContext.edition = false;
-            this.websiteService.goToWebsite({path: `${pathname}?fullscreen=0`, edition: true});
-        } else {
-            super.publicRootReady(...arguments);
+        return pathname.includes("slides") && search.includes("fullscreen=1");
+    },
+    getLocation() {
+        if (this.isSlidePage()) {
+            const location = this.websiteService.contentWindow.location;
+            return {
+                ...location,
+                search: location.search.replace(/fullscreen=1/, "fullscreen=0"),
+            };
         }
-    }
-});
+        return super.getLocation(...arguments);
+    },
 
-patch(WebsiteTranslator.prototype, {
-    /**
-     * When editing translations of a slide in fullscreen mode: force fullscreen off.
-     * Indeed, the fullscreen layout is not fit for content edition.
-     * @override
-     */
-    publicRootReady() {
-        const { pathname, search, hash } = this.websiteService.contentWindow.location;
-        if (pathname.includes('slides') && search.includes('fullscreen=1')) {
-            const searchParams = new URLSearchParams(search);
-            searchParams.set('edit_translations', '1');
-            searchParams.set('fullscreen', '0');
+    onClickEditPage() {
+        if (this.isSlidePage()) {
+            const { pathname, search, hash } = this.getLocation();
             this.websiteService.goToWebsite({
-                path: encodeURI(pathname + `?${searchParams.toString() + hash}`),
-                translation: true
+                path: pathname + search + hash,
+                edition: true,
             });
-        } else {
-            super.publicRootReady(...arguments);
         }
-    }
+        super.onClickEditPage(...arguments);
+    },
 });
