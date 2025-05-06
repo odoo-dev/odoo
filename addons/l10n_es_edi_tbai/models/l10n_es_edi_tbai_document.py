@@ -8,7 +8,7 @@ from uuid import uuid4
 import requests
 from lxml import etree
 from pytz import timezone
-from requests.exceptions import RequestException
+from requests.exceptions import RequestException, Timeout
 
 from odoo import _, api, fields, models, release
 from odoo.addons.l10n_es_edi_sii.models.account_edi_format import PatchedHTTPAdapter
@@ -173,9 +173,15 @@ class L10nEsEdiTbaiDocument(models.Model):
         try:
             # Call the web service, retrieve and parse response
             success, response_msgs = self._post_to_agency(self.env, values['is_sale'])
+        except (Timeout) as e:
+            # In case of Timeout
+            self.sudo().response_message = _("Timeout Error: %s", e)
+            return
         except (RequestException) as e:
-            # In case of timeout / request exception
+            # In other cases than Timeout we can assume it is not taken by the government
             self.sudo().response_message = e
+            self.sudo().state = 'rejected'
+            self.sudo().chain_index = 0
             return
 
         self.sudo().response_message = '\n'.join(response_msgs)
