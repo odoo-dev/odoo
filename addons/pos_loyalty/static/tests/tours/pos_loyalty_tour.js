@@ -5,6 +5,7 @@ import * as SelectionPopup from "@point_of_sale/../tests/generic_helpers/selecti
 import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
 import * as Chrome from "@point_of_sale/../tests/pos/tours/utils/chrome_util";
 import * as Notification from "@point_of_sale/../tests/generic_helpers/notification_util";
+import * as Order from "@point_of_sale/../tests/generic_helpers/order_widget_util";
 import { registry } from "@web/core/registry";
 import { scan_barcode } from "@point_of_sale/../tests/generic_helpers/utils";
 
@@ -75,7 +76,7 @@ registry.category("web_tour.tours").add("PosLoyaltyTour1", {
             PosLoyalty.enterCode("promocode"),
             PosLoyalty.hasRewardLine("50% on specific products", "-16.66"), // 17.55 - 1.78*0.5
             PosLoyalty.orderTotalIs("37.78"),
-            PosLoyalty.finalizeOrder("Cash", "50"),
+            PosLoyalty.finalizeOrder("Cash", "50", false),
         ].flat(),
 });
 
@@ -460,7 +461,7 @@ registry.category("web_tour.tours").add("PosLoyaltyArchivedRewardProductsInactiv
             ProductScreen.clickCustomer("AAAA"),
             PosLoyalty.isRewardButtonHighlighted(false, true),
             ProductScreen.selectedOrderlineHas("Test Product A", "1", "100.00"),
-            PosLoyalty.finalizeOrder("Cash", "100"),
+            PosLoyalty.finalizeOrder("Cash", "100", false),
         ].flat(),
 });
 
@@ -468,12 +469,14 @@ registry.category("web_tour.tours").add("PosLoyaltyArchivedRewardProductsActive"
     steps: () =>
         [
             Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+
             ProductScreen.clickDisplayedProduct("Test Product A"),
             ProductScreen.clickPartnerButton(),
             ProductScreen.clickCustomer("AAAA"),
             PosLoyalty.isRewardButtonHighlighted(true),
             ProductScreen.selectedOrderlineHas("Test Product A", "1", "100.00"),
-            PosLoyalty.finalizeOrder("Cash", "100"),
+            PosLoyalty.finalizeOrder("Cash", "100", false),
         ].flat(),
 });
 
@@ -533,12 +536,11 @@ registry.category("web_tour.tours").add("PosRewardProductScan", {
         [
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
-
             scan_barcode("95412427100283"),
             ProductScreen.selectedOrderlineHas("product_a", "1", "1,150.00"),
             PosLoyalty.hasRewardLine("50% on your order", "-575.00"),
             PosLoyalty.orderTotalIs("575.00"),
-            PosLoyalty.finalizeOrder("Cash", "575.00"),
+            PosLoyalty.finalizeOrder("Cash", "575.00", false),
         ].flat(),
 });
 
@@ -546,6 +548,7 @@ registry.category("web_tour.tours").add("PosRewardProductScanGS1", {
     steps: () =>
         [
             Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
             scan_barcode("0195412427100283"),
             ProductScreen.selectedOrderlineHas("product_a", "1", "1,150.00"),
             PosLoyalty.hasRewardLine("50% on your order", "-575.00"),
@@ -576,6 +579,10 @@ registry.category("web_tour.tours").add("RefundRulesProduct", {
             ...ProductScreen.clickRefund(),
             TicketScreen.filterIs("Paid"),
             TicketScreen.selectOrder("001"),
+            Order.hasLine({
+                run: "click",
+                productName: "product_a",
+            }),
             ProductScreen.clickNumpad("1"),
             TicketScreen.confirmRefund(),
             ProductScreen.isShown(),

@@ -50,6 +50,7 @@ export class DataServiceOptions {
             "pos.pack.operation.lot": ["uuid"],
             "event.registration": ["uuid"],
             "event.registration.answer": ["uuid"],
+            "loyalty.card": ["uuid"],
         };
 
         for (const model in databaseTable) {

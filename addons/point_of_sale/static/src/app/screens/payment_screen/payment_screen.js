@@ -346,6 +346,9 @@ export class PaymentScreen extends Component {
         }
 
         // 3. Post process.
+        if (this.currentOrder.waitForPushOrder()) {
+            await this.postPushOrderResolve([this.currentOrder.id]);
+        }
         await this.afterOrderValidation();
     }
     handleValidationError(error) {

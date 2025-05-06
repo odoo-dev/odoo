@@ -280,7 +280,10 @@ export class PosData extends Reactive {
                 if (!ids.length) {
                     return;
                 }
-                const vals = models[modelName].getBy("uuid", ids[0]).raw;
+                let vals = models[modelName].getBy("uuid", ids[0]).raw;
+                vals = Object.fromEntries(
+                    Object.entries(vals).filter(([key, val]) => !key.startsWith("_"))
+                );
                 // Skip IndexedDB calls if it hasn't been initialized (e.g., in prepDisplay, kiosk)
                 this.indexedDB?.create(modelName, [vals]);
                 this.queue.push(["CREATE", modelName, omit(vals, "id")]);
@@ -668,7 +671,7 @@ export class PosData extends Reactive {
         }
         await this.flush();
         if (this.queue.length > 0) {
-            throw new Error("There are unsynced changes in the queue.");
+            console.info("There are unsynced changes in the queue.");
         }
         if (Array.isArray(args) && args.length == 0) {
             // This is for static (api.model) methods.
