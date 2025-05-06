@@ -151,10 +151,21 @@ export class WebsiteBuilder extends Component {
         });
     }
 
+    /**
+     * Override to perform edit differently, and return true if you do.
+     */
+    interceptEdit() {
+        // Other modules can suspend the current edit by returning true.
+        return false;
+    }
+
     async onEditPage() {
         document.querySelector("body").classList.add("o_builder_open");
         await this.iframeLoaded;
         await this.publicRootReady;
+        if (this.interceptEdit()) {
+            return;
+        }
         await this.loadAssetsEditBundle();
 
         setTimeout(() => {
