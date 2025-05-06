@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="website.EcommCategoriesShowcaseOption">
+    <BuilderRow label.translate="# of Blocks">
+        <BuilderSelect action="'blockCount'">
+            <BuilderSelectItem actionValue="'2'">2</BuilderSelectItem>
+            <BuilderSelectItem actionValue="'3'">3</BuilderSelectItem>
+            <BuilderSelectItem actionValue="'4'">4</BuilderSelectItem>
+        </BuilderSelect>
+    </BuilderRow>
+    <BuilderRow label.translate="Layout">
+        <BuilderSelect classAction="''">
+            <BuilderSelectItem classAction="'first-large-layout'">First block larger</BuilderSelectItem>
+            <BuilderSelectItem classAction="'equal-layout'">Equal size</BuilderSelectItem>
+        </BuilderSelect>
+    </BuilderRow>
+</t>
+
+<t t-name="website.EcommCategoriesShowcaseBlocksDesign">
+    <hr class="mx-3"/>
+    <div class="px-3 text-white h6">Blocks Design</div>
+    <div class="px-3 text-white opacity-75 small mb-2">Global options for all inner blocks.</div>
+    
+    <BuilderRow label.translate="Shadows">
+        <BuilderCheckbox 
+            classAction="'shadow'" 
+            applyTo="'.s_ecomm_categories_showcase_block'"
+            preview="false" />
+    </BuilderRow>
+    <BuilderRow label.translate="Spacing">
+        <BuilderCheckbox 
+            id="'spacing_opt'"
+            action="'spacingToggle'" />
+    </BuilderRow>
+    <BuilderRow label.translate="Roundness" t-if="isActiveItem('spacing_opt')">
+        <BuilderRange 
+            action="'setClassRange'" 
+            actionParam="['rounded-0','rounded-1','rounded-2','rounded-3','rounded-4','rounded-5']" 
+            applyTo="'.s_ecomm_categories_showcase_block'"
+            max="5" 
+            step="1"/>
+    </BuilderRow>
+</t>
+
+</templates> 
