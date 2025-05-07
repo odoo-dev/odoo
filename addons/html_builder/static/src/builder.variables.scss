@@ -7,27 +7,52 @@
 //------------------------------------------------------------------------------
 
 $o-hb-bg-darkest: #000000 !default;
-$o-hb-bg-darker: #141217 !default;
-$o-hb-bg-dark: #191922 !default;
-$o-hb-bg-light: #2b2b33 !default;
-$o-hb-bg-lighter: #3e3e46 !default;
-$o-hb-bg-lightest: #595964 !default;
+$o-hb-bg-darker: #0a0a0a !default; //panel
+$o-hb-bg-dark: #353535 !default; // bg
+$o-hb-bg-light: #232323 !default; // buttonlink hover 
+$o-hb-bg-lighter: #313131 !default; // button
+$o-hb-bg-lightest: #626262 !default; //scrollbar
 
 $o-hb-fg-darker: #9d9d9d !default;
 $o-hb-fg-dark: #C6C6C6 !default;
 $o-hb-fg-light: #D9D9D9 !default;
 $o-hb-fg-lighter: #FFFFFF !default;
 
-$o-hb-color-danger: #e6586c !default;
-$o-hb-color-warning: #f0ad4e !default;
-$o-hb-color-success: #40ad67 !default;
-$o-hb-color-info: #6999a8 !default;
+$o-hb-color-cyan: #00f3ff !default;
+$o-hb-color-magenta: #f95cdf !default;
+$o-hb-color-green: #13fea7 !default;
+$o-hb-color-red: #ff3e61 !default;
+$o-hb-color-orange: #ff8f3e !default;
+$o-hb-color-gold: #c2e47c !default;
+
+$o-hb-color-info: $o-hb-color-cyan !default;
+$o-hb-color-primary: $o-hb-color-magenta !default;
+$o-hb-color-success: $o-hb-color-green !default;
+$o-hb-color-danger: $o-hb-color-red !default;
+$o-hb-color-warning: $o-hb-color-orange !default;
+
+$o-hb-color-global: $o-hb-color-gold !default;
+$o-hb-color-accent: $o-hb-color-cyan !default;
+
+$o-hb-colors: (
+    "info": $o-hb-color-info,
+    "primary": $o-hb-color-primary,
+    "success": $o-hb-color-success,
+    "danger": $o-hb-color-danger,
+    "warning": $o-hb-color-warning,
+
+    "global": $o-hb-color-global,
+    "accent": $o-hb-color-accent,
+) !default;
 
 $o-hb-bg: $o-hb-bg-light !default;
 $o-hb-color: $o-hb-fg-light !default;
-$o-hb-font-size: 13px !default;
-$o-hb-font-family: $o-font-family-sans-serif !default;
-$o-hb-accent: #01bad2 !default;
+
+$o-hb-font-size: 11px !default;
+$o-hb-font-size-lg: 13px !default;
+$o-hb-font-family: "Roboto", $o-font-family-sans-serif !default;
+$o-hb-font-family-monospace: "Fira_mono", $o-font-family-monospace !default;
+
 $o-hb-border-width: 1px !default;
 $o-hb-border-color: $o-hb-bg-light !default;
 
@@ -35,7 +60,7 @@ $o-hb-border-color: $o-hb-bg-light !default;
 // has a page with a lot of content (10000px was proven to be too small)
 $o-hb-handles-offset-to-hide: 100000px !default;
 $o-hb-handles-btn-size: 14px !default;
-$o-hb-handles-accent-color: $o-hb-accent !default;
+$o-hb-handles-accent-color: $o-hb-color-cyan !default;
 $o-hb-handles-accent-color-preview: $o-enterprise-color !default;
 $o-hb-handle-edge-size: $o-hb-handles-btn-size !default;
 $o-hb-handle-border-width: 2px !default;
@@ -44,7 +69,7 @@ $o-hb-handle-inside-line-width: 3px !default;
 $o-hb-dropzone-size: 30px !default; // $grid-gutter-width (todo: allow to use the variable)
 $o-hb-dropzone-border-width: 2px !default;
 $o-hb-dropzone-border: $o-hb-dropzone-border-width dashed $o-brand-odoo !default;
-$o-hb-dropzone-accent-color: $o-hb-accent !default;
+$o-hb-dropzone-accent-color: $o-hb-color-cyan !default;
 $o-hb-dropzone-bg-color: rgba($o-hb-dropzone-accent-color, .5) !default;
 
 // Translations
@@ -117,7 +142,7 @@ $o-hb-sidebar-border-color: $o-hb-border-color !default;
 // browser by himself.
 $o-hb-sidebar-width: 288px !default; // This includes $o-hb-sidebar-border-width
 
-$o-hb-sidebar-top-height: 46px !default;
+$o-hb-sidebar-top-height: 86px !default;
 
 $o-hb-sidebar-tabs-size-ratio: 1 !default;
 $o-hb-sidebar-tabs-height: 3rem;
@@ -125,7 +150,7 @@ $o-hb-sidebar-tabs-bg: $o-hb-bg-darker !default;
 $o-hb-sidebar-tabs-color: $o-hb-sidebar-color !default;
 $o-hb-sidebar-tabs-disabled-color: $o-hb-fg-darker !default;
 $o-hb-sidebar-tabs-active-border-width: 2px !default;
-$o-hb-sidebar-tabs-active-border-color: $o-hb-accent !default;
+$o-hb-sidebar-tabs-active-border-color: $o-hb-color-cyan !default;
 $o-hb-sidebar-tabs-active-color: $o-hb-fg-lighter !default;
 
 $o-hb-sidebar-blocks-content-bg: $o-hb-bg-dark !default;
@@ -134,7 +159,7 @@ $o-hb-sidebar-blocks-content-snippet-spacing: 2px !default;
 $o-hb-sidebar-blocks-content-snippet-bg: $o-hb-bg-lighter !default;
 
 $o-hb-sidebar-content-highlight-bar-width: 2px !default;
-$o-hb-sidebar-content-highlight-bar-color: $o-hb-accent !default;
+$o-hb-sidebar-content-highlight-bar-color: $o-hb-color-cyan !default;
 
 $o-hb-sidebar-content-gutter-item-indent: 5px !default;
 $o-hb-sidebar-content-padding-base: 10px !default;
@@ -200,19 +225,19 @@ $o-hb-sidebar-content-field-input-max-width: 60px !default;
 $o-hb-sidebar-content-field-input-bg: $o-hb-bg-light !default;
 $o-hb-sidebar-content-field-input-font-family: $o-hb-font-family !default;
 $o-hb-sidebar-content-field-input-unit-font-size: 11px !default;
-$o-hb-sidebar-content-field-input-border-color: $o-hb-accent !default;
+$o-hb-sidebar-content-field-input-border-color: $o-hb-color-cyan !default;
 
 $o-hb-sidebar-content-field-button-group-button-spacing: $o-hb-sidebar-content-field-clickable-spacing;
 
 $o-hb-sidebar-content-field-progress-height: 4px !default;
 $o-hb-sidebar-content-field-progress-control-height: 10px !default;
 $o-hb-sidebar-content-field-progress-color: $o-hb-fg-darker !default;
-$o-hb-sidebar-content-field-progress-active-color: $o-hb-accent !default;
+$o-hb-sidebar-content-field-progress-active-color: $o-hb-color-cyan !default;
 
 $o-hb-sidebar-content-field-toggle-width: 20px !default;
 $o-hb-sidebar-content-field-toggle-height: 12px !default;
 $o-hb-sidebar-content-field-toggle-bg: $o-hb-fg-darker !default;
-$o-hb-sidebar-content-field-toggle-active-bg: $o-hb-accent !default;
+$o-hb-sidebar-content-field-toggle-active-bg: $o-hb-color-cyan !default;
 $o-hb-sidebar-content-field-toggle-control-width: 11px !default;
 $o-hb-sidebar-content-field-toggle-control-height: $o-hb-sidebar-content-field-toggle-height - 2px !default;
 $o-hb-sidebar-content-field-toggle-control-bg: $o-hb-fg-lighter !default;

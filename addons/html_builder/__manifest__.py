@@ -38,6 +38,7 @@
         ],
         'web._assets_primary_variables': [
             'html_builder/static/src/builder.variables.scss',
+            'html_builder/static/src/**/*.variables.scss',
         ],
         # this bundle is lazy loaded when the editor is ready
         'html_builder.assets': [
@@ -52,6 +53,8 @@
             'html_builder/static/src/**/*',
             ('remove', 'html_builder/static/src/website_preview/**/*'),
             ('remove', 'html_builder/static/src/interactions/**/*'),
+
+            'web/static/fonts/fonts.scss',
         ],
         'html_builder.inside_builder_style': [
             ('include', 'web._assets_helpers'),

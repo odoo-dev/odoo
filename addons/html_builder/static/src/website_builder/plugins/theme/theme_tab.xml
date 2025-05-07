@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="html_builder.ThemeTab">
-    <div class="o_theme_tab h-100">
+    <div class="o_theme_tab">
         <div t-ref="content" class="d-flex flex-column h-100">
             <t t-foreach="optionsContainers" t-as="optionsContainer" t-key="optionsContainer.id">
                 <!-- TODO Define a more basic kind of options container -->
@@ -22,7 +22,7 @@
 <t t-name="html_builder.ThemeWebsiteSettingsOption">
     <BuilderContext preview="false">
         <BuilderRow label.translate="Theme">
-            <BuilderButton action="'switchTheme'" className="'o_we_bg_brand_primary'">Switch Theme</BuilderButton>
+            <BuilderButton action="'switchTheme'" type="'solid-primary'">Switch Theme</BuilderButton>
         </BuilderRow>
         <BuilderRow label.translate="Language">
             <BuilderButton action="'addLanguage'" className="'o_we_bg_brand_primary'">Add a Language</BuilderButton>

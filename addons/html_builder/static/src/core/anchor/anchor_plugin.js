@@ -38,7 +38,7 @@ export class AnchorPlugin extends Plugin {
 
         return [
             {
-                class: "fa fa-fw fa-link oe_snippet_anchor btn btn-outline-info",
+                class: "fa fa-fw oe_snippet_anchor btn",
                 title: _t("Create and copy a link targeting this block or edit it"),
                 handler: this.createOrEditAnchorLink.bind(this),
             },

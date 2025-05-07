@@ -1,0 +1,125 @@
+.o-website-builder_sidebar .btn {
+    --btn-font-weight: normal;
+    --btn-font-size: #{$o-hb-sidebar-font-size};
+
+    @include button-variant(
+        $background: transparent,
+        $border: transparent,
+        $color: $o-hb-fg-darker,
+        $hover-background: $o-hb-bg-lighter,
+        $hover-border: transparent,
+        $hover-color: $o-hb-fg-lighter,
+        $active-background: transparent,
+        $active-border: transparent,
+        $active-color: $o-hb-color-accent,
+        $disabled-background: transparent,
+        $disabled-border: transparent,
+        $disabled-color: $o-hb-fg-dark,
+    );
+
+    &.btn-secondary {
+        @include button-variant(
+            $background: rgba($o-hb-bg-light, .6),
+            $border: $o-hb-bg-light,
+            $color: $o-hb-fg-darker,
+            $hover-background: $o-hb-bg-lighter,
+            $hover-border: $o-hb-fg-darker,
+            $hover-color: $o-hb-fg-lighter,
+            $active-background: $o-hb-bg-light,
+            $active-border: rgba($o-hb-color-accent, .3),
+            $active-color: $o-hb-color-accent,
+            $disabled-background: transparent,
+            $disabled-border: transparent,
+            $disabled-color: $o-hb-fg-dark,
+        );
+    }
+
+    @each $-name, $-color in $o-hb-colors {
+        &.btn-#{$-name} {
+            --btn-color: #{$-color};
+            --btn-border-color: #{rgba($-color, .05)};
+            --btn-bg: #{rgba($-color, .05)};
+
+            --btn-hover-color: #{$-color};
+            --btn-hover-bg: #{rgba($-color, .05)};
+            --btn-hover-border-color: #{rgba($-color, .4)};
+
+            &, &.active {
+                --btn-active-color: #{$-color};
+                --btn-active-bg: #{rgba($-color, .1)};
+                --btn-active-border-color: #{rgba($-color, .4)};
+            }
+        }
+        &.btn-solid-#{$-name} {
+            $-hover-color: lighten($-color, 30%);
+
+            --btn-color: #{color-contrast($-color)};
+            --btn-border-color: #{$-color};
+            --btn-bg: #{$-color};
+
+            --btn-hover-color: #{color-contrast($-hover-color)};
+            --btn-hover-border-color: #{$-color};
+            --btn-hover-bg: #{$-hover-color};
+
+            &, &.active {
+                --btn-active-color: #{$-color};
+                --btn-active-bg: #{rgba($-color, .1)};
+                --btn-active-border-color: #{rgba($-color, .4)};
+            }
+        }
+
+        &.btn-link-#{$-name} {
+            --btn-color: #{$-color};
+            --btn-hover-color: #{$-color};
+
+            &, &.active {
+                --btn-active-color: #{$-color};
+            }
+        }
+
+        &.btn-link-#{$-name}-hover {
+            --btn-hover-color: #{$-color};
+
+            &, &.active {
+                --btn-active-color: #{$-color};
+            }
+        }
+
+
+        // &.o-btn-hb-#{$-name}-hover {
+        //     --btn-hover-color: #{$-color};
+
+        //     &, &.active {
+        //         --btn-active-color: #{$-color};
+        //     }
+        // }
+
+        // &.o-btn-hb-#{$-name}-toggle {
+        //     --btn-hover-color: #{$-color};
+        //     --btn-hover-bg: #{rgba($-color, .05)};
+        //     --btn-hover-border-color: #{rgba($-color, .4)};
+
+        //     &, &.active {
+        //         --btn-active-color: #{$-color};
+        //         --btn-active-bg: #{rgba($-color, .1)};
+        //         --btn-active-border-color: #{rgba($-color, .5)};
+        //     }
+        // }
+
+        // &.o-btn-hb-#{$-name}-solid {
+        //     --btn-color: #{$-color};
+        //     --btn-border-color: #{rgba($-color, .05)};
+        //     --btn-bg: #{rgba($-color, .05)};
+
+        //     --btn-hover-color: #{$-color};
+        //     --btn-hover-bg: #{rgba($-color, .05)};
+        //     --btn-hover-border-color: #{rgba($-color, .4)};
+
+        //     &, &.active {
+        //         --btn-active-color: #{$-color};
+        //         --btn-active-bg: #{rgba($-color, .1)};
+        //         --btn-active-border-color: #{rgba($-color, .4)};
+        //     }
+        // }
+    }
+}

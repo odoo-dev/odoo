@@ -31,19 +31,16 @@ $o-hb-zindex: $o-hb-overlay-zindex + 1 !default;
 
     &:not(:hover):not(.o_disabled):not(.o_to_install) {
         background-color: rgba($o-hb-sidebar-blocks-content-snippet-bg, .9);
-
-        .o_snippet_thumbnail {
-            filter: saturate(.7);
-            opacity: .9;
-        }
     }
 }
 
 .o_block_tab {
     background-color: $o-hb-sidebar-blocks-content-bg;
-    padding: 0 $o-hb-sidebar-blocks-content-spacing;
-    height: 100%; // give enough space for tips pointing at snippets after a snippet search
     z-index: 1;
+
+    .o_snippets_container {
+        background-color: $o-hb-bg-darker;
+    }
 
 
     .o_snippets_container, .o_snippets_container_header {

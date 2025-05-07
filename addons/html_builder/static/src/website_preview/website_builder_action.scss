@@ -2,6 +2,7 @@
     width: 0px;
     background-color: $o-hb-sidebar-bg;
     transition: width ease 400ms;
+    z-index: 1;
 
     &.o_builder_sidebar_open {
         width: $o-hb-sidebar-width;

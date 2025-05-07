@@ -3,13 +3,13 @@
 
 <t t-name="html_builder.AddElementOption">
     <BuilderRow label.translate="Add Elements" level="props.level" preview="false" applyTo="props.applyTo">
-        <BuilderButton action="'addElText'" className="'o_we_bg_brand_primary'">
+        <BuilderButton action="'addElText'" className="'btn-success'">
             Text
         </BuilderButton>
-        <BuilderButton action="'addElImage'" className="'o_we_bg_brand_primary'">
+        <BuilderButton action="'addElImage'" className="'btn-success'">
             Image
         </BuilderButton>
-        <BuilderButton action="'addElButton'" className="'o_we_bg_brand_primary'">
+        <BuilderButton action="'addElButton'" className="'btn-success'">
             Button
         </BuilderButton>
     </BuilderRow>

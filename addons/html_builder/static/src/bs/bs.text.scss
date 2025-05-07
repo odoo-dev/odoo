@@ -1,0 +1,8 @@
+.o-website-builder_sidebar {
+    @each $-name, $-color in $o-hb-colors {
+        .text-#{$-name} {
+            --color: RGBA(#{to-rgb($-color)}, var(--text-opacity, 1));
+            color: var(--color) !important;
+        }
+    }
+}

@@ -28,7 +28,7 @@ export class SaveSnippetPlugin extends Plugin {
 
         return [
             {
-                class: "fa fa-fw fa-save oe_snippet_save o_we_hover_warning btn btn-outline-warning",
+                class: "fa fa-save oe_snippet_save btn btn-link-global-hover",
                 title: _t("Save this block to use it elsewhere"),
                 handler: this.saveSnippet.bind(this),
             },

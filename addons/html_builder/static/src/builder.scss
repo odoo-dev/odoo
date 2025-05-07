@@ -1,63 +1,51 @@
 .o-snippets-menu {
-    background-color: $o-hb-bg-darker;
     color: #d9d9d9;
-    width: 288px;
+    width: $o-hb-sidebar-width;
+    font-size: $o-hb-font-size;
+    font-family: $o-hb-font-family;
+
+    // Components
+    .btn {
+        --btn-font-size: 1em;
+    }
+}
+
+.o-snippets-top {
+    height: $o-hb-sidebar-top-height;
+    width: $o-hb-sidebar-width;
+    font-size: $o-hb-font-size-lg;
+    position: absolute;
+    z-index: 1;
+    background: rgba(black, .6);
+    backdrop-filter: blur(9px) brightness(160%);
+    border-bottom: $border-width solid rgba($white, .2);
 }
 
 .o-snippets-top-actions {
-    border-bottom: 1px solid $o-hb-bg-lighter;
-    height: 46px;
-
-    .btn {
-        border: none;
-        border-radius: 0;
-        padding: 0.375rem 0.75rem;
-        font-size: $o-hb-font-size;
-        font-weight: 400;
-        line-height: 1;
-
-        &:not(.fa) {
-            font-family: $o-hb-font-family;
-        }
-        &.btn-primary {
-            @include button-variant($o-brand-primary, $o-brand-primary);
-        }
-        &.btn-secondary {
-            @include button-variant($o-hb-sidebar-tabs-bg, $o-hb-sidebar-tabs-bg);
-        }
-        &:focus, &:active, &:focus:active {
-            outline: none;
-            box-shadow: none !important;
-        }
-    }
-
-    button[data-action="mobile"] span.fa {
-        font-size: 20px;
-      }
 }
 
 .o-snippets-tabs {
-    font-size: 12px;
-    line-height: 24px;
-
-    > button {
-        color: $o-hb-color;
-    }
-    .active {
-        box-shadow: inset 0 -2px 0 #01bad2;
-    }
+    grid-template-columns: 1fr 1fr 1fr;
 }
 
 .o-tab-content {
-    background-color: $o-hb-bg-dark;
-    font-size: 12px;
+    z-index: 0;
+    width: 100vw;
+    padding-top: o-to-rem($o-hb-sidebar-top-height) + map-get($spacers, 1);
+    padding-left: calc(100vw - #{$o-hb-sidebar-width});
+    transform: translateX(calc(-100vw + #{$o-hb-sidebar-width}));
+    pointer-events: none;
+    box-sizing: border-box;
+    scrollbar-color: $o-hb-bg-lightest $o-hb-bg-light;
+    scrollbar-width: thin;
+
+    > * {
+        pointer-events: auto;
+    }
 }
 
 .we-bg-darker {
     background-color: #2b2b33;
-}
-.we-bg-options-container {
-    background-color: $o-hb-bg-darker;
 }
 
 .o_we_color_preview {
@@ -68,6 +56,7 @@
     height: $o-hb-sidebar-content-field-colorpicker-size;
     border: $o-hb-sidebar-content-field-border-width solid $o-hb-bg-darkest;
     border-radius: 10rem;
+    margin-right: auto;
     cursor: pointer;
 
     &::after {
@@ -77,14 +66,23 @@
 }
 
 .o_we_invisible_el_panel {
-    max-height: 220px;
+    max-height: 180px;
     overflow-y: auto;
-    padding: $o-hb-sidebar-blocks-content-spacing;
-    background-color: $o-hb-sidebar-blocks-content-bg;
-    box-shadow: $o-hb-item-standup-top rgba($o-hb-item-standup-color-light, .2);
+    width: $o-hb-sidebar-width;
+    font-size: $o-hb-font-size-lg;
+    position: absolute;
+    inset: auto 0 0 auto;
+    background: rgba(black, .6);
+    backdrop-filter: blur(9px) brightness(160%);
+    border-top: $border-width solid rgba($white, .2);
+
+    > div {
+        scrollbar-color: $o-hb-bg-lightest $o-hb-bg-light;
+        scrollbar-width: thin;
+    }
 
     .o_panel_header {
-        padding: $o-hb-sidebar-content-field-spacing 0;
+        padding: map-get($spacers, 2);
     }
 
     .o_we_invisible_entry {
@@ -100,6 +98,22 @@
         list-style: none;
         padding-inline-start: 15px;
         margin-bottom: $o-hb-sidebar-content-field-spacing - 4px;
+    }
+
+    .o-snippets-menu:has(&) > .o-tab-content {
+        padding-bottom: o-to-rem(180) + map-get($spacers, 2) ;
+    }
+}
+
+.o-website-builder_sidebar .btn {
+    // Emulate active state on buttons with images
+    &.active img, &:active img {
+        filter: brightness(50%) sepia(100%) saturate(1000%) brightness(150%) hue-rotate(140deg);
+    }
+
+    // Handle icon classes applied directly on buttons (:/)
+    &.fa, &.oi {
+        line-height: inherit;
     }
 }
 

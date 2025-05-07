@@ -3,33 +3,42 @@
 
 <t t-name="html_builder.Builder">
     <div class="h-100 o-snippets-menu d-flex flex-column" t-ref="builder_sidebar">
-        <div class="o-snippets-top-actions d-flex justify-content-between flex-shrink-0">
-            <div class="d-flex">
-                <button type="button" t-on-click="() => this.undo()" class="btn btn-secondary fa fa-undo" t-att-disabled="!state.canUndo"/>
-                <button type="button"  t-on-click="() => this.redo()" class="btn btn-secondary fa fa-repeat" t-att-disabled="!state.canRedo"/>
-            </div>
-            <div class="d-flex">
-                <div class="mt-2" title="Mysterious Egg">
-                        <!-- remove this before merge, otherwise people will see this egg -->
-                    <svg width="1.1em" height="1.5em" viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="80" rx="40" ry="55" fill="#F4E1C6" stroke="#E0C4A8" stroke-width="4"/></svg>
+        <div class="o-snippets-top">
+            <div class="o-snippets-top-actions d-flex justify-content-between flex-shrink-0 py-2 pe-2">
+                <div class="d-flex">
+                    <button type="button" t-on-click="() => this.undo()" class="btn fa fa-undo" t-att-disabled="!state.canUndo"/>
+                    <button type="button"  t-on-click="() => this.redo()" class="btn fa fa-repeat" t-att-disabled="!state.canRedo"/>
                 </div>
-                <button t-on-click="onMobilePreviewClick" type="button" class="btn btn-secondary" data-action="mobile" title="Mobile Preview" accesskey="v"><span class="fa fa-mobile"/></button>
-                <button type="button"  t-on-click="discard" class="btn btn-secondary" data-action="cancel" title="Tip: Esc to preview" accesskey="j">Discard</button>
-                <button type="button" t-on-click="save" class="btn btn-primary" data-action="save" accesskey="s">Save</button>
+                <div class="d-flex">
+                    <div class="d-none mt-2" title="Mysterious Egg">
+                            <!-- remove this before merge, otherwise people will see this egg -->
+                        <svg width="1.1em" height="1.5em" viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="80" rx="40" ry="55" fill="#F4E1C6" stroke="#E0C4A8" stroke-width="4"/></svg>
+                    </div>
+                    <button t-on-click="onMobilePreviewClick" type="button" class="btn ratio ratio-1x1 px-3 fs-3" data-action="mobile" title="Mobile Preview" accesskey="v">
+                        <i class="fa fa-mobile translate-middle top-50 start-50 h-auto" role="img"/>
+                    </button>
+                </div>
+                <div class="d-flex gap-1">
+                    <button type="button" t-on-click="discard" class="btn" data-action="cancel" title="Tip: Esc to preview" accesskey="j">Discard</button>
+                    <button type="button" t-on-click="save" class="btn btn-solid-success" data-action="save" accesskey="s">Save</button>
+                </div>
+            </div>
+            <div class="o-snippets-tabs d-grid gap-1 px-2 mb-1">
+                <button data-name="blocks" class="btn btn-success px-0" t-att-class="{'active pe-none': state.activeTab === 'blocks'}" t-on-click="() => this.onTabClick('blocks')" t-att-disabled="props.isTranslation">
+                     <i class="oi oi-plus me-1" role="img"/>
+                    <span class="text-white">Add</span>
+                </button>
+                <button data-name="customize" class="btn btn-info px-0" t-att-class="{'active pe-none': state.activeTab === 'customize'}" t-on-click="() => this.onTabClick('customize')">
+                    <i class="oi oi-settings-adjust me-1" role="img"/>
+                    <span class="text-white">Edit</span>
+                </button>
+                <button data-name="theme" class="btn btn-global px-0" t-att-class="{'active pe-none': state.activeTab === 'theme'}" t-on-click="() => this.onTabClick('theme')" t-att-disabled="props.isTranslation">
+                    <i class="fa fa-cog me-1" role="img"/>
+                    <span class="text-white">Theme</span>
+                </button>
             </div>
         </div>
-        <div class="o-snippets-tabs d-flex justify-content-between mt-2 p-2 pb-0 flex-shrink-0">
-            <button data-name="blocks" class="px-2 cursor-pointer pb-1 pe-auto bg-transparent text-uppercase border-0" t-att-class="{'active text-white': state.activeTab === 'blocks'}" t-on-click="() => this.onTabClick('blocks')" t-att-disabled="props.isTranslation">
-                <span class="ps-1">Blocks</span>
-            </button>
-            <button data-name="customize" class="px-2 cursor-pointer pb-1 bg-transparent text-uppercase border-0" t-att-class="{'active text-white': state.activeTab === 'customize'}" t-on-click="() => this.onTabClick('customize')">
-                <span>Customize</span>
-            </button>
-            <button data-name="theme" class="px-2 cursor-pointer pb-1 bg-transparent text-uppercase border-0" t-att-class="{'active text-white': state.activeTab === 'theme'}" t-on-click="() => this.onTabClick('theme')" t-att-disabled="props.isTranslation">
-                <span class="pe-1">Theme</span>
-            </button>
-        </div>
-        <div class="o-tab-content overflow-y-auto overflow-x-hidden flex-grow-1 pt-1">
+        <div class="o-tab-content overflow-y-auto flex-grow-1">
             <t t-if="state.activeTab === 'blocks'">
                 <BlockTab />
             </t>

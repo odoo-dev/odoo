@@ -1,27 +1,42 @@
-.o_we_collapse_toggler {
-    @include o-position-absolute($top: 0, $left: 0);
-    width: $o-hb-sidebar-content-indent;
-    height: $o-hb-sidebar-content-field-height;
-    display: flex;
+.hb-row {
+    min-height: $o-hb-row-min-height;
+    margin-bottom: $o-hb-row-margin-bottom;
     align-items: center;
-    justify-content: center;
-    padding: 0;
-    background: none;
-    border: none;
-    font-family: FontAwesome;
+    color: $o-hb-fg-darker;
 
-    &::after {
-        content: '\f0da';
-        position: static;
-        transform: none;
-        color: #9d9d9d;
-
-        .o_rtl & {
-            transform: scaleX(-1);
-        }
+    &:hover, &.active {
+        color: $o-hb-fg-lighter;
     }
 
     &.active {
+        background: rgba($o-hb-color-accent, .2);
+    }
+
+    .hb-row-label {
+        min-width: 0;
+        flex: 1 1 50%;
+    }
+
+    .hb-row-content {
+        flex: 0 1 50%;
+        align-items: center;
+        gap: map-get($spacers, 1);
+    }
+
+//     // Sublevels
+//     --treeEntry-padding-h: 0;
+
+//     &.o_rtl:before {
+//         transform: scaleX(-1);
+//     }
+
+//     @for $level from 1 through 3 {
+//         &.hb-row-sublevel-#{$level} {
+//             --treeEntry-padding-h: #{$level * 0.6em};
+//         }
+//     }
+}
+
 
         &::after {
             content: '\f0d7';

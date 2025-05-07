@@ -1,0 +1,21 @@
+.o-hb-checkbox {
+    .form-check-input {
+        --form-switch-bg: #{escape-svg($o-hb-form-switch-bg-image)};
+
+        height: $o-hb-form-check-input-height;
+        margin-top: ($line-height-base - $o-hb-form-check-input-height) * .5;
+
+        &:focus, &:hover {
+            --form-switch-bg: #{escape-svg($o-hb-form-switch-focus-bg-image)};
+
+            border-color: $o-hb-form-check-input-checked-border-color;
+        }
+
+        &:checked {
+            --form-switch-bg: #{escape-svg($o-hb-form-switch-checked-bg-image)};
+
+            background-color: $o-hb-form-check-input-checked-bg-color;
+            border-color: $o-hb-form-check-input-checked-border-color;
+        }
+    }
+}

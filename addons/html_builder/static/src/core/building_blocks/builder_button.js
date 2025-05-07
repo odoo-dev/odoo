@@ -27,7 +27,7 @@ export class BuilderButton extends Component {
     };
 
     static defaultProps = {
-        type: "primary",
+        type: "secondary",
     };
 
     setup() {
