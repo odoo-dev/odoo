@@ -16,15 +16,15 @@ registerWebsitePreviewTour("test_drag_and_drop_on_non_editable", {
     },
     {
         content: "Verify that the Replace options is in the editor.",
-        trigger: "we-button[data-replace-media]",
+        trigger: "[data-label='Media'] button[data-action-id='replaceMedia']",
     },
     goBackToBlocks(),
     {
-        trigger: ".o_website_preview.editor_enable.editor_has_snippets",
+        trigger: ".o_builder_sidebar_open .o_snippet",
     },
     {
         content: "Drag and drop the Text Highlight building block next to the Team block media.",
-        trigger: `#oe_snippets .oe_snippet[name="Text Highlight"].o_we_draggable .oe_snippet_thumbnail:not(.o_we_ongoing_insertion)`,
+        trigger: ".o_snippet[name='Text Highlight'].o_draggable .o_snippet_thumbnail",
         run: "drag_and_drop :iframe .s_company_team .o_not_editable > .o_editable_media",
     },
     {
