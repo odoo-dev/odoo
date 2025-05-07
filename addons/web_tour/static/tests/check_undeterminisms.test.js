@@ -7,7 +7,9 @@ import { mountWithCleanup, patchWithCleanup } from "@web/../tests/web_test_helpe
 import { browser } from "@web/core/browser/browser";
 import { Macro } from "@web/core/macro";
 import { registry } from "@web/core/registry";
+import { disabledPatchRpc } from "@web_tour/tour_service/tour_automatic";
 
+disabledPatchRpc();
 describe.current.tags("desktop");
 
 const mainErrorMessage = (trigger) =>

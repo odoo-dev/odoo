@@ -5,6 +5,11 @@ import { Macro } from "@web/core/macro";
 import { browser } from "@web/core/browser/browser";
 import { setupEventActions } from "@web/../lib/hoot-dom/helpers/events";
 import * as hoot from "@odoo/hoot-dom";
+import { Deferred, Mutex } from "@web/core/utils/concurrency";
+import { patch } from "@web/core/utils/patch";
+
+let allowPatchRpc = true;
+export const disabledPatchRpc = () => (allowPatchRpc = false);
 
 export class TourAutomatic {
     mode = "auto";
@@ -12,6 +17,41 @@ export class TourAutomatic {
         Object.assign(this, data);
         this.steps = this.steps.map((step, index) => new TourStepAutomatic(step, this, index));
         this.config = tourState.getCurrentConfig() || {};
+
+        this.rpcMutex = new Mutex();
+        if (allowPatchRpc) {
+            this._patchRpc();
+        }
+    }
+    _patchRpc() {
+        const rpcMutex = this.rpcMutex;
+        const waitForPromise = (promise) =>
+            new Promise((resolve) =>
+                promise.finally(async () => {
+                    // wait if RPC response trigger another rpc
+                    await new Promise((r) => setTimeout(r));
+                    // wait to dom mutation https://webidl.spec.whatwg.org/#aborterror
+                    await new Promise((r) => requestAnimationFrame(r));
+                    resolve();
+                })
+            );
+
+        const originalFetch = globalThis.fetch;
+        globalThis.fetch = function () {
+            const prom = originalFetch.apply(this, arguments);
+            rpcMutex.exec(() => waitForPromise(prom));
+            return prom;
+        };
+
+        patch(globalThis.XMLHttpRequest.prototype, {
+            send() {
+                const deferred = new Deferred();
+                rpcMutex.exec(() => waitForPromise(deferred));
+                // https://xhr.spec.whatwg.org/#suggested-names-for-events-using-the-progressevent-interface
+                this.addEventListener("loadend", () => deferred.resolve(), { once: true });
+                return super.send(...arguments);
+            },
+        });
     }
 
     get currentIndex() {
@@ -81,7 +121,8 @@ export class TourAutomatic {
                 },
             ]);
 
-        const end = () => {
+        const end = async () => {
+            await this.rpcMutex.getUnlockedDef();
             delete window.hoot;
             transitionConfig.disabled = false;
             tourState.clear();
@@ -115,7 +156,8 @@ export class TourAutomatic {
                 }
                 end();
             },
-            onComplete: () => {
+            onComplete: async () => {
+                await end();
                 browser.console.log("tour succeeded");
                 // Used to see easily in the python console and to know which tour has been succeeded in suite tours case.
                 const succeeded = `║ TOUR ${this.name} SUCCEEDED ║`;
@@ -123,7 +165,6 @@ export class TourAutomatic {
                 msg.unshift("╔" + "═".repeat(succeeded.length - 2) + "╗");
                 msg.push("╚" + "═".repeat(succeeded.length - 2) + "╝");
                 browser.console.log(`\n\n${msg.join("\n")}\n`);
-                end();
             },
         });
         if (this.debugMode && this.currentIndex === 0) {

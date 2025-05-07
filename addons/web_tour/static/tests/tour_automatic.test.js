@@ -14,7 +14,9 @@ import { Dialog } from "@web/core/dialog/dialog";
 import { Macro } from "@web/core/macro";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { disabledPatchRpc } from "@web_tour/tour_service/tour_automatic";
 
+disabledPatchRpc();
 describe.current.tags("desktop");
 
 const tourRegistry = registry.category("web_tour.tours");
