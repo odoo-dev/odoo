@@ -18,6 +18,7 @@ import { reactive } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { isColorGradient, isCSSColor, RGBA_REGEX, rgbaToHex } from "@web/core/utils/colors";
 import { ColorSelector } from "./color_selector";
+import { backgroundImageCssToParts, backgroundImagePartsToCss } from "@html_editor/utils/image";
 
 const RGBA_OPACITY = 0.6;
 const HEX_OPACITY = "99";
@@ -442,25 +443,43 @@ export class ColorPlugin extends Plugin {
             .replace(mode === "color" ? TEXT_CLASSES_REGEX : BG_CLASSES_REGEX, "")
             .replace(/\btext-gradient\b/g, "") // cannot be combined with setting a background
             .replace(/\s+/, " ");
-        oldClassName !== newClassName && element.setAttribute("class", newClassName);
-        element.style["background-image"] = "";
-        if (mode === "backgroundColor") {
-            element.style["background"] = "";
+        if (oldClassName !== newClassName) {
+            element.setAttribute("class", newClassName);
         }
+        const oldBackgroundImage = element.style["background-image"];
+        const parts = backgroundImageCssToParts(oldBackgroundImage);
+        delete parts.gradient;
+        const newBackgroundImage = backgroundImagePartsToCss(parts);
+        if (oldBackgroundImage !== newBackgroundImage) {
+            setBackgroundImage(element, newBackgroundImage);
+        }
+        if (mode === "backgroundColor") {
+            element.style["background-color"] = "";
+        }
+
         if (color.startsWith("text") || color.startsWith("bg-")) {
             element.style[mode] = "";
             element.classList.add(color);
         } else if (isColorGradient(color)) {
             element.style[mode] = "";
+            parts.gradient = color;
             if (mode === "color") {
-                element.style["background"] = "";
-                this.delegateTo("apply_color_style", element, "background-image", color);
+                element.style["background-color"] = "";
                 element.classList.add("text-gradient");
-            } else {
-                this.delegateTo("apply_color_style", element, "background-image", color);
             }
+            this.delegateTo(
+                "apply_color_style",
+                element,
+                "background-image",
+                backgroundImagePartsToCss(parts)
+            );
         } else {
             this.delegateTo("apply_color_style", element, mode, color);
         }
     }
+}
+
+function setBackgroundImage(el, backgroundImage) {
+    el.style.backgroundImage =
+        !backgroundImage || backgroundImage === "none" ? "" : backgroundImage;
 }
