@@ -307,6 +307,34 @@ export function today() {
 // Formatting
 //-----------------------------------------------------------------------------
 
+export function toLocaleDateString(value, options) {
+    if (!value) {
+        return;
+    }
+    let format = DateTime.DATE_MED;
+    if (options.condensed) {
+        format = DateTime.DATE_SHORT;
+    }
+    return value.toLocaleString(format);
+}
+
+export function toLocaleDateTimeString(value, options) {
+    if (!value) {
+        return;
+    }
+    let format = DateTime.DATETIME_MED
+    if (options.showSeconds) {
+        format = DateTime.DATETIME_MED_WITH_SECONDS;
+    }
+    if (options.showTime == false) {
+        format = DateTime.DATE_MED
+    }
+    if (options.condensed) {
+        format = DateTime.DATETIME_SHORT;
+    }
+    return value.setZone(options.tz || "default").toLocaleString(format);
+}
+
 const condensedFormats = {};
 /**
  * Given a date(time) format, returns a format where months, days and hours are
@@ -343,7 +371,7 @@ export function formatDate(value, options = {}) {
             format = getCondensedFormat(format);
         }
     }
-    return value.toFormat(format);
+    return value.toFormat(format)
 }
 
 /**
@@ -366,6 +394,7 @@ export function formatDateTime(value, options = {}) {
         if (options.condensed) {
             format = getCondensedFormat(format);
         }
+
     }
     return value.setZone(options.tz || "default").toFormat(format);
 }

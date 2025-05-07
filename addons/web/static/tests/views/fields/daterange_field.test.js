@@ -850,7 +850,7 @@ test("list daterange with start date and empty end date", async () => {
         })
         .filter(Boolean);
 
-    expect(textSiblings).toEqual(["02/03/2017", "->"]);
+    expect(textSiblings).toEqual(["Feb 3, 2017", "->"]);
 });
 
 test("list daterange with empty start date and end date", async () => {
@@ -880,7 +880,7 @@ test("list daterange with empty start date and end date", async () => {
         })
         .filter(Boolean);
 
-    expect(textSiblings).toEqual(["->", "02/03/2017"]);
+    expect(textSiblings).toEqual(["->", "Feb 3, 2017"]);
 });
 
 test("list daterange: column widths", async () => {
@@ -1164,7 +1164,7 @@ test("daterange field in kanban with show_time option", async () => {
         resId: 1,
     });
 
-    expect(queryAllTexts(".o_field_daterange span")).toEqual(["02/08/2017", "03/13/2017"]);
+    expect(queryAllTexts(".o_field_daterange span")).toEqual(["Feb 8, 2017", "Mar 13, 2017"]);
 });
 
 test("updating time keeps selected dates", async () => {

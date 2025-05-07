@@ -1,6 +1,6 @@
 import { Component, onWillRender, useState } from "@odoo/owl";
 import { useDateTimePicker } from "@web/core/datetime/datetime_hook";
-import { areDatesEqual, deserializeDate, deserializeDateTime, today } from "@web/core/l10n/dates";
+import { areDatesEqual, deserializeDate, deserializeDateTime, today, toLocaleDateString, toLocaleDateTimeString } from "@web/core/l10n/dates";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
@@ -194,11 +194,19 @@ export class DateTimeField extends Component {
     getFormattedValue(valueIndex) {
         const value = this.values[valueIndex];
         const { condensed, showSeconds, showTime } = this.props;
-        return value
+        if (this.props.readonly) {
+            return value
             ? this.field.type === "date"
-                ? formatDate(value, { condensed })
-                : formatDateTime(value, { condensed, showSeconds, showTime })
+                ? toLocaleDateString(value, { condensed })
+                : toLocaleDateTimeString(value, { condensed, showSeconds, showTime })
             : "";
+        } else {
+            return value
+                ? this.field.type === "date"
+                    ? formatDate(value, { condensed })
+                    : formatDateTime(value, { condensed, showSeconds, showTime })
+                : "";
+        }
     }
 
     /**

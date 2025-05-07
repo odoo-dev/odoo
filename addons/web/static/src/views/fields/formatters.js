@@ -12,6 +12,7 @@ import { escape, exprToBoolean } from "@web/core/utils/strings";
 
 import { markup } from "@odoo/owl";
 import { formatCurrency } from "@web/core/currency";
+import { toLocaleDateString, toLocaleDateTimeString } from "../../core/l10n/dates";
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -83,7 +84,11 @@ formatChar.extractOptions = ({ attrs }) => ({
 });
 
 export function formatDate(value, options) {
-    return _formatDate(value, options);
+    if (options.field && options.field.readonly) {
+        return toLocaleDateString(value, options);
+    } else {
+        return _formatDate(value, options);
+    }
 }
 formatDate.extractOptions = ({ options }) => ({ condensed: options.condensed });
 
@@ -91,7 +96,11 @@ export function formatDateTime(value, options = {}) {
     if (options.showTime === false) {
         return _formatDate(value, options);
     }
-    return _formatDateTime(value, options);
+    if (options.field && options.field.readonly) {
+        return toLocaleDateTimeString(value, options);
+    } else {
+        return _formatDateTime(value, options);
+    }
 }
 formatDateTime.extractOptions = ({ attrs, options }) => ({
     ...formatDate.extractOptions({ attrs, options }),

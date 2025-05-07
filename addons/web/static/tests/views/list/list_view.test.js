@@ -10505,11 +10505,11 @@ test(`multi edit field with daterange widget`, async () => {
         "Field:",
         "Date start",
         "Update to:",
-        "01/16/2017\n02/12/2017",
+        "Jan 16, 2017\nFeb 12, 2017",
         "Field:",
         "Date end",
         "Update to:",
-        "02/12/2017",
+        "Feb 12, 2017",
     ]);
 
     // Valid the confirm dialog
@@ -10571,7 +10571,7 @@ test(`multi edit field with daterange widget (edition without using the picker)`
         "Field:",
         "Date start",
         "Update to:",
-        "04/01/2016\n01/26/2017",
+        "Apr 1, 2016\nJan 26, 2017",
     ]);
 
     // Valid the confirm dialog
@@ -10593,7 +10593,7 @@ test(`list daterange with start date and empty end date`, async () => {
         `,
     });
     expect(queryAllTexts(`.o_data_row:eq(0) .o_field_widget[name=date] span`)).toEqual([
-        "01/25/2017",
+        "Jan 25, 2017",
         "",
     ]);
 });
@@ -10614,7 +10614,7 @@ test(`list daterange with empty start date and end date`, async () => {
     });
     expect(queryAllTexts(`.o_data_row:eq(0) .o_field_widget[name=date] span`)).toEqual([
         "",
-        "01/25/2017",
+        "Jan 25, 2017",
     ]);
 });
 
@@ -16574,7 +16574,7 @@ test(`Properties: date`, async () => {
     await contains(`.o_field_date input`).click();
     await contains(getPickerCell("19")).click();
     await contains(`.o_list_button_save`).click();
-    expect(`.o_field_cell.o_date_cell:eq(0)`).toHaveText("12/19/2022");
+    expect(`.o_field_cell.o_date_cell:eq(0)`).toHaveText("Dec 19, 2022");
     expect.verifySteps(["web_save"]);
 });
 
@@ -16623,7 +16623,7 @@ test(`Properties: datetime`, async () => {
     await contains(`.o_field_datetime input`).click();
     await contains(getPickerCell("19")).click();
     await contains(`.o_list_button_save`).click();
-    expect(`.o_field_cell.o_datetime_cell:eq(0)`).toHaveText("12/19/2022 12:12");
+    expect(`.o_field_cell.o_datetime_cell:eq(0)`).toHaveText("Dec 19, 2022, 12:12 PM");
     expect.verifySteps(["web_save"]);
 });
 

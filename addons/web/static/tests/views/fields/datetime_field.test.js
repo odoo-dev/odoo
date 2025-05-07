@@ -422,8 +422,8 @@ test("datetime field in list view with show_seconds option", async () => {
     });
 
     expect(queryAllTexts(".o_data_row:first .o_field_datetime")).toEqual([
-        "02/08/2017 12:00",
-        "02/08/2017 12:00:00",
+        "Feb 8, 2017, 12:00 PM",
+        "Feb 8, 2017, 12:00:00 PM",
     ]);
 });
 
@@ -479,7 +479,7 @@ test("datetime field (with widget) in kanban with show_time option", async () =>
         resId: 1,
     });
 
-    expect(".o_kanban_record:first").toHaveText("02/08/2017");
+    expect(".o_kanban_record:first").toHaveText("Feb 8, 2017");
 });
 
 test("datetime field in list with show_time option", async () => {
@@ -526,9 +526,8 @@ test("datetime field in form view with condensed option", async () => {
             </form>`,
     });
 
-    const expectedDateString = "2/8/2017 8:00"; // 10:00:00 without timezone
-    expect(".o_field_datetime input").toHaveValue(expectedDateString);
-    expect(".o_field_datetime.o_readonly_modifier").toHaveText(expectedDateString);
+    expect(".o_field_datetime input").toHaveValue("2/8/2017 8:00");
+    expect(".o_field_datetime.o_readonly_modifier").toHaveText("2/8/2017, 8:00 AM");
 });
 
 test("datetime field in kanban view with condensed option", async () => {

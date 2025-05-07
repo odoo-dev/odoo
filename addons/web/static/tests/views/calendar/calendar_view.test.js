@@ -3601,22 +3601,22 @@ test(`timezone does not affect drag and drop on desktop`, async () => {
 
     await clickEvent(1);
     expect(`.o_event[data-event-id="1"]`).toHaveText("08:00\nevent 1");
-    expect(`.o_field_widget[name="start"]`).toHaveText("12/09/2016 08:00");
+    expect(`.o_field_widget[name="start"]`).toHaveText("Dec 9, 2016, 8:00 AM");
 
     await clickEvent(6);
     expect(`.o_event[data-event-id="6"]`).toHaveText("16:00\nevent 6");
-    expect(`.o_field_widget[name="start"]`).toHaveText("12/16/2016 16:00");
+    expect(`.o_field_widget[name="start"]`).toHaveText("Dec 16, 2016, 4:00 PM");
 
     await closeCwPopOver();
     await moveEventToDate(6, "2016-11-27");
     await clickEvent(6);
     expect(`.o_event[data-event-id="6"]`).toHaveText("16:00\nevent 6");
-    expect(`.o_field_widget[name="start"]`).toHaveText("11/27/2016 16:00");
+    expect(`.o_field_widget[name="start"]`).toHaveText("Nov 27, 2016, 4:00 PM");
     expect.verifySteps(["write"]);
 
     await clickEvent(1);
     expect(`.o_event[data-event-id="1"]`).toHaveText("08:00\nevent 1");
-    expect(`.o_field_widget[name="start"]`).toHaveText("12/09/2016 08:00");
+    expect(`.o_field_widget[name="start"]`).toHaveText("Dec 9, 2016, 8:00 AM");
 });
 
 test.tags("mobile");
@@ -3648,24 +3648,24 @@ test(`timezone does not affect drag and drop on mobile`, async () => {
 
     await clickEvent(1);
     expect(`.o_event[data-event-id="1"]`).toHaveText("event 1");
-    expect(`.o_field_widget[name="start"]`).toHaveText("12/09/2016 08:00");
+    expect(`.o_field_widget[name="start"]`).toHaveText("Dec 9, 2016, 8:00 AM");
     await closeCwPopOver();
 
     await clickEvent(6);
     expect(`.o_event[data-event-id="6"]`).toHaveText("event 6");
-    expect(`.o_field_widget[name="start"]`).toHaveText("12/16/2016 16:00");
+    expect(`.o_field_widget[name="start"]`).toHaveText("Dec 16, 2016, 4:00 PM");
     await closeCwPopOver();
 
     await moveEventToDate(6, "2016-11-27");
     await clickEvent(6);
     expect(`.o_event[data-event-id="6"]`).toHaveText("event 6");
-    expect(`.o_field_widget[name="start"]`).toHaveText("11/27/2016 16:00");
+    expect(`.o_field_widget[name="start"]`).toHaveText("Nov 27, 2016, 4:00 PM");
     await closeCwPopOver();
     expect.verifySteps(["write"]);
 
     await clickEvent(1);
     expect(`.o_event[data-event-id="1"]`).toHaveText("event 1");
-    expect(`.o_field_widget[name="start"]`).toHaveText("12/09/2016 08:00");
+    expect(`.o_field_widget[name="start"]`).toHaveText("Dec 9, 2016, 8:00 AM");
 });
 
 test.tags("desktop");
@@ -3699,7 +3699,7 @@ test(`timezone does not affect calendar with date field on desktop`, async () =>
     expect(`.o_cw_popover`).toHaveCount(1);
     expect(
         `.o_cw_popover .o_cw_popover_fields_secondary .list-group-item .o_field_date`
-    ).toHaveText("12/20/2016");
+    ).toHaveText("Dec 20, 2016");
 
     await closeCwPopOver();
     await moveEventToDate(8, "2016-11-27");
@@ -3709,7 +3709,7 @@ test(`timezone does not affect calendar with date field on desktop`, async () =>
     expect(`.o_cw_popover`).toHaveCount(1);
     expect(
         `.o_cw_popover .o_cw_popover_fields_secondary .list-group-item .o_field_date`
-    ).toHaveText("11/27/2016");
+    ).toHaveText("Nov 27, 2016");
 });
 
 test.tags("mobile");
@@ -3749,7 +3749,7 @@ test(`timezone does not affect calendar with date field on mobile`, async () => 
     await clickEvent(8);
     expect(`.modal`).toHaveCount(1);
     expect(`.modal .o_cw_popover_fields_secondary .list-group-item .o_field_date`).toHaveText(
-        "12/20/2016"
+        "Dec 20, 2016"
     );
 
     await closeCwPopOver();
@@ -3759,7 +3759,7 @@ test(`timezone does not affect calendar with date field on mobile`, async () => 
     await clickEvent(8);
     expect(`.modal`).toHaveCount(1);
     expect(`.modal .o_cw_popover_fields_secondary .list-group-item .o_field_date`).toHaveText(
-        "11/27/2016"
+        "Nov 27, 2016"
     );
 });
 
