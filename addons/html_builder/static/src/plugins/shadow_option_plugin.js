@@ -29,7 +29,7 @@ class ShadowOptionPlugin extends Plugin {
                     if (editingElement.style["box-shadow"] === "") {
                         setBoxShadow(editingElement, getDefaultShadow(shadowMode));
                     } else {
-                        const shadow = getCurrentShadow(editingElement);
+                    const shadow = getCurrentShadow(editingElement);
                         if (shadowMode === "inset") {
                             shadow.mode = "inset";
                         } else {
