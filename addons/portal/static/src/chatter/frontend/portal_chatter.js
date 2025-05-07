@@ -13,6 +13,7 @@ export class PortalChatter extends Component {
     static props = ["resId", "resModel", "composer", "twoColumns", "displayRating"];
 
     setup() {
+        // debugger;
         useSubEnv({
             displayRating: this.props.displayRating,
             inFrontendPortalChatter: true,

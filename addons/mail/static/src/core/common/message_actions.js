@@ -155,6 +155,7 @@ messageActionsRegistry
         onClick: async (component) => {
             const message = toRaw(component.message);
             const def = new Deferred();
+            // debugger;
             component.dialog.add(
                 discussComponentRegistry.get("MessageConfirmDialog"),
                 {

@@ -227,6 +227,7 @@
                                     <t t-if="channel.channel_type == 'training'" t-call="website_slides.course_slides_list"/>
                                     <t t-else="" t-call="website_slides.course_slides_cards"/>
                                 </div>
+                                <!-- <t t-debug="pdb"></t> -->
                                 <div t-if="channel.allow_comment" t-att-class="'tab-pane fade %s' % ('show active' if active_tab == 'review' else '')" id="review" role="tabpanel" aria-labelledby="review-tab">
                                     <t t-call="portal.message_thread">
                                         <t t-set="object" t-value="channel"/>

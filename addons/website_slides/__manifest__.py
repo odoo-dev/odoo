@@ -112,6 +112,8 @@ Featuring
             'website_slides/static/src/xml/slide_course_prerequisite.xml',
             'website_slides/static/src/xml/slide_quiz_create.xml',
             'website_slides/static/src/xml/slide_quiz.xml',
+            # ('after', 'web/static/src/scss/utilities_custom.scss', 'web/static/src/webclient/actions/reports/utilities_custom_report.scss'),
+            # 'website_slides/static/src/mail/message/website_slides_message.xml',
             'website_slides/static/src/js/public/**/*',
         ],
         'website.assets_editor': [
@@ -199,6 +201,9 @@ Featuring
             'website_slides/static/tests/**/*',
             ('remove', 'website_slides/static/tests/legacy/**/*'),
             ('remove', 'website_slides/static/tests/tours/**/*'),
+        ],
+        'portal.assets_chatter': [
+            'website_slides/static/src/mail/message/website_slides_message.xml',
         ],
     },
     'license': 'LGPL-3',

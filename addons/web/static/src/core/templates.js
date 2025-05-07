@@ -126,6 +126,7 @@ export function getTemplate(name) {
 }
 
 export function registerTemplate(name, url, templateString) {
+    console.log(name);
     if (isRegistered(...arguments)) {
         return;
     }

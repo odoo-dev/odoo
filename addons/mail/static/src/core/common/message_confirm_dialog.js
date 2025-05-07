@@ -25,6 +25,7 @@ export class MessageConfirmDialog extends Component {
     static template = "mail.MessageConfirmDialog";
 
     get messageComponent() {
+        console.log(discussComponentRegistry.get("Message"));
         return discussComponentRegistry.get("Message");
     }
 

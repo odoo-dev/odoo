@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates>
+
+    <t t-inherit="mail.Message" t-inherit-mode="extension">
+        <xpath expr="//*[@t-ref='messageContent']" position="inside">
+            <span>Hello World! </span>
+        </xpath>
+    </t>
+
+</templates>

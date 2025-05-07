@@ -199,6 +199,7 @@
         'rounded-start-1': !isMobileOS and isReverse,
         'rounded-end-1': !isMobileOS and !isReverse,
     }">
+        <!-- <span>Hello</span> -->
         <i class="fa fa-lg fa-ellipsis-v" t-att-class="{ 'order-1': props.isInChatWindow, 'fa-fw': isMobileOS }" tabindex="1"/>
     </button>
 </t>
