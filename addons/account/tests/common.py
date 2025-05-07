@@ -1348,6 +1348,65 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
         )
 
     # -------------------------------------------------------------------------
+    # combo_product
+    # -------------------------------------------------------------------------
+
+    def _assert_sub_test_combo_product(self, results, expected_results):
+        self._assert_tax_totals_summary(
+            results['tax_totals'],
+            expected_results,
+            soft_checking=results['soft_checking'],
+        )
+
+    def _create_py_sub_test_combo_product(self, document, line_indexes_combo_price, soft_checking):
+        AccountTax = self.env['account.tax']
+        new_base_lines_mapping = {}
+        for line_indexes, combo_price in line_indexes_combo_price:
+            line_indexes = sorted(line_indexes)
+            base_lines = [base_line for index, base_line in enumerate(document['lines']) if index in line_indexes]
+            combo_base_lines = AccountTax._prepare_combo_product_lines(
+                base_lines=base_lines,
+                company=self.env.company,
+                combo_price=combo_price,
+            )
+            for index, combo_base_line in zip(line_indexes, combo_base_lines):
+                new_base_lines_mapping[index] = combo_base_line
+
+        new_document = copy.deepcopy(document)
+        new_document['lines'] = []
+        for index, base_line in enumerate(document['lines']):
+            new_document['lines'].append(new_base_lines_mapping.get(index) or base_line)
+
+        AccountTax._add_tax_details_in_base_lines(new_document['lines'], self.env.company)
+        AccountTax._round_base_lines_tax_details(new_document['lines'], self.env.company)
+        tax_totals = AccountTax._get_tax_totals_summary(
+            base_lines=new_document['lines'],
+            currency=new_document['currency'],
+            company=self.env.company,
+            cash_rounding=new_document['cash_rounding'],
+        )
+        return {'tax_totals': tax_totals, 'soft_checking': soft_checking}
+
+    def _create_js_sub_test_combo_product(self, document, combo_price, soft_checking):
+        return {
+            'test': 'combo_product',
+            'document': self._jsonify_document(document),
+            'combo_price': combo_price,
+            'soft_checking': soft_checking,
+        }
+
+    def assert_combo_product(self, document, line_indexes_combo_price, expected_values, soft_checking=False):
+        self._create_assert_test(
+            expected_values,
+            self._create_py_sub_test_combo_product,
+            None,  #self._create_js_sub_test_combo_product,
+            self._assert_sub_test_combo_product,
+            document,
+            line_indexes_combo_price,
+            soft_checking,
+        )
+
+    # -------------------------------------------------------------------------
     # down_payment
     # -------------------------------------------------------------------------
 

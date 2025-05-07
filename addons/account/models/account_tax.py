@@ -2940,7 +2940,6 @@ class AccountTax(models.Model):
     def _prepare_sub_lines_for_partial_total_amount(
         self,
         base_lines,
-        eligible_base_lines,
         company,
         target_amount_function,
         computation_key,
@@ -2966,12 +2965,12 @@ class AccountTax(models.Model):
             - raw_total_discount:       The unrounded total discount bring by the discount base lines.
             - total_amount:             The total amount of the passed base lines.
         """
-        if not eligible_base_lines:
+        if not base_lines:
             return []
 
         # Compute the total discount amount to reach.
         currency = base_lines[0]['currency_id']
-        total_amount = self._compute_subset_base_lines_total(eligible_base_lines)
+        total_amount = self._compute_subset_base_lines_total(base_lines)
         if currency.is_zero(total_amount):
             return []
 
@@ -2983,18 +2982,16 @@ class AccountTax(models.Model):
         if currency.is_zero(total_target_amount):
             return []
 
-        percentage = target_sign * abs(raw_total_target_amount) / abs(total_amount)
         # Apply the percentage to each line.
-        target_base_lines = self._group_base_lines_and_freeze_amounts(
-            base_lines=eligible_base_lines,
+        percentage = target_sign * abs(raw_total_target_amount) / abs(total_amount)
+        return self._group_base_lines_and_freeze_amounts(
+            base_lines=base_lines,
             company=company,
             percentage=percentage,
             target_amount_currency=total_target_amount,
             computation_key=computation_key,
             grouping_function=grouping_function,
         )
-
-        return target_base_lines
 
     # -------------------------------------------------------------------------
     # GLOBAL DISCOUNT
@@ -3038,6 +3035,7 @@ class AccountTax(models.Model):
 
         discountable_base_lines = []
         for base_line, (taxes_to_keep, taxes_to_exclude) in zip(base_lines, extra_data_per_base_line):
+            tax_details = base_line['tax_details']
             if any(
                 tax_data['tax'] in taxes_to_exclude
                 and tax_data['tax'].price_include
@@ -3057,7 +3055,11 @@ class AccountTax(models.Model):
                 self._add_tax_details_in_base_line(discountable_base_line, company)
                 taxes_data_for_price_unit = discountable_base_line['tax_details']['taxes_data']
             else:
-                taxes_data_for_price_unit = taxes_data
+                taxes_data_for_price_unit = [
+                    tax_data
+                    for tax_data in taxes_data
+                    if tax_data['tax'] in taxes_to_keep
+                ]
 
             discountable_base_lines.append(self._prepare_base_line_for_taxes_computation(
                 base_line,
@@ -3104,13 +3106,125 @@ class AccountTax(models.Model):
 
         discountable_base_lines = self._prepare_base_lines_for_discount(base_lines, company)
         return self._prepare_sub_lines_for_partial_total_amount(
-            base_lines=base_lines,
-            eligible_base_lines=discountable_base_lines,
+            base_lines=discountable_base_lines,
             company=company,
             target_amount_function=target_amount_function,
             computation_key=computation_key,
             grouping_function=grouping_function,
         )
+
+    # -------------------------------------------------------------------------
+    # COMBO PRODUCT
+    # -------------------------------------------------------------------------
+
+    @api.model
+    def _prepare_combo_product_lines(
+        self,
+        base_lines,
+        company,
+        combo_price,
+    ):
+        if not base_lines:
+            return []
+
+        currency = base_lines[0]['currency_id']
+
+        # Build the base lines to be considered to be reduced to match the combo price.
+        # Every tax not included in price will be added on top.
+
+        def exclude_function(base_line, tax_data):
+            return not tax_data['tax'].price_include
+
+        combo_base_lines = self._prepare_base_lines_for_discount(
+            base_lines=base_lines,
+            company=company,
+            exclude_function=exclude_function,
+        )
+
+        # Determine how much we have to reduce each combo line to reach 'combo_price'.
+        # 'current_combo_price' is currently the total of each choosen combo items.
+        # 'delta_combo_price' is the difference regarding 'combo_price'.
+        combo_base_line_totals = [
+            self._compute_subset_base_lines_total([combo_base_line])
+            for combo_base_line in combo_base_lines
+        ]
+        current_combo_price = sum(combo_base_line_totals)
+        delta_combo_price = currency.round(combo_price - current_combo_price)
+        sign = -1 if delta_combo_price < 0.0 else 1
+
+        # Distribute the delta smoothly accross the base lines.
+        nb_of_errors = round(abs(delta_combo_price / currency.rounding))
+        sorted_indexed_combo_base_lines = sorted(
+            [
+                (index, combo_base_line, total)
+                for index, (combo_base_line, total) in enumerate(zip(combo_base_lines, combo_base_line_totals))
+            ],
+            key=lambda x: -x[2]
+        )
+        remaining_errors = nb_of_errors
+        discount_amounts = [0.0] * len(combo_base_lines)
+        for index, combo_base_line, total in sorted_indexed_combo_base_lines:
+            if not remaining_errors:
+                break
+
+            nb_of_amount_to_distribute = min(
+                math.ceil(abs(total * nb_of_errors / current_combo_price)),
+                remaining_errors,
+            )
+            remaining_errors -= nb_of_amount_to_distribute
+            discount_amount = sign * nb_of_amount_to_distribute * currency.rounding
+            discount_amounts[index] += discount_amount
+
+        # Now, let's reduce each combo line individually.
+        new_base_lines = []
+        for base_line, combo_base_line, discount_amount in zip(base_lines, combo_base_lines, discount_amounts):
+            target_amount = discount_amount + base_line['combo_extra_price']
+            discount_combo_base_line = self._prepare_sub_lines_for_partial_total_amount(
+                base_lines=[combo_base_line],
+                company=company,
+                computation_key=None,
+                target_amount_function=lambda total_amount: target_amount,
+            )[0]
+
+            discount = base_line['discount']
+            discount_price_unit = discount_combo_base_line['price_unit']
+            if discount != 100.0:
+                discount_price_unit /= 1 - discount / 100.0
+
+            quantity = base_line['quantity']
+            if quantity:
+                discount_price_unit /= quantity
+
+            manual_tax_amounts = discount_combo_base_line['manual_tax_amounts']
+            if manual_tax_amounts:
+                base_line_tax_amounts = {
+                    tax_data['tax'].id: {
+                        'tax_amount_currency': tax_data['tax_amount_currency'],
+                        'base_amount_currency': tax_data['base_amount_currency'],
+                    }
+                    for tax_data in discount_combo_base_line['tax_details']['taxes_data']
+                }
+                for tax_id, amounts in manual_tax_amounts.items():
+                    amounts['tax_amount_currency'] += base_line_tax_amounts[tax_id]['tax_amount_currency']
+                    if 'base_amount_currency' in amounts:
+                        amounts['base_amount_currency'] += base_line_tax_amounts[tax_id]['base_amount_currency']
+
+            new_base_lines.append(self._prepare_base_line_for_taxes_computation(
+                base_line,
+                price_unit=base_line['price_unit'] + discount_price_unit,
+                manual_tax_amounts=manual_tax_amounts,
+            ))
+        return new_base_lines
+
+
+
+        # discount_base_lines = self._prepare_sub_lines_for_partial_total_amount(
+        #     base_lines=combo_base_lines,
+        #     company=company,
+        #     target_amount_function=target_amount_function,
+        #     computation_key=computation_key,
+        #     grouping_function=grouping_function,
+        # )
 
     # -------------------------------------------------------------------------
     # DOWN PAYMENT
@@ -3232,8 +3346,7 @@ class AccountTax(models.Model):
 
         payable_base_lines = self._prepare_base_lines_for_down_payment(base_lines, company)
         return self._prepare_sub_lines_for_partial_total_amount(
-            base_lines=base_lines,
-            eligible_base_lines=payable_base_lines,
+            base_lines=payable_base_lines,
             company=company,
             target_amount_function=target_amount_function,
             computation_key=computation_key,
