@@ -24,9 +24,12 @@ import {
     COLOR_COMBINATION_CLASSES_REGEX,
 } from "@web/core/utils/colors";
 import { ColorSelector } from "./color_selector";
+import { backgroundImageCssToParts, backgroundImagePartsToCss } from "@html_editor/utils/image";
 
 const RGBA_OPACITY = 0.6;
 const HEX_OPACITY = "99";
+const COLOR_COMBINAISON_CLASSES = [1, 2, 3, 4, 5].map((i) => `o_cc${i}`);
+const COLOR_COMBINAISON_SELECTOR = COLOR_COMBINAISON_CLASSES.map((c) => `.${c}`).join(", ");
 
 /**
  * @typedef { Object } ColorShared
@@ -80,7 +83,7 @@ export class ColorPlugin extends Plugin {
          * @param {string} color hexadecimal or bg-name/text-name class
          * @param {'color'|'backgroundColor'} mode 'color' or 'backgroundColor'
          */
-        apply_color_style: (element, mode, color) => {
+        apply_style: (element, mode, color) => {
             element.style[mode] = color;
             return true;
         },
@@ -445,30 +448,83 @@ export class ColorPlugin extends Plugin {
      * @param {'color'|'backgroundColor'} mode 'color' or 'backgroundColor'
      */
     colorElement(element, color, mode) {
+        let parts = backgroundImageCssToParts(element.style["background-image"]);
         const oldClassName = element.getAttribute("class") || "";
+
+        if (element.matches(COLOR_COMBINAISON_SELECTOR)) {
+            removeOCCGradient(element);
+        }
+
+        if (color.startsWith("o_cc")) {
+            parts = backgroundImageCssToParts(element.style["background-image"]);
+            element.classList.remove(...COLOR_COMBINAISON_CLASSES);
+            element.classList.add(color);
+            this.fixColorCombinaison(element);
+            return;
+        }
+
+        if (mode === "backgroundColor") {
+            if (!color) {
+                element.classList.remove(...COLOR_COMBINAISON_CLASSES);
+            }
+            delete parts.gradient;
+            const newBackgroundImage = backgroundImagePartsToCss(parts);
+            setBackgroundImage(element, newBackgroundImage);
+            element.style["background-color"] = "";
+        }
+
         const newClassName = oldClassName
             .replace(mode === "color" ? TEXT_CLASSES_REGEX : BG_CLASSES_REGEX, "")
             .replace(/\btext-gradient\b/g, "") // cannot be combined with setting a background
             .replace(/\s+/, " ");
-        oldClassName !== newClassName && element.setAttribute("class", newClassName);
-        element.style["background-image"] = "";
-        if (mode === "backgroundColor") {
-            element.style["background"] = "";
+        if (oldClassName !== newClassName) {
+            element.setAttribute("class", newClassName);
         }
         if (color.startsWith("text") || color.startsWith("bg-")) {
             element.style[mode] = "";
             element.classList.add(color);
         } else if (isColorGradient(color)) {
             element.style[mode] = "";
+            parts.gradient = color;
             if (mode === "color") {
-                element.style["background"] = "";
-                this.delegateTo("apply_color_style", element, "background-image", color);
+                element.style["background-color"] = "";
                 element.classList.add("text-gradient");
-            } else {
-                this.delegateTo("apply_color_style", element, "background-image", color);
             }
+            this.delegateTo(
+                "apply_style",
+                element,
+                "background-image",
+                backgroundImagePartsToCss(parts)
+            );
         } else {
-            this.delegateTo("apply_color_style", element, mode, color);
+            this.delegateTo("apply_style", element, mode, color);
+        }
+        this.fixColorCombinaison(element);
+    }
+    /**
+     * There is a limitation with css. The defining a background image and a
+     * background gradient is done only by setting one style (background-image).
+     * If there is a class (in this case o_cc[1-5]) that defines a gradient, it
+     * will be overridden by the background-image property.
+     *
+     * This function will set the gradient of the o_cc in the background-image
+     * so that setting an image in the background-image property will not
+     * override the gradient.
+     */
+    fixColorCombinaison(element) {
+        const parts = backgroundImageCssToParts(element.style["background-image"]);
+        const hasBackgroundColor =
+            element.style["background-color"] ||
+            !!element.className.match(/\bbg-/) ||
+            parts.gradient;
+
+        if (!hasBackgroundColor) {
+            element.style["background-image"] = "";
+            parts.gradient = backgroundImageCssToParts(
+                // Compute the style from o_cc class.
+                getComputedStyle(element).backgroundImage
+            ).gradient;
+            element.style["background-image"] = backgroundImagePartsToCss(parts);
         }
     }
 
@@ -484,4 +540,31 @@ export class ColorPlugin extends Plugin {
 
 function getColorCombinationFromClass(el) {
     return el.className.match?.(COLOR_COMBINATION_CLASSES_REGEX)?.[0];
+}
+
+/**
+ * Remvove the gradient of the element only if it is the inheritance from the o_cc selector.
+ */
+function removeOCCGradient(element) {
+    const oldBackgroundImage = element.style["background-image"];
+    const parts = backgroundImageCssToParts(oldBackgroundImage);
+    const currentGradient = parts.gradient;
+    delete parts.gradient;
+    element.style["background-image"] = `${backgroundImagePartsToCss(parts)} !important`;
+    const styleWithoutGradient = getComputedStyle(element);
+    const OCCGradient = backgroundImageCssToParts(styleWithoutGradient.backgroundImage).gradient;
+    if (OCCGradient !== currentGradient) {
+        parts.gradient = currentGradient;
+        element.style["background-image"] = `${backgroundImagePartsToCss(parts)}`;
+    }
+}
+
+function setBackgroundImage(el, backgroundImage) {
+    const isNone = !backgroundImage || backgroundImage === "none";
+    el.style.backgroundImage = isNone ? "" : backgroundImage;
+    // If the current background image is empty but the inherited one isn't
+    // force the background image to override the inherited one.
+    if (isNone && getComputedStyle(el).backgroundImage !== "none") {
+        el.style.backgroundImage = "none";
+    }
 }
