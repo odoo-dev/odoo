@@ -191,7 +191,12 @@ export class WebsiteBuilder extends Component {
             return;
         }
 
-        if (!isHTTPSorNakedDomainRedirection(iframe.contentWindow.location.origin, window.location.origin)) {
+        if (
+            !isHTTPSorNakedDomainRedirection(
+                iframe.contentWindow.location.origin,
+                window.location.origin
+            )
+        ) {
             // If another domain ends up loading in the iframe (for example,
             // if the iframe is being redirected and has no initial URL, so it
             // loads "about:blank"), do not push that into the history
@@ -280,7 +285,14 @@ export class WebsiteBuilder extends Component {
             if (href && target !== "_blank" && !this.state.isEditing) {
                 if (isTopWindowURL(linkEl)) {
                     ev.preventDefault();
-                    browser.location.assign(href);
+                    try {
+                        browser.location.assign(href);
+                    } catch {
+                        this.notification.add(_t("%s is not a valid URL.", href), {
+                            title: _t("Invalid URL"),
+                            type: "danger",
+                        });
+                    }
                 } else if (
                     this.websiteContent.el.contentWindow.location.pathname !==
                     new URL(href).pathname
