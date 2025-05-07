@@ -19,6 +19,7 @@ import { cleanLinkArtifacts } from "../_helpers/format";
 import { getContent, setContent, setSelection } from "../_helpers/selection";
 import { insertLineBreak, insertText, splitBlock, undo } from "../_helpers/user_actions";
 import { execCommand } from "../_helpers/userCommands";
+import { SelectionPlugin } from "@html_editor/core/selection_plugin";
 
 const base64Img =
     "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUA\n        AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO\n            9TXL0Y4OHwAAAABJRU5ErkJggg==";
@@ -655,6 +656,24 @@ describe("Link creation", () => {
             expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>[<a href="https://www.test.com">Hello</a> my friend]</p>`
             );
+        });
+        test("discard link creation should not try to set an invalid selection", async () => {
+            patchWithCleanup(SelectionPlugin.prototype, {
+                validateSelection(...args) {
+                    const isValid = super.validateSelection(...args);
+                    if (!isValid) {
+                        throw new Error("Selection is not valid");
+                    }
+                    return isValid;
+                },
+            });
+            const { el } = await setupEditor("<p>[Hello]</p>");
+            await waitFor(".o-we-toolbar");
+            await click(".o-we-toolbar .fa-link");
+            await waitFor(".o-we-linkpopover", { timeout: 1500 });
+            await click(".o-we-linkpopover .o_we_discard_link");
+            await waitForNone(".o-we-linkpopover", { timeout: 1500 });
+            expect(getContent(el)).toBe("<p>[Hello]</p>");
         });
     });
 });
