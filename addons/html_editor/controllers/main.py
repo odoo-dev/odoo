@@ -592,8 +592,11 @@ class HTML_Editor(http.Controller):
             Actions = request.env['ir.actions.actions']
             context = dict(request.env.context)
             words = preview_url.strip('/').split('/')
-
-            record_id = int(words.pop())
+            #temporary fix
+            try:
+                record_id = int(words.pop())
+            except ValueError:
+                return {}
             action_name = words.pop()
             if (action_name.startswith('m-') or '.' in action_name) and action_name in request.env and not request.env[action_name]._abstract:
                 # if path format is `odoo/<model>/<record_id>` so we use `action_name` as model name
