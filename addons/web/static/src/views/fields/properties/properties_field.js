@@ -3,7 +3,7 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
-import { reposition } from "@web/core/position/utils";
+import { computePosition } from "@web/core/position/utils";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { useBus, useService } from "@web/core/utils/hooks";
@@ -81,7 +81,8 @@ export class PropertiesField extends Component {
                     if (!canChangeDefinition) {
                         this.notification.add(
                             _t('Oops! You cannot edit the %(parentFieldLabel)s "%(parentName)s".', {
-                                parentName: this.props.record.data[this.definitionRecordField].display_name,
+                                parentName:
+                                    this.props.record.data[this.definitionRecordField].display_name,
                                 parentFieldLabel:
                                     this.props.record.fields[this.definitionRecordField].string,
                             }),
@@ -830,7 +831,15 @@ export class PropertiesField extends Component {
             `*[property-name="${propertyName}"] .o_field_property_open_popover`
         );
 
-        reposition(popover, target, { position: "top", margin: 10 });
+        // Reset popover style
+        popover.style.position = "fixed";
+        popover.style.top = "0px";
+        popover.style.left = "0px";
+        // Compute positioning solution
+        const { top, left } = computePosition(popover, target, { position: "top", margin: 10 });
+        // Apply it
+        popover.style.top = `${top}px`;
+        popover.style.left = `${left}px`;
     }
 
     /**

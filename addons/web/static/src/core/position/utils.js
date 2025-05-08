@@ -28,13 +28,6 @@ import { localization } from "@web/core/l10n/localization";
  *  allow the popper to try a flipped direction when it overflows the container
  */
 
-/** @type {ComputePositionOptions} */
-const DEFAULTS = {
-    flip: true,
-    margin: 0,
-    position: "bottom",
-};
-
 /** @type {{[d: string]: Direction}} */
 const DIRECTIONS = { t: "top", r: "right", b: "bottom", l: "left", c: "center" };
 /** @type {{[v: string]: Variant}} */
@@ -96,7 +89,8 @@ export function reverseForRTL(direction, variant = "middle") {
  *                                the containing block of the popper.
  *                                => can be applied to popper.style.(top|left)
  */
-function computePosition(popper, target, { container, flip, margin, position }) {
+export function computePosition(popper, target, options) {
+    let { container, flip = true, margin = 0, position = "bottom" } = options;
     // Retrieve directions and variants
     const [direction, variant = "middle"] = reverseForRTL(...position.split("-"));
     const directions = flip ? DIRECTION_FLIP_ORDER[direction] : [direction.at(0)];
@@ -236,37 +230,4 @@ function computePosition(popper, target, { container, flip, margin, position }) 
     }
     // Settle for the first match with the least malus
     return matches.sort((a, b) => a.malus - b.malus)[0].result;
-}
-
-/**
- * Repositions the popper element relatively to the target element (according to options).
- * The positioning strategy is always a fixed positioning with top and left.
- *
- * The positioning solution is returned by the `computePosition` function.
- * It will get applied to the popper element and then returned for convenience.
- *
- * @param {HTMLElement} popper
- * @param {HTMLElement} target
- * @param {ComputePositionOptions} options
- * @returns {PositioningSolution} the applied positioning solution.
- */
-export function reposition(popper, target, options) {
-    // Reset popper style
-    popper.style.position = "fixed";
-    popper.style.top = "0px";
-    popper.style.left = "0px";
-
-    // Compute positioning solution
-    const solution = computePosition(popper, target, { ...DEFAULTS, ...options });
-
-    // Apply it
-    const { top, left, direction, variant } = solution;
-    popper.style.top = `${top}px`;
-    popper.style.left = `${left}px`;
-    if (variant === "fit") {
-        const styleProperty = ["top", "bottom"].includes(direction) ? "width" : "height";
-        popper.style[styleProperty] = target.getBoundingClientRect()[styleProperty] + "px";
-    }
-
-    return solution;
 }

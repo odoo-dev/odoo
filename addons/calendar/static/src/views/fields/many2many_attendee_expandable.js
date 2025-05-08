@@ -1,6 +1,6 @@
 import { useState, useEffect } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { reposition } from "@web/core/position/utils";
+import { computePosition } from "@web/core/position/utils";
 import { Many2ManyAttendee, many2ManyAttendee } from "@calendar/views/fields/many2many_attendee";
 
 export class Many2ManyAttendeeExpandable extends Many2ManyAttendee {
@@ -23,7 +23,16 @@ export class Many2ManyAttendeeExpandable extends Many2ManyAttendee {
                     const target = document.querySelector(
                         `.fc-event[data-event-id="${this.props.record.resId}"]`
                     );
-                    reposition(popover, target, { position: "right", margin: 0 });
+
+                    // Reset popover style
+                    popover.style.position = "fixed";
+                    popover.style.top = "0px";
+                    popover.style.left = "0px";
+                    // Compute positioning solution
+                    const { top, left } = computePosition(popover, target, { position: "right" });
+                    // Apply it
+                    popover.style.top = `${top}px`;
+                    popover.style.left = `${left}px`;
                 },
                 () => [this.state.expanded]
             );

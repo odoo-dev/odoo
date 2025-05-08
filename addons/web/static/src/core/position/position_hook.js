@@ -1,4 +1,4 @@
-import { reposition } from "@web/core/position/utils";
+import { computePosition } from "@web/core/position/utils";
 import { omit } from "@web/core/utils/objects";
 import { useThrottleForAnimation } from "@web/core/utils/timing";
 import {
@@ -53,9 +53,25 @@ export function usePosition(refName, getTarget, options = {}) {
             // No compute needed
             return;
         }
-        const repositionOptions = omit(options, "onPositioned");
-        const solution = reposition(ref.el, targetEl, repositionOptions);
-        options.position = `${solution.direction}-${solution.variant}`; // memorize last position
+
+        // Reset popper style
+        ref.el.style.position = "fixed";
+        ref.el.style.top = "0px";
+        ref.el.style.left = "0px";
+
+        // Compute positioning solution
+        const solution = computePosition(ref.el, targetEl, omit(options, "onPositioned"));
+
+        // Apply it
+        const { top, left, direction, variant } = solution;
+        ref.el.style.top = `${top}px`;
+        ref.el.style.left = `${left}px`;
+        if (variant === "fit") {
+            const styleProperty = ["top", "bottom"].includes(direction) ? "width" : "height";
+            ref.el.style[styleProperty] = targetEl.getBoundingClientRect()[styleProperty] + "px";
+        }
+
+        options.position = `${direction}-${variant}`; // memorize last position
         options.onPositioned?.(ref.el, solution);
     };
 
