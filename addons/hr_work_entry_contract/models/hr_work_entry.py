@@ -14,7 +14,7 @@ from odoo.addons.hr_work_entry_contract.models.hr_work_intervals import WorkInte
 class HrWorkEntry(models.Model):
     _inherit = 'hr.work.entry'
 
-    contract_id = fields.Many2one('hr.contract', string="Contract", required=True)
+    contract_id = fields.Many2one('hr.contract', string="Contract", required=False)
     employee_id = fields.Many2one(domain=[('contract_ids.state', 'in', ('open', 'pending'))])
     work_entry_source = fields.Selection(related='contract_id.work_entry_source')
 
