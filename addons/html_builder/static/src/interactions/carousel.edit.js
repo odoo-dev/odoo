@@ -76,6 +76,8 @@ export class CarouselEdit extends Interaction {
             indicatorEls.forEach((indicatorEl, i) =>
                 indicatorEl.setAttribute("data-bs-slide-to", i)
             );
+            this.el.querySelector(".carousel-control-prev")?.setAttribute("data-bs-slide", "prev");
+            this.el.querySelector(".carousel-control-next")?.setAttribute("data-bs-slide", "next");
         }
     }
 }
