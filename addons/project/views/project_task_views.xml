@@ -528,7 +528,7 @@
                                         column_invisible="not parent.allow_milestones"
                                         invisible="not allow_milestones"/>
                                     <field name="partner_id" optional="hide" widget="res_partner_many2one" invisible="not project_id" column_invisible="has_template_ancestor"/>
-                                    <field name="parent_id" optional="hide" groups="base.group_no_one"/>
+                                    <field name="parent_id" optional="hide" context="{'default_project_id': project_id}" groups="base.group_no_one"/>
                                     <field name="user_ids" widget="many2many_avatar_user" optional="show"/>
                                     <field name="company_id" optional="hide" groups="base.group_multi_company" />
                                     <field name="company_id" column_invisible="True"/>
@@ -546,7 +546,7 @@
                         <page name="extra_info" string="Extra Info" groups="base.group_no_one">
                             <group>
                                 <group>
-                                    <field name="parent_id" groups="base.group_no_one" context="{'search_view_ref' : 'project.view_task_search_form','search_default_project_id': project_id, 'search_default_open_tasks': 1}"/>
+                                    <field name="parent_id" groups="base.group_no_one" context="{'search_view_ref' : 'project.view_task_search_form','search_default_project_id': project_id, 'search_default_open_tasks': 1, 'default_project_id': project_id}"/>
                                     <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
                                     <field name="sequence" groups="base.group_no_one"/>
                                     <field name="email_cc" groups="base.group_no_one"/>
@@ -770,7 +770,7 @@
                     <field name="recurrence_id" column_invisible="True" />
                 </list>
                 <xpath expr="//field[@name='partner_id']" position="after">
-                    <field name="parent_id" optional="hide" context="{'search_view_ref': 'project.view_task_search_form', 'search_default_project_id': project_id}"/>
+                    <field name="parent_id" optional="hide" context="{'search_view_ref': 'project.view_task_search_form', 'search_default_project_id': project_id, 'default_project_id': project_id}"/>
                 </xpath>
                 <xpath expr="//field[@name='stage_id']" position="after">
                     <field name="personal_stage_type_id" string="Personal Stage" optional="hide"/>
