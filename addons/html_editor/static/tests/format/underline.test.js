@@ -54,6 +54,7 @@ test("should make a whole heading underline after a triple click", async () => {
     });
 });
 
+test.tags("desktop");
 test("should make a whole heading not underline after a triple click", async () => {
     const { el, editor } = await setupEditor(`<h1>${u(`ab`)}</h1><p>cd</p>`);
     await tripleClick(el.querySelector("h1"));

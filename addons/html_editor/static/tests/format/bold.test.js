@@ -82,6 +82,7 @@ test("should make a whole heading bold after a triple click", async () => {
     });
 });
 
+test.tags("desktop");
 test("should make a whole heading not bold after a triple click (heading is considered bold)", async () => {
     const { el, editor } = await setupEditor(`<h1>[ab</h1><p>]cd</p>`, {
         styleContent: styleH1Bold,

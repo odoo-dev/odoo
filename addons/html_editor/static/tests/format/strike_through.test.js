@@ -108,6 +108,7 @@ test("should make a whole heading strikeThrough after a triple click", async () 
     });
 });
 
+test.tags("desktop");
 test("should make a whole heading not strikeThrough after a triple click", async () => {
     const { el, editor } = await setupEditor(`<h1>${s(`[ab`)}</h1><p>]cd</p>`);
     await tripleClick(el.querySelector("h1"));
