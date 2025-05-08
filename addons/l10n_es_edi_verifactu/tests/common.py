@@ -5,7 +5,7 @@ from freezegun import freeze_time
 from unittest import mock
 
 from odoo import _, Command
-from odoo.tools import file_open, html_sanitize, misc
+from odoo.tools import file_open, html_sanitize, misc, zeep
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 
@@ -83,6 +83,7 @@ class TestL10nEsEdiVerifactuCommon(AccountTestInvoicingCommon):
         response = mock.Mock(spec=requests.Response)
         response.status_code = status_code
         response.text = self._read_file(response_file)
+        response.content = response.text.encode()
         response.headers = {
             'content-type': content_type,
         }
@@ -91,6 +92,25 @@ class TestL10nEsEdiVerifactuCommon(AccountTestInvoicingCommon):
     def _mock_request(self, mock_response):
         request_function_path = 'odoo.addons.l10n_es_edi_verifactu.models.verifactu_document.L10nEsEdiVerifactuDocument._soap_request'
         return mock.patch(request_function_path, return_value=mock_response)
+
+    def _mock_zeep_registration_operation_function(self, function):
+        request_function_path = 'odoo.addons.l10n_es_edi_verifactu.models.verifactu_document.L10nEsEdiVerifactuDocument._get_zeep_registration_operation'
+        return mock.patch(request_function_path, return_value=function)
+
+    def _mock_zeep_registration_operation(self, response_file):
+        # Note: The real result is of type 'odoo.tools.zeep.client.SerialProxy'; only the needed values have been mocked
+        xml_dict = self.env['l10n_es_edi_verifactu.document'].xml_to_dict(self._read_file(response_file))
+        mock_return_value = xml_dict['Envelope']['Body']['RespuestaRegFactuSistemaFacturacion']
+        # Fix 'RespuestaLinea' to be a list
+        mock_return_value['RespuestaLinea'] = [mock_return_value['RespuestaLinea']]
+        return self._mock_zeep_registration_operation_function(lambda *args, **kwargs: mock_return_value)
+
+    def _mock_zeep_registration_operation_certificate_issue(self):
+        def _raise_certificate_error(*args, **kwargs):
+            certificate_error = "No autorizado. Se ha producido un error al verificar el certificado presentado"
+            raise zeep.exceptions.TransportError(certificate_error)
+
+        return self._mock_zeep_registration_operation_function(_raise_certificate_error)
 
     def _mock_cron_trigger(self, cron_trigger_result_dict):
         trigger_function_path = 'odoo.addons.base.models.ir_cron.ir_cron._trigger'

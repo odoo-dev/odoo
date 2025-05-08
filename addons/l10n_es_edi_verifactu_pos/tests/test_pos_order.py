@@ -97,10 +97,7 @@ class TestL10nEsEdiVerifactuPosOrder(TestL10nEsEdiVerifactuCommon, TestPoSCommon
 
     def test_record_identifier(self):
         with self.with_pos_session():
-            response = self._mock_response(
-                200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html'
-            )
-            with self._mock_request(response):
+            with self._mock_zeep_registration_operation_certificate_issue():
                 order = self._create_order({
                     'pos_order_lines_ui_args': [
                         (self.product, 1.0),
@@ -140,8 +137,7 @@ class TestL10nEsEdiVerifactuPosOrder(TestL10nEsEdiVerifactuCommon, TestPoSCommon
 
     def test_order_not_invoiced(self):
         with self.with_pos_session():
-            response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/batch_single_accepted_registration.xml')
-            with self._mock_request(response):
+            with self._mock_zeep_registration_operation('l10n_es_edi_verifactu/tests/responses/batch_single_accepted_registration.xml'):
                 order = self._create_order({
                     'pos_order_lines_ui_args': [
                         (self.product, 1.0),
@@ -170,8 +166,7 @@ class TestL10nEsEdiVerifactuPosOrder(TestL10nEsEdiVerifactuCommon, TestPoSCommon
         with self.with_pos_session() as session:
             self.assertEqual(session.config_id.l10n_es_simplified_invoice_limit, 400.0)
 
-            response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/batch_single_accepted_registration.xml')
-            with self._mock_request(response):
+            with self._mock_zeep_registration_operation('l10n_es_edi_verifactu/tests/responses/batch_single_accepted_registration.xml'):
                 order = self._create_order({
                     # Note: The total is not above the simplified invoice limit
                     'is_invoiced': True,
@@ -213,8 +208,7 @@ class TestL10nEsEdiVerifactuPosOrder(TestL10nEsEdiVerifactuCommon, TestPoSCommon
         with self.with_pos_session() as session:
             self.assertEqual(session.config_id.l10n_es_simplified_invoice_limit, 400.0)
 
-            response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/batch_single_accepted_registration.xml')
-            with self._mock_request(response):
+            with self._mock_zeep_registration_operation('l10n_es_edi_verifactu/tests/responses/batch_single_accepted_registration.xml'):
                 order = self._create_order({
                     # Note: The total is above the simplified invoice limit
                     'is_invoiced': True,

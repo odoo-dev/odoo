@@ -44,14 +44,22 @@ class ResCompany(models.Model):
         https://prewww2.aeat.es/static_files/common/internet/dep/aplicaciones/es/aeat/tikeV1.0/cont/ws/SistemaFacturacion.wsdl
         """
         self.ensure_one()
+        wsdl_base = {
+            'url': 'https://prewww2.aeat.es/static_files/common/internet/dep/aplicaciones/es/aeat/tikeV1.0/cont/ws/SistemaFacturacion.wsdl',
+            'service': 'sfVerifactu',
+            'registration': 'RegFactuSistemaFacturacion',
+            'port': None,
+        }
         if self.l10n_es_edi_verifactu_test_environment:
             endpoints = {
-                'verifactu': "https://prewww1.aeat.es/wlpl/TIKE-CONT/ws/SistemaFacturacion/VerifactuSOAP",
-                'QR': "https://prewww2.aeat.es/wlpl/TIKE-CONT/ValidarQR",
+                'wsdl': wsdl_base | {'port': 'SistemaVerifactuPruebas'},
+                'verifactu': 'https://prewww1.aeat.es/wlpl/TIKE-CONT/ws/SistemaFacturacion/VerifactuSOAP',
+                'QR': 'https://prewww2.aeat.es/wlpl/TIKE-CONT/ValidarQR',
             }
         else:
             endpoints = {
-                'verifactu': "https://www1.agenciatributaria.gob.es/wlpl/TIKE-CONT/ws/SistemaFacturacion/VerifactuSOAP",
+                'wsdl': wsdl_base | {'port': 'SistemaVerifactu'},
+                'verifactu': 'https://www1.agenciatributaria.gob.es/wlpl/TIKE-CONT/ws/SistemaFacturacion/VerifactuSOAP',
                 'QR': 'https://www2.agenciatributaria.gob.es/wlpl/TIKE-CONT/ValidarQR'
             }
         return endpoints

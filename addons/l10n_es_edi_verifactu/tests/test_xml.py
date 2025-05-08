@@ -76,8 +76,7 @@ class TestL10nEsEdiVerifactuXml(TestL10nEsEdiVerifactuCommon):
         invoice.action_post()
 
         document = invoice._l10n_es_edi_verifactu_create_document()
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
-        with self._mock_request(response):
+        with self._mock_zeep_registration_operation_certificate_issue():
             batch_xml, _info = document._send_as_batch()
         self._assert_verifactu_xml(batch_xml, 'l10n_es_edi_verifactu/tests/files/test_invoice_1.xml')
 
@@ -94,8 +93,7 @@ class TestL10nEsEdiVerifactuXml(TestL10nEsEdiVerifactuCommon):
         credit_note.action_post()
 
         document = credit_note._l10n_es_edi_verifactu_create_document()
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
-        with self._mock_request(response):
+        with self._mock_zeep_registration_operation_certificate_issue():
             batch_xml, _info = document._send_as_batch()
         self._assert_verifactu_xml(batch_xml, 'l10n_es_edi_verifactu/tests/files/test_invoice_1_credit_note.xml')
 
@@ -120,8 +118,7 @@ class TestL10nEsEdiVerifactuXml(TestL10nEsEdiVerifactuCommon):
         invoice.action_post()
 
         document = invoice._l10n_es_edi_verifactu_create_document()
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
-        with self._mock_request(response):
+        with self._mock_zeep_registration_operation_certificate_issue():
             batch_xml, _info = document._send_as_batch()
         self._assert_verifactu_xml(batch_xml, 'l10n_es_edi_verifactu/tests/files/test_invoice_2.xml')
 
@@ -151,8 +148,7 @@ class TestL10nEsEdiVerifactuXml(TestL10nEsEdiVerifactuCommon):
         expected_qr_code_url = '/report/barcode/?barcode_type=QR&value=https%3A%2F%2Fprewww2.aeat.es%2Fwlpl%2FTIKE-CONT%2FValidarQR%3Fnif%3D59962470K%26numserie%3DINV%252F2019%252F00001%26fecha%3D30-01-2019%26importe%3D1100.00&barLevel=M&width=180&height=180'
         self.assertEqual(invoice.l10n_es_edi_verifactu_qr_code, expected_qr_code_url)
 
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
-        with self._mock_request(response):
+        with self._mock_zeep_registration_operation_certificate_issue():
             batch_xml, _info = document._send_as_batch()
         self._assert_verifactu_xml(batch_xml, 'l10n_es_edi_verifactu/tests/files/test_invoice_3.xml')
 
@@ -172,8 +168,7 @@ class TestL10nEsEdiVerifactuXml(TestL10nEsEdiVerifactuCommon):
         invoice.action_post()
 
         document = invoice._l10n_es_edi_verifactu_create_document()
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
-        with self._mock_request(response):
+        with self._mock_zeep_registration_operation_certificate_issue():
             batch_xml, _info = document._send_as_batch()
         self._assert_verifactu_xml(batch_xml, 'l10n_es_edi_verifactu/tests/files/test_invoice_multi_currency_1.xml')
 
@@ -235,8 +230,7 @@ class TestL10nEsEdiVerifactuXml(TestL10nEsEdiVerifactuCommon):
             document0.id, document1.id, document2.id,
         ])
 
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
-        with self._mock_request(response):
+        with self._mock_zeep_registration_operation_certificate_issue():
             batch_xml, _info = documents._send_as_batch()
         self._assert_verifactu_xml(batch_xml, 'l10n_es_edi_verifactu/tests/files/test_multiple_invoices_with_predecessor.xml')
 
@@ -255,8 +249,7 @@ class TestL10nEsEdiVerifactuXml(TestL10nEsEdiVerifactuCommon):
         invoice.action_post()
 
         document = invoice._l10n_es_edi_verifactu_create_document(cancellation=True)
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
-        with self._mock_request(response):
+        with self._mock_zeep_registration_operation_certificate_issue():
             batch_xml, _info = document._send_as_batch()
         self._assert_verifactu_xml(batch_xml, 'l10n_es_edi_verifactu/tests/files/test_invoice_cancellation_1.xml')
 
@@ -274,7 +267,6 @@ class TestL10nEsEdiVerifactuXml(TestL10nEsEdiVerifactuCommon):
         invoice.action_post()
 
         document = invoice._l10n_es_edi_verifactu_create_document()
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
-        with self._mock_request(response):
+        with self._mock_zeep_registration_operation_certificate_issue():
             batch_xml, _info = document._send_as_batch()
         self._assert_verifactu_xml(batch_xml, 'l10n_es_edi_verifactu/tests/files/test_invoice_simplified_partner.xml')

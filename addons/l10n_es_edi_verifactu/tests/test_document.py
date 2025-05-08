@@ -4,6 +4,7 @@ from unittest import mock
 from odoo import _, Command
 from odoo.exceptions import UserError
 from odoo.tests import tagged
+from odoo.tools import zeep
 from .common import TestL10nEsEdiVerifactuCommon
 
 
@@ -82,20 +83,14 @@ class TestL10nEsEdiVerifactuDocument(TestL10nEsEdiVerifactuCommon):
         self.assertRecordValues(invoice, [expected_record_values])
 
     def test_html_response(self):
-        # Note: the status code is contained in the content / HTML not in metadata
-        #       401: "Certificate not accepted"
-        #       403: "Missing certificate in request"
+        # TODO: rename test; or maybe test for doctype html header?
         invoice = self._create_dummy_invoice()
         document = invoice._l10n_es_edi_verifactu_create_document()
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
-        with self._mock_request(response):
+        with self._mock_zeep_registration_operation_certificate_issue():
             _batch_xml, info = document._send_as_batch()
 
         expected_response_info = {
-            'content_type': 'HTML',
-            'errors': [
-                'The document could not be sent; the access was denied: <main class="col-12 col-lg-7" id="acc-main"> <div class="d-flex">\n<i class="aeat-ico fa-ico-error-sm ico-size-4 mr-3 text-danger" aria-hidden="true" role="presentation"></i><h1 id="js-nombre-canal" class="font-weight-bold mb-0 display-4 mb-3 text-danger">401</h1>\n</div>\n<p>No autorizado. Se ha producido un error al verificar el certificado presentado. Las causas m&#225;s probables de este error son:</p>\n<ul>\n<li>El certificado no ha sido firmado por una autoridad reconocida.</li>\n<li>El tipo de certificado no es v&#225;lido para el servicio al que se quiere acceder.</li>\n<li>El certificado ha expirado.</li>\n</ul>\n<p>Puede contactar con el servicio de atenci&#243;n al contribuyente indicando el c&#243;digo de error 401.</p>\n<a target="_self" title="Comunicar incidencia" href="https://www2.agenciatributaria.gob.es/soporteaeat/Formularios.nsf/soporteOnline.php?OpenForm&amp;codigoError=401" class="d-block">Comunicar incidencia</a></main> \n',
-            ],
+            'errors': ["The document could not be sent; the access was denied due to a problem with the certificate."],
             'record_info': {},
         }
         self.assertDictEqual(info, expected_response_info | info)
@@ -118,15 +113,17 @@ class TestL10nEsEdiVerifactuDocument(TestL10nEsEdiVerifactuCommon):
         self.assertRecordValues(invoice, [expected_record_values])
 
     def test_soapfault(self):
+        def _raise_soapfault(*args, **kwargs):
+            message="Codigo[4102].El XML no cumple el esquema. Falta informar campo obligatorio.: NombreRazon"
+            code="env:Client"
+            raise zeep.exceptions.Fault(message, code=code)
+
         invoice = self._create_dummy_invoice()
         document = invoice._l10n_es_edi_verifactu_create_document()
-
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/soapfault.xml')
-        with self._mock_request(response):
+        with self._mock_zeep_registration_operation_function(_raise_soapfault):
             _batch_xml, info = document._send_as_batch()
 
         expected_response_info = {
-            'content_type': 'XML',
             'state': 'rejected',
             'errors': [
                 '[env:Client] Codigo[4102].El XML no cumple el esquema. Falta informar campo obligatorio.: NombreRazon',
@@ -155,12 +152,10 @@ class TestL10nEsEdiVerifactuDocument(TestL10nEsEdiVerifactuCommon):
     def test_batch_single_accepted_registration(self):
         invoice = self._create_dummy_invoice(name='INV/2019/00026', invoice_date='2024-12-30')
         document = invoice._l10n_es_edi_verifactu_create_document()
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/batch_single_accepted_registration.xml')
-        with self._mock_request(response):
+        with self._mock_zeep_registration_operation('l10n_es_edi_verifactu/tests/responses/batch_single_accepted_registration.xml'):
             _batch_xml, info = document._send_as_batch()
 
         expected_response_info = {
-            'content_type': 'XML',
             'state': 'accepted',
             'response_csv': 'A-YDSW8NLFLANWPM',
             'waiting_time_seconds': 60,
@@ -196,8 +191,7 @@ class TestL10nEsEdiVerifactuDocument(TestL10nEsEdiVerifactuCommon):
     def test_batch_single_rejected_registration(self):
         invoice = self._create_dummy_invoice(name='INV/2019/00006', invoice_date='2024-12-11')
         document = invoice._l10n_es_edi_verifactu_create_document()
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/batch_single_rejected_registration.xml')
-        with self._mock_request(response):
+        with self._mock_zeep_registration_operation('l10n_es_edi_verifactu/tests/responses/batch_single_rejected_registration.xml'):
             _batch_xml, info = document._send_as_batch()
 
         record_info = {
@@ -208,7 +202,6 @@ class TestL10nEsEdiVerifactuDocument(TestL10nEsEdiVerifactuCommon):
             ],
         }
         expected_response_info = {
-            'content_type': 'XML',
             'state': 'rejected',
             'response_csv': False,
             'waiting_time_seconds': 60,
@@ -240,8 +233,7 @@ class TestL10nEsEdiVerifactuDocument(TestL10nEsEdiVerifactuCommon):
     def test_batch_single_registered_with_errors_registration(self):
         invoice = self._create_dummy_invoice(name='INV/2019/00007', invoice_date='2024-12-17')
         document = invoice._l10n_es_edi_verifactu_create_document()
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/batch_single_registered_with_errors_registration.xml')
-        with self._mock_request(response):
+        with self._mock_zeep_registration_operation('l10n_es_edi_verifactu/tests/responses/batch_single_registered_with_errors_registration.xml'):
             _batch_xml, info = document._send_as_batch()
 
         record_info = {
@@ -252,7 +244,6 @@ class TestL10nEsEdiVerifactuDocument(TestL10nEsEdiVerifactuCommon):
             ],
         }
         expected_response_info = {
-            'content_type': 'XML',
             'state': 'registered_with_errors',
             'response_csv': 'A-X2CPJ3HE3AFADY',
             'waiting_time_seconds': 60,
@@ -284,8 +275,7 @@ class TestL10nEsEdiVerifactuDocument(TestL10nEsEdiVerifactuCommon):
     def test_response_parsing_error_document_not_found(self):
         invoice = self._create_dummy_invoice(name='INV/2019/00500', invoice_date='2024-12-17')
         document = invoice._l10n_es_edi_verifactu_create_document()
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/batch_single_registered_with_errors_registration.xml')
-        with self._mock_request(response):
+        with self._mock_zeep_registration_operation('l10n_es_edi_verifactu/tests/responses/batch_single_registered_with_errors_registration.xml'):
             _batch_xml, info = document._send_as_batch()
 
         record_info = {
@@ -296,7 +286,6 @@ class TestL10nEsEdiVerifactuDocument(TestL10nEsEdiVerifactuCommon):
             ],
         }
         expected_response_info = {
-            'content_type': 'XML',
             'state': 'registered_with_errors',
             'waiting_time_seconds': 60,
             'errors': [],
@@ -329,10 +318,10 @@ class TestL10nEsEdiVerifactuDocument(TestL10nEsEdiVerifactuCommon):
     def test_mark_for_next_batch(self):
         # Check that we can send immediately
         self.assertFalse(self.company.l10n_es_edi_verifactu_next_batch_time)
+        mock_accept = self._mock_zeep_registration_operation('l10n_es_edi_verifactu/tests/responses/batch_single_accepted_registration.xml')
 
         invoice = self._create_dummy_invoice(name='INV/2019/00026', invoice_date='2024-12-30')
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/batch_single_accepted_registration.xml')
-        with self._mock_request(response):
+        with mock_accept:
             created_documents = invoice._l10n_es_edi_verifactu_mark_for_next_batch()
         document = created_documents[invoice]
 
@@ -361,9 +350,8 @@ class TestL10nEsEdiVerifactuDocument(TestL10nEsEdiVerifactuCommon):
         # (by checking that the trigger function was called with the right time).
 
         invoice = self._create_dummy_invoice(name='INV/2019/00027', invoice_date='2024-12-30')
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/batch_single_accepted_registration.xml')
         cron_trigger_result_dict = {}
-        with self._mock_request(response), self._mock_cron_trigger(cron_trigger_result_dict):
+        with mock_accept, self._mock_cron_trigger(cron_trigger_result_dict):
             created_documents = invoice._l10n_es_edi_verifactu_mark_for_next_batch()
         document = created_documents[invoice]
         self.assertEqual(cron_trigger_result_dict['at'], datetime.datetime(2024, 12, 5, 0, 1, 0))
@@ -382,9 +370,8 @@ class TestL10nEsEdiVerifactuDocument(TestL10nEsEdiVerifactuCommon):
 
         # Note: The record identifier of `invoice` is different than the one found in the response
         invoice = self._create_dummy_invoice(name='INV/2019/00500', invoice_date='2024-12-17')
-        response = self._mock_response(200, 'l10n_es_edi_verifactu/tests/responses/certificate_issue.html', content_type='text/html')
         cron_trigger_result_dict = {}
-        with self._mock_request(response), self._mock_cron_trigger(cron_trigger_result_dict):
+        with self._mock_zeep_registration_operation_certificate_issue(), self._mock_cron_trigger(cron_trigger_result_dict):
             created_documents = invoice._l10n_es_edi_verifactu_mark_for_next_batch()
         document = created_documents[invoice]
 

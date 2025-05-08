@@ -8,13 +8,13 @@ from werkzeug.urls import url_quote_plus, url_encode
 import hashlib
 import math
 import requests.exceptions
-import traceback
+import xmltodict
 
 from odoo import _, api, fields, models
 from odoo.addons.l10n_es.models.http_adapter import PatchedHTTPAdapter
 from odoo.addons.l10n_es.models.xml_utils import get_xades_template_render_values, sign_xades
 from odoo.exceptions import UserError
-from odoo.tools import cleanup_xml_node, float_repr, float_round
+from odoo.tools import cleanup_xml_node, float_repr, float_round, zeep
 
 import odoo.release
 
@@ -357,227 +357,123 @@ class L10nEsEdiVerifactuDocument(models.Model):
                 cron._trigger(at=next_trigger_time)
 
     @api.model
-    def _send_xml(self, xml):
-        info = {
-            'errors': [],
-            'response': None,
-        }
-
-        try:
-            info['response'] = self._soap_request(xml)
-        except requests.exceptions.RequestException as exception:
-            exception_traceback = ''.join(traceback.format_exception(exception))
-            info['errors'].append(_("Sending the document to the AEAT failed: %s", exception_traceback))
-            return info
-
-        try:
-            parse_info = self._parse_response(info['response'])
-            info['errors'].extend(parse_info.pop('errors', []))  # avoid overwriting 'errors'
-            info.update(parse_info)
-        except L10nEsEdiVerifactuDocumentParseError as exception:
-            # TODO: maybe catching all exceptions okay? No database transactions should happen?
-            exception_traceback = ''.join(traceback.format_exception(exception))
-            info['errors'].extend(_("The response could not be parsed:\n%s", exception_traceback))
-
-        return info
-
-    @api.model
-    def _soap_request(self, xml):
+    def _get_zeep_operation(self, operation):
         company = self.env.company
 
         session = requests.Session()
+
+        settings = zeep.Settings(forbid_entities=False)
+        # TODO: endpoint
+        wsdl = company._l10n_es_edi_verifactu_get_endpoints()['wsdl']
+        client = zeep.Client(wsdl['url'], operation_timeout=60, timeout=60, session=session, settings=settings)
+
+        # TODO: mounting before creating `client` causes an error
         session.cert = company.sudo()._l10n_es_edi_verifactu_get_certificate()
         session.mount('https://', PatchedHTTPAdapter())
 
-        soap_xml = self._build_soap_request_xml(xml)
-
-        response = session.request(
-            'post',
-            url=company._l10n_es_edi_verifactu_get_endpoints()['verifactu'],
-            data=soap_xml,
-            timeout=15,
-            headers={'Content-Type': 'application/soap+xml;charset=UTF-8'},
-        )
-
-        return response
+        service = client.bind(wsdl['service'], wsdl['port'])
+        return service[wsdl[operation]]
 
     @api.model
-    def _build_soap_request_xml(self, edi_xml):
-        envelope_string = self.env['ir.qweb']._render('l10n_es_edi_verifactu.soap_request_verifactu')
-        envelope = etree.fromstring(envelope_string)
-        body = envelope.find('.//soapenv:Body', namespaces=NS_MAP)
-        body.append(etree.fromstring(edi_xml))
-        return etree.tostring(envelope)
+    def _get_zeep_registration_operation(self):
+        return self._get_zeep_operation('registration')
 
     @api.model
-    def _parse_response(self, response):
-        errors = []
+    def _send_batch(self, batch_dict):
+
+        # TODO: timeouts etc
+        operation = self._get_zeep_registration_operation()
+
         info = {
-            'errors': errors,
+            'errors': [],
             'record_info': {},
         }
-
-        self._parse_response_content_type(response, info)
-        if info['content_type'] == 'HTML':
-            self._parse_html_response(response, info)
-        elif info['content_type'] == 'XML':
-            self._parse_batch_xml_response(response, info)
-        else:
-            errors.append(_("We can not parse responses with that content type."))
-
-        return info
-
-    @api.model
-    def _parse_response_content_type(self, response, info):
-        if 'content-type' in response.headers:
-            header = response.headers['content-type'].casefold()
-            if header.startswith('text/xml'):
-                info['content_type'] = 'XML'
-            elif header.startswith('text/html'):
-                info['content_type'] = 'HTML'
-
-    @api.model
-    def _parse_html_response(self, response, info):
-        # Since it is a SOAP flow we should only get an HTML response in case of an access error
-        # (and get an XML response otherwise)
-        html_parser = etree.HTMLParser()
-        info['html_tree'] = etree.fromstring(response.text, html_parser)
-        self._parse_access_error_response(response, info)
-        if not info['errors']:
-            info['errors'].append(_("The document could not be sent; the access was denied."))
-
-    @api.model
-    def _parse_access_error_response(self, response, info):
-        html_tree = info['html_tree']
-        main_node = html_tree.find('.//main')
-        main_node_html = etree.tostring(main_node, pretty_print=True, method='html').decode()
-        info['errors'].append(_("The document could not be sent; the access was denied: %s", main_node_html))
-        return info
-
-    @api.model
-    def _parse_batch_xml_response(self, response, info):
-        namespaces = {
-            'env': 'http://schemas.xmlsoap.org/soap/envelope/',
-            'tikR': 'https://www2.agenciatributaria.gob.es/static_files/common/internet/dep/aplicaciones/es/aeat/tike/cont/ws/RespuestaSuministro.xsd',
-            'tik': 'https://www2.agenciatributaria.gob.es/static_files/common/internet/dep/aplicaciones/es/aeat/tike/cont/ws/SuministroInformacion.xsd',
-            'tikLRRC': 'https://www2.agenciatributaria.gob.es/static_files/common/internet/dep/aplicaciones/es/aeat/tike/cont/ws/RespuestaConsultaLR.xsd',
-        }
-        info.update({
-            'xml_tree': etree.fromstring(response.text.encode()),
-            'namespaces': namespaces,
-        })
-
-        self._parse_response_for_soapfault(response, info)
-        if info['errors']:
-            return
-
-        self._parse_batch_response(response, info)
-
-    @api.model
-    def _parse_response_for_soapfault(self, response, info):
         errors = info['errors']
-        xml_tree = info['xml_tree']
-        namespaces = info['namespaces']
-
-        soapfault_node = xml_tree.find('.//env:Fault', namespaces=namespaces)
-        if soapfault_node is not None:
-            info['state'] = 'rejected'
-            faultcode_node = soapfault_node.find('.//faultcode', namespaces=namespaces)
-            faultstring_node = soapfault_node.find('.//faultstring', namespaces=namespaces)
-            error_message = None
-            if faultcode_node is not None and faultstring_node is not None:
-                error_message = f'[{faultcode_node.text}] {faultstring_node.text}'
-            elif faultstring_node is not None:
-                error_message = faultstring_node.text
-            errors.append(error_message)
-
-    @api.model
-    def _parse_batch_response(self, response, info):
-        xml_tree = info['xml_tree']
-        namespaces = info['namespaces']
         record_info = info['record_info']
 
-        registration_node = xml_tree.find('env:Body/tikR:RespuestaRegFactuSistemaFacturacion', namespaces=namespaces)
-        if registration_node is None:
-            raise L10nEsEdiVerifactuDocumentParseError()
-
-        csv_node = registration_node.find('tikR:CSV', namespaces=namespaces)
-        # It may not exist in some cases; i.e. in case all documents are rejected
-        if csv_node is None:
-            info['response_csv'] = False
-        else:
-            info['response_csv'] = csv_node.text
-
-        waiting_time_node = registration_node.find('tikR:TiempoEsperaEnvio', namespaces=namespaces)
         try:
-            info['waiting_time_seconds'] = int(waiting_time_node.text)
-        except ValueError:
-            raise L10nEsEdiVerifactuDocumentParseError()
+            res = operation(batch_dict['Cabecera'], batch_dict['RegistroFactura'])
+            # `res` is of type 'zeep.client.SerialProxy'
+        except requests.exceptions.SSLError:
+            errors.append(_("The SSL certificate could not be validated."))
+        except (zeep.exceptions.TransportError, requests.exceptions.ConnectionError) as error:
+            # TODO: log tracebacks / details
+            certificate_error = "No autorizado. Se ha producido un error al verificar el certificado presentado"
+            if certificate_error in error.message:
+                errors.append(_("The document could not be sent; the access was denied due to a problem with the certificate."))
+            else:
+                errors.append(_("Networking error:\n%s", error))
+        except zeep.exceptions.Fault as soapfault:
+            info['state'] = 'rejected'
+            errors.append(f"[{soapfault.code}] {soapfault.message}")
+        except zeep.exceptions.Error as error:
+            errors.append(_("Error sending the document:\n%s", error))
 
-        batch_status_node = registration_node.find('tikR:EstadoEnvio', namespaces=namespaces)
-        if batch_status_node is not None:
-            batch_state_string = batch_status_node.text.strip()
-            batch_state = {
-                'Incorrecto': 'rejected',
-                'ParcialmenteCorrecto': 'registered_with_errors',
-                'Correcto': 'accepted',
-               }.get(batch_state_string)
-            if batch_state is None:
-                # As of writing all possible values are implemented for EstadoEnvio
-                raise L10nEsEdiVerifactuDocumentParseError()
-        info['state'] = batch_state or False
+        if errors:
+            return info
 
-        identification_errors = []
-        for element in registration_node.iterfind('tikR:RespuestaLinea', namespaces=namespaces):
-            subdoc_errors = []
+        # TODO: AttributeError in case element was not found
+        received_batch_state = res['EstadoEnvio']
+        batch_state = {
+            'Incorrecto': 'rejected',
+            'ParcialmenteCorrecto': 'registered_with_errors',
+            'Correcto': 'accepted',
+        }[received_batch_state]
 
-            # Determine an identifier (`record_key`) for the response line.
-            # Sync with function `_get_record_key`
-            invoice_id_node = element.find('tikR:IDFactura', namespaces=namespaces)
-            if invoice_id_node is None:
-                raise L10nEsEdiVerifactuDocumentParseError()
-            issuer_id_node = invoice_id_node.find('tik:IDEmisorFactura', namespaces=namespaces)
-            invoice_number_node = invoice_id_node.find('tik:NumSerieFactura', namespaces=namespaces)
-            if issuer_id_node is None or invoice_number_node is None:
-                raise L10nEsEdiVerifactuDocumentParseError()
-            issuer = issuer_id_node.text.strip()
-            invoice_name = invoice_number_node.text.strip()
-            record_key = str((issuer, invoice_name))
+        info.update({
+            'response_csv': res['CSV'] if 'CSV' in res else None,
+            'waiting_time_seconds': int(res['TiempoEsperaEnvio']),
+            'state': batch_state,
+        })
 
-            status_node = element.find('tikR:EstadoRegistro', namespaces=namespaces)
-            if status_node is None:
-                raise L10nEsEdiVerifactuDocumentParseError()
-            status = status_node.text.strip()
-            subdoc_state = {
+        for response_line in res['RespuestaLinea']:
+            record_id = response_line['IDFactura']
+            invoice_issuer = record_id['IDEmisorFactura'].strip()
+            invoice_name = record_id['NumSerieFactura'].strip()
+            # TODO: ?: add date
+            # invoice_date = record_id['FechaExpedicionFactura'].strip()
+            record_key = str((invoice_issuer, invoice_name))
+
+            operation_type = response_line['Operacion']['TipoOperacion']
+
+            received_state = response_line['EstadoRegistro']
+            state = {
                 'Incorrecto': 'rejected',
                 'AceptadoConErrores': 'registered_with_errors',
                 'Correcto': 'accepted',
-            }.get(status)
-            if subdoc_state is None:
-                # As of writing all possible values are implemented for EstadoRegistro
-                raise L10nEsEdiVerifactuDocumentParseError()
-            elif subdoc_state in ('rejected', 'registered_with_errors'):
-                code_node = element.find('tikR:CodigoErrorRegistro', namespaces=namespaces)
-                description_node = element.find('tikR:DescripcionErrorRegistro', namespaces=namespaces)
-                if code_node is None or description_node is None:
-                    raise L10nEsEdiVerifactuDocumentParseError()
-                code = code_node.text.strip()
-                description = description_node.text.strip()
-                subdoc_errors.append(f"[{code}] {description}")
+            }[received_state]
 
-            operation_type_node = element.find('tikR:Operacion/tik:TipoOperacion', namespaces=namespaces)
-            operation_type = operation_type_node is not None and operation_type_node.text.strip()
-            if not operation_type or operation_type not in ('Alta', 'Anulacion'):
-                # As of writing all possible values are implemented
-                raise L10nEsEdiVerifactuDocumentParseError()
-
+            errors = []
+            if state in ('rejected', 'registered_with_errors'):
+                error_code = response_line['CodigoErrorRegistro']
+                error_description = response_line['DescripcionErrorRegistro']
+                errors.append(f"[{error_code}] {error_description}")
             record_info[record_key] = {
-                'state': subdoc_state,
+                'state': state,
                 'cancellation': operation_type == 'Anulacion',
-                'errors': subdoc_errors,
+                'errors': errors,
             }
-        if identification_errors:
-            record_info[None] = {'errors': identification_errors}
+
+        return info
+
+    # TODO: remove
+    @api.model
+    def xml_to_dict(self, xml):
+        def clean(value):
+            if isinstance(value, dict):
+                return {
+                    key.split(':', 1)[1]: clean(value)
+                    for key, value in value.items()
+                    if not key.startswith("@")
+                   }
+            elif isinstance(value, list):
+                return [clean(v) for v in value]
+            else:
+                return value
+
+        xml_dict = xmltodict.parse(xml)
+        return clean(xml_dict)
+
 
     def _send_as_batch(self):
         # Documents in `self` should all belong to `self.env.company`
@@ -597,7 +493,9 @@ class L10nEsEdiVerifactuDocument(models.Model):
             info = {'errors': batch_errors}
             return None, info
 
-        info = self._send_xml(batch_xml)
+        batch_dict = self.xml_to_dict(batch_xml)['RegFactuSistemaFacturacion']
+
+        info = self._send_batch(batch_dict)
 
         # Store the information from the response split over the individual documents
         document_infos = self._get_document_infos(self, info)
@@ -649,7 +547,6 @@ class L10nEsEdiVerifactuDocument(models.Model):
                     response_info = {
                         'errors': [_("We could not find any information about the record in the linked batch document.")],
                     }
-                response_info['level'] = 'record'
             else:
                 # I.e. in case of soapfault and access denied there is no `record_info`.
                 # So we just return the global 'state' / 'errors'.
