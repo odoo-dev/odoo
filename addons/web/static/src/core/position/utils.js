@@ -233,10 +233,6 @@ function computePosition(popper, target, { container, flip, margin, position }) 
             }
             matches.push(match);
         }
-        if (!flip) {
-            // Stop when no flip is allowed
-            break;
-        }
     }
     // Settle for the first match with the least malus
     return matches.sort((a, b) => a.malus - b.malus)[0].result;
