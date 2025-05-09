@@ -6,6 +6,7 @@ import logging
 from base64 import b64decode
 import io
 import win32print
+import pywintypes
 import ghostscript
 
 from odoo.addons.hw_drivers.controllers.proxy import proxy_drivers
@@ -99,12 +100,22 @@ class PrinterDriver(Driver):
         }
         event_manager.device_changed(self)
 
-    def print_raw(self, data):
-        win32print.StartDocPrinter(self.printer_handle, 1, ('', None, "RAW"))
-        win32print.StartPagePrinter(self.printer_handle)
-        win32print.WritePrinter(self.printer_handle, data)
-        win32print.EndPagePrinter(self.printer_handle)
-        win32print.EndDocPrinter(self.printer_handle)
+    def print_raw(self, data, should_retry=True):
+        try:
+            win32print.StartDocPrinter(self.printer_handle, 1, ('Odoo print job', None, 'RAW'))
+            win32print.StartPagePrinter(self.printer_handle)
+            win32print.WritePrinter(self.printer_handle, data)
+            win32print.EndPagePrinter(self.printer_handle)
+            win32print.EndDocPrinter(self.printer_handle)
+        except pywintypes.error as error:
+            # These two errors occur when the handle has become invalid, so we re-open the printer and try again.
+            # Error codes are listed here: https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/18d8fbe8-a967-4f1c-ae50-99ca8e491d2d
+            if error.winerror in [0x3f, 0x772] and should_retry:
+                win32print.ClosePrinter(self.printer_handle)
+                self.printer_handle = win32print.OpenPrinter(self.device_identifier)
+                return self.print_raw(data, should_retry=False)
+            else:
+                _logger.exception("Printing failed")
 
     def print_report(self, data):
         helpers.write_file('document.pdf', data, 'wb')
