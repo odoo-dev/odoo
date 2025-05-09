@@ -271,6 +271,15 @@ def is_access_point():
     """
     return subprocess.run(['systemctl', 'is-active', 'hostapd'], stdout=subprocess.DEVNULL).returncode == 0
 
+def is_connected_to_internet():
+    """ Check if the device is currently connected to the internet
+
+    :return: True if the device is connected to the internet
+    :rtype: bool
+    """
+    connectivity = _nmcli(['networking', 'connectivity'])
+    return connectivity == 'full'
+
 @cache
 def generate_qr_code_image(qr_code_data):
     """Generate a QR code based on data argument and return it in base64 image format

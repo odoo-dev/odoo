@@ -298,6 +298,12 @@ chmod -R 644 /etc/logrotate.d/
 chown root:root /etc/logrotate.conf
 chmod 644 /etc/logrotate.conf
 
+# SSH Permissions (needed for passwordless connection with public key)
+# recommended settings: see "man ssh"
+chmod 700 ~/.ssh
+chmod 755 ~
+chmod 600 ~/.ssh/authorized_keys
+
 update-rc.d -f hostapd remove
 update-rc.d -f nginx remove
 update-rc.d -f dnsmasq remove
