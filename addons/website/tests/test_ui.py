@@ -660,7 +660,6 @@ class TestUi(HttpCaseWithWebsiteUser):
 
         self.start_tour('/', 'website_no_action_no_dirty_page', login='admin')
 
-    @unittest.skip
     def test_website_no_dirty_page(self):
         # Previous tests are testing the dirty behavior when the extra items
         # "+" menu comes in play. For other "no dirty" tests, we just remove
