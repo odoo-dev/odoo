@@ -18,6 +18,8 @@ import { mergeClasses } from "@web/core/utils/classname";
 import { useChildRef, useService } from "@web/core/utils/hooks";
 import { deepMerge } from "@web/core/utils/objects";
 import { effect } from "@web/core/utils/reactive";
+import { utils } from "@web/core/ui/ui_service";
+import { hasTouch } from "@web/core/browser/feature_detection";
 
 function getFirstElementOfNode(node) {
     if (!node) {
@@ -152,7 +154,7 @@ export class Dropdown extends Component {
         );
 
         const getPosition = () => this.position;
-        this.popover = usePopover(DropdownPopover, {
+        const popoverOptions = {
             animation: false,
             arrow: false,
             closeOnClickAway: (target) => this.popoverCloseOnClickAway(target, activeEl),
@@ -161,18 +163,24 @@ export class Dropdown extends Component {
             holdOnHover: this.props.holdOnHover,
             onClose: () => this.state.close(),
             onPositioned: (el, { direction }) => this.setTargetDirectionClass(direction),
-            popoverClass: mergeClasses(
-                "o-dropdown--menu dropdown-menu mx-0",
-                { "o-dropdown--menu-submenu": this.hasParent },
-                this.props.menuClass
-            ),
+            popoverClass: this.props.menuClass,
             popoverRole: "menu",
             get position() {
                 return getPosition();
             },
             ref: this.menuRef,
             setActiveElement: false,
-        });
+        };
+        if (!this.isBottomSheet) {
+            popoverOptions.popoverClass = mergeClasses(
+                "o-dropdown--menu dropdown-menu mx-0",
+                { "o-dropdown--menu-submenu": this.hasParent },
+                popoverOptions.popoverClass
+            );
+        } else {
+            popoverOptions.useBottomSheet = true;
+        }
+        this.popover = usePopover(DropdownPopover, popoverOptions);
 
         // As the popover is in another context we need to force
         // its re-rendering when the dropdown re-renders
@@ -191,6 +199,10 @@ export class Dropdown extends Component {
                 this.closePopover();
             }
         });
+    }
+
+    get isBottomSheet() {
+        return utils.isSmall() && hasTouch() && !this.props.disableBottomSheet;
     }
 
     /** @type {string} */
