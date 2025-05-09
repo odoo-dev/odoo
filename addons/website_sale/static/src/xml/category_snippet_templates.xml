@@ -12,7 +12,7 @@
                 <t t-set="bg_color" t-value="ribbon['bg_color'] || ''"/>
                 <t t-set="bg_class" t-value="`o_${ribbon['style']} o_${ribbon['position']}`"/>
                 <img
-                    t-att-src="category.cover_image"
+                    t-attf-src="/web/image/product.public.category/{{category.id}}/cover_image"
                     alt="Category Image"
                     class="s_category_image img-fluid position-absolute w-100 h-100"
                 />
@@ -21,7 +21,7 @@
                     <a
                         role="button"
                         t-attf-href="/shop/category/{{category.id}}"
-                        class="btn btn-primary align-self-start rounded-pill"
+                        class="btn btn-primary align-self-start"
                         t-out="buttonText"
                     />
                 </div>

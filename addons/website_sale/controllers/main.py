@@ -1835,14 +1835,31 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     @route('/shop/categories', type='jsonrpc', auth='public', website=True)
     def get_shop_categories(self, filter_id):
-        dynamic_filter = request.env['website.snippet.filter'].sudo().search(
-            [('id', '=', filter_id)] + request.website.website_domain(),
+        domain = request.website.website_domain()
+        if not filter_id:
+            return [{
+                'id': category.id,
+                'name': category.name,
+                'website_ribbon_id': category.website_ribbon_id.id,
+            } for category in request.env['product.public.category'].sudo().search(
+                domain + [('parent_id', '=', False)],
+            )]
+
+        domain += [('id', '=', filter_id)]
+        parent_category = request.env['product.public.category'].sudo().search(domain)
+        published_child_ids = parent_category.child_id.filtered('has_published_products')
+        return (
+            [{
+                'id': category.id,
+                'name': category.name,
+                'website_ribbon_id': category.website_ribbon_id.id,
+            } for category in published_child_ids] if published_child_ids
+            else [{
+                'id': parent_category.id,
+                'name': parent_category.name,
+                'website_ribbon_id': parent_category.website_ribbon_id.id,
+            }]
         )
-        values = dynamic_filter._prepare_values()
-        for val in values:
-            val['website_ribbon_id'] = val['website_ribbon_id'].id \
-                if val['website_ribbon_id'] else ''
-        return values
 
     @route('/shop/ribbons', type='jsonrpc', auth='public')
     def get_shop_ribbons(self):

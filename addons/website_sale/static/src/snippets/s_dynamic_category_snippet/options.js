@@ -11,20 +11,16 @@ options.registry.dynamic_snippet_category = options.Class.extend({
      */
     init: function () {
         this._super.apply(this, arguments);
-        this.dynamicFilters = {};
+        this.categories = [];
     },
 
     async willStart() {
         const _super = this._super.bind(this);
-        const dynamicFilters = await rpc(
-            '/website/snippet/options_filters', {model_name: 'product.public.category'}
+        this.categories = await this.orm.searchRead(
+            'product.public.category',
+            [],
+            ['id', 'name'],
         );
-        if (dynamicFilters.length) {
-            for (let index in dynamicFilters) {
-                this.dynamicFilters[dynamicFilters[index].id] = dynamicFilters[index];
-            }
-            this._defaultFilterId = dynamicFilters[0].id;
-        }
         return _super(...arguments);
     },
 
@@ -33,11 +29,9 @@ options.registry.dynamic_snippet_category = options.Class.extend({
      * @override
      */
     async onBuilt() {
-        // Default values depend on the templates and filters available.
-        // Therefore, they cannot be computed prior the start of the option.
         this.$target.get(0).dataset['columns'] = 2;
         this.$target.get(0).dataset['height'] = "small";
-        this.$target.get(0).dataset['filterId'] = this._defaultFilterId;
+        this.$target.get(0).dataset['filterId'] = 0;
         this.$target.get(0).dataset['alignment'] = "left";
         this.$target.get(0).dataset['button'] = "Explore Now";
     },
@@ -49,17 +43,11 @@ options.registry.dynamic_snippet_category = options.Class.extend({
      */
     _renderCustomXML: async function (uiFragment) {
         const filtersSelectorEl = uiFragment.querySelector("[data-name='filter_opt']");
-        for (let id in this.dynamicFilters) {
+        for (let index in this.categories) {
+            const category = this.categories[index]
             const button = document.createElement("we-button");
-            button.dataset.selectDataAttribute = id;
-            if (this.dynamicFilters[id].thumb) {
-                button.dataset.img = this.dynamicFilters[id].thumb;
-            } else {
-                button.innerText = this.dynamicFilters[id].name;
-            }
-            if (this.dynamicFilters[id].help) {
-                button.title = this.dynamicFilters[id].help;
-            }
+            button.dataset.selectDataAttribute = category['id'];
+            button.innerText = category['name'];
             filtersSelectorEl.appendChild(button);
         }
     },
@@ -77,7 +65,7 @@ options.registry.dynamic_snippet_category_item = productRibbonMixin(options.Clas
 
     onSetRibbon: async function(previewMode) {
         if(!previewMode){
-            this.trigger_up('request_save', {reload: true, optionSelector: `.s_dynamic_category`});
+            this.trigger_up('request_save', {reload: true, optionSelector: '.s_dynamic_category'});
         }
     }
 }))

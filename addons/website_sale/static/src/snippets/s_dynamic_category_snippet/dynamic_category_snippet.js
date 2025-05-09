@@ -2,7 +2,7 @@ import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 import { renderToFragment } from "@web/core/utils/render";
 import { rpc } from "@web/core/network/rpc";
-import { utils as uiUtils, SIZES } from "@web/core/ui/ui_service";
+import { listenSizeChange, utils as uiUtils } from "@web/core/ui/ui_service";
 
 
 export class dynamicCategorySnippet extends Interaction{
@@ -14,13 +14,18 @@ export class dynamicCategorySnippet extends Interaction{
             const nodeData = this.el.dataset;
             this.data = await this.waitFor(rpc(
                 '/shop/categories', {'filter_id': parseInt(nodeData.filterId)}
-            ));
+            ))
         } else {
             this.data = [];
         }
     }
 
-    async start(){
+    start(){
+        this.registerCleanup(listenSizeChange(this.render.bind(this)));
+        this.render();
+    }
+
+    render(){
         const heightToSpan = {
             'small': 1,
             'medium': 2,
@@ -47,7 +52,7 @@ export class dynamicCategorySnippet extends Interaction{
                 buttonText: this.el.dataset.button,
             }
         ));
-        const columns = uiUtils.getSize() < SIZES.MD? 1 : parseInt(this.el.dataset.columns);
+        const columns = uiUtils.isSmall()? 1 : parseInt(this.el.dataset.columns);
         category_grid.style.setProperty(
             "grid-template-columns", `repeat(${columns}, calc((100% / ${columns}) - 0.7rem))`
         );

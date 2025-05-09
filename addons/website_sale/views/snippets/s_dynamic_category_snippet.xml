@@ -25,7 +25,7 @@
                                 <a
                                     role="button"
                                     href="/shop"
-                                    class="o_not_editable btn btn-primary align-self-start rounded-pill"
+                                    class="o_not_editable btn btn-primary align-self-start"
                                 >
                                     Explore Now
                                 </a>
@@ -83,7 +83,10 @@
                     data-name="filter_opt"
                     data-attribute-name="filterId"
                     data-no-preview="true"
-                /><!-- Filled using JS -->
+                >
+                    <we-button data-select-data-attribute="0">All Categories</we-button>
+                    <!-- Filled using JS -->
+                </we-select>
                 <we-checkbox
                     string="All Products"
                     data-select-data-attribute="false|true"
