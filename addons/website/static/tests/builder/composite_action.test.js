@@ -7,6 +7,9 @@ import {
     setupHTMLBuilder,
 } from "@html_builder/../tests/helpers";
 
+// TODO: test composite with each spec: prepare, load, getValue, isApplied
+// TODO: test reloadComposite
+
 describe.current.tags("desktop");
 test("can call 2 separate actions with composite action", async () => {
     addBuilderAction({
@@ -89,6 +92,3 @@ test("can call the same action twice with composite action", async () => {
     await contains("[data-action-id='composite']").click();
     expect.verifySteps(["action1: class1", "action1: class2"]); // clean
 });
-
-// TODO: test composite with each spec: prepare, load, getValue, isApplied
-// TODO: test reloadComposite

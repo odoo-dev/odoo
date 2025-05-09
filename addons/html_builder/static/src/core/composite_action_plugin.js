@@ -67,6 +67,9 @@ export class CompositeActionPlugin extends Plugin {
                     results.push(action.isApplied(actionDescr));
                 }
             }
+            if (!results.length) {
+                return;
+            }
             return results.every((result) => result);
         },
         load: async ({ editingElement, params: { mainParam: actions }, value }) => {

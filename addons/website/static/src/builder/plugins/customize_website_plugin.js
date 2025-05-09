@@ -155,7 +155,6 @@ export class CustomizeWebsitePlugin extends Plugin {
                 },
             },
             addLanguage: {
-                reload: {},
                 preview: false,
                 apply: async () => {
                     const def = new Deferred();
@@ -174,8 +173,10 @@ export class CustomizeWebsitePlugin extends Plugin {
                     if (!save) {
                         return;
                     }
+                    document
+                        .querySelector(".o-website-builder_sidebar")
+                        .classList.remove("o_builder_sidebar_open");
                     await this.dependencies.savePlugin.save(/* not in translation */);
-                    // TODO doAction in savePlugin.save ?
                     await this.services.action.doAction("base.action_view_base_language_install", {
                         additionalContext: {
                             params: {
@@ -185,7 +186,10 @@ export class CustomizeWebsitePlugin extends Plugin {
                         },
                         onClose: def.resolve,
                     });
-                    return def;
+                    await def;
+                    document
+                        .querySelector(".o-website-builder_sidebar")
+                        .classList.add("o_builder_sidebar_open");
                 },
             },
             customizeBodyBgType: {
