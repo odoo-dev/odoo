@@ -48,6 +48,9 @@ class AccountTax(models.Model):
 
     def _prepare_base_line_for_taxes_computation(self, record, **kwargs):
         # EXTENDS 'account'
+        if (hasattr(record, 'ignore_quantity') and record.ignore_quantity):
+            kwargs['quantity'] = 1.0
+
         results = super()._prepare_base_line_for_taxes_computation(record, **kwargs)
         results['l10n_in_hsn_code'] = self._get_base_line_field_value_from_record(record, 'l10n_in_hsn_code', kwargs, False)
         return results
@@ -129,3 +132,9 @@ class AccountTax(models.Model):
                 for key, values in items_map.items()
             ],
         }
+
+    def _prepare_base_line_grouping_key(self, base_line):
+        # EXTENDS 'account'
+        results = super()._prepare_base_line_grouping_key(base_line)
+        results['ignore_quantity'] = None  # trigger computation of balance when `ignore_quantity` is toggled
+        return results

@@ -96,6 +96,12 @@
                     </field>
                 </page>
             </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/list//field[@name='quantity']" position="after">
+                <field name="ignore_quantity" column_invisible="parent.country_code != 'IN' or not (parent.move_type in ['out_refund', 'in_refund'] or parent.debit_origin_id)" optional="hide"/>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/list//field[@name='quantity']" position="attributes">
+                <attribute name="readonly">ignore_quantity</attribute>
+            </xpath>
         </field>
     </record>
 

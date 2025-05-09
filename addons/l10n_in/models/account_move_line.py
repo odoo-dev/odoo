@@ -1,11 +1,13 @@
 import re
 
 from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
+    ignore_quantity = fields.Boolean(string="Ignore Quantity", help="Igonore quanity and use Unit Price as Total Amount.")
     l10n_in_hsn_code = fields.Char(string="HSN/SAC Code", compute="_compute_l10n_in_hsn_code", store=True, readonly=False, copy=False)
 
     # withholding related fields
@@ -38,3 +40,29 @@ class AccountMoveLine(models.Model):
                 product_line=self.product_id.name or self.name
             )
         return False
+
+    @api.onchange('ignore_quantity')
+    def _onchange_ignore_quantity(self):
+        for line in self:
+            line.quantity = 0.0 if line.ignore_quantity else 1.0
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('ignore_quantity'):
+                vals['quantity'] = 0.0
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if vals.get('ignore_quantity'):
+            vals['quantity'] = 0.0
+        return super().write(vals)
+
+    @api.depends('ignore_quantity')
+    def _compute_totals(self):
+        super()._compute_totals()
+
+    @api.constrains('ignore_quantity')
+    def _check_ignore_quantity(self):
+        if any(line.ignore_quantity and not (line.move_type in ['in_refund', 'out_refund'] or line.move_id.debit_origin_id) for line in self):
+            raise UserError(_("Cannot ignore quantity for a non-refund line."))
