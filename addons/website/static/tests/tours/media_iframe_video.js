@@ -11,12 +11,12 @@ registerWebsitePreviewTour("website_media_iframe_video", {
         }),
         {
             content: "Select the image",
-            trigger: ":iframe #wrap .s_text_image img",
+            trigger: ":iframe #wrap .s_text_image img, :iframe #wrap .s_text_image img:not(:visible)",
             run: "click",
         },
         {
             content: "Open image link options",
-            trigger: "[data-name='media_link_opt']",
+            trigger: "[data-action-id='setLink']",
             run: "click",
         },
         {
@@ -26,7 +26,7 @@ registerWebsitePreviewTour("website_media_iframe_video", {
         },
         {
             content: "Click on replace media",
-            trigger: "[data-replace-media='true']",
+            trigger: "[data-action-id='replaceMedia']",
             run: "click",
         },
         {
@@ -50,7 +50,7 @@ registerWebsitePreviewTour("website_media_iframe_video", {
         },
         {
             content: "Click on replace media",
-            trigger: "[data-replace-media='true']",
+            trigger: "[data-action-id='replaceMedia']",
             run: "click",
         },
         {

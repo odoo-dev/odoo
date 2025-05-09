@@ -17,6 +17,7 @@ import { MediaDialog } from "./media_dialog/media_dialog";
 import { rightPos } from "@html_editor/utils/position";
 import { withSequence } from "@html_editor/utils/resource";
 import { closestElement } from "@html_editor/utils/dom_traversal";
+import { removeAnchorForNonImageMedia } from "./utils";
 
 /**
  * @typedef { Object } MediaShared
@@ -92,6 +93,9 @@ export class MediaPlugin extends Plugin {
         const mediaElements = [...node.querySelectorAll(MEDIA_SELECTOR)];
         if (node.matches(MEDIA_SELECTOR)) {
             mediaElements.push(node);
+        }
+        if (mediaElements[0]?.classList.contains("media_iframe_video")) {
+            removeAnchorForNonImageMedia(mediaElements[0]);
         }
         for (const el of mediaElements) {
             if (isProtected(el) || isProtecting(el)) {
