@@ -33,7 +33,7 @@ class BackgroundPositionOptionPlugin extends Plugin {
                 },
                 isApplied: ({ editingElement, value }) => {
                     const hasElRepeatStyle =
-                        getComputedStyle(editingElement).backgroundRepeat === "repeat";
+                        editingElement.classList.contains("o_bg_img_opt_repeat");
                     return value === "repeat-pattern" ? hasElRepeatStyle : !hasElRepeatStyle;
                 },
             },
