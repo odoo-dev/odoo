@@ -38,7 +38,7 @@ class PosSelfOrderController(http.Controller):
         order['fiscal_position_id'] = preset_id.fiscal_position_id.id if preset_id else pos_config.default_fiscal_position_id.id
         order['pricelist_id'] = preset_id.pricelist_id.id if preset_id else pos_config.pricelist_id.id
 
-        order = pos_config.env['pos.order'].sudo().with_company(pos_config.company_id.id).create([order])
+        order = pos_config.env['pos.order'].search([('uuid', '=', order['uuid'])]) or pos_config.env['pos.order'].sudo().with_company(pos_config.company_id.id).create([order])
         line_ids = order.lines
 
         self._verify_line_price(line_ids, pos_config, preset_id)
@@ -49,7 +49,7 @@ class PosSelfOrderController(http.Controller):
             'amount_tax': amount_total - amount_untaxed,
             'amount_total': amount_total,
         })
-
+        pos_config._notify('ORDER_PLACED', order.id)
         return self._generate_return_values(order, pos_config)
 
     def _get_prefixes(self, device_type):
@@ -185,7 +185,6 @@ class PosSelfOrderController(http.Controller):
         payment_method_sudo = pos_config.env["pos.payment.method"].browse(payment_method_id)
         if not order_sudo or not payment_method_sudo or payment_method_sudo not in order_sudo.config_id.payment_method_ids:
             raise NotFound("Order or payment method not found")
-
         status = payment_method_sudo._payment_request_from_kiosk(order_sudo)
 
         if not status:

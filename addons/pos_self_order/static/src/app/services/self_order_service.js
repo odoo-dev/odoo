@@ -603,7 +603,6 @@ export class SelfOrder extends Reactive {
                 this.currentOrder.delete();
                 uuid = result["pos.order"][0].uuid;
             }
-            this.data.synchronizeLocalDataInIndexedDB();
 
             if (this.config.self_ordering_pay_after === "each") {
                 this.selectedOrderUuid = null;
@@ -723,7 +722,6 @@ export class SelfOrder extends Reactive {
                 cleanOrders = true;
             } else if (error?.data?.name === "odoo.exceptions.UserError") {
                 message = error.data.message;
-                this.resetTableIdentifier();
             }
         } else if (error instanceof ConnectionLostError) {
             message = _t("Connection lost, please try again later");
