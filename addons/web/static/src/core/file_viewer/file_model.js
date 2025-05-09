@@ -67,15 +67,23 @@ export const FileModelMixin = (T) =>
             return this.mimetype && this.mimetype.startsWith("application/pdf");
         }
 
+        // excluding text/html and text/csv
         get isText() {
-            const textMimeType = [
-                "application/javascript",
-                "application/json",
-                "text/css",
-                "text/html",
-                "text/plain",
-            ];
-            return textMimeType.includes(this.mimetype);
+            const textMimeTypePattern = /^text\//;
+            const additionalMimeTypes = ["application/xml"];
+            const excludedMimeTypes = ["text/html", "text/csv"];
+            return this.mimetype && 
+                (additionalMimeTypes.includes(this.mimetype) ||
+                (textMimeTypePattern.test(this.mimetype) && !excludedMimeTypes.some(type => this.mimetype.startsWith(type)))
+            );
+        }
+
+        get isHtml() {
+            return this.mimetype && this.mimetype.startsWith("text/html");
+        }
+
+        get isJson() {
+            return this.mimetype && this.mimetype.startsWith("application/json");
         }
 
         get isUrl() {
@@ -93,7 +101,7 @@ export const FileModelMixin = (T) =>
 
         get isViewable() {
             return (
-                (this.isText || this.isImage || this.isVideo || this.isPdf || this.isUrlYoutube) &&
+                (this.isText || this.isImage || this.isVideo || this.isPdf || this.isUrlYoutube || this.isJson || this.isHtml) &&
                 !this.uploading
             );
         }

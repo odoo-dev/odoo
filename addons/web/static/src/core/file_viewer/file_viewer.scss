@@ -43,6 +43,7 @@
     outline: none;
 
     &.o-isText {
+        user-select: text;
         background: $white;
     }
 }
