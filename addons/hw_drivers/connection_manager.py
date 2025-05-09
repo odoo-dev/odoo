@@ -5,9 +5,11 @@ from datetime import datetime, timedelta
 import logging
 import subprocess
 import requests
+import socket
 from threading import Thread
 import time
 import urllib3
+
 
 from odoo.modules.module import get_resource_path
 from odoo.addons.hw_drivers.main import iot_devices, manager
@@ -20,6 +22,23 @@ class ConnectionManager(Thread):
         super(ConnectionManager, self).__init__()
         self.pairing_code = False
         self.pairing_uuid = False
+        self.connected_to_internet = True
+
+    def check_internet_connection(self):
+        """ Check if the IoT Box internet connection status has changed """
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(5)
+        try:
+            sock.connect(("8.8.8.8", 53)) # use Google DNS to test if we can reach it
+            if not self.connected_to_internet:
+                self.connected_to_internet = True
+                _logger.debug("IoT Box connected to internet")
+        except socket.error:
+            if self.connected_to_internet:
+                self.connected_to_internet = False
+                _logger.warning("IoT Box has lost its internet connection")
+        finally:
+            sock.close()
 
     def run(self):
         if not helpers.get_odoo_server_url() and not helpers.access_point():
@@ -30,6 +49,9 @@ class ConnectionManager(Thread):
             self.pairing_code = False
             self.pairing_uuid = False
             self._refresh_displays()
+        while True:
+            self.check_internet_connection()
+            time.sleep(15)
 
     def _connect_box(self):
         data = {
