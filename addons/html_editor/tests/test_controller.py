@@ -192,8 +192,9 @@ class TestController(HttpCase):
             }),
             headers=self.headers
         )
+        response_not_record_json = response_not_record.json()
         self.assertEqual(200, response_not_record.status_code)
-        self.assertTrue('other_error_msg' in response_not_record.text)
+        self.assertEqual({}, response_not_record_json["result"])
 
         # Attempt to retrieve metadata for path format `odoo/<model>/<record_id>`
         response_model_record = self.url_open(

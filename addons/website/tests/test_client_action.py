@@ -8,7 +8,6 @@ from odoo.addons.website.tests.common import HttpCaseWithWebsiteUser
 @odoo.tests.common.tagged('post_install', '-at_install')
 class TestClientAction(HttpCaseWithWebsiteUser):
 
-    @unittest.skip
     def test_01_client_action_redirect(self):
         page = self.env['website.page'].create({
             'name': 'Base',
