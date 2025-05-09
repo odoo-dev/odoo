@@ -638,3 +638,29 @@ export function toggleMobilePreview(toggleOn) {
         },
     ];
 }
+
+/**
+ * Opens the link popup for the specified link element.
+ *
+ * @param {string} triggerSelector - Selector for the link element.
+ * @param {string} [linkName=""] - Name of the link.
+ * @returns {TourStep[]} The tour steps that opens the link popup.
+ */
+export function openLinkPopup(triggerSelector, linkName = "") {
+    return [
+        {
+            content: `Open '${linkName}' link popup`,
+            trigger: triggerSelector,
+            async run() {
+                const el = this.anchor;
+                const sel = el.ownerDocument.getSelection();
+                sel.collapse(el.childNodes[0], 1);
+                el.focus();
+            }
+        },
+        {
+            content: "Check if the link popover opened",
+            trigger: ".o-we-linkpopover"
+        }
+    ];
+}
