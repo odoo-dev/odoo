@@ -306,6 +306,10 @@ STATIC_CACHE_LONG = 60 * 60 * 24 * 365
 # Helpers
 # =========================================================
 
+class AnubisException(Exception):
+    pass
+
+
 class RegistryError(RuntimeError):
     pass
 
@@ -2179,6 +2183,9 @@ class HttpDispatcher(Dispatcher):
                 response.set_cookie('session_id', session.sid, max_age=get_session_max_inactivity(self.env), httponly=True)
             return response
 
+        if isinstance(exc, AnubisException):
+            return self.request.redirect_query('/web/anubis', {'redirect': self.request.httprequest.full_path})
+
         if isinstance(exc, HTTPException):
             return exc
 
@@ -2481,7 +2488,7 @@ class Application:
                     _logger.log(exc.loglevel, exc, exc_info=getattr(exc, 'exc_info', None))
                 elif isinstance(exc, HTTPException):
                     pass
-                elif isinstance(exc, SessionExpiredException):
+                elif isinstance(exc, (AnubisException, SessionExpiredException)):
                     _logger.info(exc)
                 elif isinstance(exc, (UserError, AccessError)):
                     _logger.warning(exc)

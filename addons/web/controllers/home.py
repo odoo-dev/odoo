@@ -1,7 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import hashlib
 import json
 import logging
+import secrets
+from datetime import timedelta
+
 import psycopg2
 
 import odoo.api
@@ -11,13 +15,14 @@ from odoo import http
 from odoo.exceptions import AccessError
 from odoo.http import request
 from odoo.service import security
+from odoo.tools.misc import hash_sign, verify_hash_signed
 from odoo.tools.translate import _
+
 from .utils import (
-    ensure_db,
     _get_login_redirect_url,
+    ensure_db,
     is_user_internal,
 )
-
 
 _logger = logging.getLogger(__name__)
 
@@ -185,3 +190,29 @@ class Home(http.Controller):
     @http.route(['/robots.txt'], type='http', auth="none")
     def robots(self, **kwargs):
         return "User-agent: *\nDisallow: /\n"
+
+    @http.route(['/web/anubis'], type='http', auth='none', methods=['GET', 'POST'])
+    def anubis(self, signed_token='', code='', redirect=''):
+        ensure_db()
+        env_su = request.env(user=odoo.SUPERUSER_ID)
+        if request.httprequest.method == 'POST':
+            token = verify_hash_signed(env_su, 'anubis-challenge', signed_token)
+            if token is None:
+                raise odoo.exceptions.AccessDenied("bad token")
+            if hashlib.sha256((token + code).encode()).digest()[:3] != b'000':
+                raise odoo.exceptions.AccessDenied("bad hash")
+            res = request.redirect(redirect)
+            res.set_cookie('anubis', hash_sign(env_su, 'anubis', '', timedelta(days=1)))
+            return res
+
+        #def hash_sign(env, scope, message_values, expiration=None, expiration_hours=None):
+        #def verify_hash_signed(env, scope, payload):
+
+        signed_token = hash_sign(
+            env_su,
+            'anubis-challenge',
+            secrets.token_urlsafe(),
+            timedelta(hours=1),
+        )
+
+        return request.csrf_token() + " " + signed_token #request.render('web.anubis', {'signed_token': signed_token})

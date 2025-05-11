@@ -30,11 +30,11 @@ import odoo
 from odoo import api, http, models, tools
 from odoo.api import SUPERUSER_ID
 from odoo.exceptions import AccessDenied
-from odoo.http import request, Response, ROUTING_KEYS, SAFE_HTTP_METHODS
+from odoo.http import ROUTING_KEYS, SAFE_HTTP_METHODS, Response, request
 from odoo.modules.registry import Registry
 from odoo.service import security
 from odoo.tools.json import json_default
-from odoo.tools.misc import get_lang, submap
+from odoo.tools.misc import get_lang, submap, verify_hash_signed
 from odoo.tools.translate import code_translations
 
 _logger = logging.getLogger(__name__)
@@ -193,6 +193,18 @@ class IrHttp(models.AbstractModel):
         except ValueError:
             return None, None
 
+    bots = [
+        'bot', 'crawl', 'slurp', 'spider', 'curl', 'wget', 'facebookexternalhit',
+        'whatsapp', 'trendsmapresolver', 'pinterest', 'instagram',
+    ]
+
+    @classmethod
+    def is_a_bot(cls):
+        user_agent = request.httprequest.user_agent.string.lower()
+        # We don't use regexp and ustr voluntarily
+        # timeit has been done to check the optimum method
+        return any(bot in user_agent for bot in cls.bots)
+
     #------------------------------------------------------
     # Routing map
     #------------------------------------------------------
@@ -264,9 +276,21 @@ class IrHttp(models.AbstractModel):
 
     @classmethod
     def _auth_method_public(cls):
-        if request.env.uid is None:
-            public_user = request.env.ref('base.public_user')
-            request.update_env(user=public_user.id)
+        if request.env.uid is not None:
+            return
+
+        cookie = request.httprequest.cookies.get('anubis')
+        if cls.is_a_bot():
+            pass
+        elif not cookie:
+            e = "Anubis token missing"
+            raise http.AnubisException(e)
+        elif verify_hash_signed(request.env(user=SUPERUSER_ID), 'anubis', cookie) is None:
+            e = "Anubis token expired"
+            raise http.AnubisException(e)
+
+        public_user = request.env.ref('base.public_user')
+        request.update_env(user=public_user.id)
 
     @classmethod
     def _authenticate(cls, endpoint):
@@ -281,7 +305,7 @@ class IrHttp(models.AbstractModel):
                     request.session.logout(keep_db=True)
                     request.env = api.Environment(request.env.cr, None, request.session.context)
             getattr(cls, f'_auth_method_{auth}')()
-        except (AccessDenied, http.SessionExpiredException, werkzeug.exceptions.HTTPException):
+        except (AccessDenied, http.SessionExpiredException, http.AnubisException, werkzeug.exceptions.HTTPException):
             raise
         except Exception:
             _logger.info("Exception during request Authentication.", exc_info=True)

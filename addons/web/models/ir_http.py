@@ -29,15 +29,6 @@ ALLOWED_DEBUG_MODES = ['', '1', 'assets', 'tests', 'disable-t-cache']
 class IrHttp(models.AbstractModel):
     _inherit = 'ir.http'
 
-    bots = ["bot", "crawl", "slurp", "spider", "curl", "wget", "facebookexternalhit", "whatsapp", "trendsmapresolver", "pinterest", "instagram"]
-
-    @classmethod
-    def is_a_bot(cls):
-        user_agent = request.httprequest.user_agent.string.lower()
-        # We don't use regexp and ustr voluntarily
-        # timeit has been done to check the optimum method
-        return any(bot in user_agent for bot in cls.bots)
-
     @classmethod
     def _sanitize_cookies(cls, cookies):
         super()._sanitize_cookies(cookies)
