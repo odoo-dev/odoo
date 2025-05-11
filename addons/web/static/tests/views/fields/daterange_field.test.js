@@ -1190,6 +1190,64 @@ test("update the selected input datetime after clearing the existing date", asyn
     expect("input[data-field=datetime]").toHaveValue("03/12/2019 15:35");
 });
 
+test("update start date via the date picker input", async () => {
+    Partner._records[0].datetime_end = "2017-02-10 00:00:00";
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="datetime" widget="daterange" options="{'end_date_field': 'datetime_end'}" />
+            </form>`,
+        resId: 1,
+    });
+
+    await contains("input[data-field=datetime]").click();
+
+    await contains(getPickerCell("12")).click();
+    await contains(getPickerCell("15")).click();
+    expect(".o_date_picker_input:eq(0)").toHaveValue("02/12/2017");
+    expect(".o_date_picker_input:eq(1)").toHaveValue("02/15/2017");
+    expect(".o_field_daterange input:eq(0)").toHaveValue("02/12/2017 15:30");
+    expect(".o_field_daterange input:eq(1)").toHaveValue("02/15/2017 05:30");
+
+    await contains(".o_date_picker_input:eq(0)").edit("02/11/2017");
+    expect(".o_date_picker_input:eq(0)").toHaveValue("02/11/2017");
+    expect(".o_date_picker_input:eq(1)").toHaveValue("02/15/2017");
+    expect(".o_field_daterange input:eq(0)").toHaveValue("02/11/2017 15:30");
+    expect(".o_field_daterange input:eq(1)").toHaveValue("02/15/2017 05:30");
+});
+
+test("update end date via the date picker input", async () => {
+    Partner._records[0].datetime_end = "2017-02-10 00:00:00";
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="datetime" widget="daterange" options="{'end_date_field': 'datetime_end'}" />
+            </form>`,
+        resId: 1,
+    });
+
+    await contains("input[data-field=datetime]").click();
+
+    await contains(getPickerCell("12")).click();
+    await contains(getPickerCell("15")).click();
+    expect(".o_date_picker_input:eq(0)").toHaveValue("02/12/2017");
+    expect(".o_date_picker_input:eq(1)").toHaveValue("02/15/2017");
+    expect(".o_field_daterange input:eq(0)").toHaveValue("02/12/2017 15:30");
+    expect(".o_field_daterange input:eq(1)").toHaveValue("02/15/2017 05:30");
+
+    await contains(".o_date_picker_input:eq(1)").edit("02/16/2017");
+    expect(".o_date_picker_input:eq(0)").toHaveValue("02/12/2017");
+    expect(".o_date_picker_input:eq(1)").toHaveValue("02/16/2017");
+    expect(".o_field_daterange input:eq(0)").toHaveValue("02/12/2017 15:30");
+    expect(".o_field_daterange input:eq(1)").toHaveValue("02/16/2017 05:30");
+});
+
 test("daterange with inverted start date and end date", async () => {
     Partner._records[0].datetime_end = "2017-02-01 00:00:00";
 

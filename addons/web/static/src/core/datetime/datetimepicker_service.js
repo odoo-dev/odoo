@@ -351,9 +351,13 @@ export const datetimePickerService = {
                  * @param {"date" | "time"} unit
                  * @param {"input" | "picker"} source
                  */
-                const updateValue = (value, unit, source) => {
+                const updateValue = (value, unit, source, valueIndex) => {
                     const previousValue = pickerProps.value;
                     pickerProps.value = value;
+
+                    if (valueIndex !== undefined) {
+                        pickerProps.focusedDateIndex = valueIndex;
+                    }
 
                     if (areDatesEqual(previousValue, pickerProps.value)) {
                         return;
@@ -415,9 +419,10 @@ export const datetimePickerService = {
                 /** @type {DateTimePickerProps} */
                 const rawPickerProps = {
                     ...DateTimePicker.defaultProps,
-                    onSelect: (value, unit) => {
+                    onSelect: (value, valueIndex, unit, source) => {
                         value &&= markRaw(value);
-                        updateValue(value, unit, "picker");
+                        source = source || "picker";
+                        updateValue(value, unit, source, valueIndex);
                         if (!pickerProps.range && pickerProps.type === "date") {
                             saveAndClose();
                         }

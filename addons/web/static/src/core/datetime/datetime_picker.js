@@ -33,7 +33,7 @@ const { DateTime, Info } = luxon;
  * @property {PrecisionLevel} [maxPrecision="decades"]
  * @property {DateLimit} [minDate]
  * @property {PrecisionLevel} [minPrecision="days"]
- * @property {(value: DateTime | DateRange, unit: "date" | "time") => any} [onSelect]
+ * @property {(value: DateTime | DateRange, valueIndex: number, unit: "date" | "time") => any} [onSelect]
  * @property {boolean} [range]
  * @property {number} [rounding=5] the rounding in minutes, pass 0 to show seconds, pass 1 to avoid
  *  rounding minutes without displaying seconds.
@@ -566,7 +566,8 @@ export class DateTimePicker extends Component {
         this.validateAndSelect(
             DateTime.fromFormat(newDate, this.props.dateFormat),
             valueIndex,
-            "date"
+            "date",
+            "inputPicker"
         );
     }
 
@@ -584,8 +585,9 @@ export class DateTimePicker extends Component {
      * @param {DateTime} value
      * @param {number} valueIndex
      * @param {"date" | "time"} unit
+     * @param {string} source
      */
-    validateAndSelect(value, valueIndex, unit) {
+    validateAndSelect(value, valueIndex, unit, source) {
         if (!this.props.onSelect) {
             // No onSelect handler
             return false;
@@ -603,7 +605,7 @@ export class DateTimePicker extends Component {
             // Date is outside range defined by min and max dates
             return false;
         }
-        this.props.onSelect(result.length === 2 ? result : result[0], unit);
+        this.props.onSelect(result.length === 2 ? result : result[0], valueIndex, unit, source);
         return true;
     }
 
