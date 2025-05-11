@@ -3030,7 +3030,7 @@ test("datetime options (edit)", async () => {
     ]);
 
     await contains(".o_datetime_input").click();
-    await contains(getPickerCell("26")).click();
+    await contains(getPickerCell("26")[1]).click();
     expect(getCurrentValue()).toBe("03/26/2025");
     expect.verifySteps([
         '["&", "&", ("datetime.year_number", "=", 2025), ("datetime.month_number", "=", 3), ("datetime.day_of_month", "=", 26)]',
