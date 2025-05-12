@@ -49,6 +49,8 @@ export class BottomSheet extends Component {
         closeOnEscape: { optional: true, type: Boolean },
         setActiveElement: { optional: true, type: Boolean },
 
+        hasParent: { optional: true, type: Boolean },
+
         // Unused Pops but needed as to be the same as Popover
         target: { optional: true, type: "*" },
         position: { optional: true, type: "*" },

@@ -8,7 +8,7 @@
                 'o_bottom_sheet_extended': state.isExtended,
                 'o_bottom_sheet_dismissing': state.isDismissing,
                 'o_bottom_sheet_snapping': state.isSnappingEnabled,
-                'o_bottom_sheet_nested': props.isNestedSheet,
+                'o_bottom_sheet_nested': props.hasParent,
             }"
             t-attf-style="--BottomSheet-progress: {{state.progress}}"
             t-att-data-sheet-id="props.id"
@@ -34,7 +34,7 @@
                 <!-- Sheet container -->
                 <div
                     class="o_bottom_sheet_sheet offcanvas position-relative overflow-hidden"
-                    t-attf-class="{{ props.sheetClasses || '' }}"
+                    t-attf-class="{{ props.class || '' }}"
                     role="dialog"
                     t-ref="sheet"
                     >
@@ -53,16 +53,16 @@
                     <t t-if="props.slots &amp;&amp; props.slots.header &amp;&amp; !props.slots.header_right">
                         <t t-slot="header"/>
                     </t>
-                    <t t-elif="props.title || props.showBackBtn || props.showCloseBtn || (props.slots &amp;&amp; props.slots.header_right)">
+                    <t t-elif="props.title || props.hasParent || props.showCloseBtn || (props.slots &amp;&amp; props.slots.header_right)">
                         <div
                             class="o_bottom_sheet_header offcanvas-header"
                             t-att-class="{
-                                o_no_back: !props.showBackBtn,
+                                o_no_back: !props.hasParent,
                                 o_no_title: !props.title,
                             }"
                             >
                             <button
-                                t-if="props.showBackBtn"
+                                t-if="props.hasParent"
                                 type="button"
                                 class="btn p-0 me-auto fs-5"
                                 t-on-click="back"
