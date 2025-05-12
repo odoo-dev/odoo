@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="dynamic_employee_card_tour" model="web_tour.tour">
+        <field name="name">dynamic_employee_card_tour</field>
+        <field name="sequence">10</field>
+        <field name="rainbow_man_message">Congrats, you completed a tour! bipty bopty bop</field>
+    </record>
+</odoo>
