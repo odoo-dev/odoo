@@ -152,7 +152,7 @@ export function changeOptionInPopover(blockName, optionName, elementName) {
     steps.push(
         clickOnElement(
             `${elementName} in the ${optionName} option`,
-            `.o_popover div:contains("${elementName}"), .o_popover ${elementName}`
+            `.o_popover div.o-dropdown-item:contains("${elementName}"), .o_popover ${elementName}`
         )
     );
     return steps;
