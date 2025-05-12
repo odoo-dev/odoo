@@ -84,6 +84,20 @@ class AccountChartTemplate(models.AbstractModel):
             },
         }
 
+    @template('in', 'account.journal')
+    def _get_in_account_journal(self):
+        """ In case of an Indin CoA, we modify the default name of the sales journal"""
+        return {
+            "sale": {
+                'name': _("Customer Invoices"),
+                'type': 'sale',
+                'code': _('INV'),
+                'show_on_dashboard': True,
+                'color': 11,
+                'sequence': 5,
+            },
+        }
+
     @template('in', 'account.tax')
     def _get_in_account_tax(self):
         # Tax mappings are dependent on the fiscal positions
