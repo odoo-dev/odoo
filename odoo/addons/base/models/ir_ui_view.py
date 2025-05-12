@@ -2830,12 +2830,19 @@ class Base(models.AbstractModel):
         options = options or {}
         result = {}
 
+        pre_views = self._get_view_ids(views, **options)
+        uncached_view_ids = [v_id for v_id, v_type, new in pre_views if new]
+        if uncached_view_ids:
+            records = self.env['ir.ui.view'].browse(uncached_view_ids).sudo()
+            archs = records._get_combined_archs()
+            options['archs'] = {view_id: (arch, view) for view_id, arch, view in zip(uncached_view_ids, archs, records)}
+
         result['views'] = {
             v_type: self.get_view(
                 v_id, v_type,
                 **options
             )
-            for [v_id, v_type] in views
+            for [v_id, v_type, _new] in pre_views
         }
 
         models = {}
@@ -2875,6 +2882,97 @@ class Base(models.AbstractModel):
         return result
 
     @api.model
+    def _get_view_ids(self, views, **options):
+        """ Returns the views object with founded view_id and if it's new in cache
+
+        :param views: list of [view_id, view_type]
+        :return: list of [view_id, view_type, boolean]
+        """
+        new_cached_view_ids = set()
+        return [(
+            (view_id:=self._get_view_id(v_id, v_type, __add_view_id=new_cached_view_ids.add, __views=views, **options)),
+            v_type,
+            view_id in new_cached_view_ids
+        ) for v_id, v_type in views]
+
+    @api.model
+    @tools.conditional(
+        'xml' not in config['dev_mode'],
+        tools.ormcache('self._get_view_cache_key(view_id, view_type, **options)', cache='templates'),
+    )
+    def _get_view_id(self, view_id=None, view_type='form', **options):
+        """Get the model view id and if this id.
+
+        :param int view_id: id of the view or None
+        :param str view_type: type of the view to return if view_id is None ('form', 'list', ...)
+        :param dict options: bool options to return additional features:
+            - bool mobile: true if the web client is currently using the responsive mobile view
+            (to use kanban views instead of list views for x2many fields)
+        :return: view id or None
+        """
+        # Insert the view id in cache
+        if '__insert_id' in options:
+            view_id = options['__insert_id']
+
+        # Callback when add a new id in cache
+        if '__add_view_id' in options and (view_id or '__insert_id' in options):
+            options['__add_view_id'](view_id)
+
+        # will try to find a view_id if none provided
+        if view_id:
+            return view_id
+
+        # Will fetch all other needed id to add it in cache in same time.
+        views = options.pop('__views', None)
+        if not views:
+            views = [(view_id, view_type)]
+
+        result = {}
+
+        missing_view_types = {view[1] for view in views if not view[0]}
+
+        # <view_type>_view_ref in context can be used to override the default view
+        view_refs = [
+            (v_type, self._context[v_type + '_view_ref'])
+            for v_type in missing_view_types
+            if self._context.get(v_type + '_view_ref')
+        ]
+        domain = Domain(False)
+        for v_type, view_ref in view_refs:
+            if '.' in view_ref:
+                module, view_ref = view_ref.split('.', 1)
+                domain |= Domain('model', '=', 'ir.ui.view') & Domain('module', '=', module) & Domain('name', '=', view_ref)
+            else:
+                _logger.warning(
+                    '%r requires a fully-qualified external id (got: %r for model %s). '
+                    'Please use the complete `module.view_id` form instead.', v_type + '_view_ref', view_ref,
+                    self._name
+                )
+        view_ref_res = {r.name: r.res_id for r in self.env['ir.model.data'].sudo().search_fetch(domain, ['res_id', 'name'])}
+        for v_type, view_ref in view_refs:
+            ref_id = view_ref_res.get(view_ref.split('.', 1).pop())
+            if ref_id:
+                missing_view_types.remove(v_type)
+                result[v_type] = ref_id
+
+        # otherwise try to find the lowest priority matching ir.ui.view
+        if missing_view_types:
+            IrUiView = self.env['ir.ui.view'].sudo()
+            domain = Domain([('model', '=', self._name), ('type', 'in', missing_view_types), ('mode', '=', 'primary')])
+            types = set()
+            for v in IrUiView.search_fetch(domain, ['type']):
+                if v.type in types:
+                    continue
+                types.add(v.type)
+                result[v.type] = v.id
+
+        # insert result in cache
+        for v_type, v_id in result.items():
+            self._get_view_id(view_id=None, view_type=v_type, __insert_id=v_id, **options)
+
+        return result.get(view_type)
+
+    @api.model
     def _get_view(self, view_id=None, view_type='form', **options):
         """
         Get the model view combined architecture (the view along all its
@@ -2898,36 +2996,16 @@ class Base(models.AbstractModel):
         """
         IrUiView = self.env['ir.ui.view'].sudo()
 
-        # try to find a view_id if none provided
         if not view_id:
-            # <view_type>_view_ref in context can be used to override the default view
-            view_ref_key = view_type + '_view_ref'
-            view_ref = self._context.get(view_ref_key)
-            if view_ref:
-                if '.' in view_ref:
-                    module, view_ref = view_ref.split('.', 1)
-
-                    sql = SQL(
-                        "SELECT res_id FROM ir_model_data WHERE model='ir.ui.view' AND module=%s AND name=%s",
-                        module, view_ref,
-                    )
-                    if view_ref_res := self.env.execute_query(sql):
-                        [[view_id]] = view_ref_res
-                else:
-                    _logger.warning(
-                        '%r requires a fully-qualified external id (got: %r for model %s). '
-                        'Please use the complete `module.view_id` form instead.', view_ref_key, view_ref,
-                        self._name
-                    )
-
-            if not view_id:
-                # otherwise try to find the lowest priority matching ir.ui.view
-                view_id = IrUiView.default_view(self._name, view_type)
+            view_id = self._get_view_id(view_id=view_id, view_type=view_type, **options)
 
         if view_id:
-            # read the view with inherited views applied
-            view = IrUiView.browse(view_id)
-            arch = view._get_combined_arch()
+            if 'archs' in options and view_id in options['archs']:
+                arch, view = options['archs'][view_id]
+            else:
+                # read the view with inherited views applied
+                view = IrUiView.browse(view_id)
+                arch = view._get_combined_arch()
         else:
             # fallback on default views methods if no ir.ui.view could be found
             view = IrUiView.browse()
