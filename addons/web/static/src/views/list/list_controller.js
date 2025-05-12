@@ -222,7 +222,7 @@ export class ListController extends Component {
             .filter((button) => button.display === "always")
             .map((button) => ({
                 id: button.id,
-                idAvailable: () => !this.evalViewModifier(button.invisible),
+                isAvailable: () => !this.evalViewModifier(button.invisible),
                 sequence: CONTROL_PANEL_BUTTONS_HEADER_SEQUENCE,
                 template: "web.ListView.Buttons.MultiRecord",
                 props: this.multiRecordViewButtonProps(button),
