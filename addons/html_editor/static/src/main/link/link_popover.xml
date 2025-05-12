@@ -11,7 +11,7 @@
                 </div>
                 <div t-else="" class="d-flex">
                     <div class="col p-2" style="max-width: 250px;">
-                        <div class="input-group mb-1">
+                        <div class="input-group mb-1" t-att-class="{'d-none': state.isLabelHidden}">
                             <input t-ref="label"
                                 class="o_we_label_link form-control form-control-sm"
                                 t-model="state.label"

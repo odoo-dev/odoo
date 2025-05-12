@@ -19,6 +19,7 @@ export class LinkPopover extends Component {
         onRemove: Function,
         onCopy: Function,
         onClose: Function,
+        onEdit: Function,
         getInternalMetaData: Function,
         getExternalMetaData: Function,
         getAttachmentMetadata: Function,
@@ -91,6 +92,7 @@ export class LinkPopover extends Component {
             customBorderSize: computedStyle.borderWidth.replace("px", "") || "1",
             customBorderStyle: computedStyle.borderStyle || "solid",
             isImage: this.props.isImage,
+            isLabelHidden: !!this.props.linkElement.childElementCount,
         });
 
         this.customTextColorState = useState({
@@ -214,6 +216,7 @@ export class LinkPopover extends Component {
     }
     onClickEdit() {
         this.state.editing = true;
+        this.props.onEdit();
         this.updateUrlAndLabel();
     }
     updateUrlAndLabel() {
@@ -406,15 +409,19 @@ export class LinkPopover extends Component {
     }
 
     get classes() {
-        if (!this.state.type) {
-            return "";
+        let classes = [...this.props.linkElement.classList]
+            .filter((value) => value != "btn" && !value.match(/btn-(sm|lg|fill)/))
+            .join(" ");
+
+        if (this.state.type) {
+            classes += ` btn btn-fill-${this.state.type}`;
         }
-        let classes = `btn btn-fill-${this.state.type}`;
 
         if (this.state.buttonSize) {
             classes += ` btn-${this.state.buttonSize}`;
         }
-        return classes;
+
+        return classes.trim();
     }
 
     get customStyles() {
