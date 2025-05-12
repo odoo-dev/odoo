@@ -178,7 +178,12 @@ export class Dropdown extends Component {
                 popoverOptions.popoverClass
             );
         } else {
+            popoverOptions.popoverClass = mergeClasses(
+                "dropdown-menu",
+                popoverOptions.popoverClass
+            );
             popoverOptions.useBottomSheet = true;
+            popoverOptions.hasParent = this.hasParent;
         }
         this.popover = usePopover(DropdownPopover, popoverOptions);
 

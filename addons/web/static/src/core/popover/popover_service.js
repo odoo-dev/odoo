@@ -80,6 +80,7 @@ export const popoverService = {
                     fixedPosition: options.fixedPosition,
                     holdOnHover: options.holdOnHover,
                     setActiveElement: options.setActiveElement ?? true,
+                    hasParent: options.hasParent,
                 },
                 {
                     env: options.env,

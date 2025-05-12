@@ -106,6 +106,9 @@ export class Popover extends Component {
         closeOnEscape: { optional: true, type: Boolean },
         setActiveElement: { optional: true, type: Boolean },
 
+        // Bottom Sheet porps
+        hasParent: { optional: true, type: Boolean },
+
         // Technical props
         ref: { optional: true, type: Function },
         slots: { optional: true, type: Object },
