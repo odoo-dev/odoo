@@ -18,7 +18,6 @@ import { MovePlugin } from "./move_plugin";
 import { OperationPlugin } from "./operation_plugin";
 import { OverlayButtonsPlugin } from "./overlay_buttons/overlay_buttons_plugin";
 import { RemovePlugin } from "./remove_plugin";
-import { ReplacePlugin } from "./replace_plugin";
 import { SavePlugin } from "./save_plugin";
 import { SaveSnippetPlugin } from "./save_snippet_plugin";
 import { SetupEditorPlugin } from "./setup_editor_plugin";
@@ -35,7 +34,6 @@ export const CORE_PLUGINS = [
     MovePlugin,
     GridLayoutPlugin,
     DragAndDropPlugin,
-    ReplacePlugin,
     RemovePlugin,
     ClonePlugin,
     SaveSnippetPlugin,

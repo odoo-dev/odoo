@@ -142,7 +142,6 @@ export class Builder extends Component {
                     key: this.env.localOverlayContainerKey,
                     ref: this.props.overlayRef,
                 },
-                replaceSnippet: async (snippet) => await this.snippetModel.replaceSnippet(snippet),
                 saveSnippet: (snippetEl, cleanForSaveHandlers) =>
                     this.snippetModel.saveSnippet(snippetEl, cleanForSaveHandlers),
                 getShared: () => this.editor.shared,

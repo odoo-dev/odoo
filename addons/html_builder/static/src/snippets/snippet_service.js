@@ -315,30 +315,6 @@ export class SnippetModel extends Reactive {
     }
 
     /**
-     * Opens the snippet dialog in order to replace the given snippet by the
-     * selected one.
-     *
-     * @param {HTMLElement} snippetEl the snippet to replace
-     * @returns {HTMLElement}
-     */
-    async replaceSnippet(snippetEl) {
-        // Find the original snippet to open the dialog on the same group.
-        const originalSnippet = this.getOriginalSnippet(snippetEl.dataset.snippet);
-        let newSnippetEl;
-        await new Promise((resolve) => {
-            this.openSnippetDialog(originalSnippet, {
-                onSelect: (selectedSnippet) => {
-                    newSnippetEl = selectedSnippet.content.cloneNode(true);
-                    snippetEl.replaceWith(newSnippetEl);
-                    return newSnippetEl;
-                },
-                onClose: () => resolve(),
-            });
-        });
-        return newSnippetEl;
-    }
-
-    /**
      * Removes the previews from the given snippet.
      *
      * @param {HTMLElement} snippetEl

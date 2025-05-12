@@ -10,7 +10,7 @@ import {
     setupWebsiteBuilderWithSnippet,
     waitForEndOfOperation,
 } from "./website_helpers";
-import { click, waitFor } from "@odoo/hoot-dom";
+import { waitFor } from "@odoo/hoot-dom";
 import { xml } from "@odoo/owl";
 
 defineWebsiteModels();
@@ -32,26 +32,6 @@ test("dropping a new snippet starts its interaction", async () => {
     ).click();
     await confirmAddSnippet("s_title");
     await waitForEndOfOperation();
-    expect.verifySteps(["refresh"]);
-});
-
-test("replacing a snippet starts the interaction of the new snippet", async () => {
-    const { openBuilderSidebar } = await setupWebsiteBuilderWithSnippet("s_text_block", {
-        openEditor: false,
-    });
-    patchWithCleanup(EditInteractionPlugin.prototype, {
-        setup() {
-            super.setup();
-            this.websiteEditService.update = () => expect.step("update");
-            this.websiteEditService.refresh = () => expect.step("refresh");
-        },
-    });
-    await openBuilderSidebar();
-    await waitFor(":iframe [data-snippet='s_text_block']");
-    expect.verifySteps(["update"]);
-    await click(`:iframe [data-snippet="s_text_block"]`);
-    await contains(".btn.o_snippet_replace").click();
-    await confirmAddSnippet("s_title");
     expect.verifySteps(["refresh"]);
 });
 
