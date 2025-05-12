@@ -439,7 +439,10 @@ export class LinkPlugin extends Plugin {
                     } else {
                         this.linkInDocument.removeAttribute("style");
                     }
-                    if (cleanZWChars(this.linkInDocument.innerText) !== label) {
+                    if (
+                        this.linkInDocument.childElementCount == 0 &&
+                        cleanZWChars(this.linkInDocument.innerText) !== label
+                    ) {
                         this.linkInDocument.innerText = label;
                         cursorsToRestore = null;
                     }
@@ -503,7 +506,7 @@ export class LinkPlugin extends Plugin {
             }
         };
 
-        const restoreSavePoint = this.dependencies.history.makeSavePoint();
+        this.restoreSavePoint = this.dependencies.history.makeSavePoint();
         const props = {
             document: this.document,
             linkElement,
@@ -517,7 +520,7 @@ export class LinkPlugin extends Plugin {
             },
             onChange: applyCallback,
             onDiscard: () => {
-                restoreSavePoint();
+                this.restoreSavePoint();
                 this.openLinkTools(linkElement);
                 this.dependencies.selection.focusEditable();
             },
@@ -534,6 +537,9 @@ export class LinkPlugin extends Plugin {
                 this.linkInDocument = null;
                 this.currentOverlay.close();
                 this.dependencies.selection.focusEditable();
+            },
+            onEdit: () => {
+                this.restoreSavePoint = this.dependencies.history.makeSavePoint();
             },
             getInternalMetaData: this.getInternalMetaData,
             getExternalMetaData: this.getExternalMetaData,
