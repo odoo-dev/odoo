@@ -321,6 +321,7 @@ class ResUsers(models.Model):
             hasLinkPreviewFeature=self.env["mail.link.preview"]._is_link_preview_enabled(),
             internalUserGroupId=self.env.ref("base.group_user").id,
             mt_comment_id=xmlid_to_res_id("mail.mt_comment"),
+            mt_note_id=xmlid_to_res_id("mail.mt_note"),
             # sudo: res.partner - exposing OdooBot data is considered acceptable
             odoobot=Store.One(self.env.ref("base.partner_root").sudo()),
         )

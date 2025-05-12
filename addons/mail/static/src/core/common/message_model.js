@@ -106,6 +106,7 @@ export class Message extends Record {
     });
     notification_ids = fields.Many("mail.notification", { inverse: "mail_message_id" });
     recipients = fields.Many("Persona");
+    subtype_id = fields.One("mail.message.subtype");
     thread = fields.One("Thread");
     threadAsNeedaction = fields.One("Thread", {
         compute() {

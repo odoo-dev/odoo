@@ -951,6 +951,8 @@ class MailMessage(models.Model):
             "date",
             "incoming_email_cc",
             "incoming_email_to",
+            # sudo: mail.message.subtype - reading subtype on accessible message is allowed
+            Store.One("subtype_id", ["description"], sudo=True),
             Store.Attr("is_note", lambda m: m.subtype_id.id == note_id),
             Store.Attr("is_discussion", lambda m: m.subtype_id.id == com_id),
             # sudo: mail.message - reading link preview on accessible message is allowed
