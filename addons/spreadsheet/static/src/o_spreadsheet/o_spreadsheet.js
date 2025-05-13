@@ -100,6 +100,7 @@
     const BACKGROUND_HEADER_COLOR = "#F8F9FA";
     const BACKGROUND_HEADER_SELECTED_COLOR = "#E8EAED";
     const BACKGROUND_HEADER_ACTIVE_COLOR = "#595959";
+    const BACKGROUND_SCROLLBAR_COLOR = "#8B8B8B";
     const TEXT_HEADER_COLOR = "#666666";
     const FIGURE_BORDER_COLOR = "#c9ccd2";
     const SELECTION_BORDER_COLOR = "#3266ca";
@@ -22805,13 +22806,66 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     z-index: ${ComponentsImportance.ScrollBar};
     background-color: ${BACKGROUND_GRAY_COLOR};
 
-    &.corner {
-      right: 0px;
-      bottom: 0px;
+    &::-webkit-scrollbar {
       height: ${SCROLLBAR_WIDTH}px;
       width: ${SCROLLBAR_WIDTH}px;
-      border-top: 1px solid #e2e3e3;
-      border-left: 1px solid #e2e3e3;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: ${BACKGROUND_SCROLLBAR_COLOR};
+      border-radius: 10px;
+      border: 3px solid transparent;
+      background-clip: content-box;
+
+      &:hover {
+        background-color: ${BACKGROUND_HEADER_ACTIVE_COLOR};
+        border: 2px solid transparent;
+      }
+    }
+
+    &::-webkit-scrollbar-button:single-button {
+      border: 1px solid ${BACKGROUND_GRAY_COLOR};
+      height: ${SCROLLBAR_WIDTH}px;
+      width: ${SCROLLBAR_WIDTH}px;
+    }
+
+    &::-webkit-scrollbar-button:single-button:vertical {
+      &:decrement {
+        border-width: 0 8px 8px 8px;
+        border-color: transparent transparent ${BACKGROUND_SCROLLBAR_COLOR} transparent;
+
+        &:hover {
+          border-color: transparent transparent ${BACKGROUND_HEADER_ACTIVE_COLOR} transparent;
+        }
+      }
+
+      &:increment {
+        border-width: 8px 8px 0 8px;
+        border-color: ${BACKGROUND_SCROLLBAR_COLOR} transparent transparent transparent;
+
+        &:hover {
+          border-color: ${BACKGROUND_HEADER_ACTIVE_COLOR} transparent transparent transparent;
+        }
+      }
+    }
+
+    &::-webkit-scrollbar-button:single-button:horizontal {
+      &:decrement {
+        border-width: 8px 8px 8px 0;
+        border-color: transparent ${BACKGROUND_SCROLLBAR_COLOR} transparent transparent;
+
+        &:hover {
+          border-color: transparent ${BACKGROUND_HEADER_ACTIVE_COLOR} transparent transparent;
+        }
+      }
+
+      &:increment {
+        border-width: 8px 0 8px 8px;
+        border-color: transparent transparent transparent ${BACKGROUND_SCROLLBAR_COLOR};
+
+        &:hover {
+          border-color: transparent transparent transparent ${BACKGROUND_HEADER_ACTIVE_COLOR};
+        }
+      }
     }
   }
 `;
@@ -43846,7 +43900,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.70';
-    __info__.date = '2025-05-12T05:29:58.112Z';
+    __info__.date = '2025-05-13T04:41:31.604Z';
     __info__.hash = 'bbdc034';
 
 
