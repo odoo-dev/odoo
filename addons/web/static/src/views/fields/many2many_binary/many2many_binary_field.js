@@ -23,12 +23,27 @@ export class Many2ManyBinaryField extends Component {
         this.orm = useService("orm");
         this.notification = useService("notification");
         this.operations = useX2ManyCrud(() => this.props.record.data[this.props.name], true);
+        this.fieldType = this.props.record.fields[this.props.name].type;
+    }
+
+    get effectiveNumberOfFiles() {
+        if (this.fieldType === 'many2one') {
+            return 1;
+        }
+        return this.props.numberOfFiles;
     }
 
     get uploadText() {
         return this.props.record.fields[this.props.name].string;
     }
     get files() {
+        if (this.fieldType === "many2one") {
+            let file = this.props.record.data[this.props.name];
+            if (!file) {
+                return [];
+            }
+            return [file];
+        }
         return this.props.record.data[this.props.name].records.map((record) => {
             return {
                 ...record.data,
@@ -57,15 +72,25 @@ export class Many2ManyBinaryField extends Component {
                     type: "danger",
                 });
             }
-            await this.operations.saveRecord([file.id]);
+            if (this.fieldType === "many2one") {
+                await this.props.record.update({ [this.props.name]: { id: file.id } });
+            }
+            else {
+                await this.operations.saveRecord([file.id]);
+            }
         }
     }
 
     async onFileRemove(deleteId) {
-        const record = this.props.record.data[this.props.name].records.find(
-            (record) => record.resId === deleteId
-        );
-        this.operations.removeRecord(record);
+        if (this.fieldType === "many2one") {
+            await this.props.record.update({ [this.props.name]: false });
+        }
+        else {
+            const record = this.props.record.data[this.props.name].records.find(
+                (record) => record.resId === deleteId
+            );
+            this.operations.removeRecord(record);
+        }
     }
 }
 
@@ -83,7 +108,7 @@ export const many2ManyBinaryField = {
             type: "integer",
         },
     ],
-    supportedTypes: ["many2many"],
+    supportedTypes: ["many2many", "many2one"],
     isEmpty: () => false,
     relatedFields: [
         { name: "name", type: "char" },
@@ -96,4 +121,4 @@ export const many2ManyBinaryField = {
     }),
 };
 
-registry.category("fields").add("many2many_binary", many2ManyBinaryField);
+registry.category("fields").add("many2x_binary", many2ManyBinaryField);
