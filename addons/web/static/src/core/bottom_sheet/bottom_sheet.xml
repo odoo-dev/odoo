@@ -34,7 +34,6 @@
                 <!-- Sheet container -->
                 <div
                     class="o_bottom_sheet_sheet offcanvas position-relative overflow-hidden"
-                    t-attf-class="{{ props.class || '' }}"
                     role="dialog"
                     t-ref="sheet"
                     >
@@ -85,7 +84,7 @@
                     <!-- Body content -->
                     <div
                         class="o_bottom_sheet_body offcanvas-body"
-                        t-attf-class="{{ props.withBodyPadding !== false ? '' : 'p-0' }}"
+                        t-att-class="props.class"
                         t-ref="sheetBody"
                         >
 

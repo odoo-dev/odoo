@@ -179,7 +179,7 @@ export class Dropdown extends Component {
             );
         } else {
             popoverOptions.popoverClass = mergeClasses(
-                "dropdown-menu",
+                "dropdown-menu show",
                 popoverOptions.popoverClass
             );
             popoverOptions.useBottomSheet = true;
