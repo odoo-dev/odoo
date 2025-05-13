@@ -97,6 +97,7 @@ export class BlockTab extends Component {
                 });
 
                 if (snippetEl) {
+                    await scrollTo(snippetEl, { extraOffset: 50 });
                     await this.processDroppedSnippet(snippetEl);
                 }
                 this.state.ongoingInsertion = false;
@@ -145,6 +146,7 @@ export class BlockTab extends Component {
         });
 
         if (selectedSnippetEl) {
+            await scrollTo(selectedSnippetEl, { extraOffset: 50 });
             await this.processDroppedSnippet(selectedSnippetEl);
         } else {
             this.cancelDragAndDrop();
@@ -375,7 +377,6 @@ export class BlockTab extends Component {
      */
     async processDroppedSnippet(snippetEl) {
         this.updateDroppedSnippet(snippetEl);
-        await scrollTo(snippetEl, { extraOffset: 50 });
         // Build the snippet.
         for (const onSnippetDropped of this.env.editor.getResource("on_snippet_dropped_handlers")) {
             const cancel = await onSnippetDropped({ snippetEl, dragState: this.dragState });
