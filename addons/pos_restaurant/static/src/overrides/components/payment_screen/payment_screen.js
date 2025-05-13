@@ -1,7 +1,26 @@
 import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
+import { useTrackedFinalizedOrder } from "@pos_restaurant/app/hooks/use_tracked_finalized_order";
 import { patch } from "@web/core/utils/patch";
 
 patch(PaymentScreen.prototype, {
+    /**
+     * @override
+     */
+    setup() {
+        super.setup();
+        this.isOrderLocked = true;
+        useTrackedFinalizedOrder(this.currentOrder.uuid, () => this.isOrderLocked, "PaymentScreen");
+    },
+    /**
+     * @override
+     */
+    async _finalizeValidation() {
+        this.isOrderLocked = false;
+        if (this.pos.config.module_pos_restaurant) {
+            this.pos.trackedTableIds.delete(this.currentOrder.table_id.id);
+        }
+        await super._finalizeValidation();
+    },
     get nextScreen() {
         const order = this.currentOrder;
         if (!this.pos.config.set_tip_after_payment || order.is_tipped) {
@@ -25,5 +44,12 @@ patch(PaymentScreen.prototype, {
             }
         }
         return await super.afterOrderValidation(...arguments);
+    },
+    /**
+     * @override
+     */
+    async validateOrder(isForceValidate) {
+        this.currentOrder.assert_editable();
+        await super.validateOrder(...arguments);
     },
 });

@@ -1,6 +1,7 @@
 import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product_screen";
 import { patch } from "@web/core/utils/patch";
 import { useState } from "@odoo/owl";
+import { useTrackedFinalizedOrder } from "@pos_restaurant/app/hooks/use_tracked_finalized_order";
 
 patch(ProductScreen.prototype, {
     /**
@@ -11,6 +12,7 @@ patch(ProductScreen.prototype, {
         this.uiState = useState({
             clicked: false,
         });
+        useTrackedFinalizedOrder(this.currentOrder.uuid, () => true, "ProductScreen");
     },
     get selectedOrderlineQuantity() {
         const order = this.pos.get_order();

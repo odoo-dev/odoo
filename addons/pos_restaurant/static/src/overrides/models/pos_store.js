@@ -11,6 +11,7 @@ patch(PosStore.prototype, {
         this.isEditMode = false;
         this.tableSyncing = false;
         await super.setup(...arguments);
+        this.trackedTableIds = new Set();
     },
     get idleTimeout() {
         return [
@@ -33,6 +34,12 @@ patch(PosStore.prototype, {
         }
 
         return screen === "LoginScreen" ? "LoginScreen" : "FloorScreen";
+    },
+    async _onBeforeDeleteOrder(order) {
+        if (this.pos.config.module_pos_restaurant) {
+            this.trackedTableIds.add(order.table_id.id);
+        }
+        return super._onBeforeDeleteOrder();
     },
     async onDeleteOrder(order) {
         const orderIsDeleted = await super.onDeleteOrder(...arguments);
@@ -170,6 +177,7 @@ patch(PosStore.prototype, {
             this.addPendingOrder([order.id]);
             if (!this.get_order().uiState.booked) {
                 this.get_order().setBooked(true);
+                await this.syncAllOrders({ orders: [order] });
             }
         }
         return super.addLineToCurrentOrder(vals, opts, configure);
@@ -195,6 +203,12 @@ patch(PosStore.prototype, {
         }
         return super.getDefaultSearchDetails();
     },
+    async pay() {
+        if (this.config.module_pos_restaurant) {
+            this.syncAllOrders({ orders: [this.get_order()] });
+        }
+        return super.pay(...arguments);
+    },
     async setTable(table, orderUuid = null) {
         this.deviceSync.readDataFromServer();
         this.selectedTable = table;
@@ -214,7 +228,9 @@ patch(PosStore.prototype, {
                 currentOrder.update({ table_id: table });
                 this.selectedOrderUuid = currentOrder.uuid;
             } else {
-                this.add_new_order();
+                const order = this.add_new_order();
+                order.setBooked(true);
+                this.syncAllOrders({ orders: [order] });
             }
         }
     },
@@ -270,6 +286,11 @@ patch(PosStore.prototype, {
         );
     },
     tableHasOrders(table) {
+        const order = table.getOrder();
+        if (order && !order.is_empty() && this.trackedTableIds.has(table.id)) {
+            this.notification.add("This order is ongoing on another device!");
+            this.trackedTableIds.delete(table.id);
+        }
         return Boolean(table.getOrder());
     },
     getTableFromElement(el) {
