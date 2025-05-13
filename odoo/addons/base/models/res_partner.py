@@ -15,7 +15,7 @@ from random import randint
 from werkzeug import urls
 
 from odoo import api, fields, models, tools, _, Command
-from odoo.exceptions import RedirectWarning, UserError, ValidationError
+from odoo.exceptions import AccessError,RedirectWarning, UserError, ValidationError
 
 import typing
 if typing.TYPE_CHECKING:
@@ -814,6 +814,11 @@ class ResPartner(models.Model):
             partner.is_public = users and any(user._is_public() for user in users)
 
     def write(self, vals):
+        if self.env.user.role == "group_user":
+            if self.env['res.company'].sudo().search([('partner_id', '=', self)]) or (
+            self.env['res.company'].sudo().search([('partner_id', '=', self.parent_id)]) and 
+            any(key in ADDRESS_FIELDS for key in vals.keys())):
+                raise AccessError(_("You are not authorized to modify company details. Please contact your administrator for assistance."))
         if vals.get('active') is False:
             # DLE: It should not be necessary to modify this to make work the ORM. The problem was just the recompute
             # of partner.user_ids when you create a new user for this partner, see test test_70_archive_internal_partners
