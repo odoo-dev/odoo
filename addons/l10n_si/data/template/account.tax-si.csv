@@ -103,7 +103,7 @@
 "","","","","","","","","","","","tax","invoice","","gd_acc_260020","","",""
 "","","","","","","","","","","100.00","base","refund","-11a||-ir_8||-pd_a3","","","",""
 "","","","","","","","","","","","tax","refund","","gd_acc_260020","","",""
-"gd_taxe_in_95_no_service_1","290","9,5%","9.5% input VAT - services","9.5% S","9.50","percent","purchase","tax_group_95","","100.00","base","invoice","+31||+pr_8a","","Vstopni DDV 9,5% - storitev","gd_fp_do,gd_fp_do1,gd_fp_eu","gd_taxe_in_95_no_service_1"
+"gd_taxe_in_95_no_service_1","290","9,5%","9.5% input VAT - services","9.5% S","9.50","percent","purchase","tax_group_95","","100.00","base","invoice","+31||+pr_8a","","Vstopni DDV 9,5% - storitev","gd_fp_do,gd_fp_do1,gd_fp_eu",""
 "","","","","","","","","","","100.00","tax","invoice","+42||+pr_19","gd_acc_160010","","",""
 "","","","","","","","","","","100.00","base","refund","-31||-pr_8a","","","",""
 "","","","","","","","","","","100.00","tax","refund","-42||-pr_19","gd_acc_160010","","",""
