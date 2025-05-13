@@ -142,17 +142,60 @@ class TestFiscalPosition(common.TransactionCase):
             {'name': 'Test Tax Group', 'company_id': self.env.company.id}
         )
 
-        self.src_tax = self.env['account.tax'].create({'name': "SRC", 'amount': 0.0})
+        fpdom = self.fp.create({'name': "FP-DOMESTIC"})
+        src_tax = self.env['account.tax'].create({'name': "SRC", 'amount': 0.0, 'fiscal_position_ids': [Command.set(fpdom.ids)]})
 
+        fp2m = self.fp.create({
+            'name': "FP-TAX2TAXES",
+        })
+        dst1_tax = self.env['account.tax'].create({'name': "DST1", 'amount': 0.0, 'fiscal_position_ids': [Command.set(fp2m.ids)], 'original_tax_ids': [Command.set(src_tax.ids)], 'sequence': 10})
+        dst2_tax = self.env['account.tax'].create({'name': "DST2", 'amount': 0.0, 'fiscal_position_ids': [Command.set(fp2m.ids)], 'original_tax_ids': [Command.set(src_tax.ids)], 'sequence': 5})
+        mapped_taxes = fp2m.map_tax(src_tax)
+
+        self.assertEqual(mapped_taxes, dst1_tax | dst2_tax)
+
+    def test_25_fp_one_tax_2m_incl_self(self):
+        # add a tax - used by l10n_es withholding taxes
+        self.env.company.country_id = self.env.ref('base.us')
+        self.env['account.tax.group'].create({
+            'name': 'Test Tax Group',
+            'company_id': self.env.company.id,
+        })
+        self.domfp = self.env['account.fiscal.position'].create({
+            'name': "Domestic",
+            'country_id': self.env.company.account_fiscal_country_id.id,
+        })
         self.fp2m = self.fp.create({
             'name': "FP-TAX2TAXES",
         })
+        src_tax = self.env['account.tax'].create({'name': "SRC", 'amount': 0.0, 'fiscal_position_ids': [Command.set((self.domfp | self.fp2m).ids)]})
+        dst1_tax = self.env['account.tax'].create({'name': "DST1", 'amount': 10.0, 'fiscal_position_ids': [Command.link(self.fp2m.id)], 'original_tax_ids': [Command.link(src_tax.id)]})
+        mapped_taxes = self.fp2m.map_tax(src_tax)
 
-        self.dst1_tax = self.env['account.tax'].create({'name': "DST1", 'amount': 0.0, 'fiscal_position_ids': [Command.set(self.fp2m.ids)], 'original_tax_ids': [Command.set(self.src_tax.ids)], 'sequence': 10})
-        self.dst2_tax = self.env['account.tax'].create({'name': "DST2", 'amount': 0.0, 'fiscal_position_ids': [Command.set(self.fp2m.ids)], 'original_tax_ids': [Command.set(self.src_tax.ids)], 'sequence': 5})
-        mapped_taxes = self.fp2m.map_tax(self.src_tax)
+        self.assertEqual(mapped_taxes, src_tax | dst1_tax)
 
-        self.assertEqual(mapped_taxes, self.dst1_tax | self.dst2_tax)
+    def test_25_fp_one_to_none(self):
+        self.env.company.country_id = self.env.ref('base.us')
+        self.env['account.tax.group'].create({
+            'name': 'Test Tax Group',
+            'company_id': self.env.company.id,
+        })
+        domfp = self.env['account.fiscal.position'].create({
+            'name': "Domestic",
+            'country_id': self.env.company.account_fiscal_country_id.id,
+        })
+        targetfp = self.env['account.fiscal.position'].create({
+            'name': "Not Applicable",
+        })
+        src_tax = self.env['account.tax'].create({'name': "SRC", 'amount': 0.0, 'fiscal_position_ids': [Command.link(domfp.id)]})
+        # Empty Fiscal Position like a VAT Unit
+        mapped_taxes = targetfp.map_tax(src_tax)
+        self.assertEqual(mapped_taxes, self.env['account.tax'])
+        # Fiscal Position which doesn't replace specified tax
+        src_tax_2 = self.env['account.tax'].create({'name': "SRC 2", 'amount': 0.0, 'fiscal_position_ids': [Command.link(domfp.id)]})
+        self.env['account.tax'].create({'name': "IRRELEVANT DEST TAX", 'amount': 0.0, 'fiscal_position_ids': [Command.link(targetfp.id)], 'original_tax_ids': [Command.link(src_tax_2.id)]})
+        mapped_taxes = targetfp.map_tax(src_tax)
+        self.assertEqual(mapped_taxes, self.env['account.tax'])
 
     def test_30_fp_delivery_address(self):
         # Make sure the billing company is from Belgium (within the EU)
@@ -284,7 +327,7 @@ class TestFiscalPosition(common.TransactionCase):
             'original_tax_ids': [Command.link(src_tax.id)],
             'active': False,
         })
-        self.assertEqual(fp.map_tax(src_tax), dest_tax)
+        self.assertEqual(fp.map_tax(src_tax), src_tax | dest_tax)
 
     def test_domestic_fp_map_self(self):
         self.env.company.country_id = self.us

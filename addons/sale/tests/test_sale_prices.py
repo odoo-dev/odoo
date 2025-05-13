@@ -566,16 +566,20 @@ class TestSalePrices(SaleCommon):
         country_belgium = self.env['res.country'].search([
             ('name', '=', 'Belgium'),
         ], limit=1)
-        fiscal_pos = self.env['account.fiscal.position'].create({
-            'name': 'Test Fiscal Position',
+        domestic_fpos, fiscal_pos = self.env['account.fiscal.position'].create([{
+            'name': 'Domestic Fiscal Position',
             'auto_apply': True,
             'country_id': country_belgium.id,
-        })
+        }, {
+            'name': 'Test Fiscal Position',
+            'auto_apply': True,
+        }])
         tax_a, tax_b = self.env['account.tax'].create([{
             'name': 'Test tax A',
             'type_tax_use': 'sale',
             'price_include_override': 'tax_included',
             'amount': 15.0,
+            'fiscal_position_ids': [Command.link(domestic_fpos.id)],
         }, {
             'name': 'Test tax B',
             'type_tax_use': 'sale',
@@ -641,11 +645,15 @@ class TestSalePrices(SaleCommon):
         partner = self.partner
 
         (
+            fpos_domestic,
             fpos_incl_incl,
             fpos_excl_incl,
             fpos_incl_excl,
             fpos_excl_excl,
         ) = self.env['account.fiscal.position'].create([{
+            'name': "product taxes",
+            'sequence': 0,
+        },{
             'name': "incl -> incl",
             'sequence': 1,
         }, {
@@ -681,6 +689,7 @@ class TestSalePrices(SaleCommon):
             'amount': 21.00,
             'amount_type': 'percent',
             'price_include_override': 'tax_included',
+            'fiscal_position_ids': [Command.link(fpos_domestic.id)],
         }, {
             'name': "Include 6%",
             'amount': 6.00,
@@ -691,6 +700,7 @@ class TestSalePrices(SaleCommon):
             'amount': 15.00,
             'amount_type': 'percent',
             'price_include_override': 'tax_excluded',
+            'fiscal_position_ids': [Command.link(fpos_domestic.id)],
         }, {
             'name': "Exclude 21%",
             'amount': 21.00,
@@ -810,16 +820,20 @@ class TestSalePrices(SaleCommon):
     def test_so_tax_mapping(self):
         order = self.empty_order
 
-        fpos = self.env['account.fiscal.position'].create({
+        domesticfpos, fpos = self.env['account.fiscal.position'].create([{
+            'name': 'Domestic Fiscal Position',
+            'sequence': 0,
+        }, {
             'name': 'Test Fiscal Position',
             'sequence': 1,
-        })
+        }])
 
         tax_include, tax_exclude = self.env['account.tax'].create([{
             'name': 'Include Tax',
             'amount': '21.00',
             'price_include_override': 'tax_included',
             'type_tax_use': 'sale',
+            'fiscal_position_ids': [Command.link(domesticfpos.id)],
         }, {
             'name': 'Exclude Tax',
             'amount': '0.00',
