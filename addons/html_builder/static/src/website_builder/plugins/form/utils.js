@@ -426,10 +426,10 @@ export function findCircular(dependentFieldEl, targetFieldEl) {
         // Get all the fields that have the same label as the dependent
         // field.
         let dependentFieldEls = Array.from(
-            formEl.querySelectorAll(
+            formEl?.querySelectorAll(
                 `.s_website_form_input[name="${CSS.escape(dependentFieldName)}"]`
             )
-        ).map((el) => el.closest(".s_website_form_field"));
+        )?.map((el) => el.closest(".s_website_form_field"));
         // Remove the duplicated fields. This could happen if the field has
         // multiple inputs ("Multiple Checkboxes" for example.)
         dependentFieldEls = new Set(dependentFieldEls);
