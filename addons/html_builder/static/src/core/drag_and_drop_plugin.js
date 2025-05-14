@@ -137,9 +137,11 @@ export class DragAndDropPlugin extends Plugin {
                     },
                     { withLoadingEffect: false }
                 );
-                this.restoreDragSavePoint = this.dependencies.history.makeSavePoint();
+                const restoreDragSavePoint = this.dependencies.history.makeSavePoint();
                 this.cancelDragAndDrop = () => {
-                    this.restoreDragSavePoint();
+                    // Undo the changes needed to ease the drag and drop.
+                    this.dragState.restoreCallbacks?.forEach((restore) => restore());
+                    restoreDragSavePoint();
                     dragAndDropResolve();
                     this.dependencies["builder-options"].updateContainers(this.overlayTarget);
                 };
@@ -326,6 +328,7 @@ export class DragAndDropPlugin extends Plugin {
 
                 // Undo the changes needed to ease the drag and drop.
                 this.dragState.restoreCallbacks.forEach((restore) => restore());
+                this.dragState.restoreCallbacks = null;
 
                 // Add a history step only if the element was not dropped where
                 // it was before, otherwise cancel everything.

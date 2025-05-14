@@ -54,6 +54,7 @@ export class BlockTab extends Component {
     onSnippetGroupClick(snippet) {
         this.shared.operation.next(
             async () => {
+                this.cancelDragAndDrop = this.shared.history.makeSavePoint();
                 let snippetEl;
                 const baseSectionEl = snippet.content.cloneNode(true);
                 this.state.ongoingInsertion = true;
@@ -101,6 +102,7 @@ export class BlockTab extends Component {
                     await this.processDroppedSnippet(snippetEl);
                 }
                 this.state.ongoingInsertion = false;
+                delete this.cancelDragAndDrop;
             },
             { withLoadingEffect: false }
         );
@@ -223,7 +225,12 @@ export class BlockTab extends Component {
                     },
                     { withLoadingEffect: false }
                 );
-                this.cancelDragAndDrop = this.shared.history.makeSavePoint();
+                const restoreDragSavePoint = this.shared.history.makeSavePoint();
+                this.cancelDragAndDrop = () => {
+                    // Undo the changes needed to ease the drag and drop.
+                    this.dragState.restoreCallbacks?.forEach((restore) => restore());
+                    restoreDragSavePoint();
+                };
                 this.hideSnippetToolTip?.();
 
                 this.document.body.classList.add("oe_dropzone_active");
@@ -231,6 +238,14 @@ export class BlockTab extends Component {
 
                 this.dragState = {};
                 dropzoneEls = [];
+
+                // Make some changes on the page to ease the drag and drop.
+                const restoreCallbacks = [];
+                for (const prepareDrag of this.env.editor.getResource("on_prepare_drag_handlers")) {
+                    const restore = prepareDrag();
+                    restoreCallbacks.push(restore);
+                }
+                this.dragState.restoreCallbacks = restoreCallbacks;
 
                 const category = element.closest(".o_snippets_container").id;
                 const id = element.dataset.id;
@@ -338,8 +353,6 @@ export class BlockTab extends Component {
                         if (closestDropzoneEl) {
                             currentDropzoneEl = closestDropzoneEl;
                         }
-                    } else {
-                        this.cancelDragAndDrop();
                     }
                 }
 
@@ -347,8 +360,13 @@ export class BlockTab extends Component {
                     currentDropzoneEl.after(snippetEl);
                     this.shared.dropzone.removeDropzones();
 
+                    // Undo the changes needed to ease the drag and drop.
+                    this.dragState.restoreCallbacks.forEach((restore) => restore());
+                    this.dragState.restoreCallbacks = null;
+
                     if (!isSnippetGroup) {
                         await this.processDroppedSnippet(snippetEl);
+                        delete this.cancelDragAndDrop;
                     } else {
                         this.shared.operation.next(
                             async () => {
@@ -357,13 +375,13 @@ export class BlockTab extends Component {
                             { withLoadingEffect: false }
                         );
                     }
+                } else {
+                    this.cancelDragAndDrop();
+                    delete this.cancelDragAndDrop;
                 }
 
                 this.state.ongoingInsertion = false;
                 delete this.cancelSnippetPreview;
-                if (!isSnippetGroup) {
-                    delete this.cancelDragAndDrop;
-                }
                 dragAndDropResolve();
             },
         };
@@ -382,7 +400,7 @@ export class BlockTab extends Component {
             const cancel = await onSnippetDropped({ snippetEl, dragState: this.dragState });
             // Cancel everything if the resource asked to.
             if (cancel) {
-                this.cancelDragAndDrop?.();
+                this.cancelDragAndDrop();
                 return;
             }
         }
