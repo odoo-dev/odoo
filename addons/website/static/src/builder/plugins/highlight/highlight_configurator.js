@@ -40,6 +40,7 @@ export class HighlightConfigurator extends Component {
         revertHighlight: Function,
         revertHighlightStyle: Function,
         componentStack: Object,
+        getUsedCustomColors: Function,
     };
 
     setup() {
@@ -73,13 +74,18 @@ export class HighlightConfigurator extends Component {
         this.props.componentStack.push(
             ColorPicker,
             {
-                state: { selectedColor: this.state.color },
-                //TODO: implement customColors
-                getUsedCustomColors: () => {},
+                state: { selectedColor: this.state.color, defaultTab: "solid" },
+                colorPrefix: "--",
+                getUsedCustomColors: this.props.getUsedCustomColors,
+                enabledTabs: ["solid", "custom"],
                 applyColor: this.selectHighlightColor.bind(this),
                 applyColorPreview: (color) =>
-                    this.props.previewHighlightStyle("--text-highlight-color", color),
+                    this.props.previewHighlightStyle(
+                        "--text-highlight-color",
+                        this.processColor(color)
+                    ),
                 applyColorResetPreview: this.props.revertHighlightStyle,
+                className: "w-100",
             },
             "Select a color",
             true
@@ -91,9 +97,16 @@ export class HighlightConfigurator extends Component {
         this.props.applyHighlight(highlightId);
     }
 
+    processColor(color) {
+        if (color.startsWith("--")) {
+            return getComputedStyle(document.documentElement).getPropertyValue(color);
+        }
+        return color;
+    }
+
     selectHighlightColor(color) {
         this.props.componentStack.pop();
-        this.props.applyHighlightStyle("--text-highlight-color", color);
+        this.props.applyHighlightStyle("--text-highlight-color", this.processColor(color));
     }
 
     onThicknessChange(ev) {
