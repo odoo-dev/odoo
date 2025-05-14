@@ -8,7 +8,7 @@
             >
                 <t t-foreach="month.daysOfWeek" t-as="dayOfWeek" t-key="dayOfWeek[0]">
                     <div
-                        class="o_day_of_week_cell fs-6 fw-bolder bg-100 border-bottom border-2 d-flex align-items-center justify-content-center"
+                        class="o_day_of_week_cell fs-6 fw-bolder bg-100 d-flex align-items-center justify-content-center"
                         t-att-title="dayOfWeek[1]"
                     >
                         <div class="text-nowrap overflow-hidden" t-esc="props.daysOfWeekFormat === 'narrow' ? dayOfWeek[2] : dayOfWeek[0]"/>
@@ -18,7 +18,6 @@
                     <t t-if="props.showWeekNumbers ?? !props.range">
                         <div
                             class="o_week_number_cell text-center align-content-center fs-6 bg-100 fw-bolder"
-                            t-att-class="{ 'border-bottom': !week_last }"
                             t-esc="week.number"
                         />
                     </t>
@@ -27,12 +26,12 @@
                         <div
                             class="o_date_item_cell o_datetime_button text-center align-content-center cursor-pointer"
                             t-att-class="{
-                                o_out_of_range: itemInfo.isOutOfRange,
+                                'o_out_of_range text-muted': itemInfo.isOutOfRange,
                                 o_selected: arInfo.isSelected,
                                 o_select_start: arInfo.isSelectStart,
                                 o_select_end: arInfo.isSelectEnd,
                                 o_highlighted: arInfo.isHighlighted,
-                                'o_today fw-bolder text-decoration-underline': itemInfo.includesToday,
+                                'o_today fw-bolder': itemInfo.includesToday,
                                 [itemInfo.extraClass]: true,
                             }"
                             t-att-disabled="!itemInfo.isValid"
