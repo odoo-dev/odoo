@@ -19,6 +19,7 @@ class accordionOptionPlugin extends Plugin {
         ],
         so_content_addition_selector: [".s_accordion"],
         builder_actions: this.getActions(),
+        on_cloned_handlers: this.onCloned.bind(this),
     };
 
     getActions() {
@@ -126,6 +127,51 @@ class accordionOptionPlugin extends Plugin {
                 },
             },
         };
+    }
+
+    onCloned({ cloneEl }) {
+        const accordionEl = cloneEl.querySelector(".accordion");
+        if (accordionEl) {
+            // Cloning a full accordion element: first generate an unique ID
+            // for the new accordion, then iterate over its accordion items
+            this.setUniqueID(accordionEl, "myCollapse");
+            accordionEl
+                .querySelectorAll(".accordion-item")
+                .forEach((item) => this.assignIDsToAccordionItem(item));
+        } else if (cloneEl.classList.contains("accordion-item")) {
+            // Cloning a single collapse item
+            this.assignIDsToAccordionItem(cloneEl);
+        }
+    }
+
+    assignIDsToAccordionItem(editingElement) {
+        const accordionEl = editingElement.closest(".accordion");
+        const accordionBtnEl = editingElement.querySelector(".accordion-button");
+        const accordionContentEl = editingElement.querySelector('[role="region"]');
+
+        const accordionId = accordionEl.id;
+        accordionContentEl.dataset.bsParent = "#" + accordionId;
+
+        const contentId = this.setUniqueID(accordionContentEl, "myCollapseTab");
+        accordionBtnEl.dataset.bsTarget = "#" + contentId;
+        accordionBtnEl.setAttribute("aria-controls", contentId);
+
+        const buttonId = this.setUniqueID(accordionBtnEl, "myCollapseBtn");
+        accordionContentEl.setAttribute("aria-labelledby", buttonId);
+    }
+
+    setUniqueID(el, label) {
+        const body = el.closest("body");
+        let time = new Date().getTime();
+        let elemId = el.id;
+        if (!elemId || body.querySelectorAll('[id="' + elemId + '"]').length > 1) {
+            do {
+                time++;
+                elemId = label + time;
+            } while (body.querySelectorAll("#" + elemId).length);
+            el.id = elemId;
+        }
+        return elemId;
     }
 }
 
