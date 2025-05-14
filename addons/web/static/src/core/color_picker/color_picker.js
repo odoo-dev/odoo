@@ -1,8 +1,9 @@
-import { Component, useEffect, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, useEffect, useRef, useState } from "@odoo/owl";
 import { CustomColorPicker } from "@web/core/color_picker/custom_color_picker/custom_color_picker";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { isCSSColor, isColorGradient } from "@web/core/utils/colors";
 import { GradientPicker } from "./gradient_picker/gradient_picker";
+import { getCSSVariableValue } from "@html_editor/utils/formatting";
 
 // These colors are already normalized as per normalizeCSSColor in @web/legacy/js/widgets/colorpicker
 export const DEFAULT_COLORS = [
@@ -72,8 +73,12 @@ export class ColorPicker extends Component {
             activeTab: this.getDefaultTab(),
             currentCustomColor: this.props.state.selectedColor,
             showGradientPicker: false,
+            presets: [],
         });
         this.usedCustomColors = this.props.getUsedCustomColors();
+        onMounted(() => {
+            this.state.presets = this.getPresets();
+        });
     }
 
     getDefaultTab() {
@@ -187,6 +192,41 @@ export class ColorPicker extends Component {
         if (targetBtn && targetBtn.classList.contains("o_color_button")) {
             targetBtn.focus();
         }
+    }
+
+    getPresets() {
+        const iframeDocument = document.querySelector("iframe").contentWindow.document;
+        const iframeStyle = iframeDocument.defaultView.getComputedStyle(
+            iframeDocument.documentElement
+        );
+        const presets = [];
+        const unquote = (string) => string.substring(1, string.length - 1);
+        for (let i = 1; i <= 5; i++) {
+            const preset = {
+                id: i,
+                background: getCSSVariableValue(`o-cc${i}-bg`, iframeStyle),
+                backgroundGradient: unquote(
+                    getCSSVariableValue(`o-cc${i}-bg-gradient`, iframeStyle)
+                ),
+                text: getCSSVariableValue(`o-cc${i}-text`, iframeStyle),
+                headings: getCSSVariableValue(`o-cc${i}-headings`, iframeStyle),
+                primaryBtn: getCSSVariableValue(`o-cc${i}-btn-primary`, iframeStyle),
+                primaryBtnText: getCSSVariableValue(`o-cc${i}-btn-primary-text`, iframeStyle),
+                primaryBtnBorder: getCSSVariableValue(`o-cc${i}-btn-primary-border`, iframeStyle),
+                secondaryBtn: getCSSVariableValue(`o-cc${i}-btn-secondary`, iframeStyle),
+                secondaryBtnText: getCSSVariableValue(`o-cc${i}-btn-secondary-text`, iframeStyle),
+                secondaryBtnBorder: getCSSVariableValue(
+                    `o-cc${i}-btn-secondary-border`,
+                    iframeStyle
+                ),
+            };
+            // TODO: check if this is necessary
+            if (preset.backgroundGradient) {
+                preset.backgroundGradient += ", url('/web/static/img/transparent.png')";
+            }
+            presets.push(preset);
+        }
+        return presets;
     }
 }
 
