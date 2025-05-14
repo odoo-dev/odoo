@@ -190,13 +190,17 @@ export class WebsiteBuilder extends Component {
         }
     }
 
-    onNewPage() {
-        this.dialog.add(AddPageDialog, {
+    onNewPage(keepUrl = false) {
+        const params = {
             onAddPage: () => {
                 this.websiteService.context.showNewContentModal = false;
             },
             websiteId: this.websiteService.currentWebsite.id,
-        });
+        };
+        if (keepUrl) {
+            params.forcedURL = this.websiteService.currentLocation;
+        }
+        this.dialog.add(AddPageDialog, params);
     }
 
     async onEditPage() {
