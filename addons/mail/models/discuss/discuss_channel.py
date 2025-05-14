@@ -331,6 +331,8 @@ class Channel(models.Model):
                 channel._bus_send_store(channel, diff)
         if vals.get('group_ids'):
             self._subscribe_users_automatically()
+        if 'active' in vals and vals.get('active') is not True :
+            channel._bus_send("discuss.channel/delete", {"id": channel.id})
         return result
 
     def init(self):
