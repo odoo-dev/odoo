@@ -37,10 +37,14 @@ export class TourAutomatic {
             );
 
         const originalFetch = globalThis.fetch;
-        globalThis.fetch = function () {
-            const prom = originalFetch.apply(this, arguments);
+        globalThis.fetch = async function () {
+            const prom = new Deferred();
             rpcMutex.exec(() => waitForPromise(prom));
-            return prom;
+            try {
+                return await originalFetch.apply(this, arguments);
+            } finally {
+                prom.resolve();
+            }
         };
 
         patch(globalThis.XMLHttpRequest.prototype, {

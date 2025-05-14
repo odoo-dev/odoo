@@ -40,7 +40,14 @@ export class ThirdPartyScriptError extends UncaughtError {
 
 export const errorService = {
     start(env) {
+        let isUnloadingPage = false;
+        window.addEventListener("beforeunload", () => (isUnloadingPage = true));
+
         function handleError(uncaughtError, retry = true) {
+            if (isUnloadingPage) {
+                uncaughtError.event.preventDefault();
+                return;
+            }
             function shouldLogError() {
                 // Only log errors that are relevant business-wise, following the heuristics:
                 // Error.event and Error.traceback have been assigned
