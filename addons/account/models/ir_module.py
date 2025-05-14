@@ -78,6 +78,7 @@ class IrModule(models.Model):
                 env['account.chart.template'].try_loading(
                     guessed,
                     env.company,
+                    install_demo=self.demo,
                 )
             self.env.registry._auto_install_template = try_loading
         return res
