@@ -68,7 +68,7 @@
             'border-top': !isNested &amp;&amp; subMenu_index != 0,
             'py-2': isNested,
         }">
-        <span t-esc="section.name"/>
+        <t t-esc="section.name"/>
     </li>
   </t>
 
