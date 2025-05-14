@@ -38,7 +38,9 @@
                             t-on-pointerenter="() => (state.hoveredDate = itemInfo.range[0])"
                             t-on-click="() => this.zoomOrSelect(itemInfo)"
                         >
-                            <t t-esc="itemInfo.label" />
+                            <div class="align-content-center" t-att-class="{'rounded-circle': itemInfo.includesToday}">
+                                <t t-esc="itemInfo.label" />
+                            </div>
                         </div>
                     </t>
                 </t>
