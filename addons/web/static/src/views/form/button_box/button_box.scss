@@ -211,3 +211,12 @@
         padding-bottom: map-get($spacers, 2);
     }
 }
+
+.o_bottom_sheet .o-form-buttonbox {
+    display: grid;
+    padding: map-get($spacers, 3) !important;
+
+    &.o-form-buttonbox-small:not(:has(.o-dropdown-item:only-child)) {
+        width: revert !important;
+    }
+}
