@@ -602,7 +602,7 @@ describe("colorElement", () => {
             const styleElement = document.createElement("style");
             styleElement.id = "temp-test-style";
             styleElement.textContent = `.o_cc1 {
-    background: ${redToBlueGradient};
+    background-image: ${redToBlueGradient};
 }`;
             document.head.appendChild(styleElement);
             after(() => {
@@ -622,7 +622,7 @@ describe("colorElement", () => {
                 contentAfter: `<div>a</div>`,
             });
         });
-        test("should write backrgound-image gradient when o_cc1 has a gradient", async () => {
+        test("should write background-image gradient when o_cc1 has a gradient", async () => {
             await testEditor({
                 contentBefore: `<div>a</div>`,
                 stepFunction: (editor) => {
@@ -648,6 +648,19 @@ describe("colorElement", () => {
                 contentAfter: `<div style='background-image: url("https://example.com/image.png"), ${redToBlueGradient};' class="o_cc1">a</div>`,
             });
         });
+        test("change o_cc1 (with gradient) with o_cc2 (without gradient)", async () => {
+            await testEditor({
+                contentBefore: `<div class="o_cc1" style="background-image: ${redToBlueGradient};">a</div>`,
+                stepFunction: (editor) => {
+                    editor.shared.color.colorElement(
+                        editor.editable.firstChild,
+                        "o_cc2",
+                        "backgroundColor"
+                    );
+                },
+                contentAfter: `<div class="o_cc2">a</div>`,
+            });
+        });
 
         describe("set o_cc1 when a color is already defined", () => {
             test("should not write o_cc1 gradient when rgb(255, 0, 0) is already present", async () => {
@@ -660,7 +673,7 @@ describe("colorElement", () => {
                             "backgroundColor"
                         );
                     },
-                    contentAfter: `<div style="background-color: rgb(255, 0, 0);" class="o_cc1">a</div>`,
+                    contentAfter: `<div style="background-color: rgb(255, 0, 0); background-image: none;" class="o_cc1">a</div>`,
                 });
             });
             test("should not write o_cc1 gradient when bg-900 is already present", async () => {
@@ -673,7 +686,7 @@ describe("colorElement", () => {
                             "backgroundColor"
                         );
                     },
-                    contentAfter: `<div class="bg-900 o_cc1">a</div>`,
+                    contentAfter: `<div class="bg-900 o_cc1" style="background-image: none;">a</div>`,
                 });
             });
             test("should not write o_cc1 gradient when a gradient is already present", async () => {
@@ -735,4 +748,3 @@ describe("colorElement", () => {
         });
     });
 });
-// !! todo transparent image
