@@ -24,7 +24,7 @@
                 <DropdownItem onSelected.bind="() => this.translatable ? this.editFromTranslate() : this.onClickEditPage()" class="'o_edit_website_dropdown_item'">
                     Edit 404 page<t t-if="translatable" t-translation="off"> - <span class="text-muted" t-out="this.currentWebsiteInfo.defaultLangName"/></t>
                 </DropdownItem>
-                <DropdownItem onSelected.bind="() => this.props.onNewPage()" class="'o_edit_website_dropdown_item'">
+                <DropdownItem onSelected.bind="() => this.props.onNewPage(true)" class="'o_edit_website_dropdown_item'">
                     <t t-set="url" t-value="this.websiteService.currentLocation"/>
                     Create <span class="text-muted" t-out="url"/> page
                 </DropdownItem>
