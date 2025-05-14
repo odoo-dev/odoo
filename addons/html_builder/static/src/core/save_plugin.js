@@ -1,6 +1,8 @@
 import { Plugin } from "@html_editor/plugin";
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
+import { groupBy } from "@web/core/utils/arrays";
+import { uniqueId } from "@web/core/utils/functions";
 
 const oeStructureSelector = "#wrapwrap .oe_structure[data-oe-xpath][data-oe-id]";
 const oeFieldSelector = "#wrapwrap [data-oe-field]:not([data-oe-sanitize-prevent-edition])";
@@ -22,7 +24,7 @@ export class SavePlugin extends Plugin {
             // }
         ],
         clean_for_save_handlers: [
-            // ({root, preserveSelection = false}) => {
+            // ({root}) => {
             //     clean DOM before save (leaving edit mode)
             //     root is the clone of a node that was o_dirty
             // }
@@ -50,15 +52,42 @@ export class SavePlugin extends Plugin {
         for (const getDirtyEls of this.getResource("get_dirty_els")) {
             dirtyEls.push(...getDirtyEls());
         }
-        const saveProms = dirtyEls.map(async (dirtyEl) => {
-            dirtyEl.classList.remove("o_dirty");
-            const cleanedEl = dirtyEl.cloneNode(true);
-            this.dispatchTo("clean_for_save_handlers", { root: cleanedEl });
+        // Group elements to save if possible.
+        const groupedElements = groupBy(dirtyEls, (dirtyEl) => {
+            const model = dirtyEl.dataset.oeModel;
+            const field = dirtyEl.dataset.oeField;
+
+            // There are elements which have no linked model as something
+            // special is to be done "to save them" (potential override to
+            // `_saveElement` which is expected to be called for each unique
+            // dirty element). In that case, do not group those elements.
+            if (!model) {
+                return uniqueId("special-element-to-save-");
+            }
+
+            // Do not group elements which are parts of views, unless we are
+            // in translate mode.
+            if (!this.config.isTranslation && model === "ir.ui.view" && field === "arch") {
+                return uniqueId("view-part-to-save-");
+            }
+
+            // Otherwise, group elements which are from the same field of the
+            // same record (`_saveElement` will only consider the first one and
+            // `_saveTranslationElement` can handle the set if it makes sense).
+            return `${model}::${dirtyEl.dataset.oeId}::${field}`;
+        });
+        const saveProms = Object.values(groupedElements).map(async (dirtyEls) => {
+            const cleanedEls = dirtyEls.map((dirtyEl) => {
+                dirtyEl.classList.remove("o_dirty");
+                const cleanedEl = dirtyEl.cloneNode(true);
+                this.dispatchTo("clean_for_save_handlers", { root: cleanedEl });
+                return cleanedEl;
+            });
 
             if (this.config.isTranslation) {
-                await this.saveTranslationElement(cleanedEl);
+                await this.saveTranslationElement(cleanedEls);
             } else {
-                await this.saveView(cleanedEl);
+                await this.saveView(cleanedEls[0]);
             }
         });
         // used to track dirty out of the editable scope, like header, footer or wrapwrap
@@ -105,12 +134,13 @@ export class SavePlugin extends Plugin {
             }
         }
 
+        const delayTranslations = this.config.isTranslation ? {} : { delay_translations: false };
         const context = {
             website_id: this.services.website.currentWebsite.id,
             lang: this.services.website.currentWebsite.metadata.lang,
             // TODO: Restore the delay translation feature once it's
             // fixed, see commit msg for more info.
-            delay_translations: false,
+            ...delayTranslations,
         };
 
         proms.push(
@@ -132,23 +162,26 @@ export class SavePlugin extends Plugin {
      * If the element holds a translation, saves it. Otherwise, fallback to the
      * standard saving but with the lang kept.
      *
-     * @param {HTMLElement} el - the element to save.
+     * @param {Array<HTMLElement>} els - the elements to save.
      */
-    async saveTranslationElement(el) {
-        if (el.dataset["oeTranslationSourceSha"]) {
+    async saveTranslationElement(els) {
+        if (els[0].dataset["oeTranslationSourceSha"]) {
             const translations = {};
-            translations[this.services.website.currentWebsite.metadata.lang] = {
-                [el.dataset["oeTranslationSourceSha"]]: this.getEscapedElement(el).innerHTML,
-            };
+            translations[this.services.website.currentWebsite.metadata.lang] = Object.assign(
+                {},
+                ...els.map((el) => ({
+                    [el.dataset["oeTranslationSourceSha"]]: this.getEscapedElement(el).innerHTML,
+                }))
+            );
             return rpc("/web_editor/field/translation/update", {
-                model: el.dataset["oeModel"],
-                record_id: [Number(el.dataset["oeId"])],
-                field_name: el.dataset["oeField"],
+                model: els[0].dataset["oeModel"],
+                record_id: [Number(els[0].dataset["oeId"])],
+                field_name: els[0].dataset["oeField"],
                 translations,
             });
         }
         // TODO: check what we want to modify in translate mode
-        return this.saveView(el);
+        return this.saveView(els[0]);
     }
 
     getEscapedElement(el) {

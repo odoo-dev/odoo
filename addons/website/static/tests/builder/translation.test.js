@@ -65,7 +65,7 @@ test("translate text", async () => {
         return true;
     });
     const { getEditor } = await setupSidebarBuilderForTranslation({
-        websiteContent: getTranslateEditable("Hello"),
+        websiteContent: getTranslateEditable({inWrap: "Hello"}),
     });
     const editor = getEditor();
     const textNode = editor.editable.querySelector("span").firstChild;
@@ -78,10 +78,10 @@ test("translate text", async () => {
 
 test("add text in translate mode do not split", async () => {
     const { getEditor } = await setupSidebarBuilderForTranslation({
-        websiteContent: getTranslateEditable("Hello"),
+        websiteContent: getTranslateEditable({inWrap: "Hello"}),
     });
     const editor = getEditor();
-    setContent(editor.editable.querySelector("#wrap"), getTranslateEditable("Hello[]"));
+    setContent(editor.editable.querySelector("#wrap"), getTranslateEditable({inWrap: "Hello[]"}));
     // Event trigger when you press "Enter" => create a new paragraph
     await manuallyDispatchProgrammaticEvent(editor.editable, "beforeinput", {
         inputType: "insertParagraph",
@@ -181,11 +181,65 @@ test("translate select", async () => {
     ]);
 });
 
-function getTranslateEditable(inWrap) {
+test("save translation of contents of the same view", async () => {
+    onRpc("/web_editor/field/translation/update", async (data) => {
+        const { params } = await data.json();
+        expect.step(params.translations.fr_BE);
+        return true;
+    });
+    const srcSha1 = "srcSha1";
+    const srcSha2 = "srcSha2";
+    const { getEditor } = await setupSidebarBuilderForTranslation({
+        websiteContent: `${getTranslateEditable({inWrap: "abc", sourceSha: srcSha1})} ${getTranslateEditable({inWrap: "def", sourceSha: srcSha2})}`,
+    });
+    const editor = getEditor();
+    await contains(".modal .btn:contains(Ok, never show me this again)").click();
+    const textFirstNode = editor.editable.querySelector(
+        `[data-oe-translation-source-sha=${srcSha1}]`
+    ).firstChild;
+    setSelection({ anchorNode: textFirstNode, anchorOffset: 1 });
+    await insertText(editor, "1");
+    const textSecondNode = editor.editable.querySelector(
+        `[data-oe-translation-source-sha=${srcSha2}]`
+    ).firstChild;
+    setSelection({ anchorNode: textSecondNode, anchorOffset: 1 });
+    await insertText(editor, "1");
+    await contains(".o-snippets-top-actions button:contains(Save)").click();
+    expect.verifySteps([{srcSha1: "a1bc", srcSha2: "d1ef"}]);
+});
+
+test("save translation of contents of different view", async () => {
+    onRpc("/web_editor/field/translation/update", async (data) => {
+        const { params } = await data.json();
+        expect.step(params.translations.fr_BE);
+        return true;
+    });
+    const srcSha1 = "srcSha1";
+    const srcSha2 = "srcSha2";
+    const { getEditor } = await setupSidebarBuilderForTranslation({
+        websiteContent: `${getTranslateEditable({inWrap: "abc", oeId: 1, sourceSha: srcSha1})} ${getTranslateEditable({inWrap: "def", oeId: 2, sourceSha: srcSha2})}`,
+    });
+    const editor = getEditor();
+    await contains(".modal .btn:contains(Ok, never show me this again)").click();
+    const textFirstNode = editor.editable.querySelector(
+        `[data-oe-translation-source-sha=${srcSha1}]`
+    ).firstChild;
+    setSelection({ anchorNode: textFirstNode, anchorOffset: 1 });
+    await insertText(editor, "1");
+    const textSecondNode = editor.editable.querySelector(
+        `[data-oe-translation-source-sha=${srcSha2}]`
+    ).firstChild;
+    setSelection({ anchorNode: textSecondNode, anchorOffset: 1 });
+    await insertText(editor, "1");
+    await contains(".o-snippets-top-actions button:contains(Save)").click();
+    expect.verifySteps([{srcSha1: "a1bc"}, {srcSha2: "d1ef"}]);
+});
+
+function getTranslateEditable({inWrap, oeId = "526", sourceSha = "sourceSha"}) {
     return `
         <div class="container s_allow_columns">
             <p>
-                <span data-oe-model="ir.ui.view" data-oe-id="526" data-oe-field="arch_db" data-oe-translation-state="to_translate" data-oe-translation-source-sha="sourceSha" class="o_editable">${inWrap}</span>
+                <span data-oe-model="ir.ui.view" data-oe-id="${oeId}" data-oe-field="arch_db" data-oe-translation-state="to_translate" data-oe-translation-source-sha="${sourceSha}" class="o_editable">${inWrap}</span>
             </p>
         </div>`;
 }
