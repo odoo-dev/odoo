@@ -9,6 +9,7 @@ import {
     useDomState,
     useHasPreview,
 } from "../utils";
+import { getThemePresets } from "@html_builder/utils/utils_css";
 import { isColorGradient } from "@web/core/utils/colors";
 
 // TODO replace by useInputBuilderComponent after extract unit by AGAU
@@ -110,6 +111,14 @@ export class BuilderColorPicker extends Component {
         this.colorButton = useRef("colorButton");
         this.state = state;
         this.state.defaultTab = this.props.selectedTab || "solid"; // TODO: select the correct tab based on the color
+        let themePresets = undefined;
+        if (this.props.enabledTabs && this.props.enabledTabs.includes("theme")) {
+            const iframeDocument = document.querySelector("iframe").contentWindow.document;
+            const iframeStyle = iframeDocument.defaultView.getComputedStyle(
+                iframeDocument.documentElement
+            );
+            themePresets = getThemePresets(iframeStyle);
+        }
         useColorPicker(
             "colorButton",
             {
@@ -121,6 +130,7 @@ export class BuilderColorPicker extends Component {
                 colorPrefix: "color-prefix-",
                 noTransparency: this.props.noTransparency,
                 enabledTabs: this.props.enabledTabs,
+                themePresets,
             },
             {
                 onClose: onPreviewRevert,
