@@ -34,7 +34,6 @@ export class FileViewer extends Component {
         this.imageRef = useRef("image");
         this.zoomerRef = useRef("zoomer");
         this.iframeViewerPdfRef = useRef("iframeViewerPdf");
-        this.preViewerTextRef = useRef("preViewerText")
 
         this.isDragging = false;
         this.dragStartX = 0;
@@ -56,31 +55,18 @@ export class FileViewer extends Component {
             imageLoaded: false,
             scale: 1,
             angle: 0,
-            textContent: "",
         });
         this.ui = useService("ui");
         useEffect(
-            () => {
-                const pdfEl = this.iframeViewerPdfRef.el;
-                const textEl = this.preViewerTextRef.el;
-                if (pdfEl) {
+            (el) => {
+                if (el) {
                     hidePDFJSButtons(this.iframeViewerPdfRef.el, {
                         hideDownload: true,
                         hidePrint: true,
                     });
                 }
-                if (textEl) {
-                    (async () => {
-                        try {
-                            const response = await fetch(this.state.file.defaultSource);
-                            this.state.textContent = await response.text();
-                        } catch {
-                            this.state.textContent = "";
-                        }
-                    })();
-                }
             },
-            () => [this.state.file?.defaultSource]
+            () => [this.iframeViewerPdfRef.el]
         );
     }
 
