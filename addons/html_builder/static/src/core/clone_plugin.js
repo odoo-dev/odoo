@@ -70,25 +70,43 @@ export class ClonePlugin extends Plugin {
             title: _t("Duplicate"),
             disabledReason,
             handler: () => {
-                this.cloneElement(this.overlayTarget, { scrollToClone: true });
+                this.cloneElement(this.overlayTarget, { activateClone: false });
                 this.dependencies.history.addStep();
             },
         });
         return buttons;
     }
 
-    cloneElement(el, { position = "afterend", scrollToClone = false } = {}) {
+    /**
+     * Duplicates the given element and returns the created clone.
+     *
+     * @param {HTMLElement} el the element to clone
+     * @param {Object}
+     *   - `position`: specifies where to position the clone (first parameter of
+     *     the `insertAdjacentElement` function)
+     *   - `scrollToClone`: true if the we should scroll to the clone (if not in
+     *     the viewport), false otherwise
+     *   - `activateClone`: true if the option containers of the clone should be
+     *     the active ones, false otherwise
+     * @returns {HTMLElement}
+     */
+    cloneElement(el, { position = "afterend", scrollToClone = false, activateClone = true } = {}) {
         this.dispatchTo("on_will_clone_handlers", { originalEl: el });
-        // TODO cleanUI resource for each option
         const cloneEl = el.cloneNode(true);
-        this.cleanElement(cloneEl);
+        this.cleanElement(cloneEl); // TODO check that
         el.insertAdjacentElement(position, cloneEl);
-        this.dependencies["builder-options"].updateContainers(cloneEl);
-        this.dispatchTo("on_cloned_handlers", { cloneEl: cloneEl, originalEl: el });
+
+        // Update the containers if required.
+        if (activateClone) {
+            this.dependencies["builder-options"].updateContainers(cloneEl);
+        }
+
+        // Scroll to the clone if required and if it is not visible.
         if (scrollToClone && !isElementInViewport(cloneEl)) {
             cloneEl.scrollIntoView({ behavior: "smooth", block: "center" });
         }
-        // TODO snippet_cloned ?
+
+        this.dispatchTo("on_cloned_handlers", { cloneEl: cloneEl, originalEl: el });
         return cloneEl;
     }
 
