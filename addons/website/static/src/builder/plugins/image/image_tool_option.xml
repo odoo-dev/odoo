@@ -22,6 +22,7 @@
         <BuilderButton title.translate="Transform the picture" action="'transformImage'" icon="'fa-object-ungroup'" id="'transformImage'" />
         <BuilderButton title.translate="Reset transformation" action="'resetTransformImage'" t-if="this.isActiveItem('transformImage')">Reset</BuilderButton>
     </BuilderRow>
+    <ImageTransformButton />
     <ImageFilterOption />
     <BuilderRow label.translate="Size">
         <BuilderButtonGroup styleAction="'width'">

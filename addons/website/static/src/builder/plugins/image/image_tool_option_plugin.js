@@ -77,21 +77,54 @@ class ImageToolOptionPlugin extends Plugin {
                     updateImageAttributes();
                 },
             },
-            transformImage: {
-                isApplied: ({ editingElement }) => editingElement.matches(`[style*="transform"]`),
-                apply: () => {
-                    this.dependencies.userCommand.getCommand("transformImage").run();
+            glFilter: {
+                isApplied: ({ editingElement, params: { mainParam: glFilterName } }) => {
+                    if (glFilterName) {
+                        return editingElement.dataset.glFilter === glFilterName;
+                    } else {
+                        return !editingElement.dataset.glFilter;
+                    }
+                },
+                load: async ({ editingElement: img, params: { mainParam: glFilterName } }) =>
+                    await this.dependencies.imagePostProcess.processImage(img, {
+                        glFilter: glFilterName,
+                    }),
+                apply: ({ loadResult: updateImageAttributes }) => {
+                    updateImageAttributes();
                 },
             },
-            resetTransformImage: {
-                apply: ({ editingElement }) => {
-                    editingElement.setAttribute(
-                        "style",
-                        (editingElement.getAttribute("style") || "").replace(
-                            /[^;]*transform[\w:]*;?/g,
-                            ""
-                        )
+            setCustomFilter: {
+                getValue: ({ editingElement, params: { mainParam: filterProperty } }) => {
+                    const filterOptions = JSON.parse(editingElement.dataset.filterOptions || "{}");
+                    return (
+                        filterOptions[filterProperty] || defaultImageFilterOptions[filterProperty]
                     );
+                },
+                isApplied: ({
+                    editingElement,
+                    params: { mainParam: filterProperty },
+                    value: filterValue,
+                }) => {
+                    const filterOptions = JSON.parse(editingElement.dataset.filterOptions || "{}");
+                    return (
+                        filterValue ===
+                        (filterOptions[filterProperty] || defaultImageFilterOptions[filterProperty])
+                    );
+                },
+                load: async ({
+                    editingElement: img,
+                    params: { mainParam: filterProperty },
+                    value,
+                }) => {
+                    const filterOptions = JSON.parse(img.dataset.filterOptions || "{}");
+                    filterOptions[filterProperty] =
+                        filterProperty === "filterColor" ? normalizeColor(value) : value;
+                    return await this.dependencies.imagePostProcess.processImage(img, {
+                        filterOptions: JSON.stringify(filterOptions),
+                    });
+                },
+                apply: ({ loadResult: updateImageAttributes }) => {
+                    updateImageAttributes();
                 },
             },
             replaceMedia: {

@@ -2,9 +2,11 @@ import { BaseOptionComponent, useDomState } from "@html_builder/core/utils";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { getImageSrc, getMimetype } from "@html_editor/utils/image";
 import { clamp } from "@web/core/utils/numbers";
+import { ImageTransformButton } from "@html_editor/main/media/image_transform_button";
 
 export class ImageFormatOption extends BaseOptionComponent {
     static template = "html_builder.ImageFormat";
+    static components = { ImageTransformButton };
     static props = {
         level: { type: Number, optional: true },
         computeMaxDisplayWidth: { type: Function, optional: true },
