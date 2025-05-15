@@ -156,3 +156,28 @@ class ProductPublicCategory(models.Model):
         for data in results_data:
             data['url'] = '/shop/category/%s' % data['id']
         return results_data
+
+    @api.model
+    def get_snippet_categories(self):
+        """
+        Return categories that are to be displayed in category list snippet.
+        :rtype: dict
+        :return: list of dictionaries with the following structure:
+            {
+                'id': int,
+                'name': string,
+            }
+        """
+        result = []
+        allowed_categories = self.search([('has_published_products', '=', True)])
+        for category in allowed_categories:
+            num_child_categories = len(category.child_id & allowed_categories)
+            result.append({
+                'id': category.id,
+                'name': self.env._(
+                    "%(name)s (%(children)d)",
+                    name=category.name,
+                    children=num_child_categories,
+                ) if num_child_categories else category.name,
+            })
+        return result

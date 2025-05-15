@@ -1,8 +1,9 @@
-import { Interaction } from "@web/public/interaction";
-import { registry } from "@web/core/registry";
-import { renderToFragment } from "@web/core/utils/render";
+import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
+import { registry } from "@web/core/registry";
 import { listenSizeChange, utils as uiUtils } from "@web/core/ui/ui_service";
+import { renderToFragment } from "@web/core/utils/render";
+import { Interaction } from "@web/public/interaction";
 
 
 export class dynamicCategorySnippet extends Interaction{
@@ -10,10 +11,10 @@ export class dynamicCategorySnippet extends Interaction{
 
     async willStart() {
         this.ribbons = await this.waitFor(rpc('/shop/ribbons'));
-        if (this.el.dataset.filterId !== undefined) {
-            const nodeData = this.el.dataset;
+        this.nodeData = this.el.dataset;
+        if (this.nodeData.filterId !== undefined) {
             this.data = await this.waitFor(rpc(
-                '/shop/categories', {'filter_id': parseInt(nodeData.filterId)}
+                '/shop/categories', {'filter_id': parseInt(this.nodeData.filterId)}
             ))
         } else {
             this.data = [];
@@ -27,15 +28,20 @@ export class dynamicCategorySnippet extends Interaction{
 
     render(){
         const heightToSpan = {
-            'small': 1,
+            'small': 2,
             'medium': 2,
             'large': 4,
         }
+        const heightToRow = {
+            'small': "10vh",
+            'medium': "15vh",
+            'large': "15vh",
+        }
 
         let alignmentClass = " justify-content-between";
-        if (this.el.dataset.alignment == "right"){
+        if (this.nodeData.alignment == "right"){
             alignmentClass += " align_category_right";
-        }else if (this.el.dataset.alignment == "center"){
+        }else if (this.nodeData.alignment == "center"){
             alignmentClass = " align_category_center";
         }
 
@@ -47,18 +53,21 @@ export class dynamicCategorySnippet extends Interaction{
                 data: this.data,
                 ribbons: this.ribbons,
                 get_ribbon: this.get_ribbon,
-                height: heightToSpan[this.el.dataset.height],
+                height: heightToSpan[this.nodeData.height],
                 alignmentClass: alignmentClass,
-                buttonText: this.el.dataset.button,
+                buttonText: _t(this.nodeData.button),
             }
         ));
-        const columns = uiUtils.isSmall()? 1 : parseInt(this.el.dataset.columns);
+        const columns = uiUtils.isSmall()? 1 : parseInt(this.nodeData.columns);
         category_grid.style.setProperty(
             "grid-template-columns", `repeat(${columns}, calc((100% / ${columns}) - 0.7rem))`
         );
+        category_grid.style.setProperty(
+            "grid-auto-rows", `minmax(${heightToRow[this.nodeData.height]}, auto)`
+        );
 
         const allProducts = this.el.querySelector(".all_products");
-        if (this.el.dataset.allProducts == "true"){
+        if (this.nodeData.allProducts == "true"){
             allProducts.classList.remove("d-none");
             const allProductsOverlay = allProducts.querySelector(".s_category_overlay");
             allProductsOverlay.classList.remove("justify-content-between", "align_category_right", "align_category_center");
@@ -67,7 +76,12 @@ export class dynamicCategorySnippet extends Interaction{
             allProductsHeadingEl.textContent = allProductsHeadingEl
                 ? allProductsHeadingEl.textContent.trim()
                 : "All Collections";
-            allProducts.querySelector("a").textContent = this.el.dataset.button;
+            allProducts.querySelector("a").textContent = this.nodeData.button;
+            if(['large', 'medium'].includes(this.nodeData.height) || this.nodeData.columns == 5){
+                allProducts.style.setProperty("grid-column", "span 2")
+            }else{
+                allProducts.style.setProperty("grid-column", "span 1")
+            }
         }else{
             allProducts.classList.add("d-none");
         }

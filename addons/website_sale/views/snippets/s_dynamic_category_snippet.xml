@@ -44,14 +44,12 @@
                 data-selector="section.s_dynamic_category"
                 data-no-preview="true"
             >
-                <we-select
+                <we-range
+                    data-min="2" data-max="5"
                     string="Columns"
                     data-attribute-name="columns"
-                >
-                    <we-button data-select-data-attribute="2">2</we-button>
-                    <we-button data-select-data-attribute="3">3</we-button>
-                    <we-button data-select-data-attribute="4">4</we-button>
-                </we-select>
+                    data-select-data-attribute=""
+                />
                 <we-select
                     string="Height"
                     data-attribute-name="height"

@@ -16,11 +16,7 @@ options.registry.dynamic_snippet_category = options.Class.extend({
 
     async willStart() {
         const _super = this._super.bind(this);
-        this.categories = await this.orm.searchRead(
-            'product.public.category',
-            [],
-            ['id', 'name'],
-        );
+        this.categories = await this.orm.call("product.public.category", "get_snippet_categories", []);
         return _super(...arguments);
     },
 
