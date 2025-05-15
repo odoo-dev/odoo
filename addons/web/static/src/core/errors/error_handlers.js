@@ -144,12 +144,17 @@ const defaultDialogs = new Map([
  * @returns {boolean}
  */
 export function defaultHandler(env, error) {
-    const DialogComponent = defaultDialogs.get(error.constructor) || ErrorDialog;
-    env.services.dialog.add(DialogComponent, {
-        traceback: error.traceback,
-        message: error.message,
-        name: error.name,
-    });
+    // An error can occur before the dialog service is up => add a check a log in the console
+    if (env.services.dialog) {
+        const DialogComponent = defaultDialogs.get(error.constructor) || ErrorDialog;
+        env.services.dialog.add(DialogComponent, {
+            traceback: error.traceback,
+            message: error.message,
+            name: error.name,
+        });
+    } else {
+        console.error(error.traceback);
+    }
     return true;
 }
 errorHandlerRegistry.add("defaultHandler", defaultHandler, { sequence: 100 });
