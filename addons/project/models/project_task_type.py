@@ -17,6 +17,11 @@ class ProjectTaskType(models.Model):
         return [default_project_id] if default_project_id else None
 
     def _default_user_id(self):
+        action_id = self.env['ir.actions.actions']._for_xml_id('project.open_task_type_form')
+        if action_id and action_id['id'] == self.env.context.get('params', {}).get('action'):
+            # The user is creating a new stage from the action menu
+            # We need to set the user_id to False to manually select project by the user
+            return False
         return not self.env.context.get('default_project_id', False) and self.env.uid
 
     active = fields.Boolean('Active', default=True)
