@@ -81,3 +81,23 @@ def test_all_l10n(env):
         except Exception:
             _logger.error("Error when creating COA %s", template_code, exc_info=True)
             env.cr.rollback()
+
+    chart_template_mapping = env['account.chart.template']._get_chart_template_mapping()
+    for template_code in list(chart_template_mapping.keys()):
+        _logger.info("Checking COA: %s", template_code)
+        try:
+            data = env['account.chart.template']._get_chart_template_data(template_code)
+        except Exception:  #noqa: BLE001
+            _logger.info("COA could not be loaded: %s", template_code)
+            continue
+        problems = {}
+        for tax_group_xmlid, tax_group_data in data['account.tax.group'].items():
+            tax_receivable_account_id = tax_group_data.get('tax_receivable_account_id')
+            tax_payable_account_id = tax_group_data.get('tax_payable_account_id')
+            reconcilable_accounts_to_check = {tax_receivable_account_id, tax_payable_account_id}
+            reconcilable_accounts_to_check.discard(None)  # 'tax_receivable_account_id', 'tax_payable_account_id' may not be set
+            for account_xmlid, account_data in data['account.account'].items():
+                if account_xmlid in reconcilable_accounts_to_check and not data.get('reconcile'):
+                    problems.setdefault(account_xmlid, set()).add(tax_group_xmlid)
+        for account_xmlid, tax_groups_set in problems.items():
+            _logger.warning("%s: account `%s` (from tax_groups %s) is not reconcilable", template_code, account_xmlid, list(tax_groups_set))
