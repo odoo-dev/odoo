@@ -35,7 +35,7 @@
                         <div class="input-group">
                             <select name="link_type" class="form-select form-select-sm w-100 mb-1" t-model="state.type" t-on-change="onChange">
                                 <t t-foreach="this.colorsData" t-as="colorData" t-key="colorData.type">
-                                    <t t-if="props.allowCustomStyle or colorData.type !== 'custom'">
+                                    <t t-if="colorData.type !== 'custom'">
                                         <option t-att-value="colorData.type" t-att-selected="state.type === colorData.type" t-attf-class="o_btn_preview">
                                             <span t-esc="colorData.label"/>
                                         </option>

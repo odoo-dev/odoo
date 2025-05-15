@@ -416,33 +416,27 @@ export class LinkPlugin extends Plugin {
         const selectionTextContent = selection?.textContent();
         const isImage = !!findInSelection(selection, "img");
 
-        const applyCallback = (url, label, classes, customStyle, linkTarget) => {
-            if (this.linkInDocument) {
+        const applyCallback = (url, label, classes) => {
+            if (this.linkInDocument && isImage) {
                 if (url) {
                     this.linkInDocument.href = url;
                 } else {
                     this.linkInDocument.removeAttribute("href");
                 }
-                if (linkTarget) {
-                    this.linkInDocument.setAttribute("target", linkTarget);
+            } else if (this.linkInDocument) {
+                if (url) {
+                    this.linkInDocument.href = url;
                 } else {
-                    this.linkInDocument.removeAttribute("target");
+                    this.linkInDocument.removeAttribute("href");
                 }
-                if (!isImage) {
-                    if (classes) {
-                        this.linkInDocument.className = classes;
-                    } else {
-                        this.linkInDocument.removeAttribute("class");
-                    }
-                    if (customStyle) {
-                        this.linkInDocument.setAttribute("style", customStyle);
-                    } else {
-                        this.linkInDocument.removeAttribute("style");
-                    }
-                    if (cleanZWChars(this.linkInDocument.innerText) !== label) {
-                        this.linkInDocument.innerText = label;
-                        cursorsToRestore = null;
-                    }
+                if (classes) {
+                    this.linkInDocument.className = classes;
+                } else {
+                    this.linkInDocument.removeAttribute("class");
+                }
+                if (cleanZWChars(this.linkInDocument.innerText) !== label) {
+                    this.linkInDocument.innerText = label;
+                    cursorsToRestore = null;
                 }
             } else if (url) {
                 // prevent the link creation if the url field was empty
@@ -489,12 +483,6 @@ export class LinkPlugin extends Plugin {
                     const link = this.createLink(url, label);
                     if (classes) {
                         link.className = classes;
-                    }
-                    if (customStyle) {
-                        link.setAttribute("style", customStyle);
-                    }
-                    if (linkTarget) {
-                        link.setAttribute("target", linkTarget);
                     }
                     this.linkInDocument = link;
                     cursorsToRestore = null;
@@ -578,16 +566,7 @@ export class LinkPlugin extends Plugin {
                     focusNode: link,
                     focusOffset: nodeSize(link),
                 });
-                const saveCustomStyle = link.getAttribute("style");
-                link.removeAttribute("style");
                 this.dependencies.color.removeAllColor();
-                if (
-                    saveCustomStyle &&
-                    this.config.allowCustomStyle &&
-                    link.className.includes("custom")
-                ) {
-                    link.setAttribute("style", saveCustomStyle);
-                }
                 // Remove the current link (linkInDocument) if it has no content
                 if (cleanZWChars(link.innerText) === "" && !link.querySelector("img")) {
                     const [anchorNode, anchorOffset] = rightPos(link);
@@ -609,10 +588,6 @@ export class LinkPlugin extends Plugin {
 
     normalizeLink(root) {
         for (const anchorEl of selectElements(root, "a")) {
-            if (/btn(-[a-z0-9_-]*)custom/.test(anchorEl.className)) {
-                // if the link is a customized button, we don't want to change the color
-                continue;
-            }
             const { color } = anchorEl.style;
             const childNodes = [...anchorEl.childNodes];
             // For each anchor element, if it has an inline color style,
