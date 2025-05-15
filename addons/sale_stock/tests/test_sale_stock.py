@@ -1984,3 +1984,29 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
         self.assertEqual(so.picking_ids[0].state, 'done')
         self.assertEqual(so.picking_ids[1].move_ids.move_line_ids[0].location_dest_id, child_location_1)
         self.assertEqual(so.picking_ids[1].move_ids.move_line_ids[1].location_dest_id, child_location_2)
+
+    def test_update_sol_quantity_without_packaging(self):
+        """
+        Test updating a SOL quantity without specifying a packaging (eg through catalog).
+        Ensure both the move's quantity & packaging are correctly updated.
+        """
+        packOf6 = self.env['product.packaging'].create({
+            'name': 'PackOf6',
+            'product_id': self.product_a.id,
+            'qty': 6,
+        })
+        so = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [(0, 0, {
+                'product_id': self.product_a.id,
+                'product_uom_qty': 1,
+                'product_uom': self.product_a.uom_id.id,
+            })],
+        })
+        so.action_confirm()
+        self.assertFalse(so.order_line.product_packaging_id)
+        so.order_line.product_uom_qty = 12
+        self.assertEqual(so.order_line.product_packaging_id, packOf6)
+        self.assertRecordValues(so.order_line.move_ids, [
+            {'product_uom_qty': 12, 'product_packaging_qty': 2, 'product_packaging_id': packOf6.id},
+        ])

@@ -184,6 +184,13 @@ class SaleOrderLine(models.Model):
                     qty -= move.product_uom._compute_quantity(move.quantity, line.product_uom, rounding_method='HALF-UP')
                 line.qty_delivered = qty
 
+    @api.depends('product_id', 'product_uom_qty', 'product_uom')
+    def _compute_product_packaging_id(self):
+        super()._compute_product_packaging_id()
+        self.move_ids.filtered(
+            lambda m: m.state not in ['cancel', 'done']
+        ).product_packaging_id = self.product_packaging_id
+
     @api.model_create_multi
     def create(self, vals_list):
         lines = super(SaleOrderLine, self).create(vals_list)
