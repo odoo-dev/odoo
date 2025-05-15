@@ -7,6 +7,8 @@ from odoo.http import Controller, request, route
 from .utils import clean_action
 from werkzeug.exceptions import BadRequest
 
+_logger = logging.getLogger(__name__)
+
 
 class MissingActionError(UserError):
     """Missing Action.
@@ -23,6 +25,7 @@ class Action(Controller):
     def load(self, action_id, context=None):
         if context:
             request.update_context(**context)
+        _logger.info(action_id)
         Actions = request.env['ir.actions.actions']
         try:
             action_id = int(action_id)

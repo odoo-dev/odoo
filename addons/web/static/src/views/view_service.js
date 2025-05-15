@@ -63,6 +63,11 @@ export const viewService = {
          */
         async function loadViews(params, options = {}) {
             const { context, resModel, views } = params;
+            console.log("**** Load Views ****");
+            console.log(JSON.stringify(context));
+            console.log(JSON.stringify(resModel));
+            console.log(JSON.stringify(views));
+            console.trace();
             const loadViewsOptions = {
                 action_id: options.actionId || false,
                 embedded_action_id: options.embeddedActionId || false,
@@ -91,7 +96,6 @@ export const viewService = {
                     ([k, v]) => k == "lang" || k.endsWith("_view_ref")
                 )
             );
-
             const result = await orm.cached.call(resModel, "get_views", [], {
                 context: filteredContext,
                 views,
