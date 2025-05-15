@@ -182,18 +182,46 @@ class TestController(HttpCase):
         self.assertEqual(200, response_wrong_record.status_code)
         self.assertTrue('error_msg' in response_wrong_record.text)
 
-        # retrieve metadata of a url not directing to a record
-        response_not_record = self.url_open(
+        # retrieve metadata of a url directing to a frontend page (not a record)
+        # page without seo description set
+        view = self.env["ir.ui.view"].create({
+            "arch": """
+            <t t-name="website.my-page">
+                <h1>My Page</h1>
+            </t>""",
+            "type": "qweb"
+        })
+        self.env["website.page"].create({
+            "url": "/my-page",
+            "view_id": view.id,
+        })
+        response_frontend_page_no_seo = self.url_open(
             '/html_editor/link_preview_internal',
             data=json_safe.dumps({
                 "params": {
-                    "preview_url": "/odoo/users",
+                    "preview_url": "/my-page",
                 }
             }),
             headers=self.headers
         )
-        self.assertEqual(200, response_not_record.status_code)
-        self.assertTrue('other_error_msg' in response_not_record.text)
+        self.assertEqual(200, response_frontend_page_no_seo.status_code)
+        self.assertTrue('"result": {}' in response_frontend_page_no_seo.text)
+
+        # page with seo description set
+        self.env["ir.ui.view"].browse(view.id).update({
+            "website_meta_description": "My page description"
+        })
+        response_frontend_page_with_seo = self.url_open(
+            '/html_editor/link_preview_internal',
+            data=json_safe.dumps({
+                "params": {
+                    "preview_url": "/my-page",
+                }
+            }),
+            headers=self.headers
+        )
+        self.assertEqual(200, response_frontend_page_with_seo.status_code)
+        self.assertTrue('"result": {"description": "My page description"}' in response_frontend_page_with_seo.text)
 
         # Attempt to retrieve metadata for path format `odoo/<model>/<record_id>`
         response_model_record = self.url_open(

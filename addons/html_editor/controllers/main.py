@@ -586,14 +586,26 @@ class HTML_Editor(http.Controller):
             link_preview_data['og_description'] = html.fromstring(link_preview_data['og_description']).text_content()
         return link_preview_data
 
-    @http.route('/html_editor/link_preview_internal', type="jsonrpc", auth="user", methods=['POST'])
+    @http.route('/html_editor/link_preview_internal', type="jsonrpc", auth="user", website=True, methods=['POST'])
     def link_preview_metadata_internal(self, preview_url):
         try:
             Actions = request.env['ir.actions.actions']
             context = dict(request.env.context)
             words = preview_url.strip('/').split('/')
 
-            record_id = int(words.pop())
+            try:
+                record_id = int(words.pop())
+            except ValueError:
+                # could be a frontend page
+                result = {}
+                page = self.env['website.page'].search([
+                    ('website_id', 'in', (False, request.website.id)),
+                    ('url', '=', preview_url),
+                ], limit=1)
+                if page and page.view_id.website_meta_description:
+                        result['description'] = page.view_id.website_meta_description
+                return result
+
             action_name = words.pop()
             if (action_name.startswith('m-') or '.' in action_name) and action_name in request.env and not request.env[action_name]._abstract:
                 # if path format is `odoo/<model>/<record_id>` so we use `action_name` as model name
