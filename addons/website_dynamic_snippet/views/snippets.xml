@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="snippet_sale_order_cards" inherit_id="website.snippets">
+        <xpath expr="//snippets[@id='snippet_content']" position="inside">
+            <t t-snippet="website_dynamic_snippet.s_sale_order_cards" string="Sale Order Cards"
+                t-thumbnail="/website_dynamic_snippet/static/src/img/s_thumbnail.svg" />
+        </xpath>
+    </template>
+
+</odoo>

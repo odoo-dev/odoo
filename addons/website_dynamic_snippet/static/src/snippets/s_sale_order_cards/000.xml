@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="website_dynamic_snippet.s_sale_order_cards.card" t-foreach="orders" t-as="order" t-key="order.name">
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-title mb-2"><t t-esc="order.name"/></h6>
+                    <h4 class="card-text mb-2"><t t-esc="order.partner_id[1]"/></h4>
+                    <span class="badge bg-info rounded-pill"><t t-esc="order.state"/></span>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="website_dynamic_snippet.s_sale_order_cards.list" t-foreach="orders" t-as="order" t-key="order.name">
+        <li class="list-group-item d-flex flex-column align-items-center">
+            <div class="p-2">
+                <strong class="px-2">Order:</strong><t t-esc="order.name"/>
+                <strong class="px-2">Customer:</strong><t t-esc="order.partner_id[1]"/>
+                <span class="badge bg-info rounded-pill mx-2">Status: <t t-esc="order.state"/></span>
+            </div>
+        </li>
+    </t>
+</templates>

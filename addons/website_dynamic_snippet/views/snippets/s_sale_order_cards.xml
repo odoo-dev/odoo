@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="s_sale_order_cards" name="Sale Order Cards">
+        <section class="s_sale_order_cards" data-no-of-orders="10">
+            <div class="row d-flex align-items-center" id="sale_order_cards_container">
+                <!-- Cards will be rendered here -->
+            </div>
+            <div class="d-flex justify-content-center my-4">
+                <button class="btn btn-primary" id="load_more_orders">Load More Orders...</button>
+            </div>
+        </section>
+    </template>
+
+    <template id="s_sale_order_cards_options" inherit_id="website.snippet_options">
+        <xpath expr="." position="inside">
+            <div data-selector=".s_sale_order_cards" data-js="sale_order_cards_options">
+                <we-checkbox
+                    string="Show Confirmed Orders"
+                    data-no-preview="true"
+                    data-select-data-attribute="false|true"
+                    data-attribute-name="showConfirmOrders"
+                />
+                <we-select string="Display Type" data-attribute-default-value="card"
+                    data-attribute-name="displayType">
+                    <we-button
+                        data-select-template="website_dynamic_snippet.s_sale_order_cards.list"
+                        data-select-data-attribute="list">List</we-button>
+                    <we-button
+                        data-select-template="website_dynamic_snippet.s_sale_order_cards.card"
+                        data-select-data-attribute="card">Card</we-button>
+                </we-select>
+                <we-input string="Number of Orders" data-step="5" data-min="0" data-max="50"
+                    data-select-data-attribute="10" data-attribute-name="noOfOrders" />
+            </div>
+        </xpath>
+    </template>
+</odoo>
