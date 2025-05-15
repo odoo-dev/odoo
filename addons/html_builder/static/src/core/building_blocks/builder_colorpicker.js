@@ -1,4 +1,3 @@
-import { ColorSelector } from "@html_editor/main/font/color_selector";
 import { Component, useComponent, useRef } from "@odoo/owl";
 import { useColorPicker } from "@web/core/color_picker/color_picker";
 import { BuilderComponent } from "./builder_component";
@@ -100,7 +99,6 @@ export class BuilderColorPicker extends Component {
         defaultColor: "#FFFFFF00",
     };
     static components = {
-        ColorSelector: ColorSelector,
         BuilderComponent,
     };
 
