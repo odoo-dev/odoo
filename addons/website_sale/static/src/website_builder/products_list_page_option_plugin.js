@@ -6,6 +6,7 @@ import { registry } from "@web/core/registry";
 
 class ProductsListPageOptionPlugin extends Plugin {
     static id = "productsListPageOptionPlugin";
+
     resources = {
         builder_options: [
             {
@@ -46,7 +47,19 @@ class ProductsListPageOptionPlugin extends Plugin {
             },
             setGap: {
                 reload: {},
+                getValue: ({ editingElement }) =>
+                    editingElement.style.getPropertyValue("--o-wsale-products-grid-gap"),
                 apply: ({ value }) => rpc("/shop/config/website", { shop_gap: value }),
+            },
+            // TODO AGAU: merge with setGap and perform rpc on save
+            setDefaultGap: {
+                reload: {},
+                isApplied: () => true,
+                apply: ({ editingElement, value }) => {
+                    editingElement.dataset.gap = value;
+                    editingElement.style.setProperty("--o-wsale-products-grid-gap", value + "px");
+                    return rpc("/shop/config/website", { shop_gap: value });
+                },
             },
             setDefaultSort: {
                 reload: {},
@@ -54,6 +67,14 @@ class ProductsListPageOptionPlugin extends Plugin {
                     editingElement.dataset.defaultSort === value,
                 apply: ({ value }) => rpc("/shop/config/website", { shop_default_sort: value }),
             },
+            // TODO AGAU: does not work when views is empty array
+            // get websiteConfigNoReload() {
+            //     const websiteConfigAction = getAction("websiteConfig");
+            //     return {
+            //         ...websiteConfigAction,
+            //         reload: undefined,
+            //     };
+            // },
         };
     }
 }
