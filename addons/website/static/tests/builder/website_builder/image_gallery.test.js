@@ -31,7 +31,7 @@ test("Add image in gallery", async () => {
         { pure: true }
     );
 
-    await setupWebsiteBuilder(
+    const { waitDomUpdated } = await setupWebsiteBuilder(
         `
         <section class="s_image_gallery o_masonry" data-columns="2">
             <div class="container">
@@ -68,7 +68,7 @@ test("Add image in gallery", async () => {
     // We use "click" instead of contains.click because contains wait for the image to be visible.
     // In this test we don't want to wait ~800ms for the image to be visible but we can still click on it
     await click("img.o_we_attachment_highlight");
-    await animationFrame();
+    await waitDomUpdated();
     await contains(".modal-footer button").click();
     await waitFor(":iframe .o_masonry_col img[data-index='6']");
 
@@ -79,6 +79,7 @@ test("Add image in gallery", async () => {
 
     expect(columnImgs).toEqual([["1", "3", "4", "5", "6"], ["2"]]);
     expect.verifySteps([
+        "get_image_info",
         "get_image_info",
         "get_image_info",
         "get_image_info",

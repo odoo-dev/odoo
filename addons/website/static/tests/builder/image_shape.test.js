@@ -105,7 +105,7 @@ test("Should change the shape color of an image", async () => {
     );
 });
 test("Should change the shape color of an image with a class color", async () => {
-    const { getEditor } = await setupWebsiteBuilder(`
+    const { getEditor, waitDomUpdated } = await setupWebsiteBuilder(`
         <div class="test-options-target">
             ${testImg}
         </div>
@@ -154,7 +154,7 @@ test("Should change the shape color of an image with a class color", async () =>
     // ensure the shape action has been applied
     await editor.shared.operation.next(() => {});
     // wait for owl to update the dom
-    await animationFrame();
+    await waitDomUpdated();
 
     expect(`[data-label="Colors"] .o_we_color_preview:nth-child(1)`).toHaveAttribute(
         "style",
