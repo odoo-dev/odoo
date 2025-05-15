@@ -13,9 +13,8 @@ export class ThemeColorsOption extends BaseOptionComponent {
             presets: this.getPresets(),
         }));
         onMounted(() => {
-            const iframeDocument = document.querySelector("iframe").contentWindow.document;
-            this.iframeStyle = iframeDocument.defaultView.getComputedStyle(
-                iframeDocument.documentElement
+            this.iframeStyle = this.env.editor.document.defaultView.getComputedStyle(
+                this.env.editor.document.documentElement
             );
             this.state.presets = this.getPresets();
         });

@@ -113,11 +113,10 @@ export class BuilderColorPicker extends Component {
         this.state.defaultTab = this.props.selectedTab || "solid"; // TODO: select the correct tab based on the color
         let themePresets = undefined;
         if (this.props.enabledTabs && this.props.enabledTabs.includes("theme")) {
-            const iframeDocument = document.querySelector("iframe").contentWindow.document;
-            const iframeStyle = iframeDocument.defaultView.getComputedStyle(
-                iframeDocument.documentElement
+            const style = this.env.editor.document.defaultView.getComputedStyle(
+                this.env.editor.document.documentElement
             );
-            themePresets = getThemePresets(iframeStyle);
+            themePresets = getThemePresets(style);
         }
         useColorPicker(
             "colorButton",
