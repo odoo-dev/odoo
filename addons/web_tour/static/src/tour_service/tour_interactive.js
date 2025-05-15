@@ -62,6 +62,12 @@ export class TourInteractive {
         }
     }
 
+    isReachable(el) {
+        const { x, y, width, height } = el.getBoundingClientRect();
+        const reachableEl = el.ownerDocument.elementFromPoint(x + width / 2, y + height / 2);
+        return el === reachableEl || el.contains(reachableEl);
+    }
+
     /**
      * @returns {HTMLElement[]}
      */
@@ -72,7 +78,10 @@ export class TourInteractive {
 
         return anchor
             .split(/,\s*(?![^(]*\))/)
-            .map((part) => hoot.queryFirst(part, { visible: true }))
+            .map((part) => {
+                const el = hoot.queryFirst(part, { visible: true });
+                return el && this.isReachable(el) ? el : false;
+            })
             .filter((el) => !!el)
             .map((el) => this.getAnchorEl(el, this.currentAction.event))
             .filter((el) => !!el);

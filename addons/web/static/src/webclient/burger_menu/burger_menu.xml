@@ -28,7 +28,7 @@
           </nav>
         </div>
       </Transition>
-      <div t-if="state.isBurgerOpened" class="modal-backdrop show d-block d-md-none" t-on-click.stop="_closeBurger" t-on-touchstart.stop="_onSwipeStart" t-on-touchend.stop="_onSwipeEnd" />
+      <div t-if="state.isBurgerOpened" class="offcanvas-backdrop show d-block d-md-none" t-on-click.stop="_closeBurger" t-on-touchstart.stop="_onSwipeStart" t-on-touchend.stop="_onSwipeEnd" />
     </t>
 </div>
 

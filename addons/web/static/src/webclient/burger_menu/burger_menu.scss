@@ -4,7 +4,7 @@
 
 .o_burger_menu, .o_app_menu_sidebar {
     width: Min(360px, 80%);
-    z-index: $zindex-tooltip + 10;
+    z-index: $zindex-offcanvas;
     transition: transform .2s ease;
 
     // Menu Toggle-Animations
