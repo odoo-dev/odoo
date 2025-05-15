@@ -2129,7 +2129,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         # prefetched fields.)
         messages.fetch()
 
-        with self.assertQueryCount(18):
+        with self.assertQueryCount(17):
             messages.mapped('author_message_count')
 
         # however, if the error is not due to the record and the prefetch is
