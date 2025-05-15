@@ -624,8 +624,8 @@ export class Store extends BaseStore {
             messages: this["mail.message"].insert(messages),
         };
     }
-    reset() {
-        super.reset();
+    async onReset() {
+        await super.onReset();
         this.insert(session.storeData);
         /**
          * Add defaults for `self` and `settings` because in livechat there could be no user and no

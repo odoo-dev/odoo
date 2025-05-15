@@ -11,9 +11,9 @@ const StorePatch = {
         this.channels = this.makeCachedFetchData("channels_as_member");
         this.fetchSsearchConversationsSequential = useSequential();
     },
-    reset() {
+    async onReset() {
         this.channels.status = "not_fetched";
-        super.reset();
+        await super.onReset();
     },
     /**
      * @param {string} categoryId

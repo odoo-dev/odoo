@@ -28,8 +28,14 @@ export class Store extends Record {
         return this.recordByLocalId.get(localId);
     }
 
-    reset() {
+    async reset() {
         this.storeReady = false;
+        await this.onReset();
+        this.resetCount++;
+        this.storeReady = true;
+    }
+
+    async onReset() {
         this.MAKE_UPDATE(() => {
             for (const [localId, record] of this.recordByLocalId.entries()) {
                 if (this.localId !== localId && record.exists()) {
@@ -44,8 +50,6 @@ export class Store extends Record {
                 rawStore._.requestSort?.(rawStore, fieldName);
             }
         });
-        this.resetCount++;
-        this.storeReady = true;
     }
 
     destroy() {
