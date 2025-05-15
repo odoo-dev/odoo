@@ -626,7 +626,6 @@ export class Store extends BaseStore {
     }
     reset() {
         super.reset();
-        this.channels.status = "not_fetched";
         this.insert(session.storeData);
         /**
          * Add defaults for `self` and `settings` because in livechat there could be no user and no
