@@ -79,23 +79,6 @@ class ImageToolOptionPlugin extends Plugin {
                     updateImageAttributes();
                 },
             },
-            transformImage: {
-                isApplied: ({ editingElement }) => editingElement.matches(`[style*="transform"]`),
-                apply: () => {
-                    this.dependencies.userCommand.getCommand("transformImage").run();
-                },
-            },
-            resetTransformImage: {
-                apply: ({ editingElement }) => {
-                    editingElement.setAttribute(
-                        "style",
-                        (editingElement.getAttribute("style") || "").replace(
-                            /[^;]*transform[\w:]*;?/g,
-                            ""
-                        )
-                    );
-                },
-            },
             glFilter: {
                 isApplied: ({ editingElement, params: { mainParam: glFilterName } }) => {
                     if (glFilterName) {
