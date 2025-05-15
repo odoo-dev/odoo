@@ -27,7 +27,7 @@ export class MegaMenuOptionPlugin extends Plugin {
     }
 
     async saveMegaMenuClasses() {
-        const megaMenuEl = this.editable.querySelector("[data-oe-field='mega_menu_content'");
+        const megaMenuEl = this.editable.querySelector("[data-oe-field='mega_menu_content']");
         if (megaMenuEl) {
             // On top of saving the mega menu content like any other field
             // content, we must save the custom classes that were set on the
