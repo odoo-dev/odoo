@@ -56,7 +56,7 @@ class TestWishlistProcess(HttpCase):
 
         self.env.ref('base.user_admin').name = 'Mitchell Admin'
 
-        self.start_tour("/", 'shop_wishlist')
+        self.start_tour("/", 'shop_wishlist',debug=True,step_delay=2000)
 
     def test_02_wishlist_admin_tour(self):
         attribute = self.env['product.attribute'].create({

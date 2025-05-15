@@ -33,6 +33,7 @@ registry.category("web_tour.tours").add('shop_wishlist', {
             content: "hover card && click on add to wishlist",
             trigger: ".o_wsale_product_grid_wrapper:contains(desk)",
             run: "hover && click .o_add_wishlist",
+
         },
         {
             trigger: ".my_wish_quantity:contains(1)",
@@ -90,9 +91,20 @@ registry.category("web_tour.tours").add('shop_wishlist', {
             run: "click",
         },
         {
+            content: "check that wishlist contains 2 items",
+            trigger: "tr",
+            run: function () {
+                const rows = document.querySelectorAll("#o_comparelist_table tr");
+                if (rows.length !== 2) {
+                    throw new Error("Expected 2 items in the wishlist, but found " + rows.length);
+                }
+            }
+        },
+        {
             content: "remove Customizable Desk (TEST)",
             trigger: 'tr:contains("Customizable Desk") .o_wish_rm:first',
             run: "click",
+            pause:true,
         },
         {
             content: "check that wishlist contains 1 item",
