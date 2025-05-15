@@ -47,7 +47,7 @@ export class AnchorPlugin extends Plugin {
 
     // TODO check if no other way when doing popup options.
     isModal(element) {
-        element.classList.contains("modal");
+        return element.classList.contains("modal");
     }
 
     setAnchorName(element, value) {

@@ -78,9 +78,7 @@ class PopupOptionPlugin extends Plugin {
             },
             copyAnchor: {
                 apply: ({ editingElement }) => {
-                    this.dependencies.anchor.createOrEditAnchorLink(
-                        editingElement.closest(".s_popup")
-                    );
+                    this.dependencies.anchor.createOrEditAnchorLink(editingElement);
                 },
             },
             setPopupDelay: {
