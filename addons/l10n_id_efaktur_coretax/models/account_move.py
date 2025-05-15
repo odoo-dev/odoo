@@ -186,16 +186,8 @@ class AccountMove(models.Model):
                 if digits:
                     move.l10n_id_coretax_add_info_08 = f"TD.005{digits[-2:]}"
 
-    def download_efaktur(self):
-        """OVERRIDE l10n_id_efaktur
-
-        Change the flow of efaktur downloading. Collects data needed for efaktur and generate the
-        xml file.
-        """
-        # Pre-download checks
-
-        # Should prevent users from generating e-Faktur document on invoices across multi-company.
-        # Allowing it will cause issues on the invoice/eFaktur document record rule
+    def _pre_efaktur_download_check(self):
+        """" Check if the requirements to generate efaktur are met """
         if len(self.company_id) > 1:
             raise UserError(_("You are not allowed to generate e-Faktur document from invoices coming from different companies"))
 
@@ -236,6 +228,14 @@ class AccountMove(models.Model):
         if err_messages:
             err_messages = [_('Unable to download E-faktur fot he following reasons(s):')] + err_messages
             raise ValidationError('\n - '.join(err_messages))
+
+    def download_efaktur(self):
+        """OVERRIDE l10n_id_efaktur
+
+        Change the flow of efaktur downloading. Collects data needed for efaktur and generate the
+        xml file.
+        """
+        self._pre_efaktur_download_check()
 
         # All invoices in self have no documents; we can create a new one for them.
         # Or all invoices in self have a document, but it's the same one. Special use case but we allow downloading it.

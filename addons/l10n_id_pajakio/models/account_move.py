@@ -11,7 +11,7 @@ class AccountMove(models.Model):
     l10n_id_pajakio_trx_uploaded = fields.Boolean(default=False, copy=False, readonly=True)
     l10n_id_pajakio_trx_url = fields.Char(readonly=True, copy=False)
     l10n_id_pajakio_nofa = fields.Char(readonly=True, copy=False)
-    l10n_id_failure_reason = fields.Text(readonly=False)
+    l10n_id_failure_reason = fields.Text(readonly=True)
 
     def _pajakio_get_api_key_encoded(self):
         """Get the base64 encoded API key from pajak.io"""
@@ -92,18 +92,20 @@ class AccountMove(models.Model):
         }
         
         # calculating all total based on all the lines
-        res.update({
-            "totalDpp": sum(l['dpp'] for l in res['barangJasa']),
-            "totalDppLain": sum(l['dppLain'] for l in res['barangJasa']),
-            'totalPpn': sum(l['ppn'] for l in res['barangJasa']),
-            "totalPpnBm": sum(l['ppnbm'] for l in res['barangJasa'])
-        })
+        # can omit due to calculation done on PajakIO side
+        # res.update({
+        #     "totalDpp": sum(l['dpp'] for l in res['barangJasa']),
+        #     "totalDppLain": sum(l['dppLain'] for l in res['barangJasa']),
+        #     'totalPpn': sum(l['ppn'] for l in res['barangJasa']),
+        #     "totalPpnBm": sum(l['ppnbm'] for l in res['barangJasa'])
+        # })
 
         return res
 
 
     def pajakio_submit_efaktur(self):
         """ Method to submit the document to the govt"""
+        self._pre_efaktur_download_check()
         payload = self._pajakio_prepare_payload()
         url = "https://sandbox-openapi.pajak.io/efaktur/v3/penjualan"
 
@@ -137,9 +139,12 @@ class AccountMove(models.Model):
 
         self.l10n_id_failure_reason = ""  # reset failure reason everytime we're about to re-send the detail
         res = self._pajakio_make_request(url)
-        if res.get("data", {}).get("status") == "APPROVAL_SUKSES":
+        status = res.get("data", {}).get("status")
+        if status == "APPROVAL_SUKSES":
             self.l10n_id_pajakio_trx_url = res.get('data').get('urlPdf')
             self.l10n_id_pajakio_nofa = res.get('data').get('nofa')
+        elif status == "DITOLAK":
+            self.l10n_id_failure_reason = res.get('data').get('keteranganDjp')
         return res
 
     def cron_pajakio_get_status(self):
@@ -153,8 +158,6 @@ class AccountMove(models.Model):
                 status = res.get("data", {}).get("status")
                 if status == "APPROVAL_SUKSES":
                     move.l10n_id_pajakio_trx_url = res.get('data').get('urlPdf')
-                elif status == "DITOLAK":
-                    move.l10n_id_failure_reason = res.get('data').get('keteranganDjp')
             except ValidationError as e:
                 # notify the user there's an error during retrieval
                 move.message_post(body=_("PajakIO, failure when getting status: %s", str(e)))
