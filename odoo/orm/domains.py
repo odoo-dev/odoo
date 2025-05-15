@@ -847,7 +847,6 @@ class DomainCondition(Domain):
         # - NewId is not a value
         # - records are not accepted, use values
         # - Query and Domain values should be using a relational operator
-        from .models import BaseModel  # noqa: PLC0415
         value = self.value
         if value is None:
             value = False
@@ -855,9 +854,6 @@ class DomainCondition(Domain):
             _logger.warning("Domains don't support NewId, use .ids instead, for %r", (self.field_expr, self.operator, self.value))
             operator = 'not in' if operator in NEGATIVE_CONDITION_OPERATORS else 'in'
             value = []
-        elif isinstance(value, BaseModel):
-            _logger.warning("The domain condition %r should not have a value which is a model", (self.field_expr, self.operator, self.value))
-            value = value.ids
         elif isinstance(value, (Domain, Query, SQL)) and operator not in ('any', 'not any', 'any!', 'not any!', 'in', 'not in'):
             # accept SQL object in the right part for simple operators
             # use case: compare 2 fields
@@ -1296,7 +1292,10 @@ def _operator_equal_as_in(condition, _):
     operator = 'in' if condition.operator == '=' else 'not in'
     if isinstance(value, COLLECTION_TYPES):
         # TODO make a warning or equality against a collection
-        if not value:  # views sometimes use ('user_ids', '!=', []) to indicate the user is set
+        from .models import BaseModel  # noqa: PLC0415
+        if isinstance(value, BaseModel):
+            pass  # handled during 'in' operator optimization
+        elif not value:  # views sometimes use ('user_ids', '!=', []) to indicate the user is set
             _logger.debug("The domain condition %r should compare with False.", condition)
             value = OrderedSet([False])
         else:
@@ -1311,7 +1310,7 @@ def _operator_equal_as_in(condition, _):
 
 
 @operator_optimization(['in', 'not in'])
-def _optimize_in_set(condition, _model):
+def _optimize_in_set(condition, model):
     """Make sure the value is an OrderedSet or use 'any' operator"""
     value = condition.value
     if isinstance(value, OrderedSet) and value:
@@ -1322,7 +1321,17 @@ def _optimize_in_set(condition, _model):
         return DomainCondition(condition.field_expr, operator, value)
     if not value:
         return _FALSE_DOMAIN if condition.operator == 'in' else _TRUE_DOMAIN
-    if not isinstance(value, COLLECTION_TYPES):
+    from .models import BaseModel  # noqa: PLC0415
+    if isinstance(value, BaseModel):
+        field = condition._field(model)
+        if field.name == 'id' or (field.relational and field.comodel_name == value._name):
+            value = value.ids
+        elif field.type == 'many2one_reference':
+            domain = Domain(field.model, '=', value._name) & Domain(condition.field_expr, 'in', OrderedSet(value.ids))
+            return ~domain if condition.operator == 'not in' else domain
+        else:
+            condition._raise("Invalid model")
+    elif not isinstance(value, COLLECTION_TYPES):
         # TODO show warning, note that condition.field_expr in ('group_ids', 'user_ids') gives a lot of them
         _logger.debug("The domain condition %r should have a list value.", condition)
         value = [value]
