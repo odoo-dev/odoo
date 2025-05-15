@@ -1012,7 +1012,12 @@ export class HistoryPlugin extends Plugin {
             // Consider the position consumed.
             revertedStep = this.steps[pos];
             this.stepsStates.set(revertedStep.id, "consumed");
-            this.revertMutations(revertedStep.mutations, { forNewStep: true });
+            this.bypassObserver(() => {
+                const mutations = this.revertMutations(revertedStep.mutations, {
+                    forNewStep: true,
+                });
+                this.currentStep.mutations = mutations;
+            });
             this.setSerializedSelection(revertedStep.selection);
             this.addStep({ stepState: "undo" });
             // Consider the last position of the history as an undo.
@@ -1035,7 +1040,12 @@ export class HistoryPlugin extends Plugin {
         if (pos > 0) {
             revertedStep = this.steps[pos];
             this.stepsStates.set(revertedStep.id, "consumed");
-            this.revertMutations(revertedStep.mutations, { forNewStep: true });
+            this.bypassObserver(() => {
+                const mutations = this.revertMutations(revertedStep.mutations, {
+                    forNewStep: true,
+                });
+                this.currentStep.mutations = mutations;
+            });
             this.setSerializedSelection(revertedStep.selection);
             this.addStep({ stepState: "redo" });
         }
@@ -1283,10 +1293,9 @@ export class HistoryPlugin extends Plugin {
      *        to create a new step
      */
     revertMutations(mutations, { forNewStep = false } = {}) {
-        this.applyMutations(mutations.toReversed().map(this.reverseMutation.bind(this)), {
-            forNewStep,
-            reverse: true,
-        });
+        const reversedMutations = mutations.toReversed().map(this.reverseMutation.bind(this));
+        this.applyMutations(reversedMutations, { forNewStep, reverse: true });
+        return reversedMutations;
         // for (const mutation of mutations.toReversed()) {
         //     switch (mutation.type) {
         //         case "custom": {
