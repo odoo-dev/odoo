@@ -32,7 +32,7 @@ export class PosData extends Reactive {
         Object.assign(this, services);
         this.opts = new DataServiceOptions();
         this.channels = [];
-        this.idUpdates = {};
+        this.idUpdates = JSON.parse(localStorage.getItem("idUpdates")) || {};
 
         this.network = {
             loading: true,
@@ -381,6 +381,7 @@ export class PosData extends Reactive {
                     false
                 );
                 Object.assign(this.idUpdates, idUpdates);
+                localStorage.setItem("idUpdates", JSON.stringify(this.idUpdates));
                 localStorage.setItem(`pos_config_${odoo.pos_config_id}_changes_queue`, "[]");
                 // Items can be added to the queue while flushing, so we have to
                 // remove only the flushed items

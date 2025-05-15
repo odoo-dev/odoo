@@ -48,6 +48,8 @@ export class DataServiceOptions {
             "product.uom": ["barcode"],
             "product.attribute.custom.value": ["uuid"],
             "pos.pack.operation.lot": ["uuid"],
+            "event.registration": ["uuid"],
+            "event.registration.answer": ["uuid"],
         };
 
         for (const model in databaseTable) {
