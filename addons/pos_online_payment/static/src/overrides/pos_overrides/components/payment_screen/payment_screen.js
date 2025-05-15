@@ -113,10 +113,14 @@ patch(PaymentScreen.prototype, {
 
                     onlinePaymentLine.setPaymentStatus("waiting");
                     this.currentOrder.selectPaymentline(onlinePaymentLine);
+                    let order_id = this.currentOrder.id;
+                    if (order_id === this.currentOrder.uuid) {
+                        order_id = this.pos.data.mapUuidToId(order_id);
+                    }
                     const onlinePaymentData = {
                         formattedAmount: this.env.utils.formatCurrency(onlinePaymentLineAmount),
                         qrCode: qrCodeSrc(
-                            `${this.pos.session._base_url}/pos/pay/${this.currentOrder.id}?access_token=${this.currentOrder.access_token}`
+                            `${this.pos.session._base_url}/pos/pay/${order_id}?access_token=${this.currentOrder.access_token}`
                         ),
                         orderName: this.currentOrder.name,
                     };

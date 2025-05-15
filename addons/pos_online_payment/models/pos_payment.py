@@ -46,11 +46,6 @@ class PosPayment(models.Model):
 
         return super().create(vals_list)
 
-    def write(self, vals):
-        if vals.keys() & ('amount', 'payment_date', 'payment_method_id', 'online_account_payment_id', 'pos_order_id') and any(payment.online_account_payment_id or payment.payment_method_id.is_online_payment for payment in self):
-            raise UserError(_("Cannot edit a POS online payment essential data."))
-        return super().write(vals)
-
     @api.constrains('payment_method_id')
     def _check_payment_method_id(self):
         bypass_check_payments = self.filtered('payment_method_id.is_online_payment')
