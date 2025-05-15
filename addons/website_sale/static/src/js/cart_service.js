@@ -8,7 +8,6 @@ import {
 import { getSelectedCustomPtav, serializeComboItem } from '@sale/js/sale_utils';
 import { browser } from '@web/core/browser/browser';
 import { serializeDateTime } from '@web/core/l10n/dates';
-import { _t } from '@web/core/l10n/translation';
 import { rpc } from '@web/core/network/rpc';
 import { registry } from '@web/core/registry';
 import { session } from '@web/session';
@@ -513,14 +512,14 @@ export class CartService {
      */
     _showCartNotification(props, options = {}) {
         if (props.lines) {
-            this.cartNotificationService.add(_t('Item(s) added to your cart'), {
+            this.cartNotificationService.add('', {
                 lines: props.lines,
                 currency_id: props.currency_id,
                 ...options,
             });
         }
         if (props.warning) {
-            this.cartNotificationService.add(_t('Warning'), {
+            this.cartNotificationService.add('', {
                 warning: props.warning,
                 ...options,
             });
