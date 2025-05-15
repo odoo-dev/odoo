@@ -55,7 +55,8 @@ export class HighlightPlugin extends Plugin {
                 }
             }
         },
-        format_splittable_class: (className) => className.startsWith("o_text_highlight"),
+        format_splittable_class: (className) =>
+            className.startsWith("o_text_highlight") || className === "o_translate_inline",
         selectionchange_handlers: this.updateSelectedHighlight.bind(this),
     };
 
@@ -157,11 +158,17 @@ formatsSpecs.highlight = {
     hasStyle: (node) => closestElement(node)?.classList.contains("o_text_highlight"),
     addStyle: (node, { highlightId }) => {
         node.dispatchEvent(new Event("text_highlight_added", { bubbles: true }));
-        node.classList.add("o_text_highlight", `o_text_highlight_${highlightId}`);
+        node.classList.add(
+            "o_text_highlight",
+            `o_text_highlight_${highlightId}`,
+            "o_translate_inline"
+        );
     },
     removeStyle: (node) => {
         node.classList.remove(
-            ...[...node.classList].filter((cls) => cls.startsWith("o_text_highlight"))
+            ...[...node.classList].filter(
+                (cls) => cls.startsWith("o_text_highlight"),
+            ), "o_translate_inline"
         );
         removeStyle(node, "--text-highlight-width");
         removeStyle(node, "--text-highlight-color");
