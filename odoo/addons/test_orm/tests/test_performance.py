@@ -54,7 +54,7 @@ class TestPerformance(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
         records = self.env['test_performance.base'].search([])
         self.assertEqual(len(records), 5)
 
-        with self.assertQueryCount(__system__=2, demo=3):
+        with self.assertQueryCount(__system__=2, demo=2):
             # without cache
             for record in records:
                 record.partner_id.country_id.name
@@ -574,11 +574,11 @@ class TestPerformance(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
         records = self.env['test_performance.base'].search([])
         self.assertEqual(len(records), 1280)
 
-        # should only cause 2 queries thanks to prefetching
-        with self.assertQueryCount(__system__=1, demo=1):
+        # makes only 1 query thanks to prefetching and access rights cache
+        with self.assertQueryCount(1):
             records.mapped('value')
 
-        with self.assertQueryCount(__system__=1, demo=1):
+        with self.assertQueryCount(1):
             records.invalidate_model(['value'])
             records.mapped('value')
 

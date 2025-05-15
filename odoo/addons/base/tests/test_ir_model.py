@@ -727,7 +727,7 @@ class TestCustomFields(TestCommonCustomFields):
 
         # create a non-computed field, and assert how many queries it takes
         model_id = self.env['ir.model']._get_id('res.partner')
-        query_count = 52
+        query_count = 46
         with self.assertQueryCount(query_count):
             self.env.transaction.invalidate_ormcache()
             self.env['ir.model.fields'].create({
@@ -738,8 +738,8 @@ class TestCustomFields(TestCommonCustomFields):
                 'store': True,
             })
 
-        # same with a related field, it only takes 10 extra queries
-        with self.assertQueryCount(query_count + 10):
+        # same with a related field, it only takes 11 extra queries
+        with self.assertQueryCount(query_count + 11):
             self.env.transaction.invalidate_ormcache()
             self.env['ir.model.fields'].create({
                 'model_id': model_id,
