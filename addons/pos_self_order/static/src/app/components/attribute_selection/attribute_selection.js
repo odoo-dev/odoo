@@ -60,26 +60,6 @@ export class AttributeSelection extends Component {
         }
     }
 
-    get showNextBtn() {
-        for (const attrSelection of Object.values(this.selectedValues)) {
-            if (!attrSelection) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    get attributeSelected() {
-        const flatAttribute = attributeFlatter(this.selectedValues);
-        const customAttribute = this.env.customValues;
-        return attributeFormatter(
-            this.selfOrder.models["product.attribute"].getAllBy("id"),
-            flatAttribute,
-            customAttribute
-        );
-    }
-
     availableAttributeValue(attribute) {
         return this.selfOrder.config.self_ordering_mode === "kiosk"
             ? attribute.product_template_value_ids.filter((a) => !a.is_custom)
