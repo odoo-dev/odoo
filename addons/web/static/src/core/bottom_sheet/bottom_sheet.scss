@@ -195,18 +195,17 @@
 
         // Provide a visual safenet in case of elastic
         // overscroll (mostly iOS).
-        // FIXME if needed, sometime go over the top of the bottom sheet => visual bug e.g.: with the activity menu
-        //&:before {
-        //    position: fixed;
-        //    inset: auto auto 0 50%;
-        //    height: calc(var(--sheet-initial-height) - #{$border-radius-xl * 2});
-        //    width: calc(100% - #{$border-width * 2});
-        //    max-width: map-get($grid-breakpoints, sm) - ($border-width * 2);
-        //    background: $offcanvas-bg-color;
-        //    z-index: $zindex-offcanvas;
-        //    transform: translateY(calc((1 - var(--BottomSheet-progress)) * 150%)) translateX(-50%);
-        //    content: "";
-        //}
+        &:before {
+            position: fixed;
+            inset: auto auto 0 50%;
+            height: calc(var(--sheet-initial-height) - #{$border-radius-xl * 2});
+            width: calc(100% - #{$border-width * 2});
+            max-width: map-get($grid-breakpoints, sm) - ($border-width * 2);
+            background: $offcanvas-bg-color;
+            z-index: $zindex-offcanvas;
+            transform: translateY(calc((1 - var(--BottomSheet-progress)) * 150%)) translateX(-50%);
+            content: "";
+        }
     }
 
     // The sheet reached the "extended" snap point
@@ -229,28 +228,6 @@
         }
     }
 
-    // RFR
-    //// When bottom sheet is open, apply styles to the body
-    //@at-root body {
-    //    & {
-    //        .o_navbar, .o_action_manager {
-    //            transition: transform $o_BottomSheet_slideOut_duration ease;
-    //            transform: scale(1) translateZ(0);
-    //            transform-origin: center top;
-    //        }
-    //    }
-    //    &.bottom-sheet-open {
-    //        overflow: hidden;
-    //
-    //        // Scale down the main content
-    //        .o_navbar, .o_action_manager {
-    //            transition: transform $o_BottomSheet_slideIn_duration ease;
-    //            transform: scale(.95) translateZ(0);
-    //        }
-    //    }
-    //}
-
-    // SRI
     // When bottom sheet is open, apply styles to the body
     @at-root .bottom-sheet-open {
         overflow: hidden;
@@ -369,22 +346,20 @@
     --treeEntry-padding-v: 1.4rem;
 
     // Dropdown
-    &.o-dropdown--bottom-sheet {
-        .dropdown-divider {
-            --dropdown-divider-bg: #{$border-color};
-            margin: map-get($spacers, 2) ($offcanvas-padding-x * .5);
-        }
+    .dropdown-divider {
+        --dropdown-divider-bg: #{$border-color};
+        margin: map-get($spacers, 2) ($offcanvas-padding-x * .5);
+    }
 
-        .dropdown-item {
-            --dropdown-item-padding-y: #{map-get($spacers, 3)};
-            --dropdown-item-padding-x: var(--BottomSheet-Entry-paddingX);
+    .dropdown-item {
+        --dropdown-item-padding-y: #{map-get($spacers, 3)};
+        --dropdown-item-padding-x: var(--BottomSheet-Entry-paddingX);
 
-            font-size: $h5-font-size;
-            font-weight: $o-font-weight-medium;
+        font-size: $h5-font-size;
+        font-weight: $o-font-weight-medium;
 
-            &.active, &.selected {
-                @extend %BottomSheet-Entry-active;
-            }
-        }
+        //&.active, &.selected {
+        //    @extend %BottomSheet-Entry-active;
+        //}
     }
 }

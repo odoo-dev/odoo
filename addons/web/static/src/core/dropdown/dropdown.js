@@ -108,6 +108,8 @@ export class Dropdown extends Component {
          * @type {import("@web/core/navigation/navigation").NavigationOptions}
          */
         navigationOptions: { type: Object, optional: true },
+
+        disableBottomSheet: { type: Boolean, optional: true },
     };
     static defaultProps = {
         disabled: false,
@@ -183,7 +185,7 @@ export class Dropdown extends Component {
                 popoverOptions.popoverClass
             );
             popoverOptions.useBottomSheet = true;
-            popoverOptions.hasParent = this.hasParent;
+            // popoverOptions.hasParent = this.hasParent;
         }
         this.popover = usePopover(DropdownPopover, popoverOptions);
 
