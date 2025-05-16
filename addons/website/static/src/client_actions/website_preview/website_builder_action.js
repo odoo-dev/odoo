@@ -212,7 +212,7 @@ export class WebsiteBuilder extends Component {
             loadBundle("html_builder.assets_edit_frontend", {
                 targetDoc: this.websiteContent.el.contentDocument,
             }),
-            loadBundle("html_builder.inside_builder_style", {
+            loadBundle("website.inside_builder_style", {
                 targetDoc: this.websiteContent.el.contentDocument,
             }),
         ]);

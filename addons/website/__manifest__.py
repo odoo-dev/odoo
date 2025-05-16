@@ -267,6 +267,10 @@
             'website/static/src/**/*.edit.scss',
             'website/static/src/core/website_edit_service.js',
         ],
+        'website.inside_builder_style': [
+            ('include', 'html_builder.inside_builder_style'),
+            'website/static/src/**/*.inside.scss',
+        ],
         'web._assets_primary_variables': [
             'website/static/src/scss/primary_variables.scss',
             'website/static/src/scss/options/user_values.scss',
