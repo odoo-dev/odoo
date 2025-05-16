@@ -641,6 +641,15 @@ class Environment(Mapping):
         :rtype: :class:`Environment`
         """
         cr = self.cr if cr is None else cr
+        if user:
+            if isinstance(user, int):
+                pass
+            elif not hasattr(user, '_name'):
+                _logger.warning("RDERDE USER SET BUT NO _NAME")
+                _logger.warning(user)
+            elif user._name != 'res.users':
+                _logger.warning("RDERDE USER IS NOT A RES.USERS")
+                _logger.warning(user)
         uid = self.uid if user is None else int(user)
         if context is None:
             context = clean_context(self.context) if su and not self.su else self.context
