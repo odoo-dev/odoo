@@ -22,6 +22,9 @@ class TestUi(HttpCaseGamification):
         self.start_tour("/", 'question', login="admin")
 
     def test_02_demo_question(self):
+        # forum = self.env['forum.forum'].sudo().search([('name', '=', 'help')])
+        # raise Exception(f"{forum.privacy} - {forum.authorized_group_id}")
+        # raise Exception(forums.mapped('name'))
         forum = self.env.ref('website_forum.forum_help')
         demo = self.user_demo
         demo.karma = forum.karma_post + 1
