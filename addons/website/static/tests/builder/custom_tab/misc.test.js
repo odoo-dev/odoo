@@ -5,7 +5,7 @@ import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, queryAllTexts, queryFirst } from "@odoo/hoot-dom";
 import { Component, onWillStart, xml } from "@odoo/owl";
 import { contains, patchWithCleanup } from "@web/../tests/web_test_helpers";
-import { OptionsContainer } from "../../src/sidebar/option_container";
+import { OptionsContainer } from "@html_builder/sidebar/option_container";
 import {
     addActionOption,
     addOption,

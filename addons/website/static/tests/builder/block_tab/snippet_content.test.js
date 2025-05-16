@@ -1,7 +1,7 @@
 import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, click, queryAll, queryAllTexts } from "@odoo/hoot-dom";
 import { contains } from "@web/../tests/web_test_helpers";
-import { setupHTMLBuilder } from "../helpers";
+import { setupHTMLBuilder } from "@html_builder/../tests/helpers";
 import { getDragHelper, waitForEndOfOperation } from "../website_helpers";
 
 describe.current.tags("desktop");
