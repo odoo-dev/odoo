@@ -29,10 +29,14 @@ export class HrPresenceStatus extends Component {
 
     get color() {
         switch (this.value) {
+            case "online":
             case "presence_present":
                 return "text-success";
             case "presence_absent":
                 return "o_icon_employee_absent";
+            case "offline":
+                return "text-700";
+            case "away":
             case "presence_out_of_working_hour":
             case "presence_archive":
                 return "text-muted";
@@ -46,9 +50,19 @@ export class HrPresenceStatus extends Component {
     }
 
     get label() {
-        return this.value !== false
+        if(!this.im_status) {
+            return this.value !== false
             ? this.options.find(([value, label]) => value === this.value)[1]
             : "";
+        }
+        switch(this.status) {
+            case "online":
+                return "Online";
+            case "offline":
+                return "Offline";
+            case "away":
+                return "Idle";
+        }
     }
 
     get options() {
@@ -60,6 +74,14 @@ export class HrPresenceStatus extends Component {
     get value() {
         return this.props.record.data[this.props.name];
     }
+
+    get im_status() {
+        return this.props.record.data.im_status;
+    }
+
+    get status() {
+        return this.im_status || this.value;
+    }
 }
 
 export const hrPresenceStatus = {
@@ -70,6 +92,7 @@ export const hrPresenceStatus = {
             tag: viewType === "kanban" ? "span" : "small",
         };
     },
+    fieldDependencies: [{ name: "im_status", type: "char" }],
 };
 
-registry.category("fields").add("hr_presence_status", hrPresenceStatus)
+registry.category("fields").add("hr_presence_status", hrPresenceStatus);

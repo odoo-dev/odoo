@@ -1,3 +1,5 @@
+/** @odoo-module **/
+
 import { patch } from "@web/core/utils/patch";
 
 import { HrPresenceStatus } from "@hr/components/hr_presence_status/hr_presence_status";
@@ -5,18 +7,46 @@ import { HrPresenceStatusPrivate, hrPresenceStatusPrivate } from "@hr/components
 
 const patchHrPresenceStatus = () => ({
     get icon() {
-        if (this.value.startsWith("presence_holiday")) {
+        if (this.status && (this.status.startsWith("presence_holiday") || this.status.startsWith('leave_'))) {
             return "fa-plane";
         }
         return super.icon;
     },
 
     get color() {
-        if (this.value.startsWith("presence_holiday")) {
-            return `${this.value === "presence_holiday_present" ? "text-success" : "o_icon_employee_absent"}`;
+        if (this.status && this.status.startsWith("presence_holiday")) {
+            return `${
+                this.value === "presence_holiday_present"
+                    ? "text-success"
+                    : "o_icon_employee_absent"
+            }`;
+        } else if (this.status && this.status?.startsWith("leave_")) {
+            switch (this.status) {
+                case "leave_online":
+                    return "text-success";
+                case "leave_away":
+                    return "text-warning";
+                case "leave_offline":
+                    return "text-700";
+            }
         }
         return super.color;
     },
+
+    get label() {
+        if(this.status && this.status.startsWith("leave_")) {
+            switch(this.status) {
+                case "leave_online":
+                    return "Online";
+                case "leave_offline":
+                    return "Out of Office";
+                case "leave_away":
+                    return "Leave away";
+            }
+        }
+        return super.label;
+    }
+
 });
 
 // Applies common patch on both components
