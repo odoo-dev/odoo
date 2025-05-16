@@ -483,7 +483,7 @@
         'html_builder.assets': [
 
             'website/static/src/scss/website_common.scss',
-            'website/static/src/website_builder/**/*',
+            'website/static/src/builder/**/*',
             # to remove
             'website/static/src/temp/**/*',
         ],

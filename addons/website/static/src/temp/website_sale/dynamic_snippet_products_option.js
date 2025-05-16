@@ -1,6 +1,6 @@
 import { BaseOptionComponent, useDomState } from "@html_builder/core/utils";
-import { DynamicSnippetCarouselOption } from "@website/website_builder/plugins/options/dynamic_snippet_carousel_option";
-import { useDynamicSnippetOption } from "@website/website_builder/plugins/options/dynamic_snippet_hook";
+import { DynamicSnippetCarouselOption } from "@website/builder/plugins/options/dynamic_snippet_carousel_option";
+import { useDynamicSnippetOption } from "@website/builder/plugins/options/dynamic_snippet_hook";
 import { onWillStart, useState } from "@odoo/owl";
 
 export class DynamicSnippetProductsOption extends BaseOptionComponent {

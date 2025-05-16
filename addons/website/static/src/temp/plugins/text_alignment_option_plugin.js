@@ -1,4 +1,4 @@
-import { TEXT_ALIGNMENT } from "@website/website_builder/option_sequence";
+import { TEXT_ALIGNMENT } from "@website/builder/option_sequence";
 import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import { withSequence } from "@html_editor/utils/resource";

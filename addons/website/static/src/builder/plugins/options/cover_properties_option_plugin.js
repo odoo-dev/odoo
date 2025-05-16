@@ -1,11 +1,11 @@
 import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
-import { CoverPropertiesOption } from "@website/website_builder/plugins/options/cover_properties_option";
+import { CoverPropertiesOption } from "@website/builder/plugins/options/cover_properties_option";
 import { classAction } from "@html_builder/core/core_builder_action_plugin";
 import { loadImageInfo } from "@html_editor/utils/image_processing";
 import { rpc } from "@web/core/network/rpc";
 import { withSequence } from "@html_editor/utils/resource";
-import { COVER_PROPERTIES } from "@website/website_builder/option_sequence";
+import { COVER_PROPERTIES } from "@website/builder/option_sequence";
 
 class CoverPropertiesOptionPlugin extends Plugin {
     static id = "coverPropertiesOption";

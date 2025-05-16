@@ -2,7 +2,7 @@ import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import { ImageGridOption } from "./image_grid_option";
 import { withSequence } from "@html_editor/utils/resource";
-import { GRID_IMAGE } from "@website/website_builder/option_sequence";
+import { GRID_IMAGE } from "@website/builder/option_sequence";
 
 class ImageGridOptionPlugin extends Plugin {
     static id = "imageGridOption";

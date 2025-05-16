@@ -10,7 +10,7 @@ import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import { LayoutColumnOption, LayoutGridOption, LayoutOption } from "./layout_option";
 import { withSequence } from "@html_editor/utils/resource";
-import { LAYOUT, LAYOUT_COLUMN, LAYOUT_GRID } from "@website/website_builder/option_sequence";
+import { LAYOUT, LAYOUT_COLUMN, LAYOUT_GRID } from "@website/builder/option_sequence";
 
 
 class LayoutOptionPlugin extends Plugin {

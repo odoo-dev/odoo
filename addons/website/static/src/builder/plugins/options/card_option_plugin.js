@@ -1,7 +1,7 @@
 import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import { CardOption } from "./card_option";
-import { CARD_PARENT_HANDLERS } from "@website/website_builder/plugins/options/utils";
+import { CARD_PARENT_HANDLERS } from "@website/builder/plugins/options/utils";
 import { WebsiteBackgroundOption } from "./background_option";
 import { CarouselCardsItemOption } from "./carousel_cards_item_option";
 

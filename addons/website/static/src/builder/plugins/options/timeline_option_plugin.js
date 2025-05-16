@@ -3,7 +3,7 @@ import { withSequence } from "@html_editor/utils/resource";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { after, before, SNIPPET_SPECIFIC_END } from "@html_builder/utils/option_sequence";
-import { WEBSITE_BACKGROUND_OPTIONS } from "@website/website_builder/option_sequence";
+import { WEBSITE_BACKGROUND_OPTIONS } from "@website/builder/option_sequence";
 
 export const TIMELINE = before(WEBSITE_BACKGROUND_OPTIONS);
 export const DOT_LINES_COLOR = SNIPPET_SPECIFIC_END;

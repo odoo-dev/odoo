@@ -1,5 +1,5 @@
-import { DYNAMIC_SNIPPET_CAROUSEL } from "@website/website_builder/plugins/options/dynamic_snippet_carousel_option_plugin";
-import { setDatasetIfUndefined } from "@website/website_builder/plugins/options/dynamic_snippet_option_plugin";
+import { DYNAMIC_SNIPPET_CAROUSEL } from "@website/builder/plugins/options/dynamic_snippet_carousel_option_plugin";
+import { setDatasetIfUndefined } from "@website/builder/plugins/options/dynamic_snippet_option_plugin";
 import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
 import { registry } from "@web/core/registry";

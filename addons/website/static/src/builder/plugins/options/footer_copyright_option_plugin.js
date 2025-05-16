@@ -1,6 +1,6 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "@html_editor/plugin";
-import { FooterCopyrightOption } from "@website/website_builder/plugins/options/footer_copyright_option";
+import { FooterCopyrightOption } from "@website/builder/plugins/options/footer_copyright_option";
 
 class FooterCopyrightOptionPlugin extends Plugin {
     static id = "footerCopyrightOption";
