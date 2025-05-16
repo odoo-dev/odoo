@@ -356,7 +356,7 @@ export class CarouselOptionPlugin extends Plugin {
 
             const activeImageEl = editingCarouselElement.querySelector(".carousel-item.active img");
             this.dependencies.history.addStep();
-            this.dependencies["builder-options"].updateContainers(activeImageEl);
+            this.dependencies["builder-options"].updateContainers(activeImageEl, { force: true });
         }
     }
 }

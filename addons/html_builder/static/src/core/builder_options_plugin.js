@@ -100,7 +100,7 @@ export class BuilderOptionsPlugin extends Plugin {
         return null;
     }
 
-    updateContainers(target) {
+    updateContainers(target, { force = false } = {}) {
         if (this.dependencies.history.getIsCurrentStepModified()) {
             console.warn(
                 "Should not have any mutations in the current step when you update the container selection"
@@ -121,8 +121,8 @@ export class BuilderOptionsPlugin extends Plugin {
         }
 
         const newContainers = this.computeContainers(this.target);
-        // Do not update the containers if they did not change.
-        if (newContainers.length === this.lastContainers.length) {
+        // Do not update the containers if they did not change or not forced to update.
+        if (newContainers.length === this.lastContainers.length && !force) {
             const previousIds = this.lastContainers.map((c) => c.id);
             const newIds = newContainers.map((c) => c.id);
             const areSameElements = newIds.every((id, i) => id === previousIds[i]);
