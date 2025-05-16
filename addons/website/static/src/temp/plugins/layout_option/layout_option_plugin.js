@@ -3,6 +3,7 @@ import {
     convertToNormalColumn,
     reloadLazyImages,
     toggleGridMode,
+    layoutOptionSelector,
 } from "@html_builder/utils/grid_layout_utils";
 import { isMobileView } from "@html_builder/utils/utils";
 import { Plugin } from "@html_editor/plugin";
@@ -11,32 +12,6 @@ import { LayoutColumnOption, LayoutGridOption, LayoutOption } from "./layout_opt
 import { withSequence } from "@html_editor/utils/resource";
 import { LAYOUT, LAYOUT_COLUMN, LAYOUT_GRID } from "@website/website_builder/option_sequence";
 
-const layoutOptionSelector = {
-    selector: "section, section.s_carousel_wrapper .carousel-item, .s_carousel_intro_item",
-    exclude:
-        ".s_dynamic, .s_dynamic_snippet_content, .s_dynamic_snippet_title, .s_masonry_block, .s_framed_intro, .s_features_grid, .s_media_list, .s_table_of_content, .s_process_steps, .s_image_gallery, .s_pricelist_boxed, .s_quadrant, .s_pricelist_cafe, .s_faq_horizontal, .s_image_frame, .s_card_offset, .s_contact_info, .s_tabs, .s_tabs_images",
-    applyTo: ":scope > *:has(> .row), :scope > .s_allow_columns",
-};
-
-/**
- * Checks if the given container has the grid mode option.
- *
- * @param {HTMLElement} containerEl the container element
- * @returns {Boolean}
- */
-export function hasGridLayoutOption(containerEl) {
-    const { selector, exclude, applyTo } = layoutOptionSelector;
-    const snippetEl = containerEl.closest(selector);
-    if (!snippetEl || snippetEl.matches(exclude)) {
-        return false;
-    }
-
-    const containerWithOptionEl = snippetEl.querySelector(applyTo);
-    if (containerWithOptionEl && containerWithOptionEl === containerEl) {
-        return true;
-    }
-    return false;
-}
 
 class LayoutOptionPlugin extends Plugin {
     static id = "LayoutOption";
