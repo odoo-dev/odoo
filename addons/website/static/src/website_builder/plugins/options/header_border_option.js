@@ -1,5 +1,5 @@
 import { BaseOptionComponent, useDomState } from "@html_builder/core/utils";
-import { BorderConfigurator } from "@website/temp/plugins/border_configurator_option";
+import { BorderConfigurator } from "@html_builder/plugins/border_configurator_option";
 import { ShadowOption } from "@website/temp/plugins/shadow_option";
 
 export class HeaderBorderOption extends BaseOptionComponent {

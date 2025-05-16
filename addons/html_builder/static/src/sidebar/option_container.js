@@ -1,4 +1,4 @@
-import { BorderConfigurator } from "@website/temp/plugins/border_configurator_option";
+import { BorderConfigurator } from "../plugins/border_configurator_option";
 import { ShadowOption } from "@website/temp/plugins/shadow_option";
 import { getSnippetName, useOptionsSubEnv } from "@html_builder/utils/utils";
 import { onWillStart, onWillUpdateProps, useState } from "@odoo/owl";
