@@ -206,7 +206,7 @@ class ResPartner(models.Model):
     def _get_suggested_invoice_edi_format(self):
         # EXTENDS 'account'
         res = super()._get_suggested_invoice_edi_format()
-        if self.country_code == 'IT':
+        if self.env.company.country_code == self.country_code == 'IT':
             return 'it_edi_xml'
         else:
             return res
