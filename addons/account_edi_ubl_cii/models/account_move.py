@@ -35,6 +35,13 @@ class AccountMove(models.Model):
             }
         return False
 
+    def action_invoice_download_invoice_edi_format(self, edi_format):
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/account/download_invoice_documents/{",".join(map(str, self.ids))}/invoice_edi_format_{edi_format}',
+            'target': 'download',
+        }
+
     # -------------------------------------------------------------------------
     # BUSINESS
     # -------------------------------------------------------------------------
@@ -54,6 +61,21 @@ class AccountMove(models.Model):
                     'filetype': 'xml',
                     'content': ubl_attachment.raw,
                 }
+        elif allow_fallback and filetype.startswith('invoice_edi_format_'):  # TODO: allow_fallback since we have to generate
+            invoice_edi_format = filetype.removeprefix('invoice_edi_format_')
+            builder = self.partner_id.commercial_partner_id._get_edi_builder(invoice_edi_format)
+            xml_content, errors = builder._export_invoice(self)
+            if not errors:
+                return {
+                    'filename': builder._export_invoice_filename(self),
+                    'filetype': 'xml',
+                    'content': xml_content,
+                }
+            # TODO: not sure?
+            invoice_edi_format_description = self.env['res.partner']._fields['invoice_edi_format'].get_description(self.env)
+            message = _("Error while generating the '%(invoice_edi_format_string)' document.",
+                        invoice_edi_format_string=dict(invoice_edi_format_description['selection'])[invoice_edi_format])
+            self.with_context(no_new_invoice=True).message_post(body=message)
         return super()._get_invoice_legal_documents(filetype, allow_fallback=allow_fallback)
 
     def get_extra_print_items(self):
@@ -63,6 +85,20 @@ class AccountMove(models.Model):
                 'key': 'download_ubl',
                 'description': _('XML UBL'),
                 **self.action_invoice_download_ubl(),
+            })
+        # TODO: maybe this should be in account? Else it will e.g. not work for italy
+        # TODO: issue: does not work with
+        # TODO: for list view `self` can have multiple moves I guess?
+        # Add 'ubl_bis3' and all the "local" formats
+        invoice_edi_formats = {
+            partner.invoice_edi_format for partner in self.partner_id.commercial_partner_id
+        } - {False} | {'ubl_bis3'}
+        for invoice_edi_format in invoice_edi_formats:
+            invoice_edi_format_description = self.env['res.partner']._fields['invoice_edi_format'].get_description(self.env)
+            print_items.append({
+                'key': f'download_{invoice_edi_format}',
+                'description': dict(invoice_edi_format_description['selection'])[invoice_edi_format],
+                **self.action_invoice_download_invoice_edi_format(invoice_edi_format),
             })
         return print_items
 
