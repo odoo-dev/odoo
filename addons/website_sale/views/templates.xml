@@ -2069,24 +2069,6 @@
                 <a t-attf-href="#" class="btn btn-link float_left js_add_cart_json" aria-label="Add one" title="Add one">
                     <i class="fa fa-plus"/>
                 </a>
-                <t t-if="product.env['res.groups']._is_feature_enabled('uom.group_uom')">
-                    <!-- public users don't have access to uom.uom model -->
-                    <t t-set="product_template_sudo" t-value="product.sudo()"/>
-                    <select t-if="product_template_sudo._has_multiple_uoms() and product.type != 'combo'" class="form-select mb-2" name="product_uom_id">
-                        <t t-set="product_uoms_sudo" t-value="product_template_sudo.uom_id + product_template_sudo.uom_ids"/>
-                        <option
-                            t-foreach="product_uoms_sudo"
-                            t-as="uom_sudo"
-                            t-out="uom_sudo.name"
-                            t-att-value="uom_sudo.id"
-                            t-att-selected="uom_sudo.id == product.uom_id.id"/>
-                    </select>
-                    <span
-                        t-elif="product.type != 'combo'"
-                        t-out="product_template_sudo.uom_id.name"
-                    />
-                    <input t-else="" type="hidden" name="product_uom_id" t-att-value="product_template_sudo.uom_id.id"/>
-                </t>
             </div>
         </div>
     </template>
@@ -2490,6 +2472,7 @@
                 <span t-out="combo_item_line._get_displayed_quantity()"/>
                 x
                 <span t-out="combo_item_line.name_short"/>
+                <!-- TODO VFE test -->
             </h6>
             <t
                 t-set="description_lines"
