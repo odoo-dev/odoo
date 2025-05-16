@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-name="sale.UoMSelector">
+        <div class="d-flex flex-column flex-lg-row gap-2 mb-2">
+            <label t-out="getTitle()" class="fw-bold text-break col-lg-3"/>
+            <ul class="list-inline list-unstyled flex-grow-1 mb-0">
+                <li
+                    t-foreach="this.props.uom_data"
+                    t-as="uom"
+                    t-key="`${this.props.product_tmpl_id}-${uom}`"
+                    t-att-class="{'active': uom == props.uom_id}"
+                    class="list-inline-item"
+                >
+                    <label
+                        class="btn btn-outline-secondary"
+                        t-attf-for="{{this.props.product_tmpl_id}}-{{uom}}-input"
+                        t-out="uom_value"
+                    />
+                    <input
+                        class="btn-check"
+                        type="radio"
+                        t-attf-id="{{this.props.product_tmpl_id}}-{{uom}}-input"
+                        t-att-value="uom"
+                        t-attf-name="uom-{{this.props.product_tmpl_id}}"
+                        t-att-checked="uom == props.uom_id"
+                        t-on-change="selectUoM"
+                    />
+                </li>
+            </ul>
+        </div>
+    </t>
+
+</templates>

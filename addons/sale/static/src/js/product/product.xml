@@ -27,6 +27,12 @@
             <div t-if="!this.env.isPossibleCombination(this.props)" class="alert alert-warning impossible_combination_alert mt-3">
                 <span>This option or combination of options is not available</span>
             </div>
+            <UoMSelector
+                t-if="this.props.uom_data"
+                uom_id="this.props.uom_id"
+                uom_data="this.props.uom_data"
+                product_tmpl_id="this.props.product_tmpl_id"
+            />
         </td>
         <t t-if="!this.props.optional">
             <td
@@ -42,9 +48,7 @@
                 <QuantityButtons
                     t-if="env.showQuantity"
                     quantity="this.props.quantity"
-                    uom_id="this.props.uom_id"
-                    uom_data="this.props.uom_data"
-                    setQuantity="(quantity, uomId) => this.env.setQuantity(this.props.product_tmpl_id, quantity, uomId)"
+                    setQuantity="quantity => this.env.setQuantity(this.props.product_tmpl_id, quantity)"
                     isMinusButtonDisabled="this.props.quantity === 1 &amp;&amp; isMainProduct"
                 />
                 <a

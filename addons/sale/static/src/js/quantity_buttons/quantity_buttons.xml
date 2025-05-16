@@ -24,21 +24,6 @@
                 t-on-click="increaseQuantity">
                 <i class="fa fa-plus"/>
             </button>
-            <select
-                t-if="props.uom_data and Object.keys(props.uom_data).length > 1"
-                t-on-change="onChangeUoM"
-                name="sale_uom"
-            >
-                <option
-                    t-foreach="props.uom_data"
-                    t-as="uom"
-                    t-key="uom"
-                    t-out="uom_value"
-                    t-att-value="uom"
-                    t-att-selected="uom == props.uom_id"/>
-                    <!-- must be == bc types are different -->
-            </select>
-            <span t-elif="props.uom_data" t-out="props.uom_data[props.uom_id]"/>
         </div>
     </t>
 </templates>

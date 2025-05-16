@@ -66,6 +66,7 @@ export class ProductConfiguratorDialog extends Component {
             addProduct: this._addProduct.bind(this),
             removeProduct: this._removeProduct.bind(this),
             setQuantity: this._setQuantity.bind(this),
+            setUoM: this._setUnitOfMeasure.bind(this),
             updateProductTemplateSelectedPTAV: this._updateProductTemplateSelectedPTAV.bind(this),
             updatePTAVCustomValue: this._updatePTAVCustomValue.bind(this),
             isPossibleCombination: this._isPossibleCombination,
@@ -211,7 +212,7 @@ export class ProductConfiguratorDialog extends Component {
      *  If not specified, the product default uom will be considered (e.g. combo flows)
      * @return {Boolean} - Whether the quantity was updated.
      */
-    async _setQuantity(productTmplId, quantity, uomId=undefined) {
+    async _setQuantity(productTmplId, quantity) {
         if (quantity <= 0) {
             if (productTmplId === this.env.mainProductTmplId) {
                 quantity = 1;
@@ -221,17 +222,27 @@ export class ProductConfiguratorDialog extends Component {
             }
         }
         const product = this._findProduct(productTmplId);
-        uomId = uomId || product.uom_id;
-        if (product.quantity === quantity && product.uom_id === uomId) {
+        if (product.quantity === quantity) {
             return false;
         }
-        const { price } = await this._updateCombination(product, quantity, uomId);
+        const { price } = await this._updateCombination(product, quantity, product.uom_id);
         product.quantity = quantity;
         product.price = parseFloat(price);
-        if (product.uom_id !== uomId) {
-            product.uom_id = uomId;
-        }
+
         return true;
+    }
+
+    async _setUnitOfMeasure(productTmplId, uomId) {
+        const product = this._findProduct(productTmplId);
+        if (product.uom_id === uomId) {
+            return false;
+        }
+        const { price } = await this._updateCombination(product, product.quantity, uomId);
+        product.price = parseFloat(price);
+        product.uom_id = uomId;
+
+        return true;
+
     }
 
     /**

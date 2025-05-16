@@ -88,10 +88,9 @@ function setProductUoM(productName, uomName) {
         content: `Set the uom of ${productName} to ${uomName}`,
         trigger: `
             ${productSelector(productName)}
-            td.o_sale_product_configurator_qty
-            select[name="sale_uom"]
+            label:contains("${uomName}")
         `,
-        run: `selectByLabel ${uomName} && click .modal-body`,
+        run: `click && click .modal-body`,
     };
 }
 

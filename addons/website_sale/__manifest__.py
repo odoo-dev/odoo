@@ -129,6 +129,7 @@
             'sale/static/src/js/product_list/*',
             'sale/static/src/js/product_template_attribute_line/*',
             'sale/static/src/js/quantity_buttons/*',
+            'sale/static/src/js/uom_selector/*',
             'sale/static/src/js/sale_utils.js',
             'website_sale/static/src/js/combo_configurator_dialog/*',
             'website_sale/static/src/js/product/*',
