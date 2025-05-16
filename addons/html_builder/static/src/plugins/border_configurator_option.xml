@@ -10,7 +10,10 @@
             <BuilderSelectItem title="'Dotted'" actionValue="'dotted'"><div class="o_we_border_preview" style="border-style: dotted;"/></BuilderSelectItem>
             <BuilderSelectItem title="'Double'" actionValue="'double'"><div class="o_we_border_preview" style="border-style: double; border-left: none; border-right: none;"/></BuilderSelectItem>
         </BuilderSelect>
-        <BuilderColorPicker action="props.action" actionParam="getStyleActionParam('color')" t-if="state.hasBorder"/>
+        <BuilderColorPicker action="props.action" actionParam="getStyleActionParam('color')"
+            t-if="state.hasBorder"
+            enabledTabs="['solid', 'custom']"
+        />
     </BuilderRow>
 
     <!-- TODO: handle the dependency with border_width_opt bg_color_opt-->
