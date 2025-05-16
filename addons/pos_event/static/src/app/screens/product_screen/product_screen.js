@@ -238,17 +238,26 @@ patch(ProductScreen.prototype, {
                 });
 
                 // TODO: Remove redundant field `registration_answer_choice_ids`; data can be derived from `registration_answer_ids` using a domain.
-                // No need to separate record creation here, domain filtering of field will handle it.
                 Object.entries({
                     ...textAnswer,
                     ...globalTextAnswer,
+                }).forEach(([questionId, answer]) => {
+                    this.pos.models["event.registration.answer"].create({
+                        registration_id: eventRegistraton.id,
+                        question_id: this.pos.models["event.question"].get(parseInt(questionId)),
+                        value_text_box: answer,
+                    });
+                });
+                Object.entries({
                     ...simpleChoice,
                     ...globalSimpleChoice,
                 }).forEach(([questionId, answer]) => {
                     this.pos.models["event.registration.answer"].create({
                         registration_id: eventRegistraton.id,
                         question_id: this.pos.models["event.question"].get(parseInt(questionId)),
-                        value_text_box: answer,
+                        value_answer_id: this.pos.models["event.question.answer"].get(
+                            parseInt(answer)
+                        ),
                     });
                 });
             }
