@@ -287,7 +287,11 @@
         background: rgba($component-active-bg, .5);
         color: color-contrast($component-active-bg);
 
-        &:before, &:after {
+        &:before {
+            content: none !important;
+        }
+
+        &:after {
             @include o-position-absolute(50%, $list-group-item-padding-x);
             background: $o-action;
             border-radius: 100%;
@@ -296,22 +300,22 @@
             transform: translateY(-50%);
             content: ""
         }
-
-        &:after {
-            transform: translateY(-50%) scale(.4);
-            background: white;
-        }
-
-        &.o-boolean {
-            &:before {
-                aspect-ratio: 1.6;
-                border-radius: $border-radius-pill;
-                background: $success;
-            }
-            &:after {
-                transform: translateY(-50%) scale(.8);
-            }
-        }
+        //
+        //&:after {
+        //    transform: translateY(-50%) scale(.4);
+        //    background: white;
+        //}
+        //
+        //&.o-boolean {
+        //    &:before {
+        //        aspect-ratio: 1.6;
+        //        border-radius: $border-radius-pill;
+        //        background: $success;
+        //    }
+        //    &:after {
+        //        transform: translateY(-50%) scale(.8);
+        //    }
+        //}
     }
 
     hr {
@@ -357,9 +361,14 @@
 
         font-size: $h5-font-size;
         font-weight: $o-font-weight-medium;
+    }
 
-        //&.active, &.selected {
-        //    @extend %BottomSheet-Entry-active;
-        //}
+    .o_bottom_sheet_body:not(.o_custom_bottom_sheet) {
+        // Dropdown
+        .dropdown-item {
+            &.active, &.selected {
+                @extend %BottomSheet-Entry-active;
+            }
+        }
     }
 }
