@@ -22,14 +22,13 @@ import { useSetupAction } from "@web/search/action_hook";
 import { InvisibleElementsPanel } from "@html_builder/sidebar/invisible_elements_panel";
 import { BlockTab } from "@html_builder/sidebar/block_tab";
 import { CustomizeTab } from "@html_builder/sidebar/customize_tab";
-import { ThemeTab } from "@website/website_builder/plugins/theme/theme_tab";
 import { CORE_PLUGINS } from "@html_builder/core/core_plugins";
 import { EDITOR_COLOR_CSS_VARIABLES, getCSSVariableValue } from "@html_builder/utils/utils_css";
 import { withSequence } from "@html_editor/utils/resource";
 
 export class Builder extends Component {
     static template = "html_builder.Builder";
-    static components = { BlockTab, CustomizeTab, InvisibleElementsPanel, ThemeTab };
+    static components = { BlockTab, CustomizeTab, InvisibleElementsPanel };
     static props = {
         closeEditor: { type: Function },
         reloadEditor: { type: Function, optional: true },
@@ -41,12 +40,14 @@ export class Builder extends Component {
         isMobile: { type: Boolean },
         Plugins: { type: Array, optional: true },
         config: { type: Object, optional: true },
+        getThemeTab: { type: Function, optional: true },
     };
     static defaultProps = {
         config: {},
     };
 
     setup() {
+        this.ThemeTab = this.props.getThemeTab?.();
         // const actionService = useService("action");
         this.builder_sidebarRef = useRef("builder_sidebar");
         this.state = useState({
