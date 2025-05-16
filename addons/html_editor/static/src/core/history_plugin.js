@@ -389,16 +389,13 @@ export class HistoryPlugin extends Plugin {
      * @returns { HistoryMutationRecord[] }
      */
     processNewRecords(mutationRecords) {
-        mutationRecords = this.filterMutationRecords(mutationRecords);
+        mutationRecords = this.preFilterMutationRecords(mutationRecords);
         /** @type {HistoryMutationRecord[]} */
         let records = mutationRecords
             .flatMap((record) => this.transformRecord(record))
-            .filter((record) => !this.isSystemClassOrAttributeRecord(record))
-            .map((record) => this.resolveHistoricalValue(record));
+            .filter((record) => !this.isSystemClassOrAttributeRecord(record));
 
-        if (this.isObserverDisabled) {
-            return [];
-        }
+        records = this.handleUnobservedMutations(records);
         records = records.filter((record) => !this.isNoOpRecord(record));
         this.stageRecords(records);
         return records;
@@ -457,11 +454,11 @@ export class HistoryPlugin extends Plugin {
      * @param { MutationRecord[] } records
      * @returns { MutationRecord[] }
      */
-    filterMutationRecords(records) {
+    preFilterMutationRecords(records) {
         this.dispatchTo("before_filter_mutation_record_handlers", records);
-        for (const callback of this.getResource("savable_mutation_record_predicates")) {
-            records = records.filter(callback);
-        }
+        // for (const callback of this.getResource("savable_mutation_record_predicates")) {
+        //     records = records.filter(callback);
+        // }
         records = this.filterAttributeMutationRecords(records);
         records = this.filterSameTextContentMutationRecords(records);
         records = this.filterOutIntermediateStateMutationRecords(records);
@@ -511,28 +508,36 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
-     * @todo: handle characterData mutations
-     *
      * @param { MutationRecord[] } records
      */
     filterOutIntermediateStateMutationRecords(records) {
+        // Keep track of visited attributes of each node
         /** @type {Map<Node, Set<string>>} */
         const nodeToAttributes = new Map();
+        // Keep track of visited nodes for characterData mutations
+        /** @type {Set<Node>} */
+        const visitedNodesCharData = new Set();
         const filteredRecords = [];
         for (const record of records) {
-            if (record.type !== "attributes") {
+            if (record.type === "attributes") {
+                // Add entry for current target if not already present.
+                if (!nodeToAttributes.has(record.target)) {
+                    nodeToAttributes.set(record.target, new Set());
+                }
+                const visitedAttributes = nodeToAttributes.get(record.target);
+                // Keep only the first mutation record for each attribute.
+                if (!visitedAttributes.has(record.attributeName)) {
+                    filteredRecords.push(record);
+                    visitedAttributes.add(record.attributeName);
+                }
+            } else if (record.type === "characterData") {
+                // Keep only the first charData mutation record for each node.
+                if (!visitedNodesCharData.has(record.target)) {
+                    filteredRecords.push(record);
+                    visitedNodesCharData.add(record.target);
+                }
+            } else {
                 filteredRecords.push(record);
-                continue;
-            }
-            // Add entry for current target if not already present.
-            if (!nodeToAttributes.has(record.target)) {
-                nodeToAttributes.set(record.target, new Set());
-            }
-            const visitedAttributes = nodeToAttributes.get(record.target);
-            // Keep only the first mutation record for each attribute.
-            if (!visitedAttributes.has(record.attributeName)) {
-                filteredRecords.push(record);
-                visitedAttributes.add(record.attributeName);
             }
         }
         return filteredRecords;
@@ -555,6 +560,11 @@ export class HistoryPlugin extends Plugin {
             const newValue = record.target.getAttribute(record.attributeName);
             const { type, target, attributeName } = record;
             return { type, target, attributeName, oldValue, newValue };
+        }
+        if (record.type === "characterData") {
+            const newValue = record.target.textContent;
+            const { type, target, oldValue } = record;
+            return { type, target, oldValue, newValue };
         }
         return record;
     }
@@ -659,36 +669,131 @@ export class HistoryPlugin extends Plugin {
      * @param {HistoryMutationRecord} record
      * @returns {HistoryMutationRecord}
      */
-    resolveHistoricalValue(record) {
-        if (!["attributes", "classList"].includes(record.type)) {
-            // @todo: handle characterData mutations
+    // resolveHistoricalValue(record) {
+    //     if (!["attributes", "classList"].includes(record.type)) {
+    //         // @todo: handle characterData mutations
+    //         return record;
+    //     }
+
+    //     // Add entry for current target if not already present.
+    //     if (!this.lastObservedState.has(record.target)) {
+    //         this.lastObservedState.set(record.target, {
+    //             attributes: new Map(),
+    //             classList: new Map(),
+    //         });
+    //     }
+    //     const stateMap = this.lastObservedState.get(record.target)[record.type];
+    //     const key = record.type === "attributes" ? record.attributeName : record.className;
+    //     if (this.isObserverDisabled) {
+    //         // Only store it if not already stored.
+    //         if (!stateMap.has(key)) {
+    //             stateMap.set(key, record.oldValue);
+    //         }
+    //         return record;
+    //     }
+    //     if (stateMap.has(key)) {
+    //         const lastObservedValue = stateMap.get(key);
+    //         // Remove entry, so it won't be used again.
+    //         stateMap.delete(key);
+    //         // Update record.
+    //         return { ...record, oldValue: lastObservedValue };
+    //     }
+    //     return record;
+    // }
+
+    /**
+     * @param {HistoryMutationRecord[]} records
+     */
+    handleUnobservedMutations(records) {
+        const newRecords = [];
+        const savableRecordPredicates = this.getResource("savable_mutation_record_predicates");
+        const isSavableRecord = (record) => savableRecordPredicates.every((p) => p(record));
+        for (const record of records) {
+            if (this.isObserverDisabled || !isSavableRecord(record)) {
+                this.storeLastObservedState(record);
+                // drop record
+            } else {
+                const adjustedRecord = this.adjustToLastObservedState(record);
+                // keep record
+                newRecords.push(adjustedRecord);
+            }
+        }
+        return newRecords;
+    }
+
+    /**
+     * @param {HistoryMutationRecord} record
+     */
+    storeLastObservedState(record) {
+        if (!["attributes", "classList", "characterData"].includes(record.type)) {
+            return;
+        }
+        const { stateMap, key } = this.getObservedStateStorage(record);
+        if (!stateMap.has(key)) {
+            // Only store it if not already stored.
+            stateMap.set(key, record.oldValue);
+        }
+    }
+
+    /**
+     * @param {HistoryMutationRecord} record
+     * @returns {HistoryMutationRecord}
+     */
+    adjustToLastObservedState(record) {
+        if (!["attributes", "classList", "characterData"].includes(record.type)) {
             return record;
         }
+        const { stateMap, key } = this.getObservedStateStorage(record);
+        if (!stateMap.has(key)) {
+            return record;
+        }
+        const lastObservedValue = stateMap.get(key);
+        // Remove entry, so it won't be used again.
+        stateMap.delete(key);
+        // Update record.
+        return { ...record, oldValue: lastObservedValue };
+    }
 
+    /**
+     * @param {HistoryMutationRecord} record
+     * @returns { { map: Map, key: string } }
+     */
+    getObservedStateStorage(record) {
         // Add entry for current target if not already present.
         if (!this.lastObservedState.has(record.target)) {
             this.lastObservedState.set(record.target, {
                 attributes: new Map(),
                 classList: new Map(),
+                characterData: new Map(),
             });
         }
         const stateMap = this.lastObservedState.get(record.target)[record.type];
-        const key = record.type === "attributes" ? record.attributeName : record.className;
-        if (this.isObserverDisabled) {
-            // Only store it if not already stored.
-            if (!stateMap.has(key)) {
-                stateMap.set(key, record.oldValue);
-            }
-            return record;
+        switch (record.type) {
+            case "attributes":
+                return { stateMap, key: record.attributeName };
+            case "classList":
+                return { stateMap, key: record.className };
+            case "characterData":
+                return { stateMap, key: "textContent" };
+            default:
+                throw new Error(`Unsupported mutation type: ${record.type}`);
         }
-        if (stateMap.has(key)) {
-            const lastObservedValue = stateMap.get(key);
-            // Remove entry, so it won't be used again.
-            stateMap.delete(key);
-            // Update record.
-            return { ...record, oldValue: lastObservedValue };
+    }
+
+    /**
+     * @param {HistoryMutation} mutation
+     */
+    clearLastObservedState(mutation) {
+        if (!["attributes", "classList"].includes(mutation.type)) {
+            return;
         }
-        return record;
+        const node = this.idToNodeMap.get(mutation.id);
+        const stateMap = this.lastObservedState.get(node)?.[mutation.type];
+        if (!stateMap) {
+            return;
+        }
+        const key = mutation.type === "attributes" ? mutation.attributeName : mutation.className;
+        stateMap.delete(key);
     }
 
     /**
@@ -1012,12 +1117,7 @@ export class HistoryPlugin extends Plugin {
             // Consider the position consumed.
             revertedStep = this.steps[pos];
             this.stepsStates.set(revertedStep.id, "consumed");
-            this.bypassObserver(() => {
-                const mutations = this.revertMutations(revertedStep.mutations, {
-                    forNewStep: true,
-                });
-                this.currentStep.mutations = mutations;
-            });
+            this.revertMutations(revertedStep.mutations, { forNewStep: true });
             this.setSerializedSelection(revertedStep.selection);
             this.addStep({ stepState: "undo" });
             // Consider the last position of the history as an undo.
@@ -1040,12 +1140,7 @@ export class HistoryPlugin extends Plugin {
         if (pos > 0) {
             revertedStep = this.steps[pos];
             this.stepsStates.set(revertedStep.id, "consumed");
-            this.bypassObserver(() => {
-                const mutations = this.revertMutations(revertedStep.mutations, {
-                    forNewStep: true,
-                });
-                this.currentStep.mutations = mutations;
-            });
+            this.revertMutations(revertedStep.mutations, { forNewStep: true });
             this.setSerializedSelection(revertedStep.selection);
             this.addStep({ stepState: "redo" });
         }
