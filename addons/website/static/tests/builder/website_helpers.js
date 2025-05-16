@@ -35,7 +35,7 @@ import { isBrowserFirefox } from "@web/core/browser/feature_detection";
 import { registry } from "@web/core/registry";
 import { uniqueId } from "@web/core/utils/functions";
 import { WebClient } from "@web/webclient/webclient";
-import { patchWithCleanupImg } from "./helpers";
+import { patchWithCleanupImg } from "@html_builder/../tests/helpers";
 import { getWebsiteSnippets } from "./snippets_getter.hoot";
 import { mockImageRequests } from "./image_test_helpers";
 

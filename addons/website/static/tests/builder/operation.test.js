@@ -2,7 +2,7 @@ import { describe, expect, test } from "@odoo/hoot";
 import { Deferred, delay, tick } from "@odoo/hoot-dom";
 import { xml } from "@odoo/owl";
 import { contains } from "@web/../tests/web_test_helpers";
-import { Operation } from "../src/core/operation";
+import { Operation } from "@html_builder/core/operation";
 import {
     addActionOption,
     addOption,

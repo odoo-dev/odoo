@@ -1,6 +1,6 @@
 import { expect, test } from "@odoo/hoot";
 import { contains } from "@web/../tests/web_test_helpers";
-import { setupHTMLBuilder } from "./helpers";
+import { setupHTMLBuilder } from "@html_builder/../tests/helpers";
 import { getDragMoveHelper, waitForEndOfOperation } from "./website_helpers";
 
 const dropzoneSelectors = {
