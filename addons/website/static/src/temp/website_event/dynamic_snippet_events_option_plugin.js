@@ -1,7 +1,7 @@
 import {
     DYNAMIC_SNIPPET,
     setDatasetIfUndefined,
-} from "@website/website_builder/plugins/options/dynamic_snippet_option_plugin";
+} from "@website/builder/plugins/options/dynamic_snippet_option_plugin";
 import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
 import { registry } from "@web/core/registry";

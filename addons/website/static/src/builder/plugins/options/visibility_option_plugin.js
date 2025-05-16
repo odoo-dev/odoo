@@ -8,7 +8,7 @@ import { withSequence } from "@html_editor/utils/resource";
 import {
     CONDITIONAL_VISIBILITY,
     DEVICE_VISIBILITY,
-} from "@website/website_builder/option_sequence";
+} from "@website/builder/option_sequence";
 
 export const VISIBILITY_OPTION_SELECTOR = "section, .s_hr";
 export const DEVICE_VISIBILITY_OPTION_SELECTOR = "section .row > div";

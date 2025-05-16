@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 import { ScrollButtonOption } from "./scroll_button_option";
 import { classAction } from "@html_builder/core/core_builder_action_plugin";
 import { withSequence } from "@html_editor/utils/resource";
-import { SCROLL_BUTTON } from "@website/website_builder/option_sequence";
+import { SCROLL_BUTTON } from "@website/builder/option_sequence";
 
 class ScrollButtonOptionPlugin extends Plugin {
     static id = "scrollButtonOption";

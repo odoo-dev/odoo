@@ -2,7 +2,7 @@ import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import { GridColumnsOption } from "./grid_column_option";
 import { withSequence } from "@html_editor/utils/resource";
-import { GRID_COLUMNS } from "@website/website_builder/option_sequence";
+import { GRID_COLUMNS } from "@website/builder/option_sequence";
 
 export class GridColumnsOptionPlugin extends Plugin {
     static id = "GridColumnsOption";

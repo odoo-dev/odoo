@@ -3,7 +3,7 @@ import { withSequence } from "@html_editor/utils/resource";
 import { registry } from "@web/core/registry";
 import { getScrollingElement } from "@web/core/utils/scrolling";
 import { AnimateOption } from "./animate_option";
-import { ANIMATE } from "@website/website_builder/option_sequence";
+import { ANIMATE } from "@website/builder/option_sequence";
 
 class AnimateOptionPlugin extends Plugin {
     static id = "animateOption";

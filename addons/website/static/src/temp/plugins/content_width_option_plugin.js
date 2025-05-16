@@ -1,7 +1,7 @@
 import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import { withSequence } from "@html_editor/utils/resource";
-import { CONTAINER_WIDTH } from "@website/website_builder/option_sequence";
+import { CONTAINER_WIDTH } from "@website/builder/option_sequence";
 
 class ContentWidthOptionPlugin extends Plugin {
     static id = "contentWidthOption";

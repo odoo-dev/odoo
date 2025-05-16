@@ -1,6 +1,6 @@
 import { BaseOptionComponent } from "@html_builder/core/utils";
-import { useDynamicSnippetOption } from "@website/website_builder/plugins/options/dynamic_snippet_hook";
-import { DynamicSnippetOption } from "@website/website_builder/plugins/options/dynamic_snippet_option";
+import { useDynamicSnippetOption } from "@website/builder/plugins/options/dynamic_snippet_hook";
+import { DynamicSnippetOption } from "@website/builder/plugins/options/dynamic_snippet_option";
 
 export class DynamicSnippetEventsOption extends BaseOptionComponent {
     static template = "website_event.DynamicSnippetEventsOption";

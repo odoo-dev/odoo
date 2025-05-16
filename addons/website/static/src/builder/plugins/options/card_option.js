@@ -1,5 +1,5 @@
 import { BaseOptionComponent, useGetItemValue } from "@html_builder/core/utils";
-import { WebsiteBackgroundOption } from "@website/website_builder/plugins/options/background_option";
+import { WebsiteBackgroundOption } from "@website/builder/plugins/options/background_option";
 import { CardImageOption } from "./card_image_option";
 import { BorderConfigurator } from "@html_builder/plugins/border_configurator_option";
 import { ShadowOption } from "@html_builder/plugins/shadow_option";
