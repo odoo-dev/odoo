@@ -74,7 +74,6 @@ export class WebsiteBuilder extends Component {
         // TODO: to remove: this is only needed to not use the website systray
         // when using the "website preview" app.
         this.websiteService.useMysterious = true;
-        this.translation = !!this.props.action.context.params?.edit_translations;
 
         this.overlayRef = useChildRef();
         useSubEnv({
@@ -370,6 +369,10 @@ export class WebsiteBuilder extends Component {
             path = "/";
         }
         return path;
+    }
+
+    get translation() {
+        return this.websiteService.currentWebsite?.metadata.translatable;
     }
 
     async reloadEditor(param = {}) {
