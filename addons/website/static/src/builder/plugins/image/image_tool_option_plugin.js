@@ -1,4 +1,4 @@
-import { cropperDataFieldsWithAspectRatio, isGif } from "@html_editor/utils/image_processing";
+import { cropperDataFieldsWithAspectRatio, isGif, loadImage } from "@html_editor/utils/image_processing";
 import { registry } from "@web/core/registry";
 import { Plugin } from "@html_editor/plugin";
 import { ImageToolOption } from "./image_tool_option";
@@ -10,6 +10,7 @@ import {
     ALIGNMENT_STYLE_PADDING,
 } from "@html_builder/utils/option_sequence";
 import { ReplaceMediaOption, searchSupportedParentLinkEl } from "./replace_media_option";
+import { computeMaxDisplayWidth } from "./image_format_option";
 
 export const REPLACE_MEDIA_SELECTOR = "img, .media_iframe_video, span.fa, i.fa";
 export const REPLACE_MEDIA_EXCLUDE =
@@ -20,6 +21,7 @@ class ImageToolOptionPlugin extends Plugin {
     static dependencies = [
         "history",
         "userCommand",
+        "imageFormatOption",
         "imagePostProcess",
         "imageCrop",
         "media",
@@ -45,6 +47,32 @@ class ImageToolOptionPlugin extends Plugin {
             }),
         ],
         builder_actions: this.getActions(),
+        on_media_dialog_saved_handlers: async (image, { node }) => {
+            if (image && image.tagName === "IMG") {
+                const finalizeCallback = await this.dependencies.imagePostProcess.processImage({
+                    img: image,
+                    newDataset: {
+                        formatMimetype: "image/webp",
+                    },
+                    onImageInfoLoaded: async (dataset) => {
+                        const original = await loadImage(dataset.originalSrc);
+                        const maxWidth = dataset.width ? image.naturalWidth : original.naturalWidth;
+                        const optimizedWidth = Math.min(maxWidth, computeMaxDisplayWidth(node || this.editable));
+                        if (!["image/gif", "image/svg+xml"].includes(dataset.mimetype)) {
+                            // Convert to recommended format and width.
+                            dataset.mimetype = "image/webp";
+                            dataset.resizeWidth = optimizedWidth;
+                        } else if (dataset.shape && dataset.originalMimetype !== "image/gif") {
+                            dataset.originalMimetype = "image/webp";
+                            dataset.resizeWidth = optimizedWidth;
+                        } else {
+                            return true;
+                        }
+                    },
+                });
+                finalizeCallback?.();
+            }
+        },
     };
     getActions() {
         return {
@@ -57,7 +85,7 @@ class ImageToolOptionPlugin extends Plugin {
                             onClose: resolve,
                             onSave: async (newDataset) => {
                                 resolve(
-                                    this.dependencies.imagePostProcess.processImage(img, newDataset)
+                                    this.dependencies.imagePostProcess.processImage({ img, newDataset })
                                 );
                             },
                         });
@@ -71,7 +99,7 @@ class ImageToolOptionPlugin extends Plugin {
                     const newDataset = Object.fromEntries(
                         cropperDataFieldsWithAspectRatio.map((field) => [field, undefined])
                     );
-                    return this.dependencies.imagePostProcess.processImage(img, newDataset);
+                    return this.dependencies.imagePostProcess.processImage({ img, newDataset });
                 },
                 apply: ({ loadResult: updateImageAttributes }) => {
                     updateImageAttributes();
@@ -96,14 +124,14 @@ class ImageToolOptionPlugin extends Plugin {
             },
             replaceMedia: {
                 load: async ({ editingElement }) => {
-                    let icon;
+                    let image, updateImageAttributes;
                     await this.dependencies.media.openMediaDialog({
                         node: editingElement,
-                        save: (newIcon) => {
-                            icon = newIcon;
+                        save: (newImage) => {
+                            image = newImage;
                         },
                     });
-                    return icon;
+                    return image;
                 },
                 apply: ({ editingElement, loadResult: newImage }) => {
                     if (!newImage) {

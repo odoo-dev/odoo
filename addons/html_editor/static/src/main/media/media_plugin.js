@@ -126,13 +126,12 @@ export class MediaPlugin extends Plugin {
         }
     }
 
-    onSaveMediaDialog(element, { node }) {
+    async onSaveMediaDialog(element, { node }) {
         if (!element) {
             // @todo @phoenix to remove
             throw new Error("Element is required: onSaveMediaDialog");
             // return;
         }
-
         if (node) {
             const changedIcon = isIconElement(node) && isIconElement(element);
             if (changedIcon) {
@@ -156,6 +155,14 @@ export class MediaPlugin extends Plugin {
     }
 
     openMediaDialog(params = {}, editableEl = null) {
+        const oldSave =
+            params.save || ((element) => this.onSaveMediaDialog(element, { node: params.node }));
+        params.save = async (element) => {
+            for (const onMediaDialogSaved of this.getResource("on_media_dialog_saved_handlers")) {
+                await onMediaDialogSaved(element, { node: params.node });
+            }
+            return oldSave(element);
+        };
         const { resModel, resId, field, type } = this.getRecordInfo(editableEl);
         const mediaDialogClosedPromise = this.dependencies.dialog.addDialog(MediaDialog, {
             resModel,
@@ -165,9 +172,6 @@ export class MediaPlugin extends Plugin {
                 ((resModel === "ir.ui.view" && field === "arch") || type === "html")
             ), // @todo @phoenix: should be removed and moved to config.mediaModalParams
             media: params.node,
-            save: (element) => {
-                this.onSaveMediaDialog(element, { node: params.node });
-            },
             onAttachmentChange: this.config.onAttachmentChange || (() => {}),
             noVideos: !this.config.allowMediaDialogVideo,
             noImages: !this.config.allowImage,
