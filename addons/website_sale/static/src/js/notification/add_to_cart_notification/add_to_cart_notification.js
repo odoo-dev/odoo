@@ -14,6 +14,7 @@ export class AddToCartNotification extends Component {
                     image_url: String,
                     quantity: Number,
                     uom_name: { type: String, optional: true },
+                    combination_name: { type: String, optional: true },
                     name: String,
                     description: { type: String, optional: true },
                     line_price_total: Number,

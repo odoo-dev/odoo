@@ -20,6 +20,7 @@ export class CartNotification extends Component {
                     quantity: Number,
                     uom_name: { type: String, optional: true },
                     name: String,
+                    combination_name: { type: String, optional: true },
                     description: { type: String, optional: true },
                     line_price_total: Number,
                 },

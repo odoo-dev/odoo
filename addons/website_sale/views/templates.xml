@@ -2319,13 +2319,15 @@
                     <div class="d-flex flex-column flex-grow-1 gap-3 min-w-0">
                         <div class="d-flex gap-3">
                             <div class="flex-grow-1 text-wrap w-100">
-                                <div class="d-flex justify-content-between">
+                                <div class="d-flex">
                                     <t t-call="website_sale.cart_line_product_link">
                                         <h6
-                                            t-field="line.name_short"
+                                            t-out="line._get_line_header()"
                                             class="d-inline align-top fw-bold text-wrap small"
                                         />
                                     </t>
+                                    -
+                                    <t t-out="line._get_combination_name()"/>
                                     <span t-if="line.product_template_id._has_multiple_uoms()" t-out="line.product_uom_id.name"/>
                                     <div
                                         t-attf-class="{{'d-block d-md-none' if not is_combo else ''}}"
@@ -3124,7 +3126,8 @@
                                                                         t-att-title="line._get_shop_warning()"
                                                                         aria-label="Warning"/>
                                                                     </t>
-                                                                    <t t-out="line.name_short"/>
+                                                                    <t t-out="line._get_line_header()"/>
+                                                                    <t t-out="line._get_combination_name()"/>
                                                                 </h6>
                                                             </td>
                                                         </t>

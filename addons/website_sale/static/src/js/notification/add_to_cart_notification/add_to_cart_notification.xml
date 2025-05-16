@@ -21,6 +21,7 @@
         </div>
         <div class="col-6 d-flex flex-column align-items-start">
             <span t-out="line.name"/>
+            <span class="text-muted small" t-if="line.combination_name" t-out="line.combination_name"/>
             <span class="text-muted small" t-if="line.description" t-out="line.description"/>
             <span t-out="line.quantity" class="text-start text-muted badge"/>
             <span t-out="line.uom_name" class="text-start text-muted badge"/>
