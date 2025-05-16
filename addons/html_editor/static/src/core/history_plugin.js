@@ -1285,6 +1285,12 @@ export class HistoryPlugin extends Plugin {
                 case "classList": {
                     const node = this.idToNodeMap.get(mutation.id);
                     if (node) {
+                        // Hack to produce observable classList mutation
+                        if (mutation.oldValue !== node.classList.contains(mutation.className)) {
+                            this.bypassObserver(() =>
+                                toggleClass(node, mutation.className, mutation.oldValue)
+                            );
+                        }
                         toggleClass(node, mutation.className, mutation.value);
                     }
                     break;
