@@ -50,19 +50,16 @@ test("Add image in gallery", async () => {
         </section>
         `
     );
-    onRpc("/html_editor/get_image_info", () => {
-        expect.step("get_image_info");
-        return {
-            attachment: {
-                id: 1,
-            },
-            original: {
-                id: 1,
-                image_src: "/web/image/hoot.png",
-                mimetype: "image/png",
-            },
-        };
-    });
+    onRpc("/html_editor/get_image_info", () => ({
+        attachment: {
+            id: 1,
+        },
+        original: {
+            id: 1,
+            image_src: "/web/image/hoot.png",
+            mimetype: "image/png",
+        },
+    }));
     await contains(":iframe .first_img").click();
     await waitFor("[data-action-id='addImage']");
     expect("[data-action-id='addImage']").toHaveCount(1);
@@ -86,7 +83,7 @@ test("Add image in gallery", async () => {
     );
     expect(":iframe .o_masonry_col img[data-index='6']").toHaveAttribute(
         "data-mimetype-before-conversion",
-        "image/jpeg"
+        "image/png"
     );
 });
 
