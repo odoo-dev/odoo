@@ -2,7 +2,7 @@ import {
     getCurrentShadow,
     getDefaultShadow,
     shadowToString,
-} from "@website/temp/plugins/shadow_option_plugin";
+} from "@html_builder/plugins/shadow_option_plugin";
 import {
     SNIPPET_SPECIFIC_END,
     SNIPPET_SPECIFIC_NEXT,
