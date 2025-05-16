@@ -5,7 +5,7 @@ import { user } from "@web/core/user";
 import { _t } from "@web/core/l10n/translation";
 import { NewsletterSubscribeCommonOption } from "./newsletter_subscribe_common_option";
 import { getSelectorParams } from "@html_builder/utils/utils";
-import { applyFunDependOnSelectorAndExclude } from "@website/temp/plugins/utils";
+import { applyFunDependOnSelectorAndExclude } from "@website/builder/plugins/utils";
 
 class MailingListSubscribeOptionPlugin extends Plugin {
     static id = "mailingListSubscribeOption";

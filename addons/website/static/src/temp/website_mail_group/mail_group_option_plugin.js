@@ -1,4 +1,4 @@
-import { InputConfirmationDialog } from "@website/temp/snippets/input_confirmation_dialog";
+import { InputConfirmationDialog } from "@html_builder/snippets/input_confirmation_dialog";
 import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
