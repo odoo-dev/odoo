@@ -8,9 +8,6 @@ from odoo.addons.sale.tests.product_configurator_common import TestProductConfig
 from odoo.addons.website.tests.common import HttpCaseWithWebsiteUser
 import unittest
 
-
-# TODO master-mysterious-egg fix error
-@unittest.skip("prepare mysterious-egg for merging")
 @tagged('post_install', '-at_install')
 class TestCustomize(HttpCaseWithUserDemo, HttpCaseWithUserPortal, TestProductConfiguratorCommon, HttpCaseWithWebsiteUser):
 
