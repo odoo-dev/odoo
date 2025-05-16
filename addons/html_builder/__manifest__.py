@@ -14,23 +14,20 @@
     # for the full list
     'category': 'Uncategorized',
     'version': '0.1',
-    'auto_install': True,
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'html_editor', 'website'],
+    'depends': ['base', 'html_editor'],
 
     'assets': {
-        'web.assets_backend': [
-            'website/static/src/xml/website_form_editor.xml',
-            # TODO Remove the module's form js - this is for testing.
-            'website/static/src/js/send_mail_form.js',
-            # TODO when moving options to website: load this from website
-            # directly. This file is loaded in assets_wysiwyg in website, but we
-            # need to load it here for html_builder.
-            'website/static/src/xml/website.cookies_bar.xml',
-        ],
         # this bundle is lazy loaded when the editor is ready
         'html_builder.assets': [
+            ('include', 'web._assets_helpers'),
+
+            'html_builder/static/src/bootstrap_overriden.scss',
+            'web/static/src/scss/pre_variables.scss',
+            'web/static/lib/bootstrap/scss/_variables.scss',
+            'web/static/lib/bootstrap/scss/_variables-dark.scss',
+            'web/static/lib/bootstrap/scss/_maps.scss',
             'html_builder/static/src/**/*',
         ],
         'html_builder.inside_builder_style': [
