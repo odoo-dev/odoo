@@ -1,4 +1,4 @@
-import { Builder } from "@website/temp/builder";
+import { Builder } from "@html_builder/builder";
 import { SetupEditorPlugin } from "@html_builder/core/setup_editor_plugin";
 import { VersionControlPlugin } from "@html_builder/core/version_control_plugin";
 import { EditInteractionPlugin } from "@website/website_builder/plugins/edit_interaction_plugin";
