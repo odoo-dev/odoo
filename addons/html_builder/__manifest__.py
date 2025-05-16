@@ -16,7 +16,9 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'html_editor'],
+    # so stupid that we need to use the stupid defineMailModel helper, so we need
+    # to depend on mail
+    'depends': ['base', 'html_editor', 'mail'],
 
     'assets': {
         # this bundle is lazy loaded when the editor is ready
