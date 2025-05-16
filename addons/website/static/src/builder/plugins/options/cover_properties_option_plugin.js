@@ -43,22 +43,7 @@ class CoverPropertiesOptionPlugin extends Plugin {
                 onlyImages: true,
                 save: (imageEl) => {
                     resultPromise = (async () => {
-                        Object.assign(imageEl.dataset, await loadImageInfo(imageEl));
-                        let b64ToSave = false;
-                        if (
-                            imageEl.dataset.mimetypeBeforeConversion &&
-                            !["image/gif", "image/svg+xml", "image/webp"].includes(
-                                imageEl.dataset.mimetypeBeforeConversion
-                            )
-                        ) {
-                            // Convert to webp but keep original width.
-                            const updateImgAttributes =
-                                await this.dependencies.imagePostProcess.processImage(imageEl, {
-                                    formatMimetype: "image/webp",
-                                });
-                            updateImgAttributes();
-                            b64ToSave = true;
-                        }
+                        const b64ToSave = imageEl.getAttribute("src").startsWith("data:");
                         return { imageSrc: imageEl.getAttribute("src"), b64ToSave };
                     })();
                 },
