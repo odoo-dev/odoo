@@ -41,11 +41,11 @@
         'html_builder.assets_edit_frontend': [
             ('include', 'website.assets_edit_frontend'),
         ],
-        # 'html_builder.iframe_add_dialog': [
-        #     ('include', 'web.assets_frontend'),
-        #     'html_builder/static/src/snippets/snippet_viewer.scss',
-        #     'website/static/src/snippets/**/*.edit.scss',
-        # ],
+        'html_builder.iframe_add_dialog': [
+            ('include', 'web.assets_frontend'),
+            'html_builder/static/src/snippets/snippet_viewer.scss',
+            'website/static/src/snippets/**/*.edit.scss',
+        ],
         'web.assets_unit_tests': [
             'html_builder/static/tests/**/*',
             ('include', 'html_builder.assets'),

@@ -16,7 +16,6 @@ export class SnippetModel extends Reactive {
         this.dialog = services.dialog;
         this.notification = services.notification;
         this.snippetsName = snippetsName;
-        this.websiteService = services.website;
         this.context = context;
         this.loadProm = null;
 
