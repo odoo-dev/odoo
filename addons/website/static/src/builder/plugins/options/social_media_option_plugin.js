@@ -8,7 +8,7 @@ import { renderToFragment } from "@web/core/utils/render";
 import { SocialMediaLinks } from "./social_media_links";
 import { selectElements } from "@html_editor/utils/dom_traversal";
 import { SNIPPET_SPECIFIC } from "@html_builder/utils/option_sequence";
-import { TITLE_LAYOUT_SIZE } from "@website/website_builder/option_sequence";
+import { TITLE_LAYOUT_SIZE } from "@website/builder/option_sequence";
 
 /**
  * @typedef { Object } SocialMediaInfo

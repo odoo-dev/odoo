@@ -1,5 +1,5 @@
 import { patch } from "@web/core/utils/patch";
-import { Many2OneOptionPlugin } from "@website/website_builder/plugins/options/many2one_option_plugin";
+import { Many2OneOptionPlugin } from "@website/builder/plugins/options/many2one_option_plugin";
 
 patch(Many2OneOptionPlugin, {
     dependencies: [...Many2OneOptionPlugin.dependencies, "history"],

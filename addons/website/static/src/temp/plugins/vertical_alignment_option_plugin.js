@@ -3,7 +3,7 @@ import { registry } from "@web/core/registry";
 import { classAction } from "@html_builder/core/core_builder_action_plugin";
 import { VerticalAlignmentOption } from "./vertical_alignment_option";
 import { withSequence } from "@html_editor/utils/resource";
-import { VERTICAL_ALIGNMENT } from "@website/website_builder/option_sequence";
+import { VERTICAL_ALIGNMENT } from "@website/builder/option_sequence";
 
 class VerticalAlignmentOptionPlugin extends Plugin {
     static id = "verticalAlignmentOption";

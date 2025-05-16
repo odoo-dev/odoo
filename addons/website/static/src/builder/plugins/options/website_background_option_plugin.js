@@ -1,4 +1,4 @@
-import { WebsiteBackgroundOption } from "@website/website_builder/plugins/options/background_option";
+import { WebsiteBackgroundOption } from "@website/builder/plugins/options/background_option";
 import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import {
@@ -11,7 +11,7 @@ import {
 } from "./utils";
 import { withSequence } from "@html_editor/utils/resource";
 import { SNIPPET_SPECIFIC_BEFORE } from "@html_builder/utils/option_sequence";
-import { WEBSITE_BACKGROUND_OPTIONS } from "@website/website_builder/option_sequence";
+import { WEBSITE_BACKGROUND_OPTIONS } from "@website/builder/option_sequence";
 
 class WebsiteBackgroundOptionPlugin extends Plugin {
     static id = "websiteOption";

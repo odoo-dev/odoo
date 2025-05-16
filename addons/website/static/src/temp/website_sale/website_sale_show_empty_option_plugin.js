@@ -1,4 +1,4 @@
-import { HEADER_END } from "@website/website_builder/plugins/options/header_option_plugin";
+import { HEADER_END } from "@website/builder/plugins/options/header_option_plugin";
 import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
 import { registry } from "@web/core/registry";

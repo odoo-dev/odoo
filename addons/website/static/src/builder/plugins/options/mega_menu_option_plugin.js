@@ -1,4 +1,4 @@
-import { MegaMenuOption } from "@website/website_builder/plugins/options/mega_menu_option";
+import { MegaMenuOption } from "@website/builder/plugins/options/mega_menu_option";
 import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import { withSequence } from "@html_editor/utils/resource";

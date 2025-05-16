@@ -1,7 +1,7 @@
 import { onWillStart, useState } from "@odoo/owl";
-import { DynamicSnippetOption } from "@website/website_builder/plugins/options/dynamic_snippet_option";
+import { DynamicSnippetOption } from "@website/builder/plugins/options/dynamic_snippet_option";
 import { BaseOptionComponent, useDomState } from "@html_builder/core/utils";
-import { useDynamicSnippetOption } from "@website/website_builder/plugins/options/dynamic_snippet_hook";
+import { useDynamicSnippetOption } from "@website/builder/plugins/options/dynamic_snippet_hook";
 
 export class DynamicSnippetBlogPostsOption extends BaseOptionComponent {
     static template = "website_blog.DynamicSnippetBlogPostsOption";

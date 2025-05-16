@@ -1,6 +1,6 @@
 import { patch } from "@web/core/utils/patch";
 import { useDomState } from "@html_builder/core/utils";
-import { CoverPropertiesOption } from "@website/website_builder/plugins/options/cover_properties_option";
+import { CoverPropertiesOption } from "@website/builder/plugins/options/cover_properties_option";
 
 patch(CoverPropertiesOption, {
     template: "website_blog.BlogCoverPropertiesOption",

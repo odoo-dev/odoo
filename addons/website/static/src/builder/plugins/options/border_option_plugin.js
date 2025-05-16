@@ -1,8 +1,8 @@
-import { CARD_PARENT_HANDLERS } from "@website/website_builder/plugins/options/utils";
+import { CARD_PARENT_HANDLERS } from "@website/builder/plugins/options/utils";
 import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import { withSequence } from "@html_editor/utils/resource";
-import { BOX_BORDER_SHADOW } from "@website/website_builder/option_sequence";
+import { BOX_BORDER_SHADOW } from "@website/builder/option_sequence";
 
 class BorderOptionPlugin extends Plugin {
     static id = "borderOption";
