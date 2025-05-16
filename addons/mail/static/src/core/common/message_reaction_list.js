@@ -1,9 +1,10 @@
 import { useHover } from "@mail/utils/common/hooks";
+
 import { Component } from "@odoo/owl";
+
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { loadEmoji } from "@web/core/emoji_picker/emoji_picker";
-
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 

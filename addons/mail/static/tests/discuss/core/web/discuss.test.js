@@ -14,7 +14,10 @@ import {
     triggerHotkey,
     waitStoreFetch,
 } from "@mail/../tests/mail_test_helpers";
+
 import { describe, test } from "@odoo/hoot";
+
+import { pick } from "@web/core/utils/objects";
 import {
     asyncStep,
     Command,
@@ -22,8 +25,6 @@ import {
     serverState,
     waitForSteps,
 } from "@web/../tests/web_test_helpers";
-
-import { pick } from "@web/core/utils/objects";
 
 describe.current.tags("desktop");
 defineMailModels();

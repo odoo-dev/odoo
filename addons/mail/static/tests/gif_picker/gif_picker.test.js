@@ -1,5 +1,5 @@
+import { GifPicker } from "@mail/discuss/gif_picker/common/gif_picker";
 import {
-    SIZES,
     click,
     contains,
     defineMailModels,
@@ -8,10 +8,14 @@ import {
     openFormView,
     patchUiSize,
     scroll,
+    SIZES,
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
+
 import { describe, expect, test } from "@odoo/hoot";
+import { animationFrame } from "@odoo/hoot-dom";
+
 import {
     asyncStep,
     getService,
@@ -20,9 +24,6 @@ import {
     preloadBundle,
     waitForSteps,
 } from "@web/../tests/web_test_helpers";
-
-import { GifPicker } from "@mail/discuss/gif_picker/common/gif_picker";
-import { animationFrame } from "@odoo/hoot-dom";
 
 describe.current.tags("desktop");
 defineMailModels();

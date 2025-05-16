@@ -1,3 +1,4 @@
+import { rpcWithEnv } from "@mail/utils/common/misc";
 import {
     click,
     contains,
@@ -6,9 +7,10 @@ import {
     startServer,
     triggerEvents,
 } from "@mail/../tests/mail_test_helpers";
-import { rpcWithEnv } from "@mail/utils/common/misc";
+
 import { describe, expect, test } from "@odoo/hoot";
 import { mockDate } from "@odoo/hoot-mock";
+
 import {
     asyncStep,
     Command,

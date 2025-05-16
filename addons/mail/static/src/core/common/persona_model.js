@@ -1,7 +1,8 @@
 import { AND, fields, Record } from "@mail/core/common/record";
-import { imageUrl } from "@web/core/utils/urls";
+
 import { rpc } from "@web/core/network/rpc";
 import { debounce } from "@web/core/utils/timing";
+import { imageUrl } from "@web/core/utils/urls";
 
 const TRANSPARENT_AVATAR =
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAQAAABpN6lAAAAAqElEQVR42u3QMQEAAAwCoNm/9GJ4CBHIjYsAAQIECBAgQIAAAQIECBAgQIAAAQIECBAgQIAAAQIECBAgQIAAAQIECBAgQIAAAQIECBAgQIAAAQIECBAgQIAAAQIECBAgQIAAAQIECBAgQIAAAQIECBAgQIAAAQIECBAgQIAAAQIECBAgQIAAAQIECBAgQIAAAQIECBAgQIAAAQIECBAgQIAAAQIECBDQ9+KgAIHd5IbMAAAAAElFTkSuQmCC";

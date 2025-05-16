@@ -1,12 +1,12 @@
-import { _t } from "@web/core/l10n/translation";
-import { registry } from "@web/core/registry";
-import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { user } from "@web/core/user";
-import { useService } from "@web/core/utils/hooks";
+import { Component, onWillStart, useState } from "@odoo/owl";
 
-import { Component, useState, onWillStart } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { _t } from "@web/core/l10n/translation";
+import { registry } from "@web/core/registry";
+import { user } from "@web/core/user";
+import { useService } from "@web/core/utils/hooks";
+import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 
 
@@ -37,10 +37,10 @@ export class MailComposerTemplateSelector extends Component {
             ["user_id", "=", user.userId]
         ], fields, { limit: this.limit });
         if (templates.length < this.limit) {
-            templates.push(...await this.orm.searchRead("mail.template", [
+            templates.push(...(await this.orm.searchRead("mail.template", [
                 ["model", "=", this.props.record.data.render_model],
                 ["user_id", "!=", user.userId]
-            ], fields, { limit: this.limit - templates.length }));
+            ], fields, { limit: this.limit - templates.length })));
         }
         this.state.templates = templates;
     }

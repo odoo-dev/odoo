@@ -1,15 +1,16 @@
+import { CallActionButton } from "@mail/discuss/call/common/call_action_button";
+import { useCallActions } from "@mail/discuss/call/common/call_actions";
+import { CALL_PROMOTE_FULLSCREEN } from "@mail/discuss/call/common/thread_model_patch";
+
 import { Component, useRef } from "@odoo/owl";
 
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
-import { useCallActions } from "@mail/discuss/call/common/call_actions";
-import { CallActionButton } from "@mail/discuss/call/common/call_action_button";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { Tooltip } from "@web/core/tooltip/tooltip";
-import { CALL_PROMOTE_FULLSCREEN } from "@mail/discuss/call/common/thread_model_patch";
+import { useService } from "@web/core/utils/hooks";
 
 export class CallActionList extends Component {
     static components = { Dropdown, DropdownItem, CallActionButton };

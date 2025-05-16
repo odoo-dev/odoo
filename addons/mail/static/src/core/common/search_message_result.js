@@ -1,5 +1,6 @@
-import { Component } from "@odoo/owl";
 import { MessageCardList } from "./message_card_list";
+import { Component } from "@odoo/owl";
+
 import { _t } from "@web/core/l10n/translation";
 
 /**

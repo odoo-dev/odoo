@@ -1,12 +1,13 @@
+import { ActionPanel } from "@mail/discuss/core/common/action_panel";
+import { useMicrophoneVolume } from "@mail/utils/common/hooks";
+
 import { Component, onWillStart, useExternalListener, useState } from "@odoo/owl";
 
-import { _t } from "@web/core/l10n/translation";
 import { browser } from "@web/core/browser/browser";
-import { debounce } from "@web/core/utils/timing";
 import { isMobileOS } from "@web/core/browser/feature_detection";
+import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
-import { useMicrophoneVolume } from "@mail/utils/common/hooks";
-import { ActionPanel } from "@mail/discuss/core/common/action_panel";
+import { debounce } from "@web/core/utils/timing";
 
 export class CallSettings extends Component {
     static template = "discuss.CallSettings";

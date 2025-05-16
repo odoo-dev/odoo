@@ -1,9 +1,11 @@
-import { useState, onWillUnmount, status, useComponent } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
-import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { Mp3Encoder } from "./mp3_encoder";
 import { loadLamejs } from "@mail/discuss/voice_message/common/voice_message_service";
+
+import { onWillUnmount, status, useComponent, useState } from "@odoo/owl";
+
+import { browser } from "@web/core/browser/browser";
+import { _t } from "@web/core/l10n/translation";
+import { useService } from "@web/core/utils/hooks";
 
 export const patchable = {
     makeFile(file) {

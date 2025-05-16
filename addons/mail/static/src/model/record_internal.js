@@ -1,11 +1,12 @@
 /** @typedef {import("./record").Record} Record */
 /** @typedef {import("./record_list").RecordList} RecordList */
 
-import { onChange } from "@mail/utils/common/misc";
 import { IS_DELETED_SYM, IS_DELETING_SYM, IS_RECORD_SYM, isRelation } from "./misc";
 import { RecordList } from "./record_list";
-import { reactive, toRaw } from "@odoo/owl";
 import { RecordUses } from "./record_uses";
+import { onChange } from "@mail/utils/common/misc";
+
+import { reactive, toRaw } from "@odoo/owl";
 
 export class RecordInternal {
     [IS_RECORD_SYM] = true;

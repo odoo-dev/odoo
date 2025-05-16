@@ -1,5 +1,5 @@
-import { getKwArgs, models } from "@web/../tests/web_test_helpers";
 import { patch } from "@web/core/utils/patch";
+import { getKwArgs, models } from "@web/../tests/web_test_helpers";
 
 patch(models.ServerModel.prototype, {
     /**

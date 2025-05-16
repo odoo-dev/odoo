@@ -10,7 +10,9 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
+
 import { test } from "@odoo/hoot";
+
 import { mockService } from "@web/../tests/web_test_helpers";
 
 defineMailModels();

@@ -1,3 +1,4 @@
+import { Composer } from "@mail/core/common/composer";
 import {
     click,
     contains,
@@ -9,8 +10,11 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
-import { beforeEach, expect, describe, test } from "@odoo/hoot";
+
+import { beforeEach, describe, expect, test } from "@odoo/hoot";
+import { press } from "@odoo/hoot-dom";
 import { Deferred, tick } from "@odoo/hoot-mock";
+
 import {
     asyncStep,
     Command,
@@ -18,9 +22,6 @@ import {
     patchWithCleanup,
     serverState,
 } from "@web/../tests/web_test_helpers";
-
-import { Composer } from "@mail/core/common/composer";
-import { press } from "@odoo/hoot-dom";
 
 describe.current.tags("desktop");
 defineMailModels();

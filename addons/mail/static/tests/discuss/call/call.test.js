@@ -1,4 +1,8 @@
 import {
+    CROSS_TAB_CLIENT_MESSAGE,
+    CROSS_TAB_HOST_MESSAGE,
+} from "@mail/discuss/call/common/rtc_service";
+import {
     click,
     contains,
     defineMailModels,
@@ -13,14 +17,12 @@ import {
     waitStoreFetch,
 } from "@mail/../tests/mail_test_helpers";
 import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
-import {
-    CROSS_TAB_CLIENT_MESSAGE,
-    CROSS_TAB_HOST_MESSAGE,
-} from "@mail/discuss/call/common/rtc_service";
 
 import { describe, expect, test } from "@odoo/hoot";
 import { advanceTime, hover, manuallyDispatchProgrammaticEvent, queryFirst } from "@odoo/hoot-dom";
 import { mockSendBeacon, mockUserAgent } from "@odoo/hoot-mock";
+
+import { isMobileOS } from "@web/core/browser/feature_detection";
 import {
     asyncStep,
     Command,
@@ -29,8 +31,6 @@ import {
     serverState,
     waitForSteps,
 } from "@web/../tests/web_test_helpers";
-
-import { isMobileOS } from "@web/core/browser/feature_detection";
 
 describe.current.tags("desktop");
 defineMailModels();

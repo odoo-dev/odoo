@@ -6,15 +6,15 @@ import { Thread } from "@mail/core/common/thread";
 import { useThreadActions } from "@mail/core/common/thread_actions";
 import { ThreadIcon } from "@mail/core/common/thread_icon";
 import { DiscussSidebar } from "@mail/core/public_web/discuss_sidebar";
+import { MessagingMenu } from "@mail/core/public_web/messaging_menu";
 import { useMessageHighlight } from "@mail/utils/common/hooks";
 
-import { Component, useRef, useState, useExternalListener, useEffect, useSubEnv } from "@odoo/owl";
-import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
+import { Component, useEffect, useExternalListener, useRef, useState, useSubEnv } from "@odoo/owl";
 
+import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { FileUploader } from "@web/views/fields/file_handler";
-import { MessagingMenu } from "@mail/core/public_web/messaging_menu";
 
 export class Discuss extends Component {
     static components = {

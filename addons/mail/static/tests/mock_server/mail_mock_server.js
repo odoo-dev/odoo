@@ -1,3 +1,7 @@
+import { Domain } from "@web/core/domain";
+import { serializeDateTime } from "@web/core/l10n/dates";
+import { registry } from "@web/core/registry";
+import { groupBy } from "@web/core/utils/arrays";
 import {
     authenticate,
     getKwArgs,
@@ -9,10 +13,6 @@ import {
     serverState,
     unmakeKwArgs,
 } from "@web/../tests/web_test_helpers";
-import { Domain } from "@web/core/domain";
-import { serializeDateTime } from "@web/core/l10n/dates";
-import { registry } from "@web/core/registry";
-import { groupBy } from "@web/core/utils/arrays";
 
 const mockRpcRegistry = registry.category("mock_rpc");
 export const DISCUSS_ACTION_ID = 104;

@@ -1,5 +1,7 @@
 import { Plugin } from "@html_editor/plugin";
+
 import { MentionList } from "@mail/core/web/mention_list";
+
 import { stateToUrl } from "@web/core/browser/router";
 import { renderToElement } from "@web/core/utils/render";
 import { url } from "@web/core/utils/urls";

@@ -1,3 +1,5 @@
+import { Store } from "@mail/core/common/store_service";
+import { LONG_TYPING, SHORT_TYPING } from "@mail/discuss/typing/common/composer_patch";
 import {
     click,
     contains,
@@ -8,8 +10,11 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
+
 import { describe, test } from "@odoo/hoot";
 import { advanceTime } from "@odoo/hoot-mock";
+
+import { rpc } from "@web/core/network/rpc";
 import {
     asyncStep,
     Command,
@@ -17,10 +22,6 @@ import {
     waitForSteps,
     withUser,
 } from "@web/../tests/web_test_helpers";
-
-import { Store } from "@mail/core/common/store_service";
-import { LONG_TYPING, SHORT_TYPING } from "@mail/discuss/typing/common/composer_patch";
-import { rpc } from "@web/core/network/rpc";
 
 describe.current.tags("desktop");
 defineMailModels();

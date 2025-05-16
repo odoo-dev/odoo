@@ -1,12 +1,14 @@
+import { useGifPicker } from "./gif_picker";
 import {
     composerActionsRegistry,
     pickerOnClick,
     pickerSetup,
 } from "@mail/core/common/composer_actions";
+
 import { useComponent } from "@odoo/owl";
+
 import { _t } from "@web/core/l10n/translation";
 import { markEventHandled } from "@web/core/utils/misc";
-import { useGifPicker } from "./gif_picker";
 
 composerActionsRegistry.add("add-gif", {
     condition: (component) =>

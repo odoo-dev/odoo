@@ -1,10 +1,10 @@
-import { markRaw, reactive, toRaw } from "@odoo/owl";
-import { Store } from "./store";
-import { STORE_SYM, isFieldDefinition, isMany, isRelation, modelRegistry } from "./misc";
-import { Record } from "./record";
-import { StoreInternal } from "./store_internal";
+import { isFieldDefinition, isMany, isRelation, modelRegistry, STORE_SYM } from "./misc";
 import { ModelInternal } from "./model_internal";
+import { Record } from "./record";
 import { RecordInternal } from "./record_internal";
+import { Store } from "./store";
+import { StoreInternal } from "./store_internal";
+import { markRaw, reactive, toRaw } from "@odoo/owl";
 
 /** @returns {import("models").Store} */
 export function makeStore(env, { localRegistry } = {}) {

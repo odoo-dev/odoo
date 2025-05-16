@@ -2,6 +2,7 @@ import { MessageCardList } from "@mail/core/common/message_card_list";
 import { ActionPanel } from "@mail/discuss/core/common/action_panel";
 
 import { Component, onWillStart, onWillUpdateProps } from "@odoo/owl";
+
 import { _t } from "@web/core/l10n/translation";
 
 /**

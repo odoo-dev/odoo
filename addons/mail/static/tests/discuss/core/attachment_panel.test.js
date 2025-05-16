@@ -6,6 +6,7 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
+
 import { describe, test } from "@odoo/hoot";
 
 describe.current.tags("desktop");

@@ -1,6 +1,6 @@
+import { browser } from "@web/core/browser/browser";
 import { rpc } from "@web/core/network/rpc";
 import { Deferred } from "@web/core/utils/concurrency";
-import { browser } from "@web/core/browser/browser";
 
 export const STREAM_TYPE = Object.freeze({
     AUDIO: "audio",

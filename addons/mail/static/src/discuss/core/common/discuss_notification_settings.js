@@ -1,4 +1,5 @@
 import { Component, useState } from "@odoo/owl";
+
 import { useService } from "@web/core/utils/hooks";
 
 export class DiscussNotificationSettings extends Component {

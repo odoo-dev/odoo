@@ -1,7 +1,7 @@
 import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
 
-import { fields, getKwArgs, makeKwArgs, models } from "@web/../tests/web_test_helpers";
 import { serializeDateTime, today } from "@web/core/l10n/dates";
+import { fields, getKwArgs, makeKwArgs, models } from "@web/../tests/web_test_helpers";
 
 export class DiscussChannelMember extends models.ServerModel {
     _name = "discuss.channel.member";

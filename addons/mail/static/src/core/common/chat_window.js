@@ -1,22 +1,22 @@
+import { AutoresizeInput } from "@mail/core/common/autoresize_input";
 import { Composer } from "@mail/core/common/composer";
+import { CountryFlag } from "@mail/core/common/country_flag";
 import { ImStatus } from "@mail/core/common/im_status";
 import { Thread } from "@mail/core/common/thread";
-import { AutoresizeInput } from "@mail/core/common/autoresize_input";
-import { CountryFlag } from "@mail/core/common/country_flag";
 import { useThreadActions } from "@mail/core/common/thread_actions";
 import { ThreadIcon } from "@mail/core/common/thread_icon";
+import { Typing } from "@mail/discuss/typing/common/typing";
 import { useHover, useMessageHighlight } from "@mail/utils/common/hooks";
-import { isEventHandled } from "@web/core/utils/misc";
 
 import { Component, toRaw, useChildSubEnv, useRef, useState, useSubEnv } from "@odoo/owl";
 
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { localization } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
-import { Typing } from "@mail/discuss/typing/common/typing";
-import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
+import { isEventHandled } from "@web/core/utils/misc";
 
 /**
  * @typedef {Object} Props

@@ -2,9 +2,9 @@ import { DiscussClientAction } from "@mail/core/public_web/discuss_client_action
 
 import { mount, whenReady } from "@odoo/owl";
 
-import { getTemplate } from "@web/core/templates";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { registry } from "@web/core/registry";
+import { getTemplate } from "@web/core/templates";
 import { makeEnv, startServices } from "@web/env";
 
 (async function boot() {

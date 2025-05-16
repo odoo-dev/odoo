@@ -1,6 +1,6 @@
-import { useService } from "@web/core/utils/hooks";
-
 import { Component, onWillStart } from "@odoo/owl";
+
+import { useService } from "@web/core/utils/hooks";
 
 /**
  * This popover is used to show a card with details for the recipients' partner with its name,

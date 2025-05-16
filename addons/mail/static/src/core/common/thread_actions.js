@@ -1,8 +1,9 @@
-import { useSubEnv, useComponent, useState } from "@odoo/owl";
+import { SearchMessagesPanel } from "@mail/core/common/search_messages_panel";
+
+import { useComponent, useState, useSubEnv } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { SearchMessagesPanel } from "@mail/core/common/search_messages_panel";
 
 export const threadActionsRegistry = registry.category("mail.thread/actions");
 

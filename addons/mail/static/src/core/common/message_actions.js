@@ -1,13 +1,14 @@
+import { discussComponentRegistry } from "./discuss_component_registry";
+import { QuickReactionMenu } from "@mail/core/common/quick_reaction_menu";
+
 import { toRaw, useComponent, useState } from "@odoo/owl";
 
+import { useEmojiPicker } from "@web/core/emoji_picker/emoji_picker";
 import { _t } from "@web/core/l10n/translation";
 import { download } from "@web/core/network/download";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
-import { discussComponentRegistry } from "./discuss_component_registry";
 import { Deferred } from "@web/core/utils/concurrency";
-import { useEmojiPicker } from "@web/core/emoji_picker/emoji_picker";
-import { QuickReactionMenu } from "@mail/core/common/quick_reaction_menu";
+import { useService } from "@web/core/utils/hooks";
 
 const { DateTime } = luxon;
 

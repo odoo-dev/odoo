@@ -1,5 +1,5 @@
+import { IS_DELETED_SYM, modelRegistry, STORE_SYM } from "./misc";
 import { Record } from "./record";
-import { IS_DELETED_SYM, STORE_SYM, modelRegistry } from "./misc";
 import { reactive, toRaw } from "@odoo/owl";
 
 /** @typedef {import("./record_list").RecordList} RecordList */

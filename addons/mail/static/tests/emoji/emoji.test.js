@@ -1,5 +1,3 @@
-import { patchTranslations, preloadBundle, serverState } from "@web/../tests/web_test_helpers";
-
 import {
     click,
     contains,
@@ -11,9 +9,11 @@ import {
     startServer,
     triggerHotkey,
 } from "@mail/../tests/mail_test_helpers";
-import { describe, getFixture, test } from "@odoo/hoot";
 
+import { describe, getFixture, test } from "@odoo/hoot";
 import { queryFirst } from "@odoo/hoot-dom";
+
+import { patchTranslations, preloadBundle, serverState } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 defineMailModels();

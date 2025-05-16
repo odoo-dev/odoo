@@ -6,12 +6,13 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
+
 import { describe, test } from "@odoo/hoot";
 import { disableAnimations } from "@odoo/hoot-mock";
-import { serverState } from "@web/../tests/web_test_helpers";
-import { deserializeDateTime } from "@web/core/l10n/dates";
 
+import { deserializeDateTime } from "@web/core/l10n/dates";
 import { getOrigin } from "@web/core/utils/urls";
+import { serverState } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 defineMailModels();

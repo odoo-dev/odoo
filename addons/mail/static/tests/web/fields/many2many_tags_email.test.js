@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from "@odoo/hoot";
+import { ResPartner } from "../../mock_server/mock_models/res_partner";
 import {
     click,
     contains,
@@ -8,6 +8,10 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
+
+import { beforeEach, describe, expect, test } from "@odoo/hoot";
+import { queryFirst } from "@odoo/hoot-dom";
+
 import {
     asyncStep,
     clickFieldDropdown,
@@ -15,8 +19,6 @@ import {
     onRpc,
     waitForSteps,
 } from "@web/../tests/web_test_helpers";
-import { queryFirst } from "@odoo/hoot-dom";
-import { ResPartner } from "../../mock_server/mock_models/res_partner";
 
 defineMailModels();
 describe.current.tags("desktop");

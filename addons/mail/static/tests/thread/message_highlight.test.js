@@ -1,3 +1,4 @@
+import { Thread } from "@mail/core/common/thread";
 import {
     click,
     defineMailModels,
@@ -6,9 +7,10 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
-import { Thread } from "@mail/core/common/thread";
+
 import { describe, test } from "@odoo/hoot";
 import { advanceTime, Deferred, tick } from "@odoo/hoot-dom";
+
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 
 defineMailModels();

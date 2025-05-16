@@ -1,7 +1,6 @@
 import { Message } from "@mail/core/common/message";
+import { AvatarCardPopover } from "@mail/discuss/web/avatar_card/avatar_card_popover";
 import { getNonEditableMentions, parseEmail } from "@mail/utils/common/format";
-import { markEventHandled } from "@web/core/utils/misc";
-import { renderToMarkup } from "@web/core/utils/render";
 
 import {
     deserializeDate,
@@ -11,6 +10,11 @@ import {
 } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
+import { usePopover } from "@web/core/popover/popover_hook";
+import { useService } from "@web/core/utils/hooks";
+import { markEventHandled } from "@web/core/utils/misc";
+import { patch } from "@web/core/utils/patch";
+import { renderToMarkup } from "@web/core/utils/render";
 import {
     formatChar,
     formatFloat,
@@ -18,10 +22,6 @@ import {
     formatMonetary,
     formatText,
 } from "@web/views/fields/formatters";
-import { useService } from "@web/core/utils/hooks";
-import { usePopover } from "@web/core/popover/popover_hook";
-import { patch } from "@web/core/utils/patch";
-import { AvatarCardPopover } from "@mail/discuss/web/avatar_card/avatar_card_popover";
 
 patch(Message.prototype, {
     setup() {

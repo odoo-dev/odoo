@@ -1,12 +1,12 @@
 import { ImStatus } from "@mail/core/common/im_status";
 import { onExternalClick } from "@mail/utils/common/hooks";
-import { markEventHandled, isEventHandled } from "@web/core/utils/misc";
 
 import { Component, useEffect, useExternalListener, useRef, useState } from "@odoo/owl";
 
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { usePosition } from "@web/core/position/position_hook";
 import { useService } from "@web/core/utils/hooks";
+import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
 
 export class NavigableList extends Component {
     static components = { ImStatus };

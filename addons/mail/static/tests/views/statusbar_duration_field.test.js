@@ -6,7 +6,9 @@ import {
     startServer,
 } from "@mail/../tests/mail_test_helpers";
 import { ResPartner } from "@mail/../tests/mock_server/mock_models/res_partner";
+
 import { describe, test } from "@odoo/hoot";
+
 import { defineModels, fields, models } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");

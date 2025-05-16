@@ -1,8 +1,8 @@
 import { useAttachmentUploader } from "@mail/core/common/attachment_uploader_hook";
 import { ActivityMailTemplate } from "@mail/core/web/activity_mail_template";
 import { ActivityMarkAsDone } from "@mail/core/web/activity_markasdone_popover";
-import { computeDelay, getMsToTomorrow } from "@mail/utils/common/dates";
 import { AvatarCardPopover } from "@mail/discuss/web/avatar_card/avatar_card_popover";
+import { computeDelay, getMsToTomorrow } from "@mail/utils/common/dates";
 
 import { Component, onMounted, onWillUnmount, useState } from "@odoo/owl";
 

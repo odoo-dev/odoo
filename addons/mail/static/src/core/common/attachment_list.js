@@ -1,13 +1,13 @@
 import { Component } from "@odoo/owl";
-import { isMobileOS } from "@web/core/browser/feature_detection";
 
+import { isMobileOS } from "@web/core/browser/feature_detection";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { download } from "@web/core/network/download";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useFileViewer } from "@web/core/file_viewer/file_viewer_hook";
 import { _t } from "@web/core/l10n/translation";
+import { download } from "@web/core/network/download";
 import { useService } from "@web/core/utils/hooks";
 import { url } from "@web/core/utils/urls";
 

@@ -1,42 +1,42 @@
+import { useComposerActions } from "./composer_actions";
 import { AttachmentList } from "@mail/core/common/attachment_list";
 import { useAttachmentUploader } from "@mail/core/common/attachment_uploader_hook";
-import { useCustomDropzone } from "@web/core/dropzone/dropzone_hook";
 import { MailAttachmentDropzone } from "@mail/core/common/mail_attachment_dropzone";
 import { MessageConfirmDialog } from "@mail/core/common/message_confirm_dialog";
 import { NavigableList } from "@mail/core/common/navigable_list";
 import { useSuggestion } from "@mail/core/common/suggestion_hook";
 import { prettifyMessageContent } from "@mail/utils/common/format";
-import { htmlJoin } from "@mail/utils/common/html";
 import { useSelection } from "@mail/utils/common/hooks";
+import { htmlJoin } from "@mail/utils/common/html";
 import { isDragSourceExternalFile } from "@mail/utils/common/misc";
-import { rpc } from "@web/core/network/rpc";
-import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
-import { browser } from "@web/core/browser/browser";
-import { useDebounced } from "@web/core/utils/timing";
 
 import {
     Component,
+    EventBus,
     markup,
     onMounted,
     onWillUnmount,
+    toRaw,
     useChildSubEnv,
     useEffect,
+    useExternalListener,
     useRef,
     useState,
-    useExternalListener,
-    toRaw,
-    EventBus,
 } from "@odoo/owl";
 
-import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
-import { createElementWithContent } from "@web/core/utils/html";
-import { FileUploader } from "@web/views/fields/file_handler";
-import { escape, isEmail } from "@web/core/utils/strings";
+import { browser } from "@web/core/browser/browser";
 import { isDisplayStandalone, isIOS, isMobileOS } from "@web/core/browser/feature_detection";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { useComposerActions } from "./composer_actions";
+import { useCustomDropzone } from "@web/core/dropzone/dropzone_hook";
+import { _t } from "@web/core/l10n/translation";
+import { rpc } from "@web/core/network/rpc";
+import { useService } from "@web/core/utils/hooks";
+import { createElementWithContent } from "@web/core/utils/html";
+import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
+import { escape, isEmail } from "@web/core/utils/strings";
+import { useDebounced } from "@web/core/utils/timing";
+import { FileUploader } from "@web/views/fields/file_handler";
 
 const EDIT_CLICK_TYPE = {
     CANCEL: "cancel",

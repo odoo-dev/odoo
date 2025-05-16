@@ -1,12 +1,12 @@
-import { useEmojiPicker } from "@web/core/emoji_picker/emoji_picker";
-
 import { useRef } from "@odoo/owl";
+
+import { useEmojiPicker } from "@web/core/emoji_picker/emoji_picker";
 
 /*
  * Common code for EmojisTextField and EmojisCharField
  */
 export const EmojisFieldCommon = (T) =>
-    class EmojisFieldCommon extends T {
+    (class EmojisFieldCommon extends T {
         /**
          * Create an emoji textfield view to enable opening an emoji popover
          */
@@ -38,4 +38,4 @@ export const EmojisFieldCommon = (T) =>
                 }
             );
         }
-    };
+    });

@@ -1,7 +1,7 @@
+import { Component } from "@odoo/owl";
+
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-
-import { Component } from "@odoo/owl";
 
 /**
  * Will be removed in master

@@ -1,4 +1,11 @@
 import {
+    getGridHtml,
+    getRegularGridHtml,
+    getRegularTableHtml,
+    getTableHtml,
+    getTdHtml,
+} from "./utils";
+import {
     addTables,
     bootstrapToTable,
     cardToTable,
@@ -9,15 +16,9 @@ import {
     normalizeColors,
     normalizeRem,
 } from "@mail/views/web/fields/html_mail_field/convert_inline";
+
 import { afterEach, beforeEach, describe, expect, getFixture, test } from "@odoo/hoot";
 import { enableTransitions } from "@odoo/hoot-mock";
-import {
-    getGridHtml,
-    getRegularGridHtml,
-    getRegularTableHtml,
-    getTableHtml,
-    getTdHtml,
-} from "./utils";
 
 const TEST_WIDTH = 800;
 const TEST_HEIGHT = 600;

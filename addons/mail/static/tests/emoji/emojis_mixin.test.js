@@ -1,6 +1,6 @@
-import { expect, test } from "@odoo/hoot";
-
 import { formatText } from "@mail/js/emojis_mixin";
+
+import { expect, test } from "@odoo/hoot";
 
 test("Emoji formatter handles compound emojis", () => {
     const testString = "👩🏿test👩🏿👩t👩";

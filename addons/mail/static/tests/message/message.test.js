@@ -14,23 +14,25 @@ import {
     startServer,
     triggerHotkey,
 } from "@mail/../tests/mail_test_helpers";
+
 import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, leave, press, queryFirst } from "@odoo/hoot-dom";
 import { mockDate, mockTouch, mockUserAgent, tick } from "@odoo/hoot-mock";
+
+import { browser } from "@web/core/browser/browser";
+import { deserializeDateTime } from "@web/core/l10n/dates";
+import { getOrigin, url } from "@web/core/utils/urls";
 import {
     asyncStep,
     Command,
+    getService,
     mockService,
     onRpc,
     patchWithCleanup,
     serverState,
     waitForSteps,
     withUser,
-    getService,
 } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
-import { deserializeDateTime } from "@web/core/l10n/dates";
-import { getOrigin, url } from "@web/core/utils/urls";
 
 const { DateTime } = luxon;
 

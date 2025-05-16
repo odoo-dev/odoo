@@ -1,12 +1,13 @@
+import { makeStore, Record, Store } from "@mail/core/common/record";
+import { AND, fields } from "@mail/model/misc";
 import { defineMailModels, start as start2 } from "@mail/../tests/mail_test_helpers";
+
 import { afterEach, beforeEach, describe, expect, test } from "@odoo/hoot";
 import { markup, reactive, toRaw } from "@odoo/owl";
-import { asyncStep, mockService, waitForSteps } from "@web/../tests/web_test_helpers";
 
-import { Record, Store, makeStore } from "@mail/core/common/record";
-import { AND, fields } from "@mail/model/misc";
 import { serializeDateTime } from "@web/core/l10n/dates";
 import { registry } from "@web/core/registry";
+import { asyncStep, mockService, waitForSteps } from "@web/../tests/web_test_helpers";
 
 const Markup = markup().constructor;
 

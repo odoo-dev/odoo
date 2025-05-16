@@ -1,3 +1,4 @@
+import { MailMessage } from "../mock_server/mock_models/mail_message";
 import {
     click,
     contains,
@@ -6,9 +7,10 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
+
 import { describe, expect, test } from "@odoo/hoot";
+
 import { asyncStep, onRpc, serverState, waitForSteps } from "@web/../tests/web_test_helpers";
-import { MailMessage } from "../mock_server/mock_models/mail_message";
 
 defineMailModels();
 describe.current.tags("desktop");

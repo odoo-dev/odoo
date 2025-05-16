@@ -1,9 +1,9 @@
 import { Composer } from "@mail/core/common/composer";
-import { markEventHandled } from "@web/core/utils/misc";
 
 import { useRef } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
+import { markEventHandled } from "@web/core/utils/misc";
 import { patch } from "@web/core/utils/patch";
 
 /** @type {Composer} */

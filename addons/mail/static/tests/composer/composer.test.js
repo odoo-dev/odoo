@@ -1,5 +1,5 @@
+import { Composer } from "@mail/core/common/composer";
 import {
-    SIZES,
     click,
     contains,
     defineMailModels,
@@ -14,12 +14,16 @@ import {
     patchUiSize,
     scroll,
     setupChatHub,
+    SIZES,
     start,
     startServer,
     triggerHotkey,
 } from "@mail/../tests/mail_test_helpers";
+
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
-import { Deferred, animationFrame, tick } from "@odoo/hoot-mock";
+import { press, queryFirst } from "@odoo/hoot-dom";
+import { animationFrame, Deferred, tick } from "@odoo/hoot-mock";
+
 import {
     Command,
     getService,
@@ -28,9 +32,6 @@ import {
     serverState,
     withUser,
 } from "@web/../tests/web_test_helpers";
-
-import { Composer } from "@mail/core/common/composer";
-import { press, queryFirst } from "@odoo/hoot-dom";
 
 describe.current.tags("desktop");
 defineMailModels();

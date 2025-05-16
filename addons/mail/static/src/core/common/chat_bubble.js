@@ -1,11 +1,11 @@
+import { CountryFlag } from "@mail/core/common/country_flag";
 import { ImStatus } from "@mail/core/common/im_status";
+import { useHover } from "@mail/utils/common/hooks";
 
 import { Component, useEffect, useRef, useState, useSubEnv } from "@odoo/owl";
 
-import { useChildRef, useService } from "@web/core/utils/hooks";
-import { useHover } from "@mail/utils/common/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
-import { CountryFlag } from "@mail/core/common/country_flag";
+import { useChildRef, useService } from "@web/core/utils/hooks";
 
 class ChatBubblePreview extends Component {
     static props = ["chatWindow", "close"];

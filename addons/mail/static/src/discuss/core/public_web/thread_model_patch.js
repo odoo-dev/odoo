@@ -1,7 +1,7 @@
 import { Thread } from "@mail/core/common/thread_model";
 import { fields } from "@mail/model/misc";
-import { rpc } from "@web/core/network/rpc";
 
+import { rpc } from "@web/core/network/rpc";
 import { patch } from "@web/core/utils/patch";
 
 /** @type {import("models").Thread} */

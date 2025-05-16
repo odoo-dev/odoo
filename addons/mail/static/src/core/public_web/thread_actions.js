@@ -1,5 +1,7 @@
 import { threadActionsRegistry } from "@mail/core/common/thread_actions";
+
 import { useComponent } from "@odoo/owl";
+
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 

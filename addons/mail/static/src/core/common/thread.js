@@ -1,6 +1,6 @@
+import { NotificationMessage } from "./notification_message";
 import { DateSection } from "@mail/core/common/date_section";
 import { Message } from "@mail/core/common/message";
-import { NotificationMessage } from "./notification_message";
 import { Record } from "@mail/core/common/record";
 import { useVisible } from "@mail/utils/common/hooks";
 
@@ -19,8 +19,8 @@ import {
     useRef,
     useState,
 } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 
+import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { Transition } from "@web/core/transition";
 import { useBus, useRefListener, useService } from "@web/core/utils/hooks";

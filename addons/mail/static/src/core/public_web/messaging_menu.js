@@ -8,10 +8,10 @@ import { Component, useExternalListener, useRef, useState } from "@odoo/owl";
 import { hasTouch, isDisplayStandalone, isIOS } from "@web/core/browser/feature_detection";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
+import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 
 export class MessagingMenu extends Component {
     static components = { CountryFlag, Dropdown, NotificationItem, ImStatus };

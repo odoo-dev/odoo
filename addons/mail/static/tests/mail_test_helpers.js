@@ -1,44 +1,8 @@
-import { addBusMessageHandler, busModels } from "@bus/../tests/bus_test_helpers";
-import { after, before, expect, getFixture, registerDebugInfo } from "@odoo/hoot";
-import { hover as hootHover, queryFirst, resize } from "@odoo/hoot-dom";
-import { Deferred, microTick } from "@odoo/hoot-mock";
-import {
-    MockServer,
-    asyncStep,
-    authenticate,
-    defineModels,
-    defineParams,
-    getMockEnv,
-    getService,
-    makeMockEnv,
-    makeMockServer,
-    mountWithCleanup,
-    onRpc,
-    parseViewProps,
-    patchWithCleanup,
-    restoreRegistry,
-    serverState,
-    waitForSteps,
-    webModels,
-} from "@web/../tests/web_test_helpers";
-
-import { CHAT_HUB_KEY } from "@mail/core/common/chat_hub_model";
 import { contains } from "./mail_test_helpers_contains";
 
-import { mailGlobal } from "@mail/utils/common/misc";
-import { Component, onMounted, onPatched, onWillDestroy, status } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
-import { loadEmoji } from "@web/core/emoji_picker/emoji_picker";
-import { registry } from "@web/core/registry";
-import { MEDIAS_BREAKPOINTS, utils as uiUtils } from "@web/core/ui/ui_service";
-import { useServiceProtectMethodHandling } from "@web/core/utils/hooks";
-import { session } from "@web/session";
-import { WebClient } from "@web/webclient/webclient";
-export { SIZES } from "@web/core/ui/ui_service";
-
 import {
-    DISCUSS_ACTION_ID,
     authenticateGuest,
+    DISCUSS_ACTION_ID,
     mailDataHelpers,
 } from "./mock_server/mail_mock_server";
 import { Base } from "./mock_server/mock_models/base";
@@ -75,6 +39,44 @@ import { ResRole } from "./mock_server/mock_models/res_role";
 import { ResUsers } from "./mock_server/mock_models/res_users";
 import { ResUsersSettings } from "./mock_server/mock_models/res_users_settings";
 import { ResUsersSettingsVolumes } from "./mock_server/mock_models/res_users_settings_volumes";
+
+import { addBusMessageHandler, busModels } from "@bus/../tests/bus_test_helpers";
+
+import { CHAT_HUB_KEY } from "@mail/core/common/chat_hub_model";
+import { mailGlobal } from "@mail/utils/common/misc";
+
+import { after, before, expect, getFixture, registerDebugInfo } from "@odoo/hoot";
+import { hover as hootHover, queryFirst, resize } from "@odoo/hoot-dom";
+import { Deferred, microTick } from "@odoo/hoot-mock";
+import { Component, onMounted, onPatched, onWillDestroy, status } from "@odoo/owl";
+
+import { browser } from "@web/core/browser/browser";
+import { loadEmoji } from "@web/core/emoji_picker/emoji_picker";
+import { registry } from "@web/core/registry";
+import { MEDIAS_BREAKPOINTS, utils as uiUtils } from "@web/core/ui/ui_service";
+import { useServiceProtectMethodHandling } from "@web/core/utils/hooks";
+import { session } from "@web/session";
+import { WebClient } from "@web/webclient/webclient";
+import {
+    asyncStep,
+    authenticate,
+    defineModels,
+    defineParams,
+    getMockEnv,
+    getService,
+    makeMockEnv,
+    makeMockServer,
+    MockServer,
+    mountWithCleanup,
+    onRpc,
+    parseViewProps,
+    patchWithCleanup,
+    restoreRegistry,
+    serverState,
+    waitForSteps,
+    webModels,
+} from "@web/../tests/web_test_helpers";
+
 
 export * from "./mail_test_helpers_contains";
 

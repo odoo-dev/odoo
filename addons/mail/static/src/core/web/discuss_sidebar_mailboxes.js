@@ -3,9 +3,9 @@ import { discussSidebarItemsRegistry } from "@mail/core/public_web/discuss_sideb
 import { useHover } from "@mail/utils/common/hooks";
 
 import { Component, useRef } from "@odoo/owl";
+
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
-
 import { useService } from "@web/core/utils/hooks";
 import { markEventHandled } from "@web/core/utils/misc";
 

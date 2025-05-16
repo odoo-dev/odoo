@@ -1,5 +1,6 @@
 import { waitNotifications, waitUntilSubscribe } from "@bus/../tests/bus_test_helpers";
 
+import { OutOfFocusService } from "@mail/core/common/out_of_focus_service";
 import {
     click,
     contains,
@@ -20,9 +21,14 @@ import {
     waitStoreFetch,
 } from "@mail/../tests/mail_test_helpers";
 import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
+
 import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, Deferred, press, runAllTimers, tick, waitFor } from "@odoo/hoot-dom";
 import { mockDate } from "@odoo/hoot-mock";
+import { EventBus } from "@odoo/owl";
+
+import { browser } from "@web/core/browser/browser";
+import { rpc } from "@web/core/network/rpc";
 import {
     asyncStep,
     Command,
@@ -35,11 +41,6 @@ import {
     waitForSteps,
     withUser,
 } from "@web/../tests/web_test_helpers";
-
-import { OutOfFocusService } from "@mail/core/common/out_of_focus_service";
-import { EventBus } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
-import { rpc } from "@web/core/network/rpc";
 
 describe.current.tags("desktop");
 defineMailModels();

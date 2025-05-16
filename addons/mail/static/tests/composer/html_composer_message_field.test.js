@@ -1,8 +1,18 @@
-import { setSelection } from "@html_editor/../tests/_helpers/selection";
-import { insertText } from "@html_editor/../tests/_helpers/user_actions";
+import {
+    defineMailModels,
+    mailModels,
+    openView,
+    registerArchs,
+    start,
+    startServer,
+} from "../mail_test_helpers";
 import { FileSelector } from "@html_editor/main/media/media_dialog/file_selector";
 import { uploadService } from "@html_editor/main/media/media_dialog/upload_progress_toast/upload_service";
+import { setSelection } from "@html_editor/../tests/_helpers/selection";
+import { insertText } from "@html_editor/../tests/_helpers/user_actions";
+
 import { HtmlComposerMessageField } from "@mail/views/web/fields/html_composer_message_field/html_composer_message_field";
+
 import { beforeEach, expect, test } from "@odoo/hoot";
 import {
     manuallyDispatchProgrammaticEvent,
@@ -12,7 +22,8 @@ import {
     queryOne,
     waitFor,
 } from "@odoo/hoot-dom";
-import { Deferred, animationFrame } from "@odoo/hoot-mock";
+import { animationFrame, Deferred } from "@odoo/hoot-mock";
+
 import {
     contains,
     makeMockServer,
@@ -22,14 +33,6 @@ import {
     onRpc,
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
-import {
-    defineMailModels,
-    mailModels,
-    openView,
-    registerArchs,
-    start,
-    startServer,
-} from "../mail_test_helpers";
 
 // Need this hack to use the arch in mountView(...)
 mailModels.MailComposeMessage._views = {};

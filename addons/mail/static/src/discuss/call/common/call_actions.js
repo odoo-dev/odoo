@@ -1,4 +1,5 @@
 import { useComponent, useState } from "@odoo/owl";
+
 import { isBrowserSafari, isMobileOS } from "@web/core/browser/feature_detection";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";

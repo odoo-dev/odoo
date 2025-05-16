@@ -1,4 +1,5 @@
 import { Component } from "@odoo/owl";
+
 import { ResizablePanel } from "@web/core/resizable_panel/resizable_panel";
 import { useService } from "@web/core/utils/hooks";
 

@@ -1,8 +1,8 @@
 import { fields } from "@mail/core/common/record";
 import { Store } from "@mail/core/common/store_service";
+
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
-
 import { patch } from "@web/core/utils/patch";
 
 /** @type {import("models").Store} */

@@ -1,3 +1,7 @@
+import { discussComponentRegistry } from "./discuss_component_registry";
+import { MessageActionMenuMobile } from "./message_action_menu_mobile";
+import { useMessageActions } from "./message_actions";
+import { NotificationMessage } from "./notification_message";
 import { AttachmentList } from "@mail/core/common/attachment_list";
 import { Composer } from "@mail/core/common/composer";
 import { ImStatus } from "@mail/core/common/im_status";
@@ -8,8 +12,6 @@ import { MessageReactionMenu } from "@mail/core/common/message_reaction_menu";
 import { MessageReactions } from "@mail/core/common/message_reactions";
 import { RelativeTime } from "@mail/core/common/relative_time";
 import { htmlToTextContentInline } from "@mail/utils/common/format";
-import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
-import { renderToElement } from "@web/core/utils/render";
 
 import {
     Component,
@@ -26,21 +28,19 @@ import {
 } from "@odoo/owl";
 
 import { ActionSwiper } from "@web/core/action_swiper/action_swiper";
+import { cookie } from "@web/core/browser/cookie";
 import { hasTouch, isMobileOS } from "@web/core/browser/feature_detection";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
+import { rpc } from "@web/core/network/rpc";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
 import { createElementWithContent } from "@web/core/utils/html";
+import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
+import { renderToElement } from "@web/core/utils/render";
 import { url } from "@web/core/utils/urls";
-import { useMessageActions } from "./message_actions";
-import { cookie } from "@web/core/browser/cookie";
-import { rpc } from "@web/core/network/rpc";
-import { MessageActionMenuMobile } from "./message_action_menu_mobile";
-import { discussComponentRegistry } from "./discuss_component_registry";
-import { NotificationMessage } from "./notification_message";
 
 /**
  * @typedef {Object} Props

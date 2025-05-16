@@ -1,9 +1,9 @@
-import { useService } from "@web/core/utils/hooks";
-
-import { Component } from "@odoo/owl";
-import { Thread } from "./thread_model";
-import { _t } from "@web/core/l10n/translation";
 import { ImStatus } from "./im_status";
+import { Thread } from "./thread_model";
+import { Component } from "@odoo/owl";
+
+import { _t } from "@web/core/l10n/translation";
+import { useService } from "@web/core/utils/hooks";
 
 /**
  * @typedef {Object} Props

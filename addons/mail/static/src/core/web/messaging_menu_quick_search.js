@@ -1,7 +1,8 @@
 import { onExternalClick } from "@mail/utils/common/hooks";
-import { Component } from "@odoo/owl";
-import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 
+import { Component } from "@odoo/owl";
+
+import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
 
 export class MessagingMenuQuickSearch extends Component {

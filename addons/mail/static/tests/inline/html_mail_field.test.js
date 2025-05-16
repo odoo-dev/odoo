@@ -1,9 +1,13 @@
+import { mailModels } from "../mail_test_helpers";
 import { setSelection } from "@html_editor/../tests/_helpers/selection";
 import { insertText } from "@html_editor/../tests/_helpers/user_actions";
+
 import { HtmlMailField } from "@mail/views/web/fields/html_mail_field/html_mail_field";
+
 import { after, before, beforeEach, expect, test } from "@odoo/hoot";
 import { press, queryOne } from "@odoo/hoot-dom";
 import { animationFrame, enableTransitions } from "@odoo/hoot-mock";
+
 import {
     contains,
     defineModels,
@@ -13,7 +17,6 @@ import {
     onRpc,
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
-import { mailModels } from "../mail_test_helpers";
 
 function setSelectionInHtmlField(selector = "p", fieldName = "body") {
     const anchorNode = queryOne(`[name='${fieldName}'] .odoo-editor-editable ${selector}`);

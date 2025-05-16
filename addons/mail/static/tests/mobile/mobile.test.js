@@ -1,5 +1,4 @@
 import {
-    SIZES,
     click,
     contains,
     defineMailModels,
@@ -7,10 +6,12 @@ import {
     listenStoreFetch,
     openDiscuss,
     patchUiSize,
+    SIZES,
     start,
     startServer,
     waitStoreFetch,
 } from "@mail/../tests/mail_test_helpers";
+
 import { describe, test } from "@odoo/hoot";
 import { press } from "@odoo/hoot-dom";
 import { Deferred } from "@odoo/hoot-mock";

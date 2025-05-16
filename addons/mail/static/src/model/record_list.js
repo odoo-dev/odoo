@@ -1,5 +1,5 @@
-import { markRaw, reactive, toRaw } from "@odoo/owl";
 import { isRecord } from "./misc";
+import { markRaw, reactive, toRaw } from "@odoo/owl";
 
 /** @param {RecordList} reclist */
 function getInverse(reclist) {

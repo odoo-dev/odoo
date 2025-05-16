@@ -1,14 +1,15 @@
 import { RecipientsInputTagsList } from "@mail/core/web/recipients_input_tags_list";
 import { RecipientsPopover } from "@mail/core/web/recipients_popover";
 import { parseEmail } from "@mail/utils/common/format";
+
 import { _t } from "@web/core/l10n/translation";
+import { usePopover } from "@web/core/popover/popover_hook";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
-import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
 import {
-    Many2ManyTagsField,
     many2ManyTagsField,
+    Many2ManyTagsField,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 

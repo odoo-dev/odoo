@@ -1,5 +1,6 @@
 import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
-import { fields, models, makeKwArgs } from "@web/../tests/web_test_helpers";
+
+import { fields, makeKwArgs, models } from "@web/../tests/web_test_helpers";
 
 export class MailMessageLinkPreview extends models.ServerModel {
     _name = "mail.message.link.preview";

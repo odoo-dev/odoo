@@ -1,12 +1,13 @@
+import { useDiscussSystray } from "@mail/utils/common/hooks";
+
 import { Component } from "@odoo/owl";
 
-import { useDiscussSystray } from "@mail/utils/common/hooks";
+import { Domain } from "@web/core/domain";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
-import { Domain } from "@web/core/domain";
 import { user } from "@web/core/user";
+import { useService } from "@web/core/utils/hooks";
 
 export class ActivityMenu extends Component {
     static components = { Dropdown };

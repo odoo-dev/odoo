@@ -2,14 +2,15 @@ import { CallContextMenu } from "@mail/discuss/call/common/call_context_menu";
 import { CallParticipantVideo } from "@mail/discuss/call/common/call_participant_video";
 import { CONNECTION_TYPES } from "@mail/discuss/call/common/rtc_service";
 import { useHover } from "@mail/utils/common/hooks";
-import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
+
+import { Component, onMounted, onWillUnmount, useExternalListener, useRef } from "@odoo/owl";
+
 import { browser } from "@web/core/browser/browser";
 import { isMobileOS } from "@web/core/browser/feature_detection";
-
-import { Component, onMounted, onWillUnmount, useRef, useExternalListener } from "@odoo/owl";
+import { rpc } from "@web/core/network/rpc";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
-import { rpc } from "@web/core/network/rpc";
+import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
 
 const HIDDEN_CONNECTION_STATES = new Set([undefined, "connected", "completed"]);
 

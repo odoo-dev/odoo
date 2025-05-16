@@ -1,6 +1,8 @@
+import { Avatar } from "../avatar/avatar";
 import { useAssignUserCommand } from "@mail/views/web/fields/assign_user_command_hook";
 
 import { Component } from "@odoo/owl";
+
 import { registry } from "@web/core/registry";
 import { computeM2OProps, Many2One } from "@web/views/fields/many2one/many2one";
 import {
@@ -8,7 +10,6 @@ import {
     extractM2OFieldProps,
     Many2OneField,
 } from "@web/views/fields/many2one/many2one_field";
-import { Avatar } from "../avatar/avatar";
 
 export class Many2OneAvatarUserField extends Component {
     static template = "mail.Many2OneAvatarUserField";

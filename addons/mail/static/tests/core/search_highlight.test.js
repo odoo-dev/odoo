@@ -1,6 +1,5 @@
 import { HIGHLIGHT_CLASS, searchHighlight } from "@mail/core/common/message_search_hook";
 import {
-    SIZES,
     click,
     contains,
     defineMailModels,
@@ -8,6 +7,7 @@ import {
     openDiscuss,
     openFormView,
     patchUiSize,
+    SIZES,
     start,
     startServer,
     triggerHotkey,

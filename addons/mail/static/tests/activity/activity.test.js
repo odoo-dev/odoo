@@ -1,5 +1,3 @@
-import { describe, expect, test } from "@odoo/hoot";
-
 import {
     click,
     contains,
@@ -10,7 +8,12 @@ import {
     startServer,
     triggerHotkey,
 } from "@mail/../tests/mail_test_helpers";
+
+import { describe, expect, test } from "@odoo/hoot";
 import { advanceTime, mockDate } from "@odoo/hoot-mock";
+
+import { deserializeDateTime, serializeDate, today } from "@web/core/l10n/dates";
+import { getOrigin } from "@web/core/utils/urls";
 import {
     asyncStep,
     mockService,
@@ -18,8 +21,6 @@ import {
     serverState,
     waitForSteps,
 } from "@web/../tests/web_test_helpers";
-import { deserializeDateTime, serializeDate, today } from "@web/core/l10n/dates";
-import { getOrigin } from "@web/core/utils/urls";
 
 describe.current.tags("desktop");
 defineMailModels();

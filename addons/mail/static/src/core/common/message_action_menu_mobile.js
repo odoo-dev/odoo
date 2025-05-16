@@ -1,6 +1,7 @@
-import { Component, onMounted, onWillUnmount } from "@odoo/owl";
-import { Dialog } from "@web/core/dialog/dialog";
 import { useMessageActions } from "./message_actions";
+import { Component, onMounted, onWillUnmount } from "@odoo/owl";
+
+import { Dialog } from "@web/core/dialog/dialog";
 import { useChildRef, useService } from "@web/core/utils/hooks";
 
 export class MessageActionMenuMobile extends Component {

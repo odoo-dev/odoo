@@ -1,3 +1,4 @@
+import { Composer } from "@mail/core/common/composer";
 import {
     click,
     contains,
@@ -8,8 +9,9 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
-import { Composer } from "@mail/core/common/composer";
+
 import { beforeEach, describe, test } from "@odoo/hoot";
+
 import { asyncStep, patchWithCleanup, waitForSteps } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");

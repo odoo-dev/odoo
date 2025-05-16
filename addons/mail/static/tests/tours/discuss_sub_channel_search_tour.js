@@ -1,5 +1,5 @@
-import { contains, dragenterFiles, dropFiles, scroll } from "@web/../tests/utils";
 import { registry } from "@web/core/registry";
+import { contains, dragenterFiles, dropFiles, scroll } from "@web/../tests/utils";
 
 registry.category("web_tour.tours").add("test_discuss_sub_channel_search", {
     steps: () => [

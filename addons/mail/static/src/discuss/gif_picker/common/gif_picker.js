@@ -1,10 +1,12 @@
-import { Component, onWillStart, useState, useEffect } from "@odoo/owl";
 import { useOnBottomScrolled, useSequential } from "@mail/utils/common/hooks";
-import { user } from "@web/core/user";
-import { useService, useAutofocus } from "@web/core/utils/hooks";
-import { useDebounced } from "@web/core/utils/timing";
-import { rpc } from "@web/core/network/rpc";
+
+import { Component, onWillStart, useEffect, useState } from "@odoo/owl";
+
 import { PICKER_PROPS, usePicker } from "@web/core/emoji_picker/emoji_picker";
+import { rpc } from "@web/core/network/rpc";
+import { user } from "@web/core/user";
+import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { useDebounced } from "@web/core/utils/timing";
 
 export function useGifPicker(...args) {
     return usePicker(GifPicker, ...args);

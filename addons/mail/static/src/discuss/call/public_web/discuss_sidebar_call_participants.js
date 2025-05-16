@@ -1,12 +1,14 @@
-import { Component, useEffect, useState } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { callActionsRegistry } from "../common/call_actions";
 import { Thread } from "@mail/core/common/thread_model";
 import { AvatarStack } from "@mail/discuss/core/common/avatar_stack";
-import { callActionsRegistry } from "../common/call_actions";
 import { useHover } from "@mail/utils/common/hooks";
-import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
+
+import { Component, useEffect, useState } from "@odoo/owl";
+
 import { Dropdown } from "@web/core/dropdown/dropdown";
+import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { _t } from "@web/core/l10n/translation";
+import { useService } from "@web/core/utils/hooks";
 
 /**
  * @typedef {Object} Props

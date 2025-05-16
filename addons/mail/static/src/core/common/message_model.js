@@ -1,8 +1,8 @@
 import { fields, Record } from "@mail/core/common/record";
 import {
-    EMOJI_REGEX,
     convertBrToLineBreak,
     decorateEmojis,
+    EMOJI_REGEX,
     htmlToTextContentInline,
     prettifyMessageContent,
 } from "@mail/utils/common/format";

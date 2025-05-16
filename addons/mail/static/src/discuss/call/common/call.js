@@ -1,8 +1,6 @@
 import { CallActionList } from "@mail/discuss/call/common/call_action_list";
 import { CallParticipantCard } from "@mail/discuss/call/common/call_participant_card";
 import { PttAdBanner } from "@mail/discuss/call/common/ptt_ad_banner";
-import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
-import { isMobileOS } from "@web/core/browser/feature_detection";
 
 import {
     Component,
@@ -16,9 +14,11 @@ import {
 } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
+import { isMobileOS } from "@web/core/browser/feature_detection";
+import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
-import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
+import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
 
 /**
  * @typedef CardData

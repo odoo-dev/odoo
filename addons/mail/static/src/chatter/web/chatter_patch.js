@@ -1,31 +1,32 @@
 import { ScheduledMessage } from "@mail/chatter/web/scheduled_message";
-import { Activity } from "@mail/core/web/activity";
-import { AttachmentList } from "@mail/core/common/attachment_list";
-import { BaseRecipientsList } from "@mail/core/web/base_recipients_list";
 import { Chatter } from "@mail/chatter/web_portal/chatter";
-import { FollowerList } from "@mail/core/web/follower_list";
-import { isDragSourceExternalFile } from "@mail/utils/common/misc";
+import { AttachmentList } from "@mail/core/common/attachment_list";
 import { useAttachmentUploader } from "@mail/core/common/attachment_uploader_hook";
-import { useCustomDropzone } from "@web/core/dropzone/dropzone_hook";
-import { useHover, useMessageHighlight } from "@mail/utils/common/hooks";
+import { usePopoutAttachment } from "@mail/core/common/attachment_view";
 import { MailAttachmentDropzone } from "@mail/core/common/mail_attachment_dropzone";
-import { RecipientsInput } from "@mail/core/web/recipients_input";
+import { useMessageSearch } from "@mail/core/common/message_search_hook";
 import { SearchMessageInput } from "@mail/core/common/search_message_input";
 import { SearchMessageResult } from "@mail/core/common/search_message_result";
-import { Deferred, KeepLast } from "@web/core/utils/concurrency";
+import { Activity } from "@mail/core/web/activity";
+import { BaseRecipientsList } from "@mail/core/web/base_recipients_list";
+import { FollowerList } from "@mail/core/web/follower_list";
+import { RecipientsInput } from "@mail/core/web/recipients_input";
+import { useHover, useMessageHighlight } from "@mail/utils/common/hooks";
+import { isDragSourceExternalFile } from "@mail/utils/common/misc";
+
 import { onWillStart, status, useEffect } from "@odoo/owl";
 
-import { _t } from "@web/core/l10n/translation";
 import { browser } from "@web/core/browser/browser";
 import { Dropdown } from "@web/core/dropdown/dropdown";
-import { FileUploader } from "@web/views/fields/file_handler";
-import { patch } from "@web/core/utils/patch";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
-import { useService } from "@web/core/utils/hooks";
-import { useMessageSearch } from "@mail/core/common/message_search_hook";
-import { usePopoutAttachment } from "@mail/core/common/attachment_view";
+import { useCustomDropzone } from "@web/core/dropzone/dropzone_hook";
+import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
+import { Deferred, KeepLast } from "@web/core/utils/concurrency";
+import { useService } from "@web/core/utils/hooks";
+import { patch } from "@web/core/utils/patch";
 import { useRecordObserver } from "@web/model/relational_model/utils";
+import { FileUploader } from "@web/views/fields/file_handler";
 
 export const DELAY_FOR_SPINNER = 1000;
 

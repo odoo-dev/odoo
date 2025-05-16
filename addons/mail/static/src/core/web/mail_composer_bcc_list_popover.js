@@ -1,5 +1,6 @@
-import { _t } from "@web/core/l10n/translation";
 import { Component } from "@odoo/owl";
+
+import { _t } from "@web/core/l10n/translation";
 
 
 export class MailComposerBccPopover extends Component {

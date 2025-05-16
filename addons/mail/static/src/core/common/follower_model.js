@@ -1,4 +1,5 @@
 import { fields, Record } from "@mail/core/common/record";
+
 import { rpc } from "@web/core/network/rpc";
 
 export class Follower extends Record {

@@ -1,10 +1,12 @@
-import { Component, xml } from "@odoo/owl";
+import { DiscussNotificationSettingsClientAction } from "./discuss_notification_settings_client_action";
 import { ActionPanel } from "@mail/discuss/core/common/action_panel";
+
+import { Component, xml } from "@odoo/owl";
+
+import { Dialog } from "@web/core/dialog/dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useService } from "@web/core/utils/hooks";
-import { DiscussNotificationSettingsClientAction } from "./discuss_notification_settings_client_action";
-import { Dialog } from "@web/core/dialog/dialog";
 
 class NotificationDialog extends Component {
     static props = ["close?"];

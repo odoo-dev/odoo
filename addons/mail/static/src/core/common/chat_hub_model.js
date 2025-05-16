@@ -1,6 +1,5 @@
-import { browser } from "@web/core/browser/browser";
 import { fields, Record } from "./record";
-
+import { browser } from "@web/core/browser/browser";
 import { Deferred, Mutex } from "@web/core/utils/concurrency";
 
 export const CHAT_HUB_KEY = "mail.ChatHub";

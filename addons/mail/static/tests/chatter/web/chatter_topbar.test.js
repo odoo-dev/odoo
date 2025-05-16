@@ -1,3 +1,4 @@
+import { DELAY_FOR_SPINNER } from "@mail/chatter/web_portal/chatter";
 import {
     click,
     contains,
@@ -8,11 +9,11 @@ import {
     startServer,
     waitStoreFetch,
 } from "@mail/../tests/mail_test_helpers";
-import { describe, test } from "@odoo/hoot";
-import { Deferred, advanceTime } from "@odoo/hoot-mock";
-import { asyncStep, waitForSteps } from "@web/../tests/web_test_helpers";
 
-import { DELAY_FOR_SPINNER } from "@mail/chatter/web_portal/chatter";
+import { describe, test } from "@odoo/hoot";
+import { advanceTime, Deferred } from "@odoo/hoot-mock";
+
+import { asyncStep, waitForSteps } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 defineMailModels();

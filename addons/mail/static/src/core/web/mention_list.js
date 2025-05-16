@@ -1,9 +1,10 @@
-import { _t } from "@web/core/l10n/translation";
-import { Component, useEffect, useState } from "@odoo/owl";
-import { useService, useAutofocus } from "@web/core/utils/hooks";
-
 import { NavigableList } from "@mail/core/common/navigable_list";
 import { useSequential } from "@mail/utils/common/hooks";
+
+import { Component, useEffect, useState } from "@odoo/owl";
+
+import { _t } from "@web/core/l10n/translation";
+import { useAutofocus, useService } from "@web/core/utils/hooks";
 
 export class MentionList extends Component {
     static template = "mail.MentionList";

@@ -1,9 +1,9 @@
-import { _t } from "@web/core/l10n/translation";
-import { sprintf } from "@web/core/utils/strings";
-import { browser } from "@web/core/browser/browser";
 import { fields, Record } from "./record";
-import { debounce } from "@web/core/utils/timing";
+import { browser } from "@web/core/browser/browser";
+import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
+import { sprintf } from "@web/core/utils/strings";
+import { debounce } from "@web/core/utils/timing";
 
 const MESSAGE_SOUND = "mail.user_setting.message_sound";
 

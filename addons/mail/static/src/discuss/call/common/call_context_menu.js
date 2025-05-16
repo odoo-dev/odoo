@@ -1,10 +1,10 @@
+import { CONNECTION_TYPES } from "@mail/discuss/call/common/rtc_service";
+
 import { Component, onMounted, onWillUnmount, useState } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
-
-import { CONNECTION_TYPES } from "@mail/discuss/call/common/rtc_service";
 
 const PROTOCOLS_TEXT = { host: "HOST", srflx: "STUN", prflx: "STUN", relay: "TURN" };
 

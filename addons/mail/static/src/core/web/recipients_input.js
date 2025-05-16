@@ -1,18 +1,18 @@
+import { RecipientsInputTagsList } from "./recipients_input_tags_list";
+import { RecipientsPopover } from "./recipients_popover";
 import { parseEmail } from "@mail/utils/common/format";
+
+import { Component } from "@odoo/owl";
+
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { _t } from "@web/core/l10n/translation";
-import { isEmail } from "@web/core/utils/strings";
-import { useService } from "@web/core/utils/hooks";
-import { useSelectCreate } from "@web/views/fields/relational_utils";
-
 import { rpc } from "@web/core/network/rpc";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { useTagNavigation } from "@web/core/record_selectors/tag_navigation_hook";
 import { uniqueId } from "@web/core/utils/functions";
-import { RecipientsPopover } from "./recipients_popover";
-import { RecipientsInputTagsList } from "./recipients_input_tags_list";
-
-import { Component } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
+import { isEmail } from "@web/core/utils/strings";
+import { useSelectCreate } from "@web/views/fields/relational_utils";
 
 export class RecipientsInput extends Component {
     static template = "mail.RecipientsInput";

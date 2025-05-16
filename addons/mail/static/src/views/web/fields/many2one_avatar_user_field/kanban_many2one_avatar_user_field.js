@@ -1,4 +1,6 @@
+import { Avatar } from "../avatar/avatar";
 import { Component } from "@odoo/owl";
+
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { computeM2OProps, KanbanMany2One } from "@web/views/fields/many2one/many2one";
@@ -8,7 +10,6 @@ import {
     m2oSupportedOptions,
     Many2OneField,
 } from "@web/views/fields/many2one/many2one_field";
-import { Avatar } from "../avatar/avatar";
 
 export class KanbanMany2OneAvatarUserField extends Component {
     static template = "mail.KanbanMany2OneAvatarUserField";

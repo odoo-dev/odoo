@@ -1,11 +1,12 @@
-import { _t } from "@web/core/l10n/translation";
 import { Component, useState } from "@odoo/owl";
-import { memoize } from "@web/core/utils/functions";
-import { useService } from "@web/core/utils/hooks";
+
+import { _t } from "@web/core/l10n/translation";
 import { ModelSelector } from "@web/core/model_selector/model_selector";
 import { registry } from "@web/core/registry";
-import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
+import { memoize } from "@web/core/utils/functions";
+import { useService } from "@web/core/utils/hooks";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 
 /** largely taken from documents' DocumentsDetailPanel, which selects arbitrary models and records
   * through two interactions:

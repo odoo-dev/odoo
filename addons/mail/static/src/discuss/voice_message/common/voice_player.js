@@ -1,12 +1,13 @@
 import {
     Component,
-    useState,
     onMounted,
     onWillUnmount,
+    status,
     useEffect,
     useRef,
-    status,
+    useState,
 } from "@odoo/owl";
+
 import { browser } from "@web/core/browser/browser";
 import { useService } from "@web/core/utils/hooks";
 import { url } from "@web/core/utils/urls";

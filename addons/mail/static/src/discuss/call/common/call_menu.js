@@ -1,8 +1,8 @@
+import { callActionsRegistry, useCallActions } from "./call_actions";
 import { Component } from "@odoo/owl";
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { callActionsRegistry, useCallActions } from "./call_actions";
 
 export class CallMenu extends Component {
     static props = [];

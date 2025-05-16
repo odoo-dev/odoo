@@ -1,9 +1,9 @@
 import { AND, fields, Record } from "@mail/core/common/record";
 import { prettifyMessageContent } from "@mail/utils/common/format";
 import { assignDefined } from "@mail/utils/common/misc";
-import { rpc } from "@web/core/network/rpc";
 
 import { _t } from "@web/core/l10n/translation";
+import { rpc } from "@web/core/network/rpc";
 import { user } from "@web/core/user";
 import { Deferred } from "@web/core/utils/concurrency";
 

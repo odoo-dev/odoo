@@ -1,6 +1,8 @@
 import { useSequential } from "@mail/utils/common/hooks";
 import { createDocumentFragmentFromContent } from "@mail/utils/common/html";
-import { useState, onWillUnmount, markup } from "@odoo/owl";
+
+import { markup, onWillUnmount, useState } from "@odoo/owl";
+
 import { useService } from "@web/core/utils/hooks";
 import { escapeRegExp } from "@web/core/utils/strings";
 

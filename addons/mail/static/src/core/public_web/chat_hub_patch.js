@@ -1,5 +1,6 @@
-import { patch } from "@web/core/utils/patch";
 import { ChatHub } from "@mail/core/common/chat_hub";
+
+import { patch } from "@web/core/utils/patch";
 
 patch(ChatHub.prototype, {
     get isShown() {

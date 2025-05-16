@@ -1,5 +1,4 @@
 import { Message } from "@mail/core/common/message_model";
-
 import { defineMailModels, start } from "@mail/../tests/mail_test_helpers";
 
 import { expect, test } from "@odoo/hoot";

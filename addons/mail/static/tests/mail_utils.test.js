@@ -1,5 +1,3 @@
-import { addLink, parseAndTransform } from "@mail/utils/common/format";
-import { useSequential } from "@mail/utils/common/hooks";
 import {
     contains,
     defineMailModels,
@@ -8,6 +6,8 @@ import {
     start,
     startServer,
 } from "./mail_test_helpers";
+import { addLink, parseAndTransform } from "@mail/utils/common/format";
+import { useSequential } from "@mail/utils/common/hooks";
 
 import { describe, expect, test } from "@odoo/hoot";
 import { press } from "@odoo/hoot-dom";

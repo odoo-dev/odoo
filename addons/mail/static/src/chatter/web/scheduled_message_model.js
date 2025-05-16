@@ -1,5 +1,6 @@
 import { fields, Record } from "@mail/core/common/record";
 import { htmlToTextContentInline } from "@mail/utils/common/format";
+
 import { _t } from "@web/core/l10n/translation";
 
 export class ScheduledMessage extends Record {

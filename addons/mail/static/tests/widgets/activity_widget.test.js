@@ -9,8 +9,11 @@ import {
     userContext,
     waitStoreFetch,
 } from "@mail/../tests/mail_test_helpers";
+
 import { describe, expect, test } from "@odoo/hoot";
 import { Deferred, tick } from "@odoo/hoot-dom";
+
+import { serializeDate } from "@web/core/l10n/dates";
 import {
     asyncStep,
     onRpc,
@@ -18,7 +21,6 @@ import {
     serverState,
     waitForSteps,
 } from "@web/../tests/web_test_helpers";
-import { serializeDate } from "@web/core/l10n/dates";
 
 defineMailModels();
 describe.current.tags("desktop");

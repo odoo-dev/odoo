@@ -1,5 +1,6 @@
 import { isBlock } from "@html_editor/utils/blocks";
 import { getAdjacentPreviousSiblings } from "@html_editor/utils/dom_traversal";
+
 import { blendColors } from "@web/core/utils/colors";
 
 function parentsGet(node, root = undefined) {

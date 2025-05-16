@@ -1,9 +1,10 @@
+import { parseVersion } from "@mail/utils/common/misc";
+
 import { markup, reactive } from "@odoo/owl";
 
-import { parseVersion } from "@mail/utils/common/misc";
 import { browser } from "@web/core/browser/browser";
-import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
+import { registry } from "@web/core/registry";
 
 export const pttExtensionHookService = {
     start(env) {

@@ -1,3 +1,5 @@
+import { Composer } from "@mail/core/common/composer";
+import { Message } from "@mail/core/common/message";
 import {
     contains,
     defineMailModels,
@@ -9,10 +11,10 @@ import {
     startServer,
     triggerHotkey,
 } from "@mail/../tests/mail_test_helpers";
-import { Composer } from "@mail/core/common/composer";
-import { Message } from "@mail/core/common/message";
+
 import { describe, expect, test } from "@odoo/hoot";
 import { onMounted, onPatched } from "@odoo/owl";
+
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");

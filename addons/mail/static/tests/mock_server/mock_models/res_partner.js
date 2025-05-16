@@ -1,13 +1,13 @@
+import { DEFAULT_MAIL_SEARCH_ID, DEFAULT_MAIL_VIEW_ID } from "./constants";
 import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
 
 import {
     fields,
     getKwArgs,
     makeKwArgs,
-    webModels,
     serverState,
+    webModels,
 } from "@web/../tests/web_test_helpers";
-import { DEFAULT_MAIL_SEARCH_ID, DEFAULT_MAIL_VIEW_ID } from "./constants";
 
 /** @typedef {import("@web/../tests/web_test_helpers").ModelRecord} ModelRecord */
 

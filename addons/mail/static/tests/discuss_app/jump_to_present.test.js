@@ -1,9 +1,5 @@
-import { describe, expect, test } from "@odoo/hoot";
-import { press, queryFirst, tick } from "@odoo/hoot-dom";
-import { serverState } from "@web/../tests/web_test_helpers";
-
+import { PRESENT_VIEWPORT_THRESHOLD } from "@mail/core/common/thread";
 import {
-    SIZES,
     click,
     contains,
     defineMailModels,
@@ -13,10 +9,15 @@ import {
     openFormView,
     patchUiSize,
     scroll,
+    SIZES,
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
-import { PRESENT_VIEWPORT_THRESHOLD } from "@mail/core/common/thread";
+
+import { describe, expect, test } from "@odoo/hoot";
+import { press, queryFirst, tick } from "@odoo/hoot-dom";
+
+import { serverState } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 defineMailModels();

@@ -1,6 +1,5 @@
+import { DELAY_FOR_SPINNER } from "@mail/chatter/web_portal/chatter";
 import {
-    SIZES,
-    STORE_FETCH_ROUTES,
     click,
     contains,
     defineMailModels,
@@ -12,13 +11,18 @@ import {
     openFormView,
     patchUiSize,
     scroll,
+    SIZES,
     start,
     startServer,
+    STORE_FETCH_ROUTES,
     triggerHotkey,
     waitStoreFetch,
 } from "@mail/../tests/mail_test_helpers";
+
 import { describe, expect, test } from "@odoo/hoot";
-import { Deferred, advanceTime } from "@odoo/hoot-mock";
+import { queryFirst } from "@odoo/hoot-dom";
+import { advanceTime, Deferred } from "@odoo/hoot-mock";
+
 import {
     asyncStep,
     defineActions,
@@ -26,9 +30,6 @@ import {
     mockService,
     waitForSteps,
 } from "@web/../tests/web_test_helpers";
-
-import { DELAY_FOR_SPINNER } from "@mail/chatter/web_portal/chatter";
-import { queryFirst } from "@odoo/hoot-dom";
 
 describe.current.tags("desktop");
 defineMailModels();

@@ -1,6 +1,6 @@
+import { registry } from "@web/core/registry";
 import * as viewHelpers from "@web/../tests/views/helpers";
 import * as webClientHelpers from "@web/../tests/webclient/helpers";
-import { registry } from "@web/core/registry";
 
 const serviceRegistry = registry.category("services");
 

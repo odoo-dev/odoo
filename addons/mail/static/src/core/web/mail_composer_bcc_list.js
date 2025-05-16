@@ -1,12 +1,13 @@
 import { MailComposerBccPopover } from "@mail/core/web/mail_composer_bcc_list_popover";
+
+import { Component, markup } from "@odoo/owl";
+
+import { _t } from "@web/core/l10n/translation";
 import { formatList } from "@web/core/l10n/utils";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { registry } from "@web/core/registry";
-import { _t } from "@web/core/l10n/translation";
 import { escape } from "@web/core/utils/strings";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-
-import { markup, Component } from "@odoo/owl";
 
 export class MailComposerBccList extends Component {
     static template = "mail.MailComposerBccList";

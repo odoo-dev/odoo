@@ -1,11 +1,11 @@
 import { ImStatus } from "@mail/core/common/im_status";
 import { ActionPanel } from "@mail/discuss/core/common/action_panel";
+import { useSequential } from "@mail/utils/common/hooks";
 
 import { Component, onMounted, onWillStart, useEffect, useRef, useState } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
-import { useSequential } from "@mail/utils/common/hooks";
 import { useDebounced } from "@web/core/utils/timing";
 
 export class ChannelInvitation extends Component {

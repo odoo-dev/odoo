@@ -1,6 +1,7 @@
-import { parseEmail } from "@mail/utils/common/format";
-import { fields, makeKwArgs, models } from "@web/../tests/web_test_helpers";
 import { DEFAULT_MAIL_SEARCH_ID, DEFAULT_MAIL_VIEW_ID } from "./constants";
+import { parseEmail } from "@mail/utils/common/format";
+
+import { fields, makeKwArgs, models } from "@web/../tests/web_test_helpers";
 
 export class ResFake extends models.Model {
     _name = "res.fake";

@@ -1,7 +1,7 @@
 import { DISCUSS_ACTION_ID, mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
 
-import { fields, makeKwArgs, serverState, webModels } from "@web/../tests/web_test_helpers";
 import { serializeDate, today } from "@web/core/l10n/dates";
+import { fields, makeKwArgs, serverState, webModels } from "@web/../tests/web_test_helpers";
 
 export class ResUsers extends webModels.ResUsers {
     im_status = fields.Char({ default: "online" });

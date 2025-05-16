@@ -1,7 +1,7 @@
 import { Activity } from "@mail/core/common/activity_model";
+
 import { formatDate, formatDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
-
 import { patch } from "@web/core/utils/patch";
 
 patch(Activity.prototype, {

@@ -1,10 +1,12 @@
-import { Component, onWillUpdateProps } from "@odoo/owl";
-import { ActionPanel } from "@mail/discuss/core/common/action_panel";
-import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
+import { useMessageSearch } from "./message_search_hook";
 import { SearchMessageInput } from "@mail/core/common/search_message_input";
 import { SearchMessageResult } from "@mail/core/common/search_message_result";
-import { useMessageSearch } from "./message_search_hook";
+import { ActionPanel } from "@mail/discuss/core/common/action_panel";
+
+import { Component, onWillUpdateProps } from "@odoo/owl";
+
+import { _t } from "@web/core/l10n/translation";
+import { useService } from "@web/core/utils/hooks";
 
 /**
  * @typedef {Object} Props

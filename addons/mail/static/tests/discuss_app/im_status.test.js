@@ -1,3 +1,4 @@
+import { Persona } from "@mail/core/common/persona_model";
 import {
     click,
     contains,
@@ -6,8 +7,9 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
-import { Persona } from "@mail/core/common/persona_model";
+
 import { describe, test } from "@odoo/hoot";
+
 import { Command, patchWithCleanup, serverState } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");

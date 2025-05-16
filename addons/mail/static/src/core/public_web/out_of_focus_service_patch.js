@@ -1,4 +1,5 @@
-import { OutOfFocusService, outOfFocusService } from "@mail/core/common/out_of_focus_service";
+import { outOfFocusService, OutOfFocusService } from "@mail/core/common/out_of_focus_service";
+
 import { patch } from "@web/core/utils/patch";
 
 patch(OutOfFocusService.prototype, {

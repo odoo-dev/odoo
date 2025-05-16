@@ -1,6 +1,8 @@
-import { patch } from "@web/core/utils/patch";
 import { Message } from "@mail/core/common/message";
+
 import { onWillUnmount } from "@odoo/owl";
+
+import { patch } from "@web/core/utils/patch";
 
 patch(Message.prototype, {
     setup() {

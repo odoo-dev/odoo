@@ -1,8 +1,9 @@
+import { MessageReactionList } from "@mail/core/common/message_reaction_list";
+
 import { Component, useRef } from "@odoo/owl";
 
-import { MessageReactionList } from "@mail/core/common/message_reaction_list";
-import { useService } from "@web/core/utils/hooks";
 import { useEmojiPicker } from "@web/core/emoji_picker/emoji_picker";
+import { useService } from "@web/core/utils/hooks";
 
 export class MessageReactions extends Component {
     static props = ["message", "openReactionMenu"];

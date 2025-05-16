@@ -3,11 +3,10 @@ import { Avatar } from "@mail/views/web/fields/avatar/avatar";
 
 import { Component, useRef } from "@odoo/owl";
 
-import { usePopover } from "@web/core/popover/popover_hook";
-
 import { formatDate } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
 import { formatList } from "@web/core/l10n/utils";
+import { usePopover } from "@web/core/popover/popover_hook";
 
 
 export class ActivityCell extends Component {

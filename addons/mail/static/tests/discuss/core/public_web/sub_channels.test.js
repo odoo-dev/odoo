@@ -8,10 +8,12 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
+
 import { describe, test } from "@odoo/hoot";
-import { Deferred, mockDate, animationFrame } from "@odoo/hoot-mock";
-import { Command, serverState, withUser } from "@web/../tests/web_test_helpers";
+import { animationFrame, Deferred, mockDate } from "@odoo/hoot-mock";
+
 import { rpc } from "@web/core/network/rpc";
+import { Command, serverState, withUser } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 defineMailModels();

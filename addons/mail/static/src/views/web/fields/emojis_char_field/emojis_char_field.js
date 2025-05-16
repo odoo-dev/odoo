@@ -3,7 +3,7 @@ import { EmojisFieldCommon } from "@mail/views/web/fields/emojis_field_common/em
 import { useRef } from "@odoo/owl";
 
 import { registry } from "@web/core/registry";
-import { CharField, charField } from "@web/views/fields/char/char_field";
+import { charField, CharField } from "@web/views/fields/char/char_field";
 
 /**
  * Extension of the FieldChar that will add emojis support

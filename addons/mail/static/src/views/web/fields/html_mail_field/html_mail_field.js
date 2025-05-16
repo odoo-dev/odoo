@@ -1,7 +1,8 @@
-import { HtmlField, htmlField } from "@html_editor/fields/html_field";
-import { registry } from "@web/core/registry";
 import { getCSSRules, toInline } from "./convert_inline";
+import { htmlField, HtmlField } from "@html_editor/fields/html_field";
 import { ColumnPlugin } from "@html_editor/main/column_plugin";
+
+import { registry } from "@web/core/registry";
 
 const cssRulesByElement = new WeakMap();
 

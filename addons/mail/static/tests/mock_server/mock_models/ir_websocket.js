@@ -1,7 +1,7 @@
 import { busModels } from "@bus/../tests/bus_test_helpers";
 
-import { makeKwArgs } from "@web/../tests/web_test_helpers";
 import { isIterable } from "@web/core/utils/arrays";
+import { makeKwArgs } from "@web/../tests/web_test_helpers";
 
 export class IrWebSocket extends busModels.IrWebSocket {
     /**

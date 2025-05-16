@@ -1,9 +1,9 @@
-import { Thread } from "@mail/core/common/thread_model";
-
-import { patch } from "@web/core/utils/patch";
 import { fields } from "../common/record";
+import { Thread } from "@mail/core/common/thread_model";
 import { compareDatetime } from "@mail/utils/common/misc";
+
 import { rpc } from "@web/core/network/rpc";
+import { patch } from "@web/core/utils/patch";
 
 /** @type {import("models").Thread} */
 const threadPatch = {

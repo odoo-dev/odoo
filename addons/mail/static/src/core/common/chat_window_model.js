@@ -1,4 +1,5 @@
 import { fields, Record } from "@mail/core/common/record";
+
 import { isMobileOS } from "@web/core/browser/feature_detection";
 
 /** @typedef {{ thread?: import("models").Thread }} ChatWindowData */

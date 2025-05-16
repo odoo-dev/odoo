@@ -7,13 +7,14 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
+
 import { describe, expect, test } from "@odoo/hoot";
 import { mockUserAgent } from "@odoo/hoot-mock";
-import { asyncStep, patchWithCleanup, waitForSteps } from "@web/../tests/web_test_helpers";
 
+import { isMobileOS } from "@web/core/browser/feature_detection";
 import { download } from "@web/core/network/download";
 import { getOrigin } from "@web/core/utils/urls";
-import { isMobileOS } from "@web/core/browser/feature_detection";
+import { asyncStep, patchWithCleanup, waitForSteps } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 defineMailModels();

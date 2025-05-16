@@ -1,3 +1,4 @@
+import { QuickReactionMenu } from "@mail/core/common/quick_reaction_menu";
 import {
     click,
     contains,
@@ -7,7 +8,7 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
-import { QuickReactionMenu } from "@mail/core/common/quick_reaction_menu";
+
 import { describe, test } from "@odoo/hoot";
 import { animationFrame, press } from "@odoo/hoot-dom";
 

@@ -1,14 +1,15 @@
-import { toRaw } from "@odoo/owl";
 import {
     IS_DELETED_SYM,
-    OR_SYM,
     isCommand,
     isMany,
     isOne,
     isRecord,
     isRelation,
     modelRegistry,
+    OR_SYM,
 } from "./misc";
+import { toRaw } from "@odoo/owl";
+
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 
 /** @typedef {import("./misc").FieldDefinition} FieldDefinition */

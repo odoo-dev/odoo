@@ -1,5 +1,6 @@
-import { Store, storeService } from "@mail/core/common/store_service";
 import { fields } from "@mail/core/common/record";
+import { Store, storeService } from "@mail/core/common/store_service";
+
 import { router } from "@web/core/browser/router";
 import { patch } from "@web/core/utils/patch";
 

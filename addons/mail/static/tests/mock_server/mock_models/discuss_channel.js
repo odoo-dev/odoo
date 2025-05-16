@@ -1,8 +1,12 @@
+import { DEFAULT_MAIL_SEARCH_ID, DEFAULT_MAIL_VIEW_ID } from "./constants";
 import { convertBrToLineBreak } from "@mail/utils/common/format";
 import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
 
 import { markup } from "@odoo/owl";
 
+import { serializeDateTime, today } from "@web/core/l10n/dates";
+import { ensureArray } from "@web/core/utils/arrays";
+import { uniqueId } from "@web/core/utils/functions";
 import {
     Command,
     fields,
@@ -11,10 +15,6 @@ import {
     models,
     serverState,
 } from "@web/../tests/web_test_helpers";
-import { serializeDateTime, today } from "@web/core/l10n/dates";
-import { ensureArray } from "@web/core/utils/arrays";
-import { uniqueId } from "@web/core/utils/functions";
-import { DEFAULT_MAIL_SEARCH_ID, DEFAULT_MAIL_VIEW_ID } from "./constants";
 
 const { DateTime } = luxon;
 

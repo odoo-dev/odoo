@@ -1,11 +1,12 @@
 import { dataUrlToBlob } from "@mail/core/common/attachment_uploader_hook";
-import { registry } from "@web/core/registry";
-import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { useService } from "@web/core/utils/hooks";
-import { useX2ManyCrud } from "@web/views/fields/relational_utils";
 
 import { Component } from "@odoo/owl";
+
+import { registry } from "@web/core/registry";
+import { useService } from "@web/core/utils/hooks";
 import { FileUploader } from "@web/views/fields/file_handler";
+import { useX2ManyCrud } from "@web/views/fields/relational_utils";
+import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
 
 export class MailComposerAttachmentSelector extends Component {

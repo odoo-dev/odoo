@@ -9,10 +9,12 @@ import {
     startServer,
     triggerHotkey,
 } from "@mail/../tests/mail_test_helpers";
+
 import { describe, expect, test } from "@odoo/hoot";
-import { asyncStep, onRpc, waitForSteps } from "@web/../tests/web_test_helpers";
+
 import { registry } from "@web/core/registry";
 import { getOrigin } from "@web/core/utils/urls";
+import { asyncStep, onRpc, waitForSteps } from "@web/../tests/web_test_helpers";
 
 defineMailModels();
 describe.current.tags("desktop");

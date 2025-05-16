@@ -1,9 +1,9 @@
-import { loadEmoji } from "@web/core/emoji_picker/emoji_picker";
 import { onExternalClick } from "@mail/utils/common/hooks";
 
 import { Component, onMounted, useEffect, useExternalListener, useRef, useState } from "@odoo/owl";
 
 import { Dialog } from "@web/core/dialog/dialog";
+import { loadEmoji } from "@web/core/emoji_picker/emoji_picker";
 import { useService } from "@web/core/utils/hooks";
 
 export class MessageReactionMenu extends Component {

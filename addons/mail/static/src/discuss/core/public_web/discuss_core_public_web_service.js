@@ -1,7 +1,7 @@
 import { reactive } from "@odoo/owl";
+
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
-
 import { registry } from "@web/core/registry";
 
 export class DiscussCorePublicWeb {

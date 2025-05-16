@@ -1,9 +1,9 @@
-import { Component, useRef, useState, onMounted } from "@odoo/owl";
+import { Component, onMounted, useRef, useState } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
+import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
-import { _t } from "@web/core/l10n/translation";
 
 export class WelcomePage extends Component {
     static props = ["proceed?"];

@@ -1,9 +1,10 @@
-import { click, contains, defineMailModels, start } from "@mail/../tests/mail_test_helpers";
-import { describe, test } from "@odoo/hoot";
-import { mountWithCleanup } from "@web/../tests/web_test_helpers";
-import { serverState } from "@web/../tests/_framework/mock_server_state.hoot";
-
 import { Avatar } from "@mail/views/web/fields/avatar/avatar";
+import { click, contains, defineMailModels, start } from "@mail/../tests/mail_test_helpers";
+
+import { describe, test } from "@odoo/hoot";
+
+import { serverState } from "@web/../tests/_framework/mock_server_state.hoot";
+import { mountWithCleanup } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 defineMailModels();

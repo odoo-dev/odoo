@@ -1,8 +1,9 @@
 import { Component, useExternalListener, useRef } from "@odoo/owl";
+
+import { browser } from "@web/core/browser/browser";
 import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
-import { browser } from "@web/core/browser/browser";
 
 class MessageSeenIndicatorDialog extends Component {
     static components = { Dialog };

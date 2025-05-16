@@ -1,6 +1,8 @@
-import { useService } from "@web/core/utils/hooks";
-import { Component, onWillStart } from "@odoo/owl";
 import { useOpenChat } from "@mail/core/web/open_chat_hook";
+
+import { Component, onWillStart } from "@odoo/owl";
+
+import { useService } from "@web/core/utils/hooks";
 
 export class AvatarCardPopover extends Component {
     static template = "mail.AvatarCardPopover";

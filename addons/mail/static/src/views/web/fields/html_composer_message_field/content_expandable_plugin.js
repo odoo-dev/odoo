@@ -2,6 +2,7 @@ import { Plugin } from "@html_editor/plugin";
 import { fillEmpty } from "@html_editor/utils/dom";
 import { isEmptyBlock } from "@html_editor/utils/dom_info";
 import { closestElement, selectElements } from "@html_editor/utils/dom_traversal";
+
 import { renderToElement } from "@web/core/utils/render";
 
 export class ContentExpandablePlugin extends Plugin {

@@ -1,17 +1,17 @@
+import { AvatarCardPopover } from "@mail/discuss/web/avatar_card/avatar_card_popover";
 import { useAssignUserCommand } from "@mail/views/web/fields/assign_user_command_hook";
 
+import { usePopover } from "@web/core/popover/popover_hook";
 import { registry } from "@web/core/registry";
 import { TagsList } from "@web/core/tags_list/tags_list";
-import { usePopover } from "@web/core/popover/popover_hook";
-import { AvatarCardPopover } from "@mail/discuss/web/avatar_card/avatar_card_popover";
 import {
-    Many2ManyTagsAvatarField,
-    many2ManyTagsAvatarField,
-    ListMany2ManyTagsAvatarField,
-    listMany2ManyTagsAvatarField,
-    KanbanMany2ManyTagsAvatarField,
     kanbanMany2ManyTagsAvatarField,
+    KanbanMany2ManyTagsAvatarField,
     KanbanMany2ManyTagsAvatarFieldTagsList,
+    listMany2ManyTagsAvatarField,
+    ListMany2ManyTagsAvatarField,
+    many2ManyTagsAvatarField,
+    Many2ManyTagsAvatarField,
 } from "@web/views/fields/many2many_tags_avatar/many2many_tags_avatar_field";
 
 export class Many2ManyAvatarUserTagsList extends TagsList {
@@ -19,7 +19,7 @@ export class Many2ManyAvatarUserTagsList extends TagsList {
 }
 
 const WithUserChatter = (T) =>
-    class UserChatterMixin extends T {
+    (class UserChatterMixin extends T {
         setup() {
             super.setup(...arguments);
             if (this.props.withCommand) {
@@ -56,7 +56,7 @@ const WithUserChatter = (T) =>
                 },
             };
         }
-    };
+    });
 
 export class Many2ManyTagsAvatarUserField extends WithUserChatter(Many2ManyTagsAvatarField) {
     static components = {

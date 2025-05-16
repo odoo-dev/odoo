@@ -1,4 +1,5 @@
 import { useEffect } from "@odoo/owl";
+
 import { patch } from "@web/core/utils/patch";
 import { exprToBoolean } from "@web/core/utils/strings";
 import { useDebounced } from "@web/core/utils/timing";

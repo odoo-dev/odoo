@@ -1,14 +1,15 @@
+import { ChatBubble } from "./chat_bubble";
 import { ChatWindow } from "@mail/core/common/chat_window";
 import { useHover, useMovable } from "@mail/utils/common/hooks";
+
 import { Component, useEffect, useExternalListener, useRef, useState } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
+import { isMobileOS } from "@web/core/browser/feature_detection";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { ChatBubble } from "./chat_bubble";
-import { isMobileOS } from "@web/core/browser/feature_detection";
 
 export class ChatHub extends Component {
     static components = { ChatBubble, ChatWindow, Dropdown };

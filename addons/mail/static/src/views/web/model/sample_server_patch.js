@@ -1,5 +1,5 @@
-import { SampleServer } from "@web/model/sample_server";
 import { patch } from "@web/core/utils/patch";
+import { SampleServer } from "@web/model/sample_server";
 
 /**
  * If `activity_exception_decoration` is set, 'Warning' is displayed

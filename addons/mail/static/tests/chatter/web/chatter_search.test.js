@@ -1,5 +1,5 @@
+import { HIGHLIGHT_CLASS } from "@mail/core/common/message_search_hook";
 import {
-    SIZES,
     click,
     contains,
     defineMailModels,
@@ -7,14 +7,15 @@ import {
     openFormView,
     patchUiSize,
     scroll,
+    SIZES,
     start,
     startServer,
     triggerHotkey,
 } from "@mail/../tests/mail_test_helpers";
-import { describe, test } from "@odoo/hoot";
-import { serverState } from "@web/../tests/web_test_helpers";
 
-import { HIGHLIGHT_CLASS } from "@mail/core/common/message_search_hook";
+import { describe, test } from "@odoo/hoot";
+
+import { serverState } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 defineMailModels();

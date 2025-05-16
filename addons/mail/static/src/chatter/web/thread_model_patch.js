@@ -1,6 +1,6 @@
+import "@mail/chatter/web_portal/thread_model_patch";
 import { fields } from "@mail/core/common/record";
 import { Thread } from "@mail/core/common/thread_model";
-import "@mail/chatter/web_portal/thread_model_patch";
 
 import { patch } from "@web/core/utils/patch";
 
