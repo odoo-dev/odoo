@@ -12,6 +12,7 @@ import { Component, useEffect } from "@odoo/owl";
 import { useChildRef } from "@web/core/utils/hooks";
 import { pick } from "@web/core/utils/objects";
 import wUtils from "@website/js/utils";
+import { Plugin } from "@html_editor/plugin";
 
 export class BuilderUrlPicker extends Component {
     static template = "html_builder.BuilderUrlPicker";
@@ -70,3 +71,16 @@ export class BuilderUrlPicker extends Component {
         }
     }
 }
+
+
+class UrlPickerPlugin extends Plugin {
+    static id = "urlPickerPlugin";
+
+    resources = {
+        builder_components: {
+            BuilderUrlPicker,
+        },
+    };
+}
+
+registry.category("website-plugins").add(UrlPickerPlugin.id, UrlPickerPlugin);
