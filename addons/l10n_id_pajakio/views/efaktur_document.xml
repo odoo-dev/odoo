@@ -1,0 +1,44 @@
+<odoo>
+    <data>
+        <record id="view_efaktur_document_form" model="ir.ui.view">
+            <field name="name">efaktur.document.form</field>
+            <field name="model">l10n_id_efaktur_coretax.document</field>
+            <field name="inherit_id" ref="l10n_id_efaktur_coretax.l10n_id_efaktur_document_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="inside">
+                    <page id="pajakio" name="pajakio_tab" string="Pajak IO">
+                        <group>
+                            <group>
+                                <field name="l10n_id_pajakio_trx_id" string="PajakIO Transaction ID"/>
+                                <field name="l10n_id_pajakio_trx_uploaded" string="Uploaded to PajakIO" class="oe_inline"/>
+                                <field name="l10n_id_pajakio_trx_url" string="PajakIO Transaction URL" widget="url"/>
+                                <field name="l10n_id_pajakio_nofa" string="Nomer Faktur PajakIO"/>
+                                <field name="l10n_id_pajakio_status" string="PajakIO Status"/>
+                                <field name="l10n_id_pajakio_invoice_type" string="PajakIO Invoice Type"/>
+                            </group>
+                            <group>
+                                <field name="l10n_id_pajakio_failure_reason" string="Pajak IO Failure Detail" invisible="not l10n_id_pajakio_failure_reason"/>
+                            </group>
+                        </group>
+                    </page>
+                </xpath>
+                <xpath expr="//header" position="inside">
+                    <button name="pajakio_submit" type="object" string="Create PajakIO Faktur" class="oe_highlight" invisible="l10n_id_pajakio_trx_id"/>
+                    <button name="pajakio_upload" type="object" string="Upload PajakIO Faktur" class="oe_highlight" invisible="not l10n_id_pajakio_trx_id or l10n_id_pajakio_trx_uploaded"/>
+                    <button name="pajakio_update_status" type="object" string="Update PajakIO Status" class="oe_highlight" invisible="not l10n_id_pajakio_trx_uploaded"/>
+                    <button name="pajakio_update" type="object" string="Update Faktur PajakiO" class="oe_highlight" invisible="not l10n_id_pajakio_need_update"/>
+                    <button name="pajakio_cancel" type="object" string="Cancel Faktur PajakiO" invisible="not l10n_id_pajakio_nofa"/>
+                </xpath>
+                <xpath expr="//header" position="after">
+                    <div class="alert alert-warning" role="alert" invisible="not l10n_id_pajakio_need_update">
+                         <span class="fw-bold">You have regenerated E-Faktur file, you might want to update the PajakIO submission as well</span>
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="not l10n_id_pajakio_failure_reason">
+                        <span>PajakIO upload fail: </span>
+                        <field name="l10n_id_pajakio_failure_reason"/>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

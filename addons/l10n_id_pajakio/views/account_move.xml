@@ -6,16 +6,17 @@
         <field name="inherit_id" ref="l10n_id_efaktur_coretax.account_move_efaktur_form_view"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <field name="l10n_id_pajakio_trx_id" invisible="1"/>
+                <!-- <field name="l10n_id_pajakio_trx_id" invisible="1"/>
                 <button name="pajakio_submit_efaktur" string="Submit to PajakIO" type="object" invisible="l10n_id_pajakio_trx_id"/>
                 <button name="pajakio_upload_efaktur" string="Upload to PajakIO" type="object" invisible="not l10n_id_pajakio_trx_id or l10n_id_pajakio_trx_uploaded"/>
-                <button name="pajakio_get_status" string="Pajakio Get Status" type="object" invisible="not l10n_id_pajakio_trx_uploaded or l10n_id_pajakio_trx_url"/>
+                <button name="pajakio_get_status" string="Pajakio Get Status" type="object" invisible="not l10n_id_pajakio_trx_uploaded or l10n_id_pajakio_trx_url"/> -->
+                <button name="open_coretax_document" string="Open Coretax Document" type="object" class="oe_highlight" invisible="not l10n_id_coretax_document"/>
             </xpath>
             <xpath expr="//field[@name='l10n_id_coretax_document']" position="after">
                 <field name="l10n_id_pajakio_trx_id" string="PajakIO Transaction ID"/>
                 <field name="l10n_id_pajakio_trx_uploaded" string="Uploaded to PajakIO"/>
                 <field name="l10n_id_pajakio_trx_url" string="PajakIO Transaction URL"/>
-                <field name="l10n_id_pajakio_nofa" string="Nomer Faktur PajakIO" />
+                <field name="l10n_id_pajakio_nofa" string="Nomer Fakt2ur PajakIO" />
                 <field name="l10n_id_failure_reason" string="Pajak IO Failure Detail" invisible="not l10n_id_failure_reason"/>
             </xpath>
         </field>

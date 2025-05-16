@@ -91,15 +91,6 @@ class AccountMove(models.Model):
             }
         }
         
-        # calculating all total based on all the lines
-        # can omit due to calculation done on PajakIO side
-        # res.update({
-        #     "totalDpp": sum(l['dpp'] for l in res['barangJasa']),
-        #     "totalDppLain": sum(l['dppLain'] for l in res['barangJasa']),
-        #     'totalPpn': sum(l['ppn'] for l in res['barangJasa']),
-        #     "totalPpnBm": sum(l['ppnbm'] for l in res['barangJasa'])
-        # })
-
         return res
 
 
@@ -202,3 +193,14 @@ class AccountMove(models.Model):
         """ Override the button_cancel method to handle cancellation """
         super().button_cancel()
         self._reset_pajakio()
+
+    def open_coretax_document(self):
+        """ Open the coretax document """
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('PajakIO Document'),
+            'res_model': 'l10n_id_efaktur_coretax.document',
+            'view_mode': 'form',
+            'res_id': self.l10n_id_coretax_document.id,
+        }

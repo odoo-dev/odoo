@@ -12,6 +12,7 @@
         # 'data/ir_cron.xml',
         'views/res_config_settings_views.xml',
         'views/account_move.xml',
+        'views/efaktur_document.xml',
     ],
     'installable': True,
     'author': 'Odoo S.A.',

@@ -106,3 +106,11 @@ class TestPajakIO(AccountTestInvoicingCommon):
 # user still needs NOFA + Transaction URL from faktur (after cancelled) + jenisFaktur => log note for historical proof
 # highlight transaction failure reason (warning/error flagging)
 # url clickable (no need for get pdf vat output)
+
+# final question:
+# if we cancel transaction successfully, is there still a way to update the transaction and re-submit it? (maybe using the `pengganti=True`)
+
+# if cancel => simply reset all fields
+# UI/UX addition for status
+# Summary of transactions and nomer faktur  (dashboarding) + download pdf
+# historical nofa depending on invoice
