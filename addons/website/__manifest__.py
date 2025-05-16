@@ -19,6 +19,7 @@
         'mail',
         'google_recaptcha',
         'utm',
+        'html_builder',
     ],
     'external_dependencies': {
         'python': ['geoip2'],
@@ -311,6 +312,14 @@
 
             # Don't include dark mode files in light mode
             ('remove', 'website/static/src/client_actions/*/*.dark.scss'),
+
+            'website/static/src/xml/website_form_editor.xml',
+            # TODO Remove the module's form js - this is for testing.
+            'website/static/src/js/send_mail_form.js',
+            # TODO when moving options to website: load this from website
+            # directly. This file is loaded in assets_wysiwyg in website, but we
+            # need to load it here for html_builder.
+            'website/static/src/xml/website.cookies_bar.xml',
         ],
         "web.assets_web_dark": [
             'website/static/src/components/dialog/*.dark.scss',
@@ -469,13 +478,6 @@
             ('remove', 'website/static/src/components/dialog/*.dark.scss'),
         ],
         'html_builder.assets': [
-            ('include', 'web._assets_helpers'),
-
-            'html_builder/static/src/bootstrap_overriden.scss',
-            'web/static/src/scss/pre_variables.scss',
-            'web/static/lib/bootstrap/scss/_variables.scss',
-            'web/static/lib/bootstrap/scss/_variables-dark.scss',
-            'web/static/lib/bootstrap/scss/_maps.scss',
 
             'website/static/src/scss/website_common.scss',
             'website/static/src/website_builder/**/*',
