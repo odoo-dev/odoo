@@ -137,7 +137,7 @@ export async function setupWebsiteBuilder(
             // load the website.assets_edit_frontend bundle.
 
             if (loadIframeBundles) {
-                await loadBundle("html_builder.inside_builder_style", {
+                await loadBundle("website.inside_builder_style", {
                     targetDoc: queryOne("iframe[data-src^='/website/force/1']").contentDocument,
                 });
             }
