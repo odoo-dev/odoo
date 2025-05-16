@@ -337,6 +337,7 @@
             'website/static/tests/core/**/*',
             'website/static/tests/helpers.js',
             'website/static/tests/interactions/**/*',
+            'website/static/tests/builder/**/*',
         ],
         'web.assets_unit_tests_setup': [
             'web/static/src/legacy/js/core/class.js',
