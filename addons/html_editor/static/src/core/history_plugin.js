@@ -706,6 +706,7 @@ export class HistoryPlugin extends Plugin {
      */
     handleUnobservedMutations(records) {
         const newRecords = [];
+        // TODO: adapt predicates to the classList record
         const savableRecordPredicates = this.getResource("savable_mutation_record_predicates");
         const isSavableRecord = (record) => savableRecordPredicates.every((p) => p(record));
         for (const record of records) {
@@ -780,21 +781,21 @@ export class HistoryPlugin extends Plugin {
         }
     }
 
-    /**
-     * @param {HistoryMutation} mutation
-     */
-    clearLastObservedState(mutation) {
-        if (!["attributes", "classList"].includes(mutation.type)) {
-            return;
-        }
-        const node = this.idToNodeMap.get(mutation.id);
-        const stateMap = this.lastObservedState.get(node)?.[mutation.type];
-        if (!stateMap) {
-            return;
-        }
-        const key = mutation.type === "attributes" ? mutation.attributeName : mutation.className;
-        stateMap.delete(key);
-    }
+    // /**
+    //  * @param {HistoryMutation} mutation
+    //  */
+    // clearLastObservedState(mutation) {
+    //     if (!["attributes", "classList"].includes(mutation.type)) {
+    //         return;
+    //     }
+    //     const node = this.idToNodeMap.get(mutation.id);
+    //     const stateMap = this.lastObservedState.get(node)?.[mutation.type];
+    //     if (!stateMap) {
+    //         return;
+    //     }
+    //     const key = mutation.type === "attributes" ? mutation.attributeName : mutation.className;
+    //     stateMap.delete(key);
+    // }
 
     /**
      * Check if a mutation consists of removing and adding a single text node
@@ -1355,6 +1356,33 @@ export class HistoryPlugin extends Plugin {
             }
         }
     }
+
+    // /**
+    //  * @param {HistoryMutation} mutations
+    //  */
+    // beforeApplyMutations(mutations) {
+    //     this.bypassObserver(() => {
+    //         for (const mutation of mutations) {
+    //             const node = this.idToNodeMap.get(mutation.id);
+    //             if (!node) {
+    //                 continue;
+    //             }
+    //             switch (mutation.type) {
+    //                 case "attributes":
+    //                     node.setAttribute(mutation.attributeName, mutation.oldValue);
+    //                     break;
+    //                 case "classList":
+    //                     toggleClass(node, mutation.className, mutation.oldValue);
+    //                     break;
+    //                 case "characterData":
+    //                     node.textContent = mutation.oldValue;
+    //                     break;
+    //                 default:
+    //                     break;
+    //             }
+    //         }
+    //     });
+    // }
 
     /**
      * @todo: this does not have to be a method.
