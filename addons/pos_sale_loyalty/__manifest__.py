@@ -2,7 +2,8 @@
 
 
 {
-    'name': 'POS - Sales Loyality',
+    'name': 'POS - Sales Loyalty',
+    'version': '1.0',
     'category': 'Sales/Point of Sale',
     'sequence': 6,
     'summary': 'Link module between pos_sale and pos_loyalty',
