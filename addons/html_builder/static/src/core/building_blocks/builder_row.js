@@ -15,6 +15,7 @@ export class BuilderRow extends Component {
         ...basicContainerBuilderComponentProps,
         label: { type: String, optional: true },
         tooltip: { type: String, optional: true },
+        className: { type: String, optional: true },
         slots: { type: Object, optional: true },
         level: { type: Number, optional: true },
         expand: { type: Boolean, optional: true },
@@ -49,6 +50,10 @@ export class BuilderRow extends Component {
 
     getLevelClass() {
         return this.props.level ? `o_we_sublevel_${this.props.level}` : "";
+    }
+
+    getClass() {
+        return [this.getLevelClass(), this.props.className].filter((x) => x).join(" ");
     }
 
     toggleCollapseContent() {

@@ -3,7 +3,7 @@
 
 <t t-name="html_builder.BuilderRow">
     <BuilderComponent>
-        <div class="d-flex position-relative p-1 px-2 ps-3 hb-row" t-att-class="this.getLevelClass()" t-ref="root" t-att-data-label="props.label">
+        <div class="d-flex position-relative p-1 px-2 ps-3 hb-row" t-att-class="this.getClass()" t-ref="root" t-att-data-label="props.label">
             <button t-ref="collapse"
                     class="o_we_collapse_toggler pt-1 d-none" t-att-class="{ 'active': state.expanded }"
                     title="Toggle more options"
