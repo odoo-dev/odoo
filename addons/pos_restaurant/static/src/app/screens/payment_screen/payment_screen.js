@@ -37,7 +37,7 @@ patch(PaymentScreen.prototype, {
                 cancelLabel: _t("Discard"),
             });
             if (confirmed) {
-                await this.pos.sendOrderInPreparationUpdateLastChange(this.currentOrder);
+                await this.pos.sendOrderInPreparation(this.currentOrder);
             }
         }
         await super.validateOrder(...arguments);

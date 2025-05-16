@@ -436,7 +436,7 @@ class PosOrder(models.Model):
             if vals.get('last_order_preparation_change'):
                 vals['last_order_preparation_change'] = PosOrder._stringify(vals['last_order_preparation_change'])
             pos_session = order.session_id
-            if vals.get('state') != 'done' and (pos_session.state == 'closing_control' or pos_session.state == 'closed'):
+            if order.state == 'draft' and (pos_session.state == 'closing_control' or pos_session.state == 'closed'):
                 vals['session_id'] = self._get_valid_session(pos_session).id
             if vals.get('state') and vals['state'] == 'paid' and order.name == '/':
                 session = self.env['pos.session'].browse(vals['session_id']) if not self.session_id and vals.get('session_id') else False
