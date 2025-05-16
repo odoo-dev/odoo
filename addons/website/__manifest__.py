@@ -486,8 +486,6 @@
             'website/static/src/temp/**/*',
         ],
         'html_builder.iframe_add_dialog': [
-            ('include', 'web.assets_frontend'),
-            'website/static/src/temp/snippets/snippet_viewer.scss',
             'website/static/src/snippets/**/*.edit.scss',
         ],
     },
