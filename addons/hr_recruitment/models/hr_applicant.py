@@ -331,7 +331,7 @@ class Applicant(models.Model):
             if applicant.partner_mobile:
                 applicant.partner_id.mobile = applicant.partner_mobile
             if applicant.partner_phone:
-                applicant.partner_id.phone = applicant.partner_phone
+                applicant.partner_id.phone = applicant.partner_phone 
 
     @api.depends('partner_phone')
     def _compute_partner_phone_sanitized(self):
