@@ -1,4 +1,4 @@
-import { Component, onMounted, useRef } from "@odoo/owl";
+import { Component, markup, onMounted, useRef } from "@odoo/owl";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import {
     clickableBuilderComponentProps,
@@ -32,7 +32,8 @@ export class BuilderSelectItem extends Component {
             // todo: it's not clear why the item.el?.innerHTML is not set at in
             // some cases. We fallback on a previously set value to circumvent
             // the problem, but it should be investigated.
-            label = this.props.label || item.el?.innerHTML || label || "";
+
+            label = this.props.label || (item.el ? markup(item.el.innerHTML) : "") || label || "";
             return label;
         };
 

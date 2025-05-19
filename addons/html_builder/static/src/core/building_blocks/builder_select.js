@@ -9,6 +9,7 @@ import {
 } from "../utils";
 import { BuilderComponent } from "./builder_component";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
+import { setElementContent } from "@web/core/utils/html";
 
 export class WithIgnoreItem extends Component {
     static template = xml`<t t-slot="default"/>`;
@@ -52,7 +53,7 @@ export class BuilderSelect extends Component {
             if (!this.props.slots.fixedButton) {
                 const newHtml = currentLabel || _t("None");
                 if (buttonRef.el && buttonRef.el.innerHTML !== newHtml) {
-                    buttonRef.el.innerHTML = newHtml;
+                    setElementContent(buttonRef.el, newHtml);
                 }
             }
         };
