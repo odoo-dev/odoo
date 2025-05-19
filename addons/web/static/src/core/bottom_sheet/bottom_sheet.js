@@ -5,6 +5,7 @@
  */
 import { Component, useState, useRef, onMounted, useExternalListener } from "@odoo/owl";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
+import { useForwardRefToParent } from "@web/core/utils/hooks";
 import { useThrottleForAnimation, useDebounced } from "@web/core/utils/timing";
 import { compensateScrollbar } from "@web/core/utils/scrolling";
 import { getViewportDimensions, useViewportChange } from "@web/core/utils/dvu";
@@ -128,11 +129,14 @@ export class BottomSheet extends Component {
         // Footer's flag
         this.hasFooter = false;
 
+        // Popover Ref Requirement
+        useForwardRefToParent("ref");
+
         // References
         this.containerRef = useRef("container");
         this.scrollRailRef = useRef("scrollRail");
         this.sheetRef = useRef("sheet");
-        this.sheetBodyRef = useRef("sheetBody");
+        this.sheetBodyRef = useRef("ref");
         this.sheetHandleRef = useRef("sheetHandle");
         // this.bottomSheetService = useService("bottomSheet");
 
