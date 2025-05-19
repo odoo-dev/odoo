@@ -422,8 +422,6 @@ class TestWebsiteSaleProductConfigurator(
         })
         self.start_tour('/', 'website_sale_product_configurator_zero_priced')
 
-    # TODO master-mysterious-egg fix error
-    @unittest.skip("prepare mysterious-egg for merging")
     def test_product_configurator_strikethrough_price(self):
         """ Test that the product configurator displays the strikethrough price correctly. """
         self.env['res.config.settings'].create({'group_product_price_comparison': True}).execute()
