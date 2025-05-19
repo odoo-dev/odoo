@@ -157,11 +157,17 @@ export class MediaPlugin extends Plugin {
     openMediaDialog(params = {}, editableEl = null) {
         const oldSave =
             params.save || ((element) => this.onSaveMediaDialog(element, { node: params.node }));
-        params.save = async (element) => {
+        params.save = async (...args) => {
+            const selection = args[0];
+            const elements = selection
+                ? selection[Symbol.iterator]
+                    ? selection
+                    : [selection]
+                : [];
             for (const onMediaDialogSaved of this.getResource("on_media_dialog_saved_handlers")) {
-                await onMediaDialogSaved(element, { node: params.node });
+                await onMediaDialogSaved(elements, { node: params.node });
             }
-            return oldSave(element);
+            return oldSave(...args);
         };
         const { resModel, resId, field, type } = this.getRecordInfo(editableEl);
         const mediaDialogClosedPromise = this.dependencies.dialog.addDialog(MediaDialog, {
