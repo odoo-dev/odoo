@@ -357,7 +357,7 @@
         margin: map-get($spacers, 2) ($offcanvas-padding-x * .5);
     }
 
-    .dropdown-item {
+    .dropdown-item, .dropdown-header {
         --dropdown-item-padding-y: #{map-get($spacers, 3)};
         --dropdown-item-padding-x: var(--BottomSheet-Entry-paddingX);
 
