@@ -85,7 +85,7 @@
                     <div
                         class="o_bottom_sheet_body offcanvas-body"
                         t-att-class="props.class"
-                        t-ref="sheetBody"
+                        t-ref="ref"
                         >
 
                         <!-- Render dynamic component if provided -->
