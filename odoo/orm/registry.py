@@ -56,6 +56,7 @@ _REGISTRY_CACHES = {
     'routing': 1024,  # 2 entries per website
     'routing.rewrites': 8192,  # url_rewrite entries
     'templates.cached_values': 2048, # arbitrary
+    'templates.editor': 16, # contains templates editor data
     'groups': 1,  # contains all res.groups
 }
 

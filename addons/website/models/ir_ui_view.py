@@ -4,7 +4,7 @@ import logging
 import uuid
 import werkzeug
 
-from odoo import api, fields, models
+from odoo import api, fields, models, tools
 from odoo.fields import Domain
 from odoo.exceptions import AccessError, MissingError
 from odoo.osv import expression
@@ -441,8 +441,16 @@ class IrUiView(models.Model):
     def render_public_asset(self, template, values=None):
         # to get the specific asset for access checking
         if request and hasattr(request, 'website'):
-            return super(IrUiView, self.with_context(website_id=request.website.id)).render_public_asset(template, values=values)
+            View = self.with_context(website_id=request.website.id)
+            View._get_template_view(template).sudo()._check_view_access()
+            return View._cached_render_public_asset(template, values=values)
         return super().render_public_asset(template, values=values)
+
+    @api.readonly
+    @api.model
+    @tools.ormcache('template', 'self.env.context.get("lang"), self.env.context.get("website_id")', cache='templates.editor')
+    def _cached_render_public_asset(self, template, values=None):
+        return self.env['ir.qweb']._render(template, values)
 
     def _render_template(self, template, values=None):
         """ Render the template. If website is enabled on request, then extend rendering context with website values. """
