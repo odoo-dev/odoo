@@ -32,16 +32,8 @@
     ],
     'installable': True,
     'assets': {
-        'website.assets_wysiwyg': [
-            'website_blog/static/src/js/options.js',
-            'website_blog/static/src/snippets/s_blog_posts/options.js',
-        ],
-        'website.assets_editor': [
-            'website_blog/static/src/js/tours/website_blog.js',
-            'website_blog/static/src/js/systray_items/*.js',
-        ],
-        'website.backend_assets_all_wysiwyg': [
-            'website_blog/static/src/js/wysiwyg_adapter.js',
+        'web.assets_backend': [
+            'website_blog/static/src/tours/website_blog.js',
         ],
         'web.assets_tests': [
             'website_blog/static/tests/tours/**/*',
@@ -52,13 +44,11 @@
         'web.assets_unit_tests_setup': [
             'website_blog/static/src/interactions/**/*.js',
             'website_blog/static/src/snippets/**/*.js',
-            ('remove', 'website_blog/static/src/snippets/**/options.js'),
         ],
         'web.assets_frontend': [
             'website_blog/static/src/interactions/**/*',
             'website_blog/static/src/scss/website_blog.scss',
             'website_blog/static/src/snippets/**/*.js',
-            ('remove', 'website_blog/static/src/snippets/**/options.js'),
         ],
         'html_builder.assets': [
             'website_blog/static/src/website_builder/**/*',
