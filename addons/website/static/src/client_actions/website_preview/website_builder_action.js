@@ -397,7 +397,7 @@ export class WebsiteBuilder extends Component {
         this.setIframeLoaded();
         this.websiteService.websiteRootInstance = undefined;
         if (url) {
-            this.websiteContent.el.contentWindow.location = url;
+            this.websiteContent.el.contentWindow.location = encodeURIComponent(url);
         } else {
             this.websiteContent.el.contentWindow.location.reload();
         }
