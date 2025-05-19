@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="html_builder.ImageToolOptionAnimateOption" t-inherit="html_builder.ImageToolOption" t-inherit-mode="extension">
+    <xpath expr="//ImageTransformButton[@id=&quot;'transformImage'&quot;]" position="attributes">
+        <attribute name="t-if">!this.state.isImageAnimated</attribute>
+    </xpath>
+</t>
+
+</templates>
