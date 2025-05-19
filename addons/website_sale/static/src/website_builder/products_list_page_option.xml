@@ -75,7 +75,7 @@
     </BuilderRow>
 
     <BuilderRow label.translate="Categories">
-        <BuilderButton id="'categories_opt'" actionParam="{views: ['website_sale.products_categories']}">Left</BuilderButton>
+        <BuilderButton id="'categories_opt'" actionParam="{views: ['website_sale.products_categories']}">Sidebar</BuilderButton>
         <BuilderButton id="'categories_opt_top'" actionParam="{views: ['website_sale.products_categories_top']}">Top</BuilderButton>
     </BuilderRow>
 
@@ -83,9 +83,18 @@
         <BuilderCheckbox id="'collapse_category_recursive'" actionParam="{views: ['website_sale.option_collapse_products_categories']}"/>
     </BuilderRow>
 
-    <BuilderRow label.translate="Attributes">
-        <BuilderButton id="'attributes_opt'" actionParam="{views: ['website_sale.products_attributes']}">Left</BuilderButton>
-        <BuilderButton id="'attributes_opt_top'" actionParam="{views: ['website_sale.products_attributes_top']}">Top</BuilderButton>
+    <BuilderRow t-if="this.isActiveItem('categories_opt_top')" label.translate="Style" level="1">
+        <BuilderSelect action="'websiteConfig'">
+            <BuilderSelectItem actionParam="{views: []}">Filmstrip - default</BuilderSelectItem>
+        </BuilderSelect>
+    </BuilderRow>
+
+    <BuilderRow label.translate="Filters">
+        <BuilderSelect action="'websiteConfig'">
+            <BuilderSelectItem actionParam="{views: []}">Hide</BuilderSelectItem>
+            <BuilderSelectItem id="'attributes_opt'" actionParam="{views: ['website_sale.products_attributes']}">Left</BuilderSelectItem>
+            <BuilderSelectItem id="'attributes_opt_top'" actionParam="{views: ['website_sale.products_attributes_top']}">Off-screen Menu</BuilderSelectItem>
+        </BuilderSelect>
     </BuilderRow>
     <t t-if="this.isActiveItem('attributes_opt') or this.isActiveItem('attributes_opt_top')">
         <BuilderRow label.translate="Price Filter" level="1">
