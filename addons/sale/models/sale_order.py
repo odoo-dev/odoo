@@ -920,7 +920,12 @@ class SaleOrder(models.Model):
 
                 # Delete any existing combo item lines.
                 delete_commands = [Command.delete(linked_line.id) for linked_line in linked_lines]
+
                 # Create a new combo item line for each selected combo item.
+                combo_base_lines = []
+                # for combo_item_values in selected_combo_items:
+                #     combo_base_lines.append(line._prepare_combo_item_base_line_for_taxes_computation(combo_item_values))
+
                 create_commands = [Command.create({
                     'product_id': combo_item['product_id'],
                     'product_uom_qty': line.product_uom_qty,

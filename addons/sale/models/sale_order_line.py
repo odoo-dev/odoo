@@ -497,34 +497,25 @@ class SaleOrderLine(models.Model):
         for line in self:
             line.allowed_uom_ids = line.product_id.uom_id | line.product_id.uom_ids
 
+    @api.model
+    def _get_default_product_taxes(self, product, company, fiscal_position):
+        if not product.taxes_id:
+            return self.env['account.tax']
+
+        taxes = product.taxes_id._filter_taxes_by_company(company)
+        if not taxes or not fiscal_position:
+            return taxes
+
+        return fiscal_position.map_tax(taxes)
+
     @api.depends('product_id', 'company_id')
     def _compute_tax_ids(self):
-        lines_by_company = defaultdict(lambda: self.env['sale.order.line'])
-        cached_taxes = {}
         for line in self:
             if line.product_type == 'combo':
-                line.tax_ids = False
-                continue
-            lines_by_company[line.company_id] += line
-        for company, lines in lines_by_company.items():
-            for line in lines.with_company(company):
-                taxes = None
-                if line.product_id:
-                    taxes = line.product_id.taxes_id._filter_taxes_by_company(company)
-                if not line.product_id or not taxes:
-                    # Nothing to map
-                    line.tax_ids = False
-                    continue
-                fiscal_position = line.order_id.fiscal_position_id
-                cache_key = (fiscal_position.id, company.id, tuple(taxes.ids))
-                cache_key += line._get_custom_compute_tax_cache_key()
-                if cache_key in cached_taxes:
-                    result = cached_taxes[cache_key]
-                else:
-                    result = fiscal_position.map_tax(taxes)
-                    cached_taxes[cache_key] = result
-                # If company_id is set, always filter taxes by the company
-                line.tax_ids = result
+                line.tax_ids = [Command.clear()]
+            else:
+                order = line.order_id
+                line.tax_ids = self._get_default_product_taxes(line.product_id, order.company_id, order.fiscal_position_id)
 
     def _get_custom_compute_tax_cache_key(self):
         """Hook method to be able to set/get cached taxes while computing them"""
@@ -578,6 +569,18 @@ class SaleOrderLine(models.Model):
     def _get_order_date(self):
         self.ensure_one()
         return self.order_id.date_order
+
+    @api.model
+    def _get_default_product_pricelist_price(self):
+        return self.pricelist_item_id._compute_price(
+            product=self.product_id.with_context(**self._get_product_price_context()),
+            quantity=self.product_uom_qty or 1.0,
+            uom=self.product_uom_id,
+            date=self._get_order_date(),
+            currency=self.currency_id,
+        )
+
+        return price
 
     def _get_display_price(self):
         """Compute the displayed unit price for a given line.
@@ -772,6 +775,33 @@ class SaleOrderLine(models.Model):
             base_values['special_type'] = 'down_payment'
         base_values.update(kwargs)
         return self.env['account.tax']._prepare_base_line_for_taxes_computation(self, **base_values)
+
+    # def _prepare_combo_item_base_line_for_taxes_computation(self, combo_item_values, **kwargs):
+    #     self.ensure_one()
+    #     order = self.order_id
+    #     product = self.env['product.product'].browse(combo_item_values['product_id'])
+    #     taxes = self._get_default_product_taxes(product, order.company_id, order.fiscal_position_id)
+    #     price_unit = product._get_tax_included_unit_price_from_price(
+    #         price,
+    #         product_taxes=taxes,
+    #         fiscal_position=self.order_id.fiscal_position_id,
+    #     )
+    #     import pudb; pudb.set_trace()
+    #     # price_unit = combo_id.currency_id._convert(
+    #     #         from_amount=combo_id.base_price,
+    #     #         to_currency=self.currency_id,
+    #     #         company=self.company_id,
+    #     #         date=self.order_id.date_order,
+    #     #     )
+    #
+    #     return self.env['account.tax']._prepare_base_line_for_taxes_computation(
+    #         self._prepare_base_line_for_taxes_computation(),
+    #         product_id=product,
+    #         tax_ids=taxes,
+    #         price_unit=0.0,
+    #         quantity=1.0,
+    #         combo_item_values=combo_item_values,
+    #     )
 
     def _is_global_discount(self):
         self.ensure_one()
