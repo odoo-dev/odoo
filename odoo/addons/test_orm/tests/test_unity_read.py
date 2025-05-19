@@ -871,18 +871,19 @@ class TestUnityRead(TransactionCase):
             }],
             'participants': [Command.link(self.env.user.id)],
         })
+        name_discussion_color_code, name_moderator_partner_id = (d['name'] for d in discussion.attributes_definition)
         partner = self.env['test_orm.partner'].create({'name': 'Test Partner Properties'})
         message = self.env['test_orm.message'].create({
             'name': 'Test Message',
             'discussion': discussion.id,
             'author': self.env.user.id,
             'attributes': {
-                'discussion_color_code': 'Test',
-                'moderator_partner_id': partner.id,
+                name_discussion_color_code: 'Test',
+                name_moderator_partner_id: partner.id,
             },
         })
         values = message.web_read({'attributes': False})[0]['attributes']
         self.assertEqual(len(values), 2)
-        self.assertEqual(values[0]['name'], 'discussion_color_code')
-        self.assertEqual(values[1]['name'], 'moderator_partner_id')
+        self.assertEqual(values[0]['name'], name_discussion_color_code)
+        self.assertEqual(values[1]['name'], name_moderator_partner_id)
         self.assertEqual(values[1]['value'], (partner.id, 'Test Partner Properties'))

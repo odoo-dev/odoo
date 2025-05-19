@@ -2751,7 +2751,9 @@ class BaseModel(metaclass=MetaModel):
             """ SELECT definition
                   FROM %(table)s, jsonb_array_elements(%(field)s) definition
                  WHERE %(field)s IS NOT NULL AND definition->>'name' = %(name)s
-                 LIMIT 1 """,
+                 LIMIT 1
+              ORDER BY id
+            """,
             table=SQL.identifier(target_model._table),
             field=SQL.identifier(field.definition_record_field),
             name=property_name,
@@ -5241,7 +5243,7 @@ class BaseModel(metaclass=MetaModel):
 
         """
         vals_list = self.with_context(active_test=False).copy_data(default)
-        new_records = self.create(vals_list)
+        new_records = self.with_context(copied_records=self).create(vals_list)
         for old_record, new_record in zip(self, new_records):
             old_record.copy_translations(new_record, excluded=default or ())
         return new_records

@@ -391,13 +391,14 @@ class TestLeadConvert(crm_common.TestLeadConvertCommon):
             'value': 'test value',
             'definition_changed': True,
         }]
+        name_test = next(iter(self.lead_1.lead_properties))
         self.lead_1.convert_opportunity(False)
         self.assertEqual(self.lead_1.team_id, initial_team)
-        self.assertEqual(self.lead_1.lead_properties, {'test': 'test value'})
+        self.assertEqual(self.lead_1.lead_properties, {name_test: 'test value'})
 
         # re-writing the team, but keeping the same value should not reset the properties
         self.lead_1.write({'team_id': self.lead_1.team_id.id})
-        self.assertEqual(self.lead_1.lead_properties, {'test': 'test value'})
+        self.assertEqual(self.lead_1.lead_properties, {name_test: 'test value'})
 
     @users('user_sales_manager')
     def test_lead_convert_properties_reset(self):
