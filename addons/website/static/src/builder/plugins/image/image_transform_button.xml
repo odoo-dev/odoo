@@ -1,0 +1,6 @@
+<templates xml:space="preserve">
+    <t t-name="html_builder.ImageTransformButton">
+        <button type="button" class="btn btn-primary fa fa-fw" t-att-class="'fa-object-ungroup' + (state.active ? ' active' : '')" style="min-width: min-content;" title="Transform the picture" t-on-click="onTransformButtonClick" />
+        <button type="button" class="btn btn-primary" style="min-width: min-content;" title="Reset transformation" t-on-click="onResetButtonClick" t-if="domState.applied">Reset</button>
+    </t>
+</templates>

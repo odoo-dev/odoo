@@ -4,7 +4,7 @@
 <t t-name="html_builder.AnimateOption">
     <t t-if="this.state.isOptionActive">
         <BuilderRow label.translate="Animation">
-            <BuilderSelect t-if="!this.isActiveItem('transformImage')" preview="false">
+            <BuilderSelect t-if="!this.state.isTransformActive" preview="false">
                 <BuilderSelectItem action="'setAnimationMode'" actionValue="''"
                             classAction="''"
                             id="'no_animation_opt'">None</BuilderSelectItem>

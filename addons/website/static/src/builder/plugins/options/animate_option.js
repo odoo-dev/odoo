@@ -34,6 +34,7 @@ export class AnimateOption extends BaseOptionComponent {
                     .getDirectionsItems(editingElement)
                     .filter((i) => !i.check || i.check(editingElement)),
                 isInDropdown: editingElement.closest(".dropdown"),
+                isTransformActive: editingElement.matches(`[style*="transform"]`),
             };
         });
     }
