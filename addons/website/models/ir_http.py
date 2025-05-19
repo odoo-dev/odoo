@@ -449,7 +449,11 @@ class IrHttp(models.AbstractModel):
     def _is_allowed_cookie(cls, cookie_type):
         result = super()._is_allowed_cookie(cookie_type)
         if result and cookie_type == 'optional':
-            if not request.env['website'].get_current_website().cookies_bar:
+            if request and hasattr(request, 'website'):
+                website = request.website
+            else:
+                website = request.env['website'].get_current_website()
+            if not website.cookies_bar:
                 # Cookies bar is disabled on this website
                 return True
             accepted_cookie_types = json_scriptsafe.loads(request.cookies.get('website_cookies_bar', '{}'))

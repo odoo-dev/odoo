@@ -199,7 +199,6 @@ class TestQweb(TransactionCaseWithUserDemo):
 
             init = env.cr.sql_log_count
             if with_website:
-                queries += 1
                 with MockRequest(env, website=website) as request:
                     value = str(request.env['ir.qweb']._render(template, {'doc': name}))
                 self.assertEqual(value, expected_website % name)
@@ -531,5 +530,5 @@ class TestQwebDataSnippet(TransactionCase):
         all_ir_ui_view_queries = first_search + t_call_snippets + fetch_snippets + get_root_view + combine_views  # 10
         self.assertEqual(len(ir_ui_view_queries), all_ir_ui_view_queries, f'ir_ui_view queries: {all_ir_ui_view_queries}')
 
-        other_queries = 44
+        other_queries = 43
         self.assertEqual(self.env.cr.sql_log_count - init, all_ir_ui_view_queries + other_queries, f'Maximum queries: {all_ir_ui_view_queries + other_queries}')
