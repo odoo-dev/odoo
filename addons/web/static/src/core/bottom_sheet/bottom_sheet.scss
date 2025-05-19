@@ -284,8 +284,10 @@
         position: relative;
         border: $border-width solid $list-group-active-border-color;
         border-radius: $border-radius-lg;
-        background: rgba($component-active-bg, .5);
         color: color-contrast($component-active-bg);
+        &:not(.focus) {
+            background: rgba($component-active-bg, .5);
+        }
 
         &:before {
             content: none !important;
