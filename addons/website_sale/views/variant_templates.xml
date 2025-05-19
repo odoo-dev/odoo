@@ -134,10 +134,19 @@
                 </li>
             </t>
             <t t-if="product._has_multiple_uoms()">
-                <li>
-                    <strong>Packaging</strong>
+                <li
+                    data-attribute_name="Packaging"
+                    data-attribute_display_type="pills"
+                    class="variant_attribute"
+                >
+                    <strong class="attribute_name o_editable" contenteditable="true">
+                        Packaging
+                    </strong>
 
-                    <ul class="btn-group-toggle list-inline list-unstyled" data-bs-toggle="buttons">
+                    <ul
+                        class="btn-group-toggle list-inline list-unstyled"
+                        data-bs-toggle="buttons"
+                    >
                         <t t-set="product_uoms" t-value="product.uom_id | product.uom_ids"/>
                         <t t-foreach="product_uoms" t-as="uom">
                             <t t-set="is_main_uom" t-value="uom.id == product.uom_id.id"/>
@@ -149,7 +158,7 @@
                                     t-attf-id="uom-{{uom.id}}"
                                     t-att-autocomplete="off"/>
                                 <label class="radio_input_value o_variant_pills_input_value" t-attf-for="uom-{{uom.id}}">
-                                    <span t-field="uom.name"/>
+                                    <span data-oe-readonly="1" t-field="uom.name"/>
                                 </label>
                             </li>
                         </t>
