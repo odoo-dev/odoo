@@ -2301,16 +2301,27 @@
                     <div class="d-flex flex-column flex-grow-1 gap-3 min-w-0">
                         <div class="d-flex gap-3">
                             <div class="flex-grow-1 text-wrap w-100">
-                                <div class="d-flex">
-                                    <t t-call="website_sale.cart_line_product_link">
-                                        <h6
-                                            t-out="line._get_line_header()"
-                                            class="d-inline align-top fw-bold text-wrap small"
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <t t-call="website_sale.cart_line_product_link">
+                                            <h6
+                                                t-out="line._get_line_header()"
+                                            class="d-inline fw-bold text-wrap small"
                                         />
-                                    </t>
-                                    -
-                                    <t t-out="line._get_combination_name()"/>
-                                    <span t-if="line.product_template_id._has_multiple_uoms()" t-out="line.product_uom_id.name"/>
+                                        </t>
+                                        <h6
+                                            t-if="line._get_combination_name()"
+                                            class="d-inline text-muted small"
+                                        >
+                                            <span class="text-500">•</span>
+                                            <t t-out="line._get_combination_name()"/>
+                                        </h6>
+                                        <span
+                                            t-if="line.product_template_id._has_multiple_uoms()"
+                                            class="badge bg-light"
+                                            t-out="line.product_uom_id.name"
+                                        />
+                                    </div>
                                     <div
                                         t-attf-class="{{'d-block d-md-none' if not is_combo else ''}}"
                                         t-call="website_sale.cart_lines_price"
@@ -3098,11 +3109,8 @@
                                                             </td>
                                                             <td t-attf-class="#{o_cart_sum_padding_top} td-product_name td-qty w-100"
                                                                 name='website_sale_cart_summary_product_name'>
-                                                                <h6>
+                                                                <h6 class="mb-1">
                                                                     <t t-out="int(line.product_uom_qty)" />
-                                                                    <t t-if="line.product_template_id._has_multiple_uoms()">
-                                                                        <t t-out="line.product_uom_id.name"/>
-                                                                    </t>
                                                                     <t t-if="line._get_shop_warning(clear=False)">
                                                                         <i class="fa fa-warning text-warning"
                                                                         role="img"
@@ -3110,8 +3118,9 @@
                                                                         aria-label="Warning"/>
                                                                     </t>
                                                                     <t t-out="line._get_line_header()"/>
-                                                                    <t t-out="line._get_combination_name()"/>
                                                                 </h6>
+                                                                <p class="text-muted small mb-0" t-out="line._get_combination_name()"/>
+                                                                <span class="badge bg-light" t-if="line.product_template_id._has_multiple_uoms()" t-out="line.product_uom_id.name"/>
                                                             </td>
                                                         </t>
                                                         <td t-attf-class="#{o_cart_sum_padding_top} td-price pe-0 text-end"
