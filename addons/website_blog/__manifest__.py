@@ -60,6 +60,9 @@
             'website_blog/static/src/snippets/**/*.js',
             ('remove', 'website_blog/static/src/snippets/**/options.js'),
         ],
+        'html_builder.assets': [
+            'website_blog/static/src/website_builder/**/*',
+        ],
     },
     'author': 'Odoo S.A.',
     'license': 'LGPL-3',
