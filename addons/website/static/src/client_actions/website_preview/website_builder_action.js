@@ -116,8 +116,10 @@ export class WebsiteBuilder extends Component {
                 this.onEditPage();
             }
             if (!this.ui.isSmall) {
-                // preload builder so clicking on "edit" is faster
-                loadBundle("html_builder.assets");
+                // preload builder and snippets so clicking on "edit" is faster
+                loadBundle("html_builder.assets").then(() => {
+                    this.env.services["html_builder.snippets"].load();
+                });
             }
         });
         this.publicRootReady = new Deferred();
