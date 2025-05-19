@@ -983,6 +983,7 @@ export class Runner {
             }
 
             let timeoutId = 0;
+            console.log("sbel:" + test.fullName);
 
             // ! The following assignment should stay in the `start` function to
             // ! keep the smallest stack trace possible:
