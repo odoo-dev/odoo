@@ -3,6 +3,89 @@ import { toolbarButtonProps } from "@html_editor/main/toolbar/toolbar";
 import { registry } from "@web/core/registry";
 import { ImageTransformation } from "./image_transformation";
 
+export function useTransformOperations(state, document, editable, addStep) {
+    let pointerDownInsideTransform = false;
+    // We close the image transform when we click outside any element not
+    // related to it. When the pointerdown of the click is inside the image
+    // transform and pointerup is outside while resizing or rotating the
+    // image it will consider the click as being done outside image
+    // transform. So we need to keep track if the pointerdown is inside or
+    // outside to know if we want to close the image transform component or
+    // not.
+    useExternalListener(document, "pointerdown", (ev) => {
+        if (isNodeInsideTransform(ev.target)) {
+            pointerDownInsideTransform = true;
+        } else {
+            closeImageTransformation();
+            pointerDownInsideTransform = false;
+        }
+    });
+    useExternalListener(document, "click", (ev) => {
+        if (!isNodeInsideTransform(ev.target) && !pointerDownInsideTransform) {
+            closeImageTransformation();
+        }
+        pointerDownInsideTransform = false;
+    });
+    // When we click on any character the image is deleted and we need to close the image transform
+    // We handle this by selectionchange
+    useExternalListener(document, "selectionchange", (ev) => {
+        closeImageTransformation();
+    });
+
+    function isNodeInsideTransform(node) {
+        if (!node) {
+            return false;
+        }
+        if (node.nodeType === Node.TEXT_NODE) {
+            node = node.parentElement;
+        }
+        if (node.matches('[name="image_transform"], [name="image_transform"] *')) {
+            return true;
+        }
+        if (
+            isImageTransformationOpen() &&
+            node.matches(
+                ".transfo-container, .transfo-container div, .transfo-container i, .transfo-container span"
+            )
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    function openImageTransformation(image) {
+        state.active = true;
+        registry.category("main_components").add("ImageTransformation", {
+            Component: ImageTransformation,
+            props: {
+                image,
+                document: document,
+                editable: editable,
+                destroy: () => closeImageTransformation(),
+                onChange: () => addStep(),
+            },
+        });
+    }
+
+    function isImageTransformationOpen() {
+        return registry.category("main_components").contains("ImageTransformation");
+    }
+
+    function closeImageTransformation() {
+        state.active = false;
+        if (isImageTransformationOpen()) {
+            registry.category("main_components").remove("ImageTransformation");
+        }
+    }
+
+    return {
+        pointerDownInsideTransform: pointerDownInsideTransform,
+        isNodeInsideTransform: isNodeInsideTransform,
+        openImageTransformation: openImageTransformation,
+        isImageTransformationOpen: isImageTransformationOpen,
+        closeImageTransformation: closeImageTransformation,
+    }
+}
 export class ImageTransformButton extends Component {
     static template = "html_editor.ImageTransformButton";
     static props = {
@@ -20,54 +103,12 @@ export class ImageTransformButton extends Component {
 
     setup() {
         this.state = useState({ active: false });
-        this.pointerDownInsideTransform = false;
-        // We close the image transform when we click outside any element not
-        // related to it. When the pointerdown of the click is inside the image
-        // transform and pointerup is outside while resizing or rotating the
-        // image it will consider the click as being done outside image
-        // transform. So we need to keep track if the pointerdown is inside or
-        // outside to know if we want to close the image transform component or
-        // not.
-        useExternalListener(this.props.document, "pointerdown", (ev) => {
-            if (this.isNodeInsideTransform(ev.target)) {
-                this.pointerDownInsideTransform = true;
-            } else {
-                this.closeImageTransformation();
-                this.pointerDownInsideTransform = false;
-            }
-        });
-        useExternalListener(this.props.document, "click", (ev) => {
-            if (!this.isNodeInsideTransform(ev.target) && !this.pointerDownInsideTransform) {
-                this.closeImageTransformation();
-            }
-            this.pointerDownInsideTransform = false;
-        });
-        // When we click on any character the image is deleted and we need to close the image transform
-        // We handle this by selectionchange
-        useExternalListener(this.props.document, "selectionchange", (ev) => {
-            this.closeImageTransformation();
-        });
-    }
-
-    isNodeInsideTransform(node) {
-        if (!node) {
-            return false;
-        }
-        if (node.nodeType === Node.TEXT_NODE) {
-            node = node.parentElement;
-        }
-        if (node.matches('[name="image_transform"], [name="image_transform"] *')) {
-            return true;
-        }
-        if (
-            this.isImageTransformationOpen() &&
-            node.matches(
-                ".transfo-container, .transfo-container div, .transfo-container i, .transfo-container span"
-            )
-        ) {
-            return true;
-        }
-        return false;
+        Object.assign(this.props, useTransformOperations(
+            this.state,
+            this.props.document,
+            this.props.editable,
+            this.props.addStep
+        ));
     }
 
     onButtonClick() {
@@ -75,36 +116,11 @@ export class ImageTransformButton extends Component {
     }
 
     handleImageTransformation(image) {
-        if (this.isImageTransformationOpen()) {
+        if (this.props.isImageTransformationOpen()) {
             this.props.resetImageTransformation(image);
-            this.closeImageTransformation();
+            this.props.closeImageTransformation();
         } else {
-            this.openImageTransformation(image);
-        }
-    }
-
-    openImageTransformation(image) {
-        this.state.active = true;
-        registry.category("main_components").add("ImageTransformation", {
-            Component: ImageTransformation,
-            props: {
-                image,
-                document: this.props.document,
-                editable: this.props.editable,
-                destroy: () => this.closeImageTransformation(),
-                onChange: () => this.props.addStep(),
-            },
-        });
-    }
-
-    isImageTransformationOpen() {
-        return registry.category("main_components").contains("ImageTransformation");
-    }
-
-    closeImageTransformation() {
-        this.state.active = false;
-        if (this.isImageTransformationOpen()) {
-            registry.category("main_components").remove("ImageTransformation");
+            this.props.openImageTransformation(image);
         }
     }
 }
