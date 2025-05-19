@@ -31,6 +31,7 @@ export class FilterValue extends Component {
         filter: Object,
         model: Object,
         showTitle: { type: Boolean, optional: true },
+        showPlaceholder: { type: Boolean, optional: true },
     };
 
     setup() {
@@ -55,6 +56,14 @@ export class FilterValue extends Component {
                 }
             }
         });
+    }
+
+    get placeholder() {
+        if (this.props.showPlaceholder) {
+            // The filter label is extracted from the spreadsheet json files
+            return ` ${_t(this.filter.label)}`;
+        }
+        return undefined;
     }
 
     get filter() {
@@ -114,10 +123,6 @@ export class FilterValue extends Component {
                 displayNames: Object.values(displayNames),
             });
         }
-    }
-
-    translate(text) {
-        return _t(text);
     }
 
     clear(id) {

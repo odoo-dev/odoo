@@ -4,7 +4,7 @@
         <div class="o-filter-value d-flex align-items-start w-100" t-att-title="props.showTitle and filter.label">
             <div t-if="filter.type === 'boolean'" class="w-100">
                 <BooleanMultiSelector
-                    placeholder="' ' + translate(filter.label)"
+                    placeholder="placeholder"
                     selectedValues="filterValue || []"
                     update="(value) => this.onBooleanInput(filter.id, value)"
                 />
@@ -20,7 +20,7 @@
             <span t-if="filter.type === 'relation'" class="w-100">
                 <MultiRecordSelector
                     t-if="isValid"
-                    placeholder="' ' + translate(filter.label)"
+                    placeholder="placeholder"
                     resModel="filter.modelName"
                     resIds="filterValue || []"
                     domain="relationalAllowedDomain"
@@ -35,7 +35,7 @@
                     t-on-change="(e) => this.onDateInput(filter.id, e.target.value || undefined)"
                     class="date_filter_values o_input me-3 text-truncate"
                     required="true">
-                    <option value="">Select period...</option>
+                    <option value=""><t t-if="props.showPlaceholder">Select period...</t></option>
                     <t t-foreach="relativeDateRangesTypes"
                         t-as="range"
                         t-key="range.type">
