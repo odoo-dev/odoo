@@ -315,13 +315,29 @@ class Applicant(models.Model):
                 applicant.partner_mobile = applicant.partner_id.mobile
 
     def _inverse_partner_email(self):
+        Partner = self.env['res.partner'].with_context(default_lang=self.env.lang)
         for applicant in self:
             if not applicant.email_from:
                 continue
             if not applicant.partner_id:
                 if not applicant.partner_name:
                     raise UserError(_('You must define a Contact Name for this applicant.'))
-                applicant.partner_id = self.env['res.partner'].with_context(default_lang=self.env.lang).find_or_create(applicant.email_from)
+                partner = False
+                _, email_normalized = tools.parse_contact_from_email(applicant.email_from)
+                if email_normalized:
+                    partner = Partner.search([
+                        ('email_normalized', '=', email_normalized),
+                        ('name', '=ilike', applicant.partner_name)
+                    ], limit=1)
+                if not partner:
+                    partner = Partner.create({
+                        'is_company': False,
+                        'name': applicant.partner_name,
+                        'email': applicant.email_from,
+                        'mobile': applicant.partner_mobile,
+                        'phone': applicant.partner_phone,
+                    })
+                applicant.partner_id = partner
             if applicant.partner_name and not applicant.partner_id.name:
                 applicant.partner_id.name = applicant.partner_name
             if tools.email_normalize(applicant.email_from) != tools.email_normalize(applicant.partner_id.email):
@@ -331,7 +347,7 @@ class Applicant(models.Model):
             if applicant.partner_mobile:
                 applicant.partner_id.mobile = applicant.partner_mobile
             if applicant.partner_phone:
-                applicant.partner_id.phone = applicant.partner_phone 
+                applicant.partner_id.phone = applicant.partner_phone
 
     @api.depends('partner_phone')
     def _compute_partner_phone_sanitized(self):

@@ -119,3 +119,37 @@ class TestRecruitment(TransactionCase):
         self.env['hr.applicant'].create(applicant_data)
         partner_count = self.env['res.partner'].search_count([('email', '=', 'test@thisisatest.com')])
         self.assertEqual(partner_count, 1)
+
+    def test_partner_sync_from_applicant_email(self):
+        """
+        Test that the partner is matched using normalized email and name.
+        """
+        Partner = self.env['res.partner']
+        emails = ['odoo@odoo.com', 'new@email.com']
+        existing_partner = Partner.create({
+            'name': 'jack',
+            'email': emails[0],
+        })
+        application_data = [{
+            'name': 'manager - john',
+            'partner_name': 'john',
+            'email_from': emails[0],
+        },
+        {
+            'name': 'hr - john',
+            'partner_name': 'john',
+            'email_from': emails[1],
+        }]
+
+        # Different names, same email
+        applicant = self.env['hr.applicant'].create(application_data[0])
+        partners = Partner.search([('email', '=', emails[0])])
+        self.assertEqual(len(partners), 2, "a new partner should be created when names are different")
+        applicant.write({'email_from': emails[1]})
+        self.assertEqual(applicant.partner_id.email, emails[1])
+        self.assertEqual(existing_partner.email, emails[0], "changing applicant email shouldn't affect the existing partner")
+
+        # Same name, same email
+        self.env['hr.applicant'].create(application_data[1])
+        partners = Partner.search([('email', '=', emails[1])])
+        self.assertEqual(len(partners), 1, "no new partner should be created when name and email are the same")
