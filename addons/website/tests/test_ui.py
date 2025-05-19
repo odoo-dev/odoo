@@ -723,7 +723,6 @@ class TestUi(HttpCaseWithWebsiteUser):
         self.start_tour('/', 'website_powerbox_snippet', login='admin')
         self.start_tour('/', 'website_powerbox_keyword', login='admin')
 
-    @unittest.skip
     def test_website_no_dirty_lazy_image(self):
         website = self.env['website'].browse(1)
         # Enable multiple langs to reduce the chance of the test being silently
