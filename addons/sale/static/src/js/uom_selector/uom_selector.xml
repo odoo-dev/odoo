@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="sale.UoMSelector">
-        <div class="d-flex flex-column flex-lg-row gap-2 mb-2">
+        <div class="d-flex flex-column flex-lg-row align-items-center gap-2 mb-2">
             <label t-out="getTitle()" class="fw-bold text-break col-lg-3"/>
             <ul class="list-inline list-unstyled flex-grow-1 mb-0">
                 <li
@@ -10,7 +10,7 @@
                     t-as="uom"
                     t-key="`${this.props.product_tmpl_id}-${uom}`"
                     t-att-class="{'active': uom == props.uom_id}"
-                    class="list-inline-item"
+                    class="o_sale_product_configurator_ptav_pills list-inline-item"
                 >
                     <label
                         class="btn btn-outline-secondary"
