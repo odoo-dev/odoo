@@ -241,7 +241,7 @@ export class PosData extends Reactive {
                 );
 
                 for (const [model, values] of Object.entries(data)) {
-                    const local = localData[model] || [];
+                    var local = localData[model] || [];
 
                     if (this.opts.uniqueModels.includes(model) && values.length > 0) {
                         this.indexedDB.delete(
@@ -250,6 +250,15 @@ export class PosData extends Reactive {
                         );
                         localData[model] = values;
                     } else {
+                        if (this.opts.cleanupModels.includes(model)) {
+                            var to_remove = await this.orm.call(
+                                model,
+                                "cleanup_data",
+                                local.length > 0 ? [local.map((r) => r.id)] : [[]]
+                            );
+                            local = local.filter((r) => !to_remove.includes(r.id));
+                            this.indexedDB.delete(model, to_remove);
+                        }
                         localData[model] = local.concat(values);
                     }
                 }

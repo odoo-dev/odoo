@@ -129,6 +129,9 @@ class ProductTemplate(models.Model):
             domain,
             order='sequence,default_code,name')
 
+    def cleanup_data(self):
+        return self.search([('id', 'in', self.ids), ('active', '=', False)]).ids
+
     def _process_pos_ui_product_product(self, products, config_id):
 
         def filter_taxes_on_company(product_taxes, taxes_by_company):
