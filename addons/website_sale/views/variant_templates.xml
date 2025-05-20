@@ -138,7 +138,7 @@
                     <strong>Packaging</strong>
 
                     <ul class="btn-group-toggle list-inline list-unstyled" data-bs-toggle="buttons">
-                        <t t-set="product_uoms" t-value="product.sudo().uom_id | product.sudo().uom_ids"/>
+                        <t t-set="product_uoms" t-value="product.uom_id | product.uom_ids"/>
                         <t t-foreach="product_uoms" t-as="uom">
                             <t t-set="is_main_uom" t-value="uom.id == product.uom_id.id"/>
                             <li t-attf-class="o_variant_pills btn btn-primary mb-1 list-inline-item #{'active' if is_main_uom else ''}">

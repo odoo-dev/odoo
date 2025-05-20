@@ -297,9 +297,9 @@ class SaleProductConfiguratorController(Controller):
                 'parent_exclusions': dict,
             }
         """
-        uom_sudo = (
-            (product_uom_id and request.env['uom.uom'].sudo().browse(product_uom_id))
-            or product_template.sudo().uom_id
+        uom = (
+            (product_uom_id and request.env['uom.uom'].browse(product_uom_id))
+            or product_template.uom_id
         )
         product = product_template._get_variant_for_combination(combination)
         attribute_exclusions = product_template._get_attribute_exclusions(
@@ -315,13 +315,13 @@ class SaleProductConfiguratorController(Controller):
                 pricelist,
                 combination,
                 quantity=quantity,
-                uom=uom_sudo,
+                uom=uom,
                 currency=currency,
                 date=so_date,
                 **kwargs,
             ),
             quantity=quantity,
-            uom_id=uom_sudo.id,
+            uom_id=uom.id,
             attribute_lines=[{
                 'id': ptal.id,
                 'attribute': dict(**ptal.attribute_id.read(['id', 'name', 'display_type'])[0]),
@@ -343,11 +343,10 @@ class SaleProductConfiguratorController(Controller):
             archived_combinations=attribute_exclusions['archived_combinations'],
             parent_exclusions=attribute_exclusions['parent_exclusions'],
         )
-        if product_template.sudo()._has_multiple_uoms():
-            product_sudo = product.sudo()  # no uom access for public users
+        if product_template._has_multiple_uoms():
             values['uom_data'] = {
                 uom.id: uom.name
-                for uom in (product_sudo.uom_id | product_sudo.uom_ids)
+                for uom in (product.uom_id | product.uom_ids)
             }
         # Shouldn't be sent client-side
         values.pop('pricelist_rule_id', None)
