@@ -30,7 +30,8 @@ class StockPickingType(models.Model):
     sequence_id = fields.Many2one(
         'ir.sequence', 'Reference Sequence',
         check_company=True, copy=False)
-    sequence_code = fields.Char('Sequence Prefix', required=True, related='sequence_id.prefix', readonly=False, precompute=True, store=True)
+    # sequence_code field is set as required at the view level.
+    sequence_code = fields.Char('Sequence Prefix', related='sequence_id.prefix', readonly=False)
     default_location_src_id = fields.Many2one(
         'stock.location', 'Source Location', compute='_compute_default_location_src_id',
         check_company=True, store=True, readonly=False, precompute=True, required=True,
@@ -188,6 +189,8 @@ class StockPickingType(models.Model):
                     raise UserError(_("Changing the company of this record is forbidden at this point, you should rather archive it and create a new one."))
         if 'sequence_code' in vals:
             for picking_type in self:
+                if vals.get('sequence_id') is False:  # revert the sequence_id
+                    vals['sequence_id'] = picking_type.sequence_id.id
                 if picking_type.warehouse_id:
                     picking_type.sequence_id.sudo().write({
                         'name': _('%(warehouse)s Sequence %(code)s', warehouse=picking_type.warehouse_id.name, code=vals['sequence_code']),
