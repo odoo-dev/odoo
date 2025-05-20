@@ -677,7 +677,10 @@ QUnit.module("SettingsFormView", (hooks) => {
 
     QUnit.test("Auto save: don't save on closing tab/browser", async function (assert) {
         assert.expect(3);
-
+        // needed to directly restore the error dialog
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+        });
         await makeView({
             type: "form",
             resModel: "res.config.settings",

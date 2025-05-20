@@ -18244,7 +18244,10 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("Auto save: save on closing tab/browser", async function (assert) {
         assert.expect(3);
-
+        // needed to directly restore the error dialog
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+        });
         await makeView({
             type: "list",
             resModel: "foo",
@@ -18272,7 +18275,10 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("Auto save: save on closing tab/browser (pending changes)", async function (assert) {
         assert.expect(1);
-
+        // needed to directly restore the error dialog
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+        });
         await makeView({
             type: "list",
             resModel: "foo",
@@ -18298,7 +18304,10 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("Auto save: save on closing tab/browser (invalid field)", async function (assert) {
         assert.expect(2);
-
+        // needed to directly restore the error dialog
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+        });
         await makeView({
             type: "list",
             resModel: "foo",
@@ -18329,7 +18338,10 @@ QUnit.module("Views", (hooks) => {
         "Auto save: save on closing tab/browser (onchanges + pending changes)",
         async function (assert) {
             assert.expect(1);
-
+            // needed to directly restore the error dialog
+            patchWithCleanup(browser, {
+                setTimeout: (fn) => fn(),
+            });
             serverData.models.foo.onchanges = {
                 int_field: function (obj) {
                     obj.foo = `${obj.int_field}`;
@@ -18365,7 +18377,10 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("Auto save: save on closing tab/browser (onchanges)", async function (assert) {
         assert.expect(1);
-
+        // needed to directly restore the error dialog
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+        });
         serverData.models.foo.onchanges = {
             int_field: function (obj) {
                 obj.foo = `${obj.int_field}`;
