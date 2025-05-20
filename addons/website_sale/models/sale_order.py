@@ -15,8 +15,8 @@ from odoo.tools import float_is_zero
 
 from odoo.addons.website_sale.models.website import (
     FISCAL_POSITION_SESSION_CACHE_KEY,
-    PRICELIST_SESSION_CACHE_KEY,
     PRICELIST_SELECTED_SESSION_CACHE_KEY,
+    PRICELIST_SESSION_CACHE_KEY,
 )
 
 
@@ -487,7 +487,7 @@ class SaleOrder(models.Model):
             return self.env['sale.order.line']
 
         line = self.env['sale.order.line'].create(
-            self._prepare_order_line_values(product_id, quantity, uom_id, **kwargs)
+            self._prepare_order_line_values(product_id, quantity, uom_id=uom_id, **kwargs)
         )
 
         # The validity of a combo product line can only be checked after creating all of its combo
