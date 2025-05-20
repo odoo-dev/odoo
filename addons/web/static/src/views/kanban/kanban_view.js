@@ -14,8 +14,6 @@ export const kanbanView = {
     Renderer: KanbanRenderer,
     Compiler: KanbanCompiler,
 
-    buttonTemplate: "web.KanbanView.Buttons",
-
     props: (genericProps, view) => {
         const { arch, relatedModels, resModel } = genericProps;
         const { ArchParser } = view;

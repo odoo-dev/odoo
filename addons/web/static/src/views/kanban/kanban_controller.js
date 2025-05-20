@@ -32,6 +32,10 @@ import {
     useState,
     useSubEnv,
 } from "@odoo/owl";
+import {
+    CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE,
+    CONTROL_PANEL_BUTTONS_HEADER_SEQUENCE,
+} from "@web/search/control_panel/control_panel";
 
 const QUICK_CREATE_FIELD_TYPES = ["char", "boolean", "many2one", "selection", "many2many"];
 
@@ -212,14 +216,43 @@ export class KanbanController extends Component {
         this.deleteRecordsWithConfirmation = useDeleteRecords(this.model);
     }
 
-    get defaultButtons() {
-        return [
-            {
-                id: "new",
+    get staticControlPanelButtons() {
+        return {
+            new: {
+                isAvailable: () => this.canCreate && !this.env.inDialog,
+                sequence: 10,
                 template: "web.KanbanView.Buttons.New",
-                isDisplayed: () => this.canCreate && !this.env.inDialog,
             },
-        ];
+        };
+    }
+
+    get controlPanelButtons() {
+        const staticButtons = Object.entries(this.staticControlPanelButtons).map(
+            ([key, button]) => ({ id: key, ...button })
+        );
+        const alwaysHeaderButtons = this.archInfo.headerButtons
+            .filter((button) => button.display === "always")
+            .map((button) => ({
+                id: button.id,
+                isAvailable: () => !this.evalViewModifier(button.invisible),
+                sequence: CONTROL_PANEL_BUTTONS_HEADER_SEQUENCE,
+                template: "web.ListView.Buttons.MultiRecord",
+                props: this.multiRecordViewButtonProps(button),
+            }));
+        return [...staticButtons, ...alwaysHeaderButtons]
+            .filter((button) => button.isAvailable === undefined || button.isAvailable())
+            .sort(
+                (btn1, btn2) =>
+                    (btn1.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE) -
+                    (btn2.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE)
+            );
+    }
+
+    get selectionButtons() {
+        const selectionHeaderButtons = this.archInfo.headerButtons
+            .filter((button) => button.display === "selection")
+            .filter((button) => !this.evalViewModifier(button.invisible));
+        return selectionHeaderButtons;
     }
 
     get actionMenuItems() {
@@ -445,13 +478,6 @@ export class KanbanController extends Component {
             title: button.title,
             attrs: button.attrs,
         };
-    }
-
-    get visibleHeaderButtons() {
-        const visibleButtons = this.archInfo.headerButtons.filter(
-            (button) => !this.evalViewModifier(button.invisible)
-        );
-        return Object.groupBy(visibleButtons, ({ display }) => display);
     }
 
     get canCreate() {

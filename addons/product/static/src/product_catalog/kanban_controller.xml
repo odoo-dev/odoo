@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="ProductCatalogKanbanController.Buttons" t-inherit="web.KanbanView.Buttons" t-inherit-mode="primary">
-        <xpath expr="." position="inside">
-            <button t-out="this.buttonString" type="button" class="btn btn-primary o-kanban-button-back" t-on-click="this.backToQuotationDebounced"/>
-        </xpath>
+    <t t-name="product.ProductCatalogKanbanController.Buttons.Back">
+        <button t-out="this.buttonString" type="button" class="btn btn-primary o-kanban-button-back" t-on-click="this.backToQuotationDebounced"/>
     </t>
 </templates>

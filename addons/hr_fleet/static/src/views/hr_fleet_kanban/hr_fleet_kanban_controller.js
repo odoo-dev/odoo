@@ -19,6 +19,15 @@ export class HrFleetKanbanController extends KanbanController {
     get canCreate() {
         return false;
     }
+    
+    get staticControlPanelButtons() {
+        return {
+            ...super.staticControlPanelButtons,
+            upload: {
+                template: "hr_fleet.HrFleetKanbanController.Buttons.Upload",
+            }
+        };
+    }
 
     async onInputChange(ev) {
         if (!ev.target.files) {

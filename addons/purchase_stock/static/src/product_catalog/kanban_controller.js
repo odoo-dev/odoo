@@ -10,6 +10,15 @@ patch(ProductCatalogKanbanController.prototype, {
             this.orderResModel === "purchase.order" && this.orderStateInfo.state === "draft"
         );
     },
+    
+    get staticControlPanelButtons() {
+        return {
+            ...super.staticControlPanelButtons,
+            suggestion: {
+                template: "purchase_stock.ProductCatalogKanbanController.Buttons.Suggestion",
+            }
+        };
+    },
 
     async openSuggestWizard() {
         // Display a warning if there is no product.

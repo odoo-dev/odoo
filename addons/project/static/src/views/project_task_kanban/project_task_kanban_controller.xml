@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="project.ProjectTaskKanbanView.Buttons" t-inherit="web.KanbanView.Buttons" t-inherit-mode="primary">
-        <xpath expr="." position="inside">
-            <ProjectTaskTemplateDropdown
-                projectId="props.context.default_project_id"
-                onCreate="() =&gt; this.createRecord()"
-                newButtonClasses="'btn btn-primary o-kanban-button-new'"
-                context="props.context"
-            />
-        </xpath>
+    <t t-name="project.ProjectTaskKanbanView.Buttons.Dropdown">
+        <ProjectTaskTemplateDropdown
+            projectId="props.context.default_project_id"
+            onCreate="() =&gt; this.createRecord()"
+            newButtonClasses="'btn btn-primary o-kanban-button-new'"
+            context="props.context"
+        />
     </t>
 
     <t t-name="project.ProjectTaskKanbanView" t-inherit="web.KanbanView" t-inherit-mode="primary">

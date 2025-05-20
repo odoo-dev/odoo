@@ -27,6 +27,15 @@ export class ProductCatalogKanbanController extends KanbanController {
     get stateFiels() {
         return ["state"];
     }
+    
+    get staticControlPanelButtons() {
+        return {
+            ...super.staticControlPanelButtons,
+            back: {
+                template: "product.ProductCatalogKanbanController.Buttons.Back",
+            }
+        };
+    }
 
     async setOrderStateInfo() {
         const orderData = await this.orm.searchRead(

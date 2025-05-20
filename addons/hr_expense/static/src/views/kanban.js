@@ -10,6 +10,15 @@ import { KanbanRenderer } from '@web/views/kanban/kanban_renderer';
 
 export class ExpenseKanbanController extends ExpenseDocumentUpload(KanbanController) {
     static template = "hr_expense.KanbanView";
+    
+    get staticControlPanelButtons() {
+        return {
+            ...super.staticControlPanelButtons,
+            upload: {
+                template: "hr_expense.KanbanView.Buttons.Upload",
+            }
+        };
+    }
 }
 
 export class ExpenseKanbanRenderer extends ExpenseDocumentDropZone(
@@ -25,14 +34,12 @@ export class ExpenseDashboardKanbanRenderer extends ExpenseKanbanRenderer {
 
 registry.category('views').add('hr_expense_kanban', {
     ...kanbanView,
-    buttonTemplate: 'hr_expense.KanbanButtons',
     Controller: ExpenseKanbanController,
     Renderer: ExpenseKanbanRenderer,
 });
 
 registry.category('views').add('hr_expense_dashboard_kanban', {
     ...kanbanView,
-    buttonTemplate: 'hr_expense.KanbanButtons',
     Controller: ExpenseKanbanController,
     Renderer: ExpenseDashboardKanbanRenderer,
 });

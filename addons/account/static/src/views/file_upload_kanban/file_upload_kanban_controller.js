@@ -6,4 +6,13 @@ export class FileUploadKanbanController extends KanbanController {
         ...KanbanController.components,
         DocumentFileUploader,
     };
+    
+    get staticControlPanelButtons() {
+        return {
+            ...super.staticControlPanelButtons,
+            upload: {
+                template: "account.DocumentViewUploadButton",
+            }
+        };
+    }
 }

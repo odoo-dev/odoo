@@ -9,8 +9,12 @@ export class ProjectTaskKanbanController extends KanbanController {
         ProjectTaskTemplateDropdown,
     };
 
-    get defaultButtons() {
-        return super.defaultButtons.filter((button) => button.id !== "new");
+    get staticControlPanelButtons() {
+        return {
+            dropdown: {
+                template: "project.ProjectTaskKanbanView.Buttons.Dropdown",
+            }
+        };
     }
 
     setup() {

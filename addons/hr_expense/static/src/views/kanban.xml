@@ -17,14 +17,12 @@
         </xpath>
     </t>
 
-    <t t-name="hr_expense.KanbanButtons" t-inherit="web.KanbanView.Buttons" t-inherit-mode="primary">
-        <xpath expr="." position="inside">
-            <input type="file" name="ufile" class="d-none" t-ref="fileInput" multiple="1" accept="*" t-on-change="onChangeFileInput"/>
-            <button type="button" class="o_button_upload_expense btn btn-primary" t-on-click.prevent="uploadDocument">
-                <t t-if="env.isSmall">Scan</t>
-                <t t-else="">Upload</t>
-            </button>
-        </xpath>
+    <t t-name="hr_expense.KanbanView.Buttons.Upload">
+        <input type="file" name="ufile" class="d-none" t-ref="fileInput" multiple="1" accept="*" t-on-change="onChangeFileInput"/>
+        <button type="button" class="o_button_upload_expense btn btn-primary" t-on-click.prevent="uploadDocument">
+            <t t-if="env.isSmall">Scan</t>
+            <t t-else="">Upload</t>
+        </button>
     </t>
 
     <t t-name="hr_expense.KanbanView" t-inherit="web.KanbanView" t-inherit-mode="primary">

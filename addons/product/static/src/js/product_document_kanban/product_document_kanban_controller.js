@@ -4,6 +4,15 @@ import { KanbanController } from '@web/views/kanban/kanban_controller';
 export class ProductDocumentKanbanController extends KanbanController {
     static components = { ...KanbanController.components, UploadButton };
 
+    get staticControlPanelButtons() {
+        return {
+            ...super.staticControlPanelButtons,
+            upload: {
+                template: "product.ProductDocumentKanbanView.Buttons.Upload",
+            },
+        };
+    }
+
     setup() {
         super.setup();
         this.uploadRoute = '/product/document/upload';

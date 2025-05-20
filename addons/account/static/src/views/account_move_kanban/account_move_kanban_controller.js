@@ -11,4 +11,14 @@ export class AccountMoveKanbanController extends FileUploadKanbanController {
         super.setup();
         this.showUploadButton = this.props.context.default_move_type !== 'entry' || 'active_id' in this.props.context;
     }
+    
+    get staticControlPanelButtons() {
+        return {
+            ...super.staticControlPanelButtons,
+            upload: {
+                isAvailable: () => this.showUploadButton,
+                template: "account.AccountViewUploadButton",
+            }
+        };
+    }
 }

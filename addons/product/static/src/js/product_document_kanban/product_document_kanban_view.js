@@ -8,7 +8,6 @@ export const productDocumentKanbanView = {
     ...kanbanView,
     Controller: ProductDocumentKanbanController,
     Renderer: ProductDocumentKanbanRenderer,
-    buttonTemplate: "product.ProductDocumentKanbanView.Buttons",
 };
 
 registry.category("views").add("product_documents_kanban", productDocumentKanbanView);

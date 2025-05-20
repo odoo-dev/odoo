@@ -13,7 +13,6 @@ export const productCatalogKanbanView = {
     Model: ProductCatalogKanbanModel,
     Renderer: ProductCatalogKanbanRenderer,
     SearchPanel: ProductCatalogSearchPanel,
-    buttonTemplate: "ProductCatalogKanbanController.Buttons",
 };
 
 registry.category("views").add("product_kanban_catalog", productCatalogKanbanView);
