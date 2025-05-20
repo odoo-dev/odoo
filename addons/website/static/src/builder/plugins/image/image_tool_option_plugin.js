@@ -59,12 +59,10 @@ class ImageToolOptionPlugin extends Plugin {
                             const original = await loadImage(dataset.originalSrc);
                             const maxWidth = dataset.width ? image.naturalWidth : original.naturalWidth;
                             const optimizedWidth = Math.min(maxWidth, computeMaxDisplayWidth(node || this.editable));
-                            if (!["image/gif", "image/svg+xml"].includes(dataset.mimetype)) {
+                            if (!["image/gif", "image/svg+xml"].includes(dataset.mimetypeBeforeConversion)) {
                                 // Convert to recommended format and width.
-                                dataset.mimetype = "image/webp";
                                 dataset.resizeWidth = optimizedWidth;
-                            } else if (dataset.shape && dataset.originalMimetype !== "image/gif") {
-                                dataset.originalMimetype = "image/webp";
+                            } else if (dataset.shape && dataset.mimetypeBeforeConversion !== "image/gif") {
                                 dataset.resizeWidth = optimizedWidth;
                             } else {
                                 return true;
