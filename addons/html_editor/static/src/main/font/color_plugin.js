@@ -21,8 +21,8 @@ import {
     isCSSColor,
     RGBA_REGEX,
     rgbaToHex,
-    COLOR_COMBINATION_CLASSES_REGEX,
 } from "@web/core/utils/colors";
+import { COLOR_COMBINATION_CLASSES_REGEX } from "@html_editor/utils/color";
 import { ColorSelector } from "./color_selector";
 
 const RGBA_OPACITY = 0.6;
