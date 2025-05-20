@@ -95,19 +95,18 @@ export class AddFontDialog extends Component {
                     );
                     return filtered.map((fontFamilyName) => ({
                         label: fontFamilyName,
-                        value: fontFamilyName,
+                        onSelect: () => this.onGoogleFontSelect(fontFamilyName),
                     }));
                 },
             },
         ];
     }
-    async onGoogleFontSelect(selected) {
+    async onGoogleFontSelect(fontFamily) {
         this.fileInput.el.value = "";
         this.state.uploadedFonts = [];
         this.state.uploadedFontName = undefined;
         this.state.uploadedFontFaces = undefined;
         try {
-            const fontFamily = selected.value;
             const result = await fetch(
                 `https://fonts.googleapis.com/css?family=${encodeURIComponent(
                     fontFamily

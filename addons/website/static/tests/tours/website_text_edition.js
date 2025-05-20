@@ -31,6 +31,11 @@ registerWebsitePreviewTour("website_text_edition", {
     goBackToBlocks(),
     ...insertSnippet({id: "s_text_block", name: "Text", groupName: "Text"}),
     {
+        // TODO: should check if o_loading_screen is not present (TO check with PIPU)
+        // Await step in the history
+        trigger: `:iframe:has(#wrap[contenteditable='true'])`,
+    },
+    {
         content: "Click on the text block first paragraph (to auto select)",
         trigger: ":iframe .s_text_block p",
         async run(actions) {

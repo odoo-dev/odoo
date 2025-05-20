@@ -17,6 +17,11 @@ registerWebsitePreviewTour('website_replace_grid_image', {
     edition: true,
 }, () => [
     ...insertSnippet(snippet),
+    {
+        // TODO: should check if o_loading_screen is not present (TO check with PIPU)
+        // Await step in the history
+        trigger: `:iframe:has(#wrap[contenteditable='true'])`,
+    },
     ...clickOnSnippet(snippet),
     {
         content: "Toggle to grid mode",

@@ -18,7 +18,10 @@ class DynamicSnippetCarouselOptionPlugin extends Plugin {
                 apply: ({ editingElement, value }) => {
                     editingElement.dataset.carouselInterval = value * 1000;
                 },
-                getValue: ({ editingElement }) => editingElement.dataset.carouselInterval / 1000,
+                getValue: ({ editingElement }) =>
+                    editingElement.dataset.carouselInterval === undefined
+                        ? undefined
+                        : editingElement.dataset.carouselInterval / 1000,
             },
         },
         builder_options: withSequence(DYNAMIC_SNIPPET_CAROUSEL, {

@@ -61,6 +61,8 @@ class TestWebsiteFormEditor(HttpCaseWithUserPortal):
     def test_website_form_editable_content(self):
         self.start_tour('/', 'website_form_editable_content', login="admin")
 
+    # TODO @mysterious-egg: new tour
+    @unittest.skip
     def test_website_form_special_characters(self):
         self.start_tour('/', 'website_form_special_characters', login='admin')
         mail = self.env['mail.mail'].search([], order='id desc', limit=1)

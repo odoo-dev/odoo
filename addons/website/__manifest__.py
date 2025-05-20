@@ -312,9 +312,6 @@
             'website/static/src/xml/website.xml',
             'website/static/src/scss/website_controller_page_kanban.scss',
 
-            # Don't include dark mode files in light mode
-            ('remove', 'website/static/src/client_actions/*/*.dark.scss'),
-
             'website/static/src/xml/website_form_editor.xml',
             # TODO Remove the module's form js - this is for testing.
             'website/static/src/js/send_mail_form.js',
@@ -326,7 +323,6 @@
         "web.assets_web_dark": [
             'website/static/src/components/dialog/*.dark.scss',
             'website/static/src/scss/website.backend.dark.scss',
-            'website/static/src/client_actions/*/*.dark.scss',
             'website/static/src/components/website_loader/website_loader.dark.scss'
         ],
         'web.qunit_suite_tests': [

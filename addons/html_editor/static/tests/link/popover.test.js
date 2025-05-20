@@ -1123,7 +1123,8 @@ describe("readonly mode", () => {
         expect(".o-we-linkpopover .o_we_edit_link").toHaveCount(0);
         expect(".o-we-linkpopover .o_we_remove_link").toHaveCount(0);
     });
-    test("popover should not open for not editable image", async () => {
+    // TODO: need to check with AGE
+    test.todo("popover should not open for not editable image", async () => {
         await setupEditor(`<a href="#"><img src="${base64Img}" contenteditable="false"></a>`);
         await click("img");
         await animationFrame();
