@@ -17,6 +17,7 @@ class TestPoSEventSale(TestUi):
             ]
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()
+        current_session = self.main_pos_config.current_session_id
 
         order_data = {
             "amount_paid": 100,
@@ -49,15 +50,8 @@ class TestPoSEventSale(TestUi):
             ],
             "name": "Order 12345-123-1234",
             "partner_id": self.partner_a.id,
-            "session_id": self.main_pos_config.current_session_id.id,
+            "session_id": current_session.id,
             "sequence_number": 2,
-            "payment_ids": [
-                    Command.create({
-                        "amount": 100,
-                        "name": fields.Datetime.now(),
-                        "payment_method_id": self.bank_payment_method.id,
-                    }),
-            ],
             "uuid": "12345-123-1234",
             "last_order_preparation_change": "{}",
             "user_id": self.env.uid,
@@ -96,7 +90,7 @@ class TestPoSEventSale(TestUi):
             "name": "Order 12345-123-1234",
             "access_token": "12345-123-1234",
             "partner_id": self.partner_a.id,
-            "session_id": self.main_pos_config.current_session_id.id,
+            "session_id": current_session.id,
             "sequence_number": 2,
             "payment_ids": [],
             "uuid": "12345-123-4331",
@@ -105,7 +99,12 @@ class TestPoSEventSale(TestUi):
             "to_invoice": False,
             "state": "draft",
         }
-        self.env['pos.order'].create(order_data)
+        order = self.env['pos.order'].create(order_data)
+        order_payment = self.env['pos.make.payment'].with_context({"active_id": order.id}).create({
+            'amount': order.amount_total,
+            'payment_method_id': current_session.payment_method_ids[0].id,
+        })
+        order_payment.with_context({"active_id": order.id}).check()
         self.env['pos.order'].create(order_data_2)
         sale_status = self.env['event.registration'].search([]).mapped("sale_status")
         self.assertEqual(len(sale_status), 2)
