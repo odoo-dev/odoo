@@ -17,7 +17,6 @@ export class FloatingBlocks extends Interaction {
             }),
         },
     };
-
     setup() {
         this.boxScaleStep = 0.02;
         this.maximalScale = 0.98;
@@ -175,9 +174,3 @@ export class FloatingBlocks extends Interaction {
 registry
     .category("public.interactions")
     .add("website.floating_blocks", FloatingBlocks);
-
-registry
-    .category("public.interactions.edit")
-    .add("website.floating_blocks", {
-        Interaction: FloatingBlocks,
-    });
