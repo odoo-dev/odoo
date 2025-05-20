@@ -649,27 +649,18 @@ actual arch.
 
     @api.depends('parent_path', 'inherit_children_ids')
     def _compute_hierarchy_ids(self):
-        all_parented_ids = [map(int, view.parent_path.split('/')[0:-1]) for view in self]
-        all_parented = self.browse(unique(view_id for view_ids in all_parented_ids for view_id in view_ids))
+        parent_paths = [view.parent_path.split('/')[0:-1] for view in self]
+        domain = Domain.OR(
+            Domain('parent_path', '=like', f'{parent_path[0]}/%')
+            for parent_path in parent_paths
+        )
 
-        domain = Domain.OR(Domain('parent_path', '=like', f'{view.parent_path}%') for view in all_parented)
         field_names = [f.name for f in self._fields.values() if f.prefetch is True]
         all_tree_views = self.with_context(active_test=False).search_fetch(domain, field_names, order='priority, id')
 
-        def get_inheriting_views(root):
-            children = root
-            for view in all_tree_views:
-                if view.inherit_id == root and view.model == root.model and view.mode != 'primary':
-                    children |= get_inheriting_views(view)
-            return children
-
-        for view in self:
-            hierarchy = [
-                item
-                for parent in (view | view.parent_ids)
-                for item in get_inheriting_views(parent)
-            ]
-            view.hierarchy_ids = all_tree_views.filtered(lambda view: view in hierarchy)
+        for view, parent_path in zip(self, parent_paths):
+            reg_parent = re.compile('^' + '(/'.join(parent_path) + (')?' * (len(parent_path) - 1)) + '/')
+            view.hierarchy_ids = all_tree_views.filtered(lambda view: reg_parent.search(view.parent_path))
 
     def _get_inheriting_views(self):
         """
