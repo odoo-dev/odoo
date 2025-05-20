@@ -348,7 +348,7 @@ export function clickOnText(snippet, element, position = "bottom") {
  * dialog.
  * @param {*} position Where the purple arrow will show up
  */
-export function insertSnippet(snippet, position = "bottom") {
+export function insertSnippet(snippet, { position = "bottom", ignoreLoading = false } = {}) {
     const blockEl = snippet.groupName || snippet.name;
     const insertSnippetSteps = [{
         trigger: ".o_website_preview :iframe .odoo-editor-editable",
@@ -370,9 +370,6 @@ export function insertSnippet(snippet, position = "bottom") {
             noPrepend: true,
             tooltipPosition: "top",
             run: "click",
-        },
-        {
-            trigger: ":iframe:not(:has(.o_loading_screen))",
         });
     } else {
         insertSnippetSteps.push({
@@ -380,6 +377,12 @@ export function insertSnippet(snippet, position = "bottom") {
             trigger: `#snippet_content .o_snippet[name="${blockEl}"].o_draggable .o_snippet_thumbnail:not(.o_we_ongoing_insertion)`,
             tooltipPosition: position,
             run: "drag_and_drop :iframe #wrapwrap > footer",
+        });
+    }
+
+    if (!ignoreLoading) {
+        insertSnippetSteps.push({
+            trigger: ":iframe:not(:has(.o_loading_screen))",
         });
     }
 

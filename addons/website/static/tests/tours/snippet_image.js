@@ -4,7 +4,7 @@ registerWebsitePreviewTour("snippet_image", {
     url: "/",
     edition: true,
 }, () => [
-    ...insertSnippet({id: "s_image", name: "Image"}),
+    ...insertSnippet({id: "s_image", name: "Image"}, { ignoreLoading: true }),
 {
     content: "Verify if the media dialog opens",
     trigger: ".o_select_media_dialog",
