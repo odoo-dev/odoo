@@ -42,9 +42,21 @@ export class UncaughtCorsError extends UncaughtError {
     }
 }
 
+// outside the error service to avoid qunit timeout
+let isUnloadingPage = false;
+window.addEventListener("beforeunload", () => {
+    isUnloadingPage = true;
+    // restore after 30 seconds
+    browser.setTimeout(() => (isUnloadingPage = false), 30000);
+});
+
 export const errorService = {
     start(env) {
         function handleError(uncaughtError, retry = true) {
+            if (isUnloadingPage) {
+                uncaughtError.event.preventDefault();
+                return;
+            }
             function shouldLogError() {
                 // Only log errors that are relevant business-wise, following the heuristics:
                 // Error.event and Error.traceback have been assigned
