@@ -56,6 +56,9 @@ class ImageToolOptionPlugin extends Plugin {
                             formatMimetype: "image/webp",
                         },
                         onImageInfoLoaded: async (dataset) => {
+                            if (!dataset.originalSrc || !dataset.originalId) {
+                                return true;
+                            }
                             const original = await loadImage(dataset.originalSrc);
                             const maxWidth = dataset.width ? image.naturalWidth : original.naturalWidth;
                             const optimizedWidth = Math.min(maxWidth, computeMaxDisplayWidth(node || this.editable));
