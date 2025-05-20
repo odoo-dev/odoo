@@ -18,9 +18,30 @@ class AccountWithholdingLine(models.AbstractModel):
     # Fields declaration
     # ------------------
 
-    name = fields.Char(string='Sequence Number')
-    placeholder_value = fields.Char(
-        help='Populated by the comodel during edition of the line.'
+    name = fields.Char(string="Sequence Number")
+    placeholder_value = fields.Char(help="Populated by the comodel during edition of the line.")
+    placeholder_type = fields.Selection(
+        selection=[
+            ('given_by_sequence', "Given By the Sequence"),
+            ('given_by_name', "Given By the Name"),
+            ('not_defined', "Not defined"),
+        ],
+        compute='_compute_placeholder_type',
+        store=True,
+        readonly=False,
+        precompute=True,
+        required=True,
+    )
+    previous_placeholder_type = fields.Selection(
+        selection=[
+            ('given_by_sequence', "Given By the Sequence"),
+            ('given_by_name', "Given By the Name"),
+            ('not_defined', "Not defined"),
+        ],
+        compute='_compute_placeholder_type',
+        store=True,
+        readonly=False,
+        precompute=True,
     )
     type_tax_use = fields.Char(compute='_compute_type_tax_use')
     tax_id = fields.Many2one(
@@ -30,31 +51,36 @@ class AccountWithholdingLine(models.AbstractModel):
         domain="[('type_tax_use', '=', type_tax_use), ('is_withholding_tax_on_payment', '=', True)]",
     )
     withholding_sequence_id = fields.Many2one(related='tax_id.withholding_sequence_id')
-    original_base_amount = fields.Monetary(required=True)
+    source_base_amount_currency = fields.Monetary(currency_field='source_currency_id')
+    source_base_amount = fields.Monetary(currency_field='comodel_company_currency_id')
+    source_tax_amount_currency = fields.Monetary(currency_field='source_currency_id')
+    source_tax_amount = fields.Monetary(currency_field='comodel_company_currency_id')
+    source_currency_id = fields.Many2one(comodel_name='res.currency')
+    source_tax_id = fields.Many2one(comodel_name='account.tax')
+    original_base_amount = fields.Monetary(
+        currency_field='comodel_currency_id',
+        compute='_compute_original_amounts',
+    )
+    original_tax_amount = fields.Monetary(
+        currency_field='comodel_currency_id',
+        compute='_compute_original_amounts',
+    )
     base_amount = fields.Monetary(
+        currency_field='comodel_currency_id',
         string='Withholding base',
         compute='_compute_base_amount',
-        precompute=True,
-        required=True,
         readonly=False,
         store=True,
     )
-    amount = fields.Monetary(string='Withholding amount')
-    custom_user_amount = fields.Monetary()
-    custom_user_currency_id = fields.Many2one(comodel_name='res.currency')
+    amount = fields.Monetary(
+        currency_field='comodel_currency_id',
+        string='Withholding amount',
+        compute='_compute_amount',
+        readonly=False,
+        store=True,
+    )
+
     # Fields related to the comodel, computed in child models.
-    company_id = fields.Many2one(
-        comodel_name='res.company',
-        compute='_compute_company_id',
-    )
-    currency_id = fields.Many2one(
-        comodel_name='res.currency',
-        compute='_compute_currency_id',
-        precompute=True,
-        required=True,
-        readonly=False,
-        store=True,
-    )
     account_id = fields.Many2one(
         comodel_name='account.account',
         compute='_compute_account_id',
@@ -63,8 +89,7 @@ class AccountWithholdingLine(models.AbstractModel):
         readonly=False,
         store=True,
     )
-    comodel_original_amount = fields.Monetary(compute='_compute_comodel_original_amount')
-    comodel_amount = fields.Monetary(compute='_compute_comodel_amount')
+    comodel_percentage_paid_factor = fields.Float(compute='_compute_comodel_percentage_paid_factor')
     comodel_date = fields.Date(compute='_compute_comodel_date')
     comodel_payment_type = fields.Selection(
         selection=[
@@ -73,21 +98,125 @@ class AccountWithholdingLine(models.AbstractModel):
         ],
         compute='_compute_comodel_payment_type',
     )
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        compute='_compute_company_id',
+        precompute=True,
+        required=True,
+        store=True,
+    )
+    comodel_company_currency_id = fields.Many2one(
+        related='company_id.currency_id',
+        store=True,
+    )
+    comodel_currency_id = fields.Many2one(
+        comodel_name='res.currency',
+        compute='_compute_comodel_currency_id',
+        precompute=True,
+        required=True,
+        store=True,
+    )
 
     # --------------------------------
     # Compute, inverse, search methods
     # --------------------------------
 
-    @api.depends('original_base_amount', 'comodel_original_amount', 'currency_id', 'company_id', 'comodel_date')
-    def _compute_base_amount(self):
-        """ The base_amount is manually editable, but will also be dynamically computed by default.
-        If the amount of the payment/register payment linked to the line is edited, the base amount will also be re-computed.
+    @api.depends('withholding_sequence_id', 'name')
+    def _compute_placeholder_type(self):
+        """ Since the placeholder_value has to be recomputed on all lines by the comodel, we need
+        a way to track the changed regarding the sequence and the name. Since the ORM is quite
+        limited for such advance feature, we use a trick here: we store the current and the previous
+        state of the placeholder to be able to detect the changes.
         """
         for line in self:
-            if not line.custom_user_amount:
-                line.base_amount = line._get_default_base_amount()
+            line.previous_placeholder_type = line.placeholder_type
+            if not line.name and line.withholding_sequence_id:
+                line.placeholder_type = 'given_by_sequence'
+            elif line.name:
+                line.placeholder_type = 'given_by_name'
             else:
-                line.base_amount = line.custom_user_amount
+                line.placeholder_type = 'not_defined'
+
+    def _get_default_base_amount_when_no_source_currency(self):
+        self.ensure_one()
+        return 0.0
+
+    @api.depends(
+        'source_base_amount_currency',
+        'source_base_amount',
+        'source_tax_amount_currency',
+        'source_tax_amount',
+        'source_currency_id',
+        'comodel_currency_id',
+        'company_id',
+        'comodel_date',
+        'tax_id',
+    )
+    def _compute_original_amounts(self):
+        AccountTax = self.env['account.tax']
+        for line in self:
+            source_curr = line.source_currency_id
+            company = line.company_id
+            date = line.comodel_date
+            comp_curr = line.comodel_company_currency_id
+            line_curr = line.comodel_currency_id
+            if not source_curr:
+                rate = 1.0
+                base_amount = line._get_default_base_amount_when_no_source_currency()
+                if line.tax_id:
+                    base_line = AccountTax._prepare_base_line_for_taxes_computation(
+                        line,
+                        tax_ids=line.tax_id,
+                        price_unit=base_amount,
+                        quantity=1.0,
+                        currency_id=line_curr,
+                        calculate_withholding_taxes=True,
+                    )
+                    AccountTax._add_tax_details_in_base_line(base_line, company)
+                    AccountTax._round_base_lines_tax_details([base_line], company)
+                    tax_amount = -base_line['tax_details']['taxes_data'][0]['tax_amount_currency']
+                else:
+                    tax_amount = 0.0
+            elif source_curr == line_curr:
+                rate = 1.0
+                base_amount = line.source_base_amount_currency
+                tax_amount = line.source_tax_amount_currency
+            elif source_curr != comp_curr and line_curr == comp_curr:
+                rate = self.env['res.currency']._get_conversion_rate(
+                    from_currency=source_curr,
+                    to_currency=comp_curr,
+                    company=company,
+                    date=date,
+                )
+                base_amount = line.source_base_amount_currency
+                tax_amount = line.source_tax_amount_currency
+            else:
+                rate = self.env['res.currency']._get_conversion_rate(
+                    from_currency=comp_curr,
+                    to_currency=line_curr,
+                    company=company,
+                    date=date,
+                )
+                base_amount = line.source_base_amount
+                tax_amount = line.source_tax_amount
+            line.original_base_amount = line_curr.round(base_amount * rate)
+            line.original_tax_amount = line_curr.round(tax_amount * rate)
+
+    @api.depends('original_base_amount', 'comodel_percentage_paid_factor')
+    def _compute_base_amount(self):
+        for line in self:
+            line_curr = line.comodel_currency_id
+            percentage_paid_factor = line.comodel_percentage_paid_factor
+            line.base_amount = line_curr.round(line.original_base_amount * percentage_paid_factor)
+
+    @api.depends('source_tax_id', 'tax_id', 'base_amount')
+    def _compute_amount(self):
+        for line in self:
+            line_curr = line.comodel_currency_id
+            if line.original_base_amount:
+                line.amount = line_curr.round(line.original_tax_amount * line.base_amount / line.original_base_amount)
+            else:
+                line.amount = 0.0
 
     @api.depends('company_id')
     def _compute_account_id(self):
@@ -105,16 +234,20 @@ class AccountWithholdingLine(models.AbstractModel):
     def _compute_currency_id(self):
         raise NotImplementedError()
 
-    def _compute_comodel_original_amount(self):
-        raise NotImplementedError()
-
-    def _compute_comodel_amount(self):
-        raise NotImplementedError()
+    def _compute_comodel_percentage_paid_factor(self):
+        for line in self:
+            line.comodel_percentage_paid_factor = 1.0
 
     def _compute_comodel_date(self):
         raise NotImplementedError()
 
     def _compute_comodel_payment_type(self):
+        raise NotImplementedError()
+
+    def _compute_company_id(self):
+        raise NotImplementedError()
+
+    def _compute_comodel_currency_id(self):
         raise NotImplementedError()
 
     # ----------------------------
@@ -125,89 +258,38 @@ class AccountWithholdingLine(models.AbstractModel):
     def _constrains_base_amount(self):
         """ It wouldn't make sense to register a withholding tax with no base amount. """
         for line in self:
-            if line.currency_id.compare_amounts(line.base_amount, 0) <= 0:
+            if line.comodel_currency_id.compare_amounts(line.base_amount, 0) <= 0:
                 raise UserError(line.env._("The base amount of a withholding tax line must be above 0."))
-
-    @api.onchange('base_amount')
-    def _onchange_base_amount(self):
-        """ Register if the user has input a custom amount; if so we don't want to recompute it automatically.
-        We still want to handle currency conversion, though.
-        """
-        if not self.currency_id:
-            return
-
-        is_custom_user_amount = self.base_amount != self._get_default_base_amount()
-        if is_custom_user_amount:
-            self.custom_user_amount = self.base_amount
-            self.custom_user_currency_id = self.currency_id
-        else:
-            self.custom_user_amount = None
-            self.custom_user_currency_id = None
-
-    # -----------------------
-    # CRUD, inherited methods
-    # -----------------------
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        # EXTEND to populate the original base amount with the amount value at creation.
-        for vals in vals_list:
-            if 'original_base_amount' not in vals and 'base_amount' in vals:
-                vals['original_base_amount'] = vals['base_amount']
-
-        return super().create(vals_list)
 
     # ----------------
     # Business methods
     # ----------------
 
-    def _get_default_base_amount(self):
-        """ Helper which retrieves the original base amount, in the comodel currency.
-        It takes into account the ratio calculated based on the payment original and current amount.
-        """
-        self.ensure_one()
-        if not self.comodel_original_amount:
-            ratio = 1
-        else:
-            # We convert comodel_original_amount to the comodel currency, as comodel_amount is in this currency.
-            cc_comodel_original_amount = self.company_id.currency_id._convert(
-                self.comodel_original_amount,
-                self.currency_id,
-                self.company_id,
-                self.comodel_date,
-            )
-            ratio = self.comodel_amount / cc_comodel_original_amount
-
-        if not self.currency_id:
-            cc_original_base_amount = self.original_base_amount
-        else:
-            cc_original_base_amount = self.company_id.currency_id._convert(
-                self.original_base_amount,
-                self.currency_id,
-                self.company_id,
-                self.comodel_date,
-            )
-        return cc_original_base_amount * ratio
-
     def _prepare_base_line_for_taxes_computation(self):
         self.ensure_one()
         company = self.company_id
-        currency = self.currency_id
+        currency = self.comodel_currency_id
         conversion_date = self.comodel_date
         conversion_rate = self.env['res.currency']._get_conversion_rate(company.currency_id, currency, company, conversion_date)
         payment_type = self.comodel_payment_type
         sign = 1 if payment_type == 'inbound' else -1
+        manual_tax_amounts = {str(self.tax_id.id): {
+            'base_amount_currency': self.base_amount,
+            'tax_amount_currency': -self.amount,
+        }}
         return self.env['account.tax']._prepare_base_line_for_taxes_computation(
             self,
             tax_ids=self.tax_id,
             price_unit=self.base_amount,
             quantity=1.0,
+            currency_id=currency,
             rate=conversion_rate,
             sign=sign,
             account_id=self.account_id,
             calculate_withholding_taxes=True,
             manual_tax_line_name=self.name,
             computation_key=str(self.id),
+            manual_tax_amounts=manual_tax_amounts,
         )
 
     def _prepare_withholding_amls_create_values(self):
@@ -230,7 +312,7 @@ class AccountWithholdingLine(models.AbstractModel):
 
         # Check names first to not consume sequences if any is missing
         for line in self:
-            if not line.name and not line.tax_id.withholding_sequence_id:
+            if not line.name and not line.withholding_sequence_id:
                 raise UserError(self.env._('Please enter the withholding number for the tax %(tax_name)s', tax_name=line.tax_id.name))
 
         # Convert them to base lines to compute the taxes.
@@ -241,8 +323,8 @@ class AccountWithholdingLine(models.AbstractModel):
 
             base_line = line._prepare_base_line_for_taxes_computation()
             AccountTax._add_tax_details_in_base_line(base_line, company)
-            AccountTax._round_base_lines_tax_details([base_line], company)
             base_lines.append(base_line)
+        AccountTax._round_base_lines_tax_details(base_lines, company)
         AccountTax._add_accounting_data_in_base_lines_tax_details(base_lines, company)
         tax_results = AccountTax._prepare_tax_lines(base_lines, company)
 
@@ -299,6 +381,32 @@ class AccountWithholdingLine(models.AbstractModel):
         payment_type = 'purchase' if payment_type == 'outbound' else 'sale'
         return expression.AND([filter_domain, [('type_tax_use', '=', payment_type), ('is_withholding_tax_on_payment', '=', True)]])
 
+    def _need_update_withholding_lines_placeholder(self):
+        return self and any(line.previous_placeholder_type != line.placeholder_type for line in self)
+
+    def _prepare_update_withholding_lines_placeholder_commands(self):
+        if not self:
+            return []
+
+        commands = []
+        lines_per_sequence = self\
+            .sorted()\
+            .grouped(lambda line: line.placeholder_type == 'given_by_sequence' and line.withholding_sequence_id)
+        for sequence, lines in lines_per_sequence.items():
+            if sequence:
+                for i, line in enumerate(lines):
+                    commands.append(Command.update(line.id, {
+                        'placeholder_value': sequence.get_next_char(sequence.number_next_actual + i),
+                        'previous_placeholder_type': line.placeholder_type,
+                    }))
+            else:
+                for line in lines:
+                    commands.append(Command.update(line.id, {
+                        'placeholder_value': None,
+                        'previous_placeholder_type': line.placeholder_type,
+                    }))
+        return commands
+
     def _get_grouping_key(self):
         """ Helper returning the grouping key for this line; should match what is done in _compute_withholding_lines on the wizard. """
         self.ensure_one()
@@ -309,7 +417,6 @@ class AccountWithholdingLine(models.AbstractModel):
             'account': self.account_id.id,
             'tax_id': self.tax_id.id,
             'skip': False,
-            'currency': self.currency_id.id,
         })
 
     def _prepare_withholding_lines_commands(self, base_lines, company):
@@ -347,7 +454,7 @@ class AccountWithholdingLine(models.AbstractModel):
                 'account': account.id,
                 'tax_id': tax_data['tax'].id,
                 'skip': not tax_data['tax'].is_withholding_tax_on_payment,
-                'currency': base_line['currency_id'].id,
+                'currency_id': base_line['currency_id'].id,
             }
 
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(new_base_lines, grouping_function)
@@ -369,7 +476,10 @@ class AccountWithholdingLine(models.AbstractModel):
                 # Compute the amount for existing withholding lines when the lines are updated in the view
                 # We only want to recompute the tax amount
                 withholding_line_commands.append(Command.update(existing_line.id, {
-                    'amount': -values['tax_amount_currency'],
+                    'source_base_amount_currency': values['base_amount_currency'],
+                    'source_base_amount': values['base_amount'],
+                    'source_tax_amount_currency': -values['tax_amount_currency'],
+                    'source_tax_amount': -values['tax_amount'],
                 }))
             else:
                 withholding_line_commands.append(Command.create({
@@ -377,9 +487,12 @@ class AccountWithholdingLine(models.AbstractModel):
                     'tax_id': grouping_key['tax_id'],
                     'analytic_distribution': grouping_key['analytic_distribution'],
                     'account_id': grouping_key['account'],
-                    'original_base_amount': values['base_amount_currency'],
-                    'amount': -values['tax_amount_currency'],
-                    'currency_id': grouping_key['currency'],
+                    'source_base_amount_currency': values['base_amount_currency'],
+                    'source_base_amount': values['base_amount'],
+                    'source_tax_amount_currency': -values['tax_amount_currency'],
+                    'source_tax_amount': -values['tax_amount'],
+                    'source_tax_id': grouping_key['tax_id'],
+                    'source_currency_id': grouping_key['currency_id'],
                 }))
 
         keys_to_remove = existing_withholding_line_map.keys() - values_per_grouping_key.keys()

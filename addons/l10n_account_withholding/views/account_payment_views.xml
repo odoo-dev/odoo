@@ -13,15 +13,30 @@
                     <group>
                         <field name="withholding_line_ids" nolabel="1" colspan="2" readonly="state != 'draft'">
                             <list editable="bottom" no_open="1">
-                                <field name="currency_id" column_invisible="1"/>  <!-- Required to display the currency and sum of the amount_currency field -->
-                                <field name="custom_user_amount" column_invisible="1"/>  <!-- Required for the onchange, in order to save the value -->
-                                <field name="custom_user_currency_id" column_invisible="1"/>  <!-- Required for the onchange, in order to save the value -->
+                                <field name="source_base_amount_currency" column_invisible="True"/> <!-- Needed for taxes computation -->
+                                <field name="source_base_amount" column_invisible="True"/> <!-- Needed for taxes computation -->
+                                <field name="source_tax_amount_currency" column_invisible="True"/> <!-- Needed for taxes computation -->
+                                <field name="source_tax_amount" column_invisible="True"/> <!-- Needed for taxes computation -->
+                                <field name="source_currency_id" column_invisible="True"/> <!-- Needed for taxes computation -->
                                 <field name="placeholder_value" column_invisible="True"/> <!-- Needed for the placeholder widget -->
-                                <field name="name" string="Sequence Number" required="not withholding_sequence_id" widget="char_with_placeholder_field" options="{'placeholder_field': 'placeholder_value'}" width="92px"/>
-                                <field name="account_id" column_invisible="parent.withholding_hide_tax_base_account" force_save="1" width="184px" optional="show"/>
+                                <field name="name"
+                                       string="Sequence Number"
+                                       required="not withholding_sequence_id"
+                                       widget="char_with_placeholder_field"
+                                       options="{'placeholder_field': 'placeholder_value'}"
+                                       width="92px"/>
+                                <field name="account_id"
+                                       column_invisible="parent.withholding_hide_tax_base_account"
+                                       width="184px"
+                                       optional="show"/>
                                 <field name="base_amount"/>
-                                <field name="tax_id" options="{'no_open': True, 'no_create': True}" string="Tax" width="92px"/>
-                                <field name="analytic_distribution" widget="analytic_distribution" groups="analytic.group_analytic_accounting"/>
+                                <field name="tax_id"
+                                       options="{'no_open': True, 'no_create': True}"
+                                       string="Tax"
+                                       width="92px"/>
+                                <field name="analytic_distribution"
+                                       widget="analytic_distribution"
+                                       groups="analytic.group_analytic_accounting"/>
                                 <field name="amount" string="Withheld Amount" sum="Total Withheld Amount"/>
                             </list>
                         </field>

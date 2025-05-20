@@ -21,36 +21,33 @@ class AccountPaymentRegisterWithholdingLine(models.TransientModel):
     # Compute, inverse, search methods
     # --------------------------------
 
+    def _get_default_base_amount_when_no_source_currency(self):
+        self.ensure_one()
+        return self.payment_register_id.amount
+
+    @api.depends('payment_register_id.amount')
+    def _compute_original_amounts(self):
+        # Extended to add the dependency
+        super()._compute_original_amounts()
+
     @api.depends('payment_register_id.payment_type')
     def _compute_type_tax_use(self):
-        # Override to implement the logic
         for line in self:
             line.type_tax_use = 'sale' if line.payment_register_id.payment_type == 'inbound' else 'purchase'
 
-    @api.depends('payment_register_id.amount')
-    def _compute_base_amount(self):
-        # Extended to add the dependency
-        super()._compute_base_amount()
-
-    @api.depends('payment_register_id.company_id')
-    def _compute_company_id(self):
+    @api.depends('payment_register_id.amount', 'payment_register_id.can_edit_wizard', 'payment_register_id.should_withhold_tax')
+    def _compute_comodel_percentage_paid_factor(self):
         for line in self:
-            line.company_id = line.payment_register_id.company_id
+            wizard = line.payment_register_id
+            if not wizard.can_edit_wizard:
+                line.comodel_percentage_paid_factor = 0.0
+                continue
 
-    @api.depends('payment_register_id.currency_id')
-    def _compute_currency_id(self):
-        for line in self:
-            line.currency_id = line.payment_register_id.currency_id
-
-    @api.depends('payment_register_id.withholding_payment_move_amount_total')
-    def _compute_comodel_original_amount(self):
-        for line in self:
-            line.comodel_original_amount = line.payment_register_id.withholding_payment_move_amount_total
-
-    @api.depends('payment_register_id.amount')
-    def _compute_comodel_amount(self):
-        for line in self:
-            line.comodel_amount = line.payment_register_id.amount
+            total_amount_values = wizard._get_total_amounts_to_pay(wizard.batches)
+            if total_amount_values['full_amount']:
+                line.comodel_percentage_paid_factor = abs(wizard.amount / total_amount_values['full_amount'])
+            else:
+                line.comodel_percentage_paid_factor = 0.0
 
     @api.depends('payment_register_id.payment_date')
     def _compute_comodel_date(self):
@@ -61,6 +58,16 @@ class AccountPaymentRegisterWithholdingLine(models.TransientModel):
     def _compute_comodel_payment_type(self):
         for line in self:
             line.comodel_payment_type = line.payment_register_id.payment_type
+
+    @api.depends('payment_register_id.company_id')
+    def _compute_company_id(self):
+        for line in self:
+            line.company_id = line.payment_register_id.company_id
+
+    @api.depends('payment_register_id.currency_id')
+    def _compute_comodel_currency_id(self):
+        for line in self:
+            line.comodel_currency_id = line.payment_register_id.currency_id
 
     # -----------------------
     # CRUD, inherited methods
