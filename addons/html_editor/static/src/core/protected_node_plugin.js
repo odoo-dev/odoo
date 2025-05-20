@@ -115,7 +115,7 @@ export class ProtectedNodePlugin extends Plugin {
     }
 
     /**
-     * @param {MutationRecord} record
+     * @param {import("./history_plugin").HistoryMutationRecord} record
      * @return {boolean}
      */
     isMutationRecordSavable(record) {

@@ -40,9 +40,10 @@ export class HighlightPlugin extends Plugin {
             }
         },
         /**
-         * @param {MutationRecord} mutationRecord
+         * @param {import("@html_editor/core/history_plugin").HistoryMutationRecord} mutationRecord
          */
         savable_mutation_record_predicates: (mutationRecord) =>
+            mutationRecord.type !== "childList" ||
             ![...mutationRecord.addedNodes, ...mutationRecord.removedNodes].some((node) =>
                 closestElement(node, ".o_text_highlight_svg")
             ),

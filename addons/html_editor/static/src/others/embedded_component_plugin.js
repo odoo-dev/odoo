@@ -45,6 +45,9 @@ export class EmbeddedComponentPlugin extends Plugin {
         // when start_edition_handlers are called.
     }
 
+    /**
+     * @param {import("@html_editor/core/history_plugin").HistoryMutationRecord} record
+     */
     isMutationRecordSavable(record) {
         const info = this.nodeMap.get(record.target);
         if (

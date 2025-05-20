@@ -94,15 +94,29 @@ import { toggleClass } from "@html_editor/utils/dom";
  * @property { string } oldValue
  * @property { string } newValue
  *
+ * @typedef {Object} MutationRecordCharacterData
+ * @property { "characterData" } type
+ * @property { Node } target
+ * @property { string } oldValue
+ * @property { string } newValue
+ *
  * @typedef {Object} MutationRecordChildList
+ * @property { "childList" } type
+ * @property { Node } target
+ * @property { NodeList } addedNodes
+ * @property { NodeList } removedNodes
+ * @property { Node } previousSibling
+ * @property { Node } nextSibling
+ *
+ * @typedef { MutationRecordClassList | MutationRecordAttributes | MutationRecordCharacterData | MutationRecordChildList } HistoryMutationRecord
+ *
+ * @typedef {Object} ChildListSingleMutation
  * @property { "childList" } type
  * @property { Node } parent
  * @property { "add" | "remove" } operation
  * @property { Node } node
  * @property { Node } nextSibling
  * @property { Node } previousSibling
- *
- * @typedef { MutationRecord | MutationRecordClassList | MutationRecordAttributes } HistoryMutationRecord
  *
  * @typedef { Object } PreviewableOperation
  * @property { Function } apply
@@ -226,6 +240,8 @@ export class HistoryPlugin extends Plugin {
         this._cleanups.push(() => this.observer.disconnect());
         /** @type { WeakMap<Node, { attributes: Map<string, string>, classList: Map<string, boolean> }> } */
         this.lastObservedState = new WeakMap();
+        /** @type { WeakSet<Node> } */
+        this.observedNodes = new WeakMap();
         this.clean();
     }
 
@@ -402,10 +418,16 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
-     * @param {HistoryMutationRecord} param0
+     * @param {HistoryMutationRecord} record
      */
-    isNoOpRecord({ type, oldValue, newValue }) {
-        return ["attributes", "classList"].includes(type) && oldValue === newValue;
+    isNoOpRecord(record) {
+        if (["attributes", "classList", "characterData"].includes(record.type)) {
+            return record.newValue === record.oldValue;
+        }
+        if (record.type === "childList") {
+            return !record.addedNodes.length && !record.removedNodes.length;
+        }
+        return false;
     }
 
     dispatchContentUpdated() {
@@ -456,9 +478,6 @@ export class HistoryPlugin extends Plugin {
      */
     preFilterMutationRecords(records) {
         this.dispatchTo("before_filter_mutation_record_handlers", records);
-        // for (const callback of this.getResource("savable_mutation_record_predicates")) {
-        //     records = records.filter(callback);
-        // }
         records = this.filterAttributeMutationRecords(records);
         records = this.filterSameTextContentMutationRecords(records);
         records = this.filterOutIntermediateStateMutationRecords(records);
@@ -566,7 +585,11 @@ export class HistoryPlugin extends Plugin {
             const { type, target, oldValue } = record;
             return { type, target, oldValue, newValue };
         }
-        return record;
+        if (record.type === "childList") {
+            // make a copy with enumerable properties for later use
+            const { type, target, addedNodes, removedNodes, previousSibling, nextSibling } = record;
+            return { type, target, addedNodes, removedNodes, previousSibling, nextSibling };
+        }
     }
 
     /**
@@ -606,8 +629,8 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
-     * @param {MutationRecord} record
-     * @returns {MutationRecordChildList[]}
+     * @param {HistoryMutationRecord} record
+     * @returns {ChildListSingleMutation[]}
      */
     splitChildListMutationRecord(record) {
         /** @type {(nodes: NodeList, operation: "add"|"remove") => MutationRecordClassList } */
@@ -706,7 +729,6 @@ export class HistoryPlugin extends Plugin {
      */
     handleUnobservedMutations(records) {
         const newRecords = [];
-        // TODO: adapt predicates to the classList record
         const savableRecordPredicates = this.getResource("savable_mutation_record_predicates");
         const isSavableRecord = (record) => savableRecordPredicates.every((p) => p(record));
         for (const record of records) {
@@ -715,8 +737,10 @@ export class HistoryPlugin extends Plugin {
                 // drop record
             } else {
                 const adjustedRecord = this.adjustToLastObservedState(record);
-                // keep record
-                newRecords.push(adjustedRecord);
+                if (adjustedRecord !== null) {
+                    // keep record
+                    newRecords.push(adjustedRecord);
+                }
             }
         }
         return newRecords;
@@ -726,33 +750,68 @@ export class HistoryPlugin extends Plugin {
      * @param {HistoryMutationRecord} record
      */
     storeLastObservedState(record) {
-        if (!["attributes", "classList", "characterData"].includes(record.type)) {
-            return;
-        }
-        const { stateMap, key } = this.getObservedStateStorage(record);
-        if (!stateMap.has(key)) {
-            // Only store it if not already stored.
-            stateMap.set(key, record.oldValue);
+        if (["attributes", "classList", "characterData"].includes(record.type)) {
+            const { stateMap, key } = this.getObservedStateStorage(record);
+            if (!stateMap.has(key)) {
+                // Only store it if not already stored.
+                stateMap.set(key, record.oldValue);
+            }
+        } else if (record.type === "childList") {
+            record.removedNodes.forEach((node) => {
+                if (!this.observedNodes.has(node)) {
+                    this.observedNodes.set(node, true);
+                }
+            });
+            record.addedNodes.forEach((node) => {
+                if (!this.observedNodes.has(node)) {
+                    this.observedNodes.set(node, false);
+                }
+            });
         }
     }
 
     /**
      * @param {HistoryMutationRecord} record
-     * @returns {HistoryMutationRecord}
+     * @returns {HistoryMutationRecord|null}
      */
     adjustToLastObservedState(record) {
-        if (!["attributes", "classList", "characterData"].includes(record.type)) {
-            return record;
+        const isObservedNode = (node) => !(this.observedNodes.get(node) === false);
+        if (!isObservedNode(record.target)) {
+            // This mutation depends on a previous unobserved one, and should be
+            // ignored.
+            return null;
         }
-        const { stateMap, key } = this.getObservedStateStorage(record);
-        if (!stateMap.has(key)) {
-            return record;
+        if (["attributes", "classList", "characterData"].includes(record.type)) {
+            const { stateMap, key } = this.getObservedStateStorage(record);
+            if (!stateMap.has(key)) {
+                return record;
+            }
+            const lastObservedValue = stateMap.get(key);
+            // Remove entry, so it won't be used again.
+            stateMap.delete(key);
+            // Update record.
+            return { ...record, oldValue: lastObservedValue };
         }
-        const lastObservedValue = stateMap.get(key);
-        // Remove entry, so it won't be used again.
-        stateMap.delete(key);
-        // Update record.
-        return { ...record, oldValue: lastObservedValue };
+        if (record.type === "childList") {
+            let { previousSibling, nextSibling, addedNodes, removedNodes } = record;
+            const isValidReference = (node) => node === null || isObservedNode(node);
+
+            // Adjust sibling references
+            previousSibling = isValidReference(previousSibling) ? previousSibling : undefined;
+            nextSibling = isValidReference(nextSibling) ? nextSibling : undefined;
+            if (previousSibling === undefined && nextSibling === undefined) {
+                // Mutation depends on previous unobserved ones, and should be ignored.
+                return null;
+            }
+
+            // Filter out unobserved nodes
+            addedNodes = [...addedNodes].filter(isObservedNode);
+            removedNodes = [...removedNodes].filter(isObservedNode);
+
+            // Update record
+            return { ...record, previousSibling, nextSibling, addedNodes, removedNodes };
+        }
+        return record;
     }
 
     /**
@@ -903,7 +962,7 @@ export class HistoryPlugin extends Plugin {
                     // @todo: merge the logic of these two functions
                     // into a single one
                     this.splitChildListMutationRecord(record)
-                        .filter(this.skipHistoryHack.bind(this))
+                        // .filter(this.skipHistoryHack.bind(this))
                         .forEach((record) => {
                             const parentId = this.nodeToIdMap.get(record.parent);
                             if (!parentId) {
@@ -1316,51 +1375,62 @@ export class HistoryPlugin extends Plugin {
                     break;
                 }
                 case "remove": {
-                    // @todo: validade that the parent matches
+                    const parent = this.idToNodeMap.get(mutation.parentId);
                     const toremove = this.idToNodeMap.get(mutation.id);
-                    if (toremove) {
-                        toremove.remove();
+                    if (!toremove) {
+                        console.warn("node to remove is unknown");
+                        break;
                     }
+                    if (toremove.parentElement !== parent) {
+                        console.warn("parent node does not match");
+                        break;
+                    }
+                    toremove.remove();
                     break;
                 }
                 case "add": {
-                    const node =
-                        this.idToNodeMap.get(mutation.id) || this.unserializeNode(mutation.node);
-                    if (!node) {
-                        continue;
-                    }
-
-                    this.setNodeId(node);
-
-                    const parent = this.idToNodeMap.get(mutation.parentId);
-                    if (!parent) {
-                        throw new Error("parent node is not in observed tree");
-                    }
-                    if (mutation.previousId === null) {
-                        parent.prepend(node);
-                        continue;
-                    }
-                    if (mutation.nextId === null) {
-                        parent.append(node);
-                        continue;
-                    }
-                    // @todo: handle previousId undefined and previousNode not
-                    // connected/not a child of parent
-                    const previousNode = this.idToNodeMap.get(mutation.previousId);
-                    if (previousNode?.isConnected) {
-                        previousNode.after(node);
-                        continue;
-                    }
-                    // @todo: same as above
-                    const nextNode = this.idToNodeMap.get(mutation.nextId);
-                    if (nextNode?.isConnected) {
-                        nextNode.before(node);
-                        continue;
-                    }
-                    throw new Error("next and previous nodes are not in the observed tree");
+                    this.applyAddMutation(mutation);
+                    break;
                 }
             }
         }
+    }
+
+    /**
+     * @param {HistoryMutationAdd} param0
+     */
+    applyAddMutation({ id, node, parentId, nextId, previousId }) {
+        const toAdd = this.idToNodeMap.get(id) || this.unserializeNode(node);
+        if (!toAdd) {
+            return;
+        }
+
+        this.setNodeId(toAdd);
+
+        const parent = this.idToNodeMap.get(parentId);
+        if (!parent) {
+            throw new Error("parent node is not in observed tree");
+        }
+        if (previousId === null) {
+            parent.prepend(toAdd);
+            return;
+        }
+        if (nextId === null) {
+            parent.append(toAdd);
+            return;
+        }
+        for (const [siblingId, position] of [
+            [previousId, "after"],
+            [nextId, "before"],
+        ]) {
+            const sibling = this.idToNodeMap.get(siblingId);
+            if (sibling && sibling.isConnected) {
+                sibling[position](toAdd);
+                return;
+            }
+        }
+        // todo: log that history is corrupt instead
+        throw new Error("next and previous siblings are not in the observed tree");
     }
 
     // /**

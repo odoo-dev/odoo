@@ -42,6 +42,9 @@ class SpacingOptionPlugin extends Plugin {
         };
     }
 
+    /**
+     * @param {import("@html_editor/core/history_plugin").HistoryMutationRecord} record
+     */
     isMutationRecordSavable(record) {
         // Do not consider the grid preview in the history.
         if (record.type === "childList") {
@@ -50,7 +53,7 @@ class SpacingOptionPlugin extends Plugin {
                 return false;
             }
         }
-        if (record.type === "attributes") {
+        if (["attributes", "classList"].includes(record.type)) {
             if (record.target.matches(".o_we_grid_preview")) {
                 return false;
             }
