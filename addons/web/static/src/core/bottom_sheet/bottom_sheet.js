@@ -24,7 +24,7 @@ export class BottomSheet extends Component {
         fixedPosition: false,
         setActiveElement: false,
 
-        // Unused Pops but needed as to be the same as Popover
+        // Unused Props but needed as to be the same as Popover
         position: null,
     };
 
@@ -61,41 +61,6 @@ export class BottomSheet extends Component {
         slots: { optional: true, type: Object },
     };
 
-    // SRI Props
-    // static props = {
-    //     // id: { type: Number, optional: true },
-    //     title: { type: String, optional: true },
-    //     // showBackBtn: { type: Boolean, optional: true },
-    //     // showCloseBtn: { type: Boolean, optional: true },
-    //     // withBodyPadding: { type: Boolean, optional: true },
-    //     // initialHeightPercent: { type: Number, optional: true },
-    //     // maxHeightPercent: { type: Number, optional: true },
-    //     // startExpanded: { type: Boolean, optional: true },
-    //     // preventDismissOnContentScroll: { type: Boolean, optional: true },
-    //     // sheetClasses: { type: String, optional: true },
-    //     onClose: { type: Function, optional: true },
-    //     onBack: { type: Function, optional: true },
-    //     slots: { type: Object, optional: true },
-    //     component: { optional: true },
-    //     componentProps: { type: Object, optional: true },
-    //     // isNestedSheet: { type: Boolean, optional: true },
-    //     // removeAllSheets: { type: Function, optional: true },
-    // };
-    //
-    // static defaultProps = {
-    //     title: "",
-    //     // showBackBtn: false,
-    //     // showCloseBtn: false,
-    //     // withBodyPadding: true,
-    //     // initialHeightPercent: 50,
-    //     // maxHeightPercent: 90,
-    //     // startExpanded: false,
-    //     // preventDismissOnContentScroll: false,
-    //     // sheetClasses: "",
-    //     // isNestedSheet: false,
-    //     // removeAllSheets: () => {},
-    // };
-
     setup() {
         this.initialHeightPercent = 50;
         this.maxHeightPercent = 90;
@@ -126,9 +91,6 @@ export class BottomSheet extends Component {
             extended: null,
         };
 
-        // Footer's flag
-        this.hasFooter = false;
-
         // Popover Ref Requirement
         useForwardRefToParent("ref");
 
@@ -138,11 +100,9 @@ export class BottomSheet extends Component {
         this.sheetRef = useRef("sheet");
         this.sheetBodyRef = useRef("ref");
         this.sheetHandleRef = useRef("sheetHandle");
-        // this.bottomSheetService = useService("bottomSheet");
 
         // Create throttled version for onScroll
         this.throttledOnScroll = useThrottleForAnimation(this.onScroll.bind(this));
-        this.throttledBodyScroll = useThrottleForAnimation(this.onBodyScroll.bind(this));
 
         // Create debounced function to enable snapping
         this.enableSnapping = useDebounced(() => {
@@ -186,9 +146,6 @@ export class BottomSheet extends Component {
             return;
         }
 
-        // Step 0: Handle Footer
-        this.handleFooter();
-
         // Step 1: Take measurements
         this.measureDimensions();
 
@@ -215,28 +172,6 @@ export class BottomSheet extends Component {
             this.sheetHandleRef.el?.focus();
             this.state.isSnappingEnabled = true;
         }, animationDuration);
-    }
-
-    /**
-     * Updates dimensions when viewport changes
-     * Recalculates measurements and snap points while preserving extended state
-     */
-    handleFooter() {
-        const footerEl = this.sheetBodyRef.el.querySelector(".o_bottom_sheet_footer");
-        if (!footerEl) {
-            return;
-        }
-
-        const footerPlaceholder = document.createElement("div");
-
-        // Force a reflow and measure
-        // footerEl.offsetHeight; // Not need as getBoundingClientRect will trigger a reflow normally
-        const boundingClientRect = footerEl.getBoundingClientRect();
-        footerPlaceholder.style.height = `${boundingClientRect.height}px`;
-
-        this.sheetBodyRef.el.after(footerPlaceholder);
-        this.scrollRailRef.el.appendChild(footerEl);
-        this.hasFooter = true;
     }
 
     /**
@@ -340,7 +275,6 @@ export class BottomSheet extends Component {
      * Sets CSS variables and styles based on measurements and snap points
      */
     applyDimensions() {
-        const container = this.containerRef.el;
         const rail = this.scrollRailRef.el;
         const sheet = this.sheetRef.el;
         const viewportHeight = this.measurements.viewportHeight;
@@ -361,14 +295,6 @@ export class BottomSheet extends Component {
 
         // Reset max-height to appropriate value
         sheet.style.maxHeight = `${maxHeightPercent}dvh`;
-
-        if (this.hasFooter) {
-            container.classList.toggle(
-                "o_bottom_sheet_footer_shadow",
-                this.measurements.contentRequiresScrolling || this.snapPoints.extended
-            );
-            container.classList.add("o_bottom_sheet_has_footer");
-        }
     }
 
     /**
@@ -416,14 +342,9 @@ export class BottomSheet extends Component {
      */
     setupEventHandlers() {
         const scrollRail = this.scrollRailRef.el;
-        const bodyContent = this.sheetBodyRef.el;
 
         // Add scroll event listener
         scrollRail.addEventListener("scroll", this.throttledOnScroll);
-
-        if (this.hasFooter && this.measurements.contentRequiresScrolling) {
-            bodyContent.addEventListener("scroll", this.throttledBodyScroll);
-        }
     }
 
     /**
@@ -462,10 +383,6 @@ export class BottomSheet extends Component {
                 if (this.sheetBodyRef.el) {
                     this.sheetBodyRef.el.style.overflow = "auto";
                 }
-
-                if (this.hasFooter && !this.measurements.contentRequiresScrolling) {
-                    this.containerRef.el.classList.remove("o_bottom_sheet_footer_shadow");
-                }
             }
         }
         // At initial position
@@ -482,10 +399,6 @@ export class BottomSheet extends Component {
                 if (this.state.isInForcedExtendedMode) {
                     this.state.isInForcedExtendedMode = false;
                 }
-
-                if (this.hasFooter && extended) {
-                    this.containerRef.el.classList.add("o_bottom_sheet_footer_shadow");
-                }
             }
         }
 
@@ -493,19 +406,6 @@ export class BottomSheet extends Component {
         if (wasExtended !== this.state.isExtended) {
             this.updateContentScrolling(this.state.isExtended);
         }
-    }
-
-    /**
-     * Handles scroll events on the body element
-     */
-    onBodyScroll() {
-        if (!this.sheetBodyRef.el) {
-            return;
-        }
-
-        const sheetBody = this.sheetBodyRef.el;
-        const showShadow = sheetBody.scrollHeight - sheetBody.scrollTop - sheetBody.clientHeight;
-        this.containerRef.el.classList.toggle("o_bottom_sheet_footer_shadow", showShadow);
     }
 
     /**
@@ -601,19 +501,8 @@ export class BottomSheet extends Component {
 
         // Wait for animation to complete
         setTimeout(() => {
-            if (this.props.id !== undefined) {
-                // this.bottomSheetService.remove(this.props.id);
-            }
-
             if (this.props.close) {
                 this.props.close();
-            }
-
-            // TODO removeAllSheets props
-            // If there are other sheets in the stack, remove them
-            if (this.props.removeAllSheets) {
-                // Only remove other sheets, no need to remove the current one
-                this.props.removeAllSheets(false);
             }
         }, animationDuration);
     }
