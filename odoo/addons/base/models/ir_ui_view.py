@@ -142,6 +142,8 @@ class IrUiView(models.Model):
     _description = 'View'
     _order = "priority,name,id"
     _allow_sudo_commands = False
+    _parent_store = True
+    _parent_name = 'inherit_id'
 
     name = fields.Char(string='View Name', required=True)
     model = fields.Char(index=True)
@@ -169,6 +171,10 @@ class IrUiView(models.Model):
                                                                          Useful to (soft) reset a broken view.""")
     inherit_id = fields.Many2one('ir.ui.view', string='Inherited View', ondelete='restrict', index=True)
     inherit_children_ids = fields.One2many('ir.ui.view', 'inherit_id', string='Views which inherit from this one')
+    parent_path = fields.Char(index=True)
+    parent_ids = fields.Many2many('ir.ui.view', compute='_compute_parent_ids')
+    root_id = fields.Many2one('ir.ui.view', compute='_compute_root_id')
+    hierarchy_ids = fields.Many2many('ir.ui.view', compute='_compute_hierarchy_ids')
     model_data_id = fields.Many2one('ir.model.data', string="Model Data",
                                     compute='_compute_model_data_id', search='_search_model_data_id')
     xml_id = fields.Char(string="External ID", compute='_compute_xml_id',
@@ -622,14 +628,6 @@ actual arch.
     #------------------------------------------------------
     # Inheritance mecanism
     #------------------------------------------------------
-    @api.model
-    def _get_inheriting_views_domain(self):
-        """ Return a domain to filter the sub-views to inherit from. """
-        tree_cut_off_view = self.env.context.get("ir_ui_view_tree_cut_off_view")
-        if not tree_cut_off_view:
-            return [('active', '=', True)]
-        else:
-            return ['|', ('active', '=', True), ('id','=', tree_cut_off_view.id)]
 
     @api.model
     def _get_filter_xmlid_query(self):
@@ -639,58 +637,52 @@ actual arch.
                   WHERE res_id IN %(res_ids)s AND model = 'ir.ui.view' AND module IN %(modules)s
                """
 
+    @api.depends('parent_path')
+    def _compute_parent_ids(self):
+        for view in self:
+            view.parent_ids = self.browse(map(int, view.parent_path.split('/')[0:-1]))
+
+    @api.depends('parent_ids')
+    def _compute_root_id(self):
+        for view in self:
+            view.root_id = (view.parent_ids or view.root_id)[0]
+
+    @api.depends('parent_path', 'inherit_children_ids')
+    def _compute_hierarchy_ids(self):
+        all_parented_ids = [map(int, view.parent_path.split('/')[0:-1]) for view in self]
+        all_parented = self.browse(unique(view_id for view_ids in all_parented_ids for view_id in view_ids))
+
+        domain = Domain.OR(Domain('parent_path', '=like', f'{view.parent_path}%') for view in all_parented)
+        field_names = [f.name for f in self._fields.values() if f.prefetch is True]
+        all_tree_views = self.with_context(active_test=False).search_fetch(domain, field_names, order='priority, id')
+
+        def get_inheriting_views(root):
+            children = root
+            for view in all_tree_views:
+                if view.inherit_id == root and view.model == root.model and view.mode != 'primary':
+                    children |= get_inheriting_views(view)
+            return children
+
+        for view in self:
+            hierarchy = [
+                item
+                for parent in (view | view.parent_ids)
+                for item in get_inheriting_views(parent)
+            ]
+            view.hierarchy_ids = all_tree_views.filtered(lambda view: view in hierarchy)
+
     def _get_inheriting_views(self):
         """
         Determine the views that inherit from the current recordset, and return
         them as a recordset, ordered by priority then by id.
         """
-        if not self.ids:
-            return self.browse()
-        domain = self._get_inheriting_views_domain()
-        query = self._search(domain)
-        where_clause = query.where_clause
-        assert query.from_clause == SQL.identifier('ir_ui_view'), f"Unexpected from clause: {query.from_clause}"
-
-        field_names = [f.name for f in self._fields.values() if f.prefetch is True]
-        sql_field_names = SQL(', ').join(SQL("%s AS %s", self._field_to_sql('ir_ui_view', name), SQL.identifier(name)) for name in field_names)
-
-        query = SQL("""
-            WITH RECURSIVE ir_ui_view_inherits AS (
-                SELECT ir_ui_view.id, %(sql_field_names)s
-                FROM ir_ui_view
-                WHERE id IN %(ids)s AND (%(where_clause)s)
-            UNION
-                SELECT ir_ui_view.id, %(sql_field_names)s
-                FROM ir_ui_view
-                INNER JOIN ir_ui_view_inherits parent ON parent.id = ir_ui_view.inherit_id
-                WHERE coalesce(ir_ui_view.model, '') = coalesce(parent.model, '')
-                      AND ir_ui_view.mode = 'extension'
-                      AND (%(where_clause)s)
-            )
-            SELECT
-                v.id, %(field_names)s
-            FROM ir_ui_view_inherits as v
-            ORDER BY v.priority, v.id
-        """,
-            sql_field_names=sql_field_names,
-            field_names=SQL(', ').join(SQL.identifier('v', f) for f in field_names),
-            ids=tuple(self.ids), where_clause=where_clause)
-        # ORDER BY v.priority, v.id:
-        # 1/ sort by priority: abritrary value set by developers on some
-        #    views to solve "dependency hell" problems and force a view
-        #    to be combined earlier or later. e.g. all views created via
-        #    studio have a priority=99 to be loaded last.
-        # 2/ sort by view id: the order the views were inserted in the
-        #    database. e.g. base views are placed before stock ones.
-
-        rows = self.env.execute_query(query)
-        views = self.browse(row[0] for row in rows)
-
-        # optimization: fill in cache of inherit_id and mode
-        for index, f in enumerate(field_names):
-            self._fields[f]._insert_cache(views, [row[1 + index] for row in rows])
-
-        return views
+        if not self._context.get('active_test', True):
+            return self.hierarchy_ids
+        tree_cut_off_view = self.env.context.get("ir_ui_view_tree_cut_off_view")
+        if tree_cut_off_view:
+            return self.hierarchy_ids.filtered(lambda view: view.active or view == tree_cut_off_view)
+        else:
+            return self.hierarchy_ids.filtered('active')
 
     def _filter_loaded_views(self, check_view_ids):
         """
@@ -961,21 +953,9 @@ actual arch.
 
     def _get_combined_archs(self):
         """ Return the arch of ``self`` (as an etree) combined with its inherited views. """
-        parented = []
-        roots = self.env['ir.ui.view']
-        for root in self:
-            parented.append(view_ids := [])
-            while True:
-                view_ids.append(root.id)
-                if not root.inherit_id:
-                    roots += root
-                    break
-                root = root.inherit_id
-        views = self.env['ir.ui.view'].browse(unique(view_id for view_ids in parented for view_id in view_ids))
-
         # Map each node to its children nodes. Note that all children nodes are
         # part of a single prefetch set, which is all views to combine.
-        all_tree_views = views._get_inheriting_views()
+        all_tree_views = self._get_inheriting_views()
 
         # During an upgrade, we can only use the views that have been
         # fully upgraded already.
@@ -985,26 +965,24 @@ actual arch.
             # Otherwise, inherited views could not find elements created in
             # their direct parents if that parent is defined in the same module
             # introduce check_view_ids in context
-            check_view_ids += views.ids
+            check_view_ids += self.parent_ids.ids
             all_tree_views = all_tree_views._filter_loaded_views(set(check_view_ids))
 
-        # get the global children views then get hierarchy for each views
-        children_views = collections.defaultdict(list)
-        for view in all_tree_views:
-            children_views[view.inherit_id].append(view)
-
-        def get_hierarchy(root, parented_ids, _hierarchy=None):
+        def get_hierarchy(view, _parented=None, _hierarchy=None):
             if _hierarchy is None:
+                _parented = view.parent_ids | view
                 _hierarchy = collections.defaultdict(list)
-            _hierarchy[root.inherit_id].append(root)
-            for child in children_views[root]:
-                if child.id in parented_ids or child.mode != 'primary':
-                    get_hierarchy(child, parented_ids, _hierarchy)
+                view = view.root_id
+
+            _hierarchy[view.inherit_id].append(view)
+            for child in all_tree_views:
+                if child.inherit_id == view and (child in _parented or child.mode != 'primary'):
+                    get_hierarchy(child, _parented, _hierarchy)
             return _hierarchy
 
         return [
-            root.with_prefetch(all_tree_views._prefetch_ids)._combine(hierarchy)
-            for root, hierarchy in zip(roots, map(get_hierarchy, roots, parented))
+            view.root_id.with_prefetch(all_tree_views._prefetch_ids)._combine(get_hierarchy(view))
+            for view in self
         ]
 
     def _get_view_refs(self, node):

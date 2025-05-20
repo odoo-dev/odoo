@@ -315,24 +315,14 @@ class IrUiView(models.Model):
         return extensions.filter_duplicate()
 
     @api.model
-    def _get_inheriting_views_domain(self):
-        domain = super()._get_inheriting_views_domain()
-        current_website = self.env['website'].browse(self._context.get('website_id'))
-        website_views_domain = current_website.website_domain()
-        # when rendering for the website we have to include inactive views
-        # we will prefer inactive website-specific views over active generic ones
-        if current_website:
-            domain = [leaf for leaf in domain if 'active' not in leaf]
-        return expression.AND([website_views_domain, domain])
-
-    @api.model
     def _get_inheriting_views(self):
-        if not self._context.get('website_id'):
-            return super()._get_inheriting_views()
-
-        views = super(IrUiView, self.with_context(active_test=False))._get_inheriting_views()
-        # prefer inactive website-specific views over active generic ones
-        return views.filter_duplicate().filtered('active')
+        website_id = self.env.context.get('website_id')
+        website_domain = self.env['website'].website_domain(website_id=website_id)
+        if website_id:
+            # prefer inactive website-specific views over active generic ones
+            views = super(IrUiView, self.with_context(active_test=False))._get_inheriting_views()
+            return views.filtered_domain(website_domain).filter_duplicate().filtered('active')
+        return super()._get_inheriting_views().filtered_domain(website_domain)
 
     @api.model
     def _get_filter_xmlid_query(self):
