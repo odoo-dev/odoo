@@ -43,8 +43,21 @@ export class UncaughtCorsError extends UncaughtError {
 }
 
 export const errorService = {
+    isUnloadingPage: false,
+    _appendBeforeUnload() {
+        window.addEventListener("beforeunload", () => {
+            this.isUnloadingPage = true;
+            // restore after 30 seconds
+            browser.setTimeout(() => (this.isUnloadingPage = false), 30000);
+        });
+    },
     start(env) {
+        this._appendBeforeUnload();
         function handleError(uncaughtError, retry = true) {
+            if (this.isUnloadingPage) {
+                uncaughtError.event.preventDefault();
+                return;
+            }
             function shouldLogError() {
                 // Only log errors that are relevant business-wise, following the heuristics:
                 // Error.event and Error.traceback have been assigned

@@ -4,9 +4,14 @@ import { isVisible as isElemVisible } from "@web/core/utils/ui";
 import { fullTraceback, fullAnnotatedTraceback } from "@web/core/errors/error_utils";
 import { registry } from "@web/core/registry";
 import { Component, whenReady } from "@odoo/owl";
+import { errorService } from "@web/core/errors/error_service";
+import { patch } from "@web/core/utils/patch";
 
 const consoleError = console.error;
-
+// disable beforeunload on errorservice to avoid timeout
+patch(errorService, {
+    _appendBeforeUnload() {},
+});
 function setQUnitDebugMode() {
     whenReady(() => document.body.classList.add("debug")); // make the test visible to the naked eye
     QUnit.config.debug = true; // allows for helper functions to behave differently (logging, the HTML element in which the test occurs etc...)
