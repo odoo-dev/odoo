@@ -596,6 +596,29 @@ describe("colorElement", () => {
             contentAfter: `<div style='background-image: url("https://example.com/image.png"), ${greenToBlueGradient};'>a</div>`,
         });
     });
+    test("should keep custom gradient when switching o_cc class", async () => {
+        await testEditor({
+            contentBefore: `<div class="">a</div>`,
+            stepFunction: (editor) => {
+                editor.shared.color.colorElement(
+                    editor.editable.firstChild,
+                    "o_cc1",
+                    "backgroundColor"
+                );
+                editor.shared.color.colorElement(
+                    editor.editable.firstChild,
+                    greenToBlueGradient,
+                    "backgroundColor"
+                );
+                editor.shared.color.colorElement(
+                    editor.editable.firstChild,
+                    "o_cc2",
+                    "backgroundColor"
+                );
+            },
+            contentAfter: `<div class="o_cc2" style="background-image: ${greenToBlueGradient};">a</div>`,
+        });
+    });
 
     describe("with o_cc1 gradient defined", () => {
         before(() => {

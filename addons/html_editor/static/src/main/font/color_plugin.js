@@ -550,15 +550,14 @@ function removePresetGradient(element) {
     const oldBackgroundImage = element.style["background-image"];
     const parts = backgroundImageCssToParts(oldBackgroundImage);
     const currentGradient = parts.gradient;
-    delete parts.gradient;
-    element.style["background-image"] = `none !important`;
+    element.style.removeProperty("background-image");
     const styleWithoutGradient = getComputedStyle(element);
     const presetGradient = backgroundImageCssToParts(styleWithoutGradient.backgroundImage).gradient;
     if (presetGradient !== currentGradient) {
-        parts.gradient = currentGradient;
         const withGradient = backgroundImagePartsToCss(parts);
         element.style["background-image"] = withGradient === "none" ? "" : withGradient;
     } else {
+        delete parts.gradient;
         const withoutGradient = backgroundImagePartsToCss(parts);
         element.style["background-image"] = styleWithoutGradient === "none" ? "" : withoutGradient;
     }
