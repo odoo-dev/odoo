@@ -406,7 +406,7 @@ export class SelfOrder extends Reactive {
             (p) => p.pos_categ_ids.length === 0 && !excludedProductTemplateIds.has(p.id)
         );
 
-        if (productWoCat.length) {
+        if (productWoCat.length && !this.config.iface_available_categ_ids.length) {
             this.productCategories.push({
                 id: 0,
                 hour_after: 0,

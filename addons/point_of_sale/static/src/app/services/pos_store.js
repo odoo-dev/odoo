@@ -2347,9 +2347,18 @@ export class PosStore extends WithLazyGetterTrap {
             return [];
         }
         const excludedProductIds = this.getExcludedProductIds();
+        const posRestrictedCateg = this.config.iface_available_categ_ids;
 
         list = list
-            .filter((product) => !excludedProductIds.includes(product.id) && product.canBeDisplayed)
+            .filter(
+                (product) =>
+                    !excludedProductIds.includes(product.id) &&
+                    product.canBeDisplayed &&
+                    (posRestrictedCateg.length == 0 ||
+                        product.pos_categ_ids.some((categ) =>
+                            posRestrictedCateg.map((c) => c.id).includes(categ.id)
+                        ))
+            )
             .sort((a, b) => {
                 // Sort in the same order as what we receive (look _load_product_with_domain)
                 if (a.sequence !== b.sequence) {
