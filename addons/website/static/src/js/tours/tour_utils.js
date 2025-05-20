@@ -370,6 +370,9 @@ export function insertSnippet(snippet, position = "bottom") {
             noPrepend: true,
             tooltipPosition: "top",
             run: "click",
+        },
+        {
+            trigger: ":iframe:not(:has(.o_loading_screen))",
         });
     } else {
         insertSnippetSteps.push({
@@ -379,6 +382,7 @@ export function insertSnippet(snippet, position = "bottom") {
             run: "drag_and_drop :iframe #wrapwrap > footer",
         });
     }
+
     return insertSnippetSteps;
 }
 
