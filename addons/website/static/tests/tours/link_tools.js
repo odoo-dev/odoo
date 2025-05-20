@@ -7,6 +7,7 @@ import {
     registerWebsitePreviewTour,
 } from '@website/js/tours/tour_utils';
 import { boundariesIn, setSelection, nodeSize } from '@web_editor/js/editor/odoo-editor/src/utils/utils';
+import { changeOptionInPopover } from '../../src/js/tours/tour_utils';
 
 const clickOnImgStep = {
     content: "Click somewhere else to save.",
@@ -17,14 +18,12 @@ const clickOnImgStep = {
 const clickOnLink = (selector) => ({
     content: "Click on the link",
     trigger: selector,
-    async run(actions) {
-        await actions.click();
-        const el = actions.anchor;
-        if (el) {
-            const sel = el.ownerDocument.getSelection();
-            sel.collapse(el.childNodes[1], 1);
-            el.focus();
-        }
+    async run(helpers) {
+        await helpers.click();
+        const el = this.anchor;
+        const sel = el.ownerDocument.getSelection();
+        sel.collapse(el, 0);
+        el.focus();
     },
 });
 
@@ -157,6 +156,12 @@ registerWebsitePreviewTour('link_tools', {
     ...clickOnSave(),
     // 3. Edit a link after saving the page.
     ...clickOnEditAndWaitEditMode(),
+    {
+        trigger: "body",
+        async run() {
+            await new Promise((r) => setTimeout(r, 1000));
+        }
+    },
     clickOnLink(":iframe .s_text_image a[href='http://odoo.be']:contains('odoo website')"),
     {
         content: "Click on edit button in link popover",
@@ -249,8 +254,8 @@ registerWebsitePreviewTour('link_tools', {
         trigger: ':iframe .s_three_columns .row > :nth-child(1) figure > img',
     },
     // 6. Add mega menu with Cards template and edit URL on text-selected card.
-    clickOnElement("menu link", ":iframe header .nav-item a.nav-link"),
-    clickOnElement("'Edit menu' icon", ":iframe .o_edit_menu_popover .fa-sitemap"),
+    clickOnElement("menu link", ":iframe header .nav-item a.nav-link span"),
+    clickOnElement("'Edit menu' icon", ".o-we-linkpopover .js_edit_menu"),
     {
         trigger: ".o_website_dialog:visible",
     },
@@ -291,13 +296,31 @@ registerWebsitePreviewTour('link_tools', {
         run: "click",
     },
     clickOnElement("mega menu", ":iframe header .o_mega_menu_toggle"),
-    changeOption("MegaMenuLayout", "we-toggler"),
-    changeOption("MegaMenuLayout", '[data-select-label="Cards"]'),
-    clickOnElement("card's text", ":iframe header .s_mega_menu_cards span"),
+    clickOnElement("mega menu", ":iframe header .o_mega_menu"),
+    ...changeOptionInPopover("Mega Menu", "Template", "[title='Cards']"),
+    // changeOption("MegaMenuLayout", "we-toggler"),
+    // changeOption("MegaMenuLayout", '[data-select-label="Cards"]'),
+    // clickOnElement("card's text", ":iframe header .s_mega_menu_cards span"),
+    clickOnLink(":iframe header .s_mega_menu_cards span"),
+    // {
+    //     content: "Enter an URL",
+    //     trigger: "#o_link_dialog_url_input",
+    //     run: "edit https://www.odoo.com",
+    // },
     {
-        content: "Enter an URL",
-        trigger: "#o_link_dialog_url_input",
-        run: "edit https://www.odoo.com",
+        content: "Click on edit button in link popover",
+        trigger: ".o-we-linkpopover .o_we_edit_link",
+        run: "click",
+    },
+    {
+        content: "Change content (editing the label input) to odoo website_2",
+        trigger: ".o-we-linkpopover .o_we_href_input_link",
+        run: 'edit https://www.odoo.com',
+    },
+    {
+        content: "Click on apply button in link popover",
+        trigger: ".o-we-linkpopover .o_we_apply_link",
+        run: "click",
     },
     {
         content: "Check nothing is lost",
@@ -329,8 +352,14 @@ registerWebsitePreviewTour('link_tools', {
     },
     {
         content: "Open link tools",
-        trigger: "#toolbar #create-link",
-        run: "click",
+        trigger: ".o-we-toolbar div[name='link'] button",
+        run: 'click',
+    },
+    // TODO: remove this step once the issue begin resolved
+    {
+        content: "Change content (editing the label input) to odoo website_2",
+        trigger: ".o-we-linkpopover .o_we_href_input_link",
+        run: 'edit odoo.com',
     },
     clickOnImgStep,
     {
@@ -339,11 +368,7 @@ registerWebsitePreviewTour('link_tools', {
         content: "Check that link was created",
         trigger: ":iframe .s_text_image p a[href='https://odoo.com']:contains('odoo.com')",
     },
-    {
-        content: "Click on link to open the link tools",
-        trigger: ":iframe .s_text_image p a[href='https://odoo.com']",
-        run: "click",
-    },
+    clickOnLink(":iframe .s_text_image p a[href='https://odoo.com']"),
     // 8. Check that http links are not coerced to https and vice-versa.
     {
         content: "Change URL to https",
@@ -369,7 +394,7 @@ registerWebsitePreviewTour('link_tools', {
         trigger: "#o_link_dialog_url_input",
         run() {
             // TODO: update the tour to use helpers.edit("https://odoo.com")
-            this.anchor.value = "https://odoo.com";
+            this.anchor.value = "http://odoo.com";
             this.anchor.dispatchEvent(new InputEvent("input", { bubbles: true }));
         }
     },
