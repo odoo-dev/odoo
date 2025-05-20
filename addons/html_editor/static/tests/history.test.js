@@ -870,6 +870,22 @@ describe("unobserved mutations", () => {
             expect(textNode.textContent).toBe("a");
         });
     });
+    describe("childList", () => {
+        test("unobserved childList mutations should not affect history", async () => {
+            const { editor } = await setupEditor(`<p><span></span></p>`);
+            /** @type {HTMLElement} */
+            const parent = editor.editable.querySelector("p span");
+            const childA = editor.document.createElement("span");
+            const childB = editor.document.createElement("span");
+            withAddStep(editor, () => parent.append(childA));
+            editor.shared.history.ignoreDOMMutations(() => parent.append(childB));
+            withAddStep(editor, () => parent.replaceChildren());
+            editor.shared.history.undo();
+            const childNodes = [...parent.childNodes];
+            expect(childNodes.length).toBe(1);
+            expect(childNodes[0]).toBe(childA);
+        });
+    });
 });
 
 describe("mutations order", () => {
