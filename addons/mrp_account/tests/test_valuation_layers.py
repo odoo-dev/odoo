@@ -610,3 +610,53 @@ class TestMrpStockValuation(TestStockValuationBase):
         ], order='date, id')
         self.assertEqual(out_aml.credit, 100)
         self.assertEqual(in_aml.product_id, self.product1)
+
+    def test_average_cost_after_unbuild(self):
+        """
+        Ensures, that a final product aswell as the components are reavaluated
+        during an unbuild as the same rate as during the MO.
+        """
+        avco_category = self.env['product.category'].create({
+            'name': 'AVCO',
+            'property_cost_method': 'average',
+            'property_valuation': 'real_time',
+        })
+        comp_1, final_product = self.product1, self.product2
+        (comp_1 |final_product).categ_id = avco_category
+        self._make_in_move(comp_1,  quantity=2, unit_cost=100)
+        self._make_in_move(final_product, quantity=1, unit_cost=100)
+        final_product_bom = self.env['mrp.bom'].create({
+            'product_tmpl_id': final_product.product_tmpl_id.id,
+            'type': 'normal',
+            'bom_line_ids': [(0, 0, {
+                'product_id': comp_1.id,
+                'product_qty': 1,
+            })],
+        })
+        mo = self.env['mrp.production'].create({
+            'product_qty': 1.0,
+            'bom_id': final_product_bom.id,
+        })
+        mo.action_confirm()
+        mo.button_mark_done()
+        self._make_in_move(comp_1,  quantity=1, unit_cost=200)
+        self._make_in_move(final_product, quantity=2, unit_cost=200)
+        action = mo.button_unbuild()
+        wizard = Form(self.env[action['res_model']].with_context(action['context']))
+        wizard.product_qty = 1
+        unbuild = wizard.save()
+        unbuild.action_validate()
+        self.assertEqual(final_product.standard_price, 166.67)
+        self.assertEqual(comp_1.standard_price, 133.33)
+        # change the quantity on the stock move of the unbuild for the component
+        unbuild.produce_line_ids.filtered(lambda l: l.product_id == comp_1).quantity = 0
+        # check that the new stock valuation layer created has a unit_cost of 100 (the value of comp_1
+        # at the time of the MO) and not 133 (the current standard_price)
+        self.assertEqual(comp_1.standard_price, 150)
+        # check the svl values
+        unbuild_svls = self.env['stock.valuation.layer'].search([('reference', '=', unbuild.name)])
+        self.assertRecordValues(unbuild_svls.sorted(lambda svl: (svl.product_id.id, svl.quantity)), [
+            {'product_id': comp_1.id, 'quantity': -1.0, 'value': -100, 'unit_cost': 100},
+            {'product_id': comp_1.id, 'quantity': 1.0, 'value': 100, 'unit_cost': 100},
+            {'product_id': final_product.id, 'quantity': -1.0, 'value': -100, 'unit_cost': 100},
+        ])

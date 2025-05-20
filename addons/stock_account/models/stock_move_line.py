@@ -103,8 +103,8 @@ class StockMoveLine(models.Model):
                 move.product_id._run_fifo_vacuum(move.company_id)
         elif (move._is_in() and diff < 0) or (move._is_out() and diff > 0):
             stock_valuation_layers |= move._create_out_svl(forced_quantity=qty)
-            if move.product_id.lot_valuated:
-                move._product_price_update_after_done()
+            if move._should_update_price_after_done():
+               move._product_price_update_after_done()
         elif (move._is_dropshipped() and diff > 0) or (move._is_dropshipped_returned() and diff < 0):
             stock_valuation_layers |= move._create_dropshipped_svl(forced_quantity=qty)
         elif (move._is_dropshipped() and diff < 0) or (move._is_dropshipped_returned() and diff > 0):

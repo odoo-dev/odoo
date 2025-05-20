@@ -371,7 +371,7 @@ class StockMove(models.Model):
         stock_valuation_layers._validate_accounting_entries()
         stock_valuation_layers._validate_analytic_accounting_entries()
 
-        valued_moves['out'].filtered(lambda m: m.product_id.lot_valuated).sudo()._product_price_update_after_done()
+        valued_moves['out'].filtered(lambda m: m._should_update_price_after_done()).sudo()._product_price_update_after_done()
 
         stock_valuation_layers._check_company()
 
@@ -458,8 +458,6 @@ class StockMove(models.Model):
         """ Outgoing moves lot valuation should recompute the standard price of the product as the
         layer price unit may differ from the product price unit """
         for product, layers in self.stock_valuation_layer_ids.grouped('product_id').items():
-            if all(not m._is_out() for m in layers.stock_move_id) or not product.lot_valuated:
-                continue
             if layers.with_company(layers.company_id).product_id.cost_method == 'standard':
                 continue
             product_qty = product.sudo().with_company(layers.company_id).quantity_svl
@@ -473,6 +471,10 @@ class StockMove(models.Model):
             # write the standard price, as superuser_id because a warehouse manager may not have the right to write on products
             new_std_price = product_value / product_qty
             product.with_company(layers.company_id.id).with_context(disable_auto_svl=True).sudo().write({'standard_price': new_std_price})
+
+    def _should_update_price_after_done(self):
+        self.ensure_one()
+        return self.product_id.lot_valuated and any(m._is_out() for m in self.stock_valuation_layer_ids.stock_move_id)
 
     def _get_accounting_data_for_valuation(self):
         """ Return the accounts and journal to use to post Journal Entries for
