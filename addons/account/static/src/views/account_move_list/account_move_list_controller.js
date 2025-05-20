@@ -30,8 +30,8 @@ export class AccountMoveListController extends FileUploadListController {
         return this.orm.call("account.move", "get_extra_print_items", [this.actionMenuProps.getActiveIds()]);
     }
 
-    async onDeleteSelectedRecords() {
-        const deleteConfirmationDialogProps = this.deleteConfirmationDialogProps;
+    async getDeleteConfirmationDialogProps() {
+        const deleteConfirmationDialogProps = await this.getDeleteConfirmationDialogProps();
         const selectedResIds = await this.model.root.getResIds(true);
         if (this.props.resModel === "account.move") {
             let body = deleteConfirmationMessage;
@@ -40,8 +40,6 @@ export class AccountMoveListController extends FileUploadListController {
             }
             deleteConfirmationDialogProps.body = await this.account_move_service.getDeletionDialogBody(body, selectedResIds);
         }
-        this.deleteRecordsWithConfirmation(
-            deleteConfirmationDialogProps
-        );
+        return deleteConfirmationDialogProps;
     }
 }

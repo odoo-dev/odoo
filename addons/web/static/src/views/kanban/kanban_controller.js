@@ -31,6 +31,7 @@ import {
     useState,
     useSubEnv,
 } from "@odoo/owl";
+import { isArchiveAvailable } from "../utils";
 
 const QUICK_CREATE_FIELD_TYPES = ["char", "boolean", "many2one", "selection", "many2many"];
 
@@ -200,12 +201,7 @@ export class KanbanController extends Component {
         onWillStart(async () => {
             this.isExportEnable = await user.hasGroup("base.group_allow_export");
         });
-        this.archiveEnabled =
-            "active" in this.props.fields
-                ? !this.props.fields.active.readonly
-                : "x_active" in this.props.fields
-                ? !this.props.fields.x_active.readonly
-                : false;
+        this.archiveEnabled = isArchiveAvailable(this.props.fields);
         useSubEnv({ model: this.model });
         this.exportRecords = useExportRecords(this.env, this.props.context, () =>
             this.getExportableFields()
@@ -330,7 +326,7 @@ export class KanbanController extends Component {
         return {};
     }
 
-    get deleteConfirmationDialogProps() {
+    async getDeleteConfirmationDialogProps() {
         return {};
     }
 
@@ -382,12 +378,11 @@ export class KanbanController extends Component {
                 icon: "fa fa-trash-o",
                 description: _t("Delete"),
                 class: "text-danger",
-                callback: () =>
-                    this.model.root.deleteRecordsWithConfirmation(
-                        this.deleteConfirmationDialogProps,
-                        null,
-                        this.archiveEnabled
-                    ),
+                callback: async () =>
+                    this.model.root.deleteRecordsWithConfirmation({
+                        dialogProps: await this.getDeleteConfirmationDialogProps(),
+                        fallbackOnArchive: this.archiveEnabled,
+                    }),
             },
         };
     }
@@ -396,8 +391,12 @@ export class KanbanController extends Component {
         return evaluateBooleanExpr(modifier, { context: this.props.context });
     }
 
-    deleteRecord(record) {
-        this.model.root.deleteRecordsWithConfirmation(this.deleteConfirmationDialogProps, [record], this.archiveEnabled);
+    async deleteRecord(record) {
+        this.model.root.deleteRecordsWithConfirmation({
+            dialogProps: await this.getDeleteConfirmationDialogProps(),
+            fallbackOnArchive: this.archiveEnabled,
+            records: [record],
+        });
     }
 
     async openRecord(record, { newWindow } = {}) {

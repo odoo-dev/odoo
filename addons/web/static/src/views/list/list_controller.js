@@ -34,6 +34,7 @@ import {
     useState,
     useSubEnv,
 } from "@odoo/owl";
+import { isArchiveAvailable } from "../utils";
 
 // -----------------------------------------------------------------------------
 
@@ -114,12 +115,7 @@ export class ListController extends Component {
             }
         });
 
-        this.archiveEnabled =
-            "active" in this.props.fields
-                ? !this.props.fields.active.readonly
-                : "x_active" in this.props.fields
-                ? !this.props.fields.x_active.readonly
-                : false;
+        this.archiveEnabled = isArchiveAvailable(this.props.fields);
         useSubEnv({ model: this.model }); // do this in useModelWithSampleData?
         useViewButtons(this.rootRef, {
             beforeExecuteAction: this.beforeExecuteActionButton.bind(this),
@@ -251,7 +247,7 @@ export class ListController extends Component {
         return {};
     }
 
-    get deleteConfirmationDialogProps() {
+    getDeleteConfirmationDialogProps() {
         return {};
     }
 
@@ -266,8 +262,11 @@ export class ListController extends Component {
         );
     }
 
-    onDeleteSelectedRecords() {
-        this.model.root.deleteRecordsWithConfirmation(this.deleteConfirmationDialogProps, null, this.archiveEnabled);
+    async onDeleteSelectedRecords() {
+        this.model.root.deleteRecordsWithConfirmation({
+            dialogProps: await this.getDeleteConfirmationDialogProps(),
+            fallbackOnArchive: this.archiveEnabled,
+        });
     }
 
     /**

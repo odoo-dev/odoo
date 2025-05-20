@@ -1,6 +1,9 @@
 import { _t } from "@web/core/l10n/translation";
 import { hasTouch } from "@web/core/browser/feature_detection";
-import { ConfirmationDialog, deleteConfirmationMessage } from "@web/core/confirmation_dialog/confirmation_dialog";
+import {
+    ConfirmationDialog,
+    deleteConfirmationMessage,
+} from "@web/core/confirmation_dialog/confirmation_dialog";
 import { makeContext } from "@web/core/context";
 import { useDebugCategory } from "@web/core/debug/debug_context";
 import { registry } from "@web/core/registry";
@@ -14,14 +17,13 @@ import { useSetupAction } from "@web/search/action_hook";
 import { Layout } from "@web/search/layout";
 import { usePager } from "@web/search/pager_hook";
 import { standardViewProps } from "@web/views/standard_view_props";
-import { isX2Many } from "@web/views/utils";
+import { deleteOrArchiveRecords, isArchiveAvailable, isX2Many } from "@web/views/utils";
 import { executeButtonCallback, useViewButtons } from "@web/views/view_button/view_button_hook";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { Field } from "@web/views/fields/field";
 import { useModel } from "@web/model/model";
 import { addFieldDependencies, extractFieldsFromArchInfo } from "@web/model/relational_model/utils";
 import { useViewCompiler } from "@web/views/view_compiler";
-import { useDeleteRecords } from "@web/views/view_hook";
 import { Widget } from "@web/views/widgets/widget";
 import { STATIC_ACTIONS_GROUP_NUMBER } from "@web/search/action_menus/action_menus";
 
@@ -168,6 +170,7 @@ export class FormController extends Component {
         this.canCreate = create && !this.props.preventCreate;
         this.canEdit = edit && !this.props.preventEdit;
         this.duplicateId = false;
+        this.archiveEnabled = isArchiveAvailable(this.props.fields);
 
         this.display = { ...this.props.display };
         if (this.env.inDialog) {
@@ -195,8 +198,10 @@ export class FormController extends Component {
             if (this.display.controlPanel) {
                 addFieldDependencies(activeFields, fields, [
                     { name: "display_name", type: "char", readonly: true },
-                    ...["active", "x_active"].filter(field => field in fields).map(field => ({ name: field, type: "boolean" }))
-                  ]);
+                    ...["active", "x_active"]
+                        .filter((field) => field in fields)
+                        .map((field) => ({ name: field, type: "boolean" })),
+                ]);
             }
             this.model.config.activeFields = activeFields;
             this.model.config.fields = fields;
@@ -322,8 +327,6 @@ export class FormController extends Component {
         if (this.env.inDialog) {
             useFormViewInDialog();
         }
-
-        this.deleteRecordsWithConfirmation = useDeleteRecords(this.dialogService.add);
     }
 
     get cogMenuProps() {
@@ -537,15 +540,6 @@ export class FormController extends Component {
         };
     }
 
-    // enable the archive feature in Actions menu only if the active field is in the view
-    get archiveEnabled() {
-        return "active" in this.model.root.activeFields
-            ? !this.props.fields.active.readonly
-            : "x_active" in this.model.root.activeFields
-            ? !this.props.fields.x_active.readonly
-            : false;
-    }
-
     async shouldExecuteAction(item) {
         const dirty = await this.model.root.isDirty();
         if ((dirty || this.model.root.isNew) && !item.skipSave) {
@@ -566,32 +560,25 @@ export class FormController extends Component {
         this.duplicateId = this.model.root.id;
     }
 
-    get deleteConfirmationDialogProps() {
-        return {
-            title: _t("Bye-bye, record!"),
-            body: deleteConfirmationMessage,
-            confirmLabel: _t("Delete"),
-            cancel: () => {
-                // `ConfirmationDialog` needs this prop to display the cancel
-                // button but we do nothing on cancel.
-            },
-            cancelLabel: _t("No, keep it"),
-        };
+    async getDeleteConfirmationDialogProps() {
+        return {};
     }
 
     async deleteRecord() {
-        const archive = this.archiveEnabled ? async() => {
-            this.model.root.archive();
-        } : null;
-
         const deleteFn = async () => {
             await this.model.root.delete();
             if (!this.model.root.resId) {
                 this.env.config.historyBack();
             }
         };
-
-        this.deleteRecordsWithConfirmation(this.deleteConfirmationDialogProps, deleteFn, archive);
+        let archiveFn;
+        if (this.archiveEnabled) {
+            archiveFn = () => this.model.root.archive();
+        }
+        return deleteOrArchiveRecords(this.dialogService.add, deleteFn, {
+            archiveFn,
+            deleteDialogProps: await this.getDeleteConfirmationDialogProps(),
+        });
     }
 
     async beforeExecuteActionButton(clickParams) {

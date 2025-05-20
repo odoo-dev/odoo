@@ -3,12 +3,8 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { download } from "@web/core/network/download";
-import { rpc, RPCError } from "@web/core/network/rpc";
+import { rpc } from "@web/core/network/rpc";
 import { ExportDataDialog } from "@web/views/view_dialogs/export_data_dialog";
-import {
-    ConfirmationDialog,
-} from "@web/core/confirmation_dialog/confirmation_dialog";
-
 import { useComponent, useEffect } from "@odoo/owl";
 
 /**
@@ -185,38 +181,3 @@ export function useExportRecords(env, context, getDefaultExportList) {
         });
     };
 }
-
-export function useDeleteRecords(displayDialog) {
-    function getDefaultDialogProps(deleteFn, archive) {
-        // no body generation logic here, only confirm
-        return {
-            confirm: async() => {
-                try {
-                    await deleteFn();
-                } catch (e) {
-                    if (
-                        archive &&
-                        e instanceof RPCError &&
-                        e.data.name === "odoo.exceptions.UserError"
-                    ) { // I think it's how we detect UserError, to check
-                        displayDialog(ConfirmationDialog, {
-                            title: _t("Archive records"),
-                            confirm: await archive(),
-                            confirmLabel: _t("Archive"),
-                            body: e.message,
-                            cancel: () => {},
-                            cancelLabel: _t("No, keep it"),
-                        });
-                    } else {
-                        throw e;
-                    }
-                }
-            },
-        };
-    };
-
-    return (dialogProps, deleteFn, archive) => {
-        const defaultProps = getDefaultDialogProps(deleteFn, archive);
-        displayDialog(ConfirmationDialog, { ...defaultProps, ...dialogProps });
-    };
-};

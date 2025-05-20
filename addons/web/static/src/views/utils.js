@@ -1,4 +1,9 @@
+import {
+    ConfirmationDialog,
+    deleteConfirmationMessage,
+} from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
+import { RPCError } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { unique } from "@web/core/utils/arrays";
 import { exprToBoolean } from "@web/core/utils/strings";
@@ -131,6 +136,52 @@ export const computeReportMeasures = (
 };
 
 /**
+ * Helper function to delete records with a confirmation dialog and an optional fallback on archive
+ * if deletion wasn't allowed.
+ *
+ * @param {function} addDialog function to open a dialog, typically dialogService.add
+ * @param {function} deleteFn
+ * @param {Object} [options={}]
+ * @param {function} [options.archiveFn]
+ * @param {Object} [options.deleteDialogProps]
+ * @param {boolean} [options.multi] set to true if we are deleting more than one records, such that
+ *  messages in confirmation dialogs can be adapted accordingly.
+ */
+export async function deleteOrArchiveRecords(addDialog, deleteFn, options = {}) {
+    const { archiveFn, deleteDialogProps = {}, multi } = options;
+    const confirm = async () => {
+        try {
+            await deleteFn();
+        } catch (e) {
+            const errorToCatch = ["odoo.exceptions.ValidationError", "odoo.exceptions.UserError"];
+            if (archiveFn && e instanceof RPCError && errorToCatch.includes(e.data.name)) {
+                addDialog(ConfirmationDialog, {
+                    confirm: archiveFn,
+                    confirmLabel: _t("Archive"),
+                    body: e.data.message,
+                    cancel: () => {},
+                    cancelLabel: multi ? _t("No, keep them") : _t("No, keep it"),
+                    title: multi ? _t("Archive records") : _t("Archive record"),
+                });
+            } else {
+                throw e;
+            }
+        }
+    };
+    const defaultProps = {
+        body: multi
+            ? _t("Are you sure you want to delete these records?")
+            : deleteConfirmationMessage,
+        cancel: () => {},
+        cancelLabel: multi ? _t("No, keep them") : _t("No, keep it"),
+        confirm,
+        confirmLabel: _t("Delete"),
+        title: multi ? _t("Bye-bye, records!") : _t("Bye-bye, record!"),
+    };
+    addDialog(ConfirmationDialog, { ...defaultProps, ...deleteDialogProps });
+}
+
+/**
  * @param {Record} record
  * @param {String} fieldName
  * @param {Object} [fieldInfo]
@@ -186,6 +237,21 @@ export function getDecoration(rootNode) {
         }
     }
     return decorations;
+}
+
+/**
+ * Returns true iff the archive feature is available, i.e. iff there's an
+ * "active" or "x_active" field on the model which can be toggled.
+ *
+ * @param {Object} fields
+ * @returns boolean
+ */
+export function isArchiveAvailable(fields) {
+    return "active" in fields
+        ? !fields.active.readonly
+        : "x_active" in fields
+        ? !fields.x_active.readonly
+        : false;
 }
 
 /**

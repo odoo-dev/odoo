@@ -13,8 +13,8 @@ export class ProjectTaskCalendarController extends CalendarController {
         return _t("New Task");
     }
 
-    deleteConfirmationDialogProps(record) {
-        const deleteConfirmationDialogProps = super.deleteConfirmationDialogProps(record);
+    async getDeleteConfirmationDialogProps(record) {
+        const deleteConfirmationDialogProps = await super.getDeleteConfirmationDialogProps(record);
         if  (!record.rawRecord.subtask_count) {
             return deleteConfirmationDialogProps;
         }

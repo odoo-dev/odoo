@@ -68,8 +68,8 @@ export class ProjectTaskFormController extends FormControllerWithHTMLExpander {
         };
     }
 
-    get deleteConfirmationDialogProps() {
-        const deleteConfirmationDialogProps = super.deleteConfirmationDialogProps;
+    async getDeleteConfirmationDialogProps() {
+        const deleteConfirmationDialogProps = await super.getDeleteConfirmationDialogProps();
         if (!this.model.root.data.subtask_count) {
             return deleteConfirmationDialogProps;
         }

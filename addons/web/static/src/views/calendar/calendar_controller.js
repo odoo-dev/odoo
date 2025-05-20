@@ -1,4 +1,3 @@
-import { deleteConfirmationMessage } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
 import { Layout } from "@web/search/layout";
@@ -18,9 +17,9 @@ import { CogMenu } from "@web/search/cog_menu/cog_menu";
 import { browser } from "@web/core/browser/browser";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { getLocalYearAndWeek } from "@web/core/l10n/dates";
-import { useDeleteRecords } from "@web/views/view_hook";
 
 import { Component, useState } from "@odoo/owl";
+import { deleteOrArchiveRecords, isArchiveAvailable } from "../utils";
 
 const { DateTime } = luxon;
 
@@ -108,12 +107,6 @@ export class CalendarController extends Component {
                 await this.model.unlinkRecords(ids);
             },
         };
-        this.archiveEnabled = "active" in this.props.fields
-            ? !this.props.fields.active.readonly
-            : "x_active" in this.props.fields
-            ? !this.props.fields.x_active.readonly
-            : false;
-        this.deleteRecordsWithConfirmation = useDeleteRecords(this.displayDialog);
     }
 
     get currentDate() {
@@ -334,33 +327,24 @@ export class CalendarController extends Component {
         return this.editRecord(record, context, false);
     }
 
-    deleteConfirmationDialogProps(record) {
-        return {
-            title: _t("Bye-bye, record!"),
-            body: deleteConfirmationMessage,
-            confirmLabel: _t("Delete"),
-            cancel: () => {
-                // `ConfirmationDialog` needs this prop to display the cancel
-                // button but we do nothing on cancel.
-            },
-            cancelLabel: _t("No, keep it"),
-        };
+    async getDeleteConfirmationDialogProps(/* record */) {
+        return {};
     }
 
-    deleteRecord(record) {
-        const deleteFn = async() => {
-            await this.model.unlinkRecord(record.id);
-        };
-        const archive = this.archiveEnabled ? async() => {
-            await this.orm.call(
-                this.model.resModel,
-                "action_archive",
-                [[record.id]]
-            );
-            await this.model.load();
-        } : null;
-
-        this.deleteRecordsWithConfirmation(this.deleteConfirmationDialogProps(record), deleteFn, archive);
+    async deleteRecord(record) {
+        const deleteFn = () => this.model.unlinkRecord(record.id);
+        const archiveEnabled = isArchiveAvailable(this.props.fields);
+        let archiveFn;
+        if (archiveEnabled) {
+            archiveFn = async () => {
+                await this.orm.call(this.model.resModel, "action_archive", [[record.id]]);
+                return this.model.load();
+            };
+        }
+        return deleteOrArchiveRecords(this.displayDialog, deleteFn, {
+            archiveFn,
+            deleteDialogProps: await this.getDeleteConfirmationDialogProps(record),
+        });
     }
 
     async setDate(move) {

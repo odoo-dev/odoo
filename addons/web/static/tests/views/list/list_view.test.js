@@ -5183,8 +5183,8 @@ test(`deleting one record and verify context key`, async () => {
 test(`custom delete confirmation dialog`, async () => {
     const listView = registry.category("views").get("list");
     class CautiousController extends listView.Controller {
-        get deleteConfirmationDialogProps() {
-            const props = super.deleteConfirmationDialogProps;
+        async getDeleteConfirmationDialogProps() {
+            const props = await super.getDeleteConfirmationDialogProps();
             props.body = markup(`<span class="text-danger">These are the consequences</span>`);
             return props;
         }

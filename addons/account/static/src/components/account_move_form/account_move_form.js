@@ -28,11 +28,10 @@ export class AccountMoveFormController extends FormController {
         return this.orm.call("account.move", "get_extra_print_items", [this.model.root.resId]);
     }
 
-
-    async deleteRecord() {
-        const deleteConfirmationDialogProps = this.deleteConfirmationDialogProps;
+    async getDeleteConfirmationDialogProps() {
+        const deleteConfirmationDialogProps = await this.getDeleteConfirmationDialogProps();
         deleteConfirmationDialogProps.body = await this.account_move_service.getDeletionDialogBody(deleteConfirmationMessage, this.model.root.resId);
-        this.deleteRecordsWithConfirmation(deleteConfirmationDialogProps, [this.model.root]);
+        return deleteConfirmationDialogProps;
     }
 }
 
