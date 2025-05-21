@@ -289,8 +289,13 @@ export class LinkPlugin extends Plugin {
             {
                 hotkey: "control+k",
                 category: "shortcut_conflict",
-                isAvailable: () =>
-                    this.dependencies.selection.getSelectionData().documentSelectionIsInEditable,
+                isAvailable: () => {
+                    const selectionData = this.dependencies.selection.getSelectionData();
+                    return (
+                        selectionData.documentSelectionIsInEditable &&
+                        !selectionData.documentSelectionIsSimpleText
+                    );
+                },
             }
         );
         this.ignoredClasses = new Set(this.getResource("system_classes"));
@@ -686,7 +691,10 @@ export class LinkPlugin extends Plugin {
                 }
             }
         }
-        if (!selectionData.currentSelectionIsInEditable) {
+        if (
+            !selectionData.currentSelectionIsInEditable ||
+            selectionData.documentSelectionIsSimpleText
+        ) {
             const anchorNode = document.getSelection()?.anchorNode;
             if (anchorNode && isElement(anchorNode) && anchorNode.closest(".o-we-linkpopover")) {
                 return;

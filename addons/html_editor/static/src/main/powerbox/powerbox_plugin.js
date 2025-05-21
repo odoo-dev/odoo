@@ -74,6 +74,7 @@ import { baseContainerGlobalSelector } from "@html_editor/utils/base_container";
  * @property {Function} run
  * @property {TranslatedString[]} [keywords]
  * @property { (selection: EditorSelection) => boolean  } [isAvailable]
+ * @property { (selection: EditorSelection) => boolean  } [isAvailableInSimpleText]
  */
 
 /**
@@ -140,8 +141,12 @@ export class PowerboxPlugin extends Plugin {
      */
     getAvailablePowerboxCommands() {
         const selection = this.dependencies.selection.getEditableSelection();
-        return this.powerboxCommands.filter(
-            (cmd) => cmd.isAvailable === undefined || cmd.isAvailable(selection)
+        const inSimpleText =
+            this.dependencies.selection.getSelectionData().documentSelectionIsSimpleText;
+        return this.powerboxCommands.filter((cmd) =>
+            inSimpleText
+                ? cmd.isAvailableInSimpleText?.(selection)
+                : cmd.isAvailable === undefined || cmd.isAvailable(selection)
         );
     }
 
@@ -159,7 +164,14 @@ export class PowerboxPlugin extends Plugin {
         return powerboxItems.map((/** @type {PowerboxItem} */ item) => {
             const command = this.dependencies.userCommand.getCommand(item.commandId);
             return {
-                ...pick(command, "title", "description", "icon", "isAvailable"),
+                ...pick(
+                    command,
+                    "title",
+                    "description",
+                    "icon",
+                    "isAvailable",
+                    "isAvailableInSimpleText"
+                ),
                 ...omit(item, "commandId", "commandParams"),
                 categoryName: categoryDict[item.categoryId].name,
                 run: () => command.run(item.commandParams),
