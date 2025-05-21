@@ -4,7 +4,7 @@ import odoo.tests
 
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo
 
-@odoo.tests.common.tagged('post_install', '-at_install')
+@odoo.tests.common.tagged('post_install', '-at_install', 'plop')
 class TestUiCertification(HttpCaseWithUserDemo):
 
     def setUp(self):
@@ -271,8 +271,8 @@ class TestUiCertification(HttpCaseWithUserDemo):
 
     def test_04_certification_success_tour(self):
         access_token = self.survey_certification.access_token
-        self.start_tour("/survey/start/%s" % access_token, 'test_certification_success', login="demo")
+        self.start_tour("/survey/start/%s" % access_token, 'test_certification_success', login="demo", debug=True)
 
     def test_05_certification_failure_tour(self):
         access_token = self.survey_certification.access_token
-        self.start_tour("/survey/start/%s" % access_token, 'test_certification_failure', login="demo")
+        self.start_tour("/survey/start/%s" % access_token, 'test_certification_failure', login="demo", debug=True)
