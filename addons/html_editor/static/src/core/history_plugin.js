@@ -757,13 +757,20 @@ export class HistoryPlugin extends Plugin {
                 stateMap.set(key, record.oldValue);
             }
         } else if (record.type === "childList") {
+            // TODO: tag descendants too as observed/unobserved
             record.removedNodes.forEach((node) => {
-                if (!this.observedNodes.has(node)) {
+                if (this.observedNodes.get(node) === false) {
+                    // Node was previously marked as unobserved, clear it from map
+                    this.observedNodes.delete(node);
+                } else {
                     this.observedNodes.set(node, true);
                 }
             });
             record.addedNodes.forEach((node) => {
-                if (!this.observedNodes.has(node)) {
+                if (this.observedNodes.get(node) === true) {
+                    // Node was previously marked as observed, clear it from map
+                    this.observedNodes.delete(node);
+                } else {
                     this.observedNodes.set(node, false);
                 }
             });
@@ -804,9 +811,22 @@ export class HistoryPlugin extends Plugin {
                 return null;
             }
 
-            // Filter out unobserved nodes
-            addedNodes = [...addedNodes].filter(isObservedNode);
-            removedNodes = [...removedNodes].filter(isObservedNode);
+            const isNodePresentInObservedState = (node, defaultValue) => {
+                if (!this.observedNodes.has(node)) {
+                    return defaultValue;
+                }
+                const isPresent = this.observedNodes.get(node);
+                this.observedNodes.delete(node);
+                return isPresent;
+            };
+            // Filter out nodes that were already present in the last observed state
+            addedNodes = [...addedNodes].filter(
+                (node) => !isNodePresentInObservedState(node, false)
+            );
+            // Filter out nodes that were already absent in the last observed state
+            removedNodes = [...removedNodes].filter((node) =>
+                isNodePresentInObservedState(node, true)
+            );
 
             // Update record
             return { ...record, previousSibling, nextSibling, addedNodes, removedNodes };
