@@ -1,4 +1,17 @@
 /**
+ * @template T
+ * @template {any[]} [Args=[]]
+ * @param {T | ((...args: Args) => T)} value
+ * @returns {(...args: Args) => T}
+ */
+export function ensureFunction(value) {
+    if (value instanceof Function) {
+        return value;
+    }
+    return () => value;
+}
+
+/**
  * Creates a version of the function that's memoized on the value of its first
  * argument, if any.
  *
