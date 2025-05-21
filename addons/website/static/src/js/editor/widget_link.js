@@ -40,7 +40,6 @@ patch(LinkTools.prototype, {
                 },
                 body: this.$editable[0].ownerDocument.body,
                 urlChosen: this._onAutocompleteClose.bind(this),
-                isDestroyed: () => status(this) === 'destroyed',
             };
             const unmountAutocompleteWithPages = wUtils.autocompleteWithPages(input, options);
             return () => unmountAutocompleteWithPages();
