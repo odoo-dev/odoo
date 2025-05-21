@@ -1,4 +1,5 @@
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
+import { useSuggester } from "@web/core/autocomplete/suggester_hook";
 import { useChildRef } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
@@ -26,6 +27,17 @@ export class L10nInHsnAutoComplete extends CharField {
             parse: (v) => this.parse(v),
             ref: this.inputRef,
         });
+
+        const suggest = useSuggester(async (request, lock) => {
+            if (request.length < 3) {
+                return [];
+            }
+            return lock(this.getHsnSuggestions(request));
+        });
+        this.hsnSource = {
+            options: suggest,
+            placeholder: _t("Searching..."),
+        };
     }
 
     async getHsnSuggestions(value) {
@@ -72,21 +84,6 @@ export class L10nInHsnAutoComplete extends CharField {
             console.warn("HSN Autocomplete API error:", e);
         }
         return suggestions;
-    }
-
-    get sources() {
-        return [
-            {
-                options: async (request) => {
-                    if (request?.length > 2) {
-                        return await this.getHsnSuggestions(request);
-                    } else {
-                        return [];
-                    }
-                },
-                placeholder: _t("Searching..."),
-            },
-        ];
     }
 
     selectSuggestion(label, description) {

@@ -3,7 +3,7 @@
     <t t-name="l10n_in.hsnAutoComplete">
         <AutoComplete
             value="props.record.data[props.name] || ''"
-            sources="sources"
+            sources="[hsnSource]"
             input="inputRef"
             placeholder="props.placeholder || ''"
         >
