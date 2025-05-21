@@ -2,6 +2,7 @@ import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { CharField, charField } from "@web/views/fields/char/char_field";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
+import { useSuggester } from "@web/core/autocomplete/suggester_hook";
 import { googlePlacesSession } from "../google_places_session";
 import { useChildRef } from "@web/core/utils/hooks";
 import { useInputField } from "@web/views/fields/input_field_hook";
@@ -57,37 +58,32 @@ export class AddressAutoComplete extends CharField {
             getValue: () => this.props.record.data[this.props.name] || "",
             parse: (v) => this.parse(v),
         });
-    }
 
-    get sources() {
-        return [
-            {
-                options: async (request) => {
-                    if (request.length > 5) {
-                        const suggestions = await googlePlacesSession.getAddressPropositions({
-                            partial_address: request,
-                            use_employees_key: true,
-                        });
-                        suggestions.results = suggestions.results.map((result) => ({
-                            label: result.formatted_address,
-                            onSelect: () => this.selectAddressProposition(result),
-                            slotName: "option",
-                        }));
-                        if (suggestions.results.length) {
-                            suggestions.results.push({
-                                cssClass: "pe-none o-google-credits",
-                                label: "&#160;",
-                                slotName: "option",
-                            });
-                        }
-                        return suggestions.results;
-                    } else {
-                        return [];
-                    }
-                },
-                placeholder: _t("Searching for addresses..."),
-            },
-        ];
+        const suggest = useSuggester(async (request, lock) => {
+            if (request.length < 6) {
+                return [];
+            }
+            const suggestions = await lock(googlePlacesSession.getAddressPropositions({
+                partial_address: request,
+                use_employees_key: true,
+            }));
+            suggestions.results = suggestions.results.map((result) => ({
+                label: result.formatted_address,
+                onSelect: () => this.selectAddressProposition(result),
+            }));
+            if (suggestions.results.length) {
+                suggestions.results.push({
+                    cssClass: "pe-none o-google-credits",
+                    label: "&#160;",
+                    slotName: "option",
+                });
+            }
+            return suggestions.results;
+        });
+        this.addressSource = {
+            options: suggest,
+            placeholder: _t("Searching for addresses..."),
+        };
     }
 
     async selectAddressProposition(option) {

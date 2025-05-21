@@ -4,7 +4,7 @@
     <t t-name="google_address_autocomplete.AddressAutoCompleteTemplate">
         <AutoComplete
             value="props.record.data[props.name] || ''"
-            sources="sources"
+            sources="[addressSource]"
             placeholder="props.placeholder"
             searchOnInputClick="false"
             inputDebounceDelay="350"
