@@ -132,7 +132,10 @@ export class TourHelpers {
         });
         await moveTo(target, options);
         await dragEffectDelay();
-        await drop(target, options);
+        const dragHelperEl = document.body.querySelector(
+            ".o_draggable_dragging .o_snippet_thumbnail"
+        );
+        await drop(dragHelperEl, options);
         await dragEffectDelay();
     }
 

@@ -551,7 +551,7 @@ class TestUi(HttpCaseWithWebsiteUser):
         self.env['ir.ui.view'].with_context(website_id=default_website.id).save_snippet(
             name='custom_snippet_test',
             arch="""
-                <section class="s_text_block" data-snippet="s_text_block">
+                <section class="s_text_block s_custom_snippet" data-snippet="s_text_block">
                     <div class="custom_snippet_website_1">Custom Snippet Website 1</div>
                 </section>
             """,
