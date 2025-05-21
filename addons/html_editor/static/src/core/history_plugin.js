@@ -412,7 +412,7 @@ export class HistoryPlugin extends Plugin {
             .filter((record) => !this.isSystemClassOrAttributeRecord(record));
 
         records = this.handleUnobservedMutations(records);
-        records = records.filter((record) => !this.isNoOpRecord(record));
+        records = records.filter((record) => this.isValidRecord(record));
         this.stageRecords(records);
         return records;
     }
@@ -420,14 +420,21 @@ export class HistoryPlugin extends Plugin {
     /**
      * @param {HistoryMutationRecord} record
      */
-    isNoOpRecord(record) {
+    isValidRecord(record) {
         if (["attributes", "classList", "characterData"].includes(record.type)) {
-            return record.newValue === record.oldValue;
+            // filter out no-ops
+            return record.newValue !== record.oldValue;
         }
-        if (record.type === "childList") {
-            return !record.addedNodes.length && !record.removedNodes.length;
+        // Record type is "childList"
+        if (!record.addedNodes.length && !record.removedNodes.length) {
+            // no-op
+            return false;
         }
-        return false;
+        if (record.previousSibling === undefined && record.nextSibling === undefined) {
+            // No valid position for node insertion, due to unobserved mutations
+            return false;
+        }
+        return true;
     }
 
     dispatchContentUpdated() {
@@ -667,31 +674,6 @@ export class HistoryPlugin extends Plugin {
         return false;
     }
 
-    /**
-     * Ensures mutation records have the correct historical "oldValue" by
-     * checking against the last observed state.
-     *
-     * When the observer is disabled, it stores the `oldValue` for a given
-     * node-attribute/class as the last observed value (only if it not already
-     * stored).
-     *
-     * When enabled, it updates records with the last observed state and removes
-     * its entry (prevents reuse).
-     *
-     * When the observer is disabled, multiple related DOM operations might
-     * happen in sequence. By only storing the first value encountered for each
-     * node-attribute/class, we capture the state as it was before any
-     * modifications in the disabled observer sequence began.
-     *
-     * When the observer is enabled, after updating a record with the last
-     * observed state, it removes the entry to prevent reuse. Without removing
-     * the entry, the same historical value might be incorrectly applied to
-     * future mutation records targeting the same attribute/class of the same
-     * element, which would create incorrect history entries.
-     *
-     * @param {HistoryMutationRecord} record
-     * @returns {HistoryMutationRecord}
-     */
     // resolveHistoricalValue(record) {
     //     if (!["attributes", "classList"].includes(record.type)) {
     //         // @todo: handle characterData mutations
@@ -728,110 +710,95 @@ export class HistoryPlugin extends Plugin {
      * @param {HistoryMutationRecord[]} records
      */
     handleUnobservedMutations(records) {
-        const newRecords = [];
+        const updatedRecords = [];
         const savableRecordPredicates = this.getResource("savable_mutation_record_predicates");
         const isSavableRecord = (record) => savableRecordPredicates.every((p) => p(record));
         for (const record of records) {
             if (this.isObserverDisabled || !isSavableRecord(record)) {
                 this.storeLastObservedState(record);
-                // drop record
-            } else {
-                const adjustedRecord = this.adjustToLastObservedState(record);
-                if (adjustedRecord !== null) {
-                    // keep record
-                    newRecords.push(adjustedRecord);
-                }
+                // Drop record
+                continue;
             }
+            if (this.observedNodes.get(record.target) === false) {
+                // Mutation targets an unobserved node, drop it.
+                continue;
+            }
+            const updatedRecord = this.adjustToLastObservedState(record);
+            updatedRecords.push(updatedRecord);
         }
-        return newRecords;
+        return updatedRecords;
     }
 
     /**
      * @param {HistoryMutationRecord} record
      */
     storeLastObservedState(record) {
-        if (["attributes", "classList", "characterData"].includes(record.type)) {
-            const { stateMap, key } = this.getObservedStateStorage(record);
-            if (!stateMap.has(key)) {
-                // Only store it if not already stored.
-                stateMap.set(key, record.oldValue);
-            }
-        } else if (record.type === "childList") {
-            // TODO: tag descendants too as observed/unobserved
-            record.removedNodes.forEach((node) => {
-                if (this.observedNodes.get(node) === false) {
-                    // Node was previously marked as unobserved, clear it from map
-                    this.observedNodes.delete(node);
-                } else {
-                    this.observedNodes.set(node, true);
-                }
-            });
-            record.addedNodes.forEach((node) => {
-                if (this.observedNodes.get(node) === true) {
-                    // Node was previously marked as observed, clear it from map
-                    this.observedNodes.delete(node);
-                } else {
-                    this.observedNodes.set(node, false);
-                }
-            });
+        if (record.type === "childList") {
+            this.trackObservedNodes(record);
+        } else {
+            this.storeOldValue(record);
         }
     }
 
     /**
      * @param {HistoryMutationRecord} record
-     * @returns {HistoryMutationRecord|null}
+     * @returns {HistoryMutationRecord}
      */
     adjustToLastObservedState(record) {
-        const isObservedNode = (node) => !(this.observedNodes.get(node) === false);
-        if (!isObservedNode(record.target)) {
-            // This mutation depends on a previous unobserved one, and should be
-            // ignored.
-            return null;
-        }
-        if (["attributes", "classList", "characterData"].includes(record.type)) {
-            const { stateMap, key } = this.getObservedStateStorage(record);
-            if (!stateMap.has(key)) {
-                return record;
-            }
-            const lastObservedValue = stateMap.get(key);
-            // Remove entry, so it won't be used again.
-            stateMap.delete(key);
-            // Update record.
-            return { ...record, oldValue: lastObservedValue };
-        }
-        if (record.type === "childList") {
-            let { previousSibling, nextSibling, addedNodes, removedNodes } = record;
-            const isValidReference = (node) => node === null || isObservedNode(node);
+        return record.type === "childList"
+            ? this.updateChildListRecord(record)
+            : this.updateOldValue(record);
+    }
 
-            // Adjust sibling references
-            previousSibling = isValidReference(previousSibling) ? previousSibling : undefined;
-            nextSibling = isValidReference(nextSibling) ? nextSibling : undefined;
-            if (previousSibling === undefined && nextSibling === undefined) {
-                // Mutation depends on previous unobserved ones, and should be ignored.
-                return null;
-            }
-
-            const isNodePresentInObservedState = (node, defaultValue) => {
-                if (!this.observedNodes.has(node)) {
-                    return defaultValue;
-                }
-                const isPresent = this.observedNodes.get(node);
-                this.observedNodes.delete(node);
-                return isPresent;
-            };
-            // Filter out nodes that were already present in the last observed state
-            addedNodes = [...addedNodes].filter(
-                (node) => !isNodePresentInObservedState(node, false)
-            );
-            // Filter out nodes that were already absent in the last observed state
-            removedNodes = [...removedNodes].filter((node) =>
-                isNodePresentInObservedState(node, true)
-            );
-
-            // Update record
-            return { ...record, previousSibling, nextSibling, addedNodes, removedNodes };
+    /**
+     * Ensures mutation records have the correct historical "oldValue" by
+     * checking against the last observed state.
+     *
+     * When the observer is disabled, it stores the `oldValue` for a given
+     * node-attribute/class as the last observed value (only if it not already
+     * stored).
+     *
+     * When enabled, it updates records with the last observed state and removes
+     * its entry (prevents reuse).
+     *
+     * When the observer is disabled, multiple related DOM operations might
+     * happen in sequence. By only storing the first value encountered for each
+     * node-attribute/class, we capture the state as it was before any
+     * modifications in the disabled observer sequence began.
+     *
+     * When the observer is enabled, after updating a record with the last
+     * observed state, it removes the entry to prevent reuse. Without removing
+     * the entry, the same historical value might be incorrectly applied to
+     * future mutation records targeting the same attribute/class of the same
+     * element, which would create incorrect history entries.
+     *
+     * @see updateOldValue
+     *
+     * @param {HistoryMutationRecord} record
+     */
+    storeOldValue(record) {
+        const { stateMap, key } = this.getObservedStateStorage(record);
+        if (!stateMap.has(key)) {
+            // Only store it if not already stored.
+            stateMap.set(key, record.oldValue);
         }
-        return record;
+    }
+
+    /**
+     * @see storeOldValue
+     *
+     * @param {HistoryMutationRecord} record of type "attributes", "classList" or "characterData"
+     * @returns {HistoryMutationRecord}
+     */
+    updateOldValue(record) {
+        const { stateMap, key } = this.getObservedStateStorage(record);
+        if (!stateMap.has(key)) {
+            return record;
+        }
+        const lastObservedValue = stateMap.get(key);
+        // Remove entry, so it won't be used again.
+        stateMap.delete(key);
+        return { ...record, oldValue: lastObservedValue };
     }
 
     /**
@@ -860,21 +827,51 @@ export class HistoryPlugin extends Plugin {
         }
     }
 
-    // /**
-    //  * @param {HistoryMutation} mutation
-    //  */
-    // clearLastObservedState(mutation) {
-    //     if (!["attributes", "classList"].includes(mutation.type)) {
-    //         return;
-    //     }
-    //     const node = this.idToNodeMap.get(mutation.id);
-    //     const stateMap = this.lastObservedState.get(node)?.[mutation.type];
-    //     if (!stateMap) {
-    //         return;
-    //     }
-    //     const key = mutation.type === "attributes" ? mutation.attributeName : mutation.className;
-    //     stateMap.delete(key);
-    // }
+    /**
+     * @todo: tag descendants too as observed/unobserved
+     *
+     * @param {MutationRecordChildList} record
+     */
+    trackObservedNodes(record) {
+        record.removedNodes.forEach((node) => {
+            if (this.observedNodes.get(node) === false) {
+                // Node was previously marked as unobserved, clear it from map
+                this.observedNodes.delete(node);
+            } else {
+                this.observedNodes.set(node, true);
+            }
+        });
+        record.addedNodes.forEach((node) => {
+            if (this.observedNodes.get(node) === true) {
+                // Node was previously marked as observed, clear it from map
+                this.observedNodes.delete(node);
+            } else {
+                this.observedNodes.set(node, false);
+            }
+        });
+    }
+
+    /**
+     * @param {MutationRecordChildList} record
+     * @returns {MutationRecordChildList}
+     */
+    updateChildListRecord(record) {
+        const isObservedNode = (node) => !(this.observedNodes.get(node) === false);
+        let { previousSibling, nextSibling, addedNodes, removedNodes } = record;
+
+        // Adjust sibling references
+        const isValidReference = (node) => node === null || isObservedNode(node);
+        previousSibling = isValidReference(previousSibling) ? previousSibling : undefined;
+        nextSibling = isValidReference(nextSibling) ? nextSibling : undefined;
+
+        // Filter out nodes that were already absent in the last observed state
+        const filteredRemovedNodes = [...removedNodes].filter(isObservedNode);
+
+        // Clear entries in the observed nodes map
+        [...addedNodes, ...removedNodes].forEach((node) => this.observedNodes.delete(node));
+
+        return { ...record, previousSibling, nextSibling, removedNodes: filteredRemovedNodes };
+    }
 
     /**
      * Check if a mutation consists of removing and adding a single text node
