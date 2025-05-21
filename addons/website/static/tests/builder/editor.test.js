@@ -9,6 +9,7 @@ import { parseHTML } from "@html_editor/utils/html";
 import { setSelection } from "@html_editor/../tests/_helpers/selection";
 import { expandToolbar } from "@html_editor/../tests/_helpers/toolbar";
 import { FontPlugin } from "@html_editor/main/font/font_plugin";
+import { LanguageSelector } from "@html_editor/main/chatgpt/language_selector";
 
 defineWebsiteModels();
 
@@ -154,5 +155,28 @@ describe("toolbar dropdowns", () => {
         await focusAndClick(".dropdown-menu .dropdown-item");
         await animationFrame();
         expect(p.firstChild).toHaveClass("test-font-size");
+    });
+
+    // TODO: IA team should add translation button again
+    test.todo("translate dropdown should close only after click", async () => {
+        patchWithCleanup(LanguageSelector.prototype, {
+            // Override setup to avoid rpc call and to mock installed languages
+            setup() {
+                this.state = {
+                    languages: [
+                        ["en_US", "English"],
+                        ["fr_FR", "French"],
+                    ],
+                };
+            },
+            // Override to avoid opening the dialog
+            onSelected() {
+                expect.step("language-selected");
+            },
+        });
+        await setup();
+        click(".o-we-toolbar .btn[name='translate']");
+        await focusAndClick(".dropdown-menu .dropdown-item");
+        expect.verifySteps(["language-selected"]);
     });
 });
