@@ -1,8 +1,8 @@
 import { Plugin } from "@html_editor/plugin";
-import { registry } from "@web/core/registry";
-import { NavbarLinkPopover } from "@html_editor/main/link/navbar_link_popover";
-import { MenuDialog, EditMenuDialog } from "@website/components/dialog/edit_menu";
 import { withSequence } from "@html_editor/utils/resource";
+import { registry } from "@web/core/registry";
+import { NavbarLinkPopover } from "@website/builder/plugins/menu_data/navbar_link_popover";
+import { EditMenuDialog, MenuDialog } from "@website/components/dialog/edit_menu";
 
 export class MenuDataPlugin extends Plugin {
     static id = "menuDataPlugin";
