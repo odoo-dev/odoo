@@ -155,14 +155,17 @@ export class BackgroundImageOptionPlugin extends Plugin {
             // Do nothing: no images has been selected on the media dialog
             return;
         }
-        this.setImageBackground(editingElement, imageEl.src);
+        const src = imageEl?.src || "";
+        this.setImageBackground(editingElement, src);
         for (const attr of removeOnImageChangeAttrs) {
             delete editingElement.dataset[attr];
         }
-        if (imageEl.src.startsWith("data:")) {
-            editingElement.classList.add("o_modified_image_to_save");
+        if (imageEl) {
+            if (src.startsWith("data:")) {
+                editingElement.classList.add("o_modified_image_to_save");
+            }
+            Object.assign(editingElement.dataset, imageEl.dataset);
         }
-        Object.assign(editingElement.dataset, imageEl.dataset);
     }
     /**
      *

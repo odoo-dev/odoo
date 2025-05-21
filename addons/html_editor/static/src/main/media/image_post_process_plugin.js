@@ -29,15 +29,14 @@ export class ImagePostProcessPlugin extends Plugin {
      * @returns {Function} callback that sets dataURL of the image with the
      * applied modifications to `img` element
      */
-    async processImage({ img, newDataset, onImageInfoLoaded }) {
-        newDataset ||= {};
+    async processImage({ img, newDataset = {}, onImageInfoLoaded }) {
         const processContext = {};
         if (!newDataset.originalSrc || !newDataset.mimetypeBeforeConversion) {
             Object.assign(newDataset, await loadImageInfo(img));
         }
         if (onImageInfoLoaded) {
             if (await onImageInfoLoaded(newDataset)) {
-                return;
+                return () => {};
             }
         }
         for (const cb of this.getResource("process_image_warmup_handlers")) {
