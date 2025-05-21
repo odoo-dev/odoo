@@ -1,4 +1,4 @@
-import { EXHIBITOR_FILTER, SPONSOR } from "@website/temp/website_event/option_sequence";
+import { EXHIBITOR_FILTER, SPONSOR } from "@website_event/website_builder/option_sequence";
 import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
 import { registry } from "@web/core/registry";

@@ -1,4 +1,4 @@
-import { ProductsListPageOption } from "@website/temp/website_sale/products_list_page_option";
+import { ProductsListPageOption } from "@website_sale/website_builder/products_list_page_option";
 import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";

@@ -1,4 +1,4 @@
-import { TRACK } from "@website/temp/website_event/option_sequence";
+import { TRACK } from "@website_event/website_builder/option_sequence";
 import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
 import { _t } from "@web/core/l10n/translation";

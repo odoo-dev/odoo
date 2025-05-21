@@ -1,5 +1,5 @@
 import { before } from "@html_builder/utils/option_sequence";
-import { NEWSLETTER_SELECT } from "@website/temp/website_mass_mailing/newsletter_subscribe_common_option_plugin";
+import { NEWSLETTER_SELECT } from "@website_mass_mailing/website_builder/newsletter_subscribe_common_option_plugin";
 import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import { withSequence } from "@html_editor/utils/resource";
