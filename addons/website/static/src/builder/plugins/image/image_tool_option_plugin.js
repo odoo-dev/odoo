@@ -21,7 +21,6 @@ class ImageToolOptionPlugin extends Plugin {
     static dependencies = [
         "history",
         "userCommand",
-        "imageFormatOption",
         "imagePostProcess",
         "imageCrop",
         "media",
@@ -50,11 +49,15 @@ class ImageToolOptionPlugin extends Plugin {
         on_media_dialog_saved_handlers: async (elements, { node }) => {
             for (const image of elements) {
                 if (image && image.tagName === "IMG") {
-                    const finalizeCallback = await this.dependencies.imagePostProcess.processImage({
+                    const updateImageAttributes = await this.dependencies.imagePostProcess.processImage({
                         img: image,
                         newDataset: {
                             formatMimetype: "image/webp",
                         },
+                        // TODO Using a callback is currently needed to avoid
+                        // the extra RPC that would occur if loadImageInfo was
+                        // called before processImage as well. This flow can be
+                        // simplified if image infos are somehow cached.
                         onImageInfoLoaded: async (dataset) => {
                             if (!dataset.originalSrc || !dataset.originalId) {
                                 return true;
@@ -72,7 +75,7 @@ class ImageToolOptionPlugin extends Plugin {
                             }
                         },
                     });
-                    finalizeCallback?.();
+                    updateImageAttributes();
                 }
             }
         },
@@ -127,7 +130,7 @@ class ImageToolOptionPlugin extends Plugin {
             },
             replaceMedia: {
                 load: async ({ editingElement }) => {
-                    let image, updateImageAttributes;
+                    let image;
                     await this.dependencies.media.openMediaDialog({
                         node: editingElement,
                         save: (newImage) => {
