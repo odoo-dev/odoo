@@ -239,6 +239,11 @@
             transform-origin: center top;
         }
 
+        // Avoid blank on the side
+        .o_main_navbar {
+            box-shadow: 20px 0 0 $o-navbar-background, -20px 0 0 $o-navbar-background;
+        }
+
         &:not(.bottom-sheet-open-stack):has(.o_bottom_sheet_dismissing) {
             .o_navbar, .o_action_manager {
                 transition: transform $o_BottomSheet_slideOut_duration ease;
