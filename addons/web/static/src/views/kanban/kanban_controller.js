@@ -63,7 +63,6 @@ export class KanbanController extends Component {
         Compiler: Function,
         Model: Function,
         Renderer: Function,
-        buttonTemplate: String,
         archInfo: Object,
     };
 

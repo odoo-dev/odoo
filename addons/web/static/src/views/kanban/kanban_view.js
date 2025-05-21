@@ -24,7 +24,6 @@ export const kanbanView = {
             Compiler: view.Compiler,
             Model: view.Model,
             Renderer: view.Renderer,
-            buttonTemplate: view.buttonTemplate,
             archInfo,
         };
     },
