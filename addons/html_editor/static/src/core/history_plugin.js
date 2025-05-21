@@ -194,6 +194,7 @@ export class HistoryPlugin extends Plugin {
             this.enableObserver();
             this.reset(this.config.content);
         },
+        on_prepare_drag_handlers: this.disableIsCurrentStepModifiedWarning.bind(this),
         // Resource definitions:
         normalize_handlers: [
             // (commonRootOfModifiedEl or editableEl) => {
@@ -1351,7 +1352,17 @@ export class HistoryPlugin extends Plugin {
         this.currentStep.extraStepInfos[key] = value;
     }
 
+    disableIsCurrentStepModifiedWarning() {
+        this.ignoreIsCurrentStepModified = true;
+        return () => {
+            this.ignoreIsCurrentStepModified = false;
+        };
+    }
+
     getIsCurrentStepModified() {
+        if (this.ignoreIsCurrentStepModified) {
+            return false;
+        }
         return this.currentStep.mutations.find((m) =>
             ["characterData", "remove", "add"].includes(m.type)
         );
