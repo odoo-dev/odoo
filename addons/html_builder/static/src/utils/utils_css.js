@@ -531,9 +531,9 @@ export function applyNeededCss(
     computedStyle = window.getComputedStyle(el),
     { force = false, allowImportant = true } = {}
 ) {
-    const classes = [1, 2, 3, 4, 5].map((i) => `o_cc${i}`);
-    el.classList.remove(...classes);
     if (cssValue.startsWith("o_cc")) {
+        const classes = [1, 2, 3, 4, 5].map((i) => `o_cc${i}`);
+        el.classList.remove(...classes);
         el.style.removeProperty(cssProp);
         el.classList.add(cssValue);
         return;
