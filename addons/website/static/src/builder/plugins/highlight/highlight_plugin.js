@@ -92,24 +92,38 @@ export class HighlightPlugin extends Plugin {
     }
 
     _applyHighlight(highlightId) {
-        const highlightedNodes = new Set(
+        const highlightedNodes =
             this.dependencies.selection
                 .getTraversedNodes()
                 .map((n) => {
                     const el = n.nodeType === Node.ELEMENT_NODE ? n : n.parentElement;
                     return el.closest(".o_text_highlight");
                 })
-                .filter(Boolean)
-        );
-        for (const node of highlightedNodes) {
+                .filter(Boolean);
+        for (const node of new Set(highlightedNodes)) {
             for (const svg of node.querySelectorAll(".o_text_highlight_svg")) {
                 svg.remove();
             }
         }
+
+        let thicknessToRestore;
+        let colorToRestore;
+        if (highlightedNodes.length > 0) {
+            const style = getComputedStyle(highlightedNodes[0]);
+            colorToRestore = style.getPropertyValue("--text-highlight-color");
+            thicknessToRestore = style.getPropertyValue("--text-highlight-width");
+        }
+
         this.dependencies.format.formatSelection("highlight", {
             formatProps: { highlightId },
             applyStyle: true,
         });
+
+        if (thicknessToRestore || colorToRestore) {
+            this._applyHighlightStyle("--text-highlight-color", colorToRestore);
+            this._applyHighlightStyle("--text-highlight-width", thicknessToRestore);
+        }
+        
         this.updateSelectedHighlight();
     }
 
