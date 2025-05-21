@@ -141,6 +141,7 @@ export class MediaPlugin extends Plugin {
                 for (const attribute of element.attributes) {
                     node.setAttribute(attribute.nodeName, attribute.nodeValue);
                 }
+                element = node;
             } else {
                 node.replaceWith(element);
             }

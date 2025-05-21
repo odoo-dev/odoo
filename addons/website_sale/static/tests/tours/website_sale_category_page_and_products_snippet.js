@@ -28,7 +28,9 @@ registerWebsitePreviewTour('category_page_and_products_snippet_edition', {
         trigger: ':iframe .o_snippet_preview_wrap[data-snippet-id="s_dynamic_snippet_products"]',
         run: "click",
     },
-
+    {
+        trigger: ":iframe:not(:has(.o_loading_screen))",
+    },
     {
         content: "Click on the product snippet to show its options",
         trigger: ':iframe #category_header .s_dynamic_snippet_products',
