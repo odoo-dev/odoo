@@ -66,16 +66,15 @@ export class ImageCrop extends Component {
     }
 
     closeCropper() {
-        if (!this.cropperOpen) {
-            return;
-        }
-        this.cropper?.destroy?.();
-        this.media.setAttribute("src", this.initialSrc);
-        if (
-            this.hasModifiedImageClass &&
-            !this.media.classList.contains("o_modified_image_to_save")
-        ) {
-            this.media.classList.add("o_modified_image_to_save");
+        if (this.cropperOpen) {
+            this.cropper?.destroy?.();
+            this.media.setAttribute("src", this.initialSrc);
+            if (
+                this.hasModifiedImageClass &&
+                !this.media.classList.contains("o_modified_image_to_save")
+            ) {
+                this.media.classList.add("o_modified_image_to_save");
+            }
         }
         this.props?.onClose?.();
         this.cropperOpen = false;

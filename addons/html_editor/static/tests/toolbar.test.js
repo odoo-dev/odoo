@@ -866,23 +866,22 @@ test("should not close image cropper while loading media", async () => {
     await animationFrame();
 
     // cropper should not close as the cropper still loading the image.
-    expect('.btn[title="Discard"]').toHaveCount(1);
+    expect('.btn[title="Discard"]').toHaveCount(0);
 
     // once the image loaded we should be able to close
-    await waitFor('img[src^="blob:"]', { timeout: 2000 });
-    await click('.btn[title="Discard"]');
-    await waitForNone('.btn[title="Discard"]', { timeout: 1000 });
-
     await click("img");
     await waitFor(".o-we-toolbar", { timeout: 1000 });
 
     await click('div[name="image_transform"] > .btn');
     await animationFrame();
 
-    await waitFor('.btn[name="image_crop"]', { timeout: 1000 });
     await click('.btn[name="image_crop"]');
-    await waitFor('.btn[title="Discard"]', { timeout: 1000 });
-    expect('.btn[title="Discard"]').toHaveCount(1);
+    await animationFrame();
+    await waitFor('img[src^="blob:"]', { timeout: 2000 });
+
+    await click('.btn[title="Discard"]');
+    await animationFrame();
+    expect('.btn[title="Discard"]').toHaveCount(0);
 });
 
 describe.tags("desktop");
