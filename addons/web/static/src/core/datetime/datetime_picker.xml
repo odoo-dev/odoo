@@ -85,7 +85,7 @@
                         <input
                             t-if="props.range || dateValue_index === props.focusedDateIndex"
                             type="text"
-                            class="o_date_picker_input o_input fs-6"
+                            class="o_date_picker_input o_input form-control fs-6"
                             t-att-placeholder="props.range ? dateString : 'Date'"
                             t-att-value="dateValue ? dateValue.toFormat(props.dateFormat) : ''"
                             t-on-change="(ev) => this.onDateInputChange(dateValue_index, ev.target.value)"
