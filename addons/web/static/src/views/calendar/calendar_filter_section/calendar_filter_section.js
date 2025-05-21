@@ -1,5 +1,6 @@
 import { _t } from "@web/core/l10n/translation";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
+import { useSuggester } from "@web/core/autocomplete/suggester_hook";
 import { Transition } from "@web/core/transition";
 import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
@@ -29,6 +30,12 @@ export class CalendarFilterSection extends Component {
         });
         this.addDialog = useOwnedDialogs();
         this.orm = useService("orm");
+
+        const suggest = useSuggester(this.loadSource.bind(this));
+        this.recordSource = {
+            options: suggest,
+            placeholder: _t("Loading..."),
+        };
     }
 
     get autoCompleteProps() {
@@ -36,12 +43,7 @@ export class CalendarFilterSection extends Component {
             autoSelect: true,
             resetOnSelect: true,
             placeholder: _t("+ Add %s", this.section.label),
-            sources: [
-                {
-                    placeholder: _t("Loading..."),
-                    options: (request) => this.loadSource(request),
-                },
-            ],
+            sources: [this.recordSource],
             value: "",
             class: "mt-1",
         };
@@ -85,17 +87,18 @@ export class CalendarFilterSection extends Component {
         });
     }
 
-    async loadSource(request) {
+    /** @type {import("@web/core/autocomplete/suggester_hook").SuggesterFn} */
+    async loadSource(request, lock) {
         const resModel = this.props.model.fields[this.section.fieldName].relation;
         const activeIds = this.section.filters.map((f) => f.value);
         const domain = [["id", "not in", activeIds]];
-        const records = await this.orm.call(resModel, "name_search", [], {
+        const records = await lock(this.orm.call(resModel, "name_search", [], {
             name: request,
             operator: "ilike",
             domain: domain,
             limit: 8,
             context: this.section.context,
-        });
+        }));
 
         const options = records.map((result) => ({
             data: {
