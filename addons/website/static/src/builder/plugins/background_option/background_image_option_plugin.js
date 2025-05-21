@@ -6,8 +6,6 @@ import { registry } from "@web/core/registry";
 import { convertCSSColorToRgba } from "@web/core/utils/colors";
 import { getBackgroundImageColor } from "./background_image_option";
 
-// TODO: support the setTarget
-
 export class BackgroundImageOptionPlugin extends Plugin {
     static id = "backgroundImageOption";
     static dependencies = ["builderActions", "media", "style"];

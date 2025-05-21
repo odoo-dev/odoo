@@ -4,6 +4,19 @@ import { getBgImageURLFromEl, normalizeColor } from "@html_builder/utils/utils_c
 export class BackgroundImageOption extends BaseOptionComponent {
     static template = "html_builder.BackgroundImageOption";
     static props = {};
+    setup(){
+        this.addBgImageClasses();
+        super.setup();
+    }
+    addBgImageClasses(){
+        const editingEl = this.env.getEditingElement();
+        const backgroundURL = getBgImageURLFromEl(editingEl);
+        if (backgroundURL) {
+            editingEl.classList.add("oe_img_bg", "o_bg_img_center");
+        } else {
+            editingEl.classList.remove("oe_img_bg", "o_bg_img_center", "o_modified_image_to_save");
+        }
+    }
     showMainColorPicker() {
         const editingEl = this.env.getEditingElement();
         const src = new URL(getBgImageURLFromEl(editingEl), window.location.origin);
