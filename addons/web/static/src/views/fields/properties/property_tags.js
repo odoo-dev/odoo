@@ -1,4 +1,5 @@
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
+import { useSuggester } from "@web/core/autocomplete/suggester_hook";
 import { ColorList } from "@web/core/colorlist/colorlist";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
@@ -54,6 +55,52 @@ export class PropertyTags extends Component {
         useTagNavigation("propertyTags", {
             delete: (index) => this.deleteTagByIndex(index),
         });
+
+        const suggest = useSuggester((request) => {
+            const tagsFiltered = this.props.tags.filter(
+                (tag) =>
+                    (!this.props.selectedTags ||
+                        this.props.selectedTags.indexOf(tag[0]) < 0) &&
+                    (!request ||
+                        !request.length ||
+                        tag[1].toLocaleLowerCase().indexOf(request.toLocaleLowerCase()) >=
+                            0)
+            );
+            if (tagsFiltered.length) {
+                return tagsFiltered.map((tag) => ({
+                    label: tag[1],
+                    onSelect: () => this.onOptionSelected(tag[0]),
+                }));
+            }
+
+            // no result, ask the user if he wants to create a new tag
+            if (!request.length) {
+                return [
+                    {
+                        label: _t("Start typing..."),
+                        cssClass: "fst-italic",
+                    },
+                ];
+            } else if (!this.props.canChangeTags) {
+                return [
+                    {
+                        label: _t("No result"),
+                        cssClass: "fst-italic",
+                    },
+                ];
+            }
+
+            return [
+                {
+                    label: _t('Create "%s"', request),
+                    cssClass: "o_field_property_dropdown_add",
+                    onSelect: () => this.onTagCreate(request),
+                },
+            ];
+        });
+        this.tagSource = {
+            options: suggest,
+        };
     }
 
     /* --------------------------------------------------------
@@ -125,59 +172,6 @@ export class PropertyTags extends Component {
      */
     get availableTags() {
         return JSON.parse(JSON.stringify(this.props.tags || []));
-    }
-
-    /**
-     * Options available in the autocomplete component.
-     *
-     * @returns {array}
-     */
-    get autocompleteSources() {
-        return [
-            {
-                options: (request) => {
-                    const tagsFiltered = this.props.tags.filter(
-                        (tag) =>
-                            (!this.props.selectedTags ||
-                                this.props.selectedTags.indexOf(tag[0]) < 0) &&
-                            (!request ||
-                                !request.length ||
-                                tag[1].toLocaleLowerCase().indexOf(request.toLocaleLowerCase()) >=
-                                    0)
-                    );
-                    if (!tagsFiltered || !tagsFiltered.length) {
-                        // no result, ask the user if he want to create a new tag
-                        if (!request || !request.length) {
-                            return [
-                                {
-                                    label: _t("Start typing..."),
-                                    cssClass: "fst-italic",
-                                },
-                            ];
-                        } else if (!this.props.canChangeTags) {
-                            return [
-                                {
-                                    label: _t("No result"),
-                                    cssClass: "fst-italic",
-                                },
-                            ];
-                        }
-
-                        return [
-                            {
-                                label: _t('Create "%s"', request),
-                                cssClass: "o_field_property_dropdown_add",
-                                onSelect: () => this.onTagCreate(request),
-                            },
-                        ];
-                    }
-                    return tagsFiltered.map((tag) => ({
-                        label: tag[1],
-                        onSelect: () => this.onOptionSelected(tag[0]),
-                    }));
-                },
-            },
-        ];
     }
 
     /* --------------------------------------------------------
