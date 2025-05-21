@@ -125,9 +125,12 @@ export async function setupWebsiteBuilder(
     patchWithCleanup(WebsiteBuilder.prototype, {
         setIframeLoaded() {
             super.setIframeLoaded();
-            this.publicRootReady.resolve();
             originalIframeLoaded = this.iframeLoaded;
             this.iframeLoaded = iframeLoaded;
+        },
+        async onEditPage(){
+            super.onEditPage();
+            this.publicRootReady.resolve();
         },
         async loadAssetsEditBundle() {
             // To instantiate interactions in the iframe test we need to
