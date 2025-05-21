@@ -1,4 +1,5 @@
-import { areCssValuesEqual } from "@html_builder/utils/utils_css";
+// import { areCssValuesEqual } from "@html_builder/utils/utils_css";
+import weUtils from "@web_editor/js/common/utils";
 import {
     clickOnEditAndWaitEditMode,
     clickOnSave,
@@ -14,19 +15,19 @@ const TARGET_BODY_COLOR_V2 = 'rgb(255, 0, 255)';
 
 const checkFontSize = function () {
     const style = document.defaultView.getComputedStyle(this.anchor);
-    if (!areCssValuesEqual(style.fontSize, `${TARGET_FONT_SIZE}px`, "font-size")) {
+    if (!weUtils.areCssValuesEqual(style.fontSize, `${TARGET_FONT_SIZE}px`, "font-size")) {
         console.error(`Expected the font-size to be equal to ${TARGET_FONT_SIZE}px but found ${style.fontSize} instead`);
     }
 };
 const checkBodyBgColor = function () {
     const style = document.defaultView.getComputedStyle(this.anchor);
-    if (!areCssValuesEqual(style.backgroundColor, `${TARGET_BODY_BG_COLOR}`, "background-color")) {
+    if (!weUtils.areCssValuesEqual(style.backgroundColor, `${TARGET_BODY_BG_COLOR}`, "background-color")) {
         console.error(`Expected the background color to be equal to ${TARGET_BODY_BG_COLOR} but found ${style.backgroundColor} instead`);
     }
 };
 const checkBodyColor = function () {
     const style = document.defaultView.getComputedStyle(this.anchor);
-    if (!areCssValuesEqual(style.color, `${TARGET_BODY_COLOR}`, "color")) {
+    if (!weUtils.areCssValuesEqual(style.color, `${TARGET_BODY_COLOR}`, "color")) {
         console.error(`Expected the color to be equal to ${TARGET_BODY_COLOR} but found ${style.color} instead`);
     }
 };
@@ -41,11 +42,11 @@ registerWebsitePreviewTour("website_style_edition", {
     trigger: "[data-action-param='font-size-base'] input",
     run: `edit ${TARGET_FONT_SIZE} && click body`,
 },
-// {
-//     // Waiting the CSS to be reloaded: the code adds a new assets bundle with
-//     // a #t=... at the end then removes the old one.
-//     trigger: ':iframe html:not(:has(link[href$="web.assets_frontend.min.css"]))',
-// },
+{
+    // Waiting the CSS to be reloaded: the code adds a new assets bundle with
+    // a #t=... at the end then removes the old one.
+    trigger: ':iframe html:not(:has(link[href$="web.assets_frontend.min.css"]))',
+},
 {
     content: "Check the font size was properly adapted",
     trigger: ':iframe #wrapwrap',

@@ -129,8 +129,8 @@ function _computePxByRem(toRem) {
  *                             may change
  * @returns {number}
  */
-function _convertValueToUnit(value, unitTo, cssProp, $target) {
-    const m = _getNumericAndUnit(value);
+function convertValueToUnit(value, unitTo, cssProp, $target) {
+    const m = getNumericAndUnit(value);
     if (!m) {
         return NaN;
     }
@@ -170,7 +170,7 @@ function _convertNumericToUnit(value, unitFrom, unitTo, cssProp, $target) {
  * @param {string} value
  * @returns {Array|null}
  */
-function _getNumericAndUnit(value) {
+function getNumericAndUnit(value) {
     const m = value.trim().match(/^(-?[0-9.]+(?:e[+|-]?[0-9]+)?)\s*([^\s]*)$/);
     if (!m) {
         return null;
@@ -183,27 +183,25 @@ function _getNumericAndUnit(value) {
  * @param {string} value1
  * @param {string} value2
  * @param {string} [cssProp] - the css property on which the unit applies
- * @param {Node} [target] - the element on which that css property
  * @returns {boolean}
  */
-function _areCssValuesEqual(value1, value2, cssProp, target) {
-    const $target = $(target);
+export function areCssValuesEqual(value1, value2, cssProp) {
     // String comparison first
     if (value1 === value2) {
         return true;
     }
 
     // In case the values are a size, they might be made of two parts.
-    if (cssProp && cssProp.endsWith('-size')) {
+    if (cssProp && cssProp.endsWith("-size")) {
         // Avoid re-splitting each part during their individual comparison.
-        const pseudoPartProp = cssProp + '-part';
+        const pseudoPartProp = cssProp + "-part";
         const re = /-?[0-9.]+(?:e[+|-]?[0-9]+)?\s*[A-Za-z%-]+|auto/g;
         const parts1 = value1.match(re);
         const parts2 = value2.match(re);
         for (const index of [0, 1]) {
-            const part1 = parts1 && parts1.length > index ? parts1[index] : 'auto';
-            const part2 = parts2 && parts2.length > index ? parts2[index] : 'auto';
-            if (!_areCssValuesEqual(part1, part2, pseudoPartProp, $target)) {
+            const part1 = parts1 && parts1.length > index ? parts1[index] : "auto";
+            const part2 = parts2 && parts2.length > index ? parts2[index] : "auto";
+            if (!areCssValuesEqual(part1, part2, pseudoPartProp)) {
                 return false;
             }
         }
@@ -212,11 +210,11 @@ function _areCssValuesEqual(value1, value2, cssProp, target) {
 
     // It could be a CSS variable, in that case the actual value has to be
     // retrieved before comparing.
-    if (value1.startsWith('var(--')) {
-        value1 = _getCSSVariableValue(value1.substring(6, value1.length - 1));
+    if (isCSSVariable(value1)) {
+        value1 = getCSSVariableValue(value1.substring(6, value1.length - 1));
     }
-    if (value2.startsWith('var(--')) {
-        value2 = _getCSSVariableValue(value2.substring(6, value2.length - 1));
+    if (isCSSVariable(value2)) {
+        value2 = getCSSVariableValue(value2.substring(6, value2.length - 1));
     }
     if (value1 === value2) {
         return true;
@@ -230,8 +228,8 @@ function _areCssValuesEqual(value1, value2, cssProp, target) {
     }
 
     // They may be gradients
-    const value1IsGradient = _isColorGradient(value1);
-    const value2IsGradient = _isColorGradient(value2);
+    const value1IsGradient = isColorGradient(value1);
+    const value2IsGradient = isColorGradient(value2);
     if (value1IsGradient !== value2IsGradient) {
         return false;
     }
@@ -239,13 +237,13 @@ function _areCssValuesEqual(value1, value2, cssProp, target) {
         // Kinda hacky and probably inneficient but probably the easiest way:
         // applied the value as background-image of two fakes elements and
         // compare their computed value.
-        const temp1El = document.createElement('div');
+        const temp1El = document.createElement("div");
         temp1El.style.backgroundImage = value1;
         document.body.appendChild(temp1El);
         value1 = getComputedStyle(temp1El).backgroundImage;
         document.body.removeChild(temp1El);
 
-        const temp2El = document.createElement('div');
+        const temp2El = document.createElement("div");
         temp2El.style.backgroundImage = value2;
         document.body.appendChild(temp2El);
         value2 = getComputedStyle(temp2El).backgroundImage;
@@ -258,14 +256,14 @@ function _areCssValuesEqual(value1, value2, cssProp, target) {
     // In this case we use the kinda hacky and probably inneficient but probably
     // easiest way: applying the value as box-shadow of two fakes elements and
     // compare their computed value.
-    if (cssProp === 'box-shadow') {
-        const temp1El = document.createElement('div');
+    if (cssProp === "box-shadow") {
+        const temp1El = document.createElement("div");
         temp1El.style.boxShadow = value1;
         document.body.appendChild(temp1El);
         value1 = getComputedStyle(temp1El).boxShadow;
         document.body.removeChild(temp1El);
 
-        const temp2El = document.createElement('div');
+        const temp2El = document.createElement("div");
         temp2El.style.boxShadow = value2;
         document.body.appendChild(temp2El);
         value2 = getComputedStyle(temp2El).boxShadow;
@@ -276,13 +274,21 @@ function _areCssValuesEqual(value1, value2, cssProp, target) {
 
     // Convert the second value in the unit of the first one and compare
     // floating values
-    const data = _getNumericAndUnit(value1);
+    const data = getNumericAndUnit(value1);
     if (!data) {
         return false;
     }
     const numValue1 = data[0];
-    const numValue2 = _convertValueToUnit(value2, data[1], cssProp, $target);
-    return (Math.abs(numValue1 - numValue2) < Number.EPSILON);
+    const numValue2 = convertValueToUnit(value2, data[1], cssProp);
+    return Math.abs(numValue1 - numValue2) < Number.EPSILON;
+}
+/**
+ * @param {string} value
+ * @returns {boolean}
+ */
+export function isCSSVariable(value) {
+    value = value.replace(/^'|'$/g, "");
+    return /^var\(--.+?\)$/.test(value);
 }
 /**
  * @param {string|number} name
@@ -317,7 +323,7 @@ function _computeColorClasses(colorNames, prefix = 'bg-') {
  * @param {CSSStyleDeclaration} [htmlStyle] if not provided, it is computed
  * @returns {string}
  */
-function _getCSSVariableValue(key, htmlStyle) {
+function getCSSVariableValue(key, htmlStyle) {
     if (htmlStyle === undefined) {
         htmlStyle = editableWindow.getComputedStyle(editableWindow.document.documentElement);
     }
@@ -343,7 +349,7 @@ function _normalizeColor(color) {
     if (isCSSColor(color)) {
         return color;
     }
-    return _getCSSVariableValue(color);
+    return getCSSVariableValue(color);
 }
 /**
  * Parse an element's background-image's url.
@@ -381,7 +387,7 @@ function _backgroundImageCssToParts(css) {
         const commaPos = css.indexOf(',', urlEnd);
         css = commaPos > 0 ? css.substring(commaPos + 1) : '';
     }
-    if (_isColorGradient(css)) {
+    if (isColorGradient(css)) {
         parts.gradient = css.trim();
     }
     return parts;
@@ -403,7 +409,7 @@ function _backgroundImagePartsToCss(parts) {
  * @param {string} [value]
  * @returns {boolean}
  */
-function _isColorGradient(value) {
+function isColorGradient(value) {
     // FIXME duplicated in odoo-editor/utils.js
     return value && value.includes('-gradient(');
 }
@@ -556,14 +562,14 @@ export default {
     DEFAULT_PALETTE: DEFAULT_PALETTE,
     EDITOR_COLOR_CSS_VARIABLES: EDITOR_COLOR_CSS_VARIABLES,
     computePxByRem: _computePxByRem,
-    convertValueToUnit: _convertValueToUnit,
+    convertValueToUnit: convertValueToUnit,
     convertNumericToUnit: _convertNumericToUnit,
-    getNumericAndUnit: _getNumericAndUnit,
-    areCssValuesEqual: _areCssValuesEqual,
+    getNumericAndUnit: getNumericAndUnit,
+    areCssValuesEqual: areCssValuesEqual,
     isColorCombinationName: _isColorCombinationName,
-    isColorGradient: _isColorGradient,
+    isColorGradient: isColorGradient,
     computeColorClasses: _computeColorClasses,
-    getCSSVariableValue: _getCSSVariableValue,
+    getCSSVariableValue: getCSSVariableValue,
     normalizeColor: _normalizeColor,
     getBgImageURL: _getBgImageURL,
     backgroundImageCssToParts: _backgroundImageCssToParts,
