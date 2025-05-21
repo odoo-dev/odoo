@@ -29,6 +29,7 @@ from odoo.tools import (
     lazy_classproperty,
     remove_accents,
     sql,
+    profiler
 )
 from odoo.tools.func import locked, reset_cached_properties
 from odoo.tools.lru import LRU
@@ -130,6 +131,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
         upgrade_modules: Collection[str] = (),
         new_db_demo: bool | None = None,
     ) -> Registry:
+      with profiler.Profiler(db=db_name, collectors=[profiler.PeriodicCollector(interval=0.1)]):
         """Create and return a new registry for the given database name.
 
         :param db_name: The name of the database to associate with the Registry instance.
