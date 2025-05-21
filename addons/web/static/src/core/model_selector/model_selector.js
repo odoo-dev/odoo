@@ -1,4 +1,5 @@
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
+import { useSuggester } from "@web/core/autocomplete/suggester_hook";
 import { useService } from "@web/core/utils/hooks";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { _t } from "@web/core/l10n/translation";
@@ -42,21 +43,25 @@ export class ModelSelector extends Component {
                 }),
             }));
         });
-    }
 
-    get sources() {
-        return [this.optionsSource];
+        const suggest = useSuggester((request) => {
+            const options = this.filterModels(request);
+            if (!options.length) {
+                options.push({
+                    cssClass: "o_m2o_no_result",
+                    label: _t("No records"),
+                });
+            }
+            return options;
+        });
+        this.modelSource = {
+            options: suggest,
+            placeholder: _t("Loading..."),
+        };
     }
 
     get placeholder() {
         return this.props.placeholder || _t("Type a model here...");
-    }
-
-    get optionsSource() {
-        return {
-            placeholder: _t("Loading..."),
-            options: this.loadOptionsSource.bind(this),
-        };
     }
 
     filterModels(name) {
@@ -71,18 +76,6 @@ export class ModelSelector extends Component {
             return visibleModels;
         }
         return fuzzyLookup(name, this.models, (model) => model.data.technical + model.label);
-    }
-
-    loadOptionsSource(request) {
-        const options = this.filterModels(request);
-
-        if (!options.length) {
-            options.push({
-                label: _t("No records"),
-                cssClass: "o_m2o_no_result",
-            });
-        }
-        return options;
     }
 
     /**

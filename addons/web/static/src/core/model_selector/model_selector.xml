@@ -12,7 +12,7 @@
             <AutoComplete t-else=""
                 id="props.id"
                 value="props.value || ''"
-                sources="sources"
+                sources="[modelSource]"
                 placeholder="this.placeholder"
                 autoSelect="props.autoSelect"
             />
