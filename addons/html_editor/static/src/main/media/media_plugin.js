@@ -17,6 +17,7 @@ import { MediaDialog } from "./media_dialog/media_dialog";
 import { rightPos } from "@html_editor/utils/position";
 import { withSequence } from "@html_editor/utils/resource";
 import { closestElement } from "@html_editor/utils/dom_traversal";
+import { execSyncOrAsync } from "@web/core/utils/concurrency";
 
 /**
  * @typedef { Object } MediaShared
@@ -148,11 +149,24 @@ export class MediaPlugin extends Plugin {
         } else {
             this.dependencies.dom.insert(newImgElement);
         }
-        // Collapse selection after the inserted/replaced element.
-        const [anchorNode, anchorOffset] = rightPos(newImgElement);
-        this.dependencies.selection.setSelection({ anchorNode, anchorOffset });
-        this.delegateTo("afer_save_media_dialog_handlers", newImgElement);
-        this.dependencies.history.addStep();
+
+        // Without execSyncOrAsync, tests in html_editor would fail if they
+        // don't await for the promise of onSaveMediaDialog to resolve.
+        //
+        // This code should be simplifed if the html_editor allows asynchronous
+        // operations.
+        execSyncOrAsync(function* () {
+            const promises = this.getResource("process_new_image").map((cb) => cb(newImgElement));
+            // Wait for some promise if any.
+            yield promises.some((p) => p instanceof Promise) && Promise.all(promises);
+
+            // Collapse selection after the inserted/replaced element.
+            const [anchorNode, anchorOffset] = rightPos(newImgElement);
+            this.dependencies.selection.setSelection({ anchorNode, anchorOffset });
+            this.delegateTo("afer_save_media_dialog_handlers", newImgElement);
+
+            this.dependencies.history.addStep();
+        }, this);
     }
 
     openMediaDialog(params = {}, editableEl = null) {

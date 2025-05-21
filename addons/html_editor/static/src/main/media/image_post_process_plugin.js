@@ -7,6 +7,7 @@ import {
     loadImage,
     loadImageDataURL,
     loadImageInfo,
+    postProcessAttributes,
 } from "@html_editor/utils/image_processing";
 import { Plugin } from "../../plugin";
 import { getAffineApproximation, getProjective } from "@html_editor/utils/perspective_utils";
@@ -17,6 +18,29 @@ export class ImagePostProcessPlugin extends Plugin {
     static id = "imagePostProcess";
     static dependencies = ["style"];
     static shared = ["processImage"];
+    resources = {
+        post_process_image_predicates: (image) =>
+            postProcessAttributes.some((attr) => image.hasAttribute(attr)),
+        process_new_image: (img) => {
+            // Without `shouldPostProcessImage`, `imagePostProcess.processImage`
+            // would be called everytime and thus would break html_editor tests
+            // that does not mock request made by `processImage` and that don't
+            // await the `processImage`.
+            //
+            // This code should be simplifed if the html_editor allows asynchronous
+            // operations.
+            const shouldPostProcessImage = this.getResource("post_process_image_predicates").some(
+                (cb) => cb(img)
+            );
+            if (shouldPostProcessImage) {
+                return this.dependencies.imagePostProcess
+                    .processImage(img)
+                    .then((updateAttributes) => {
+                        updateAttributes();
+                    });
+            }
+        },
+    };
 
     /**
      * Applies data-attributes modifications to an img tag and returns a dataURL
@@ -43,6 +67,9 @@ export class ImagePostProcessPlugin extends Plugin {
         }
 
         const data = getImageTransformationData({ ...img.dataset, ...newDataset });
+        if (!data.originalSrc) {
+            return () => {};
+        }
         const {
             mimetypeBeforeConversion,
             formatMimetype,
