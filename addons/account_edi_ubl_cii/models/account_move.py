@@ -35,13 +35,6 @@ class AccountMove(models.Model):
             }
         return False
 
-    def action_invoice_download_invoice_edi_format(self, edi_format):
-        return {
-            'type': 'ir.actions.act_url',
-            'url': f'/account/download_invoice_documents/{",".join(map(str, self.ids))}/invoice_edi_format_{edi_format}',
-            'target': 'download',
-        }
-
     # -------------------------------------------------------------------------
     # BUSINESS
     # -------------------------------------------------------------------------
@@ -61,22 +54,31 @@ class AccountMove(models.Model):
                     'filetype': 'xml',
                     'content': ubl_attachment.raw,
                 }
-        elif allow_fallback and filetype.startswith('invoice_edi_format_'):  # TODO: allow_fallback since we have to generate
-            invoice_edi_format = filetype.removeprefix('invoice_edi_format_')
-            builder = self.partner_id.commercial_partner_id._get_edi_builder(invoice_edi_format)
-            xml_content, errors = builder._export_invoice(self)
+        return super()._get_invoice_legal_documents(filetype, allow_fallback=allow_fallback)
+
+    def _get_invoice_legal_documents_invoice_edi_format_generator(self, invoice_edi_format):
+        builder = self.partner_id._get_edi_builder(invoice_edi_format)
+        if builder is None:
+            return False
+
+        # TODO: Add some check?
+        # Would maybe nice to say that it cannot be generated instead of just omitting the entry
+
+        def _get_documents(invoice):
+            xml_content, errors = builder._export_invoice(invoice)
             if not errors:
                 return {
-                    'filename': builder._export_invoice_filename(self),
+                    'filename': builder._export_invoice_filename(invoice),
                     'filetype': 'xml',
                     'content': xml_content,
                 }
             # TODO: not sure?
-            invoice_edi_format_description = self.env['res.partner']._fields['invoice_edi_format'].get_description(self.env)
+            invoice_edi_format_description = invoice.env['res.partner']._fields['invoice_edi_format'].get_description(invoice.env)
             message = _("Error while generating the '%(invoice_edi_format_string)' document.",
                         invoice_edi_format_string=dict(invoice_edi_format_description['selection'])[invoice_edi_format])
             self.with_context(no_new_invoice=True).message_post(body=message)
-        return super()._get_invoice_legal_documents(filetype, allow_fallback=allow_fallback)
+
+        return _get_documents
 
     def get_extra_print_items(self):
         print_items = super().get_extra_print_items()
@@ -86,20 +88,12 @@ class AccountMove(models.Model):
                 'description': _('XML UBL'),
                 **self.action_invoice_download_ubl(),
             })
-        # TODO: maybe this should be in account? Else it will e.g. not work for italy
-        # TODO: issue: does not work with
-        # TODO: for list view `self` can have multiple moves I guess?
-        # Add 'ubl_bis3' and all the "local" formats
-        invoice_edi_formats = {
-            partner.invoice_edi_format for partner in self.partner_id.commercial_partner_id
-        } - {False} | {'ubl_bis3'}
-        for invoice_edi_format in invoice_edi_formats:
-            invoice_edi_format_description = self.env['res.partner']._fields['invoice_edi_format'].get_description(self.env)
-            print_items.append({
-                'key': f'download_{invoice_edi_format}',
-                'description': dict(invoice_edi_format_description['selection'])[invoice_edi_format],
-                **self.action_invoice_download_invoice_edi_format(invoice_edi_format),
-            })
+
+        bis3_edi_format = 'ubl_bis3'
+        bis3_print_item = next((item for item in print_items if item['key'] == f'generate_{bis3_edi_format}'), None)
+        if not bis3_print_item:
+            print_items.append(self._get_invoice_edi_format_print_item(bis3_edi_format))
+
         return print_items
 
     # -------------------------------------------------------------------------

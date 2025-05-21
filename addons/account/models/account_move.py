@@ -5841,6 +5841,15 @@ class AccountMove(models.Model):
                 return self._get_invoice_pdf_proforma()
         elif filetype == 'all':
             return self._get_invoice_legal_documents_all(allow_fallback=allow_fallback)
+        elif allow_fallback and filetype.startswith('invoice_edi_format_'):
+            invoice_edi_format = filetype.removeprefix('invoice_edi_format_')
+            get_documents = self._get_invoice_legal_documents_invoice_edi_format_generator(invoice_edi_format)
+            if get_documents:
+                return get_documents(self)
+
+    def _get_invoice_legal_documents_invoice_edi_format_generator(self, invoice_edi_format):
+        # To extend
+        return None
 
     def _get_invoice_legal_documents_all(self, allow_fallback=False):
         """ Retrieve the invoice legal attachments: PDF, XML, ...
@@ -6287,11 +6296,51 @@ class AccountMove(models.Model):
         This is necessary to avoid the re-generation of the PDF through the action_report.
         Indeed, once a legal PDF is generated, it should be used and not re-generated.
         """
-        return [{
+        print_items = [{
             'key': 'download_pdf',
             'description': _('PDF'),
             **self.action_invoice_download_pdf()
         }]
+
+        # Add items to generate XMLs in the suggested / selected / local edi formats (they may all be the same or `False`)
+        # TODO: This could also be a function (to add formats more easily)
+        invoice_edi_formats = {
+            edi_format
+            for partner in [move.partner_id.with_company(move.company_id) for move in self]
+            for edi_format in [
+                    partner._get_suggested_invoice_edi_format(),
+                    partner.invoice_edi_format,
+                    partner._get_local_invoice_edi_format() if partner._use_local_invoice_edi_format() else False,
+            ]
+        } - {False}
+        print_items.extend([
+            print_item for invoice_edi_format in invoice_edi_formats
+            if (print_item := self._get_invoice_edi_format_print_item(invoice_edi_format))
+        ])
+
+        return print_items
+
+    def _get_action_generate_invoice_edi_format(self, invoice_edi_format):
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/account/download_invoice_documents/{",".join(map(str, self.ids))}/invoice_edi_format_{invoice_edi_format}',
+            'target': 'download',
+        }
+
+    def _get_invoice_edi_format_print_item(self, invoice_edi_format):
+        # Check whether we can generate the document
+        if not self._get_invoice_legal_documents_invoice_edi_format_generator(invoice_edi_format):
+            return False
+
+        # TODO: maybe merging _get_invoice_edi_format_print_item and _get_invoice_legal_documents_invoice_edi_format_generator
+        #       into 1 function would make sense (to handle errors / labels better)
+
+        invoice_edi_format_description = self.env['res.partner']._fields['invoice_edi_format'].get_description(self.env)
+        return {
+            'key': f'generate_{invoice_edi_format}',
+            'description': dict(invoice_edi_format_description['selection'])[invoice_edi_format],
+            **self._get_action_generate_invoice_edi_format(invoice_edi_format),
+        }
 
     @staticmethod
     def _can_commit():
