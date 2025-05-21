@@ -23,6 +23,7 @@ import {
     rgbaToHex,
     COLOR_COMBINATION_CLASSES_REGEX,
 } from "@web/core/utils/colors";
+import { backgroundImageCssToParts } from "@html_editor/utils/image";
 import { ColorSelector } from "./color_selector";
 
 const RGBA_OPACITY = 0.6;
@@ -136,7 +137,8 @@ export class ColorPlugin extends Plugin {
     getElementColors(el) {
         const elStyle = getComputedStyle(el);
         const backgroundImage = elStyle.backgroundImage;
-        const hasGradient = isColorGradient(backgroundImage);
+        const gradient = backgroundImageCssToParts(backgroundImage).gradient;
+        const hasGradient = isColorGradient(gradient);
         const hasTextGradientClass = el.classList.contains("text-gradient");
 
         let backgroundColor = elStyle.backgroundColor;
@@ -155,9 +157,9 @@ export class ColorPlugin extends Plugin {
         }
 
         return {
-            color: hasGradient && hasTextGradientClass ? backgroundImage : rgbaToHex(elStyle.color),
+            color: hasGradient && hasTextGradientClass ? gradient : rgbaToHex(elStyle.color),
             backgroundColor:
-                hasGradient && !hasTextGradientClass ? backgroundImage : rgbaToHex(backgroundColor),
+                hasGradient && !hasTextGradientClass ? gradient : rgbaToHex(backgroundColor),
         };
     }
 
