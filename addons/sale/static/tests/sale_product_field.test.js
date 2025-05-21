@@ -100,8 +100,7 @@ class Company extends models.Model {
     _records = [{ id: 1, name: "test company" }];
 }
 
-defineModels([Company, SaleOrder, SaleOrderLine, ProductTemplate, ProductTemplateAttributeValue, Product]);
-defineMailModels();
+defineModels([Company, SaleOrder, SaleOrderLine, ProductTemplateAttributeValue]);
 
 test.tags`desktop`;
 test("pressing tab with incomplete text will create a product", async () => {

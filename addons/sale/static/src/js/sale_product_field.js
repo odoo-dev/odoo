@@ -203,7 +203,7 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
             await this.props.record.update({
                 product_id: { id: result.product_id, display_name: result.product_name },
             });
-            await this._openComboConfigurator(false, result.has_optional_products);
+            await this._openComboConfigurator(false, result.show_optional_product);
         }else if(result.dialog == 'product'){
             await this._openProductConfigurator(
                 result['show_main_product'],
@@ -270,7 +270,7 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
         this.dialog.add(ProductConfiguratorDialog, {
             products: product_configurator_values['products'],
             optionalProducts: product_configurator_values['optional_products'],
-            currencyId: saleOrderLine.currency_id.id,
+            currencyId: product_configurator_values['currency_id'],
             productTemplateId: saleOrderLine.product_template_id.id,
             ptavIds: ptavIds,
             customPtavs: customPtavs,
@@ -383,7 +383,7 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
             const selectedComboProducts = selectedComboItems.map(
                 item => ({ name: item.product.display_name })
             );
-            await this._openProductConfigurator(false, selectedComboProducts);
+            await this._openProductConfigurator(true, true, false, selectedComboProducts);
         }
     }
 

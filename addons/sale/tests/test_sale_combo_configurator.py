@@ -86,7 +86,7 @@ class TestSaleComboConfigurator(HttpCase, SaleCommon):
             ],
             'optional_product_ids': [Command.link(optional_product.id)],
         })
-        self.start_tour('/', 'sale_combo_configurator_with_optional_products', login='salesman')
+        self.start_tour('/', 'sale_combo_configurator_with_optional_products', login='salesman', watch=True)
 
         order = self.env['sale.order'].search([('partner_id.name', '=', 'Test Partner')], limit=1)
         self.assertTrue(order, "A new Sale order should be created.")

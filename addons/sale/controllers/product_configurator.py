@@ -24,14 +24,13 @@ class SaleProductConfiguratorController(Controller):
         result = {
             'product_id': product_template.product_variant_id.id,
             'product_name': product_template.product_variant_id.display_name,
-            'dialog': False,
+            'dialog': product_template._get_dialog_type(),
         }
 
         # force_open_dialog has higher priority than force_stop
         force_open_product_configurator = self._force_open_product_configurator(**kwargs)
         if not force_open_product_configurator and self._force_stop_product_configurator(
-            product_template,
-            **kwargs,
+            product_template, **kwargs,
         ):
             dialog_type = product_template._get_dialog_type()
             result['dialog'] = False if dialog_type == 'product' else dialog_type
@@ -43,7 +42,7 @@ class SaleProductConfiguratorController(Controller):
             or product_template.has_configurable_attributes
         )
 
-        show_optional_products = not only_main_product and (
+        result['show_optional_product'] = show_optional_products = not only_main_product and (
             show_main_product
             or (
                 any(
@@ -59,10 +58,9 @@ class SaleProductConfiguratorController(Controller):
             )
         )
 
-        if show_main_product or show_optional_products:
-            result['dialog'] = 'product'
-        result['show_main_product'] = show_main_product or show_optional_products
-        result['show_optional_product'] = show_optional_products
+        if products := show_main_product or show_optional_products:
+            result['dialog'] = product_template._get_dialog_type()
+        result['show_main_product'] = products
 
         return result
 
@@ -164,7 +162,7 @@ class SaleProductConfiguratorController(Controller):
         return result
 
     def _force_stop_product_configurator(self, product_template, **kwargs):
-        return product_template._get_dialog_type() != 'product'
+        return False
 
     def _force_open_product_configurator(self, **kwargs):
         return kwargs.get('force_dialog')

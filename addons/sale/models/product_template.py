@@ -300,4 +300,8 @@ class ProductTemplate(models.Model):
         )
 
     def _get_dialog_type(self):
-        return 'combo' if self.type == 'combo' else 'product'
+        if self.type == 'combo':
+            return 'combo'
+        if self.type == 'consu':
+            return 'product'
+        return False
