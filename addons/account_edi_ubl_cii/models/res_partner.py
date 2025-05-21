@@ -262,16 +262,7 @@ class ResPartner(models.Model):
         if invoice_edi_format == 'ubl_sg':
             return self.env['account.edi.xml.ubl_sg']
 
-    def _get_suggested_invoice_edi_format(self):
-        # EXTENDS 'account'
-        edi_format = super()._get_suggested_invoice_edi_format()
-        if edi_format or self.country_code != self.env.company.country_code:
-            return edi_format
-        # TODO: Not sure:
-        # Maybe we could code the logic of local format more explicitly?
-        # Add sth. like the following in the super fn:
-        # `self._get_local_edi_format() if self._use_local_edi_format() else False`
-        # Then we could just override `_get_local_edi_format` in most cases for the localizations
+    def _get_local_invoice_edi_format(self):
         local_edi_format = {
             'BE': 'ubl_bis3',  # TODO:
             'FR': 'facturx',

@@ -712,6 +712,14 @@ class ResPartner(models.Model):
     def _get_suggested_invoice_edi_format(self):
         # TO OVERRIDE
         self.ensure_one()
+        if self._use_local_invoice_edi_format():
+            return self._get_local_invoice_edi_format()
+        return False
+
+    def _use_local_invoice_edi_format(self):
+        return self.env.company.country_code == self.country_code
+
+    def _get_local_invoice_edi_format(self):
         return False
 
     def _find_accounting_partner(self, partner):
