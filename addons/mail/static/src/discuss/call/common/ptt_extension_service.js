@@ -97,7 +97,7 @@ export const pttExtensionHookService = {
                 return;
             }
             if (version.isLowerThan("1.0.0.2")) {
-                window.postMessage({ from: "discuss", type, value }, location.origin);
+                window?.postMessage({ from: "discuss", type, value }, location.origin);
                 return;
             }
             window.chrome?.runtime?.sendMessage(EXT_ID, { type, value });
