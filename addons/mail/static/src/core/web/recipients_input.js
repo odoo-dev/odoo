@@ -1,5 +1,6 @@
 import { parseEmail } from "@mail/utils/common/format";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
+import { useSuggester } from "@web/core/autocomplete/suggester_hook";
 import { _t } from "@web/core/l10n/translation";
 import { isEmail } from "@web/core/utils/strings";
 import { useService } from "@web/core/utils/hooks";
@@ -53,6 +54,12 @@ export class RecipientsInput extends Component {
                 }
             },
         });
+
+        const suggest = useSuggester(this.loadRecipients.bind(this));
+        this.recipientSource = {
+            options: suggest,
+            placeholder: _t("Loading..."),
+        };
     }
 
     deleteTagByIndex(index) {
@@ -62,113 +69,106 @@ export class RecipientsInput extends Component {
         }
     }
 
-    getAutoCompleteSources() {
-        return [
-            {
-                placeholder: _t("Loading..."),
-                /** @param {string} term */
-                options: async (term) => {
-                    const partnerIds = new Set();
-                    const recipients = this.getAllMailThreadRecipients();
+    /** @type {import("@web/core/autocomplete/suggester_hook").SuggesterFn} */
+    async loadRecipients(term, lock) {
+        const partnerIds = new Set();
+        const recipients = this.getAllMailThreadRecipients();
 
-                    for (const recipient of recipients) {
-                        if (recipient.partner_id) {
-                            partnerIds.add(recipient.partner_id);
-                        }
-                    }
+        for (const recipient of recipients) {
+            if (recipient.partner_id) {
+                partnerIds.add(recipient.partner_id);
+            }
+        }
 
-                    const options = [];
-                    const [name, email] = term ? parseEmail(term) : ["", ""];
+        const options = [];
+        const [name, email] = term ? parseEmail(term) : ["", ""];
 
-                    const limit = 8;
-                    const matches = await this.orm.searchRead(
-                        "res.partner",
-                        [
-                            ["id", "not in", Array.from(partnerIds)],
-                            "|",
-                            ["name", "ilike", name],
-                            email ? ["email_normalized", "ilike", email] : [0, "=", 1], // if no email, use a false leaf
-                        ],
-                        ["email", "id", "lang", "name"],
-                        { limit }
-                    );
+        const limit = 8;
+        const matches = await lock(this.orm.searchRead(
+            "res.partner",
+            [
+                ["id", "not in", Array.from(partnerIds)],
+                "|",
+                ["name", "ilike", name],
+                email ? ["email_normalized", "ilike", email] : [0, "=", 1], // if no email, use a false leaf
+            ],
+            ["email", "id", "lang", "name"],
+            { limit }
+        ));
 
-                    options.push(
-                        ...matches.map((match) => ({
-                            label: match.email
-                                ? _t("%(partner_name)s <%(partner_email)s>", {
-                                      partner_name: match.name || _t("Unnamed"),
-                                      partner_email: match.email,
-                                  })
-                                : match.name || _t("Unnamed"),
-                            onSelect: () => {
-                                this.insertAdditionalRecipient({
-                                    email: match.email,
-                                    name: match.name,
-                                    partner_id: match.id,
-                                    persona: { type: "partner", id: match.id },
-                                });
-                            },
-                        }))
-                    );
-
-                    if (matches.length >= limit) {
-                        options.push({
-                            label: _t("Search More..."),
-                            cssClass: "o_m2o_dropdown_option o_m2o_dropdown_option_search_more",
-                            onSelect: () => {
-                                this.openListViewToSelectResPartner({});
-                            },
-                        });
-                    }
-
-                    const createOption = {
-                        cssClass: "o_m2o_dropdown_option o_m2o_dropdown_option_create",
-                        label: _t("Create %s", name),
-                    };
-
-                    if (isEmail(email)) {
-                        createOption.onSelect = async () => {
-                            const partners = await rpc("/mail/partner/from_email", {
-                                thread_model: this.props.thread.model,
-                                thread_id: this.props.thread.id,
-                                emails: [term],
-                            });
-                            if (partners.length) {
-                                const partner = partners[0];
-                                this.insertAdditionalRecipient({
-                                    email: partner.email,
-                                    name: partner.name,
-                                    partner_id: partner.id,
-                                    persona: { type: "partner", id: partner.id },
-                                });
-                            } else {
-                                this.insertAdditionalRecipient({
-                                    email,
-                                    name,
-                                    partner_id: false,
-                                    persona: false,
-                                });
-                            }
-                        };
-                    } else {
-                        createOption.onSelect = async () => {
-                            const [partnerId] = await this.orm.create("res.partner", [
-                                { name, email },
-                            ]);
-                            this.insertAdditionalRecipient({
-                                email,
-                                name,
-                                partner_id: partnerId,
-                                persona: { type: "partner", id: partnerId },
-                            });
-                        };
-                    }
-                    options.push(createOption);
-                    return options;
+        options.push(
+            ...matches.map((match) => ({
+                label: match.email
+                    ? _t("%(partner_name)s <%(partner_email)s>", {
+                            partner_name: match.name || _t("Unnamed"),
+                            partner_email: match.email,
+                        })
+                    : match.name || _t("Unnamed"),
+                onSelect: () => {
+                    this.insertAdditionalRecipient({
+                        email: match.email,
+                        name: match.name,
+                        partner_id: match.id,
+                        persona: { type: "partner", id: match.id },
+                    });
                 },
-            },
-        ];
+            }))
+        );
+
+        if (matches.length >= limit) {
+            options.push({
+                label: _t("Search More..."),
+                cssClass: "o_m2o_dropdown_option o_m2o_dropdown_option_search_more",
+                onSelect: () => {
+                    this.openListViewToSelectResPartner({});
+                },
+            });
+        }
+
+        const createOption = {
+            cssClass: "o_m2o_dropdown_option o_m2o_dropdown_option_create",
+            label: _t("Create %s", name),
+        };
+
+        if (isEmail(email)) {
+            createOption.onSelect = async () => {
+                const partners = await rpc("/mail/partner/from_email", {
+                    thread_model: this.props.thread.model,
+                    thread_id: this.props.thread.id,
+                    emails: [term],
+                });
+                if (partners.length) {
+                    const partner = partners[0];
+                    this.insertAdditionalRecipient({
+                        email: partner.email,
+                        name: partner.name,
+                        partner_id: partner.id,
+                        persona: { type: "partner", id: partner.id },
+                    });
+                } else {
+                    this.insertAdditionalRecipient({
+                        email,
+                        name,
+                        partner_id: false,
+                        persona: false,
+                    });
+                }
+            };
+        } else {
+            createOption.onSelect = async () => {
+                const [partnerId] = await this.orm.create("res.partner", [
+                    { name, email },
+                ]);
+                this.insertAdditionalRecipient({
+                    email,
+                    name,
+                    partner_id: partnerId,
+                    persona: { type: "partner", id: partnerId },
+                });
+            };
+        }
+        options.push(createOption);
+        return options;
     }
 
     /** @returns {Object} */
