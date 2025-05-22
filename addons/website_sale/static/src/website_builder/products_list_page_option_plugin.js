@@ -6,6 +6,7 @@ import { registry } from "@web/core/registry";
 
 class ProductsListPageOptionPlugin extends Plugin {
     static id = "productsListPageOptionPlugin";
+    static dependencies = ["builderActions", "history", "savePlugin"];
 
     resources = {
         builder_options: [
@@ -19,6 +20,7 @@ class ProductsListPageOptionPlugin extends Plugin {
             },
         ],
         builder_actions: this.getActions(),
+        save_handlers: this.onSave.bind(this),
     };
 
     getActions() {
@@ -53,12 +55,10 @@ class ProductsListPageOptionPlugin extends Plugin {
             },
             // TODO AGAU: merge with setGap and perform rpc on save
             setDefaultGap: {
-                reload: {},
                 isApplied: () => true,
                 apply: ({ editingElement, value }) => {
-                    editingElement.dataset.gap = value;
-                    editingElement.style.setProperty("--o-wsale-products-grid-gap", value + "px");
-                    return rpc("/shop/config/website", { shop_gap: value });
+                    editingElement.style.setProperty("--o-wsale-products-grid-gap", value);
+                    editingElement.dataset.gapToSave = value;
                 },
             },
             setDefaultSort: {
@@ -67,15 +67,15 @@ class ProductsListPageOptionPlugin extends Plugin {
                     editingElement.dataset.defaultSort === value,
                 apply: ({ value }) => rpc("/shop/config/website", { shop_default_sort: value }),
             },
-            // TODO AGAU: does not work when views is empty array
-            // get websiteConfigNoReload() {
-            //     const websiteConfigAction = getAction("websiteConfig");
-            //     return {
-            //         ...websiteConfigAction,
-            //         reload: undefined,
-            //     };
-            // },
         };
+    }
+
+    async onSave() {
+        const pageEl = this.editable.querySelector("#o_wsale_container");
+        const gapToSave = pageEl.dataset.gapToSave;
+        if (typeof gapToSave !== "undefined") {
+            return rpc("/shop/config/website", { shop_gap: gapToSave });
+        }
     }
 }
 

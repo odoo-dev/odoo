@@ -595,36 +595,13 @@ export class CustomizeWebsitePlugin extends Plugin {
      * @returns {Promise} deferred function
      */
     async customizeThemeData(isViewData, shouldReset, toEnable, toDisable) {
-        const themeRequest = { isViewData, shouldReset, toEnable, toDisable };
-        let previousActiveRecordsState;
-        const apply = () => {
-            this.pendingThemeRequests.push(themeRequest);
-
-            previousActiveRecordsState = {};
-            for (const record of toDisable) {
-                previousActiveRecordsState[record] = this.activeRecords[record];
-                this.activeRecords[record] = false;
-            }
-            for (const record of toEnable) {
-                if (typeof previousActiveRecordsState[record] === "undefined") {
-                    previousActiveRecordsState[record] = this.activeRecords[record];
-                }
-                this.activeRecords[record] = true;
-            }
-        };
-        apply();
-        this.dependencies.history.addCustomMutation({
-            apply: apply,
-            revert: () => {
-                this.pendingThemeRequests = this.pendingThemeRequests.filter(
-                    (req) => req !== themeRequest
-                );
-
-                for (const [record, value] of Object.entries(previousActiveRecordsState)) {
-                    this.activeRecords[record] = value;
-                }
-            },
-        });
+        this.pendingThemeRequests.push({ isViewData, shouldReset, toEnable, toDisable });
+        for (const record of toDisable) {
+            this.activeRecords[record] = false;
+        }
+        for (const record of toEnable) {
+            this.activeRecords[record] = true;
+        }
     }
 
     getConfigKey(key) {

@@ -2,10 +2,11 @@
 <templates xml:space="preserve">
 
 <!-- TODO AGAU: reimplement navigation improvements from commit 328c241fa58976bd5029dc526789113a88a333f2 -->
+<!-- TODO AGAU: double check enterprise changes don't need adapting https://github.com/odoo/enterprise/pull/79062 -->
 
 <t t-name="website_sale.ProductsListPageOption">
     <BuilderRow label.translate="Content Width" className="'o_wsale_editor_section'">
-        <BuilderButtonGroup action="'websiteConfig'">
+        <BuilderButtonGroup action="'websiteConfigNoReload'">
             <BuilderButton
                     title.translate="Regular"
                     classAction="'container'"
@@ -22,7 +23,7 @@
     </BuilderRow>
 
     <BuilderRow label.translate="Layout" className="'o_wsale_editor_section'">
-        <BuilderButtonGroup action="'websiteConfig'">
+        <BuilderButtonGroup action="'websiteConfigNoReload'">
             <BuilderButton
                 title.translate="Catalog of products"
                 id="'grid_view_opt'"
@@ -59,6 +60,7 @@
         </BuilderSelect>
     </BuilderRow>
 
+    <!-- TODO AGAU: preview -->
     <BuilderRow label.translate="Gap" level="1">
         <BuilderRange
             styleAction="'--o-wsale-products-grid-gap'"
@@ -70,7 +72,7 @@
     </BuilderRow>
 
     <BuilderRow label.translate="Style" className="'o_wsale_editor_section'">
-        <BuilderSelect action="'reloadComposite'">
+        <BuilderSelect action="'composite'">
             <t t-set="defaultLabel">Default</t>
             <t t-set="cardsLabel">Cards</t>
             <t t-set="thumbnailsLabel">Thumbnails</t>
@@ -102,11 +104,10 @@
                 },
             ]"/>
             <t t-foreach="styles" t-as="style" t-key="style_index">
-                <!-- TODO AGAU: no reload -->
                 <BuilderSelectItem
                         classAction="style.className"
                         actionParam="[
-                            {action: 'websiteConfig', actionParam: {views: style.views}},
+                            {action: 'websiteConfigNoReload', actionParam: {views: style.views}},
                             {action: 'setDefaultGap', actionValue: style.gap + 'px'},
                         ]"
                         t-out="style.label"
@@ -116,7 +117,7 @@
     </BuilderRow>
 
     <BuilderRow label.translate="Images Size" level="1">
-        <BuilderSelect action="'websiteConfig'">
+        <BuilderSelect action="'websiteConfigNoReload'">
             <BuilderSelectItem classAction="'o_wsale_context_thumb_4_3'" actionParam="{views: ['website_sale.products_thumb_4_3']}">Landscape (4/3)</BuilderSelectItem>
             <BuilderSelectItem classAction="''" actionParam="{views: []}">Default (1/1)</BuilderSelectItem>
             <BuilderSelectItem classAction="'o_wsale_context_thumb_4_5'" actionParam="{views: ['website_sale.products_thumb_4_5']}">Portrait (4/5)</BuilderSelectItem>
@@ -125,7 +126,7 @@
     </BuilderRow>
 
     <BuilderRow label.translate="Images Fill" level="2">
-        <BuilderButtonGroup action="'websiteConfig'">
+        <BuilderButtonGroup action="'websiteConfigNoReload'">
             <BuilderButton
                     title.translate="Contain within the box"
                     classAction="''"
@@ -194,7 +195,8 @@
     </BuilderRow>
 
     <BuilderRow t-if="isActiveItem('categories_opt_top')" label.translate="Style" level="1">
-        <BuilderSelect action="'websiteConfig'">
+        <!-- we use NoReload here assuming there will be preview classes to backup the view change -->
+        <BuilderSelect action="'websiteConfigNoReload'">
             <BuilderSelectItem classAction="''" actionParam="{views: []}">Filmstrip - default</BuilderSelectItem>
         </BuilderSelect>
     </BuilderRow>
