@@ -19,6 +19,10 @@
 
         button {
             margin: 0; // Reset boostrap.
+
+            &.o-default-button:not(:only-child) {
+                display: none;
+            }
         }
         
         @include media-breakpoint-down(md) {

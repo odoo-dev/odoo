@@ -1114,9 +1114,12 @@ test(`list view: action button in controlPanel with display='always' on mobile`,
         queryAllTexts(`div.o_control_panel_breadcrumbs button, div.o_control_panel_actions button`)
     ).toEqual([
         "New",
-        "display",
+        "", // more menu
         "", // cog menu
     ]);
+
+    await contains(".o_control_panel_main_buttons button .fa-ellipsis-v").click();
+    expect(queryAllTexts(".o_popover .o-dropdown-item")).toEqual(["display"]);
 
     await clickRecordSelector();
     await contains(".o_control_panel_breadcrumbs .o_cp_action_menus .fa-cog").click();
@@ -1132,9 +1135,12 @@ test(`list view: action button in controlPanel with display='always' on mobile`,
         queryAllTexts(`div.o_control_panel_breadcrumbs button, div.o_control_panel_actions button`)
     ).toEqual([
         "New",
-        "display",
+        "", // more menu
         "", // cog menu
     ]);
+
+    await contains(".o_control_panel_main_buttons button .fa-ellipsis-v").click();
+    expect(queryAllTexts(".o_popover .o-dropdown-item")).toEqual(["display"]);
 });
 
 test(`list view: give a context dependent on the current context to a header button`, async () => {
@@ -1870,7 +1876,8 @@ test(`at least 4 rows are rendered, even if less data`, async () => {
     expect(`tbody tr`).toHaveCount(4, { message: "should have 4 rows" });
 });
 
-test(`discard a new record in editable="top" list with less than 4 records`, async () => {
+test.tags("desktop");
+test(`discard a new record in editable="top" list with less than 4 records on desktop`, async () => {
     await mountView({
         resModel: "foo",
         type: "list",
@@ -1884,7 +1891,29 @@ test(`discard a new record in editable="top" list with less than 4 records`, asy
     expect(`.o_data_row`).toHaveCount(4);
     expect(`tbody tr:eq(0)`).toHaveClass("o_selected_row");
 
-    await contains(`.o_list_button_discard:not(.dropdown-item)`).click();
+    await contains(`.o_list_button_discard`).click();
+    expect(`.o_data_row`).toHaveCount(3);
+    expect(`tbody tr`).toHaveCount(4);
+    expect(`tbody tr:eq(0)`).toHaveClass("o_data_row");
+});
+
+test.tags("mobile");
+test(`discard a new record in editable="top" list with less than 4 records on mobile`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<list editable="top"><field name="bar"/></list>`,
+        domain: [["bar", "=", true]],
+    });
+    expect(`.o_data_row`).toHaveCount(3);
+    expect(`tbody tr`).toHaveCount(4);
+
+    await contains(`.o_list_button_add`).click();
+    expect(`.o_data_row`).toHaveCount(4);
+    expect(`tbody tr:eq(0)`).toHaveClass("o_selected_row");
+
+    await contains(".o_control_panel_main_buttons button .fa-ellipsis-v").click();
+    await contains(`.o_popover .o-dropdown-item .o_list_button_discard`).click();
     expect(`.o_data_row`).toHaveCount(3);
     expect(`tbody tr`).toHaveCount(4);
     expect(`tbody tr:eq(0)`).toHaveClass("o_data_row");
