@@ -674,39 +674,18 @@ export class HistoryPlugin extends Plugin {
         return false;
     }
 
-    // resolveHistoricalValue(record) {
-    //     if (!["attributes", "classList"].includes(record.type)) {
-    //         // @todo: handle characterData mutations
-    //         return record;
-    //     }
-
-    //     // Add entry for current target if not already present.
-    //     if (!this.lastObservedState.has(record.target)) {
-    //         this.lastObservedState.set(record.target, {
-    //             attributes: new Map(),
-    //             classList: new Map(),
-    //         });
-    //     }
-    //     const stateMap = this.lastObservedState.get(record.target)[record.type];
-    //     const key = record.type === "attributes" ? record.attributeName : record.className;
-    //     if (this.isObserverDisabled) {
-    //         // Only store it if not already stored.
-    //         if (!stateMap.has(key)) {
-    //             stateMap.set(key, record.oldValue);
-    //         }
-    //         return record;
-    //     }
-    //     if (stateMap.has(key)) {
-    //         const lastObservedValue = stateMap.get(key);
-    //         // Remove entry, so it won't be used again.
-    //         stateMap.delete(key);
-    //         // Update record.
-    //         return { ...record, oldValue: lastObservedValue };
-    //     }
-    //     return record;
-    // }
-
     /**
+     * History must be kept integer: history steps must be applicable and
+     * rollbackable.
+     * Unobserved mutations might interfere with the history steps,
+     * and this functions aims to handle them.
+     *
+     * The `oldValue` of mutations records cannot always be trusted, as they
+     * might be the result of a previous unobserved mutation.
+     *
+     * Mutations depending on a previous unobserved mutation are not stored (e.g.
+     * appending nodes to a parent that was inserted with observer off).
+     *
      * @param {HistoryMutationRecord[]} records
      */
     handleUnobservedMutations(records) {
@@ -716,17 +695,30 @@ export class HistoryPlugin extends Plugin {
         for (const record of records) {
             if (this.isObserverDisabled || !isSavableRecord(record)) {
                 this.storeLastObservedState(record);
-                // Drop record
                 continue;
             }
-            if (this.observedNodes.get(record.target) === false) {
-                // Mutation targets an unobserved node, drop it.
+            if (!this.isObservedNode(record.target)) {
+                // TODO: log a warning, mutation depends on previous unobserved
+                // mutation and will not be stored
                 continue;
             }
             const updatedRecord = this.adjustToLastObservedState(record);
             updatedRecords.push(updatedRecord);
         }
         return updatedRecords;
+    }
+
+    /**
+     * Any node that was added to the DOM without a mutation record in a history
+     * step (tipically due to observer off) is considered an unobserved node.
+     * @todo: check of ancestors?
+     *
+     * @param {Node} node
+     * @returns {boolean}
+     */
+    isObservedNode(node) {
+        // Undefined or true means the node is observed
+        return this.observedNodes.get(node) !== false;
     }
 
     /**
@@ -833,20 +825,30 @@ export class HistoryPlugin extends Plugin {
      * @param {MutationRecordChildList} record
      */
     trackObservedNodes(record) {
-        record.removedNodes.forEach((node) => {
-            if (this.observedNodes.get(node) === false) {
-                // Node was previously marked as unobserved, clear it from map
-                this.observedNodes.delete(node);
-            } else {
-                this.observedNodes.set(node, true);
-            }
-        });
+        // Tag added nodes with observer off as unobserved.
+        // Except if they are already marked as observed, meaning that they were
+        // removed with observer off and are now being inserted back.
         record.addedNodes.forEach((node) => {
             if (this.observedNodes.get(node) === true) {
                 // Node was previously marked as observed, clear it from map
                 this.observedNodes.delete(node);
             } else {
+                // Tag node as unobserved
                 this.observedNodes.set(node, false);
+            }
+        });
+        // Tag removed nodes with observer off as observed (as they are present
+        // in the last observed state). This is useful in case the node is later
+        // re-added.
+        // Except if they are already marked as unobserved, meaning that they were
+        // added with observer off and are now being removed.
+        record.removedNodes.forEach((node) => {
+            if (this.observedNodes.get(node) === false) {
+                // Node was previously marked as unobserved, clear it from map
+                this.observedNodes.delete(node);
+            } else {
+                // Tag node as observed
+                this.observedNodes.set(node, true);
             }
         });
     }
@@ -856,16 +858,15 @@ export class HistoryPlugin extends Plugin {
      * @returns {MutationRecordChildList}
      */
     updateChildListRecord(record) {
-        const isObservedNode = (node) => !(this.observedNodes.get(node) === false);
         let { previousSibling, nextSibling, addedNodes, removedNodes } = record;
 
         // Adjust sibling references
-        const isValidReference = (node) => node === null || isObservedNode(node);
+        const isValidReference = (node) => node === null || this.isObservedNode(node);
         previousSibling = isValidReference(previousSibling) ? previousSibling : undefined;
         nextSibling = isValidReference(nextSibling) ? nextSibling : undefined;
 
         // Filter out nodes that were already absent in the last observed state
-        const filteredRemovedNodes = [...removedNodes].filter(isObservedNode);
+        const filteredRemovedNodes = [...removedNodes].filter(this.isObservedNode.bind(this));
 
         // Clear entries in the observed nodes map
         [...addedNodes, ...removedNodes].forEach((node) => this.observedNodes.delete(node));
@@ -1008,43 +1009,6 @@ export class HistoryPlugin extends Plugin {
                                 previousId,
                             });
                         });
-
-                    // record.addedNodes.forEach((added) => {
-                    //     const mutation = {
-                    //         type: "add",
-                    //     };
-                    //     if (!record.nextSibling && this.nodeToIdMap.get(record.target)) {
-                    //         mutation.append = this.nodeToIdMap.get(record.target);
-                    //     } else if (record.nextSibling && this.nodeToIdMap.get(record.nextSibling)) {
-                    //         mutation.before = this.nodeToIdMap.get(record.nextSibling);
-                    //     } else if (!record.previousSibling && this.nodeToIdMap.get(record.target)) {
-                    //         mutation.prepend = this.nodeToIdMap.get(record.target);
-                    //     } else if (
-                    //         record.previousSibling &&
-                    //         this.nodeToIdMap.get(record.previousSibling)
-                    //     ) {
-                    //         mutation.after = this.nodeToIdMap.get(record.previousSibling);
-                    //     } else {
-                    //         return false;
-                    //     }
-                    //     mutation.id = this.nodeToIdMap.get(added);
-                    //     mutation.node = this.serializeNode(added, mutatedNodes);
-                    //     this.currentStep.mutations.push(mutation);
-                    // });
-                    // record.removedNodes.forEach((removed) => {
-                    //     this.currentStep.mutations.push({
-                    //         type: "remove",
-                    //         id: this.nodeToIdMap.get(removed),
-                    //         parentId: this.nodeToIdMap.get(record.target),
-                    //         node: this.serializeNode(removed),
-                    //         nextId: record.nextSibling
-                    //             ? this.nodeToIdMap.get(record.nextSibling)
-                    //             : undefined,
-                    //         previousId: record.previousSibling
-                    //             ? this.nodeToIdMap.get(record.previousSibling)
-                    //             : undefined,
-                    //     });
-                    // });
                     break;
                 }
             }
