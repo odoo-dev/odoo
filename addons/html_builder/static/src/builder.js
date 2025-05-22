@@ -160,7 +160,15 @@ export class Builder extends Component {
             // instantiating the sub components that potentially need the
             // editor.
             const iframeEl = await this.props.iframeLoaded;
-            this.editor.attachTo(iframeEl.contentDocument.body.querySelector("#wrapwrap"));
+            this.editableEl = iframeEl.contentDocument.body.querySelector("#wrapwrap");
+            this.onDragStart = (ev) => {
+                if (ev.target.nodeName === "IMG") {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                }
+            };
+            this.editor.attachTo(this.editableEl);
+            this.editableEl.addEventListener("dragstart", this.onDragStart);
         });
 
         useSubEnv({
@@ -172,6 +180,7 @@ export class Builder extends Component {
         // });
         onWillDestroy(() => {
             this.editor.destroy();
+            this.editableEl.removeEventListener("dragstart", this.onDragStart);
             // actionService.setActionMode("current");
         });
 
