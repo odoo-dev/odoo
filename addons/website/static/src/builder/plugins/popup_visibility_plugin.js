@@ -10,6 +10,7 @@ class PopupVisibilityPlugin extends Plugin {
         target_show: this.onTargetShow.bind(this),
         target_hide: this.onTargetHide.bind(this),
         clean_for_save_handlers: this.cleanForSave.bind(this),
+        selectionchange_handlers: this.invisibleWithoutSelection.bind(this),
     };
 
     setup() {
@@ -60,6 +61,16 @@ class PopupVisibilityPlugin extends Plugin {
             modalEl.classList.remove("show");
             this.Modal.getOrCreateInstance(modalEl)._hideModal();
             this.Modal.getInstance(modalEl).dispose();
+        }
+    }
+
+    invisibleWithoutSelection(selectionData) {
+        const selectionContainer = selectionData.documentSelection.commonAncestorContainer;
+        for (const popupEl of this.editable.querySelectorAll(".s_popup:not([data-invisible])")) {
+            if (!popupEl.contains(selectionContainer)) {
+                this.onTargetHide(popupEl);
+                this.dependencies.visibility.onOptionVisibilityUpdate(popupEl, false);
+            }
         }
     }
 }
