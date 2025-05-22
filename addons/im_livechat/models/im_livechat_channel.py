@@ -62,6 +62,8 @@ class Im_LivechatChannel(models.Model):
     available_operator_ids = fields.Many2many('res.users', compute='_compute_available_operator_ids')
     script_external = fields.Html('Script (external)', compute='_compute_script_external', store=False, readonly=True, sanitize=False)
     nbr_channel = fields.Integer('Number of conversation', compute='_compute_nbr_channel', store=False, readonly=True)
+    total_conversations = fields.Integer(string="Total Conversations", compute='_compute_total_conversations')
+    total_capacity = fields.Integer(string="Total Capacity", compute='_compute_total_capacity')
 
     image_128 = fields.Image("Image", max_width=128, max_height=128)
 
@@ -165,6 +167,17 @@ class Im_LivechatChannel(models.Model):
         channel_count = {livechat_channel.id: count for livechat_channel, count in data}
         for record in self:
             record.nbr_channel = channel_count.get(record.id, 0)
+
+    @api.depends('channel_ids')
+    def _compute_total_conversations(self):
+        for channel in self:
+            channel.total_conversations = sum(channel.user_ids.mapped('ongoing_conversations'))
+
+    @api.depends('max_sessions')
+    def _compute_total_capacity(self):
+        for channel in self:
+            incall_users = len(channel.user_ids.filtered(lambda l: l.is_in_call))
+            self.total_capacity = (len(channel.user_ids) - incall_users) * channel.max_sessions + incall_users
 
     # --------------------------
     # Action Methods

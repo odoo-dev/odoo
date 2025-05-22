@@ -36,6 +36,8 @@ class ResUsers(models.Model):
         help="When forwarding live chat conversations, the chatbot will prioritize users with matching expertise.",
     )
     has_access_livechat = fields.Boolean(compute='_compute_has_access_livechat', string='Has access to Livechat', store=False, readonly=True)
+    ongoing_conversations = fields.Integer(compute='_compute_ongoing_conversations', string="Ongoing Conversations")
+    is_in_call = fields.Boolean(groups="im_livechat.im_livechat_group_user,im_livechat.im_livechat_group_manager")
 
     @property
     def SELF_READABLE_FIELDS(self):
@@ -91,6 +93,13 @@ class ResUsers(models.Model):
     def _compute_has_access_livechat(self):
         for user in self.sudo():
             user.has_access_livechat = user.has_group('im_livechat.im_livechat_group_user')
+
+    @api.depends('channel_ids')
+    def _compute_ongoing_conversations(self):
+        for user in self:
+            user.ongoing_conversations = len(user.channel_ids.filtered(
+                lambda c: c.livechat_active and user.partner_id in c.livechat_agent_partner_ids
+            ))
 
     def write(self, vals):
         if vals.get("group_ids"):
