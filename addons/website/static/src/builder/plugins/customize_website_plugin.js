@@ -36,6 +36,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                 return `o_cc${getCSSVariableValue(combination, style)}`;
             }
         }),
+        save_handlers: this.onSave.bind(this),
     };
 
     cache = {};
@@ -60,6 +61,29 @@ export class CustomizeWebsitePlugin extends Plugin {
     colorsToCustomize = {};
     resolves = {};
     getActions() {
+        const websiteConfigAction = {
+            reload: {},
+            prepare: async ({ actionParam }) => this.loadConfigKey(actionParam),
+            getPriority: ({ params }) => {
+                const records = [...(params.views || []), ...(params.assets || [])];
+                return records.length;
+            },
+            isApplied: ({ params }) => {
+                const records = [...(params.views || []), ...(params.assets || [])];
+                const configKeysIsApplied = records.every((v) => this.getConfigKey(v));
+                if (params.checkVars || params.checkVars === undefined) {
+                    return (
+                        configKeysIsApplied &&
+                        Object.entries(params.vars || {}).every(
+                            ([variable, value]) => value === this.getWebsiteVariableValue(variable)
+                        )
+                    );
+                }
+                return configKeysIsApplied;
+            },
+            apply: async (action) => this.toggleConfig(action, true),
+            clean: (action) => this.toggleConfig(action, false),
+        };
         return {
             customizeWebsiteVariable: this.withCustomHistory({
                 isApplied: ({ params: { mainParam: variable } = {}, value }) => {
@@ -295,29 +319,10 @@ export class CustomizeWebsitePlugin extends Plugin {
                     );
                 },
             }),
-            websiteConfig: {
-                reload: {},
-                prepare: async ({ actionParam }) => this.loadConfigKey(actionParam),
-                getPriority: ({ params }) => {
-                    const records = [...(params.views || []), ...(params.assets || [])];
-                    return records.length;
-                },
-                isApplied: ({ params }) => {
-                    const records = [...(params.views || []), ...(params.assets || [])];
-                    const configKeysIsApplied = records.every((v) => this.getConfigKey(v));
-                    if (params.checkVars || params.checkVars === undefined) {
-                        return (
-                            configKeysIsApplied &&
-                            Object.entries(params.vars || {}).every(
-                                ([variable, value]) =>
-                                    value === this.getWebsiteVariableValue(variable)
-                            )
-                        );
-                    }
-                    return configKeysIsApplied;
-                },
-                apply: async (action) => this.toggleConfig(action, true),
-                clean: (action) => this.toggleConfig(action, false),
+            websiteConfig: websiteConfigAction,
+            websiteConfigNoReload: {
+                ...websiteConfigAction,
+                reload: undefined,
             },
             selectTemplate: {
                 prepare: async ({ actionParam }) => {
@@ -503,6 +508,10 @@ export class CustomizeWebsitePlugin extends Plugin {
     }
 
     async toggleConfig(action, apply) {
+        const isPreviewMode = this.dependencies.history.getIsPreviewing();
+        if (isPreviewMode) {
+            return;
+        }
         // step 1: enable and disable records
         const updateViews = this.toggleTheme(action, "views", apply);
         const updateAssets = this.toggleTheme(action, "assets", apply);
@@ -542,14 +551,17 @@ export class CustomizeWebsitePlugin extends Plugin {
             }
             for (const item of action.selectableContext.items) {
                 for (const a of item.getActions()) {
-                    if (a.actionId === "websiteConfig") {
+                    if (a.actionId.startsWith("websiteConfig")) {
                         for (const record of a.actionParam[paramName] || []) {
                             // disable all
                             prepareRecord(record, true);
                         }
-                    } else if (a.actionId === "composite" || a.actionId === "reloadComposite") {
+                    } else if (
+                        a.actionId === "composite" ||
+                        a.actionId.startsWith("reloadComposite")
+                    ) {
                         for (const itemAction of a.actionParam.mainParam) {
-                            if (itemAction.action === "websiteConfig") {
+                            if (itemAction.action.startsWith("websiteConfig")) {
                                 for (const record of itemAction.actionParam[paramName] || []) {
                                     prepareRecord(record, true);
                                 }
@@ -583,42 +595,36 @@ export class CustomizeWebsitePlugin extends Plugin {
      * @returns {Promise} deferred function
      */
     async customizeThemeData(isViewData, shouldReset, toEnable, toDisable) {
-        const def = new Deferred();
-        this.pendingThemeRequests.push({ isViewData, shouldReset, toEnable, toDisable, def });
-        setTimeout(() => {
-            let aggregatedToEnable = new Set();
-            let aggregatedToDisable = new Set();
-            const defs = [];
-            for (const req of this.pendingThemeRequests) {
-                if (req.isViewData === isViewData && req.shouldReset === shouldReset) {
-                    // Synchronize with the last request: if a view was enabled
-                    // first and then disabled (or the other way around), the
-                    // final state should be disabled (or enabled).
-                    aggregatedToEnable = aggregatedToEnable.difference(req.toDisable);
-                    aggregatedToDisable = aggregatedToDisable.difference(req.toEnable);
-                    // Now aggregate.
-                    aggregatedToEnable = aggregatedToEnable.union(req.toEnable);
-                    aggregatedToDisable = aggregatedToDisable.union(req.toDisable);
-                    defs.push(req.def);
+        const themeRequest = { isViewData, shouldReset, toEnable, toDisable };
+        let previousActiveRecordsState;
+        const apply = () => {
+            this.pendingThemeRequests.push(themeRequest);
+
+            previousActiveRecordsState = {};
+            for (const record of toDisable) {
+                previousActiveRecordsState[record] = this.activeRecords[record];
+                this.activeRecords[record] = false;
+            }
+            for (const record of toEnable) {
+                if (typeof previousActiveRecordsState[record] === "undefined") {
+                    previousActiveRecordsState[record] = this.activeRecords[record];
                 }
+                this.activeRecords[record] = true;
             }
-            this.pendingThemeRequests = this.pendingThemeRequests.filter(
-                (req) => req.isViewData !== isViewData || req.shouldReset !== shouldReset
-            );
-            if (!aggregatedToEnable.size && !aggregatedToDisable.size) {
-                return;
-            } else {
-                rpc("/website/theme_customize_data", {
-                    is_view_data: isViewData,
-                    enable: [...aggregatedToEnable],
-                    disable: [...aggregatedToDisable],
-                    reset_view_arch: shouldReset,
-                })
-                    .then(() => Promise.all(defs.map((def) => def.resolve())))
-                    .catch(() => Promise.all(defs.map((def) => def.reject())));
-            }
-        }, 0);
-        return def;
+        };
+        apply();
+        this.dependencies.history.addCustomMutation({
+            apply: apply,
+            revert: () => {
+                this.pendingThemeRequests = this.pendingThemeRequests.filter(
+                    (req) => req !== themeRequest
+                );
+
+                for (const [record, value] of Object.entries(previousActiveRecordsState)) {
+                    this.activeRecords[record] = value;
+                }
+            },
+        });
     }
 
     getConfigKey(key) {
@@ -692,6 +698,45 @@ export class CustomizeWebsitePlugin extends Plugin {
         value.then((resolvedValue) => {
             this.activeRecords[record] = resolvedValue;
         });
+    }
+
+    async onSave() {
+        const rpcRequests = [];
+
+        // Save all theme requests
+        for (const isViewData of [false, true]) {
+            for (const shouldReset of [false, true]) {
+                let aggregatedToEnable = new Set();
+                let aggregatedToDisable = new Set();
+                for (const req of this.pendingThemeRequests) {
+                    if (req.isViewData === isViewData && req.shouldReset === shouldReset) {
+                        // Synchronize with the last request: if a view was enabled
+                        // first and then disabled (or the other way around), the
+                        // final state should be disabled (or enabled).
+                        aggregatedToEnable = aggregatedToEnable.difference(req.toDisable);
+                        aggregatedToDisable = aggregatedToDisable.difference(req.toEnable);
+                        // Now aggregate.
+                        aggregatedToEnable = aggregatedToEnable.union(req.toEnable);
+                        aggregatedToDisable = aggregatedToDisable.union(req.toDisable);
+                    }
+                }
+                this.pendingThemeRequests = this.pendingThemeRequests.filter(
+                    (req) => req.isViewData !== isViewData || req.shouldReset !== shouldReset
+                );
+                if (aggregatedToEnable.size || aggregatedToDisable.size) {
+                    rpcRequests.push(
+                        rpc("/website/theme_customize_data", {
+                            is_view_data: isViewData,
+                            enable: [...aggregatedToEnable],
+                            disable: [...aggregatedToDisable],
+                            reset_view_arch: shouldReset,
+                        })
+                    );
+                }
+            }
+        }
+
+        return Promise.all(rpcRequests);
     }
 }
 
