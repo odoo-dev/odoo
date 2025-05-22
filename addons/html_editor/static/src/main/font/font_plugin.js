@@ -1,6 +1,6 @@
 import { Plugin } from "@html_editor/plugin";
 import { isBlock, closestBlock } from "@html_editor/utils/blocks";
-import { fillEmpty } from "@html_editor/utils/dom";
+import { fillEmpty, unwrapContents } from "@html_editor/utils/dom";
 import { leftLeafOnlyNotBlockPath } from "@html_editor/utils/dom_state";
 import {
     isParagraphRelatedElement,
@@ -282,6 +282,7 @@ export class FontPlugin extends Plugin {
         clipboard_content_processors: this.processContentForClipboard.bind(this),
 
         format_splittable_class: (className) => FONT_SIZE_CLASSES.includes(className),
+        before_insert_processors: this.handleInsertWithinPre.bind(this),
     };
 
     setup() {
@@ -569,5 +570,35 @@ export class FontPlugin extends Plugin {
             }
         }
         return clonedContents;
+    }
+
+    handleInsertWithinPre(insertContainer, block) {
+        if (block.nodeName !== "PRE") {
+            return insertContainer;
+        }
+        for (const cb of this.getResource("before_handle_insert_within_pre_processors")) {
+            insertContainer = cb(insertContainer);
+        }
+        const isDeepestBlock = (node) =>
+            isBlock(node) && ![...node.querySelectorAll("*")].some(isBlock);
+        let linebreak;
+        const processNode = (node) => {
+            const childs = childNodes(node);
+            if (isDeepestBlock(node)) {
+                linebreak = this.document.createTextNode("\n");
+                node.append(linebreak);
+            }
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                unwrapContents(node);
+            }
+            for (const child of childs) {
+                processNode(child);
+            }
+        };
+        for (const node of childNodes(insertContainer)) {
+            processNode(node);
+        }
+        linebreak?.remove();
+        return insertContainer;
     }
 }

@@ -784,16 +784,6 @@ describe("Simple html elements containing <br>", () => {
                 contentAfter: "<blockquote>abc<br>def[]</blockquote>",
             });
         });
-
-        test("should not split pre with <br>", async () => {
-            await testEditor({
-                contentBefore: "<p>[]<br></p>",
-                stepFunction: async (editor) => {
-                    pasteHtml(editor, "<pre>abc<br>def</pre>");
-                },
-                contentAfter: "<pre>abc<br>def[]</pre>",
-            });
-        });
     });
 });
 
@@ -2404,28 +2394,28 @@ describe("pasting within pre", () => {
             stepFunction: async (editor) => {
                 pasteHtml(editor, "<h1>abc</h1><h2>def</h2><h3>ghi</h3>");
             },
-            contentAfter: "<pre><h1>abc</h1><h2>def</h2><h3>ghi[]</h3></pre>",
+            contentAfter: "<pre>abc\ndef\nghi[]</pre>",
         });
         await testEditor({
             contentBefore: "<pre>x[]</pre>",
             stepFunction: async (editor) => {
                 pasteHtml(editor, "<h1>abc</h1><h2>def</h2><h3>ghi</h3>");
             },
-            contentAfter: "<pre>x<h1>abc</h1><h2>def</h2><h3>ghi[]</h3></pre>",
+            contentAfter: "<pre>xabc\ndef\nghi[]</pre>",
         });
         await testEditor({
             contentBefore: "<pre>[]x</pre>",
             stepFunction: async (editor) => {
                 pasteHtml(editor, "<h1>abc</h1><h2>def</h2><h3>ghi</h3>");
             },
-            contentAfter: "<pre><h1>abc</h1><h2>def</h2><h3>ghi[]</h3>x</pre>",
+            contentAfter: "<pre>abc\ndef\nghi[]x</pre>",
         });
         await testEditor({
             contentBefore: "<pre>x[]y</pre>",
             stepFunction: async (editor) => {
                 pasteHtml(editor, "<h1>abc</h1><h2>def</h2><h3>ghi</h3>");
             },
-            contentAfter: "<pre>x<h1>abc</h1><h2>def</h2><h3>ghi[]</h3>y</pre>",
+            contentAfter: "<pre>xabc\ndef\nghi[]y</pre>",
         });
     });
 });

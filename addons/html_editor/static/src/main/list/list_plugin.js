@@ -144,6 +144,7 @@ export class ListPlugin extends Plugin {
         format_selection_overrides: this.applyFormatToListItem.bind(this),
         node_to_insert_processors: this.processNodeToInsert.bind(this),
         clipboard_content_processors: this.processContentForClipboard.bind(this),
+        before_handle_insert_within_pre_processors: this.insertListWithinPre.bind(this),
     };
 
     setup() {
@@ -919,6 +920,27 @@ export class ListPlugin extends Plugin {
             clonedContents = list;
         }
         return clonedContents;
+    }
+
+    insertListWithinPre(node) {
+        const nodes = node.querySelectorAll("li:not(.oe-nested)");
+        const getListNestingLvl = (node) => ancestors(node).filter(isListElement).length - 1;
+        for (const a of nodes) {
+            const lvl = getListNestingLvl(a);
+            const ul = closestElement(a, "ul, ol");
+            const listMode = this.getListMode(ul);
+            let char;
+            if (listMode === "CL") {
+                char = "[] ";
+            } else if (listMode === "OL") {
+                char = `${childNodeIndex(a) + 1}. `;
+            } else {
+                char = "* ";
+            }
+            const prefix = " ".repeat(lvl * 4) + char;
+            a.prepend(this.document.createTextNode(prefix));
+        }
+        return node;
     }
 
     // --------------------------------------------------------------------------
