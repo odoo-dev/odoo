@@ -112,6 +112,7 @@ class PosPayment(models.Model):
                 'partner_id': accounting_partner.id if is_split_transaction and is_reverse else False,
             }, amounts['amount'], amounts['amount_converted'])
             lines = self.env['account.move.line'].create([credit_line_vals, debit_line_vals])
+            print('lines', lines)
             if amounts['amount_converted'] < 0:
                 credit_line_ids += lines.filtered(lambda l: l.debit).ids
             else:

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import traceback
 
 from odoo import fields, models, api
 
@@ -82,6 +83,11 @@ class AccountMove(models.Model):
     def _compute_tax_totals(self):
         return super(AccountMove, self.with_context(linked_to_pos=bool(self.sudo().pos_order_ids)))._compute_tax_totals()
 
+    def create(self, vals_list):
+        return super().create(vals_list)
+
+    def update(self, values):
+        return super().update(values)
 
 
 class AccountMoveLine(models.Model):

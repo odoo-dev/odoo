@@ -181,6 +181,28 @@ export class PosOrder extends Base {
             remaining -= paymentAmount;
         }
 
+        // If the order is tipped, remove the tip from the remaining too?? :eyes:
+        // but here, we should only do that if the tip is added later. Since if it's
+        // added later, it will have no trace on the payment lines, so we account for that
+        // by doing `remaining -= tip_amount`; but if it was added before, it will appear
+        // in the payment lines anw and those the above logic will account for it.
+
+        // TODO: so how to check if the order is tipped after??
+        //  so the order will have fields `is_tipped` and `tip_amount`
+        //  if it's tipped; if it's tipped before, there will be a line
+        //  on it with the product set as the tip_product `product_id: tipProduct`,
+        //  but I guess it's also the case if the order is tipped after!!
+        //  so we can't use that to differentiate between them!!
+
+        // TODO: complete the below logic
+        const isTippedAfter = true;
+        if (this.is_tipped && isTippedAfter) {
+            remaining -= this.tip_amount;
+        }
+
+        // With the above logic, we don't have a change field on the receipt anymore,
+        // but in the account journal, we still have the tip as a difference!!!!!
+
         taxTotals.order_rounding = order_rounding;
         taxTotals.order_remaining = remaining;
 

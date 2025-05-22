@@ -436,6 +436,9 @@ class PosSession(models.Model):
                 self._get_closed_orders().filtered(lambda o: not o.is_total_cost_computed)._compute_total_cost_at_session_closing(self.picking_ids.move_ids)
             try:
                 with self.env.cr.savepoint():
+                    # we create 2 lines, with names 'Sales untaxed', and 'P../xx - Customer Account'
+                    # and 'balance', respectively, -12 and 10 -> balance below will be -2 -> Error.
+                    # TODO: should the balance actually be 0 here?? Check in 17 :eyes:
                     data = self.with_company(self.company_id).with_context(check_move_validity=False, skip_invoice_sync=True)._create_account_move(balancing_account, amount_to_balance, bank_payment_method_diffs)
             except AccessError as e:
                 if sudo:
@@ -444,6 +447,9 @@ class PosSession(models.Model):
                     raise e
 
             balance = sum(self.move_id.line_ids.mapped('balance'))
+            print('MOVE_ID:', self.move_id.id)
+            print('BALANCE:', balance)
+
             try:
                 with self.move_id._check_balanced({'records': self.move_id.sudo()}):
                     pass
@@ -796,27 +802,57 @@ class PosSession(models.Model):
         )
 
     def _create_account_move(self, balancing_account=False, amount_to_balance=0, bank_payment_method_diffs=None):
+        # here we are creating the move and the move lines
         """ Create account.move and account.move.line records for this session.
 
         Side-effects include:
             - setting self.move_id to the created account.move record
             - reconciling cash receivable lines, invoice receivable lines and stock output lines
         """
+
+        # Will be called when clicking 'Close Session &
+        # Post Entries', so just when the wizard appears.
+
+        # But also when closing the register... Remember,
+        # that will make an error, but it's ignored (cf notion).
+
+        print('Create')
+        # import traceback;
+        # print('Stack:', traceback.print_stack())
+
         account_move = self.env['account.move'].create({
             'journal_id': self.config_id.journal_id.id,
             'date': fields.Date.context_today(self),
             'ref': self.name,
         })
+
+        # For now, no lines have been added yet,
+        print('Result:', account_move, account_move.line_ids)
+
+        # Below will add the bad lines (-12 & 10).
+
         self.write({'move_id': account_move.id})
 
         data = {'bank_payment_method_diffs': bank_payment_method_diffs or {}}
         data = self._accumulate_amounts(data)
+        # print('op1', self.move_id.line_ids.mapped('balance'))
         data = self._create_non_reconciliable_move_lines(data)
+        # op2 added the `-12` line ✅
+        print('op2', self.move_id.line_ids.mapped('balance'))
         data = self._create_bank_payment_moves(data)
+        # print('op3', self.move_id.line_ids.mapped('balance'))
         data = self._create_pay_later_receivable_lines(data)
+        # op4 added the `-10` line ❌
+        # so `_create_pay_later_receivable_lines` is adding `-10`
+        # instead of `-12` — Is that the case in 17? Ben NO, why?
+        print('op4', self.move_id.line_ids.mapped('balance'))
         data = self._create_cash_statement_lines_and_cash_move_lines(data)
+        # print('op5', self.move_id.line_ids.mapped('balance'))
         data = self._create_invoice_receivable_lines(data)
+        # print('op6', self.move_id.line_ids.mapped('balance'))
         data = self._create_stock_output_lines(data)
+        # print('op7', self.move_id.line_ids.mapped('balance'))
+
         if balancing_account and amount_to_balance:
             data = self._create_balancing_line(data, balancing_account, amount_to_balance)
 

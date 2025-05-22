@@ -612,6 +612,8 @@ export class PosStore extends Reactive {
     }
 
     async set_tip(tip) {
+        // here we set the tip before validating the order,
+        // so look, we add it as an order line.
         const currentOrder = this.get_order();
         const tipProduct = this.config.tip_product_id;
         let line = currentOrder.lines.find((line) => line.product_id.id === tipProduct.id);

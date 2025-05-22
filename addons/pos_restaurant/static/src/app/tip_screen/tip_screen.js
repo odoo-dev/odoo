@@ -43,6 +43,7 @@ export class TipScreen extends Component {
         ];
     }
     async validateTip() {
+        // we call this when clicking "Settle" in the tip_screen
         const amount = this.env.utils.parseValidFloat(this.state.inputTipAmount);
         const order = this.pos.get_order();
         const serverId = typeof order.id === "number" && order.id;
@@ -76,19 +77,35 @@ export class TipScreen extends Component {
         }
 
         order.state = "draft";
-        await this.pos.set_tip(amount);
+
+        // hmm so it seems that we also call `set_tip` adding
+        // an order line to that order :eyes:
+        const tipLine = await this.pos.set_tip(amount);
         order.state = "paid";
 
+        // this is a payment line ... anything to do?? :eyes:
         const paymentline = this.pos.get_order().payment_ids[0];
         if (paymentline.payment_method_id.payment_terminal) {
             paymentline.amount += amount;
             await paymentline.payment_method_id.payment_terminal.send_payment_adjust(
                 paymentline.uuid
             );
+        } else {
+            // this `else` block is my fix!
+            // we had to update the payment line,
+            // but also write it manually to backend?!
+            paymentline.amount += amount;
+            await this.pos.data.write("pos.payment", [paymentline.id], {
+                amount: paymentline.amount,
+            });
         }
 
         const serializedTipLine = order.get_selected_orderline().serialize({ orm: true });
+        // We delete the order line???? YES :)
         order.get_selected_orderline().delete();
+        // And we create it again, nicely linked to the order.
+        // So why then the entry in journal entries does not have
+        // the customer linked??
         const serverTipLine = await this.pos.data.create("pos.order.line", [serializedTipLine]);
         await this.pos.data.write("pos.order", [serverId], {
             is_tipped: true,
