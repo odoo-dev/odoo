@@ -10,7 +10,8 @@ const SAVABLE_SELECTOR = `${oeStructureSelector}, ${oeFieldSelector}, ${oeCoverS
 
 export class SavePlugin extends Plugin {
     static id = "savePlugin";
-    static shared = ["save"];
+    static shared = ["save", "isAlreadySaved"];
+    static dependencies = ["history"];
 
     resources = {
         handleNewRecords: this.handleMutations.bind(this),
@@ -64,6 +65,14 @@ export class SavePlugin extends Plugin {
         // used to track dirty out of the editable scope, like header, footer or wrapwrap
         const willSaves = this.getResource("save_handlers").map((c) => c());
         await Promise.all(saveProms.concat(willSaves));
+        this.lastSavedStep = this.dependencies.history.getHistorySteps().at(-1);
+    }
+
+    isAlreadySaved() {
+        return (
+            !this.lastSavedStep ||
+            this.lastSavedStep === this.dependencies.history.getHistorySteps().at(-1)
+        );
     }
 
     async saveCoverProperties(el) {
