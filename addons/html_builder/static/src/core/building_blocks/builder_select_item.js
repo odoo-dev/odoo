@@ -25,6 +25,7 @@ export class BuilderSelectItem extends Component {
         if (!this.env.selectableContext) {
             throw new Error("BuilderSelectItem must be used inside a BuilderSelect component.");
         }
+        this.isPreviewed = false;
         this.info = useActionInfo();
         const item = useRef("item");
         let label = "";
@@ -44,9 +45,23 @@ export class BuilderSelectItem extends Component {
         });
         this.state = state;
         this.operation = operation;
+        this.preview = () => {
+            if (this.isPreviewed) {
+                return;
+            }
+            this.operation.preview();
+            this.isPreviewed = true;
+        };
+        this.revert = () => {
+            if (!this.isPreviewed) {
+                return;
+            }
+            this.isPreviewed = false;
+            this.operation.revert();
+        };
 
-        this.onFocusin = this.operation.preview;
-        this.onFocusout = this.operation.revert;
+        this.onFocusin = this.preview;
+        this.onFocusout = this.revert;
     }
 
     onClick() {
@@ -57,18 +72,18 @@ export class BuilderSelectItem extends Component {
     onKeydown(ev) {
         const hotkey = getActiveHotkey(ev);
         if (hotkey === "escape") {
-            this.operation.revert();
+            this.revert();
             this.removeKeydown?.();
         }
     }
     onMouseenter() {
-        this.operation.preview();
+        this.preview();
         const _onKeydown = this.onKeydown.bind(this);
         document.addEventListener("keydown", _onKeydown);
         this.removeKeydown = () => document.removeEventListener("keydown", _onKeydown);
     }
     onMouseleave() {
-        this.operation.revert();
+        this.revert();
         this.removeKeydown();
     }
 }
