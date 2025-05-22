@@ -35,7 +35,7 @@ import { KeepLast } from "@web/core/utils/concurrency";
  */
 export function useSuggester(suggester) {
     const component = useComponent();
-    const suggest = suggester instanceof Function ? suggester : suggester.suggest;
+    const suggest = suggester instanceof Function ? suggester : suggester.suggest.bind(suggester);
     const keepLast = new KeepLast();
     return async (request) => {
         await keepLast.add(Promise.resolve());
