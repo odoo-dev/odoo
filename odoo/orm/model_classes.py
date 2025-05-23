@@ -219,6 +219,7 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
         )
 
     # update the registry after all checks have passed
+
     registry[name] = model_cls
 
     return model_cls
@@ -307,7 +308,22 @@ def setup_model_classes(env: Environment):
     # prepare the setup on all models
     models = list(env.values())
     for model in models:
+        model_cls = model.env.registry[model._name]
+
+        # changing base classes is costly, do it only when necessary
+        if model_cls.__bases__ != model_cls._base_classes__:
+            model_cls.__bases__ = model_cls._base_classes__
+            model_cls._setup_done__ = False
+
+    for model in models:
         _prepare_setup(model)
+
+    for model in models:
+        model_cls = model.env.registry[model._name]
+        if model._setup_done__ and model._inherits:
+            for model_name in model._inherits:
+                if not type(model.env[model_name])._setup_done__:
+                    model_cls._setup_done__ = False
 
     # do the actual setup
     for model in models:
@@ -325,15 +341,37 @@ def setup_model_classes(env: Environment):
 def _prepare_setup(model: BaseModel):
     """ Prepare the setup of the model. """
     model_cls = model.env.registry[model._name]
-    model_cls._setup_done__ = False
+    #model_cls._setup_done__ = False
 
-    # changing base classes is costly, do it only when necessary
-    if model_cls.__bases__ != model_cls._base_classes__:
-        model_cls.__bases__ = model_cls._base_classes__
+    model_classes = getattr(model_cls, '_model_classes__', None)
+    # the classes that define this model, i.e., the ones that are not
+    # registry classes; the purpose of this attribute is to behave as a
+    # cache of [c for c in model_cls.mro() if not is_model_class(c))], which
+    # is heavily used in function fields.resolve_mro()
+    model_cls._model_classes__ = tuple(c for c in model_cls.mro() if getattr(c, 'pool', None) is None)
+    if model_classes != model_cls._model_classes__:
+        model_cls._setup_done__ = False
+
+    old_definitions = getattr(model_cls, '_field_definitions', None)
+    definitions = defaultdict(list)
+    for cls in reversed(model_cls._model_classes__):
+        # this condition is an optimization of is_model_definition(cls)
+        if isinstance(cls, models.MetaModel):
+            for field in cls._field_definitions:
+                definitions[field.name].append(field)
+    model_cls._field_definitions = definitions
+    if old_definitions != model_cls._field_definitions:
+        model_cls._setup_done__ = False
+
+    model_manual_fields = getattr(model_cls, '_model_manual_fields__', None)
+    model_cls._model_manual_fields__ = bool(model.pool._init_modules) and tuple(model.env['ir.model.fields']._get_manual_field_data(model._name).keys())
+    if model_manual_fields != model_cls._model_manual_fields__:
+        model_cls._setup_done__ = False
 
     # reset those attributes on the model's class for _setup_fields() below
-    for attr in ('_rec_name', '_active_name'):
-        discardattr(model_cls, attr)
+    if not model_cls._setup_done__:
+        for attr in ('_rec_name', '_active_name'):
+            discardattr(model_cls, attr)
 
     # reset properties memoized on model_cls
     model_cls._constraint_methods = models.BaseModel._constraint_methods
@@ -346,13 +384,6 @@ def _setup(model: BaseModel):
     model_cls = model.env.registry[model._name]
     if model_cls._setup_done__:
         return
-
-    # the classes that define this model, i.e., the ones that are not
-    # registry classes; the purpose of this attribute is to behave as a
-    # cache of [c for c in model_cls.mro() if not is_model_class(c))], which
-    # is heavily used in function fields.resolve_mro()
-    model_cls._model_classes__ = tuple(c for c in model_cls.mro() if getattr(c, 'pool', None) is None)
-
     # 1. determine the proper fields of the model: the fields defined on the
     # class and magic fields, not the inherited or custom ones
 
@@ -363,12 +394,7 @@ def _setup(model: BaseModel):
     model_cls._fields._data__.clear()
 
     # collect the definitions of each field (base definition + overrides)
-    definitions = defaultdict(list)
-    for cls in reversed(model_cls._model_classes__):
-        # this condition is an optimization of is_model_definition(cls)
-        if isinstance(cls, models.MetaModel):
-            for field in cls._field_definitions:
-                definitions[field.name].append(field)
+    definitions = model_cls._field_definitions
 
     for name, fields_ in definitions.items():
         if f'{model_cls._name}.{name}' in model_cls.pool._database_translated_fields:
@@ -394,9 +420,12 @@ def _setup(model: BaseModel):
 
     # 3. make sure that parent models determine their own fields, then add
     # inherited fields to model_cls
+
     _check_inherits(model)
+
     for parent_name in model._inherits:
         _setup(model.env[parent_name])
+
     _add_inherited_fields(model)
 
     # 4. initialize more field metadata
@@ -462,7 +491,6 @@ def _add_inherited_fields(model: BaseModel):
         for parent_model_name, parent_fname in model._inherits.items()
         for name, field in model.env[parent_model_name]._fields.items()
     }
-
     # add inherited fields that are not redefined locally
     for name, (parent_fname, field) in to_inherit.items():
         if name not in model._fields:

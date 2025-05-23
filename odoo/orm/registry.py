@@ -376,7 +376,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
 
         self.field_depends.clear()
         self.field_depends_context.clear()
-        self.field_inverses.clear()
+        #self.field_inverses.clear()  # note this is maybe not correct since we may not remove some elements, but this is close enough to have the install working
         self.many2one_company_dependents.clear()
 
         model_classes.setup_model_classes(env)
