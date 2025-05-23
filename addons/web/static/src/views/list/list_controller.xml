@@ -5,30 +5,8 @@
         <div t-att-class="className" t-ref="root">
             <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''" display="props.display">
                 <t t-set-slot="control-panel-buttons">
-                    <t t-if="env.isSmall">
-                        <t t-if="controlPanelButtons.length">
-                            <t t-set="buttonProps" t-value="controlPanelButtons[0].props"/>
-                            <t t-call="{{ controlPanelButtons[0].template }}"/>
-                        </t>
-                        <Dropdown t-if="controlPanelButtons.length > 1">
-                            <button class="btn btn-secondary" title="More">
-                                <i class="fa fa-fw fa-ellipsis-v" />
-                            </button>
-                            <t t-set-slot="content">
-                                <t t-foreach="controlPanelButtons.slice(1)" t-as="button" t-key="button.id">
-                                    <t t-set="buttonProps" t-value="button.props"/>
-                                    <DropdownItem class="'o-dropdown-item-unstyled-button'">
-                                        <t t-call="{{ button.template }}"/>
-                                    </DropdownItem>
-                                </t>
-                            </t>
-                        </Dropdown>
-                    </t>
-                    <t t-else="">
-                        <t t-foreach="controlPanelButtons" t-as="button" t-key="button.id">
-                            <t t-set="buttonProps" t-value="button.props"/>
-                            <t t-call="{{ button.template }}"/>
-                        </t>
+                    <t t-call="web.View.ResponsiveButtons">
+                        <t t-set="buttons" t-value="controlPanelButtons"/>
                     </t>
                 </t>
                 <t t-set-slot="control-panel-additional-actions">
@@ -37,7 +15,7 @@
                         <t t-foreach="selectionButtons" t-as="button" t-key="button.id">
                             <DropdownItem class="'o-dropdown-item-unstyled-button'">
                                 <t t-set="buttonProps" t-value="multiRecordViewButtonProps(button)"/>
-                                <t t-call="web.ListView.Buttons.MultiRecord"/>
+                                <t t-call="web.View.Buttons.MultiRecord"/>
                             </DropdownItem>
                         </t>
                     </CogMenu>
@@ -48,7 +26,7 @@
                         <t t-if="!env.isSmall">
                             <t t-foreach="selectionButtons" t-as="button" t-key="button.id">
                                 <t t-set="buttonProps" t-value="multiRecordViewButtonProps(button)"/>
-                                <t t-call="web.ListView.Buttons.MultiRecord"/>
+                                <t t-call="web.View.Buttons.MultiRecord"/>
                             </t>
                             <t t-if="props.info.actionMenus">
                                 <ActionMenus t-props="actionMenuProps"/>
@@ -96,10 +74,6 @@
         <button type="button" class="btn btn-primary o_list_button_add" data-hotkey="c" t-on-click="onClickCreate" data-bounce-button="">
             New
         </button>
-    </t>
-
-    <t t-name="web.ListView.Buttons.MultiRecord">
-        <MultiRecordViewButton t-props="buttonProps"/>
     </t>
 
 </templates>

@@ -14,4 +14,36 @@
       </WithSearch>
   </t>
 
+  <t t-name="web.View.ResponsiveButtons">
+      <t t-if="env.isSmall">
+          <t t-if="buttons.length">
+              <t t-set="buttonProps" t-value="buttons[0].props"/>
+              <t t-call="{{ buttons[0].template }}"/>
+          </t>
+          <Dropdown t-if="buttons.length > 1">
+              <button class="btn btn-secondary" title="More">
+                  <i class="fa fa-fw fa-ellipsis-v" />
+              </button>
+              <t t-set-slot="content">
+                  <t t-foreach="buttons.slice(1)" t-as="button" t-key="button.id">
+                      <t t-set="buttonProps" t-value="button.props"/>
+                      <DropdownItem class="'o-dropdown-item-unstyled-button'">
+                          <t t-call="{{ button.template }}"/>
+                      </DropdownItem>
+                  </t>
+              </t>
+          </Dropdown>
+      </t>
+      <t t-else="">
+          <t t-foreach="buttons" t-as="button" t-key="button.id">
+              <t t-set="buttonProps" t-value="button.props"/>
+              <t t-call="{{ button.template }}"/>
+          </t>
+      </t>
+  </t>
+
+  <t t-name="web.View.Buttons.MultiRecord">
+      <MultiRecordViewButton t-props="buttonProps"/>
+  </t>
+
 </templates>

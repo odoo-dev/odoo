@@ -224,7 +224,7 @@ export class ListController extends Component {
                 id: button.id,
                 isAvailable: () => !this.evalViewModifier(button.invisible),
                 sequence: CONTROL_PANEL_BUTTONS_HEADER_SEQUENCE,
-                template: "web.ListView.Buttons.MultiRecord",
+                template: "web.View.Buttons.MultiRecord",
                 props: this.multiRecordViewButtonProps(button),
             }));
         return [...staticButtons, ...alwaysHeaderButtons]
