@@ -62,8 +62,8 @@ const viewport = {
 if (typeof window !== "undefined") {
     const throttledUpdate = throttleForAnimation(() => viewport.notifyListeners());
 
-    if (window.visualViewport) {
-        window.visualViewport.addEventListener("resize", throttledUpdate);
+    if (browser.visualViewport) {
+        browser.visualViewport.addEventListener("resize", throttledUpdate);
     }
 
     if (isVirtualKeyboardSupported()) {
@@ -82,8 +82,8 @@ if (typeof window !== "undefined") {
  */
 export function getViewportDimensions() {
     return {
-        width: window.visualViewport?.width || browser.innerWidth,
-        height: window.visualViewport?.height || browser.innerHeight,
+        width: browser.visualViewport?.width || browser.innerWidth,
+        height: browser.visualViewport?.height || browser.innerHeight,
     };
 }
 

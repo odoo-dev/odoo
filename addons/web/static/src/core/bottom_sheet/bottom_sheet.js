@@ -258,7 +258,7 @@ export class BottomSheet extends Component {
         if (naturalHeight <= initialHeight) {
             // Small content: only one snap point at natural height
             this.snapPoints.initial = naturalHeight;
-            this.snapPoints.extended = null;
+            this.snapPoints.extended = naturalHeight;
         } else if (naturalHeight <= extendedHeight) {
             // Medium content: initial at configured height, extended at natural height
             this.snapPoints.initial = initialHeight;
