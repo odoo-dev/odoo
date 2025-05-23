@@ -44,8 +44,10 @@ class MailingListSubscribeOptionPlugin extends Plugin {
         const thanksMessageEl = editingElement.querySelector(".js_subscribed_wrap");
         thanksMessageEl.classList.toggle("o_enable_preview", isVisible);
         thanksMessageEl.classList.toggle("o_disable_preview", !isVisible);
+        thanksMessageEl.classList.toggle("d-none", !isVisible);
         toSubscribeEl.classList.toggle("o_enable_preview", !isVisible);
         toSubscribeEl.classList.toggle("o_disable_preview", isVisible);
+        toSubscribeEl.classList.toggle("d-none", isVisible);
     }
 
     async onSnippetDropped({ snippetEl }) {
