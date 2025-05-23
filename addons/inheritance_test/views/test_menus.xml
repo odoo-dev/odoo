@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem name="Test Application"
+        id="inheritance_test_menu_root"/>
+
+    <menuitem name="Base model"
+        id="base_model_action_menu"
+        parent="inheritance_test_menu_root"
+        sequence="1"
+        action="inheritance_test.base_model_action"/>
+
+    <menuitem name="Inherited model"
+        id="inherited_model_action_menu"
+        parent="inheritance_test_menu_root"
+        sequence="2"
+        action="inheritance_test.inherited_model_action"/>
+</odoo>
