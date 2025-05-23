@@ -838,18 +838,28 @@ export class HistoryPlugin extends Plugin {
     updateChildListRecord(record) {
         let { previousSibling, nextSibling, addedNodes, removedNodes } = record;
 
-        // Adjust sibling references
+        // Invalidate sibling references to unobserved nodes
         const isValidReference = (node) => node === null || this.isObservedNode(node);
         previousSibling = isValidReference(previousSibling) ? previousSibling : undefined;
         nextSibling = isValidReference(nextSibling) ? nextSibling : undefined;
 
         // Filter out nodes that were already absent in the last observed state
         const filteredRemovedNodes = [...removedNodes].filter(this.isObservedNode.bind(this));
+        // Filter out nodes that were already present in the last observed state
+        const filteredAddedNodes = [...addedNodes].filter(
+            (node) => this.observedNodes.get(node) !== true
+        );
 
         // Clear entries in the observed nodes map
         [...addedNodes, ...removedNodes].forEach((node) => this.observedNodes.delete(node));
 
-        return { ...record, previousSibling, nextSibling, removedNodes: filteredRemovedNodes };
+        return {
+            ...record,
+            previousSibling,
+            nextSibling,
+            removedNodes: filteredRemovedNodes,
+            addedNodes: filteredAddedNodes,
+        };
     }
 
     /**
