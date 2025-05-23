@@ -100,6 +100,10 @@ import { omit, pick } from "@web/core/utils/objects";
  * @property { string } oldValue
  * @property { string } value
  *
+ * @typedef {Object} Tree
+ * @property {Node} node
+ * @property {Tree[]} childNodes
+ *
  * @typedef {Object} MutationRecordChildList
  * @property { "childList" } type
  * @property { Node } target
@@ -107,6 +111,8 @@ import { omit, pick } from "@web/core/utils/objects";
  * @property { NodeList } removedNodes
  * @property { Node } previousSibling
  * @property { Node } nextSibling
+ * @property { Tree[] } addedTrees
+ * @property { Tree[] } removedTrees
  *
  * @typedef { MutationRecordClassList | MutationRecordAttributes | MutationRecordCharacterData | MutationRecordChildList } HistoryMutationRecord
  *
@@ -405,12 +411,11 @@ export class HistoryPlugin extends Plugin {
      * @returns { HistoryMutationRecord[] }
      */
     processNewRecords(mutationRecords) {
+        // TODO: assert that takeRecords() returns an empty array.
         mutationRecords = this.preFilterMutationRecords(mutationRecords);
         /** @type {HistoryMutationRecord[]} */
-        let records = mutationRecords
-            .flatMap((record) => this.transformRecord(record))
-            .filter((record) => !this.isSystemClassOrAttributeRecord(record));
-
+        let records = this.transformRecords(mutationRecords);
+        records = records.filter((record) => !this.isSystemClassOrAttributeRecord(record));
         records = this.handleUnobservedMutations(records);
         records = records.filter((record) => this.isValidRecord(record));
         this.stageRecords(records);
@@ -468,14 +473,27 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
-     * @param { MutationRecord[] } records
+     * @param { HistoryMutationRecord[] } records
      */
     setIdOnRecords(records) {
+        /** @type {(tree: Tree) => Node[]} */
+        const getNodesFromTree = (tree) => [
+            tree.node,
+            ...tree.childNodes.flatMap(getNodesFromTree),
+        ];
         for (const record of records) {
-            if (record.type === "childList") {
-                for (const node of record.addedNodes) {
-                    this.setNodeId(node);
+            if (record.type !== "childList") {
+                continue;
+            }
+            const addedNodes = record.addedTrees.flatMap(getNodesFromTree);
+            const removedNodes = record.removedTrees.flatMap(getNodesFromTree);
+            for (const node of [...addedNodes, ...removedNodes]) {
+                if (this.nodeToIdMap.has(node)) {
+                    continue;
                 }
+                const id = node === this.editable ? "root" : this.generateId();
+                this.nodeToIdMap.set(node, id);
+                this.idToNodeMap.set(id, node);
             }
         }
     }
@@ -573,6 +591,69 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
+     * @param {MutationRecord[]} records
+     * @returns {Array<MutationRecord|MutationRecordChildList}
+     */
+    transformChildListRecords(records) {
+        /** @type {WeakMap<Node, Node[]>} */
+        const childListSnapshot = new WeakMap();
+        /** @param {Node} node */
+        const getChildListSnapshot = (node) => childListSnapshot.get(node) || childNodes(node);
+        /** @type {(node: Node) => Tree} */
+        const makeTree = (node) => ({
+            node,
+            childNodes: getChildListSnapshot(node).map(makeTree),
+        });
+        return records
+            .toReversed()
+            .map((/** @type {MutationRecord} */ record) => {
+                if (record.type !== "childList") {
+                    return record;
+                }
+                const { target, addedNodes, removedNodes, previousSibling, nextSibling } = record;
+                const addedTrees = [...addedNodes].map(makeTree);
+                const removedTrees = [...removedNodes].map(makeTree);
+                // Update childListSnapshot for the target node
+                const childListAfterMutation = getChildListSnapshot(target);
+                const prevSiblingIndex = previousSibling
+                    ? childListAfterMutation.indexOf(previousSibling)
+                    : -1;
+                const nextSiblingIndex = nextSibling
+                    ? childListAfterMutation.indexOf(nextSibling)
+                    : childListAfterMutation.length;
+                const childListBeforeMutation = [
+                    ...childListAfterMutation.slice(0, prevSiblingIndex + 1),
+                    ...removedNodes,
+                    ...childListAfterMutation.slice(nextSiblingIndex),
+                ];
+                childListSnapshot.set(target, childListBeforeMutation);
+                return {
+                    type: "childList",
+                    target,
+                    addedNodes,
+                    removedNodes,
+                    previousSibling,
+                    nextSibling,
+                    // Added properties:
+                    addedTrees,
+                    removedTrees,
+                };
+            })
+            .toReversed();
+    }
+
+    /**
+     *
+     * @param {MutationRecord[]} records
+     * @returns {HistoryMutationRecord[]}
+     */
+    transformRecords(records) {
+        let transformedRecords = this.transformChildListRecords(records);
+        transformedRecords = transformedRecords.flatMap((record) => this.transformRecord(record));
+        return transformedRecords;
+    }
+
+    /**
      * Class attribute records are expanded into multiple classList records.
      * Attribute records have their oldValue normalized and new value added to it.
      * @todo: expand childList mutations to add/remove records.
@@ -593,18 +674,7 @@ export class HistoryPlugin extends Plugin {
             const value = record.target.textContent;
             return { ...pick(record, "type", "target", "oldValue"), value };
         }
-        if (record.type === "childList") {
-            // Simply a copy with enumerable properties for later use
-            return pick(
-                record,
-                "type",
-                "target",
-                "addedNodes",
-                "removedNodes",
-                "previousSibling",
-                "nextSibling"
-            );
-        }
+        return record;
     }
 
     /**
@@ -676,13 +746,15 @@ export class HistoryPlugin extends Plugin {
             records.forEach((record) => this.storeLastObservedState(record));
             return [];
         }
-        return records.flatMap((record) => {
-            if (!this.isObservedNode(record.target)) {
-                console.warn("Mutation targets unobserved node", record);
-                return [];
-            }
-            return this.adjustToLastObservedState(record);
-        });
+        return records
+            .map((record) => {
+                if (!this.isObservedNode(record.target)) {
+                    console.warn("Mutation targets unobserved node", record);
+                    return null;
+                }
+                return this.adjustToLastObservedState(record);
+            })
+            .filter(Boolean);
     }
 
     /**
@@ -799,36 +871,35 @@ export class HistoryPlugin extends Plugin {
      * @param {MutationRecordChildList} record
      */
     trackObservedNodes(record) {
+        const addedNodes = record.addedTrees.flatMap(treeToNodes);
+        const removedNodes = record.removedTrees.flatMap(treeToNodes);
+
         // Tag added nodes with observer off as unobserved.
         // Except if they are already marked as observed, meaning that they were
         // removed with observer off and are now being inserted back.
-        [...record.addedNodes]
-            .flatMap((node) => [node, ...descendants(node)])
-            .forEach((node) => {
-                if (this.observedNodes.get(node) === true) {
-                    // Node was previously marked as observed, clear it from map
-                    this.observedNodes.delete(node);
-                } else {
-                    // Tag node as unobserved
-                    this.observedNodes.set(node, false);
-                }
-            });
+        addedNodes.forEach((node) => {
+            if (this.observedNodes.get(node) === true) {
+                // Node was previously marked as observed, clear it from map
+                this.observedNodes.delete(node);
+            } else {
+                // Tag node as unobserved
+                this.observedNodes.set(node, false);
+            }
+        });
         // Tag removed nodes with observer off as observed, as they are present
         // in the last observed state (this is useful in case the node is later
         // re-added).
         // Except if they are already marked as unobserved, meaning that they were
         // added with observer off and are now being removed.
-        [...record.removedNodes]
-            .flatMap((node) => [node, ...descendants(node)])
-            .forEach((node) => {
-                if (this.observedNodes.get(node) === false) {
-                    // Node was previously marked as unobserved, clear it from map
-                    this.observedNodes.delete(node);
-                } else {
-                    // Tag node as observed
-                    this.observedNodes.set(node, true);
-                }
-            });
+        removedNodes.forEach((node) => {
+            if (this.observedNodes.get(node) === false) {
+                // Node was previously marked as unobserved, clear it from map
+                this.observedNodes.delete(node);
+            } else {
+                // Tag node as observed
+                this.observedNodes.set(node, true);
+            }
+        });
     }
 
     /**
@@ -836,7 +907,7 @@ export class HistoryPlugin extends Plugin {
      * @returns {MutationRecordChildList}
      */
     updateChildListRecord(record) {
-        let { previousSibling, nextSibling, addedNodes, removedNodes } = record;
+        let { previousSibling, nextSibling } = record;
 
         // Invalidate sibling references to unobserved nodes
         const isValidReference = (node) => node === null || this.isObservedNode(node);
@@ -844,21 +915,25 @@ export class HistoryPlugin extends Plugin {
         nextSibling = isValidReference(nextSibling) ? nextSibling : undefined;
 
         // Filter out nodes that were already absent in the last observed state
-        const filteredRemovedNodes = [...removedNodes].filter(this.isObservedNode.bind(this));
+        const removedTrees = record.removedTrees.filter(({ node }) => this.isObservedNode(node));
         // Filter out nodes that were already present in the last observed state
-        const filteredAddedNodes = [...addedNodes].filter(
-            (node) => this.observedNodes.get(node) !== true
+        const addedTrees = record.addedTrees.filter(
+            ({ node }) => this.observedNodes.get(node) !== true
         );
 
         // Clear entries in the observed nodes map
-        [...addedNodes, ...removedNodes].forEach((node) => this.observedNodes.delete(node));
+        [...record.addedTrees, ...record.removedTrees]
+            .flatMap(treeToNodes)
+            .forEach((node) => this.observedNodes.delete(node));
 
         return {
             ...record,
             previousSibling,
             nextSibling,
-            removedNodes: filteredRemovedNodes,
-            addedNodes: filteredAddedNodes,
+            addedTrees,
+            removedTrees,
+            addedNodes: addedTrees.map((tree) => tree.node),
+            removedNodes: removedTrees.map((tree) => tree.node),
         };
     }
 
@@ -908,25 +983,6 @@ export class HistoryPlugin extends Plugin {
      */
     stageRecords(records) {
         this.setIdOnRecords(records);
-        // @todo @phoenix test this feature.
-        // There is a case where node A is added and node B is a descendant of
-        // node A where node B was not in the observed tree) then node B is
-        // added into another node. In that case, we need to keep track of node
-        // B so when serializing node A, we strip node B from the node A tree to
-        // avoid the duplication of node A.
-        const mutatedNodes = new Set();
-        for (const record of records) {
-            if (record.type === "childList") {
-                for (const node of record.addedNodes) {
-                    const id = this.setNodeId(node);
-                    mutatedNodes.add(id);
-                }
-                for (const node of record.removedNodes) {
-                    const id = this.setNodeId(node);
-                    mutatedNodes.delete(id);
-                }
-            }
-        }
         for (const record of records) {
             switch (record.type) {
                 case "characterData":
@@ -937,7 +993,7 @@ export class HistoryPlugin extends Plugin {
                     break;
                 }
                 case "childList": {
-                    this.stageChildListRecords(record, mutatedNodes);
+                    this.stageChildListRecords(record);
                     break;
                 }
             }
@@ -952,29 +1008,27 @@ export class HistoryPlugin extends Plugin {
     /**
      * @param {MutationRecordChildList} record
      */
-    stageChildListRecords(record, mutatedNodes) {
+    stageChildListRecords(record) {
         const parentId = this.nodeToIdMap.get(record.target);
         if (!parentId) {
             throw new Error("Unknown parent node");
         }
-        const makeSingleNodeRecords = (nodes, type) =>
-            [...nodes].map((node, index, nodeList) => {
-                const nextSibling = nodeList[index + 1] || record.nextSibling;
-                const previousSibling = nodeList[index - 1] || record.previousSibling;
+        const makeSingleNodeRecords = (trees, type) =>
+            trees.map((tree, index, array) => {
+                const node = tree.node;
+                const nextSibling = array[index + 1]?.node || record.nextSibling;
+                const previousSibling = array[index - 1]?.node || record.previousSibling;
                 const [nextId, previousId] = [nextSibling, previousSibling].map((sibling) =>
                     // Preserve undefined and null values
                     sibling ? this.nodeToIdMap.get(sibling) : sibling
                 );
                 const id = this.nodeToIdMap.get(node);
-                const serializedNode = this.serializeNode(
-                    node,
-                    type === "add" ? mutatedNodes : undefined
-                );
+                const serializedNode = this.serializeTree(tree);
                 return { type, id, parentId, node: serializedNode, nextId, previousId };
             });
         this.currentStep.mutations.push(
-            ...makeSingleNodeRecords(record.addedNodes, "add"),
-            ...makeSingleNodeRecords(record.removedNodes, "remove")
+            ...makeSingleNodeRecords(record.addedTrees, "add"),
+            ...makeSingleNodeRecords(record.removedTrees, "remove")
         );
     }
 
@@ -1621,12 +1675,11 @@ export class HistoryPlugin extends Plugin {
         }
     }
     /**
-     * Serialize a node and its children if the collaboration is true.
+     * Serialize a node and its children.
      * @param { Node } node
-     * @param { Set<Node> } nodesToStripFromChildren
      */
-    serializeNode(node, mutatedNodes) {
-        return this._serializeNode(node, mutatedNodes, this.nodeToIdMap);
+    serializeNode(node) {
+        return this.serializeTree(nodeToTree(node));
     }
     /**
      * Unserialize a node and its children if the collaboration is true.
@@ -1670,13 +1723,13 @@ export class HistoryPlugin extends Plugin {
             return unserializedNode;
         }
     }
+
     /**
-     * Serialize a node and its children.
-     * @param { Node } node
-     * @param { [Set<Node>] } nodesToStripFromChildren
-     * @returns { SerializedNode }
+     * @param {Tree} tree
+     * @returns {SerializedNode}
      */
-    _serializeNode(node, nodesToStripFromChildren = new Set()) {
+    serializeTree(tree) {
+        const node = tree.node;
         const nodeId = this.nodeToIdMap.get(node);
         if (!nodeId) {
             return;
@@ -1688,9 +1741,9 @@ export class HistoryPlugin extends Plugin {
         if (node.nodeType === Node.TEXT_NODE) {
             result.textValue = node.nodeValue;
         } else if (node.nodeType === Node.ELEMENT_NODE) {
-            let childrenToSerialize = childNodes(node);
+            let childTreesToSerialize = tree.childNodes;
             for (const cb of this.getResource("serializable_descendants_processors")) {
-                childrenToSerialize = cb(node, childrenToSerialize);
+                childTreesToSerialize = cb(node, childTreesToSerialize);
             }
             result.tagName = node.tagName;
             result.children = [];
@@ -1698,12 +1751,10 @@ export class HistoryPlugin extends Plugin {
             for (let i = 0; i < node.attributes.length; i++) {
                 result.attributes[node.attributes[i].name] = node.attributes[i].value;
             }
-            for (const child of childrenToSerialize) {
-                if (!nodesToStripFromChildren.has(child.nodeId)) {
-                    const serializedChild = this._serializeNode(child, nodesToStripFromChildren);
-                    if (serializedChild) {
-                        result.children.push(serializedChild);
-                    }
+            for (const child of childTreesToSerialize) {
+                const serializedChild = this.serializeTree(child);
+                if (serializedChild) {
+                    result.children.push(serializedChild);
                 }
             }
         }
@@ -1767,4 +1818,23 @@ export class HistoryPlugin extends Plugin {
             this._onKeyupResetContenteditableNodes = [];
         }
     }
+}
+
+/**
+ * @param {Node} node
+ * @returns {Tree}
+ */
+function nodeToTree(node) {
+    return {
+        node,
+        childNodes: childNodes(node).map(nodeToTree),
+    };
+}
+
+/**
+ * @param {Tree} tree
+ * @returns {Node[]}
+ */
+function treeToNodes(tree) {
+    return [tree.node, ...tree.childNodes.flatMap(treeToNodes)];
 }

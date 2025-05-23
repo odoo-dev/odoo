@@ -1,4 +1,5 @@
 import { Plugin } from "@html_editor/plugin";
+import { childNodes } from "@html_editor/utils/dom_traversal";
 import { memoize } from "@web/core/utils/functions";
 
 /**
@@ -67,7 +68,12 @@ export class EmbeddedComponentPlugin extends Plugin {
         if (!embedding) {
             return serializableDescendants;
         }
-        return Object.values(embedding.getEditableDescendants?.(elem) || {});
+        const serializableChildren = Object.values(embedding.getEditableDescendants?.(elem) || {});
+        const nodeToTree = (node) => ({
+            node,
+            childNodes: childNodes(node).map(nodeToTree),
+        });
+        return serializableChildren.map(nodeToTree);
     }
 
     handleComponents(elem) {
