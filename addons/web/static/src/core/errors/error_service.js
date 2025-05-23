@@ -48,7 +48,7 @@ export const errorService = {
         window.addEventListener("beforeunload", () => {
             isUnloadingPage = true;
             // restore after 30 seconds
-            browser.setTimeout(() => (isUnloadingPage = false), 30000);
+            // browser.setTimeout(() => (isUnloadingPage = false), 30000);
         });
 
         function handleError(uncaughtError, retry = true) {

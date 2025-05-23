@@ -1829,10 +1829,13 @@ QUnit.module("Views", (hooks) => {
             scrollableParent.style.maxHeight = "400px";
 
             // The element must be contained in the scrollable parent (top and bottom)
-            const isVisible = (el) =>
-                el.getBoundingClientRect().bottom <=
-                    scrollableParent.getBoundingClientRect().bottom &&
-                el.getBoundingClientRect().top >= scrollableParent.getBoundingClientRect().top;
+            const isVisible = (el) => {
+                return (
+                    el.getBoundingClientRect().bottom <=
+                        scrollableParent.getBoundingClientRect().bottom &&
+                    el.getBoundingClientRect().top >= scrollableParent.getBoundingClientRect().top
+                );
+            };
 
             assert.ok(
                 scrollableParent
@@ -12737,10 +12740,7 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("Auto save: save on closing tab/browser", async function (assert) {
         assert.expect(5);
-        // needed to directly restore the error dialog
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+
         const sendBeaconDef = makeDeferred();
         mockSendBeacon((route, blob) => {
             blob.text().then((r) => {
@@ -12792,10 +12792,7 @@ QUnit.module("Views", (hooks) => {
                 assert.step("save"); // should be called
                 return false;
             });
-            // needed to directly restore the error dialog
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
-            });
+
             await makeView({
                 type: "form",
                 resModel: "partner",
@@ -12829,10 +12826,7 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("Auto save: save on closing tab/browser (invalid field)", async function (assert) {
         assert.expect(2);
-        // needed to directly restore the error dialog
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+
         mockSendBeacon(() => {
             assert.step("save"); // should not be called
         });
@@ -12868,10 +12862,7 @@ QUnit.module("Views", (hooks) => {
         mockSendBeacon(() => {
             assert.step("save"); // should not be called
         });
-        // needed to directly restore the error dialog
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+
         await makeView({
             type: "form",
             resModel: "partner",
@@ -12902,10 +12893,7 @@ QUnit.module("Views", (hooks) => {
             mockSendBeacon(() => {
                 throw new Error("no write should be done");
             });
-            // needed to directly restore the error dialog
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
-            });
+
             serverData.models.partner.fields.foo.trim = true;
             serverData.models.partner.records[0].foo = "name with trailing spaces   ";
 
@@ -12938,10 +12926,7 @@ QUnit.module("Views", (hooks) => {
             mockSendBeacon(() => {
                 assert.step("save"); // should not be called
             });
-            // needed to directly restore the error dialog
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
-            });
+
             serverData.models.partner.fields.bloup = {
                 string: "Bloup",
                 type: "text",
@@ -12983,10 +12968,7 @@ QUnit.module("Views", (hooks) => {
         mockSendBeacon(() => {
             assert.step("save"); // should not be called
         });
-        // needed to directly restore the error dialog
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+
         serverData.actions[1] = {
             id: 1,
             name: "Partner",
@@ -13044,10 +13026,7 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("Auto save: save on closing tab/browser (onchanges)", async function (assert) {
         assert.expect(1);
-        // needed to directly restore the error dialog
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+
         const sendBeaconDef = makeDeferred();
         mockSendBeacon((route, blob) => {
             blob.text().then((r) => {
@@ -13094,10 +13073,7 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("Auto save: save on closing tab/browser (onchanges 2)", async function (assert) {
         assert.expect(1);
-        // needed to directly restore the error dialog
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+
         const sendBeaconDef = makeDeferred();
         mockSendBeacon((route, blob) => {
             blob.text().then((r) => {
@@ -13143,10 +13119,7 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("Auto save: save on closing tab/browser (pending change)", async function (assert) {
         assert.expect(5);
-        // needed to directly restore the error dialog
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+
         const sendBeaconDef = makeDeferred();
         mockSendBeacon((route, blob) => {
             blob.text().then((r) => {
@@ -13187,10 +13160,7 @@ QUnit.module("Views", (hooks) => {
         "Auto save: save on closing tab/browser (onchanges + pending change)",
         async function (assert) {
             assert.expect(6);
-            // needed to directly restore the error dialog
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
-            });
+
             const sendBeaconDef = makeDeferred();
             mockSendBeacon((route, blob) => {
                 blob.text().then((r) => {
@@ -13257,10 +13227,7 @@ QUnit.module("Views", (hooks) => {
         "Auto save: save on closing tab/browser (invalid pending change)",
         async function (assert) {
             assert.expect(3);
-            // needed to directly restore the error dialog
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
-            });
+
             mockSendBeacon(() => {
                 assert.step(`sendBeacon`);
                 assert.notOk(true, "should not call the /write route");
@@ -13301,10 +13268,7 @@ QUnit.module("Views", (hooks) => {
                     obj.name = `copy: ${obj.display_name}`;
                 },
             };
-            // needed to directly restore the error dialog
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
-            });
+
             mockSendBeacon(() => {
                 assert.step(`sendBeacon`);
                 throw new Error("Should not save the record");
