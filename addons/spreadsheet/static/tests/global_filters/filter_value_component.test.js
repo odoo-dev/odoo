@@ -24,6 +24,18 @@ defineSpreadsheetModels();
  * @param {{ model: Model, filter: object}} props
  */
 async function mountFilterValueComponent(props) {
+    props.setGlobalFilterValue =
+        props.setGlobalFilterValue ||
+        ((id, value, displayNames) => {
+            props.model.dispatch("SET_GLOBAL_FILTER_VALUE", {
+                id,
+                value,
+                displayNames,
+            });
+        });
+    props.getGlobalFilterValue =
+        props.getGlobalFilterValue ||
+        (() => props.model.getters.getGlobalFilterValue(props.filter.id));
     await mountWithCleanup(FilterValue, { props });
 }
 

@@ -108,6 +108,14 @@ export class SpreadsheetDashboardAction extends Component {
         return dashboard.model.getters.getGlobalFilters();
     }
 
+    setGlobalFilterValue(id, value, displayNames) {
+        this.state.activeDashboard.model.dispatch("SET_GLOBAL_FILTER_VALUE", {
+            id,
+            value,
+            displayNames,
+        });
+    }
+
     /**
      * @private
      * @returns {number | undefined}
