@@ -43,12 +43,13 @@ export class UncaughtCorsError extends UncaughtError {
 }
 
 export const errorService = {
+    _beforeunload_restore_timeout: 30000,
     start(env) {
         let isUnloadingPage = false;
         window.addEventListener("beforeunload", () => {
             isUnloadingPage = true;
             // restore after 30 seconds
-            // browser.setTimeout(() => (isUnloadingPage = false), 30000);
+            browser.setTimeout(() => (isUnloadingPage = false), this._beforeunload_restore_timeout);
         });
 
         function handleError(uncaughtError, retry = true) {

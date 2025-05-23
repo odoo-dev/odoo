@@ -4,6 +4,8 @@ import { isVisible as isElemVisible } from "@web/core/utils/ui";
 import { fullTraceback, fullAnnotatedTraceback } from "@web/core/errors/error_utils";
 import { registry } from "@web/core/registry";
 import { Component, whenReady } from "@odoo/owl";
+import { errorService } from "@web/core/errors/error_service";
+import { patch } from "@web/core/utils/patch";
 
 const consoleError = console.error;
 
@@ -656,5 +658,10 @@ export function setupQUnit() {
     errorHandlerRegistry.add(defaultHandlerName, testDefaultHandler, {
         sequence: Number.POSITIVE_INFINITY,
         force: true,
+    });
+
+    // disable the restore timeout
+    patch(errorService, {
+        _beforeunload_restore_timeout: 0,
     });
 }
