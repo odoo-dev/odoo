@@ -796,37 +796,39 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
-     * @todo: tag descendants too as observed/unobserved?
-     *
      * @param {MutationRecordChildList} record
      */
     trackObservedNodes(record) {
         // Tag added nodes with observer off as unobserved.
         // Except if they are already marked as observed, meaning that they were
         // removed with observer off and are now being inserted back.
-        record.addedNodes.forEach((node) => {
-            if (this.observedNodes.get(node) === true) {
-                // Node was previously marked as observed, clear it from map
-                this.observedNodes.delete(node);
-            } else {
-                // Tag node as unobserved
-                this.observedNodes.set(node, false);
-            }
-        });
+        [...record.addedNodes]
+            .flatMap((node) => [node, ...descendants(node)])
+            .forEach((node) => {
+                if (this.observedNodes.get(node) === true) {
+                    // Node was previously marked as observed, clear it from map
+                    this.observedNodes.delete(node);
+                } else {
+                    // Tag node as unobserved
+                    this.observedNodes.set(node, false);
+                }
+            });
         // Tag removed nodes with observer off as observed, as they are present
         // in the last observed state (this is useful in case the node is later
         // re-added).
         // Except if they are already marked as unobserved, meaning that they were
         // added with observer off and are now being removed.
-        record.removedNodes.forEach((node) => {
-            if (this.observedNodes.get(node) === false) {
-                // Node was previously marked as unobserved, clear it from map
-                this.observedNodes.delete(node);
-            } else {
-                // Tag node as observed
-                this.observedNodes.set(node, true);
-            }
-        });
+        [...record.removedNodes]
+            .flatMap((node) => [node, ...descendants(node)])
+            .forEach((node) => {
+                if (this.observedNodes.get(node) === false) {
+                    // Node was previously marked as unobserved, clear it from map
+                    this.observedNodes.delete(node);
+                } else {
+                    // Tag node as observed
+                    this.observedNodes.set(node, true);
+                }
+            });
     }
 
     /**

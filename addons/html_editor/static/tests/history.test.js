@@ -901,7 +901,7 @@ describe("unobserved mutations", () => {
             // addition of A is reverted
             expect(nodeA.parentNode).toBe(null);
         });
-        test.todo("node addition to descendant of unobserved node is not observed", async () => {
+        test("node addition to descendant of unobserved node is not observed", async () => {
             const { editor } = await setupEditor(`<p></p>`);
             const p = editor.editable.querySelector("p");
             const nodeA = editor.document.createElement("span");
