@@ -4,12 +4,12 @@ import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { _t } from "@web/core/l10n/translation";
 import { NewsletterSubscribeCommonOption } from "./newsletter_subscribe_common_option";
-import { getSelectorParams } from "@html_builder/utils/utils";
+import { getElementsWithOption, getSelectorParams } from "@html_builder/utils/utils";
 import { applyFunDependOnSelectorAndExclude } from "@website/builder/plugins/utils";
 
 class MailingListSubscribeOptionPlugin extends Plugin {
     static id = "mailingListSubscribeOption";
-    static dependencies = ["remove", "savePlugin"];
+    static dependencies = ["savePlugin"];
     static shared = ["fetchMailingLists"];
     resources = {
         builder_actions: [
@@ -49,38 +49,39 @@ class MailingListSubscribeOptionPlugin extends Plugin {
     }
 
     async onSnippetDropped({ snippetEl }) {
-        const proms = [];
-        for (const mailingListSubscribeOptionSelector of this
-            .mailingListSubscribeOptionSelectorParams) {
-            proms.push(
-                applyFunDependOnSelectorAndExclude(
-                    this.addNewsletterListElement.bind(this),
-                    snippetEl,
-                    mailingListSubscribeOptionSelector
-                )
-            );
+        const newsLetterEls = [];
+        for (const { selector, exclude, applyTo } of this.mailingListSubscribeOptionSelectorParams) {
+            newsLetterEls.push(...getElementsWithOption(snippetEl, selector, exclude, applyTo));
         }
-        await Promise.all(proms);
-    }
+        if (!newsLetterEls.length) {
+            return;
+        }
 
-    async addNewsletterListElement(elementToAdd) {
         await this.fetchMailingLists();
-        if (this.mailingLists.length) {
-            elementToAdd.dataset.listId = this.mailingLists[0].id;
+        if (!this.mailingLists.length) {
+            let cancelDrop = false;
+            await new Promise((resolve) => {
+                this.services.dialog.add(ConfirmationDialog, {
+                    body: _t(
+                        "No mailing list found, do you want to create a new one? This will save all your changes, are you sure you want to proceed?"
+                    ),
+                    confirm: async () => {
+                        // TODO properly save and redirect.
+                        await this.dependencies.savePlugin.save();
+                        window.location.href =
+                            "/odoo/action-mass_mailing.action_view_mass_mailing_lists";
+                    },
+                    cancel: () => cancelDrop = true,
+                }, { onClose: resolve });
+            })
+            // Cancel the drop if the dialog was cancelled.
+            if (cancelDrop) {
+                return true;
+            }
         } else {
-            this.services.dialog.add(ConfirmationDialog, {
-                body: _t(
-                    "No mailing list found, do you want to create a new one? This will save all your changes, are you sure you want to proceed?"
-                ),
-                confirm: async () => {
-                    await this.dependencies.savePlugin.save();
-                    window.location.href =
-                        "/odoo/action-mass_mailing.action_view_mass_mailing_lists";
-                },
-                cancel: () => {
-                    this.dependencies.remove.removeElementAndUpdateContainers(elementToAdd);
-                },
-            });
+            for (const newsLetterEl of newsLetterEls) {
+                newsLetterEl.dataset.listId = this.mailingLists[0].id;
+            }
         }
     }
 
