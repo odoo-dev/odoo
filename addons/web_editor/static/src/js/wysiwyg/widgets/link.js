@@ -725,7 +725,18 @@ export function getOrCreateLink({ containerNode, startNode } = {}) {
             range.insertNode(link);
             needLabel = true;
         } else {
-            link.appendChild(range.extractContents());
+            const fontSizeSpan = OdooEditorLib.closestElement(
+                commonAncestor,
+                (el) =>
+                    el.tagName === "SPAN" &&
+                    OdooEditorLib.FONT_SIZE_CLASSES.some((cls) => el.classList.contains(cls))
+            );
+            if (fontSizeSpan) {
+                const spanToAppend = OdooEditorLib.splitAroundUntil(commonAncestor, fontSizeSpan);
+                link.appendChild(spanToAppend);
+            } else {
+                link.appendChild(range.extractContents());
+            }
             range.insertNode(link);
         }
     }
