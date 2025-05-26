@@ -68,7 +68,7 @@ class AccountMove(models.Model):
                 move.l10n_in_state_id = False
 
     @api.model
-    def _l10n_in_error_logger_entry(self, service_name, message, request_url, company=False):
+    def _l10n_in_error_logger_entry(self, service_name, message, request_url, document_name=False, company=False):
         if not company:
             company = self.env.company
         self.sudo().env['ir.logging'].create({
@@ -79,7 +79,7 @@ class AccountMove(models.Model):
             'message': message,
             'path': request_url,
             'func': self.env.user.id,
-            'line': f"{company.id}-{company.vat}",
+            'line': f"{company.id}-{document_name}",
         })
 
     @api.autovacuum

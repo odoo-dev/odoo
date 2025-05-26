@@ -137,6 +137,8 @@ class AccountEdiFormat(models.Model):
         if response.get("error"):
             error = response["error"]
             error_codes = [e.get("code") for e in error]
+            self._l10n_in_error_logger_entry(
+                'edi', str(error), '/iap/l10n_in_edi/1/generate', invoice.name, invoice.company_id)
             if "1005" in error_codes:
                 # Invalid token eror then create new token and send generate request again.
                 # This happen when authenticate called from another odoo instance with same credentials (like. Demo/Test)
@@ -200,6 +202,8 @@ class AccountEdiFormat(models.Model):
         if response.get("error"):
             error = response["error"]
             error_codes = [e.get("code") for e in error]
+            self._l10n_in_error_logger_entry(
+                'edi', str(error), '/iap/l10n_in_edi/1/cancel', invoice.name, invoice.company_id)
             if "1005" in error_codes:
                 # Invalid token eror then create new token and send generate request again.
                 # This happen when authenticate called from another odoo instance with same credentials (like. Demo/Test)
