@@ -351,7 +351,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
         return model_names
 
     @locked
-    def _setup_models__(self, cr: BaseCursor) -> None:
+    def _setup_models__(self, cr: BaseCursor, force=True) -> None:
         """ Complete the setup of models.
             This must be called after loading modules and before using the ORM.
         """
@@ -379,7 +379,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
         #self.field_inverses.clear()  # note this is maybe not correct since we may not remove some elements, but this is close enough to have the install working
         self.many2one_company_dependents.clear()
 
-        model_classes.setup_model_classes(env)
+        model_classes.setup_model_classes(env, force=force)
 
         # determine field_depends and field_depends_context
         for model in env.values():

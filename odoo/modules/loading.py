@@ -188,7 +188,7 @@ def load_module_graph(
             py_module = sys.modules['odoo.addons.%s' % (module_name,)]
             pre_init = package.manifest.get('pre_init_hook')
             if pre_init:
-                registry._setup_models__(env.cr)
+                registry._setup_models__(env.cr, force=False)
                 getattr(py_module, pre_init)(env)
 
         model_names = registry.load(package)
@@ -197,7 +197,7 @@ def load_module_graph(
             model_names = registry.descendants(model_names, '_inherit', '_inherits')
             models_updated |= set(model_names)
             models_to_check -= set(model_names)
-            registry._setup_models__(env.cr)
+            registry._setup_models__(env.cr, force=False)
             registry.init_models(env.cr, model_names, {'module': package.name}, new_install)
         elif package.state != 'to remove':
             # The current module has simply been loaded. The models extended by this module
@@ -284,7 +284,7 @@ def load_module_graph(
             suite = loader.make_suite([module_name], 'at_install')
             if suite.countTestCases():
                 if not needs_update:
-                    registry._setup_models__(env.cr)
+                    registry._setup_models__(env.cr, force=False)
                 registry.check_null_constraints(env.cr)
                 # Python tests
                 tests_t0, tests_q0 = time.time(), odoo.sql_db.sql_counter
@@ -405,7 +405,7 @@ def load_modules(
         load_lang = tools.config._cli_options.pop('load_language', None)
         if load_lang or update_module:
             # some base models are used below, so make sure they are set up
-            registry._setup_models__(cr)
+            registry._setup_models__(cr, force=False)
 
         if load_lang:
             for lang in load_lang.split(','):
@@ -457,7 +457,7 @@ def load_modules(
             # set up the registry without the patch for translated fields
             database_translated_fields = registry._database_translated_fields
             registry._database_translated_fields = set()
-            registry._setup_models__(cr)
+            registry._setup_models__(cr, force=False)
             # determine which translated fields should no longer be translated,
             # and make their model fix the database schema
             models_to_untranslate = set()
