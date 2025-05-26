@@ -1,4 +1,14 @@
+import {
+    Component,
+    onWillUpdateProps,
+    useComponent,
+    useEffect,
+    useEnv,
+    useState,
+    useSubEnv,
+} from "@odoo/owl";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
+import { useSuggester } from "@web/core/autocomplete/suggester_hook";
 import { makeContext } from "@web/core/context";
 import { Dialog } from "@web/core/dialog/dialog";
 import { Domain } from "@web/core/domain";
@@ -6,6 +16,7 @@ import { _t } from "@web/core/l10n/translation";
 import { RPCError } from "@web/core/network/rpc";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { Cache } from "@web/core/utils/cache";
+import { ensureFunction } from "@web/core/utils/functions";
 import {
     useBus,
     useChildRef,
@@ -13,6 +24,7 @@ import {
     useOwnedDialogs,
     useService,
 } from "@web/core/utils/hooks";
+import { odoomark } from "@web/core/utils/strings";
 import { createElement, parseXML } from "@web/core/utils/xml";
 import { extractFieldsFromArchInfo, useRecordObserver } from "@web/model/relational_model/utils";
 import { FormArchParser } from "@web/views/form/form_arch_parser";
@@ -23,6 +35,7 @@ import { ViewButton } from "@web/views/view_button/view_button";
 import { executeButtonCallback, useViewButtons } from "@web/views/view_button/view_button_hook";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
+import { highlightText } from "@web/core/utils/strings";
 
 /**
  * @typedef {Object} RelationalActiveActions {
@@ -37,17 +50,41 @@ import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog
  *
  * @typedef {import("services").Services} Services
  */
-
-import {
-    Component,
-    onWillUpdateProps,
-    useComponent,
-    useEffect,
-    useEnv,
-    useState,
-    useSubEnv,
-} from "@odoo/owl";
-import { highlightText } from "@web/core/utils/strings";
+/**
+@typedef {{
+    orm: import("@web/core/orm_service").ORM;
+    context?: MaybeFunction<Record<string, any>>;
+    createEditItem?: {
+        enabled?: MaybeFunction<boolean, [state: { request: string; records: Record<string, any>[] | null }]>;
+        label?: MaybeFunction<ReturnType<typeof _t>, [request: string]>;
+        onSelect(request: string): MaybePromise<void>;
+    };
+    createItem?: {
+        enabled?: MaybeFunction<boolean, [state: { request: string; records: Record<string, any>[] | null }]>;
+        label?: MaybeFunction<ReturnType<typeof _t>, [request: string]>;
+        onSelect(request: string): MaybePromise<void>;
+    };
+    domain?: MaybeFunction<import("@web/core/domain").DomainListRepr>;
+    limit?: MaybeFunction<number>;
+    noRecordsItem?: {
+        enabled?: MaybeFunction<boolean, [request: string]>;
+        label?: MaybeFunction<ReturnType<typeof _t>, [request: string]>;
+    };
+    onRecordSelected: (record: Record<string, any>) => MaybePromise<void>;
+    resModel: MaybeFunction<string>;
+    searchMoreItem?: {
+        enabled?: MaybeFunction<boolean, [state: { request: string; records: Record<string, any>[] | null }]>;
+        label?: MaybeFunction<ReturnType<typeof _t>, [request: string]>;
+        onSelect(request: string): MaybePromise<void>;
+    };
+    specification?: MaybeFunction<Record<string, any>>;
+    startTypingItem?: {
+        enabled?: MaybeFunction<boolean, [request: string]>;
+        label?: MaybeFunction<ReturnType<typeof _t>, [request: string]>;
+    };
+    threshold?: MaybeFunction<number>;
+}} RecordSuggesterParams
+*/
 
 //
 // Commons
@@ -181,6 +218,173 @@ export function useSpecialData(loadFn) {
 // Many2X
 //
 
+export class RecordSuggester {
+    /**
+     * @param {RecordSuggesterParams} params
+     */
+    constructor(params) {
+        /** @type {RecordSuggesterParams["orm"]} */
+        this.orm = params.orm;
+        /** @type {Extract<RecordSuggesterParams["createItem"]["enabled"], Function>} */
+        this.addCreate = ensureFunction(params.createItem?.enabled ?? !!params.createItem);
+        /** @type {Extract<RecordSuggesterParams["createEditItem"]["enabled"], Function>} */
+        this.addCreateEdit = ensureFunction(params.createEditItem?.enabled ?? !!params.createEditItem);
+        /** @type {Extract<RecordSuggesterParams["noRecordsItem"]["enabled"], Function>} */
+        this.addNoRecords = ensureFunction(params.noRecordsItem?.enabled ?? !!params.noRecordsItem);
+        /** @type {Extract<RecordSuggesterParams["searchMoreItem"]["enabled"], Function>} */
+        this.addSearchMore = ensureFunction(params.searchMoreItem?.enabled ?? !!params.searchMoreItem);
+        /** @type {Extract<RecordSuggesterParams["startTypingItem"]["enabled"], Function>} */
+        this.addStartTyping = ensureFunction(params.startTypingItem?.enabled ?? !!params.startTypingItem);
+        /** @type {Extract<RecordSuggesterParams["context"], Function>} */
+        this.context = ensureFunction(params.context ?? {});
+        /** @type {Extract<RecordSuggesterParams["createEditItem"]["label"], Function>} */
+        this.createEditLabel = ensureFunction(params.createEditItem?.label ?? this.getDefaultCreateEditLabel.bind(this));
+        /** @type {Extract<RecordSuggesterParams["createItem"]["label"], Function>} */
+        this.createLabel = ensureFunction(params.createItem?.label ?? this.getDefaultCreateLabel.bind(this));
+        /** @type {Extract<RecordSuggesterParams["domain"], Function>} */
+        this.domain = ensureFunction(params.domain ?? []);
+        /** @type {Extract<RecordSuggesterParams["limit"], Function>} */
+        this.limit = ensureFunction(params.limit ?? 7);
+        /** @type {Extract<RecordSuggesterParams["noRecordsItem"]["label"], Function>} */
+        this.noRecordsLabel = ensureFunction(params.noRecordsItem?.label ?? this.getDefaultNoRecordsLabel.bind(this));
+        /** @type {RecordSuggesterParams["createItem"]["onSelect"]} */
+        this.onCreate = params.createItem?.onSelect ?? (() => {});
+        /** @type {RecordSuggesterParams["createEditItem"]["onSelect"]} */
+        this.onCreateEdit = params.createEditItem?.onSelect ?? (() => {});
+        /** @type {RecordSuggesterParams["onRecordSelected"]} */
+        this.onRecordSelected = params.onRecordSelected;
+        /** @type {RecordSuggesterParams["searchMoreItem"]["onSelect"]} */
+        this.onSearchMore = params.searchMoreItem?.onSelect ?? (() => {});
+        /** @type {Extract<RecordSuggesterParams["resModel"], Function>} */
+        this.resModel = ensureFunction(params.resModel);
+        /** @type {Extract<RecordSuggesterParams["searchMoreItem"]["label"], Function>} */
+        this.searchMoreLabel = ensureFunction(params.searchMoreItem?.label ?? this.getDefaultSearchMoreLabel.bind(this));
+        /** @type {Extract<RecordSuggesterParams["specification"], Function>} */
+        this.specification = ensureFunction(params.specification ?? {});
+        /** @type {Extract<RecordSuggesterParams["startTypingItem"]["label"], Function>} */
+        this.startTypingLabel = ensureFunction(params.startTypingItem?.label ?? this.getDefaultStartTypingLabel.bind(this));
+        /** @type {Extract<RecordSuggesterParams["threshold"], Function>} */
+        this.threshold = ensureFunction(params.threshold ?? 0);
+    }
+
+    buildCreateOption(request) {
+        return {
+            cssClass: "o_m2o_dropdown_option o_m2o_dropdown_option_create",
+            label: this.createLabel(request),
+            onSelect: () => this.onCreate(request),
+            slotName: "createItem",
+        };
+    }
+
+    buildCreateEditOption(request) {
+        return {
+            cssClass: "o_m2o_dropdown_option o_m2o_dropdown_option_create_edit",
+            label: this.createEditLabel(request),
+            onSelect: () => this.onCreateEdit(request),
+            slotName: "createEditItem",
+        };
+    }
+
+    buildNoRecordsOption(request) {
+        return {
+            cssClass: "o_m2o_no_result",
+            label: this.noRecordsLabel(request),
+            slotName: "noRecordsItem",
+        };
+    }
+
+    buildRecordOption(request, record) {
+        const label = record.__formatted_display_name || record.display_name;
+        return {
+            data: { record },
+            label: label ? highlightText(request, label, "text-primary fw-bold") : _t("Unnamed"),
+            onSelect: () => this.onRecordSelected(record),
+            slotName: "recordItem",
+        };
+    }
+
+    buildSearchMoreOption(request) {
+        return {
+            cssClass: "o_m2o_dropdown_option o_m2o_dropdown_option_search_more",
+            label: this.searchMoreLabel(request),
+            onSelect: this.onSearchMore(request),
+            slotName: "searchMoreItem",
+        };
+    }
+
+    buildStartTypingOption(request) {
+        return {
+            cssClass: "o_m2o_start_typing",
+            label: this.startTypingLabel(request),
+            slotName: "startTypingItem",
+        };
+    }
+
+    fetchRecords(request) {
+        return this.orm.call(this.resModel(), "web_name_search", [], {
+            name: request,
+            operator: "ilike",
+            domain: this.domain(),
+            limit: this.limit() + 1,
+            context: this.context(),
+            specification: this.specification(),
+        });
+    }
+
+    getDefaultCreateLabel(request) {
+        return _t('Create "%s"', request);
+    }
+
+    getDefaultCreateEditLabel(request) {
+        return request.length > 0 ? _t("Create and edit...") : _t("Create...");
+    }
+
+    getDefaultNoRecordsLabel() {
+        return _t("No records");
+    }
+
+    getDefaultSearchMoreLabel() {
+        return _t("Search more...");
+    }
+
+    getDefaultStartTypingLabel() {
+        const threshold = this.threshold();
+        return threshold > 1 ? _t("Start typing %s characters", threshold) : _t("Start typing...");
+    }
+
+    async suggest(request, lock) {
+        const suggestions = [];
+        /** @type {Record<string, any>[] | null} */
+        let records = null;
+
+        if (request.length < this.threshold()) {
+            if (this.addStartTyping(request)) {
+                suggestions.push(this.buildStartTypingOption(request));
+            }
+        } else {
+            records = await lock(this.fetchRecords(request));
+            if (records.length) {
+                for (const record of records) {
+                    suggestions.push(this.buildRecordOption(request, record));
+                }
+            } else if (this.addNoRecords(request)) {
+                suggestions.push(this.buildNoRecordsOption(request));
+            }
+        }
+        if (this.addCreate({ request, records })) {
+            suggestions.push(this.buildCreateOption(request));
+        }
+        if (this.addCreateEdit({ request, records })) {
+            suggestions.push(this.buildCreateEditOption(request));
+        }
+        if (this.addSearchMore({ request, records })) {
+            suggestions.push(this.buildSearchMoreOption(request));
+        }
+
+        return suggestions;
+    }
+}
+
 export class Many2XAutocomplete extends Component {
     static template = "web.Many2XAutocomplete";
     static components = { AutoComplete };
@@ -269,6 +473,51 @@ export class Many2XAutocomplete extends Component {
             onCreateEdit: ({ context }) => this.openMany2X({ context }),
             onUnselect: isToMany ? undefined : () => update(),
         });
+
+        const slowCreate = (request) =>
+            this.openMany2X({
+                context: this.getCreationContext(request),
+                nextRecordsContext: this.props.context,
+            });
+        const suggest = useSuggester(new RecordSuggester({
+            orm: this.orm,
+            resModel: () => this.props.resModel,
+            onRecordSelected: (record) => this.props.update([record]),
+            context: () => this.props.context,
+            domain: () => this.props.getDomain(),
+            limit: () => this.props.searchLimit,
+            specification: () => this.searchSpecification,
+            threshold: () => this.props.searchThreshold,
+            createItem: {
+                enabled: ({ request }) => !!this.props.quickCreate && request.length > 0,
+                onSelect: async (request) => {
+                    try {
+                        await this.props.quickCreate(request);
+                    } catch (e) {
+                        this.onQuickCreateError(e, request);
+                    }
+                },
+            },
+            createEditItem: {
+                enabled: ({ records, request }) => (this.activeActions.createEdit ?? this.activeActions.create) && (request.length > 0 || records?.length === 0),
+                onSelect: (request) => slowCreate(request),
+            },
+            noRecordsItem: {
+                enabled: () => !this.activeActions.createEdit && !this.props.quickCreate,
+            },
+            searchMoreItem: {
+                enabled: ({ records, request }) => request.length < this.props.searchThreshold || records?.length > 0,
+                label: () => this.SearchMoreButtonLabel,
+                onSelect: (request) => this.onSearchMore(request),
+            },
+            startTypingItem: {
+                enabled: () => !this.props.value,
+            },
+        }));
+        this.optionsSource = {
+            placeholder: _t("Loading..."),
+            options: suggest,
+        };
     }
 
     get autoCompleteProps() {
@@ -283,19 +532,9 @@ export class Many2XAutocomplete extends Component {
             onInput: this.onInput.bind(this),
             placeholder: this.props.placeholder,
             resetOnSelect: this.props.value === "",
-            sources: this.sources,
+            sources: [this.optionsSource, ...this.props.otherSources],
             slots: this.props.slots,
             value: this.props.value,
-        };
-    }
-
-    get sources() {
-        return [this.optionsSource, ...this.props.otherSources];
-    }
-    get optionsSource() {
-        return {
-            placeholder: _t("Loading..."),
-            options: this.loadOptionsSource.bind(this),
         };
     }
 
@@ -318,41 +557,10 @@ export class Many2XAutocomplete extends Component {
         this.props.setInputFloats(false);
     }
 
-    abortableSearch(name) {
-        const originalPromise = this.search(name);
-        return {
-            promise: originalPromise,
-            abort: originalPromise.abort ? originalPromise.abort.bind(originalPromise) : () => {},
-        };
-    }
-
     get searchSpecification() {
         return {
             display_name: {},
             ...this.props.specification,
-        };
-    }
-
-    search(name) {
-        if (name.length < this.props.searchThreshold) {
-            return [];
-        }
-        return this.orm.call(this.props.resModel, "web_name_search", [], {
-            name: name,
-            operator: "ilike",
-            domain: this.props.getDomain(),
-            limit: this.props.searchLimit + 1,
-            context: this.props.context,
-            specification: this.searchSpecification,
-        });
-    }
-    mapRecordToOption(record, request) {
-        const label = record.__formatted_display_name || record.display_name;
-        return {
-            data: { record },
-            label: label ? highlightText(request, label, "text-primary fw-bold") : _t("Unnamed"),
-            onSelect: () => this.props.update([record]),
-            slotName: "recordItem",
         };
     }
 
@@ -368,95 +576,6 @@ export class Many2XAutocomplete extends Component {
         } else {
             throw error;
         }
-    }
-    async loadOptionsSource(request) {
-        if (this.lastProm) {
-            this.lastProm.abort(false);
-            this.lastProm = null;
-        }
-        const canCreateEdit =
-            "createEdit" in this.activeActions
-                ? this.activeActions.createEdit
-                : this.activeActions.create;
-        let addSearchMore = true;
-
-        const options = [];
-        if (request.length < this.props.searchThreshold) {
-            if (!this.props.value) {
-                options.push({
-                    cssClass: "o_m2o_start_typing",
-                    label:
-                        this.props.searchThreshold > 1
-                            ? _t("Start typing %s characters", this.props.searchThreshold)
-                            : _t("Start typing..."),
-                    slotName: "startTypingItem",
-                });
-            }
-        } else {
-            this.lastProm = this.abortableSearch(request);
-            const records = await this.lastProm.promise;
-            addSearchMore = records.length > 0;
-            if (records.length) {
-                for (const record of records) {
-                    options.push(this.mapRecordToOption(record, request));
-                }
-            } else if (!this.activeActions.createEdit && !this.props.quickCreate) {
-                options.push({
-                    cssClass: "o_m2o_no_result",
-                    label: _t("No records"),
-                    slotName: "noRecordsItem",
-                });
-            }
-        }
-
-        const slowCreate = () =>
-            this.openMany2X({
-                context: this.getCreationContext(request),
-                nextRecordsContext: this.props.context,
-            });
-        if (request.length) {
-            if (this.props.quickCreate) {
-                options.push({
-                    cssClass: "o_m2o_dropdown_option o_m2o_dropdown_option_create",
-                    label: _t('Create "%s"', request),
-                    onSelect: async () => {
-                        try {
-                            await this.props.quickCreate(request);
-                        } catch (e) {
-                            this.onQuickCreateError(e, request);
-                        }
-                    },
-                    slotName: "createItem",
-                });
-            }
-
-            if (canCreateEdit) {
-                options.push({
-                    cssClass: "o_m2o_dropdown_option o_m2o_dropdown_option_create_edit",
-                    label: _t("Create and edit..."),
-                    onSelect: slowCreate,
-                    slotName: "createEditItem",
-                });
-            }
-        } else if (canCreateEdit && !addSearchMore) {
-            options.push({
-                cssClass: "o_m2o_dropdown_option o_m2o_dropdown_option_create_new",
-                label: _t("Create..."),
-                onSelect: slowCreate,
-                slotName: "createEditItem",
-            });
-        }
-
-        if (addSearchMore) {
-            options.push({
-                cssClass: "o_m2o_dropdown_option o_m2o_dropdown_option_search_more",
-                label: this.SearchMoreButtonLabel,
-                onSelect: this.onSearchMore.bind(this, request),
-                slotName: "searchMoreItem",
-            });
-        }
-
-        return options;
     }
 
     get SearchMoreButtonLabel() {
