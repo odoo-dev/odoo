@@ -564,7 +564,9 @@ export class Composer extends Component {
         }
         default_body = this.formatDefaultBodyForFullComposer(
             default_body,
-            this.props.composer.emailAddSignature ? markup(this.store.self.signature) : ""
+            this.props.composer.emailAddSignature
+                ? markup(this.thread.effectiveSelfPersona.signature)
+                : ""
         );
         const context = {
             default_attachment_ids: attachmentIds,

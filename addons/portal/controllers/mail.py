@@ -49,13 +49,22 @@ class PortalChatter(http.Controller):
             has_react_access = request.env[thread_model]._get_thread_with_access(thread_id, mode, **kwargs)
             can_react = has_react_access
             if request.env.user._is_public():
-                portal_partner = get_portal_partner(
+                if portal_partner := get_portal_partner(
                     thread, kwargs.get("hash"), kwargs.get("pid"), kwargs.get("token")
-                )
+                ):
+                    partner = portal_partner
+                    store.add(
+                        thread,
+                        {
+                            "portal_partner": Store.one(
+                                portal_partner, fields=["active", "avatar_128", "name", "user"]
+                            )
+                        },
+                        as_thread=True
+                    )
                 can_react = has_react_access and portal_partner
                 partner = portal_partner or partner
             store.add(thread, {"can_react": bool(can_react)}, as_thread=True)
-        store.add({"self": Store.one(partner, fields=["active", "avatar_128", "name", "user"])})
         if request.env.user.has_group("website.group_website_restricted_editor"):
             store.add(partner, {"is_user_publisher": True})
         return store.get_result()

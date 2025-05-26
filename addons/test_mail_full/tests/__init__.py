@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from . import test_im_livechat_portal
 from . import test_odoobot
 from . import test_mail_performance
 from . import test_mail_thread_internals
