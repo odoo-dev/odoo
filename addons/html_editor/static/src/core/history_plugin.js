@@ -478,17 +478,12 @@ export class HistoryPlugin extends Plugin {
      * @param { HistoryMutationRecord[] } records
      */
     setIdOnRecords(records) {
-        /** @type {(tree: Tree) => Node[]} */
-        const getNodesFromTree = (tree) => [
-            tree.node,
-            ...tree.childNodes.flatMap(getNodesFromTree),
-        ];
         for (const record of records) {
             if (record.type !== "childList") {
                 continue;
             }
-            const addedNodes = record.addedTrees.flatMap(getNodesFromTree);
-            const removedNodes = record.removedTrees.flatMap(getNodesFromTree);
+            const addedNodes = record.addedTrees.flatMap(treeToNodes);
+            const removedNodes = record.removedTrees.flatMap(treeToNodes);
             for (const node of [...addedNodes, ...removedNodes]) {
                 if (this.nodeToIdMap.has(node)) {
                     continue;
@@ -593,8 +588,14 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
+     * ChildList mutation records do not contain information about the
+     * descendants of the added/removed nodes at the time of the mutation. This
+     * method transforms childList mutation records to include information about
+     * the added/removed trees. This is useful for later serialization and for
+     * keeping track of inserted/removed nodes in the DOM.
+     *
      * @param {MutationRecord[]} records
-     * @returns {Array<MutationRecord|MutationRecordChildList}
+     * @returns {(MutationRecord|MutationRecordChildList)[]}
      */
     transformChildListRecords(records) {
         /** @type {WeakMap<Node, Node[]>} */
@@ -602,46 +603,43 @@ export class HistoryPlugin extends Plugin {
         /** @param {Node} node */
         const getChildListSnapshot = (node) => childListSnapshot.get(node) || childNodes(node);
         /** @type {(node: Node) => Tree} */
-        const makeTree = (node) => ({
+        const makeSnapshotTree = (node) => ({
             node,
-            childNodes: getChildListSnapshot(node).map(makeTree),
+            childNodes: getChildListSnapshot(node).map(makeSnapshotTree),
         });
-        return records
-            .toReversed()
-            .map((/** @type {MutationRecord} */ record) => {
-                if (record.type !== "childList") {
-                    return record;
-                }
-                const { target, addedNodes, removedNodes, previousSibling, nextSibling } = record;
-                const addedTrees = [...addedNodes].map(makeTree);
-                const removedTrees = [...removedNodes].map(makeTree);
-                // Update childListSnapshot for the target node
-                const childListAfterMutation = getChildListSnapshot(target);
-                const prevSiblingIndex = previousSibling
-                    ? childListAfterMutation.indexOf(previousSibling)
-                    : -1;
-                const nextSiblingIndex = nextSibling
-                    ? childListAfterMutation.indexOf(nextSibling)
-                    : childListAfterMutation.length;
-                const childListBeforeMutation = [
-                    ...childListAfterMutation.slice(0, prevSiblingIndex + 1),
-                    ...removedNodes,
-                    ...childListAfterMutation.slice(nextSiblingIndex),
-                ];
-                childListSnapshot.set(target, childListBeforeMutation);
-                return {
-                    type: "childList",
-                    target,
-                    addedNodes,
-                    removedNodes,
-                    previousSibling,
-                    nextSibling,
-                    // Added properties:
-                    addedTrees,
-                    removedTrees,
-                };
-            })
-            .toReversed();
+        const reconstructChildList = (childListAfter, record) => {
+            const { removedNodes, previousSibling, nextSibling } = record;
+            const previousSiblingNodes = previousSibling
+                ? childListAfter.slice(0, childListAfter.indexOf(previousSibling) + 1)
+                : [];
+            const nextSiblingNodes = nextSibling
+                ? childListAfter.slice(childListAfter.indexOf(nextSibling))
+                : [];
+            return [...previousSiblingNodes, ...removedNodes, ...nextSiblingNodes];
+        };
+
+        const transformedRecords = [];
+        /** @type {MutationRecord[]} */
+        const reversedRecords = records.toReversed();
+        for (const record of reversedRecords) {
+            if (record.type !== "childList") {
+                transformedRecords.unshift(record);
+                continue;
+            }
+            const { type, target, previousSibling, nextSibling, addedNodes, removedNodes } = record;
+            const copy = { type, target, previousSibling, nextSibling, addedNodes, removedNodes };
+            transformedRecords.unshift({
+                ...copy,
+                addedTrees: [...addedNodes].map(makeSnapshotTree),
+                removedTrees: [...removedNodes].map(makeSnapshotTree),
+            });
+
+            // Update childListSnapshot to be used by previous records.
+            const childListAfterMutation = getChildListSnapshot(target);
+            const childListBefore = reconstructChildList(childListAfterMutation, record);
+            childListSnapshot.set(target, childListBefore);
+        }
+        return transformedRecords;
     }
 
     /**
@@ -658,7 +656,7 @@ export class HistoryPlugin extends Plugin {
     /**
      * Class attribute records are expanded into multiple classList records.
      * Attribute records have their oldValue normalized and new value added to it.
-     * @todo: expand childList mutations to add/remove records.
+     * CharacterData records have new value added to it.
      *
      * @param { MutationRecord } record
      * @returns { HistoryMutationRecord | HistoryMutationRecord[] }
