@@ -170,7 +170,7 @@ class PosController(PortalAccount):
         pos_order = pos_order.with_company(pos_order.company_id)
 
         # If the order was already invoiced, return the invoice directly by forcing the access token so that the non-connected user can see it.
-        if pos_order.account_move and pos_order.account_move.is_sale_document():
+        if self._check_redirect_to_existing_invoice(pos_order):
             return request.redirect('/my/invoices/%s?access_token=%s' % (pos_order.account_move.id, pos_order.account_move._portal_ensure_token()))
 
         # Get the optional extra fields that could be required for a localisation.
@@ -259,3 +259,12 @@ class PosController(PortalAccount):
         # Allowing default values for moves is important for some localizations that would need specific fields to be set on the invoice, such as Mexico.
         pos_order.with_context(with_context).action_pos_order_invoice()
         return request.redirect('/my/invoices/%s?access_token=%s' % (pos_order.account_move.id, pos_order.account_move._portal_ensure_token()))
+
+    def _check_redirect_to_existing_invoice(self, pos_order):
+        """
+        This method checks if a pos order has been invoiced and if we should redirect the user to the already existing invoice
+        It's called by show_ticket_validation_screen and is to be overrided in the localizations
+        :param pos_order: The pos_order used to perform the checks
+        :return: A bool, True if we should redirect the user to the invoice, False if we don't
+        """
+        return pos_order.account_move and pos_order.account_move.is_sale_document()

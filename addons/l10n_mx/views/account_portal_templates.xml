@@ -1,0 +1,20 @@
+<odoo>
+    <template id="portal_invoice_page" name="Invoice/Bill" inherit_id="account.portal_invoice_page">
+        <xpath expr="//div[@id='invoice_communication']" position="before">
+            <div>
+                <t t-if="invoice.country_code == 'MX' and not invoice.invoice_pdf_report_id">
+                    <div class="alert alert-warning my-3"
+                         colspan="2"
+                         role="alert">
+                        This invoice is a Proforma, check your informations to try regenerating one
+                        <form method="post" target="_self" t-att-action="'/pos/ticket/validate'">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" name="access_token" t-att-value="invoice.pos_order_ids.access_token"/>
+                            <button class="btn btn-primary">TEST REGENERATE</button>
+                        </form>
+                    </div>
+                </t>
+            </div>
+        </xpath>
+    </template>
+</odoo>
