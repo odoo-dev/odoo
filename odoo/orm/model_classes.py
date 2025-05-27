@@ -305,9 +305,13 @@ def setup_model_classes(env: Environment, force=True, check_manual_fields=False)
     if registry._init_modules:
         _add_manual_models(env)
 
+
     # prepare the setup on all models
     models_classes = list(registry.values())
     for model_cls in models_classes:
+        model_cls._get_depends_done__ = True
+        model_cls._setup_done__ = True
+
         if force:
             model_cls._setup_done__ = False
 
@@ -373,6 +377,7 @@ def _setup(model_cls: BaseModel, env):
     """ Determine all the fields of the model. """
     if model_cls._setup_done__:
         return
+    model_cls._get_depends_done__ = False
     # 1. determine the proper fields of the model: the fields defined on the
     # class and magic fields, not the inherited or custom ones
 
@@ -508,9 +513,10 @@ def _setup_fields(model_cls: BaseModel, env):
     """ Setup the fields, except for recomputation triggers. """
     bad_fields = []
     many2one_company_dependents = model_cls.pool.many2one_company_dependents
+    model = model_cls(env, (), ())
     for name, field in model_cls._fields.items():
         try:
-            field.setup(model_cls(env, (), ()))
+            field.setup(model)
         except Exception:
             if field.base_field.manual:
                 # Something goes wrong when setup a manual field.

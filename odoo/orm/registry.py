@@ -373,26 +373,28 @@ class Registry(Mapping[str, type["BaseModel"]]):
         self._field_trigger_trees.clear()
         self._is_modifying_relations.clear()
         self.registry_invalidated = True
-
-        self.field_depends.clear()
-        self.field_depends_context.clear()
         if force:
+            self.field_depends.clear()
+            self.field_depends_context.clear()
+
             # note this is NOT correct since we may not remove some elements, but this is close enough to have the install working
             # looks like this cause a hudge slow down of testsa when not clearing it
             # we should have a targeted way to clear it during install (not force)
             self.field_inverses.clear()
-
 
         self.many2one_company_dependents.clear()
 
         model_classes.setup_model_classes(env, force=force, check_manual_fields=check_manual_fields)
 
         # determine field_depends and field_depends_context
-        for model in env.values():
-            for field in model._fields.values():
-                depends, depends_context = field.get_depends(model)
+        for model_cls in env.registry.values():
+            if model_cls._get_depends_done__:
+                continue
+            for field in model_cls._fields.values():
+                depends, depends_context = field.get_depends(model_cls(env, (), ()))
                 self.field_depends[field] = tuple(depends)
                 self.field_depends_context[field] = tuple(depends_context)
+            model_cls._get_depends_done__ = True
 
         # clean the lazy_property again in case they are cached by another ongoing registry readonly request
         reset_cached_properties(self)
