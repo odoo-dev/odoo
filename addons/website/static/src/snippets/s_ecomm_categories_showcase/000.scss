@@ -1,5 +1,5 @@
 .s_ecomm_categories_showcase {
-    --ecomm-categories-showcase-height: 550px;
+    --ecomm-categories-showcase-height: 50vh;
     --ecomm-categories-showcase-width: 85%;
     --ecomm-categories-showcase-row-height: 100%;
     --ecomm-categories-showcase-flex-base: 1;
@@ -54,10 +54,9 @@
 
         .s_ecomm_categories_showcase_block {
             flex: var(--ecomm-categories-showcase-flex-base);
-            height: var(--ecomm-categories-showcase-height);
+            min-height: var(--ecomm-categories-showcase-height);
             width: auto;
             transition: flex 0.3s ease-out;
-            min-height: auto;
         }
         
         .s_ecomm_categories_showcase_wrapper:hover .s_ecomm_categories_showcase_block {
@@ -70,6 +69,26 @@
 
         &.first-large-layout .s_ecomm_categories_showcase_block:first-child {
             flex: 2;
+        }
+    }
+
+    &.o_aspect_ratio_short {
+        --ecomm-categories-showcase-height: 25vh;
+        
+        @include media-breakpoint-down(md) {
+            .s_ecomm_categories_showcase_block {
+                min-height: 30vh;
+            }
+        }
+    }
+
+    &.o_aspect_ratio_tall {
+        --ecomm-categories-showcase-height: 75vh;
+        
+        @include media-breakpoint-down(md) {
+            .s_ecomm_categories_showcase_block {
+                min-height: 60vh;
+            }
         }
     }
 }

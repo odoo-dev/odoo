@@ -138,6 +138,29 @@ class EcommCategoriesShowcaseOptionPlugin extends Plugin {
                     }
                 },
             },
+            setAspectRatio: {
+                getValue: ({ editingElement }) => {
+                    if (editingElement.classList.contains('o_aspect_ratio_short')) return 'short';
+                    if (editingElement.classList.contains('o_aspect_ratio_tall')) return 'tall';
+                    return 'default';
+                },
+                apply: ({ editingElement, value }) => {
+                    // Remove all aspect ratio classes
+                    editingElement.classList.remove('o_aspect_ratio_short', 'o_aspect_ratio_tall');
+                    
+                    // Add the selected aspect ratio class
+                    if (value !== 'default') {
+                        editingElement.classList.add(`o_aspect_ratio_${value}`);
+                    }
+                },
+                isApplied: ({ editingElement, value }) => {
+                    if (value === 'default') {
+                        return !editingElement.classList.contains('o_aspect_ratio_short') &&
+                               !editingElement.classList.contains('o_aspect_ratio_tall');
+                    }
+                    return editingElement.classList.contains(`o_aspect_ratio_${value}`);
+                },
+            },
         };
     }
 

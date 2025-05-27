@@ -22,6 +22,13 @@
     <div class="px-3 text-white h6">Blocks Design</div>
     <div class="px-3 text-white opacity-75 small mb-2">Global options for all inner blocks.</div>
     
+    <BuilderRow label.translate="Block Height">
+        <BuilderButtonGroup action="'setAspectRatio'">
+            <BuilderButton actionValue="'default'">Default</BuilderButton>
+            <BuilderButton actionValue="'short'">Short</BuilderButton>
+            <BuilderButton actionValue="'tall'">Tall</BuilderButton>
+        </BuilderButtonGroup>
+    </BuilderRow>
     <BuilderRow label.translate="Shadows">
         <BuilderCheckbox 
             classAction="'shadow'" 
