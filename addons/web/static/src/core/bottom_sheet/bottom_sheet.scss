@@ -220,38 +220,16 @@
             content: none !important;
         }
 
-        &:after {
+        &::after {
             @include o-position-absolute(50%, $list-group-item-padding-x);
-            background: $o-action;
-            border-radius: 100%;
-            height: 1rem;
-            aspect-ratio: 1;
             transform: translateY(-50%);
-            content: ""
+            color: $o-action;
+            // .fa
+            text-rendering: auto;
+            font: normal normal normal 14px/1 FontAwesome;
+            // .fa-check
+            content: "";
         }
-    }
-
-    &, .list-group.list-group-flush {
-        --list-group-bg: transparent;
-        --list-group-color: inherit;
-        --list-group-item-padding-y: #{map-get($spacers, 3)};
-        --list-group-active-bg: #{rgba($component-active-bg, .5)};
-        --list-group-active-color: #{color-contrast($component-active-bg)};
-    }
-
-    .list-group-flush .list-group-item.active {
-        @extend %BottomSheet-Entry-active;
-    }
-
-    .list-group:where(:not(.list-group-flush)) {
-        --list-group-border-radius: #{$border-radius-lg};
-        --list-group-item-padding-y: #{map-get($spacers, 3)};
-        --list-group-item-padding-x: #{map-get($spacers, 3)};
-    }
-
-    .list-group-item {
-        font-weight: $o-font-weight-medium;
-        font-size: $h5-font-size;
     }
 
     // TreeEntry
