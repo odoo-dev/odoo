@@ -22,6 +22,12 @@ export class Popup extends Interaction {
         "_window": {
             "t-on-hashchange": this.onHashChange,
         },
+        ".modal": {
+            "t-on-click": this.onOutSideClick,
+        },
+        "_document": {
+            "t-on-mousedown": this.onOutSideClick,
+        },
     };
 
     setup() {
@@ -61,6 +67,21 @@ export class Popup extends Interaction {
         });
         if (!this.popupAlreadyShown && !emptyPopup) {
             this.bindPopup();
+        }
+    }
+
+    onOutSideClick(ev) {
+        if (document.body.classList.contains('editor_enable')) {
+            return;
+        }
+
+        if (ev.target === this.modalEl) {
+            this.onCloseClick();
+        }
+
+        const modalContent = this.el.querySelector(".modal-content");
+        if (modalContent && !modalContent.contains(ev.target)) {
+            this.onCloseClick();
         }
     }
 
