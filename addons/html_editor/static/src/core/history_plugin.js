@@ -411,7 +411,9 @@ export class HistoryPlugin extends Plugin {
      * @returns { HistoryMutationRecord[] }
      */
     processNewRecords(mutationRecords) {
-        // TODO: assert that takeRecords() returns an empty array.
+        if (this.observer.takeRecords().length) {
+            throw new Error("MutationObserver has pending records");
+        }
         mutationRecords = this.preFilterMutationRecords(mutationRecords);
         /** @type {HistoryMutationRecord[]} */
         let records = this.transformRecords(mutationRecords);
@@ -907,15 +909,17 @@ export class HistoryPlugin extends Plugin {
      * @returns {MutationRecordChildList}
      */
     updateChildListRecord(record) {
-        let { previousSibling, nextSibling } = record;
+        const isValidReference = (node) => node === null || this.isObservedNode(node);
+        const updateSibling = (sibling) => (isValidReference(sibling) ? sibling : undefined);
 
         // Invalidate sibling references to unobserved nodes
-        const isValidReference = (node) => node === null || this.isObservedNode(node);
-        previousSibling = isValidReference(previousSibling) ? previousSibling : undefined;
-        nextSibling = isValidReference(nextSibling) ? nextSibling : undefined;
+        const previousSibling = updateSibling(record.previousSibling);
+        const nextSibling = updateSibling(record.nextSibling);
 
         // Filter out nodes that were already absent in the last observed state
-        const removedTrees = record.removedTrees.filter(({ node }) => this.isObservedNode(node));
+        const removedTrees = record.removedTrees.filter(
+            ({ node }) => this.observedNodes.get(node) !== false
+        );
         // Filter out nodes that were already present in the last observed state
         const addedTrees = record.addedTrees.filter(
             ({ node }) => this.observedNodes.get(node) !== true
