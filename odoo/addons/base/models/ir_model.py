@@ -2407,7 +2407,7 @@ class IrModelData(models.Model):
                         # the field is shared across registries; don't modify it
                         Field = type(field)
                         field_ = Field(_base_fields__=(field, Field(prefetch=False)))
-                        add_field(self.registry[ir_field.model], ir_field.name, field_)
+                        add_field(self.env.registry[ir_field.model], ir_field.name, field_)
                         field_.setup(model)
                         has_shared_field = True
         if has_shared_field:

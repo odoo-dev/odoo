@@ -352,17 +352,6 @@ def _prepare_setup(model_cls: BaseModel, env: Environment):
     if model_classes != model_cls._model_classes__:
         model_cls._setup_done__ = False
 
-    old_definitions = getattr(model_cls, '_field_definitions', None)
-    definitions = defaultdict(list)
-    for cls in reversed(model_cls._model_classes__):
-        # this condition is an optimization of is_model_definition(cls)
-        if isinstance(cls, models.MetaModel):
-            for field in cls._field_definitions:
-                definitions[field.name].append(field)
-    model_cls._field_definitions = definitions
-    if old_definitions != model_cls._field_definitions:
-        model_cls._setup_done__ = False
-
     if model_cls._setup_done__:
         model_manual_fields = getattr(model_cls, '_model_manual_fields__', None)
         model_cls._model_manual_fields__ = bool(env.registry._init_modules) and tuple(env['ir.model.fields']._get_manual_field_data(model_cls._name).keys())
@@ -394,7 +383,12 @@ def _setup(model_cls: BaseModel, env):
     model_cls._fields._data__.clear()
 
     # collect the definitions of each field (base definition + overrides)
-    definitions = model_cls._field_definitions
+    definitions = defaultdict(list)
+    for cls in reversed(model_cls._model_classes__):
+        # this condition is an optimization of is_model_definition(cls)
+        if isinstance(cls, models.MetaModel):
+            for field in cls._field_definitions:
+                definitions[field.name].append(field)
 
     for name, fields_ in definitions.items():
         if f'{model_cls._name}.{name}' in model_cls.pool._database_translated_fields:
