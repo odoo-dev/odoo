@@ -1746,17 +1746,12 @@ export class HistoryPlugin extends Plugin {
                 childTreesToSerialize = cb(node, childTreesToSerialize);
             }
             result.tagName = node.tagName;
-            result.children = [];
-            result.attributes = {};
-            for (let i = 0; i < node.attributes.length; i++) {
-                result.attributes[node.attributes[i].name] = node.attributes[i].value;
-            }
-            for (const child of childTreesToSerialize) {
-                const serializedChild = this.serializeTree(child);
-                if (serializedChild) {
-                    result.children.push(serializedChild);
-                }
-            }
+            result.attributes = Object.fromEntries(
+                [...node.attributes].map((attr) => [attr.name, attr.value])
+            );
+            result.children = childTreesToSerialize
+                .map((tree) => this.serializeTree(tree))
+                .filter(Boolean);
         }
         return result;
     }
