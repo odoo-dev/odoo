@@ -129,6 +129,7 @@ class TestConfigManager(TransactionCase):
             default_values.update(
                 {
                     'workers': 0,
+                    'gevent_workers': 1,
                     'limit_memory_soft': 2048 * 1024 * 1024,
                     'limit_memory_soft_gevent': False,
                     'limit_memory_hard': 2560 * 1024 * 1024,
@@ -250,6 +251,7 @@ class TestConfigManager(TransactionCase):
             values.update(
                 {
                     'workers': 92,
+                    'gevent_workers': 3,
                     'limit_memory_soft': 1048576,
                     'limit_memory_soft_gevent': 1048577,
                     'limit_memory_hard': 1048578,
@@ -380,6 +382,7 @@ class TestConfigManager(TransactionCase):
             assert_options.update(
                 {
                     'workers': 0,
+                    'gevent_workers': 1,
                     'limit_memory_soft': 2048 * 1024 * 1024,
                     'limit_memory_soft_gevent': False,
                     'limit_memory_hard': 2560 * 1024 * 1024,
@@ -521,6 +524,7 @@ class TestConfigManager(TransactionCase):
             values.update(
                 {
                     'workers': 92,
+                    'gevent_workers': 3,
                     'limit_memory_soft': 1048576,
                     'limit_memory_soft_gevent': 1048577,
                     'limit_memory_hard': 1048578,
