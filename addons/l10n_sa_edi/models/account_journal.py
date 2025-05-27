@@ -101,6 +101,12 @@ class AccountJournal(models.Model):
         self.ensure_one()
         return self.sudo().l10n_sa_production_csid_json
 
+    def _l10n_sa_edi_set_csr_fields(self):
+        '''
+            Sets default values for CSR generation fields in Odoo, if their values do not exist
+        '''
+        self.ensure_one()
+        self.l10n_sa_serial_number = self.get_external_id()
     # ====== CSR Generation =======
 
     def _l10n_sa_csr_required_fields(self):
@@ -217,6 +223,8 @@ class AccountJournal(models.Model):
                 3.  Get the Production CSID
         """
         self.ensure_one()
+        self._l10n_sa_edi_set_csr_fields()
+
         try:
             # If the company does not have a private key, we generate it.
             # The private key is used to generate the CSR but also to sign the invoices
