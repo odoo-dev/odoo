@@ -293,13 +293,13 @@ def _init_model_class_attributes(model_cls: type[BaseModel]):
         _init_model_class_attributes(registry[child_name])
 
 
-def setup_model_classes(env: Environment, force=True):
+def setup_model_classes(env: Environment, force=True, check_manual_fields=False):
     registry = env.registry
 
     # we must setup ir.model before adding manual fields because _add_manual_models may
     # depend on behavior that is implemented through overrides, such as is_mail_thread which
     # is implemented through an override to env['ir.model']._instanciate_attrs
-    _prepare_setup(registry['ir.model'], env)
+    _prepare_setup(registry['ir.model'], env, check_manual_fields)
 
     # add manual models
     if registry._init_modules:
@@ -317,7 +317,7 @@ def setup_model_classes(env: Environment, force=True):
             model_cls._setup_done__ = False
 
     for model_cls in models_classes:
-        _prepare_setup(model_cls, env)
+        _prepare_setup(model_cls, env, check_manual_fields)
 
     for model_cls in models_classes:
         if model_cls._setup_done__ and model_cls._inherits:
@@ -339,7 +339,7 @@ def setup_model_classes(env: Environment, force=True):
         model_cls(env, (), ())._post_model_setup__()
 
 
-def _prepare_setup(model_cls: BaseModel, env: Environment):
+def _prepare_setup(model_cls: BaseModel, env: Environment, check_manual_fields=False):
     """ Prepare the setup of the model. """
     #model_cls._setup_done__ = False
 
@@ -352,7 +352,7 @@ def _prepare_setup(model_cls: BaseModel, env: Environment):
     if model_classes != model_cls._model_classes__:
         model_cls._setup_done__ = False
 
-    if model_cls._setup_done__:
+    if model_cls._setup_done__ and check_manual_fields:
         model_manual_fields = getattr(model_cls, '_model_manual_fields__', None)
         model_cls._model_manual_fields__ = bool(env.registry._init_modules) and tuple(env['ir.model.fields']._get_manual_field_data(model_cls._name).keys())
         if model_manual_fields != model_cls._model_manual_fields__:

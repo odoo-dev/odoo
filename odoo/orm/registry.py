@@ -351,7 +351,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
         return model_names
 
     @locked
-    def _setup_models__(self, cr: BaseCursor, force=True) -> None:
+    def _setup_models__(self, cr: BaseCursor, force=True, check_manual_fields=False) -> None:
         """ Complete the setup of models.
             This must be called after loading modules and before using the ORM.
         """
@@ -385,7 +385,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
 
         self.many2one_company_dependents.clear()
 
-        model_classes.setup_model_classes(env, force=force)
+        model_classes.setup_model_classes(env, force=force, check_manual_fields=check_manual_fields)
 
         # determine field_depends and field_depends_context
         for model in env.values():
