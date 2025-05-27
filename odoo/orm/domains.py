@@ -1292,15 +1292,14 @@ def _value_to_datetime(value):
             value = value.astimezone(timezone.utc).replace(tzinfo=None)
         return value, False
     if value is False:
-        return False, True
+        return False, False
     if isinstance(value, str):
         dt, _ = _value_to_datetime(datetime.fromisoformat(value))
         return dt, len(value) == 10
     if isinstance(value, date):
         return datetime.combine(value, time.min), True
     if isinstance(value, COLLECTION_TYPES):
-        value, is_date = zip(*(_value_to_datetime(v) for v in value))
-        return OrderedSet(value), all(is_date)
+        return OrderedSet(_value_to_datetime(v)[0] for v in value), False
     if isinstance(value, SQL):
         return value, False
     raise ValueError(f'Failed to cast {value!r} into a datetime')
