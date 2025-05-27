@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { queryAllTexts } from "@odoo/hoot-dom";
+import { click, edit, queryAllTexts } from "@odoo/hoot-dom";
 import { defineSpreadsheetModels } from "@spreadsheet/../tests/helpers/data";
 import { contains, makeMockEnv, mountWithCleanup, onRpc } from "@web/../tests/web_test_helpers";
 
@@ -136,6 +136,71 @@ test("Can set a text filter value", async function () {
         { operator: "not ilike", strings: ["foo"] },
         { message: "value is set" }
     );
+});
+
+test("Can set a numeric filter value with basic operator", async function () {
+    const env = await makeMockEnv();
+    const model = new Model({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
+    await addGlobalFilter(model, {
+        id: "42",
+        type: "numeric",
+        label: "Numeric Filter",
+    });
+    await mountFiltersSearchDialog(env, { model });
+    await contains(".o-add-global-filter").click();
+    await contains(".o-add-global-filter-label").click();
+    await contains(".modal select").select(">");
+    await contains("input").edit(1998);
+    await contains("input").press("Enter");
+    expect(model.getters.getGlobalFilterValue("42")).toBe(undefined, {
+        message: "value is not directly set",
+    });
+    await contains(".btn-primary").click();
+    expect(model.getters.getGlobalFilterValue("42")).toEqual(
+        { operator: ">", minimumOrTargetValue: 1998, maximumValue: undefined },
+        { message: "value is set" }
+    );
+});
+
+test("Can set a numeric filter value with between operator", async function () {
+    const env = await makeMockEnv();
+    const model = new Model({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
+    await addGlobalFilter(model, {
+        id: "42",
+        type: "numeric",
+        label: "Numeric Filter",
+    });
+    await mountFiltersSearchDialog(env, { model });
+    await contains(".o-add-global-filter").click();
+    await contains(".o-add-global-filter-label").click();
+    await contains(".modal select").select("between");
+    // await contains("input").edit(1998);
+    const inputs = document.querySelectorAll(".o-global-filter-numeric-value");
+    expect(inputs).toHaveLength(2);
+    // Simulate entering values into both input fields
+    await click(inputs[0]);
+    await edit(1);
+    await click(inputs[1]);
+    await edit(99);
+    await contains(".btn-primary").click();
+    expect(model.getters.getGlobalFilterValue("42")).toEqual(
+        { operator: "between", minimumOrTargetValue: 1, maximumValue: 99 },
+        { message: "value is set" }
+    );
+});
+
+test("Default value for numeric filter is correctly displayed", async function () {
+    const env = await makeMockEnv();
+    const model = new Model({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
+    await addGlobalFilter(model, {
+        id: "42",
+        type: "numeric",
+        label: "Numeric Filter",
+        defaultValue: { operator: "=", minimumOrTargetValue: 1998 },
+    });
+    await mountFiltersSearchDialog(env, { model });
+    expect(".o_tag").toHaveCount(1);
+    expect(queryAllTexts(".o_tag")).toEqual(["1998"]);
 });
 
 test("Can set a relation filter value", async function () {

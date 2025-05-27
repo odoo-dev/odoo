@@ -156,6 +156,13 @@ declare module "@spreadsheet" {
         domainOfAllowedValues?: DomainListRepr | string;
     }
 
+    export interface NumericGlobalFilter {
+        type: "numeric";
+        id: string;
+        label: string;
+        defaultValue?: number;
+    }
+
     export interface BooleanGlobalFilter {
         type: "boolean";
         id: string;
@@ -163,6 +170,6 @@ declare module "@spreadsheet" {
         defaultValue?: SetValue;
     }
 
-    export type GlobalFilter = TextGlobalFilter | DateGlobalFilter | RelationalGlobalFilter | BooleanGlobalFilter | SelectionGlobalFilter;
-    export type CmdGlobalFilter = CmdTextGlobalFilter | DateGlobalFilter | RelationalGlobalFilter | BooleanGlobalFilter | SelectionGlobalFilter;
+    export type GlobalFilter = TextGlobalFilter | DateGlobalFilter | RelationalGlobalFilter | BooleanGlobalFilter | SelectionGlobalFilter | NumericGlobalFilter;
+    export type CmdGlobalFilter = CmdTextGlobalFilter | DateGlobalFilter | RelationalGlobalFilter | BooleanGlobalFilter | SelectionGlobalFilter | NumericGlobalFilter;
 }

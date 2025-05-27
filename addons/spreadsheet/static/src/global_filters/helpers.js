@@ -229,6 +229,60 @@ const FILTERS_BEHAVIORS = {
         },
     ],
     boolean: [SET_OPERATORS_BEHAVIORS],
+    numeric: [
+        {
+            operators: ["=", "!=", ">", "<"],
+            defaultValue: { minimumOrTargetValue: undefined, maximumValue: undefined },
+            validateValue: (filterValue) =>
+                isNumericFilterValueValid(filterValue.minimumOrTargetValue),
+            validateDefaultValue: (filterValue) =>
+                isNumericFilterValueValid(filterValue.minimumOrTargetValue),
+            getSearchBarFacetValues: (env, filter, filterValue) => {
+                if (filterValue.minimumOrTargetValue === undefined) {
+                    return [];
+                }
+                return [`${filterValue.minimumOrTargetValue}`];
+            },
+            toDomain(fieldPath, filterValue) {
+                return new Domain([
+                    [fieldPath, filterValue.operator, filterValue.minimumOrTargetValue],
+                ]);
+            },
+            toCellValue(getters, filter, filterValue) {
+                return { value: filterValue.value !== undefined ? String(filterValue.value) : "" };
+            },
+        },
+        {
+            operators: ["between"],
+            defaultValue: { minimumOrTargetValue: undefined, maximumValue: undefined },
+            validateValue: (filterValue) =>
+                isNumericFilterValueValid(filterValue.minimumOrTargetValue) &&
+                isNumericFilterValueValid(filterValue.maximumValue),
+            validateDefaultValue: (filterValue) =>
+                isNumericFilterValueValid(filterValue.minimumOrTargetValue) &&
+                isNumericFilterValueValid(filterValue.maximumValue),
+            getSearchBarFacetValues: (env, filter, filterValue) => {
+                if (
+                    filterValue.minimumOrTargetValue === undefined &&
+                    filterValue.maximumValue === undefined
+                ) {
+                    return [];
+                }
+                return [`${filterValue.minimumOrTargetValue} and ${filterValue.maximumValue}`];
+            },
+            toDomain(fieldPath, filterValue) {
+                return new Domain([
+                    [fieldPath, ">=", filterValue.minimumOrTargetValue],
+                    [fieldPath, "<=", filterValue.maximumValue],
+                ]);
+            },
+            toCellValue(getters, filter, filterValue) {
+                return {
+                    value: `${filterValue.minimumOrTargetValue} - ${filterValue.maximumValue}`,
+                };
+            },
+        },
+    ],
 };
 
 /**
@@ -257,6 +311,14 @@ function isArrayOfStrings(strings) {
         strings.length &&
         strings.every((item) => typeof item === "string")
     );
+}
+
+/**
+ * A numeric filter value is valid if it is a number
+ * @returns {boolean}
+ */
+function isNumericFilterValueValid(value) {
+    return typeof value === "number";
 }
 
 function isArrayOfIds(ids) {

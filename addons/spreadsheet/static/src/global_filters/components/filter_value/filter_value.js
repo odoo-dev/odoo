@@ -17,6 +17,7 @@ import {
     isSetOperator,
     getDefaultValue,
 } from "@spreadsheet/global_filters/helpers";
+import { NumericFilterValue } from "../numeric_filter_value/numeric_filter_value";
 
 const { ValidationMessages } = components;
 
@@ -28,6 +29,7 @@ export class FilterValue extends Component {
         MultiRecordSelector,
         SelectionFilterValue,
         ValidationMessages,
+        NumericFilterValue,
     };
     static props = {
         filter: Object,
@@ -115,6 +117,16 @@ export class FilterValue extends Component {
         this.props.setGlobalFilterValue(id, { operator, strings: value });
     }
 
+    onNumericInput(id, value, type) {
+        const operator = this.filterValue?.operator ?? this.getDefaultOperator();
+        this.props.setGlobalFilterValue(id, {
+            operator,
+            minimumOrTargetValue:
+                type === "minOrTarget" ? value : this.filterValue?.minimumOrTargetValue,
+            maximumValue: type === "max" ? value : this.filterValue?.maximumValue,
+        });
+    }
+
     onBooleanInput(id, value) {
         if (Array.isArray(value) && value.length === 0) {
             this.clear(id);
@@ -138,10 +150,7 @@ export class FilterValue extends Component {
             this.clear(id);
         } else {
             const operator = this.filterValue?.operator ?? this.getDefaultOperator();
-            this.props.setGlobalFilterValue(
-                id,
-                { operator, ids: resIds },
-            );
+            this.props.setGlobalFilterValue(id, { operator, ids: resIds });
         }
     }
 
