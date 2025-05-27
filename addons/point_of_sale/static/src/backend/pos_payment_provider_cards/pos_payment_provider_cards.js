@@ -87,6 +87,7 @@ const providers = [
     ["worldline", "pos_iot_worldline", "Worldline"],
     ["tyro", "pos_tyro", "Tyro"],
     ["pine_labs", "pos_pine_labs", "Pine Labs"],
+    ["dpo", "pos_dpo", "DPO by Network"],
 ];
 
 export const PosPaymentProviderCardsParams = {
