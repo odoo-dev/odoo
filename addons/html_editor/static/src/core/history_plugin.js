@@ -1824,7 +1824,7 @@ export class HistoryPlugin extends Plugin {
  * @param {Node} node
  * @returns {Tree}
  */
-function nodeToTree(node) {
+export function nodeToTree(node) {
     return {
         node,
         childNodes: childNodes(node).map(nodeToTree),

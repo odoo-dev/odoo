@@ -1,5 +1,5 @@
+import { nodeToTree } from "@html_editor/core/history_plugin";
 import { Plugin } from "@html_editor/plugin";
-import { childNodes } from "@html_editor/utils/dom_traversal";
 import { memoize } from "@web/core/utils/functions";
 
 /**
@@ -63,17 +63,19 @@ export class EmbeddedComponentPlugin extends Plugin {
         return true;
     }
 
+    /**
+     * @typedef {import("@html_editor/core/history_plugin").Tree} Tree
+     *
+     * @param {Node} elem
+     * @param {Tree[]} serializableDescendants
+     * @returns {Tree[]}
+     */
     processDescendantsToSerialize(elem, serializableDescendants) {
         const embedding = this.getEmbedding(elem);
         if (!embedding) {
             return serializableDescendants;
         }
-        const serializableChildren = Object.values(embedding.getEditableDescendants?.(elem) || {});
-        const nodeToTree = (node) => ({
-            node,
-            childNodes: childNodes(node).map(nodeToTree),
-        });
-        return serializableChildren.map(nodeToTree);
+        return Object.values(embedding.getEditableDescendants?.(elem) || {}).map(nodeToTree);
     }
 
     handleComponents(elem) {
