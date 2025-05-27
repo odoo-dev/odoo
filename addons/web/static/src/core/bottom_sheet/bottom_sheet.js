@@ -229,8 +229,6 @@ export class BottomSheet extends Component {
         sheet.style.removeProperty("height");
         sheet.style.maxHeight = "none";
 
-        // Force a reflow and measure
-        sheet.offsetHeight;
         const naturalHeight = sheet.offsetHeight;
 
         // Store all measurements
@@ -282,11 +280,11 @@ export class BottomSheet extends Component {
         // Convert heights to dvh percentages for CSS variables
         const initialHeightPercent = this.snapPoints.initial
             ? (this.snapPoints.initial / viewportHeight) * 100
-            : this.props.initialHeightPercent;
+            : this.initialHeightPercent;
 
         const maxHeightPercent = this.snapPoints.extended
             ? (this.snapPoints.extended / viewportHeight) * 100
-            : this.props.maxHeightPercent;
+            : this.maxHeightPercent;
 
         // Set CSS variables for heights
         rail.style.setProperty("--sheet-initial-height", `${initialHeightPercent}dvh`);
