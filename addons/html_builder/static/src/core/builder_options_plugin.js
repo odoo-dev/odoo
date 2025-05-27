@@ -27,7 +27,7 @@ export class BuilderOptionsPlugin extends Plugin {
         "getReloadSelector",
     ];
     resources = {
-        step_added_handlers: () => this.updateContainers(),
+        step_added_handlers: this.onStepAdded.bind(this),
         clean_for_save_handlers: this.cleanForSave.bind(this),
         post_undo_handlers: this.restoreContainer.bind(this),
         post_redo_handlers: this.restoreContainer.bind(this),
@@ -100,7 +100,7 @@ export class BuilderOptionsPlugin extends Plugin {
         return null;
     }
 
-    updateContainers(target) {
+    updateContainers(target, { forceUpdate = false } = {}) {
         if (this.dependencies.history.getIsCurrentStepModified()) {
             console.warn(
                 "Should not have any mutations in the current step when you update the container selection"
@@ -122,7 +122,7 @@ export class BuilderOptionsPlugin extends Plugin {
 
         const newContainers = this.computeContainers(this.target);
         // Do not update the containers if they did not change.
-        if (newContainers.length === this.lastContainers.length) {
+        if (!forceUpdate && newContainers.length === this.lastContainers.length) {
             const previousIds = this.lastContainers.map((c) => c.id);
             const newIds = newContainers.map((c) => c.id);
             const areSameElements = newIds.every((id, i) => id === previousIds[i]);
@@ -148,6 +148,7 @@ export class BuilderOptionsPlugin extends Plugin {
 
         this.lastContainers = newContainers;
         this.dependencies.history.setStepExtra("optionSelection", this.target);
+        this.dependencies.history.setStepExtra("forceContainerUpdate", forceUpdate);
         this.dispatchTo("change_current_options_containers_listeners", this.lastContainers);
     }
 
@@ -263,9 +264,22 @@ export class BuilderOptionsPlugin extends Plugin {
         }
     }
 
+    onStepAdded({ step }) {
+        // If a target is specified, activate its containers.
+        const nextTargetEl = step.extraStepInfos.nextTarget;
+        if (nextTargetEl) {
+            const forceUpdate = step.extraStepInfos.forceContainerUpdate || false;
+            this.updateContainers(nextTargetEl, { forceUpdate });
+        } else {
+            this.updateContainers();
+        }
+    }
+
     restoreContainer(revertedStep) {
         if (revertedStep && revertedStep.extraStepInfos.optionSelection) {
-            this.updateContainers(revertedStep.extraStepInfos.optionSelection);
+            const targetEl = revertedStep.extraStepInfos.optionSelection;
+            const forceUpdate = revertedStep.extraStepInfos.forceContainerUpdate || false;
+            this.updateContainers(targetEl, { forceUpdate });
         }
     }
     getRemoveDisabledReason(el) {
