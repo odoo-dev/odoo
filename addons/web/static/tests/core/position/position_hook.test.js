@@ -32,34 +32,34 @@ function getTestComponent(popperOptions, styles = {}, target = false) {
         `;
         static props = ["*"];
         setup() {
-            if (!target) {
-                target = useRef("target");
-            }
-            const container = useRef("container");
-            const popper = useRef("popper");
+            const targetRef = target
+                ? {
+                      get el() {
+                          return target;
+                      },
+                  }
+                : useRef("target");
+            const containerRef = useRef("container");
+            const popperRef = useRef("popper");
             onMounted(() => {
-                Object.assign(container.el.style, styles.container);
-                Object.assign(popper.el.style, styles.popper);
+                Object.assign(containerRef.el.style, styles.container);
+                Object.assign(popperRef.el.style, styles.popper);
             });
-            usePosition("popper", () => target?.el || target, {
+            const { position } = usePosition(popperRef, targetRef, {
                 ...popperOptions,
-                container: () => popperOptions?.container || container.el,
+                container: () => popperOptions?.container || containerRef.el,
             });
+            this.position = position;
         }
     }
     return TestComp;
 }
 
 test("default position is bottom-middle", async () => {
-    expect.assertions(1);
-
-    const TestComp = getTestComponent({
-        onPositioned: (el, { direction, variant }) => {
-            expect(`${direction}-${variant}`).toBe("bottom-middle");
-        },
-    });
-
-    await mountWithCleanup(TestComp);
+    const TestComp = getTestComponent();
+    const comp = await mountWithCleanup(TestComp);
+    expect(comp.position.solution.direction).toBe("bottom");
+    expect(comp.position.solution.variant).toBe("middle");
 });
 
 test("can add margin", async () => {
@@ -113,27 +113,26 @@ test("can add margin", async () => {
 });
 
 test("should flip direction and store it", async () => {
-    const TestComp = getTestComponent({
-        onPositioned: (el, { direction, variant }) => {
-            expect.step(`${direction}-${variant}`);
-        },
-    });
+    const TestComp = getTestComponent();
 
     // Initial: the test styling allows the popper to be on the bottom
-    await mountWithCleanup(TestComp);
-    expect.verifySteps(["bottom-middle"]);
+    const comp = await mountWithCleanup(TestComp);
+    expect(comp.position.solution.direction).toBe("bottom");
+    expect(comp.position.solution.variant).toBe("middle");
 
     // Move the target down in order to leave not enough space for the popper to be at its bottom
     defineStyle(/* css*/ `#target { margin-top: 50%; }`);
     await scroll(queryOne("#scroll-container"));
     await animationFrame();
-    expect.verifySteps(["top-middle"]);
+    expect(comp.position.solution.direction).toBe("top");
+    expect(comp.position.solution.variant).toBe("middle");
 
     // Move the target back, popper will still be on top (last direction stored)
     defineStyle(/* css*/ `#target { margin-top: unset !important; }`);
     await scroll(queryOne("#scroll-container"));
     await animationFrame();
-    expect.verifySteps(["top-middle"]);
+    expect(comp.position.solution.direction).toBe("top");
+    expect(comp.position.solution.variant).toBe("middle");
 });
 
 test("can disable auto-flipping", async () => {
@@ -272,13 +271,8 @@ test("is positioned relative to its containing block", async () => {
     const fixtureBox = getFixture().getBoundingClientRect();
     // offset the container
     const margin = 15;
-    let pos1, pos2;
     let TestComp = getTestComponent(
-        {
-            onPositioned: (el, pos) => {
-                pos1 = pos;
-            },
-        },
+        {},
         {
             container: {
                 margin: `${margin}px`,
@@ -287,16 +281,12 @@ test("is positioned relative to its containing block", async () => {
     );
 
     let popper = await mountWithCleanup(TestComp);
-
+    const pos1 = { top: popper.position.y, left: popper.position.x };
     const popBox1 = queryOne("#popper").getBoundingClientRect();
     destroy(popper);
 
     TestComp = getTestComponent(
-        {
-            onPositioned: (el, pos) => {
-                pos2 = pos;
-            },
-        },
+        {},
         {
             container: {
                 margin: `${margin}px`,
@@ -306,6 +296,7 @@ test("is positioned relative to its containing block", async () => {
     );
 
     popper = await mountWithCleanup(TestComp);
+    const pos2 = { top: popper.position.y, left: popper.position.x };
     const popBox2 = queryOne("#popper").getBoundingClientRect();
     destroy(popper);
 

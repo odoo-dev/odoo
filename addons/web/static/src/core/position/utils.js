@@ -79,9 +79,6 @@ export function reverseForRTL(direction, variant = "middle") {
  * The popper will stay at `margin` distance from its target. One could also
  * use the CSS margins of the popper element to achieve the same result.
  *
- * Pre-condition: the popper element must have a fixed positioning
- *                with top and left set to 0px.
- *
  * @param {HTMLElement} popper
  * @param {HTMLElement} target
  * @param {ComputePositionOptions} options
@@ -91,6 +88,15 @@ export function reverseForRTL(direction, variant = "middle") {
  */
 export function computePosition(popper, target, options) {
     let { container, flip = true, margin = 0, position = "bottom" } = options;
+
+    // Save initial style
+    const popperStyle = getComputedStyle(popper);
+
+    // Set popper style
+    popper.style.position = "fixed";
+    popper.style.top = "0px";
+    popper.style.left = "0px";
+
     // Retrieve directions and variants
     const [direction, variant = "middle"] = reverseForRTL(...position.split("-"));
     const directions = flip ? DIRECTION_FLIP_ORDER[direction] : [direction.at(0)];
@@ -104,7 +110,6 @@ export function computePosition(popper, target, options) {
     }
 
     // Account for popper actual margins
-    const popperStyle = getComputedStyle(popper);
     const { marginTop, marginLeft, marginRight, marginBottom } = popperStyle;
     const popMargins = {
         top: parseFloat(marginTop),
@@ -143,6 +148,11 @@ export function computePosition(popper, target, options) {
         hm: iframeBox.top + targetBox.top + targetBox.height / 2 - popBox.height / 2,
         he: iframeBox.top + targetBox.bottom - popMargins.bottom - popBox.height,
     };
+
+    // Restore initial popper style
+    popper.style.position = popperStyle.position;
+    popper.style.top = popperStyle.top;
+    popper.style.left = popperStyle.left;
 
     function getPositioningData(d, v) {
         const [direction, variant] = reverseForRTL(DIRECTIONS[d], VARIANTS[v]);
@@ -200,7 +210,7 @@ export function computePosition(popper, target, options) {
             : { top: variantValue, left: directionValue };
         // Subtract the offsets of the containing block (relative to the
         // viewport). It can be done like that because the style top and
-        // left were reset to 0px in `reposition`
+        // left were reset to 0px.
         // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
         result.top = positioning.top - popBox.top;
         result.left = positioning.left - popBox.left;

@@ -1,14 +1,14 @@
 import { computePosition } from "@web/core/position/utils";
-import { omit } from "@web/core/utils/objects";
 import { useThrottleForAnimation } from "@web/core/utils/timing";
 import {
     EventBus,
     onWillDestroy,
+    reactive,
     useChildSubEnv,
     useComponent,
     useEffect,
-    useRef,
 } from "@odoo/owl";
+import { effect } from "../utils/reactive";
 
 /**
  * @typedef {import("@web/core/position/utils").ComputePositionOptions} ComputePositionOptions
@@ -44,35 +44,42 @@ const POSITION_BUS = Symbol("position-bus");
  * @returns {PositioningControl}
  *  control object to lock/unlock the positioning.
  */
-export function usePosition(refName, getTarget, options = {}) {
-    const ref = useRef(refName);
+export function usePosition(popperRef, targetRef, options = {}) {
+    const position = reactive({ x: 0, y: 0, popperStyles: {} });
     let lock = false;
     const update = () => {
-        const targetEl = getTarget();
-        if (!ref.el || !targetEl?.isConnected || lock) {
+        if (!popperRef.el || !targetRef.el?.isConnected || lock) {
             // No compute needed
             return;
         }
 
         // Reset popper style
-        ref.el.style.position = "fixed";
-        ref.el.style.top = "0px";
-        ref.el.style.left = "0px";
+        popperRef.el.style.position = "fixed";
 
         // Compute positioning solution
-        const solution = computePosition(ref.el, targetEl, omit(options, "onPositioned"));
+        const solution = computePosition(popperRef.el, targetRef.el, options);
+        options.position = `${solution.direction}-${solution.variant}`; // memorize last position
 
         // Apply it
-        const { top, left, direction, variant } = solution;
-        ref.el.style.top = `${top}px`;
-        ref.el.style.left = `${left}px`;
-        if (variant === "fit") {
-            const styleProperty = ["top", "bottom"].includes(direction) ? "width" : "height";
-            ref.el.style[styleProperty] = targetEl.getBoundingClientRect()[styleProperty] + "px";
-        }
+        popperRef.el.style.position = "fixed";
+        popperRef.el.style.left = `${solution.left}px`;
+        popperRef.el.style.top = `${solution.top}px`;
 
-        options.position = `${direction}-${variant}`; // memorize last position
-        options.onPositioned?.(ref.el, solution);
+        // Update reactive
+        if (solution.left !== position.x || solution.top !== position.y) {
+            Object.assign(position, {
+                solution,
+                // middlewareData: solution.middlewareData,
+                x: solution.left,
+                y: solution.top,
+                popperStyles: {
+                    ...position.popperStyles,
+                    position: "fixed",
+                    left: `${solution.left}px`,
+                    top: `${solution.top}px`,
+                },
+            });
+        }
     };
 
     const component = useComponent();
@@ -104,13 +111,13 @@ export function usePosition(refName, getTarget, options = {}) {
         if (isTopmost) {
             // Attach listeners to keep the positioning up to date
             const scrollListener = (e) => {
-                if (ref.el?.contains(e.target)) {
+                if (popperRef.el?.contains(e.target)) {
                     // In case the scroll event occurs inside the popper, do not reposition
                     return;
                 }
                 throttledUpdate();
             };
-            const targetDocument = getTarget()?.ownerDocument;
+            const targetDocument = targetRef.el?.ownerDocument;
             targetDocument?.addEventListener("scroll", scrollListener, { capture: true });
             targetDocument?.addEventListener("load", throttledUpdate, { capture: true });
             window.addEventListener("resize", throttledUpdate);
@@ -122,7 +129,20 @@ export function usePosition(refName, getTarget, options = {}) {
         }
     });
 
+    effect(
+        ({ x, y }) => {
+            if (!popperRef.el) {
+                return;
+            }
+            popperRef.el.style.position = "fixed";
+            popperRef.el.style.left = `${x}px`;
+            popperRef.el.style.top = `${y}px`;
+        },
+        [position]
+    );
+
     return {
+        position,
         lock: () => {
             lock = true;
         },
