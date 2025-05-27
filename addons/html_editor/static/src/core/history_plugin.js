@@ -244,10 +244,6 @@ export class HistoryPlugin extends Plugin {
         this.observer = new MutationObserver(this.handleNewRecords.bind(this));
         this.enableObserverCallbacks = new Set();
         this._cleanups.push(() => this.observer.disconnect());
-        /** @type { WeakMap<Node, { attributes: Map<string, string>, classList: Map<string, boolean> }> } */
-        this.lastObservedState = new WeakMap();
-        /** @type { WeakSet<Node> } */
-        this.observedNodes = new WeakMap();
         this.clean();
     }
 
@@ -271,6 +267,10 @@ export class HistoryPlugin extends Plugin {
         this.stepsStates = new Map();
         this.nodeToIdMap = new WeakMap();
         this.idToNodeMap = new Map();
+        /** @type { WeakMap<Node, { attributes: Map<string, string>, classList: Map<string, boolean> }> } */
+        this.lastObservedState = new WeakMap();
+        /** @type { WeakSet<Node> } */
+        this.observedNodes = new WeakMap();
         this.setNodeId(this.editable);
         this.dispatchTo("history_cleaned_handlers");
     }
