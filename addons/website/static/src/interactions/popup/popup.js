@@ -62,6 +62,27 @@ export class Popup extends Interaction {
         if (!this.popupAlreadyShown && !emptyPopup) {
             this.bindPopup();
         }
+        this.closeOnOutsideClick();
+    }
+
+    closeOnOutsideClick() {
+        if (document.body.classList.contains('editor_enable')) {
+            return;
+        }
+
+        const hasNoBackdrop = this.modalEl.classList.contains("s_popup_no_backdrop");
+        const modalContent = this.modalEl.querySelector(".modal-content");
+
+        this.addListener(document, "mousedown", (ev) => {
+            if (!this.modalEl.classList.contains("show")) {
+                return;
+            }
+
+            if ((ev.target === this.modalEl) ||
+                (hasNoBackdrop && modalContent && !modalContent.contains(ev.target))) {
+                this.onCloseClick();
+            }
+        });
     }
 
     bindPopup() {
