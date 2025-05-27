@@ -2,7 +2,7 @@ import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { parseHTML } from "@html_editor/utils/html";
 import { describe, expect, test } from "@odoo/hoot";
-import { click, pointerDown, pointerUp, press, queryOne } from "@odoo/hoot-dom";
+import { click, microTick, pointerDown, pointerUp, press, queryOne } from "@odoo/hoot-dom";
 import { animationFrame, mockUserAgent, tick } from "@odoo/hoot-mock";
 import { setupEditor, testEditor } from "./_helpers/editor";
 import { getContent, setSelection } from "./_helpers/selection";
@@ -926,5 +926,65 @@ describe("mutations order", () => {
         editor.shared.history.addStep();
         editor.shared.history.undo();
         expect(getContent(el)).toBe(`<p>[]ab</p>`);
+    });
+});
+
+describe("added and removed trees in mutation records", () => {
+    test("serialized node should have the childlist as it was at mutation time", async () => {
+        const { editor, plugins } = await setupEditor(`<p><br></p>`);
+        const p = editor.editable.querySelector("p");
+        const [a, b, c, d] = ["a", "b", "c", "d"].map((name) => {
+            const span = editor.document.createElement("span");
+            span.className = name;
+            return span;
+        });
+        // A is added with no children.
+        p.append(a);
+
+        // B is added having c as child.
+        b.append(c); // b is not yet observed
+        a.append(b); // b - c is added to a
+
+        // D is added with no children.
+        a.append(d);
+
+        // C is moved from B to D (creates 2 records: removal and addition).
+        d.append(c);
+
+        await microTick();
+
+        const historyPlugin = plugins.get("history");
+        const mutations = historyPlugin.currentStep.mutations;
+        const idToNode = (id) => historyPlugin.idToNodeMap.get(id);
+
+        expect(mutations.length).toBe(5);
+
+        // Serialized node A should not have children, even though it currently
+        // has B and D as children.
+        let { nodeId, children } = mutations[0].node;
+        expect(idToNode(nodeId)).toBe(a);
+        expect(children.length).toBe(0);
+
+        // Serialized node B should have C as child, even though it currently
+        // has no children
+        ({ nodeId, children } = mutations[1].node);
+        expect(idToNode(nodeId)).toBe(b);
+        expect(children.length).toBe(1);
+        expect(idToNode(children[0].nodeId)).toBe(c);
+
+        // Serialized node D should not have children, even though it currently
+        // has C as child.
+        ({ nodeId, children } = mutations[2].node);
+        expect(idToNode(nodeId)).toBe(d);
+        expect(children.length).toBe(0);
+
+        // Serialized node C should have no children
+        ({ nodeId, children } = mutations[3].node);
+        expect(idToNode(nodeId)).toBe(c);
+        expect(children.length).toBe(0);
+
+        ({ nodeId, children } = mutations[4].node);
+        expect(idToNode(nodeId)).toBe(c);
+        expect(children.length).toBe(0);
     });
 });
