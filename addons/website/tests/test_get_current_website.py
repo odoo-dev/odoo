@@ -1,5 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import json
+import re
+
+from contextlib import contextmanager
 
 from odoo import Command
 from odoo.addons.website.tools import MockRequest
@@ -128,7 +131,7 @@ class TestGetCurrentWebsite(HttpCaseWithUserDemo):
         self.user_demo.website_id = website2
         self.assertFalse(rpc_login_user_demo())
 
-    def test_recursive_current_website(self):
+    def test_04_recursive_current_website(self):
         Website = self.env['website']
         self.env['ir.rule'].create({
             'name': 'Recursion Test',
@@ -150,3 +153,63 @@ class TestGetCurrentWebsite(HttpCaseWithUserDemo):
                 failed = True
         if failed:
             self.fail("There should not be a RecursionError")
+
+    def test_05_get_current_website_queries(self):
+        self.env.cr.cache.clear()
+
+        page = self.env['website.page'].create({
+            'name': 'Base',
+            'type': 'qweb',
+            'arch': """<t t-call="website.layout">
+                <div t-out="request.env['website'].get_current_website().google_maps_api_key"/>
+                <div t-out="request.env['website'].get_current_website().company_id.name"/>
+            </t>""",
+            'key': 'website.test_ooo',
+            'url': '/test_ooo',
+            'is_published': True,
+        })
+
+        View = self.env['ir.ui.view'].with_context(lang='en_US')
+
+        # cold
+
+        actual_queries = []
+        with contextmanager(lambda: self._patchExecute(actual_queries))():
+            with MockRequest(self.env, url_root='', website=self.env['website'].browse(1)):
+                View._render_template(page.key)
+
+        re_sql_view = re.compile(r'\bir_ui_view\b', re.IGNORECASE)
+        website_queries = [q for q in actual_queries if re_sql_view.search(q)]
+        self.assertEqual(len(website_queries), 17, f'Maximum queries: {17}')
+
+        re_sql_website = re.compile(r'\bwebsite\b', re.IGNORECASE)
+        website_queries = [q for q in actual_queries if re_sql_website.search(q)]
+        self.assertEqual(len(website_queries), 11, f'Maximum queries: {11}')
+
+        # warn
+
+        actual_queries = []
+        with contextmanager(lambda: self._patchExecute(actual_queries))():
+            with MockRequest(self.env, url_root='', website=self.env['website'].browse(1)):
+                View._render_template(page.key)
+
+        website_queries = [q for q in actual_queries if re_sql_view.search(q)]
+        self.assertEqual(len(website_queries), 0, f'Maximum queries: {0}')
+
+        website_queries = [q for q in actual_queries if re_sql_website.search(q)]
+        self.assertEqual(len(website_queries), 0, f'Maximum queries: {0}')
+
+        # warn simulate other request
+
+        self.env.cache.clear()
+
+        actual_queries = []
+        with contextmanager(lambda: self._patchExecute(actual_queries))():
+            with MockRequest(self.env, url_root='', website=self.env['website'].browse(1)):
+                View._render_template(page.key)
+
+        website_queries = [q for q in actual_queries if re_sql_view.search(q)]
+        self.assertEqual(len(website_queries), 2, f'Maximum queries: {2}')
+
+        website_queries = [q for q in actual_queries if re_sql_website.search(q)]
+        self.assertEqual(len(website_queries), 2, f'Maximum queries: {2}')

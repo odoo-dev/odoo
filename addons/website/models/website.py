@@ -1357,7 +1357,10 @@ class Website(models.Model):
         """
         is_frontend_request = request and getattr(request, 'is_frontend', False)
         if request and request.session.get('force_website_id'):
-            website_id = self.browse(request.session['force_website_id']).exists()
+            website_id = self.browse(request.session['force_website_id'])
+            if not self.env.cr.cache.get('forced_website_exists'):
+                website_id = website_id.exists()
+                self.env.cr.cache['forced_website_exists'] = bool(website_id)
             if not website_id:
                 # Don't crash is session website got deleted
                 request.session.pop('force_website_id')

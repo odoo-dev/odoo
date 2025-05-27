@@ -199,7 +199,6 @@ class TestQweb(TransactionCaseWithUserDemo):
 
             init = env.cr.sql_log_count
             if with_website:
-                queries += 1
                 with MockRequest(env, website=website) as request:
                     value = str(request.env['ir.qweb']._render(template, {'doc': name}))
                 self.assertEqual(value, expected_website % name)
@@ -510,6 +509,8 @@ class TestQwebDataSnippet(TransactionCase):
         self.assertEqual(self._normalize_xml(rendered), self._normalize_xml(expected_output))
 
     def test_call_query_count_snippets_template(self):
+        self.env.cr.cache.clear()
+
         actual_queries = []
         with contextmanager(lambda: self._patchExecute(actual_queries))():
             with MockRequest(self.env, website=self.env['website'].browse(1)):
@@ -532,4 +533,4 @@ class TestQwebDataSnippet(TransactionCase):
         re_sql = re.compile(r'\bwebsite\b', re.IGNORECASE)
         website_queries = [q for q in actual_queries if re_sql.search(q)]
 
-        self.assertEqual(len(website_queries), 19, f'Maximum queries: {19}')
+        self.assertEqual(len(website_queries), 14, f'Maximum queries: {14}')
