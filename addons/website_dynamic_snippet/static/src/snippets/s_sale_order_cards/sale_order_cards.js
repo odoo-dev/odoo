@@ -1,48 +1,42 @@
-/** @odoo-module */
-import { renderToFragment } from "@web/core/utils/render";
-import publicWidget from "@web/legacy/js/public/public_widget";
+import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
 
-publicWidget.registry.s_sale_order_cards = publicWidget.Widget.extend({
-    selector: ".s_sale_order_cards",
-    disabledInEditableMode: false,
-    events: {
-        "click #load_more_orders": "loadMore",
-    },
+export class SaleOrderCards extends Interaction {
+    static selector = ".s_sale_order_cards";
+    dynamicContent = {
+        "#load_more_orders": {
+            "t-on-click": this.loadMore,
+        },
+    };
 
-    init() {
-        this._super(...arguments);
-        this.orm = this.bindService("orm");
+    setup() {
         this.noOfOrders = 10;
         this.offset = 0;
         this.orders = [];
-    },
+    }
 
     async willStart() {
         await this.fetchOrders();
-    },
+    }
 
     start() {
         this.renderOrders();
-    },
+    }
 
     renderOrders() {
         const target = this.el.querySelector("#sale_order_cards_container");
         const displayType = this.el.dataset.displayType ?? "card";
+        const templateName = `website_dynamic_snippet.s_sale_order_cards.${displayType}`;
         if (this.orders.length) {
-            const cards = renderToFragment(
-                `website_dynamic_snippet.s_sale_order_cards.${displayType}`,
-                { orders: this.orders }
-            );
-            target.innerHTML = "";
-            target.appendChild(cards);
+            this.renderAt(templateName, { orders: this.orders }, target, "afterbegin");
         }
-    },
+    }
 
     async fetchOrders() {
         this.showConfirmOrders = this.el.dataset.showConfirmOrders === "true" ?? false;
         this.noOfOrders = parseInt(this.el.dataset.noOfOrders) || 10;
         const domain = this.showConfirmOrders ? [["state", "=", "sale"]] : [];
-        const temp_orders = await this.orm.searchRead(
+        const temp_orders = await this.services.orm.searchRead(
             "sale.order",
             domain,
             ["name", "partner_id", "state"],
@@ -53,11 +47,19 @@ publicWidget.registry.s_sale_order_cards = publicWidget.Widget.extend({
             loadMoreButton.classList.add("d-none");
         }
         this.orders.push(...temp_orders);
-    },
+    }
 
     async loadMore() {
         this.offset += this.noOfOrders;
         await this.fetchOrders();
         this.renderOrders();
-    },
-});
+    }
+}
+
+registry
+    .category("public.interactions")
+    .add("website.sale_order_cards", SaleOrderCards);
+
+registry
+    .category("public.interactions.edit")
+    .add("website.sale_order_cards", { Interaction: SaleOrderCards });

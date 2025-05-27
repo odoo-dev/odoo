@@ -23,10 +23,8 @@
                 <we-select string="Display Type" data-attribute-default-value="card"
                     data-attribute-name="displayType">
                     <we-button
-                        data-select-template="website_dynamic_snippet.s_sale_order_cards.list"
                         data-select-data-attribute="list">List</we-button>
                     <we-button
-                        data-select-template="website_dynamic_snippet.s_sale_order_cards.card"
                         data-select-data-attribute="card">Card</we-button>
                 </we-select>
                 <we-input string="Number of Orders" data-step="5" data-min="0" data-max="50"

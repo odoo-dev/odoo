@@ -14,8 +14,7 @@
     ],
     "assets": {
         "web.assets_frontend": [
-            "website_dynamic_snippet/static/src/snippets/s_sale_order_cards/000.js",
-            "website_dynamic_snippet/static/src/snippets/s_sale_order_cards/000.xml",
+            "website_dynamic_snippet/static/src/snippets/**/*",
         ],
     },
     "installable": True,
