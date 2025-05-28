@@ -130,8 +130,8 @@ class AccountJournal(models.Model):
             (NameOID.ORGANIZATIONAL_UNIT_NAME, (company_id.vat or '')[:10]),
             # Organization Name
             (NameOID.ORGANIZATION_NAME, company_id.name),
-            # Subject Common Name
-            (NameOID.COMMON_NAME, company_id.name),
+            # Subject Common Name (Short Code - Journal Name - Company Name)
+            (NameOID.COMMON_NAME, "%s-%s-%s" % (self.code, self.name, company_id.name)),
             # Organization Identifier
             (ObjectIdentifier('2.5.4.97'), company_id.vat),
             # State/Province Name
