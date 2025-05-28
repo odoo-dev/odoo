@@ -161,31 +161,31 @@ describe("ORM serialization", () => {
         }
 
         // Server results with ids
-        models.connectNewData({
-            "pos.order": [{ ...order.raw, id: 1, lines: [11, 12] }],
-            "pos.order.line": [
-                { ...line1.raw, id: "b", order_id: 1 },
-                { ...line2.raw, id: "c", order_id: 1 },
-            ],
-        });
+        // debugger
+        const idUpdates = {
+            [order.uuid]: 1,
+            [line1.uuid]: 11,
+            [line2.uuid]: 12,
+        };
+        localStorage.setItem("idUpdates", JSON.stringify(idUpdates));
 
         line1.quantity = 99;
-        // {
-        //     const result = models.serializeForORM(order);
-        //     expect(result.lines.length).toBe(1);
-        //     expect(result.lines[0][0]).toBe(1);
-        //     expect(result.lines[0][1]).toBe(11);
-        //     expect(result.lines[0][2].quantity).toBe(99);
-        // }
+        {
+            const result = models.serializeForORM(order);
+            expect(result.lines.length).toBe(1);
+            expect(result.lines[0][0]).toBe(1);
+            expect(result.lines[0][1]).toBe(11);
+            expect(result.lines[0][2].quantity).toBe(99);
+        }
 
-        // // Delete line
-        // line1.delete();
-        // {
-        //     const result = models.serializeForORM(order);
-        //     expect(result.lines.length).toBe(1);
-        //     expect(result.lines[0][0]).toBe(3);
-        //     expect(result.lines[0][1]).toBe(11);
-        // }
+        // Delete line
+        line1.delete();
+        {
+            const result = models.serializeForORM(order);
+            expect(result.lines.length).toBe(1);
+            expect(result.lines[0][0]).toBe(3);
+            expect(result.lines[0][1]).toBe(11);
+        }
     });
 
     test("serialization of non-dynamic model relationships", () => {
@@ -287,14 +287,14 @@ describe("ORM serialization", () => {
         parentLine = models["pos.order.line"].getBy("uuid", parentLine.uuid);
 
         line1.quantity = 99;
-        // {
-        //     const result = models.serializeForORM(order);
-        //     expect(result.lines.length).toBe(1);
-        //     expect(result.lines[0][0]).toBe(1);
-        //     expect(result.lines[0][1]).toBe(11);
-        //     expect(result.lines[0][2].quantity).toBe(99);
-        //     expect(result.relations_uuid_mapping).toBe(undefined);
-        // }
+        {
+            const result = models.serializeForORM(order);
+            expect(result.lines.length).toBe(1);
+            expect(result.lines[0][0]).toBe(1);
+            expect(result.lines[0][1]).toBe(11);
+            expect(result.lines[0][2].quantity).toBe(99);
+            expect(result.relations_uuid_mapping).toBe(undefined);
+        }
     });
 
     test("recursive relationship with group of lines", () => {
@@ -402,46 +402,46 @@ describe("ORM serialization", () => {
         expect(order.groups[0].lines.length).toBe(1);
         expect(order.groups[1].lines.length).toBe(1);
 
-        // {
-        //     const result = models.serializeForORM(order);
-        //     expect(result.groups[0].lines).toBeEmpty();
-        //     expect(result.groups[1].lines).toBeEmpty();
-        //     expect(result.lines.length).toBe(1);
-        //     expect(result.lines[0][0]).toBe(1);
-        //     expect(result.lines[0][1]).toBe(111);
-        //     expect(result.lines[0][2].group_id).toBe(group2.id);
-        //     expect(result.relations_uuid_mapping).toBe(undefined);
-        // }
+        {
+            const result = models.serializeForORM(order);
+            expect(result.groups[0].lines).toBeEmpty();
+            expect(result.groups[1].lines).toBeEmpty();
+            expect(result.lines.length).toBe(1);
+            expect(result.lines[0][0]).toBe(1);
+            expect(result.lines[0][1]).toBe(111);
+            expect(result.lines[0][2].group_id).toBe(group2.id);
+            expect(result.relations_uuid_mapping).toBe(undefined);
+        }
 
-        // // Delete line
-        // line1.delete();
-        // //update the group, to be sure the lines are empty
-        // group1.index = 3;
-        // group2.index = 4;
-        // {
-        //     const result = models.serializeForORM(order);
-        //     expect(result.groups.length).toBe(2);
-        //     expect(result.groups[0][0]).toBe(1);
-        //     expect(result.groups[0][1]).toBe(group1.id);
-        //     expect(result.groups[0][2].index).toBe(3);
-        // expect(result.groups[0][2].lines).toBeEmpty();
-        // expect(result.groups[1][0]).toBe(1);
-        // expect(result.groups[1][1]).toBe(group2.id);
-        // expect(result.groups[1][2].index).toBe(4);
-        // expect(result.groups[1][2].lines).toBeEmpty();
+        // Delete line
+        line1.delete();
+        //update the group, to be sure the lines are empty
+        group1.index = 3;
+        group2.index = 4;
+        {
+            const result = models.serializeForORM(order);
+            expect(result.groups.length).toBe(2);
+            expect(result.groups[0][0]).toBe(1);
+            expect(result.groups[0][1]).toBe(group1.id);
+            expect(result.groups[0][2].index).toBe(3);
+            expect(result.groups[0][2].lines).toBeEmpty();
+            expect(result.groups[1][0]).toBe(1);
+            expect(result.groups[1][1]).toBe(group2.id);
+            expect(result.groups[1][2].index).toBe(4);
+            expect(result.groups[1][2].lines).toBeEmpty();
 
-        // expect(result.lines.length).toBe(1);
-        // expect(result.lines[0][0]).toBe(3);
-        // expect(result.lines[0][1]).toBe(110);
-        // expect(result.relations_uuid_mapping).toBe(undefined);
-        // }
+            expect(result.lines.length).toBe(1);
+            expect(result.lines[0][0]).toBe(3);
+            expect(result.lines[0][1]).toBe(110);
+            expect(result.relations_uuid_mapping).toBe(undefined);
+        }
 
-        // {
-        //     //All update/delete have been cleared
-        //     const result = models.serializeForORM(order);
-        //     expect(result.groups).toBeEmpty();
-        //     expect(result.lines).toBeEmpty();
-        // }
+        {
+            //All update/delete have been cleared
+            const result = models.serializeForORM(order);
+            expect(result.groups).toBeEmpty();
+            expect(result.lines).toBeEmpty();
+        }
     });
 
     test("grouped lines and nested lines", () => {

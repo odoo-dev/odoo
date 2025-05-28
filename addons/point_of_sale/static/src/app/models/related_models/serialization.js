@@ -53,8 +53,11 @@ const deepSerialization = (
                         continue;
                     }
 
-                    if (typeof childRecord.id !== "number") {
+                    if (typeof childRecord.getId() !== "number") {
                         toCreate.push(childRecord);
+                    } else if (childRecord._dirty) {
+                        toUpdate.push(childRecord);
+                        childRecord._dirty = false;
                     }
                     serialized[relatedModel][childRecord.uuid] = childRecord.uuid;
                 }
@@ -67,7 +70,7 @@ const deepSerialization = (
                         ...(result[fieldName] || []),
                         ...toUpdate.map((childRecord) => [
                             1,
-                            childRecord.id,
+                            childRecord.getId(),
                             recursiveSerialize(childRecord, field.inverse_name),
                         ]),
                         ...toCreate.map((childRecord) => [
@@ -93,7 +96,7 @@ const deepSerialization = (
             if (modelCommands.unlink.has(fieldName) || modelCommands.delete.has(fieldName)) {
                 result[fieldName] = result[fieldName] || [];
                 const processRecords = (records, cmdCode) => {
-                    for (const { id, parentId } of records) {
+                    for (const { id, parentId, getId } of records) {
                         const isAlreadyDeleted = serialized[relatedModel]?.["_deleted_" + id];
                         if (parentId === record.id && !isAlreadyDeleted) {
                             const isCascadeDelete =
@@ -101,7 +104,7 @@ const deepSerialization = (
                             if (isCascadeDelete) {
                                 serialized[relatedModel]["_deleted_" + id] = true;
                             }
-                            result[fieldName].push([cmdCode, id]);
+                            result[fieldName].push([cmdCode, getId]);
                         }
                     }
                 };
@@ -163,6 +166,8 @@ const deepSerialization = (
         const [res, key, getValue] = stack.pop();
         res[key] = getValue();
     }
+
+    record._dirty = false;
 
     // Cleanup: remove empty entries from uuidMapping.
     for (const key in uuidMapping) {

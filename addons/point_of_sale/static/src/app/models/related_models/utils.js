@@ -119,6 +119,7 @@ export class AggregatedUpdates {
                     [...fields].map((fieldName) => [fieldName, record[fieldName]])
                 ),
             });
+            record._markDirty();
         }
     }
 

@@ -450,7 +450,7 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
         }
 
         _delete(record, opts = {}) {
-            const id = record.id;
+            const id = record.getId();
             const ownFields = getFields(this.name);
             const handleCommand = (inverse, field, record, backend = false) => {
                 if (inverse && !inverse.dummy && typeof id === "number") {
@@ -459,7 +459,7 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
                     const oldVal = map.get(inverse.name);
                     map.set(inverse.name, [
                         ...(oldVal || []),
-                        { id: record.id, parentId: record[field.name].id },
+                        { id: record.id, parentId: record[field.name].id, getId: record.getId() },
                     ]);
                 }
             };

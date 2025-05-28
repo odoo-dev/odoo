@@ -29,7 +29,9 @@ export class Base extends WithLazyGetterTrap {
      * This method is called when the instance is created or updated
      * @param {*} _vals
      */
-    setup(_vals) {}
+    setup(_vals) {
+        this._dirty = typeof this.id !== "number";
+    }
 
     /**
      *  This method is invoked only during instance creation to preserve the state across updates.
@@ -77,7 +79,28 @@ export class Base extends WithLazyGetterTrap {
         return { ...this.uiState };
     }
 
+    _markDirty() {
+        if (this.models._loadingData || this._dirty) {
+            return;
+        }
+
+        this._dirty = true;
+        this.model.getParentFields().forEach((field) => {
+            this[field.name]?._markDirty?.();
+        });
+    }
+
     backLink(link) {
         return this.model.backLink(this, link);
+    }
+
+    getId() {
+        // Returns integer id if exist or return uuid
+        const id = this.id;
+        if (typeof id === "number" || !this.uuid) {
+            return id;
+        }
+        const idUpdates = JSON.parse(localStorage.getItem("idUpdates")) || {};
+        return idUpdates[this.uuid] || this.uuid;
     }
 }
