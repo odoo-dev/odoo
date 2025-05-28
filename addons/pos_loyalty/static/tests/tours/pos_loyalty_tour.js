@@ -123,12 +123,15 @@ registry.category("web_tour.tours").add("PosLoyaltyTour2", {
             // set quantity to 18
             // free qty stays the same since the amount of points on the card only allows for 4 free products
             //TODO: The following step should works with ProductScreen.clickNumpad("⌫", "8"),
-            ProductScreen.clickNumpad("⌫", "⌫", "1", "8"),
-            PosLoyalty.hasRewardLine("10% on your order", "-6.68"),
+            ProductScreen.clickNumpad("⌫"),
+            ProductScreen.clickNumpad("⌫"),
+            ProductScreen.clickNumpad("1"),
+            ProductScreen.clickNumpad("8"),
+            PosLoyalty.hasRewardLine("10% on your order", "-7.19"),
             PosLoyalty.hasRewardLine("Free Product - Desk Organizer", "-20.40"),
             // scan the code again and check notification
             PosLoyalty.enterCode("5678"),
-            PosLoyalty.orderTotalIs("60.13"),
+            PosLoyalty.orderTotalIs("64.72"),
             PosLoyalty.finalizeOrder("Cash", "65"),
 
             // Specific products discount (with promocode) and free product (1357)
