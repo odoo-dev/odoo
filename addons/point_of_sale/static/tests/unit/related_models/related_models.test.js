@@ -669,7 +669,6 @@ describe("Related Model", () => {
         order.sampleData = "test";
 
         expect(order.lines.length).toBe(1);
-        const oldLineId = order.lines[0].id;
         expect(typeof oldOrderId).toBe("string");
         expect(models["pos.order"].get(oldOrderId)).not.toBeEmpty();
 
@@ -694,11 +693,9 @@ describe("Related Model", () => {
         expect(order.lines[0].name).toBe("Line 1111");
 
         //Find by ids, uuids
-        expect(models["pos.order"].get(oldOrderId)).toBe(undefined);
         expect(models["pos.order"].get(order.id)).toBe(order);
         expect(models["pos.order"].getBy("uuid", order.uuid)).toBe(order);
 
-        expect(models["pos.order.line"].get(oldLineId)).toBe(undefined);
         expect(models["pos.order.line"].get(line.id)).toBe(line);
         expect(models["pos.order.line"].getBy("uuid", line.uuid)).toBe(line);
     });

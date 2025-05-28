@@ -99,9 +99,29 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
             return result;
         }
 
+        getUuidFromId(id) {
+            if (typeof id === "string") {
+                return id;
+            }
+            const modelUuids = this.map((rec) => rec.uuid);
+            const idUpdates = JSON.parse(localStorage.getItem("idUpdates")) || {};
+            const entry = Object.entries(idUpdates).find(
+                ([_uuid, _id]) => modelUuids.includes(_uuid) && _id === id
+            );
+            if (entry) {
+                return entry[0];
+            }
+            return false;
+        }
+
         read(value) {
             const id = /^\d+$/.test(value) ? parseInt(value) : value; // In case of ID came from an input
-            return this[STORE_SYMBOL].getById(this.name, id);
+            const record = this[STORE_SYMBOL].getById(this.name, id);
+            const uuid = record || this.fields["uuid"] ? this.getUuidFromId(id) : null;
+            if (record || !uuid) {
+                return record;
+            }
+            return this[STORE_SYMBOL].get(this.name, "uuid", uuid);
         }
 
         readFirst() {
