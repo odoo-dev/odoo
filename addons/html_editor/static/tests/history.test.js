@@ -226,7 +226,7 @@ describe("selection", () => {
         await pointerUp(pElement);
         await tick();
         const historyPlugin = plugins.get("history");
-        const nodeId = historyPlugin.nodeToIdMap.get(pElement.firstChild);
+        const nodeId = historyPlugin.nodeMap.getId(pElement.firstChild);
         expect(historyPlugin.currentStep.selection).toEqual({
             anchorNodeId: nodeId,
             anchorOffset: 0,
@@ -328,7 +328,7 @@ describe("system classes and attributes", () => {
         historyPlugin.applyMutations([
             {
                 attributeName: "class",
-                id: historyPlugin.nodeToIdMap.get(p),
+                id: historyPlugin.nodeMap.getId(p),
                 oldValue: null,
                 type: "attributes",
                 value: "x y",
@@ -955,7 +955,7 @@ describe("added and removed trees in mutation records", () => {
 
         const historyPlugin = plugins.get("history");
         const mutations = historyPlugin.currentStep.mutations;
-        const idToNode = (id) => historyPlugin.idToNodeMap.get(id);
+        const idToNode = (id) => historyPlugin.nodeMap.getNode(id);
 
         expect(mutations.length).toBe(5);
 

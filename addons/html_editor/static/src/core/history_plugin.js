@@ -6,6 +6,7 @@ import { withSequence } from "@html_editor/utils/resource";
 import { Deferred } from "@web/core/utils/concurrency";
 import { toggleClass } from "@html_editor/utils/dom";
 import { omit, pick } from "@web/core/utils/objects";
+import { NodeBiMap } from "./history_utils";
 
 /**
  * @typedef { import("./selection_plugin").EditorSelection } EditorSelection
@@ -265,8 +266,7 @@ export class HistoryPlugin extends Plugin {
         });
         /** @type { Map<string, "consumed"|"undo"|"redo"> } */
         this.stepsStates = new Map();
-        this.nodeToIdMap = new WeakMap();
-        this.idToNodeMap = new Map();
+        this.nodeMap = new NodeBiMap();
         /** @type { WeakMap<Node, { attributes: Map<string, string>, classList: Map<string, boolean> }> } */
         this.lastObservedState = new WeakMap();
         /** @type { WeakSet<Node> } */
@@ -279,7 +279,7 @@ export class HistoryPlugin extends Plugin {
      * @returns {Node}
      */
     getNodeById(id) {
-        return this.idToNodeMap.get(id);
+        return this.nodeMap.getNode(id);
     }
     /**
      * Reset the history.
@@ -320,7 +320,7 @@ export class HistoryPlugin extends Plugin {
             mutations: childNodes(this.editable).map((node) => ({
                 type: "add",
                 parentId: "root",
-                id: this.nodeToIdMap.get(node),
+                id: this.nodeMap.getId(node),
                 node: this.serializeNode(node),
                 nextId: null,
             })),
@@ -485,12 +485,11 @@ export class HistoryPlugin extends Plugin {
             const addedNodes = record.addedTrees.flatMap(treeToNodes);
             const removedNodes = record.removedTrees.flatMap(treeToNodes);
             for (const node of [...addedNodes, ...removedNodes]) {
-                if (this.nodeToIdMap.has(node)) {
+                if (this.nodeMap.hasNode(node)) {
                     continue;
                 }
                 const id = node === this.editable ? "root" : this.generateId();
-                this.nodeToIdMap.set(node, id);
-                this.idToNodeMap.set(id, node);
+                this.nodeMap.set(id, node);
             }
         }
     }
@@ -537,12 +536,9 @@ export class HistoryPlugin extends Plugin {
         for (const record of records) {
             if (record.type === "childList" && this.isSameTextContentMutation(record)) {
                 const { addedNodes, removedNodes } = record;
-                const oldId = this.nodeToIdMap.get(removedNodes[0]);
+                const oldId = this.nodeMap.getId(removedNodes[0]);
                 if (oldId) {
-                    this.nodeToIdMap.delete(removedNodes[0]);
-                    this.idToNodeMap.delete(oldId);
-                    this.nodeToIdMap.set(addedNodes[0], oldId);
-                    this.idToNodeMap.set(oldId, addedNodes[0]);
+                    this.nodeMap.set(oldId, addedNodes[0]);
                 }
                 continue;
             }
@@ -990,7 +986,7 @@ export class HistoryPlugin extends Plugin {
                 case "characterData":
                 case "classList":
                 case "attributes": {
-                    const id = this.nodeToIdMap.get(record.target);
+                    const id = this.nodeMap.getId(record.target);
                     this.currentStep.mutations.push({ ...omit(record, "target"), id });
                     break;
                 }
@@ -1011,7 +1007,7 @@ export class HistoryPlugin extends Plugin {
      * @param {MutationRecordChildList} record
      */
     stageChildListRecords(record) {
-        const parentId = this.nodeToIdMap.get(record.target);
+        const parentId = this.nodeMap.getId(record.target);
         if (!parentId) {
             throw new Error("Unknown parent node");
         }
@@ -1022,9 +1018,9 @@ export class HistoryPlugin extends Plugin {
                 const previousSibling = array[index - 1]?.node || record.previousSibling;
                 const [nextId, previousId] = [nextSibling, previousSibling].map((sibling) =>
                     // Preserve undefined and null values
-                    sibling ? this.nodeToIdMap.get(sibling) : sibling
+                    sibling ? this.nodeMap.getId(sibling) : sibling
                 );
-                const id = this.nodeToIdMap.get(node);
+                const id = this.nodeMap.getId(node);
                 const serializedNode = this.serializeTree(tree);
                 return { type, id, parentId, node: serializedNode, nextId, previousId };
             });
@@ -1058,11 +1054,10 @@ export class HistoryPlugin extends Plugin {
      * @param { Node } node
      */
     setNodeId(node) {
-        let id = this.nodeToIdMap.get(node);
+        let id = this.nodeMap.getId(node);
         if (!id) {
             id = node === this.editable ? "root" : this.generateId();
-            this.nodeToIdMap.set(node, id);
-            this.idToNodeMap.set(id, node);
+            this.nodeMap.set(id, node);
             node = node.firstChild;
             while (node) {
                 this.setNodeId(node);
@@ -1198,7 +1193,7 @@ export class HistoryPlugin extends Plugin {
         if (!selection.anchorNodeId) {
             return;
         }
-        const anchorNode = this.idToNodeMap.get(selection.anchorNodeId);
+        const anchorNode = this.nodeMap.getNode(selection.anchorNodeId);
         if (!anchorNode) {
             return;
         }
@@ -1206,7 +1201,7 @@ export class HistoryPlugin extends Plugin {
             anchorNode,
             anchorOffset: selection.anchorOffset,
         };
-        const focusNode = this.idToNodeMap.get(selection.focusNodeId);
+        const focusNode = this.nodeMap.getNode(selection.focusNodeId);
         if (focusNode) {
             newSelection.focusNode = focusNode;
             newSelection.focusOffset = selection.focusOffset;
@@ -1320,7 +1315,7 @@ export class HistoryPlugin extends Plugin {
                     break;
                 }
                 case "characterData": {
-                    const node = this.idToNodeMap.get(mutation.id);
+                    const node = this.nodeMap.getNode(mutation.id);
                     if (node) {
                         node.textContent = mutation.value;
                     }
@@ -1331,7 +1326,7 @@ export class HistoryPlugin extends Plugin {
                     break;
                 }
                 case "attributes": {
-                    const node = this.idToNodeMap.get(mutation.id);
+                    const node = this.nodeMap.getNode(mutation.id);
                     if (node) {
                         let value = mutation.value;
                         for (const cb of this.getResource("attribute_change_processors")) {
@@ -1366,8 +1361,8 @@ export class HistoryPlugin extends Plugin {
      * @param {HistoryMutationRemove} mutation
      */
     applyRemoveMutation(mutation) {
-        const parent = this.idToNodeMap.get(mutation.parentId);
-        const toremove = this.idToNodeMap.get(mutation.id);
+        const parent = this.nodeMap.getNode(mutation.parentId);
+        const toremove = this.nodeMap.getNode(mutation.id);
         if (!toremove) {
             console.warn("Mutation could not be applied, node to remove is unknown.", mutation);
             return;
@@ -1385,14 +1380,14 @@ export class HistoryPlugin extends Plugin {
     applyAddMutation(mutation) {
         const { id, node, parentId, nextId, previousId } = mutation;
 
-        const toAdd = this.idToNodeMap.get(id) || this.unserializeNode(node);
+        const toAdd = this.nodeMap.getNode(id) || this.unserializeNode(node);
         if (!toAdd) {
             return;
         }
 
         this.setNodeId(toAdd);
 
-        const parent = this.idToNodeMap.get(parentId);
+        const parent = this.nodeMap.getNode(parentId);
         if (!parent) {
             console.warn("Mutation could not be applied, parent node is missing.", mutation);
             return;
@@ -1409,7 +1404,7 @@ export class HistoryPlugin extends Plugin {
             [previousId, "after"],
             [nextId, "before"],
         ]) {
-            const sibling = this.idToNodeMap.get(siblingId);
+            const sibling = this.nodeMap.getNode(siblingId);
             if (sibling && sibling.isConnected) {
                 sibling[position](toAdd);
                 return;
@@ -1428,7 +1423,7 @@ export class HistoryPlugin extends Plugin {
      * @param {HistoryMutationClassList} mutation
      */
     applyClassListMutation(mutation) {
-        const node = this.idToNodeMap.get(mutation.id);
+        const node = this.nodeMap.getNode(mutation.id);
         if (!node) {
             return;
         }
@@ -1479,9 +1474,9 @@ export class HistoryPlugin extends Plugin {
      */
     serializeSelection(selection) {
         return {
-            anchorNodeId: this.nodeToIdMap.get(selection.anchorNode),
+            anchorNodeId: this.nodeMap.getId(selection.anchorNode),
             anchorOffset: selection.anchorOffset,
-            focusNodeId: this.nodeToIdMap.get(selection.focusNode),
+            focusNodeId: this.nodeMap.getId(selection.focusNode),
             focusOffset: selection.focusOffset,
         };
     }
@@ -1492,7 +1487,7 @@ export class HistoryPlugin extends Plugin {
      */
     getMutationsRoot(mutations) {
         const nodes = mutations
-            .map((m) => this.idToNodeMap.get(m.parentId || m.id))
+            .map((m) => this.nodeMap.getNode(m.parentId || m.id))
             .filter((node) => this.editable.contains(node));
         let commonAncestor = getCommonAncestor(nodes, this.editable);
         if (commonAncestor?.nodeType === Node.TEXT_NODE) {
@@ -1704,7 +1699,7 @@ export class HistoryPlugin extends Plugin {
      * @returns { Node }
      */
     unserializeNode(node) {
-        let [unserializedNode, nodeMap] = this._unserializeNode(node, this.idToNodeMap);
+        let [unserializedNode, newNodesMap] = this._unserializeNode(node);
         const fakeNode = this.document.createElement("fake-el");
         fakeNode.appendChild(unserializedNode);
         this.dependencies.sanitize.sanitize(fakeNode, { IN_PLACE: true });
@@ -1712,16 +1707,15 @@ export class HistoryPlugin extends Plugin {
 
         if (unserializedNode) {
             // Only assing id to the remaining nodes, otherwise the removed
-            // nodes will still be accessible through the idToNodeMap and could
+            // nodes will still be accessible through the nodeMap and could
             // lead to security issues.
             for (const node of [unserializedNode, ...descendants(unserializedNode)]) {
-                if (this.idToNodeMap.has(node)) {
+                if (this.nodeMap.hasNode(node)) {
                     continue;
                 }
-                const id = nodeMap.get(node);
+                const id = newNodesMap.get(node);
                 if (id) {
-                    this.nodeToIdMap.set(node, id);
-                    this.idToNodeMap.set(id, node);
+                    this.nodeMap.set(id, node);
                 }
             }
             this.setNodeId(unserializedNode);
@@ -1735,7 +1729,7 @@ export class HistoryPlugin extends Plugin {
      */
     serializeTree(tree) {
         const node = tree.node;
-        const nodeId = this.nodeToIdMap.get(node);
+        const nodeId = this.nodeMap.getId(node);
         if (!nodeId) {
             return;
         }
@@ -1764,10 +1758,10 @@ export class HistoryPlugin extends Plugin {
      * Unserialize a node and its children.
      * @param { SerializedNode } serializedNode
      * @param { Map<Node, number> } _map
-     * @returns { Node, Map<Node, number> }
+     * @returns { [Node, Map<Node, number>] }
      */
-    _unserializeNode(serializedNode, idToNodeMap = new Map(), _map = new Map()) {
-        let node = idToNodeMap.get(serializedNode.nodeId);
+    _unserializeNode(serializedNode, _map = new Map()) {
+        let node = this.nodeMap.getNode(serializedNode.nodeId);
         if (node) {
             return [node, _map];
         }
@@ -1779,7 +1773,7 @@ export class HistoryPlugin extends Plugin {
                 node.setAttribute(key, serializedNode.attributes[key]);
             }
             serializedNode.children.forEach((child) =>
-                node.append(this._unserializeNode(child, idToNodeMap, _map)[0])
+                node.append(this._unserializeNode(child, _map)[0])
             );
         } else {
             console.warn("unknown node type");
