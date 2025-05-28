@@ -4,6 +4,7 @@ import {
 } from "@html_editor/main/media/image_post_process_plugin";
 import { Plugin } from "@html_editor/plugin";
 import { loadImage, loadImageInfo } from "@html_editor/utils/image_processing";
+import { withSequence } from "@html_editor/utils/resource";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { clamp } from "@web/core/utils/numbers";
@@ -14,6 +15,16 @@ class ImageFormatOptionPlugin extends Plugin {
     static shared = ["computeAvailableFormats"];
     resources = {
         builder_actions: this.getActions(),
+        process_new_image: withSequence(5, async (img) => {
+            const newData = await loadImageInfo(img);
+            const isNotGifOrSvg = !["image/gif", "image/svg+xml"].includes(newData.mimetype);
+            const isCustomShape = newData.shape && newData.originalMimetype !== "image/gif";
+            if (isNotGifOrSvg || isCustomShape) {
+                const { optimizedWidth } = await this.getImageInfos(img, "image");
+                newData.formatMimetype = "image/webp";
+                newData.resizeWidth = optimizedWidth;
+            }
+        }),
     };
     MAX_SUGGESTED_WIDTH = 1920;
     getActions() {
@@ -60,18 +71,11 @@ class ImageFormatOptionPlugin extends Plugin {
      * @param {string} computeFrom - The source of the image, either "image" or "background".
      */
     async computeAvailableFormats(img, computeFrom) {
-        const computeMaxDisplayWidth =
-            computeFrom === "image"
-                ? this.computeMaxDisplayWidth.bind(this)
-                : this.computeMaxDisplayWidthBackground;
-
-        const data = { ...img.dataset, ...(await loadImageInfo(img)) };
-        if (!data.mimetypeBeforeConversion || shouldPreventGifTransformation(data)) {
+        const infos = await this.getImageInfos(img, computeFrom);
+        if (!infos) {
             return [];
         }
-
-        const maxWidth = await this.getImageWidth(data.originalSrc, data.width);
-        const optimizedWidth = Math.min(maxWidth, computeMaxDisplayWidth?.(img) || 0);
+        const { data, maxWidth, optimizedWidth } = infos;
         const widths = {
             128: ["128px", "image/webp"],
             256: ["256px", "image/webp"],
@@ -95,6 +99,22 @@ class ImageFormatOptionPlugin extends Plugin {
                 const id = `${width}-${mimetype}`;
                 return { id, width: Math.round(width), label, mimetype, isOriginal };
             });
+    }
+
+    async getImageInfos(img, computeFrom) {
+        const computeMaxDisplayWidth =
+            computeFrom === "image"
+                ? this.computeMaxDisplayWidth.bind(this)
+                : this.computeMaxDisplayWidthBackground;
+
+        const data = { ...img.dataset, ...(await loadImageInfo(img)) };
+        if (!data.mimetypeBeforeConversion || shouldPreventGifTransformation(data)) {
+            return;
+        }
+
+        const maxWidth = await this.getImageWidth(data.originalSrc, data.width);
+        const optimizedWidth = Math.min(maxWidth, computeMaxDisplayWidth?.(img) || 0);
+        return { data, maxWidth, optimizedWidth };
     }
     async getImageWidth(originalSrc, width) {
         const getNaturalWidth = () => loadImage(originalSrc).then((i) => i.naturalWidth);
