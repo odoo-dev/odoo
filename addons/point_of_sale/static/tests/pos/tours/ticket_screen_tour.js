@@ -233,6 +233,7 @@ registry.category("web_tour.tours").add("LotRefundTour", {
             FeedbackScreen.clickNextOrder(),
             ...ProductScreen.clickRefund(),
             TicketScreen.selectOrder("001"),
+            ProductScreen.clickLine("Product A"),
             ProductScreen.clickNumpad("1"),
             TicketScreen.toRefundTextContains("1"),
             TicketScreen.confirmRefund(),
