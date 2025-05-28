@@ -9,6 +9,7 @@
             <field name="company_id" ref="base.main_company"/>
             <field name="image_128" type="base64" file="payment_hdfc_upi_qr/static/description/icon.png"/>
             <!-- <field name="redirect_form_view_id" ref="payment_hdfc_upi_redirect_form"/> -->
+            <field name="inline_form_view_id" ref="inline_form"/>
             <field name="hdfc_upi_qr_expiry_time">5</field>
             <field name="payment_method_ids"
                eval="[Command.set([

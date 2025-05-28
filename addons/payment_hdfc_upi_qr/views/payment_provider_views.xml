@@ -20,12 +20,14 @@
                            string="Encryption Key"
                            required="code == 'hdfc_upi' and state != 'disabled'"
                            password="True"/>
-                    <field name="hdfc_upi_vpa"
-                           string="VPA"
-                           required="code == 'hdfc_upi' and state != 'disabled'"/>
                     <field name="hdfc_upi_qr_expiry_time"
                            string="QR Expiry Time"
                            required="code == 'hdfc_upi' and state != 'disabled'"/>
+                    <div class="o_form_label_help" colspan="2">
+                        <span class="text-info">
+                            <b>Note:</b> The UPI Id used here is the one set in the Company form (Settings &gt; Companies &gt; Your Company &gt; UPI Id).
+                        </span>
+                    </div>
                 </group>
             </group>
         </field>

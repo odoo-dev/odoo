@@ -1,4 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_payment_transaction_portal,payment.transaction.portal,payment.model_payment_transaction,base.group_portal,1,0,0,0
-access_payment_provider_portal,payment.provider.portal,payment.model_payment_provider,base.group_portal,1,0,0,0
-access_ir_actions_report_portal,ir.actions.report.portal,base.model_ir_actions_report,base.group_portal,1,0,0,0

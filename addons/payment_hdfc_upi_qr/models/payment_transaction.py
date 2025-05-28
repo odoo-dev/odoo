@@ -25,40 +25,79 @@ class PaymentTransaction(models.Model):
     hdfc_upi_payer_vpa = fields.Char(string="Payer VPA", readonly=True)
     hdfc_upi_payer_name = fields.Char(string="Payer Name", readonly=True)
     
-    def _get_specific_rendering_values(self, processing_values):
-        """ Override of payment to return HDFC UPI-specific rendering values.
+    # def _get_specific_rendering_values(self, processing_values):
+    #     """ Override of payment to return HDFC UPI-specific rendering values.
         
-        Note: self.ensure_one() from the parent method.
+    #     Note: self.ensure_one() from the parent method.
         
-        :param dict processing_values: The generic and specific processing values of the transaction
-        :return: The dict of provider-specific rendering values
+    #     :param dict processing_values: The generic and specific processing values of the transaction
+    #     :return: The dict of provider-specific rendering values
+    #     :rtype: dict
+    #     """
+    #     breakpoint()
+    #     res = super()._get_specific_rendering_values(processing_values)
+    #     if self.provider_code != 'hdfc_upi':
+    #         return res
+        
+    #     _logger.info("Getting rendering values for HDFC UPI transaction: %s", self.id)
+        
+    #     # Generate QR code immediately
+    #     if not self.hdfc_upi_qr_code:
+    #         try:
+    #             self._generate_hdfc_upi_qr_code()
+    #             _logger.info("QR code generated during rendering for transaction: %s", self.id)
+    #         except Exception as e:
+    #             _logger.error("Failed to generate QR code during rendering: %s", e, exc_info=True)
+        
+    #     # # For HDFC UPI, we'll redirect to our internal QR code display page
+    #     # base_url = self.provider_id.get_base_url()
+    #     # redirect_url = urls.url_join(base_url, f'/payment/hdfc_upi/get_form/{self.id}')
+
+    #     rendering_values = {
+    #         # 'api_url': redirect_url,
+    #         'transaction_id': self.id,
+    #         'reference': self.reference,
+    #         'amount': self.amount,
+    #         'currency': self.currency_id.name,
+    #         'merchant_name': self.provider_id.hdfc_upi_merchant_name,
+    #         'provider_code': 'hdfc_upi'
+    #     }
+        
+    #     _logger.info("HDFC UPI rendering values: %s", rendering_values)
+    #     return rendering_values
+
+    def _get_specific_processing_values(self, processing_values):
+        """ Override of payment to return HDFC UPI-specific processing values.
+        
+        Note: self.ensure_one() from `_get_processing_values`
+        
+        :param dict processing_values: The generic processing values of the transaction
+        :return: The dict of provider-specific processing values
         :rtype: dict
         """
-        res = super()._get_specific_rendering_values(processing_values)
+        res = super()._get_specific_processing_values(processing_values)
         if self.provider_code != 'hdfc_upi':
             return res
         
-        _logger.info("Getting rendering values for HDFC UPI transaction: %s", self.id)
+        _logger.info("Getting processing values for HDFC UPI transaction: %s", self.id)
         
-        # Generate QR code immediately
+        # Generate QR code immediately for the transaction
         if not self.hdfc_upi_qr_code:
             try:
                 self._generate_hdfc_upi_qr_code()
-                _logger.info("QR code generated during rendering for transaction: %s", self.id)
+                _logger.info("QR code generated during processing for transaction: %s", self.id)
             except Exception as e:
-                _logger.error("Failed to generate QR code during rendering: %s", e, exc_info=True)
+                _logger.error("Failed to generate QR code during processing: %s", e, exc_info=True)
         
-        # For HDFC UPI, we'll redirect to our internal QR code display page
-        base_url = self.provider_id.get_base_url()
-        redirect_url = urls.url_join(base_url, f'/payment/hdfc_upi/get_form/{self.id}')
+        # Return processing values that will be used by the frontend
+        processing_values.update({
+            'transaction_id': self.id,
+            'merchant_name': self.provider_id.hdfc_upi_merchant_name or 'HDFC UPI',
+            'currency_code': self.currency_id.name,
+        })
         
-        rendering_values = {
-            'api_url': redirect_url,
-            'reference': self.reference,
-        }
-        
-        _logger.info("HDFC UPI rendering values: %s", rendering_values)
-        return rendering_values
+        _logger.info("HDFC UPI processing values: %s", processing_values)
+        return processing_values
     
     def _generate_hdfc_upi_qr_code(self):
         """ Generate a UPI QR code for the transaction.
@@ -77,6 +116,7 @@ class PaymentTransaction(models.Model):
         
         # Generate unique order number
         order_no = f"PQ{self.reference.replace('/', '')}{int(datetime.now().timestamp())}"
+        _logger.info("Generated HDFC UPI order number: %s for transaction: %s", order_no, self.id)
         self.hdfc_upi_order_no = order_no
 
         # Set QR code expiry time
@@ -93,7 +133,7 @@ class PaymentTransaction(models.Model):
             f"&tr={order_no}"
             f"&tn=Payment {self.reference}"
             f"&pn={provider.hdfc_upi_merchant_name}"
-            f"&pa={provider.hdfc_upi_vpa}"
+            f"&pa={provider.company_id.l10n_in_upi_id}"
             f"&mc={provider.hdfc_upi_merchant_category}"
             f"&am={self.amount}"
             f"&cu={self.currency_id.name}"

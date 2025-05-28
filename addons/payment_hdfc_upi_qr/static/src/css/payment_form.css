@@ -1,4 +1,4 @@
-.qr-timer-container {
+/* .qr-timer-container {
   text-align: center;
   margin: 15px 0;
 }
@@ -84,4 +84,330 @@
 
 .font-weight-bold {
   font-weight: bold !important;
+} */
+
+
+/* UPI Payment Modal Styles */
+.upi-payment-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.upi-payment-modal.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.upi-modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 0;
+  max-width: 480px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+  position: relative;
+}
+
+.upi-payment-modal.show .upi-modal-content {
+  transform: scale(1);
+}
+
+.upi-modal-header {
+  padding: 24px 24px 0 24px;
+  text-align: center;
+  border-bottom: none;
+}
+
+.upi-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #666;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.upi-modal-close:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.merchant-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+}
+
+.payment-title {
+  font-size: 16px;
+  color: #666;
+  margin: 0 0 32px 0;
+  font-weight: 500;
+}
+
+.upi-modal-body {
+  padding: 0 24px 24px 24px;
+  text-align: center;
+}
+
+.qr-code-container {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  display: inline-block;
+}
+
+.qr-code-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 8px;
+  background: white;
+  padding: 8px;
+}
+
+.payment-amount {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 24px 0 16px 0;
+}
+
+.payment-amount .currency {
+  color: #2563eb;
+}
+
+.scan-instruction {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.upi-apps-container {
+  margin-bottom: 24px;
+}
+
+.upi-apps-title {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.upi-apps-grid {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.upi-app-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  transition: transform 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.upi-app-icon:hover {
+  transform: scale(1.1);
+}
+
+.timer-container {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.timer-icon {
+  color: #856404;
+  font-size: 16px;
+}
+
+.timer-text {
+  color: #856404;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.timer-value {
+  font-weight: 700;
+  color: #856404;
+}
+
+.timer-container.warning {
+  background: #f8d7da;
+  border-color: #f5c6cb;
+}
+
+.timer-container.warning .timer-icon,
+.timer-container.warning .timer-text,
+.timer-container.warning .timer-value {
+  color: #721c24;
+}
+
+.status-message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  display: none;
+}
+
+.status-message.show {
+  display: block;
+}
+
+.status-message.success {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.status-message.error {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.status-message.info {
+  background: #d1ecf1;
+  border: 1px solid #bee5eb;
+  color: #0c5460;
+}
+
+.powered-by {
+  text-align: center;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
+  margin-top: 16px;
+}
+
+.powered-by-text {
+  font-size: 12px;
+  color: #888;
+  margin: 0;
+}
+
+.powered-by-brand {
+  font-weight: 600;
+  color: #2563eb;
+}
+
+/* Loading States */
+.qr-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e9ecef;
+  border-top: 3px solid #2563eb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
+  .upi-modal-content {
+    width: 95%;
+    margin: 20px;
+  }
+
+  .upi-modal-header,
+  .upi-modal-body {
+    padding: 20px;
+  }
+
+  .merchant-name {
+    font-size: 20px;
+  }
+
+  .qr-code-image {
+    width: 180px;
+    height: 180px;
+  }
+
+  .upi-apps-grid {
+    gap: 8px;
+  }
+
+  .upi-app-icon {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Animation for success state */
+.success-animation {
+  animation: successPulse 0.6s ease-in-out;
+}
+
+@keyframes successPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Hide default payment form elements when modal is active */
+.payment-form-hidden {
+  pointer-events: none;
+  opacity: 0.5;
 }

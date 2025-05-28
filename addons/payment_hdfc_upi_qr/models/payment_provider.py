@@ -35,11 +35,6 @@ class PaymentProvider(models.Model):
         required_if_provider='hdfc_upi',
         groups='base.group_system'
     )
-    hdfc_upi_vpa = fields.Char(
-        string="UPI Virtual Payment Address (VPA)",
-        help="Your UPI ID (e.g., merchant@hdfcbank).",
-        required_if_provider='hdfc_upi',
-    )
     hdfc_upi_qr_expiry_time = fields.Integer(
         string="QR Code Expiry Time (minutes)",
         help="Time in minutes after which the QR code will expire.",
@@ -47,13 +42,17 @@ class PaymentProvider(models.Model):
         required_if_provider='hdfc_upi',
     )
     
-    @api.constrains('hdfc_upi_vpa')
-    def _check_hdfc_upi_vpa(self):
+    # Use l10n_in_upi_id from res.company via company_id
+    @api.constrains('company_id')
+    def _check_l10n_in_upi_id(self):
         for provider in self:
-            if provider.code == 'hdfc_upi' and provider.hdfc_upi_vpa:
-                if '@' not in provider.hdfc_upi_vpa:
-                    raise ValidationError(_("UPI VPA must be in the format 'username@provider'"))
-    
+            if provider.code == 'hdfc_upi' and provider.state != 'disabled':
+                upi_id = provider.company_id.l10n_in_upi_id
+                if not upi_id:
+                    raise ValidationError(_("UPI VPA is required for HDFC UPI provider (from company UPI Id)."))
+                if '@' not in upi_id:
+                    raise ValidationError(_("UPI VPA must be in the format 'username@provider' (from company UPI Id)."))
+
     @api.constrains('hdfc_upi_qr_expiry_time')
     def _check_hdfc_upi_qr_expiry_time(self):
         for provider in self:
@@ -68,23 +67,23 @@ class PaymentProvider(models.Model):
         return default_codes
     
     def _should_build_inline_form(self, is_validation=False):
-        """ Override to specify that inline forms are not used for HDFC UPI. """
+        """ Override to specify that inline forms are used for HDFC UPI. """
         if self.code == 'hdfc_upi':
-            return False
+            return True
         return super()._should_build_inline_form(is_validation=is_validation)
 
-    def _get_redirect_form_view(self, is_validation=False):
-        """ Return the view of the redirect form.
+    # def _get_redirect_form_view(self, is_validation=False):
+    #     """ Return the view of the redirect form.
         
-        Note: This method must return a view record, not a string.
+    #     Note: This method must return a view record, not a string.
         
-        :param bool is_validation: Whether the operation is a validation operation
-        :return: The redirect form view
-        :rtype: recordset of `ir.ui.view`
-        """
-        if self.code == 'hdfc_upi':
-            return self.env.ref('payment_hdfc_upi_qr.payment_hdfc_upi_redirect_form')
-        return super()._get_redirect_form_view(is_validation=is_validation)
+    #     :param bool is_validation: Whether the operation is a validation operation
+    #     :return: The redirect form view
+    #     :rtype: recordset of `ir.ui.view`
+    #     """
+    #     if self.code == 'hdfc_upi':
+    #         return self.env.ref('payment_hdfc_upi_qr.payment_hdfc_upi_redirect_form')
+    #     return super()._get_redirect_form_view(is_validation=is_validation)
     
     def _get_validation_amount(self):
         """ Return the amount to use for validation operations. """
@@ -111,13 +110,13 @@ class PaymentProvider(models.Model):
     def _check_required_if_provider(self):
         """ Check required fields based on provider code. """
         super()._check_required_if_provider()
-        
         for provider in self.filtered(lambda p: p.code == 'hdfc_upi' and p.state != 'disabled'):
             if not provider.hdfc_upi_merchant_id:
                 raise ValidationError(_("Merchant ID is required for HDFC UPI provider"))
             if not provider.hdfc_upi_merchant_name:
                 raise ValidationError(_("Merchant Name is required for HDFC UPI provider"))
-            if not provider.hdfc_upi_vpa:
-                raise ValidationError(_("UPI VPA is required for HDFC UPI provider"))
+            upi_id = provider.company_id.l10n_in_upi_id
+            if not upi_id:
+                raise ValidationError(_("UPI VPA is required for HDFC UPI provider (from company UPI Id)."))
             if not provider.hdfc_upi_encryption_key:
                 raise ValidationError(_("Encryption Key is required for HDFC UPI provider"))

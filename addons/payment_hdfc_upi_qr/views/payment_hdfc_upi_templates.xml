@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
    <!-- Redirect Form -->
-   <template id="payment_hdfc_upi_redirect_form">
+   <!-- <template id="payment_hdfc_upi_redirect_form">
        <form t-att-action="api_url" method="get" class="hdfc_upi_form" id="hdfc_upi_redirect_form">
            <input type="hidden" name="reference" t-att-value="reference"/>
            <p class="alert alert-info">You will be redirected to the payment page in a moment...</p>
@@ -11,7 +11,46 @@
                });
            </script>
        </form>
-   </template>
+   </template> -->
+
+<!-- Inline Form Template for HDFC UPI -->
+   <!-- <template id="hdfc_upi_inline_form">
+       <div class="hdfc_upi_inline_form" 
+            t-att-data-transaction-id="transaction_id"
+            t-att-data-reference="reference"
+            t-att-data-amount="amount"
+            t-att-data-currency="currency"
+            t-att-data-merchant-name="merchant_name">
+           
+           <input type="hidden" name="hdfc_upi_transaction_id" t-att-value="transaction_id"/>
+           
+           <div class="text-center mt-3">
+               <div class="d-flex align-items-center justify-content-center mb-2">
+                   <i class="fa fa-qrcode text-primary me-2" style="font-size: 24px;"></i>
+                   <span class="text-muted">UPI QR Code Payment</span>
+               </div>
+               <small class="text-muted d-block mb-3">
+                   A QR code will be generated when you proceed with payment
+               </small>
+               
+           </div>
+       </div>
+   </template> -->
+
+   <template id="inline_form">
+        <div name="o_hdfc_upi_component_container">
+            <!-- Simple container for UPI payment - the modal will be triggered by JavaScript -->
+            <div class="text-center mt-3">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                    <i class="fa fa-qrcode text-primary me-2" style="font-size: 24px;"></i>
+                    <span class="text-muted">UPI QR Code Payment</span>
+                </div>
+                <small class="text-muted d-block mb-3">
+                    Click "Pay Now" to generate and display the QR code for payment
+                </small>
+            </div>
+        </div>
+    </template>
    
    <!-- QR Code Form Template -->
    <template id="hdfc_upi_qr_form">
@@ -63,15 +102,6 @@
                                        </div>
                                    </div>
                                    
-                                   <!-- Action Buttons -->
-                                   <div class="mt-3">
-                                       <button id="check_payment_status" class="btn btn-primary">
-                                           Check Payment Status
-                                       </button>
-                                       <button id="refresh_qr_code" class="btn btn-secondary ml-2">
-                                           Refresh QR Code
-                                       </button>
-                                   </div>
                                    
                                    <!-- Status Message -->
                                    <div id="payment_status_message" class="mt-3 alert d-none"></div>
