@@ -2,9 +2,17 @@
 <odoo>
 
     <template id="snippet_sale_order_cards" inherit_id="website.snippets">
-        <xpath expr="//snippets[@id='snippet_content']" position="inside">
-            <t t-snippet="website_dynamic_snippet.s_sale_order_cards" string="Sale Order Cards"
-                t-thumbnail="/website_dynamic_snippet/static/src/img/s_thumbnail.svg" />
+        <xpath expr="//snippets[@id='snippet_groups']" position="inside">
+            <t snippet-group="sale" t-snippet="website.s_snippet_group" string="Website Sale"
+                t-thumbnail="/website_dynamic_snippet/static/src/img/s_website_sale.png" />
+        </xpath>
+        <xpath expr="//snippets[@id='snippet_structure']" position="inside">
+            <t t-snippet="website_dynamic_snippet.s_sale_order_cards"
+                string="Sale Order Cards"
+                t-thumbnail="/website_dynamic_snippet/static/src/img/s_thumbnail.svg"
+                group="sale">
+                <keywords>sale, order, cards</keywords>
+            </t>
         </xpath>
     </template>
 

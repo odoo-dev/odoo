@@ -20,6 +20,8 @@ export class SaleOrderCards extends Interaction {
     }
 
     start() {
+        this.loadMoreButton = this.el.querySelector("#load_more_orders")
+        this.loadMoreButton.removeAttribute("disabled");
         this.renderOrders();
     }
 
@@ -34,7 +36,7 @@ export class SaleOrderCards extends Interaction {
 
     async fetchOrders() {
         this.showConfirmOrders = this.el.dataset.showConfirmOrders === "true" ?? false;
-        this.noOfOrders = parseInt(this.el.dataset.noOfOrders) || 10;
+        this.noOfOrders = parseInt(this.el.dataset.noOfOrders);
         const domain = this.showConfirmOrders ? [["state", "=", "sale"]] : [];
         const temp_orders = await this.services.orm.searchRead(
             "sale.order",
@@ -58,8 +60,4 @@ export class SaleOrderCards extends Interaction {
 
 registry
     .category("public.interactions")
-    .add("website.sale_order_cards", SaleOrderCards);
-
-registry
-    .category("public.interactions.edit")
-    .add("website.sale_order_cards", { Interaction: SaleOrderCards });
+    .add("website_dynamic_snippet.s_sale_order_cards", SaleOrderCards);
