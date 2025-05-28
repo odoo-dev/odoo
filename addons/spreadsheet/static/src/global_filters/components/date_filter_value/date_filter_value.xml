@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t t-name="spreadsheet.DateFilterValue">
+        <Dropdown>
+            <div class="w-100">
+                <input type="text" class="o_input" t-att-value="selectedOption?.label" readonly="true"/>
+            </div>
+            <t t-set-slot="content">
+                <div class="o_date_filter_value">
+                    <t t-foreach="options" t-as="option" t-key="option_index">
+                        <DropdownItem
+                            tag="'div'"
+                            class="{
+                                'd-flex justify-content-between date_filter': true,
+                                'selected': option.id === selectedOption?.id,
+                            }"
+                            onSelected="() => this.selectOption(option)"
+                            closingMode="'none'"
+                        >
+                            <div class="filter_name pe-3" t-out="option.label"/>
+                            <div t-if="option.selector" class="d-flex justify-content-between">
+                                <button
+                                    class="btn_previous_date fa fa-caret-left"
+                                    t-on-click="() => {}"
+                                />
+                                <input
+                                    class="o_input input_current_date"
+                                    type="text"
+                                    readonly="true"
+                                />
+                                <button
+                                    class="btn_next_date fa fa-caret-right"
+                                    t-on-click="() => {}"
+                                />
+                            </div>
+                        </DropdownItem>
+                        <div t-if="option.separator" role="separator" class="dropdown-divider"/>
+                    </t>
+                </div>
+            </t>
+        </Dropdown>
+    </t>
+</templates>

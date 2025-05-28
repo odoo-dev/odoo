@@ -13,8 +13,8 @@ const { DateTime } = luxon;
  * @property {string | import("@spreadsheet").LazyTranslatedString} description
  */
 
-export class DateFilterValue extends Component {
-    static template = "spreadsheet.DateFilterValue";
+export class FilterDateValue extends Component {
+    static template = "spreadsheet.FilterDateValue";
     static components = { DateTimeInput };
     static props = {
         // See @spreadsheet/bundle/global_filters/filters_plugin.RangeType

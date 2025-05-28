@@ -2,7 +2,7 @@
 
 import { MultiRecordSelector } from "@web/core/record_selectors/multi_record_selector";
 import { RELATIVE_DATE_RANGE_TYPES } from "@spreadsheet/helpers/constants";
-import { DateFilterValue } from "../filter_date_value/filter_date_value";
+import { FilterDateValue } from "../filter_date_value/filter_date_value";
 import { DateFromToValue } from "../filter_date_from_to_value/filter_date_from_to_value";
 
 import { Component, onWillStart } from "@odoo/owl";
@@ -14,19 +14,22 @@ import { user } from "@web/core/user";
 import { TextFilterValue } from "../filter_text_value/filter_text_value";
 import { getFields, ModelNotFoundError } from "@spreadsheet/data_sources/data_source";
 import { BooleanMultiSelector } from "../boolean_multi_selector/boolean_multi_selector";
+import { DateFilterValue } from "../date_filter_value/date_filter_value";
 
 const { ValidationMessages } = components;
 
 export class FilterValue extends Component {
     static template = "spreadsheet.FilterValue";
     static components = {
-        DateFilterValue,
+        FilterDateValue,
         DateFromToValue,
         MultiRecordSelector,
         TextFilterValue,
         ValidationMessages,
         BooleanMultiSelector,
+        DateFilterValue,
     };
+
     static props = {
         filter: Object,
         model: Object,

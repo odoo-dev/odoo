@@ -54,10 +54,69 @@ declare module "@spreadsheet" {
         disabledPeriods?: FixedPeriods[];
     }
 
-    export type DateGlobalFilter =
-        | FromToDateGlobalFilter
-        | RelativeDateGlobalFilter
-        | FixedPeriodDateGlobalFilter;
+    export type DateGlobalFilterAllowedOptions = "relative" | "month" | "quarter" | "year" | "from_to";
+
+    export type DateRelativeValue = {
+        type: "relative";
+        value: DateFilterTimePeriod;
+    }
+
+    export type DefaultDateMonthValue = {
+        type: "month";
+        value: "CURRENT" | { month: number; year: number };
+    }
+
+    export type DateMonthValue = {
+        type: "month";
+        value: { month: number; year: number };
+    }
+
+    export type DefaultDateQuarterValue = {
+        type: "quarter";
+        value: "CURRENT" | { quarter: number; year: number };
+    }
+
+    export type DateQuarterValue = {
+        type: "quarter";
+        value: { quarter: number; year: number };
+    }
+
+    export type DefaultDateYearValue = {
+        type: "year";
+        value: "CURRENT" | { year: number };
+    }
+
+    export type DateYearValue = {
+        type: "year";
+        value: { year: number };
+    }
+
+    export type DateFromToValue = {
+        type: "from_to";
+        value: { from: string; to: string };
+    }
+
+    export type DefaultDateGlobalFilterValue =
+        | DateRelativeValue
+        | DefaultDateMonthValue
+        | DefaultDateQuarterValue
+        | DefaultDateYearValue
+        | DateFromToValue;
+
+    export type DateGlobalFilterValue =
+        | DateRelativeValue
+        | DateMonthValue
+        | DateQuarterValue
+        | DateYearValue
+        | DateFromToValue;
+
+    export type DateGlobalFilter = {
+        type: "date";
+        id: string;
+        label: string;
+        allowedOptions: DateGlobalFilterAllowedOptions[];
+        defaultValue?: DefaultDateGlobalFilterValue;
+    }
 
     export interface RelationalGlobalFilter {
         type: "relation";

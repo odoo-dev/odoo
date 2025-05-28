@@ -68,6 +68,67 @@ migrationStepRegistry.add("18.4.10", {
     },
 });
 
+migrationStepRegistry.add("18.4.11", {
+    migrate(data) {
+        for (const globalFilter of data.globalFilters || []) {
+            if (globalFilter.type === "date") {
+                switch (globalFilter.rangeType) {
+                    case "relative":
+                        globalFilter.allowedOptions = ["relative"];
+                        if (globalFilter.defaultValue) {
+                            globalFilter.defaultValue = {
+                                type: "relative",
+                                value: globalFilter.defaultValue,
+                            };
+                        }
+                        break;
+                    case "from_to":
+                        globalFilter.allowedOptions = ["from_to"];
+                        if (globalFilter.defaultValue) {
+                            globalFilter.defaultValue = {
+                                type: "from_to",
+                                value: globalFilter.defaultValue,
+                            };
+                        }
+                        break;
+                    case "fixedPeriod":
+                        globalFilter.allowedOptions = ["year"];
+                        if (!globalFilter.disabledPeriods.includes("month")) {
+                            globalFilter.allowedOptions.push("month");
+                        }
+                        if (!globalFilter.disabledPeriods.includes("quarter")) {
+                            globalFilter.allowedOptions.push("quarter");
+                        }
+                        delete globalFilter.disabledPeriods;
+                        switch (globalFilter.defaultValue) {
+                            case "this_year":
+                                globalFilter.defaultValue = {
+                                    type: "year",
+                                    value: "CURRENT",
+                                };
+                                break;
+                            case "this_month":
+                                globalFilter.defaultValue = {
+                                    type: "month",
+                                    value: "CURRENT",
+                                };
+                                break;
+                            case "this_quarter":
+                                globalFilter.defaultValue = {
+                                    type: "quarter",
+                                    value: "CURRENT",
+                                };
+                                break;
+                        }
+                        break;
+                }
+                delete globalFilter.rangeType;
+            }
+        }
+        return data;
+    },
+});
+
 function migrateOdooData(data) {
     const version = data.odooVersion || 0;
     if (version < 1) {

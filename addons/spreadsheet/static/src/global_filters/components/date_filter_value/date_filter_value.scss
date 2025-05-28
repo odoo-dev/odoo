@@ -1,0 +1,38 @@
+.o_date_filter_value {
+    .date_filter:hover .btn_previous_date,
+        .date_filter:hover .btn_next_date:not(:disabled) {
+            color: $o-gray-600;
+        }
+        .filter_name {
+            min-width: 10ch;
+            padding: 1px 0;
+            border: var(--border-width) solid transparent;
+            border-width: 0 0 var(--border-width) 0;
+            margin-right: 16px;
+        }
+        .btn_previous_date, .btn_next_date {
+            background: inherit;
+            border: var(--border-width) solid transparent;
+            border-width: 0 0 var(--border-width) 0;
+            color: $o-gray-300;
+            padding: 1px 0;
+            text-align: center;
+            width: 20px;
+        }
+        .date_filter .o_input {
+            min-width: 20ch;
+            padding: 0 4px;
+            margin: 0 8px;
+            border-color: var(--o-input-border-color);
+            text-align: center;
+            &[readonly] {
+                cursor: pointer;
+            }
+            &[readonly]:not(:focus) {
+                border-color: transparent;
+            }
+            &:not([readonly]):focus {
+                @include print-variable(o-input-border-color, $o-action);
+            }
+        }
+}
