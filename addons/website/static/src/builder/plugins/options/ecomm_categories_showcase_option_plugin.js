@@ -1,6 +1,6 @@
 import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
-import { EcommCategoriesShowcaseOption, EcommCategoriesShowcaseBlocksDesign } from "./ecomm_categories_showcase_option";
+import { EcommCategoriesShowcaseOption, EcommCategoriesShowcaseBlocksDesign, EcommCategoriesShowcaseBlockDesign } from "./ecomm_categories_showcase_option";
 import { withSequence } from "@html_editor/utils/resource";
 import { SNIPPET_SPECIFIC_BEFORE, END } from "@html_builder/utils/option_sequence";
 import { WEBSITE_BACKGROUND_OPTIONS, VERTICAL_ALIGNMENT } from "@website/builder/option_sequence";
@@ -30,12 +30,7 @@ class EcommCategoriesShowcaseOptionPlugin extends Plugin {
                 OptionComponent: EcommCategoriesShowcaseOption,
                 selector: ".s_ecomm_categories_showcase",
             }),
-            withSequence(VERTICAL_ALIGNMENT, {
-                template: "html_builder.VerticalJustifyOption",
-                selector: ".s_ecomm_categories_showcase_block",
-                applyTo: ".s_ecomm_categories_showcase_row",
-            }),
-            withSequence(WEBSITE_BACKGROUND_OPTIONS, {
+            withSequence(WEBSITE_BACKGROUND_OPTIONS + 1, {
                 OptionComponent: WebsiteBackgroundOption,
                 selector: ".s_ecomm_categories_showcase_block",
                 props: {
@@ -45,6 +40,11 @@ class EcommCategoriesShowcaseOptionPlugin extends Plugin {
                     withShapes: true,
                     withColorCombinations: true,
                 },
+            }),
+            withSequence(VERTICAL_ALIGNMENT, {
+                OptionComponent: EcommCategoriesShowcaseBlockDesign,
+                selector: ".s_ecomm_categories_showcase_block",
+                applyTo: ".s_ecomm_categories_showcase_row",
             }),
             withSequence(END, {
                 OptionComponent: EcommCategoriesShowcaseBlocksDesign,

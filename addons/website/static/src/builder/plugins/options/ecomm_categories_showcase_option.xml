@@ -31,7 +31,7 @@
     </BuilderRow>
     <BuilderRow label.translate="Shadows">
         <BuilderCheckbox 
-            classAction="'shadow'" 
+            classAction="'shadow'"
             applyTo="'.s_ecomm_categories_showcase_block'"
             preview="false" />
     </BuilderRow>
@@ -47,6 +47,17 @@
             applyTo="'.s_ecomm_categories_showcase_block'"
             max="5" 
             step="1"/>
+    </BuilderRow>
+</t>
+
+<t t-name="website.EcommCategoriesShowcaseBlockDesign">
+    <BuilderRow label.translate="Vert. Alignment">
+        <BuilderButtonGroup>
+            <BuilderButton classAction="'align-items-start'" title.translate="Align Top" iconImg="'/website/static/src/img/snippets_options/align_items_start.svg'"/>
+            <BuilderButton classAction="'align-items-center'" title.translate="Align Middle" iconImg="'/website/static/src/img/snippets_options/align_items_center.svg'"/>
+            <BuilderButton classAction="'align-items-end'" title.translate="Align Bottom" iconImg="'/website/static/src/img/snippets_options/align_items_end.svg'"/>
+            <BuilderButton classAction="'d-flex flex-column justify-content-between'" applyTo="'.s_ecomm_categories_showcase_content'" title.translate="Stretch to Equal Height" iconImg="'/website/static/src/img/snippets_options/justify_content_between.svg'"/>
+        </BuilderButtonGroup>
     </BuilderRow>
 </t>
 

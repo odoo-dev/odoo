@@ -14,7 +14,7 @@
                     style="background-image: url('/web/image/website.s_ecomm_categories_showcase_1'); background-position: 15% 50%;"
                     >
                     <div class="o_we_bg_filter bg-black-25"></div>
-                    <div class="s_ecomm_categories_showcase_row d-flex flex-column justify-content-end">
+                    <div class="s_ecomm_categories_showcase_row d-flex align-items-end">
                         <div class="s_ecomm_categories_showcase_content text-start">
                             <h2 class="h3-fs">Sofas</h2>
                             <p>
@@ -29,7 +29,7 @@
                     style="background-image: url('/web/image/website.s_ecomm_categories_showcase_2'); background-position: 15% 50%;"
                     >
                     <div class="o_we_bg_filter bg-black-25"></div>
-                    <div class="s_ecomm_categories_showcase_row d-flex flex-column justify-content-end">
+                    <div class="s_ecomm_categories_showcase_row d-flex align-items-end">
                         <div class="s_ecomm_categories_showcase_content text-start">
                             <h2 class="h3-fs">Desks</h2>
                             <p>
@@ -44,7 +44,7 @@
                     style="background-image: url('/web/image/website.s_ecomm_categories_showcase_3'); background-position: 15% 50%;"
                     >
                     <div class="o_we_bg_filter bg-black-25"></div>
-                    <div class="s_ecomm_categories_showcase_row d-flex flex-column justify-content-end">
+                    <div class="s_ecomm_categories_showcase_row d-flex align-items-end">
                         <div class="s_ecomm_categories_showcase_content text-start">
                             <h2 class="h3-fs">Drawers</h2>
                             <p>
@@ -59,7 +59,7 @@
                     style="background-image: url('/web/image/website.s_ecomm_categories_showcase_4'); background-position: 15% 50%;"
                     >
                     <div class="o_we_bg_filter bg-black-25"></div>
-                    <div class="s_ecomm_categories_showcase_row d-flex flex-column justify-content-end">
+                    <div class="s_ecomm_categories_showcase_row d-flex align-items-end">
                         <div class="s_ecomm_categories_showcase_content text-start">
                             <h2 class="h3-fs">Lamps</h2>
                             <p>

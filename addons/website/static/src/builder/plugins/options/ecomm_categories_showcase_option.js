@@ -17,3 +17,12 @@ export class EcommCategoriesShowcaseBlocksDesign extends BaseOptionComponent {
         super.setup();
     }
 } 
+
+export class EcommCategoriesShowcaseBlockDesign extends BaseOptionComponent {
+    static template = "website.EcommCategoriesShowcaseBlockDesign";
+    static props = {};
+
+    setup() {
+        super.setup();
+    }
+}
