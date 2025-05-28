@@ -326,6 +326,9 @@ class QwebTracker():
             template_functions, def_name = method_compile(self, template)
             render_template = template_functions[def_name]
 
+            if render_template.__name__ == "profiled_method_compile":
+                return (template_functions, def_name)
+
             def profiled_method_compile(self, values):
                 options = template_functions['options']
                 ref = options.get('ref')
