@@ -1715,6 +1715,9 @@ export class HistoryPlugin extends Plugin {
             // nodes will still be accessible through the idToNodeMap and could
             // lead to security issues.
             for (const node of [unserializedNode, ...descendants(unserializedNode)]) {
+                if (this.idToNodeMap.has(node)) {
+                    continue;
+                }
                 const id = nodeMap.get(node);
                 if (id) {
                     this.nodeToIdMap.set(node, id);
@@ -1764,14 +1767,13 @@ export class HistoryPlugin extends Plugin {
      * @returns { Node, Map<Node, number> }
      */
     _unserializeNode(serializedNode, idToNodeMap = new Map(), _map = new Map()) {
-        let node = undefined;
+        let node = idToNodeMap.get(serializedNode.nodeId);
+        if (node) {
+            return [node, _map];
+        }
         if (serializedNode.nodeType === Node.TEXT_NODE) {
             node = this.document.createTextNode(serializedNode.textValue);
         } else if (serializedNode.nodeType === Node.ELEMENT_NODE) {
-            node = idToNodeMap.get(serializedNode.nodeId);
-            if (node) {
-                return [node, _map];
-            }
             node = this.document.createElement(serializedNode.tagName);
             for (const key in serializedNode.attributes) {
                 node.setAttribute(key, serializedNode.attributes[key]);
