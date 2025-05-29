@@ -7,7 +7,10 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
     is_newsletter_enabled = fields.Boolean(
-        compute='_compute_is_newsletter_enabled', store=True, readonly=False,
+        related='website_id.is_newsletter_enabled',
+        compute='_compute_is_newsletter_enabled',
+        store=True,
+        readonly=False,
     )
     newsletter_id = fields.Many2one(related='website_id.newsletter_id', readonly=False)
 
