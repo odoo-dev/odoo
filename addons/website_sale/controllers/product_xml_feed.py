@@ -1,5 +1,3 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from urllib.parse import urljoin
 from werkzeug.exceptions import NotFound
 
@@ -37,55 +35,80 @@ class ProductXmlFeed(Controller):
         website = request.website
         path = request.httprequest.path
 
-        # Configuration map for feed-specific behavior
-        feed_config = {
-            'gmc': {
-                'enabled_feed': website.enabled_gmc_src,
-                'template': 'website_sale.gmc_xml',
-                'item_fn': lambda products: products._prepare_gmc_items(),
-            },
-            'meta': {
-                'enabled_feed': website.enabled_meta_src,
-                'template': 'website_sale.meta_xml',
-                'item_fn': lambda products: products._prepare_meta_items(),
-            },
-        }
-
-        # Determine feed type
+        # Feed config
         feed_type = 'gmc' if path.startswith('/gmc') else 'meta' if path.startswith('/meta') else None
-        feed_cfg = feed_config.get(feed_type)
-        if not feed_cfg or not feed_cfg['enabled_feed'] or not website.has_ecommerce_access():
+        if not feed_type:
             raise NotFound()
 
-        # Find the pricelist by name if specified.
-        if pricelist_name_ilike is not None:
-            pricelist_sudo = request.env['product.pricelist'].sudo().search(
+        feed_cfg = {
+            'gmc': {
+                'enabled': website.enabled_gmc_src,
+                'template': 'website_sale.gmc_xml',
+                'prepare_items': lambda products: products._prepare_gmc_items(),
+            },
+            'meta': {
+                'enabled': website.enabled_meta_src,
+                'template': 'website_sale.meta_xml',
+                'prepare_items': lambda products: products._prepare_meta_items(),
+            },
+        }[feed_type]
+
+        if not feed_cfg['enabled'] or not website.has_ecommerce_access():
+            raise NotFound()
+
+        # Pricelist selection
+        if pricelist_name_ilike:
+            Pricelist = request.env['product.pricelist']
+            pricelist = Pricelist.sudo().search(
                 expression.AND([
                     [('name', 'ilike', pricelist_name_ilike)],
-                    request.env['product.pricelist']._get_website_pricelists_domain(website),
+                    Pricelist._get_website_pricelists_domain(website),
                 ]),
-                limit=1,
+                limit=1
             )
-            if not pricelist_sudo:
+            if not pricelist:
                 raise NotFound()
-            request.pricelist = pricelist_sudo
+            request.pricelist = pricelist
 
-        # Generate data source for GMC/META.
-        homepage_url = website.homepage_url or '/'
-        website_homepage = website._get_website_pages(
-            [('url', '=', homepage_url), ('website_id', '!=', False)], limit=1,
+        # Fetch homepage meta data efficiently
+        homepage_meta = website.read(['homepage_url', 'name'])[0]
+        homepage_url = homepage_meta['homepage_url'] or '/'
+        full_homepage_url = urljoin(website.get_base_url(), request.env['ir.http']._url_lang(homepage_url))
+
+        # Attempt to fetch homepage metadata from page model directly (no computed fields)
+        WebsitePage = request.env['website.page']
+        homepage_page = WebsitePage.sudo().search_read(
+            [('url', '=', homepage_url), ('website_id', '=', website.id)],
+            ['website_meta_title', 'website_meta_description'],
+            limit=1
         )
-        products = request.env['product.product'].search(expression.AND([
-            [('is_published', '=', True), ('type', 'in', ('consu', 'combo'))],
-            website.website_domain(),
-        ]))
+        page_meta = homepage_page[0] if homepage_page else {}
+
+        # Fetch only required product fields
+        products = request.env['product.product'].with_context(website_id=website.id).search_read(
+            expression.AND([
+                [('is_published', '=', True), ('type', 'in', ('consu', 'combo'))],
+                website.website_domain(),
+            ]),
+            ['id', 'product_tmpl_id', 'name', 'list_price', 'image_1920', 'default_code'],
+        )
+
+        # Convert to recordset to use _prepare_*_items
+        product_ids = [prod['id'] for prod in products]
+        product_records = request.env['product.product'].browse(product_ids).with_context(website_id=website.id)
+
+        # Prepare feed items
+        items = feed_cfg['prepare_items'](product_records)
+
+        # Prepare rendering data
         feed_data = {
-            'title': website_homepage.website_meta_title or website.name,
-            'link': urljoin(website.get_base_url(), request.env['ir.http']._url_lang(homepage_url)),
-            'description': website_homepage.website_meta_description,
-            'items': feed_cfg['item_fn'](products),
+            'title': page_meta.get('website_meta_title') or homepage_meta['name'],
+            'link': full_homepage_url,
+            'description': page_meta.get('website_meta_description', ''),
+            'items': items,
         }
-        content = request.env['ir.ui.view'].sudo()._render_template(
-            feed_cfg['template'], feed_data,
-        )
-        return request.make_response(content, [('Content-Type', 'application/xml;charset=utf-8')])
+
+        # Render feed via QWeb template
+        content = request.env['ir.ui.view'].sudo()._render_template(feed_cfg['template'], feed_data)
+
+        return request.make_response(content, headers=[('Content-Type', 'application/xml;charset=utf-8')])

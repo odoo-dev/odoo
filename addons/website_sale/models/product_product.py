@@ -215,12 +215,6 @@ class ProductProduct(models.Model):
             if extra_image.image_1920  # only images, no video urls
         ]
 
-    @staticmethod
-    def _get_published_delivery_methods():
-        return request.env['delivery.carrier'].sudo().search(
-            [('is_published', '=', True), ('website_id', 'in', (request.website.id, False))],
-        )
-
     def _prepare_general_additional_info(self):
         self.ensure_one()
         general_info = {
@@ -245,6 +239,7 @@ class ProductProduct(models.Model):
 
     def _prepare_additional_info(self, for_meta=False):
         info = self._prepare_general_additional_info()
+        tags = self.all_product_tag_ids.sorted('sequence')
         if for_meta:
             info.update({
                 'internal_label': [
@@ -259,7 +254,7 @@ class ProductProduct(models.Model):
                     (f'custom_label_{i}', tag_name)
                     for i, tag_name in enumerate(
                         # supports up to 5 custom labels
-                        self.all_product_tag_ids.sorted('sequence').mapped('name')[:5],
+                        tags.mapped('name')[:5],
                     )
                 ],
             })
@@ -275,15 +270,22 @@ class ProductProduct(models.Model):
         }
 
     def _prepare_feed_setup(self):
+        """
+        Get shared context values used for generating XML feeds.
+        """
         base_url = request.website.get_base_url()
-        delivery_methods = self._get_published_delivery_methods()
-        all_countries = self.env['res.country'].search([])
+        delivery_methods = request.env['delivery.carrier'].sudo().search(
+            [('is_published', '=', True), ('website_id', 'in', (request.website.id, False))]
+        )
+        countries = request.env['res.country'].search([])
+        pricelist_id = request.pricelist.id
 
-        def format_product_link(url_):
-            url_ = urlparse(url_)._replace(query=f'pricelist={request.pricelist.id}').geturl()
-            return urljoin(base_url, self.env['ir.http']._url_lang(url_))
+        def format_product_link(url):
+            parsed_url = urlparse(url)
+            parsed_url = parsed_url._replace(query=f'pricelist={pricelist_id}')
+            return urljoin(base_url, request.env['ir.http']._url_lang(parsed_url.geturl()))
 
-        return base_url, delivery_methods, all_countries, format_product_link
+        return base_url, delivery_methods, countries, format_product_link
 
     def _prepare_gmc_items(self):
         """ Prepare Google Merchant Center items' fields.
