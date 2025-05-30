@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="schedul_email_compose_form_mass_mailing">
+        <field name="name">mail.compose.message.form.mass_mailing</field>
+        <field name="model">mail.compose.message</field>
+        <field name="inherit_id" ref="mail.email_compose_message_wizard_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='auto_delete_keep_log']" position="before">
+                <field name="schedule_date"
+                    invisible="composition_mode != 'mass_mail' or not model_is_thread"/>
+            </xpath>
+            <xpath expr="//button[@name='action_send_mail']" position="after">
+                <button string="Schedual mail" name="action_schedul_mail" type="object" class="btn-primary o_mail_send"
+                    invisible="mass_mailing_name == '' or not schedule_date" data-hotkey="q"/>    
+            </xpath>
+        </field>
+    </record>
+</odoo>
