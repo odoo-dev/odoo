@@ -297,7 +297,7 @@ class YamlInterpreter(object):
                     self.id_map[record] = int(id)
                     return None
                 else:
-                    if not self._coerce_bool(record.forcecreate):
+                    if not self._coerce_bool(record.forcecreate, default=True):
                         return None
 
             #context = self.get_context(record, self.eval_context)
