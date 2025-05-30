@@ -16,6 +16,9 @@
         'point_of_sale._assets_pos': [
             'pos_dpo/static/src/**/*',
         ],
+        'web.assets_tests': [
+            'pos_dpo/static/tests/tours/**/*',
+        ],
     },
     'author': 'Odoo India Pvt. Ltd.',
     'license': 'LGPL-3',
