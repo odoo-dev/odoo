@@ -4,14 +4,16 @@
     <t t-name="website_sale.dynamic_filter_template_categories">
         <t t-foreach="data" t-as="category" t-key="category.id">
             <div
-                class="o_not_editable category_item rounded position-relative"
+                class="category_item rounded position-relative oe_unremovable oe_unmovable"
                 t-att-data-category-id="category.id"
                 t-attf-style="grid-row: span {{height}};"
+                contenteditable="false"
             >
                 <t t-set="ribbon" t-value="get_ribbon(category['website_ribbon_id'])"/>
                 <t t-set="bg_color" t-value="ribbon['bg_color'] || ''"/>
                 <t t-set="bg_class" t-value="`o_${ribbon['style']} o_${ribbon['position']}`"/>
                 <img
+                    loading="lazy"
                     t-attf-src="/web/image/product.public.category/{{category.id}}/cover_image"
                     alt="Category Image"
                     class="s_category_image img-fluid position-absolute w-100 h-100"
@@ -21,7 +23,7 @@
                     <a
                         role="button"
                         t-attf-href="/shop/category/{{category.id}}"
-                        class="btn btn-primary align-self-start"
+                        class="btn btn-primary align-self-start oe_unremovable"
                         t-out="buttonText"
                     />
                 </div>
@@ -31,6 +33,8 @@
                     t-attf-style="#{'color: ' + ribbon['text_color']};#{'background-color: ' + bg_color}"
                     t-out="ribbon['name'] or ''"
                     t-att-data-ribbon-id="ribbon['id']"
+                    t-att-data-record-id="category.id"
+                    data-record-model="product.public.category"
                 />
             </div>
         </t>

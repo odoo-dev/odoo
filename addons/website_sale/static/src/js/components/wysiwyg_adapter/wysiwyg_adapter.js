@@ -92,30 +92,26 @@ patch(WysiwygAdapterComponent.prototype, {
         );
 
         // Building the final template to ribbon-id map
-        const finalTemplateRibbons = this.productTemplatesRibbons.reduce(
-            (acc, {recordId, ribbonId}) => {
-                acc[recordId] = ribbonId;
-                return acc;
-            },{}
-        );
+        const finalTemplateRibbons = this.productTemplatesRibbons.reduce((acc, {templateId, ribbonId}) => {
+            acc[templateId] = ribbonId;
+            return acc;
+        }, {});
         // Inverting the relationship so that we have all templates that have the same ribbon to reduce RPCs
-        const ribbonTemplates = Object.entries(finalTemplateRibbons).reduce(
-            (acc, [recordId, ribbonId]) => {
-                if (!acc[ribbonId]) {
-                    acc[ribbonId] = [];
-                }
-                acc[ribbonId].push(parseInt(recordId));
-                return acc;
-            }, {}
-        );
+        const ribbonTemplates = Object.entries(finalTemplateRibbons).reduce((acc, [templateId, ribbonId]) => {
+            if (!acc[ribbonId]) {
+                acc[ribbonId] = [];
+            }
+            acc[ribbonId].push(parseInt(templateId));
+            return acc;
+        }, {});
         const setProductTemplateRibbons = Object.entries(ribbonTemplates)
             // If the ribbonId that the template had no longer exists, remove the ribbon (id = false)
-            .map(([ribbonId, recordId]) => {
+            .map(([ribbonId, templateIds]) => {
                 const id = currentIds.includes(parseInt(ribbonId)) ? ribbonId : false;
-                return [id, recordId];
-            }).map(([ribbonId, recordId]) => this.orm.write(
-                this.recordModel,
-                recordId,
+                return [id, templateIds];
+            }).map(([ribbonId, templateIds]) => this.orm.write(
+                'product.template',
+                templateIds,
                 {'website_ribbon_id': localToServer[ribbonId].id},
             ));
         return Promise.all(setProductTemplateRibbons);
@@ -182,17 +178,8 @@ patch(WysiwygAdapterComponent.prototype, {
      * @private
      */
     _onSetProductRibbon(ev) {
-        const {recordId, ribbonId} = ev.data;
-        this.productTemplatesRibbons.push({recordId, ribbonId});
-    },
-    /**
-     * Sets the model of the record.
-     *
-     * @private
-     */
-    _onSetRecordModel(ev) {
-        const {model} = ev.data;
-        this.recordModel = model;
+        const {templateId, ribbonId} = ev.data;
+        this.productTemplatesRibbons.push({templateId, ribbonId});
     },
     /**
      * @override
@@ -204,7 +191,6 @@ patch(WysiwygAdapterComponent.prototype, {
             delete_ribbon: this._onDeleteRibbon.bind(this),
             set_ribbon: this._onSetRibbon.bind(this),
             set_product_ribbon: this._onSetProductRibbon.bind(this),
-            set_record_model: this._onSetRecordModel.bind(this),
         }
         if (methods[ev.name]) {
             return methods[ev.name](ev);

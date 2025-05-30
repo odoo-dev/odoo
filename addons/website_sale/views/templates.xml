@@ -239,6 +239,8 @@
                     <t t-set="bg_class" t-value="ribbon._get_css_classes()"/>
                     <span
                         t-att-data-ribbon-id="ribbon.id"
+                        t-att-data-record-id="ribbon_record_id"
+                        data-record-model="product.template"
                         t-attf-class="o_ribbons o_not_editable #{bg_class}"
                         t-attf-style="#{text_color and ('color: %s;' % text_color)} #{bg_color and 'background-color:' + bg_color}"
                         t-out="ribbon.name or ''"
@@ -653,6 +655,7 @@
                                                     t-set="ribbon"
                                                     t-value="td_product['product'].product_variant_id.sudo()._get_ribbon(template_price_vals)"
                                                 />
+                                                <t t-set="ribbon_record_id" t-value="td_product['product']['id']"/>
                                                 <div
                                                     t-attf-class="oe_product {{col_is_custom_portrait and 'oe_product_custom_portrait'}} {{col_class}} {{col_class_md}} {{col_class_lg}} {{col_is_stretched and 'oe_product_size_stretch'}}"
                                                     t-attf-style="--o-wsale-products-grid-product-col-height: {{col_height}};"
@@ -3394,6 +3397,7 @@
             t-set="ribbon"
             t-value="product_variant._get_ribbon(combination_info)"
         />
+        <t t-set="ribbon_record_id" t-value="product_variant.product_tmpl_id.id"/>
         <t t-set="bg_color" t-value="ribbon['bg_color'] or ''"/>
         <t t-set="text_color" t-value="ribbon['text_color']"/>
         <t t-set="bg_class" t-value="ribbon._get_css_classes()"/>
@@ -3417,6 +3421,8 @@
                     t-attf-style="#{text_color and ('color: %s; ' % text_color)}#{bg_color and 'background-color:' + bg_color}"
                     t-out="ribbon['name'] or ''"
                     t-att-data-ribbon-id="ribbon['id']"
+                    t-att-data-record-id="ribbon_record_id"
+                    data-record-model="product.template"
                 />
             <span
                 t-field="product_image.image_1920"
@@ -3464,6 +3470,8 @@
                     t-attf-style="#{text_color and ('color: %s; ' % text_color)}#{bg_color and 'background-color:' + bg_color}"
                     t-out="ribbon['name'] or ''"
                     t-att-data-ribbon-id="ribbon['id']"
+                    t-att-data-record-id="ribbon_record_id"
+                    data-record-model="product.template"
                 />
                 <div class="carousel-inner h-100">
                     <t t-set="image_classes" t-value="'d-flex align-items-center justify-content-center h-100'"/>
@@ -3604,6 +3612,8 @@
                     t-attf-style="#{text_color and ('color: %s; ' % text_color)}#{bg_color and 'background-color:' + bg_color}"
                     t-out="ribbon['name'] or ''"
                     t-att-data-ribbon-id="ribbon['id']"
+                    t-att-data-record-id="ribbon_record_id"
+                    data-record-model="product.template"
                 />
                 <!-- One row for every two images -->
                 <t t-set="image_classes" t-value="'w-100'"/>

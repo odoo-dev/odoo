@@ -48,7 +48,7 @@ class ProductPageOptionPlugin extends Plugin {
         },
         patch_builder_options: [
             {
-                target_name: 'ProductsRibbonOption',
+                target_name: 'websiteSaleRibbonOption',
                 target_element: 'selector',
                 method: 'add',
                 value: productPageSelector,
