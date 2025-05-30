@@ -1,3 +1,4 @@
+import base64
 import requests
 
 from odoo import models, fields, _, api, modules, tools
@@ -22,7 +23,7 @@ class AccountMove(models.Model):
                 - Validated: Sent & validated by the SPV
                 - Error: Sending error or validation error from the SPV""",
     )
-    l10n_ro_edi_attachment_id = fields.Many2one(comodel_name='ir.attachment')
+    l10n_ro_edi_attachment_file = fields.Binary()
     l10n_ro_edi_index = fields.Char(string='E-Factura Index', readonly=True)
 
     ################################################################################
@@ -61,6 +62,7 @@ class AccountMove(models.Model):
             'name': f"ciusro_signature_{self.name.replace('/', '_')}.xml",
             'res_model': res_model,
             'res_id': res_id,
+            'res_field': 'attachment_file',
             'raw': raw,
             'type': 'binary',
             'mimetype': 'application/xml',
@@ -82,7 +84,7 @@ class AccountMove(models.Model):
             res_model=document._name,
             res_id=document.id,
         )
-        document.attachment_id = self.env['ir.attachment'].sudo().create(attachment_values)
+        self.env['ir.attachment'].sudo().create(attachment_values)
         return document
 
     def _l10n_ro_edi_create_document_invoice_sending_failed(self, values: dict):
@@ -109,7 +111,7 @@ class AccountMove(models.Model):
                 res_model=document._name,
                 res_id=document.id,
             )
-            document.attachment_id = self.env['ir.attachment'].sudo().create(attachment_values)
+            self.env['ir.attachment'].sudo().create(attachment_values)
         return document
 
     def _l10n_ro_edi_create_document_invoice_validated(self, values: dict):
@@ -126,8 +128,8 @@ class AccountMove(models.Model):
             'key_signature': values['key_signature'],
             'key_certificate': values['key_certificate'],
         })
-        attachment = self.env['ir.attachment'].sudo().create(self._l10n_ro_edi_create_attachment_values(values['attachment_raw']))
-        document.attachment_id = self.l10n_ro_edi_attachment_id = attachment
+        self.env['ir.attachment'].sudo().create(self._l10n_ro_edi_create_attachment_values(values['attachment_raw'], document._name, document.id))
+        self.l10n_ro_edi_attachment_file = base64.b64encode(values['attachment_raw'])
         return document
 
     def _l10n_ro_edi_get_attachment_file_name(self):
