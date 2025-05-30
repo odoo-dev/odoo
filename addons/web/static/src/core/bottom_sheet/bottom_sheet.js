@@ -380,6 +380,8 @@ export class BottomSheet extends Component {
                 // Enable content scrolling
                 if (this.sheetBodyRef.el) {
                     this.sheetBodyRef.el.style.overflow = "auto";
+                    // TODO break scrolling
+                    // this.sheetBodyRef.el.style.containerType = "scroll-state size";
                 }
             }
         }
