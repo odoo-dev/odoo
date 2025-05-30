@@ -357,9 +357,39 @@ export class SelectionPlugin extends Plugin {
      *
      * @return { EditorSelection }
      */
+    // createEditorSelection(anchorNode, anchorOffset, focusNode, focusOffset, direction) {
+    //     let startContainer, startOffset, endContainer, endOffset;
+    //     const range = new Range();
+    //     if (direction) {
+    //         [startContainer, startOffset] = [anchorNode, anchorOffset];
+    //         [endContainer, endOffset] = [focusNode, focusOffset];
+    //     } else {
+    //         [startContainer, startOffset] = [focusNode, focusOffset];
+    //         [endContainer, endOffset] = [anchorNode, anchorOffset];
+    //     }
+
+    //     range.setStart(startContainer, startOffset);
+    //     range.setEnd(endContainer, endOffset);
+    //     return Object.freeze({
+    //         ...this.activeSelection,
+    //         anchorNode,
+    //         anchorOffset,
+    //         focusNode,
+    //         focusOffset,
+    //         startContainer,
+    //         startOffset,
+    //         endContainer,
+    //         endOffset,
+    //         commonAncestorContainer: range.commonAncestorContainer,
+    //         cloneContents: () => range.cloneContents(),
+    //     });
+    // }
     createEditorSelection(anchorNode, anchorOffset, focusNode, focusOffset, direction) {
+        // console.log("testing...........................................");
+
         let startContainer, startOffset, endContainer, endOffset;
         const range = new Range();
+
         if (direction) {
             [startContainer, startOffset] = [anchorNode, anchorOffset];
             [endContainer, endOffset] = [focusNode, focusOffset];
@@ -368,14 +398,28 @@ export class SelectionPlugin extends Plugin {
             [endContainer, endOffset] = [anchorNode, anchorOffset];
         }
 
+        // Clamp offsets to the max length of their respective nodes
+        const getClampedOffset = (node, offset) => {
+            if (node.nodeType === Node.TEXT_NODE) {
+                return Math.min(offset, node.nodeValue.length);
+            } else if (node.childNodes.length > 0) {
+                return Math.min(offset, node.childNodes.length);
+            }
+            return 0;
+        };
+
+        startOffset = getClampedOffset(startContainer, startOffset);
+        endOffset = getClampedOffset(endContainer, endOffset);
+
         range.setStart(startContainer, startOffset);
         range.setEnd(endContainer, endOffset);
+
         return Object.freeze({
             ...this.activeSelection,
             anchorNode,
-            anchorOffset,
+            anchorOffset: startOffset,
             focusNode,
-            focusOffset,
+            focusOffset: endOffset,
             startContainer,
             startOffset,
             endContainer,
@@ -384,6 +428,7 @@ export class SelectionPlugin extends Plugin {
             cloneContents: () => range.cloneContents(),
         });
     }
+
     /**
      @return { EditorSelection }
      */
