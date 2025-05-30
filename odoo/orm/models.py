@@ -5148,7 +5148,6 @@ class BaseModel(metaclass=MetaModel):
             seen_map[record._name].add(record.id)
 
             vals = default.copy()
-
             for name, field in fields_to_copy.items():
                 if field.type == 'one2many':
                     # duplicate following the order of the ids because we'll rely on

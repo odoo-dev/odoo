@@ -22,6 +22,7 @@ class SpreadsheetMixin(models.AbstractModel):
     spreadsheet_binary_data = fields.Binary(
         string="Spreadsheet file",
         default=lambda self: self._empty_spreadsheet_data_base64(),
+        copy=True,
     )
     spreadsheet_data = fields.Text(compute='_compute_spreadsheet_data', inverse='_inverse_spreadsheet_data')
     spreadsheet_file_name = fields.Char(compute='_compute_spreadsheet_file_name')
