@@ -5,18 +5,18 @@ import { reactive } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { ProductsRibbonOption } from "./product_ribbon_options";
+import { ribbonOption } from "./ribbon_option";
 
-class ProductsRibbonOptionPlugin extends Plugin {
-    static id = 'productsRibbonOptionPlugin';
+class ribbonOptionPlugin extends Plugin {
+    static id = 'ribbonOptionPlugin';
     static dependencies = ['history'];
     count = reactive({ value: 0 });
 
     resources = {
         builder_options: [
             withSequence(SNIPPET_SPECIFIC_NEXT, {
-                OptionComponent: ProductsRibbonOption,
-                name: 'ProductsRibbonOption',
+                OptionComponent: ribbonOption,
+                name: 'ribbonOption',
                 props: {
                     loadInfo: this.loadInfo.bind(this),
                     count: this.count,
@@ -32,7 +32,7 @@ class ProductsRibbonOptionPlugin extends Plugin {
     setup() {
         this.positionClasses = { left: "o_left", right: "o_right" };
         this.styleClasses = { ribbon: "o_ribbon", tag: "o_tag" };
-        this.productTemplatesRibbons = [];
+        this.recordRibbons = [];
         this.editMode = false;
     }
 
@@ -50,13 +50,11 @@ class ProductsRibbonOptionPlugin extends Plugin {
                     return match === value;
                 },
                 apply: ({ editingElement, value }) => {
-                    this.productTemplateID = parseInt(
-                        editingElement
-                            .querySelector('[data-oe-model="product.template"]')
-                            .getAttribute("data-oe-id")
+                    this.recordId = parseInt(
+                        editingElement.querySelector('.o_ribbons').dataset.recordId,
                     );
-                    this.productTemplatesRibbons.push({
-                        templateId: this.productTemplateID,
+                    this.recordRibbons.push({
+                        id: this.recordId,
                         ribbonId: value,
                     });
 
@@ -78,14 +76,12 @@ class ProductsRibbonOptionPlugin extends Plugin {
             },
             createRibbon: {
                 apply: ({ editingElement }) => {
-                    this.productTemplateID = parseInt(
-                        editingElement
-                            .querySelector('[data-oe-model="product.template"]')
-                            .getAttribute("data-oe-id")
+                    this.recordId = parseInt(
+                        editingElement.querySelector('.o_ribbons').dataset.recordId,
                     );
                     const ribbonId = Date.now();
-                    this.productTemplatesRibbons.push({
-                        templateId: this.productTemplateID,
+                    this.recordRibbons.push({
+                        id: this.recordId,
                         ribbonId: ribbonId,
                     });
                     const ribbon = reactive({
@@ -203,10 +199,10 @@ class ProductsRibbonOptionPlugin extends Plugin {
             ribbonElement.style.color = ribbon.text_color || "";
         }
 
-        return save ? await this._saveRibbons() : "";
+        return save ? await this._saveRibbons(editingElement.dataset.recordModel) : "";
     }
 
-    async _saveRibbons() {
+    async _saveRibbons(resModel) {
         const originalIds = Object.keys(this.originalRibbons).map((id) => parseInt(id));
         const currentIds = this.ribbons.map((ribbon) => parseInt(ribbon.id));
         const created = this.ribbons.filter((ribbon) => !originalIds.includes(ribbon.id));
@@ -270,28 +266,28 @@ class ProductsRibbonOptionPlugin extends Plugin {
 
         await Promise.all(proms);
 
-        // Building the final template to ribbon-id map so that we can remove duplicate entries
-        const finalTemplateRibbons = this.productTemplatesRibbons.reduce(
-            (acc, { templateId, ribbonId }) => {
-                acc[templateId] = ribbonId;
+        // Building the final record to ribbon-id map so that we can remove duplicate entries
+        const finalRecordRibbons = this.recordRibbons.reduce(
+            (acc, { id, ribbonId }) => {
+                acc[id] = ribbonId;
                 return acc;
             }, {},
         );
-        // Inverting the relationship so that we have all templates that have the same ribbon to
+        // Inverting the relationship so that we have all records that have the same ribbon to
         // reduce RPCs
-        const ribbonTemplates = {};
-        for (const [templateId, ribbonId] of Object.entries(finalTemplateRibbons)) {
-            const rid = ribbonTemplates[ribbonId] ||= [];
-            rid.push(parseInt(templateId));
+        const ribbonRecords = {};
+        for (const [id, ribbonId] of Object.entries(finalRecordRibbons)) {
+            const rid = ribbonRecords[ribbonId] ||= [];
+            rid.push(parseInt(id));
         }
 
         const promises = [];
-        for (const ribbonId in ribbonTemplates) {
-            const templateIds = ribbonTemplates[ribbonId];
+        for (const ribbonId in ribbonRecords) {
+            const id = ribbonRecords[ribbonId];
             const parsedId = parseInt(ribbonId);
             const validRibbonId = currentIds.includes(parsedId) ? ribbonId : false;
             promises.push(
-                this.services.orm.write("product.template", templateIds, {
+                this.services.orm.write(resModel, id, {
                     website_ribbon_id: localToServer[validRibbonId]?.id || false,
                 })
             );
@@ -318,28 +314,25 @@ class ProductsRibbonOptionPlugin extends Plugin {
             this.count.value++;
         }
         const isProductPage = editingElement.ownerDocument.querySelector('#product_detail');
-        this.productTemplateID = parseInt(
-            editingElement
-                .querySelector('[data-oe-model="product.template"]')
-                .getAttribute("data-oe-id")
-        );
+        const ribbonData = editingElement.querySelector('.o_ribbons').dataset
+        this.recordId = parseInt(ribbonData.recordId);
         const ribbons = editingElement.ownerDocument.querySelectorAll(
             `[data-ribbon-id="${ribbonId}"]`
         );
         ribbons.forEach((ribbonElement) => {
             ribbonElement.classList.add("d-none");
             ribbonElement.dataset.ribbonId = "";
-            this.productTemplatesRibbons.push({
-                templateId: isProductPage
-                    ? this.productTemplateID
-                    : parseInt(ribbonElement.previousElementSibling.dataset.oeId),
+            this.recordRibbons.push({
+                id: isProductPage
+                    ? this.recordId
+                    : parseInt(ribbonElement.dataset.recordId),
                 ribbonId: false,
             });
         });
-        this._saveRibbons();
+        this._saveRibbons(ribbonData.recordModel);
     }
 }
 
 registry.category('website-plugins').add(
-    ProductsRibbonOptionPlugin.id, ProductsRibbonOptionPlugin,
+    ribbonOptionPlugin.id, ribbonOptionPlugin,
 );

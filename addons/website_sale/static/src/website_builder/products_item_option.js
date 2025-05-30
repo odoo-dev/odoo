@@ -7,7 +7,6 @@ export class ProductsItemOption extends BaseOptionComponent {
     static props = {
         loadInfo: Function,
         itemSize: Object,
-        count: Object,
     };
 
     setup() {
