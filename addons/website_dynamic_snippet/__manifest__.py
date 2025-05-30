@@ -16,6 +16,9 @@
         "web.assets_frontend": [
             "website_dynamic_snippet/static/src/snippets/**/*",
         ],
+        "web.assets_tests": [
+            "website_dynamic_snippet/static/tests/tours/**/*",
+        ],
     },
     "installable": True,
     "auto_install": True,

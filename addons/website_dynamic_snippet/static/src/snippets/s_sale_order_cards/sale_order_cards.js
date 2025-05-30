@@ -27,10 +27,11 @@ export class SaleOrderCards extends Interaction {
 
     renderOrders() {
         const target = this.el.querySelector("#sale_order_cards_container");
+        target.innerHTML = "";
         const displayType = this.el.dataset.displayType ?? "card";
         const templateName = `website_dynamic_snippet.s_sale_order_cards.${displayType}`;
         if (this.orders.length) {
-            this.renderAt(templateName, { orders: this.orders }, target, "afterbegin");
+            this.renderAt(templateName, { orders: this.orders }, target);
         }
     }
 
