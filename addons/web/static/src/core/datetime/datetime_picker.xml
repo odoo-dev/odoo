@@ -46,9 +46,6 @@
                 </t>
             </div>
         </t>
-        <div class="o_datetime_buttons d-flex justify-content-end">
-            <t t-slot="buttons" />
-        </div>
     </t>
 
     <t t-name="web.DateTimePicker.Grid">
@@ -88,6 +85,7 @@
                             class="o_date_picker_input o_input form-control fs-6"
                             t-att-placeholder="props.range ? dateString : 'Date'"
                             t-att-value="dateValue ? dateValue.toFormat(props.dateFormat) : ''"
+                            t-on-focus="(ev) => ev.target.select()"
                             t-on-change="(ev) => this.onDateInputChange(dateValue_index, ev.target.value)"
                         />
                     </t>
