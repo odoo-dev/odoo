@@ -1005,8 +1005,6 @@ class PosOrder(models.Model):
             'date_order': fields.Datetime.now(),
             'pos_reference': self.pos_reference,
             'lines': False,
-            'amount_tax': -self.amount_tax,
-            'amount_total': -self.amount_total,
             'amount_paid': 0,
             'is_total_cost_computed': False
         }
@@ -1035,11 +1033,13 @@ class PosOrder(models.Model):
             refund_order = order.copy(
                 order._prepare_refund_values(current_session)
             )
-            for line in order.lines:
+            for line in order.lines.filtered(lambda l: l.refunded_qty < l.qty):
                 PosOrderLineLot = self.env['pos.pack.operation.lot']
                 for pack_lot in line.pack_lot_ids:
                     PosOrderLineLot += pack_lot.copy()
-                line.copy(line._prepare_refund_data(refund_order, PosOrderLineLot))
+                refund_line = line.copy(line._prepare_refund_data(refund_order, PosOrderLineLot))
+                refund_line.update(refund_line._compute_amount_line_all())
+            refund_order._compute_batch_amount_all()
             refund_orders |= refund_order
 
         return {
@@ -1228,8 +1228,6 @@ class PosOrderLine(models.Model):
             'name': self.name + _(' REFUND'),
             'qty': -(self.qty - self.refunded_qty),
             'order_id': refund_order.id,
-            'price_subtotal': -self.price_subtotal,
-            'price_subtotal_incl': -self.price_subtotal_incl,
             'pack_lot_ids': PosOrderLineLot,
             'is_total_cost_computed': False,
             'refunded_orderline_id': self.id,
