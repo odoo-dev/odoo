@@ -3,9 +3,7 @@ import {
     clickOnSnippet,
     insertSnippet,
     registerWebsitePreviewTour,
-    clickOnEditAndWaitEditMode,
     clickOnSave,
-    clickOnElement,
 } from '@website/js/tours/tour_utils';
 
 registerWebsitePreviewTour("snippet_sale_order_cards", {
@@ -47,10 +45,7 @@ registerWebsitePreviewTour("snippet_sale_order_cards", {
         run: `click`,
     },
     {
-        content: "Check for load more button applied",
-        trigger: ":iframe #sale_order_cards_container",
-        run: function () {
-            return this.anchor.childElementCount === 30;
-        },
+        content: "Check for expected number of orders loaded",
+        trigger: ':iframe #sale_order_cards_container > :nth-child(25)',
     },
 ]);

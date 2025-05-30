@@ -4,7 +4,7 @@ import { SaleOrderCards } from "./sale_order_cards"
 const SaleOrderCardsPreview = I => class extends I {
     dynamicContent = {
         _root: {
-            "t-on-mouseenter": ()=> {
+            "t-on-mouseenter": () => {
                 this.el.style.backgroundColor = "#f0f0f0"
             },
             "t-on-mouseleave": () => {
