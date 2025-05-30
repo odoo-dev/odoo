@@ -66,6 +66,7 @@
         'views/snippets/s_card.xml',
         'views/snippets/s_cards_grid.xml',
         'views/snippets/s_cards_soft.xml',
+        'views/snippets/s_chatgpt.xml',
         'views/snippets/s_share.xml',
         'views/snippets/s_social_media.xml',
         'views/snippets/s_rating.xml',

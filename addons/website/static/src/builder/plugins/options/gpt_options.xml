@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="website_chatgpt.ChatGPTOptions">
+        <BuilderContext>
+            <BuilderRow label="Button Text">
+                <BuilderInput action="'setButtonText'"/>
+            </BuilderRow>
+        </BuilderContext>
+    </t>
+</templates>

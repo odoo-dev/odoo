@@ -40,6 +40,9 @@
             </snippets>
 
             <snippets id="snippet_structure" string="Structure">
+                <t t-snippet="website.s_chatgpt" string="ChatGPT Widget" group="text">
+                    <keywords>chatgpt, chatbot, AI, widget, interaction, conversation, support, assistance</keywords>
+                </t>
 
                 <!-- Intro group -->
                 <t t-snippet="website.s_banner" string="Banner" group="intro">

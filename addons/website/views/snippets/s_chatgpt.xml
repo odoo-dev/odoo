@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="s_chatgpt" name="ChatGPT Widget">
+        <section class="s_chatgpt" style="background: linear-gradient(135deg, #232526 0%, #414345 100%); padding: 40px 0;">
+            <div class="container" style="max-width: 500px; background: #fff; border-radius: 18px; box-shadow: 0 8px 32px 0 rgba(31,38,135,0.15); padding: 32px;">
+                <h2 style="text-align:center; color:#232526; font-weight:700; margin-bottom:24px; letter-spacing:1px;">
+                    <i class="fa fa-comments" style="color:#5e72e4; margin-right:10px;"></i>
+                    Ask ChatGPT
+                </h2>
+                <textarea class="chatgpt-input" style="width:100%; min-height:80px; border-radius:10px; border:1px solid #e0e0e0; padding:12px; font-size:16px; margin-bottom:16px; resize:vertical; box-shadow:0 2px 8px rgba(94,114,228,0.05);"></textarea>
+                <button class="chatgpt-send" style="width:100%; background:linear-gradient(90deg,#5e72e4 0%,#825ee4 100%); color:#fff; border:none; border-radius:8px; padding:12px 0; font-size:16px; font-weight:600; box-shadow:0 2px 8px rgba(94,114,228,0.15); transition:background 0.2s;">
+                    <i class="fa fa-paper-plane" style="margin-right:8px;"></i>Send
+                </button>
+                <div class="chatgpt-response" style="margin-top:24px; background:#f7f8fa; border-radius:8px; min-height:40px; padding:16px; color:#232526; font-size:15px; box-shadow:0 1px 4px rgba(94,114,228,0.07);"></div>
+            </div>
+        </section>
+    </template>
+</odoo>
