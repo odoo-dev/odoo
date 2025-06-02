@@ -258,6 +258,7 @@ export class BottomSheet extends Component {
 
         // Set scroll position
         scrollRail.scrollTop = scrollValue || 0;
+        scrollRail.style.containerType = "scroll-state size";
     }
 
     /**

@@ -46,6 +46,12 @@
         &.o_bottom_sheet_rail_prevent_overscroll * {
             overscroll-behavior: contain;
         }
+
+        &::after {
+            @container scroll-state(scrollable: bottom) {
+                @include has-more-content-visual;
+            }
+        }
     }
 
     // Set snapping behaviors
@@ -103,12 +109,6 @@
             scrollbar-width: none;
             -ms-overflow-style: none;
             flex: 1;
-
-            &::after {
-                @container scroll-state(scrollable: bottom) {
-                    @include has-more-content-visual;
-                }
-            }
         }
     }
 
