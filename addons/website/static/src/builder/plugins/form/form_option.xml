@@ -221,6 +221,13 @@
             default="{ display_name: state.valueList.defaultItemName, selected: false }"
         />
     </BuilderRow>
+    <BuilderRow label.translate="Add Other">
+        <BuilderCheckbox
+            title.translate="Allow People to add their own option"
+            action="'toggleAddOther'"
+            preview="false"
+        />
+    </BuilderRow>
     <BuilderRow label.translate="Visibility">
         <BuilderSelect preview="false" action="'setVisibility'">
             <BuilderSelectItem actionValue="'visible'" classAction="''">Always Visible</BuilderSelectItem>
