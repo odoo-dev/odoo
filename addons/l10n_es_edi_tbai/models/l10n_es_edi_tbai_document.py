@@ -59,8 +59,15 @@ class L10n_Es_Edi_TbaiDocument(models.Model):
     xml_attachment_id = fields.Many2one(
         comodel_name='ir.attachment',
         string="XML Attachment",
+        compute='_compute_linked_attachment_id',
         copy=False,
         readonly=True,
+    )
+    xml_attachment_file = fields.Binary(
+        string="XML File",
+    )
+    xml_attachment_filename = fields.Char(
+        string="XML Filename",
     )
     company_id = fields.Many2one(
         'res.company',
@@ -90,6 +97,21 @@ class L10n_Es_Edi_TbaiDocument(models.Model):
         default=False,
         readonly=True,
     )
+
+    @api.depends('xml_attachment_file')
+    def _compute_linked_attachment_id(self):
+        """Helper to retreive Attachment from Binary fields
+        This is needed because fields.Many2one('ir.attachment') makes all
+        attachments available to the user.
+        """
+        attachments = self.env['ir.attachment'].search([
+            ('res_model', '=', self._name),
+            ('res_id', 'in', self.ids),
+            ('res_field', '=', 'xml_attachment_file'),
+        ])
+        edi_docs = {att.res_id: att for att in attachments}
+        for doc in self:
+            doc['xml_attachment_id'] = edi_docs.get(doc._origin.id, False)
 
     # -------------------------------------------------------------------------
     # HELPER METHODS
@@ -364,12 +386,17 @@ class L10n_Es_Edi_TbaiDocument(models.Model):
             xml_doc = self._generate_purchase_document_xml_bi(values)
 
         if xml_doc is not None:
-            self.sudo().xml_attachment_id = self.env['ir.attachment'].create({
+            attachment = self.env['ir.attachment'].sudo().create({
                 'name': values['attachment_name'],
                 'raw': etree.tostring(xml_doc, encoding='UTF-8'),
                 'type': 'binary',
-                'res_model': values['res_model'],
-                'res_id': values['res_id'],
+                'res_model': self._name,
+                'res_id': self.id,
+                'res_field': 'xml_attachment_file',
+            })
+            self.sudo().write({
+                'xml_attachment_filename': values['attachment_name'],
+                'xml_attachment_id': attachment,
             })
 
     @api.model
