@@ -15,7 +15,7 @@ from psycopg2.extras import Json
 from odoo import api, fields, models, tools
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Command, Domain
-from odoo.tools import reset_cached_properties, split_every, sql, unique, OrderedSet, SQL
+from odoo.tools import reset_cached_properties, split_every, sql, unique, OrderedSet, SQL, frozendict
 from odoo.tools.safe_eval import safe_eval, datetime, dateutil, time
 from odoo.tools.translate import _, LazyTranslate
 
@@ -819,11 +819,8 @@ class IrModelFields(models.Model):
         field_id = model_name and name and self._get_ids(model_name).get(name)
         return self.sudo().browse(field_id)
 
-    @tools.ormcache('model_name')
     def _get_ids(self, model_name):
-        cr = self.env.cr
-        cr.execute("SELECT name, id FROM ir_model_fields WHERE model=%s", [model_name])
-        return dict(cr.fetchall())
+        return {field_name: values['id'] for field_name, values in self._get_fields_cached(model_name).items()}
 
     def _drop_column(self):
         from odoo.orm.model_classes import pop_field
@@ -1308,7 +1305,6 @@ class IrModelFields(models.Model):
         return name.startswith('x_')
 
     @api.model
-    @tools.ormcache_context('model_name', keys=('lang',))
     def get_field_string(self, model_name):
         """ Return the translation of fields strings in the context's language.
         Note that the result contains the available translations only.
@@ -1316,11 +1312,9 @@ class IrModelFields(models.Model):
         :param model_name: the name of a model
         :return: the model's fields' strings as a dictionary `{field_name: field_string}`
         """
-        fields = self.sudo().search([('model', '=', model_name)])
-        return {field.name: field.field_description for field in fields}
+        return {field_name: values['field_description'] for field_name, values in self._get_fields_cached(model_name).items()}
 
     @api.model
-    @tools.ormcache_context('model_name', keys=('lang',))
     def get_field_help(self, model_name):
         """ Return the translation of fields help in the context's language.
         Note that the result contains the available translations only.
@@ -1328,8 +1322,7 @@ class IrModelFields(models.Model):
         :param model_name: the name of a model
         :return: the model's fields' help as a dictionary `{field_name: field_help}`
         """
-        fields = self.sudo().search([('model', '=', model_name)])
-        return {field.name: field.help for field in fields}
+        return {field_name: values['help'] for field_name, values in self._get_fields_cached(model_name).items()}
 
     @api.model
     def get_field_selection(self, model_name, field_name):
@@ -1340,21 +1333,49 @@ class IrModelFields(models.Model):
         :param field_name: the name of the field
         :return: the fields' selection as a list
         """
-        return self._get_fields_selection(model_name).get(field_name, [])
+        return self._get_fields_cached(model_name).get(field_name, {}).get('selection', [])
 
     @api.model
     @tools.ormcache_context('model_name', keys=('lang',))
-    def _get_fields_selection(self, model_name):
-        """ Return the translation of all model field's selection in the context's language.
+    def _get_fields_cached(self, model_name):
+        """ Return the translated information of all model field's in the context's language.
         Note that the result contains the available translations only.
 
         :param model_name: the name of the field's model
-        :return: the fields' selection as a list
+        :return: {field_name: {id, selection, help, field_description}}
         """
-        return {
-            field.name: [(sel.value, sel.name) for sel in field.selection_ids]
-            for field in self.sudo().search_fetch([('model', '=', model_name), ('ttype', '=', 'selection')], ['name', 'selection_ids'])
-        }
+        rows = self.env.execute_query(SQL("""
+                SELECT
+                    "f"."id" AS field_id,
+                    %(field_name)s AS field_name,
+                    %(help)s AS help,
+                    %(field_description)s AS field_description,
+                    json_agg(
+                        json_build_array(%(selection_value)s, %(selection_name)s)
+                        ORDER BY "sel"."sequence", "sel"."id"
+                    ) AS selection
+                FROM "ir_model_fields" AS f
+                LEFT JOIN "ir_model_fields_selection" AS sel ON "sel"."field_id" = "f"."id"
+                WHERE "f"."model"=%(model)s
+                GROUP BY "f"."id"
+                ORDER BY "f"."id"
+            """,
+            field_name=self._field_to_sql('f', 'name'),
+            help=self._field_to_sql('f', 'help'),
+            field_description=self._field_to_sql('f', 'field_description'),
+            selection_name=self.env['ir.model.fields.selection']._field_to_sql('sel', 'name'),
+            selection_value=self.env['ir.model.fields.selection']._field_to_sql('sel', 'value'),
+            model=model_name
+        ))
+        return frozendict({
+            field_name: {
+                'id': field_id,
+                'selection': selection if len(selection) and selection[0][0] else None,
+                'help': help,
+                'field_description': field_description,
+            }
+            for field_id, field_name, help, field_description, selection in rows
+        })
 
 
 class IrModelInherit(models.Model):
