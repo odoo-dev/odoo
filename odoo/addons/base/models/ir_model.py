@@ -1332,7 +1332,6 @@ class IrModelFields(models.Model):
         return {field.name: field.help for field in fields}
 
     @api.model
-    @tools.ormcache_context('model_name', 'field_name', keys=('lang',))
     def get_field_selection(self, model_name, field_name):
         """ Return the translation of a field's selection in the context's language.
         Note that the result contains the available translations only.
@@ -1341,8 +1340,21 @@ class IrModelFields(models.Model):
         :param field_name: the name of the field
         :return: the fields' selection as a list
         """
-        field = self._get(model_name, field_name)
-        return [(sel.value, sel.name) for sel in field.selection_ids]
+        return self._get_fields_selection(model_name).get(field_name, [])
+
+    @api.model
+    @tools.ormcache_context('model_name', keys=('lang',))
+    def _get_fields_selection(self, model_name):
+        """ Return the translation of all model field's selection in the context's language.
+        Note that the result contains the available translations only.
+
+        :param model_name: the name of the field's model
+        :return: the fields' selection as a list
+        """
+        return {
+            field.name: [(sel.value, sel.name) for sel in field.selection_ids]
+            for field in self.sudo().search_fetch([('model', '=', model_name), ('ttype', '=', 'selection')], ['name', 'selection_ids'])
+        }
 
 
 class IrModelInherit(models.Model):
