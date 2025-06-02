@@ -76,6 +76,21 @@
         <div t-if="default_description" class="s_website_form_field_description small form-text text-muted" contenteditable="true">
             <t t-esc="default_description"/>
         </div>
+
+        <div t-if="addOther" class="s_website_form_add_other form-text">
+            <input
+                type="text"
+                class="form-control s_website_form_input"
+                t-att-value="field.value"
+                t-att-placeholder="field.placeholder || 'Add other...'"
+            />
+        </div>
+    </t>
+
+    <t t-name="website.form_add_other_option">
+        <t t-call="website.form_field">
+
+        </t>
     </t>
 
     <!-- Hidden Field -->
