@@ -8,7 +8,7 @@
                 'o_bottom_sheet_extended': state.isExtended,
                 'o_bottom_sheet_dismissing': state.isDismissing,
                 'o_bottom_sheet_snapping': state.isSnappingEnabled,
-                'o_bottom_sheet_nested': props.hasParent,
+                'o_bottom_has_more_content': measurements.contentRequiresScrolling,
             }"
             t-attf-style="--BottomSheet-progress: {{state.progress}}"
             t-ref="container"
@@ -43,7 +43,7 @@
                         t-ref="sheetHandle"
                         role="button"
                         class="o_bottom_sheet_handle text-center d-flex align-items-center justify-content-center opacity-50 pt-2 pb-1"
-                        t-on-click.stop="state.isExtended ? collapseSheet : expandSheet"
+                        t-on-click.stop="slideOut"
                         >
                         <div class="o_bottom_sheet_handle_bar pt-1 mx-auto rounded-pill d-inline-block px-5 opacity-25"/>
                     </div>

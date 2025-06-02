@@ -74,7 +74,7 @@
 
     // Spacer area
     .o_bottom_sheet_spacer {
-        height: calc(100dvh - var(--sheet-initial-height, 50dvh));
+        height: calc(100dvh - var(--sheet-height, 50dvh));
         pointer-events: none;
     }
 
@@ -83,7 +83,7 @@
         --offcanvas-box-shadow: #{$box-shadow};
 
         margin: 0 auto;
-        min-height: var(--sheet-initial-height);
+        min-height: var(--sheet-height);
         max-height: var(--sheet-max-height, 90dvh);
         border-radius: $border-radius-xl $border-radius-xl 0 0;
         border-bottom-width: 0;
@@ -153,7 +153,7 @@
         &:before {
             position: fixed;
             inset: auto auto 0 50%;
-            height: calc(var(--sheet-initial-height) - #{$border-radius-xl * 2});
+            height: calc(var(--sheet-height) - #{$border-radius-xl * 2});
             width: calc(100% - #{$border-width * 2});
             max-width: map-get($grid-breakpoints, sm) - ($border-width * 2);
             background: $offcanvas-bg-color;
@@ -166,9 +166,10 @@
     // The sheet reached the "extended" snap point
     &.o_bottom_sheet_extended {}
 
-    &:not(.o_bottom_sheet_extended)::after {
-        @include has-more-content-visual;
-    }
+    // TODO
+    //&:not(.o_bottom_sheet_extended)::after {
+    //    @include has-more-content-visual;
+    //}
 
     // Dismissing the sheet
     &.o_bottom_sheet_dismissing {
