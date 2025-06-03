@@ -3374,11 +3374,23 @@ class MailThread(models.AbstractModel):
             restricting_names=self._get_notify_valid_parameters()
         )
 
-        recipients_data = self._notify_get_recipients(message, **kwargs)
+        recipients_data = self._notify_get_recipients(message, msg_vals=False, **kwargs)
         # cache data fetched by manual query to avoid extra queries when reading user.partner_id
         uid2pid = {r['uid']: r['id'] for r in recipients_data if r['id'] and r['uid']}
         users = self.env['res.users'].browse(uid2pid)
         users._fields['partner_id']._insert_cache(users, uid2pid.values())
+
+        # cache message data to avoid extra queries when accessing already-given values
+        # cache_msg = self.env['mail.message'].browse(message.id)
+        # for fname, fvalue in (msg_vals or {}).items():
+        #     cache_msg._fields[fname]._insert_cache(cache_msg, [fvalue])
+        # # fillup values checked by lower methods, if not given
+        # if scheduled_date:
+        #     cache_msg._fields['message_schedule_ids']._insert_cache(cache_msg, schedule.ids)
+        # else:
+        #     cache_msg._fields['message_schedule_ids']._insert_cache(cache_msg, [])
+        # if 'tracking_value_ids' not in msg_vals:
+        #     cache_msg._fields['tracking_value_ids']._insert_cache(cache_msg, [])
 
         # check for automated content (OOO), before shortcutting if no recipients
         # as OOO may include more people (parent message author, responsible)
