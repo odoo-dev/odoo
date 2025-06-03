@@ -38,9 +38,11 @@ export class dynamicSnippetCategory extends Interaction{
 
         // Clear existing content and render with new values
         const categoryGrid = this.el.querySelector('.s_category_container');
-        categoryGrid.querySelectorAll('.category_item').forEach(el => {el.remove()});
-        categoryGrid.appendChild(
-            renderToFragment('website_sale.dynamic_filter_template_categories', {
+        const categoryWrapperEl = this.el.querySelector(".s_dynamic_category_wrapper");
+        const categoryTemplate = nodeData?.isClickable ? "website_sale.dynamic_filter_template_categories_clickable_items" : "website_sale.dynamic_filter_template_categories";
+        categoryWrapperEl.querySelectorAll(".category_item").forEach(el => {el.remove()});
+        categoryWrapperEl.appendChild(
+            renderToFragment(categoryTemplate, {
                 data: this.data,
                 ribbons: this.ribbons,
                 get_ribbon: this.get_ribbon,
@@ -80,6 +82,24 @@ export class dynamicSnippetCategory extends Interaction{
             const shouldSpanTwo = columns !== 1 &&
                 (['large', 'medium'].includes(nodeData.size) || columns === 5);
             allProducts.style.setProperty('grid-column', `span ${shouldSpanTwo ? 2 : 1}`);
+            const allProductsButtonEl = allProducts.querySelector(".s_dynamic_category_button");
+            const allProductsArrowEl = allProducts.querySelector(".s_dynamic_category_arrow");
+            const allProductsImgEl = allProducts.querySelector(".s_category_image");
+            const allProductsFilterEl = allProducts.querySelector(".s_category_filter");
+            const allProductsOverlayEl = allProducts.querySelector(".s_category_overlay");
+            const allProductsTitleEl = allProducts.querySelector("h3");
+            const isClickable = Boolean(nodeData.isClickable);
+            allProducts.classList.toggle("opacity-trigger-hover", isClickable);
+            allProductsButtonEl.classList.toggle("oe_unremovable", isClickable);
+            allProductsButtonEl.classList.toggle("stretched-link", isClickable);
+            allProductsButtonEl.classList.toggle("opacity-0", isClickable);
+            allProductsButtonEl.classList.toggle("p-0", isClickable);
+            allProductsButtonEl.classList.toggle("h-0", isClickable);
+            allProductsArrowEl.classList.toggle("d-none", !isClickable);
+            allProductsImgEl.classList.toggle("transition-base", isClickable);
+            allProductsFilterEl.classList.toggle("d-none", !isClickable);
+            allProductsOverlayEl.classList.toggle("z-0", isClickable);
+            allProductsTitleEl.classList.toggle("mb-0", isClickable);
         } else {
             allProducts.classList.add("d-none");
         }
