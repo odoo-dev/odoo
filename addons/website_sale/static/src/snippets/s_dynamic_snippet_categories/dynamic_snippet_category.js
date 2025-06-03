@@ -52,15 +52,9 @@ export class dynamicSnippetCategory extends Interaction{
 
         // Styling for grid
         const columns = uiUtils.isSmall()? 1 : parseInt(nodeData.columns);
-        if (columns == 1){
-            categoryGrid.style.setProperty(
-                'grid-template-columns', `100%`
-            );
-        }else{
-            categoryGrid.style.setProperty(
-                'grid-template-columns', `repeat(${columns}, calc((100% / ${columns}) - 0.7rem))`
-            );
-        }
+        categoryGrid.style.setProperty(
+            '--DynamicCategory-columns', `${columns}`
+        );
         categoryGrid.style.setProperty(
             'grid-auto-rows', `minmax(${SIZE_MAP[nodeData.size]['row']}, auto)`
         );

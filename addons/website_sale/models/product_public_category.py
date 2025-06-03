@@ -74,7 +74,7 @@ class ProductPublicCategory(models.Model):
         help="The ribbon displayed on the category list snippet.",
     )
 
-    cover_image = fields.Image(string="Cover Image")
+    image_1920 = fields.Image(string="Cover Image")
 
     # === COMPUTE METHODS === #
 
