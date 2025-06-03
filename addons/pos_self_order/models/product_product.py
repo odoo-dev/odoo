@@ -14,10 +14,7 @@ class ProductTemplate(models.Model):
         default=True,
     )
 
-    self_order_visible = fields.Boolean(
-        compute='_compute_self_order_visible',
-        store=True
-    )
+    self_order_visible = fields.Boolean(compute='_compute_self_order_visible')
 
     def _load_pos_self_data(self, data):
         domain = self._load_pos_self_data_domain(data)
@@ -80,12 +77,10 @@ class ProductTemplate(models.Model):
             if not record.available_in_pos:
                 record.self_order_available = False
 
-    @api.depends('pos_categ_ids.pos_config_ids.self_ordering_mode')
     def _compute_self_order_visible(self):
         active_self_order_configs = self.env['pos.config'].search([('self_ordering_mode', '!=', 'nothing')])
-        is_self_order_enabled = bool(active_self_order_configs)
         for product in self:
-            product.self_order_visible = is_self_order_enabled
+            product.self_order_visible = bool(active_self_order_configs)
 
     def write(self, vals_list):
         if 'available_in_pos' in vals_list:
