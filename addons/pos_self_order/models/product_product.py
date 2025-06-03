@@ -80,12 +80,12 @@ class ProductTemplate(models.Model):
             if not record.available_in_pos:
                 record.self_order_available = False
 
-    @api.depends('pos_categ_ids', 'pos_categ_ids.pos_config_ids.self_ordering_mode')
+    @api.depends('pos_categ_ids.pos_config_ids.self_ordering_mode')
     def _compute_self_order_visible(self):
-        config_with_self = self.env['pos.config'].search([('self_ordering_mode', '!=', 'nothing')])
-        categ_ids = config_with_self.iface_available_categ_ids.ids
+        active_self_order_configs = self.env['pos.config'].search([('self_ordering_mode', '!=', 'nothing')])
+        is_self_order_enabled = bool(active_self_order_configs)
         for product in self:
-            product.self_order_visible = any(p_cat_id in categ_ids for p_cat_id in product.pos_categ_ids.ids)
+            product.self_order_visible = is_self_order_enabled
 
     def write(self, vals_list):
         if 'available_in_pos' in vals_list:
