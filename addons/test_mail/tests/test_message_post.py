@@ -279,11 +279,11 @@ class TestMailNotifyAPI(TestMessagePostCommon):
         # TOFIX: the test is actually broken because test_message cannot be
         # read; this populates the cache to make it work, but that's cheating...
         test_message.sudo().email_add_signature
-        template_values = test_record._notify_by_email_prepare_rendering_context(test_message, {})
+        template_values = test_record._notify_by_email_prepare_rendering_context(test_message)
         self.assertNotEqual(escape(template_values['signature']), escape('<p>-- <br/>Steve</p>'))
 
         self.test_message.author_id = None
-        template_values = test_record._notify_by_email_prepare_rendering_context(test_message, {})
+        template_values = test_record._notify_by_email_prepare_rendering_context(test_message)
         self.assertEqual(template_values['signature'], '')
 
     @users('employee')
@@ -304,7 +304,7 @@ class TestMailNotifyAPI(TestMessagePostCommon):
         # self.env.company.id = Main Company    AND    test_record.company_id = False
         self.assertEqual(self.env.company.id, main_company.id)
         self.assertEqual(test_record.company_id.id, False)
-        template_values = test_record._notify_by_email_prepare_rendering_context(test_record.message_ids, {})
+        template_values = test_record._notify_by_email_prepare_rendering_context(test_record.message_ids)
         self.assertEqual(template_values.get('company').id, self.env.company.id)
 
         # self.env.company.id = Other Company    AND    test_record.company_id = False
@@ -312,7 +312,7 @@ class TestMailNotifyAPI(TestMessagePostCommon):
         test_record = self.env['mail.test.multi.company'].browse(test_record.id)
         self.assertEqual(self.env.company.id, other_company.id)
         self.assertEqual(test_record.company_id.id, False)
-        template_values = test_record._notify_by_email_prepare_rendering_context(test_record.message_ids, {})
+        template_values = test_record._notify_by_email_prepare_rendering_context(test_record.message_ids)
         self.assertEqual(template_values.get('company').id, self.env.company.id)
 
         # self.env.company.id = Other Company    AND    test_record.company_id = Main Company
@@ -320,7 +320,7 @@ class TestMailNotifyAPI(TestMessagePostCommon):
         test_record = self.env['mail.test.multi.company'].browse(test_record.id)
         self.assertEqual(self.env.company.id, other_company.id)
         self.assertEqual(test_record.company_id.id, main_company.id)
-        template_values = test_record._notify_by_email_prepare_rendering_context(test_record.message_ids, {})
+        template_values = test_record._notify_by_email_prepare_rendering_context(test_record.message_ids)
         self.assertEqual(template_values.get('company').id, main_company.id)
 
     @users('employee')
@@ -333,6 +333,7 @@ class TestMailNotifyAPI(TestMessagePostCommon):
             'res_id': base_record.id,
             'subject': 'Message subject',
         }
+        message = self.env['mail.message'].create(msg_vals)
         link_vals = {
             'token': 'token_val',
             'access_token': 'access_token_val',
@@ -343,8 +344,7 @@ class TestMailNotifyAPI(TestMessagePostCommon):
 
         # test notifying the class (void recordset)
         classify_res = self.env[base_record._name]._notify_get_recipients_classify(
-            self.env['mail.message'], pdata, 'My Custom Model Name',
-            msg_vals=notify_msg_vals,
+            message, pdata, 'My Custom Model Name',
         )
         # find back information for each recipients
         partner_info = next(item for item in classify_res if item['recipients_ids'] == self.partner_1.ids)
@@ -371,8 +371,7 @@ class TestMailNotifyAPI(TestMessagePostCommon):
                     'res_id': res_id,
                 })
                 classify_res = self.env[model].browse(res_id)._notify_get_recipients_classify(
-                    self.env['mail.message'], pdata, 'Test',
-                    msg_vals=notify_msg_vals,
+                    message, pdata, 'Test',
                 )
                 # find back information for partner
                 partner_info = next(item for item in classify_res if item['recipients_ids'] == self.partner_1.ids)
@@ -396,7 +395,7 @@ class TestMailNotifyAPI(TestMessagePostCommon):
                 })
                 classify_res = base_record._notify_get_recipients_classify(
                     self.env['mail.message'], pdata, 'Test',
-                    msg_vals=notify_msg_vals,
+                    # msg_vals=notify_msg_vals,
                 )
                 # find back information for partner
                 partner_info = next(item for item in classify_res if item['recipients_ids'] == self.partner_1.ids)
@@ -1616,9 +1615,10 @@ class TestMessagePost(TestMessagePostCommon, CronMixinCase):
             )
         self.assertEqual(msg.subject, '1st line 2nd line')
 
-    @mute_logger('odoo.addons.base.models.ir_model', 'odoo.addons.mail.models.mail_mail')
+    # @mute_logger('odoo.addons.base.models.ir_model', 'odoo.addons.mail.models.mail_mail')
     def test_portal_acls(self):
         self.test_record.message_subscribe((self.partner_1 | self.user_employee.partner_id).ids)
+        record_asportal = self.test_record.with_user(self.user_portal)
 
         with self.assertPostNotifications(
                 [{'content': '<p>Test</p>', 'notif': [
@@ -1626,7 +1626,10 @@ class TestMessagePost(TestMessagePostCommon, CronMixinCase):
                     {'partner': self.partner_1, 'type': 'email'}]}
                 ]
             ), patch.object(MailTestSimple, '_access_domain', return_value=Domain.TRUE):
-            new_msg = self.test_record.with_user(self.user_portal).message_post(
+            self.assertTrue(record_asportal.has_access('read'))
+            self.assertTrue(record_asportal.has_access('write'))
+
+            new_msg = record_asportal.message_post(
                 body=Markup('<p>Test</p>'),
                 message_type='comment',
                 subject='Subject',
@@ -1635,7 +1638,7 @@ class TestMessagePost(TestMessagePostCommon, CronMixinCase):
         self.assertEqual(new_msg.sudo().notified_partner_ids, (self.partner_1 | self.user_employee.partner_id))
 
         with self.assertRaises(AccessError):
-            self.test_record.with_user(self.user_portal).message_post(
+            record_asportal.message_post(
                 body=Markup('<p>Test</p>'),
                 message_type='comment',
                 subject='Subject',

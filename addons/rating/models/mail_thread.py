@@ -181,15 +181,15 @@ class MailThread(models.AbstractModel):
             kwargs["rating_id"] = rating_id
         return super().message_post(**kwargs)
 
-    def _message_post_after_hook(self, message, msg_values):
+    def _message_post_after_hook(self, message):
         """Override to link rating to message as sudo. This is done in
         _message_post_after_hook to be before _notify_thread."""
         # sudo: rating.rating - can link rating to message from same author and thread
-        rating = self.env["rating.rating"].browse(msg_values.get("rating_id")).sudo()
+        rating = message.sudo().rating_ids[:1]
         same_author = rating.partner_id and rating.partner_id == message.author_id
         if same_author and rating.res_model == message.model and rating.res_id == message.res_id:
             rating.message_id = message.id
-        super()._message_post_after_hook(message, msg_values)
+        super()._message_post_after_hook(message)
 
     def _get_allowed_message_params(self):
         return super()._get_allowed_message_params() | {"rating_value"}

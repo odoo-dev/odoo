@@ -384,8 +384,7 @@ class MailMail(models.Model):
         if (partner and self.model and self.id and  # document based only
             (getattr(self.env[self.model], '_partner_unfollow_enabled', False) or not partner.partner_share) and  # internal or model-allowance
             (doc_to_followers or {}).get((self.model, self.res_id))):
-            unfollow_url = self.env['mail.thread']._notify_get_action_link(
-                'unfollow', model=self.model, res_id=self.res_id, pid=partner.id)
+            unfollow_url = self.env['mail.thread']._notify_get_action_link('unfollow', model=self.model, res_id=self.res_id, pid=partner.id)
             body = body.replace('/mail/unfollow', unfollow_url)
         else:
             body = re.sub(_UNFOLLOW_REGEX, '', body)
