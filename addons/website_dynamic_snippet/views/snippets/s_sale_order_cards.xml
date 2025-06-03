@@ -7,7 +7,7 @@
                 <!-- Cards will be rendered here -->
             </div>
             <div class="d-flex justify-content-center my-4">
-                <button class="btn btn-primary" id="load_more_orders">Load More Orders...</button>
+                <button class="btn btn-primary d-none" id="load_more_orders">Load More Orders...</button>
             </div>
         </section>
     </template>
@@ -29,7 +29,7 @@
                         data-select-data-attribute="card">Card</we-button>
                 </we-select>
                 <we-input string="Number of Orders" data-step="5" data-min="0" data-max="50"
-                    data-select-data-attribute="10" data-attribute-name="noOfOrders" />
+                    data-select-data-attribute="" data-attribute-name="noOfOrders" />
             </div>
         </xpath>
     </template>

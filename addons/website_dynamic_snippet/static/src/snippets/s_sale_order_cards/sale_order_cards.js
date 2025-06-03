@@ -36,7 +36,7 @@ export class SaleOrderCards extends Interaction {
     }
 
     async fetchOrders() {
-        this.showConfirmOrders = this.el.dataset.showConfirmOrders === "true" ?? false;
+        this.showConfirmOrders = this.el.dataset.showConfirmOrders === "true";
         this.noOfOrders = parseInt(this.el.dataset.noOfOrders);
         const domain = this.showConfirmOrders ? [["state", "=", "sale"]] : [];
         const temp_orders = await this.services.orm.searchRead(
@@ -45,10 +45,8 @@ export class SaleOrderCards extends Interaction {
             ["name", "partner_id", "state"],
             { limit: this.noOfOrders, offset: this.offset }
         );
-        if (temp_orders.length === 0) {
-            const loadMoreButton = this.el.querySelector("#load_more_orders");
-            loadMoreButton.classList.add("d-none");
-        }
+        const loadMoreButton = this.el.querySelector("#load_more_orders");
+        loadMoreButton.classList.toggle("d-none", temp_orders.length === 0);
         this.orders.push(...temp_orders);
     }
 
