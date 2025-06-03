@@ -227,6 +227,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
         self.field_depends_context: Collector[Field, str] = Collector()
 
         # field inverses
+        self.field_inverses: Collector[Field, Field] = Collector()
         self.many2many_relations: defaultdict[tuple[str, str, str], OrderedSet[tuple[str, str]]] = defaultdict(OrderedSet)
 
         # company dependent
@@ -376,6 +377,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
 
         self.field_depends.clear()
         self.field_depends_context.clear()
+        self.field_inverses.clear()
         self.many2many_relations.clear()
         self.many2one_company_dependents.clear()
 
@@ -388,6 +390,12 @@ class Registry(Mapping[str, type["BaseModel"]]):
                 self.field_depends[field] = tuple(depends)
                 self.field_depends_context[field] = tuple(depends_context)
 
+        # determine field_inverses
+        for model_cls in self.models.values():
+            for field in model_cls._fields.values():
+                if field.relational:
+                    field.setup_field_inverses(self)
+
         # clean the lazy_property again in case they are cached by another ongoing registry readonly request
         reset_cached_properties(self)
 
@@ -397,15 +405,6 @@ class Registry(Mapping[str, type["BaseModel"]]):
             for model in env.values():
                 model._register_hook()
             env.flush_all()
-
-    @functools.cached_property
-    def field_inverses(self) -> Collector[Field, Field]:
-        result = Collector()
-        for model_cls in self.models.values():
-            for field in model_cls._fields.values():
-                if field.relational:
-                    field.setup_inverses(self, result)
-        return result
 
     @functools.cached_property
     def field_computed(self) -> dict[Field, list[Field]]:

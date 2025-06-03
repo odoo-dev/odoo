@@ -22,7 +22,6 @@ from .utils import COLLECTION_TYPES, SQL_OPERATORS, check_pg_name
 
 if typing.TYPE_CHECKING:
     from collections.abc import Sequence
-    from odoo.tools.misc import Collector
     from .types import CommandValue, ContextType, DomainType, Environment, Registry
 
     OnDelete = typing.Literal['cascade', 'set null', 'restrict']
@@ -87,8 +86,8 @@ class _Relational(Field[BaseModel]):
         assert self.comodel_name in model.pool, \
             f"Field {self} with unknown comodel_name {self.comodel_name or '???'!r}"
 
-    def setup_inverses(self, registry: Registry, inverses: Collector[Field, Field]):
-        """ Populate ``inverses`` with ``self`` and its inverse fields. """
+    def setup_field_inverses(self, registry: Registry):
+        """ Populate ``registry.field_inverses``. """
 
     def get_comodel_domain(self, model: BaseModel) -> Domain:
         """ Return a domain from the domain attribute. """
@@ -821,15 +820,15 @@ class One2many(_RelationalMulti):
             except KeyError:
                 raise ValueError(f"{self.inverse_name!r} declared in {self!r} does not exist on {comodel._name!r}.")
 
-    def setup_inverses(self, registry, inverses):
+    def setup_field_inverses(self, registry):
         if self.inverse_name:
             # link self to its inverse field and vice-versa
             invf = registry[self.comodel_name]._fields[self.inverse_name]
             if isinstance(invf, (Many2one, Many2oneReference)):
                 # setting one2many fields only invalidates many2one inverses;
                 # integer inverses (res_model/res_id pairs) are not supported
-                inverses.add(self, invf)
-            inverses.add(invf, self)
+                registry.field_inverses.add(self, invf)
+            registry.field_inverses.add(invf, self)
 
     _description_relation_field = property(attrgetter('inverse_name'))
 
@@ -1243,13 +1242,13 @@ class Many2many(_RelationalMulti):
                 raise TypeError(msg % (self, field))
             fields.add((self.model_name, self.name))
 
-    def setup_inverses(self, registry, inverses):
+    def setup_field_inverses(self, registry):
         if self.relation:
             # retrieve inverse fields, and link them in field_inverses
             for mname, fname in registry.many2many_relations[self.relation, self.column2, self.column1]:
                 field = registry[mname]._fields[fname]
-                inverses.add(self, field)
-                inverses.add(field, self)
+                registry.field_inverses.add(self, field)
+                registry.field_inverses.add(field, self)
 
     def update_db(self, model, columns):
         cr = model._cr
