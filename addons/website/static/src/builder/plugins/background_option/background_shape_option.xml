@@ -3,7 +3,7 @@
 
 <t t-name="website.BackgroundShapeOption">
     <BuilderRow label.translate="Shape" level="1" t-if="isActiveItem('toggle_bg_shape_id')">
-        <button class="btn btn-primary" t-on-click="this.showBackgroundShapes" t-out="state.shapeName"/>
+        <button class="o-hb-btn btn btn-secondary" t-on-click="this.showBackgroundShapes" t-out="state.shapeName"/>
         <BuilderButton
             title.translate="Show/Hide on Mobile"
             preview="false"
