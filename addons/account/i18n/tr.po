@@ -47,7 +47,7 @@
 # Melih Melik Sonmez, 2025
 # Hakan Türkün, 2025
 # Ayhan Kızıltan, 2025
-# Deniz Guvener, 2025
+# Deniz Guvener_Odoo <degu@odoo.com>, 2025
 # 
 msgid ""
 msgstr ""
@@ -55,7 +55,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-02-10 12:10+0000\n"
 "PO-Revision-Date: 2024-07-16 09:15+0000\n"
-"Last-Translator: Deniz Guvener, 2025\n"
+"Last-Translator: Deniz Guvener_Odoo <degu@odoo.com>, 2025\n"
 "Language-Team: Turkish (https://app.transifex.com/odoo/teams/41243/tr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3710,7 +3710,7 @@ msgstr "Gerçekleşme Esası Geçiş Hesabı"
 #. module: account
 #: model:account.account,name:account.1_cash_journal_default_account_51
 msgid "Cash Clothes Shop"
-msgstr ""
+msgstr "Nakit - Giyim Mağazası"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__default_cash_difference_expense_account_id
@@ -3768,7 +3768,7 @@ msgstr "Nakit İndirimi Borç Silme Zarar Hesabı"
 #. module: account
 #: model:account.account,name:account.1_cash_journal_default_account_50
 msgid "Cash Furn. Shop"
-msgstr ""
+msgstr "Nakit - Mobilya Mağazası"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.action_view_bank_statement_tree
@@ -17464,6 +17464,8 @@ msgid ""
 "[(Total Receivable/Total Revenue) * number of days since the first invoice] "
 "for this customer"
 msgstr ""
+"[(Toplam Alacak / Toplam Gelir) * ilk faturadan bu yana geçen gün sayısı] bu"
+" müşteri için"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.bill_preview

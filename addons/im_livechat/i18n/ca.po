@@ -12,7 +12,7 @@
 # oscaryuu, 2024
 # Arnau Ros, 2024
 # José Cabrera Lozano <jose.cabrera@edukative.es>, 2024
-# Xavier, 2024
+# Harcogourmet, 2024
 # Ivan Espinola, 2024
 # Guspy12, 2024
 # Marc Tormo i Bochaca <mtbochaca@gmail.com>, 2024

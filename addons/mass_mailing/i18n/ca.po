@@ -10,7 +10,7 @@
 # Eric Antones <eantones@users.noreply.github.com>, 2024
 # Marc Tormo i Bochaca <mtbochaca@gmail.com>, 2024
 # Braulio D. López Vázquez <bdl@odoo.com>, 2024
-# Xavier, 2024
+# Harcogourmet, 2024
 # Raimon Coral, 2024
 # Iván Infantes Castarnado, 2024
 # martioodo hola, 2024

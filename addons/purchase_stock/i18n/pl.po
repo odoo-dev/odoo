@@ -80,6 +80,9 @@ msgid ""
 "  - Manual: the quantity is set manually on the line\n"
 "  - Stock Moves: the quantity comes from confirmed pickings\n"
 msgstr ""
+"Zgodnie z konfiguracją produktu, otrzymana ilość może być automatycznie obliczana przez mechanizm:\n"
+"  - Ręczny: ilość jest ustawiana ręcznie w pozycji\n"
+"  - Przesunięcie zapasów: ilość pochodzi z potwierdzonych kompletacji\n"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_rule__action

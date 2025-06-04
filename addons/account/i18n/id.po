@@ -2702,7 +2702,7 @@ msgstr "Akun Analitik"
 #: model:ir.model.fields,field_description:account.field_account_move_line__analytic_distribution
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_line__analytic_distribution
 msgid "Analytic Distribution"
-msgstr "Analisa Distribusi"
+msgstr "Distribusi Analitik"
 
 #. module: account
 #: model:ir.model,name:account.model_account_analytic_distribution_model
@@ -15702,8 +15702,8 @@ msgid ""
 "To keep the audit trail, you can not delete journal entries once they have been posted.\n"
 "Instead, you can cancel the journal entry."
 msgstr ""
-"Untuk menyimpan audit trail, Anda tidak dapat menghapus entri jurnal setelah mereka diposting.\n"
-"ALih-alih, Anda dapat membatalkan entri jurnal."
+"Untuk menyimpan jejak audit, Anda tidak dapat menghapus entri jurnal setelah mereka diposting.\n"
+"Alih-alih, Anda dapat membatalkan entri jurnal."
 
 #. module: account
 #. odoo-python

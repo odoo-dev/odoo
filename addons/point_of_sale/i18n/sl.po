@@ -1077,7 +1077,7 @@ msgstr "Pekarna"
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 msgid "Bakery Shop"
-msgstr ""
+msgstr "Pekarna"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -3322,7 +3322,7 @@ msgstr "Integrirana plačila s karticami"
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_payment_method__payment_method_type
 msgid "Integration"
-msgstr ""
+msgstr "Integracija"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_payment_method__receivable_account_id
@@ -4646,7 +4646,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__other_devices
 #: model:ir.model.fields,field_description:point_of_sale.field_res_config_settings__pos_other_devices
 msgid "Other Devices"
-msgstr ""
+msgstr "Druge naprave"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_pos_form
@@ -4751,7 +4751,7 @@ msgstr "Nadrejena kategorija"
 #. module: point_of_sale
 #: model:pos.category,name:point_of_sale.pos_category_pastries
 msgid "Pastries"
-msgstr ""
+msgstr "Pecivo"
 
 #. module: point_of_sale
 #. odoo-javascript

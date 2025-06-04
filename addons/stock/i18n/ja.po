@@ -2839,7 +2839,7 @@ msgstr "出荷先梱包IDドメイン"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move__partner_id
 msgid "Destination Address "
-msgstr "移動先アドレス (引当用)"
+msgstr "配送先住所"
 
 #. module: stock
 #. odoo-python
@@ -6228,7 +6228,7 @@ msgstr "実地棚卸"
 #: code:addons/stock/models/stock_warehouse.py:0
 #: model:ir.model.fields,field_description:stock.field_stock_backorder_confirmation__pick_ids
 msgid "Pick"
-msgstr "集荷"
+msgstr "ピッキング"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move_line__quant_id

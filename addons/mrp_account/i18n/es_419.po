@@ -318,12 +318,12 @@ msgstr "Unidades"
 #. module: mrp_account
 #: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
 msgid "WIP Report for"
-msgstr "Reporte WIP para "
+msgstr "Reporte de trabajo en curso para"
 
 #. module: mrp_account
 #: model:ir.actions.report,name:mrp_account.wip_report
 msgid "WIP report"
-msgstr "Reporte WIP"
+msgstr "Reporte de trabajo en curso"
 
 #. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_workorder__wc_analytic_account_line_ids

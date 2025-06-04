@@ -5161,7 +5161,7 @@ msgstr "Guardar archivos adjuntos"
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity_type__keep_done
 msgid "Keep Done"
-msgstr "Mantener como hecho"
+msgstr "Mantener actividades hechas"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__auto_delete_keep_log
@@ -10342,7 +10342,7 @@ msgstr ""
 "El uso de un servidor propio de correo electrónico es necesario para "
 "enviar/recibir correos en las versiones Community y Enterprise. Los usuarios"
 " de la versión Online si tienen disponible un servidor de correo listo para "
-"usar (@mycompany.odoo.com)."
+"usar (@micompania.odoo.com)."
 
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_alias__alias_status__valid

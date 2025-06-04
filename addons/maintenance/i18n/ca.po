@@ -24,7 +24,7 @@
 # Manel Fernandez Ramirez <manelfera@outlook.com>, 2024
 # Marc Tormo i Bochaca <mtbochaca@gmail.com>, 2024
 # Martin Trigaux, 2024
-# Xavier, 2024
+# Harcogourmet, 2024
 # Noemi Pla, 2025
 # 
 msgid ""

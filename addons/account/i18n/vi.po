@@ -9652,7 +9652,7 @@ msgstr "Ngày tối đa của các dòng đã khớp"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__max_tax_lock_date
 msgid "Max Tax Lock Date"
-msgstr "Ngày chốt thuế tối đa"
+msgstr "Ngày khoá thuế tối đa"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__res_company__fiscalyear_last_month__5
@@ -13775,7 +13775,7 @@ msgstr "Khoá thuế"
 #: model:ir.model.fields,field_description:account.field_account_move__tax_lock_date_message
 #: model:ir.model.fields,field_description:account.field_account_payment__tax_lock_date_message
 msgid "Tax Lock Date Message"
-msgstr "Thông báo ngày chốt thuế"
+msgstr "Thông báo ngày khoá thuế"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__tax_map
@@ -13836,7 +13836,7 @@ msgstr "Dòng phân bổ thuế"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__tax_lock_date
 msgid "Tax Return Lock Date"
-msgstr "Ngày chốt tờ khai thuế"
+msgstr "Ngày khoá tờ khai thuế"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax__tax_scope
@@ -14723,7 +14723,7 @@ msgid ""
 "settings (%s) to proceed."
 msgstr ""
 "Không thể thực hiện thao tác này vì nó sẽ ảnh hưởng đến báo cáo thuế đã được"
-" phát hành. Để tiếp tục, vui lòng thay đổi ngày tạo bút toán hoặc ngày chốt "
+" phát hành. Để tiếp tục, vui lòng thay đổi ngày tạo bút toán hoặc ngày khoá "
 "thuế đã thiết lập trong phần cài đặt (%s)."
 
 #. module: account

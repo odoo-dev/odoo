@@ -3428,7 +3428,7 @@ msgstr "Date de facturation"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "Bill Reference"
-msgstr "Référence de la facture"
+msgstr "Référence facture"
 
 #. module: account
 #: model:res.groups,name:account.group_account_invoice
@@ -8078,7 +8078,7 @@ msgstr "Arrondi d'entiers"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__transfer_account_id
 msgid "Inter-Banks Transfer Account"
-msgstr "Compte de virement inter-bancaire"
+msgstr "Compte de virement interbancaire"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_config_settings__transfer_account_id
@@ -12003,7 +12003,7 @@ msgstr "Reçu"
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__partner_bank_id
 #: model:ir.model.fields,field_description:account.field_account_move__partner_bank_id
 msgid "Recipient Bank"
-msgstr "Compte bancaire destinataire"
+msgstr "Banque destinataire"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment__partner_bank_id
@@ -16409,7 +16409,7 @@ msgstr "Erreur de chargement"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "Use Bill Reference"
-msgstr "Utiliser la référence de la facture"
+msgstr "Utiliser la référence facture"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__tax_exigibility
@@ -18206,7 +18206,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "units"
-msgstr "unités"
+msgstr "unité(s)"
 
 #. module: account
 #. odoo-javascript

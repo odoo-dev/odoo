@@ -1786,7 +1786,7 @@ msgstr "Добавить год"
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "Add a Custom Font"
-msgstr "Добавить пользовательский шрифт"
+msgstr "Добавить шрифт"
 
 #. module: website
 #. odoo-javascript

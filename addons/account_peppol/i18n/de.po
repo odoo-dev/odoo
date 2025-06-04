@@ -26,6 +26,8 @@ msgid ""
 "<br/>\n"
 "                                In Belgium, electronic invoicing will be <u>mandatory as of January 2026</u> - don't wait to register."
 msgstr ""
+"<br/>\n"
+"                                In Belgien ist die elektronische Rechnungsstellung <u>ab Januar 20262 verpflichtend</u> – registrieren Sie sich jetzt!"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.mail_notification_layout_with_responsible_signature_and_peppol
@@ -34,6 +36,9 @@ msgid ""
 "                            This invoice has also been <b style=\"color: $o-enterprise-action-color\">sent via Peppol</b>.\n"
 "                        </i>"
 msgstr ""
+"<i class=\"text-muted\" style=\"min-width: 590px;\">\n"
+"                            Diese Rechnung wurde auch <b style=\"color: $o-enterprise-action-color\">über Peppol versendet</b>.\n"
+"                        </i>"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.account_peppol_view_move_form
@@ -1166,8 +1171,10 @@ msgid ""
 "to send invoices, but this one <b style=\"color: $o-enterprise-action-"
 "color;\">could not be sent via Peppol</b>."
 msgstr ""
+", um Rechnungen zu versenden, aber diese <b style=\"color: $o-enterprise-"
+"action-color;\">konnte nicht über Peppol gesendet werden</b>."
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.mail_notification_layout_with_responsible_signature_and_peppol
 msgid "uses"
-msgstr ""
+msgstr "verwendet"

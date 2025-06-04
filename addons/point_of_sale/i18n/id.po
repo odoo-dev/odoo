@@ -64,7 +64,7 @@ msgstr "%(payment_method)s pembayaran POS %(partner)s di %(session)s"
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_session.py:0
 msgid "%(title)s %(product_name)s with %(taxes)s"
-msgstr ""
+msgstr "%(title)s %(product_name)s dengan %(taxes)s"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -102,7 +102,7 @@ msgstr "%s produk ditemukan untuk \"%s\"."
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_session.py:0
 msgid "%s untaxed"
-msgstr ""
+msgstr "%s sebelum pajak"
 
 #. module: point_of_sale
 #. odoo-javascript

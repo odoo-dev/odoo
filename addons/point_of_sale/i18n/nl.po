@@ -8431,7 +8431,7 @@ msgstr "Eenheidsprijs:"
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/components/product_info_banner/product_info_banner.xml:0
 msgid "Units"
-msgstr "Stuks"
+msgstr "Stuk(s)"
 
 #. module: point_of_sale
 #. odoo-javascript

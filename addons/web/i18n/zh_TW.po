@@ -4078,7 +4078,7 @@ msgstr "一"
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/monetary/monetary_field.js:0
 msgid "Monetary"
-msgstr "貨幣的"
+msgstr "貨幣金額"
 
 #. module: web
 #. odoo-javascript
@@ -4170,7 +4170,7 @@ msgstr "聖誕老人太太"
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/text/text_field.js:0
 msgid "Multiline Text"
-msgstr "多行文本"
+msgstr "多行文字"
 
 #. module: web
 #. odoo-javascript
@@ -7101,7 +7101,7 @@ msgstr "填寫你的電話、電郵、銀行賬戶、稅務編號等"
 #. odoo-python
 #: code:addons/web/controllers/home.py:0
 msgid "Wrong login/password"
-msgstr "錯誤的登入名/密碼"
+msgstr "登入名稱或密碼錯誤"
 
 #. module: web
 #. odoo-javascript

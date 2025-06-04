@@ -6330,7 +6330,7 @@ msgstr "作業区はブロックされています。クリックでブロック
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter__resource_calendar_id
 msgid "Working Hours"
-msgstr "労働時間"
+msgstr "稼働時間"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__working_user_ids

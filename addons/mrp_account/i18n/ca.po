@@ -15,7 +15,7 @@
 # Quim - coopdevs <quim.rebull@coopdevs.org>, 2024
 # José Cabrera Lozano <jose.cabrera@edukative.es>, 2024
 # Josep Anton Belchi, 2024
-# Xavier, 2025
+# Harcogourmet, 2025
 # Noemi Pla, 2025
 # 
 msgid ""

@@ -664,7 +664,7 @@ msgstr "Črna"
 #. odoo-javascript
 #: code:addons/product/static/src/js/product_attribute_value_list.js:0
 msgid "Bye-bye, record!"
-msgstr ""
+msgstr "Adijo, ta zapis!"
 
 #. module: product
 #: model:product.template,name:product.product_product_10_product_template
@@ -1299,12 +1299,12 @@ msgstr "Priljubljene"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__datas
 msgid "File Content (base64)"
-msgstr ""
+msgstr "Vsebina datoteke (base64)"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__raw
 msgid "File Content (raw)"
-msgstr ""
+msgstr "Vsebina datoteke (raw)"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__file_size
@@ -1956,7 +1956,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/product/static/src/js/product_attribute_value_list.js:0
 msgid "No, keep it"
-msgstr ""
+msgstr "Ne, obdrži"
 
 #. module: product
 #. odoo-python
@@ -2142,7 +2142,7 @@ msgstr ""
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_weight_in_lbs__1
 msgid "Pounds"
-msgstr ""
+msgstr "Funti"
 
 #. module: product
 #: model_terms:product.template,website_description:product.product_product_4_product_template

@@ -6,8 +6,8 @@
 # Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2024
 # Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2025
 # Wil Odoo, 2025
-# Larissa Manderfeld, 2025
 # Pilar Vargas, 2025
+# Larissa Manderfeld, 2025
 # 
 msgid ""
 msgstr ""
@@ -15,7 +15,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-02-04 10:30+0000\n"
 "PO-Revision-Date: 2024-07-16 11:42+0000\n"
-"Last-Translator: Pilar Vargas, 2025\n"
+"Last-Translator: Larissa Manderfeld, 2025\n"
 "Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -7385,7 +7385,7 @@ msgstr "Logotipo"
 #: model_terms:ir.ui.view,arch_db:website.template_footer_contact
 #: model_terms:ir.ui.view,arch_db:website.template_footer_minimalist
 msgid "Logo of MyCompany"
-msgstr "Logotipo de MyCompany"
+msgstr "Logotipo de MiCompañía"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -13804,7 +13804,7 @@ msgstr "título, h1"
 #: model_terms:ir.ui.view,arch_db:website.template_footer_contact
 #: model_terms:ir.ui.view,arch_db:website.template_footer_descriptive
 msgid "hello@mycompany.com"
-msgstr "hello@mycompany.com"
+msgstr "hello@MiCompañía.com"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets

@@ -969,8 +969,8 @@ msgid ""
 "User-agent: *\n"
 "                Allow: /cards/"
 msgstr ""
-"User-agent: *\n"
-"                Allow: /cards/"
+"Thành phần kết nối phía người dùng: *\n"
+"                Cho phép: /cards/"
 
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign_element__value_type

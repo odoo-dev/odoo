@@ -1313,7 +1313,7 @@ msgstr "<strong>參考：</strong><br/>"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "<strong>Shipping Address:</strong>"
-msgstr "<strong>送貨地址:</strong>"
+msgstr "<strong>送貨地址：</strong>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -2069,7 +2069,7 @@ msgstr "動作"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Activate Audit Trail"
-msgstr "啟動審計軌跡"
+msgstr "啟動審計追蹤"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -2839,7 +2839,7 @@ msgstr "審計日誌已啟動"
 #: model:ir.ui.menu,name:account.account_audit_trail_menu
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Audit Trail"
-msgstr "審計軌跡"
+msgstr "審計追蹤"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_expression__auditable
@@ -3478,7 +3478,7 @@ msgstr "允許分組付款"
 #. odoo-python
 #: code:addons/account/models/company.py:0
 msgid "Can't disable audit trail when there are existing records."
-msgstr "若有現存記錄，便無法停用審計軌跡。"
+msgstr "若有現存記錄，便無法停用審計追蹤。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_automatic_entry_wizard_form
@@ -9178,7 +9178,7 @@ msgstr "建立應計分錄"
 #: model_terms:ir.actions.act_window,help:account.action_account_audit_trail_report
 msgid ""
 "Make sure you first activate the audit trail in the accounting settings"
-msgstr "請確保首先在會計設定中，啟動審計軌跡"
+msgstr "請確保首先在會計設定中，啟動審計追蹤"
 
 #. module: account
 #: model:ir.ui.menu,name:account.account_management_menu
@@ -9515,7 +9515,7 @@ msgstr "模組"
 #: model:ir.model.fields.selection,name:account.selection__account_report_column__figure_type__monetary
 #: model:ir.model.fields.selection,name:account.selection__account_report_expression__figure_type__monetary
 msgid "Monetary"
-msgstr "貨幣的"
+msgstr "貨幣金額"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_setup_bank_manual_config__money_transfer_service
@@ -15113,7 +15113,7 @@ msgid ""
 "To keep the audit trail, you can not delete journal entries once they have been posted.\n"
 "Instead, you can cancel the journal entry."
 msgstr ""
-"為保留審計軌跡，日記賬記項在完成過賬後便無法刪除。\n"
+"為保留審計追蹤，日記賬記項在完成過賬後便無法刪除。\n"
 "你可考慮改為取消該日記賬記項。"
 
 #. module: account
@@ -15484,7 +15484,7 @@ msgstr "未雜湊處理記項"
 #. module: account
 #: model:ir.model.fields,help:account.field_account_report_line__code
 msgid "Unique identifier for this line."
-msgstr "此明細的唯一識別."
+msgstr "此資料行的唯一識別碼。"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__price_unit

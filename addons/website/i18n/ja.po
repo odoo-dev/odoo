@@ -1456,7 +1456,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_masonry_block_reversed_template
 #: model_terms:ir.ui.view,arch_db:website.s_masonry_block_texts_image_texts_template
 msgid "A great title"
-msgstr "素晴らしいタイトル"
+msgstr "魅力的なタイトル"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_snippet_filter__field_names
@@ -1487,12 +1487,12 @@ msgstr "第2項目"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_showcase
 msgid "A short description of this great feature."
-msgstr "この優れた特徴の簡単な説明。"
+msgstr "この優れた機能の簡単な説明です。"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features
 msgid "A small explanation of this great <br/>feature, in clear words."
-msgstr "この素晴らしい特徴を<br/>簡単な言葉で説明しましょう。"
+msgstr "この優れた機能について<br/>わかりやすく簡潔に説明します。"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -9587,12 +9587,12 @@ msgstr "丸い"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_gallery_options
 msgid "Rounded Miniatures"
-msgstr "丸いミニチュア"
+msgstr "丸型サムネイル"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Rounded box menu"
-msgstr "丸型ボックスメニュー"
+msgstr "角丸ボックスメニュー"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_rewrite__route_id
@@ -11578,7 +11578,7 @@ msgstr "追跡"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "Track visits using Google Analytics"
-msgstr "Google Analyticsで訪問を追跡"
+msgstr "Googleアナリティクスで訪問を追跡"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_pages_view_search

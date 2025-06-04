@@ -10561,7 +10561,7 @@ msgstr "Nemáte povolení nahrát tady přílohu."
 #. odoo-python
 #: code:addons/mail/controllers/attachment.py:0
 msgid "You are not allowed to upload attachments on this channel."
-msgstr ""
+msgstr "Nemáte povolení nahrávat přílohy na tento kanál."
 
 #. module: mail
 #. odoo-javascript

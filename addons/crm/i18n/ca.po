@@ -28,7 +28,7 @@
 # marcescu, 2024
 # Ivan Espinola, 2024
 # Josep Anton Belchi, 2024
-# Xavier, 2024
+# Harcogourmet, 2024
 # Wil Odoo, 2024
 # Noemi Pla, 2025
 # 

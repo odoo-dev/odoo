@@ -436,7 +436,7 @@ msgstr "O nás..."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "AVERAGE"
-msgstr ""
+msgstr "AVERAGE"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1114,13 +1114,13 @@ msgstr "Průměr hodnot v závislosti na více kritériích."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Avg"
-msgstr ""
+msgstr "Prům."
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 msgid "Axis"
-msgstr ""
+msgstr "Axis"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1252,7 +1252,7 @@ msgstr "Spodek"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "COUNT"
-msgstr ""
+msgstr "COUNT"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4241,13 +4241,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "MAX"
-msgstr ""
+msgstr "MAX"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "MIN"
-msgstr ""
+msgstr "MIN"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5187,7 +5187,7 @@ msgstr "Fialový"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Q%(quarter)s"
-msgstr ""
+msgstr "Q%(quarter)s"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5199,7 +5199,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Q%(quarter_number)s"
-msgstr ""
+msgstr "Q%(quarter_number)s"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5636,7 +5636,7 @@ msgstr "Ŕádky"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "SUM"
-msgstr ""
+msgstr "SUM"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -10905,4 +10905,4 @@ msgstr "hodnota"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "yesterday"
-msgstr ""
+msgstr "včera"

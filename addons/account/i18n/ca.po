@@ -35,7 +35,7 @@
 # Juande Gutierrez <juni55mcyt@gmail.com>, 2024
 # Eugeni Chafer <eugeni@chafer.cat>, 2024
 # Quim, 2025
-# Xavier, 2025
+# Harcogourmet, 2025
 # Carles Antoli <carlesantoli@hotmail.com>, 2025
 # Ivan Espinola, 2025
 # Óscar Fonseca <tecnico@pyming.com>, 2025

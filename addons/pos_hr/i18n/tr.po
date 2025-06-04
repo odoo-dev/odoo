@@ -94,13 +94,13 @@ msgstr "Çalışan: %(employee)s - PoS Yapılandırmaları: %(config_list)s\n"
 #: model:ir.model.fields,field_description:pos_hr.field_pos_config__basic_employee_ids
 #: model:ir.model.fields,field_description:pos_hr.field_res_config_settings__pos_basic_employee_ids
 msgid "Employees with basic access"
-msgstr ""
+msgstr "Temel erişime sahip çalışanlar"
 
 #. module: pos_hr
 #: model:ir.model.fields,field_description:pos_hr.field_pos_config__advanced_employee_ids
 #: model:ir.model.fields,field_description:pos_hr.field_res_config_settings__pos_advanced_employee_ids
 msgid "Employees with manager access"
-msgstr ""
+msgstr "Yönetici erişimine sahip çalışanlar"
 
 #. module: pos_hr
 #. odoo-javascript
@@ -118,7 +118,7 @@ msgstr "Identify Manually"
 #: model:ir.model.fields,help:pos_hr.field_pos_config__basic_employee_ids
 #: model:ir.model.fields,help:pos_hr.field_res_config_settings__pos_basic_employee_ids
 msgid "If left empty, all employees can log in to PoS"
-msgstr ""
+msgstr "Boş bırakılırsa tüm çalışanlar POS'a giriş yapabilir."
 
 #. module: pos_hr
 #: model:ir.model.fields,help:pos_hr.field_pos_config__advanced_employee_ids
@@ -161,7 +161,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/pos_hr/static/src/app/login_screen/login_screen.js:0
 msgid "PIN not found"
-msgstr ""
+msgstr "PIN bulunamadı"
 
 #. module: pos_hr
 #. odoo-javascript

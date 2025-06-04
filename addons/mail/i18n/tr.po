@@ -163,6 +163,10 @@ msgid ""
 "Enter%(close_samp)s %(open_em)sto "
 "%(open_save)ssave%(close_save)s%(close_em)s"
 msgstr ""
+"%(open_samp)sEscape%(close_samp)s %(open_em)sto "
+"%(open_cancel)scancel%(close_cancel)s%(close_em)s, %(open_samp)sCTRL-"
+"Enter%(close_samp)s %(open_em)sto "
+"%(open_save)ssave%(close_save)s%(close_em)s"
 
 #. module: mail
 #. odoo-javascript
@@ -173,6 +177,10 @@ msgid ""
 "%(open_samp)sEnter%(close_samp)s %(open_em)sto "
 "%(open_save)ssave%(close_save)s%(close_em)s"
 msgstr ""
+"%(open_samp)sEscape%(close_samp)s %(open_em)sto "
+"%(open_cancel)scancel%(close_cancel)s%(close_em)s, "
+"%(open_samp)sEnter%(close_samp)s %(open_em)sto "
+"%(open_save)ssave%(close_save)s%(close_em)s"
 
 #. module: mail
 #. odoo-javascript
@@ -2862,6 +2870,8 @@ msgstr "Teslimat hatası"
 #: code:addons/mail/wizard/mail_compose_message.py:0
 msgid "Deprecated usage of 'default_res_id', should use 'default_res_ids'."
 msgstr ""
+"'default_res_id', kullanımı artık önerilmemektedir, bunun yerine "
+"'default_res_ids' kullanılmalıdır. "
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_discuss_channel__description
@@ -4740,7 +4750,7 @@ msgstr "Geçersiz"
 #. odoo-python
 #: code:addons/mail/wizard/mail_compose_message.py:0
 msgid "Invalid domain “%(domain)s” (type “%(domain_type)s”)"
-msgstr ""
+msgstr "Geçersiz alan adı “%(domain)s” (tür “%(domain_type)s”)"
 
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_mail__failure_type__mail_email_invalid
@@ -5376,7 +5386,7 @@ msgstr "Aktivite Oluştur"
 #. odoo-javascript
 #: code:addons/mail/static/src/chatter/web_portal/composer_patch.js:0
 msgid "Log an internal note…"
-msgstr ""
+msgstr "Dahili bir not kaydedin..."
 
 #. module: mail
 #. odoo-javascript
@@ -7735,6 +7745,7 @@ msgstr "İşleme Modeli"
 msgid ""
 "Rendering of %(field_name)s is not possible as no counterpart on template."
 msgstr ""
+"%(field_name)s'in gösterimi mümkün değil çünkü şablonda karşılığı yok."
 
 #. module: mail
 #. odoo-python
@@ -7743,6 +7754,7 @@ msgstr ""
 msgid ""
 "Rendering of %(field_name)s is not possible as not defined on template."
 msgstr ""
+"%(field_name)s'in gösterimi mümkün değil çünkü şablonda tanımlı değil."
 
 #. module: mail
 #. odoo-javascript
@@ -8306,7 +8318,7 @@ msgstr "Şimdi Gönder"
 #. odoo-javascript
 #: code:addons/mail/static/src/chatter/web_portal/composer_patch.js:0
 msgid "Send a message to followers…"
-msgstr ""
+msgstr "Takipçilere mesaj gönderin…"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
@@ -8326,7 +8338,7 @@ msgstr "E-posta Gönder"
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__force_send
 msgid "Send mailing or notifications directly"
-msgstr ""
+msgstr "Doğrudan e-posta veya bildirim gönderin"
 
 #. module: mail
 #. odoo-javascript
@@ -8921,7 +8933,7 @@ msgstr "Şablon Sıfırlama Mixin"
 #. odoo-python
 #: code:addons/mail/wizard/mail_compose_message.py:0
 msgid "Template creation from composer requires a valid model."
-msgstr ""
+msgstr "Şablon oluşturmak için composer'da geçerli bir model gereklidir."
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_template__description
@@ -9391,7 +9403,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__model_is_thread
 msgid "Thread-Enabled"
-msgstr ""
+msgstr "Konular Etkin"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_guest__timezone
@@ -9970,7 +9982,7 @@ msgstr "Burada Kullanıldı"
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_compose_message__res_domain_user_id
 msgid "Used as context used to evaluate composer domain"
-msgstr ""
+msgstr "Composer etki alanını değerlendirmek için bağlam olarak kullanılır"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_mail__message_type

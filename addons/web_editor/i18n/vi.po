@@ -2942,7 +2942,7 @@ msgstr "Toggle bold"
 #. odoo-javascript
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 msgid "Toggle checklist"
-msgstr "Toggle checklist"
+msgstr "Bật/tắt danh sách"
 
 #. module: web_editor
 #. odoo-javascript
@@ -2960,7 +2960,7 @@ msgstr "Toggle italic"
 #. odoo-javascript
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 msgid "Toggle ordered list"
-msgstr "Toggle ordered list"
+msgstr "Bật/tắt danh sách có thứ tự"
 
 #. module: web_editor
 #. odoo-javascript
@@ -2978,7 +2978,7 @@ msgstr "Toggle underline"
 #. odoo-javascript
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 msgid "Toggle unordered list"
-msgstr "Toggle unordered list"
+msgstr "Bật/tắt danh sách không có thứ tự"
 
 #. module: web_editor
 #. odoo-javascript

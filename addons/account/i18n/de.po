@@ -17998,7 +17998,7 @@ msgstr "z. B. https://www.odoo.com"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
 msgid "e.g. mycompany.com"
-msgstr "z. B. mycompany.com"
+msgstr "z. B. meinunternehmen.com"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.validate_account_move_view

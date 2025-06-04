@@ -3117,7 +3117,7 @@ msgstr "Conta bancária"
 #. odoo-python
 #: code:addons/account/models/res_partner_bank.py:0
 msgid "Bank Account %(link)s with number %(number)s deleted"
-msgstr "Conta bancária %(link)s com número %(number)s excluído"
+msgstr "Conta bancária %(link)s com número %(number)s excluída"
 
 #. module: account
 #. odoo-python

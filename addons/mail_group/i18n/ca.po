@@ -19,7 +19,7 @@
 # Martin Trigaux, 2024
 # marcescu, 2024
 # Carles Antoli <carlesantoli@hotmail.com>, 2024
-# Xavier, 2024
+# Harcogourmet, 2024
 # Noemi Pla, 2025
 # 
 msgid ""

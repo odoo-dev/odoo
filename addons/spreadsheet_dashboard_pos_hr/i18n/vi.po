@@ -4,6 +4,7 @@
 # 
 # Translators:
 # Wil Odoo, 2024
+# Thi Huong Nguyen, 2025
 # 
 msgid ""
 msgstr ""
@@ -11,7 +12,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-08-06 10:25+0000\n"
 "PO-Revision-Date: 2024-07-16 09:15+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"Last-Translator: Thi Huong Nguyen, 2025\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -90,31 +91,31 @@ msgstr "Giai đoạn"
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: model:spreadsheet.dashboard,name:spreadsheet_dashboard_pos_hr.spreadsheet_dashboard_pos
 msgid "Point of Sale"
-msgstr "Điểm bán hàng"
+msgstr "Máy tính tiền"
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 msgid "Point of Sale Analysis by Point of Sale"
-msgstr "Phân tích điểm bán hàng theo điểm bán hàng"
+msgstr "Phân tích máy tính tiền theo máy tính tiền"
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 msgid "Point of Sale Analysis by Product"
-msgstr "Phân tích điểm bán hàng theo sản phẩm"
+msgstr "Phân tích máy tính tiền theo sản phẩm"
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 msgid "Point of Sale Analysis by Session"
-msgstr "Phân tích điểm bán hàng theo phiên"
+msgstr "Phân tích máy tính tiền theo phiên"
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 msgid "Point of Sale Analysis by User"
-msgstr "Phân tích điểm bán hàng theo người dùng"
+msgstr "Phân tích máy tính tiền theo người dùng"
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
@@ -162,7 +163,7 @@ msgstr "Đơn hàng tiêu biểu"
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 msgid "Top Points of Sale"
-msgstr "Điểm bán hàng tiêu biểu"
+msgstr "Máy tính tiền tiêu biểu"
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript

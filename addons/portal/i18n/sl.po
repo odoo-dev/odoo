@@ -220,13 +220,13 @@ msgstr ""
 #. module: portal
 #: model:ir.model,name:portal.model_res_users_apikeys_description
 msgid "API Key Description"
-msgstr ""
+msgstr "API Opis tipke"
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/js/portal_security.js:0
 msgid "API Key Ready"
-msgstr ""
+msgstr "API Ključ pripravljen"
 
 #. module: portal
 #. odoo-javascript
@@ -549,13 +549,13 @@ msgstr "Obravnava z elektronsko pošto"
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 msgid "Enter a description of and purpose for the key."
-msgstr ""
+msgstr "Vnesite opis in namen ključa."
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 msgid "Forgot password?"
-msgstr ""
+msgstr "Ste pozabili geslo?"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -723,7 +723,7 @@ msgstr "Povezava"
 #: code:addons/portal/static/src/js/portal_security.js:0
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "Log out from all devices"
-msgstr ""
+msgstr "Odjava iz vseh naprav"
 
 #. module: portal
 #. odoo-javascript
@@ -764,14 +764,14 @@ msgstr "Naziv"
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 msgid "Name your key"
-msgstr ""
+msgstr "Poimenujte svoj ključ"
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/js/portal_security.js:0
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "New API Key"
-msgstr ""
+msgstr "Nov ključ API-ja"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -1290,7 +1290,7 @@ msgstr "Kronologija komunikacij spletne strani"
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 msgid "What's this key for?"
-msgstr ""
+msgstr "Čemu je namenjen ta ključ?"
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_wizard_user__wizard_id
@@ -1307,7 +1307,7 @@ msgstr "Napiši sporočilo..."
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 msgid "Write down your key"
-msgstr ""
+msgstr "Zapišite si svoj ključ"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security

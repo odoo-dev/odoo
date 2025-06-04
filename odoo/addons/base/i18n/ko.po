@@ -592,6 +592,9 @@ msgid ""
 "            Egypt Tax Authority Invoice Integration\n"
 "        "
 msgstr ""
+"\n"
+"            이집트 국세청 청구서 통합\n"
+"        "
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_ke_edi_oscu
@@ -2218,6 +2221,8 @@ msgid ""
 "\n"
 "Additional module to allow the export of the Italian monthly tax report to XML format.\n"
 msgstr ""
+"\n"
+"해당 명세서를 가져올 전표를 찾을 수 없습니다. 전표를 직접 선택하세요.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_it_edi_ndd
@@ -4617,6 +4622,12 @@ msgid ""
 "TaxBase (DPP) has to be mulitplied by factor of 11/12 while multiplied to tax of 12% which\n"
 "is resulting to 11%.\n"
 msgstr ""
+"\n"
+"DJP(인도네시아 세무서)에서 제공하는 전자 청구서 기능입니다. 2025년 1월 1일부터 인도네시아에서는,\n"
+"CoreTax 시스템을 사용 중이며, 이를 기준으로 E-Faktur의 파일 형식과 내용이 변경됩니다.\n"
+"CSV 파일운 XML 파일로 변경됩니다.\n"
+"또한 세금 규정이 수시로 변경되는 상황을 고려하여 일반 E-Faktur의 경우,\n"
+"과세 표준(TaxBase: DPP)에 11/12를 곱한 후 12%의 세율을 적용하여 11%로 계산합니다.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_skills_slides
@@ -7275,6 +7286,10 @@ msgid ""
 "Official website: https://sie.se/\n"
 "XSD and documentation: https://sie.se/format/\n"
 msgstr ""
+"\n"
+"회계 데이터를 SIE 4 표준 파일로 내보내는 모듈입니다.\n"
+"공식 웹사이트: https://sie.se/\n"
+"XSD 및 문서: https://sie.se/format/\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_fr_fec_import
@@ -7381,6 +7396,10 @@ msgid ""
 "Official website: https://sie.se/\n"
 "XSD and documentation: https://sie.se/format/\n"
 msgstr ""
+"\n"
+"SIE 4 표준 파일 가져오기용 모듈입니다.\n"
+"공식 웹사이트: https://sie.se/\n"
+"XSD 및 문서: https://sie.se/format/\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_se_sie_import
@@ -9711,6 +9730,17 @@ msgid ""
 "- Taxes\n"
 "- Tax report\n"
 msgstr ""
+"\n"
+"Odoo 방글라데시 회계 계정과목표를 관리하기 위한 기본 모듈입니다.\n"
+"===================================================================================\n"
+"\n"
+"방글라데시 회계 기본 계정과목표 및 현지화.\n"
+"\n"
+"활성화 항목:\n"
+"\n"
+"- 계정과목표\n"
+"- 세금\n"
+"- 세금 신고서\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_be
@@ -12937,6 +12967,8 @@ msgid ""
 "\n"
 "eFaktura E-invoice implementation for Serbia\n"
 msgstr ""
+"\n"
+"세르비아 eFaktura 전자 청구서 구현\n"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_delivery_mondialrelay
@@ -15336,7 +15368,7 @@ msgstr "고객이 Stripe으로 결제할 수 있는 셀프 주문 앱용 애드�
 #. module: base
 #: model:ir.module.module,description:base.module_tests
 msgid "Addons to test Odoo industries code."
-msgstr ""
+msgstr "Odoo 인더스트리 코드 테스트용 애드온"
 
 #. module: base
 #. odoo-python
@@ -17470,7 +17502,7 @@ msgstr "아르메니아"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_art_craft
 msgid "Arts & Crafts Store"
-msgstr ""
+msgstr "공예점"
 
 #. module: base
 #: model:res.country,name:base.aw
@@ -18160,7 +18192,7 @@ msgstr "방문자에게 메일링 리스트에 가입하도록 유도"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_certification_organism
 msgid "Audit & Certification"
-msgstr ""
+msgstr "감사 및 인증"
 
 #. module: base
 #: model:res.country,name:base.au
@@ -18433,7 +18465,7 @@ msgstr "직원 계약을 기반으로 한 자동화 규칙"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_automobile
 msgid "Automobile Spare Parts"
-msgstr ""
+msgstr "차량 예비용 부품"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__available_model_ids
@@ -22975,7 +23007,7 @@ msgstr "루마니아의 전자 청구서 구현"
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_rs_edi
 msgid "E-Invoice implementation for Serbia"
-msgstr ""
+msgstr "세르비아 전자 청구서 구현"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_dk_oioubl
@@ -23647,7 +23679,7 @@ msgstr "에스토니아 - 반올림"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ee_intrastat
 msgid "Estonia Intrastat Declaration"
-msgstr ""
+msgstr "에스토니아 인트라스탯 신고"
 
 #. module: base
 #: model:res.country,name:base.sz
@@ -25281,7 +25313,7 @@ msgstr "강좌 포럼"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_coal_petroleum
 msgid "Fossil Fuel Trading"
-msgstr ""
+msgstr "화석 연료 거래"
 
 #. module: base
 #. odoo-python
@@ -26198,7 +26230,7 @@ msgstr "모든 보고서의 상단에 표시되는 머리말 문구입니다."
 #. module: base
 #: model:ir.module.category,name:base.module_category_health_and_fitness
 msgid "Health and Fitness"
-msgstr ""
+msgstr "헬스 및 피트니스"
 
 #. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_Q
@@ -26801,7 +26833,7 @@ msgstr "ISO 코드"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_it_hardware
 msgid "IT Hardware & Support"
-msgstr ""
+msgstr "IT 하드웨어 및 지원"
 
 #. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_J
@@ -27462,7 +27494,7 @@ msgstr "인도네시아 전자 팩스"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_id_efaktur_coretax
 msgid "Indonesia E-faktur (Coretax)"
-msgstr ""
+msgstr "인도네시아 E-faktur (Coretax)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_id
@@ -28276,7 +28308,7 @@ msgstr "이탈리아 - 전자 인보이스 - 직불 메모 (nota di debito - NDD
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_it_edi_sale
 msgid "Italy - Sale E-invoicing"
-msgstr ""
+msgstr "이탈리아 - 판매용 전자 청구서"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_it_stock_ddt
@@ -28286,7 +28318,7 @@ msgstr "이탈리아 - 재고 DDT"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_it_xml_export
 msgid "Italy - Tax Report XML Export"
-msgstr ""
+msgstr "이탈리아 - 세금 신고서 XML 내보내기"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_it_edi_website_sale
@@ -30069,7 +30101,7 @@ msgstr "판매 주문 고나련 대량 문자 발송"
 #: model:ir.module.module,description:base.module_hr_recruitment_sms
 #: model:ir.module.module,summary:base.module_hr_recruitment_sms
 msgid "Mass mailing sms to job applicants"
-msgstr ""
+msgstr "입사 지원자에게 대량 메일 발송"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_mps
@@ -36671,7 +36703,7 @@ msgstr "채용"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_recruitment_sms
 msgid "Recruitment - SMS"
-msgstr ""
+msgstr "채용 - SMS"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_recruitment_sign
@@ -37607,7 +37639,7 @@ msgstr "브라질의 판매 변경 사항"
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_it_edi_sale
 msgid "Sale modifications for Italy E-invoicing"
-msgstr ""
+msgstr "이탈리아 전자 청구서의 판매 변경 사항"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_social_sale
@@ -38329,7 +38361,7 @@ msgstr "세르비아 - 회계 보고서"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_rs_edi
 msgid "Serbia - eFaktura E-invoicing"
-msgstr ""
+msgstr "세르비아 - eFaktura 전자 청구서"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_logging__type__server
@@ -38792,7 +38824,7 @@ msgstr "소프트웨어 리셀러"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_solar_installation
 msgid "Solar Energy Systems"
-msgstr ""
+msgstr "태양광 에너지 시스템"
 
 #. module: base
 #: model:res.country,name:base.sb
@@ -39543,7 +39575,7 @@ msgstr "수리남"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_surveyor
 msgid "Surveying & Mapping"
-msgstr ""
+msgstr "측량 및 지도 제작"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_marketing_surveys
@@ -39575,17 +39607,17 @@ msgstr "스웨덴 - 회계 보고서"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_se_sie4_export
 msgid "Sweden - SIE 4 Export"
-msgstr ""
+msgstr "스웨덴 - SIE 4 내보내기"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_se_sie4_import
 msgid "Sweden - SIE 4 Import"
-msgstr ""
+msgstr "스웨덴 - SIE 4 가져오기"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_se_sie_import
 msgid "Sweden - SIE 5 Import"
-msgstr ""
+msgstr "스웨덴 - SIE 5 가져오기"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_l10n_se

@@ -4,8 +4,8 @@
 # 
 # Translators:
 # Wil Odoo, 2025
-# Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2025
 # Fernanda Alvarez, 2025
+# Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2025
 # 
 msgid ""
 msgstr ""
@@ -13,7 +13,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-05-13 14:27+0000\n"
 "PO-Revision-Date: 2024-07-16 09:15+0000\n"
-"Last-Translator: Fernanda Alvarez, 2025\n"
+"Last-Translator: Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2025\n"
 "Language-Team: Spanish (Latin America) (https://app.transifex.com/odoo/teams/41243/es_419/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -6805,7 +6805,7 @@ msgstr ""
 "Gestione la coincidencia de tres vías en las facturas de proveedor\n"
 "=====================================\n"
 "\n"
-"En el sector de fabricación es común recibir las facturas de los proveedores antes\n"
+"En la industria manufacturera es común recibir las facturas de los proveedores antes\n"
 "de recibir la compra, pero también es común querer pagar la factura hasta después de haber recibido los\n"
 "bienes.\n"
 "\n"
@@ -6813,14 +6813,14 @@ msgstr ""
 "(según las cantidades ordenadas), pero pagar la factura solo cuando las cantidades\n"
 "recibidas (indicadas en la orden de compra) coincidan con lo indicado en la factura del proveedor.\n"
 "\n"
-"Este módulo introduce un mecanismo de \"emisión de pago\" que marca en cada una de las\n"
-"facturas de los proveedores si estas se pueden pagar o no.\n"
+"Este módulo introduce un mecanismo de \"emisión de pago\" que indica si es posible pagar o no cada una de las\n"
+"facturas de los proveedores.\n"
 "\n"
 "Cada factura recibe uno de los siguientes tres estados:\n"
 "\n"
-"- Sí (es posible pagar la factura)\n"
-"- No (no es posible pagar la factura, no ha recibido los productos)\n"
-"- Excepción (las cantidades recibidas no coinciden con las cantidades facturadas)\n"
+"- Sí (Es posible pagar la factura)\n"
+"- No (No es posible pagar la factura, no ha recibido los productos)\n"
+"- Excepción (Las cantidades recibidas no coinciden con las cantidades facturadas)\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_helpdesk_stock
@@ -7800,7 +7800,7 @@ msgstr ""
 "\n"
 "Organización sin fines de lucro\n"
 "\n"
-"Este módulo de sector preconfigura Odoo para organizaciones sin fines de lucro.\n"
+"Este módulo de industria preconfigura Odoo para organizaciones sin fines de lucro.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_no_saft
@@ -9520,7 +9520,7 @@ msgid ""
 "This industry caters to billboard rental businesses, specializing in managing outdoor advertising spaces. It involves coordinating prime location leases, complying with regulations, and maximizing client visibility.\n"
 msgstr ""
 "\n"
-"Este es un sector específico para empresas de alquiler de espectaculares que se especializan en la gestión de espacios publicitarios al aire libre. Involucra la mejor coordinación para alquilar las mejores ubicaciones, cumplir con normas y maximizar la visibilidad de los clientes.\n"
+"Esta industria es específica para las empresas de alquiler de espectaculares que se especializan en la gestión de espacios publicitarios al aire libre. Involucra la coordinación del alquiler de las mejores ubicaciones, el cumplimiento de las normas y maximiza la visibilidad de los clientes.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_construction
@@ -9530,8 +9530,8 @@ msgid ""
 "focusing on accurate quoting, efficient planning, seamless execution, and excellent customer service, ...\n"
 msgstr ""
 "\n"
-"Este sector es perfecto para empresas de construcción que gestionen proyectos desde su conceptualización hasta que se hayan terminado.\n"
-"Estas empresas se enfocan en cotizaciones correctas, planeación eficiente, ejecución fluida y excelente servicio al cliente.\n"
+"Esta industria es perfecta para las empresas de construcción que gestionan proyectos desde su conceptualización hasta su elaboración.\n"
+"Estas empresas se enfocan en crear cotizaciones correctas, elaborar una planeación eficiente, realizar una ejecución fluida y proporcionar excelente servicio al cliente.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_architects
@@ -9541,8 +9541,8 @@ msgid ""
 "schematic design, design development, worksite follow-up, energy efficiency assessment.\n"
 msgstr ""
 "\n"
-"                Este sector está hecho para estudios de arquitectura que venden todo tipo de servicios arquitectónicos como estudios de viabilidad,\n"
-"diseños preliminares, desarrollo de diseño, seguimiento en el sitio de trabajo, o evaluación de la eficiencia energética.\n"
+"                Esta industria está creada para los estudios de arquitectura que venden todo tipo de servicios arquitectónicos como estudios de viabilidad,\n"
+"diseños preliminares, desarrollo de diseño, seguimiento en el sitio de trabajo y evaluación de la eficiencia energética.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_condominium
@@ -9552,8 +9552,8 @@ msgid ""
 "Moreover, the business is legally regulated in lots of countries under different names: condo in the US, co-ownership in Canada, joint domination in the UK, property syndicate in France, syndic in Belgium, etc\n"
 msgstr ""
 "\n"
-"Este sector está adaptado a las empresas que se dedican a la gestión de propiedades bajo la modalidad de copropiedad. Este tipo de actividad empresarial es compleja, pues implica la gestión de todos los aspectos de las propiedades y la división equitativa de los gastos.\n"
-"Además, estas empresas están reguladas en muchos países bajo diferentes nombres: condominio en Estados Unidos, copropiedad en Canadá, dominación conjunta en el Reino Unido, sindicato de propiedades en Francia, síndico en Bélgica, etc.\n"
+"Esta industria está creada para las empresas que se dedican a la gestión de propiedades bajo la modalidad de copropiedad. Este tipo de actividad empresarial es compleja, pues implica la gestión de todos los aspectos de las propiedades y la división equitativa de los gastos.\n"
+"Además, en muchos países estas empresas están reguladas bajo diferentes nombres: condominio en Estados Unidos, copropiedad en Canadá, dominación conjunta en el Reino Unido, sindicato de propiedades en Francia, síndico en Bélgica, etc.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_partner
@@ -11939,7 +11939,7 @@ msgid ""
 "This module is a complete solution for the bike leasing industry, simplifying lease management, bike tracking, and customer service. It's perfect for businesses aiming to streamline operations and embrace the growing trend of sustainable mobility.\n"
 msgstr ""
 "\n"
-"Este módulo es una solución completa para el sector de alquiler de bicicletas, ya que simplifica la gestión de alquileres, el rastreo de las bicicletas y el servicio al cliente. Es perfecto para empresas que buscan optimizar sus operaciones y aprovechar la tendencia de buscar una movilidad sostenible.\n"
+"Este módulo es una solución completa para la industria de alquiler de bicicletas, ya que simplifica la gestión de alquileres, el rastreo de las bicicletas y el servicio al cliente. Es perfecto para las empresas que buscan optimizar sus operaciones y aprovechar la tendencia de buscar una movilidad sostenible.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_micro_brewery
@@ -11987,8 +11987,8 @@ msgid ""
 "The sales process involves creating sale orders, managing deliveries and invoicing. Additionally, they operate an eCommerce shop for online sales in the eyewear industry.\n"
 msgstr ""
 "\n"
-"Este módulo es para ópticas elegantes y con productos asequibles. Gestiona varios tipos de lentes, como lentes de sol, lentes de contacto, lentes especializados, etc.\n"
-"El proceso de ventas incluye la creación de órdenes de venta, la gestión de entregas y la facturación. Además, opera una tienda de comercio electrónico para realizar ventas en línea en el sector óptico.\n"
+"Este módulo es para ópticas elegantes y con productos asequibles. Le permite gestionar varios tipos de lentes, como lentes de sol, lentes de contacto, lentes especializados, etc.\n"
+"El proceso de ventas incluye la creación de órdenes de venta, la gestión de entregas y la facturación. Además, le ayuda a gestionar una tienda de comercio electrónico para realizar ventas en línea en la industria óptica.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_crm_full
@@ -12062,7 +12062,7 @@ msgid ""
 "This module offers a vibrant selection of cocktails, soft drinks, and other essential items for the bar and pub industry. It is an invaluable resource for anyone looking to elevate their establishment, enhance customer experience, or explore new trends in mixology and hospitality.\n"
 msgstr ""
 "\n"
-"Este módulo ofrece una vibrante selección de cócteles, bebidas no alcohólicas y otros elementos esenciales para el sector de bares y pubs. Es un recurso invaluable para cualquier persona que desee llevar su establecimiento a otro nivel, mejorar la experiencia de los clientes o explorar nuevas tendencias en mixología y hospitalidad.\n"
+"Este módulo ofrece una vibrante selección de cócteles, bebidas sin alcohol y otros artículos esenciales para la industria de bares y pubs. Es un recurso invaluable para cualquier persona que desee llevar su establecimiento a otro nivel, mejorar la experiencia de los clientes o explorar nuevas tendencias en mixología y hospitalidad.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_check_printing
@@ -18984,7 +18984,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_bar_industry
 msgid "Bar Industry"
-msgstr "Sector de bares"
+msgstr "Industria de bares"
 
 #. module: base
 #: model:res.country,name:base.bb
@@ -20626,7 +20626,7 @@ msgstr "Cóbrele a sus clientes mediante domiciliación bancaria SEPA."
 #. module: base
 #: model:ir.module.module,summary:base.module_documents
 msgid "Collect, organize and share documents."
-msgstr "Recolecta, organiza y comparte documentos"
+msgstr "Recopile, organice y comparta documentos"
 
 #. module: base
 #: model_terms:res.partner,website_description:base.res_partner_address_28
@@ -21458,7 +21458,7 @@ msgstr "Crear"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_access__perm_create
 msgid "Create Access"
-msgstr "Crear acceso"
+msgstr "Acceso de creación"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
@@ -21568,7 +21568,7 @@ msgstr "Cree un nuevo proveedor en su libreta de direcciones"
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.res_partner_industry_action
 msgid "Create an Industry"
-msgstr "Crear un sector"
+msgstr "Crear una industria"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_web_studio
@@ -22551,7 +22551,7 @@ msgstr "Eliminar clave API"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_access__perm_unlink
 msgid "Delete Access"
-msgstr "Eliminar acceso"
+msgstr "Acceso de eliminación"
 
 #. module: base
 #. odoo-python
@@ -27068,7 +27068,7 @@ msgstr "Legible para humanos"
 #: model:ir.module.category,name:base.module_category_human_resources
 #: model_terms:ir.ui.view,arch_db:base.user_groups_view
 msgid "Human Resources"
-msgstr "Recursos Humanos"
+msgstr "Recursos humanos"
 
 #. module: base
 #: model:res.country,name:base.hu
@@ -27987,7 +27987,7 @@ msgstr "Indonesia - Contabilidad"
 #. module: base
 #: model:ir.actions.act_window,name:base.res_partner_industry_action
 msgid "Industries"
-msgstr "Sectores"
+msgstr "Industrias"
 
 #. module: base
 #: model:ir.model,name:base.model_res_partner_industry
@@ -27996,7 +27996,7 @@ msgstr "Sectores"
 #: model_terms:ir.ui.view,arch_db:base.res_partner_industry_view_form
 #: model_terms:ir.ui.view,arch_db:base.res_partner_industry_view_tree
 msgid "Industry"
-msgstr "Sector"
+msgstr "Industria"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model__info
@@ -28689,7 +28689,7 @@ msgstr "¿Es la divisa actual de la empresa?"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_embedded_actions__is_deletable
 msgid "Is Deletable"
-msgstr "Se puede borrar"
+msgstr "Se puede eliminar"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__is_public
@@ -30173,7 +30173,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_room
 msgid "Manage Meeting Rooms"
-msgstr "Gestione salas de juntas"
+msgstr "Gestione sus salas de reunión"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_recruitment
@@ -37539,7 +37539,7 @@ msgstr "Funciones de reparación para Control de calidad"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_repair
 msgid "Repairs"
-msgstr "Reparaciones"
+msgstr "Reparación"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_cron__interval_number
@@ -37741,7 +37741,7 @@ msgstr "Restaurante"
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_restaurant
 msgid "Restaurant extensions for the Point of Sale "
-msgstr "Extensiones de restaurante para Punto de venta"
+msgstr "Extensión de restaurante para la aplicación Punto de venta"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__reset_view_arch_wizard__reset_mode__soft
@@ -38578,7 +38578,7 @@ msgstr "Buscar categoría de contacto"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_partner_industry_view_search
 msgid "Search Partner Industry"
-msgstr "Buscar sector del contacto"
+msgstr "Buscar industria del contacto"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_window__search_view_id
@@ -39218,7 +39218,7 @@ msgstr "Sierra Leona"
 #: model:ir.module.category,name:base.module_category_sales_sign
 #: model:ir.module.module,shortdesc:base.module_sign
 msgid "Sign"
-msgstr "Firma "
+msgstr "Firma electrónica"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_contract_salary
@@ -39635,7 +39635,8 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:base.res_partner_industry_action
 msgid "Specify industries to classify your contacts and draw up reports."
 msgstr ""
-"Especifique los sectores para clasificar sus contactos y elaborar reportes."
+"Especifique las industrias para clasificar sus contactos y elaborar "
+"reportes."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_server__crud_model_id
@@ -45218,7 +45219,7 @@ msgstr "No puede desactivar el usuario que está usando ahora mismo."
 #. odoo-python
 #: code:addons/base/models/ir_embedded_actions.py:0
 msgid "You cannot delete a default embedded action"
-msgstr "No puede borrar una acción incrustada predeterminada"
+msgstr "No puede eliminar una acción incrustada predeterminada"
 
 #. module: base
 #. odoo-python
