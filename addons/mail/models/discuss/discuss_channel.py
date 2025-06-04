@@ -349,7 +349,6 @@ class DiscussChannel(models.Model):
         # pop the mail_create_bypass_create_check key to avoid leaking it outside of create)
         channels = channels.with_context(mail_create_bypass_create_check=None)
         channels._subscribe_users_automatically()
-
         return channels
 
     @api.ondelete(at_uninstall=False)
@@ -439,7 +438,7 @@ class DiscussChannel(models.Model):
             self.env['discuss.channel.member'].sudo().create(to_create)
         for channel in self:
             channel.group_ids._bus_send_store(
-                Store(channel, channel._to_store_defaults(for_current_user=False)).add(
+                Store(channel, channel._to_store_defaults(for_current_user=True)).add(
                     channel, {"is_pinned": True}
                 )
             )
