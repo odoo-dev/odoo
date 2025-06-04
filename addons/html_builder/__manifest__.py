@@ -21,6 +21,9 @@
     'depends': ['base', 'html_editor', 'mail'],
 
     'assets': {
+        'web._assets_primary_variables': [
+            ('after', 'web/static/src/scss/primary_variables.scss', 'html_builder/static/src/builder.variables.scss'),
+        ],
         # this bundle is lazy loaded when the editor is ready
         'html_builder.assets': [
             ('include', 'web._assets_helpers'),
