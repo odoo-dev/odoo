@@ -5,7 +5,6 @@ import { user } from "@web/core/user";
 import { ProjectTemplateDropdown } from "../components/project_template_dropdown";
 
 export class ProjectKanbanController extends KanbanController {
-    static template = "project.ProjectKanbanView";
     static components = {
         ...KanbanController.components,
         ProjectTemplateDropdown,
@@ -16,6 +15,15 @@ export class ProjectKanbanController extends KanbanController {
         onWillStart(async () => {
             this.isProjectManager = await user.hasGroup('project.group_project_manager');
         });
+    }
+
+    get staticControlPanelButtons() {
+        return {
+            ...super.staticControlPanelButtons,
+            new: {
+                template: "project.ProjectKanbanView.Buttons.TemplateDropdown",
+            },
+        };
     }
 
     getStaticActionMenuItems() {

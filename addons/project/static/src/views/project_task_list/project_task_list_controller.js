@@ -11,7 +11,9 @@ export class ProjectTaskListController extends ListController {
 
     get staticControlPanelButtons() {
         return {
-            templateDropdown: {
+            ...super.staticControlPanelButtons,
+            new: {
+                isAvailable: () => !this.editedRecord && this.canCreate,
                 template: "project.ProjectTaskListView.Buttons.TemplateDropdown",
             },
         };
