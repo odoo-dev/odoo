@@ -6,7 +6,7 @@ import { runTests } from "./module_set.hoot";
 definePreset("desktop", {
     icon: "fa-desktop",
     label: "Desktop",
-    platform: "linux",
+    // platform: "linux",
     size: [1366, 768],
     tags: ["-mobile"],
     touch: false,
@@ -14,7 +14,7 @@ definePreset("desktop", {
 definePreset("mobile", {
     icon: "fa-mobile font-bold",
     label: "Mobile",
-    platform: "android",
+    // platform: "android",
     size: [375, 667],
     tags: ["-desktop"],
     touch: true,
