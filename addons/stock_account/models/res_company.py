@@ -1,11 +1,11 @@
 from odoo import models, fields
 
-
 class ResCompany(models.Model):
     _inherit = "res.company"
 
     account_production_wip_account_id = fields.Many2one('account.account', string='Production WIP Account', check_company=True)
     account_production_wip_overhead_account_id = fields.Many2one('account.account', string='Production WIP Overhead Account', check_company=True)
+
     cost_method = fields.Selection(
         string="Cost Method",
         selection=[
@@ -16,3 +16,5 @@ class ResCompany(models.Model):
         default='standard',
         required=True,
     )
+
+    account_stock_variation_id = fields.Many2one('account.account', string='Stock Variation Account', check_company=True)

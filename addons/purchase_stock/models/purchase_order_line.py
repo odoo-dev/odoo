@@ -193,30 +193,6 @@ class PurchaseOrderLine(models.Model):
                 moves = line._create_stock_moves(picking)
                 moves._action_confirm()._action_assign()
 
-    def _get_stock_move_price_unit(self):
-        self.ensure_one()
-        order = self.order_id
-        price_unit = self.price_unit
-        price_unit_prec = self.env['decimal.precision'].precision_get('Product Price')
-        if self.tax_ids:
-            qty = self.product_qty or 1
-            price_unit = self.tax_ids.compute_all(
-                price_unit,
-                currency=self.order_id.currency_id,
-                quantity=qty,
-                product=self.product_id,
-                partner=self.order_id.partner_id,
-                rounding_method="round_globally",
-            )['total_void']
-            price_unit = price_unit / qty
-        if self.product_uom_id.id != self.product_id.uom_id.id:
-            price_unit /= self.product_uom_id.factor
-            price_unit *= self.product_id.uom_id.factor
-        if order.currency_id != order.company_id.currency_id:
-            price_unit = order.currency_id._convert(
-                price_unit, order.company_id.currency_id, self.company_id, self.date_order or fields.Date.today(), round=False)
-        return float_round(price_unit, precision_digits=price_unit_prec)
-
     def _get_move_dests_initial_demand(self, move_dests):
         return self.product_id.uom_id._compute_quantity(
             sum(move_dests.filtered(lambda m: m.state != 'cancel' and m.location_dest_id.usage != 'supplier').mapped('product_qty')),
@@ -254,6 +230,30 @@ class PurchaseOrderLine(models.Model):
             extra_move_vals['move_dest_ids'] = False  # don't attach
             res.append(extra_move_vals)
         return res
+
+    def _get_stock_move_price_unit(self):
+        self.ensure_one()
+        order = self.order_id
+        price_unit = self.price_unit
+        price_unit_prec = self.env['decimal.precision'].precision_get('Product Price')
+        if self.tax_ids:
+            qty = self.product_qty or 1
+            price_unit = self.tax_ids.compute_all(
+                price_unit,
+                currency=self.order_id.currency_id,
+                quantity=qty,
+                product=self.product_id,
+                partner=self.order_id.partner_id,
+                rounding_method="round_globally",
+            )['total_void']
+            price_unit = price_unit / qty
+        if self.product_uom_id.id != self.product_id.uom_id.id:
+            price_unit /= self.product_uom_id.factor
+            price_unit *= self.product_id.uom_id.factor
+        if order.currency_id != order.company_id.currency_id:
+            price_unit = order.currency_id._convert(
+                price_unit, order.company_id.currency_id, self.company_id, self.date_order or fields.Date.today(), round=False)
+        return float_round(price_unit, precision_digits=price_unit_prec)
 
     def _get_qty_procurement(self):
         self.ensure_one()

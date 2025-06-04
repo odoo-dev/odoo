@@ -6,8 +6,8 @@ from odoo import models
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
-    def _stock_account_get_anglo_saxon_price_unit(self):
-        price_unit = super(AccountMoveLine, self)._stock_account_get_anglo_saxon_price_unit()
+    def _get_cogs_value(self):
+        price_unit = super()._get_cogs_value()
 
         so_line = self.sale_line_ids and self.sale_line_ids[-1] or False
         if so_line:

@@ -11,12 +11,9 @@ class StockLot(models.Model):
     _inherit = 'stock.lot'
 
     lot_valuated = fields.Boolean(related='product_id.lot_valuated', readonly=True, store=False)
-    value_svl = fields.Float(compute='_compute_value_svl', compute_sudo=True)
-    quantity_svl = fields.Float(compute='_compute_value_svl', compute_sudo=True)
-    avg_cost = fields.Monetary(string="Average Cost", compute='_compute_value_svl', compute_sudo=True, currency_field='company_currency_id')
-    total_value = fields.Monetary(string="Total Value", compute='_compute_value_svl', compute_sudo=True, currency_field='company_currency_id')
+    avg_cost = fields.Monetary(string="Average Cost", currency_field='company_currency_id')
+    total_value = fields.Monetary(string="Total Value", compute='_compute_value', compute_sudo=True, currency_field='company_currency_id')
     company_currency_id = fields.Many2one('res.currency', 'Valuation Currency', compute='_compute_value_svl', compute_sudo=True)
-    stock_valuation_layer_ids = fields.One2many('stock.valuation.layer', 'lot_id')
     standard_price = fields.Float(
         "Cost", company_dependent=True,
         digits='Product Price', groups="base.group_user",
@@ -25,13 +22,10 @@ class StockLot(models.Model):
         Used to compute margins on sale orders."""
     )
 
-    @api.depends('stock_valuation_layer_ids', 'product_id.lot_valuated')
+    @api.depends('product_id.lot_valuated')
     @api.depends_context('to_date', 'company')
     def _compute_value_svl(self):
         """Compute totals of multiple svl related values"""
-        self.value_svl = 0
-        self.quantity_svl = 0
-        self.avg_cost = 0
         self.total_value = 0
         self.company_currency_id = False
         lots = self.filtered(lambda l: l.product_id.lot_valuated)
@@ -39,28 +33,8 @@ class StockLot(models.Model):
             return
         company_id = self.env.company
         self.company_currency_id = company_id.currency_id
-        domain = [
-            *self.env['stock.valuation.layer']._check_company_domain(company_id),
-            ('lot_id', 'in', lots.ids),
-        ]
-        if self.env.context.get('to_date'):
-            to_date = fields.Datetime.to_datetime(self.env.context['to_date'])
-            domain.append(('create_date', '<=', to_date))
-        groups = self.env['stock.valuation.layer']._read_group(
-            domain,
-            groupby=['lot_id'],
-            aggregates=['value:sum', 'quantity:sum'],
-        )
-        # Browse all lots and compute lots' quantities_dict in batch.
-        group_mapping = {lot: aggregates for lot, *aggregates in groups}
         for lot in lots:
-            value_sum, quantity_sum = group_mapping.get(lot._origin, (0, 0))
-            value_svl = self.company_currency_id.round(value_sum)
-            avg_cost = value_svl / quantity_sum if quantity_sum else 0
-            lot.value_svl = value_svl
-            lot.quantity_svl = quantity_sum
-            lot.avg_cost = avg_cost
-            lot.total_value = avg_cost * quantity_sum
+            lot.total_value = lot.avg_cost * lot.product_qty
 
     @api.model_create_multi
     def create(self, vals_list):
