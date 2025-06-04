@@ -116,6 +116,14 @@
             <field name="groups" eval="[(4, ref('group_hr_timesheet_approver'))]"/>
         </record>
 
+        <record model="ir.rule" id="project.project_project_manager_rule">
+            <field name="groups" eval="[(4,ref('group_timesheet_manager'))]"/>
+        </record>
+
+        <record model="ir.rule" id="project.project_manager_all_project_tasks_rule">
+            <field name="groups" eval="[(4,ref('group_timesheet_manager'))]"/>
+        </record>
+
         <record id="timesheet_analysis_report_manager" model="ir.rule">
             <field name="name">Timesheets Analysis Report manager</field>
             <field name="model_id" ref="model_timesheets_analysis_report"/>
