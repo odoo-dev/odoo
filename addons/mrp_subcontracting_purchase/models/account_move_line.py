@@ -16,9 +16,3 @@ class AccountMoveLine(models.Model):
             if not self.product_uom_id.is_zero(qty):
                 price_unit_val_dif = price_unit_val_dif + components_cost / qty
         return price_unit_val_dif, relevant_qty
-
-    def _get_valued_in_moves(self):
-        res = super()._get_valued_in_moves()
-        # subcontracted move valuations are not linked to the PO move but its orig move (the MO finished move)
-        res |= res.filtered(lambda m: m.is_subcontract).move_orig_ids
-        return res

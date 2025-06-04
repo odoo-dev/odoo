@@ -139,7 +139,6 @@ class ResCompany(models.Model):
         string="Loss Exchange Rate Account",
         check_company=True,
         domain="[('account_type', '=', 'expense')]")
-    anglo_saxon_accounting = fields.Boolean(string="Use anglo-saxon accounting")
     bank_journal_ids = fields.One2many('account.journal', 'company_id', domain=[('type', '=', 'bank')], string='Bank Journals')
     incoterm_id = fields.Many2one('account.incoterms', string='Default incoterm',
         help='International Commercial Terms are a series of predefined commercial terms used in international transactions.')
@@ -296,6 +295,32 @@ class ResCompany(models.Model):
         help="The expense is accounted for when a vendor bill is validated, except in anglo-saxon"
              " accounting with perpetual inventory valuation in which case the expense (Cost of"
              " Goods Sold account) is recognized at the customer invoice validation.",
+    )
+    price_difference_account_id = fields.Many2one(
+        comodel_name='account.account',
+        string="Price Difference Account",
+        domain=ACCOUNT_DOMAIN,
+        help="During perpetual valuation, this account will hold the price difference between the standard price and the bill price.",
+    )
+
+    # Inventory
+    anglo_saxon_accounting = fields.Boolean(string="Use anglo-saxon accounting")
+    inventory_period = fields.Selection(
+        string='Inventory Period',
+        selection=[
+            ('manual', 'Manual'),
+            ('daily', 'Daily'),
+            ('monthly', 'Monthly'),
+        ],
+        default='manual',
+        required=True)
+    inventory_valuation = fields.Selection(
+        string='Valuation',
+        selection=[
+            ('periodic', 'Periodic (at closing)'),
+            ('real_time', 'Perpetual (at invoicing)'),
+        ],
+        default='periodic',
     )
 
     def get_next_batch_payment_communication(self):
@@ -711,6 +736,11 @@ class ResCompany(models.Model):
             if 'currency_id' in vals and vals['currency_id'] != company.currency_id.id:
                 if company.root_id._existing_accounting():
                     raise UserError(_('You cannot change the currency of the company since some journal items already exist'))
+
+            if 'expense_account_id' in vals and vals['expense_account_id'] != company.expense_account_id.id:
+                self.env['ir.default'].set('product.category', 'property_account_expense_categ_id', vals['expense_account_id'], company_id=company.id)
+            if 'income_account_id' in vals and vals['income_account_id'] != company.income_account_id.id:
+                self.env['ir.default'].set('product.category', 'property_account_income_categ_id', vals['income_account_id'], company_id=company.id)
 
         companies = super().write(vals)
 
