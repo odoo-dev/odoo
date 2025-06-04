@@ -4,7 +4,7 @@
 from collections import defaultdict
 
 from odoo import api, fields, models, _, Command
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, get_lang
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, SQL, get_lang
 
 
 class PurchaseOrderGroup(models.Model):
@@ -256,7 +256,8 @@ class PurchaseOrder(models.Model):
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
-    price_total_cc = fields.Monetary(compute='_compute_price_total_cc', string="Company Subtotal", currency_field="company_currency_id", store=True)
+    price_total_cc = fields.Monetary(compute='_compute_price_total_cc', string="Company Subtotal",
+                        currency_field="company_currency_id", store=True, aggregator=None)
     company_currency_id = fields.Many2one(related="company_id.currency_id", string="Company Currency")
 
     @api.depends('price_subtotal', 'order_id.currency_rate')
