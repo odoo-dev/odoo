@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="payment_provider_form_hdfc_upi" model="ir.ui.view">
+        <field name="name">payment.provider.form.inherit.hdfc.upi</field>
+        <field name="model">payment.provider</field>
+        <field name="inherit_id" ref="payment.payment_provider_form"/>
+        <field name="arch" type="xml">
+            <group name="provider_credentials" position="inside">
+                <group invisible="code != 'hdfc_upi'">
+                    <field name="hdfc_upi_merchant_id"
+                           string="Merchant ID"
+                           required="code == 'hdfc_upi' and state != 'disabled'"/>
+                    <field name="hdfc_upi_merchant_name"
+                           string="Merchant Name"
+                           required="code == 'hdfc_upi' and state != 'disabled'"/>
+                    <field name="hdfc_upi_merchant_category"
+                           string="Merchant Category"
+                           required="code == 'hdfc_upi' and state != 'disabled'"/>
+                    <field name="hdfc_upi_encryption_key"
+                           string="Encryption Key"
+                           required="code == 'hdfc_upi' and state != 'disabled'"
+                           password="True"/>
+                    <div class="o_form_label_help" colspan="2">
+                        <span class="text-info">
+                            <b>Note:</b> The UPI Id used here is the one set in the Company form (Settings &gt; Companies &gt; Your Company &gt; UPI Id).
+                        </span>
+                    </div>
+                </group>
+            </group>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+   <template id="inline_form">
+        <div name="o_hdfc_upi_component_container">
+            <!-- Simple container for UPI payment - the modal will be triggered by JavaScript -->
+            <div class="text-center mt-3">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                    <i class="fa fa-qrcode text-primary me-2" style="font-size: 24px;"></i>
+                    <span class="text-muted">UPI QR Code Payment</span>
+                </div>
+                <small class="text-muted d-block mb-3">
+                    Click "Pay" to generate and display the QR code for payment
+                </small>
+            </div>
+        </div>
+    </template>
+</odoo>
