@@ -363,7 +363,7 @@ class UpiPaymentModal {
 
       // Get the bus service instance
       const busServiceFactory = serviceRegistry.get("bus_service")
-      
+
       // Create a minimal environment and services object for the bus service
       const env = {
         services: {
@@ -382,26 +382,26 @@ class UpiPaymentModal {
           }
         }
       }
-      
+
       // Start the bus service
       const busInstance = busServiceFactory.start(env, env.services)
-      
+
       // Add the channel to listen for payment updates
       busInstance.addChannel(channel)
-      
+
       // Subscribe to single notification type for all payment updates
       busInstance.subscribe('payment.transaction/updated', (payload, { id: notifId }) => {
         console.log("Received payment transaction update:", payload, "notifId:", notifId)
-        
+
         // Check if this notification is for our transaction
         if (payload.transaction_id === this.transactionId) {
           this._handleBusTransactionUpdate(payload)
         }
       })
-      
+
       // Store the bus instance for cleanup
       this.busInstance = busInstance
-      
+
       console.log("Bus service subscription created for channel:", channel)
     } catch (error) {
       console.error("Error setting up bus service:", error)
@@ -417,9 +417,9 @@ class UpiPaymentModal {
    */
   _handleBusTransactionUpdate(payload) {
     console.log("Received bus transaction update:", payload)
-    
+
     const { state, state_message, notification_type, transaction_id } = payload
-    
+
     // Verify this update is for our transaction
     if (transaction_id && transaction_id !== this.transactionId) {
       console.log("Transaction update for different transaction, ignoring")

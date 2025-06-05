@@ -11,7 +11,7 @@ class PaymentProvider(models.Model):
         selection_add=[('hdfc_upi', 'HDFC UPI')],
         ondelete={'hdfc_upi': 'set default'}
     )
-    
+
     hdfc_upi_merchant_id = fields.Char(
         string="HDFC UPI Merchant ID",
         help="The merchant ID provided by HDFC Bank for UPI integration.",
@@ -35,7 +35,7 @@ class PaymentProvider(models.Model):
         required_if_provider='hdfc_upi',
         groups='base.group_system'
     )
-    
+
     # Use l10n_in_upi_id from res.company via company_id
     @api.constrains('company_id')
     def _check_l10n_in_upi_id(self):
@@ -53,27 +53,27 @@ class PaymentProvider(models.Model):
         if self.code == 'hdfc_upi':
             default_codes = {'upi_qr'}
         return default_codes
-    
+
     def _should_build_inline_form(self, is_validation=False):
         """ Override to specify that inline forms are used for HDFC UPI. """
         if self.code == 'hdfc_upi':
             return True
         return super()._should_build_inline_form(is_validation=is_validation)
-    
+
     def _get_validation_amount(self):
         """ Return the amount to use for validation operations. """
         self.ensure_one()
         if self.code == 'hdfc_upi':
             return 1.0  # Use a small amount for validation
         return super()._get_validation_amount()
-    
+
     def _get_validation_currency(self):
         """ Return the currency to use for validation operations. """
         self.ensure_one()
         if self.code == 'hdfc_upi':
             return self.env.ref('base.INR')  # UPI only supports INR
         return super()._get_validation_currency()
-    
+
     def _compute_feature_support_fields(self):
         """ Specify the features supported by the HDFC UPI provider. """
         super()._compute_feature_support_fields()
