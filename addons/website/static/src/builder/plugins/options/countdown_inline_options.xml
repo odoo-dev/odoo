@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+<!-- 
+<template id="s_countdown_inline_options" inherit_id="website.snippet_options">
+    <xpath expr="." position="inside">
+        <div data-js="countdownInlineTemplates" data-selector=".s_countdown_inline">
+            <we-select string="Template"
+                data-name="countdown_inline_template_opt"
+                data-attribute-name="countdownInlineTemplate"
+                data-attribute-default-value="default">
+                <we-button title="Default"
+                    data-name="template_default_opt"
+                    data-select-template="website.s_countdown_inline_default_template"
+                    data-select-data-attribute="default"
+                    >Default </we-button>
+                <we-button title="Dominoes"
+                    data-name="template_dominoes_opt"
+                    data-select-template="website.s_countdown_inline_dominoes_template"
+                    data-select-data-attribute="dominoes"
+                >Dominoes</we-button>
+                <we-button title="Wrapped Numbers"
+                    data-name="template_wrapped_numbers_opt"
+                    data-select-template="website.s_countdown_inline_wrapped_numbers_template"
+                    data-select-data-attribute="wrapped_numbers"
+                >Wrapped Numbers</we-button>
+                <we-button title="Text"
+                    data-name="template_text_opt"
+                    data-select-template="website.s_countdown_inline_text_template"
+                    data-select-data-attribute="text"
+                >Text</we-button>
+                <we-button title="Big Numbers"
+                    data-name="template_big_numbers_opt"
+                    data-select-template="website.s_countdown_inline_big_numbers_template"
+                    data-select-data-attribute="big_numbers"
+                >Big Numbers</we-button>
+            </we-select>
+            <we-input class="o_we_sublevel_1" string="Round Corners" data-apply-to=".o_count_item_nbs"
+                data-dependencies="template_wrapped_numbers_opt"
+                data-select-style="0" data-css-property="border-radius"
+                data-unit="px" data-extra-class="rounded"/>
+            <we-select string="Color">
+                <we-button data-select-class="o_countdown_default" data-name="color_default_opt">Default</we-button>
+                <we-button data-select-class="o_countdown_primary">Primary</we-button>
+                <we-button data-select-class="o_countdown_secondary">Secondary</we-button>
+                <we-button data-select-class="o_countdown_info">Info</we-button>
+                <we-button data-select-class="o_countdown_success">Success</we-button>
+                <we-button data-select-class="o_countdown_warning">Warning</we-button>
+                <we-button data-select-class="o_countdown_danger">Danger</we-button>
+                <we-button data-select-class="o_countdown_light">Light</we-button>
+                <we-button data-select-class="o_countdown_dark">Dark</we-button>
+            </we-select>
+            <we-checkbox
+                string="Subtle colors"
+                class="o_we_sublevel_1"
+                data-name="subtle_colors_opt"
+                data-select-class="o_countdown_subtle"
+                data-dependencies="template_default_opt, template_dominoes_opt, template_wrapped_numbers_opt, template_boxes_opt"
+                />
+            <we-select string="Label">
+                <we-button data-select-class="">Default</we-button>
+                <we-button data-select-class="o_label_compact">Compact</we-button>
+                <we-button data-select-class="o_label_none">None</we-button>
+            </we-select>
+            <we-button-group string="Alignment" data-apply-to=".s_countdown_inline_wrapper">
+                <we-button class="fa fa-fw fa-align-left" title="Left" data-select-class=""/>
+                <we-button class="fa fa-fw fa-align-center" title="Center" data-select-class="align-self-center text-center"/>
+                <we-button class="fa fa-fw fa-align-right" title="Right" data-select-class="align-self-end text-end"/>
+            </we-button-group>
+            <we-checkbox string="Font Monospace" name="font_monospace_opt" data-select-class="o_count_monospace" data-dependencies="template_dominoes_opt, template_wrapped_numbers_opt, template_big_numbers_opt"/>
+        </div>
+        <div data-js="countdownInline" data-selector=".s_countdown_inline">
+            <we-datetimepicker string="Due Date" data-select-data-attribute="0" data-attribute-name="endTime"/>
+            <we-row>
+                <we-select string="At The End" data-no-preview="true">
+                    <we-button data-end-action="nothing" data-name="no_end_action_opt">Nothing</we-button>
+                    <we-button data-end-action="redirect" data-name="redirect_end_action_opt">Redirect</we-button>
+                    <we-button data-end-action="message_no_countdown" data-name="message_no_countdown_opt">Show Message and hide countdown</we-button>
+                    <we-button data-end-action="message" data-name="message_opt">Show Message and keep countdown</we-button>
+                </we-select>
+                <we-button class="toggle-edit-message" title="The message will be visible once the countdown ends" data-dependencies="message_no_countdown_opt, message_opt">
+                    <i class="fa fa-fw fa-eye"/>
+                </we-button>
+            </we-row>
+            <we-urlpicker string="URL" data-dependencies="redirect_end_action_opt" data-select-data-attribute="" placeholder="e.g. /my-awesome-page" data-attribute-name="redirectUrl"/>
+            <we-select string="Display" data-attribute-name="display">
+                <we-button data-select-data-attribute="d">D</we-button>
+                <we-button data-select-data-attribute="dhm">D - H - M</we-button>
+                <we-button data-select-data-attribute="dhms">D - H - M - S</we-button>
+            </we-select>
+            <hr/>
+        </div>
+        <t t-call="website.snippet_options_background_options">
+            <t t-set="selector" t-valuef=".s_countdown_inline"/>
+            <t t-set="target" t-valuef=".s_countdown_inline_wrapper"/>
+            <t t-set="with_colors" t-value="True"/>
+            <t t-set="with_images" t-value="False"/>
+            <t t-set="with_color_combinations" t-value="True"/>
+            <t t-set="with_gradients" t-value="True"/>
+        </t>
+        <div data-selector=".s_countdown_inline">
+            <we-range string="Edge Spacing" data-apply-to=".s_countdown_inline_wrapper" data-select-style="" data-display-range-value="true" data-display-range-value-unit="px" data-unit="px" data-css-property="padding" data-min="0"
+            data-step="1" data-max="200"/>
+            <t t-call="website.snippet_options_border_widgets">
+                <t t-set="apply_to" t-valuef=".s_countdown_inline_wrapper"/>
+            </t>
+        </div>
+    </xpath>
+</template> -->
+
+<t t-name="website.CountdownInlineOption">
+    <BuilderRow label.translate="Template">
+        <BuilderSelect id="'countdown_inline_template_opt'" action="'selectTemplate'">
+            <BuilderSelectItem
+                title.translate="Default"
+                actionParam="{
+                    view: 'website.s_countdown_inline_default_template',
+                    templateClass: 'default',
+                }">
+                Default
+            </BuilderSelectItem>
+            <BuilderSelectItem
+                title.translate="Dominoes"
+                actionParam="{
+                    view: 'website.s_countdown_inline_dominoes_template',
+                    templateClass: 'dominoes',
+                }">
+                Dominoes
+            </BuilderSelectItem>
+            <BuilderSelectItem
+                title.translate="Wrapped Numbers"
+                actionParam="{
+                    view: 'website.s_countdown_inline_wrapped_numbers_template',
+                    templateClass: 'wrapped_numbers',
+                }">
+                Wrapped Numbers
+            </BuilderSelectItem>
+            <BuilderSelectItem
+                title.translate="Text"
+                actionParam="{
+                    view: 'website.s_countdown_inline_text_template',
+                    templateClass: 'text',
+                }">
+                Text
+            </BuilderSelectItem>
+            <BuilderSelectItem
+                title.translate="Big Numbers"
+                actionParam="{
+                    view: 'website.s_countdown_inline_big_numbers_template',
+                    templateClass: 'big_numbers',
+                }">
+                Big Numbers
+            </BuilderSelectItem>
+        </BuilderSelect>
+    </BuilderRow>
+    <!-- <BuilderContext action="'reloadCountdown'"> -->
+    <!-- TODO AGAU: remove after merging generalized restart interactions -->
+    <!-- <BuilderRow label.translate="Due Date">
+        <BuilderDateTimePicker dataAttributeAction="'endTime'"/>
+    </BuilderRow>
+    <BuilderRow label.translate="At The End">
+        <BuilderSelect preview="false" action="'setEndAction'">
+            <BuilderSelectItem actionValue="'nothing'" id="'no_end_action_opt'">Nothing</BuilderSelectItem>
+            <BuilderSelectItem actionValue="'redirect'" id="'redirect_end_action_opt'">Redirect</BuilderSelectItem>
+            <BuilderSelectItem actionValue="'message_no_countdown'">Show Message and hide countdown</BuilderSelectItem>
+            <BuilderSelectItem actionValue="'message'">Show Message and keep countdown</BuilderSelectItem>
+        </BuilderSelect>
+        <BuilderButton title.translate="The message will be visible once the countdown ends"
+                       t-if="!this.isActiveItem('no_end_action_opt') and !this.isActiveItem('redirect_end_action_opt')"
+                       action="'previewEndMessage'"
+                       preview="false"
+                       icon="'fa-eye'"
+                       classActive="'text-primary'"
+        />
+    </BuilderRow>
+    <BuilderRow t-if="this.isActiveItem('redirect_end_action_opt')"
+                label.translate="URL">
+        <BuilderUrlPicker placeholder.translate="e.g. /my-awesome-page" dataAttributeAction="'redirectUrl'"/>
+    </BuilderRow>
+    <BuilderRow label.translate="Size">
+        <BuilderSelect dataAttributeAction="'size'">
+            <BuilderSelectItem dataAttributeActionValue="'80'">Small</BuilderSelectItem>
+            <BuilderSelectItem dataAttributeActionValue="'120'">Medium</BuilderSelectItem>
+            <BuilderSelectItem dataAttributeActionValue="'175'">Large</BuilderSelectItem>
+        </BuilderSelect>
+    </BuilderRow>
+    <BuilderRow label.translate="Display">
+        <BuilderSelect dataAttributeAction="'display'">
+            <BuilderSelectItem dataAttributeActionValue="'d'">D</BuilderSelectItem>
+            <BuilderSelectItem dataAttributeActionValue="'dhm'">D - H - M</BuilderSelectItem>
+            <BuilderSelectItem dataAttributeActionValue="'dhms'">D - H - M - S</BuilderSelectItem>
+        </BuilderSelect>
+    </BuilderRow>
+
+    <BuilderRow label.translate="Text Color">
+        <BuilderColorPicker dataAttributeAction="'textColor'" enabledTabs="['solid', 'custom']"/>
+    </BuilderRow>
+
+    <BuilderRow label.translate="Layout">
+        <BuilderSelect action="'setLayout'">
+            <BuilderSelectItem actionValue="'circle'" id="'circle_layout_opt'">Circle</BuilderSelectItem>
+            <BuilderSelectItem actionValue="'boxes'" id="'boxes_layout_opt'">Boxes</BuilderSelectItem>
+            <BuilderSelectItem actionValue="'clean'">Clean</BuilderSelectItem>
+            <BuilderSelectItem actionValue="'text'">Text Inline</BuilderSelectItem>
+        </BuilderSelect>
+    </BuilderRow>
+    <t t-if="this.isActiveItem('circle_layout_opt') or this.isActiveItem('boxes_layout_opt')">
+        <BuilderRow label.translate="Layout Background">
+            <BuilderSelect dataAttributeAction="'layoutBackground'">
+                <BuilderSelectItem dataAttributeActionValue="'inner'">Inner</BuilderSelectItem>
+                <BuilderSelectItem dataAttributeActionValue="'plain'">Plain</BuilderSelectItem>
+                <BuilderSelectItem dataAttributeActionValue="'none'" id="'no_background_layout_opt'">None</BuilderSelectItem>
+            </BuilderSelect>
+        </BuilderRow>
+        <BuilderRow label.translate="Layout Background Color"
+                    t-if="!this.isActiveItem('no_background_layout_opt')">
+            <BuilderColorPicker dataAttributeAction="'layoutBackgroundColor'" enabledTabs="['solid', 'custom']"/>
+        </BuilderRow>
+
+        <BuilderRow label.translate="Progress Bar Style">
+            <BuilderSelect dataAttributeAction="'progressBarStyle'">
+                <BuilderSelectItem dataAttributeActionValue="'surrounded'">Surrounded</BuilderSelectItem>
+                <BuilderSelectItem dataAttributeActionValue="'disappear'">Disappearing</BuilderSelectItem>
+                <BuilderSelectItem dataAttributeActionValue="'none'" id="'no_progressbar_style_opt'">None</BuilderSelectItem>
+            </BuilderSelect>
+        </BuilderRow>
+
+        <t t-if="!this.isActiveItem('no_progressbar_style_opt')">
+            <BuilderRow label.translate="Progress Bar Weight">
+                <BuilderSelect dataAttributeAction="'progressBarWeight'">
+                    <BuilderSelectItem dataAttributeActionValue="'thin'">Thin</BuilderSelectItem>
+                    <BuilderSelectItem dataAttributeActionValue="'thick'">Thick</BuilderSelectItem>
+                </BuilderSelect>
+            </BuilderRow>
+            <BuilderRow label.translate="Progress Bar Color"
+                        t-if="!this.isActiveItem('no_progressbar_style_opt')">
+                <BuilderColorPicker dataAttributeAction="'progressBarColor'" enabledTabs="['solid', 'custom']"/>
+            </BuilderRow>
+        </t>
+    </t>
+    </BuilderContext> -->
+</t>
+
+<t t-name="website.s_countdown_inline.end_message">
+    <div class="s_countdown_inline_end_message d-none">
+        <div class="oe_structure">
+            <div class="s_text_highlight o_colored_level o_cc o_cc2 w-100 my-3">
+                <div class="container">
+                    <h5>Congratulations! 🎉</h5>
+                    <p>Your patience and anticipation have paid off—thank you for waiting, and now it's time to enjoy the exciting surprise we've been building up to!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</t>
+
+<t t-name="website.s_countdown_inline.end_redirect_message">
+    <p class="s_countdown_inline_end_redirect_message w-100 mt-2 mb-0">Time's up! You can now visit <a class="s_countdown_end_redirect_url" t-attf-href="#{redirectUrl}">this page</a>.</p>
+</t>
+
+</templates>

@@ -6,6 +6,7 @@ import { renderToElement } from "@web/core/utils/render";
 
 class CountdownOptionPlugin extends Plugin {
     static id = "CountdownOption";
+    // static shared = ["open"];
     resources = {
         builder_options: [
             withSequence(before(SNIPPET_SPECIFIC_END), {
