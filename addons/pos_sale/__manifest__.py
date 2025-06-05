@@ -29,6 +29,7 @@ This module adds a custom Sales Team for the Point of Sale. This enables you to 
     'assets': {
         'point_of_sale._assets_pos': [
             'pos_sale/static/src/**/*',
+            'sale/static/src/js/placeholder_widget/**/*',
         ],
         'web.assets_tests': [
             'pos_sale/static/tests/tours/**/*',
