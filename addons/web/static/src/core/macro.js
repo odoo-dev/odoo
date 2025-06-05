@@ -18,8 +18,10 @@ const macroSchema = {
             validate: (step) => step.action || step.trigger,
         },
     },
+    finally: { type: Function, optional: true },
     onComplete: { type: Function, optional: true },
-    onStep: { type: Function, optional: true },
+    onStepStart: { type: Function, optional: true },
+    onStepEnd: { type: Function, optional: true },
     onError: { type: Function, optional: true },
 };
 
@@ -115,8 +117,10 @@ export class Macro {
             );
         }
         Object.assign(this, descr);
+        this.finally = this.finally || (() => {});
         this.onComplete = this.onComplete || (() => {});
-        this.onStep = this.onStep || (() => {});
+        this.onStepStart = this.onStepStart || (() => {});
+        this.onStepEnd = this.onStepEnd || (() => {});
         this.onError =
             this.onError ||
             ((error, step, index) => {
@@ -134,14 +138,24 @@ export class Macro {
             return;
         }
         try {
-            const currentStep = this.steps[this.currentIndex];
+            const index = this.currentIndex;
+            const step = this.steps[index];
             const executeStep = async () => {
-                const trigger = await waitForTrigger(currentStep.trigger);
-                await this.onStep(currentStep, trigger, this.currentIndex);
-                return await performAction(trigger, currentStep.action);
+                await this.onStepStart({
+                    step,
+                    index,
+                });
+                const trigger = await waitForTrigger(step.trigger);
+                const result = await performAction(trigger, step.action);
+                await this.onStepEnd({
+                    step,
+                    index,
+                    trigger,
+                });
+                return result;
             };
             const launchTimer = async () => {
-                const timeout_delay = currentStep.timeout || this.timeout || 10000;
+                const timeout_delay = step.timeout || this.timeout || 10000;
                 await delay(timeout_delay);
                 throw new MacroError(
                     "Timeout",
@@ -170,8 +184,10 @@ export class Macro {
         this.isComplete = true;
         if (error) {
             this.onError(error, this.steps[this.currentIndex], this.currentIndex);
+            this.finally();
         } else if (this.currentIndex === this.steps.length) {
             this.onComplete();
+            this.finally();
         }
     }
 }

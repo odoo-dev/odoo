@@ -85,6 +85,7 @@ registerBackendAndFrontendTour("question", {
     content: _t("Click to post your answer."),
     tooltipPosition: "bottom",
     run: "click",
+    willUnload: true,
 }, 
 {
     trigger: ".o_wforum_content_wrapper h3:contains(test)",

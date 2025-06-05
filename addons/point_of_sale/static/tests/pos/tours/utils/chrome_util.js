@@ -21,6 +21,7 @@ export function clickMenuDropdownOption(name) {
         content: `click on something in the burger menu`,
         trigger: `span.dropdown-item:contains(${name})`,
         run: "click",
+        willUnload: true,
     };
 }
 export function isCashMoveButtonHidden() {

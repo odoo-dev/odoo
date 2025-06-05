@@ -1,5 +1,4 @@
 import { registry } from "@web/core/registry";
-import { TourError } from "@web_tour/tour_service/tour_utils";
 import * as wsTourUtils from "@website_sale/js/tours/tour_utils";
 
 
@@ -16,7 +15,7 @@ registry.category("web_tour.tours").add('shop_sale_ewallet', {
                 if (rewards.length === 1) {
                     this.anchor.click();
                 } else {
-                    throw new TourError(`Expected 1 claimable reward, got: ${rewards.length}`);
+                    console.error(`Expected 1 claimable reward, got: ${rewards.length}`);
                 }
             },
         },
@@ -24,11 +23,13 @@ registry.category("web_tour.tours").add('shop_sale_ewallet', {
             content: 'Checkout',
             trigger: 'a[name="website_sale_main_button"]',
             run: "click",
+            willUnload: true,
         },
         {
             content: 'Confirm Order',
             trigger: 'button[name="o_payment_submit_button"]',
             run: "click",
+            willUnload: true,
         },
         {
             trigger: 'div[id="introduction"] h2:contains("Sales Order")'
@@ -38,7 +39,7 @@ registry.category("web_tour.tours").add('shop_sale_ewallet', {
             run: function() {
                 const cartQuantity = document.querySelector('.my_cart_quantity');
                 if (cartQuantity.textContent !== '0'){
-                    throw new TourError('cart should be empty and reset after an order is paid using ewallet')
+                    console.error('cart should be empty and reset after an order is paid using ewallet')
                 }
             }
         },

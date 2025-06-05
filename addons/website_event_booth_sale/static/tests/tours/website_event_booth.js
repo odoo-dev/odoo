@@ -35,6 +35,7 @@ registry.category("web_tour.tours").add('website_event_booth_tour', {
     content: 'Submit your informations',
     trigger: 'button[type="submit"]',
     run: "click",
+    willUnload: true,
 },
 ...wsTourUtils.assertCartAmounts({
     taxes: '20.00',

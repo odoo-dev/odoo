@@ -7,15 +7,8 @@ import { Macro } from "@web/core/macro";
 
 let macro;
 async function waitForMacro() {
-    for (let i = 0; i < 50; i++) {
+    while (!macro.isComplete) {
         await animationFrame();
-        await advanceTime(265);
-        if (macro.isComplete) {
-            return;
-        }
-    }
-    if (!macro.isComplete) {
-        throw new Error(`Macro is not complete`);
     }
 }
 
@@ -27,22 +20,6 @@ beforeEach(() => {
         },
     });
 });
-
-function onTextChange(element, callback) {
-    const observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-            if (mutation.type === "characterData" || mutation.type === "childList") {
-                callback(element.textContent);
-            }
-        }
-    });
-    observer.observe(element, {
-        characterData: true,
-        childList: true,
-        subtree: true,
-    });
-    return observer;
-}
 
 class TestComponent extends Component {
     static template = xml`
@@ -75,9 +52,8 @@ test("simple use", async () => {
 
     const span = queryOne("span.value");
     expect(span).toHaveText("0");
-    onTextChange(span, expect.step);
     await waitForMacro();
-    expect.verifySteps(["1"]);
+    expect(span).toHaveText("1");
 });
 
 test("multiple steps", async () => {
@@ -104,10 +80,14 @@ test("multiple steps", async () => {
                 },
             },
         ],
+        onStepEnd: async () => {
+            await animationFrame();
+            const span = queryOne("span.value");
+            expect.step(span.textContent);
+        },
     }).start(queryOne(".counter"));
-    onTextChange(span, expect.step);
     await waitForMacro();
-    expect.verifySteps(["1", "2"]);
+    expect.verifySteps(["1", "1", "2"]);
 });
 
 test("can input values", async () => {
@@ -154,15 +134,18 @@ test("a step can have no trigger", async () => {
     expect.verifySteps(["1", "2", "3"]);
 });
 
-test("onStep function is called at each step", async () => {
+test("onStepStart and onStepEnd functions are called at each step", async () => {
     await mountWithCleanup(TestComponent);
     const span = queryOne("span.value");
     expect(span).toHaveText("0");
 
     new Macro({
         name: "test",
-        onStep: (el, step, index) => {
-            expect.step(index);
+        onStepStart: ({ index }) => {
+            expect.step(`start ${index}`);
+        },
+        onStepEnd: ({ index }) => {
+            expect.step(`end ${index}`);
         },
         steps: [
             {
@@ -180,7 +163,7 @@ test("onStep function is called at each step", async () => {
     }).start(queryOne(".counter"));
     await waitForMacro();
     expect(span).toHaveText("1");
-    expect.verifySteps([0, 1]);
+    expect.verifySteps(["start 0", "end 0", "start 1", "end 1"]);
 });
 
 test("trigger can be a function returning an htmlelement", async () => {
@@ -225,7 +208,7 @@ test("macro wait element is visible to do action", async () => {
             expect.step(error);
         },
     }).start(queryOne(".counter"));
-    advanceTime(500);
+    await advanceTime(500);
     button.classList.remove("d-none");
     await waitForMacro();
     expect.verifySteps(["element is now visible"]);

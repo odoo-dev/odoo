@@ -10,6 +10,7 @@ import * as tourUtils from "@website_sale/js/tours/tour_utils";
         content: "Open product page",
         trigger: '.oe_product_cart a:contains("Storage Box Test")',
         run: "click",
+        willUnload: true,
     },
     {
         content: "Add one more storage box",
@@ -277,6 +278,7 @@ import * as tourUtils from "@website_sale/js/tours/tour_utils";
         content: "Open product page",
         trigger: '.oe_product_cart a:contains("Storage Box Test")',
         run: "click",
+        willUnload: true,
     },
     {
         content: "Add one more Storage Box Test",
@@ -479,6 +481,7 @@ import * as tourUtils from "@website_sale/js/tours/tour_utils";
         content: "Open product page",
         trigger: '.oe_product_cart a:contains("Storage Box Test")',
         run: "click",
+        willUnload: true,
     },
     {
         content: "Click on add to cart",

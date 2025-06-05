@@ -46,6 +46,7 @@
             content: "Go through the modal window of the product configurator",
             trigger: ".modal:contains(configure your product) button:contains(Proceed to Checkout)",
             run: "click",
+            willUnload: true,
         },
         {
             content: "Check the product is in the cart",

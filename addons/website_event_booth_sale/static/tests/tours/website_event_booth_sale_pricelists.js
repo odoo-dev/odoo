@@ -38,6 +38,7 @@ registry.category("web_tour.tours").add('event_booth_sale_pricelists_different_c
         content: 'Submit your informations',
         trigger: 'button[type="submit"]',
         run: "click",
+        willUnload: true,
     },
     wsTourUtils.goToCheckout(),
     ...getPriceListChecksSteps({

@@ -238,6 +238,7 @@ registry.category("web_tour.tours").add('totp_login_device', {
 {
     trigger: "button:contains(Log in)",
     run: "click",
+    willUnload: true,
 },
 {
     content: "check we're logged in",

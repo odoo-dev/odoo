@@ -18,6 +18,7 @@ registry.category("web_tour.tours").add('website_profile_description', {
         content: "Save changes",
         trigger: "button:contains('Update')",
         run: "click",
+        willUnload: true,
     }, {
         content: "Check the content is saved",
         trigger: "span[data-oe-field='website_description']:contains('content <p>code here</p>')",

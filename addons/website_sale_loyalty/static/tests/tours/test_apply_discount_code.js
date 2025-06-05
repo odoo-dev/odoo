@@ -33,6 +33,7 @@ registry.category("web_tour.tours").add('apply_discount_code_program_multi_rewar
             content: 'validate the promo code',
             trigger: 'form[name="coupon_code"] .a-submit',
             run: "click",
+            willUnload: true,
         },
         {
             content: 'check reward',
@@ -61,6 +62,7 @@ registry.category("web_tour.tours").add('apply_discount_code_program_multi_rewar
             content: 'validate the promo code',
             trigger: 'form[name="coupon_code"] .a-submit',
             run: "click",
+            willUnload: true,
         },
         {
             content: 'check refused message',

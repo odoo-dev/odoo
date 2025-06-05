@@ -12,6 +12,7 @@ registry.category("web_tour.tours").add('update_billing_shipping_address', {
             content: "Edit Address",
             trigger: '#delivery_and_billing a:contains("Edit")',
             run: "click",
+            willUnload: true,
         },
         {
             content: "Edit  billing address which is shipping address too",

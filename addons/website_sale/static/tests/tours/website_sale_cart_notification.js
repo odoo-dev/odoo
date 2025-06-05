@@ -63,6 +63,7 @@ registry.category("web_tour.tours").add("website_sale_cart_notification", {
             content: "Go To Cart",
             trigger: '.toast-body a:contains("View cart")',
             run: "click",
+            willUnload: true,
         },
         tourUtils.assertCartContains({
             productName: "website_sale_cart_notification_product_1",

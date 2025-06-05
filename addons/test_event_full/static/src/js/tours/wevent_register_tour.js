@@ -168,6 +168,7 @@ var browseTalksSteps = [{
     content: 'Browse Talks Submenu',
     trigger: 'a.dropdown-item span:contains("Talks")',
     run: "click",
+    willUnload: true,
 }, {
     content: 'Check we are on the talk list page',
     trigger: 'h5:contains("Book your talks")',

@@ -21,6 +21,7 @@ registry.category("web_tour.tours").add('shop_sale_loyalty_delivery', {
             content: "click on 'Apply'",
             trigger: "a[role='button'].a-submit:contains(Apply)",
             run: "click",
+            willUnload: true,
         },
         wsTourUtils.confirmOrder(),
         ...wsTourUtils.assertCartAmounts({

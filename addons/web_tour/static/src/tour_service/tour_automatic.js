@@ -35,16 +35,6 @@ export class TourAutomatic {
             .flatMap((step) => [
                 {
                     action: async () => {
-                        if (this.debugMode) {
-                            console.groupCollapsed(step.describeMe);
-                            console.log(step.stringify);
-                            if (step.break) {
-                                // eslint-disable-next-line no-debugger
-                                debugger;
-                            }
-                        } else {
-                            console.log(step.describeMe);
-                        }
                         // This delay is important for making the current set of tour tests pass.
                         // IMPROVEMENT: Find a way to remove this delay.
                         await new Promise((resolve) => requestAnimationFrame(resolve));
@@ -64,17 +54,8 @@ export class TourAutomatic {
                             await step.checkForUndeterminisms(trigger, delayToCheckUndeterminisms);
                         }
                         const result = await step.doAction();
-                        if (this.debugMode) {
-                            console.log(trigger);
-                            if (step.skipped) {
-                                console.log("This step has been skipped");
-                            } else {
-                                console.log("This step has run successfully");
-                            }
-                            console.groupEnd();
-                            if (step.pause) {
-                                await this.pause();
-                            }
+                        if (this.debugMode && step.pause) {
+                            await this.pause();
                         }
                         tourState.setCurrentIndex(step.index + 1);
                         return result;
@@ -82,39 +63,38 @@ export class TourAutomatic {
                 },
             ]);
 
-        const end = () => {
-            delete window[hootNameSpace];
-            transitionConfig.disabled = false;
-            tourState.clear();
-            //No need to catch error yet.
-            window.addEventListener(
-                "error",
-                (ev) => {
-                    ev.preventDefault();
-                    ev.stopImmediatePropagation();
-                },
-                true
-            );
-            window.addEventListener(
-                "unhandledrejection",
-                (ev) => {
-                    ev.preventDefault();
-                    ev.stopImmediatePropagation();
-                },
-                true
-            );
-        };
-
         this.macro = new Macro({
             name: this.name,
             steps: macroSteps,
+            onStepStart: ({ step }) => {
+                if (this.debugMode) {
+                    console.groupCollapsed(step.describeMe);
+                    console.log(step.stringify);
+                    if (step.break) {
+                        // eslint-disable-next-line no-debugger
+                        debugger;
+                    }
+                } else {
+                    console.log(step.describeMe);
+                }
+            },
+            onStepEnd: ({ step, trigger }) => {
+                if (this.debugMode) {
+                    console.log(trigger);
+                    if (step.skipped) {
+                        console.log("This step has been skipped");
+                    } else {
+                        console.log("This step has run successfully");
+                    }
+                    console.groupEnd();
+                }
+            },
             onError: (error) => {
                 if (error.type === "Timeout") {
                     this.throwError(...this.currentStep.describeWhyIFailed, error.message);
                 } else {
                     this.throwError(error.message);
                 }
-                end();
             },
             onComplete: () => {
                 browser.console.log("tour succeeded");
@@ -124,7 +104,11 @@ export class TourAutomatic {
                 msg.unshift("╔" + "═".repeat(succeeded.length - 2) + "╗");
                 msg.push("╚" + "═".repeat(succeeded.length - 2) + "╝");
                 browser.console.log(`\n\n${msg.join("\n")}\n`);
-                end();
+            },
+            finally: () => {
+                delete window[hootNameSpace];
+                transitionConfig.disabled = false;
+                tourState.clear();
             },
         });
         if (this.debugMode && this.currentIndex === 0) {

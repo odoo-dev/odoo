@@ -22,6 +22,7 @@ export function changePricelist(pricelistName) {
             content: `Activate Pricelist ${pricelistName}`,
             trigger: `.dropdown-item:contains(${pricelistName})`,
             run: 'click',
+            willUnload: true,
         },
         {
             content: 'Wait for pricelist to load',

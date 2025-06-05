@@ -85,7 +85,8 @@ registry.category("web_tour.tours").add('website_sale_reorder_from_portal', {
             trigger: 'body',
             run: () => {
                 window.location = '/my/orders';
-            }
+            },
+            willUnload: true,
         },
         {
             content: "Select first order",

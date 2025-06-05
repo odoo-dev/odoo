@@ -13,6 +13,7 @@ registry.category("web_tour.tours").add(
                 content: "Go to login page",
                 trigger: "a:contains('Sign in')",
                 run: "click",
+                willUnload: true,
             },
             {
                 content: "Submit login",

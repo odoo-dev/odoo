@@ -113,6 +113,7 @@ import * as tourUtils from "@website_sale/js/tours/tour_utils";
         content: "click on compare button",
         trigger: '.o_comparelist_button a',
         run: "click",
+        willUnload: true,
     },
     // test on compare page
     {
@@ -157,6 +158,7 @@ import * as tourUtils from "@website_sale/js/tours/tour_utils";
         content: "click on compare button to reload",
         trigger: '.o_comparelist_button a',
         run: "click",
+        willUnload: true,
     },
     {
         content: "check product 'Color T-Shirt' is removed",

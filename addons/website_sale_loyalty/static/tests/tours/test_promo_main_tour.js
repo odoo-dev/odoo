@@ -37,6 +37,7 @@ registry.category("web_tour.tours").add('shop_sale_loyalty', {
             content: "validate the coupon",
             trigger: 'form[name="coupon_code"] .a-submit',
             run: "click",
+            willUnload: true,
         },
         {
             content: "check reward product",
