@@ -37,6 +37,7 @@
     box-sizing: content-box;
     align-items: center;
     color: var(--o-hb-row-color, #{$o-we-fg-dark});
+    margin-top: 2px;
 
     &[data-disabled] {
         .hb-row-label {

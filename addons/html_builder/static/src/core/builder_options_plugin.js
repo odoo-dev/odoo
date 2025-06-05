@@ -355,6 +355,7 @@ export class BuilderOptionsPlugin extends Plugin {
             .sort(([a], [b]) => (b.contains(a) ? 1 : -1))
             .map(([element, Options]) => ({
                 id: previousElementToIdMap.get(element) || uniqueId(),
+                folded: true,
                 element,
                 options: Options,
                 optionTitleComponents: elementToOptionTitleComponents.get(element) || [],
@@ -375,6 +376,9 @@ export class BuilderOptionsPlugin extends Plugin {
         );
         if (lastValidContainerIdx > 0) {
             containers = containers.slice(lastValidContainerIdx);
+        }
+        if (containers.length) {
+            containers.at(-1).folded = false;
         }
         return containers;
     }
