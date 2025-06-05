@@ -47,6 +47,7 @@ export class OptionsContainer extends BaseOptionComponent {
             isUpToDate: this.env.editor.shared.versionControl.hasAccessToOutdatedEl(
                 this.props.editingElement
             ),
+            folded: this.props.folded,
         });
 
         this.hasGroup = {};
@@ -55,6 +56,7 @@ export class OptionsContainer extends BaseOptionComponent {
         });
         onWillUpdateProps(async (nextProps) => {
             await this.updateAccessGroup(nextProps.options);
+            this.state.folded = nextProps.folded;
         });
     }
 
@@ -88,6 +90,10 @@ export class OptionsContainer extends BaseOptionComponent {
             : "";
 
         return (title || getSnippetName(this.env.getEditingElement())) + titleExtraInfo;
+    }
+
+    toggle() {
+        this.state.folded = !this.state.folded;
     }
 
     selectElement() {
