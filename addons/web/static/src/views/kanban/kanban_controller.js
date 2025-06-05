@@ -63,6 +63,7 @@ export class KanbanController extends Component {
         Compiler: Function,
         Model: Function,
         Renderer: Function,
+        staticControlPanelButtons: Object,
         archInfo: Object,
     };
 
@@ -216,13 +217,7 @@ export class KanbanController extends Component {
     }
 
     get staticControlPanelButtons() {
-        return {
-            new: {
-                isAvailable: () => this.canCreate && !this.env.inDialog,
-                sequence: 10,
-                template: "web.KanbanView.Buttons.New",
-            },
-        };
+        return this.props.staticControlPanelButtons;
     }
 
     get controlPanelButtons() {
@@ -239,7 +234,7 @@ export class KanbanController extends Component {
                 props: this.multiRecordViewButtonProps(button),
             }));
         return [...staticButtons, ...alwaysHeaderButtons]
-            .filter((button) => button.isAvailable === undefined || button.isAvailable())
+            .filter((button) => button.isAvailable === undefined || button.isAvailable.call(this))
             .sort(
                 (btn1, btn2) =>
                     (btn1.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE) -

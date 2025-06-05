@@ -13,6 +13,15 @@ export const kanbanView = {
     Model: RelationalModel,
     Renderer: KanbanRenderer,
     Compiler: KanbanCompiler,
+    staticControlPanelButtons: {
+        new: {
+            isAvailable() {
+                return this.canCreate && !this.env.inDialog;
+            },
+            sequence: 10,
+            template: "web.KanbanView.Buttons.New",
+        },
+    },
 
     props: (genericProps, view) => {
         const { arch, relatedModels, resModel } = genericProps;
@@ -24,6 +33,7 @@ export const kanbanView = {
             Compiler: view.Compiler,
             Model: view.Model,
             Renderer: view.Renderer,
+            staticControlPanelButtons: view.staticControlPanelButtons,
             archInfo,
         };
     },

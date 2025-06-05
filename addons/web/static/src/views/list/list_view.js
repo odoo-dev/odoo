@@ -13,6 +13,29 @@ export const listView = {
     Model: RelationalModel,
 
     canOrderByCount: true,
+    staticControlPanelButtons: {
+        save: {
+            isAvailable() {
+                return this.editedRecord;
+            },
+            sequence: 10,
+            template: "web.ListView.Buttons.Save",
+        },
+        discard: {
+            isAvailable() {
+                return this.editedRecord;
+            },
+            sequence: 20,
+            template: "web.ListView.Buttons.Discard",
+        },
+        new: {
+            isAvailable() {
+                return !this.editedRecord && this.canCreate && !this.env.inDialog;
+            },
+            sequence: 30,
+            template: "web.ListView.Buttons.New",
+        },
+    },
 
     props: (genericProps, view) => {
         const { ArchParser } = view;
@@ -23,6 +46,7 @@ export const listView = {
             readonly: genericProps.readonly || !archInfo.activeActions?.edit,
             Model: view.Model,
             Renderer: view.Renderer,
+            staticControlPanelButtons: view.staticControlPanelButtons,
             archInfo,
         };
     },

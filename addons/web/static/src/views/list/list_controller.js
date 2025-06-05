@@ -62,6 +62,7 @@ export class ListController extends Component {
         readonly: { type: Boolean, optional: true },
         Model: Function,
         Renderer: Function,
+        staticControlPanelButtons: Object,
         archInfo: Object,
     };
     static defaultProps = {
@@ -195,23 +196,7 @@ export class ListController extends Component {
     }
 
     get staticControlPanelButtons() {
-        return {
-            save: {
-                isAvailable: () => this.editedRecord,
-                sequence: 10,
-                template: "web.ListView.Buttons.Save",
-            },
-            discard: {
-                isAvailable: () => this.editedRecord,
-                sequence: 20,
-                template: "web.ListView.Buttons.Discard",
-            },
-            new: {
-                isAvailable: () => !this.editedRecord && this.canCreate && !this.env.inDialog,
-                sequence: 30,
-                template: "web.ListView.Buttons.New",
-            },
-        };
+        return this.props.staticControlPanelButtons;
     }
 
     get controlPanelButtons() {
@@ -228,7 +213,7 @@ export class ListController extends Component {
                 props: this.multiRecordViewButtonProps(button),
             }));
         return [...staticButtons, ...alwaysHeaderButtons]
-            .filter((button) => button.isAvailable === undefined || button.isAvailable())
+            .filter((button) => button.isAvailable === undefined || button.isAvailable.call(this))
             .sort(
                 (btn1, btn2) =>
                     (btn1.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE) -
