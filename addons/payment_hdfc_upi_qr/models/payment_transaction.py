@@ -5,9 +5,10 @@ import json
 import requests
 from datetime import datetime, timedelta
 from werkzeug import urls
+import pytz
 
 from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 from odoo.addons.payment import utils as payment_utils
 from odoo.tools.image import image_data_uri
 
@@ -24,47 +25,6 @@ class PaymentTransaction(models.Model):
     hdfc_upi_qr_expiry = fields.Datetime(string="QR Code Expiry Time", readonly=True)
     hdfc_upi_payer_vpa = fields.Char(string="Payer VPA", readonly=True)
     hdfc_upi_payer_name = fields.Char(string="Payer Name", readonly=True)
-    
-    # def _get_specific_rendering_values(self, processing_values):
-    #     """ Override of payment to return HDFC UPI-specific rendering values.
-        
-    #     Note: self.ensure_one() from the parent method.
-        
-    #     :param dict processing_values: The generic and specific processing values of the transaction
-    #     :return: The dict of provider-specific rendering values
-    #     :rtype: dict
-    #     """
-    #     breakpoint()
-    #     res = super()._get_specific_rendering_values(processing_values)
-    #     if self.provider_code != 'hdfc_upi':
-    #         return res
-        
-    #     _logger.info("Getting rendering values for HDFC UPI transaction: %s", self.id)
-        
-    #     # Generate QR code immediately
-    #     if not self.hdfc_upi_qr_code:
-    #         try:
-    #             self._generate_hdfc_upi_qr_code()
-    #             _logger.info("QR code generated during rendering for transaction: %s", self.id)
-    #         except Exception as e:
-    #             _logger.error("Failed to generate QR code during rendering: %s", e, exc_info=True)
-        
-    #     # # For HDFC UPI, we'll redirect to our internal QR code display page
-    #     # base_url = self.provider_id.get_base_url()
-    #     # redirect_url = urls.url_join(base_url, f'/payment/hdfc_upi/get_form/{self.id}')
-
-    #     rendering_values = {
-    #         # 'api_url': redirect_url,
-    #         'transaction_id': self.id,
-    #         'reference': self.reference,
-    #         'amount': self.amount,
-    #         'currency': self.currency_id.name,
-    #         'merchant_name': self.provider_id.hdfc_upi_merchant_name,
-    #         'provider_code': 'hdfc_upi'
-    #     }
-        
-    #     _logger.info("HDFC UPI rendering values: %s", rendering_values)
-    #     return rendering_values
 
     def _get_specific_processing_values(self, processing_values):
         """ Override of payment to return HDFC UPI-specific processing values.
@@ -94,6 +54,7 @@ class PaymentTransaction(models.Model):
             'transaction_id': self.id,
             'merchant_name': self.provider_id.hdfc_upi_merchant_name or 'HDFC UPI',
             'currency_code': self.currency_id.name,
+            'bus_channel': self._bus_channel(),
         })
         
         _logger.info("HDFC UPI processing values: %s", processing_values)
@@ -119,13 +80,15 @@ class PaymentTransaction(models.Model):
         _logger.info("Generated HDFC UPI order number: %s for transaction: %s", order_no, self.id)
         self.hdfc_upi_order_no = order_no
 
-        # Set QR code expiry time
-        expiry_minutes = provider.hdfc_upi_qr_expiry_time or 5
+        # Set QR code expiry time (hardcoded to 5 minutes)
+        expiry_minutes = 5
         self.hdfc_upi_qr_expiry = fields.Datetime.now() + timedelta(minutes=expiry_minutes)
-        
+
         # Format expiry time in the required format for QRexpire parameter
-        # Format: YYYY-MM-DDTHH:MM:SS+05:30
-        expiry_formatted = self.hdfc_upi_qr_expiry.strftime("%Y-%m-%dT%H:%M:%S+05:30")
+        # Format: YYYY-MM-DDTHH:MM:SS+05.30
+        ist = pytz.timezone('Asia/Kolkata')
+        expiry_ist = self.hdfc_upi_qr_expiry.astimezone(ist)
+        expiry_formatted = expiry_ist.strftime("%Y-%m-%dT%H:%M:%S") + "+05.30"
 
         # Create QR string as per HDFC specifications
         payment_url = (
@@ -173,6 +136,40 @@ class PaymentTransaction(models.Model):
         except Exception as e:
             _logger.error("Error generating QR code for transaction %s: %s", self.id, e, exc_info=True)
             raise ValidationError(_("Failed to generate QR code: %s") % e)
+
+    def _send_payment_notification(self, notification_type, message=None):
+        """ Send real-time notification via Odoo bus for payment status updates.
+        
+        Uses the modern bus approach with direct _sendone method
+        
+        :param str notification_type: Type of notification (success, error, expired, etc.)
+        :param str message: Optional custom message
+        """
+        self.ensure_one()
+        if self.provider_code != 'hdfc_upi':
+            return
+        
+        try:
+            # Prepare notification payload
+            payload = {
+                'transaction_id': self.id,
+                'state': self.state,
+                'state_message': message or self.state_message or '',
+                'reference': self.reference,
+                'amount': self.amount,
+                'currency': self.currency_id.name,
+                'notification_type': notification_type,
+                'timestamp': fields.Datetime.now().isoformat(),
+            }
+            
+            # Use direct bus._sendone method with string channel
+            # Send single notification type for all transaction updates
+            channel = f'payment_hdfc_upi_{self.id}'
+            self.env['bus.bus']._sendone(channel, 'payment.transaction/updated', payload)
+            _logger.info("Sent bus notification for transaction %s: %s", self.id, payload)
+            
+        except Exception as e:
+            _logger.error("Error sending payment notification: %s", e, exc_info=True)
     
     def _get_hdfc_upi_api_url(self, endpoint):
         """ Return the appropriate URL for the requested endpoint.
@@ -213,6 +210,86 @@ class PaymentTransaction(models.Model):
         
         return tx
     
+    def action_check_payment_status(self):
+        """ Manual action to check payment status from the backend.
+        
+        This method is triggered by the 'Check Payment Status' button
+        in the payment transaction form view.
+        """
+        self.ensure_one()
+        if self.provider_code != 'hdfc_upi':
+            raise UserError(_("This action is only available for HDFC UPI transactions."))
+        
+        if not self.hdfc_upi_order_no:
+            raise UserError(_("Order number is missing. Cannot check payment status."))
+        
+        try:
+            # Check if QR code has expired
+            if self._is_qr_expired() and self.state not in ['done', 'cancel', 'error']:
+                # Mark transaction as expired
+                self._set_canceled("HDFC UPI: QR code has expired.")
+                # Send notification for real-time update
+                self._send_payment_notification('expired', 'QR code has expired')
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': _('QR Code Expired'),
+                        'message': _('The QR code for this transaction has expired.'),
+                        'type': 'warning'
+                    }
+                }
+            
+            # Check payment status with provider
+            result = self._check_hdfc_upi_payment_status()
+            
+            if result:
+                # Send notification for real-time update
+                self._send_payment_notification('status_updated', f'Payment status: {self.state}')
+                
+                # Show result notification
+                if self.state == 'done':
+                    message = _('Payment confirmed successfully!')
+                    notification_type = 'success'
+                elif self.state in ['cancel', 'error']:
+                    message = _('Payment failed or was cancelled.')
+                    notification_type = 'warning'
+                else:
+                    message = _('Payment status updated. Current status: %s') % self.state.title()
+                    notification_type = 'info'
+                    
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': _('Status Check Complete'),
+                        'message': message,
+                        'type': notification_type
+                    }
+                }
+            else:
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': _('Status Check Failed'),
+                        'message': _('Unable to retrieve payment status from provider.'),
+                        'type': 'warning'
+                    }
+                }
+                
+        except Exception as e:
+            _logger.error("Error in manual payment status check: %s", e, exc_info=True)
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Error'),
+                    'message': _('An error occurred while checking payment status: %s') % str(e),
+                    'type': 'danger'
+                }
+            }
+
     def _process_notification_data(self, notification_data):
         """ Override of payment to process the transaction based on notification data.
         
@@ -239,21 +316,44 @@ class PaymentTransaction(models.Model):
         }
         
         # Update transaction state based on status
-        if status.upper() == 'SUCCESS':
+        if status and status.upper() == 'SUCCESS':
+            _logger.info("Payment successful for transaction %s", self.reference)
+            if vals:
+                self.write(vals)
             self._set_done()
-            self.write(vals)
-        elif status.upper() == 'FAILED':
-            self._set_canceled("HDFC UPI: " + (notification_data.get('response_message') or _("Payment failed.")))
-            self.write(vals)
-        elif status.upper() == 'PENDING':
+            self._send_payment_notification('done', 'Payment completed successfully')
+        elif status and status.upper() == 'FAILED':
+            error_msg = notification_data.get('response_message') or _("Payment failed.")
+            _logger.info("Payment failed for transaction %s: %s", self.reference, error_msg)
+            if vals:
+                self.write(vals)
+            self._set_canceled(f"HDFC UPI: {error_msg}")
+            self._send_payment_notification('error', error_msg)
+        elif status and status.upper() == 'REJECTED':
+            error_msg = notification_data.get('response_message') or _("Payment was rejected.")
+            _logger.info("Payment rejected for transaction %s: %s", self.reference, error_msg)
+            if vals:
+                self.write(vals)
+            self._set_canceled(f"HDFC UPI: {error_msg}")
+            self._send_payment_notification('error', error_msg)
+        elif status and status.upper() == 'PENDING':
+            _logger.info("Payment pending for transaction %s", self.reference)
+            if vals:
+                self.write(vals)
             self._set_pending()
-            self.write(vals)
-        elif status.upper() == 'EXPIRED':
+            self._send_payment_notification('pending', 'Payment is being processed')
+        elif status and status.upper() == 'EXPIRED':
+            _logger.info("Payment expired for transaction %s", self.reference)
+            if vals:
+                self.write(vals)
             self._set_canceled(_("HDFC UPI: QR code has expired."))
-            self.write(vals)
+            self._send_payment_notification('expired', 'QR code has expired')
         else:
-            _logger.warning("Received unrecognized payment status for transaction %s: %s", self.reference, status)
-            self.write(vals)
+            _logger.warning("Received unrecognized payment status for transaction %s: %s", 
+                           self.reference, status)
+            if vals:
+                self.write(vals)
+            self._send_payment_notification('error', f'Unknown status: {status}')
     
     def _send_refund_request(self, amount_to_refund=None):
         """ Override of payment to send a refund request to HDFC UPI.
@@ -433,7 +533,7 @@ class PaymentTransaction(models.Model):
         :rtype: bool
         """
         self.ensure_one()
-        
+        _logger.info("Status Checking from API")
         if not self.hdfc_upi_order_no:
             raise ValidationError(_("Order number is missing. Cannot check payment status."))
         
@@ -502,6 +602,15 @@ class PaymentTransaction(models.Model):
             _logger.error("Error checking payment status: %s", e)
             return False
     
+    def _bus_channel(self):
+        """Return the bus channel for this payment transaction.
+        
+        :return: The bus channel name
+        :rtype: str
+        """
+        self.ensure_one()
+        return f'payment_hdfc_upi_{self.id}'
+
     def _is_qr_expired(self):
         """Check if the QR code has expired.
         

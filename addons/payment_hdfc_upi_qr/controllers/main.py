@@ -160,90 +160,7 @@ class HdfcUpiController(http.Controller):
         except Exception as e:
             _logger.exception("Error checking payment status: %s", e)
             return {'error': 'An error occurred while checking payment status'}
-            
-    # @http.route('/payment/hdfc_upi/get_form/<int:tx_id>', type='http', auth='public')
-    # def hdfc_upi_get_form(self, tx_id, **kwargs):
-    #     """ Return the QR code payment form for the transaction.
-        
-    #     :param int tx_id: The transaction ID
-    #     :return: The QR code payment form
-    #     """
-    #     try:
-    #         _logger.info("Received request for QR form for transaction: %s with kwargs: %s", tx_id, kwargs)
-            
-    #         # Get transaction with sudo to avoid access rights issues
-    #         tx_sudo = request.env['payment.transaction'].sudo().browse(tx_id).exists()
-            
-    #         if not tx_sudo:
-    #             _logger.error("Transaction not found: %s", tx_id)
-    #             return self._render_error_page("Transaction not found")
-                
-    #         if tx_sudo.provider_code != 'hdfc_upi':
-    #             _logger.error("Transaction is not HDFC UPI: %s, provider: %s", tx_id, tx_sudo.provider_code)
-    #             return self._render_error_page("Invalid payment method")
-            
-    #         # Generate QR code if not already generated
-    #         if not tx_sudo.hdfc_upi_qr_code:
-    #             _logger.info("Generating QR code for transaction: %s", tx_id)
-    #             try:
-    #                 tx_sudo._generate_hdfc_upi_qr_code()
-    #                 _logger.info("QR code generated successfully for transaction: %s", tx_id)
-    #             except Exception as e:
-    #                 _logger.error("Failed to generate QR code: %s", e, exc_info=True)
-    #                 return self._render_error_page(f"Failed to generate QR code: {str(e)}")
-            
-    #         # Calculate expiry time in seconds from now
-    #         expiry_seconds = 0
-    #         if tx_sudo.hdfc_upi_qr_expiry:
-    #             now = datetime.now()
-    #             expiry_delta = tx_sudo.hdfc_upi_qr_expiry - now
-    #             expiry_seconds = max(0, int(expiry_delta.total_seconds()))
-        
-    #         # Debug QR code data
-    #         _logger.info("QR code exists: %s", bool(tx_sudo.hdfc_upi_qr_code))
-    #         if tx_sudo.hdfc_upi_qr_code:
-    #             _logger.info("QR code length: %s bytes", len(tx_sudo.hdfc_upi_qr_code))
-            
-    #         # Convert QR code to data URI
-    #         qr_code_data = None
-    #         if tx_sudo.hdfc_upi_qr_code:
-    #             try:
-    #                 # Handle both string and bytes
-    #                 if isinstance(tx_sudo.hdfc_upi_qr_code, bytes):
-    #                     qr_code_base64 = tx_sudo.hdfc_upi_qr_code.decode('utf-8')
-    #                 else:
-    #                     qr_code_base64 = tx_sudo.hdfc_upi_qr_code
-                    
-    #                 qr_code_data = f"data:image/png;base64,{qr_code_base64}"
-    #                 _logger.info("QR code data URI created successfully")
-    #             except Exception as e:
-    #                 _logger.error("Error creating QR code data URI: %s", e, exc_info=True)
-    #                 # Continue without QR code data URI
-            
-    #         # Prepare rendering values
-    #         values = {
-    #             'tx': tx_sudo,
-    #             'qr_code': qr_code_data,
-    #             'qr_string': tx_sudo.hdfc_upi_qr_string,
-    #             'reference': tx_sudo.reference,
-    #             'amount': tx_sudo.amount,
-    #             'currency': tx_sudo.currency_id.name,
-    #             'partner_name': tx_sudo.partner_name,
-    #             'txn_id': tx_sudo.id,
-    #             'expiry_seconds': expiry_seconds,
-    #         }
-            
-    #         _logger.info("Rendering QR form for transaction: %s", tx_id)
-    #         try:
-    #             return request.render('payment_hdfc_upi_qr.hdfc_upi_qr_form', values)
-    #         except Exception as e:
-    #             _logger.error("Error rendering QR form template: %s", e, exc_info=True)
-    #             return self._render_error_page(f"Error rendering payment form: {str(e)}")
-        
-    #     except Exception as e:
-    #         _logger.error("Unhandled error displaying QR form: %s", e, exc_info=True)
-    #         return self._render_error_page("An unexpected error occurred")
-    
+
     @http.route('/payment/hdfc_upi/get_qr_data/<int:tx_id>', type='jsonrpc', auth='public', csrf=False)
     def hdfc_upi_get_qr_data(self, tx_id, **kwargs):
         """ Get QR code data for the transaction (for modal display).
@@ -309,6 +226,7 @@ class HdfcUpiController(http.Controller):
                 'currency': tx_sudo.currency_id.name,
                 'merchant_name': tx_sudo.provider_id.hdfc_upi_merchant_name,
                 'expiry_seconds': expiry_seconds,
+                'bus_channel': tx_sudo._bus_channel()
             }
         
         except Exception as e:
@@ -376,46 +294,3 @@ class HdfcUpiController(http.Controller):
         </html>
         """
         return html
-
-    # def _render_error_page(self, error_message):
-    #     """Render a simple error page with the given message.
-        
-    #     :param str error_message: The error message to display
-    #     :return: The rendered error page
-    #     """
-    #     _logger.error("Rendering error page: %s", error_message)
-    #     values = {
-    #         'error_message': error_message,
-    #     }
-    #     try:
-    #         return request.render('payment_hdfc_upi_qr.hdfc_upi_error_page', values)
-    #     except Exception as e:
-    #         _logger.error("Error rendering error page template: %s", e, exc_info=True)
-    #         # Fallback if the error template is not found
-    #         html = f"""
-    #         <!DOCTYPE html>
-    #         <html>
-    #             <head>
-    #                 <meta charset="utf-8"/>
-    #                 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-    #                 <title>Payment Error</title>
-    #                 <style>
-    #                     body {{ font-family: Arial, sans-serif; margin: 50px; }}
-    #                     .error-container {{ max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }}
-    #                     .error-title {{ color: #d9534f; }}
-    #                     .back-button {{ margin-top: 20px; }}
-    #                     .back-button a {{ text-decoration: none; color: #337ab7; }}
-    #                 </style>
-    #             </head>
-    #             <body>
-    #                 <div class="error-container">
-    #                     <h2 class="error-title">Payment Error</h2>
-    #                     <p>{error_message}</p>
-    #                     <div class="back-button">
-    #                         <a href="/payment/status">&larr; Return to Payment Status</a>
-    #                     </div>
-    #                 </div>
-    #             </body>
-    #         </html>
-    #         """
-    #         return html

@@ -1,38 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <data noupdate="1">
-        <!-- Payment Provider -->
-        <record id="payment_provider_hdfc_upi" model="payment.provider">
-            <field name="name">HDFC UPI</field>
-            <field name="code">hdfc_upi</field>
-            <field name="module_id" ref="base.module_payment_hdfc_upi_qr"/>
-            <field name="company_id" ref="base.main_company"/>
-            <field name="image_128" type="base64" file="payment_hdfc_upi_qr/static/description/icon.png"/>
-            <!-- <field name="redirect_form_view_id" ref="payment_hdfc_upi_redirect_form"/> -->
-            <field name="inline_form_view_id" ref="inline_form"/>
-            <field name="hdfc_upi_qr_expiry_time">5</field>
-            <field name="payment_method_ids"
-               eval="[Command.set([
-                         ref('payment.payment_method_hdfc_upi'),
-                     ])]"
-        />
-        </record>
+<odoo noupdate="1">
 
-        <!-- Payment Method
-        <record id="payment_method_hdfc_upi" model="payment.method">
-            <field name="name">UPI QR</field>
-            <field name="code">upi_qr</field>
-            <field name="sequence">1000</field>
-            <field name="active">False</field>
-            <field name="image" type="base64" file="payment/static/img/upi.png"/>
-            <field name="support_tokenization">False</field>
-            <field name="support_express_checkout">False</field>
-            <field name="support_manual_capture">none</field>
-            <field name="support_refund">partial</field>
-            <field name="supported_country_ids"
-                   eval="[Command.set([ref('base.in')])]"/>
-            <field name="supported_currency_ids"
-                   eval="[Command.set([ref('base.INR')])]"/>
-        </record> -->
-    </data>
+    <record id="payment.payment_provider_hdfc_upi" model="payment.provider">
+        <field name="code">hdfc_upi</field>
+        <field name="inline_form_view_id" ref="inline_form"/>
+    </record>
+
 </odoo>

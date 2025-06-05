@@ -1,42 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-   <!-- Redirect Form -->
-   <!-- <template id="payment_hdfc_upi_redirect_form">
-       <form t-att-action="api_url" method="get" class="hdfc_upi_form" id="hdfc_upi_redirect_form">
-           <input type="hidden" name="reference" t-att-value="reference"/>
-           <p class="alert alert-info">You will be redirected to the payment page in a moment...</p>
-           <script type="text/javascript">
-               document.addEventListener("DOMContentLoaded", function() {
-                   document.getElementById("hdfc_upi_redirect_form").submit();
-               });
-           </script>
-       </form>
-   </template> -->
-
-<!-- Inline Form Template for HDFC UPI -->
-   <!-- <template id="hdfc_upi_inline_form">
-       <div class="hdfc_upi_inline_form" 
-            t-att-data-transaction-id="transaction_id"
-            t-att-data-reference="reference"
-            t-att-data-amount="amount"
-            t-att-data-currency="currency"
-            t-att-data-merchant-name="merchant_name">
-           
-           <input type="hidden" name="hdfc_upi_transaction_id" t-att-value="transaction_id"/>
-           
-           <div class="text-center mt-3">
-               <div class="d-flex align-items-center justify-content-center mb-2">
-                   <i class="fa fa-qrcode text-primary me-2" style="font-size: 24px;"></i>
-                   <span class="text-muted">UPI QR Code Payment</span>
-               </div>
-               <small class="text-muted d-block mb-3">
-                   A QR code will be generated when you proceed with payment
-               </small>
-               
-           </div>
-       </div>
-   </template> -->
-
    <template id="inline_form">
         <div name="o_hdfc_upi_component_container">
             <!-- Simple container for UPI payment - the modal will be triggered by JavaScript -->
@@ -46,115 +9,9 @@
                     <span class="text-muted">UPI QR Code Payment</span>
                 </div>
                 <small class="text-muted d-block mb-3">
-                    Click "Pay Now" to generate and display the QR code for payment
+                    Click "Pay" to generate and display the QR code for payment
                 </small>
             </div>
         </div>
     </template>
-   
-   <!-- QR Code Form Template -->
-   <template id="hdfc_upi_qr_form">
-       <t t-call="web.layout">
-           <t t-set="head">
-               <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
-               <link rel="stylesheet" href="/payment_hdfc_upi_qr/static/src/css/payment_form.css"/>
-               <t t-call-assets="web.assets_frontend" t-js="true"/>
-           </t>
-           <div class="container mt-4 mb-4">
-               <div class="row">
-                   <div class="col-md-6 offset-md-3 col-sm-12">
-                       <div class="hdfc_upi_payment_container">
-                           <div class="card">
-                               <div class="card-header bg-primary text-white">
-                                   <h3 class="mb-0">Pay with UPI</h3>
-                               </div>
-                               <div class="card-body text-center">
-                                   <p class="text-muted">Scan the QR code with any UPI app to make payment</p>
-                                   
-                                   <!-- QR Code -->
-                                   <div class="my-4">
-                                       <t t-if="qr_code">
-                                           <img t-att-src="qr_code" class="img-fluid" style="max-width: 250px;"/>
-                                       </t>
-                                       <t t-elif="tx and tx.hdfc_upi_qr_code">
-                                           <img t-att-src="'data:image/png;base64,' + tx.hdfc_upi_qr_code" class="img-fluid" style="max-width: 250px;"/>
-                                       </t>
-                                       <div t-else="" class="alert alert-warning">
-                                           QR code could not be generated. Please try again.
-                                       </div>
-                                   </div>
-                                   
-                                   <!-- Payment Details -->
-                                   <div class="d-flex justify-content-between">
-                                       <div>
-                                           <strong>Amount:</strong> <span t-out="amount"/> <span t-out="currency"/>
-                                       </div>
-                                       <div>
-                                           <strong>Reference:</strong> <span t-out="reference"/>
-                                       </div>
-                                   </div>
-                                   
-                                   <!-- QR Code Timer -->
-                                   <div class="mt-3 qr-timer-container">
-                                       <div class="alert alert-info">
-                                           <span>QR Code expires in: </span>
-                                           <span id="qr_timer" class="font-weight-bold"></span>
-                                       </div>
-                                   </div>
-                                   
-                                   
-                                   <!-- Status Message -->
-                                   <div id="payment_status_message" class="mt-3 alert d-none"></div>
-                                   
-                                   <!-- Payment Instructions -->
-                                   <div class="mt-4 payment-instructions">
-                                       <h5>How to pay using UPI:</h5>
-                                       <ol class="text-left">
-                                           <li>Open any UPI app on your mobile (Google Pay, PhonePe, Paytm, etc.)</li>
-                                           <li>Select the option to scan QR code</li>
-                                           <li>Scan the QR code displayed above</li>
-                                           <li>Verify the payment details</li>
-                                           <li>Enter your UPI PIN to complete the payment</li>
-                                           <li>Click "Check Payment Status" to verify your payment</li>
-                                       </ol>
-                                   </div>
-                               </div>
-                           </div>
-                           
-                           <!-- Hidden Fields -->
-                           <input type="hidden" id="tx_id" t-att-value="txn_id"/>
-                           <input type="hidden" id="expiry_seconds" t-att-value="expiry_seconds"/>
-                       </div>
-                   </div>
-               </div>
-           </div>
-       </t>
-   </template>
-   
-   <!-- Error Page Template -->
-   <template id="hdfc_upi_error_page">
-       <t t-call="web.layout">
-           <div class="container mt-4 mb-4">
-               <div class="row">
-                   <div class="col-md-6 offset-md-3 col-sm-12">
-                       <div class="card">
-                           <div class="card-header bg-danger text-white">
-                               <h3 class="mb-0">Payment Error</h3>
-                           </div>
-                           <div class="card-body text-center">
-                               <div class="alert alert-danger">
-                                   <p t-out="error_message"/>
-                               </div>
-                               <div class="mt-4">
-                                   <a href="/payment/status" class="btn btn-primary">
-                                       Return to Payment Status
-                                   </a>
-                               </div>
-                           </div>
-                       </div>
-                   </div>
-               </div>
-           </div>
-       </t>
-   </template>
 </odoo>

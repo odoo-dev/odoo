@@ -3710,7 +3710,6 @@
         />
     </record>
 
-    <!-- Payment Method -->
     <record id="payment_method_hdfc_upi" model="payment.method">
         <field name="name">UPI QR</field>
         <field name="code">upi_qr</field>
@@ -3722,18 +3721,16 @@
         <field name="support_manual_capture">none</field>
         <field name="support_refund">full_only</field>
         <field name="supported_country_ids"
-                eval="[Command.set([ref('base.in')])]"/>
+               eval="[Command.set([
+                         ref('base.in'),
+                     ])]"
+        />
         <field name="supported_currency_ids"
-                eval="[Command.set([ref('base.INR')])]"/>
+               eval="[Command.set([
+                         ref('base.INR'),
+                     ])]"
+        />
     </record>
-
-    <!-- <record id="payment_method_hdfc_upi" model="payment.method">
-        <field name="name">UPI QR Code</field>
-        <field name="code">upi_qr</field>
-        <field name="support_tokenization">False</field>
-        <field name="support_refund">full_only</field>
-        <field name="image_payment_form" type="base64" file="payment_hdfc_upi/static/description/icon.png"/>
-    </record> -->
 
     <record id="payment_method_ussd" model="payment.method">
         <field name="name">USSD</field>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="payment_transaction_form_hdfc_upi" model="ir.ui.view">
+        <field name="name">payment.transaction.form.inherit.hdfc.upi</field>
+        <field name="model">payment.transaction</field>
+        <field name="inherit_id" ref="payment.payment_transaction_form"/>
+        <field name="arch" type="xml">  
+            <!-- Hide original statusbar for HDFC UPI and show custom one without 'Authorized' state -->
+            <xpath expr="//field[@name='state'][@widget='statusbar']" position="attributes">
+                <attribute name="invisible">provider_code == 'hdfc_upi'</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='state'][@widget='statusbar']" position="after">
+                <field name="state" widget="statusbar" 
+                       statusbar_visible="draft,pending,done,cancel,error"
+                       invisible="provider_code != 'hdfc_upi'"/>
+            </xpath>
+            
+            <header position="inside">
+                <button name="action_check_payment_status" 
+                        type="object" 
+                        string="Check Payment Status" 
+                        class="oe_highlight"
+                        invisible="provider_code != 'hdfc_upi' or state in ['done', 'cancel', 'error']"
+                        confirm="This will check the current payment status with HDFC UPI. Continue?"/>
+            </header>
+            <group name="transaction_partner" position="after">
+                <group string="HDFC UPI Details" invisible="provider_code != 'hdfc_upi'">
+                    <field name="hdfc_upi_order_no"/>
+                    <field name="hdfc_upi_txn_id"/>
+                    <field name="hdfc_upi_customer_ref_no"/>
+                    <field name="hdfc_upi_qr_expiry"/>
+                    <field name="hdfc_upi_payer_vpa"/>
+                    <field name="hdfc_upi_payer_name"/>
+                </group>
+            </group>
+        </field>
+    </record>
+</odoo>

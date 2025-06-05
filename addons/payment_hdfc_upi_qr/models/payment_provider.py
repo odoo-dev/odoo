@@ -35,12 +35,6 @@ class PaymentProvider(models.Model):
         required_if_provider='hdfc_upi',
         groups='base.group_system'
     )
-    hdfc_upi_qr_expiry_time = fields.Integer(
-        string="QR Code Expiry Time (minutes)",
-        help="Time in minutes after which the QR code will expire.",
-        default=5,
-        required_if_provider='hdfc_upi',
-    )
     
     # Use l10n_in_upi_id from res.company via company_id
     @api.constrains('company_id')
@@ -53,12 +47,6 @@ class PaymentProvider(models.Model):
                 if '@' not in upi_id:
                     raise ValidationError(_("UPI VPA must be in the format 'username@provider' (from company UPI Id)."))
 
-    @api.constrains('hdfc_upi_qr_expiry_time')
-    def _check_hdfc_upi_qr_expiry_time(self):
-        for provider in self:
-            if provider.code == 'hdfc_upi' and provider.hdfc_upi_qr_expiry_time <= 0:
-                raise ValidationError(_("QR Code Expiry Time must be greater than 0 minutes"))
-    
     def _get_default_payment_method_codes(self):
         """ Return the default payment methods for this provider. """
         default_codes = super()._get_default_payment_method_codes()
@@ -71,19 +59,6 @@ class PaymentProvider(models.Model):
         if self.code == 'hdfc_upi':
             return True
         return super()._should_build_inline_form(is_validation=is_validation)
-
-    # def _get_redirect_form_view(self, is_validation=False):
-    #     """ Return the view of the redirect form.
-        
-    #     Note: This method must return a view record, not a string.
-        
-    #     :param bool is_validation: Whether the operation is a validation operation
-    #     :return: The redirect form view
-    #     :rtype: recordset of `ir.ui.view`
-    #     """
-    #     if self.code == 'hdfc_upi':
-    #         return self.env.ref('payment_hdfc_upi_qr.payment_hdfc_upi_redirect_form')
-    #     return super()._get_redirect_form_view(is_validation=is_validation)
     
     def _get_validation_amount(self):
         """ Return the amount to use for validation operations. """

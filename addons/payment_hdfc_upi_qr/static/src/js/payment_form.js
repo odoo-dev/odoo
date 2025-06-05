@@ -1,225 +1,9 @@
-// /** @odoo-module **/
-
-// import publicWidget from "@web/legacy/js/public/public_widget"
-// import { _t } from "@web/core/l10n/translation"
-// import { rpc } from "@web/core/network/rpc"
-
-// publicWidget.registry.HdfcUpiPaymentForm = publicWidget.Widget.extend({
-//   selector: ".hdfc_upi_payment_container",
-
-//   /**
-//    * @override
-//    */
-//   start: function () {
-//     console.log("HDFC UPI Payment Form widget starting")
-//     this._super.apply(this, arguments)
-//     this._startQrTimer()
-//     this._initializePaymentMonitoring()
-//     return Promise.resolve()
-//   },
-
-//   /**
-//    * Initialize lightweight payment monitoring
-//    *
-//    * @private
-//    */
-//   _initializePaymentMonitoring: function () {
-//     const txIdEl = this.el.querySelector("#tx_id")
-//     if (!txIdEl) {
-//       console.error("Transaction ID element not found")
-//       return
-//     }
-
-//     this._transactionId = txIdEl.value
-//     if (!this._transactionId) {
-//       console.error("Transaction ID not found")
-//       return
-//     }
-
-//     console.log("Initializing payment monitoring for transaction:", this._transactionId)
-
-//     // Show initial waiting message
-//     this._showStatusMessage("info", _t("Scan the QR code with your UPI app to complete payment..."))
-
-//     // Start lightweight monitoring (every 10 seconds, much less aggressive than before)
-//     this._startStatusMonitoring()
-//   },
-
-//   /**
-//    * Start status monitoring with minimal frequency
-//    *
-//    * @private
-//    */
-//   _startStatusMonitoring: function () {
-//     // Check every 10 seconds (less frequent than typical polling)
-//     this._monitoringInterval = setInterval(() => {
-//       this._checkTransactionStatus()
-//     }, 10000)
-
-//     // Initial check after 5 seconds
-//     setTimeout(() => {
-//       this._checkTransactionStatus()
-//     }, 5000)
-//   },
-
-//   /**
-//    * Check transaction status - simplified approach
-//    *
-//    * @private
-//    */
-//   _checkTransactionStatus: function () {
-//     if (!this._transactionId) {
-//       return
-//     }
-
-//     rpc(`/payment/hdfc_upi/check_status/${this._transactionId}`, {})
-//       .then((result) => {
-//         if (result.error) {
-//           console.error("Error checking status:", result.error)
-//           return
-//         }
-
-//         if (result.state === "done") {
-//           // Payment successful - redirect immediately following Odoo patterns
-//           this._showStatusMessage("success", _t("Payment successful! Redirecting..."))
-//           this._stopMonitoring()
-
-//           // Redirect to status page following standard Odoo pattern
-//           setTimeout(() => {
-//             window.location.href = "/payment/status"
-//           }, 1500)
-//         } else if (result.state === "cancel" || result.state === "error") {
-//           // Payment failed/cancelled
-//           this._showStatusMessage("danger", result.message || _t("Payment was not completed."))
-//           this._stopMonitoring()
-//         } else if (result.expired) {
-//           // QR expired
-//           this._showStatusMessage("danger", _t("QR code has expired. Please refresh the page to try again."))
-//           this._stopMonitoring()
-//         }
-//         // For pending state, continue monitoring
-//       })
-//       .catch((error) => {
-//         console.error("Error in status check:", error)
-//         // Don't show error to user for background checks
-//       })
-//   },
-
-//   /**
-//    * Show status message to user
-//    *
-//    * @private
-//    * @param {string} type - Message type (info, success, warning, danger)
-//    * @param {string} message - Message text
-//    */
-//   _showStatusMessage: function (type, message) {
-//     const messageEl = this.el.querySelector("#payment_status_message")
-//     if (!messageEl) {
-//       return
-//     }
-
-//     // Clear existing classes
-//     messageEl.classList.remove("d-none", "alert-info", "alert-success", "alert-warning", "alert-danger")
-
-//     // Add appropriate class
-//     messageEl.classList.add(`alert-${type}`)
-//     messageEl.textContent = message
-//     messageEl.classList.remove("d-none")
-//   },
-
-//   /**
-//    * Start QR code timer
-//    *
-//    * @private
-//    */
-//   _startQrTimer: function () {
-//     const expirySecondsEl = this.el.querySelector("#expiry_seconds")
-//     if (!expirySecondsEl) {
-//       console.error("Expiry seconds element not found")
-//       return
-//     }
-
-//     const expirySeconds = Number.parseInt(expirySecondsEl.value) || 300 // Default 5 minutes
-//     this._remainingSeconds = expirySeconds
-
-//     console.log("Starting QR timer with", expirySeconds, "seconds")
-
-//     // Update timer immediately
-//     this._updateTimer()
-
-//     // Update every second
-//     this._timerInterval = setInterval(this._updateTimer.bind(this), 1000)
-//   },
-
-//   /**
-//    * Update the timer display
-//    *
-//    * @private
-//    */
-//   _updateTimer: function () {
-//     const timerEl = this.el.querySelector("#qr_timer")
-//     if (!timerEl) {
-//       return
-//     }
-
-//     if (this._remainingSeconds <= 0) {
-//       // QR expired
-//       clearInterval(this._timerInterval)
-//       timerEl.textContent = _t("Expired")
-//       timerEl.classList.add("text-danger", "font-weight-bold")
-
-//       this._showStatusMessage("danger", _t("QR code has expired. Please refresh the page to generate a new QR code."))
-//       this._stopMonitoring()
-//       return
-//     }
-
-//     const minutes = Math.floor(this._remainingSeconds / 60)
-//     const seconds = this._remainingSeconds % 60
-
-//     timerEl.textContent = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`
-
-//     // Add warning when less than 1 minute remains
-//     if (this._remainingSeconds < 60) {
-//       timerEl.classList.add("text-danger")
-//     }
-
-//     this._remainingSeconds--
-//   },
-
-//   /**
-//    * Stop all monitoring activities
-//    *
-//    * @private
-//    */
-//   _stopMonitoring: function () {
-//     if (this._monitoringInterval) {
-//       clearInterval(this._monitoringInterval)
-//       this._monitoringInterval = null
-//     }
-
-//     if (this._timerInterval) {
-//       clearInterval(this._timerInterval)
-//       this._timerInterval = null
-//     }
-//   },
-
-//   /**
-//    * @override
-//    */
-//   destroy: function () {
-//     console.log("Destroying HDFC UPI Payment Form widget")
-//     this._stopMonitoring()
-//     this._super.apply(this, arguments)
-//   },
-// })
-
-// export default publicWidget.registry.HdfcUpiPaymentForm
-
 /** @odoo-module **/
 
 import paymentForm from "@payment/js/payment_form"
 import { _t } from "@web/core/l10n/translation"
 import { rpc } from "@web/core/network/rpc"
+import { registry } from "@web/core/registry"
 
 // Global UPI Modal instance
 let globalUpiModal = null
@@ -340,8 +124,11 @@ class UpiPaymentModal {
   constructor() {
     this.isOpen = false
     this.transactionId = null
-    this.monitoringInterval = null
+    this.busSubscription = null
+    this.busChannel = null
+    this.busInstance = null
     this.timerInterval = null
+    this.monitoringInterval = null
     this.remainingSeconds = 0
     this._createModal()
     this._bindEvents()
@@ -500,7 +287,6 @@ class UpiPaymentModal {
 
         if (response.success) {
           this._displayQrCode(response)
-          this._startPaymentMonitoring(transactionId)
         } else {
           this._showStatus("error", response.error || _t("Failed to generate QR code"))
         }
@@ -552,29 +338,146 @@ class UpiPaymentModal {
 
     // Show initial status
     this._showStatus("info", _t("Scan the QR code to complete your payment"))
+
+    // Setup bus service for real-time updates
+    this._setupBusService(qrData.bus_channel || `payment_hdfc_upi_${this.transactionId}`)
   }
 
   /**
-   * Start payment monitoring
+   * Setup bus service for real-time payment updates
+   * @private
+   * @param {string} channel - Bus channel for this transaction
+   */
+  _setupBusService(channel) {
+    this.busChannel = channel
+    console.log("Setting up bus service for channel:", channel)
+
+    try {
+      // Get the bus service from the registry
+      const serviceRegistry = registry.category("services")
+      if (!serviceRegistry.contains("bus_service")) {
+        console.warn("Bus service not available, falling back to polling")
+        this._startPaymentMonitoring(this.transactionId)
+        return
+      }
+
+      // Get the bus service instance
+      const busServiceFactory = serviceRegistry.get("bus_service")
+      
+      // Create a minimal environment and services object for the bus service
+      const env = {
+        services: {
+          bus_service: null,
+          notification: {
+            add: () => {}  // Minimal notification service
+          },
+          'bus.parameters': {
+            serverURL: window.location.origin
+          },
+          localization: {},
+          multi_tab: {
+            setSharedValue: () => {},
+            getSharedValue: () => 0,
+            unregister: () => {}
+          }
+        }
+      }
+      
+      // Start the bus service
+      const busInstance = busServiceFactory.start(env, env.services)
+      
+      // Add the channel to listen for payment updates
+      busInstance.addChannel(channel)
+      
+      // Subscribe to single notification type for all payment updates
+      busInstance.subscribe('payment.transaction/updated', (payload, { id: notifId }) => {
+        console.log("Received payment transaction update:", payload, "notifId:", notifId)
+        
+        // Check if this notification is for our transaction
+        if (payload.transaction_id === this.transactionId) {
+          this._handleBusTransactionUpdate(payload)
+        }
+      })
+      
+      // Store the bus instance for cleanup
+      this.busInstance = busInstance
+      
+      console.log("Bus service subscription created for channel:", channel)
+    } catch (error) {
+      console.error("Error setting up bus service:", error)
+      console.log("Falling back to polling method")
+      this._startPaymentMonitoring(this.transactionId)
+    }
+  }
+
+  /**
+   * Handle bus transaction updates (unified for all payment events)
+   * @private
+   * @param {Object} payload - Transaction update payload
+   */
+  _handleBusTransactionUpdate(payload) {
+    console.log("Received bus transaction update:", payload)
+    
+    const { state, state_message, notification_type, transaction_id } = payload
+    
+    // Verify this update is for our transaction
+    if (transaction_id && transaction_id !== this.transactionId) {
+      console.log("Transaction update for different transaction, ignoring")
+      return
+    }
+
+    // Stop all monitoring
+    this._stopMonitoring()
+
+    // Show appropriate status message based on state
+    let statusMessage = state_message || _t("Processing payment update...")
+    let statusType = "info"
+
+    switch (state) {
+      case "done":
+        statusMessage = state_message || _t("Payment completed successfully! Redirecting...")
+        statusType = "success"
+        break
+      case "cancel":
+      case "error":
+        statusMessage = state_message || _t("Payment failed. Redirecting...")
+        statusType = "error"
+        break
+      case "pending":
+        statusMessage = state_message || _t("Payment is being processed. Redirecting...")
+        statusType = "info"
+        break
+      default:
+        statusMessage = state_message || _t("Payment status updated. Redirecting...")
+        statusType = "info"
+    }
+
+    // Show status message
+    this._showStatus(statusType, statusMessage)
+
+    // Always redirect to payment status page after a short delay
+    setTimeout(() => {
+      console.log("Redirecting to payment status page...")
+      window.location.href = "/payment/status"
+    }, 2000)
+  }
+
+  /**
+   * Start payment monitoring (fallback when bus service is not available)
    * @private
    * @param {number} transactionId
    */
   _startPaymentMonitoring(transactionId) {
-    console.log("Starting payment monitoring for transaction:", transactionId)
+    console.log("Starting fallback payment monitoring for transaction:", transactionId)
 
-    // Check every 5 seconds
+    // Check every 10 seconds (less frequent since this is fallback)
     this.monitoringInterval = setInterval(() => {
       this._checkPaymentStatus(transactionId)
-    }, 5000)
-
-    // Initial check after 3 seconds
-    setTimeout(() => {
-      this._checkPaymentStatus(transactionId)
-    }, 3000)
+    }, 10000)
   }
 
   /**
-   * Check payment status
+   * Check payment status (fallback method)
    * @private
    * @param {number} transactionId
    */
@@ -584,11 +487,11 @@ class UpiPaymentModal {
         console.log("Payment status result:", result)
 
         if (result.state === "done") {
-          this._handlePaymentSuccess()
+          this._handlePaymentSuccess(result.message)
         } else if (result.state === "cancel" || result.state === "error") {
           this._handlePaymentFailure(result.message)
         } else if (result.expired) {
-          this._handleQrExpiry()
+          this._handleQrExpiry(result.message)
         }
       })
       .catch((error) => {
@@ -599,19 +502,19 @@ class UpiPaymentModal {
   /**
    * Handle successful payment
    * @private
+   * @param {string} message
    */
-  _handlePaymentSuccess() {
+  _handlePaymentSuccess(message) {
     this._stopMonitoring()
 
     // Show success message
-    this._showStatus("success", _t("Payment successful! Redirecting..."))
+    this._showStatus("success", message || _t("Payment successful! Redirecting..."))
 
     // Add success animation
     document.getElementById("qrContainer").classList.add("success-animation")
 
     // Redirect after delay
     setTimeout(() => {
-      // this.close()
       window.location.href = "/payment/status"
     }, 2000)
   }
@@ -629,10 +532,11 @@ class UpiPaymentModal {
   /**
    * Handle QR code expiry
    * @private
+   * @param {string} message
    */
-  _handleQrExpiry() {
+  _handleQrExpiry(message) {
     this._stopMonitoring()
-    this._showStatus("error", _t("QR code has expired. Please close and try again."))
+    this._showStatus("error", message || _t("QR code has expired. Please close and try again."))
 
     // Update timer
     document.getElementById("timerValue").textContent = _t("Expired")
@@ -734,6 +638,18 @@ class UpiPaymentModal {
     if (this.timerInterval) {
       clearInterval(this.timerInterval)
       this.timerInterval = null
+    }
+
+    if (this.busInstance && this.busChannel) {
+      // Remove the bus channel when cleaning up
+      try {
+        this.busInstance.deleteChannel(this.busChannel)
+        this.busInstance.stop()
+        this.busInstance = null
+        this.busChannel = null
+      } catch (error) {
+        console.warn("Error cleaning up bus service:", error)
+      }
     }
   }
 
