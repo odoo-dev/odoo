@@ -19,7 +19,6 @@ import {
     useChildRef,
     useForwardRefToParent,
     useService,
-    useServiceProtectMethodHandling,
     useSpellCheck,
 } from "@web/core/utils/hooks";
 
@@ -337,7 +336,7 @@ describe("useService", () => {
     });
 
     test("async service with protected methods", async () => {
-        useServiceProtectMethodHandling.fn = useServiceProtectMethodHandling.original;
+      //  useServiceProtectMethodHandling.fn = useServiceProtectMethodHandling.original;
         const state = reactive({ child: true });
         let nbCalls = 0;
         let def = new Deferred();
@@ -421,7 +420,7 @@ describe("useService", () => {
         await expect(functionService()).rejects.toThrow("Component is destroyed");
         await expect(functionService.call("boundThis")).rejects.toThrow("Component is destroyed");
         expect(nbCalls).toBe(8);
-        useServiceProtectMethodHandling.fn = useServiceProtectMethodHandling.mocked;
+     //   useServiceProtectMethodHandling.fn = useServiceProtectMethodHandling.mocked;
     });
 });
 

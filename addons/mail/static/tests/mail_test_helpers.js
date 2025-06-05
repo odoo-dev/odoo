@@ -75,7 +75,7 @@ export const registryNamesToCloneWithCleanup = [];
 registryNamesToCloneWithCleanup.push("mock_server_callbacks", "discuss.model");
 
 mailGlobal.isInTest = true;
-useServiceProtectMethodHandling.fn = useServiceProtectMethodHandling.mocked; // so that RPCs after tests do not throw error
+// useServiceProtectMethodHandling.fn = useServiceProtectMethodHandling.mocked; // so that RPCs after tests do not throw error
 
 addBusMessageHandler("mail.record/insert", (_env, _id, payload) => {
     const recordsByModelName = Object.entries(payload);
