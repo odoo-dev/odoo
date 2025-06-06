@@ -1,11 +1,6 @@
 import { describe, expect, test } from "@odoo/hoot";
-import {
-    asyncStep,
-    makeMockEnv,
-    patchWithCleanup,
-    restoreRegistry,
-    waitForSteps,
-} from "@web/../tests/web_test_helpers";
+import { advanceTime } from "@odoo/hoot-mock";
+import { makeMockEnv, patchWithCleanup, restoreRegistry } from "@web/../tests/web_test_helpers";
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 
@@ -13,6 +8,8 @@ describe.current.tags("desktop");
 
 test("multi tab service elects new main on pagehide", async () => {
     const firstTabEnv = await makeMockEnv();
+    // wait for the first tab to become the main tab
+    await advanceTime(5000);
     expect(firstTabEnv.services.multi_tab.isOnMainTab()).toBe(true);
     // Prevent second tab from receiving pagehide event.
     patchWithCleanup(browser, {
@@ -26,17 +23,17 @@ test("multi tab service elects new main on pagehide", async () => {
     const secondTabEnv = await makeMockEnv(null, { makeNew: true });
     expect(secondTabEnv.services.multi_tab.isOnMainTab()).toBe(false);
     firstTabEnv.services.multi_tab.bus.addEventListener("no_longer_main_tab", () =>
-        asyncStep("tab1 no_longer_main_tab")
+        expect.step("tab1 no_longer_main_tab")
     );
     secondTabEnv.services.multi_tab.bus.addEventListener("no_longer_main_tab", () =>
-        asyncStep("tab2 no_longer_main_tab")
+        expect.step("tab2 no_longer_main_tab")
     );
     secondTabEnv.services.multi_tab.bus.addEventListener("become_main_tab", () =>
-        asyncStep("tab2 become_main_tab")
+        expect.step("tab2 become_main_tab")
     );
     browser.dispatchEvent(new Event("pagehide"));
 
-    await waitForSteps(["tab1 no_longer_main_tab", "tab2 become_main_tab"]);
+    await expect.waitForSteps(["tab1 no_longer_main_tab", "tab2 become_main_tab"]);
     expect(firstTabEnv.services.multi_tab.isOnMainTab()).toBe(false);
     expect(secondTabEnv.services.multi_tab.isOnMainTab()).toBe(true);
 });
@@ -58,10 +55,10 @@ test("multi tab triggers shared_value_updated", async () => {
     restoreRegistry(registry);
     const secondTabEnv = await makeMockEnv(null, { makeNew: true });
     secondTabEnv.services.multi_tab.bus.addEventListener("shared_value_updated", ({ detail }) => {
-        asyncStep(`${detail.key} - ${JSON.parse(detail.newValue)}`);
+        expect.step(`${detail.key} - ${JSON.parse(detail.newValue)}`);
     });
     firstTabEnv.services.multi_tab.setSharedValue("foo", "bar");
     firstTabEnv.services.multi_tab.setSharedValue("foo", "foo");
     firstTabEnv.services.multi_tab.removeSharedValue("foo");
-    await waitForSteps(["foo - bar", "foo - foo", "foo - null"]);
+    await expect.waitForSteps(["foo - bar", "foo - foo", "foo - null"]);
 });
