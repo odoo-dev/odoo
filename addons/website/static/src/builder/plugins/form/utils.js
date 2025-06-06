@@ -131,6 +131,9 @@ export function renderField(field, resetId = false) {
     if (field.custom && !field.string) {
         params.field.string = field.name;
     }
+    if (field.addOther) {
+        params.addOther = _t("Other");
+    }
     if (field.description) {
         params.default_description = _t("Describe your field here.");
     } else if (["email_cc", "email_to"].includes(field.name)) {

@@ -38,6 +38,7 @@
                 <div class="col-sm">
                     <t t-out="0"/>
                     <t t-call="website.form_field_description"/>
+                    <t t-call="website.form_field_add_other" />
                 </div>
             </div>
             <t t-else="">
@@ -46,6 +47,7 @@
                 </label>
                 <t t-out="0"/>
                 <t t-call="website.form_field_description"/>
+                <t t-call="website.form_field_add_other" />
             </t>
         </div>
     </t>
@@ -75,6 +77,20 @@
         -->
         <div t-if="default_description" class="s_website_form_field_description small form-text text-muted" contenteditable="true">
             <t t-esc="default_description"/>
+        </div>
+    </t>
+
+    <t t-name="website.form_field_add_other">
+    <t t-log="field" />
+        <div t-if="addOther" class="s_website_form_add_other form-text">
+            <input
+                t-att-type="text"
+                class="form-control s_website_form_input"
+                t-att-name="field.name"
+                t-att-value="field.value"
+                t-att-placeholder="field.placeholder || 'Add other...'"
+                t-att-required="field.required || field.modelRequired || None"
+            />
         </div>
     </t>
 

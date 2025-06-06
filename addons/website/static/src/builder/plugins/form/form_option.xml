@@ -221,6 +221,12 @@
             default="{ display_name: state.valueList.defaultItemName, selected: false }"
         />
     </BuilderRow>
+    <BuilderRow t-if="['many2one', 'selection'].includes(domState.elDataset.type)" label.translate="Add Other">
+        <BuilderCheckbox
+            action="'toggleAddOther'"
+            preview="false"
+        />
+    </BuilderRow>
     <BuilderRow label.translate="Visibility">
         <BuilderSelect preview="false" action="'setVisibility'">
             <BuilderSelectItem actionValue="'visible'" classAction="''">Always Visible</BuilderSelectItem>

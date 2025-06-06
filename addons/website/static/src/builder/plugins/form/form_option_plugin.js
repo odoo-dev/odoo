@@ -480,6 +480,37 @@ export class FormOptionPlugin extends Plugin {
                     return !!description;
                 },
             },
+            toggleAddOther: {
+                load: this.prepareFields.bind(this),
+                apply: ({ editingElement: fieldEl, loadResult: fields, value }) => {
+                    const addOther = fieldEl.querySelector(".s_website_form_add_other");
+                    const hasAddOther = !!addOther;
+                    const field = getActiveField(fieldEl, { fields });
+                    field.addOther = !hasAddOther;
+                    if (field.custom && (field.type === "many2one" || field.type === "selection")) {
+                        if (field.addOther) {
+                            if (
+                                !field.records.some((record) => record.display_name === _t("Other"))
+                            ) {
+                                field.records.push({
+                                    id: _t("Other"),
+                                    display_name: _t("Other"),
+                                    // selected: true,
+                                });
+                            }
+                        } else {
+                            field.records = field.records.filter(
+                                (record) => record.display_name !== _t("Other")
+                            );
+                        }
+                    }
+                    this.replaceField(fieldEl, field, fields);
+                },
+                isApplied: ({ editingElement: fieldEl }) => {
+                    const addOther = fieldEl.querySelector(".s_website_form_add_other");
+                    return !!addOther;
+                },
+            },
             selectTextareaValue: {
                 apply: ({ editingElement: fieldEl, value }) => {
                     fieldEl.textContent = value;
