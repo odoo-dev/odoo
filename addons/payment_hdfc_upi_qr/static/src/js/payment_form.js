@@ -130,6 +130,9 @@ class UpiPaymentModal {
     this.timerInterval = null
     this.monitoringInterval = null
     this.remainingSeconds = 0
+    this._finalStateReceived = false
+    this._qrExpired = false // Track QR expiry state
+    this._beforeUnloadHandler = null
     this._createModal()
     this._bindEvents()
     console.log("UPI Payment Modal created")
@@ -217,24 +220,27 @@ class UpiPaymentModal {
    * @private
    */
   _bindEvents() {
-    // Close button
+    // Close button with confirmation
     document.getElementById("closeUpiModal").addEventListener("click", () => {
-      this.close()
+      this._handleModalClose("User clicked close button")
     })
 
-    // Click outside to close
+    // Click outside to close with confirmation
     document.getElementById("upiPaymentModal").addEventListener("click", (e) => {
       if (e.target.id === "upiPaymentModal") {
-        this.close()
+        this._handleModalClose("User clicked outside modal")
       }
     })
 
-    // Escape key to close
+    // Escape key to close with confirmation
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && this.isOpen) {
-        this.close()
+        this._handleModalClose("User pressed Escape key")
       }
     })
+
+    // Browser beforeunload event handling
+    this._setupBeforeUnloadHandler()
   }
 
   /**
@@ -252,6 +258,8 @@ class UpiPaymentModal {
     }
 
     this.transactionId = transactionData.transaction_id
+    this._finalStateReceived = false // Reset state tracking
+    this._qrExpired = false // Reset QR expiry state
 
     // Show modal
     const modal = document.getElementById("upiPaymentModal")
@@ -266,6 +274,9 @@ class UpiPaymentModal {
 
     // Prevent body scroll
     document.body.style.overflow = "hidden"
+
+    // Setup beforeunload handler when modal is shown
+    this._setupBeforeUnloadHandler()
 
     // Update merchant name and amount immediately
     document.getElementById("merchantName").textContent = transactionData.merchant_name || "HDFC UPI"
@@ -289,8 +300,18 @@ class UpiPaymentModal {
       return
     }
 
+    // Show loading state
+    this._showStatus("info", _t("Generating QR code..."))
+
+    // Add timeout for QR code loading
+    const qrLoadTimeout = setTimeout(() => {
+      console.error("QR code loading timeout")
+      this._showStatus("error", _t("QR code generation timed out. Please try again."))
+    }, 30000) // 30 second timeout
+
     rpc(`/payment/hdfc_upi/get_qr_data/${transactionId}`, {})
       .then((response) => {
+        clearTimeout(qrLoadTimeout)
         console.log("QR data response:", response)
 
         if (response.success) {
@@ -300,9 +321,69 @@ class UpiPaymentModal {
         }
       })
       .catch((error) => {
+        clearTimeout(qrLoadTimeout)
         console.error("Error loading QR code:", error)
-        this._showStatus("error", _t("Failed to load QR code. Please try again."))
+        
+        // Enhanced error handling for different scenarios
+        let errorMessage = _t("Failed to load QR code")
+        
+        if (error.name === 'AbortError' || error.message?.toLowerCase().includes('abort')) {
+          errorMessage = _t("QR code loading was cancelled")
+        } else if (error.name === 'TimeoutError' || error.message?.toLowerCase().includes('timeout')) {
+          errorMessage = _t("QR code loading timed out. Please check your connection and try again.")
+        } else if (error.message?.toLowerCase().includes('network') || 
+                   error.message?.toLowerCase().includes('fetch') ||
+                   error.message?.toLowerCase().includes('connection')) {
+          errorMessage = _t("Network error. Please check your internet connection and try again.")
+        } else if (error.status >= 500) {
+          errorMessage = _t("Server error. Please try again later.")
+        } else if (error.status === 404) {
+          errorMessage = _t("Transaction not found. Please refresh the page and try again.")
+        } else if (error.status >= 400) {
+          errorMessage = _t("Invalid request. Please refresh the page and try again.")
+        }
+        
+        this._showStatus("error", errorMessage)
+        
+        // Provide retry option for certain errors
+        if (!error.name?.includes('Abort') && !this._finalStateReceived) {
+          setTimeout(() => {
+            if (this.isOpen && !this._finalStateReceived) {
+              this._showRetryOption(transactionId)
+            }
+          }, 3000)
+        }
       })
+  }
+
+  /**
+   * Show retry option for QR code loading
+   * @private
+   * @param {number} transactionId
+   /**
+   * Show retry option for QR code loading
+   * @private
+   * @param {number} transactionId
+   */
+  _showRetryOption(transactionId) {
+    const statusEl = document.getElementById("statusMessage")
+    if (statusEl && statusEl.classList.contains("error")) {
+      statusEl.innerHTML = `
+        ${statusEl.textContent}
+        <br>
+        <button class="retry-qr-btn" style="margin-top: 10px; padding: 8px 16px; background: #007cba; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          ${_t("Retry")}
+        </button>
+      `
+      
+      const retryBtn = statusEl.querySelector('.retry-qr-btn')
+      if (retryBtn) {
+        retryBtn.addEventListener('click', () => {
+          console.log("Retrying QR code load")
+          this._loadQrCode(transactionId)
+        })
+      }
+    }
   }
 
   /**
@@ -434,6 +515,11 @@ class UpiPaymentModal {
       return
     }
 
+    // Mark as finalized state received
+    if (['done', 'cancel', 'error'].includes(state)) {
+      this._finalStateReceived = true
+    }
+
     // Stop all monitoring
     this._stopMonitoring()
 
@@ -499,7 +585,7 @@ class UpiPaymentModal {
         } else if (result.state === "cancel" || result.state === "error") {
           this._handlePaymentFailure(result.message)
         } else if (result.expired) {
-          this._handleQrExpiry(result.message)
+          this._handleQrExpiry(result.message || _t("QR code has expired. Please close this modal and try again."))
         }
       })
       .catch((error) => {
@@ -534,7 +620,16 @@ class UpiPaymentModal {
    */
   _handlePaymentFailure(message) {
     this._stopMonitoring()
-    this._showStatus("error", message || _t("Payment failed. Please try again."))
+    this._showStatus("error", message || _t("Payment failed. Redirecting..."))
+
+    // Mark as final state to avoid confirmation dialog
+    this._finalStateReceived = true
+
+    // Redirect to payment status page after a short delay
+    setTimeout(() => {
+      console.log("Redirecting to payment status page due to payment failure...")
+      window.location.href = "/payment/status"
+    }, 2000)
   }
 
   /**
@@ -544,11 +639,20 @@ class UpiPaymentModal {
    */
   _handleQrExpiry(message) {
     this._stopMonitoring()
-    this._showStatus("error", message || _t("QR code has expired. Please close and try again."))
+    this._showStatus("error", message || _t("QR code has expired. Please close this modal and try again."))
 
     // Update timer
     document.getElementById("timerValue").textContent = _t("Expired")
     document.getElementById("timerContainer").classList.add("warning")
+
+    // Mark as final state to avoid confirmation dialog and track expiry
+    this._finalStateReceived = true
+    this._qrExpired = true // Track that QR has expired
+
+    // Show retry instruction instead of redirecting
+    setTimeout(() => {
+      this._showStatus("warning", _t("QR code expired. Close this modal and start a new payment to generate a fresh QR code."))
+    }, 3000)
   }
 
   /**
@@ -571,7 +675,7 @@ class UpiPaymentModal {
    */
   _updateTimer() {
     if (this.remainingSeconds <= 0) {
-      this._handleQrExpiry()
+      this._handleQrExpiry(_t("Timer expired. Please close this modal and try again."))
       return
     }
 
@@ -611,6 +715,9 @@ class UpiPaymentModal {
     // Restore body scroll
     document.body.style.overflow = ""
 
+    // Remove beforeunload handler since modal is closing
+    this._removeBeforeUnloadHandler()
+
     // Stop monitoring
     this._stopMonitoring()
 
@@ -631,6 +738,11 @@ class UpiPaymentModal {
     document.getElementById("timerContainer").classList.remove("warning")
     document.getElementById("merchantName").textContent = "Loading..."
     document.getElementById("amountValue").textContent = "0"
+    
+    // Reset internal state
+    this.transactionId = null
+    this._finalStateReceived = false
+    this._qrExpired = false // Reset QR expiry state
   }
 
   /**
@@ -666,11 +778,154 @@ class UpiPaymentModal {
    */
   destroy() {
     this._stopMonitoring()
+    this._removeBeforeUnloadHandler()
 
     // Remove modal from DOM
     const modal = document.getElementById("upiPaymentModal")
     if (modal) {
       modal.remove()
     }
+    
+    // Reset global reference
+    if (globalUpiModal === this) {
+      globalUpiModal = null
+    }
+  }
+
+  /**
+   * Setup browser beforeunload event handler to handle browser/tab closure
+   * @private
+   */
+  _setupBeforeUnloadHandler() {
+    const handleBeforeUnload = (e) => {
+      if (this.isOpen && this.transactionId) {
+        // Cancel transaction immediately without confirmation
+        this._cancelTransaction("Browser/tab closed during payment")
+        
+        // Show browser confirmation dialog
+        const message = "Your payment is in progress. Are you sure you want to leave?"
+        e.preventDefault()
+        e.returnValue = message
+        return message
+      }
+    }
+
+    // Store reference to remove later
+    this._beforeUnloadHandler = handleBeforeUnload
+    window.addEventListener('beforeunload', handleBeforeUnload)
+  }
+
+  /**
+   * Remove beforeunload event handler
+   * @private
+   */
+  _removeBeforeUnloadHandler() {
+    if (this._beforeUnloadHandler) {
+      window.removeEventListener('beforeunload', this._beforeUnloadHandler)
+      this._beforeUnloadHandler = null
+    }
+  }
+
+  /**
+   * Handle modal close with confirmation
+   * @private
+   * @param {string} reason - Reason for closing
+   */
+  _handleModalClose(reason) {
+    console.log("Modal close requested:", reason)
+
+    // If payment is completed or already cancelled, close immediately
+    if (!this.transactionId || this._isTransactionFinalized()) {
+      // If QR has expired, cancel transaction with expiry message and reload page
+      if (this._qrExpired && this.transactionId) {
+        this._cancelTransaction("QR code expired - User closed modal")
+        this.close()
+        
+        // Reload the payment page to show available payment methods
+        setTimeout(() => {
+          console.log("Reloading payment page after QR expiry...")
+          window.location.reload()
+        }, 500)
+        return
+      }
+      
+      this.close()
+      return
+    }
+
+    // Show confirmation dialog
+    this._showCloseConfirmation(reason)
+  }
+
+  /**
+   * Check if transaction is in a finalized state
+   * @private
+   * @returns {boolean}
+   */
+  _isTransactionFinalized() {
+    // If we have received a final state via bus, don't ask for confirmation
+    return this._finalStateReceived === true
+  }
+
+  /**
+   * Show close confirmation dialog
+   * @private
+   * @param {string} reason - Reason for closing
+   */
+  _showCloseConfirmation(reason) {
+    const shouldConfirm = confirm(
+      "Your payment is in progress. Closing this window will cancel the payment. Are you sure you want to continue?"
+    )
+
+    if (shouldConfirm) {
+      console.log("User confirmed modal close")
+      this._cancelTransaction(`Payment cancelled: ${reason}`)
+      
+      // Close modal first
+      this.close()
+      
+      // Reload the payment page to show available payment methods
+      setTimeout(() => {
+        console.log("Reloading payment page after user cancellation...")
+        window.location.reload()
+      }, 500)
+    } else {
+      console.log("User cancelled modal close")
+    }
+  }
+
+  /**
+   * Cancel the transaction
+   * @private
+   * @param {string} reason - Reason for cancellation
+   */
+  _cancelTransaction(reason) {
+    if (!this.transactionId) {
+      console.warn("No transaction ID to cancel")
+      return
+    }
+
+    console.log("Cancelling transaction:", this.transactionId, "Reason:", reason)
+
+    // Cancel transaction on server
+    rpc(`/payment/hdfc_upi/cancel_transaction/${this.transactionId}`, {
+      reason: reason
+    }).then((result) => {
+      if (result.success) {
+        console.log("Transaction cancelled successfully:", result)
+        this._showStatus("warning", result.message || "Your payment has been cancelled.")
+      } else {
+        console.error("Failed to cancel transaction:", result.error)
+        // Still show cancelled status to user
+        this._showStatus("warning", "Your payment has been cancelled.")
+      }
+    }).catch((error) => {
+      console.error("Error cancelling transaction:", error)
+      // Still show cancelled status to user
+      this._showStatus("warning", "Your payment has been cancelled.")
+    })
+
+    // Mark transaction as cancelled locally
+    this._finalStateReceived = true
   }
 }

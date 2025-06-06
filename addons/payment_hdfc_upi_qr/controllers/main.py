@@ -294,3 +294,47 @@ class HdfcUpiController(http.Controller):
         </html>
         """
         return html
+
+    @http.route('/payment/hdfc_upi/cancel_transaction/<int:tx_id>', type='jsonrpc', auth='public', csrf=False)
+    def hdfc_upi_cancel_transaction(self, tx_id, reason=None, **kwargs):
+        """ Cancel a payment transaction.
+
+        :param int tx_id: The transaction ID
+        :param str reason: Optional reason for cancellation
+        :return: The result of the cancellation
+        :rtype: dict
+        """
+        _logger.info("Cancelling transaction: %s, reason: %s", tx_id, reason)
+        
+        try:
+            tx_sudo = request.env['payment.transaction'].sudo().browse(tx_id).exists()
+            if not tx_sudo or tx_sudo.provider_code != 'hdfc_upi':
+                _logger.error("Transaction not found or not HDFC UPI: %s", tx_id)
+                return {'success': False, 'error': 'Transaction not found'}
+
+            # Only cancel if transaction is still pending
+            if tx_sudo.state not in ['draft', 'pending']:
+                _logger.warning("Cannot cancel transaction %s in state: %s", tx_id, tx_sudo.state)
+                return {
+                    'success': False, 
+                    'error': f'Cannot cancel transaction in {tx_sudo.state} state',
+                    'current_state': tx_sudo.state
+                }
+
+            # Set cancellation reason
+            cancellation_reason = reason or "Your payment has been cancelled."
+            
+            # Cancel the transaction
+            tx_sudo._set_canceled(cancellation_reason)
+            
+            _logger.info("Transaction %s cancelled successfully with reason: %s", tx_id, cancellation_reason)
+            
+            return {
+                'success': True,
+                'state': 'cancel',
+                'message': cancellation_reason
+            }
+
+        except Exception as e:
+            _logger.exception("Error cancelling transaction %s: %s", tx_id, e)
+            return {'success': False, 'error': 'An error occurred while cancelling the transaction'}
