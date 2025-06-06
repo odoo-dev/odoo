@@ -6,7 +6,7 @@
             <div
                 class="category_item rounded position-relative oe_unremovable oe_unmovable"
                 t-att-data-category-id="category.id"
-                t-attf-style="grid-row: span {{height}};"
+                t-attf-style="grid-row: span {{size}};"
                 contenteditable="false"
             >
                 <t t-set="ribbon" t-value="get_ribbon(category['website_ribbon_id'])"/>

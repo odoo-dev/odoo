@@ -5,7 +5,7 @@
             <BuilderRange dataAttributeAction="'columns'" default="'2'" min="2" max="5" step="1"/>
         </BuilderRow>
         <BuilderRow label.translate="Size">
-            <BuilderSelect dataAttributeAction="'height'" default="'small'">
+            <BuilderSelect dataAttributeAction="'size'" default="'small'">
                 <BuilderSelectItem dataAttributeActionValue="'small'">Small</BuilderSelectItem>
                 <BuilderSelectItem dataAttributeActionValue="'medium'">Medium</BuilderSelectItem>
                 <BuilderSelectItem dataAttributeActionValue="'large'">Large</BuilderSelectItem>

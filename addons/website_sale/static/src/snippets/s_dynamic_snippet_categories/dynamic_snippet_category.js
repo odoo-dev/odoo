@@ -24,7 +24,7 @@ export class dynamicSnippetCategory extends Interaction{
 
     render(){
         const nodeData = this.el.dataset;
-        const HEIGHT_MAP = {
+        const SIZE_MAP = {
             small: { span: 2, row: "10vh" },
             medium: { span: 2, row: "15vh" },
             large: { span: 4, row: "15vh" },
@@ -44,7 +44,7 @@ export class dynamicSnippetCategory extends Interaction{
                 data: this.data,
                 ribbons: this.ribbons,
                 get_ribbon: this.get_ribbon,
-                height: HEIGHT_MAP[nodeData.height]['span'],
+                size: SIZE_MAP[nodeData.size]['span'],
                 alignmentClass: alignmentClass,
                 buttonText: _t(nodeData.button),
             }
@@ -62,7 +62,7 @@ export class dynamicSnippetCategory extends Interaction{
             );
         }
         categoryGrid.style.setProperty(
-            'grid-auto-rows', `minmax(${HEIGHT_MAP[nodeData.height]['row']}, auto)`
+            'grid-auto-rows', `minmax(${SIZE_MAP[nodeData.size]['row']}, auto)`
         );
 
         // Styling for all_products item
@@ -84,7 +84,7 @@ export class dynamicSnippetCategory extends Interaction{
             allProducts.querySelector('a').textContent = nodeData.button;
 
             const shouldSpanTwo = columns !== 1 &&
-                (['large', 'medium'].includes(nodeData.height) || columns === 5);
+                (['large', 'medium'].includes(nodeData.size) || columns === 5);
             allProducts.style.setProperty('grid-column', `span ${shouldSpanTwo ? 2 : 1}`);
         } else {
             allProducts.classList.add("d-none");

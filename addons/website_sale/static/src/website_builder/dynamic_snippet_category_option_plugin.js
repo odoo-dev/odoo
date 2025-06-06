@@ -27,7 +27,7 @@ export class DynamicSnippetCategoryOptionPlugin extends Plugin {
         if (snippetEl.matches(this.selector)) {
             for (const [optionName, value] of [
                 ['columns', '2'],
-                ['height', 'small'],
+                ['size', 'small'],
                 ['filterId', '0'],
                 ['allProducts', 'true'],
                 ['button', 'Explore Now'],
