@@ -4,7 +4,7 @@
 import odoo
 from odoo import api, fields, models, tools, _, Command
 from odoo.exceptions import MissingError, ValidationError, AccessError, UserError
-from odoo.tools import frozendict
+from odoo.tools import frozendict, mute_logger
 from odoo.tools.safe_eval import safe_eval, test_python_expr
 from odoo.tools.float_utils import float_compare
 from odoo.http import request
@@ -775,6 +775,16 @@ class IrActionsServer(models.Model):
             msg = test_python_expr(expr=action.code.strip(), mode="exec")
             if msg:
                 raise ValidationError(msg)
+            try:
+                eval_context = self._get_eval_context(action)
+                #To catch log from test_server_action
+                with mute_logger('odoo.addons.base.models.ir_actions.server_action_safe_eval'):
+                    safe_eval(self.code.strip(), eval_context, mode="exec", nocopy=True, filename=str(self))  # nocopy allows to return 'action'
+            except Exception:
+                #return function as usual if Exception is due to safe_eval
+                return
+            if eval_context.get('action') is not None and not isinstance(eval_context.get('action'),dict):
+                raise ValidationError(_("'action' variable should be a dictionary!"))
 
     @api.constrains('child_ids')
     def _check_child_recursion(self):
@@ -825,6 +835,8 @@ class IrActionsServer(models.Model):
 
     def _run_action_code_multi(self, eval_context):
         safe_eval(self.code.strip(), eval_context, mode="exec", nocopy=True, filename=str(self))  # nocopy allows to return 'action'
+        if eval_context.get('action') is not None and not isinstance(eval_context.get('action'),dict):
+            raise ValidationError(_("The action variable is not a dictionary for this action."))
         return eval_context.get('action')
 
     def _run_action_multi(self, eval_context=None):

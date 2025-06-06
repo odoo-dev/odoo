@@ -538,6 +538,31 @@ ZeroDivisionError: division by zero""" % self.test_server_action.id
         })
         self.assertEqual(self.action._eval_value()[self.action.id], 20.99)
 
+    def test_90_invalid_action_variable(self):
+        invalid_codes = [
+        ('list', 'action = ["list with a value"]'),
+        ('string', 'action = "not a dict"'),
+        ('int', 'action = 123'),
+        ('float', 'action = 3.14'),
+        ('bool', 'action = True'),
+        ]
+
+        for label,code in invalid_codes:
+            with self.subTest(label=label):
+                with self.assertRaises(ValidationError):
+                    self.action.write({
+                        'state': 'code',
+                        'code': code,
+                    })
+
+        self.env.cr.execute("""
+            UPDATE ir_act_server
+            SET code = 'action = [{"name":"TestFail"}]', state = 'code'
+            WHERE id = %s
+        """, [self.action.id])
+
+        with self.assertRaises(ValidationError):
+            self.action.with_context(self.context).run()
 
 class TestCommonCustomFields(common.TransactionCase):
     MODEL = 'res.partner'
