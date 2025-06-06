@@ -11,7 +11,7 @@ import {
 import { describe, expect, test } from "@odoo/hoot";
 import { tick } from "@odoo/hoot-dom";
 import { mockDate } from "@odoo/hoot-mock";
-import { asyncStep, makeMockEnv, waitForSteps } from "@web/../tests/web_test_helpers";
+import { asyncStep, makeMockEnv, waitForSteps,Command, serverState,onRpc } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 defineMailModels();
@@ -86,4 +86,30 @@ test("bus subscription is refreshed when channel is left", async () => {
     await click("[title='Channel Actions']");
     await click(".o-dropdown-item:contains('Leave Channel')");
     await waitForSteps(["subscribe"]);
+});
+
+test("Search Members in discuss channel", async () => {
+    const pyEnv = await startServer();
+    const demoId = pyEnv["res.partner"].create({ name: "Demo User", im_status: "online" });
+    const guestId = pyEnv["mail.guest"].create({ name: "Mario" });
+    const channelId = pyEnv["discuss.channel"].create({
+        name: "TestChanel",
+        channel_member_ids: [
+            Command.create({ partner_id: serverState.partnerId }),
+            Command.create({ partner_id: demoId }),
+            Command.create({ guest_id: guestId }),
+        ],
+        channel_type: "channel",
+    });
+
+    onRpc("/discuss/channel/members/fetch", () => {});
+    
+    await start();
+    await openDiscuss(channelId);
+    await contains(".o-discuss-ChannelMemberList");
+    await contains(".o_searchview_input");
+    await click(".o_searchview_input");
+    await insertText("input[placeholder='Search by name']", "demo");
+    await click("button [title='Search Members']");
+    await contains(".o-discuss-ChannelMember", { text: "Demo User" });
 });

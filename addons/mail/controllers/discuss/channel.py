@@ -76,6 +76,17 @@ class ChannelController(http.Controller):
             raise NotFound()
         return channel._load_more_members(known_member_ids)
 
+    @http.route("/discuss/channel/members/fetch", methods=["POST"], type="jsonrpc", auth="public")
+    def discuss_channel_member_fetch(self, channel_id, search_term=None, limit=30):
+        channel = request.env["discuss.channel"].search([("id", "=", channel_id)])
+        if not channel:
+            raise NotFound()
+        domain = [("channel_id", "=", channel.id)]
+        if search_term:
+            domain += ['|', ('partner_id.name', 'ilike', search_term), ('guest_id.name', 'ilike', search_term)]
+        members = request.env["discuss.channel.member"].search(domain, order="id desc", limit=limit)
+        return Store(members).get_result()
+
     @http.route("/discuss/channel/update_avatar", methods=["POST"], type="jsonrpc")
     def discuss_channel_avatar_update(self, channel_id, data):
         channel = request.env["discuss.channel"].search([("id", "=", channel_id)])

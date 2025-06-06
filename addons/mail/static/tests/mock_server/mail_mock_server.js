@@ -273,6 +273,80 @@ async function discuss_channel_members(request) {
     return DiscussChannel._load_more_members([channel_id], known_member_ids);
 }
 
+registerRoute("/discuss/channel/members/fetch", discuss_channel_member_fetch);
+/** @type {RouteCallback} */
+async function discuss_channel_member_fetch(request) {
+    /** @type {import("mock_models").DiscussChannel} */
+    const DiscussChannel = this.env["discuss.channel"];
+    const allMembers = Array.from(this.env["discuss.channel.member"]);
+    const allPartners = Array.from(this.env["res.partner"]);
+    const allGuests = Array.from(this.env["mail.guest"]);
+    const { channel_id, search_term = "", limit = 30 } = await parseRequestParams(request);
+    if (!channel_id) {
+        return {
+            "discuss.channel.member": [],
+            "res.partner": [],
+            "mail.guest": [],
+        };
+    }
+    const channel = Array.from(DiscussChannel).find(ch => ch && ch.id === channel_id);
+    function getPartnerById(id) {
+        return allPartners.find(partner => partner && partner.id === id);
+    }
+    function getGuestById(id) {
+        return allGuests.find(guest => guest && guest.id === id);
+    }
+    const filteredMembers = allMembers.filter((member) => {
+        if (member.channel_id !== channel_id) return false;
+        if (!search_term) return true;
+
+        const partner = member.partner_id ? getPartnerById(member.partner_id) : null;
+        const guest = member.guest_id ? getGuestById(member.guest_id) : null;
+
+        const name = partner?.name || guest?.name || "";
+        return name.toLowerCase().includes(search_term.toLowerCase());
+    }).slice(0, limit);
+
+    const memberRecords = {};
+    const partnerRecords = {};
+    const guestRecords = {};
+    for (const member of filteredMembers) {
+        const partner = member.partner_id ? getPartnerById(member.partner_id) : null;
+        const guest = member.guest_id ? getGuestById(member.guest_id) : null;
+
+        memberRecords[member.id] = {
+            ...member,
+            channel_id: {
+                id: channel.id,
+                model: 'discuss.channel',
+                channel_member_ids: channel.channel_member_ids || []
+            },
+            persona: partner ? {
+                id: partner.id,
+                type: 'partner',
+                channelMembers: [member.id]
+            } : guest ? {
+                id: guest.id,
+                type: 'guest',
+                channelMembers: [member.id]
+            } : null
+        };
+
+        if (partner && !partnerRecords[partner.id]) {
+            partnerRecords[partner.id] = partner;
+        }
+        if (guest && !guestRecords[guest.id]) {
+            guestRecords[guest.id] = guest;
+        }
+    }
+
+    return {
+        "discuss.channel.member": Object.values(memberRecords),
+        "res.partner": Object.values(partnerRecords),
+        "mail.guest": Object.values(guestRecords),
+    };
+};
+
 registerRoute("/discuss/channel/messages", discuss_channel_messages);
 /** @type {RouteCallback} */
 async function discuss_channel_messages(request) {
