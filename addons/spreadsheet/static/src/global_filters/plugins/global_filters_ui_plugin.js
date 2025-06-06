@@ -2,7 +2,6 @@
 
 import { helpers } from "@odoo/o-spreadsheet";
 import { globalFieldMatchingRegistry } from "@spreadsheet/global_filters/helpers";
-import { CommandResult } from "@spreadsheet/o_spreadsheet/cancelled_reason";
 
 import { SearchArchParser } from "@web/search/search_arch_parser";
 
@@ -24,42 +23,17 @@ export class GlobalFiltersUIPlugin extends OdooUIPlugin {
         super(config);
         this.env = config.custom.env;
     }
-    allowDispatch(cmd) {
-        switch (cmd.type) {
-            case "AUTO_MATCH_GLOBAL_FILTERS": {
-                const matcher = globalFieldMatchingRegistry.get(cmd.dataSourceType);
-                return !matcher.isValid(this.getters, cmd.dataSourceId)
-                    ? CommandResult.DataSourceNotValid
-                    : CommandResult.Success;
-            }
-        }
-        return CommandResult.Success;
-    }
-    /**
-     * Handle a spreadsheet command
-     *
-     * @param {import("@spreadsheet").AllCommand} cmd
-     */
-    handle(cmd) {
-        switch (cmd.type) {
-            case "SET_MANY_GLOBAL_FILTER_VALUE":
-                for (const filter of cmd.filters) {
-                    this.dispatch("SET_GLOBAL_FILTER_VALUE", {
-                        id: filter.filterId,
-                        value: filter.value,
-                    });
-                }
-                break;
-            case "AUTO_MATCH_GLOBAL_FILTERS": {
-                const matcher = globalFieldMatchingRegistry.get(cmd.dataSourceType);
-                const dataSourceId = cmd.dataSourceId;
-                const fieldNames = cmd.fieldNames;
-                const fields = matcher.getFields(this.getters, dataSourceId);
-                this.generateMissingGlobalFilters(fields, fieldNames);
-                this.autoMatchFields(matcher, fields, cmd.dataSourceType, dataSourceId, fieldNames);
-            }
-        }
-    }
+    // allowDispatch(cmd) {
+    //     switch (cmd.type) {
+    //         case "AUTO_MATCH_GLOBAL_FILTERS": {
+    //             const matcher = globalFieldMatchingRegistry.get(cmd.dataSourceType);
+    //             return !matcher.isValid(this.getters, cmd.dataSourceId)
+    //                 ? CommandResult.DataSourceNotValid
+    //                 : CommandResult.Success;
+    //         }
+    //     }
+    //     return CommandResult.Success;
+    // }
 
     async getGlobalFilterSuggestions() {
         // const matcher = globalFieldMatchingRegistry.get(cmd.dataSourceType);
@@ -75,140 +49,101 @@ export class GlobalFiltersUIPlugin extends OdooUIPlugin {
             "get_global_filter_suggestions",
             [xmlIds]
         );
-        const modelToFilters = {};
-        const fieldsByModel = {};
-        const blackList = [
-            "activity_user_id", // from mail.activity.mixin, present in many search views but not useful for reporting
-        ];
+        const dataSourceSearchFilters = {};
         for (const model in views) {
             const archs = views[model];
-            modelToFilters[model] = [];
             for (const arch of archs) {
-                // const fields = await this.fields.loadFields(model);
-                debugger;
-                const fields = await this.env.services.field.loadFields(model);
-                fieldsByModel[model] = fields;
-                const a = new SearchArchParser({ arch }, fields, {}).parse();
-                const relationalFilters = a.preSearchItems
-                    .flat()
-                    .filter(
-                        (item) =>
-                            !blackList.includes(item.fieldName) &&
-                            item.type === "field" &&
-                            ["many2one", "many2many", "one2many"].includes(item.fieldType)
-                    );
-                modelToFilters[model].push(...relationalFilters);
+                dataSourceSearchFilters[model] = {
+                    ...dataSourceSearchFilters[model],
+                    ...(await this.getRelationalFiltersFromArch(model, arch)),
+                };
             }
         }
         const relationsToDataSources = {};
-        for (const dataSourceModel in modelToFilters) {
-            const fields = fieldsByModel[dataSourceModel];
-            for (const filter of modelToFilters[dataSourceModel]) {
-                const relation = fields[filter.fieldName]?.relation;
+        for (const dataSourceModel in dataSourceSearchFilters) {
+            const fields = await this.env.services.field.loadFields(dataSourceModel);
+            for (const fieldName in dataSourceSearchFilters[dataSourceModel]) {
+                const relation = fields[fieldName]?.relation;
                 if (!relationsToDataSources[relation]) {
                     relationsToDataSources[relation] = {};
                 }
                 if (!relationsToDataSources[relation][dataSourceModel]) {
-                    relationsToDataSources[relation][dataSourceModel] = [];
+                    relationsToDataSources[relation][dataSourceModel] = new Set();
                 }
-                relationsToDataSources[relation][dataSourceModel].push(filter.fieldName);
-            }
-        }
-        // keep only data sources that have single field matching a relation
-        for (const relation in relationsToDataSources) {
-            const matchingDataSources = relationsToDataSources[relation];
-            for (const dataSourceModel in matchingDataSources) {
-                const fields = matchingDataSources[dataSourceModel];
-                if (fields.length > 1) {
-                    // more than one field matching this relation, remove it
-                    // because we cannot choose which one to use
-                    // for the global filter
-                    delete relationsToDataSources[relation][dataSourceModel];
-                }
+                relationsToDataSources[relation][dataSourceModel].add(fieldName);
             }
         }
 
-        const numberOfDataSourceModels = Object.keys(modelToFilters).length;
-        const fieldMatchingPerModel = {};
+        const existingFilters = new Set(
+            this.getters
+                .getGlobalFilters()
+                .filter((filter) => filter.type === "relation")
+                .map((filter) => filter.modelName)
+        );
+        const numberOfDataSourceModels = Object.keys(dataSourceSearchFilters).length;
+        const validRelations = [];
         for (const relation in relationsToDataSources) {
-            const matchingDataSources = relationsToDataSources[relation];
-            if (Object.keys(matchingDataSources).length === numberOfDataSourceModels) {
-                // all data sources have a field matching this relation
-                for (const dataSourceModel in matchingDataSources) {
-                    const fieldName = matchingDataSources[dataSourceModel][0];
-                    fieldMatchingPerModel[dataSourceModel] = {
-                        chain: fieldName,
-                        type: fieldsByModel[dataSourceModel][fieldName].type,
-                    };
-                }
+            // all data sources must have one and only one search field matching the relation
+            const matchingDataSourceModels = Object.keys(relationsToDataSources[relation]);
+            const numberOfMatchingFields = Object.values(relationsToDataSources[relation])
+                .map((fields) => fields.size)
+                .reduce((acc, val) => acc + val, 0);
+            if (
+                matchingDataSourceModels.length === numberOfDataSourceModels &&
+                numberOfMatchingFields === numberOfDataSourceModels &&
+                !existingFilters.has(relation)
+            ) {
+                validRelations.push(relation);
             }
         }
 
-        // {
-        //     relation: "res.partner",
-        //     fieldMatching: {
-        //         pivot: {
-        //             chain: "partner_id",
-        //         }
-        //     }
-        // }
-        // console.log(relationsToModels);
-        console.log(modelToFilters);
-        console.log(relationsToDataSources);
-        console.log(fieldMatchingPerModel);
-        const models = Object.keys(modelToFilters);
-        const isMultiModel = models.length > 1;
         const suggestions = [];
-        if (isMultiModel) {
-            // all data sources must have a search field matching the model
-            const baseModel = models.pop();
-            const baseModelFields = fieldsByModel[baseModel];
-            // uniquify the fields, then relations from the base model
-            for (const candidateFilter of modelToFilters[baseModel]) {
-                let isCandidate = true;
-                const relation = baseModelFields[candidateFilter.fieldName].relation;
-                for (const model of models) {
-                    const fields = fieldsByModel[model];
-                    const matchingFields = modelToFilters[model].filter(
-                        (filterItem) => fields[filterItem.fieldName].relation === relation
-                    );
-                    if (matchingFields.length !== 1) {
-                        isCandidate = false;
-                        break;
-                    }
-                }
-                if (isCandidate) {
-                    const field = fieldsByModel[baseModel][candidateFilter.fieldName];
-                    // field matching...
-                    suggestions.push({
-                        label: candidateFilter.description,
-                        modelName: field.relation,
-                        // id: candidateField.name,
-                        // type: candidateField.fieldType,
-                    });
+        for (const relation of validRelations) {
+            const fieldMatching = {};
+            let filterLabel = "";
+            for (const matcher of globalFieldMatchingRegistry.getAll()) {
+                for (const dataSourceId of matcher.getIds(this.getters)) {
+                    const model = matcher.getModel(this.getters, dataSourceId);
+                    const matchingField = relationsToDataSources[relation][model]
+                        ?.values()
+                        .next().value;
+                    fieldMatching[model] = matchingField;
+                    filterLabel = dataSourceSearchFilters[model][matchingField].description; // last one wins
                 }
             }
-        } else {
-            const whiteList = ["res.partner", "res.users", "res.country"];
-            const model = models[0];
-            const filter = modelToFilters[model];
-            for (const item of filter) {
-                const field = fieldsByModel[model][item.fieldName];
-                if (whiteList.includes(field.relation)) {
-                    suggestions.push({
-                        label: item.description,
-                        modelName: field.relation,
-                        // id: item.name,
-                        // type: item.fieldType,
-                    });
-                }
-            }
-
-            // white list common models
-            // res
+            suggestions.push({
+                modelName: relation,
+                label: filterLabel,
+                fieldMatching,
+            });
         }
-        console.log(suggestions);
         return suggestions;
+    }
+
+    /**
+     * @private
+     */
+    async getRelationalFiltersFromArch(model, arch) {
+        const blackList = [
+            // ?
+            "activity_user_id", // from mail.activity.mixin, present in many search views but not useful for reporting
+            "activity_type_id", // also from mail.activity.mixin, not useful for reporting
+        ];
+        const fields = await this.env.services.field.loadFields(model);
+        const parsedArch = new SearchArchParser({ arch }, fields, {}).parse();
+        const relationalFilters = parsedArch.preSearchItems
+            .flat()
+            .filter(
+                (item) =>
+                    !blackList.includes(item.fieldName) &&
+                    item.type === "field" &&
+                    ["many2one", "many2many", "one2many"].includes(item.fieldType)
+            );
+        const result = {};
+        for (const filter of relationalFilters) {
+            result[filter.fieldName] = filter;
+        }
+        return result;
     }
 
     generateMissingGlobalFilters(fields, fieldNames) {
