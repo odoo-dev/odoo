@@ -296,9 +296,9 @@ class PaymentProvider(models.Model):
 
     # === CONSTRAINT METHODS === #
 
-    @api.constrains('capture_manually')
+    @api.constrains('state', 'capture_manually')
     def _check_manual_capture_supported_by_payment_methods(self):
-        if self.capture_manually:
+        if self.state != 'disabled' and self.capture_manually:
             incompatible_pms = self.payment_method_ids.filtered(
                 lambda method: method.active and method.support_manual_capture == 'none'
             )
