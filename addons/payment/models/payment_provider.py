@@ -412,7 +412,7 @@ class PaymentProvider(models.Model):
         for provider in self:
             pm_codes = provider._get_default_payment_method_codes()
             pms = provider.with_context(active_test=False).payment_method_ids
-            (pms + pms.brand_ids).filtered(lambda pm: pm.code in pm_codes).active = True
+            (pms + pms.brand_ids).filtered(lambda pm: pm.code in pm_codes and (not any(p.state != 'disabled' and p.capture_manually for p in pm.provider_ids) or pm.support_manual_capture != 'none')).active = True
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_master_data(self):
