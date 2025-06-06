@@ -5317,6 +5317,10 @@
         });
     };
     const CAN_REMOVE_COLUMNS_ROWS = (dimension, env) => {
+        if ((dimension === "COL" && env.model.getters.getActiveRows().size > 0) ||
+            (dimension === "ROW" && env.model.getters.getActiveCols().size > 0)) {
+            return false;
+        }
         const sheetId = env.model.getters.getActiveSheetId();
         const selectedElements = env.model.getters.getElementsFromSelection(dimension);
         const includesAllVisibleHeaders = env.model.getters.checkElementsIncludeAllVisibleHeaders(sheetId, dimension, selectedElements);
@@ -43858,8 +43862,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.71';
-    __info__.date = '2025-05-13T17:55:53.089Z';
-    __info__.hash = '2ff9f1a';
+    __info__.date = '2025-06-09T05:19:13.391Z';
+    __info__.hash = '87dd4ea';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
