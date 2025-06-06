@@ -8,11 +8,13 @@
     </t>
 
     <t t-name="hr_homeworking_calendar.CalendarCommonRenderer.buttonWorklocation">
-        <t t-if="multiCalendar">
-            <t t-call="hr_homeworking_calendar.MultiCalendarButtonWorkLocation"/>
-        </t>
-        <t t-else="">
-            <t t-call="hr_homeworking_calendar.SingleCalendarButtonWorkLocation"/>
+        <t t-if="!hideWorkLocationBtn">
+            <t t-if="multiCalendar">
+                <t t-call="hr_homeworking_calendar.MultiCalendarButtonWorkLocation"/>
+            </t>
+            <t t-else="">
+                <t t-call="hr_homeworking_calendar.SingleCalendarButtonWorkLocation"/>
+            </t>
         </t>
     </t>
 

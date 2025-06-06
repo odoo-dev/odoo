@@ -98,7 +98,11 @@ patch(AttendeeCalendarCommonRenderer.prototype, {
     },
     headerTemplateProps(date) {
         if (this.props.model.scale === "month") {
-            return super.headerTemplateProps(date);
+            const props = super.headerTemplateProps(date);
+            return {
+                ...props,
+                hideWorkLocationBtn: !!props?.hideWorkLocationBtn,
+            };
         }
         const parsedDate = DateTime.fromJSDate(date).toISODate();
         const multiCalendar = this.props.model.multiCalendar;
