@@ -87,14 +87,6 @@
   text-align: center;
 }
 
-.qr-code-container {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
-  display: inline-block;
-}
-
 .qr-code-image {
   width: 200px;
   height: 200px;
@@ -229,10 +221,52 @@
   margin-top: 16px;
 }
 
+.powered-by-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.powered-by-bank {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bank-logo {
+  height: 20px;
+  width: auto;
+}
+
 .powered-by-text {
   font-size: 12px;
   color: #888;
   margin: 0;
+}
+
+.powered-by-divider {
+  width: 1px;
+  height: 30px;
+  background-color: #e9ecef;
+}
+
+.powered-by-upi {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.upi-logo {
+  height: 25px;
+  width: auto;
+}
+
+.upi-text {
+  font-size: 12px;
+  color: #888;
+  font-weight: 500;
 }
 
 .powered-by-brand {
@@ -297,6 +331,23 @@
   .upi-app-icon {
     width: 36px;
     height: 36px;
+  }
+
+  .powered-by-container {
+    gap: 12px;
+  }
+
+  .bank-logo {
+    height: 20px;
+  }
+
+  .upi-logo {
+    height: 18px;
+  }
+
+  .powered-by-text,
+  .upi-text {
+    font-size: 11px;
   }
 }
 

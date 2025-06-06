@@ -159,7 +159,7 @@ class UpiPaymentModal {
                             <div class="loading-spinner"></div>
                             <p class="mt-2">Generating QR code...</p>
                         </div>
-                        <div class="qr-code-container" id="qrContainer" style="display: none;">
+                        <div id="qrContainer" style="display: none;">
                             <img class="qr-code-image" id="qrCodeImage" alt="UPI QR Code" />
                         </div>
                         
@@ -182,18 +182,26 @@ class UpiPaymentModal {
                         <div class="upi-apps-container">
                             <p class="upi-apps-title">Supported UPI Apps</p>
                             <div class="upi-apps-grid">
-                                <img src="/l10n_in/static/src/img/Google_Pay-Logo.svg" alt="Google Pay" class="upi-app-icon" />
-                                <img src="/l10n_in/static/src/img/Paytm-Logo.svg" alt="Paytm" class="upi-app-icon" />
-                                <img src="/l10n_in/static/src/img/PhonePe-Logo.svg" alt="PhonePe" class="upi-app-icon" />
-                                <img src="/l10n_in/static/src/img/BHIM-Logo.svg" alt="BHIM" class="upi-app-icon" />
-                                <img src="/l10n_in/static/src/img/Cred-Logo.svg" alt="CRED" class="upi-app-icon" />
+                                <img src="/payment_hdfc_upi_qr/static/img/googlepay.svg" alt="Google Pay" class="upi-app-icon" />
+                                <img src="/payment_hdfc_upi_qr/static/img/phonepe.svg" alt="PhonePe" class="upi-app-icon" />
+                                <img src="/payment_hdfc_upi_qr/static/img/paytm.svg" alt="Paytm" class="upi-app-icon" />
+                                <img src="/payment_hdfc_upi_qr/static/img/bhim.svg" alt="BHIM" class="upi-app-icon" />
+                                <img src="/payment_hdfc_upi_qr/static/img/amazonpay.svg" alt="Amazon Pay" class="upi-app-icon" />
+                                <img src="/payment_hdfc_upi_qr/static/img/cred.svg" alt="CRED" class="upi-app-icon" />
                             </div>
                         </div>
                         
                         <div class="powered-by">
-                            <p class="powered-by-text">
-                                QR Code by <span class="powered-by-brand">HDFC Bank</span>
-                            </p>
+                            <div class="powered-by-container">
+                                <div class="powered-by-bank">
+                                    <img src="/payment_hdfc_upi_qr/static/description/icon.svg" alt="HDFC Bank" class="bank-logo" />
+                                </div>
+                                <div class="powered-by-divider"></div>
+                                <div class="powered-by-upi">
+                                    <span class="powered-by-text">Powered by</span>
+                                    <img src="/payment_hdfc_upi_qr/static/img/upi.png" alt="UPI" class="upi-logo" />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
