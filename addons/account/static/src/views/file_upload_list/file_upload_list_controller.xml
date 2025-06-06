@@ -1,7 +1,0 @@
-<templates>
-
-    <t t-name="account.FileuploadListView.Buttons.Upload">
-        <t t-call="account.DocumentViewUploadButton"/>
-    </t>
-
-</templates>

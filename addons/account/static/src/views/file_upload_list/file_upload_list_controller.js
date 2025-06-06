@@ -11,7 +11,7 @@ export class FileUploadListController extends ListController {
         return {
             ...super.staticControlPanelButtons,
             upload: {
-                template: "account.FileuploadListView.Buttons.Upload",
+                template: "account.DocumentViewUploadButton",
             },
         };
     }

@@ -11,20 +11,21 @@ export class AccountMoveListController extends FileUploadListController {
         AccountFileUploader,
     };
 
-    get staticControlPanelButtons() {
-        return {
-            ...super.staticControlPanelButtons,
-            upload: {
-                template: "account.AccountMoveListView.Buttons.Upload",
-            },
-        };
-    }
-
     setup() {
         super.setup();
         this.orm = useService("orm");
         this.account_move_service = useService("account_move");
         this.showUploadButton = this.props.context.default_move_type !== 'entry' || 'active_id' in this.props.context;
+    }
+
+    get staticControlPanelButtons() {
+        return {
+            ...super.staticControlPanelButtons,
+            upload: {
+                isAvailable: () => this.showUploadButton,
+                template: "account.AccountViewUploadButton",
+            },
+        };
     }
 
     get actionMenuProps() {
