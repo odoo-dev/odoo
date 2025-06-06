@@ -16,13 +16,13 @@ class HomeworkLocationWizard(models.TransientModel):
     employee_name = fields.Char(related="employee_id.name")
 
     weekly = fields.Boolean(default=False)
-    date = fields.Date(string="Date")
+    date = fields.Date(string="Date", required=True)
     day_week_string = fields.Char(compute="_compute_day_week_string")
 
     @api.depends('date')
     def _compute_day_week_string(self):
         for record in self:
-            record.day_week_string = record.date.strftime("%A")
+            record.day_week_string = record.date.strftime("%A") if record.date else ''
 
     def set_employee_location(self):
         self.ensure_one()
