@@ -482,19 +482,24 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
-     * @todo: handle characterData mutations
+     * When multiple mutations occur in the same batch for an element's
+     * attribute, we can discard the ones after the first one. This allows us to
+     * later store a record representing the accumulated changes, using the
+     * first record's oldValue and the current value for the new value.
+     * The same applies to characterData mutations.
      *
      * @param { MutationRecord[] } records
      */
     filterOutIntermediateStateMutationRecords(records) {
+        // Keep track of visited attributes of each node
         /** @type {Map<Node, Set<string>>} */
         const nodeToAttributes = new Map();
+        // Keep track of visited nodes for characterData mutations
+        /** @type {Set<Node>} */
+        const visitedNodesCharData = new Set();
         const filteredRecords = [];
         for (const record of records) {
-            if (record.type !== "attributes") {
-                filteredRecords.push(record);
-                continue;
-            }
+            if (record.type === "attributes") {
             // Add entry for current target if not already present.
             if (!nodeToAttributes.has(record.target)) {
                 nodeToAttributes.set(record.target, new Set());
@@ -504,6 +509,15 @@ export class HistoryPlugin extends Plugin {
             if (!visitedAttributes.has(record.attributeName)) {
                 filteredRecords.push(record);
                 visitedAttributes.add(record.attributeName);
+                }
+            } else if (record.type === "characterData") {
+                // Keep only the first charData mutation record for each node.
+                if (!visitedNodesCharData.has(record.target)) {
+                    filteredRecords.push(record);
+                    visitedNodesCharData.add(record.target);
+                }
+            } else {
+                filteredRecords.push(record);
             }
         }
         return filteredRecords;
