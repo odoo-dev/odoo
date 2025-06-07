@@ -270,7 +270,7 @@ export class HistoryPlugin extends Plugin {
      * @param { HistoryStep[] } steps
      */
     resetFromSteps(steps) {
-        this.ignoreDOMMutations(() => {
+        this.bypassObserver(() => {
             this.editable.replaceChildren();
             this.clean();
             this.stageSelection();
@@ -316,9 +316,6 @@ export class HistoryPlugin extends Plugin {
     }
 
     enableObserver() {
-        if (this.enableObserverCallbacks.size > 0) {
-            return;
-        }
         this.observer.observe(this.editable, {
             childList: true,
             subtree: true,
@@ -328,6 +325,7 @@ export class HistoryPlugin extends Plugin {
             characterDataOldValue: true,
         });
     }
+
     /**
      * Disable the mutation observer.
      *
@@ -337,11 +335,15 @@ export class HistoryPlugin extends Plugin {
     disableObserver() {
         const enableObserver = () => {
             this.enableObserverCallbacks.delete(enableObserver);
-            this.enableObserver();
+            if (this.enableObserverCallbacks.size > 0) {
+                return;
+            }
+            this.handleObserverRecords();
+            this.isObserverDisabled = false;
         };
         this.enableObserverCallbacks.add(enableObserver);
         this.handleObserverRecords();
-        this.observer.disconnect();
+        this.isObserverDisabled = true;
         return enableObserver;
     }
 
@@ -360,6 +362,17 @@ export class HistoryPlugin extends Plugin {
         } finally {
             enableObserver();
         }
+    }
+
+    /**
+     * Please don't use this method.
+     * Use ignoreDOMMutations instead (with caution).
+     */
+    bypassObserver(callback) {
+        this.handleObserverRecords();
+        this.observer.disconnect();
+        callback();
+        this.enableObserver();
     }
 
     handleObserverRecords() {
@@ -996,6 +1009,7 @@ export class HistoryPlugin extends Plugin {
      * @param { number } index
      */
     addExternalStep(newStep, index) {
+        this.bypassObserver(() => {
         // The last step is an uncommited draft, revert it first
         this.revertMutations(this.currentStep.mutations);
 
@@ -1016,6 +1030,7 @@ export class HistoryPlugin extends Plugin {
         // Reapply the uncommited draft, since this is not an operation which should cancel it
         this.applyMutations(this.currentStep.mutations);
         this.dispatchTo("external_step_added_handlers");
+        });
     }
     /**
      * @param { HistoryMutation[] } mutations
