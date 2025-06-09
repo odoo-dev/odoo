@@ -103,7 +103,7 @@
                 <field name="active" column_invisible="True"/>
                 <field name="complete_name" string="Location"/>
                 <field name="usage"/>
-                <field name="is_empty" invisible="usage not in ['internal', 'transit']"/>
+                <field name="is_empty" optional="hide" invisible="usage not in ['internal', 'transit']"/>
                 <field name="storage_category_id" readonly="usage != 'internal'" groups="stock.group_stock_multi_locations"/>
                 <field name="company_id" groups="base.group_multi_company"/>
             </list>
@@ -134,6 +134,7 @@
         <field name="view_mode">list,form</field>
         <field name="view_id" ref="view_location_tree2"/>
         <field name="search_view_id" ref="view_location_search"/>
+        <field name="domain">['|', ('warehouse_id', '!=', False), ('usage', '!=', 'view')]</field>
         <field name="context">{'search_default_in_location':1}</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
