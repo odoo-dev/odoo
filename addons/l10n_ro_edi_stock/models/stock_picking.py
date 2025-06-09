@@ -603,6 +603,7 @@ class Picking(models.Model):
             'name': f"etransport_{values['name'].replace('/', '_')}.xml",
             'res_model': 'l10n_ro_edi.document',
             'res_id': values['res_id'],
+            'res_field': 'attachment_file',
             'raw': values['raw'],
             'type': 'binary',
             'mimetype': 'application/xml',
@@ -619,7 +620,7 @@ class Picking(models.Model):
             'l10n_ro_edi_stock_uit': values['l10n_ro_edi_stock_uit'],
         })
 
-        document.attachment_id = self._l10n_ro_edi_stock_create_attachment({
+        self._l10n_ro_edi_stock_create_attachment({
             'name': self.name,
             'res_id': document.id,
             'raw': values['raw_xml'],
@@ -639,7 +640,7 @@ class Picking(models.Model):
 
         if 'raw_xml' in values:
             # when an error is thrown during data validation there will be no 'raw_xml'
-            document.attachment_id = self._l10n_ro_edi_stock_create_attachment({
+            self._l10n_ro_edi_stock_create_attachment({
                 'name': self.name,
                 'res_id': document.id,
                 'raw': values['raw_xml'],
@@ -656,7 +657,7 @@ class Picking(models.Model):
             'l10n_ro_edi_stock_uit': values['l10n_ro_edi_stock_uit'],
         })
 
-        document.attachment_id = self._l10n_ro_edi_stock_create_attachment({
+        self._l10n_ro_edi_stock_create_attachment({
             'name': self.name,
             'res_id': document.id,
             'raw': values['raw_xml'],

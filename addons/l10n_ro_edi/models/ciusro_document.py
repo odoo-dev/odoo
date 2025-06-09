@@ -66,11 +66,30 @@ class L10n_Ro_EdiDocument(models.Model):
                 Error -> Sending error or validation error from the SPV.""",
     )
     datetime = fields.Datetime(default=fields.Datetime.now, required=True)
-    attachment_id = fields.Many2one(comodel_name='ir.attachment')
+    attachment_id = fields.Many2one(
+        comodel_name='ir.attachment',
+        compute=lambda self: self._compute_linked_attachment_id('attachment_id', 'attachment_file'),
+        depends=['attachment_file']
+    )
+    attachment_file = fields.Binary(copy=False)
     message = fields.Char()
     key_loading = fields.Char(string="E-Factura Index")  # To be used to fetch the status of previously sent XML
     key_signature = fields.Char()    # Received from a successful response: to be saved for government purposes
     key_certificate = fields.Char()  # Received from a successful response: to be saved for government purposes
+
+    def _compute_linked_attachment_id(self, attachment_field, binary_field):
+        """Helper to retreive Attachment from Binary fields
+        This is needed because fields.Many2one('ir.attachment') makes all
+        attachments available to the user.
+        """
+        attachments = self.env['ir.attachment'].search([
+            ('res_model', '=', self._name),
+            ('res_id', 'in', self.ids),
+            ('res_field', '=', binary_field)
+        ])
+        move_vals = {att.res_id: att for att in attachments}
+        for move in self:
+            move[attachment_field] = move_vals.get(move._origin.id, False)
 
     @api.model
     def _request_ciusro_send_invoice(self, company, xml_data, move_type='out_invoice', is_b2b=True):
