@@ -302,11 +302,12 @@ export class PivotRenderer extends Component {
      * @param {Object} context
      */
     openView(domain, views, context, newWindow) {
+        const { name, res_model } = this._getActionMeta();
         this.actionService.doAction(
             {
                 type: "ir.actions.act_window",
-                name: this.model.metaData.title,
-                res_model: this.model.metaData.resModel,
+                name,
+                res_model,
                 views: views,
                 view_mode: "list",
                 target: "current",
@@ -317,6 +318,15 @@ export class PivotRenderer extends Component {
                 newWindow,
             }
         );
+    }
+    /**
+     * Helper method to provide model metadata for actions.
+     */
+    _getActionMeta() {
+        return {
+            name: this.model.metaData.title,
+            res_model: this.model.metaData.resModel,
+        };
     }
     /**
      * @param {CustomEvent} ev
