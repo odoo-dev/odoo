@@ -13,6 +13,7 @@ export class DynamicSnippetCategoryOption extends BaseOptionComponent {
     setup() {
         super.setup();
         this.orm = useService("orm");
+        this.website = useService("website");
 
         this.state = useState({
             categories: [],
@@ -20,7 +21,10 @@ export class DynamicSnippetCategoryOption extends BaseOptionComponent {
 
         onWillStart(async () => {
             this.state.categories = await this.orm.call(
-                'product.public.category', 'get_snippet_categories', []
+                'product.public.category',
+                'get_snippet_categories',
+                [],
+                {context: {website_id: this.website.currentWebsiteId}},
             );
         });
     }

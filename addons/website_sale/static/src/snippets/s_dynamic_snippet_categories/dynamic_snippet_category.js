@@ -11,9 +11,9 @@ export class dynamicSnippetCategory extends Interaction {
 
     async willStart() {
         this.ribbons = await this.waitFor(rpc('/shop/ribbons'));
-        const filterId = this.el.dataset.filterId;
-        this.data = filterId
-            ? await this.waitFor(rpc("/shop/categories", { filter_id: parseInt(filterId) }))
+        const categoryId = this.el.dataset.categoryId;
+        this.data = categoryId
+            ? await this.waitFor(rpc('/shop/categories', { category_id: parseInt(categoryId) }))
             : [];
     }
 
@@ -39,7 +39,9 @@ export class dynamicSnippetCategory extends Interaction {
         // Clear existing content and render with new values
         const categoryGrid = this.el.querySelector('.s_category_container');
         const categoryWrapperEl = this.el.querySelector(".s_dynamic_category_wrapper");
-        const categoryTemplate = nodeData?.isClickable ? "website_sale.dynamic_filter_template_categories_clickable_items" : "website_sale.dynamic_filter_template_categories";
+        const categoryTemplate = nodeData?.isClickable
+            ? "website_sale.dynamic_filter_template_categories_clickable_items"
+            : "website_sale.dynamic_filter_template_categories";
         categoryWrapperEl.querySelectorAll(".category_item").forEach(el => {el.remove()});
         categoryWrapperEl.appendChild(
             renderToFragment(categoryTemplate, {
@@ -89,17 +91,18 @@ export class dynamicSnippetCategory extends Interaction {
             const allProductsOverlayEl = allProducts.querySelector(".s_category_overlay");
             const allProductsTitleEl = allProducts.querySelector("h3");
             const isClickable = Boolean(nodeData.isClickable);
-            allProducts.classList.toggle("opacity-trigger-hover", isClickable);
-            allProductsButtonEl.classList.toggle("oe_unremovable", isClickable);
-            allProductsButtonEl.classList.toggle("stretched-link", isClickable);
-            allProductsButtonEl.classList.toggle("opacity-0", isClickable);
-            allProductsButtonEl.classList.toggle("p-0", isClickable);
-            allProductsButtonEl.classList.toggle("h-0", isClickable);
-            allProductsArrowEl.classList.toggle("d-none", !isClickable);
-            allProductsImgEl.classList.toggle("transition-base", isClickable);
-            allProductsFilterEl.classList.toggle("d-none", !isClickable);
-            allProductsOverlayEl.classList.toggle("z-0", isClickable);
-            allProductsTitleEl.classList.toggle("mb-0", isClickable);
+            const toggleClass = (el, className, condition) => {
+                el.classList.toggle(className, condition);
+            }
+
+            toggleClass(allProducts, "opacity-trigger-hover", isClickable);
+            ["oe_unremovable", "stretched-link", "opacity-0", "p-0", "h-0"]
+                .forEach(className => toggleClass(allProductsButtonEl, className, isClickable));
+            toggleClass(allProductsArrowEl, "d-none", !isClickable);
+            toggleClass(allProductsImgEl, "transition-base", isClickable);
+            toggleClass(allProductsFilterEl, "d-none", !isClickable);
+            toggleClass(allProductsOverlayEl, "z-0", isClickable);
+            toggleClass(allProductsTitleEl, "mb-0", isClickable);
         } else {
             allProducts.classList.add("d-none");
         }

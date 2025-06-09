@@ -25,7 +25,7 @@ export class DynamicSnippetCategoryOptionPlugin extends Plugin {
             for (const [optionName, value] of [
                 ['columns', '2'],
                 ['size', 'small'],
-                ['filterId', '0'],
+                ['categoryId', '0'],
                 ['allProducts', 'true'],
                 ['button', 'Explore Now'],
                 ['alignment', 'left'],

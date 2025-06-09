@@ -1,20 +1,8 @@
-import { MediaDialog } from "@html_editor/main/media/media_dialog/media_dialog";
 import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 
-
-export class CategoryMediaDialog extends MediaDialog {
-    async save(){
-        rpc('/snippets/category/set_image',{
-            category_id: parseInt(this.props.node.parentElement.dataset.categoryId),
-            media: this.selectedMedia[this.state.activeTab],
-        })
-        this.props.close()
-        await super.save();
-    }
-}
 
 export class DynamicSnippetCategoryItemOptionPlugin extends Plugin {
     static id = 'dynamicSnippetCategoryItemOptionPlugin';
@@ -40,25 +28,23 @@ export class DynamicSnippetCategoryItemOptionPlugin extends Plugin {
                 reload: {},
                 load: async ({ editingElement: el }) => {
                     const imageEl = el.querySelector(".s_category_image")
-                    if(el.classList.contains("category_item")){
-                        await new Promise((resolve) => {
-                            this.dependencies.dialog.addDialog(CategoryMediaDialog, {
-                                node: imageEl,
-                                onlyImages: true,
-                                noDocuments: true,
-                                save: resolve,
-                            });
-                        });
-                    } else {
-                        let icon;
-                        await this.dependencies.media.openMediaDialog({
-                            node: imageEl,
-                            onlyImages: true,
-                            noDocuments: true,
-                            save: (newIcon) => { icon = newIcon },
-                        });
-                        return icon;
-                    }
+                    const categId = parseInt(imageEl.parentElement.dataset.categoryId)
+                    let icon;
+                    await this.dependencies.media.openMediaDialog({
+                        node: imageEl,
+                        onlyImages: true,
+                        noDocuments: true,
+                        save: async (imgEls, selectedMedia, activeTab) => {
+                            if (el.classList.contains("category_item")) {
+                                rpc('/snippets/category/set_image',{
+                                    category_id: categId,
+                                    media: selectedMedia,
+                                })
+                            }
+                            icon = imgEls;
+                        },
+                    });
+                    return icon;
                 },
                 apply: ({ editingElement: el, loadResult: newImage }) => {
                     if (!(newImage instanceof HTMLImageElement)) return;

@@ -23,7 +23,7 @@ class ProductPublicCategory(models.Model):
         return 10000
 
     name = fields.Char(required=True, translate=True)
-    image_1920 = fields.Image(string="Cover Image")
+    cover_image = fields.Image(string="Cover Image")
     sequence = fields.Integer(default=_default_sequence, index=True)
 
     parent_id = fields.Many2one(
@@ -165,7 +165,11 @@ class ProductPublicCategory(models.Model):
                 'name': string,
             }
         """
-        allowed_categories = self.search([('has_published_products', '=', True)])
+        allowed_categories = self.search([
+            ('has_published_products', '=', True),
+            '|', ('website_id', '=', self.env.context['website_id']),
+            ('website_id', '=', False),
+        ])
         return [{
             'id': category.id,
             'name': self.env._(

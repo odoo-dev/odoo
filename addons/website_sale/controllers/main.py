@@ -1831,18 +1831,27 @@ class WebsiteSale(payment_portal.PaymentPortal):
         return {}
 
     @route('/shop/categories', type='jsonrpc', auth='public', website=True)
-    def get_shop_categories(self, filter_id):
+    def get_shop_categories(self, category_id):
         CategorySudo = request.env['product.public.category'].sudo()
         domain = request.website.website_domain() + [('has_published_products', '=', True)]
-        if not filter_id:
+        if not category_id:
             categories = CategorySudo.search(domain + [('parent_id', '=', False)])
         else:
-            parent = CategorySudo.search(domain + [('id', '=', filter_id)])
-            categories = parent.child_id.filtered('has_published_products') or parent
+            parent = CategorySudo.search(domain + [('id', '=', category_id)])
+            categories = (
+                parent.child_id.filtered_domain(
+                    domain + [('has_published_products', '=', True)]
+                ) or parent
+            )
         return [{
             'id': cat.id,
             'name': cat.name,
             'website_ribbon_id': cat.website_ribbon_id.id,
+            'cover_image_url': (
+                f"/web/image/product.public.category/{cat.id}/cover_image"
+                if cat.cover_image
+                else "/product/static/img/placeholder_thumbnail.png"
+            ),
         } for cat in categories]
 
     @route('/shop/ribbons', type='jsonrpc', auth='public')
@@ -1856,7 +1865,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
     def set_category_image(self, category_id, media):
         image_data = request.env['ir.attachment'].browse(media[0]['id']).datas
         request.env['product.public.category'].browse(category_id).write({
-            'image_1920': image_data,
+            'cover_image': image_data,
         })
 
     @staticmethod

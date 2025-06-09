@@ -11,13 +11,21 @@
         >
             <div class="container">
                 <div>
-                    <section class="s_dynamic_snippet_title oe_unremovable oe_unmovable" data-name="Intro text" role="heading">
+                    <section
+                        class="s_dynamic_snippet_title oe_unremovable oe_unmovable"
+                        data-name="Intro text"
+                        role="heading"
+                    >
                         <div class="container">
                             <h2 class="h4">Crafting Beautiful Spaces</h2>
                             <p>Designing elegant, inviting environments that inspire and delight.</p>
                         </div>
                     </section>
-                    <div class="s_category_container d-grid gap-2" contenteditable="false" style="--DynamicCategory-columns: 4; grid-auto-rows: minmax(15vh, auto);">
+                    <div
+                        class="s_category_container d-grid gap-2"
+                        contenteditable="false"
+                        style="--DynamicCategory-columns: 4; grid-auto-rows: minmax(15vh, auto);"
+                    >
                         <div class="s_dynamic_category_wrapper d-contents rounded-2">
                             <div
                                 class="all_products s_dynamic_category_item position-relative bg-black overflow-hidden oe_unremovable"
@@ -30,7 +38,10 @@
                                     class="s_category_image img-fluid position-absolute w-100 h-100 object-fit-cover"
                                 />
                                 <div class="s_category_overlay p-3 bg-black-25 position-relative w-100 h-100 d-flex flex-column oe_unremovable oe_unmovable">
-                                    <span class="s_category_filter position-absolute start-0 top-0 end-0 bottom-0 d-none bg-black-25 transition-base z-n1" aria-hidden="true"/>
+                                    <span
+                                        class="s_category_filter position-absolute start-0 top-0 end-0 bottom-0 d-none bg-black-25 transition-base z-n1"
+                                        aria-hidden="true"
+                                    />
                                     <h3 class="all_products_heading h4">All Collections</h3>
                                     <a
                                         role="button"
