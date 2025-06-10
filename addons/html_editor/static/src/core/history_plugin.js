@@ -257,8 +257,6 @@ export class HistoryPlugin extends Plugin {
         this.nodeMap = new NodeMap();
         /** @type { WeakMap<Node, { attributes: Map<string, string>, classList: Map<string, boolean>, characterData: Map<string, string> }> } */
         this.lastObservedState = new WeakMap();
-        /** @type { WeakMap<Node> } */
-        this.observedNodes = new WeakMap();
         this.setNodeId(this.editable);
         this.dispatchTo("history_cleaned_handlers");
     }
@@ -466,23 +464,17 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
-     * @param { HistoryMutationRecord[] } records
+     * @param {HistoryMutationRecord[]} records
      */
-    setIdOnRecords(records) {
-        for (const record of records) {
-            if (record.type !== "childList") {
-                continue;
-            }
-            const addedNodes = record.addedTrees.flatMap(treeToNodes);
-            const removedNodes = record.removedTrees.flatMap(treeToNodes);
-            for (const node of [...addedNodes, ...removedNodes]) {
-                if (this.nodeMap.hasNode(node)) {
-                    continue;
-                }
+    setIdOnAddedNodes(records) {
+        records
+            .filter((record) => record.type === "childList")
+            .flatMap((record) => record.addedTrees.flatMap(treeToNodes))
+            .filter((node) => !this.nodeMap.hasNode(node))
+            .forEach((node) => {
                 const id = node === this.editable ? "root" : this.generateId();
                 this.nodeMap.set(id, node);
-            }
-        }
+            });
     }
     /**
      * @param { MutationRecord[] } records
@@ -737,6 +729,7 @@ export class HistoryPlugin extends Plugin {
             records.forEach((record) => this.storeLastObservedState(record));
             return [];
         }
+        this.setIdOnAddedNodes(records);
         return records.map((record) => this.adjustToLastObservedState(record)).filter(Boolean);
     }
 
@@ -748,17 +741,14 @@ export class HistoryPlugin extends Plugin {
      * @returns {boolean}
      */
     isObservedNode(node) {
-        // Undefined or true means the node is observed
-        return this.observedNodes.get(node) !== false;
+        return this.nodeMap.hasNode(node);
     }
 
     /**
      * @param {HistoryMutationRecord} record
      */
     storeLastObservedState(record) {
-        if (record.type === "childList") {
-            this.trackObservedNodes(record);
-        } else {
+        if (record.type !== "childList") {
             this.storeOldValue(record);
         }
     }
@@ -859,41 +849,6 @@ export class HistoryPlugin extends Plugin {
 
     /**
      * @param {MutationRecordChildList} record
-     */
-    trackObservedNodes(record) {
-        const addedNodes = record.addedTrees.flatMap(treeToNodes);
-        const removedNodes = record.removedTrees.flatMap(treeToNodes);
-
-        // Tag added nodes with observer off as unobserved.
-        // Except if they are already marked as observed, meaning that they were
-        // removed with observer off and are now being inserted back.
-        addedNodes.forEach((node) => {
-            if (this.observedNodes.get(node) === true) {
-                // Node was previously marked as observed, clear it from map
-                this.observedNodes.delete(node);
-            } else {
-                // Tag node as unobserved
-                this.observedNodes.set(node, false);
-            }
-        });
-        // Tag removed nodes with observer off as observed, as they are present
-        // in the last observed state (this is useful in case the node is later
-        // re-added).
-        // Except if they are already marked as unobserved, meaning that they were
-        // added with observer off and are now being removed.
-        removedNodes.forEach((node) => {
-            if (this.observedNodes.get(node) === false) {
-                // Node was previously marked as unobserved, clear it from map
-                this.observedNodes.delete(node);
-            } else {
-                // Tag node as observed
-                this.observedNodes.set(node, true);
-            }
-        });
-    }
-
-    /**
-     * @param {MutationRecordChildList} record
      * @returns {MutationRecordChildList}
      */
     updateChildListRecord(record) {
@@ -903,27 +858,14 @@ export class HistoryPlugin extends Plugin {
         const previousSibling = updateSibling(record.previousSibling);
         const nextSibling = updateSibling(record.nextSibling);
 
-        // Filter out nodes that were already absent in the last observed state
-        const removedTrees = record.removedTrees.filter(
-            ({ node }) => this.observedNodes.get(node) !== false
-        );
-        // Filter out nodes that were already present in the last observed state
-        const addedTrees = record.addedTrees.filter(
-            ({ node }) => this.observedNodes.get(node) !== true
-        );
-
-        // Clear entries in the observed nodes map
-        [...record.addedTrees, ...record.removedTrees]
-            .flatMap(treeToNodes)
-            .forEach((node) => this.observedNodes.delete(node));
+        // Filter out unobserved nodes
+        const removedTrees = record.removedTrees.filter(({ node }) => this.isObservedNode(node));
 
         return {
             ...record,
             previousSibling,
             nextSibling,
-            addedTrees,
             removedTrees,
-            addedNodes: addedTrees.map((tree) => tree.node),
             removedNodes: removedTrees.map((tree) => tree.node),
         };
     }
@@ -973,7 +915,7 @@ export class HistoryPlugin extends Plugin {
      * @param { HistoryMutationRecord[] } records
      */
     stageRecords(records) {
-        this.setIdOnRecords(records);
+        // this.setIdOnRecords(records);
         for (const record of records) {
             switch (record.type) {
                 case "characterData":
@@ -1401,7 +1343,8 @@ export class HistoryPlugin extends Plugin {
             return;
         }
 
-        this.setNodeId(toAdd);
+        // Remove this one, not needed. We dont't want to add id to unobserved descendants.
+        // this.setNodeId(toAdd);
 
         const parent = this.nodeMap.getNode(parentId);
         if (!parent) {
@@ -1718,8 +1661,10 @@ export class HistoryPlugin extends Plugin {
             if (this.nodeMap.hasNode(node)) {
                 continue;
             }
-            const id = newNodesMap.get(node) || this.generateId();
-            this.nodeMap.set(id, node);
+            const id = newNodesMap.get(node);
+            if (id) {
+                this.nodeMap.set(id, node);
+            }
         }
         return unserializedNode;
     }
