@@ -325,10 +325,10 @@ class StockMove(models.Model):
         for move in self:
             move.is_initial_demand_editable = not move.picking_id.is_locked or move.state == 'draft'
 
-    @api.depends('product_id')
+    @api.depends('has_tracking')
     def _compute_is_quantity_done_editable(self):
         for move in self:
-            move.is_quantity_done_editable = move.product_id
+            move.is_quantity_done_editable = not move.has_tracking or move.has_tracking == 'none'
 
     @api.depends('name', 'picking_id.name', 'scrap_id.name', 'scrapped')
     def _compute_reference(self):
