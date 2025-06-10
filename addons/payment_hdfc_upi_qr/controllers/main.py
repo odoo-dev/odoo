@@ -1,21 +1,35 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+import base64
+import json
 import logging
 import pprint
-import werkzeug
-import json
-import base64
 from datetime import datetime
 
+import werkzeug
+
 from odoo import http, tools
-from odoo.exceptions import ValidationError, AccessError
+from odoo.exceptions import AccessError, ValidationError
 from odoo.http import request
 
+from odoo.addons.payment.controllers.post_processing import PaymentPostProcessing
+
 _logger = logging.getLogger(__name__)
+
 
 class HdfcUpiController(http.Controller):
 
     @http.route('/payment/hdfc_upi/callback', type='http', auth='public', csrf=False, methods=['POST'])
     def hdfc_upi_callback(self, **post):
-        """ Process the notification data sent by HDFC UPI after a transaction."""
+        """Process the notification data sent by HDFC UPI after a transaction.
+        
+        This endpoint handles the encrypted callback from HDFC Bank's UPI gateway.
+        It decrypts the response and processes the transaction status update.
+        
+        :param dict post: POST data containing encrypted response and merchant ID
+        :return: HTTP response with appropriate status code
+        :rtype: werkzeug.wrappers.Response
+        """
         _logger.info("Received HDFC UPI callback: %s", pprint.pformat(post))
 
         # Get parameters
@@ -58,11 +72,15 @@ class HdfcUpiController(http.Controller):
             return werkzeug.wrappers.Response(status=500)
 
     def _process_callback_response(self, response_text, provider):
-        """ Process the callback response from HDFC Bank.
-
+        """Process the callback response from HDFC Bank.
+        
+        Parses the pipe-separated response data and updates the corresponding
+        payment transaction with the received information.
+        
         :param str response_text: The decrypted response text
         :param recordset provider: The payment provider
-        :return: None
+        :return: True if processing was successful, False otherwise
+        :rtype: bool
         """
         if not response_text:
             return False
@@ -117,56 +135,16 @@ class HdfcUpiController(http.Controller):
         tx_sudo._process_notification_data(data)
         return True
 
-    @http.route('/payment/hdfc_upi/check_status/<int:tx_id>', type='jsonrpc', auth='public', csrf=False)
-    def hdfc_upi_check_status(self, tx_id, **kwargs):
-        """ Check the status of a payment transaction.
-
-        :param int tx_id: The transaction ID
-        :return: The status of the transaction
-        :rtype: dict
-        """
-        _logger.info("Checking payment status for transaction: %s", tx_id)
-        tx_sudo = request.env['payment.transaction'].sudo().browse(tx_id).exists()
-        if not tx_sudo or tx_sudo.provider_code != 'hdfc_upi':
-            _logger.error("Transaction not found or not HDFC UPI: %s", tx_id)
-            return {'error': 'Transaction not found'}
-
-        try:
-            # Check if QR code has expired
-            if tx_sudo._is_qr_expired() and tx_sudo.state not in ['done', 'cancel', 'error']:
-                # Mark transaction as expired
-                tx_sudo._set_canceled("HDFC UPI: QR code has expired.")
-                _logger.info("QR code expired for transaction: %s", tx_id)
-                return {
-                    'success': True,
-                    'state': 'cancel',
-                    'message': "QR code has expired.",
-                    'expired': True
-                }
-
-            # Check payment status with provider
-            result = tx_sudo._check_hdfc_upi_payment_status()
-            _logger.info("Payment status check result for transaction %s: %s, state: %s", 
-                        tx_id, result, tx_sudo.state)
-            return {
-                'success': result,
-                'state': tx_sudo.state,
-                'message': tx_sudo.state_message or '',
-                'expired': False
-            }
-        except ValidationError as e:
-            _logger.error("Validation error checking payment status: %s", e)
-            return {'error': str(e)}
-        except Exception as e:
-            _logger.exception("Error checking payment status: %s", e)
-            return {'error': 'An error occurred while checking payment status'}
-
     @http.route('/payment/hdfc_upi/get_qr_data/<int:tx_id>', type='jsonrpc', auth='public', csrf=False)
     def hdfc_upi_get_qr_data(self, tx_id, **kwargs):
-        """ Get QR code data for the transaction (for modal display).
-
+        """Get QR code data for the transaction (for modal display).
+        
+        Retrieves or generates QR code data for the specified transaction,
+        used by the frontend to display the payment QR code to customers.
+        
         :param int tx_id: The transaction ID
-        :return: QR code data
+        :param dict kwargs: Additional parameters (unused)
+        :return: QR code data with success status and base64 encoded image
         :rtype: dict
         """
         try:
@@ -225,8 +203,7 @@ class HdfcUpiController(http.Controller):
                 'amount': tx_sudo.amount,
                 'currency': tx_sudo.currency_id.name,
                 'merchant_name': tx_sudo.provider_id.hdfc_upi_merchant_name,
-                'expiry_seconds': expiry_seconds,
-                'bus_channel': tx_sudo._bus_channel()
+                'expiry_seconds': expiry_seconds
             }
 
         except Exception as e:

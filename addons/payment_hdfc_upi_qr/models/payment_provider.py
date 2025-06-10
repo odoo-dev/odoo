@@ -1,8 +1,12 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 import logging
+
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
+
 
 class PaymentProvider(models.Model):
     _inherit = 'payment.provider'
@@ -48,42 +52,79 @@ class PaymentProvider(models.Model):
                     raise ValidationError(_("UPI VPA must be in the format 'username@provider' (from company UPI Id)."))
 
     def _get_default_payment_method_codes(self):
-        """ Return the default payment methods for this provider. """
+        """Return the default payment method codes for this provider.
+        
+        For HDFC UPI, only UPI QR payment method is supported.
+        
+        :return: The default payment method codes
+        :rtype: set
+        """
         default_codes = super()._get_default_payment_method_codes()
         if self.code == 'hdfc_upi':
             default_codes = {'upi_qr'}
         return default_codes
 
     def _should_build_inline_form(self, is_validation=False):
-        """ Override to specify that inline forms are used for HDFC UPI. """
+        """Override to specify that inline forms are used for HDFC UPI.
+        
+        HDFC UPI uses inline forms to display QR codes directly in the payment form.
+        
+        :param bool is_validation: Whether the validation operation is being performed
+        :return: True for HDFC UPI provider, parent result otherwise
+        :rtype: bool
+        """
         if self.code == 'hdfc_upi':
             return True
         return super()._should_build_inline_form(is_validation=is_validation)
 
     def _get_validation_amount(self):
-        """ Return the amount to use for validation operations. """
+        """Return the amount to use for validation operations.
+        
+        For HDFC UPI, a minimal amount of 1.0 INR is used for validation.
+        
+        :return: The validation amount
+        :rtype: float
+        """
         self.ensure_one()
         if self.code == 'hdfc_upi':
             return 1.0  # Use a small amount for validation
         return super()._get_validation_amount()
 
     def _get_validation_currency(self):
-        """ Return the currency to use for validation operations. """
+        """Return the currency to use for validation operations.
+        
+        UPI only supports Indian Rupee (INR) currency.
+        
+        :return: The validation currency
+        :rtype: res.currency
+        """
         self.ensure_one()
         if self.code == 'hdfc_upi':
             return self.env.ref('base.INR')  # UPI only supports INR
         return super()._get_validation_currency()
 
     def _compute_feature_support_fields(self):
-        """ Specify the features supported by the HDFC UPI provider. """
+        """Specify the features supported by the HDFC UPI provider.
+        
+        HDFC UPI supports:
+        - Partial refunds
+        - Does not support tokenization
+        - Does not support express checkout
+        """
         super()._compute_feature_support_fields()
         if self.code == 'hdfc_upi':
-            self.support_refund = 'partial'
+            self.support_refund = 'full_only'
             self.support_tokenization = False
             self.support_express_checkout = False
 
     def _check_required_if_provider(self):
-        """ Check required fields based on provider code. """
+        """Check required fields based on provider code.
+        
+        For HDFC UPI provider, validates that all required configuration
+        fields are properly set when the provider is enabled.
+        
+        :raises ValidationError: If any required field is missing
+        """
         super()._check_required_if_provider()
         for provider in self.filtered(lambda p: p.code == 'hdfc_upi' and p.state != 'disabled'):
             if not provider.hdfc_upi_merchant_id:

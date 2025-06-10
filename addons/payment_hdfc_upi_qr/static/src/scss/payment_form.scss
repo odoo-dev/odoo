@@ -1,4 +1,9 @@
-/* UPI Payment Modal Styles */
+// Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+/* ===========================================================
+   HDFC UPI QR Payment Modal Styles
+   =========================================================== */
+
 .upi-payment-modal {
   position: fixed;
   top: 0;
@@ -212,66 +217,6 @@
   background: #d1ecf1;
   border: 1px solid #bee5eb;
   color: #0c5460;
-}
-
-.powered-by {
-  text-align: center;
-  padding-top: 16px;
-  border-top: 1px solid #e9ecef;
-  margin-top: 16px;
-}
-
-.powered-by-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 8px 0;
-}
-
-.powered-by-bank {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.bank-logo {
-  height: 20px;
-  width: auto;
-}
-
-.powered-by-text {
-  font-size: 12px;
-  color: #888;
-  margin: 0;
-}
-
-.powered-by-divider {
-  width: 1px;
-  height: 30px;
-  background-color: #e9ecef;
-}
-
-.powered-by-upi {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.upi-logo {
-  height: 25px;
-  width: auto;
-}
-
-.upi-text {
-  font-size: 12px;
-  color: #888;
-  font-weight: 500;
-}
-
-.powered-by-brand {
-  font-weight: 600;
-  color: #2563eb;
 }
 
 /* Loading States */

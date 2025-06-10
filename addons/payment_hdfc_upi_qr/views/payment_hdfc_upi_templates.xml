@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Part of Odoo. See LICENSE file for full copyright and licensing details. -->
 <odoo>
-   <template id="inline_form">
+
+    <template id="inline_form">
         <div name="o_hdfc_upi_component_container">
             <!-- Simple container for UPI payment - the modal will be triggered by JavaScript -->
             <div class="text-center mt-3">
@@ -14,4 +16,5 @@
             </div>
         </div>
     </template>
+
 </odoo>
