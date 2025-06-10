@@ -2,6 +2,7 @@ import { useState } from "@web/owl2/utils";
 import { localization } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { user } from "@web/core/user";
 import { sortBy } from "@web/core/utils/arrays";
 import { checkFileSize, DEFAULT_MAX_FILE_SIZE } from "@web/core/utils/files";
 import { memoize } from "@web/core/utils/functions";
@@ -12,6 +13,8 @@ import { ImportBlockUI } from "./import_block_ui";
 import { BinaryFileManager } from "./binary_file_manager";
 
 const mainComponentRegistry = registry.category("main_components");
+
+export const IMPORT_LANGUAGE_SEPARATOR = `@`;
 
 const strftimeFormatTable = {
     d: "w",
@@ -147,6 +150,8 @@ export class BaseImportModel {
 
         this.fieldsToHandle = {};
 
+        this.languagesInstalled = [];
+
         this.notificationService = useService("notification");
     }
 
@@ -232,12 +237,21 @@ export class BaseImportModel {
     }
 
     async init() {
-        [this.importTemplates, this.id] = await Promise.all([
+        [this.importTemplates, this.id, this.languagesInstalled] = await Promise.all([
             this.orm.call(this.resModel, "get_import_templates", [], {
                 context: this.context,
             }),
             this.orm.call("base_import.import", "create", [{ res_model: this.resModel }]),
+            this.orm.call("res.lang", "get_installed", []),
         ]);
+    }
+
+    getFinalFieldName(field) {
+        let name = Boolean(field.fieldInfo) && field.fieldInfo.fieldPath;
+        if (name && field.language) {
+            name += `${IMPORT_LANGUAGE_SEPARATOR}${field.language}`;
+        }
+        return name;
     }
 
     async executeImport(isTest = false, totalSteps, importProgress) {
@@ -248,7 +262,7 @@ export class BaseImportModel {
         const startRow = this.importOptions.skip;
         const importRes = {
             ids: [],
-            fields: this.columns.map((e) => Boolean(e.fieldInfo) && e.fieldInfo.fieldPath),
+            fields: this.columns.map((e) => this.getFinalFieldName(e)),
             columns: this.columns.map((e) => e.name.trim().toLowerCase()),
             hasError: false,
         };
@@ -361,6 +375,11 @@ export class BaseImportModel {
 
     setColumnField(column, fieldInfo) {
         column.fieldInfo = fieldInfo;
+        this._updateComments(column);
+    }
+
+    setColumnLanguage(column, language) {
+        column.language = language;
         this._updateComments(column);
     }
 
@@ -622,7 +641,10 @@ export class BaseImportModel {
                     header,
                     index,
                     res.preview[index],
-                    res.preview[index][0]
+                    res.preview[index][0],
+                    this.languagesInstalled.find((val) => val[0] === res.languages[index])
+                        ? res.languages[index]
+                        : null
                 )
             );
         } else if (res.preview && res.preview.length >= 2) {
@@ -640,7 +662,7 @@ export class BaseImportModel {
         return [];
     }
 
-    _createColumn(res, id, name, index, previews, preview) {
+    _createColumn(res, id, name, index, previews, preview, language = null) {
         const fields = this._getFields(res, index);
         return {
             id,
@@ -648,6 +670,7 @@ export class BaseImportModel {
             preview,
             previews,
             fields,
+            language,
             fieldInfo: this._findField(fields, id),
             comments: [],
             errors: [],
@@ -736,6 +759,13 @@ export class BaseImportModel {
     }
 
     _updateComments(updatedColumn) {
+        const userLanguage = user.lang.replace("-", "_");
+        const translatedColumns = new Set();
+        for (const column of this.columns) {
+            if (column.fieldInfo && this.languagesInstalled.length > 1 && column.language) {
+                translatedColumns.add(column.fieldInfo.fieldPath);
+            }
+        }
         for (const column of this.columns) {
             column.comments = [];
             column.errors = [];
@@ -770,15 +800,23 @@ export class BaseImportModel {
                 // If multiple columns are mapped on the same field, inform
                 // the user that they will be concatenated.
                 const samefieldColumns = this.columns.filter(
-                    (col) => col.fieldInfo && col.fieldInfo.fieldPath === column.fieldInfo.fieldPath
+                    (col) =>
+                        col.fieldInfo &&
+                        col.fieldInfo.fieldPath === column.fieldInfo.fieldPath &&
+                        (this.languagesInstalled.length === 1 ||
+                            (col.language ?? userLanguage) === (column.language ?? userLanguage))
                 );
                 if (samefieldColumns.length >= 2) {
                     column.comments.push({
                         type: "info",
                         content: _t("This column will be concatenated in field"),
                         fieldName: column.fieldInfo.string,
+                        lang: this.languagesInstalled.find(
+                            (val) => val[0] === (column.language ?? userLanguage)
+                        )?.[1],
                     });
                 }
+                column.translatedColumn = translatedColumns.has(column.fieldInfo.fieldPath);
             } else if (updatedColumn && column.id !== updatedColumn.id && updatedColumn.fieldInfo) {
                 // If column is mapped on an already mapped field, remove that field
                 // from the old column to keep it unique.

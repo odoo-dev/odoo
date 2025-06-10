@@ -10,7 +10,6 @@ import difflib
 import io
 import itertools
 import logging
-import operator
 import os
 import re
 import unicodedata
@@ -48,6 +47,8 @@ MIMETYPE_TO_READER = {
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
     'application/vnd.oasis.opendocument.spreadsheet': 'ods',
 }
+
+LANGUAGE_SEPARATOR = '@'
 
 CONCAT_SEPARATOR_IMPORT = {
     'char': ' ',
@@ -262,12 +263,13 @@ class Base_ImportImport(models.TransientModel):
             'fields': [],
             'type': 'id',
             'model_name': model,
+            'translate': False,
         }]
         if not depth:
             return importable_fields
 
         model_fields = Model.fields_get(attributes=[
-            'string', 'required', 'type', 'readonly', 'relation',
+            'string', 'required', 'type', 'readonly', 'relation', 'translate',
             'definition_record', 'definition_record_field',
         ])
         blacklist = models.MAGIC_COLUMNS
@@ -330,6 +332,7 @@ class Base_ImportImport(models.TransientModel):
                 'fields': [],
                 'type': field['type'],
                 'model_name': model,
+                'translate': bool(field.get('translate')),
             }
 
             if field['type'] in ('many2many', 'many2one'):
@@ -818,6 +821,9 @@ class Base_ImportImport(models.TransientModel):
         if not fields_tree:
             return {}
 
+        if LANGUAGE_SEPARATOR in header:
+            header = header.split(LANGUAGE_SEPARATOR, 1)[0]
+
         # First, check in saved mapped fields
         mapping_field_name = mapping_fields.get(header.lower())
         if mapping_field_name and mapping_field_name:
@@ -986,6 +992,10 @@ class Base_ImportImport(models.TransientModel):
         min_dist_per_field = {}
         headers_to_keep = []
         for header, suggestion in mapping_suggestions.items():
+            if LANGUAGE_SEPARATOR in header[1]:
+                headers_to_keep.append(header)
+                continue
+
             if suggestion is None or len(suggestion['field_path']) > 1:
                 headers_to_keep.append(header)
                 continue
@@ -1035,6 +1045,7 @@ class Base_ImportImport(models.TransientModel):
 
             # Get matches: the ones already selected by the user or propose a new matching.
             matches = {}
+            languages = []
             # If user checked to the advanced mode, we re-parse the file but we keep the mapping "as is".
             # No need to make another mapping proposal
             if options.get('keep_matches') and options.get('fields'):
@@ -1050,6 +1061,7 @@ class Base_ImportImport(models.TransientModel):
                     for header_key, suggestion in matches.items()
                     if suggestion
                 }
+                languages = [val.split(LANGUAGE_SEPARATOR)[1] if LANGUAGE_SEPARATOR in val else None for val in headers]
 
             # compute if we should activate advanced mode or not:
             # if was already activated of if file contains "relational fields".
@@ -1098,6 +1110,7 @@ class Base_ImportImport(models.TransientModel):
             return {
                 'fields': fields_tree,
                 'matches': matches or False,
+                'languages': languages or False,
                 'headers': headers or False,
                 'header_types': list(header_types.values()) or False,
                 'preview': column_example,
@@ -1142,18 +1155,67 @@ class Base_ImportImport(models.TransientModel):
             :returns: (data, fields)
             :raises ValueError: in case the import data could not be converted
         """
-        # Get indices for non-empty fields
-        indices = [index for index, field in enumerate(fields) if field]
-        if not indices:
+        at_least_one_field = False
+
+        # sample of input
+        # fields = ["id","name","name@fr_FR",False,"description@en_US","description@fr_FR","description"]
+
+        # set containing the fields that are translated
+        # result for the giving sample:
+        # {"name", "description"}
+        fields_translated = set()
+
+        # array containing information for each column of the dataset
+        # this information is a dict with these key:
+        # * field: containing the fields name (trimming from the language separator (@))
+        # * lang: the lang for this column (if no lang it will fallback to the lang of the normal import)
+        # result for the giving sample:
+        # [
+        #   {"field": "id"},
+        #   {"field": "name", "lang": "en_US"},
+        #   {"field": "name", "lang": "fr_FR"},
+        #   {"field": False },
+        #   {"field": "description", "lang": "en_US"},
+        #   {"field": "description", "lang": "fr_FR"},
+        #   {"field": "description", "lang": "en_US"},
+        # ]
+        data_column_info = []
+
+        # array containing fields for the import
+        # result for the giving sample:
+        # ["id","name", "description"]
+        import_fields = []
+
+        for field in fields:
+            if field and LANGUAGE_SEPARATOR in field:
+                fields_translated.add(field.split(LANGUAGE_SEPARATOR)[0])
+
+        for field in fields:
+            data_column_info.append({"field": False})
+            if field:
+                at_least_one_field = True
+                field_translated = False
+
+                if LANGUAGE_SEPARATOR in field:
+                    field_translated = field.split(LANGUAGE_SEPARATOR)
+                elif field in fields_translated:
+                    field_translated = [field, self.env.lang or "en_US"]
+
+                # Translation field
+                if field_translated:
+                    field_name, lang = field_translated
+                    data_column_info[-1]["field"] = field_name
+                    data_column_info[-1]["lang"] = lang
+                    if field_name not in import_fields:
+                        import_fields.append(field_name)
+
+                # Standard import field
+                else:
+                    data_column_info[-1]["field"] = field
+                    import_fields.append(field)
+
+        if not at_least_one_field:
             raise ImportValidationError(_("You must configure at least one field to import"))
-        # If only one index, itemgetter will return an atom rather
-        # than a 1-tuple
-        if len(indices) == 1:
-            mapper = lambda row: [row[indices[0]]]
-        else:
-            mapper = operator.itemgetter(*indices)
-        # Get only list of actually imported fields
-        import_fields = [f for f in fields if f]
 
         _file_length, rows_to_import = self._read_file(options)
         if len(rows_to_import[0]) != len(fields):
@@ -1167,12 +1229,37 @@ class Base_ImportImport(models.TransientModel):
 
         if options.get('has_headers'):
             rows_to_import = rows_to_import[1:]
-        data = [
-            list(row) for row in map(mapper, rows_to_import)
-            # don't try inserting completely empty rows (e.g. from
-            # filtering out o2m fields)
-            if any(row)
-        ]
+
+        data = []
+
+        # Extract the value from the data file into import format for the model.load
+        for row in rows_to_import:
+            row_has_data = False
+            row_data = []
+            for index_col, value in enumerate(row):
+                field = data_column_info[index_col]["field"]
+                lang = data_column_info[index_col].get("lang")
+                if not field:
+                    continue
+
+                if value:
+                    # Check to be sure that this line has at least one value
+                    row_has_data = True
+
+                # Translation import
+                if lang:
+                    field_lang_col_index = import_fields.index(field)
+                    if field_lang_col_index == len(row_data):
+                        row_data.append({})
+                    translations = row_data[field_lang_col_index]
+                    translations.setdefault(lang, []).append(value)
+
+                # Normal import
+                else:
+                    row_data.append(value)
+            if row_has_data:
+                # don't try inserting completely empty rows (e.g. from filtering out o2m fields)
+                data.append(row_data)
 
         # slicing needs to happen after filtering out empty rows as the
         # data offsets from load are post-filtering
@@ -1484,17 +1571,25 @@ class Base_ImportImport(models.TransientModel):
             BaseImportMapping = self.env['base_import.mapping']
             for index, column_name in enumerate(columns):
                 if column_name:
+                    field = fields[index]
+
+                    # Don't save translation hint into mapping table
+                    if LANGUAGE_SEPARATOR in column_name:
+                        column_name = column_name.split(LANGUAGE_SEPARATOR, 1)[0]
+                    if LANGUAGE_SEPARATOR in (field or ""):
+                        field = field.split(LANGUAGE_SEPARATOR, 1)[0]
+
                     # Update to latest selected field
                     mapping_domain = [('res_model', '=', self.res_model), ('column_name', '=', column_name)]
                     column_mapping = BaseImportMapping.search(mapping_domain, limit=1)
                     if column_mapping:
-                        if column_mapping.field_name != fields[index]:
-                            column_mapping.field_name = fields[index]
+                        if column_mapping.field_name != field:
+                            column_mapping.field_name = field
                     else:
                         BaseImportMapping.create({
                             'res_model': self.res_model,
                             'column_name': column_name,
-                            'field_name': fields[index]
+                            'field_name': field
                         })
         if 'name' in import_fields:
             index_of_name = import_fields.index('name')
@@ -1610,12 +1705,22 @@ class Base_ImportImport(models.TransientModel):
                     if field_type != 'many2many':
                         # Trim trailing whitespaces before joining
                         trim = field_type == 'char' and field.trim
-                        new_record.append(
-                            separator.join(
-                                self._stringify_date_like_objects(record[idx], import_options, trim)
-                                for idx in indexes if record[idx]
+                        if field.translate and isinstance(record[indexes[0]], dict):
+                            languages = record[indexes[0]].keys()
+                            for language in languages:
+                                record[indexes[0]][language] = separator.join(record[indexes[0]][language])
+                            if len(languages) == 1 and next(iter(languages)) == (self.env.lang or "en_US"):
+                                # when only the env language, unwrap the value of the dict to be a normal import
+                                default_language = next(iter(languages))
+                                record[indexes[0]] = record[indexes[0]][default_language]
+                            new_record.append(record[indexes[0]])
+                        else:
+                            new_record.append(
+                                separator.join(
+                                    self._stringify_date_like_objects(record[idx], import_options, trim)
+                                    for idx in indexes if record[idx]
+                                )
                             )
-                        )
                     else:
                         new_record.append(separator.join(record[idx] for idx in indexes if record[idx]))
                 elif field_type == 'properties':
