@@ -907,6 +907,28 @@ describe("unobserved mutations", () => {
             withAddStep(editor, () => nodeB.append(nodeC)); // should be an empty step
             expect(editor.shared.history.getHistorySteps().length).toBe(1);
         });
+        test("weird stuff", async () => {
+            const { editor } = await setupEditor(`<p><span class="parent"></span></p>`);
+            /** @type {HTMLElement} */
+            const parent = editor.editable.querySelector("p span");
+            const [a, b] = ["a", "b"].map((name) => {
+                const span = editor.document.createElement("span");
+                span.className = name;
+                return span;
+            });
+            console.log("test begins");
+            withAddStep(editor, () => parent.append(a));
+            withAddStep(editor, () => a.remove());
+            await tick();
+            a.append(b);
+            withAddStep(editor, () => parent.append(a));
+            editor.shared.history.undo();
+            expect(parent.childNodes.length).toBe(0);
+            editor.shared.history.undo();
+            expect(parent.childNodes.length).toBe(1);
+            expect(parent.firstChild).toBe(a);
+            expect(a.childNodes.length).toBe(0);
+        });
     });
 });
 

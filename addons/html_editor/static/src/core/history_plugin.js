@@ -400,6 +400,9 @@ export class HistoryPlugin extends Plugin {
         if (this.observer.takeRecords().length) {
             throw new Error("MutationObserver has pending records");
         }
+        if (mutationRecords.length) {
+            console.log(mutationRecords);
+        }
         mutationRecords = this.filterMutationRecords(mutationRecords);
         /** @type {HistoryMutationRecord[]} */
         let records = this.transformToMutationRecords(mutationRecords);
@@ -410,6 +413,7 @@ export class HistoryPlugin extends Plugin {
         records
             .filter(({ type }) => type === "attributes")
             .forEach((record) => this.dispatchTo("attribute_change_handlers", record));
+        // console.log(records);
         return records;
     }
 
