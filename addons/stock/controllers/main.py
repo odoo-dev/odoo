@@ -17,6 +17,7 @@ class StockReportController(http.Controller):
         domain = [('create_uid', '=', uid)]
         stock_traceability = request.env['stock.traceability.report'].with_user(uid).search(domain, limit=1)
         line_data = json.loads(kw['data'])
+        print("called"*50)
         try:
             if output_format == 'pdf':
                 response = request.make_response(

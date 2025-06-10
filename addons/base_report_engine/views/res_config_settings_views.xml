@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="open_report_engine_modules" model="ir.actions.act_window">
+        <field name="name">Report Rendering Engines</field>
+        <field name="res_model">ir.module.module</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{}</field>
+        <field name="domain">[
+            ('name', 'in',
+                [
+                    'base_report_wkhtml',
+                    'base_report_paper_muncher',
+                ]
+            )
+        ]</field>
+        <field name="search_view_id" ref="base.view_module_filter"/>
+    </record>
+
+    <record id="res_config_settings_view_form_inherit_report_engine" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.report.engine</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='inter_company']" position="after">
+                <setting id="rendering_engine_settings"
+                    string="PDF Rendering Engine"
+                    company_dependent="1"
+                    help="Choose the default rendering engine to use for your documents."
+                    groups="base.group_no_one"
+                >
+                    <field name="report_rendering_engine" widget="radio"/>
+                    <div class="mt8" id="localization_text">
+                    <button name="%(open_report_engine_modules)d"
+                        icon="oi-arrow-right"
+                        type="action"
+                        string="Manage Rendering Engines"
+                        class="btn-link"
+                    />
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

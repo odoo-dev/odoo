@@ -1,5 +1,6 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from lxml import etree
+import lxml.html
 
 from odoo import api, models, _
 from odoo.tools import format_datetime
@@ -230,24 +231,34 @@ class StockTraceabilityReport(models.TransientModel):
             'mode': 'print',
             'base_url': base_url,
         }
-
         context = dict(self.env.context)
         if context.get('active_id') and context.get('active_model'):
-            rcontext['reference'] = self.env[context.get('active_model')].browse(int(context.get('active_id'))).display_name
-
+            record = self.env[context['active_model']].browse(int(context['active_id']))
+            rcontext['reference'] = record.display_name
         body = self.env['ir.ui.view'].with_context(context)._render_template(
             "stock.report_stock_inventory_print",
             values=dict(rcontext, lines=lines, report=self, context=self),
         )
+        header_raw = self.env['ir.actions.report']._render_template("web.internal_layout", values=rcontext)
+        header = self.env['ir.actions.report']._render_template(
+            "web.minimal_layout",
+            values=dict(rcontext, subst=True, body=Markup(header_raw.decode()))
+        )
 
-        header = self.env['ir.actions.report']._render_template("web.internal_layout", values=rcontext)
-        header = self.env['ir.actions.report']._render_template("web.minimal_layout", values=dict(rcontext, subst=True, body=Markup(header.decode())))
-
-        return self.env['ir.actions.report']._run_wkhtmltopdf(
-            [body],
-            header=header.decode(),
+        document_tree = lxml.html.fromstring(str(body))
+        header_tree = lxml.html.fromstring(str(header))
+        header_tree.tag = 'header'
+        # insert the header into the document (inside the body tag)
+        body_tag = document_tree.find('.//body')
+        body_tag.insert(0, header_tree)
+        document = etree.tostring(document_tree, encoding='unicode', method='html')
+        return self.env['ir.actions.report'].company_pdf_engine(
+            documents=[document],
             landscape=True,
-            specific_paperformat_args={'data-report-margin-top': 30, 'data-report-header-spacing': 25}
+            specific_paperformat_args={
+                'data-report-margin-top': 30,
+                'data-report-header-spacing': 25
+            },
         )
 
     def _get_main_lines(self):

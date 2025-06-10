@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_internalpreview" model="ir.actions.report">
+        <field name="name">Preview Internal Report</field>
+        <field name="model">res.company</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">web.preview_internalreport</field>
+        <field name="report_file">web.preview_internalreport</field>
+        <field name="binding_model_id" ref="base.model_res_company"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_externalpreview" model="ir.actions.report">
+        <field name="name">Preview External Report</field>
+        <field name="model">res.company</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">web.preview_externalreport</field>
+        <field name="report_file">web.preview_externalreport</field>
+        <field name="binding_model_id" ref="base.model_res_company"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_layout_preview" model="ir.actions.report">
+        <field name="name">Report Layout Preview</field>
+        <field name="model">res.company</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">web.preview_layout_report</field>
+        <field name="report_file">web.preview_layout_report</field>
+        <field name="binding_model_id" ref="base.model_res_company"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

@@ -30,29 +30,6 @@ export function getReportUrl(action, type, userContext) {
     return url;
 }
 
-// messages that might be shown to the user dependening on the state of wkhtmltopdf
-function getWKHTMLTOPDF_MESSAGES(status) {
-    const link = '<br><br><a href="http://wkhtmltopdf.org/" target="_blank">wkhtmltopdf.org</a>'; // FIXME missing markup
-    const _status = {
-        broken: _t(
-            "Your installation of Wkhtmltopdf seems to be broken. The report will be shown in html.%(link)s",
-            { link }
-        ),
-        install: _t(
-            "Unable to find Wkhtmltopdf on this system. The report will be shown in html.%(link)s",
-            { link }
-        ),
-        upgrade: _t(
-            "You should upgrade your version of Wkhtmltopdf to at least 0.12.0 in order to get a correct display of headers and footers as well as support for table-breaking between pages.%(link)s",
-            { link }
-        ),
-        workers: _t(
-            "You need to start Odoo with at least two workers to print a pdf version of the reports."
-        ),
-    };
-    return _status[status];
-}
-
 /**
  * Launches download action of the report
  *
@@ -64,12 +41,28 @@ function getWKHTMLTOPDF_MESSAGES(status) {
  */
 export async function downloadReport(rpc, action, type, userContext) {
     let message;
-    if (type === "pdf") {
+    if (type.startsWith("pdf")) {
         // Cache the wkhtml status on the function. In prod this means is only
         // checked once, but we can reset it between tests to test multiple statuses.
-        downloadReport.wkhtmltopdfStatusProm ||= rpc("/report/check_wkhtmltopdf");
-        const status = await downloadReport.wkhtmltopdfStatusProm;
-        message = getWKHTMLTOPDF_MESSAGES(status);
+        const report_name = action.report_name;
+        if (
+            !downloadReport.pdfEngineStatusProm
+            || !downloadReport.pdfEngine
+            || !downloadReport.pdfEngineStatusMessage
+        ) {
+            [
+                downloadReport.pdfEngine,
+                downloadReport.pdfEngineStatusProm,
+                downloadReport.pdfEngineStatusMessage,
+            ] = await rpc(
+                "/report/get_pdf_engine_state/",
+                {
+                    report_name,
+                }
+            );
+        }
+        const status = await downloadReport.pdfEngineStatusProm;
+        message = downloadReport.pdfEngineStatusMessage;
         if (!["upgrade", "ok"].includes(status)) {
             return { success: false, message };
         }
