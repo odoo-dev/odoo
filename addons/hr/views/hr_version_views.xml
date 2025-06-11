@@ -80,6 +80,8 @@
                 <separator />
                 <filter string="Contract Start Date" name="contract_date_start" date="contract_date_start"/>
                 <filter string="Contract End Date" name="contract_date_end" date="contract_date_end"/>
+                <separator />
+                <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
 
                 <filter string="Job Position" name="group_by_job" domain="[]" context="{'group_by': 'job_id'}"/>
                 <filter string="Department" name="group_by_department" domain="[]" context="{'group_by': 'department_id'}"/>
