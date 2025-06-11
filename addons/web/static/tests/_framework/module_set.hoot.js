@@ -11,6 +11,7 @@ import { mockSessionFactory } from "./mock_session.hoot";
 import { makeTemplateFactory } from "./mock_templates.hoot";
 import { mockUserFactory } from "./mock_user.hoot";
 import { mockIndexedDB } from "./mock_indexed_db.hoot";
+import { resetLazySessionValue } from "@web/core/user";
 
 /**
  * @typedef {{
@@ -620,6 +621,7 @@ export async function runTests(options) {
             }
             currentAddonsKey = moduleSet.addonsKey;
         }
+        resetLazySessionValue();
 
         const suite = describe(suitePath, () => {
             moduleSetLoader.setup();
