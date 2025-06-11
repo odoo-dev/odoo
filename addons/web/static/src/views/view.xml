@@ -35,15 +35,23 @@
           </Dropdown>
       </t>
       <t t-else="">
-          <t t-foreach="buttons" t-as="button" t-key="button.id">
-              <t t-set="buttonProps" t-value="button.props"/>
-              <t t-call="{{ button.template }}"/>
-          </t>
+          <t t-call="web.View.Buttons"/>
       </t>
+  </t>
+
+  <t t-name="web.View.Buttons">
+        <t t-foreach="buttons" t-as="button" t-key="button.id">
+            <t t-set="buttonProps" t-value="button.props"/>
+            <t t-call="{{ button.template }}"/>
+        </t>
   </t>
 
   <t t-name="web.View.Buttons.MultiRecord">
       <MultiRecordViewButton t-props="buttonProps"/>
+  </t>
+
+  <t t-name="web.View.Buttons.SingleRecord">
+      <ViewButton t-props="buttonProps"/>
   </t>
 
 </templates>

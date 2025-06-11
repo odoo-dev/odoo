@@ -106,7 +106,58 @@ export class TimeOffFormViewDialog extends FormViewDialog {
 
         this.viewProps = Object.assign(this.viewProps, {
             jsClass: "timeoff_dialog_form",
-            buttonTemplate: "hr_holidays.FormViewDialog.buttons",
+            staticControlPanelButtons: {
+                ...this.staticControlPanelButtons,
+                save: {
+                    isAvailable() {
+                        return this.canSave;
+                    },
+                    template: "hr_holidays.FormViewDialog.Buttons.Save",
+                    sequence: 10,
+                },
+                approve: {
+                    isAvailable() {
+                        return this.canApprove;
+                    },
+                    template: "hr_holidays.FormViewDialog.Buttons.Approve",
+                    sequence: 15,
+                },
+                validate: {
+                    isAvailable() {
+                        return this.canValidate;
+                    },
+                    template: "hr_holidays.FormViewDialog.Buttons.Validate",
+                    sequence: 20,
+                },
+                refuse: {
+                    isAvailable() {
+                        return this.canRefuse;
+                    },
+                    template: "hr_holidays.FormViewDialog.Buttons.Refuse",
+                    sequence: 25,
+                },
+                discard: {
+                    isAvailable() {
+                        return this.canClose;
+                    },
+                    template: "hr_holidays.FormViewDialog.Buttons.Discard",
+                    sequence: 30,
+                },
+                deleteTimeOff: {
+                    isAvailable() {
+                        return this.canDelete;
+                    },
+                    template: "hr_holidays.FormViewDialog.Buttons.DeleteTimeOff",
+                    sequence: 35,
+                },
+                cancelTimeOff: {
+                    isAvailable() {
+                        return this.canCancel;
+                    },
+                    template: "hr_holidays.FormViewDialog.Buttons.CancelTimeOff",
+                    sequence: 40,
+                },
+            },
             onCancelLeave: () => {
                 this.props.close();
             },

@@ -241,7 +241,17 @@ export class PagePropertiesDialog extends FormViewDialog {
             ),
             ...(this.isPage
                 ? {
-                      buttonTemplate: "website.PagePropertiesDialogButtons",
+                      staticControlPanelButtons: {
+                        ...this.staticControlPanelButtons,
+                        duplicate: {
+                            template: "website.PagePropertiesDialog.Buttons.Duplicate",
+                            sequence: 25,
+                        },
+                        delete: {
+                            template: "website.PagePropertiesDialog.Buttons.Delete",
+                            sequence: 26,
+                        },
+                      },
                       clonePage: this.clonePage.bind(this),
                       deletePage: this.deletePage.bind(this),
                   }

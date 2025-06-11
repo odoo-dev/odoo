@@ -26,7 +26,7 @@ import { SelectionBox } from "@web/views/view_components/selection_box";
 import { useExportRecords, useDeleteRecords } from "@web/views/view_hook";
 import {
     CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE,
-    CONTROL_PANEL_BUTTONS_HEADER_SEQUENCE,
+    CONTROL_PANEL_BUTTONS_ARCH_SEQUENCE,
 } from "@web/search/control_panel/control_panel";
 
 import {
@@ -208,7 +208,7 @@ export class ListController extends Component {
             .map((button) => ({
                 id: button.id,
                 isAvailable: () => !this.evalViewModifier(button.invisible),
-                sequence: CONTROL_PANEL_BUTTONS_HEADER_SEQUENCE,
+                sequence: CONTROL_PANEL_BUTTONS_ARCH_SEQUENCE,
                 template: "web.View.Buttons.MultiRecord",
                 props: this.multiRecordViewButtonProps(button),
             }));

@@ -6,20 +6,11 @@
             <div class="o_form_view_container">
                 <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''" display="display">
                     <t t-set-slot="control-panel-buttons">
-                        <t t-if="env.inDialog">
-                            <t t-if="footerArchInfo">
-                                <t t-component="props.Renderer" record="model.root" Compiler="props.Compiler" archInfo="footerArchInfo">
-                                    <t t-set-slot="default_buttons">
-                                        <t t-call="{{ props.buttonTemplate }}"/>
-                                    </t>
-                                </t>
-                            </t>
-                            <t t-else="">
-                                <t t-call="{{ props.buttonTemplate }}"/>
-                            </t>
+                        <t t-if="env.inDialog" t-call="web.View.Buttons">
+                            <t t-set="buttons" t-value="controlPanelButtons"/>
                         </t>
-                        <t t-elif="canCreate">
-                            <button type="button" class="btn btn-outline-primary o_form_button_create" data-hotkey="c" t-on-click.stop="create">New</button>
+                        <t t-else="" t-call="web.View.ResponsiveButtons">
+                            <t t-set="buttons" t-value="controlPanelButtons"/>
                         </t>
                     </t>
 
@@ -47,17 +38,23 @@
         </div>
     </t>
 
-    <t t-name="web.FormView.Buttons">
-        <button t-if="model.root.isInEdition" type="button" class="btn btn-primary o_form_button_save" data-hotkey="s" t-on-click.stop="() => this.saveButtonClicked({closable: true})">
+    <t t-name="web.FormView.Buttons.Save">
+        <button type="button" class="btn btn-primary o_form_button_save" data-hotkey="s" t-on-click.stop="() => this.saveButtonClicked({closable: true})">
             Save
         </button>
-        <button t-if="model.root.isInEdition" type="button" class="btn btn-secondary o_form_button_cancel" data-hotkey="j" t-on-click.stop="discard">
+    </t>
+    <t t-name="web.FormView.Buttons.Discard">
+        <button type="button" class="btn btn-secondary o_form_button_cancel" data-hotkey="j" t-on-click.stop="discard">
             Discard
         </button>
-        <button t-if="model.root.isInEdition and props.removeRecord" class="btn btn-secondary o_form_button_remove" t-on-click="props.removeRecord" data-hotkey="x">
+    </t>
+    <t t-name="web.FormView.Buttons.Remove">
+        <button class="btn btn-secondary o_form_button_remove" t-on-click="props.removeRecord" data-hotkey="x">
             Remove
         </button>
-        <button t-if="!model.root.isInEdition and canCreate" type="button" class="btn btn-secondary o_form_button_create" data-hotkey="c" t-on-click.stop="create">
+    </t>
+    <t t-name="web.FormView.Buttons.New">
+        <button type="button" t-attf-class="btn #{env.inDialog ? 'btn-secondary' : 'btn-outline-primary'} o_form_button_create" data-hotkey="c" t-on-click.stop="create">
             New
         </button>
     </t>

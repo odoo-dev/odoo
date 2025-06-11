@@ -13,7 +13,39 @@ export const formView = {
     ArchParser: FormArchParser,
     Model: RelationalModel,
     Compiler: FormCompiler,
-    buttonTemplate: "web.FormView.Buttons",
+    staticControlPanelButtons: {
+        save: {
+            isAvailable() {
+                return this.model.root.isInEdition && this.env.inDialog;
+            },
+            template: "web.FormView.Buttons.Save",
+            sequence: 10,
+        },
+        discard: {
+            isAvailable() {
+                return this.model.root.isInEdition && this.env.inDialog;
+            },
+            template: "web.FormView.Buttons.Discard",
+            sequence: 20,
+        },
+        remove: {
+            isAvailable() {
+                return this.model.root.isInEdition && this.props.removeRecord && this.env.inDialog;
+            },
+            template: "web.FormView.Buttons.Remove",
+            sequence: 30,
+        },
+        new: {
+            isAvailable() {
+                return (
+                    this.canCreate &&
+                    (!this.env.inDialog || (this.env.inDialog && !this.model.root.isInEdition))
+                );
+            },
+            template: "web.FormView.Buttons.New",
+            sequence: 40,
+        },
+    },
 
     props: (genericProps, view) => {
         const { ArchParser } = view;
@@ -27,7 +59,8 @@ export const formView = {
                 (archInfo.activeActions?.edit === false && genericProps.resId !== false),
             Model: view.Model,
             Renderer: view.Renderer,
-            buttonTemplate: genericProps.buttonTemplate || view.buttonTemplate,
+            staticControlPanelButtons:
+                genericProps.staticControlPanelButtons || view.staticControlPanelButtons,
             Compiler: view.Compiler,
             archInfo,
         };

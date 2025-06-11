@@ -45,6 +45,12 @@ import {
 } from "@odoo/owl";
 import { FetchRecordError } from "@web/model/relational_model/errors";
 import { effect } from "@web/core/utils/reactive";
+import {
+    CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE,
+    CONTROL_PANEL_BUTTONS_ARCH_SEQUENCE,
+} from "@web/search/control_panel/control_panel";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 
 const viewRegistry = registry.category("views");
 
@@ -131,6 +137,8 @@ export class FormController extends Component {
         Field,
         CogMenu: FormCogMenu,
         Widget,
+        Dropdown,
+        DropdownItem,
     };
 
     static props = {
@@ -143,7 +151,7 @@ export class FormController extends Component {
         Renderer: Function,
         Compiler: Function,
         archInfo: Object,
-        buttonTemplate: String,
+        staticControlPanelButtons: Object,
         preventCreate: { type: Boolean, optional: true },
         preventEdit: { type: Boolean, optional: true },
         onDiscard: { type: Function, optional: true },
@@ -363,6 +371,51 @@ export class FormController extends Component {
             },
             useSendBeaconToSaveUrgently: true,
         };
+    }
+
+    get staticControlPanelButtons() {
+        return this.props.staticControlPanelButtons;
+    }
+
+    get controlPanelButtons() {
+        const staticButtons = Object.entries(this.staticControlPanelButtons).map(
+            ([key, button]) => ({ id: key, ...button })
+        );
+        const footerButtons = this.archInfo.footerButtons.map((button) => ({
+            id: button.id,
+            isAvailable: () => !this.evalViewModifier(button.invisible),
+            sequence: CONTROL_PANEL_BUTTONS_ARCH_SEQUENCE,
+            template: "web.View.Buttons.SingleRecord",
+            props: this.singleRecordViewButtonProps(button),
+        }));
+        let buttons = [...footerButtons];
+        if (this.archInfo.displayGenericButtons) {
+            buttons = [...staticButtons, ...buttons];
+        }
+        return buttons
+            .filter((button) => button.isAvailable === undefined || button.isAvailable.call(this))
+            .sort(
+                (btn1, btn2) =>
+                    (btn1.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE) -
+                    (btn2.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE)
+            );
+    }
+
+    singleRecordViewButtonProps(button) {
+        return {
+            record: this.model.root,
+            className: button.className,
+            clickParams: button.clickParams,
+            defaultRank: "btn-secondary",
+            icon: button.icon,
+            string: button.string,
+            title: button.title,
+            attrs: button.attrs,
+        };
+    }
+
+    evalViewModifier(modifier) {
+        return evaluateBooleanExpr(modifier, this.model.root.evalContext);
     }
 
     /**

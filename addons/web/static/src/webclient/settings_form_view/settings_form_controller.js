@@ -50,6 +50,20 @@ export class SettingsFormController extends formView.Controller {
         this.initialApp = "module" in this.props.context ? this.props.context.module : "";
     }
 
+    get staticControlPanelButtons() {
+        return {
+            ...this.props.staticControlPanelButtons,
+            save: {
+                ...this.props.staticControlPanelButtons.save,
+                isAvailable: () => this.model.root.isInEdition,
+            },
+            discard: {
+                ...this.props.staticControlPanelButtons.discard,
+                isAvailable: () => this.model.root.isInEdition,
+            },
+        };
+    }
+
     get modelParams() {
         const headerFields = Object.values(this.archInfo.fieldNodes)
             .filter((fieldNode) => fieldNode.options.isHeaderField)

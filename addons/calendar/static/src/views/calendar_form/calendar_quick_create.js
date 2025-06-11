@@ -77,7 +77,13 @@ export class CalendarQuickCreate extends FormViewDialog {
         super.setup();
         Object.assign(this.viewProps, {
             ...this.viewProps,
-            buttonTemplate: "calendar.CalendarQuickCreateButtons",
+            staticControlPanelButtons: {
+                ...this.staticControlPanelButtons,
+                moreOptions: {
+                    template: "calendar.CalendarQuickCreate.Buttons.MoreOptions",
+                    sequence: 25,
+                },
+            },
             goToFullEvent: (contextData) => {
                 this.props.goToFullEvent(contextData);
             }

@@ -87,11 +87,11 @@
     </WebsiteDialog>
 </t>
 
-<t t-name="website.PagePropertiesDialogButtons" t-inherit="web.FormViewDialog.ToOne.buttons">
-    <xpath expr="//button[hasclass('o_form_button_cancel')]" position="after">
-        <button class="btn btn-link order-last ms-auto" t-on-click="props.clonePage"><i class="fa fa-fw fa-clone"/>Duplicate Page</button>
-        <button class="btn btn-link order-last" t-on-click="props.deletePage"><i class="fa fa-fw fa-trash"/>Delete Page</button>
-    </xpath>
+<t t-name="website.PagePropertiesDialog.Buttons.Duplicate">
+    <button class="btn btn-link order-last ms-auto" t-on-click="props.clonePage"><i class="fa fa-fw fa-clone"/>Duplicate Page</button>
+</t>
+<t t-name="website.PagePropertiesDialog.Buttons.Delete">
+    <button class="btn btn-link order-last" t-on-click="props.deletePage"><i class="fa fa-fw fa-trash"/>Delete Page</button>
 </t>
 
 </templates>

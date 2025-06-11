@@ -34,7 +34,7 @@ import {
 } from "@odoo/owl";
 import {
     CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE,
-    CONTROL_PANEL_BUTTONS_HEADER_SEQUENCE,
+    CONTROL_PANEL_BUTTONS_ARCH_SEQUENCE,
 } from "@web/search/control_panel/control_panel";
 
 const QUICK_CREATE_FIELD_TYPES = ["char", "boolean", "many2one", "selection", "many2many"];
@@ -229,7 +229,7 @@ export class KanbanController extends Component {
             .map((button) => ({
                 id: button.id,
                 isAvailable: () => !this.evalViewModifier(button.invisible),
-                sequence: CONTROL_PANEL_BUTTONS_HEADER_SEQUENCE,
+                sequence: CONTROL_PANEL_BUTTONS_ARCH_SEQUENCE,
                 template: "web.View.Buttons.MultiRecord",
                 props: this.multiRecordViewButtonProps(button),
             }));

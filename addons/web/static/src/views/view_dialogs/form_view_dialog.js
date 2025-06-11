@@ -4,6 +4,7 @@ import { CallbackRecorder } from "@web/search/action_hook";
 import { View } from "@web/views/view";
 
 import { Component } from "@odoo/owl";
+import { formView } from "@web/views/form/form_view";
 
 export class FormViewDialog extends Component {
     static template = "web.FormViewDialog";
@@ -43,19 +44,27 @@ export class FormViewDialog extends Component {
         this.modalRef = useChildRef();
         this.env.dialogData.dismiss = () => this.discardRecord();
 
-        const buttonTemplate = this.props.isToMany
-            ? "web.FormViewDialog.ToMany.buttons"
-            : "web.FormViewDialog.ToOne.buttons";
-
         this.currentResId = this.props.resId;
 
         if (this.props.canExpand) {
             this.onExpandCallback = this.onExpand.bind(this);
         }
+        this.staticControlPanelButtons = {
+            ...formView.staticControlPanelButtons,
+            save: {
+                template: "web.FormViewDialog.Buttons.Save",
+                sequence: 10,
+            },
+            saveNew: {
+                isAvailable: () => this.props.isToMany,
+                template: "web.FormViewDialog.Buttons.SaveNew",
+                sequence: 15,
+            },
+        };
 
         this.viewProps = {
             type: "form",
-            buttonTemplate,
+            staticControlPanelButtons: this.staticControlPanelButtons,
 
             context: this.props.context || {},
             display: { controlPanel: false },

@@ -15,17 +15,12 @@
     </Dialog>
   </t>
 
-  <t t-name="web.FormViewDialog.ToMany.buttons" t-inherit="web.FormView.Buttons">
-    <xpath expr="//button[hasclass('o_form_button_save')]" position="replace">
+  <t t-name="web.FormViewDialog.Buttons.Save">
       <button class="btn btn-primary o_form_button_save" t-on-click="saveButtonClicked" data-hotkey="c">Save</button>
-      <button class="btn btn-primary o_form_button_save_new" t-on-click="() => this.saveButtonClicked({saveAndNew: true})" data-hotkey="n">Save &amp; New</button>
-    </xpath>
   </t>
 
-  <t t-name="web.FormViewDialog.ToOne.buttons" t-inherit="web.FormView.Buttons">
-    <xpath expr="//button[hasclass('o_form_button_save')]" position="replace">
-      <button class="btn btn-primary o_form_button_save" t-on-click="saveButtonClicked" data-hotkey="c">Save</button>
-    </xpath>
+  <t t-name="web.FormViewDialog.Buttons.SaveNew">
+      <button class="btn btn-primary o_form_button_save_new" t-on-click="() => this.saveButtonClicked({saveAndNew: true})" data-hotkey="n">Save &amp; New</button>
   </t>
 
 </templates>
