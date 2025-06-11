@@ -8,6 +8,13 @@
             <xpath expr="//field[@name='country_id']" position="after">
                 <field name="account_enabled_tax_country_ids" invisible="1"/>
             </xpath>
+<<<<<<< HEAD
+=======
+            <field name="currency_id" position="after">
+                <field name="income_account_id" groups="account.group_account_readonly" invisible="1"/>
+                <field name="expense_account_id" groups="account.group_account_readonly" invisible="1"/>
+            </field>
+>>>>>>> 11fa7b4ba7d6 ([IMP] stock: move cost_method to settings)
             <xpath expr="//sheet" position="after">
                 <chatter/>
             </xpath>
