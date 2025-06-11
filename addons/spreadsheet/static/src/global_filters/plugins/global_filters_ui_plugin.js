@@ -126,19 +126,24 @@ export class GlobalFiltersUIPlugin extends OdooUIPlugin {
     async getRelationalFiltersFromArch(model, arch) {
         const blackList = [
             // ?
-            "activity_user_id", // from mail.activity.mixin, present in many search views but not useful for reporting
+            "activity_user_id", // from mail.activity.mixin, present in many search views but not really useful for reporting and prevents from
+            // matching other res.users fields when there are more than one
             "activity_type_id", // also from mail.activity.mixin, not useful for reporting
         ];
         const fields = await this.env.services.field.loadFields(model);
         const parsedArch = new SearchArchParser({ arch }, fields, {}).parse();
-        const relationalFilters = parsedArch.preSearchItems
-            .flat()
-            .filter(
-                (item) =>
-                    !blackList.includes(item.fieldName) &&
-                    item.type === "field" &&
-                    ["many2one", "many2many", "one2many"].includes(item.fieldType)
-            );
+        const relationalFilters = parsedArch.preSearchItems.flat().filter(
+            (item) =>
+                !blackList.includes(item.fieldName) &&
+                item.type === "field" &&
+                ["many2one", "many2many", "one2many"].includes(item.fieldType) &&
+                // if there's a filter domain, it must at least match the field itself.
+                // Otherwise the domain targets related fields `order_line_ids.product_id` for example,
+                // and it would require a specific handling
+                (!item.filterDomain ||
+                    item.filterDomain.includes(`'${item.fieldName}'`) ||
+                    item.filterDomain.includes(`"${item.fieldName}"`))
+        );
         const result = {};
         for (const filter of relationalFilters) {
             result[filter.fieldName] = filter;
