@@ -375,7 +375,11 @@ class ProjectTask(models.Model):
                 if task.state not in CLOSED_STATES:
                     task.state = '04_waiting_normal'
             # if the task as no blocking dependencies and is in waiting_normal, the task goes back to in progress
-            elif task.state not in CLOSED_STATES:
+            elif (
+                (task.stage_id != task._origin.stage_id)
+                or task.env.context.get('project_kanban')
+                or task.state == '04_waiting_normal' and (not task.depend_on_ids or not task.depend_on_ids in CLOSED_STATES)
+            ) and task.state not in CLOSED_STATES:
                 task.state = '01_in_progress'
 
     @api.depends('state')
@@ -396,11 +400,6 @@ class ProjectTask(models.Model):
     def OPEN_STATES(self):
         """ Return a list of the technical names complementing the CLOSED_STATES, a.k.a the open states """
         return list(set(self._fields['state'].get_values(self.env)) - set(CLOSED_STATES))
-
-    @api.onchange('project_id')
-    def _onchange_project_id(self):
-        if self.state != '04_waiting_normal':
-            self.state = '01_in_progress'
 
     def is_blocked_by_dependences(self):
         return any(blocking_task.state not in CLOSED_STATES for blocking_task in self.depend_on_ids)
@@ -1294,8 +1293,8 @@ class ProjectTask(models.Model):
                     if task.is_blocked_by_dependences() and vals['state'] not in CLOSED_STATES and vals['state'] != '04_waiting_normal':
                         task.state = '04_waiting_normal'
                 task.date_last_stage_update = now
-        elif 'project_id' in vals:
-            self.filtered(lambda t: t.state != '04_waiting_normal').state = '01_in_progress'
+        # elif 'project_id' in vals:
+        #     self.filtered(lambda t: t.state != '04_waiting_normal').state = '01_in_progress'
 
         # Do not recompute the state when changing the parent (to avoid resetting the state)
         if 'parent_id' in vals:
