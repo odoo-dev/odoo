@@ -10,7 +10,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.osv import expression
 from odoo.tools import float_is_zero, check_barcode_encoding
-from odoo.tools.float_utils import float_round
+from odoo.tools.float_utils import float_round, float_compare
 from odoo.tools.mail import html2plaintext, is_html_empty
 from odoo.tools.misc import groupby
 
@@ -232,18 +232,41 @@ class ProductProduct(models.Model):
         """
         if self.env.context.get('skip_qty_available_update', False):
             return
+        Quant = self.env['stock.quant']
+        location = self.env['stock.warehouse'].search(
+            [('company_id', '=', self.env.company.id)], limit=1
+        ).lot_stock_id
+        quant_sums = dict(
+            Quant._read_group(
+            [('product_id', 'in', self.ids), ('location_id', '=', location.id)],
+            groupby=['product_id'],
+            aggregates=['quantity:sum'])
+        )
+
         for product in self:
-            if (
-                product.type == "consu" and product.is_storable and product.qty_available > 0
-            ):
-                warehouse = self.env['stock.warehouse'].search(
-                    [('company_id', '=', self.env.company.id)], limit=1
-                )
-                self.env['stock.quant'].with_context(inventory_mode=True).create({
-                    'product_id': product.id,
-                    'location_id': warehouse.lot_stock_id.id,
-                    'inventory_quantity': product.qty_available,
-                })._apply_inventory()
+            if not product.type == "consu" or not product.is_storable:
+                continue
+            rounding = product.uom_id.rounding
+            product_qty = product.qty_available
+            if float_compare(product_qty, 0.0, precision_rounding=rounding) >= 0:
+                if quant_sums.get(product) and \
+                    float_compare(quant_sums[product], product_qty, precision_rounding=rounding) != 0:
+                    # If the quant already exists and the quant qty is different with product_qty, we update it
+                    Quant.with_context(inventory_mode=True).create({
+                        'product_id': product.id,
+                        'location_id': location.id,
+                        'inventory_quantity': product_qty,
+                    })._apply_inventory()
+                elif not quant_sums.get(product):
+                    # if no quant exists for the product, we create a new one
+                    quants = Quant.with_context(inventory_mode=True).create({
+                        'product_id': product.id,
+                        'location_id': location.id,
+                        'inventory_quantity': product_qty,
+                    })
+                    if float_compare(product_qty, 0.0, precision_rounding=rounding) != 0:
+                        # if the qty_available is zero, we skip the apply inventory to create a SM with 0 quantity
+                        quants._apply_inventory()
 
     def _compute_nbr_moves(self):
         incoming_moves = self.env['stock.move.line']._read_group([
