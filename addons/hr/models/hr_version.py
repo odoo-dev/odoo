@@ -162,11 +162,6 @@ class HrVersion(models.Model):
     contract_type_id = fields.Many2one('hr.contract.type', "Contract Type", tracking=True,
                                        groups="hr.group_hr_user")
 
-    _check_contract_start_date_defined = models.Constraint(
-        'CHECK(contract_date_end IS NULL OR contract_date_start IS NOT NULL)',
-        'The contract must have a start date.',
-    )
-
     def _get_hr_responsible_domain(self):
         return "[('share', '=', False), ('company_ids', 'in', company_id), ('all_group_ids', 'in', %s)]" % self.env.ref('hr.group_hr_user').id
 
@@ -174,6 +169,16 @@ class HrVersion(models.Model):
         'res.users', 'HR Responsible', tracking=True,
         help='Person responsible for validating the employee\'s contracts.', domain=_get_hr_responsible_domain,
         default=lambda self: self.env.user, required=True, groups="hr.group_hr_user")
+
+    _check_contract_start_date_defined = models.Constraint(
+        'CHECK(contract_date_end IS NULL OR contract_date_start IS NOT NULL)',
+        'The contract must have a start date.',
+    )
+
+    _check_unique_date_version = models.UniqueIndex(
+        '(employee_id, date_version) WHERE active = TRUE',
+        'An employee cannot have multiple active versions sharing the same effective date.',
+    )
 
     @api.depends('employee_id.company_id')
     def _compute_company_id(self):
