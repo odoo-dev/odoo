@@ -209,7 +209,7 @@ class HrEmployee(models.Model):
         # Prevent the resource calendar of leaves to be updated by a write to
         # employee. When this module is enabled the resource calendar of
         # leaves are determined by those of the contracts.
-        self = self.with_context(no_leave_resource_calendar_update=True)
+        self = self.with_context(no_leave_resource_calendar_update=True)  # noqa: PLW0642
         if 'parent_id' in values:
             manager = self.env['hr.employee'].browse(values['parent_id']).user_id
             if manager:

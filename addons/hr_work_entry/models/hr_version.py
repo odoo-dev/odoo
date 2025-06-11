@@ -343,7 +343,7 @@ class HrVersion(models.Model):
         # based on the target timezone
         assert isinstance(date_start, datetime)
         assert isinstance(date_stop, datetime)
-        self = self.with_context(tracking_disable=True)
+        self = self.with_context(tracking_disable=True)  # noqa: PLW0642
         vals_list = []
         self.write({'last_generation_date': fields.Date.today()})
 
