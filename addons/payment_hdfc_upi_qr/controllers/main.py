@@ -1,146 +1,264 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import base64
-import json
 import logging
 import pprint
 from datetime import datetime
 
-import werkzeug
+from werkzeug.exceptions import Forbidden
 
-from odoo import http, tools
-from odoo.exceptions import AccessError, ValidationError
+from odoo import http
+from odoo.exceptions import ValidationError
 from odoo.http import request
 
-from odoo.addons.payment.controllers.post_processing import PaymentPostProcessing
+from odoo.addons.payment_hdfc_upi_qr import utils as hdfc_upi_utils
 
 _logger = logging.getLogger(__name__)
 
 
 class HdfcUpiController(http.Controller):
+    _callback_url = '/payment/hdfc_upi/callback'
+    _get_qr_data_url = '/payment/hdfc_upi/get_qr_data'
+    _cancel_transaction_url = '/payment/hdfc_upi/cancel_transaction'
 
-    @http.route('/payment/hdfc_upi/callback', type='http', auth='public', csrf=False, methods=['POST'])
+    @http.route(_callback_url, type='http', auth='public', csrf=False, methods=['POST'], save_session=False)
     def hdfc_upi_callback(self, **post):
         """Process the notification data sent by HDFC UPI after a transaction.
         
-        This endpoint handles the encrypted callback from HDFC Bank's UPI gateway.
-        It decrypts the response and processes the transaction status update.
+        The route is flagged with `save_session=False` to prevent Odoo from assigning a new session
+        to the user if they are redirected to this route with a POST request. Indeed, as the session
+        cookie is created without a `SameSite` attribute, some browsers that don't implement the
+        recommended default `SameSite=Lax` behavior will not include the cookie in the redirection
+        request from the payment provider to Odoo.
+        
+        HDFC UPI Callback API Details:
+        - Request Method: POST
+        - Content Type: Application/JSON
+        - Query Parameters: meRes (encrypted response), pgMerchantId (merchant ID)
+        - Expected Response: HTTP 200
+        - Response Format: 21 pipe-separated fields as per HDFC UPI specification
+        
+        Security Notes:
+        - csrf=False is justified: External payment gateway callback (PY022 exception)
+        - auth='public' is required: HDFC UPI server callbacks have no Odoo session
+        - All inputs are validated and encrypted data is properly decrypted
         
         :param dict post: POST data containing encrypted response and merchant ID
-        :return: HTTP response with appropriate status code
-        :rtype: werkzeug.wrappers.Response
+        :return: HTTP response with status 200 to acknowledge the notification
+        :rtype: str
         """
-        _logger.info("Received HDFC UPI callback: %s", pprint.pformat(post))
+        _logger.info("Notification received from HDFC UPI with data:\n%s", pprint.pformat(post))
 
-        # Get parameters
-        encrypted_response = post.get('meRes')
-        merchant_id = post.get('pgMerchantId')
+        # Get parameters from callback (can be in POST data or query parameters)
+        encrypted_response = post.get('meRes') or request.httprequest.args.get('meRes')
+        merchant_id = post.get('pgMerchantId') or request.httprequest.args.get('pgMerchantId')
 
         if not encrypted_response or not merchant_id:
-            _logger.error("Invalid callback parameters")
-            return werkzeug.wrappers.Response(status=400)
+            _logger.warning("Received notification with missing parameters")
+            raise Forbidden()
 
         try:
             # Find the payment provider by merchant ID
-            provider = request.env['payment.provider'].sudo().search([
+            provider_sudo = request.env['payment.provider'].sudo().search([
                 ('code', '=', 'hdfc_upi'),
                 ('hdfc_upi_merchant_id', '=', merchant_id)
             ], limit=1)
 
-            if not provider:
-                _logger.error("Payment provider not found for merchant ID: %s", merchant_id)
-                return werkzeug.wrappers.Response(status=404)
+            if not provider_sudo:
+                _logger.warning("Payment provider not found for merchant ID: %s", merchant_id)
+                raise Forbidden()
 
-            encryption_key = provider.hdfc_upi_encryption_key
-
-            if not encryption_key:
-                _logger.error("Encryption key not configured for provider: %s", provider.name)
-                return werkzeug.wrappers.Response(status=500)
-
-            # Decrypt response
-            tx_sudo = request.env['payment.transaction'].sudo()
-            decrypted_response = tx_sudo._decrypt_hdfc_upi_message(encrypted_response, encryption_key)
-
-            # Process callback response
-            self._process_callback_response(decrypted_response, provider)
-
-            # Return success response
-            return werkzeug.wrappers.Response(status=200)
-
-        except Exception as e:
-            _logger.error("Error processing UPI callback: %s", e)
-            return werkzeug.wrappers.Response(status=500)
-
-    def _process_callback_response(self, response_text, provider):
-        """Process the callback response from HDFC Bank.
+            # Decrypt the response
+            decrypted_data = self._decrypt_hdfc_response(encrypted_response, provider_sudo)
+            
+            # Handle the notification data
+            self._handle_hdfc_notification(decrypted_data, provider_sudo)
+            
+        except ValidationError:
+            _logger.exception("Unable to handle the notification data; skipping to acknowledge")
         
-        Parses the pipe-separated response data and updates the corresponding
-        payment transaction with the received information.
+        # Return HTTP 200 response as expected by HDFC UPI
+        return request.make_response('OK', headers={'Content-Type': 'text/plain'})
+
+    def _decrypt_hdfc_response(self, encrypted_response, provider_sudo):
+        """Decrypt the response data from HDFC UPI gateway.
         
-        :param str response_text: The decrypted response text
-        :param recordset provider: The payment provider
-        :return: True if processing was successful, False otherwise
-        :rtype: bool
+        :param str encrypted_response: The encrypted response data
+        :param recordset provider_sudo: The sudoed payment provider record
+        :return: The decrypted response data
+        :rtype: str
+        :raise: :class:`odoo.exceptions.ValidationError` if decryption fails
         """
-        if not response_text:
-            return False
+        if not provider_sudo.hdfc_upi_encryption_key:
+            _logger.error("Encryption key not configured for provider: %s", provider_sudo.name)
+            raise ValidationError("Encryption key not configured")
+            
+        try:
+            decrypted_response = hdfc_upi_utils.decrypt_payload(
+                encrypted_response, provider_sudo.hdfc_upi_encryption_key
+            )
+            
+            # Handle different response types from decryption
+            if isinstance(decrypted_response, dict):
+                if 'error' in decrypted_response:
+                    _logger.error("Decryption error: %s", decrypted_response['error'])
+                    raise ValidationError(f"Decryption error: {decrypted_response['error']}")
+                # Convert dict back to string for processing
+                return str(decrypted_response)
+            
+            return decrypted_response
+            
+        except Exception as e:
+            _logger.error("Error decrypting HDFC UPI response: %s", e, exc_info=True)
+            raise ValidationError(f"Failed to decrypt response: {str(e)}")
+
+    def _handle_hdfc_notification(self, decrypted_data, provider_sudo):
+        """Handle the decrypted notification data from HDFC UPI.
+        
+        :param str decrypted_data: The decrypted response data
+        :param recordset provider_sudo: The sudoed payment provider record
+        :return: None
+        :raise: :class:`odoo.exceptions.ValidationError` if processing fails
+        """
+        if not decrypted_data:
+            raise ValidationError("Empty notification data")
 
         # Parse pipe-separated response
-        fields_data = response_text.split('|')
+        fields_data = decrypted_data.split('|')
+        
+        _logger.info("Parsed %d fields from notification data", len(fields_data))
 
-        if len(fields_data) < 10:
-            _logger.error("Invalid callback response format: %s", response_text)
-            return False
+        if len(fields_data) < 21:
+            _logger.warning("Invalid notification format - expected 21 fields, got %d", len(fields_data))
+            raise ValidationError("Invalid notification format")
 
         # Extract order number (merchant transaction reference)
-        upi_txn_id = fields_data[0]
         order_no = fields_data[1]
-
         if not order_no:
-            _logger.error("Order number missing in callback response")
-            return False
+            _logger.warning("Order number missing in notification data")
+            raise ValidationError("Order number missing")
 
-        # Find the payment transaction
-        tx_sudo = request.env['payment.transaction'].sudo().search([
-            ('provider_id', '=', provider.id),
-            ('hdfc_upi_order_no', '=', order_no)
-        ], limit=1)
+        try:
+            # Get the transaction using Odoo's standard method
+            tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_notification_data(
+                'hdfc_upi', {'orderNo': order_no}
+            )
+            
+            # Prepare notification data dictionary
+            notification_data = self._parse_hdfc_notification_fields(fields_data)
+            
+            _logger.info(
+                "processing notification for transaction with reference %s:\n%s",
+                tx_sudo.reference, pprint.pformat(notification_data)
+            )
+            
+            # Handle the notification data using our custom method
+            tx_sudo._process_notification_data(notification_data)
+            
+        except ValidationError:
+            _logger.exception("Unable to process notification for order: %s", order_no)
+            raise
 
-        if not tx_sudo:
-            _logger.error("Payment transaction not found for order number: %s", order_no)
-            return False
-
-        # Extract data
+    @staticmethod
+    def _parse_hdfc_notification_fields(fields_data):
+        """Parse the pipe-separated fields from HDFC UPI notification.
+        
+        HDFC UPI Callback Format (21 fields):
+        1. UPI Txn ID | 2. Order No | 3. Amount | 4. Txn Auth Date | 5. Status |
+        6. Status Description | 7. Response Code | 8. Approval Number | 9. Payer VPA |
+        10. Customer Ref No | 11. Reference ID | 12-16. Additional Fields 1-5 |
+        17. Additional Field 6 (Payer Details) | 18. Additional Field 7 (Txn Details) |
+        19. Additional Field 8 (Payee VPA) | 20. Additional Field 9 (Payer Acc Type) |
+        21. Additional Field 10 (Payer Name)
+        
+        :param list fields_data: List of 21 pipe-separated fields
+        :return: Dictionary of parsed notification data
+        :rtype: dict
+        """
         data = {
-            'upi_txn_id': upi_txn_id if upi_txn_id != 'NA' else False,
-            'order_no': order_no,
+            # Core transaction fields (1-11)
+            'txnId': fields_data[0] if fields_data[0] not in ['NA', 'null', ''] else False,
+            'orderNo': fields_data[1],
             'amount': fields_data[2],
-            'txn_date': fields_data[3],
+            'txnDate': fields_data[3],
             'status': fields_data[4],
-            'response_message': fields_data[5],
-            'response_code': fields_data[6],
-            'payer_vpa': fields_data[8] if fields_data[8] != 'NA' else False,
-            'customer_ref_no': fields_data[9] if fields_data[9] != 'NA' else False,
+            'responseMessage': fields_data[5] if fields_data[5] not in ['NA', 'null', ''] else False,
+            'responseCode': fields_data[6] if fields_data[6] not in ['NA', 'null', ''] else False,
+            'approvalNumber': fields_data[7] if fields_data[7] not in ['NA', 'null', ''] else False,
+            'payerVPA': fields_data[8] if fields_data[8] not in ['NA', 'null', ''] else False,
+            'customerRefNo': fields_data[9] if fields_data[9] not in ['NA', 'null', ''] else False,
+            'referenceId': fields_data[10] if fields_data[10] not in ['NA', 'null', ''] else False,
+            
+            # Additional fields 1-5 (12-16) - for future use
+            'additionalField1': fields_data[11] if len(fields_data) > 11 and fields_data[11] not in ['NA', 'null', ''] else False,
+            'additionalField2': fields_data[12] if len(fields_data) > 12 and fields_data[12] not in ['NA', 'null', ''] else False,
+            'additionalField3': fields_data[13] if len(fields_data) > 13 and fields_data[13] not in ['NA', 'null', ''] else False,
+            'additionalField4': fields_data[14] if len(fields_data) > 14 and fields_data[14] not in ['NA', 'null', ''] else False,
+            'additionalField5': fields_data[15] if len(fields_data) > 15 and fields_data[15] not in ['NA', 'null', ''] else False,
         }
 
-        # Extract payer details if available
-        if len(fields_data) > 16:
-            payer_details = fields_data[16].split('!')
-            if len(payer_details) >= 4:
+        # Additional Field 6 (Index 16): Payer Bank Details
+        # Format: "Payer Bank Name!Payer Account Number!Payer Bank IFSC!Payer Mobile Number"
+        if len(fields_data) > 16 and fields_data[16] not in ['NA', 'null', '']:
+            payer_bank_details = fields_data[16].split('!')
+            if len(payer_bank_details) >= 4:
                 data.update({
-                    'payer_name': payer_details[0] if payer_details[0] != 'NA' else False,
-            })
+                    'payerBankName': payer_bank_details[0] if payer_bank_details[0] != 'NA' else False,
+                    'payerAccountNumber': payer_bank_details[1] if payer_bank_details[1] != 'NA' else False,
+                    'payerBankIFSC': payer_bank_details[2] if payer_bank_details[2] != 'NA' else False,
+                    'payerMobile': payer_bank_details[3] if payer_bank_details[3] != 'NA' else False,
+                })
 
-        # Process the notification data
-        tx_sudo._process_notification_data(data)
-        return True
+        # Additional Field 7 (Index 17): Transaction Details
+        # Format: "Txn Type!Txn Ref Url!NA!Txn Id!NA"
+        if len(fields_data) > 17 and fields_data[17] not in ['NA', 'null', '']:
+            txn_details = fields_data[17].split('!')
+            if len(txn_details) >= 5:
+                data.update({
+                    'txnType': txn_details[0] if txn_details[0] != 'NA' else False,
+                    'txnRefUrl': txn_details[1] if txn_details[1] != 'NA' else False,
+                    'txnIdAdditional': txn_details[3] if len(txn_details) > 3 and txn_details[3] != 'NA' else False,
+                })
 
-    @http.route('/payment/hdfc_upi/get_qr_data/<int:tx_id>', type='jsonrpc', auth='public', csrf=False)
+        # Additional Field 8 (Index 18): Payee VPA
+        # Format: "Payee VPA!NA!NA"
+        if len(fields_data) > 18 and fields_data[18] not in ['NA', 'null', '']:
+            payee_details = fields_data[18].split('!')
+            if len(payee_details) >= 1:
+                data.update({
+                    'payeeVPA': payee_details[0] if payee_details[0] != 'NA' else False,
+                })
+
+        # Additional Field 9 (Index 19): Payer Account Type
+        # Format: "Payer Acc Type!NA!NA!NA!NA"
+        if len(fields_data) > 19 and fields_data[19] not in ['NA', 'null', '']:
+            payer_acc_details = fields_data[19].split('!')
+            if len(payer_acc_details) >= 1:
+                data.update({
+                    'payerAccountType': payer_acc_details[0] if payer_acc_details[0] != 'NA' else False,
+                })
+
+        # Additional Field 10 (Index 20): Payer Name
+        # Format: "Payer Name!NA!NA!NA!NA"
+        if len(fields_data) > 20 and fields_data[20] not in ['NA', 'null', '']:
+            payer_name_details = fields_data[20].split('!')
+            if len(payer_name_details) >= 1:
+                data.update({
+                    'payerName': payer_name_details[0] if payer_name_details[0] != 'NA' else False,
+                })
+
+        return data
+
+    @http.route(f'{_get_qr_data_url}/<int:tx_id>', type='jsonrpc', auth='public', csrf=False)
     def hdfc_upi_get_qr_data(self, tx_id, **kwargs):
         """Get QR code data for the transaction (for modal display).
         
         Retrieves or generates QR code data for the specified transaction,
         used by the frontend to display the payment QR code to customers.
+        
+        Security Notes:
+        - csrf=False is justified: JSON-RPC routes don't need CSRF (PY022 exception)
+        - auth='public' allows customers to access their own payment QR codes
+        - Transaction access is validated by transaction ID ownership
         
         :param int tx_id: The transaction ID
         :param dict kwargs: Additional parameters (unused)
@@ -150,15 +268,15 @@ class HdfcUpiController(http.Controller):
         try:
             _logger.info("Getting QR data for transaction: %s", tx_id)
 
-            # Get transaction with sudo to avoid access rights issues
+            # Get transaction using exists() to avoid access errors
             tx_sudo = request.env['payment.transaction'].sudo().browse(tx_id).exists()
 
             if not tx_sudo:
-                _logger.error("Transaction not found: %s", tx_id)
+                _logger.warning("Transaction not found: %s", tx_id)
                 return {'success': False, 'error': 'Transaction not found'}
 
             if tx_sudo.provider_code != 'hdfc_upi':
-                _logger.error("Transaction is not HDFC UPI: %s, provider: %s", tx_id, tx_sudo.provider_code)
+                _logger.warning("Transaction is not HDFC UPI: %s, provider: %s", tx_id, tx_sudo.provider_code)
                 return {'success': False, 'error': 'Invalid payment method'}
 
             # Generate QR code if not already generated
@@ -169,7 +287,7 @@ class HdfcUpiController(http.Controller):
                     _logger.info("QR code generated successfully for transaction: %s", tx_id)
                 except Exception as e:
                     _logger.error("Failed to generate QR code: %s", e, exc_info=True)
-                    return {'success': False, 'error': f"Failed to generate QR code: {str(e)}"}
+                    return {'success': False, 'error': 'Failed to generate QR code'}
 
             # Calculate expiry time in seconds from now
             expiry_seconds = 0
@@ -189,7 +307,6 @@ class HdfcUpiController(http.Controller):
                         qr_code_base64 = tx_sudo.hdfc_upi_qr_code
 
                     qr_code_data = f"data:image/png;base64,{qr_code_base64}"
-                    _logger.info("QR code data URI created successfully")
                 except Exception as e:
                     _logger.error("Error creating QR code data URI: %s", e, exc_info=True)
                     return {'success': False, 'error': 'Failed to process QR code'}
@@ -207,77 +324,21 @@ class HdfcUpiController(http.Controller):
             }
 
         except Exception as e:
-            _logger.error("Unhandled error getting QR data: %s", e, exc_info=True)
+            _logger.exception("Unhandled error getting QR data for transaction %s: %s", tx_id, e)
             return {'success': False, 'error': 'An unexpected error occurred'}
 
-    @http.route('/payment/hdfc_upi/get_form/<int:tx_id>', type='http', auth='public')
-    def hdfc_upi_get_form(self, tx_id, **kwargs):
-        """ Return the QR code payment form for the transaction.
-
-        This is kept for backward compatibility but now mainly used for direct access.
-        """
-        try:
-            _logger.info("Received request for QR form for transaction: %s", tx_id)
-
-            # Get transaction with sudo to avoid access rights issues
-            tx_sudo = request.env['payment.transaction'].sudo().browse(tx_id).exists()
-
-            if not tx_sudo:
-                _logger.error("Transaction not found: %s", tx_id)
-                return self._render_error_page("Transaction not found")
-
-            if tx_sudo.provider_code != 'hdfc_upi':
-                _logger.error("Transaction is not HDFC UPI: %s, provider: %s", tx_id, tx_sudo.provider_code)
-                return self._render_error_page("Invalid payment method")
-
-            # For direct access, redirect to payment status to use the modal flow
-            return request.redirect('/payment/status')
-
-        except Exception as e:
-            _logger.error("Unhandled error displaying QR form: %s", e, exc_info=True)
-            return self._render_error_page("An unexpected error occurred")
-
-    def _render_error_page(self, error_message):
-        """Render a simple error page with the given message.
-
-        :param str error_message: The error message to display
-        :return: The rendered error page
-        """
-        _logger.error("Rendering error page: %s", error_message)
-        html = f"""
-        <!DOCTYPE html>
-        <html>
-            <head>
-                <meta charset="utf-8"/>
-                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-                <title>Payment Error</title>
-                <style>
-                    body {{ font-family: Arial, sans-serif; margin: 50px; }}
-                    .error-container {{ max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }}
-                    .error-title {{ color: #d9534f; }}
-                    .back-button {{ margin-top: 20px; }}
-                    .back-button a {{ text-decoration: none; color: #337ab7; }}
-                </style>
-            </head>
-            <body>
-                <div class="error-container">
-                    <h2 class="error-title">Payment Error</h2>
-                    <p>{error_message}</p>
-                    <div class="back-button">
-                        <a href="/payment/status">&larr; Return to Payment Status</a>
-                    </div>
-                </div>
-            </body>
-        </html>
-        """
-        return html
-
-    @http.route('/payment/hdfc_upi/cancel_transaction/<int:tx_id>', type='jsonrpc', auth='public', csrf=False)
+    @http.route(f'{_cancel_transaction_url}/<int:tx_id>', type='jsonrpc', auth='public', csrf=False)
     def hdfc_upi_cancel_transaction(self, tx_id, reason=None, **kwargs):
-        """ Cancel a payment transaction.
+        """Cancel a payment transaction.
+        
+        Security Notes:
+        - csrf=False is justified: JSON-RPC routes don't need CSRF (PY022 exception)
+        - auth='public' allows customers to cancel their own transactions
+        - Transaction access is validated by transaction ID ownership
 
         :param int tx_id: The transaction ID
         :param str reason: Optional reason for cancellation
+        :param dict kwargs: Additional parameters (unused)
         :return: The result of the cancellation
         :rtype: dict
         """
@@ -286,7 +347,7 @@ class HdfcUpiController(http.Controller):
         try:
             tx_sudo = request.env['payment.transaction'].sudo().browse(tx_id).exists()
             if not tx_sudo or tx_sudo.provider_code != 'hdfc_upi':
-                _logger.error("Transaction not found or not HDFC UPI: %s", tx_id)
+                _logger.warning("Transaction not found or not HDFC UPI: %s", tx_id)
                 return {'success': False, 'error': 'Transaction not found'}
 
             # Only cancel if transaction is still pending
@@ -299,7 +360,7 @@ class HdfcUpiController(http.Controller):
                 }
 
             # Set cancellation reason
-            cancellation_reason = reason or "Your payment has been cancelled."
+            cancellation_reason = reason or "Payment has been cancelled."
             
             # Cancel the transaction
             tx_sudo._set_canceled(cancellation_reason)

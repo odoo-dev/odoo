@@ -8,7 +8,49 @@ import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 
 // Global UPI Modal instance
-let globalUpiModal = null
+let globalUpiModal = null;
+
+// Enhanced error handling
+const HDFC_UPI_ERRORS = {
+  NETWORK_ERROR: _t("Network connection failed. Please check your internet connection."),
+  TIMEOUT_ERROR: _t("Request timed out. Please try again."),
+  VALIDATION_ERROR: _t("Payment validation failed. Please check your details."),
+  QR_GENERATION_ERROR: _t("Failed to generate QR code. Please try again."),
+  UNKNOWN_ERROR: _t("An unexpected error occurred. Please try again."),
+};
+
+/**
+ * Enhanced error handler for HDFC UPI payments
+ * @param {Error|string} error - The error to handle
+ * @param {string} context - The context where error occurred
+ * @returns {string} User-friendly error message
+ */
+function handleHdfcUpiError(error, context = '') {
+  console.error(`HDFC UPI Error${context ? ' in ' + context : ''}:`, error);
+  
+  if (typeof error === 'string') {
+    return error;
+  }
+  
+  if (error.data && error.data.message) {
+    return error.data.message;
+  }
+  
+  if (error.message) {
+    if (error.message.includes('network')) {
+      return HDFC_UPI_ERRORS.NETWORK_ERROR;
+    }
+    if (error.message.includes('timeout')) {
+      return HDFC_UPI_ERRORS.TIMEOUT_ERROR;
+    }
+    if (error.message.includes('validation')) {
+      return HDFC_UPI_ERRORS.VALIDATION_ERROR;
+    }
+    return error.message;
+  }
+  
+  return HDFC_UPI_ERRORS.UNKNOWN_ERROR;
+}
 
 paymentForm.include({
   // #=== DOM MANIPULATION ===#
@@ -27,8 +69,8 @@ paymentForm.include({
    */
   async _prepareInlineForm(providerId, providerCode, paymentOptionId, paymentMethodCode, flow) {
     if (providerCode !== "hdfc_upi") {
-      this._super(...arguments)
-      return
+      this._super(...arguments);
+      return;
     }
 
     console.log("Preparing HDFC UPI inline form", {
@@ -37,23 +79,23 @@ paymentForm.include({
       paymentOptionId,
       paymentMethodCode,
       flow,
-    })
+    });
 
     // Check if instantiation is needed
     if (flow === "token") {
-      this._super(...arguments)
-      return // No component for tokens
+      this._super(...arguments);
+      return; // No component for tokens
     }
 
     // Overwrite the flow of the selected payment method
-    this._setPaymentFlow("direct")
+    this._setPaymentFlow("direct");
 
     // Create global modal if it doesn't exist
     if (!globalUpiModal) {
-      globalUpiModal = new UpiPaymentModal()
+      globalUpiModal = new UpiPaymentModal();
     }
 
-    console.log("HDFC UPI inline form prepared successfully")
+    console.log("HDFC UPI inline form prepared successfully");
   },
 
   // #=== PAYMENT FLOW ===#
@@ -71,25 +113,107 @@ paymentForm.include({
    */
   async _initiatePaymentFlow(providerCode, paymentOptionId, paymentMethodCode, flow) {
     if (providerCode !== "hdfc_upi" || flow === "token") {
-      await this._super(...arguments)
-      return
+      await this._super(...arguments);
+      return;
     }
 
-    console.log("Initiating HDFC UPI payment flow", { providerCode, paymentOptionId, paymentMethodCode, flow })
+    console.log("Initiating HDFC UPI payment flow", { 
+      providerCode, 
+      paymentOptionId, 
+      paymentMethodCode, 
+      flow 
+    });
 
-    // Create the transaction and retrieve the processing values
+    // Validate payment form before proceeding
+    if (!this._validatePaymentForm()) {
+      this._enableButton();
+      return;
+    }
+
     try {
-      const processingValues = await rpc(this.paymentContext["transactionRoute"], this._prepareTransactionRouteParams())
+      // Create the transaction and retrieve the processing values
+      const processingValues = await rpc(
+        this.paymentContext["transactionRoute"], 
+        this._prepareTransactionRouteParams()
+      );
 
-      console.log("Processing values received:", processingValues)
+      console.log("Processing values received:", processingValues);
+
+      // Enhanced validation of processing values
+      if (!this._validateProcessingValues(processingValues)) {
+        throw new Error(_t("Invalid processing values received from server"));
+      }
 
       // Show UPI modal with transaction data
-      this._showUpiModal(processingValues)
+      this._showUpiModal(processingValues);
+      
     } catch (error) {
-      console.error("Error creating transaction:", error)
-      this._displayErrorDialog(_t("Payment processing failed"), error.message)
-      this._enableButton()
+      const errorMessage = handleHdfcUpiError(error, 'payment initiation');
+      this._displayErrorDialog(_t("Payment Processing Failed"), errorMessage);
+      this._enableButton();
     }
+  },
+
+  /**
+   * Validate processing values received from server
+   * @private
+   * @param {Object} processingValues - The processing values to validate
+   * @returns {boolean} True if valid, false otherwise
+   */
+  _validateProcessingValues(processingValues) {
+    if (!processingValues) {
+      console.error("No processing values received");
+      return false;
+    }
+
+    if (!processingValues.transaction_id) {
+      console.error("Transaction ID is missing from processing values");
+      return false;
+    }
+
+    if (!processingValues.inline_form_values) {
+      console.error("Inline form values are missing");
+      return false;
+    }
+
+    return true;
+  },
+
+  /**
+   * Validate payment form data before submission
+   * @private
+   * @returns {boolean} True if valid, false otherwise
+   */
+  _validatePaymentForm() {
+    // Get amount from payment context
+    const amount = this.paymentContext.amount;
+    
+    if (!amount || amount <= 0) {
+      this._displayErrorDialog(
+        _t("Validation Error"), 
+        _t("Please enter a valid payment amount")
+      );
+      return false;
+    }
+
+    // UPI specific validations
+    if (amount < 1.0) {
+      this._displayErrorDialog(
+        _t("Validation Error"), 
+        _t("Minimum payment amount is ₹1.00")
+      );
+      return false;
+    }
+
+    if (amount > 100000.0) {
+      this._displayErrorDialog(
+        _t("Validation Error"), 
+        _t("Maximum UPI QR payment amount is ₹1,00,000.00")
+      );
+      return false;
+    }
+
+    return true;
   },
 
   /**
@@ -98,10 +222,10 @@ paymentForm.include({
    * @param {Object} processingValues - The processing values from transaction creation
    */
   _showUpiModal(processingValues) {
-    console.log("Showing UPI modal with processing values:", processingValues)
+    console.log("Showing UPI modal with processing values:", processingValues);
 
     if (!globalUpiModal) {
-      globalUpiModal = new UpiPaymentModal()
+      globalUpiModal = new UpiPaymentModal();
     }
 
     // Extract transaction data from processing values
@@ -112,14 +236,14 @@ paymentForm.include({
       currency: processingValues.currency_code,
       merchant_name: processingValues.merchant_name || "HDFC UPI",
       provider_code: "hdfc_upi",
-    }
+    };
 
-    console.log("Transaction data for modal:", transactionData)
+    console.log("Transaction data for modal:", transactionData);
 
     // Show modal
-    globalUpiModal.show(transactionData)
+    globalUpiModal.show(transactionData);
   },
-})
+});
 
 // UPI Payment Modal Class
 class UpiPaymentModal {

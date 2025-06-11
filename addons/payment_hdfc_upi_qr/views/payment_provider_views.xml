@@ -1,4 +1,3 @@
-<!-- Part of Odoo. See LICENSE file for full copyright and licensing details. -->
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="payment_provider_form_hdfc_upi" model="ir.ui.view">
