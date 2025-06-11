@@ -108,51 +108,155 @@
 </template> -->
 
 <t t-name="website.CountdownInlineOption">
+<!-- <BuilderContext action="'reloadCountdownInline'"> -->
     <BuilderRow label.translate="Template">
-        <BuilderSelect id="'countdown_inline_template_opt'" action="'selectTemplate'">
+        <BuilderSelect id="'countdown_inline_template_opt'" action="'selectCountdownInlineTemplate'" applyTo="'.s_countdown_inline_wrapper'">
             <BuilderSelectItem
                 title.translate="Default"
                 actionParam="{
                     view: 'website.s_countdown_inline_default_template',
-                    templateClass: 'default',
-                }">
+                    templateClass: 'o_template_default',
+                }"
+                >
                 Default
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Dominoes"
                 actionParam="{
                     view: 'website.s_countdown_inline_dominoes_template',
-                    templateClass: 'dominoes',
-                }">
+                    templateClass: 'o_template_dominoes',
+                }"
+                id="'template_dominoes_opt'">
                 Dominoes
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Wrapped Numbers"
                 actionParam="{
                     view: 'website.s_countdown_inline_wrapped_numbers_template',
-                    templateClass: 'wrapped_numbers',
-                }">
+                    templateClass: 'o_template_wrapped_numbers',
+                }"
+                id="'template_wrapped_numbers_opt'">
                 Wrapped Numbers
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Text"
                 actionParam="{
                     view: 'website.s_countdown_inline_text_template',
-                    templateClass: 'text',
-                }">
+                    templateClass: 'o_template_text',
+                }"
+                id="'template_text_opt'">
                 Text
             </BuilderSelectItem>
             <BuilderSelectItem
                 title.translate="Big Numbers"
                 actionParam="{
                     view: 'website.s_countdown_inline_big_numbers_template',
-                    templateClass: 'big_numbers',
-                }">
+                    templateClass: 'o_template_big_numbers',
+                }"
+                id="'template_big_numbers_opt'">
                 Big Numbers
             </BuilderSelectItem>
         </BuilderSelect>
     </BuilderRow>
-    <!-- <BuilderContext action="'reloadCountdown'"> -->
+    <BuilderRow label.translate="Round Corners" level="1" applyTo="'.o_count_item_nbs'" t-if="isActiveItem('template_wrapped_numbers_opt')">
+        <BuilderNumberInput styleAction="'border-radius'" unit="'px'" min="0"/>
+    </BuilderRow>
+    <BuilderRow label.translate="Color">
+        <BuilderSelect>
+            <BuilderSelectItem
+                title.translate="Default"
+                id="'color_default_opt'" classAction="'o_countdown_default'">
+                Default
+            </BuilderSelectItem>
+            <BuilderSelectItem
+                title.translate="Primary"
+                classAction="'o_countdown_primary'">
+                Primary
+            </BuilderSelectItem>
+            <BuilderSelectItem
+                title.translate="Secondary"
+                classAction="'o_countdown_secondary'">
+                Secondary
+            </BuilderSelectItem>
+            <BuilderSelectItem
+                title.translate="Info"
+                classAction="'o_countdown_info'">
+                Info
+            </BuilderSelectItem>
+            <BuilderSelectItem
+                title.translate="Success"
+                classAction="'o_countdown_success'">
+                Success
+            </BuilderSelectItem>
+            <BuilderSelectItem
+                title.translate="Warning"
+                classAction="'o_countdown_warning'">
+                Warning
+            </BuilderSelectItem>
+            <BuilderSelectItem
+                title.translate="Danger"
+                classAction="'o_countdown_danger'">
+                Danger
+            </BuilderSelectItem>
+            <BuilderSelectItem
+                title.translate="Light"
+                classAction="'o_countdown_light'">
+                Light
+            </BuilderSelectItem>
+            <BuilderSelectItem
+                title.translate="Dark"
+                classAction="'o_countdown_dark'">
+                Dark
+            </BuilderSelectItem>
+        </BuilderSelect>
+    </BuilderRow>
+    <BuilderRow label.translate="Subtle colors">
+        <BuilderCheckbox
+            classAction="'o_countdown_subtle'"
+            level="1"
+            id="'subtle_colors_opt'"
+            t-if="!this.isActiveItem('color_default_opt') and !this.isActiveItem('template_text_opt')"
+            />
+    </BuilderRow>
+    <BuilderRow label.translate="Label">
+        <BuilderSelect>
+            <BuilderSelectItem
+                title.translate="Default"
+                classAction="''">
+                Default
+            </BuilderSelectItem>
+            <BuilderSelectItem
+                title.translate="Compact"
+                classAction="'o_label_compact'">
+                Compact
+            </BuilderSelectItem>
+            <BuilderSelectItem
+                title.translate="None"
+                classAction="'o_label_none'">
+                None
+            </BuilderSelectItem>
+        </BuilderSelect>
+    </BuilderRow>
+    <BuilderRow label.translate="Alignment">
+        <BuilderButtonGroup applyTo="'.s_countdown_inline_wrapper'">
+            <BuilderButton icon="'fa-align-left'" title.translate="Left" classAction="''"/>
+            <BuilderButton icon="'fa-align-center'" title.translate="Center" classAction="'align-self-center text-center'"/>
+            <BuilderButton icon="'fa-align-right'" title.translate="Right" classAction="'align-self-end text-end'"/>
+        </BuilderButtonGroup>
+    </BuilderRow>
+    <BuilderRow label.translate="Font Monospace">
+        <BuilderCheckbox
+            classAction="'o_count_monospace'"
+            level="1"
+            id="'subtle_colors_opt'"
+            t-if="this.isActiveItem('template_dominoes_opt') or this.isActiveItem('template_wrapped_numbers_opt') or this.isActiveItem('template_big_numbers_opt')"
+            />
+    </BuilderRow>
+
+
+    
+            <!-- <we-checkbox string="Font Monospace" name="font_monospace_opt" data-select-class="o_count_monospace" data-dependencies="template_dominoes_opt, template_wrapped_numbers_opt, template_big_numbers_opt"/> -->
+    
     <!-- TODO AGAU: remove after merging generalized restart interactions -->
     <!-- <BuilderRow label.translate="Due Date">
         <BuilderDateTimePicker dataAttributeAction="'endTime'"/>
@@ -237,7 +341,8 @@
             </BuilderRow>
         </t>
     </t>
-    </BuilderContext> -->
+     -->
+    <!-- </BuilderContext> -->
 </t>
 
 <t t-name="website.s_countdown_inline.end_message">

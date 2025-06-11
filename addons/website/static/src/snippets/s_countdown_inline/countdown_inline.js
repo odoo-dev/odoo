@@ -67,8 +67,8 @@ registry
     .category("public.interactions")
     .add("website.countdownInline", CountdownInline);
 
-registry
-    .category("public.interactions.edit")
-    .add("website.countdownInline", {
-        Interaction: CountdownInline,
-    });
+// registry
+//     .category("public.interactions.edit")
+//     .add("website.countdownInline", {
+//         Interaction: CountdownInline,
+//     });

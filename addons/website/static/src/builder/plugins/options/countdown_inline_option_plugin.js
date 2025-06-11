@@ -6,7 +6,8 @@ import { Plugin } from "@html_editor/plugin";
 class CountdownInlineOptionPlugin extends Plugin {
 // class CountdownInlineOptionPlugin extends Plugin {
     static id = "countdownInlineOption";
-    static dependencies = ["CountdownOption"];
+    static dependencies = ["builderActions"];
+    // static dependencies = ["CountdownOption"];
     resources = {
         builder_options: [
             withSequence(before(SNIPPET_SPECIFIC_END), {
@@ -15,11 +16,20 @@ class CountdownInlineOptionPlugin extends Plugin {
                 // cleanForSave: this.cleanForSave.bind(this),
             }),
         ],
+
+        // ajouter une action
+
         so_content_addition_selector: [".s_countdown_inline"],
+        builder_actions: this.getActions(),
         // builder_actions: {
+        //     reloadCountdown: {
+        //         apply: ({ editingElement }) => {
+        //             this.dispatchTo("update_interactions", editingElement);
+        //         },
+        //     },
             // TODO AGAU: update after merging generalized restart interactions
             //  remove this and xml BuilderContext
-            // reloadCountdown: {
+            // reloadCountdownInline: {
             //     apply: ({ editingElement }) => {
             //         this.dispatchTo("update_interactions", editingElement);
             //     },
@@ -40,8 +50,48 @@ class CountdownInlineOptionPlugin extends Plugin {
         // },
     };
 
-    setup() {
-        console.log('coucou');
+    getActions() {
+        const getAction = this.dependencies.builderActions.getAction;
+        return {
+            // Continuer ici
+            selectCountdownInlineTemplate: {
+                prepare: async ({ actionParam }) => {
+                    await getAction("selectTemplate").prepare({ actionParam: actionParam });
+                },
+                isApplied: ({ editingElement, params: { templateClass } }) => {
+                    const isDefaultOrTextTemplate = ["o_template_default", "o_template_text"].includes(templateClass);
+                    const hasMonospaceFont = editingElement.parentElement.classList.contains("o_count_monospace");
+
+                    // Reset the monospace option if we select a template that doesn't provide it.
+                    if (hasMonospaceFont && isDefaultOrTextTemplate) {
+                        editingElement.parentElement.classList.remove('o_count_monospace');
+
+                        probleme : ca efface tout le temps
+                    }
+                    
+                    // if(templateClass === "o_template_default" || templateClass === "o_template_text") {
+                        
+                        // console.log("oui")
+                    // if (params.name === "countdown_inline_template_opt") {
+                    //     const countdownEl = this.$target[0];
+                    //     const templateEl = countdownEl.querySelector('.s_countdown_inline_wrapper > div');
+                    //     const hasMonospaceFont = countdownEl.classList.contains('o_count_monospace');
+                    //     if (hasMonospaceFont && isDefaultOrTextTemplate) {
+                    //         countdownEl.classList.remove('o_count_monospace');
+                    //     }
+                    // }
+
+                    if (templateClass) {
+                        return !!editingElement.querySelector(`.${templateClass}`);
+                    }
+                    return true;
+                },
+                apply: (action) => {
+                    getAction("selectTemplate").apply(action);
+                },
+                clean: (action) => getAction("selectTemplate").clean(action),
+            },
+        };
     }
 
     /**
