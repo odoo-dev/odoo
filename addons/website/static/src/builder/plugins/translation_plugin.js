@@ -59,6 +59,8 @@ export class TranslationPlugin extends Plugin {
             const translationSavableEls = getTranslationEditableEls(
                 this.services.website.pageDocument
             );
+            this.setupServicesIfNotSet();
+            this.prepareTranslation();
             for (const translationSavableEl of translationSavableEls) {
                 if (!translationSavableEl.hasAttribute("data-oe-readonly")) {
                     translationSavableEl.classList.add("o_editable");
