@@ -941,6 +941,16 @@ class HrEmployee(models.Model):
             resource_vals['active'] = active_status
         return resource_vals
 
+    @api.model
+    def new(self, values=None, origin=None, ref=None):
+        new_vals = values.copy()
+        version_vals = {val: new_vals.pop(val) for val in values if val in self._fields and self._fields[val].inherited}
+
+        employee = super().new(new_vals, origin, ref)
+        version_vals['employee_id'] = employee
+        self.env['hr.version'].new(version_vals)
+        return employee
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
