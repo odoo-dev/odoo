@@ -344,7 +344,7 @@ class HrEmployee(models.Model):
                 order='date_version desc',
                 limit=1,
             )
-            employee.current_version_id = version
+            employee.current_version_id = version or employee.version_ids[0]
 
     def _search_version_id(self, operator, value):
         if operator == 'any':
