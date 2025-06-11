@@ -25,7 +25,7 @@ export class VersionsTimeline extends StatusBarField {
                 }
                 const value = record.data[fieldName];
                 let domain = getFieldDomain(record, fieldName, props.domain)
-                domain = Domain.and([this.getDomain(), domain]).toList();
+                domain = Domain.and([[['employee_id', '=', props.record.evalContext.id]], domain]).toList();
                 if (domain.length && value) {
                     domain = Domain.or([[["id", "=", value.id]], domain]).toList(
                         record.evalContext
@@ -67,11 +67,6 @@ export class VersionsTimeline extends StatusBarField {
 
     onClickDateTimePickerBtn() {
         this.dateTimePicker.open();
-    }
-
-    /** @override **/
-    getDomain() {
-        return [['employee_id', '=', this.props.record.evalContext.id]];
     }
 
     /** @override **/
