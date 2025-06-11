@@ -256,9 +256,9 @@
                                             <field name="employee_type"/>
                                             <label for="contract_type_id" string="Contract Type"/>
                                             <div class="o_row" name="contract_type">
-                                                <field name="contract_type_id" class="oe_inline o_hr_narrow_field" nolabel="1"/>
+                                                <field name="contract_type_id" class="oe_inline o_hr_narrow_field" nolabel="1" placeholder="Contract Type"/>
                                                 <div class="mx-3 flex-grow-0">─</div>
-                                                <field name="structure_type_id" class="oe_inline o_hr_narrow_field" nolabel="1"
+                                                <field name="structure_type_id" class="oe_inline" nolabel="1" placeholder="Salary Structure Type"
                                                        domain="['|', ('country_id', '=', False), ('country_id', '=', company_country_id)]"/>
                                             </div>
                                         </group>
