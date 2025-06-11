@@ -51,7 +51,7 @@ export class PersistentCache {
         }
     }
 
-    read(table, key, fallback, { onUpdate }) {
+    read(table, key, fallback, { onUpdate } = {}) {
         const ramValue = this.ramCache.read(table, key);
         if (ramValue && !onUpdate) {
             return ramValue;
