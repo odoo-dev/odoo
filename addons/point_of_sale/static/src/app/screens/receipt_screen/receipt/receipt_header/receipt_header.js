@@ -1,5 +1,6 @@
 import { _t } from "@web/core/l10n/translation";
-import { Component } from "@odoo/owl";
+import { Component, onWillStart } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
 
 export class ReceiptHeader extends Component {
     static template = "point_of_sale.ReceiptHeader";
@@ -14,6 +15,18 @@ export class ReceiptHeader extends Component {
             },
         },
     };
+
+    setup() {
+        this.orm = useService("orm");
+        onWillStart(async () => {
+            const [company] = await this.orm.read(
+                "res.company",
+                [this.props.data.company.id],
+                ["logo"]
+            );
+            this.companyLogo = company?.logo ? `data:image/png;base64,${company.logo}` : null;
+        });
+    }
 
     get vatText() {
         if (this.props.data.company.country_id?.vat_label) {
