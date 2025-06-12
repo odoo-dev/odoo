@@ -848,6 +848,16 @@ export class GraphRenderer extends Component {
      * @param {Object} context
      */
     openView(domain, views, context) {
+        if (this.model.metaData.openAction) {
+            const { action, type } = this.model.metaData.openAction;
+            //  it's opening all the records, but I need it to do something else
+            return this.actionService.doActionButton({
+                name: action,
+                type: type,
+                context: context,
+                domain: domain,
+            });
+        }
         this.actionService.doAction(
             {
                 context,
