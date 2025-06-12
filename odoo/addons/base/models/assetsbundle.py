@@ -1032,9 +1032,7 @@ class SassStylesheetAsset(PreprocessedCSS):
 
 
 class ScssStylesheetAsset(PreprocessedCSS):
-    @property
-    def bootstrap_path(self):
-        return file_path('web/static/lib/bootstrap/scss')
+    bootstrap_path = file_path('web/static/lib/bootstrap/scss')
 
     precision = 8
     output_style = 'expanded'
@@ -1051,6 +1049,7 @@ class ScssStylesheetAsset(PreprocessedCSS):
                 parent_path = file_path(os.path.join(*parent_path))
             except FileNotFoundError:
                 parent_path = file_path(os.path.join(self.bootstrap_path, *parent_path))
+            profiler.force_hook()
             return [(os.path.join(parent_path, file),)]
 
         try:

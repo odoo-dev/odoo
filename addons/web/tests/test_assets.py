@@ -71,14 +71,26 @@ class TestLogsAssetsGenerateTime(TestAssetsGenerateTimeCommon):
 class TestPregenerateTime(HttpCase):
 
     def test_logs_pregenerate_time(self):
-        self.env['ir.qweb']._pregenerate_assets_bundles()
-        start = time.time()
-        self.env.registry.clear_cache()
+        self.env.cr.execute("""DELETE FROM ir_attachment WHERE url LIKE '/web/assets/%'""")
+        self.env.registry.clear_all_caches()
         self.env.cache.invalidate()
-        with self.profile(collectors=['sql', odoo.tools.profiler.PeriodicCollector(interval=0.01)], disable_gc=True):
+        with self.profile(description='creation css', collectors=['sql', odoo.tools.profiler.PeriodicCollector(interval=0.01)], disable_gc=True):
+            self.env['ir.qweb']._pregenerate_assets_bundles(js=False)
+        return
+        with self.profile(description='creation js', collectors=['sql', odoo.tools.profiler.PeriodicCollector(interval=0.01)], disable_gc=True):
+            self.env['ir.qweb']._pregenerate_assets_bundles(css=False)
+
+        start = time.time()
+        self.env.registry.clear_all_caches()
+        self.env.cache.invalidate()
+        with self.profile(description='cold check', collectors=['sql', odoo.tools.profiler.PeriodicCollector(interval=0.01)], disable_gc=True):
             self.env['ir.qweb']._pregenerate_assets_bundles()
         duration = time.time() - start
         _logger.info('All bundle checked in %.2fs', duration)
+
+        with self.profile(description='warm check', collectors=['sql', odoo.tools.profiler.PeriodicCollector(interval=0.01)], disable_gc=True):
+            self.env['ir.qweb']._pregenerate_assets_bundles()
+
 
 @odoo.tests.tagged('post_install', '-at_install', '-standard', 'assets_bundle')
 class TestAssetsGenerateTime(TestAssetsGenerateTimeCommon):

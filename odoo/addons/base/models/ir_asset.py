@@ -208,6 +208,11 @@ class IrAsset(models.Model):
         :param target: string or None or False
         :param path_def: string
         """
+        if directive == 'clone':
+            target_bundle = self.env['ir.qweb']._get_asset_bundle(path_def, assets_params=assets_params)
+            asset_paths.append([(target_bundle.get_link('js'), None, None)], bundle)
+            asset_paths.append([(target_bundle.get_link('js'), None, None)], bundle)
+            return
         if directive == INCLUDE_DIRECTIVE:
             # recursively call this function for each INCLUDE_DIRECTIVE directive.
             self._fill_asset_paths(path_def, asset_paths, seen + [bundle], addons, installed, **assets_params)

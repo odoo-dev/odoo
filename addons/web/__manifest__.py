@@ -142,7 +142,7 @@ This module provides the core of the Odoo Web Client.
             ('include', 'web.assets_backend_lazy'),
         ],
         'web.assets_web': [
-            ('include', 'web.assets_backend'),
+            ('clone', 'web.assets_backend'),
             'web/static/src/main.js',
             'web/static/src/start.js',
         ],
@@ -462,7 +462,7 @@ This module provides the core of the Odoo Web Client.
             ('remove', 'web/static/tests/legacy/**/*'), # to remove when all legacy tests are ported
         ],
         'web.tests_assets': [
-            ('include', 'web.assets_backend'),
+            ('clone', 'web.assets_backend'),
             ('include', 'web.assets_backend_lazy'),
 
             'web/static/src/public/public_component_service.js',

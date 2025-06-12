@@ -2699,7 +2699,7 @@ class IrQweb(models.AbstractModel):
         asset_nodes = self._get_asset_nodes(bundle, js=False, debug=debug)
         return [node[1]['href'] for node in asset_nodes if node[0] == 'link']
 
-    def _pregenerate_assets_bundles(self):
+    def _pregenerate_assets_bundles(self, css=True, js=True):
         """
         Pregenerates all assets that may be used in web pages to speedup first loading.
         This may is mainly usefull for tests.
@@ -2715,13 +2715,17 @@ class IrQweb(models.AbstractModel):
 
         links = []
         start = time.time()
-        for bundle in sorted(js_bundles):
-            links += self._get_asset_bundle(bundle, css=False, js=True).js()
-        _logger.info('JS Assets bundles generated in %s seconds', time.time()-start)
+        if js:
+            for bundle in sorted(js_bundles):
+                with ExecutionContext(bundle=bundle, type="js"):
+                    links += self._get_asset_bundle(bundle, css=False, js=True).js()
+            _logger.info('JS Assets bundles generated in %s seconds', time.time()-start)
         start = time.time()
-        for bundle in sorted(css_bundles):
-            links += self._get_asset_bundle(bundle, css=True, js=False).css()
-        _logger.info('CSS Assets bundles generated in %s seconds', time.time()-start)
+        if css:
+            for bundle in sorted(css_bundles):
+                with ExecutionContext(bundle=bundle, type="css"):
+                    links += self._get_asset_bundle(bundle, css=True, js=False).css()
+            _logger.info('CSS Assets bundles generated in %s seconds', time.time()-start)
         return links
 
     def _get_bundles_to_pregenarate(self):
