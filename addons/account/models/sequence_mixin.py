@@ -374,7 +374,7 @@ class SequenceMixin(models.AbstractModel):
             cache[cache_key] += 1
             return format_string.format(**format_values, seq=cache[cache_key])
 
-        self.flush_recordset()
+        self.flush_recordset([self._sequence_field])
         with self.env.cr.savepoint(flush=False) as sp:
             # By updating a row covered by the sequence's UNIQUE constraint,
             # the transaction acquires an exclusive lock on the corresponding

@@ -3279,6 +3279,7 @@ class AccountMove(models.Model):
                 # Protected against holes in the pre-validation checks.
                 if 'journal_id' in vals and 'name' not in vals:
                     draft_move = self.filtered(lambda m: not m.posted_before)
+                    # TODO: name be should protected...
                     draft_move.name = False
                     draft_move._compute_name()
 
@@ -3290,7 +3291,7 @@ class AccountMove(models.Model):
                     posted_move.line_ids._check_tax_lock_date()
 
                 if vals.get('state') == 'posted':
-                    self.flush_recordset()  # Ensure that the name is correctly computed
+                    self.flush_recordset(["name"])  # Ensure that the name is correctly computed
                     self._hash_moves()
 
             self._synchronize_business_models(set(vals.keys()))
@@ -5015,7 +5016,7 @@ class AccountMove(models.Model):
                 ('journal_id', '=', journal.id),
                 ('sequence_prefix', '=', prefix),
                 ('sequence_number', 'in', [move.sequence_number + 1 for move in moves]),
-            ])
+            ], order="id")  # Force a dummy order to avoid flusing `name` coming from default _order
         next_moves.made_sequence_gap = made_gap
 
     def _find_and_set_purchase_orders(self, po_references, partner_id, amount_total, from_ocr=False, timeout=10):
@@ -6212,6 +6213,7 @@ class AccountMove(models.Model):
             and not self.env.is_protected(field, move._origin)
             and (move._origin or not move[fname])
         )
+        # We shouldn't invalidate store compute ... and don't `add_to_compute` for no-store one
         to_reset.invalidate_recordset([fname])
         self.env.add_to_compute(field, to_reset)
 
