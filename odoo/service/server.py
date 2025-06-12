@@ -684,7 +684,6 @@ class GeventServer(CommonServer):
     def sigint_handler(self, sig, frame):
         if self.httpd:
             self.httpd._stop_event.set()
-            # self.httpd.close()  -- This is less correct but also works if we don't like setting an internal variable
 
     def process_limits(self):
         restart = False
@@ -789,6 +788,18 @@ class GeventServer(CommonServer):
             handler_class=ProxyHandler,
             spawn=gevent.pool.Pool(),
         )
+
+        # override gevent.WSGIServer's `close` to end websocket connections
+        # before we wait for all greenlets to finish & kill remaining.
+        original_httpd_close = self.httpd.close
+        super_stop = super().stop
+
+        def httpd_close_override():
+            original_httpd_close()
+            super_stop()
+
+        self.httpd.close = httpd_close_override
+
         _logger.info('Evented Service (longpolling) running on %s:%s', self.interface, self.port)
         try:
             self.httpd.serve_forever(stop_timeout=GEVENT_STOP_TIMEOUT)
@@ -797,8 +808,11 @@ class GeventServer(CommonServer):
             raise
 
     def stop(self):
-        self.httpd.stop()
-        super().stop()
+        if self.httpd:
+            self.httpd._stop_event.set()
+            # will call super().stop() in WSGIServer.close
+        else:
+            super().stop()
         _logger.info('Gevent server stopped')
 
     def run(self, preload, stop):
