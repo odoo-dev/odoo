@@ -31,6 +31,23 @@ const errorNotificationRegistry = registry.category("error_notifications");
  * @param {Error} originalError
  * @returns {boolean}
  */
+export function offlineFailToFetchErrorHandler(env, error, originalError) {
+    if (!navigator.onLine) {
+        if (["Failed to fetch", "Load failed"].includes(originalError.message)) {
+            return true;
+        }
+    }
+}
+errorHandlerRegistry.add("offlineFailToFetchErrorHandler", offlineFailToFetchErrorHandler, {
+    sequence: 96,
+});
+
+/**
+ * @param {OdooEnv} env
+ * @param {UncaughError} error
+ * @param {Error} originalError
+ * @returns {boolean}
+ */
 export function rpcErrorHandler(env, error, originalError) {
     if (!(error instanceof UncaughtPromiseError)) {
         return false;
@@ -183,5 +200,5 @@ if (user.isInternalUser === undefined) {
         );
     }
 } else {
-    registry.category("error_handlers").add("swallowAllVisitorErrors", swallowAllVisitorErrors, { sequence: 0 });
+    errorHandlerRegistry.add("swallowAllVisitorErrors", swallowAllVisitorErrors, { sequence: 0 });
 }

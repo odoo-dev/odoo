@@ -2,26 +2,46 @@
 
 /* eslint-disable no-restricted-globals */
 const cacheName = "odoo-sw-cache";
-const cachedRequests = ["/odoo/offline"];
+const offLineURL = "/odoo/offline";
 
 self.addEventListener("install", (event) => {
-    event.waitUntil(caches.open(cacheName).then((cache) => cache.addAll(cachedRequests)));
+    event.waitUntil(caches.open(cacheName).then((cache) => cache.add(offLineURL)));
 });
+
+const storeDataOnCache = async (url, response) => {
+    console.log(`[SW] Caching new resource: ${url}`);
+    const cache = await caches.open(cacheName);
+    await cache.put(url, response);
+};
+
+const readDataOnCache = async (url) => {
+    console.log(`[SW] Reading resource from Caching: ${url}`);
+    const cache = await caches.open(cacheName);
+    return cache.match(url);
+};
 
 const navigateOrDisplayOfflinePage = async (request) => {
     try {
-        return await fetch(request);
+        const response = await fetch(request);
+        storeDataOnCache(request.url, response.clone());
+        return response;
     } catch (requestError) {
         if (
             request.method === "GET" &&
             ["Failed to fetch", "Load failed"].includes(requestError.message)
         ) {
-            if (cachedRequests.includes("/odoo/offline")) {
-                const cache = await caches.open(cacheName);
-                const cachedResponse = await cache.match("/odoo/offline");
+            if (
+                !navigator.onLine &&
+                !new URL(request.url).searchParams.get("debug")?.includes("assets")
+            ) {
+                const cachedResponse = await readDataOnCache(request.url);
                 if (cachedResponse) {
                     return cachedResponse;
                 }
+            }
+            const offlinePage = await readDataOnCache(offLineURL);
+            if (offlinePage) {
+                return offlinePage;
             }
         }
         throw requestError;
@@ -71,14 +91,13 @@ const nextMessageMap = new Map();
  * @param message : string
  * @return {Promise}
  */
-const waitingMessage = async (message) => {
-    return new Promise((resolve) => {
+const waitingMessage = async (message) =>
+    new Promise((resolve) => {
         if (!nextMessageMap.has(message)) {
             nextMessageMap.set(message, []);
         }
         nextMessageMap.get(message).push(resolve);
     });
-};
 
 self.addEventListener("message", (event) => {
     const messageNotifiers = nextMessageMap.get(event.data);
