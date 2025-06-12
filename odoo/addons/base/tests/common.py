@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from unittest.mock import patch, Mock
 
 from odoo import Command, modules
+from odoo.exceptions import ValidationError
 from odoo.tests.common import new_test_user, TransactionCase, HttpCase
 from odoo.tools.mail import email_split_and_format
 
@@ -153,6 +154,12 @@ class BaseCommon(TransactionCase):
         """Find the matching record, without an existence check."""
         model, id = cls.env['ir.model.data']._xmlid_to_res_model_res_id(xmlid)
         return cls.env[model].browse(id)
+
+    def __setitem__(self, key, value):
+        """ Assign the field ``key`` to ``value`` in record ``self``. """
+        if self.__getattribute__(key) != None:
+            raise ValidationError("hohoho")
+        return super().__setattr__(key, value)
 
 
 class TransactionCaseWithUserDemo(TransactionCase):

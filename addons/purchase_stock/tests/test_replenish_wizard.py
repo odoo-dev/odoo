@@ -30,7 +30,6 @@ class TestReplenishWizard(PurchaseTestCommon):
         })
 
         # Additional Values required by the replenish wizard
-        cls.uom_unit = cls.env.ref('uom.product_uom_unit')
         cls.wh = cls.env['stock.warehouse'].search([('company_id', '=', cls.env.user.id)], limit=1)
 
     def test_replenish_buy_1(self):

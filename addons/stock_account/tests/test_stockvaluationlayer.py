@@ -1232,11 +1232,10 @@ class TestAngloSaxonAccounting(AccountTestInvoicingCommon, TestStockValuationCom
             'account_type': 'expense',
             'reconcile': True,
         })
-        cls.uom_unit = cls.env.ref('uom.product_uom_unit')
         cls.product1 = cls.env['product.product'].create({
             'name': 'product1',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_goods').id,
+            'categ_id': cls.product_category.id,
             'property_account_expense_id': cls.expense_account.id,
         })
         cls.product1.categ_id.write({

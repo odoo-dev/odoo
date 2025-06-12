@@ -14,14 +14,12 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
     def setUpClass(cls):
         super(TestPurchaseToInvoiceCommon, cls).setUpClass()
         cls.other_currency = cls.setup_other_currency('EUR')
-        uom_unit = cls.env.ref('uom.product_uom_unit')
-        uom_hour = cls.env.ref('uom.product_uom_hour')
         cls.product_order = cls.env['product.product'].create({
             'name': "Zed+ Antivirus",
             'standard_price': 235.0,
             'list_price': 280.0,
             'type': 'consu',
-            'uom_id': uom_unit.id,
+            'uom_id': cls.uom_unit.id,
             'purchase_method': 'purchase',
             'default_code': 'PROD_ORDER',
             'taxes_id': False,
@@ -31,7 +29,7 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
             'standard_price': 240.0,
             'list_price': 290.0,
             'type': 'consu',
-            'uom_id': uom_unit.id,
+            'uom_id': cls.uom_unit.id,
             'purchase_method': 'purchase',
             'default_code': 'PROD_ORDER',
             'taxes_id': False,
@@ -41,7 +39,7 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
             'standard_price': 235.0,
             'list_price': 280.0,
             'type': 'consu',
-            'uom_id': uom_unit.id,
+            'uom_id': cls.uom_unit.id,
             'purchase_method': 'purchase',
             'default_code': 'PROD_ORDER_VAR_NAME',
             'taxes_id': False,
@@ -51,7 +49,7 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
             'standard_price': 200.0,
             'list_price': 180.0,
             'type': 'service',
-            'uom_id': uom_unit.id,
+            'uom_id': cls.uom_unit.id,
             'purchase_method': 'receive',
             'default_code': 'SERV_DEL',
             'taxes_id': False,
@@ -61,7 +59,7 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
             'standard_price': 40.0,
             'list_price': 90.0,
             'type': 'service',
-            'uom_id': uom_hour.id,
+            'uom_id': cls.uom_hour.id,
             'purchase_method': 'purchase',
             'default_code': 'PRE-PAID',
             'taxes_id': False,
@@ -71,7 +69,7 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
             'standard_price': 55.0,
             'list_price': 70.0,
             'type': 'consu',
-            'uom_id': uom_unit.id,
+            'uom_id': cls.uom_unit.id,
             'purchase_method': 'receive',
             'default_code': 'PROD_DEL',
             'taxes_id': False,
@@ -875,13 +873,12 @@ class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
         """Test that a purchase line with a line of 0 as unit price won't match
         with a non-invoice-lines (not an invoice_line_ids)
         """
-        uom_unit = self.env.ref('uom.product_uom_unit')
         product_order_zero_price = self.env['product.product'].create({
             'name': "A zero price product",
             'standard_price': 0.0,
             'list_price': 0.0,
             'type': 'consu',
-            'uom_id': uom_unit.id,
+            'uom_id': self.uom_unit.id,
             'purchase_method': 'purchase',
             'default_code': 'PROD_ORDER',
             'taxes_id': False,

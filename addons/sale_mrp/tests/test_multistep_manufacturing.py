@@ -27,8 +27,6 @@ class TestMultistepManufacturing(TestMrpCommon):
         cls.warehouse = warehouse_form.save()
         cls.warehouse.mto_pull_id.route_id.rule_ids.procure_method = "make_to_order"
 
-        cls.uom_unit = cls.env.ref('uom.product_uom_unit')
-
         # Create manufactured product
         product_form = Form(cls.env['product.product'])
         product_form.name = 'Stick'

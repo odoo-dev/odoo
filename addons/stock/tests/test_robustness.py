@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import Command
 from odoo.exceptions import UserError, ValidationError
-from odoo.tests.common import TransactionCase
+
+from odoo.addons.uom.tests.common import UomCommon
 
 
-class TestRobustness(TransactionCase):
+class TestRobustness(UomCommon):
 
     @classmethod
     def setUpClass(cls):
@@ -14,8 +13,6 @@ class TestRobustness(TransactionCase):
         cls.supplier_location = cls.env.ref('stock.stock_location_suppliers')
         cls.stock_location = cls.env.ref('stock.stock_location_stock')
         cls.customer_location = cls.env.ref('stock.stock_location_customers')
-        cls.uom_unit = cls.env.ref('uom.product_uom_unit')
-        cls.uom_dozen = cls.env.ref('uom.product_uom_dozen')
         cls.product1 = cls.env['product.product'].create({
             'name': 'Product A',
             'is_storable': True,

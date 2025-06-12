@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import logging
-from lxml import etree
 from freezegun import freeze_time
+from lxml import etree
+
 from odoo import tools
 from odoo.tests import Form, tagged
-from odoo.addons.l10n_it_edi.tests.common import TestItEdi
 
-_logger = logging.getLogger(__name__)
+from odoo.addons.l10n_it_edi.tests.common import TestItEdi
 
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
@@ -17,10 +16,6 @@ class TestItEdiDDT(TestItEdi):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
-        # UoM
-        uom_unit = cls.env.ref('uom.product_uom_unit')
-        uom_hour = cls.env.ref('uom.product_uom_hour')
 
         # Tax
         cls.tax_22 = cls.env['account.tax'].with_company(cls.company).create({
@@ -42,7 +37,7 @@ class TestItEdiDDT(TestItEdi):
                 'standard_price': 200.0,
                 'list_price': 180.0,
                 'type': 'service',
-                'uom_id': uom_unit.id,
+                'uom_id': cls.uom_unit.id,
                 'default_code': 'SERV_DEL',
                 'invoice_policy': 'delivery',
                 'taxes_id': [(6, 0, [])],
@@ -53,7 +48,7 @@ class TestItEdiDDT(TestItEdi):
                 'standard_price': 40.0,
                 'list_price': 90.0,
                 'type': 'service',
-                'uom_id': uom_hour.id,
+                'uom_id': cls.uom_hour.id,
                 'description': 'Example of product to invoice on order',
                 'default_code': 'PRE-PAID',
                 'invoice_policy': 'order',
@@ -66,7 +61,7 @@ class TestItEdiDDT(TestItEdi):
                 'list_price': 280.0,
                 'type': 'consu',
                 'weight': 0.01,
-                'uom_id': uom_unit.id,
+                'uom_id': cls.uom_unit.id,
                 'default_code': 'FURN_9999',
                 'invoice_policy': 'order',
                 'expense_policy': 'no',
@@ -79,7 +74,7 @@ class TestItEdiDDT(TestItEdi):
                 'list_price': 70.0,
                 'type': 'consu',
                 'weight': 0.01,
-                'uom_id': uom_unit.id,
+                'uom_id': cls.uom_unit.id,
                 'default_code': 'FURN_7777',
                 'invoice_policy': 'delivery',
                 'expense_policy': 'no',

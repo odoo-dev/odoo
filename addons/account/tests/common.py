@@ -1,21 +1,24 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import fields, Command
+
+import base64
+import copy
+import json
+import logging
+
+from contextlib import contextmanager
+from functools import wraps
+from itertools import count
+from unittest import SkipTest
+from unittest.mock import patch
+
+from lxml import etree
+
+from odoo import fields
+from odoo.fields import Command
 from odoo.tests import Form, HttpCase, new_test_user
 from odoo.tools.float_utils import float_round
 
 from odoo.addons.product.tests.common import ProductCommon
-
-import json
-import base64
-import copy
-import logging
-from contextlib import contextmanager
-from functools import wraps
-from itertools import count
-from lxml import etree
-from unittest import SkipTest
-from unittest.mock import patch
 
 _logger = logging.getLogger(__name__)
 
@@ -92,11 +95,11 @@ class AccountTestInvoicingCommon(ProductCommon):
         cls.fiscal_pos_a = cls.env['account.fiscal.position'].create({
             'name': 'fiscal_pos_a',
             'account_ids': [
-                (0, None, {
+                Command.create({
                     'account_src_id': cls.product_a.property_account_income_id.id,
                     'account_dest_id': cls.product_b.property_account_income_id.id,
                 }),
-                (0, None, {
+                Command.create({
                     'account_src_id': cls.product_a.property_account_expense_id.id,
                     'account_dest_id': cls.product_b.property_account_expense_id.id,
                 }),
@@ -110,17 +113,17 @@ class AccountTestInvoicingCommon(ProductCommon):
             cls.tax_purchase_b.original_tax_ids = cls.tax_purchase_a
 
         # ==== Payment terms ====
-        cls.pay_terms_a = cls.env.ref('account.account_payment_term_immediate')
+        cls.pay_terms_a = cls.quick_ref('account.account_payment_term_immediate')
         cls.pay_terms_b = cls.env['account.payment.term'].create({
             'name': '30% Advance End of Following Month',
             'note': 'Payment terms: 30% Advance End of Following Month',
             'line_ids': [
-                (0, 0, {
+                Command.create({
                     'value': 'percent',
                     'value_amount': 30.0,
                     'nb_days': 0,
                 }),
-                (0, 0, {
+                Command.create({
                     'value': 'percent',
                     'value_amount': 70.0,
                     'delay_type': 'days_after_end_of_next_month',
@@ -130,75 +133,68 @@ class AccountTestInvoicingCommon(ProductCommon):
         })
 
         # ==== Partners ====
-        cls.partner_a = cls.env['res.partner'].create({
-            'name': 'partner_a',
-            'invoice_sending_method': 'manual',
-            'invoice_edi_format': False,
-            'property_payment_term_id': cls.pay_terms_a.id,
-            'property_supplier_payment_term_id': cls.pay_terms_a.id,
-            'property_account_receivable_id': cls.company_data['default_account_receivable'].id,
-            'property_account_payable_id': cls.company_data['default_account_payable'].id,
-            'company_id': False,
-        })
-        cls.partner_b = cls.env['res.partner'].create({
-            'name': 'partner_b',
-            'invoice_sending_method': 'manual',
-            'invoice_edi_format': False,
-            'property_payment_term_id': cls.pay_terms_b.id,
-            'property_supplier_payment_term_id': cls.pay_terms_b.id,
-            'property_account_position_id': cls.fiscal_pos_a.id,
-            'property_account_receivable_id': cls.company_data['default_account_receivable'].copy().id,
-            'property_account_payable_id': cls.company_data['default_account_payable'].copy().id,
-            'company_id': False,
-        })
+        cls.partner_a, cls.partner_b = cls.env['res.partner'].create([
+            {
+                'name': 'partner_a',
+                'invoice_sending_method': 'manual',
+                'invoice_edi_format': False,
+                'property_payment_term_id': cls.pay_terms_a.id,
+                'property_supplier_payment_term_id': cls.pay_terms_a.id,
+                'property_account_receivable_id': cls.company_data['default_account_receivable'].id,
+                'property_account_payable_id': cls.company_data['default_account_payable'].id,
+                'company_id': False,
+            },
+            {
+                'name': 'partner_b',
+                'invoice_sending_method': 'manual',
+                'invoice_edi_format': False,
+                'property_payment_term_id': cls.pay_terms_b.id,
+                'property_supplier_payment_term_id': cls.pay_terms_b.id,
+                'property_account_position_id': cls.fiscal_pos_a.id,
+                'property_account_receivable_id': cls.company_data['default_account_receivable'].copy().id,
+                'property_account_payable_id': cls.company_data['default_account_payable'].copy().id,
+                'company_id': False,
+            }
+        ])
 
         # ==== Cash rounding ====
-        cls.cash_rounding_a = cls.env['account.cash.rounding'].create({
-            'name': 'add_invoice_line',
-            'rounding': 0.05,
-            'strategy': 'add_invoice_line',
-            'profit_account_id': cls.company_data['default_account_revenue'].copy().id,
-            'loss_account_id': cls.company_data['default_account_expense'].copy().id,
-            'rounding_method': 'UP',
-        })
-        cls.cash_rounding_b = cls.env['account.cash.rounding'].create({
-            'name': 'biggest_tax',
-            'rounding': 0.05,
-            'strategy': 'biggest_tax',
-            'rounding_method': 'DOWN',
-        })
+        cls.cash_rounding_a, cls.cash_rounding_b = cls.env['account.cash.rounding'].create([
+            {
+                'name': 'add_invoice_line',
+                'rounding': 0.05,
+                'strategy': 'add_invoice_line',
+                'profit_account_id': cls.company_data['default_account_revenue'].copy().id,
+                'loss_account_id': cls.company_data['default_account_expense'].copy().id,
+                'rounding_method': 'UP',
+            }, {
+                'name': 'biggest_tax',
+                'rounding': 0.05,
+                'strategy': 'biggest_tax',
+                'rounding_method': 'DOWN',
+            }
+        ])
 
         # ==== Payment methods ====
         bank_journal = cls.company_data['default_journal_bank']
-        in_outstanding_account = cls.env['account.account'].create({
-            'name': "Outstanding Receipts",
-            'code': 'OSTR00',
-            'reconcile': True,
-            'account_type': 'asset_current'
-        })
-        out_outstanding_account = cls.env['account.account'].create({
-            'name': "Outstanding Payments",
-            'code': 'OSTP00',
-            'reconcile': True,
-            'account_type': 'asset_current'
-        })
+        in_outstanding_account, out_outstanding_account = cls.env['account.account'].create([
+            {
+                'name': "Outstanding Receipts",
+                'code': 'OSTR00',
+                'reconcile': True,
+                'account_type': 'asset_current'
+            },
+            {
+                'name': "Outstanding Payments",
+                'code': 'OSTP00',
+                'reconcile': True,
+                'account_type': 'asset_current'
+            },
+        ])
         if bank_journal:
             cls.inbound_payment_method_line = bank_journal.inbound_payment_method_line_ids[0]
             cls.inbound_payment_method_line.payment_account_id = in_outstanding_account
             cls.outbound_payment_method_line = bank_journal.outbound_payment_method_line_ids[0]
             cls.outbound_payment_method_line.payment_account_id = out_outstanding_account
-
-        # user with restricted groups
-        cls.simple_accountman = cls.env['res.users'].create({
-            'name': 'simple accountman',
-            'login': 'simple_accountman',
-            'password': 'simple_accountman',
-            'group_ids': [
-                # the `account` specific groups from get_default_groups()
-                Command.link(cls.env.ref('account.group_account_manager').id),
-                Command.link(cls.env.ref('account.group_account_user').id),
-            ],
-        })
 
     @classmethod
     def change_company_country(cls, company, country):
@@ -397,7 +393,7 @@ class AccountTestInvoicingCommon(ProductCommon):
     def copy_account(cls, account, default=None):
         suffix_nb = 1
         while True:
-            new_code = '%s.%s' % (account.code, suffix_nb)
+            new_code = f'{account.code}.{suffix_nb}'
             if account.search_count([('code', '=', new_code)]):
                 suffix_nb += 1
             else:
@@ -409,13 +405,13 @@ class AccountTestInvoicingCommon(ProductCommon):
         cash_basis_transition_account = company_data['default_account_tax_sale'] and company_data['default_account_tax_sale'].copy()
         cash_basis_transition_account.reconcile = True
         return cls.env['account.tax'].create({
-            'name': '%s (group)' % tax_name,
+            'name': f'{tax_name} (group)',
             'amount_type': 'group',
             'amount': 0.0,
             'country_id': company_data['company'].account_fiscal_country_id.id,
             'children_tax_ids': [
-                (0, 0, {
-                    'name': '%s (child 1)' % tax_name,
+                Command.create({
+                    'name': f'{tax_name} (child 1)',
                     'amount_type': 'percent',
                     'amount': 20.0,
                     'type_tax_use': type_tax_use,
@@ -424,38 +420,38 @@ class AccountTestInvoicingCommon(ProductCommon):
                     'include_base_amount': True,
                     'tax_exigibility': 'on_invoice',
                     'invoice_repartition_line_ids': [
-                        (0, 0, {
+                        Command.create({
                             'repartition_type': 'base',
                         }),
-                        (0, 0, {
+                        Command.create({
                             'factor_percent': 40,
                             'repartition_type': 'tax',
                             'account_id': company_data['default_account_tax_sale'].id,
                         }),
-                        (0, 0, {
+                        Command.create({
                             'factor_percent': 60,
                             'repartition_type': 'tax',
                             # /!\ No account set.
                         }),
                     ],
                     'refund_repartition_line_ids': [
-                        (0, 0, {
+                        Command.create({
                             'repartition_type': 'base',
                         }),
-                        (0, 0, {
+                        Command.create({
                             'factor_percent': 40,
                             'repartition_type': 'tax',
                             'account_id': company_data['default_account_tax_sale'].id,
                         }),
-                        (0, 0, {
+                        Command.create({
                             'factor_percent': 60,
                             'repartition_type': 'tax',
                             # /!\ No account set.
                         }),
                     ],
                 }),
-                (0, 0, {
-                    'name': '%s (child 2)' % tax_name,
+                Command.create({
+                    'name': f'{tax_name} (child 2)',
                     'amount_type': 'percent',
                     'amount': 10.0,
                     'type_tax_use': type_tax_use,
@@ -463,20 +459,20 @@ class AccountTestInvoicingCommon(ProductCommon):
                     'tax_exigibility': 'on_payment' if cash_basis_transition_account else 'on_invoice',
                     'cash_basis_transition_account_id': cash_basis_transition_account.id,
                     'invoice_repartition_line_ids': [
-                        (0, 0, {
+                        Command.create({
                             'repartition_type': 'base',
                         }),
-                        (0, 0, {
+                        Command.create({
                             'repartition_type': 'tax',
                             'account_id': company_data['default_account_tax_sale'].id,
                         }),
                     ],
                     'refund_repartition_line_ids': [
-                        (0, 0, {
+                        Command.create({
                             'repartition_type': 'base',
                         }),
 
-                        (0, 0, {
+                        Command.create({
                             'repartition_type': 'tax',
                             'account_id': company_data['default_account_tax_sale'].id,
                         }),
@@ -1027,7 +1023,7 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
         invoice_date = '2020-01-01'
         currency = document['currency']
         self._ensure_rate(currency, invoice_date, document['rate'])
-        invoice = self.env['account.move'].create({
+        return self.env['account.move'].create({
             'move_type': 'out_invoice',
             'invoice_date': invoice_date,
             'currency_id': currency.id,
@@ -1037,7 +1033,6 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
                 for base_line in document['lines']
             ],
         })
-        return invoice
 
     def _run_js_tests(self):
         if not self.js_tests:

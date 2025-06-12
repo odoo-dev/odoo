@@ -21,7 +21,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon):
             'is_storable': True,
         })
         cls.env['product.supplierinfo'].create([{
-            'partner_id': cls.partner_1.id,
+            'partner_id': cls.partner.id,
             'price': 100,
             'product_id': cls.product_1.id,
         }])
@@ -76,11 +76,11 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon):
 
         # Create supplier info.
         self.env['product.supplierinfo'].create([{
-            'partner_id': self.partner_1.id,
+            'partner_id': self.partner.id,
             'price': 20,
             'product_id': product_2.id,
         }, {
-            'partner_id': self.partner_1.id,
+            'partner_id': self.partner.id,
             'price': 50,
             'product_id': product_3.id,
         }])
@@ -166,7 +166,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon):
         self.assertEqual(product_3.with_context(context).monthly_demand, 0)
 
         # Create a new PO for the vendor then check suggest wizard estimed price.
-        po = self.env['purchase.order'].create({'partner_id': self.partner_1.id})
+        po = self.env['purchase.order'].create({'partner_id': self.partner.id})
         action = po.action_display_suggest()
         context = {
             **action['context'],
@@ -216,15 +216,15 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon):
 
         # Create supplier info.
         self.env['product.supplierinfo'].create([{
-            'partner_id': self.partner_1.id,
+            'partner_id': self.partner.id,
             'price': 90,
             'product_id': product_4.id,
         }, {
-            'partner_id': self.partner_1.id,
+            'partner_id': self.partner.id,
             'price': 45,
             'product_id': product_5.id,
         }, {
-            'partner_id': self.partner_1.id,
+            'partner_id': self.partner.id,
             'price': 24,
             'product_id': product_6.id,
         }])
@@ -272,7 +272,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon):
         self.assertEqual(product_5.with_context(context).outgoing_qty, 10)
         self.assertEqual(product_6.with_context(context).outgoing_qty, 0)
 
-        po = self.env['purchase.order'].create({'partner_id': self.partner_1.id})
+        po = self.env['purchase.order'].create({'partner_id': self.partner.id})
         action = po.action_display_suggest()
         context = {
             **action['context'],
@@ -331,7 +331,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon):
 
         # Create supplier info.
         self.env['product.supplierinfo'].create({
-            'partner_id': self.partner_1.id,
+            'partner_id': self.partner.id,
             'price': 20,
             'product_id': consu.id,
         })
@@ -391,7 +391,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon):
         self.assertEqual(consu.with_context(context).monthly_demand, 5)
 
         # Create a new PO for the vendor then check suggest wizard estimed price.
-        po = self.env['purchase.order'].create({'partner_id': self.partner_1.id})
+        po = self.env['purchase.order'].create({'partner_id': self.partner.id})
         action = po.action_display_suggest()
         context = {
             **action['context'],
@@ -441,7 +441,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon):
         self._create_and_process_delivery_at_date([(self.product_1, 12)], date=today - timedelta(days=10))
 
         # Create a new PO for the vendor then check suggest wizard estimed price.
-        po = self.env['purchase.order'].create({'partner_id': self.partner_1.id})
+        po = self.env['purchase.order'].create({'partner_id': self.partner.id})
         action = po.action_display_suggest()
         context = {
             **action['context'],
@@ -488,7 +488,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon):
         }])
 
         self.env['product.supplierinfo'].create([{
-            'partner_id': self.partner_1.id,
+            'partner_id': self.partner.id,
             'price': 55,
             'product_id': product_ad.id,
         }])
@@ -500,7 +500,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon):
         delivery.scheduled_date = today + relativedelta(days=3)
 
         # Create a new PO for the vendor then check suggest wizard estimed price.
-        po = self.env['purchase.order'].create({'partner_id': self.partner_1.id})
+        po = self.env['purchase.order'].create({'partner_id': self.partner.id})
         action = po.action_display_suggest()
         context = {
             **action['context'],
@@ -555,7 +555,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon):
 
         # Create a PO for each warehouse and check the right quantity is added to the PO line.
         po_1 = self.env['purchase.order'].create({
-            'partner_id': self.partner_1.id,
+            'partner_id': self.partner.id,
             'picking_type_id': main_warehouse.in_type_id.id,
         })
         action = po_1.action_display_suggest()
@@ -584,7 +584,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon):
         ])
 
         po_2 = self.env['purchase.order'].create({
-            'partner_id': self.partner_1.id,
+            'partner_id': self.partner.id,
             'picking_type_id': self.warehouse_1.in_type_id.id,
         })
         action = po_2.action_display_suggest()
@@ -614,7 +614,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon):
         }])
 
         self.env['product.supplierinfo'].create([{
-            'partner_id': self.partner_1.id,
+            'partner_id': self.partner.id,
             'price': 55,
             'product_id': product_ad.id,
         }])
@@ -652,7 +652,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon):
 
         # Create a PO for each warehouse and check the right quantity is added to the PO line.
         po_1 = self.env['purchase.order'].create({
-            'partner_id': self.partner_1.id,
+            'partner_id': self.partner.id,
             'picking_type_id': main_warehouse.in_type_id.id,
         })
         action = po_1.action_display_suggest()
@@ -683,7 +683,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon):
         ])
 
         po_2 = self.env['purchase.order'].create({
-            'partner_id': self.partner_1.id,
+            'partner_id': self.partner.id,
             'picking_type_id': self.warehouse_1.in_type_id.id,
         })
         action = po_2.action_display_suggest()

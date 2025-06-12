@@ -74,14 +74,12 @@ class TestValuationReconciliation(TestValuationReconciliationCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        uom_unit = cls.env.ref('uom.product_uom_unit')
-
         cls.test_product_delivery_2 = cls.env['product.product'].create({
             'name': 'Test product template invoiced on delivery 2',
             'standard_price': 42.0,
             'type': 'consu',
             'categ_id': cls.stock_account_product_categ.id,
-            'uom_id': uom_unit.id,
+            'uom_id': cls.uom_unit.id,
         })
 
     def test_shipment_invoice(self):

@@ -19,6 +19,18 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
     def setUpClass(cls):
         super().setUpClass()
 
+        # user with restricted groups
+        cls.simple_accountman = cls.env['res.users'].create({
+            'name': 'simple accountman',
+            'login': 'simple_accountman',
+            'password': 'simple_accountman',
+            'group_ids': [
+                # the `account` specific groups from get_default_groups()
+                Command.link(cls.env.ref('account.group_account_manager').id),
+                Command.link(cls.env.ref('account.group_account_user').id),
+            ],
+        })
+
         cls.receivable_account = cls.company_data['default_account_receivable']
         cls.payable_account = cls.company_data['default_account_payable']
         cls.expense_account = cls.company_data['default_account_expense']

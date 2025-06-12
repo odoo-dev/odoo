@@ -3,10 +3,11 @@
 
 from datetime import timedelta
 
-from odoo.tests import Form, TransactionCase, tagged
-from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo import fields
 from odoo.fields import Command
+from odoo.tests import Form, tagged
+
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 
 @tagged('post_install', '-at_install')
@@ -20,15 +21,11 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         cls.warehouse = cls.env['stock.warehouse'].search([('company_id', '=', cls.env.company.id)])
         cls.stock_location = cls.warehouse.lot_stock_id
 
-        grp_uom = cls.env.ref('uom.group_uom')
-        group_user = cls.env.ref('base.group_user')
-        group_user.write({'implied_ids': [(4, grp_uom.id)]})
-        cls.env.user.write({'group_ids': [(4, grp_uom.id)]})
+        cls.group_user.write({'implied_ids': [(4, cls.group_uom.id)]})
+        cls.env.user.write({'group_ids': [(4, cls.group_uom.id)]})
 
-        cls.uom_kg = cls.env.ref('uom.product_uom_kgm')
-        cls.uom_gm = cls.env.ref('uom.product_uom_gram')
-        cls.uom_unit = cls.env.ref('uom.product_uom_unit')
-        cls.uom_dozen = cls.env.ref('uom.product_uom_dozen')
+        cls.uom_kg = cls.uom_kgm
+        cls.uom_gm = cls.uom_gram
 
         # Creating all components
         cls.component_a = cls._create_product_with_form('Comp A', cls.uom_unit)

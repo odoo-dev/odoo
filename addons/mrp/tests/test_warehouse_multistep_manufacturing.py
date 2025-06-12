@@ -23,8 +23,6 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         warehouse_form.code = 'TWH'
         cls.warehouse = warehouse_form.save()
 
-        cls.uom_unit = cls.env.ref('uom.product_uom_unit')
-
         # Create manufactured product
         product_form = Form(cls.env['product.product'])
         product_form.name = 'Stick'

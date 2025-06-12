@@ -164,12 +164,6 @@ class TestStockCommon(ProductVariantsCommon):
             groups='stock.group_stock_manager',
         )
 
-        # Partner
-        cls.partner_1 = cls.env['res.partner'].create({
-            'name': 'Julia Agrolait',
-            'email': 'julia@agrolait.example.com',
-        })
-
         # Existing data
         cls.existing_inventories = cls.StockQuantObj.search([('inventory_quantity', '!=', 0.0)])
         cls.existing_quants = cls.StockQuantObj.search([])

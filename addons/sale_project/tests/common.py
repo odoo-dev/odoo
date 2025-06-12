@@ -14,7 +14,6 @@ class TestSaleProjectCommon(TestSaleCommon):
             .create({'group_project_milestone': True}) \
             .execute()
 
-        cls.uom_hour = cls.env.ref('uom.product_uom_hour')
         cls.account_sale = cls.company_data['default_account_revenue']
 
         cls.analytic_plan, _other_plans = cls.env['account.analytic.plan']._get_all_plans()

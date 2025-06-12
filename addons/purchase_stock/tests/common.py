@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+
 from datetime import timedelta
 
 from odoo import Command, fields
+
 from odoo.addons.stock.tests.common import TestStockCommon
-from odoo import tools
 
 
 class PurchaseTestCommon(TestStockCommon):
@@ -23,33 +24,32 @@ class PurchaseTestCommon(TestStockCommon):
 
     @classmethod
     def setUpClass(cls):
-        super(PurchaseTestCommon, cls).setUpClass()
+        super().setUpClass()
+
         cls.route_mto.active = True
-
         cls.route_buy = cls.warehouse_1.buy_pull_id.route_id
-        cls.categ_id = cls.env.ref('product.product_category_goods').id
 
-        # Update product_1 with type, route and Delivery Lead Time
+        cls.group_purchase_user = cls.quick_ref('purchase.group_purchase_user')
+
+        # Update product_1 & product_2 with type, route and Delivery Lead Time
         cls.product_1.write({
             'is_storable': True,
             'route_ids': [Command.set([cls.route_buy.id, cls.route_mto.id])],
-            'seller_ids': [Command.create({'partner_id': cls.partner_1.id, 'delay': 5})],
-            'categ_id': cls.categ_id,
+            'seller_ids': [Command.create({'partner_id': cls.partner.id, 'delay': 5})],
+            'categ_id': cls.product_category.id,
+        })
+        cls.product_2.write({
+            'is_storable': True,
+            'route_ids': [Command.set([cls.route_buy.id, cls.route_mto.id])],
+            'seller_ids': [Command.create({'partner_id': cls.partner.id, 'delay': 2})],
+            'categ_id': cls.product_category.id,
         })
 
         cls.t_shirt = cls.env['product.product'].create({
             'name': 'T-shirt',
             'description': 'Internal Notes',
             'route_ids': [Command.set([cls.route_buy.id, cls.route_mto.id])],
-            'seller_ids': [Command.create({'partner_id': cls.partner_1.id, 'delay': 5})]
-        })
-
-        # Update product_2 with type, route and Delivery Lead Time
-        cls.product_2.write({
-            'is_storable': True,
-            'route_ids': [Command.set([cls.route_buy.id, cls.route_mto.id])],
-            'seller_ids': [Command.create({'partner_id': cls.partner_1.id, 'delay': 2})],
-            'categ_id': cls.categ_id,
+            'seller_ids': [Command.create({'partner_id': cls.partner.id, 'delay': 5})]
         })
 
         cls.res_users_purchase_user = cls.env['res.users'].create({
@@ -57,5 +57,5 @@ class PurchaseTestCommon(TestStockCommon):
             'name': "Purchase User",
             'login': "pu",
             'email': "purchaseuser@yourcompany.com",
-            'group_ids': [Command.set([cls.env.ref('purchase.group_purchase_user').id])],
+            'group_ids': [Command.set([cls.group_purchase_user.id])],
         })

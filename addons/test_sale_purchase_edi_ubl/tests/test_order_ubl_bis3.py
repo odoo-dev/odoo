@@ -60,13 +60,13 @@ class TestOrderEdiUbl(TestAccountEdiUblCii):
             {
                 'product_id': self.place_prdct.id,
                 'price_unit': 30.0,
-                'product_uom_id': self.uom_units.id,
+                'product_uom_id': self.uom_unit.id,
                 'product_qty': 10.0,
                 'tax_ids': self.purchase_tax.ids,
             }, {
                 'product_id': self.displace_prdct.id,
                 'price_unit': 30.0,
-                'product_uom_id': self.uom_units.id,
+                'product_uom_id': self.uom_unit.id,
                 'product_qty': 50.0,
                 'tax_ids': self.purchase_tax.ids,
             },
@@ -100,7 +100,7 @@ class TestOrderEdiUbl(TestAccountEdiUblCii):
         line_vals = [{
             'product_id': self.displace_prdct.id,
             'price_unit': 1100.0,
-            'product_uom_id': self.uom_dozens.id,
+            'product_uom_id': self.uom_dozen.id,
             'product_qty': 5.0,
         }]
         xml_attachment = self.get_xml_attachment_of_po(line_vals)
@@ -119,7 +119,7 @@ class TestOrderEdiUbl(TestAccountEdiUblCii):
         line_vals = [{
             'product_id': self.displace_prdct.id,
             'price_unit': 80.0,
-            'product_uom_id': self.uom_dozens.id,
+            'product_uom_id': self.uom_dozen.id,
         }]
         xml_attachment = self.get_xml_attachment_of_po(line_vals)
         self.displace_prdct.active = False

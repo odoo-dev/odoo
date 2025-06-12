@@ -2,26 +2,23 @@
 
 from odoo.exceptions import ValidationError
 from odoo.fields import Command
-from odoo.tests import Form, common
+from odoo.tests import Form, tagged
+
+from odoo.addons.sale.tests.common import SaleCommon
 
 
-@common.tagged('post_install', '-at_install')
-class TestLoyaltyDeliveryCost(common.TransactionCase):
+@tagged('post_install', '-at_install')
+class TestLoyaltyDeliveryCost(SaleCommon):
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.partner_1 = cls.env['res.partner'].create({'name': 'My Test Customer'})
-        cls.pricelist = cls.env['product.pricelist'].create({
-            'name': 'Test Pricelist',
-        })
         cls.product_4 = cls.env['product.product'].create({
             'name': "A product to deliver",
             'type': 'consu',
             'list_price': 200.0,
         })
-        cls.product_uom_unit = cls.env.ref('uom.product_uom_unit')
         cls.product_delivery = cls.env['product.product'].create({
             'name': 'Delivery Charges',
             'type': 'service',
@@ -53,7 +50,7 @@ class TestLoyaltyDeliveryCost(common.TransactionCase):
             })],
         })
         cls.order = cls.env['sale.order'].create({
-            'partner_id': cls.partner_1.id,
+            'partner_id': cls.partner.id,
             'pricelist_id': cls.pricelist.id,
             'order_line': [Command.create({'product_id': cls.product_4.id})],
         })

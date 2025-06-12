@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from dateutil.relativedelta import relativedelta
@@ -6,21 +5,23 @@ from dateutil.relativedelta import relativedelta
 from odoo import Command, fields
 from odoo.exceptions import UserError
 from odoo.tests import Form, new_test_user
-from odoo.tests.common import TransactionCase
+
 from odoo.addons.mail.tests.common import mail_new_test_user
+from odoo.addons.uom.tests.common import UomCommon
 
 
-class StockMove(TransactionCase):
+class TestStockMove(UomCommon):
+
     @classmethod
     def setUpClass(cls):
-        super(StockMove, cls).setUpClass()
-        group_stock_multi_locations = cls.env.ref('stock.group_stock_multi_locations')
-        group_production_lot = cls.env.ref('stock.group_production_lot')
+        super().setUpClass()
+        group_stock_multi_locations = cls.quick_ref('stock.group_stock_multi_locations')
+        group_production_lot = cls.quick_ref('stock.group_production_lot')
         cls.env.user.write({'group_ids': [
-            (4, group_stock_multi_locations.id),
-            (4, group_production_lot.id)
+            Command.link(group_stock_multi_locations.id),
+            Command.link(group_production_lot.id)
         ]})
-        cls.stock_location = cls.env.ref('stock.stock_location_stock')
+        cls.stock_location = cls.quick_ref('stock.stock_location_stock')
         if not cls.stock_location.child_ids:
             cls.stock_location.create([{
                 'name': 'Shelf 1',
@@ -29,9 +30,9 @@ class StockMove(TransactionCase):
                 'name': 'Shelf 2',
                 'location_id': cls.stock_location.id,
             }])
-        cls.customer_location = cls.env.ref('stock.stock_location_customers')
-        cls.supplier_location = cls.env.ref('stock.stock_location_suppliers')
-        cls.pack_location = cls.env.ref('stock.location_pack_zone')
+        cls.customer_location = cls.quick_ref('stock.stock_location_customers')
+        cls.supplier_location = cls.quick_ref('stock.stock_location_suppliers')
+        cls.pack_location = cls.quick_ref('stock.location_pack_zone')
         cls.pack_location.active = True
         cls.transit_location = cls.env['stock.location'].search([
             ('company_id', '=', cls.env.company.id),
@@ -39,8 +40,6 @@ class StockMove(TransactionCase):
             ('active', '=', False)
         ], limit=1)
         cls.transit_location.active = True
-        cls.uom_unit = cls.env.ref('uom.product_uom_unit')
-        cls.uom_dozen = cls.env.ref('uom.product_uom_dozen')
         cls.product = cls.env['product.product'].create({
             'name': 'Product A',
             'is_storable': True,
