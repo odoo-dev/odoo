@@ -22,9 +22,13 @@ const { DateTime, Interval } = luxon;
  */
 
 export const RELATIVE_PERIODS = {
+    today: _t("Today"),
+    yesterday: _t("Yesterday"),
     last_7_days: _t("Last 7 Days"),
     last_30_days: _t("Last 30 Days"),
     last_90_days: _t("Last 90 Days"),
+    month_to_date: _t("Month to Date"),
+    last_month: _t("Last Month"),
     last_12_months: _t("Last 12 Months"),
     year_to_date: _t("Year to Date"),
 };
@@ -289,6 +293,30 @@ export function getRelativeDateFromTo(now, offset, period) {
     let to = now.endOf("day");
     let from = to;
     switch (period) {
+        case "today": {
+            const offsetParam = { days: offset };
+            from = now.startOf("day").plus(offsetParam);
+            to = now.endOf("day").plus(offsetParam);
+            break;
+        }
+        case "yesterday": {
+            const offsetParam = { days: offset };
+            from = now.startOf("day").minus({ days: 1 }).plus(offsetParam);
+            to = now.endOf("day").minus({ days: 1 }).plus(offsetParam);
+            break;
+        }
+        case "month_to_date": {
+            const offsetParam = { months: offset };
+            from = now.startOf("month").plus(offsetParam);
+            to = now.endOf("day").plus(offsetParam);
+            break;
+        }
+        case "last_month": {
+            const offsetParam = { months: offset };
+            from = now.plus(offsetParam).minus({ months: 1 }).startOf("month");
+            to = now.plus(offsetParam).minus({ months: 1 }).endOf("month");
+            break;
+        }
         case "year_to_date": {
             const offsetParam = { years: offset };
             from = now.startOf("year").plus(offsetParam);
