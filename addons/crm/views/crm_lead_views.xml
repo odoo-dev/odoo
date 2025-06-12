@@ -96,7 +96,7 @@
                                 <!-- Preload all the partner's information -->
                                 <field name="is_partner_visible" invisible='1'/>
                                 <field name="partner_id" widget="res_partner_many2one"
-                                    context="{
+                                context="{
                                         'default_parent_id': commercial_partner_id,
                                         'default_name': contact_name,
                                         'default_street': street,

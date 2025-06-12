@@ -98,6 +98,16 @@ class CrmLead(models.Model):
     _check_company_auto = True
     _track_duration_field = 'stage_id'
 
+    @api.model
+    def default_get(self, fields):
+        result = super().default_get(fields)
+        if self.env.context.get('is_kanban_quick_create_crm_lead'):
+            if result.get('partner_id') and 'commercial_partner_id' not in result:
+                partner = self.env['res.partner'].browse(result['partner_id'])
+                if partner.is_company and partner.commercial_partner_id == partner:
+                    result['commercial_partner_id'] = result.pop('partner_id')
+        return result
+
     # Description
     name = fields.Char(
         'Opportunity', index='trigram', required=True,
@@ -414,7 +424,7 @@ class CrmLead(models.Model):
     @api.onchange('commercial_partner_id')
     def _onchange_commercial_partner_id(self):
         for lead in self:
-            if lead.partner_id and lead.commercial_partner_id != lead.partner_id.commercial_partner_id:
+            if lead.partner_id and lead.commercial_partner_id and lead.commercial_partner_id != lead.partner_id.commercial_partner_id:
                 # writing to partner will invalidate and recompute
                 # re-write the original value to keep user selection
                 commercial_partner = lead.commercial_partner_id
