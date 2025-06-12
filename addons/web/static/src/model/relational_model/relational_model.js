@@ -205,6 +205,7 @@ export class RelationalModel extends Model {
         ) {
             cached = {
                 onUpdate: async (result) => {
+                    //TODO: Ask AAB: maybe we can here check whenReady (it's also a Deferred)?
                     await def;
                     if (root.id !== this.root.id) {
                         // The root that we want to update is not the current one

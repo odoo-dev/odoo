@@ -227,7 +227,7 @@ export async function mountView(params, target = null) {
     after(() => actionManagerEl.remove());
     return mountWithCleanup(View, {
         env: params.env,
-        componentEnv: { config: params.config },
+        componentEnv: { config: { actionCache: true, ...params.config } },
         props: parseViewProps(params),
         target: actionManagerEl,
     });
