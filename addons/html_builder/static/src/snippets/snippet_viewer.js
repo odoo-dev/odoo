@@ -10,6 +10,7 @@ import {
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { InputConfirmationDialog } from "./input_confirmation_dialog";
+import { fuzzyLookup } from "@web/core/utils/search";
 
 export class SnippetViewer extends Component {
     static template = "html_builder.SnippetViewer";
@@ -108,16 +109,22 @@ export class SnippetViewer extends Component {
             this.content.el.ownerDocument.body.scrollTop = 0;
         }
         if (this.props.state.search) {
-            const strMatches = (str) =>
-                str ? str.toLowerCase().includes(this.props.state.search.toLowerCase()) : false;
-            return snippetStructures.filter(
-                (snippet) =>
-                    strMatches(snippet.name) ||
-                    strMatches(snippet.title) ||
-                    strMatches(snippet.keyWords)
-            );
+            const getAllClasses = (el) => {
+                const elements = el.querySelectorAll("*");
+                const classSet = new Set();
+                el.classList.forEach((cls) => classSet.add(cls));
+                elements.forEach((child) => {
+                    child.classList.forEach((cls) => classSet.add(cls));
+                });
+                return Array.from(classSet);
+            };
+            return fuzzyLookup(this.props.state.search, snippetStructures, (snippet) => [
+                snippet.name || "",
+                snippet.title || "",
+                ...(snippet.keyWords?.split(",") || ""),
+                ...getAllClasses(snippet.content),
+            ]);
         }
-
         return snippetStructures.filter(
             (snippet) => snippet.groupName === this.props.state.groupSelected
         );
