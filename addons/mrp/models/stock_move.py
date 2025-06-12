@@ -676,6 +676,11 @@ class StockMove(models.Model):
             vals['production_id'] = self.raw_material_production_id.id
         if self.production_id.product_tracking == 'lot' and self.product_id == self.production_id.product_id:
             vals['lot_id'] = self.production_id.lot_producing_id.id
+        consumed_lots = self.raw_material_production_id.procurement_group_id.mrp_production_ids.move_raw_ids.move_line_ids.mapped('lot_id')
+        picking_moves_lots = self.raw_material_production_id.picking_ids.move_ids.move_line_ids.mapped('lot_id')
+        available_lots = picking_moves_lots.filtered(lambda lot: lot and lot not in consumed_lots)
+        if available_lots:
+            vals['lot_id'] = available_lots[0].id
         return vals
 
     def _key_assign_picking(self):
