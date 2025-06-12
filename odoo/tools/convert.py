@@ -267,7 +267,7 @@ form: module.record_id""" % (xml_id,)
         if self.noupdate and self.mode != 'init':
             return
         env = self.get_env(rec)
-        _eval_xml(self, rec, env)
+        yield rec, _eval_xml, self, rec, env
 
     def _tag_menuitem(self, rec, parent=None):
         rec_id = rec.attrib["id"]
@@ -284,12 +284,11 @@ form: module.record_id""" % (xml_id,)
             values['sequence'] = int(rec.get('sequence'))
 
         if parent is not None:
-            values['parent_id'] = parent
+            values['parent_id'] = parent['id']
         elif rec.get('parent'):
             values['parent_id'] = self.id_get(rec.attrib['parent'])
         elif rec.get('web_icon'):
             values['web_icon'] = rec.attrib['web_icon']
-
 
         if rec.get('name'):
             values['name'] = rec.attrib['name']
@@ -320,19 +319,31 @@ form: module.record_id""" % (xml_id,)
         if groups:
             values['group_ids'] = groups
 
-
         data = {
             'xml_id': self.make_xml_id(rec_id),
             'values': values,
             'noupdate': self.noupdate,
         }
-        menu = self.env['ir.ui.menu']._load_records([data], self.mode == 'update')
-        for child in rec.iterchildren('menuitem'):
-            self._tag_menuitem(child, parent=menu.id)
+        parent = {}
 
-    def _tag_record(self, rec, extra_vals=None):
-        rec_model = rec.get("model")
+        def load_record(data, update):
+            # Load the menu item record
+            rec = self.env['ir.ui.menu']._load_records(data, update)
+            parent['id'] = rec.id
+            self.idref[rec_id] = rec.id
+            return rec._name, rec.id
+        yield rec, load_record, [data], self.mode == 'update'
+
+        for child in rec.iterchildren('menuitem'):
+            # todo change that, we should yield all menu items and fill a cache for xmlids to id
+            yield from self._tag_menuitem(child, parent=parent)
+
+    def _tag_record(self, rec, extra_vals=None, inverse_name=None, parent=None):
+        if parent:
+            extra_vals[inverse_name] = parent['id']
         env = self.get_env(rec)
+        rec_model = rec.get("model")
+
         rec_id = rec.get("id", '')
 
         model = env[rec_model]
@@ -447,14 +458,19 @@ form: module.record_id""" % (xml_id,)
         data = dict(xml_id=xid, values=res, noupdate=self.noupdate)
         if foreign_record_to_create:
             model = model.with_context(foreign_record_to_create=foreign_record_to_create)
-        record = model._load_records([data], self.mode == 'update')
-        if rec_id:
-            self.idref[rec_id] = record.id
+        parent = {}
+        def load_record(data, update):
+            record = model._load_records(data, update)
+            parent['id'] = record.id
+            if rec_id:
+                self.idref[rec_id] = record.id
+            return record._name, record.id
+        yield rec, load_record, [data], self.mode == 'update'
         if config.get('import_partial'):
             env.cr.commit()
         for child_rec, inverse_name in sub_records:
-            self._tag_record(child_rec, extra_vals={inverse_name: record.id})
-        return rec_model, record.id
+            yield from self._tag_record(child_rec, {}, inverse_name, parent)
+
 
     def _tag_template(self, el):
         # This helper transforms a <template> element into a <record> and forwards it
@@ -524,7 +540,7 @@ form: module.record_id""" % (xml_id,)
         # the ``arch`` field
         record.append(Field(el, name="arch", type="xml"))
 
-        return self._tag_record(record)
+        yield from self._tag_record(record)
 
     def id_get(self, id_str, raise_if_not_found=True):
         if id_str in self.idref:
@@ -547,7 +563,17 @@ form: module.record_id""" % (xml_id,)
             self._noupdate.append(nodeattr2bool(el, 'noupdate', self.noupdate))
             self._sequences.append(0 if nodeattr2bool(el, 'auto_sequence', False) else None)
             try:
-                f(rec)
+                yield from f(rec)
+            finally:
+                self._noupdate.pop()
+                self.envs.pop()
+                self._sequences.pop()
+
+    def _load_nodes(self, nodes):
+        for rec, loader, *args in nodes:
+            try:
+                args[0]
+                loader(*args)
             except ParseError:
                 raise
             except ValidationError as err:
@@ -565,10 +591,6 @@ form: module.record_id""" % (xml_id,)
                     rec.sourceline,
                     etree.tostring(rec, encoding='unicode').rstrip()
                 )) from e
-            finally:
-                self._noupdate.pop()
-                self.envs.pop()
-                self._sequences.pop()
 
     @property
     def env(self):
@@ -604,7 +626,8 @@ form: module.record_id""" % (xml_id,)
 
     def parse(self, de):
         assert de.tag in self.DATA_ROOTS, "Root xml tag must be <openerp>, <odoo> or <data>."
-        self._tag_root(de)
+        self._load_nodes(self._tag_root(de))
+
     DATA_ROOTS = ['odoo', 'data', 'openerp']
 
 def convert_file(env, module, filename, idref, mode='update', noupdate=False, kind=None, pathname=None):
