@@ -848,13 +848,12 @@ export class GraphRenderer extends Component {
      * @param {Object} context
      */
     openView(domain, views, context) {
-        const { name, res_model } = this._getActionMeta();
         this.actionService.doAction(
             {
                 context,
                 domain,
-                name,
-                res_model,
+                name: this.model.metaData.title,
+                res_model: this.model.metaData.resModel,
                 target: "current",
                 type: "ir.actions.act_window",
                 views,
@@ -864,17 +863,6 @@ export class GraphRenderer extends Component {
             }
         );
     }
-
-    /**
-     * Helper method to provide model metadata for actions.
-     */
-    _getActionMeta() {
-        return {
-            name: this.model.metaData.title,
-            res_model: this.model.metaData.resModel,
-        };
-    }
-
     /**
      * @param {string} domain the domain of the clicked area
      */
