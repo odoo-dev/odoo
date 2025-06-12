@@ -3293,6 +3293,15 @@ class AccountMove(models.Model):
                 if 'tax_totals' in vals:
                     super(AccountMove, move).write({'tax_totals': vals['tax_totals']})
 
+            for move in self:
+                if (
+                    move.tax_cash_basis_origin_move_id
+                    and (not move.name or move.name == '/')
+                ):
+                    print("Force assigning name for move", move.id)
+                    move._set_next_sequence()
+                    print("Name after force-set:", move.name)
+
         if any(field in vals for field in ['journal_id', 'currency_id']):
             self.line_ids._check_constrains_account_id_journal_id()
 
