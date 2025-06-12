@@ -406,6 +406,8 @@
                     border: none;
                     padding: 0;
                     margin: 0;
+                }
+                .o_input:not(button) { 
                     width: 100%;
                 }
                 &.o_field_text {
