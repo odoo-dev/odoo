@@ -45,7 +45,7 @@ class AssetsBundle(object):
 
     TRACKED_BUNDLES = ['web.assets_web']
 
-    def __init__(self, name, files, external_assets=(), env=None, css=True, js=True, debug_assets=False, rtl=False, assets_params=None, autoprefix=False):
+    def __init__(self, name, files, external_assets=(), bases=(), env=None, css=True, js=True, debug_assets=False, rtl=False, assets_params=None, autoprefix=False):
         """
         :param name: bundle name
         :param files: files to be added to the bundle
@@ -71,6 +71,7 @@ class AssetsBundle(object):
             for url in external_assets
             if (css and url.rpartition('.')[2] in STYLE_EXTENSIONS) or (js and url.rpartition('.')[2] in SCRIPT_EXTENSIONS)
         ]
+        self.bases = bases
 
         # asset-wide html "media" attribute
         for f in files:
@@ -233,10 +234,12 @@ class AssetsBundle(object):
                 extension=extension,
                 ignore_params=True,
             )
+            fallback_url_pattern = fallback_url_pattern.replace(self.name, '%')
             self.env.cr.execute(query, [SUPERUSER_ID, fallback_url_pattern])
             similar_attachment_ids = [r[0] for r in self.env.cr.fetchall()]
             if similar_attachment_ids:
                 similar = self.env['ir.attachment'].sudo().browse(similar_attachment_ids)
+                similar = similar[0]
                 _logger.info('Found a similar attachment for %s, copying from %s', url_pattern, similar.url)
                 url = url_pattern
                 values = {
@@ -333,7 +336,8 @@ class AssetsBundle(object):
                 """)
 
             if is_minified:
-                content_bundle = ';\n'.join(asset.minify() for asset in self.javascripts)
+                content_bundle = '\n'.join(self.bases.js())
+                content_bundle += ';\n'.join(asset.minify() for asset in self.javascripts)
                 content_bundle += template_bundle
                 js_attachment = self.save_attachment(extension, content_bundle)
             else:

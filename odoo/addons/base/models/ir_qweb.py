@@ -390,7 +390,7 @@ from odoo import api, models, tools
 from odoo.modules import get_module_path
 from odoo.modules.registry import _REGISTRY_CACHES
 from odoo.tools import config, safe_eval, pycompat
-from odoo.tools.constants import SUPPORTED_DEBUGGER, EXTERNAL_ASSET
+from odoo.tools.constants import SUPPORTED_DEBUGGER, EXTERNAL_ASSET, BASE_BUNDLE
 from odoo.tools.safe_eval import assert_valid_codeobj, _BUILTINS, to_opcodes, _EXPR_OPCODES, _BLACKLIST
 from odoo.tools.json import scriptsafe
 from odoo.tools.lru import LRU
@@ -2537,10 +2537,7 @@ class IrQweb(models.AbstractModel):
         content = converter.value_to_html(value, field_options)
         attributes = {}
         attributes['data-oe-type'] = field_options['type']
-        attributes['data-oe-expression'] = field_options['expression']
-
-        return (attributes, content, inherit_branding)
-
+        attributes['data-oe-expression'] = BASE_BUNDLE
     def _get_asset_nodes(self, bundle, css=True, js=True, debug=False, defer_load=False, lazy_load=False, media=None, autoprefix=False):
         """Generates asset nodes.
         If debug=assets, the assets will be regenerated when a file which composes them has been modified.
@@ -2622,25 +2619,28 @@ class IrQweb(models.AbstractModel):
         if assets_params is None:
             assets_params = self.env['ir.asset']._get_asset_params()  # website_id
         asset_paths = self.env['ir.asset']._get_asset_paths(bundle=bundle, assets_params=assets_params)
+        bases = []
         files = []
         external_asset = []
         for path, full_path, _bundle, last_modified in asset_paths:
-            if full_path is not EXTERNAL_ASSET:
+            if full_path is EXTERNAL_ASSET:
+                external_asset.append(path)
+            elif full_path is BASE_BUNDLE:
+                bases.append(path)
+            else:
                 files.append({
                     'url': path,
                     'filename': full_path,
                     'content': '',
                     'last_modified': last_modified,
                 })
-            else:
-                external_asset.append(path)
-        return (files, external_asset)
+        return (files, external_asset, bases)
 
     def _get_asset_bundle(self, bundle_name, css=True, js=True, debug_assets=False, rtl=False, assets_params=None, autoprefix=False):
         if assets_params is None:
             assets_params = self.env['ir.asset']._get_asset_params()
-        files, external_assets = self._get_asset_content(bundle_name, assets_params)
-        return AssetsBundle(bundle_name, files, external_assets, env=self.env, css=css, js=js, debug_assets=debug_assets, rtl=rtl, assets_params=assets_params, autoprefix=autoprefix)
+        files, external_assets, bases = self._get_asset_content(bundle_name, assets_params)
+        return AssetsBundle(bundle_name, files, external_assets, bases=bases, env=self.env, css=css, js=js, debug_assets=debug_assets, rtl=rtl, assets_params=assets_params, autoprefix=autoprefix)
 
     def _links_to_nodes(self, paths, defer_load=False, lazy_load=False, media=None):
         return [self._link_to_node(path, defer_load=defer_load, lazy_load=lazy_load, media=media) for path in paths]

@@ -8,7 +8,7 @@ import odoo
 import odoo.modules.module  # get_manifest, don't from-import it
 from odoo import api, fields, models, tools
 from odoo.tools import misc
-from odoo.tools.constants import ASSET_EXTENSIONS, EXTERNAL_ASSET
+from odoo.tools.constants import ASSET_EXTENSIONS, EXTERNAL_ASSET, BASE_BUNDLE
 
 _logger = getLogger(__name__)
 
@@ -208,11 +208,11 @@ class IrAsset(models.Model):
         :param target: string or None or False
         :param path_def: string
         """
-        if directive == 'clone':
+        if directive == 'base_bundle':
             target_bundle = self.env['ir.qweb']._get_asset_bundle(path_def, assets_params=assets_params)
-            asset_paths.append([(target_bundle.get_link('js'), None, None)], bundle)
-            asset_paths.append([(target_bundle.get_link('js'), None, None)], bundle)
+            asset_paths.append([(target_bundle, BASE_BUNDLE, None)], bundle)
             return
+
         if directive == INCLUDE_DIRECTIVE:
             # recursively call this function for each INCLUDE_DIRECTIVE directive.
             self._fill_asset_paths(path_def, asset_paths, seen + [bundle], addons, installed, **assets_params)

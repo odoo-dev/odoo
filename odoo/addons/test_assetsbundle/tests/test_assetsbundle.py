@@ -138,7 +138,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
         self.cssbundle_name = 'test_assetsbundle.bundle2'
 
     def _get_asset(self, bundle, rtl=False, debug_assets=False):
-        files, _ = self.env['ir.qweb']._get_asset_content(bundle)
+        files = self.env['ir.qweb']._get_asset_content(bundle)[0]
         return AssetsBundle(bundle, files, env=self.env, debug_assets=debug_assets, rtl=rtl)
 
     def _any_ira_for_bundle(self, extension, rtl=False):
@@ -640,7 +640,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
 class TestXMLAssetsBundle(FileTouchable):
 
     def _get_asset(self, bundle, rtl=False, debug_assets=False):
-        files, _ = self.env['ir.qweb']._get_asset_content(bundle)
+        files = self.env['ir.qweb']._get_asset_content(bundle)[0]
         return AssetsBundle(bundle, files, env=self.env, debug_assets=debug_assets, rtl=rtl)
 
     def test_01_broken_xml(self):

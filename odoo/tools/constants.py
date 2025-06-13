@@ -7,6 +7,7 @@ ASSET_EXTENSIONS = SCRIPT_EXTENSIONS + STYLE_EXTENSIONS + TEMPLATE_EXTENSIONS
 
 SUPPORTED_DEBUGGER = {'pdb', 'ipdb', 'wdb', 'pudb'}
 EXTERNAL_ASSET = object()
+BASE_BUNDLE = object()
 
 PREFETCH_MAX = 1000
 """Maximum number of prefetched records"""
