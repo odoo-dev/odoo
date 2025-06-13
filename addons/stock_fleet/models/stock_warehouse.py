@@ -15,6 +15,7 @@ class StockWarehouse(models.Model):
 
         if values.get('out_type_id'):
             values['out_type_id']['dispatch_management'] = True
+            values['out_type_id']['dock_ids'] = self.wh_output_stock_loc_id
         if values.get('in_type_id'):
             values['in_type_id']['dispatch_management'] = True
 
