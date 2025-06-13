@@ -1,4 +1,3 @@
-/* global odoo */
 // Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 /** @odoo-module **/
@@ -27,15 +26,15 @@ const HDFC_UPI_ERRORS = {
  */
 function handleHdfcUpiError(error, context = '') {
   console.error(`HDFC UPI Error${context ? ' in ' + context : ''}:`, error);
-  
+
   if (typeof error === 'string') {
     return error;
   }
-  
+
   if (error.data && error.data.message) {
     return error.data.message;
   }
-  
+
   if (error.message) {
     if (error.message.includes('network')) {
       return HDFC_UPI_ERRORS.NETWORK_ERROR;
@@ -48,7 +47,7 @@ function handleHdfcUpiError(error, context = '') {
     }
     return error.message;
   }
-  
+
   return HDFC_UPI_ERRORS.UNKNOWN_ERROR;
 }
 
@@ -117,11 +116,11 @@ paymentForm.include({
       return;
     }
 
-    console.log("Initiating HDFC UPI payment flow", { 
-      providerCode, 
-      paymentOptionId, 
-      paymentMethodCode, 
-      flow 
+    console.log("Initiating HDFC UPI payment flow", {
+      providerCode,
+      paymentOptionId,
+      paymentMethodCode,
+      flow
     });
 
     // Validate payment form before proceeding
@@ -133,7 +132,7 @@ paymentForm.include({
     try {
       // Create the transaction and retrieve the processing values
       const processingValues = await rpc(
-        this.paymentContext["transactionRoute"], 
+        this.paymentContext["transactionRoute"],
         this._prepareTransactionRouteParams()
       );
 
@@ -146,7 +145,7 @@ paymentForm.include({
 
       // Show UPI modal with transaction data
       this._showUpiModal(processingValues);
-      
+
     } catch (error) {
       const errorMessage = handleHdfcUpiError(error, 'payment initiation');
       this._displayErrorDialog(_t("Payment Processing Failed"), errorMessage);
@@ -187,10 +186,10 @@ paymentForm.include({
   _validatePaymentForm() {
     // Get amount from payment context
     const amount = this.paymentContext.amount;
-    
+
     if (!amount || amount <= 0) {
       this._displayErrorDialog(
-        _t("Validation Error"), 
+        _t("Validation Error"),
         _t("Please enter a valid payment amount")
       );
       return false;
@@ -199,7 +198,7 @@ paymentForm.include({
     // UPI specific validations
     if (amount < 1.0) {
       this._displayErrorDialog(
-        _t("Validation Error"), 
+        _t("Validation Error"),
         _t("Minimum payment amount is ₹1.00")
       );
       return false;
@@ -207,7 +206,7 @@ paymentForm.include({
 
     if (amount > 100000.0) {
       this._displayErrorDialog(
-        _t("Validation Error"), 
+        _t("Validation Error"),
         _t("Maximum UPI QR payment amount is ₹1,00,000.00")
       );
       return false;
@@ -273,6 +272,12 @@ class UpiPaymentModal {
       existingModal.remove()
     }
 
+    // Remove existing confirmation modal if any
+    const existingConfirmModal = document.getElementById("upiConfirmationModal")
+    if (existingConfirmModal) {
+      existingConfirmModal.remove()
+    }
+
     const modalHtml = `
             <div class="upi-payment-modal" id="upiPaymentModal">
                 <div class="upi-modal-content">
@@ -289,23 +294,23 @@ class UpiPaymentModal {
                         <div id="qrContainer" style="display: none;">
                             <img class="qr-code-image" id="qrCodeImage" alt="UPI QR Code" />
                         </div>
-                        
+
                         <div class="payment-amount" id="paymentAmount">
                             Amount: <span class="currency">₹</span> <span id="amountValue">0</span>
                         </div>
-                        
+
                         <p class="scan-instruction">
                             Scan the QR using any UPI app on your phone.
                         </p>
-                        
+
                         <div class="timer-container" id="timerContainer">
                             <span class="timer-icon">⏰</span>
                             <span class="timer-text">Expires in: </span>
                             <span class="timer-value" id="timerValue">5:00</span>
                         </div>
-                        
+
                         <div class="status-message" id="statusMessage"></div>
-                        
+
                         <div class="upi-apps-container">
                             <p class="upi-apps-title">Supported UPI Apps</p>
                             <div class="upi-apps-grid">
@@ -435,15 +440,15 @@ class UpiPaymentModal {
       .catch((error) => {
         clearTimeout(qrLoadTimeout)
         console.error("Error loading QR code:", error)
-        
+
         // Enhanced error handling for different scenarios
         let errorMessage = _t("Failed to load QR code")
-        
+
         if (error.name === 'AbortError' || error.message?.toLowerCase().includes('abort')) {
           errorMessage = _t("QR code loading was cancelled")
         } else if (error.name === 'TimeoutError' || error.message?.toLowerCase().includes('timeout')) {
           errorMessage = _t("QR code loading timed out. Please check your connection and try again.")
-        } else if (error.message?.toLowerCase().includes('network') || 
+        } else if (error.message?.toLowerCase().includes('network') ||
                    error.message?.toLowerCase().includes('fetch') ||
                    error.message?.toLowerCase().includes('connection')) {
           errorMessage = _t("Network error. Please check your internet connection and try again.")
@@ -454,9 +459,9 @@ class UpiPaymentModal {
         } else if (error.status >= 400) {
           errorMessage = _t("Invalid request. Please refresh the page and try again.")
         }
-        
+
         this._showStatus("error", errorMessage)
-        
+
         // Provide retry option for certain errors
         if (!error.name?.includes('Abort') && !this._finalStateReceived) {
           setTimeout(() => {
@@ -487,7 +492,7 @@ class UpiPaymentModal {
           ${_t("Retry")}
         </button>
       `
-      
+
       const retryBtn = statusEl.querySelector('.retry-qr-btn')
       if (retryBtn) {
         retryBtn.addEventListener('click', () => {
@@ -576,7 +581,7 @@ class UpiPaymentModal {
       })
       .catch((error) => {
         console.error("Error checking payment status:", error)
-        
+
         // Handle specific error cases
         if (error.message === 'retry') {
           console.log("Retrying status check due to database error")
@@ -596,10 +601,10 @@ class UpiPaymentModal {
   _handleStateChange(state, landingRoute) {
     this._finalStateReceived = true
     this._isRedirecting = true // Set flag before removing handler
-    
+
     // Remove beforeunload handler immediately to prevent dialog
     this._removeBeforeUnloadHandler()
-    
+
     this._stopMonitoring()
     console.log("Handling state change:", state, "Landing route:", landingRoute)
 
@@ -628,7 +633,7 @@ class UpiPaymentModal {
     // Redirect to the landing route (inline flow)
     setTimeout(() => {
       console.log("Redirecting to landing route:", landingRoute)
-      window.location.href = landingRoute || "/shop/payment/validate"
+      window.location.href = landingRoute
     }, 2000)
   }
 
@@ -643,7 +648,7 @@ class UpiPaymentModal {
     this._qrExpired = true
     this._isRedirecting = true // Set flag before removing handler
     this._removeBeforeUnloadHandler()
-    
+
     this._stopMonitoring()
     this._showStatus("error", message || _t("QR code has expired. Redirecting..."))
 
@@ -683,14 +688,14 @@ class UpiPaymentModal {
       this._qrExpired = true
       this._isRedirecting = true // Set flag before removing handler
       this._removeBeforeUnloadHandler()
-      
+
       this._stopMonitoring()
       this._showStatus("error", _t("QR code has expired. Redirecting..."))
-      
+
       // Update timer display
       document.getElementById("timerValue").textContent = _t("Expired")
       document.getElementById("timerContainer").classList.add("warning")
-      
+
       // Redirect to payment status page for expired QR
       setTimeout(() => {
         console.log("Redirecting to payment status page due to timer expiry...")
@@ -758,7 +763,7 @@ class UpiPaymentModal {
     document.getElementById("timerContainer").classList.remove("warning")
     document.getElementById("merchantName").textContent = "Loading..."
     document.getElementById("amountValue").textContent = "0"
-    
+
     // Reset internal state
     this.transactionId = null
     this._finalStateReceived = false
@@ -794,7 +799,7 @@ class UpiPaymentModal {
     if (modal) {
       modal.remove()
     }
-    
+
     // Reset global reference
     if (globalUpiModal === this) {
       globalUpiModal = null
@@ -811,7 +816,7 @@ class UpiPaymentModal {
       if (this.isOpen && this.transactionId && !this._isRedirecting) {
         // Cancel transaction immediately without confirmation
         this._cancelTransaction("Browser/tab closed during payment")
-        
+
         // Show browser confirmation dialog
         const message = "Your payment is in progress. Are you sure you want to leave?"
         e.preventDefault()
@@ -849,14 +854,14 @@ class UpiPaymentModal {
       // If QR has expired, redirect to payment status instead of reloading
       if (this._qrExpired && this.transactionId) {
         this.close()
-        
+
         setTimeout(() => {
           console.log("Redirecting to payment status after QR expiry...")
           window.location.href = "/payment/status"
         }, 500)
         return
       }
-      
+
       this.close()
       return
     }
@@ -881,25 +886,108 @@ class UpiPaymentModal {
    * @param {string} reason - Reason for closing
    */
   _showCloseConfirmation(reason) {
-    const shouldConfirm = confirm(
-      "Your payment is in progress. Closing this window will cancel the payment. Are you sure you want to continue?"
-    )
+    this._createConfirmationModal(reason)
+  }
 
-    if (shouldConfirm) {
-      console.log("User confirmed modal close")
-      this._cancelTransaction(`Payment cancelled: ${reason}`)
-      
-      // Close modal first
-      this.close()
-      
-      // Reload the payment page to show available payment methods
+  /**
+   * Create and show modern confirmation modal
+   * @private
+   * @param {string} reason - Reason for closing
+   */
+  _createConfirmationModal(reason) {
+    // Create modal backdrop
+    const modalBackdrop = document.createElement('div')
+    modalBackdrop.className = 'upi-confirmation-modal'
+    modalBackdrop.id = 'upiConfirmationModal'
+
+    // Create modal content
+    modalBackdrop.innerHTML = `
+      <div class="upi-confirmation-content">
+        <div class="upi-confirmation-header">
+          <div class="warning-icon">
+            <i class="fa fa-exclamation-triangle"></i>
+          </div>
+          <h3 class="confirmation-title">⚠️ Cancel Payment?</h3>
+          <p class="confirmation-message">
+            <strong>Your UPI payment is currently in progress.</strong><br>
+          </p>
+        </div>
+        <div class="upi-confirmation-body">
+          <p class="confirmation-details">
+            Are you sure you want to cancel and return to the payment selection page?
+          </p>
+        </div>
+        <div class="upi-confirmation-actions">
+          <button class="btn-cancel-payment" data-action="confirm">
+            <i class="fa fa-times"></i>
+            Yes, Cancel Payment
+          </button>
+          <button class="btn-continue-payment" data-action="dismiss">
+            <i class="fa fa-arrow-left"></i>
+            Continue Payment
+          </button>
+        </div>
+      </div>
+    `
+
+    // Add to DOM
+    document.body.appendChild(modalBackdrop)
+
+    // Animate in
+    requestAnimationFrame(() => {
+      modalBackdrop.classList.add('show')
+    })
+
+    // Add event listeners
+    const handleAction = (action) => {
+      // Animate out
+      modalBackdrop.classList.remove('show')
+
       setTimeout(() => {
-        console.log("Reloading payment page after user cancellation...")
-        window.location.reload()
-      }, 500)
-    } else {
-      console.log("User cancelled modal close")
+        document.body.removeChild(modalBackdrop)
+
+        if (action === 'confirm') {
+          console.log("User confirmed payment cancellation")
+          this._cancelTransaction(`Payment cancelled: ${reason}`)
+
+          // Close modal first
+          this.close()
+
+          // Reload the payment page to show available payment methods
+          setTimeout(() => {
+            console.log("Reloading payment page after user cancellation...")
+            window.location.reload()
+          }, 500)
+        } else {
+          console.log("User chose to continue payment")
+        }
+      }, 300)
     }
+
+    // Button event listeners
+    modalBackdrop.querySelector('.btn-cancel-payment').addEventListener('click', () => {
+      handleAction('confirm')
+    })
+
+    modalBackdrop.querySelector('.btn-continue-payment').addEventListener('click', () => {
+      handleAction('dismiss')
+    })
+
+    // Click outside to dismiss
+    modalBackdrop.addEventListener('click', (e) => {
+      if (e.target === modalBackdrop) {
+        handleAction('dismiss')
+      }
+    })
+
+    // Escape key to dismiss
+    const handleKeyPress = (e) => {
+      if (e.key === 'Escape') {
+        document.removeEventListener('keydown', handleKeyPress)
+        handleAction('dismiss')
+      }
+    }
+    document.addEventListener('keydown', handleKeyPress)
   }
 
   /**
