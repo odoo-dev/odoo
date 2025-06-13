@@ -22,6 +22,9 @@ threadActionsRegistry.add("open-hr-profile", {
             res_model: "hr.employee.public",
             views: [[false, "form"]],
         });
+        if (component.env.isSmall) {
+            component.props.chatWindow.hidden = true;
+        }
     },
     async setup(action) {
         const component = useComponent();
