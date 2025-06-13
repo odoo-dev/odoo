@@ -77,6 +77,30 @@
                     />
                 </div>
             </group>
+            <!-- view for showing all payments of razorpay via range (from and to) -->
+            <xpath expr="//group[@name='payment_followup']" position="after">
+                <group string="Razorpay Transactions" invisible="code!='razorpay' or not is_journal_bank or razorpay_data_fetched"> <!-- invisible="code!='razorpay' or not is_journal_bank or razorpay_data_fetched"-->
+                    <label for="razorpay_from_date" string="Dates" />
+                    <div class="o_row">
+                        <field name="razorpay_from_date" widget="date" options="{'end_date_field': 'razorpay_to_date'}"  required="True"/>
+                    </div>
+                    <button name="action_fetch_razorpay_data" type="object" string="Next"
+                        class="btn-primary" invisible="is_online_sync==True"
+                        /> 
+                        <div class="o_form_label text-danger" invisible="is_online_sync==False">
+                       ⚠ This journal is already configured for online synchronization.
+                    </div>
+                </group>
+                <!-- Add this new group to show disable_cron_fetch info -->
+                <group string="Auto Fetch Status" invisible="disable_cron_fetch==False">
+                    <field name="disable_cron_fetch" readonly="1" invisible="1"/>
+                    <field name="disable_cron_fetch"
+                           widget="boolean_toggle"
+                           invisible="disable_cron_fetch==False"
+                           readonly="1"
+                           string="Auto-fetch is disabled due to Online Sync journal"/>
+                </group>
+            </xpath>
             <field name="allow_tokenization" position="after">
                 <div invisible="code != 'razorpay' or not allow_tokenization" colspan="2">
                     <widget

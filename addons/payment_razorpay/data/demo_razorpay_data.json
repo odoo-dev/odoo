@@ -1,0 +1,367 @@
+[
+  {
+    "id": "pay_KB0006",
+    "entity": "payment",
+    "amount": 99000,
+    "currency": "INR",
+    "status": "captured",
+    "order_id": "order_006",
+    "description": "Booking Payment 6",
+    "international": false,
+    "method": "upi",
+    "vpa": "user6@upi",
+    "email": "user6@example.com",
+    "contact": "+966666666666",
+    "notes": {
+      "address": "Office 6",
+      "narration": "Sixth payment",
+      "ref": "REF006"
+    },
+    "fee": 180,
+    "tax": 32,
+    "acquirer_data": {
+      "upi_transaction_id": "UPI20006"
+    },
+    "created_at": 1736112000
+  },
+  {
+    "id": "pay_KB0007",
+    "entity": "payment",
+    "amount": 87500,
+    "currency": "INR",
+    "status": "failed",
+    "order_id": "order_007",
+    "description": "Failed Attempt",
+    "international": false,
+    "method": "netbanking",
+    "bank": "SBI",
+    "email": "user7@example.com",
+    "contact": "+977777777777",
+    "notes": {
+      "address": "Office 7",
+      "narration": "Failed transaction",
+      "ref": "REF007"
+    },
+    "fee": 0,
+    "tax": 0,
+    "acquirer_data": {
+      "bank_transaction_id": "TRX10007"
+    },
+    "created_at": 1736284800
+  },
+  {
+    "id": "pay_KB0008",
+    "entity": "payment",
+    "amount": 123000,
+    "currency": "INR",
+    "status": "captured",
+    "order_id": "order_008",
+    "description": "Installment Payment",
+    "international": false,
+    "method": "wallet",
+    "email": "user8@example.com",
+    "contact": "+988888888888",
+    "notes": {
+      "address": "Office 8",
+      "narration": "Installment paid",
+      "ref": "REF008"
+    },
+    "fee": 220,
+    "tax": 40,
+    "acquirer_data": {},
+    "created_at": 1736976000
+  },
+  {
+    "id": "pay_KB0009",
+    "entity": "payment",
+    "amount": 76000,
+    "currency": "INR",
+    "status": "authorized",
+    "order_id": "order_009",
+    "description": "Advance Booking 9",
+    "international": false,
+    "method": "netbanking",
+    "bank": "HDFC",
+    "email": "user9@example.com",
+    "contact": "+999999999999",
+    "notes": {
+      "address": "Office 9",
+      "narration": "Partial advance",
+      "ref": "REF009"
+    },
+    "fee": 150,
+    "tax": 27,
+    "acquirer_data": {
+      "bank_transaction_id": "TRX10009"
+    },
+    "created_at": 1737580800
+  },
+  {
+    "id": "pay_KB0010",
+    "entity": "payment",
+    "amount": 110000,
+    "currency": "INR",
+    "status": "captured",
+    "order_id": "order_010",
+    "description": "Booking Payment 10",
+    "international": false,
+    "method": "upi",
+    "vpa": "user10@upi",
+    "email": "user10@example.com",
+    "contact": "+910101010101",
+    "notes": {
+      "address": "Office 10",
+      "narration": "Booking success",
+      "ref": "REF010"
+    },
+    "fee": 200,
+    "tax": 36,
+    "acquirer_data": {
+      "upi_transaction_id": "UPI20010"
+    },
+    "created_at": 1738185600
+  },
+  {
+    "id": "pay_KB0011",
+    "entity": "payment",
+    "amount": 87000,
+    "currency": "INR",
+    "status": "captured",
+    "order_id": "order_011",
+    "description": "Final Installment",
+    "international": false,
+    "method": "wallet",
+    "email": "user11@example.com",
+    "contact": "+911111111112",
+    "notes": {
+      "address": "Office 11",
+      "narration": "Paid in full",
+      "ref": "REF011"
+    },
+    "fee": 175,
+    "tax": 31,
+    "acquirer_data": {},
+    "created_at": 1738790400
+  },
+  {
+    "id": "pay_KB0601",
+    "entity": "payment",
+    "amount": 25000,
+    "currency": "INR",
+    "status": "captured",
+    "order_id": "order_601",
+    "description": "June 1 Payment - Customer A",
+    "international": false,
+    "method": "netbanking",
+    "email": "customerA@example.com",
+    "contact": "+911234567801",
+    "notes": {
+      "address": "Mumbai Office",
+      "narration": "Monthly subscription",
+      "ref": "REF0601"
+    },
+    "fee": 125,
+    "tax": 22,
+    "acquirer_data": {},
+    "created_at": 1748793600
+  },
+  {
+    "id": "pay_KB0602",
+    "entity": "payment",
+    "amount": 18000,
+    "currency": "INR",
+    "status": "captured",
+    "order_id": "order_602",
+    "description": "June 2 Payment - Customer B",
+    "international": false,
+    "method": "upi",
+    "email": "customerB@example.com",
+    "contact": "+911234567802",
+    "notes": {
+      "address": "Delhi Branch",
+      "narration": "Service renewal",
+      "ref": "REF0602"
+    },
+    "fee": 90,
+    "tax": 16,
+    "acquirer_data": {},
+    "created_at": 1748880000 
+  },
+  {
+    "id": "pay_KB0603",
+    "entity": "payment",
+    "amount": 32000,
+    "currency": "INR",
+    "status": "captured",
+    "order_id": "order_603",
+    "description": "June 3 Payment - Customer C",
+    "international": false,
+    "method": "card",
+    "email": "customerC@example.com",
+    "contact": "+911234567803",
+    "notes": {
+      "address": "Bangalore HQ",
+      "narration": "Annual membership",
+      "ref": "REF0603"
+    },
+    "fee": 160,
+    "tax": 29,
+    "acquirer_data": {},
+    "created_at": 1748966400 
+  },
+  {
+    "id": "pay_KB0604",
+    "entity": "payment",
+    "amount": 15000,
+    "currency": "INR",
+    "status": "captured",
+    "order_id": "order_604",
+    "description": "June 4 Payment - Customer D",
+    "international": false,
+    "method": "wallet",
+    "email": "customerD@example.com",
+    "contact": "+911234567804",
+    "notes": {
+      "address": "Hyderabad Office",
+      "narration": "Product purchase",
+      "ref": "REF0604"
+    },
+    "fee": 75,
+    "tax": 13,
+    "acquirer_data": {},
+    "created_at": 1749052800  
+  },
+  {
+    "id": "pay_KB0605",
+    "entity": "payment",
+    "amount": 42000,
+    "currency": "INR",
+    "status": "captured",
+    "order_id": "order_605",
+    "description": "June 5 Payment - Customer E",
+    "international": false,
+    "method": "netbanking",
+    "email": "customerE@example.com",
+    "contact": "+911234567805",
+    "notes": {
+      "address": "Chennai Branch",
+      "narration": "Bulk order payment",
+      "ref": "REF0605"
+    },
+    "fee": 210,
+    "tax": 38,
+    "acquirer_data": {},
+    "created_at": 1749139200
+  },
+  {
+    "id": "pay_KB0608",
+    "entity": "payment",
+    "amount": 28000,
+    "currency": "INR",
+    "status": "captured",
+    "order_id": "order_608",
+    "description": "June 8 Payment - Customer F",
+    "international": false,
+    "method": "upi",
+    "email": "customerF@example.com",
+    "contact": "+911234567806",
+    "notes": {
+      "address": "Pune Office",
+      "narration": "Service fee",
+      "ref": "REF0608"
+    },
+    "fee": 140,
+    "tax": 25,
+    "acquirer_data": {},
+    "created_at": 1749398400  
+  },
+  {
+    "id": "pay_KB0609",
+    "entity": "payment",
+    "amount": 19000,
+    "currency": "INR",
+    "status": "captured",
+    "order_id": "order_609",
+    "description": "June 9 Payment - Customer G",
+    "international": false,
+    "method": "card",
+    "email": "customerG@example.com",
+    "contact": "+911234567807",
+    "notes": {
+      "address": "Kolkata Branch",
+      "narration": "Consultation fee",
+      "ref": "REF0609"
+    },
+    "fee": 95,
+    "tax": 17,
+    "acquirer_data": {},
+    "created_at": 1749484800
+  },
+  {
+    "id": "pay_KB0610",
+    "entity": "payment",
+    "amount": 32500,
+    "currency": "INR",
+    "status": "captured",
+    "order_id": "order_610",
+    "description": "June 10 Payment - Customer X",
+    "international": false,
+    "method": "netbanking",
+    "email": "customerX@example.com",
+    "contact": "+911234567891",
+    "notes": {
+      "address": "Mumbai HQ",
+      "narration": "Monthly subscription",
+      "ref": "REF0610"
+    },
+    "fee": 163,
+    "tax": 29,
+    "acquirer_data": {},
+    "created_at": 1749571200
+  },
+  {
+    "id": "pay_KB0611",
+    "entity": "payment",
+    "amount": 18750,
+    "currency": "INR",
+    "status": "captured",
+    "order_id": "order_611",
+    "description": "June 11 Payment - Customer Y",
+    "international": false,
+    "method": "upi",
+    "email": "customerY@example.com",
+    "contact": "+911234567892",
+    "notes": {
+      "address": "Delhi Office",
+      "narration": "Service payment",
+      "ref": "REF0611"
+    },
+    "fee": 94,
+    "tax": 17,
+    "acquirer_data": {},
+    "created_at": 1749657600  
+  },
+  {
+    "id": "pay_KB0612",
+    "entity": "payment",
+    "amount": 42000,
+    "currency": "INR",
+    "status": "captured",
+    "order_id": "order_612",
+    "description": "June 12 Payment - Customer Z",
+    "international": false,
+    "method": "card",
+    "email": "customerZ@example.com",
+    "contact": "+911234567893",
+    "notes": {
+      "address": "Bangalore Branch",
+      "narration": "Annual membership",
+      "ref": "REF0612"
+    },
+    "fee": 210,
+    "tax": 38,
+    "acquirer_data": {},
+    "created_at": 1749744000  
+  }
+]
+
