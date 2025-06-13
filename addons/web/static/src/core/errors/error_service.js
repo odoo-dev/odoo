@@ -84,7 +84,7 @@ export const errorService = {
             if (shouldLogError()) {
                 // Log the full traceback instead of letting the browser log the incomplete one
                 uncaughtError.event.preventDefault();
-                console.error(uncaughtError.traceback);
+                console.error(uncaughtError);
             }
         }
 

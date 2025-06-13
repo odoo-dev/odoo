@@ -95,7 +95,6 @@ export class OdooPivotModel extends PivotModel {
     }
 
     updateCollapsedDomains(collapsedDomains) {
-        console.log("updateCollapsedDomains", collapsedDomains);
         this.definition.collapsedDomains = collapsedDomains;
         this.resetTableStructure();
     }
@@ -134,6 +133,7 @@ export class OdooPivotModel extends PivotModel {
      * @param {PivotDomain} domain
      */
     getPivotCellValue(measure, domain) {
+        console.log("getPivotCellValue", domain);
         if (domain.some((node) => node.value === NO_RECORD_AT_THIS_POSITION)) {
             return "";
         }
@@ -280,6 +280,13 @@ export class OdooPivotModel extends PivotModel {
         };
         visitTree(tree);
         return valuesWithLabels;
+    }
+
+    getPossibleFieldValues(fieldName) {
+        const field = this.metaData.fields[fieldName];
+        if (!field) {
+            throw new EvaluationError(_t("Field %s does not exist", fieldName));
+        }
     }
 
     /**
@@ -513,6 +520,7 @@ export class OdooPivotModel extends PivotModel {
             const subTree = tree.directSubTrees.get(subTreeKey);
             rows.push(...this._getSpreadsheetRows(subTree));
         });
+        console.log("Rows for pivot:", rows);
         return rows;
     }
 
@@ -625,6 +633,12 @@ export class OdooPivotModel extends PivotModel {
      * @override to add the order by clause to the read_group kwargs
      */
     _getSubGroups(groupBys, params) {
+        this._addOrderToKwargs(groupBys, params.kwargs);
+        const readGroupResult = super._getSubGroups(groupBys, params);
+        return readGroupResult;
+    }
+
+    _addOrderToKwargs(groupBys, kwargs) {
         const { columns, rows } = this.getDefinition();
         const order = columns
             .concat(rows)
@@ -633,8 +647,333 @@ export class OdooPivotModel extends PivotModel {
             )
             .map((dimension) => `${dimension.nameWithGranularity} ${dimension.order}`)
             .join(",");
-        params.kwargs.order = order;
-        return super._getSubGroups(groupBys, params);
+        kwargs.order = order;
+    }
+
+    _getCustomFieldGroupDomains(customField) {
+        let notInAGroupDomain = [
+            [
+                customField.parentField,
+                "not in",
+                customField.groups.map((group) => group.values).flat(),
+            ],
+        ];
+        const groupDomains = customField.groups.map((group) => {
+            if (group.isOtherGroup) {
+                const domain = notInAGroupDomain;
+                notInAGroupDomain = undefined;
+                return { groupName: group.name, domain: domain };
+            }
+            return {
+                groupName: group.name,
+                domain: [[customField.parentField, "in", group.values]],
+            };
+        });
+        return { groupDomains, notInAGroupDomain };
+    }
+
+    removeItemFromArray(array, item) {
+        const index = array.indexOf(item);
+        if (index > -1) {
+            array = [...array];
+            array.splice(index, 1);
+        }
+        return array;
+    }
+
+    async _getSubGroupsForCustomGroup(request, params) {
+        const { resModel, groupDomain, measureSpecs, kwargs, mapping } = params;
+        const groupBy = request.groupBys;
+        this._addOrderToKwargs(groupBy, kwargs);
+        const domain = Domain.combine([request.domain, groupDomain], "AND").toList();
+        const key = JSON.stringify(request.customFields) + JSON.stringify(groupBy);
+        if (!mapping[key]) {
+            mapping[key] = this.orm.formattedReadGroup(
+                resModel,
+                domain,
+                groupBy,
+                measureSpecs,
+                kwargs
+            );
+        }
+        return mapping[key];
+    }
+
+    _aggretateSubGroups(subGroups, measures) {
+        const subGroup = { ...subGroups[0] };
+        for (const measure of measures) {
+            const aggregator = measure.split(":")[1];
+            switch (aggregator) {
+                case "sum":
+                case "count":
+                    subGroup[measure] = subGroups.reduce((sum, sg) => sum + sg[measure], 0);
+                    break;
+                case "min":
+                    subGroup[measure] = Math.min(...subGroups.map((sg) => sg[measure]));
+                    break;
+                case "max":
+                    subGroup[measure] = Math.max(...subGroups.map((sg) => sg[measure]));
+                    break;
+                case "avg": {
+                    const totalCount = subGroups.reduce((sum, sg) => sum + (sg.__count || 0), 0);
+                    if (totalCount === 0) {
+                        subGroup[measure] = 0;
+                    } else {
+                        subGroup[measure] =
+                            subGroups.reduce((sum, sg) => sum + sg[measure] * sg.__count, 0) /
+                            totalCount;
+                    }
+                    break;
+                }
+            }
+        }
+        subGroup.__count = subGroups.reduce((sum, sg) => sum + (sg.__count || 0), 0);
+
+        const domains = subGroups.map((sg) => sg.__domain || []);
+        subGroup.__domain = Domain.combine(domains, "OR").toList();
+        const extraDomains = subGroups.map((sg) => sg.__extraDomain || []);
+        subGroup.__extraDomain = Domain.combine(extraDomains, "OR").toList();
+
+        return subGroup;
+    }
+
+    _sortCustomFieldsInSubGroups(groupBys, subGroups) {
+        const isInOthersGroup = (subGroup, groupBy, customField) => {
+            const value = Array.isArray(subGroup[groupBy])
+                ? subGroup[groupBy][0]
+                : subGroup[groupBy];
+            const otherGroup = customField.groups.find((g) => g.isOtherGroup);
+            return otherGroup && value === otherGroup.name;
+        };
+
+        const sortFn = (subGroupA, subGroupB, order, groupBy, customField) => {
+            if (isInOthersGroup(subGroupB, groupBy, customField)) {
+                return -1;
+            }
+            if (isInOthersGroup(subGroupA, groupBy, customField)) {
+                return 1;
+            }
+            const aValue = subGroupA[groupBy];
+            const aLabel = Array.isArray(aValue) ? aValue[1] : aValue;
+            const bValue = subGroupB[groupBy];
+            const bLabel = Array.isArray(bValue) ? bValue[1] : bValue;
+            // ADRM TODO unstring
+            if (aValue === false) {
+                return order === "asc" ? 1 : -1;
+            } else if (bValue === false) {
+                return order === "asc" ? -1 : 1;
+            }
+            return order === "asc" ? aLabel.localeCompare(bLabel) : bLabel.localeCompare(aLabel);
+        };
+
+        const sortSubGroups = (groupBys, subGroups) => {
+            const groupBy = groupBys[0];
+            const childrenMap = new Map();
+
+            for (const item of subGroups) {
+                const value = item[groupBy];
+                const key = Array.isArray(value) ? value[0] : value;
+                if (!childrenMap.has(key)) {
+                    childrenMap.set(key, []);
+                }
+                childrenMap.get(key).push(item);
+            }
+
+            // Sort group keys
+            const customField = this.definition.customFields?.[groupBy];
+            const keys = Array.from(childrenMap.keys());
+
+            if (customField) {
+                const order = this.definition.getDimension(groupBy)?.order;
+                if (order) {
+                    keys.sort((a, b) => {
+                        const subGroupB = childrenMap.get(b)[0];
+                        const subGroupA = childrenMap.get(a)[0];
+                        return sortFn(subGroupA, subGroupB, order, groupBy, customField);
+                    });
+                }
+            }
+
+            return keys.flatMap((key) =>
+                groupBys.length > 1
+                    ? sortSubGroups(groupBys.slice(1), childrenMap.get(key))
+                    : childrenMap.get(key)
+            );
+        };
+
+        return sortSubGroups(groupBys, subGroups);
+    }
+
+    /**
+     * If the measures can be aggregated client side (not `count_distinct`), we can do a single RPC to get all the
+     * subgroups, then do a Object.groupBy() client side to aggregate the subgroups.
+     */
+    async _doClientSideCustomGroupSubdivision(group, rowGroupBy, colGroupBy, params) {
+        const customFields = this.definition.customFields || {};
+        const groupBys = [...rowGroupBy, ...colGroupBy];
+
+        const mockRowGroupBy = rowGroupBy.map((gb) => customFields[gb]?.parentField || gb);
+        const mockColGroupBy = colGroupBy.map((gb) => customFields[gb]?.parentField || gb);
+
+        const result = await super._getGroupSubdivision(
+            group,
+            mockRowGroupBy,
+            mockColGroupBy,
+            params
+        );
+
+        // Add custom fields to the rpc result
+        for (const groupBy of groupBys) {
+            const customField = customFields[groupBy];
+            if (!customField) {
+                continue;
+            }
+
+            for (const subGroup of result.subGroups) {
+                const parentFieldName = customField.parentField;
+                const parentValue = Array.isArray(subGroup[parentFieldName])
+                    ? subGroup[parentFieldName][0]
+                    : subGroup[parentFieldName];
+                const group =
+                    customField.groups.find((g) => g.values.includes(parentValue)) ||
+                    customField.groups.find((g) => g.isOtherGroup);
+                const value = group ? group.name : parentValue;
+                const label = group ? group.name : subGroup[parentFieldName][1];
+
+                if (Array.isArray(subGroup[parentFieldName])) {
+                    subGroup[groupBy] = [value, label];
+                } else {
+                    subGroup[groupBy] = value;
+                }
+            }
+        }
+
+        // Note: we need to preserve the order of the subGroups from the server. Object.groupBy() has no guarantee
+        // on the order of keys, but its implementation in major browsers does seem to preserve the order. We'll use
+        // Object.groupBy() until we find practical issues with it.
+        const getKey = (subGroup) => JSON.stringify(groupBys.map((groupBy) => subGroup[groupBy]));
+        const groupedSubgroups = Object.groupBy(result.subGroups, getKey);
+
+        const aggregatedSubgroups = Object.values(groupedSubgroups).map((subGroups) =>
+            this._aggretateSubGroups(subGroups, params.measureSpecs)
+        );
+        const sortedSubGroups = this._sortCustomFieldsInSubGroups(groupBys, aggregatedSubgroups);
+
+        console.log("Sorted subGroups for custom fields:", sortedSubGroups);
+
+        return { rowGroupBy, colGroupBy, group, subGroups: sortedSubGroups };
+    }
+
+    // ADRM TODO delete this
+    getSubgroupsForDebug(subGroups) {
+        return subGroups.map((subGroup) => {
+            const obj = {};
+            for (const key in subGroup) {
+                if (Array.isArray(subGroup[key])) {
+                    obj[key] = subGroup[key][1];
+                } else {
+                    obj[key] = subGroup[key];
+                }
+            }
+            return obj;
+        });
+    }
+
+    /**
+     * If the measures cannot be aggregated client side (`count_distinct`), we need to do a separate read_group RPC for
+     * each custom groups in the pivot.
+     */
+    async _doServerSideCustomGroupSubdivision(group, rowGroupBy, colGroupBy, params) {
+        // ADRM TODO: group is present in pivot even if empty
+        const customFields = this.definition.customFields || {};
+        const groupBys = [...rowGroupBy, ...colGroupBy];
+
+        let requests = [{ groupBys, domain: [], customFields: [] }];
+        for (const groupBy of groupBys) {
+            const customField = customFields[groupBy];
+            if (!customField) {
+                continue;
+            }
+
+            const { groupDomains, notInAGroupDomain } =
+                this._getCustomFieldGroupDomains(customField);
+            const newRequests = [];
+            for (const request of requests) {
+                for (const groupDomain of groupDomains) {
+                    const domains = [request.domain, groupDomain.domain];
+                    const domain = Domain.combine(domains, "AND").toList();
+                    const groupBys = this.removeItemFromArray(request.groupBys, customField.name);
+                    const customFields = {
+                        ...request.customFields,
+                        [customField.name]: groupDomain.groupName,
+                    };
+                    newRequests.push({ domain, groupBys, customFields });
+                }
+                if (notInAGroupDomain) {
+                    const domains = [request.domain, notInAGroupDomain];
+                    const domain = Domain.combine(domains, "AND").toList();
+                    const groupBys = [
+                        ...this.removeItemFromArray(request.groupBys, customField.name),
+                        customField.parentField,
+                    ];
+
+                    newRequests.push({ ...request, domain, groupBys });
+                }
+            }
+            requests = newRequests;
+        }
+        const myResults = await Promise.all(
+            requests.map((request) => this._getSubGroupsForCustomGroup(request, params))
+        );
+        const myActualSubgroups = [];
+        for (let i = 0; i < requests.length; i++) {
+            const request = requests[i];
+            const subGroups = myResults[i];
+
+            for (const subGroup of subGroups) {
+                for (const groupBy of groupBys) {
+                    const customField = customFields[groupBy];
+                    if (!customField) {
+                        continue;
+                    }
+                    if (request.customFields[groupBy]) {
+                        subGroup[groupBy] = request.customFields[groupBy];
+                    } else {
+                        const parentFieldName = customField.parentField;
+                        const parentValue = Array.isArray(subGroup[parentFieldName])
+                            ? subGroup[parentFieldName][0]
+                            : subGroup[parentFieldName];
+
+                        if (Array.isArray(subGroup[parentFieldName])) {
+                            const label = subGroup[parentFieldName][1];
+                            subGroup[groupBy] = [parentValue, label]; // ADRM TODO string sux
+                        } else {
+                            subGroup[groupBy] = parentValue;
+                        }
+                    }
+                }
+                myActualSubgroups.push(subGroup);
+            }
+        }
+
+        return { rowGroupBy, colGroupBy, group, subGroups: myActualSubgroups };
+    }
+
+    async _getGroupSubdivision(group, rowGroupBy, colGroupBy, params) {
+        const customFields = this.definition.customFields || {};
+        const groupBys = [...rowGroupBy, ...colGroupBy];
+
+        const hasCustomField = groupBys.some((gb) => customFields[gb] !== undefined);
+        const hasCountDistinctMeasure = params.measureSpecs.some((measure) =>
+            measure.endsWith(":count_distinct")
+        );
+        if (!hasCustomField) {
+            return super._getGroupSubdivision(group, rowGroupBy, colGroupBy, params);
+        } else if (hasCountDistinctMeasure) {
+            return this._doServerSideCustomGroupSubdivision(group, rowGroupBy, colGroupBy, params);
+        } else {
+            return this._doClientSideCustomGroupSubdivision(group, rowGroupBy, colGroupBy, params);
+        }
     }
 
     /**

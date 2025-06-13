@@ -98,7 +98,8 @@ export class OdooPivot {
             deepEquals(actualDefinition.domain, nextDefinition.domain) &&
             deepEquals(actualDefinition.context, nextDefinition.context) &&
             deepEquals(actualDefinition.actionXmlId, nextDefinition.actionXmlId) &&
-            deepEquals(actualDefinition.model, nextDefinition.model)
+            deepEquals(actualDefinition.model, nextDefinition.model) &&
+            deepEquals(actualDefinition.customFields, nextDefinition.customFields)
         ) {
             if (deepEquals(actualDefinition.measures, nextDefinition.measures)) {
                 // Nothing change for the table structure, no need to reload the data
@@ -163,7 +164,27 @@ export class OdooPivot {
     }
 
     getFields() {
-        return this._fields || {};
+        const fields = { ...(this._fields || {}) };
+        for (const key in this.coreDefinition.customFields || {}) {
+            const customField = this.coreDefinition.customFields?.[key];
+            if (!customField) {
+                continue;
+            }
+            const baseField = fields[customField.parentField];
+            if (!baseField) {
+                continue;
+            }
+            fields[key] = {
+                ...baseField,
+                isCustomField: true,
+                name: key,
+                string: customField.name,
+                customGroups: customField.groups,
+                parentField: customField.parentField,
+            };
+        }
+
+        return fields;
     }
 
     /**
@@ -436,6 +457,11 @@ export class OdooPivot {
         return this.model.getPossibleDimensionValues(dimension);
     }
 
+    getPossibleFieldValues(fieldName) {
+        this.assertIsValid();
+        return this.model.getPossibleFieldValues(fieldName);
+    }
+
     async copyModelWithOriginalDomain() {
         const { model } = await this.createModelAndDefinition();
 
@@ -572,6 +598,13 @@ export class OdooPivotRuntimeDefinition extends PivotRuntimeDefinition {
      */
 
     getDefinitionForPivotModel(fields) {
+        // ADRM TODO: probably patch the specific loading fns of the pivot model instead ?
+        const colGroupBys = this.columns.map((c) =>
+            c.isCustomField ? c.nameWithGranularity : c.nameWithGranularity
+        );
+        const rowGroupBys = this.rows.map((r) =>
+            r.isCustomField ? r.nameWithGranularity : r.nameWithGranularity
+        );
         return {
             searchParams: {
                 domain: this.domain,
@@ -582,8 +615,10 @@ export class OdooPivotRuntimeDefinition extends PivotRuntimeDefinition {
             metaData: {
                 activeMeasures: this.measures.filter((m) => !m.computedBy).map((m) => m.fieldName),
                 resModel: this.model,
-                colGroupBys: this.columns.map((c) => c.nameWithGranularity),
-                rowGroupBys: this.rows.map((r) => r.nameWithGranularity),
+                colGroupBys,
+                rowGroupBys,
+                // colGroupBysWithCustomGroups: this.columns.map((c) => c.nameWithGranularity),
+                // rowGroupBysWithCustomGroups: this.rows.map((r) => r.nameWithGranularity),
                 fieldAttrs: {},
                 fields,
             },
@@ -618,6 +653,10 @@ pivotRegistry.add("ODOO", {
         field.name !== "id" &&
         field.store,
     isGroupable: (field) => field.groupable,
+    canHaveCustomGroup: (field) =>
+        field.groupable &&
+        !field.isCustomField &&
+        ["many2one", "char", "one2many", "many2many", "selection"].includes(field.type),
 });
 
 supportedPivotPositionalFormulaRegistry.add("ODOO", true);

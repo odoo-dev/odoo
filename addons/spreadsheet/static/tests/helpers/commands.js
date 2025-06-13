@@ -98,6 +98,37 @@ export function setSelection(model, xc) {
     model.selection.selectZone({ cell: { col: zone.left, row: zone.top }, zone });
 }
 
+// ADRM TODO: remove if not needed
+export function selectZones(model, xcs) {
+    const sheetId = model.getters.getActiveSheetId();
+    const zones = xcs
+        .reverse()
+        .map(toZone)
+        .map((z) => model.getters.expandZone(sheetId, z));
+
+    const anchorZone = zones.splice(0, 1)[0]; // the default for most tests is to have the anchor as the first zone
+    const anchor = {
+        cell: {
+            col: anchorZone.left,
+            row: anchorZone.top,
+        },
+        zone: anchorZone,
+    };
+
+    if (zones.length !== 0) {
+        const z1 = zones.splice(0, 1)[0];
+        model.selection.selectZone({ cell: { col: z1.left, row: z1.top }, zone: z1 });
+        for (const zone of zones) {
+            model.selection.addCellToSelection(zone.left, zone.top);
+            model.selection.setAnchorCorner(zone.right, zone.bottom);
+        }
+        model.selection.addCellToSelection(anchor.zone.left, anchor.zone.top);
+        model.selection.setAnchorCorner(anchor.zone.right, anchor.zone.bottom);
+    } else {
+        model.selection.selectZone(anchor, { scrollIntoView: true });
+    }
+}
+
 /**
  * Autofill from a zone to a cell
  */
