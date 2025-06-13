@@ -209,6 +209,11 @@ class ResConfigSettings(models.TransientModel):
     # Autopost of bills
     autopost_bills = fields.Boolean(related='company_id.autopost_bills', readonly=False)
 
+    account_dont_prioritize_invoiced_products = fields.Boolean(
+        "Disable prioritizing invoiced products",
+        config_parameter='account.dont_prioritize_invoiced_products'
+    )
+
     @api.depends('country_code')
     def _compute_is_account_peppol_eligible(self):
         # we want to show Peppol settings only to customers that are eligible for Peppol,

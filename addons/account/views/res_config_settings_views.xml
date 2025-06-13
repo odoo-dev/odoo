@@ -378,6 +378,13 @@
                         </block>
                     </app>
                 </xpath>
+                <xpath expr="//block[@name='performance']" position="inside">
+                    <setting id="account_dont_prioritize_invoiced_products" groups="base.group_no_one"
+                             help="Disable prioritizing already invoiced products in bills, purchase orders and sale orders.
+                                   To use in case the computation of products' last invoice date causes performance issue.">
+                        <field name="account_dont_prioritize_invoiced_products"/>
+                    </setting>
+                </xpath>
             </field>
         </record>
 

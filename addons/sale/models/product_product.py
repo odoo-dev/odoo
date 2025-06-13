@@ -23,7 +23,7 @@ class ProductProduct(models.Model):
     def _compute_last_invoice_date(self):
         self.last_invoice_date = False
         partner_id = self.env.context.get('partner_id')
-        if not partner_id:
+        if not partner_id or self.env['ir.config_parameter'].sudo().get_param('account.dont_prioritize_invoiced_products'):
             return
 
         today = fields.Date.today()
@@ -43,6 +43,7 @@ class ProductProduct(models.Model):
 
         # Add last invoiced date beside the product's name.
         if self.env.context.get('formatted_display_name') and\
+            self.env.context.get('prioritize_for') == 'sale' and\
             self.env['product.template']._must_prioritize_invoiced_product():
             today = fields.Date.today()
             for product in self:

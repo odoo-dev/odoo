@@ -196,6 +196,8 @@ class ProductTemplate(models.Model):
 
     @api.model
     def _must_prioritize_invoiced_product(self):
+        if self.env['ir.config_parameter'].sudo().get_param('account.dont_prioritize_invoiced_products'):
+            return False
         return bool(self.env.context.get('partner_id') and self.env.context.get('prioritize_for'))
 
     @api.model
