@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import defaultdict
 from datetime import timedelta
 
 from odoo import _, api, fields, models
@@ -25,15 +26,14 @@ class ProductProduct(models.Model):
         if not partner_id:
             return
 
-        read_group_data = self.env['account.move.line']._read_group(
-            [
-                ('product_id', 'in', self.ids),
-                ('move_id.state', '=', 'posted'),
-                ('partner_id', '=', partner_id),
-            ],
-            ['product_id', 'invoice_date:day']
-        )
-        for product, date in read_group_data:
+        prioritized_product_and_time = self.env['product.template']._get_products_and_most_recent_invoice_date(partner_id, 'sale', self.ids)
+        dates_by_product = defaultdict(lambda: False)
+        for data in prioritized_product_and_time:
+            date = data['invoice_date']
+            product = self.browse(data['product_id'])
+            if not dates_by_product[product] or date > dates_by_product[product]:
+                dates_by_product[product] = date
+        for (product, date) in dates_by_product.items():
             product.last_invoice_date = date
 
     @api.depends_context('formatted_display_name', 'partner_id', 'prioritize_for')

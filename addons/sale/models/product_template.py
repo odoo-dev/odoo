@@ -63,17 +63,11 @@ class ProductTemplate(models.Model):
         if not partner_id:
             return
 
-        read_group_data = self.env['account.move.line']._read_group(
-            [
-                ('product_id', 'in', self.product_variant_ids.ids),
-                ('move_id.state', '=', 'posted'),
-                ('partner_id', '=', partner_id),
-            ],
-            ['product_id', 'invoice_date:day']
-        )
+        prioritized_product_and_time = self._get_products_and_most_recent_invoice_date(partner_id, 'sale', self.product_variant_ids.ids)
         dates_by_product_template = defaultdict(lambda: False)
-        for product, date in read_group_data:
-            product_tmpl = product.product_tmpl_id
+        for data in prioritized_product_and_time:
+            date = data['invoice_date']
+            product_tmpl = self.browse(data['product_tmpl_id'])
             if not dates_by_product_template[product_tmpl] or date > dates_by_product_template[product_tmpl]:
                 dates_by_product_template[product_tmpl] = date
         for (product_tmpl, date) in dates_by_product_template.items():
