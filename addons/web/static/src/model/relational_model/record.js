@@ -338,9 +338,7 @@ export class Record extends DataPoint {
     }
 
     _applyDefaultValues() {
-        const fieldNames = this.fieldNames.filter((fieldName) => {
-            return !(fieldName in this.data);
-        });
+        const fieldNames = this.fieldNames.filter((fieldName) => !(fieldName in this.data));
         const defaultValues = this._getDefaultValues(fieldNames);
         if (this.isNew) {
             this._applyChanges({}, defaultValues);
@@ -369,61 +367,16 @@ export class Record extends DataPoint {
     _checkValidity({ silent, displayNotification } = {}) {
         const unsetRequiredFields = [];
         for (const fieldName in this.activeFields) {
-            const fieldType = this.fields[fieldName].type;
             if (this._isInvisible(fieldName) || this.fields[fieldName].relatedPropertyField) {
                 continue;
             }
-            switch (fieldType) {
-                case "boolean":
-                case "float":
-                case "integer":
-                case "monetary":
-                    continue;
-                case "html":
-                    if (this._isRequired(fieldName) && this.data[fieldName].length === 0) {
-                        unsetRequiredFields.push(fieldName);
-                    }
-                    break;
-                case "one2many":
-                case "many2many": {
-                    const list = this.data[fieldName];
-                    if (
-                        (this._isRequired(fieldName) && !list.count) ||
-                        !list.records.every((r) => !r.dirty || r._checkValidity({ silent }))
-                    ) {
-                        unsetRequiredFields.push(fieldName);
-                    }
-                    break;
-                }
-                case "properties": {
-                    const value = this.data[fieldName];
-                    if (value) {
-                        const ok = value.every(
-                            (propertyDefinition) =>
-                                propertyDefinition.name &&
-                                propertyDefinition.name.length &&
-                                propertyDefinition.string &&
-                                propertyDefinition.string.length
-                        );
-                        if (!ok) {
-                            unsetRequiredFields.push(fieldName);
-                        }
-                    }
-                    break;
-                }
-                case "json": {
-                    if (
-                        this._isRequired(fieldName) &&
-                        (!this.data[fieldName] || !Object.keys(this.data[fieldName]).length)
-                    ) {
-                        unsetRequiredFields.push(fieldName);
-                    }
-                    break;
-                }
-                default:
-                    if (!this.data[fieldName] && this._isRequired(fieldName)) {
-                        unsetRequiredFields.push(fieldName);
-                    }
+            let isValid = this._isValueValid(fieldName, this.data[fieldName]);
+            if (isValid && ["one2many", "many2many"].includes(this.fields[fieldName].type)) {
+                const list = this.data[fieldName];
+                isValid = list.records.every((r) => !r.dirty || r._checkValidity({ silent }));
+            }
+            if (!isValid) {
+                unsetRequiredFields.push(fieldName);
             }
         }
 
@@ -441,9 +394,10 @@ export class Record extends DataPoint {
         }
         const isValid = !this._invalidFields.size;
         if (!isValid && displayNotification) {
-            const items = [...this._invalidFields].map((fieldName) => {
-                return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
-            }, this);
+            const items = [...this._invalidFields].map(
+                (fieldName) => `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`,
+                this
+            );
             this._closeInvalidFieldsNotification = this.model.notification.add(
                 markup(`<ul>${items.join("")}</ul>`),
                 {
@@ -661,6 +615,39 @@ export class Record extends DataPoint {
         return required ? evaluateBooleanExpr(required, this.evalContextWithVirtualIds) : false;
     }
 
+    _isValueValid(fieldName, value) {
+        switch (this.fields[fieldName].type) {
+            case "boolean":
+            case "float":
+            case "integer":
+            case "monetary":
+                return true;
+            case "html":
+                return value.length > 0 || !this._isRequired(fieldName);
+            case "one2many":
+            case "many2many": {
+                return value.count > 0 || !this._isRequired(fieldName);
+            }
+            case "properties": {
+                return (
+                    !value ||
+                    value.every(
+                        (propertyDefinition) =>
+                            propertyDefinition.name &&
+                            propertyDefinition.name.length &&
+                            propertyDefinition.string &&
+                            propertyDefinition.string.length
+                    )
+                );
+            }
+            case "json": {
+                return (value && Object.keys(value).length > 0) || !this._isRequired(fieldName);
+            }
+            default:
+                return value || !this._isRequired(fieldName);
+        }
+    }
+
     async _load(nextConfig = {}) {
         if ("resId" in nextConfig && this.resId) {
             throw new Error("Cannot change resId of a record");
@@ -759,9 +746,7 @@ export class Record extends DataPoint {
                 if (!staticList) {
                     let data = valueIsCommandList ? [] : value;
                     if (data.length > 0 && typeof data[0] === "number") {
-                        data = data.map((resId) => {
-                            return { id: resId };
-                        });
+                        data = data.map((resId) => ({ id: resId }));
                     }
                     staticList = this._createStaticListDatapoint(data, fieldName);
                     if (valueIsCommandList) {

@@ -271,16 +271,14 @@ export class DynamicList extends DataPoint {
         if (!Object.keys(changes).length) {
             return;
         }
-        const validSelection = this.selection.filter((record) => {
-            return Object.keys(changes).every((fieldName) => {
+        const validSelection = this.selection.filter((record) =>
+            Object.keys(changes).every((fieldName) => {
                 if (record._isReadonly(fieldName)) {
                     return false;
-                } else if (record._isRequired(fieldName) && !changes[fieldName]) {
-                    return false;
                 }
-                return true;
-            });
-        });
+                return record._isValueValid(fieldName, changes[fieldName]);
+            })
+        );
         const canProceed = await this.model.hooks.onWillSaveMulti(record, changes, validSelection);
         if (canProceed === false) {
             return false;
