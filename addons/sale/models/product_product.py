@@ -26,13 +26,14 @@ class ProductProduct(models.Model):
         if not partner_id:
             return
 
+        today = fields.Date.today()
         prioritized_product_and_time = self.env['product.template']._get_products_and_most_recent_invoice_date(partner_id, 'sale', self.ids)
         dates_by_product = defaultdict(lambda: False)
         for data in prioritized_product_and_time:
             date = data['invoice_date']
             product = self.browse(data['product_id'])
             if not dates_by_product[product] or date > dates_by_product[product]:
-                dates_by_product[product] = date
+                dates_by_product[product] = date if date <= today else today
         for (product, date) in dates_by_product.items():
             product.last_invoice_date = date
 
@@ -53,7 +54,7 @@ class ProductProduct(models.Model):
                         day_value_str = self.env._('%(months_count)smo', months_count=(days_count // 30))
                     else:
                         day_value_str = self.env._('%(days_count)sd', days_count=days_count)
-                    product.display_name += f'\t--{day_value_str}--'
+                    product.display_name += f'\t`{day_value_str}`'
 
     def _compute_sales_count(self):
         r = {}
