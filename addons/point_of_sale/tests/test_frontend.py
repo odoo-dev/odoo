@@ -1853,6 +1853,10 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_zero_decimal_places_currency', login="pos_user")
 
+    def test_order_time(self):
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'OrderTimeTour', login="pos_user")
+
     def test_fiscal_position_tax_group_labels(self):
         tax_1 = self.env['account.tax'].create({
             'name': 'Tax 15%',

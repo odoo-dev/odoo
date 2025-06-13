@@ -303,10 +303,7 @@ registry.category("web_tour.tours").add("OrderTimeTour", {
             content: "Validate order time matches local timezone",
             trigger: ".orders .order-row:first .small.text-muted",
             run: function ({ anchor: displayedTimeElement }) {
-                const orderDateUTC = window.posmodel.getOrder().date_order;
-                const orderDateTime = luxon.DateTime.fromSQL(orderDateUTC, {
-                    zone: "UTC",
-                }).toLocal();
+                const orderDateTime = window.posmodel.getOrder().date_order;
                 if (orderDateTime.toFormat("HH:mm") !== displayedTimeElement.textContent.trim()) {
                     throw new Error("Order time does not match local timezone");
                 }

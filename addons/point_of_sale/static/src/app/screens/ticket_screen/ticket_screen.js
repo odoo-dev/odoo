@@ -449,10 +449,7 @@ export class TicketScreen extends Component {
     }
     getDate(order) {
         const todayTs = DateTime.now().startOf("day").ts;
-        if (
-            DateTime.fromSQL(order.date_order, { zone: "utc" }).toLocal().startOf("day").ts ===
-            todayTs
-        ) {
+        if (order.date_order.toLocal().startOf("day").ts === todayTs) {
             return _t("Today");
         } else {
             return formatDate(order.date_order);
