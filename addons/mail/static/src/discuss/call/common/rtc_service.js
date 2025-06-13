@@ -1335,6 +1335,7 @@ export class Rtc extends Record {
                 event.preventDefault();
             })
         );
+        this.store.env.bus.trigger("RTC-SERVICE:CALL_START");
     }
 
     newLogs() {
@@ -1486,6 +1487,7 @@ export class Rtc extends Record {
                 session.isTalking = false;
             }
         }
+        this.store.env.bus.trigger("RTC-SERVICE:CALL_END");
         this._remotelyHostedSessionId = undefined;
         this._remotelyHostedChannelId = undefined;
         browser.clearTimeout(this._crossTabTimeoutId);
@@ -1543,14 +1545,16 @@ export class Rtc extends Record {
             }
             session.audioElement.muted = is_deaf;
         }
+        this.store.env.bus.trigger("RTC-SERVICE:DEAF_CHANGED", { is_deaf });
         await this.refreshMicAudioStatus();
     }
 
     /**
-     * @param {Boolean} is_muted
+     * @param {Boolean} is_muted4
      */
     async setMute(is_muted) {
         this.updateAndBroadcast({ is_muted });
+        this.store.env.bus.trigger("RTC-SERVICE:MIC_CHANGED", { is_muted });
         await this.refreshMicAudioStatus();
     }
 
