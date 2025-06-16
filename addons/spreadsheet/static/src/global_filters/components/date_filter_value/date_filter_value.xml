@@ -2,7 +2,15 @@
 <templates>
     <t t-name="spreadsheet.DateFilterValue">
         <Dropdown navigationOptions="{ 'shouldFocusChildInput': false }">
-            <input class="o_input w-100 o-date-filter-input" readonly="true" t-att-value="inputValue"/>
+            <t t-if="props.displayAsButton">
+                <button class="btn btn-secondary">
+                    <i class="fa fa-calendar me-2"/>
+                    <span class="o-date-filter-value" t-esc="inputValue"/>
+                </button>
+            </t>
+            <t t-else="">
+                <input class="o_input w-100 o-date-filter-input" readonly="true" t-att-value="inputValue"/>
+            </t>
             <t t-set-slot="content">
                 <t t-foreach="dateOptions" t-as="option" t-key="option.id">
                     <DropdownItem tag="'div'"
@@ -21,9 +29,9 @@
                         </t>
                         <t t-elif="isMonthQuarterYear(option)">
                             <div class="d-flex justify-content-between">
-                                <button class="btn-previous fa fa-caret-left" t-on-click="() => this.selectPrevious(option.type)" />
+                                <button class="btn-previous fa fa-caret-left" t-on-click="() => this.selectPreviousFromDropdown(option.type)" />
                                 <input class="o_input" type="text" t-att-value="getDescription(option.type)" readonly="true"/>
-                                <button class="btn-next fa fa-caret-right" t-on-click="() => this.selectNext(option.type)" />
+                                <button class="btn-next fa fa-caret-right" t-on-click="() => this.selectNextFromDropdown(option.type)" />
                             </div>
                         </t>
                     </DropdownItem>
@@ -31,5 +39,13 @@
                 </t>
             </t>
         </Dropdown>
+        <t t-if="props.displayAsButton">
+            <button class="btn btn-secondary ms-1 btn-previous-date" t-on-click="this.selectPreviousFromButton" t-att-disabled="this.props.value === undefined">
+                <i class="fa fa-caret-left"/>
+            </button>
+            <button class="btn btn-secondary ms-1 btn-next-date" t-on-click="this.selectNextFromButton" t-att-disabled="this.props.value === undefined">
+                <i class="fa fa-caret-right"/>
+            </button>
+        </t>
     </t>
 </templates>

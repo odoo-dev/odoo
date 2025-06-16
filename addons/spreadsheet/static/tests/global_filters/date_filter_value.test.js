@@ -86,7 +86,7 @@ test("Date filter with range value", async function () {
         value: { type: "range", from: "2023-01-01", to: "2023-01-31" },
         update: () => {},
     });
-    expect("input").toHaveValue("2023-01-01 to 2023-01-31");
+    expect("input").toHaveValue("January 1 – 31, 2023");
 });
 
 test("Date options are computed from the current date", async function () {
@@ -403,7 +403,7 @@ test("Input value is correct for range", async function () {
         value: { type: "range", from: "2023-01-01", to: "2023-01-31" },
         update: () => {},
     });
-    expect("input").toHaveValue("2023-01-01 to 2023-01-31");
+    expect("input").toHaveValue("January 1 – 31, 2023");
     await contains("input").click();
     expect("div.selected .o-date-option-label").toHaveText("Custom Range");
 });
@@ -429,4 +429,43 @@ test("Can open date time picker to select a range", async function () {
     expect(".o_datetime_picker").toHaveCount(0);
     await contains("input.o_datetime_input:first").click();
     expect(".o_datetime_picker").toHaveCount(1);
+});
+
+test("Can display the input as a button", async function () {
+    const env = await makeMockEnv();
+    await mountDateFilterValue(env, {
+        value: { type: "range", from: "2023-01-01", to: "2023-01-31" },
+        update: () => {},
+        displayAsButton: true,
+    });
+    expect("button").toHaveCount(3);
+    expect(".o-date-filter-value").toHaveText("January 1 – 31, 2023");
+});
+
+test("Can navigate with buttons to select the next period", async function () {
+    const env = await makeMockEnv();
+    await mountDateFilterValue(env, {
+        value: { type: "month", month: 1, year: 2023 },
+        update: (value) => {
+            expect.step("update");
+            expect(value).toEqual({ type: "month", month: 2, year: 2023 });
+        },
+        displayAsButton: true,
+    });
+    await contains(".btn-next-date").click();
+    expect.verifySteps(["update"]);
+});
+
+test("Can navigate with buttons to select the previous period", async function () {
+    const env = await makeMockEnv();
+    await mountDateFilterValue(env, {
+        value: { type: "month", month: 1, year: 2023 },
+        update: (value) => {
+            expect.step("update");
+            expect(value).toEqual({ type: "month", month: 12, year: 2022 });
+        },
+        displayAsButton: true,
+    });
+    await contains(".btn-previous-date").click();
+    expect.verifySteps(["update"]);
 });

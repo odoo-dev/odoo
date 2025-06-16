@@ -2,6 +2,8 @@ import { Component, onWillUpdateProps } from "@odoo/owl";
 import {
     dateFilterValueToString,
     getDateRange,
+    getNextDateFilterValue,
+    getPreviousDateFilterValue,
     RELATIVE_PERIODS,
 } from "@spreadsheet/global_filters/helpers";
 import { DateTimeInput } from "@web/core/datetime/datetime_input";
@@ -77,6 +79,7 @@ export class DateFilterValue extends Component {
     static props = {
         value: { type: Object, optional: true },
         update: Function,
+        displayAsButton: { type: Boolean, optional: true },
     };
 
     setup() {
@@ -147,7 +150,7 @@ export class DateFilterValue extends Component {
     }
 
     isMonthQuarterYear(value) {
-        return ["month", "quarter", "year"].includes(value.type);
+        return ["month", "quarter", "year"].includes(value?.type);
     }
 
     isSelected(value) {
@@ -207,83 +210,59 @@ export class DateFilterValue extends Component {
         return dateFilterValueToString({ type, ...this.selectedValues[type] });
     }
 
-    selectPrevious(type) {
-        if (type === "month") {
-            this._selectPreviousMonth();
-        } else if (type === "quarter") {
-            this._selectPreviousQuarter();
-        } else if (type === "year") {
-            this._selectPreviousYear();
+    selectPreviousFromDropdown(type) {
+        const value =
+            type === "relative"
+                ? this.props.value
+                : {
+                      type,
+                      ...this.selectedValues[type],
+                  };
+        const previousValue = getPreviousDateFilterValue(value);
+        if (previousValue) {
+            const type = previousValue.type;
+            delete previousValue.type;
+            this.selectedValues[type] = previousValue;
+            return type;
         }
     }
 
-    selectNext(type) {
-        if (type === "month") {
-            this._selectNextMonth();
-        } else if (type === "quarter") {
-            this._selectNextQuarter();
-        } else if (type === "year") {
-            this._selectNextYear();
+    selectNextFromDropdown(type) {
+        const value =
+            type === "relative"
+                ? this.props.value
+                : {
+                      type,
+                      ...this.selectedValues[type],
+                  };
+        const nextValue = getNextDateFilterValue(value);
+        if (nextValue) {
+            const newType = nextValue.type;
+            delete nextValue.type;
+            this.selectedValues[newType] = nextValue;
+            return newType;
         }
     }
 
-    _selectPreviousQuarter() {
-        const date = DateTime.local()
-            .set({
-                month: this.selectedValues.quarter.quarter * 3 - 2,
-                year: this.selectedValues.quarter.year,
-            })
-            .minus({ months: 3 });
-        this.selectedValues.quarter = {
-            quarter: Math.ceil(date.month / 3),
-            year: date.year,
-        };
+    selectPreviousFromButton() {
+        if (!this.props.value?.type) {
+            return;
+        }
+        const type = this.selectPreviousFromDropdown(this.props.value.type);
+        if (!type) {
+            return;
+        }
+        this.update({ type, ...this.selectedValues[type] });
     }
 
-    _selectNextQuarter() {
-        const date = DateTime.local()
-            .set({
-                month: this.selectedValues.quarter.quarter * 3 - 2,
-                year: this.selectedValues.quarter.year,
-            })
-            .plus({ months: 3 });
-        this.selectedValues.quarter = {
-            quarter: Math.ceil(date.month / 3),
-            year: date.year,
-        };
-    }
-
-    _selectPreviousMonth() {
-        const date = DateTime.local()
-            .set({
-                month: this.selectedValues.month.month,
-                year: this.selectedValues.month.year,
-            })
-            .minus({ months: 1 });
-        this.selectedValues.month = {
-            month: date.month,
-            year: date.year,
-        };
-    }
-
-    _selectNextMonth() {
-        const date = DateTime.local()
-            .set({
-                month: this.selectedValues.month.month,
-                year: this.selectedValues.month.year,
-            })
-            .plus({ months: 1 });
-        this.selectedValues.month = {
-            month: date.month,
-            year: date.year,
-        };
-    }
-
-    _selectPreviousYear() {
-        this.selectedValues.year.year -= 1;
-    }
-
-    _selectNextYear() {
-        this.selectedValues.year.year += 1;
+    selectNextFromButton() {
+        if (!this.props.value?.type) {
+            return;
+        }
+        const type = this.selectNextFromDropdown(this.props.value.type);
+        if (!type) {
+            return;
+        }
+        this.update({ type, ...this.selectedValues[type] });
     }
 }
