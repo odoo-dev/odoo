@@ -595,6 +595,16 @@ actual arch.
         if vals.get('active') or 'arch_db' in vals:
             self.filtered('active')._check_xml()
 
+        if not self.env.context.get('install_mode'):
+            for view in self:
+                # This method is for when combined_arch() is valid but a specific node location is invalid i.e no broken hiearchy and there is no error at write time.
+                if view.invalid_locators:
+                    if view.invalid_locators == [{"broken_hierarchy": True}]:
+                        continue
+                    filtered = list(filter(lambda loc: loc.get('attrib', {}).get('position') != 'move' and loc.get("tag", {}) == "xpath", view.invalid_locators))
+                    if filtered:
+                        raise ValidationError(_("Invalid XPath '%(view)s' (line %(line)s).") % {'view': view.name, 'line': filtered[0].get('sourceline')})
+
         return res
 
     def unlink(self):

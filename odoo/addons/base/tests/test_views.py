@@ -573,6 +573,42 @@ class TestViewInheritance(ViewCase):
         }])
         self.assertEqual(not_broken.invalid_locators, [{"broken_hierarchy": True}])
 
+    def test_invalid_locator_on_write(self):
+        """ Test that invalid xpath during write (but valid on create) triggers ValidationError via custom write logic. """
+        base_view_arch = """
+            <form string="View">
+                <field name="id"/>
+            </form>
+        """
+        base_view = self.makeView('write_xpath_base_view', arch=base_view_arch)
+
+        child_view = self.View.create({
+            'model': self.model,
+            'name': "studio_test_view",
+            'arch': """
+                <data>
+                    <xpath expr="//field[@name='id']" position="after">
+                        <div/>
+                    </xpath>
+                </data>
+            """,
+            'inherit_id': base_view.id,
+            'priority': 99,
+            'active': False,
+        })
+
+        invalid_arch = """
+            <data>
+                <xpath expr="//field[@name='id']" position="after">
+                    <field name="x_studio_field_custom1"/>
+                </xpath>
+                <xpath expr="/form[1]/field[6]"/>
+            </data>
+        """
+
+        with self.assertRaises(ValidationError):
+            child_view.write({'arch': invalid_arch})
+
 
 class TestApplyInheritanceSpecs(ViewCase):
     """ Applies a sequence of inheritance specification nodes to a base
