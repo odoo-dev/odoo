@@ -11,6 +11,7 @@ import { Component, onMounted, onWillStart, useExternalListener, useState } from
 import { router, routerBus } from "@web/core/browser/router";
 import { browser } from "@web/core/browser/browser";
 import { rpcBus } from "@web/core/network/rpc";
+import { Ribbon } from "@web/core/ribbon/ribbon";
 
 export class WebClient extends Component {
     static template = "web.WebClient";
@@ -19,6 +20,7 @@ export class WebClient extends Component {
         ActionContainer,
         NavBar,
         MainComponentsContainer,
+        Ribbon,
     };
 
     setup() {
@@ -38,6 +40,7 @@ export class WebClient extends Component {
         this.localization = localization;
         this.state = useState({
             fullscreen: false,
+            offLine: !navigator.onLine,
         });
         useBus(routerBus, "ROUTE_CHANGE", async () => {
             document.body.style.pointerEvents = "none";
@@ -59,6 +62,8 @@ export class WebClient extends Component {
             // order to initialize themselves:
             this.env.bus.trigger("WEB_CLIENT_READY");
         });
+        useExternalListener(window, "online", () => (this.state.offLine = false));
+        useExternalListener(window, "offline", () => (this.state.offLine = true));
         useExternalListener(window, "click", this.onGlobalClick, { capture: true });
         onWillStart(this.registerServiceWorker);
     }
