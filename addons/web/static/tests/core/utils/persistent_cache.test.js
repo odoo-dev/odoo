@@ -237,6 +237,7 @@ test("update callback - Ram Value", async () => {
     // the fallback returned a different value
     def.resolve({ test: 456 });
     await microTick();
+    await microTick();
     expect.verifySteps(["Callback"]);
     // Both caches are updated with the last value
     expect(persistentCache.indexedDB.mockIndexedDB.table.key).toEqual({ test: 456 });
@@ -289,6 +290,7 @@ test("update callback - Disk Value", async () => {
 
     // the fallback returned a different value
     def.resolve({ test: 456 });
+    await microTick();
     await microTick();
     expect.verifySteps(["Callback"]);
     // Both caches are updated with the last value

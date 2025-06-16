@@ -40,7 +40,8 @@ export class PersistentCache {
         this.indexedDB = new IndexedDB(name, version);
         this.ramCache = new RamCache();
         if (window.isSecureContext && idbSecret) {
-            window.crypto.subtle
+            this.encrypt = true;
+            this.encryptReady = window.crypto.subtle
                 .importKey("raw", new TextEncoder().encode(idbSecret), "AES-CTR", true, [
                     "encrypt",
                     "decrypt",
@@ -59,25 +60,24 @@ export class PersistentCache {
         const def = new Deferred();
         let fromCache = false;
         const prom = fallback()
-            .then((result) => {
-                if (this.cryptoKey) {
+            .then(async (result) => {
+                if (this.encrypt) {
+                    await this.encryptReady;
                     const counter = window.crypto.getRandomValues(new Uint8Array(16)); // 16-byte counter for CTR
-                    window.crypto.subtle
-                        .encrypt(
-                            {
-                                name: "AES-CTR",
-                                counter,
-                                length: 64, // Length of the counter in bits
-                            },
-                            this.cryptoKey,
-                            new TextEncoder().encode(JSON.stringify(result)) //encoded Data
-                        )
-                        .then((ciphertext) => {
-                            this.indexedDB.write(table, key, {
-                                ciphertext,
-                                counter,
-                            });
-                        });
+                    const ciphertext = await window.crypto.subtle.encrypt(
+                        {
+                            name: "AES-CTR",
+                            counter,
+                            length: 64, // Length of the counter in bits
+                        },
+                        this.cryptoKey,
+                        new TextEncoder().encode(JSON.stringify(result)) //encoded Data
+                    );
+
+                    this.indexedDB.write(table, key, {
+                        ciphertext,
+                        counter,
+                    });
                 } else {
                     this.indexedDB.write(table, key, result);
                 }
@@ -102,11 +102,12 @@ export class PersistentCache {
             });
         } else {
             this.ramCache.write(table, key, prom);
-            this.indexedDB.read(table, key).then((result) => {
+            this.indexedDB.read(table, key).then(async (result) => {
                 if (result) {
-                    if (this.cryptoKey) {
-                        window.crypto.subtle
-                            .decrypt(
+                    if (this.encrypt) {
+                        await this.encryptReady;
+                        try {
+                            const decrypted = await window.crypto.subtle.decrypt(
                                 {
                                     name: "AES-CTR",
                                     counter: result.counter,
@@ -114,18 +115,16 @@ export class PersistentCache {
                                 },
                                 this.cryptoKey,
                                 result.ciphertext
-                            )
-                            .then((decrypted) => {
-                                const decoded = new TextDecoder().decode(decrypted);
-                                const result = JSON.parse(decoded);
-                                fromCache = decoded;
-                                this.ramCache.write(table, key, Promise.resolve(result));
-                                def.resolve(result);
-                            })
-                            .catch(() => {
-                                // Do nothing ! The cryptoKey is probably different.
-                                // The data will be upgrade with the new cryptoKey.
-                            });
+                            );
+                            const decoded = new TextDecoder().decode(decrypted);
+                            const res = JSON.parse(decoded);
+                            fromCache = decoded;
+                            this.ramCache.write(table, key, Promise.resolve(res));
+                            def.resolve(res);
+                        } catch {
+                            // Do nothing ! The cryptoKey is probably different.
+                            // The data will be upgrade with the new cryptoKey.
+                        }
                     } else {
                         fromCache = JSON.stringify(result);
                         this.ramCache.write(table, key, Promise.resolve(result));
