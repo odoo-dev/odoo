@@ -58,7 +58,7 @@ export class PersistentCache {
             return ramValue;
         }
         const def = new Deferred();
-        let fromCache = false;
+        const fromCache = new Deferred();
         const prom = fallback()
             .then(async (result) => {
                 if (this.encrypt) {
@@ -83,13 +83,15 @@ export class PersistentCache {
                 }
                 this.ramCache.write(table, key, Promise.resolve(result));
                 def.resolve(result);
-                if (onUpdate && fromCache && fromCache !== JSON.stringify(result)) {
+                const fromCacheValue = await fromCache;
+                if (onUpdate && fromCacheValue && fromCacheValue !== JSON.stringify(result)) {
                     onUpdate(result);
                 }
                 return result;
             })
-            .catch((error) => {
-                if (fromCache) {
+            .catch(async (error) => {
+                const fromCacheValue = await fromCache;
+                if (fromCacheValue) {
                     throw error;
                 }
                 this.ramCache.delete(table, key);
@@ -97,7 +99,7 @@ export class PersistentCache {
             });
         if (ramValue) {
             ramValue.then((value) => {
-                fromCache = JSON.stringify(value);
+                fromCache.resolve(JSON.stringify(value));
                 def.resolve(value);
             });
         } else {
@@ -118,18 +120,21 @@ export class PersistentCache {
                             );
                             const decoded = new TextDecoder().decode(decrypted);
                             const res = JSON.parse(decoded);
-                            fromCache = decoded;
+                            fromCache.resolve(decoded);
                             this.ramCache.write(table, key, Promise.resolve(res));
                             def.resolve(res);
                         } catch {
+                            fromCache.resolve();
                             // Do nothing ! The cryptoKey is probably different.
                             // The data will be upgrade with the new cryptoKey.
                         }
                     } else {
-                        fromCache = JSON.stringify(result);
+                        fromCache.resolve(JSON.stringify(result));
                         this.ramCache.write(table, key, Promise.resolve(result));
                         def.resolve(result);
                     }
+                } else {
+                    fromCache.resolve();
                 }
             });
         }
