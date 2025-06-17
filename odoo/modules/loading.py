@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import contextlib
 import datetime
 import itertools
 import logging
@@ -155,8 +156,13 @@ def load_module_graph(
     loading_cursor_query_count = env.cr.sql_log_count
 
     models_updated = set()
-
+    TO_PROFILE = ['hr']
     for index, package in enumerate(graph, 1):
+      if 'all' in TO_PROFILE or package.name in TO_PROFILE:
+          profiler = tools.profiler.Profiler(db=env.cr.dbname, description=package.name)
+      else:
+          profiler = contextlib.nullcontext()
+      with profiler:
         module_name = package.name
         module_id = package.id
 
