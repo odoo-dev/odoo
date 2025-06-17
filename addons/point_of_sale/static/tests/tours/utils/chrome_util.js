@@ -39,17 +39,26 @@ export function endTour() {
         trigger: "body",
     };
 }
+export function isSynced() {
+    return {
+        content: "Check if the request is proceeded",
+        trigger: negate(".fa-spin", ".status-buttons"),
+    };
+}
 export function isSyncStatusConnected() {
     return {
         trigger: negate(".oe_status", ".pos-rightheader .status-buttons"),
     };
 }
 export function clickPlanButton() {
-    return {
-        content: "go back to the floor screen",
-        trigger: ".pos-leftheader .back-button:not(.btn-primary)",
-        run: "click",
-    };
+    return [
+        {
+            content: "go back to the floor screen",
+            trigger: ".pos-leftheader .back-button:not(.btn-primary)",
+            run: "click",
+        },
+        isSynced(),
+    ];
 }
 export function startPoS() {
     return [
@@ -109,11 +118,4 @@ export function freezeDateTime(millis) {
             },
         },
     ];
-}
-
-export function isSynced() {
-    return {
-        content: "Check if the request is proceeded",
-        trigger: negate(".fa-spin", ".status-buttons"),
-    };
 }

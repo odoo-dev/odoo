@@ -1,3 +1,4 @@
+import * as Chrome from "@point_of_sale/../tests/tours/utils/chrome_util";
 import * as Order from "@point_of_sale/../tests/tours/utils/generic_components/order_widget_util";
 import * as ProductScreen from "@point_of_sale/../tests/tours/utils/product_screen_util";
 
@@ -8,6 +9,7 @@ export function clickOrderButton() {
             trigger: ".actionpad .submit-order",
             run: "click",
         },
+        Chrome.isSynced(),
     ];
 }
 export function orderlinesHaveNoChange() {
