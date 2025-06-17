@@ -614,7 +614,7 @@
     <field name="type">qweb</field>
     <field name="key">website_hr_recruitment.thankyou</field>
     <field name="arch" type="xml">
-        <t name="Thank you (Recruitment)" t-name="website_hr_recruitment.thankyou">
+        <t t-id="Thank you (Recruitment)" t-name="website_hr_recruitment.thankyou">
             <t t-if="request.session.get('form_builder_model_model', '') == 'hr.applicant'">
                 <t t-set="job_sudo" t-value="request.website._website_form_last_record().sudo().job_id"/>
             </t>

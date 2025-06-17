@@ -845,7 +845,7 @@
     <div class="card w-100 o_wslides_lesson_card mb-4">
         <t t-if="slide.is_new_slide and not channel_progress[slide.id].get('completed')" t-call="website_slides.course_card_information"/>
         <t t-set="can_access" t-value="not invite_preview and (slide.is_preview or channel.is_member or channel.can_publish)"/>
-        <a t-if="can_access" t-attf-href="/slides/slide/#{slug(slide)}#{query_string}" t-title="slide.name" style="height:150px">
+        <a t-if="can_access" t-attf-href="/slides/slide/#{slug(slide)}#{query_string}" style="height:150px">
             <div t-field="slide.image_1920" t-options="{'widget': 'image', 'preview_image': 'image_512'}" class="o_wslides_background_image h-100"/>
         </a>
         <div t-else="" class="o_wslides_background_image" style="height:150px">

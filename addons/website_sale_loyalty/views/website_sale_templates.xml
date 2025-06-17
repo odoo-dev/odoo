@@ -4,7 +4,7 @@
         <xpath expr="//form[@name='coupon_code']//input[@name='promo']" position="attributes">
             <attribute name="placeholder">Gift card or discount code...</attribute>
         </xpath>
-        <xpath expr="//t[@name='code_not_available']" position="replace"/>
+        <xpath expr="//t[@t-id='code_not_available']" position="replace"/>
     </template>
 
     <template id="modify_code_form" inherit_id="website_sale.total" name="Loyalty, coupon, gift card">

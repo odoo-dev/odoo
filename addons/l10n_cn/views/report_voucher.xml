@@ -61,7 +61,7 @@
                                 <t t-set="total_debit" t-value="total_debit + line.debit"/>
                                 <t t-set="total_credit" t-value="total_credit + line.credit"/>
                                 <tr>
-                                    <t name="account_move_line">
+                                    <t t-id="account_move_line">
                                         <td name="description">
                                             <span t-field="line.name" t-options="{'widget': 'text'}"/>
                                         </td>

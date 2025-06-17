@@ -469,7 +469,10 @@ FIRST_RSTRIP_REGEXP = re.compile(r'^(\n[ \t]*)+(\n[ \t])')
 VARNAME_REGEXP = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*$')
 TO_VARNAME_REGEXP = re.compile(r'[^A-Za-z0-9_]+')
 # Attribute name used outside the context of the QWeb.
-SPECIAL_DIRECTIVES = {'t-translation', 't-ignore', 't-title'}
+# 't-translation' is used to enabled or disabled the translation.
+# 't-ignore' is used for the distribute branding.
+# 't-id' can be used to target inherited nodes.
+SPECIAL_DIRECTIVES = {'t-translation', 't-ignore', 't-id'}
 # Name of the variable to insert the content in t-call in the template.
 # The slot will be replaced by the `t-call` tag content of the caller.
 T_CALL_SLOT = '0'
@@ -745,6 +748,9 @@ class IrQweb(models.AbstractModel):
             return (code, {}, 'not_found_template')
 
         compile_context.pop('raise_if_not_found', None)
+
+        if element.tag == 't' and 't-name' in element.attrib:
+            element.attrib.pop('name', None)
 
         # reference to get xml and etree (usually the template ID)
         compile_context['ref'] = ref
@@ -1580,6 +1586,14 @@ class IrQweb(models.AbstractModel):
         - value from keys that start with ``t-attf-``: format string
             expression.
         """
+
+        if el.tag == 't' and not el.attrib.get('t-field') and not el.attrib.get('t-options'):
+            # attribute propagation is forbidden
+            return []
+        if not el.nsmap and not any(not key.startswith('t-') or key == 't-att' or key.startswith('t-att') for key in el.attrib):
+            # there is no attribute
+            return []
+
         code = [indent_code("attrs = values['__qweb_attrs__'] = {}", level)]
 
         # Compile the introduced new namespaces of the given element.

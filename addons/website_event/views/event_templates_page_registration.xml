@@ -324,7 +324,7 @@
                     <t t-set="counter" t-value="0"/>
                     <t t-set="input_type_by_question_type" t-value="{'name': 'text', 'email': 'email', 'phone': 'tel', 'company_name': 'text'}"/>
                     <t t-if="availability_check" t-foreach="tickets" t-as="ticket">
-                        <t t-foreach="range(1, ticket['quantity'] + 1)" t-as="att_counter" name="attendee_loop">
+                        <t t-foreach="range(1, ticket['quantity'] + 1)" t-as="att_counter" t-id="attendee_loop">
                             <t t-set="counter" t-value="counter + 1"/>
                             <input t-if="event_slot_id" type="hidden" t-attf-name="#{counter}-event_slot_id" t-att-value="event_slot_id"/>
                             <input class="d-none" type="text" t-attf-name="#{counter}-event_ticket_id" t-attf-value="#{ticket['id']}"/>

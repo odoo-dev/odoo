@@ -10,7 +10,7 @@
                         allowedMIMETypes="props.allowedMIMETypes"
                         onUploaded.bind="update"
                     >
-                        <t name="download" t-if="props.record.resId and !props.record.dirty">
+                        <t t-id="download" t-if="props.record.resId and !props.record.dirty">
                             <button
                                 class="btn btn-link btn-sm lh-1 fa fa-download o_download_file_button"
                                 data-tooltip="Download"

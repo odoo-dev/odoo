@@ -178,7 +178,7 @@
                 class="form-control"
             />
         </div>
-        <t name="b2b_fields">
+        <t t-id="b2b_fields">
             <div class="w-100"/>
             <t t-if="is_used_as_billing">
                 <t t-set="vat_warning" t-value="current_partner.vat and not current_partner.can_edit_vat()"/>
@@ -386,7 +386,7 @@
                 <hr class="w-100"/>
             </div>
             <button id="save_address" class="btn btn-primary w-100 w-md-auto order-1 order-md-3">
-                <t name="save_address_label">Save Address</t>
+                <t t-id="save_address_label">Save Address</t>
                 <i class="fw-light fa fa-angle-right ms-2"/>
             </button>
         </div>

@@ -40,11 +40,11 @@
                 <field name="virtual_available"/>
                 <field name="monthly_demand"/>
             </field>
-            <t name="qty_free" position="attributes">
+            <t t-id="qty_free" position="attributes">
                 <attribute name="invisible">True</attribute>
             </t>
-            <t name="qty_available" position="after">
-                <t name="qty_forecasted" t-if="record.qty_available.raw_value != record.virtual_available.raw_value">
+            <t t-id="qty_available" position="after">
+                <t t-id="qty_forecasted" t-if="record.qty_available.raw_value != record.virtual_available.raw_value">
                     <span> / </span>
                     <span class="fw-bold" t-att-class="record.virtual_available.raw_value &lt; 0 ? 'text-danger' : ''" t-out="record.virtual_available.raw_value"/>
                     <span class="text-muted small"> Forecasted</span>

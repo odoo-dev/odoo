@@ -946,6 +946,7 @@ class TestQWebBasic(TransactionCase):
         rendered = self.env['ir.qweb']._render(t.id, values)
         self.assertEqual(rendered.strip(), result.strip())
 
+    @mute_logger('odoo.addons.base.models.ir_qweb')
     def test_att_no_propagation_1(self):
         t = self.env['ir.ui.view'].create({
             'name': 'test',

@@ -2,12 +2,12 @@
 <odoo>
 
     <template id="sale_stock_help_message_template" inherit_id="stock.help_message_template">
-        <xpath expr="//p[@name='top_help_message']/t[@name='delivery_message']" position="replace">
+        <xpath expr="//p[@name='top_help_message']/t[@t-id='delivery_message']" position="replace">
             <t t-if="picking_type_code == 'outgoing'">
                 No delivery yet! Automate them with sales orders.
             </t>
         </xpath>
-        <xpath expr="//p[@name='bottom_help_message']/t[@name='delivery_message']" position="replace">
+        <xpath expr="//p[@name='bottom_help_message']/t[@t-id='delivery_message']" position="replace">
             <t t-if="picking_type_code == 'outgoing'">
                 Reduce back orders with reservations, locations management, smart
                 replenishment propositions, shipping connectors, barcode scanner, etc.

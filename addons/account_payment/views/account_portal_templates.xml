@@ -109,7 +109,7 @@
                 </a>
             </td>
         </xpath>
-        <xpath expr="//t[@name='invoice_status_posted']/span[1]" position="before">
+        <xpath expr="//t[@t-id='invoice_status_posted']/span[1]" position="before">
             <t t-set="tx_sudo" t-value="invoice.get_portal_last_transaction()"/>
         </xpath>
         <xpath expr="//span[@name='invoice_status_waiting_for_payment']" position="before">
@@ -324,7 +324,7 @@
 
     <template id="portal_invoice_error" name="Invoice error display: payment errors"
             inherit_id="account.portal_invoice_error">
-        <xpath expr="//t[@name='generic']" position="after">
+        <xpath expr="//t[@t-id='generic']" position="after">
             <t t-if="error == 'pay_invoice_invalid_doc'">
                 There was an error processing your payment: invalid invoice.
             </t>

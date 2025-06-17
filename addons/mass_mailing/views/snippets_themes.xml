@@ -27,8 +27,8 @@
 
 <!-- Snippets & Themes Menu -->
 <template id="email_designer_snippets" inherit_id="web_editor.snippets" primary="True" groups="base.group_user">
-    <xpath expr="//t[@id='default_snippets']" position="replace">
-        <t id="default_snippets">
+    <xpath expr="//t[@t-id='default_snippets']" position="replace">
+        <t t-id="default_snippets">
             <t t-set="company_id" t-value="res_company"/>
             <snippets id="email_designer_header_elements" string="Headers">
                 <t t-snippet="mass_mailing.s_mail_block_header_social" string="Left Logo" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/block_header_social.png"/>

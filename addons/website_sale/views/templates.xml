@@ -1638,7 +1638,7 @@
     </template>
 
     <template id="filter_products_tags_list">
-        <t t-foreach="all_tags" t-as="tag" class="list-group-item border-0 ps-0 pb-0">
+        <t t-foreach="all_tags" t-as="tag">
             <div class="form-check mb-1">
                 <input type="checkbox"
                        name="tags"
@@ -1773,7 +1773,7 @@
                                             </t>
                                         </small>
                                     </div>
-                                    <t name="variant_info">
+                                    <t t-id="variant_info">
                                         <input
                                             type="hidden"
                                             class="o_not_editable product_id"
@@ -2641,7 +2641,7 @@
                 <a href="#" role="button" class="btn btn-light a-submit border">Apply</a>
             </div>
         </form>
-        <t t-if="request.params.get('code_not_available')" name="code_not_available">
+        <t t-if="request.params.get('code_not_available')" t-id="code_not_available">
             <div class="alert alert-danger text-start" role="alert">This promo code is not available.</div>
         </t>
     </template>
@@ -2806,7 +2806,7 @@
 
     <!-- /shop/address route -->
     <template id="website_sale.address_form_fields" inherit_id="portal.address_form_fields" primary="True">
-        <t name="b2b_fields" position="attributes">
+        <t t-id="b2b_fields" position="attributes">
             <attribute name="t-if">display_b2b_fields</attribute>
         </t>
     </template>

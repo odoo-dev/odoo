@@ -605,33 +605,33 @@
 
         <template id="help_message_template" name="Help Message" groups="base.group_user">
             <p name="top_help_message" class="o_view_nocontent_smiling_face o_view_nocontent_stock">
-                <t name="receipt_message">
+                <t t-id="receipt_message">
                     <t t-if="picking_type_code == 'incoming'">
                         No receipt yet! Create a new one.
                     </t>
                 </t>
-                <t name="delivery_message">
+                <t t-id="delivery_message">
                     <t t-if="picking_type_code == 'outgoing'">
                         No delivery to do!
                     </t>
                 </t>
-                <t name="transfer_message">
+                <t t-id="transfer_message">
                     <t t-if="picking_type_code not in ['incoming', 'outgoing']">
                         No transfer found. Let's create one!
                     </t>
                 </t>
             </p>
             <p name="bottom_help_message" class="text-muted">
-                <t name="receipt_message">
+                <t t-id="receipt_message">
                     <t t-if="picking_type_code == 'incoming'">
                         Reduce stockouts with alerts, barcode app, replenishment propositions,
                         locations management traceability, quality control, etc.
                     </t>
                 </t>
-                <t name="delivery_message">
+                <t t-id="delivery_message">
                     <t t-if="picking_type_code == 'outgoing'"></t>
                 </t>
-                <t name="transfer_message">
+                <t t-id="transfer_message">
                     <t t-if="picking_type_code not in ['incoming', 'outgoing']">
                         Transfers allow you to move products from one location to another.
                     </t>

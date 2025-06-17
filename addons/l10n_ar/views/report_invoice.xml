@@ -207,7 +207,7 @@
                         <span t-field="o.invoice_date_due"/>
                     </t>
 
-                    <t t-if="o.invoice_payment_term_id" name="payment_term">
+                    <t t-if="o.invoice_payment_term_id" t-id="payment_term">
                         <br/><strong>Payment Terms: </strong><span t-field="o.invoice_payment_term_id.name"/>
                     </t>
 

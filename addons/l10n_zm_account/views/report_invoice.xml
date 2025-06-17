@@ -5,23 +5,23 @@
             <t t-set="forced_vat" t-value="o.company_id.vat"/>
         </xpath>
 
-        <t name="invoice_title" position="replace">
-            <t name="invoice_title">Fiscal Tax Invoice</t>
+        <t t-id="invoice_title" position="replace">
+            <t t-id="invoice_title">Fiscal Tax Invoice</t>
         </t>
-        <t name="draft_invoice_title" position="replace">
-            <t name="draft_invoice_title">Draft Tax Invoice</t>
+        <t t-id="draft_invoice_title" position="replace">
+            <t t-id="draft_invoice_title">Draft Tax Invoice</t>
         </t>
-        <t name="cancelled_invoice_title" position="replace">
-            <t name="cancelled_invoice_title">Cancelled Tax Invoice</t>
+        <t t-id="cancelled_invoice_title" position="replace">
+            <t t-id="cancelled_invoice_title">Cancelled Tax Invoice</t>
         </t>
-        <t name="proforma_invoice_title" position="replace">
-            <t name="proforma_invoice_title">Proforma Fiscal Tax Invoice</t>
+        <t t-id="proforma_invoice_title" position="replace">
+            <t t-id="proforma_invoice_title">Proforma Fiscal Tax Invoice</t>
         </t>
-        <t name="draft_proforma_invoice_title" position="replace">
-            <t name="draft_proforma_invoice_title">Draft Proforma Tax Invoice</t>
+        <t t-id="draft_proforma_invoice_title" position="replace">
+            <t t-id="draft_proforma_invoice_title">Draft Proforma Tax Invoice</t>
         </t>
-        <t name="cancelled_proforma_invoice_title" position="replace">
-            <t name="cancelled_proforma_invoice_title">Cancelled Proforma Tax Invoice</t>
+        <t t-id="cancelled_proforma_invoice_title" position="replace">
+            <t t-id="cancelled_proforma_invoice_title">Cancelled Proforma Tax Invoice</t>
         </t>
     </template>
     <template id="report_invoice" inherit_id="account.report_invoice">

@@ -64,7 +64,7 @@
                                 <g:attribute_value t-out="name_value[1]"/>
                             </g:product_detail>
                         </t>
-                        <t name="shippings" t-foreach="item['free_shipping_threshold']" t-as="shipping">
+                        <t t-id="shippings" t-foreach="item['free_shipping_threshold']" t-as="shipping">
                             <g:free_shipping_threshold>
                                 <g:country t-out="shipping['country']"/>
                                 <g:price_threshold t-out="shipping['price_threshold']"/>

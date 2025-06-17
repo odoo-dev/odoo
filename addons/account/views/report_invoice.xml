@@ -53,54 +53,54 @@
                         <t t-set="layout_document_title">
                             <t t-if="not proforma">
                                 <span t-if="o.move_type == 'out_invoice' and o.state == 'posted'">
-                                    <t name="invoice_title">Invoice</t>
+                                    <t t-id="invoice_title">Invoice</t>
                                 </span>
                                 <span t-elif="o.move_type == 'out_invoice' and o.state == 'draft'">
-                                    <t name="draft_invoice_title">Draft Invoice</t>
+                                    <t t-id="draft_invoice_title">Draft Invoice</t>
                                 </span>
                                 <span t-elif="o.move_type == 'out_invoice' and o.state == 'cancel'">
-                                    <t name="cancelled_invoice_title">Cancelled Invoice</t>
+                                    <t t-id="cancelled_invoice_title">Cancelled Invoice</t>
                                 </span>
                                 <span t-elif="o.move_type == 'out_refund' and o.state == 'posted'">
-                                    <t name="credit_note_title">Credit Note</t>
+                                    <t t-id="credit_note_title">Credit Note</t>
                                 </span>
                                 <span t-elif="o.move_type == 'out_refund' and o.state == 'draft'">
-                                    <t name="draft_credit_note_title">Draft Credit Note</t>
+                                    <t t-id="draft_credit_note_title">Draft Credit Note</t>
                                 </span>
                                 <span t-elif="o.move_type == 'out_refund' and o.state == 'cancel'">
-                                    <t name="cancelled_credit_note_title">Cancelled Credit Note</t>
+                                    <t t-id="cancelled_credit_note_title">Cancelled Credit Note</t>
                                 </span>
                                 <span t-elif="o.move_type == 'in_refund'">
-                                    <t name="vendor_credit_note_title">Vendor Credit Note</t>
+                                    <t t-id="vendor_credit_note_title">Vendor Credit Note</t>
                                 </span>
                                 <span t-elif="o.move_type == 'in_invoice'">
-                                    <t name="vendor_bill_title">Vendor Bill</t>
+                                    <t t-id="vendor_bill_title">Vendor Bill</t>
                                 </span>
                             </t>
                             <t t-else="">
                                 <span t-if="o.move_type == 'out_invoice' and o.state == 'posted'">
-                                    <t name="proforma_invoice_title">Proforma Invoice</t>
+                                    <t t-id="proforma_invoice_title">Proforma Invoice</t>
                                 </span>
                                 <span t-elif="o.move_type == 'out_invoice' and o.state == 'draft'">
-                                    <t name="draft_proforma_invoice_title">Draft Proforma Invoice</t>
+                                    <t t-id="draft_proforma_invoice_title">Draft Proforma Invoice</t>
                                 </span>
                                 <span t-elif="o.move_type == 'out_invoice' and o.state == 'cancel'">
-                                    <t name="cancelled_proforma_invoice_title">Cancelled Proforma Invoice</t>
+                                    <t t-id="cancelled_proforma_invoice_title">Cancelled Proforma Invoice</t>
                                 </span>
                                 <span t-elif="o.move_type == 'out_refund' and o.state == 'posted'">
-                                    <t name="proforma_credit_note_title">Proforma Credit Note</t>
+                                    <t t-id="proforma_credit_note_title">Proforma Credit Note</t>
                                 </span>
                                 <span t-elif="o.move_type == 'out_refund' and o.state == 'draft'">
-                                    <t name="draft_proforma_credit_note_title">Draft Proforma Credit Note</t>
+                                    <t t-id="draft_proforma_credit_note_title">Draft Proforma Credit Note</t>
                                 </span>
                                 <span t-elif="o.move_type == 'out_refund' and o.state == 'cancel'">
-                                    <t name="cancelled_proforma_credit_note_title">Cancelled Proforma Credit Note</t>
+                                    <t t-id="cancelled_proforma_credit_note_title">Cancelled Proforma Credit Note</t>
                                 </span>
                                 <span t-elif="o.move_type == 'in_refund'">
-                                    <t name="proforma_vendor_credit_note_title">Proforma Vendor Credit Note</t>
+                                    <t t-id="proforma_vendor_credit_note_title">Proforma Vendor Credit Note</t>
                                 </span>
                                 <span t-elif="o.move_type == 'in_invoice'">
-                                    <t name="proforma_vendor_bill_title">Proforma Vendor Bill</t>
+                                    <t t-id="proforma_vendor_bill_title">Proforma Vendor Bill</t>
                                 </span>
                             </t>
                             <span t-if="o.name and o.name != '/'" t-field="o.name">INV/2023/0001</span>
@@ -174,7 +174,7 @@
                                     <t t-set="current_total" t-value="current_total + line.price_total"/>
 
                                     <tr t-att-class="'fw-bold o_line_section' if line.display_type == 'line_section' else 'fst-italic o_line_note' if line.display_type == 'line_note' else ''">
-                                        <t t-if="line.display_type == 'product'" name="account_invoice_line_accountable">
+                                        <t t-if="line.display_type == 'product'" t-id="account_invoice_line_accountable">
                                             <td name="account_invoice_line_name">
                                                 <span t-if="line.name" t-field="line.name" t-options="{'widget': 'text'}">Bacon Burger</span>
                                             </td>

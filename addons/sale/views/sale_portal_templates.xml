@@ -128,7 +128,7 @@
 
             <div class="row o_portal_sale_sidebar">
                 <!-- Sidebar -->
-                <t t-call="portal.portal_record_sidebar" id="sale_order_portal_sidebar">
+                <t t-call="portal.portal_record_sidebar" t-id="sale_order_portal_sidebar">
                     <t t-set="classes" t-value="'col-lg-4 col-xxl-3 d-print-none'"/>
 
                     <t t-set="title">
@@ -550,7 +550,7 @@
                                     else ''"
                                 >
                                     <t
-                                        name="product_line_row"
+                                        t-id="product_line_row"
                                         t-if="not line.display_type and line.product_type != 'combo'"
                                     >
                                         <td id="product_name">

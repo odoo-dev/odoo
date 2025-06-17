@@ -2,7 +2,7 @@
 <odoo>
 <template id="snippets" groups="base.group_user">
     <snippets id="snippet_custom" string="Custom"/>
-    <t id="default_snippets">
+    <t t-id="default_snippets">
         <snippets id="snippet_structure" string="First Panel">
             <t t-snippet="web_editor.s_hr" string="Separator" t-thumbnail="/web_editor/static/src/img/snippets_thumbs/s_hr.svg"/>
         </snippets>

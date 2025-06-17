@@ -2,7 +2,7 @@
 <odoo>
 
     <template id="purchase_help_message_template" inherit_id="stock.help_message_template">
-        <xpath expr="//p[@name='top_help_message']/t[@name='receipt_message']" position="replace">
+        <xpath expr="//p[@name='top_help_message']/t[@t-id='receipt_message']" position="replace">
             <t t-if="picking_type_code == 'incoming'">
                 No receipt yet! Automate them with purchase orders.
             </t>
