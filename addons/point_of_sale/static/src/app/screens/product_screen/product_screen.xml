@@ -17,6 +17,7 @@
                             actionName.translate="Payment"
                             actionToTrigger="() => pos.pay()"
                             showActionButton="!currentOrder?.isEmpty()"
+                            fastValidate="fastValidate"
                         />
                     </div>
                 </div>

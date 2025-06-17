@@ -395,6 +395,11 @@ export class ProductScreen extends Component {
             });
         }
     }
+
+    async fastValidate() {
+        debugger
+        this.paymentScreen.validateOrder(false)
+    }
 }
 
 registry.category("pos_pages").add("ProductScreen", {

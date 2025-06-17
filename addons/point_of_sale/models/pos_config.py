@@ -201,6 +201,10 @@ class PosConfig(models.Model):
     order_edit_tracking = fields.Boolean(string="Track orders edits", help="Store edited orders in the backend", default=False)
     last_data_change = fields.Datetime(string='Last Write Date', readonly=True, compute='_compute_local_data_integrity', store=True)
     fallback_nomenclature_id = fields.Many2one('barcode.nomenclature', string="Fallback Nomenclature")
+    set_fast_payment_methods = fields.Boolean('Fast payment validation', help="Set fast payment methods to validate orders faster.")
+    fast_payment_method_ids = fields.Many2many(
+        'pos.payment.method', string='Fast Payment Methods', relation="pos_payment_method_fast_relation",
+        help="These payment methods will be available for the fast payment")
 
     def notify_synchronisation(self, session_id, login_number, records={}):
         self.ensure_one()
