@@ -1,8 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
+import { Ribbon } from "@web/core/ribbon/ribbon";
 import { registry } from "@web/core/registry";
-import { standardWidgetProps } from "../standard_widget_props";
-
-import { Component } from "@odoo/owl";
+import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 
 /**
  * This widget adds a ribbon on the top right side of the form
@@ -17,39 +16,20 @@ import { Component } from "@odoo/owl";
  *        If you don't specify the bg_color prop the bg-success class will be used
  *        by default.
  */
-class RibbonWidget extends Component {
-    static template = "web.Ribbon";
+class RibbonWidget extends Ribbon {
     static props = {
         ...standardWidgetProps,
-        text: { type: String },
-        title: { type: String, optional: true },
-        bgClass: { type: String, optional: true },
+        ...Ribbon.props,
     };
-    static defaultProps = {
-        title: "",
-        bgClass: "text-bg-success",
-    };
-
-    get classes() {
-        let classes = this.props.bgClass;
-        if (this.props.text.length > 15) {
-            classes += " o_small";
-        } else if (this.props.text.length > 10) {
-            classes += " o_medium";
-        }
-        return classes;
-    }
 }
 
 export const ribbonWidget = {
     component: RibbonWidget,
-    extractProps: ({ attrs }) => {
-        return {
-            text: attrs.title || attrs.text,
-            title: attrs.tooltip,
-            bgClass: attrs.bg_color,
-        };
-    },
+    extractProps: ({ attrs }) => ({
+        text: attrs.title || attrs.text,
+        title: attrs.tooltip,
+        bgClass: attrs.bg_color,
+    }),
     supportedAttributes: [
         {
             label: _t("Title"),
