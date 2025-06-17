@@ -79,37 +79,6 @@ class PaymentProvider(models.Model):
 
     # === BUSINESS METHODS - PAYMENT FLOW === #
 
-    def _get_supported_currencies(self):
-        """ Override of `payment` to return the supported currencies. """
-        supported_currencies = super()._get_supported_currencies()
-        if self.code == 'hdfc_upi':
-            supported_currencies = supported_currencies.filtered(
-                lambda c: c.name in const.SUPPORTED_CURRENCIES
-            )
-        return supported_currencies
-
-    def _get_default_payment_method_codes(self):
-        """ Override of `payment` to return the default payment method codes. """
-        default_codes = super()._get_default_payment_method_codes()
-        if self.code != 'hdfc_upi':
-            return default_codes
-        return const.DEFAULT_PAYMENT_METHOD_CODES
-
-    def _should_build_inline_form(self, is_validation=False):
-        """ Override of `payment` to specify that inline forms are used for HDFC UPI.
-
-        HDFC UPI uses inline forms to display QR codes directly in the payment form.
-
-        :param bool is_validation: Whether the validation operation is being performed.
-        :return: True for HDFC UPI provider, parent result otherwise.
-        :rtype: bool
-        """
-        if self.code == 'hdfc_upi':
-            return True
-        return super()._should_build_inline_form(is_validation=is_validation)
-
-    # === BUSINESS METHODS - HDFC UPI API === #
-
     def _hdfc_upi_make_request(self, endpoint, payload=None, method='POST'):
         """ Make a request to HDFC UPI API at the specified endpoint.
 
@@ -179,6 +148,22 @@ class PaymentProvider(models.Model):
 
     # === BUSINESS METHODS - GETTERS === #
 
+    def _get_supported_currencies(self):
+        """ Override of `payment` to return the supported currencies. """
+        supported_currencies = super()._get_supported_currencies()
+        if self.code == 'hdfc_upi':
+            supported_currencies = supported_currencies.filtered(
+                lambda c: c.name in const.SUPPORTED_CURRENCIES
+            )
+        return supported_currencies
+
+    def _get_default_payment_method_codes(self):
+        """ Override of `payment` to return the default payment method codes. """
+        default_codes = super()._get_default_payment_method_codes()
+        if self.code != 'hdfc_upi':
+            return default_codes
+        return const.DEFAULT_PAYMENT_METHOD_CODES
+
     def _hdfc_upi_get_api_url(self, endpoint):
         """ Return the appropriate URL for the requested endpoint.
 
@@ -195,27 +180,6 @@ class PaymentProvider(models.Model):
         )
         endpoint_path = const.API_ENDPOINTS.get(endpoint, '')
         return f"{base_url}{endpoint_path}"
-
-    def _hdfc_upi_get_formatted_amount(self, amount, currency=None):
-        """ Return the amount in the format required by HDFC UPI.
-
-        :param float amount: The transaction amount.
-        :param res.currency currency: The transaction currency (should be INR).
-        :return: The formatted amount for HDFC UPI.
-        :rtype: dict
-        """
-        if currency and currency.name != 'INR':
-            raise ValidationError(_("HDFC UPI only supports INR currency"))
-
-        # Validate amount limits
-        is_valid, error_message = hdfc_upi_utils.validate_transaction_amount(amount)
-        if not is_valid:
-            raise ValidationError(_("HDFC UPI: %s", error_message))
-
-        return {
-            'value': hdfc_upi_utils.format_upi_amount(amount),
-            'currency': 'INR',
-        }
 
     def _hdfc_upi_get_inline_form_values(self, amount=None, currency=None, reference=None):
         """ Return a serialized JSON of the required values to render the inline form.

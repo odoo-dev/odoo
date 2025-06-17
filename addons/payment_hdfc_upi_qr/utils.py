@@ -271,7 +271,7 @@ def validate_transaction_amount(amount, currency_code='INR'):
         return False, f"Amount must be at least ₹{limits['min_amount']}"
 
     if amount > limits['max_amount']:
-        return False, f"Amount cannot exceed ₹{limits['max_amount']:,.2f}"
+        return False, f"Amount cannot exceed ₹{limits['max_amount']}"
 
     return True, None
 
@@ -371,32 +371,31 @@ def build_pipe_separated_request(field_values, field_names):
 
 
 def parse_pipe_separated_response(response_string, field_names):
-    """Parse pipe-separated response string from HDFC UPI APIs.
+    """Parse pipe-separated response from HDFC UPI APIs.
 
-    Parses the pipe-separated response format used by all HDFC UPI APIs
-    according to the 21-field response specification.
+    All HDFC UPI APIs return responses in pipe-separated format with exactly
+    21 fields as per the API specification.
 
     :param str response_string: Pipe-separated response string
-    :param list field_names: List of field names for mapping
-    :return: Dictionary of parsed response data
+    :param list field_names: List of field names to map values to
+    :return: Dictionary of parsed field data
     :rtype: dict
     """
     if not response_string:
         return {}
 
-    response_fields = response_string.split('|')
-    parsed_data = {}
+    # Split by pipe separator
+    field_values = response_string.split('|')
 
+    # Create dictionary mapping field names to values
+    parsed_data = {}
     for i, field_name in enumerate(field_names):
-        if i < len(response_fields):
-            value = response_fields[i].strip()
-            # Convert 'NA', 'null', empty string to False
-            if value in ['NA', 'null', '', 'None']:
-                parsed_data[field_name] = False
-            else:
-                parsed_data[field_name] = value
+        if i < len(field_values):
+            value = field_values[i].strip()
+            # Convert 'NA', 'null', or empty strings to None for cleaner handling
+            parsed_data[field_name] = value if value not in ['NA', 'null', ''] else None
         else:
-            parsed_data[field_name] = False
+            parsed_data[field_name] = None
 
     return parsed_data
 

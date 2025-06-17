@@ -5,7 +5,7 @@
     'version': '1.0',
     'category': 'Accounting/Payment Providers',
     'sequence': 350,
-    'summary': "A payment provider enabling payments via HDFC UPI QR codes.",
+    'summary': "An Indian payment provider enabling payments via UPI QR codes.",
     'description': " ",  # Non-empty string to avoid loading the README file.
     'depends': [
         'payment',

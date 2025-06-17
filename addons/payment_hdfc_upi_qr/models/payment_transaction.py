@@ -131,10 +131,6 @@ class PaymentTransaction(models.Model):
             'inline_form_values': inline_form_values,
         })
 
-        _logger.info(
-            "Processing values prepared for transaction with reference %s:\n%s",
-            self.reference, pprint.pformat(processing_values, indent=4, width=80)
-        )
         return processing_values
 
     def _send_refund_request(self, amount_to_refund=None):
@@ -158,7 +154,7 @@ class PaymentTransaction(models.Model):
 
         _logger.info(
             "Sending refund request for transaction with reference %s:\n%s",
-            self.reference, pprint.pformat(refund_payload, indent=4, width=80)
+            self.reference, pprint.pformat(refund_payload)
         )
 
         try:
@@ -170,7 +166,7 @@ class PaymentTransaction(models.Model):
 
             _logger.info(
                 "Refund request response for transaction with reference %s:\n%s",
-                self.reference, pprint.pformat(response_data, indent=4, width=80)
+                self.reference, pprint.pformat(response_data)
             )
 
             # Process refund response
@@ -224,7 +220,7 @@ class PaymentTransaction(models.Model):
         if len(tx) > 1:
             _logger.warning(
                 "Found %s transactions for HDFC UPI notification with data:\n%s",
-                len(tx), pprint.pformat(notification_data, indent=4, width=80)
+                len(tx), pprint.pformat(notification_data)
             )
 
         return tx
@@ -243,7 +239,7 @@ class PaymentTransaction(models.Model):
 
         _logger.info(
             "Processing HDFC UPI notification for transaction with reference %s:\n%s",
-            self.reference, pprint.pformat(notification_data, indent=4, width=80)
+            self.reference, pprint.pformat(notification_data)
         )
 
         # Extract and validate notification data according to HDFC UPI specification
@@ -618,7 +614,7 @@ class PaymentTransaction(models.Model):
 
         _logger.info(
             "Processing refund response for transaction with reference %s:\n%s",
-            self.reference, pprint.pformat(response_data, indent=4, width=80)
+            self.reference, pprint.pformat(response_data)
         )
 
         # Validate response format first
@@ -747,7 +743,7 @@ class PaymentTransaction(models.Model):
             if payload:
                 _logger.info(
                     "Request payload for transaction with reference %s:\n%s",
-                    self.reference, pprint.pformat(payload, indent=4, width=80)
+                    self.reference, pprint.pformat(payload)
                 )
                 response = requests.post(
                     url,
@@ -794,7 +790,7 @@ class PaymentTransaction(models.Model):
             raise ValidationError("HDFC UPI: " + error_msg)
 
     def _hdfc_upi_check_payment_status(self):
-        """ Check the status of a HDFC UPI payment.
+        """Check payment status using HDFC UPI Transaction Status Enquiry API.
 
         Enhanced status checking with comprehensive HDFC UPI specification compliance.
         Implements 14-field request format and processes 21-field response format.

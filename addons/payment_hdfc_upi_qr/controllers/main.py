@@ -164,11 +164,6 @@ class HdfcUpiController(http.Controller):
         Retrieves or generates QR code data for the specified transaction,
         used by the frontend to display the payment QR code to customers.
 
-        Security Notes:
-        - csrf=False is justified: JSON-RPC routes don't need CSRF (PY022 exception)
-        - auth='public' allows customers to access their own payment QR codes
-        - Transaction access is validated by transaction ID ownership
-
         :param int tx_id: The transaction ID
         :param dict kwargs: Additional parameters (unused)
         :return: QR code data with success status and base64 encoded image
@@ -239,11 +234,6 @@ class HdfcUpiController(http.Controller):
     @http.route(f'{_cancel_transaction_url}/<int:tx_id>', type='jsonrpc', auth='public')
     def hdfc_upi_cancel_transaction(self, tx_id, reason=None, **kwargs):
         """Cancel a payment transaction.
-
-        Security Notes:
-        - csrf=False is justified: JSON-RPC routes don't need CSRF (PY022 exception)
-        - auth='public' allows customers to cancel their own transactions
-        - Transaction access is validated by transaction ID ownership
 
         :param int tx_id: The transaction ID
         :param str reason: Optional reason for cancellation

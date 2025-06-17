@@ -131,8 +131,8 @@ DEFAULT_PAYMENT_METHOD_CODES = {'upi_qr'}
 
 # UPI transaction limits (in INR)
 TRANSACTION_LIMITS = {
-    'min_amount': 1.0,
-    'max_amount': 100000.0,  # ₹1,00,000 UPI QR limit
+    'min_amount': 1.00,
+    'max_amount': 100000.00,
 }
 
 # QR code configuration
