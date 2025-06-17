@@ -1,584 +1,599 @@
-// Part of Odoo. See LICENSE file for full copyright and licensing details.
+///
+/// This file regroups the HDFC UPI payment form styles.
+/// They provide the modal interface and confirmation dialogs for UPI QR payments.
+///
 
-/* ===========================================================
-   HDFC UPI QR Payment Modal Styles
-   =========================================================== */
+//==============================================================================
+// Variables
+//==============================================================================
+
+// Modal sizing
+$o-upi-modal-max-width: 480px !default;
+$o-upi-modal-border-radius: 16px !default;
+$o-upi-qr-size: 300px !default;
+$o-upi-qr-size-mobile: 180px !default;
+
+// Colors
+$o-upi-warning-gradient-start: #ff4444 !default;
+$o-upi-warning-gradient-end: #dd3333 !default;
+$o-upi-success-color: #d4edda !default;
+$o-upi-error-color: #f8d7da !default;
+
+//==============================================================================
+// Main Payment Modal
+//==============================================================================
 
 .upi-payment-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+
+    &.show {
+        opacity: 1;
+        visibility: visible;
+    }
 }
 
-.upi-payment-modal.show {
-  opacity: 1;
-  visibility: visible;
-}
+//==============================================================================
+// Modal Content Components
+//==============================================================================
 
 .upi-modal-content {
-  background: white;
-  border-radius: 16px;
-  padding: 0;
-  max-width: 480px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-  transform: scale(0.9);
-  transition: transform 0.3s ease;
-  position: relative;
+    background: white;
+    border-radius: 16px;
+    padding: 0;
+    max-width: 480px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    position: relative;
+
+    .upi-modal-header {
+        padding: 24px 24px 0 24px;
+        text-align: center;
+        border-bottom: none;
+    }
+
+    .upi-modal-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: #f5f5f5;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #666;
+        font-size: 18px;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+    }
+
+    .upi-modal-body {
+        padding: 0 24px 24px 24px;
+        text-align: center;
+    }
 }
 
 .upi-payment-modal.show .upi-modal-content {
-  transform: scale(1);
+    transform: scale(1);
 }
 
-.upi-modal-header {
-  padding: 24px 24px 0 24px;
-  text-align: center;
-  border-bottom: none;
-}
-
-.upi-modal-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: #f5f5f5;
-  border: none;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #666;
-  font-size: 18px;
-  transition: all 0.2s ease;
-}
-
-.upi-modal-close:hover {
-  background: #e0e0e0;
-  color: #333;
-}
+//==============================================================================
+// QR Code and Payment Display
+//==============================================================================
 
 .merchant-name {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 8px 0;
-  letter-spacing: -0.5px;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.5px;
 }
 
 .payment-title {
-  font-size: 16px;
-  color: #666;
-  margin: 0 0 32px 0;
-  font-weight: 500;
-}
-
-.upi-modal-body {
-  padding: 0 24px 24px 24px;
-  text-align: center;
+    font-size: 16px;
+    color: #666;
+    margin: 0 0 32px 0;
+    font-weight: 500;
 }
 
 .qr-code-image {
-  width: 300px;
-  height: 300px;
-  border-radius: 8px;
-  background: white;
-  padding: 8px;
+    width: $o-upi-qr-size;
+    height: $o-upi-qr-size;
+    border-radius: 8px;
+    background: white;
+    padding: 8px;
 }
 
 .payment-amount {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 24px 0 16px 0;
-}
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 24px 0 16px 0;
 
-.payment-amount .currency {
-  color: #2563eb;
+    .currency {
+        color: #2563eb;
+    }
 }
 
 .scan-instruction {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 24px;
-  line-height: 1.5;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 24px;
+    line-height: 1.5;
 }
+
+//==============================================================================
+// UPI Apps Integration
+//==============================================================================
 
 .upi-apps-container {
-  margin-bottom: 24px;
+    margin-bottom: 24px;
+
+    .upi-apps-title {
+        font-size: 12px;
+        color: #888;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .upi-apps-grid {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .upi-app-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        transition: transform 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+        &:hover {
+            transform: scale(1.1);
+        }
+    }
 }
 
-.upi-apps-title {
-  font-size: 12px;
-  color: #888;
-  margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.upi-apps-grid {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.upi-app-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  transition: transform 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.upi-app-icon:hover {
-  transform: scale(1.1);
-}
+//==============================================================================
+// Timer and Status Components
+//==============================================================================
 
 .timer-container {
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 
-.timer-icon {
-  color: #856404;
-  font-size: 16px;
-}
+    .timer-icon,
+    .timer-text,
+    .timer-value {
+        color: #856404;
+        font-size: 14px;
+    }
 
-.timer-text {
-  color: #856404;
-  font-size: 14px;
-  font-weight: 500;
-}
+    .timer-text {
+        font-weight: 500;
+    }
 
-.timer-value {
-  font-weight: 700;
-  color: #856404;
-}
+    .timer-value {
+        font-weight: 700;
+    }
 
-.timer-container.warning {
-  background: #f8d7da;
-  border-color: #f5c6cb;
-}
+    &.warning {
+        background: #f8d7da;
+        border-color: #f5c6cb;
 
-.timer-container.warning .timer-icon,
-.timer-container.warning .timer-text,
-.timer-container.warning .timer-value {
-  color: #721c24;
+        .timer-icon,
+        .timer-text,
+        .timer-value {
+            color: #721c24;
+        }
+    }
 }
 
 .status-message {
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  font-size: 14px;
-  font-weight: 500;
-  display: none;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    display: none;
+
+    &.show {
+        display: block;
+    }
+
+    &.success {
+        background: $o-upi-success-color;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+
+    &.error {
+        background: $o-upi-error-color;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+
+    &.info {
+        background: #d1ecf1;
+        border: 1px solid #bee5eb;
+        color: #0c5460;
+    }
 }
 
-.status-message.show {
-  display: block;
-}
+//==============================================================================
+// Loading States and Animations
+//==============================================================================
 
-.status-message.success {
-  background: #d4edda;
-  border: 1px solid #c3e6cb;
-  color: #155724;
-}
-
-.status-message.error {
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  color: #721c24;
-}
-
-.status-message.info {
-  background: #d1ecf1;
-  border: 1px solid #bee5eb;
-  color: #0c5460;
-}
-
-/* Loading States */
 .qr-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 200px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  margin-bottom: 24px;
-}
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    margin-bottom: 24px;
 
-.loading-spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid #e9ecef;
-  border-top: 3px solid #2563eb;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+    .loading-spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #e9ecef;
+        border-top: 3px solid #2563eb;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
-/* Responsive Design */
-@media (max-width: 576px) {
-  .upi-modal-content {
-    width: 95%;
-    margin: 20px;
-  }
-
-  .upi-modal-header,
-  .upi-modal-body {
-    padding: 20px;
-  }
-
-  .merchant-name {
-    font-size: 20px;
-  }
-
-  .qr-code-image {
-    width: 180px;
-    height: 180px;
-  }
-
-  .upi-apps-grid {
-    gap: 8px;
-  }
-
-  .upi-app-icon {
-    width: 36px;
-    height: 36px;
-  }
-
-  .powered-by-container {
-    gap: 12px;
-  }
-
-  .bank-logo {
-    height: 20px;
-  }
-
-  .upi-logo {
-    height: 18px;
-  }
-
-  .powered-by-text,
-  .upi-text {
-    font-size: 11px;
-  }
-}
-
-/* Animation for success state */
 .success-animation {
-  animation: successPulse 0.6s ease-in-out;
+    animation: successPulse 0.6s ease-in-out;
 }
 
 @keyframes successPulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
 }
 
-/* Hide default payment form elements when modal is active */
 .payment-form-hidden {
-  pointer-events: none;
-  opacity: 0.5;
+    pointer-events: none;
+    opacity: 0.5;
 }
 
-/* ===========================================================
-   CONFIRMATION MODAL STYLES
-   =========================================================== */
+//==============================================================================
+// Confirmation Dialog Modal
+//==============================================================================
 
-/* Confirmation Modal Overlay */
 .upi-confirmation-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10000;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.25s ease;
-  backdrop-filter: blur(3px);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s ease;
+    backdrop-filter: blur(3px);
+
+    &.show {
+        opacity: 1;
+        visibility: visible;
+    }
 }
 
-.upi-confirmation-modal.show {
-  opacity: 1;
-  visibility: visible;
-}
-
-/* Confirmation Modal Content */
 .upi-confirmation-content {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 0;
-  max-width: 380px;
-  width: 90%;
-  margin: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  transform: scale(0.95) translateY(10px);
-  transition: transform 0.25s ease;
-  position: relative;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+    background: #ffffff;
+    border-radius: $o-upi-modal-border-radius;
+    padding: 0;
+    max-width: 420px;
+    width: 90%;
+    margin: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    transform: scale(0.95) translateY(10px);
+    transition: transform 0.25s ease;
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .upi-confirmation-modal.show .upi-confirmation-content {
-  transform: scale(1) translateY(0);
+    transform: scale(1) translateY(0);
 }
 
-/* Confirmation Header */
 .upi-confirmation-header {
-  text-align: center;
-  padding: 32px 24px 20px;
-  background: #ffffff;
-  border-bottom: 1px solid #f1f5f9;
+    text-align: center;
+    padding: 40px 24px 24px;
+    background: #ffffff;
+    border-radius: $o-upi-modal-border-radius $o-upi-modal-border-radius 0 0;
 }
 
 .warning-icon {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 16px;
-  background: #ef4444;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
-}
+    width: auto;
+    height: auto;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    line-height: 1;
 
-.warning-icon i {
-  color: #ffffff;
-  font-size: 20px;
+    i {
+        color: #f59e0b;
+        font-size: 80px;
+    }
 }
 
 .confirmation-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 8px 0;
-  letter-spacing: -0.025em;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.025em;
 }
 
 .confirmation-message {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 0;
-  line-height: 1.5;
-  font-weight: 400;
+    font-size: 15px;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.5;
+    font-weight: 400;
 }
 
-/* Confirmation Body */
 .upi-confirmation-body {
-  padding: 24px 32px;
-  background: #ffffff;
+    padding: 0 24px 32px;
+    background: #ffffff;
+    text-align: center;
 }
 
 .confirmation-details {
-  font-size: 15px;
-  color: #718096;
-  margin: 0;
-  line-height: 1.6;
-  text-align: center;
+    font-size: 14px;
+    color: #718096;
+    margin: 0;
+    line-height: 1.6;
 }
 
-/* Confirmation Actions */
 .upi-confirmation-actions {
-  padding: 24px 32px 32px;
-  background: #ffffff;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+    padding: 0 24px 32px;
+    background: #ffffff;
+    display: flex;
+    gap: 12px;
+    border-radius: 0 0 $o-upi-modal-border-radius $o-upi-modal-border-radius;
 }
 
-/* Action Buttons */
 .btn-cancel-payment,
 .btn-continue-payment {
-  width: 100%;
-  padding: 14px 20px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    position: relative;
+    min-height: 48px;
+    outline: none;
+
+    i {
+        font-size: 14px;
+    }
+
+    &:focus {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
 }
 
 .btn-cancel-payment {
-  background: #ef4444;
-  color: #ffffff;
-  border: 1px solid #ef4444;
-}
+    background: #ef4444;
+    color: #ffffff;
+    border: 1px solid #ef4444;
 
-.btn-cancel-payment:hover {
-  background: #dc2626;
-  border-color: #dc2626;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+    &:hover {
+        background: #dc2626;
+        border-color: #dc2626;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+    }
+
+    &:focus {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+    }
 }
 
 .btn-continue-payment {
-  background: #ffffff;
-  color: #374151;
-  border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    border: 1px solid #d1d5db;
+
+    &:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
 }
 
-.btn-continue-payment:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+//==============================================================================
+// Responsive Design (Mobile)
+//==============================================================================
 
-/* Button Icons */
-.btn-cancel-payment i,
-.btn-continue-payment i {
-  font-size: 14px;
-}
-
-/* Mobile Responsive */
 @media (max-width: 576px) {
-  .upi-confirmation-content {
-    max-width: 90%;
-    margin: 10px;
-  }
+    .upi-modal-content {
+        width: 95%;
+        margin: 20px;
 
-  .upi-confirmation-header {
-    padding: 32px 24px 20px;
-  }
+        .upi-modal-header,
+        .upi-modal-body {
+            padding: 20px;
+        }
+    }
 
-  .warning-icon {
-    width: 40px;
-    height: 40px;
-    margin: 0 auto 12px;
-  }
+    .merchant-name {
+        font-size: 20px;
+    }
 
-  .warning-icon i {
-    font-size: 18px;
-  }
+    .qr-code-image {
+        width: $o-upi-qr-size-mobile;
+        height: $o-upi-qr-size-mobile;
+    }
 
-  .confirmation-title {
-    font-size: 16px;
-  }
+    .upi-apps-container {
+        .upi-apps-grid {
+            gap: 8px;
+        }
 
-  .confirmation-message {
-    font-size: 13px;
-  }
+        .upi-app-icon {
+            width: 36px;
+            height: 36px;
+        }
+    }
 
-  .upi-confirmation-body {
-    padding: 20px 24px;
-  }
+    .upi-confirmation-content {
+        max-width: 90%;
+        margin: 10px;
+    }
 
-  .confirmation-details {
-    font-size: 14px;
-  }
+    .upi-confirmation-header {
+        padding: 32px 24px 20px;
+    }
 
-  .upi-confirmation-actions {
-    padding: 20px 24px 24px;
-  }
+    .warning-icon {
+        width: auto;
+        height: auto;
+        margin: 0 auto 16px;
+        font-size: 64px;
 
-  .btn-cancel-payment,
-  .btn-continue-payment {
-    padding: 12px 16px;
-    font-size: 13px;
-  }
+        i {
+            font-size: 64px;
+        }
+    }
+
+    .confirmation-title {
+        font-size: 18px;
+    }
+
+    .confirmation-message {
+        font-size: 14px;
+    }
+
+    .upi-confirmation-body {
+        padding: 20px 24px;
+    }
+
+    .confirmation-details {
+        font-size: 13px;
+    }
+
+    .upi-confirmation-actions {
+        padding: 20px 24px 24px;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .btn-cancel-payment,
+    .btn-continue-payment {
+        padding: 12px 16px;
+        font-size: 13px;
+        flex: none;
+        width: 100%;
+    }
 }
 
-/* Focus states for accessibility */
-.btn-cancel-payment:focus,
-.btn-continue-payment:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-}
+//==============================================================================
+// Dark Mode Support
+//==============================================================================
 
-.btn-cancel-payment:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
-}
-
-/* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
-  .upi-confirmation-content {
-    background: #1f2937;
-    border: 1px solid #374151;
-  }
+    .upi-confirmation-content {
+        background: #1f2937;
+        border: 1px solid #374151;
+    }
 
-  .upi-confirmation-header {
-    background: #1f2937;
-    border-bottom: 1px solid #374151;
-  }
+    .upi-confirmation-header {
+        background: #1f2937;
+    }
 
-  .confirmation-title {
-    color: #f9fafb;
-  }
+    .confirmation-title {
+        color: #f9fafb;
+    }
 
-  .confirmation-message {
-    color: #d1d5db;
-  }
+    .confirmation-message {
+        color: #d1d5db;
+    }
 
-  .upi-confirmation-body {
-    background: #1f2937;
-  }
+    .upi-confirmation-body {
+        background: #1f2937;
+    }
 
-  .confirmation-details {
-    color: #9ca3af;
-  }
+    .confirmation-details {
+        color: #9ca3af;
+    }
 
-  .upi-confirmation-actions {
-    background: #1f2937;
-  }
+    .upi-confirmation-actions {
+        background: #1f2937;
+    }
 
-  .btn-continue-payment {
-    background: #374151;
-    color: #f9fafb;
-    border-color: #4b5563;
-  }
+    .btn-continue-payment {
+        background: #374151;
+        color: #f9fafb;
+        border-color: #4b5563;
 
-  .btn-continue-payment:hover {
-    background: #4b5563;
-    border-color: #6b7280;
-  }
+        &:hover {
+            background: #4b5563;
+            border-color: #6b7280;
+        }
+    }
 }

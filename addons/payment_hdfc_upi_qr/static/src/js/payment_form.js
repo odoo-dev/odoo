@@ -1,318 +1,165 @@
-// Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 /** @odoo-module **/
 
-import paymentForm from "@payment/js/payment_form";
-import { _t } from "@web/core/l10n/translation";
-import { rpc } from "@web/core/network/rpc";
-
-// Global UPI Modal instance
-let globalUpiModal = null;
-
-// Enhanced error handling
-const HDFC_UPI_ERRORS = {
-  NETWORK_ERROR: _t("Network connection failed. Please check your internet connection."),
-  TIMEOUT_ERROR: _t("Request timed out. Please try again."),
-  VALIDATION_ERROR: _t("Payment validation failed. Please check your details."),
-  QR_GENERATION_ERROR: _t("Failed to generate QR code. Please try again."),
-  UNKNOWN_ERROR: _t("An unexpected error occurred. Please try again."),
-};
-
-/**
- * Enhanced error handler for HDFC UPI payments
- * @param {Error|string} error - The error to handle
- * @param {string} context - The context where error occurred
- * @returns {string} User-friendly error message
- */
-function handleHdfcUpiError(error, context = '') {
-  console.error(`HDFC UPI Error${context ? ' in ' + context : ''}:`, error);
-
-  if (typeof error === 'string') {
-    return error;
-  }
-
-  if (error.data && error.data.message) {
-    return error.data.message;
-  }
-
-  if (error.message) {
-    if (error.message.includes('network')) {
-      return HDFC_UPI_ERRORS.NETWORK_ERROR;
-    }
-    if (error.message.includes('timeout')) {
-      return HDFC_UPI_ERRORS.TIMEOUT_ERROR;
-    }
-    if (error.message.includes('validation')) {
-      return HDFC_UPI_ERRORS.VALIDATION_ERROR;
-    }
-    return error.message;
-  }
-
-  return HDFC_UPI_ERRORS.UNKNOWN_ERROR;
-}
+import paymentForm from '@payment/js/payment_form';
+import { _t } from '@web/core/l10n/translation';
+import { rpc, RPCError } from '@web/core/network/rpc';
 
 paymentForm.include({
-  // #=== DOM MANIPULATION ===#
 
-  /**
-   * Prepare the inline form of HDFC UPI for direct payment.
-   *
-   * @override method from payment.payment_form
-   * @private
-   * @param {number} providerId - The id of the selected payment option's provider.
-   * @param {string} providerCode - The code of the selected payment option's provider.
-   * @param {number} paymentOptionId - The id of the selected payment option
-   * @param {string} paymentMethodCode - The code of the selected payment method, if any.
-   * @param {string} flow - The online payment flow of the selected payment option
-   * @return {void}
-   */
-  async _prepareInlineForm(providerId, providerCode, paymentOptionId, paymentMethodCode, flow) {
-    if (providerCode !== "hdfc_upi") {
-      this._super(...arguments);
-      return;
-    }
+    hdfcUpiComponents: undefined,
 
-    console.log("Preparing HDFC UPI inline form", {
-      providerId,
-      providerCode,
-      paymentOptionId,
-      paymentMethodCode,
-      flow,
-    });
+    // #=== DOM MANIPULATION ===#
 
-    // Check if instantiation is needed
-    if (flow === "token") {
-      this._super(...arguments);
-      return; // No component for tokens
-    }
+    /**
+     * Prepare the inline form of HDFC UPI for direct payment.
+     *
+     * @override method from payment.payment_form
+     * @private
+     * @param {number} providerId - The id of the selected payment option's provider.
+     * @param {string} providerCode - The code of the selected payment option's provider.
+     * @param {number} paymentOptionId - The id of the selected payment option.
+     * @param {string} paymentMethodCode - The code of the selected payment method, if any.
+     * @param {string} flow - The online payment flow of the selected payment option.
+     * @return {void}
+     */
+    async _prepareInlineForm(providerId, providerCode, paymentOptionId, paymentMethodCode, flow) {
+        if (providerCode !== 'hdfc_upi') {
+            this._super(...arguments);
+            return;
+        }
 
-    // Overwrite the flow of the selected payment method
-    this._setPaymentFlow("direct");
+        this.hdfcUpiComponents ??= {};
+        if (flow === 'token') {
+            this._super(...arguments);
+            return;
+        } else if (this.hdfcUpiComponents[paymentOptionId]) {
+            this._setPaymentFlow('direct');
+            return;
+        }
 
-    // Create global modal if it doesn't exist
-    if (!globalUpiModal) {
-      globalUpiModal = new UpiPaymentModal();
-    }
+        this._setPaymentFlow('direct');
+        this.hdfcUpiComponents[paymentOptionId] = true;
+    },
 
-    console.log("HDFC UPI inline form prepared successfully");
-  },
+    // #=== PAYMENT FLOW ===#
 
-  // #=== PAYMENT FLOW ===#
+    /**
+     * Trigger the payment processing by initiating UPI QR flow.
+     *
+     * @override method from payment.payment_form
+     * @private
+     * @param {string} providerCode - The code of the selected payment option's provider.
+     * @param {number} paymentOptionId - The id of the payment option handling the transaction.
+     * @param {string} paymentMethodCode - The code of the selected payment method, if any.
+     * @param {string} flow - The online payment flow of the transaction.
+     * @return {void}
+     */
+    async _initiatePaymentFlow(providerCode, paymentOptionId, paymentMethodCode, flow) {
+        if (providerCode !== 'hdfc_upi' || flow === 'token') {
+            await this._super(...arguments);
+            return;
+        }
 
-  /**
-   * Trigger the payment processing by initiating UPI QR flow.
-   *
-   * @override method from payment.payment_form
-   * @private
-   * @param {string} providerCode - The code of the selected payment option's provider.
-   * @param {number} paymentOptionId - The id of the payment option handling the transaction.
-   * @param {string} paymentMethodCode - The code of the selected payment method, if any.
-   * @param {string} flow - The online payment flow of the transaction.
-   * @return {void}
-   */
-  async _initiatePaymentFlow(providerCode, paymentOptionId, paymentMethodCode, flow) {
-    if (providerCode !== "hdfc_upi" || flow === "token") {
-      await this._super(...arguments);
-      return;
-    }
+        if (!this.hdfcUpiComponents[paymentOptionId]) {
+            this._enableButton();
+            return;
+        }
 
-    console.log("Initiating HDFC UPI payment flow", {
-      providerCode,
-      paymentOptionId,
-      paymentMethodCode,
-      flow
-    });
+        // Basic validation
+        const amount = this.paymentContext.amount;
+        if (!amount || amount <= 0 || amount > 100000) {
+            this._displayErrorDialog(_t("Validation Error"),
+                amount <= 0 ? _t("Please enter a valid payment amount") :
+                _t("Maximum UPI QR payment amount is ₹1,00,000.00"));
+            this._enableButton();
+            return;
+        }
 
-    // Validate payment form before proceeding
-    if (!this._validatePaymentForm()) {
-      this._enableButton();
-      return;
-    }
+        // Create transaction and show UPI modal
+        rpc(this.paymentContext['transactionRoute'], this._prepareTransactionRouteParams())
+            .then(processingValues => {
+                if (!processingValues?.transaction_id) {
+                    throw new Error(_t("Invalid response from server"));
+                }
+                this._showUpiPayment(processingValues);
+            })
+            .catch(error => {
+                const errorMessage = error instanceof RPCError ?
+                    error.data?.message || _t("Server error occurred") :
+                    error.message || _t("An unexpected error occurred");
+                this._displayErrorDialog(_t("Payment Processing Failed"), errorMessage);
+                this._enableButton();
+            });
+    },
 
-    try {
-      // Create the transaction and retrieve the processing values
-      const processingValues = await rpc(
-        this.paymentContext["transactionRoute"],
-        this._prepareTransactionRouteParams()
-      );
+    // #=== UPI MODAL MANAGEMENT ===#
 
-      console.log("Processing values received:", processingValues);
+    /**
+     * Show HDFC UPI payment modal and handle QR code generation.
+     *
+     * @private
+     * @param {object} processingValues - The processing values from transaction creation.
+     * @return {void}
+     */
+    _showUpiPayment(processingValues) {
+        this._createUpiModal();
+        this._showUpiModal(processingValues);
+    },
 
-      // Enhanced validation of processing values
-      if (!this._validateProcessingValues(processingValues)) {
-        throw new Error(_t("Invalid processing values received from server"));
-      }
+    /**
+     * Create UPI modal DOM structure.
+     *
+     * @private
+     * @return {void}
+     */
+    _createUpiModal() {
+        // Remove existing modal if any
+        const existingModal = document.getElementById("upiPaymentModal");
+        if (existingModal) {
+            existingModal.remove();
+        }
 
-      // Show UPI modal with transaction data
-      this._showUpiModal(processingValues);
+        // Remove existing confirmation modal if any
+        const existingConfirmModal = document.getElementById("upiConfirmationModal");
+        if (existingConfirmModal) {
+            existingConfirmModal.remove();
+        }
 
-    } catch (error) {
-      const errorMessage = handleHdfcUpiError(error, 'payment initiation');
-      this._displayErrorDialog(_t("Payment Processing Failed"), errorMessage);
-      this._enableButton();
-    }
-  },
-
-  /**
-   * Validate processing values received from server
-   * @private
-   * @param {Object} processingValues - The processing values to validate
-   * @returns {boolean} True if valid, false otherwise
-   */
-  _validateProcessingValues(processingValues) {
-    if (!processingValues) {
-      console.error("No processing values received");
-      return false;
-    }
-
-    if (!processingValues.transaction_id) {
-      console.error("Transaction ID is missing from processing values");
-      return false;
-    }
-
-    if (!processingValues.inline_form_values) {
-      console.error("Inline form values are missing");
-      return false;
-    }
-
-    return true;
-  },
-
-  /**
-   * Validate payment form data before submission
-   * @private
-   * @returns {boolean} True if valid, false otherwise
-   */
-  _validatePaymentForm() {
-    // Get amount from payment context
-    const amount = this.paymentContext.amount;
-
-    if (!amount || amount <= 0) {
-      this._displayErrorDialog(
-        _t("Validation Error"),
-        _t("Please enter a valid payment amount")
-      );
-      return false;
-    }
-
-    // UPI specific validations
-    if (amount < 1.0) {
-      this._displayErrorDialog(
-        _t("Validation Error"),
-        _t("Minimum payment amount is ₹1.00")
-      );
-      return false;
-    }
-
-    if (amount > 100000.0) {
-      this._displayErrorDialog(
-        _t("Validation Error"),
-        _t("Maximum UPI QR payment amount is ₹1,00,000.00")
-      );
-      return false;
-    }
-
-    return true;
-  },
-
-  /**
-   * Show UPI QR modal with transaction data
-   * @private
-   * @param {Object} processingValues - The processing values from transaction creation
-   */
-  _showUpiModal(processingValues) {
-    console.log("Showing UPI modal with processing values:", processingValues);
-
-    if (!globalUpiModal) {
-      globalUpiModal = new UpiPaymentModal();
-    }
-
-    // Extract transaction data from processing values
-    const transactionData = {
-      transaction_id: processingValues.transaction_id,
-      reference: processingValues.reference,
-      amount: processingValues.amount,
-      currency: processingValues.currency_code,
-      merchant_name: processingValues.merchant_name || "HDFC UPI",
-      provider_code: "hdfc_upi",
-    };
-
-    console.log("Transaction data for modal:", transactionData);
-
-    // Show modal
-    globalUpiModal.show(transactionData);
-  },
-});
-
-// UPI Payment Modal Class
-class UpiPaymentModal {
-  constructor() {
-    this.isOpen = false
-    this.transactionId = null
-    this.timerInterval = null
-    this.monitoringInterval = null
-    this.remainingSeconds = 0
-    this._finalStateReceived = false
-    this._qrExpired = false // Track QR expiry state
-    this._beforeUnloadHandler = null
-    this._isRedirecting = false // Flag to prevent cancellation during intended redirects
-    this._createModal()
-    this._bindEvents()
-    console.log("UPI Payment Modal created")
-  }
-
-  /**
-   * Create the modal HTML structure
-   * @private
-   */
-  _createModal() {
-    // Remove existing modal if any
-    const existingModal = document.getElementById("upiPaymentModal")
-    if (existingModal) {
-      existingModal.remove()
-    }
-
-    // Remove existing confirmation modal if any
-    const existingConfirmModal = document.getElementById("upiConfirmationModal")
-    if (existingConfirmModal) {
-      existingConfirmModal.remove()
-    }
-
-    const modalHtml = `
+        const modalHtml = `
             <div class="upi-payment-modal" id="upiPaymentModal">
                 <div class="upi-modal-content">
                     <div class="upi-modal-header">
                         <button class="upi-modal-close" id="closeUpiModal">&times;</button>
                         <h2 class="merchant-name" id="merchantName">Loading...</h2>
-                        <p class="payment-title">Pay With UPI QR</p>
+                        <p class="payment-title">${_t("Pay With UPI QR")}</p>
                     </div>
                     <div class="upi-modal-body">
                         <div class="qr-loading" id="qrLoading">
                             <div class="loading-spinner"></div>
-                            <p class="mt-2">Generating QR code...</p>
+                            <p class="mt-2">${_t("Generating QR code...")}</p>
                         </div>
                         <div id="qrContainer" style="display: none;">
-                            <img class="qr-code-image" id="qrCodeImage" alt="UPI QR Code" />
+                            <img class="qr-code-image" id="qrCodeImage" alt="${_t("UPI QR Code")}" />
                         </div>
 
                         <div class="payment-amount" id="paymentAmount">
-                            Amount: <span class="currency">₹</span> <span id="amountValue">0</span>
+                            ${_t("Amount")}: <span class="currency">₹</span> <span id="amountValue">0</span>
                         </div>
 
                         <p class="scan-instruction">
-                            Scan the QR using any UPI app on your phone.
+                            ${_t("Scan the QR using any UPI app on your phone.")}
                         </p>
 
                         <div class="timer-container" id="timerContainer">
                             <span class="timer-icon">⏰</span>
-                            <span class="timer-text">Expires in: </span>
+                            <span class="timer-text">${_t("Expires in")}: </span>
                             <span class="timer-value" id="timerValue">5:00</span>
                         </div>
 
                         <div class="status-message" id="statusMessage"></div>
 
                         <div class="upi-apps-container">
-                            <p class="upi-apps-title">Supported UPI Apps</p>
+                            <p class="upi-apps-title">${_t("Supported UPI Apps")}</p>
                             <div class="upi-apps-grid">
                                 <img src="/payment_hdfc_upi_qr/static/img/googlepay.svg" alt="Google Pay" class="upi-app-icon" />
                                 <img src="/payment_hdfc_upi_qr/static/img/phonepe.svg" alt="PhonePe" class="upi-app-icon" />
@@ -325,703 +172,490 @@ class UpiPaymentModal {
                     </div>
                 </div>
             </div>
-        `
+        `;
 
-    // Add modal to body
-    document.body.insertAdjacentHTML("beforeend", modalHtml)
-  }
+        // Add modal to body
+        document.body.insertAdjacentHTML("beforeend", modalHtml);
+    },
 
-  /**
-   * Bind modal events
-   * @private
-   */
-  _bindEvents() {
-    // Close button with confirmation
-    document.getElementById("closeUpiModal").addEventListener("click", () => {
-      this._handleModalClose("User clicked close button")
-    })
-
-    // Click outside to close with confirmation
-    document.getElementById("upiPaymentModal").addEventListener("click", (e) => {
-      if (e.target.id === "upiPaymentModal") {
-        this._handleModalClose("User clicked outside modal")
-      }
-    })
-
-    // Escape key to close with confirmation
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && this.isOpen) {
-        this._handleModalClose("User pressed Escape key")
-      }
-    })
-
-    // Browser beforeunload event handling
-    this._setupBeforeUnloadHandler()
-  }
-
-  /**
-   * Show modal with transaction data
-   * @param {Object} transactionData - Transaction data
-   */
-  show(transactionData) {
-    console.log("Showing UPI modal with transaction data:", transactionData)
-
-    // Ensure we have a transaction ID
-    if (!transactionData.transaction_id) {
-      console.error("No transaction ID provided to modal")
-      this._showStatus("error", _t("Transaction ID missing. Please try again."))
-      return
-    }
-
-    this.transactionId = transactionData.transaction_id
-    this._finalStateReceived = false // Reset state tracking
-    this._qrExpired = false // Reset QR expiry state
-    this._isRedirecting = false // Reset redirect flag
-
-    // Show modal
-    const modal = document.getElementById("upiPaymentModal")
-    if (!modal) {
-      console.error("Modal element not found, recreating...")
-      this._createModal()
-      this._bindEvents()
-    }
-
-    modal.classList.add("show")
-    this.isOpen = true
-
-    // Prevent body scroll
-    document.body.style.overflow = "hidden"
-
-    // Setup beforeunload handler when modal is shown
-    this._setupBeforeUnloadHandler()
-
-    // Update merchant name and amount immediately
-    document.getElementById("merchantName").textContent = transactionData.merchant_name || "HDFC UPI"
-    document.getElementById("amountValue").textContent = transactionData.amount
-
-    // Load QR code data
-    this._loadQrCode(transactionData.transaction_id)
-  }
-
-  /**
-   * Load QR code for transaction
-   * @private
-   * @param {number} transactionId
-   */
-  _loadQrCode(transactionId) {
-    console.log("Loading QR code for transaction:", transactionId)
-
-    if (!transactionId) {
-      console.error("No transaction ID provided to _loadQrCode")
-      this._showStatus("error", _t("Transaction ID missing"))
-      return
-    }
-
-    // Show loading state
-    this._showStatus("info", _t("Generating QR code..."))
-
-    // Add timeout for QR code loading
-    const qrLoadTimeout = setTimeout(() => {
-      console.error("QR code loading timeout")
-      this._showStatus("error", _t("QR code generation timed out. Please try again."))
-    }, 30000) // 30 second timeout
-
-    rpc(`/payment/hdfc_upi/get_qr_data/${transactionId}`, {})
-      .then((response) => {
-        clearTimeout(qrLoadTimeout)
-        console.log("QR data response:", response)
-
-        if (response.success) {
-          this._displayQrCode(response)
-        } else {
-          this._showStatus("error", response.error || _t("Failed to generate QR code"))
-        }
-      })
-      .catch((error) => {
-        clearTimeout(qrLoadTimeout)
-        console.error("Error loading QR code:", error)
-
-        // Enhanced error handling for different scenarios
-        let errorMessage = _t("Failed to load QR code")
-
-        if (error.name === 'AbortError' || error.message?.toLowerCase().includes('abort')) {
-          errorMessage = _t("QR code loading was cancelled")
-        } else if (error.name === 'TimeoutError' || error.message?.toLowerCase().includes('timeout')) {
-          errorMessage = _t("QR code loading timed out. Please check your connection and try again.")
-        } else if (error.message?.toLowerCase().includes('network') ||
-                   error.message?.toLowerCase().includes('fetch') ||
-                   error.message?.toLowerCase().includes('connection')) {
-          errorMessage = _t("Network error. Please check your internet connection and try again.")
-        } else if (error.status >= 500) {
-          errorMessage = _t("Server error. Please try again later.")
-        } else if (error.status === 404) {
-          errorMessage = _t("Transaction not found. Please refresh the page and try again.")
-        } else if (error.status >= 400) {
-          errorMessage = _t("Invalid request. Please refresh the page and try again.")
+    /**
+     * Show UPI modal with transaction data.
+     *
+     * @private
+     * @param {object} processingValues - Processing values from transaction.
+     * @return {void}
+     */
+    _showUpiModal(processingValues) {
+        if (!processingValues.transaction_id) {
+            this._showUpiStatus("error", _t("Transaction ID missing. Please try again."));
+            return;
         }
 
-        this._showStatus("error", errorMessage)
+        this.upiTransactionId = processingValues.transaction_id;
+        this.upiFinalStateReceived = false;
+        this.upiModalOpen = true;
 
-        // Provide retry option for certain errors
-        if (!error.name?.includes('Abort') && !this._finalStateReceived) {
-          setTimeout(() => {
-            if (this.isOpen && !this._finalStateReceived) {
-              this._showRetryOption(transactionId)
+        const modal = document.getElementById("upiPaymentModal");
+        modal.classList.add("show");
+        document.body.style.overflow = "hidden";
+
+        this._setupBeforeUnloadHandler();
+        this._updateModalContent(processingValues);
+        this._bindModalEvents();
+        this._loadQrCode(processingValues.transaction_id);
+    },
+
+    /**
+     * Update modal content with transaction data.
+     *
+     * @private
+     * @param {object} processingValues - Processing values.
+     * @return {void}
+     */
+    _updateModalContent(processingValues) {
+        document.getElementById("merchantName").textContent =
+            processingValues.merchant_name || "HDFC UPI";
+        document.getElementById("amountValue").textContent = processingValues.amount;
+    },
+
+    // #=== QR CODE MANAGEMENT ===#
+
+    /**
+     * Load QR code for transaction.
+     *
+     * @private
+     * @param {number} transactionId - The transaction ID.
+     * @return {void}
+     */
+    _loadQrCode(transactionId) {
+        this._showUpiStatus("info", _t("Generating QR code..."));
+
+        const timeout = setTimeout(() => {
+            this._showUpiStatus("error", _t("QR code generation timed out. Please try again."));
+        }, 30000);
+
+        rpc(`/payment/hdfc_upi/get_qr_data/${transactionId}`, {})
+            .then(response => {
+                clearTimeout(timeout);
+                if (response.success) {
+                    this._displayQrCode(response);
+                } else {
+                    this._showUpiStatus("error", response.error || _t("Failed to generate QR code"));
+                }
+            })
+            .catch(error => {
+                clearTimeout(timeout);
+                const errorMessage = error instanceof RPCError ?
+                    error.data?.message || _t("Server error occurred") :
+                    _t("Failed to load QR code");
+                this._showUpiStatus("error", errorMessage);
+            });
+    },
+
+    /**
+     * Display QR code in modal.
+     *
+     * @private
+     * @param {object} qrData - The QR code data.
+     * @return {void}
+     */
+    _displayQrCode(qrData) {
+        document.getElementById("qrLoading").style.display = "none";
+
+        const qrImage = document.getElementById("qrCodeImage");
+        qrImage.src = qrData.qr_code;
+        qrImage.onload = () => {
+            document.getElementById("qrContainer").style.display = "block";
+            this._showUpiStatus("info", _t("Scan the QR code to complete your payment"));
+            this._startTimer(qrData.expiry_seconds || 300);
+            this._startMonitoring(this.upiTransactionId);
+        };
+        qrImage.onerror = () => {
+            this._showUpiStatus("error", _t("Failed to display QR code"));
+        };
+    },
+
+    // #=== EVENT HANDLERS ===#
+
+    /**
+     * Bind events for the UPI modal.
+     *
+     * @private
+     * @return {void}
+     */
+    _bindModalEvents() {
+        document.getElementById("closeUpiModal").addEventListener("click", () => {
+            this._handleModalClose();
+        });
+
+        document.getElementById("upiPaymentModal").addEventListener("click", (e) => {
+            if (e.target.id === "upiPaymentModal") {
+                this._handleModalClose();
             }
-          }, 3000)
+        });
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && this.upiModalOpen) {
+                this._handleModalClose();
+            }
+        });
+    },
+
+    // #=== TIMER MANAGEMENT ===#
+
+    /**
+     * Start UPI timer.
+     *
+     * @private
+     * @param {number} seconds - Timer duration in seconds.
+     * @return {void}
+     */
+    _startTimer(seconds) {
+        this.upiRemainingSeconds = seconds;
+        this._updateTimer();
+
+        this.timerInterval = setInterval(() => {
+            this._updateTimer();
+        }, 1000);
+    },
+
+    /**
+     * Update UPI timer display.
+     *
+     * @private
+     * @return {void}
+     */
+    _updateTimer() {
+        if (this.upiRemainingSeconds <= 0) {
+            this.upiFinalStateReceived = true;
+            this._removeBeforeUnloadHandler();
+            this._stopMonitoring();
+            this._showUpiStatus("error", _t("QR code has expired. Redirecting..."));
+
+            document.getElementById("timerValue").textContent = _t("Expired");
+            document.getElementById("timerContainer").classList.add("warning");
+
+            setTimeout(() => {
+                window.location = "/payment/status";
+            }, 2000);
+            return;
         }
-      })
-  }
 
-  /**
-   * Show retry option for QR code loading
-   * @private
-   * @param {number} transactionId
-   /**
-   * Show retry option for QR code loading
-   * @private
-   * @param {number} transactionId
-   */
-  _showRetryOption(transactionId) {
-    const statusEl = document.getElementById("statusMessage")
-    if (statusEl && statusEl.classList.contains("error")) {
-      statusEl.innerHTML = `
-        ${statusEl.textContent}
-        <br>
-        <button class="retry-qr-btn" style="margin-top: 10px; padding: 8px 16px; background: #007cba; color: white; border: none; border-radius: 4px; cursor: pointer;">
-          ${_t("Retry")}
-        </button>
-      `
+        const minutes = Math.floor(this.upiRemainingSeconds / 60);
+        const seconds = this.upiRemainingSeconds % 60;
+        document.getElementById("timerValue").textContent =
+            `${minutes}:${seconds.toString().padStart(2, "0")}`;
 
-      const retryBtn = statusEl.querySelector('.retry-qr-btn')
-      if (retryBtn) {
-        retryBtn.addEventListener('click', () => {
-          console.log("Retrying QR code load")
-          this._loadQrCode(transactionId)
-        })
-      }
-    }
-  }
-
-  /**
-   * Display QR code in modal
-   * @private
-   * @param {Object} qrData
-   */
-  _displayQrCode(qrData) {
-    console.log("Displaying QR code with data:", qrData)
-
-    // Hide loading
-    document.getElementById("qrLoading").style.display = "none"
-
-    // Show QR code
-    const qrContainer = document.getElementById("qrContainer")
-    const qrImage = document.getElementById("qrCodeImage")
-
-    if (qrData.qr_code) {
-      qrImage.src = qrData.qr_code
-      qrImage.onload = () => {
-        console.log("QR code image loaded successfully")
-      }
-      qrImage.onerror = () => {
-        console.error("Failed to load QR code image")
-        this._showStatus("error", _t("Failed to display QR code"))
-        return
-      }
-      qrContainer.style.display = "block"
-    } else {
-      console.error("No QR code data received")
-      this._showStatus("error", _t("No QR code data received"))
-      return
-    }
-
-    // Update merchant name and amount (in case they weren't set earlier)
-    document.getElementById("merchantName").textContent = qrData.merchant_name || "HDFC UPI"
-    document.getElementById("amountValue").textContent = qrData.amount
-
-    // Start timer
-    this._startTimer(qrData.expiry_seconds || 300)
-
-    // Show initial status
-    this._showStatus("info", _t("Scan the QR code to complete your payment"))
-
-    // Start monitoring transaction status
-    this._startPaymentMonitoring(this.transactionId)
-  }
-
-  /**
-   * Start payment monitoring
-   * @private
-   * @param {number} transactionId
-   */
-  _startPaymentMonitoring(transactionId) {
-    console.log("Starting payment monitoring for transaction:", transactionId)
-
-    // Check every 5 seconds
-    this.monitoringInterval = setInterval(() => {
-      this._checkPaymentStatus(transactionId)
-    }, 5000)
-  }
-
-  /**
-   * Check payment status
-   * @private
-   * @param {number} transactionId
-   */
-  _checkPaymentStatus(transactionId) {
-    rpc(`/payment/status/poll`, {})
-      .then((result) => {
-        console.log("Payment status result:", result)
-
-        // The poll endpoint returns the monitored transaction's state directly
-        if (result.state && result.state !== 'draft') {
-          console.log("Transaction state changed:", result.state)
-          this._handleStateChange(result.state, result.landing_route)
+        if (this.upiRemainingSeconds < 60) {
+            document.getElementById("timerContainer").classList.add("warning");
         }
-      })
-      .catch((error) => {
-        console.error("Error checking payment status:", error)
 
-        // Handle specific error cases
-        if (error.message === 'retry') {
-          console.log("Retrying status check due to database error")
-          // Don't stop monitoring, just continue
-        } else {
-          console.error("Payment status polling error:", error)
-        }
-      })
-  }
+        this.upiRemainingSeconds--;
+    },
 
-  /**
-   * Handle transaction state change
-   * @private
-   * @param {string} state
-   * @param {string} landingRoute
-   */
-  _handleStateChange(state, landingRoute) {
-    this._finalStateReceived = true
-    this._isRedirecting = true // Set flag before removing handler
+    // #=== PAYMENT MONITORING ===#
 
-    // Remove beforeunload handler immediately to prevent dialog
-    this._removeBeforeUnloadHandler()
+    /**
+     * Start UPI payment monitoring.
+     *
+     * @private
+     * @param {number} transactionId - The transaction ID.
+     * @return {void}
+     */
+    _startMonitoring(transactionId) {
+        this.monitoringInterval = setInterval(() => {
+            this._checkPaymentStatus();
+        }, 5000);
+    },
 
-    this._stopMonitoring()
-    console.log("Handling state change:", state, "Landing route:", landingRoute)
+    /**
+     * Check UPI payment status.
+     *
+     * @private
+     * @return {void}
+     */
+    _checkPaymentStatus() {
+        rpc('/payment/status/poll', {})
+            .then(result => {
+                if (result.state && result.state !== 'draft') {
+                    this._handleStateChange(result.state, result.landing_route);
+                }
+            })
+            .catch(() => {
+                // Silently continue monitoring
+            });
+    },
 
-    // Show appropriate status message based on state
-    let statusMessage = _t("Payment status updated. Redirecting...")
-    let statusType = "info"
+    /**
+     * Handle UPI transaction state change.
+     *
+     * @private
+     * @param {string} state - The transaction state.
+     * @param {string} landingRoute - The landing route URL.
+     * @return {void}
+     */
+    _handleStateChange(state, landingRoute) {
+        this.upiFinalStateReceived = true;
+        this._removeBeforeUnloadHandler();
+        this._stopMonitoring();
 
-    switch (state) {
-      case "done":
-        statusMessage = _t("Payment completed successfully! Redirecting...")
-        statusType = "success"
-        break
-      case "cancel":
-      case "error":
-        statusMessage = _t("Payment failed. Redirecting...")
-        statusType = "error"
-        break
-      case "pending":
-        statusMessage = _t("Payment is being processed. Redirecting...")
-        statusType = "info"
-        break
-    }
+        const messages = {
+            done: _t("Payment completed successfully! Redirecting..."),
+            cancel: _t("Payment failed. Redirecting..."),
+            error: _t("Payment failed. Redirecting..."),
+            pending: _t("Payment is being processed. Redirecting...")
+        };
 
-    this._showStatus(statusType, statusMessage)
-
-    // Redirect to the landing route (inline flow)
-    setTimeout(() => {
-      console.log("Redirecting to landing route:", landingRoute)
-      window.location.href = landingRoute
-    }, 2000)
-  }
-
-  /**
-   * Handle QR code expiry
-   * @private
-   * @param {string} message
-   */
-  _handleQrExpiry(message) {
-    // Mark as final state and remove handler immediately
-    this._finalStateReceived = true
-    this._qrExpired = true
-    this._isRedirecting = true // Set flag before removing handler
-    this._removeBeforeUnloadHandler()
-
-    this._stopMonitoring()
-    this._showStatus("error", message || _t("QR code has expired. Redirecting..."))
-
-    // Update timer
-    document.getElementById("timerValue").textContent = _t("Expired")
-    document.getElementById("timerContainer").classList.add("warning")
-
-    // Redirect to payment status page
-    setTimeout(() => {
-      console.log("Redirecting to payment status page due to QR expiry...")
-      window.location.href = "/payment/status"
-    }, 2000)
-  }
-
-  /**
-   * Start countdown timer
-   * @private
-   * @param {number} seconds
-   */
-  _startTimer(seconds) {
-    this.remainingSeconds = seconds
-    this._updateTimer()
-
-    this.timerInterval = setInterval(() => {
-      this._updateTimer()
-    }, 1000)
-  }
-
-  /**
-   * Update timer display
-   * @private
-   */
-  _updateTimer() {
-    if (this.remainingSeconds <= 0) {
-      // Mark as final state and remove handler immediately
-      this._finalStateReceived = true
-      this._qrExpired = true
-      this._isRedirecting = true // Set flag before removing handler
-      this._removeBeforeUnloadHandler()
-
-      this._stopMonitoring()
-      this._showStatus("error", _t("QR code has expired. Redirecting..."))
-
-      // Update timer display
-      document.getElementById("timerValue").textContent = _t("Expired")
-      document.getElementById("timerContainer").classList.add("warning")
-
-      // Redirect to payment status page for expired QR
-      setTimeout(() => {
-        console.log("Redirecting to payment status page due to timer expiry...")
-        window.location.href = "/payment/status"
-      }, 2000)
-      return
-    }
-
-    const minutes = Math.floor(this.remainingSeconds / 60)
-    const seconds = this.remainingSeconds % 60
-
-    document.getElementById("timerValue").textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`
-
-    // Add warning when less than 1 minute
-    if (this.remainingSeconds < 60) {
-      document.getElementById("timerContainer").classList.add("warning")
-    }
-
-    this.remainingSeconds--
-  }
-
-  /**
-   * Show status message
-   * @private
-   * @param {string} type - success, error, info
-   * @param {string} message
-   */
-  _showStatus(type, message) {
-    const statusEl = document.getElementById("statusMessage")
-    statusEl.className = `status-message show ${type}`
-    statusEl.textContent = message
-  }
-
-  /**
-   * Close modal
-   */
-  close() {
-    const modal = document.getElementById("upiPaymentModal")
-    modal.classList.remove("show")
-    this.isOpen = false
-
-    // Restore body scroll
-    document.body.style.overflow = ""
-
-    // Remove beforeunload handler since modal is closing
-    this._removeBeforeUnloadHandler()
-
-    // Stop monitoring
-    this._stopMonitoring()
-
-    // Reset modal state
-    setTimeout(() => {
-      this._resetModal()
-    }, 300)
-  }
-
-  /**
-   * Reset modal to initial state
-   * @private
-   */
-  _resetModal() {
-    document.getElementById("qrLoading").style.display = "flex"
-    document.getElementById("qrContainer").style.display = "none"
-    document.getElementById("statusMessage").className = "status-message"
-    document.getElementById("timerContainer").classList.remove("warning")
-    document.getElementById("merchantName").textContent = "Loading..."
-    document.getElementById("amountValue").textContent = "0"
-
-    // Reset internal state
-    this.transactionId = null
-    this._finalStateReceived = false
-    this._qrExpired = false // Reset QR expiry state
-    this._isRedirecting = false // Reset redirect flag
-  }
-
-  /**
-   * Stop all monitoring
-   * @private
-   */
-  _stopMonitoring() {
-    if (this.monitoringInterval) {
-      clearInterval(this.monitoringInterval)
-      this.monitoringInterval = null
-    }
-
-    if (this.timerInterval) {
-      clearInterval(this.timerInterval)
-      this.timerInterval = null
-    }
-  }
-
-  /**
-   * Destroy modal
-   */
-  destroy() {
-    this._stopMonitoring()
-    this._removeBeforeUnloadHandler()
-
-    // Remove modal from DOM
-    const modal = document.getElementById("upiPaymentModal")
-    if (modal) {
-      modal.remove()
-    }
-
-    // Reset global reference
-    if (globalUpiModal === this) {
-      globalUpiModal = null
-    }
-  }
-
-  /**
-   * Setup browser beforeunload event handler to handle browser/tab closure
-   * @private
-   */
-  _setupBeforeUnloadHandler() {
-    const handleBeforeUnload = (e) => {
-      // Don't cancel transaction if we're in the middle of an intended redirect
-      if (this.isOpen && this.transactionId && !this._isRedirecting) {
-        // Cancel transaction immediately without confirmation
-        this._cancelTransaction("Browser/tab closed during payment")
-
-        // Show browser confirmation dialog
-        const message = "Your payment is in progress. Are you sure you want to leave?"
-        e.preventDefault()
-        e.returnValue = message
-        return message
-      }
-    }
-
-    // Store reference to remove later
-    this._beforeUnloadHandler = handleBeforeUnload
-    window.addEventListener('beforeunload', handleBeforeUnload)
-  }
-
-  /**
-   * Remove beforeunload event handler
-   * @private
-   */
-  _removeBeforeUnloadHandler() {
-    if (this._beforeUnloadHandler) {
-      window.removeEventListener('beforeunload', this._beforeUnloadHandler)
-      this._beforeUnloadHandler = null
-    }
-  }
-
-  /**
-   * Handle modal close with confirmation
-   * @private
-   * @param {string} reason - Reason for closing
-   */
-  _handleModalClose(reason) {
-    console.log("Modal close requested:", reason)
-
-    // If payment is completed or already cancelled, close immediately
-    if (!this.transactionId || this._isTransactionFinalized()) {
-      // If QR has expired, redirect to payment status instead of reloading
-      if (this._qrExpired && this.transactionId) {
-        this.close()
+        const statusType = state === "done" ? "success" : state === "pending" ? "info" : "error";
+        this._showUpiStatus(statusType, messages[state] || _t("Payment status updated. Redirecting..."));
 
         setTimeout(() => {
-          console.log("Redirecting to payment status after QR expiry...")
-          window.location.href = "/payment/status"
-        }, 500)
-        return
-      }
+            window.location = landingRoute;
+        }, 2000);
+    },
 
-      this.close()
-      return
-    }
-
-    // Show confirmation dialog
-    this._showCloseConfirmation(reason)
-  }
-
-  /**
-   * Check if transaction is in a finalized state
-   * @private
-   * @returns {boolean}
-   */
-  _isTransactionFinalized() {
-    // If we have received a final state via bus, don't ask for confirmation
-    return this._finalStateReceived === true
-  }
-
-  /**
-   * Show close confirmation dialog
-   * @private
-   * @param {string} reason - Reason for closing
-   */
-  _showCloseConfirmation(reason) {
-    this._createConfirmationModal(reason)
-  }
-
-  /**
-   * Create and show modern confirmation modal
-   * @private
-   * @param {string} reason - Reason for closing
-   */
-  _createConfirmationModal(reason) {
-    // Create modal backdrop
-    const modalBackdrop = document.createElement('div')
-    modalBackdrop.className = 'upi-confirmation-modal'
-    modalBackdrop.id = 'upiConfirmationModal'
-
-    // Create modal content
-    modalBackdrop.innerHTML = `
-      <div class="upi-confirmation-content">
-        <div class="upi-confirmation-header">
-          <div class="warning-icon">
-            <i class="fa fa-exclamation-triangle"></i>
-          </div>
-          <h3 class="confirmation-title">⚠️ Cancel Payment?</h3>
-          <p class="confirmation-message">
-            <strong>Your UPI payment is currently in progress.</strong><br>
-          </p>
-        </div>
-        <div class="upi-confirmation-body">
-          <p class="confirmation-details">
-            Are you sure you want to cancel and return to the payment selection page?
-          </p>
-        </div>
-        <div class="upi-confirmation-actions">
-          <button class="btn-cancel-payment" data-action="confirm">
-            <i class="fa fa-times"></i>
-            Yes, Cancel Payment
-          </button>
-          <button class="btn-continue-payment" data-action="dismiss">
-            <i class="fa fa-arrow-left"></i>
-            Continue Payment
-          </button>
-        </div>
-      </div>
-    `
-
-    // Add to DOM
-    document.body.appendChild(modalBackdrop)
-
-    // Animate in
-    requestAnimationFrame(() => {
-      modalBackdrop.classList.add('show')
-    })
-
-    // Add event listeners
-    const handleAction = (action) => {
-      // Animate out
-      modalBackdrop.classList.remove('show')
-
-      setTimeout(() => {
-        document.body.removeChild(modalBackdrop)
-
-        if (action === 'confirm') {
-          console.log("User confirmed payment cancellation")
-          this._cancelTransaction(`Payment cancelled: ${reason}`)
-
-          // Close modal first
-          this.close()
-
-          // Reload the payment page to show available payment methods
-          setTimeout(() => {
-            console.log("Reloading payment page after user cancellation...")
-            window.location.reload()
-          }, 500)
-        } else {
-          console.log("User chose to continue payment")
+    /**
+     * Show UPI status message.
+     *
+     * @private
+     * @param {string} type - The status type (success, error, info).
+     * @param {string} message - The status message.
+     * @return {void}
+     */
+    _showUpiStatus(type, message) {
+        const statusEl = document.getElementById("statusMessage");
+        if (statusEl) {
+            statusEl.className = `status-message show ${type}`;
+            statusEl.textContent = message;
         }
-      }, 300)
-    }
+    },
 
-    // Button event listeners
-    modalBackdrop.querySelector('.btn-cancel-payment').addEventListener('click', () => {
-      handleAction('confirm')
-    })
+    // #=== BROWSER HANDLERS ===#
 
-    modalBackdrop.querySelector('.btn-continue-payment').addEventListener('click', () => {
-      handleAction('dismiss')
-    })
+    /**
+     * Setup beforeunload handler.
+     *
+     * @private
+     * @return {void}
+     */
+    _setupBeforeUnloadHandler() {
+        this.upiBeforeUnloadHandler = (e) => {
+            if (this.upiModalOpen && this.upiTransactionId && !this.upiFinalStateReceived) {
+                this._cancelTransaction();
+                e.preventDefault();
+                e.returnValue = "Your payment is in progress. Are you sure you want to leave?";
+                return e.returnValue;
+            }
+        };
+        window.addEventListener('beforeunload', this.upiBeforeUnloadHandler);
+    },
 
-    // Click outside to dismiss
-    modalBackdrop.addEventListener('click', (e) => {
-      if (e.target === modalBackdrop) {
-        handleAction('dismiss')
-      }
-    })
+    /**
+     * Remove beforeunload handler.
+     *
+     * @private
+     * @return {void}
+     */
+    _removeBeforeUnloadHandler() {
+        if (this.upiBeforeUnloadHandler) {
+            window.removeEventListener('beforeunload', this.upiBeforeUnloadHandler);
+            this.upiBeforeUnloadHandler = null;
+        }
+    },
 
-    // Escape key to dismiss
-    const handleKeyPress = (e) => {
-      if (e.key === 'Escape') {
-        document.removeEventListener('keydown', handleKeyPress)
-        handleAction('dismiss')
-      }
-    }
-    document.addEventListener('keydown', handleKeyPress)
-  }
+    // #=== MODAL LIFECYCLE ===#
 
-  /**
-   * Cancel the transaction
-   * @private
-   * @param {string} reason - Reason for cancellation
-   */
-  _cancelTransaction(reason) {
-    if (!this.transactionId) {
-      console.warn("No transaction ID to cancel")
-      return
-    }
+    /**
+     * Handle modal close with confirmation.
+     *
+     * @private
+     * @return {void}
+     */
+    _handleModalClose() {
+        if (!this.upiTransactionId || this.upiFinalStateReceived) {
+            this._closeModal();
+            return;
+        }
 
-    console.log("Cancelling transaction:", this.transactionId, "Reason:", reason)
+        // Show custom confirmation dialog
+        this._showCloseConfirmation();
+    },
 
-    // Cancel transaction on server
-    rpc(`/payment/hdfc_upi/cancel_transaction/${this.transactionId}`, {
-      reason: reason
-    }).then((result) => {
-      if (result.success) {
-        console.log("Transaction cancelled successfully:", result)
-        this._showStatus("warning", result.message || "Your payment has been cancelled.")
-      } else {
-        console.error("Failed to cancel transaction:", result.error)
-        // Still show cancelled status to user
-        this._showStatus("warning", "Your payment has been cancelled.")
-      }
-    }).catch((error) => {
-      console.error("Error cancelling transaction:", error)
-      // Still show cancelled status to user
-      this._showStatus("warning", "Your payment has been cancelled.")
-    })
+    /**
+     * Show custom close confirmation dialog.
+     *
+     * @private
+     * @return {void}
+     */
+    _showCloseConfirmation() {
+        // Remove existing confirmation modal if any
+        const existingConfirmModal = document.getElementById("upiConfirmationModal");
+        if (existingConfirmModal) {
+            existingConfirmModal.remove();
+        }
 
-    // Mark transaction as cancelled locally
-    this._finalStateReceived = true
-  }
-}
+        // Create confirmation modal
+        const confirmModalHtml = `
+            <div class="upi-confirmation-modal" id="upiConfirmationModal">
+                <div class="upi-confirmation-content">
+                    <div class="upi-confirmation-header">
+                        <div class="warning-icon">⚠️</div>
+                        <h3 class="confirmation-title">${_t("Cancel Payment?")}</h3>
+                    </div>
+                    <div class="upi-confirmation-body">
+                        <p class="confirmation-message">
+                            <strong>${_t("Your UPI payment is currently in progress.")}</strong>
+                        </p>
+                        <p class="confirmation-details">
+                            ${_t("Are you sure you want to cancel and return to the payment selection page?")}
+                        </p>
+                    </div>
+                    <div class="upi-confirmation-actions">
+                        <button class="btn-cancel-payment" data-action="confirm">
+                            ${_t("Yes, Cancel Payment")}
+                        </button>
+                        <button class="btn-continue-payment" data-action="dismiss">
+                            ${_t("Continue Payment")}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add to DOM
+        document.body.insertAdjacentHTML("beforeend", confirmModalHtml);
+
+        // Get the modal element
+        const confirmModal = document.getElementById("upiConfirmationModal");
+
+        // Animate in
+        requestAnimationFrame(() => {
+            confirmModal.classList.add('show');
+        });
+
+        // Handle actions
+        const handleAction = (action) => {
+            confirmModal.classList.remove('show');
+            
+            setTimeout(() => {
+                confirmModal.remove();
+                
+                if (action === 'confirm') {
+                    this._cancelTransaction();
+                    this._closeModal();
+                    setTimeout(() => window.location.reload(), 500);
+                }
+            }, 300);
+        };
+
+        // Add event listeners
+        confirmModal.querySelector('.btn-cancel-payment').addEventListener('click', () => {
+            handleAction('confirm');
+        });
+
+        confirmModal.querySelector('.btn-continue-payment').addEventListener('click', () => {
+            handleAction('dismiss');
+        });
+
+        // Click outside to dismiss
+        confirmModal.addEventListener('click', (e) => {
+            if (e.target === confirmModal) {
+                handleAction('dismiss');
+            }
+        });
+
+        // Escape key to dismiss
+        const handleKeyPress = (e) => {
+            if (e.key === 'Escape') {
+                document.removeEventListener('keydown', handleKeyPress);
+                handleAction('dismiss');
+            }
+        };
+        document.addEventListener('keydown', handleKeyPress);
+    },
+
+    /**
+     * Cancel UPI transaction.
+     *
+     * @private
+     * @return {void}
+     */
+    _cancelTransaction() {
+        if (this.upiTransactionId) {
+            rpc(`/payment/hdfc_upi/cancel_transaction/${this.upiTransactionId}`, {
+                reason: "Payment cancelled by user"
+            }).catch(() => {
+                // Silent fail - transaction will timeout naturally
+            });
+            this.upiFinalStateReceived = true;
+        }
+    },
+
+    /**
+     * Close UPI modal.
+     *
+     * @private
+     * @return {void}
+     */
+    _closeModal() {
+        const modal = document.getElementById("upiPaymentModal");
+        if (modal) {
+            modal.classList.remove("show");
+        }
+
+        this.upiModalOpen = false;
+        document.body.style.overflow = "";
+        this._removeBeforeUnloadHandler();
+        this._stopMonitoring();
+
+        setTimeout(() => {
+            this._resetModal();
+            this._enableButton();
+        }, 300);
+    },
+
+    /**
+     * Reset modal to initial state.
+     *
+     * @private
+     * @return {void}
+     */
+    _resetModal() {
+        const elements = {
+            qrLoading: document.getElementById("qrLoading"),
+            qrContainer: document.getElementById("qrContainer"),
+            statusMessage: document.getElementById("statusMessage"),
+            timerContainer: document.getElementById("timerContainer"),
+            merchantName: document.getElementById("merchantName"),
+            amountValue: document.getElementById("amountValue")
+        };
+
+        if (elements.qrLoading) elements.qrLoading.style.display = "flex";
+        if (elements.qrContainer) elements.qrContainer.style.display = "none";
+        if (elements.statusMessage) elements.statusMessage.className = "status-message";
+        if (elements.timerContainer) elements.timerContainer.classList.remove("warning");
+        if (elements.merchantName) elements.merchantName.textContent = "Loading...";
+        if (elements.amountValue) elements.amountValue.textContent = "0";
+
+        this.upiTransactionId = null;
+        this.upiFinalStateReceived = false;
+    },
+
+    /**
+     * Stop monitoring and timers.
+     *
+     * @private
+     * @return {void}
+     */
+    _stopMonitoring() {
+        if (this.monitoringInterval) {
+            clearInterval(this.monitoringInterval);
+            this.monitoringInterval = null;
+        }
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+    },
+
+});
