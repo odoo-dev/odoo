@@ -91,7 +91,7 @@ export class PosKanbanRenderer extends KanbanRenderer {
 
     async callWithViewUpdate(func) {
         try {
-            const isPosManager = await user.hasGroup("point_of_sale.group_pos_manager");
+            const isPosManager = await user.hasGroup("base.group_system") && user.hasGroup("point_of_sale.group_pos_manager");
             if (!isPosManager) {
                 this.dialog.add(AlertDialog, {
                     title: _t("Access Denied"),
