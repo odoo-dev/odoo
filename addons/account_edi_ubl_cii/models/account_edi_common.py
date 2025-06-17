@@ -510,6 +510,37 @@ class AccountEdiCommon(models.AbstractModel):
             logs.append(_("A payment of %s was detected.", formatted_amount))
         return logs
 
+    def _import_rounding_amount(self, invoice, tree, xpath, qty_factor):
+        """
+        Add an invoice line representing the rounding amount given in the document.
+        - The amount is assumed to be in document currency
+        """
+        currency = invoice.currency_id
+        rounding_amount_currency = currency.round(qty_factor * float(tree.findtext(xpath) or 0))
+
+        if invoice.currency_id.is_zero(rounding_amount_currency):
+            return []
+
+        inverse_rate = abs(invoice.amount_total_signed) / invoice.amount_total if invoice.amount_total else 0
+        rounding_amount = invoice.company_id.currency_id.round(rounding_amount_currency * inverse_rate)
+
+        invoice.line_ids.create([{
+            'display_type': 'product',
+            'name': _('Rounding'),
+            'quantity': 1,
+            'product_id': False,
+            'price_unit': rounding_amount_currency,
+            'balance': invoice.direction_sign * rounding_amount,
+            'company_id': invoice.company_id.id,
+            'move_id': invoice.id,
+            'tax_ids': False,
+        }])
+
+        formatted_amount = formatLang(self.env, rounding_amount_currency, currency_obj=currency)
+        return [
+            _("A rounding amount of %s was detected.", formatted_amount),
+        ]
+
     def _import_invoice_lines(self, invoice, tree, xpath, qty_factor):
         logs = []
         lines_values = []

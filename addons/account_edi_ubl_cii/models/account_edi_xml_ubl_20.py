@@ -535,15 +535,20 @@ class AccountEdiXmlUBL20(models.AbstractModel):
 
     def _get_invoice_monetary_total_vals(self, invoice, taxes_vals, line_extension_amount, allowance_total_amount, charge_total_amount):
         """ Method used to fill the cac:{Legal,Requested}MonetaryTotal node"""
+        # We only handle rounding amounts that do not belong to any tax ('add_invoice_line' cash rounding strategy).
+        # Rounding amounts belonging to a tax ('biggest_tax' strategy) are included already in the tax amounts.
+        rounding_amls = invoice.line_ids.filtered(lambda line: line.display_type == 'rounding' and not line.tax_line_id)
+        payable_rounding_amount = invoice.direction_sign * sum(rounding_amls.mapped('amount_currency'))
         return {
             'currency': invoice.currency_id,
             'currency_dp': self._get_currency_decimal_places(invoice.currency_id),
             'line_extension_amount': line_extension_amount,
             'tax_exclusive_amount': taxes_vals['base_amount_currency'],
-            'tax_inclusive_amount': invoice.amount_total,
+            'tax_inclusive_amount': invoice.amount_total - payable_rounding_amount,
             'allowance_total_amount': allowance_total_amount or None,
             'charge_total_amount': charge_total_amount or None,
             'prepaid_amount': invoice.amount_total - invoice.amount_residual,
+            'payable_rounding_amount': payable_rounding_amount or None,
             'payable_amount': invoice.amount_residual,
         }
 
@@ -814,9 +819,10 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             if incoterm:
                 invoice_values['invoice_incoterm_id'] = incoterm.id
 
-        # ==== Document level AllowanceCharge, Prepaid Amounts, Invoice Lines ====
+        # ==== Document level AllowanceCharge, Prepaid Amounts, Payable Rounding Amount, Invoice Lines ====
         allowance_charges_line_vals, allowance_charges_logs = self._import_document_allowance_charges(tree, invoice, invoice.journal_id.type, qty_factor)
         logs += self._import_prepaid_amount(invoice, tree, './{*}LegalMonetaryTotal/{*}PrepaidAmount', qty_factor)
+        logs += self._import_rounding_amount(invoice, tree, './{*}LegalMonetaryTotal/{*}PayableRoundingAmount', qty_factor)
         line_tag = (
             'InvoiceLine'
             if invoice.move_type in ('in_invoice', 'out_invoice') or qty_factor == -1
@@ -885,8 +891,12 @@ class AccountEdiXmlUBL20(models.AbstractModel):
     def _correct_invoice_tax_amount(self, tree, invoice):
         """ The tax total may have been modified for rounding purpose, if so we should use the imported tax and not
          the computed one """
+        currency = invoice.currency_id
         # For each tax in our tax total, get the amount as well as the total in the xml.
-        for elem in tree.findall('.//{*}TaxTotal/{*}TaxSubtotal'):
+        # Negative tax amounts may appear in invoices; they have to be inverted (since they are credit notes).
+        document_amount_sign = self._get_import_document_amount_sign(tree)[1] or 1
+        # We only search for `TaxTotal/TaxSubtotal` in the "root" element (i.e. not in `InvoiceLine` elements).
+        for elem in tree.findall('./{*}TaxTotal/{*}TaxSubtotal'):
             percentage = elem.find('.//{*}TaxCategory/{*}Percent')
             if percentage is None:
                 percentage = elem.find('.//{*}Percent')
@@ -898,13 +908,15 @@ class AccountEdiXmlUBL20(models.AbstractModel):
                 taxes = invoice.line_ids.tax_line_id.filtered(lambda tax: tax.amount == tax_percent)
                 # If we found taxes with the correct amount, look for a tax line using it, and correct it as needed.
                 if taxes:
-                    tax_total = float(amount.text)
-                    tax_line = invoice.line_ids.filtered(lambda line: line.tax_line_id in taxes)[:1]
-                    if tax_line:
+                    tax_total = document_amount_sign * float(amount.text)
+                    # Sometimes we have multiple lines for the same tax.
+                    tax_lines = invoice.line_ids.filtered(lambda line: line.tax_line_id in taxes)
+                    if tax_lines:
                         sign = -1 if invoice.is_inbound(include_receipts=True) else 1
-                        tax_line_amount = abs(tax_line.amount_currency)
-                        if abs(tax_total - tax_line_amount) <= 0.05:
-                            tax_line.amount_currency = tax_total * sign
+                        tax_lines_total = currency.round(sign * sum(tax_lines.mapped('amount_currency')))
+                        difference = currency.round(tax_total - tax_lines_total)
+                        if not currency.is_zero(difference):
+                            tax_lines[0].amount_currency += sign * difference
 
     # -------------------------------------------------------------------------
     # IMPORT : helpers
