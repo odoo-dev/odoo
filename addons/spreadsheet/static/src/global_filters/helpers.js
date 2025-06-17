@@ -489,6 +489,8 @@ function getPreviousMonthDateFilterValue(value) {
  */
 function getNextRelativeDateFilterValue(value) {
     switch (value.period) {
+        case "today":
+        case "yesterday":
         case "last_7_days":
         case "last_30_days":
         case "last_90_days": {
@@ -505,6 +507,22 @@ function getNextRelativeDateFilterValue(value) {
                 type: "range",
                 from: from.startOf("month").toISODate(),
                 to: to.endOf("month").toISODate(),
+            };
+        }
+        case "last_month": {
+            const now = DateTime.local();
+            return {
+                type: "month",
+                year: now.year,
+                month: now.month,
+            };
+        }
+        case "month_to_date": {
+            const now = DateTime.local().plus({ months: 1 });
+            return {
+                type: "month",
+                year: now.year,
+                month: now.month,
             };
         }
         case "year_to_date": {
@@ -524,6 +542,8 @@ function getNextRelativeDateFilterValue(value) {
  */
 function getPreviousRelativeDateFilterValue(value) {
     switch (value.period) {
+        case "today":
+        case "yesterday":
         case "last_7_days":
         case "last_30_days":
         case "last_90_days": {
@@ -540,6 +560,23 @@ function getPreviousRelativeDateFilterValue(value) {
                 type: "range",
                 from: from.startOf("month").toISODate(),
                 to: to.endOf("month").toISODate(),
+            };
+        }
+
+        case "last_month": {
+            const now = DateTime.local().minus({ months: 2 });
+            return {
+                type: "month",
+                year: now.year,
+                month: now.month,
+            };
+        }
+        case "month_to_date": {
+            const now = DateTime.local().minus({ months: 1 });
+            return {
+                type: "month",
+                year: now.year,
+                month: now.month,
             };
         }
         case "year_to_date": {

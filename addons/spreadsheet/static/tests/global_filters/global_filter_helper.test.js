@@ -304,6 +304,34 @@ describe("getNextDateFilterValue", () => {
             from: "2022-07-01",
             to: "2023-06-30",
         });
+
+        result = getNextDateFilterValue({ type: "relative", period: "today" });
+        expect(result).toEqual({
+            type: "range",
+            from: "2022-07-15",
+            to: "2022-07-15",
+        });
+
+        result = getNextDateFilterValue({ type: "relative", period: "yesterday" });
+        expect(result).toEqual({
+            type: "range",
+            from: "2022-07-14",
+            to: "2022-07-14",
+        });
+
+        result = getNextDateFilterValue({ type: "relative", period: "last_month" });
+        expect(result).toEqual({
+            type: "month",
+            year: 2022,
+            month: 7,
+        });
+
+        result = getNextDateFilterValue({ type: "relative", period: "month_to_date" });
+        expect(result).toEqual({
+            type: "month",
+            year: 2022,
+            month: 8,
+        });
     });
 
     test("range: shifts range forward", () => {
@@ -385,6 +413,34 @@ describe("getPreviousDateFilterValue", () => {
             type: "range",
             from: "2020-07-01",
             to: "2021-06-30",
+        });
+
+        result = getPreviousDateFilterValue({ type: "relative", period: "today" });
+        expect(result).toEqual({
+            type: "range",
+            from: "2022-07-13",
+            to: "2022-07-13",
+        });
+
+        result = getPreviousDateFilterValue({ type: "relative", period: "yesterday" });
+        expect(result).toEqual({
+            type: "range",
+            from: "2022-07-12",
+            to: "2022-07-12",
+        });
+
+        result = getPreviousDateFilterValue({ type: "relative", period: "last_month" });
+        expect(result).toEqual({
+            type: "month",
+            year: 2022,
+            month: 5,
+        });
+
+        result = getPreviousDateFilterValue({ type: "relative", period: "month_to_date" });
+        expect(result).toEqual({
+            type: "month",
+            year: 2022,
+            month: 6,
         });
     });
 
