@@ -336,4 +336,4 @@ function removePlugins(plugins, pluginsToRemove) {
     return plugins.filter((p) => !pluginsToRemove.includes(p.name));
 }
 
-registry.category("lazy_components").add("website.Builder", Builder);
+registry.category("lazy_components").add("html_builder.Builder", Builder);

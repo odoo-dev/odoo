@@ -176,6 +176,7 @@ export class WebsiteBuilder extends Component {
                         this.state.showSidebar = show ?? !this.state.showSidebar;
                     },
                 },
+                getRec
              },
             getThemeTab: () =>
                 odoo.loader.modules.get("@website/builder/plugins/theme/theme_tab").ThemeTab,
