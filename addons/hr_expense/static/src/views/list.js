@@ -12,7 +12,10 @@ import { listView } from "@web/views/list/list_view";
 import { ListController } from "@web/views/list/list_controller";
 import { ListRenderer } from "@web/views/list/list_renderer";
 
-const { onWillStart } = owl;
+import { insert } from '@mail/model/model_field_command';
+import { WebClientViewAttachmentViewContainer } from "@mail/components/web_client_view_attachment_view_container/web_client_view_attachment_view_container";
+
+const { onWillStart, useState } = owl;
 
 export class ExpenseListController extends ListController {
     setup() {
@@ -70,10 +73,106 @@ patch(ExpenseListRenderer.prototype, 'expense_list_renderer_qrcode', ExpenseMobi
 patch(ExpenseListRenderer.prototype, 'expense_list_renderer_qrcode_dzone', ExpenseDocumentDropZone);
 ExpenseListRenderer.template = 'hr_expense.ListRenderer';
 
-export class ExpenseDashboardListRenderer extends ExpenseListRenderer {}
+export class ExpenseAttachmentListController extends ExpenseListController {
+    setup() {
+        super.setup();
+        this.messaging = useService("messaging");
+        this.ui = useService("ui");
+        this.attachmentPreviewState = useState({
+            // previewEnabled: !this.env.searchModel.context.disable_preview && this.ui.size >= SIZES.XXL,  // TODO
+            // displayAttachment: localStorage.getItem('account.move_line_pdf_previewer_hidden') !== 'false', // TODO
+            selectedRecord: false,
+            thread: null,
+            displayAttachment: false,
+        });
+    }
 
-ExpenseDashboardListRenderer.components = { ...ExpenseDashboardListRenderer.components, ExpenseDashboard};
-ExpenseDashboardListRenderer.template = 'hr_expense.DashboardListRenderer';
+    setSelectedRecord(ExpenseData) {
+        this.attachmentPreviewState.selectedRecord = ExpenseData;
+        this.setThread(this.attachmentPreviewState.selectedRecord);
+    }
+
+    async setThread(ExpenseData) {
+        if (!ExpenseData || !ExpenseData.data.attachment_ids.records.length) {
+            this.attachmentPreviewState.thread = null;
+            return;
+        }
+        const attachments = insert(
+            ExpenseData.data.attachment_ids.records
+                .map(attachment => ({ id: attachment.resId, mimetype: attachment.data.mimetype }))
+                .filter(attachment => attachment.mimetype !== 'application/xml')
+        );
+        const messaging = await this.messaging.get();
+        // As the real thread is AccountMove and the attachment are from AccountMove
+        // We prevent this hack to leak into the WebClientViewAttachmentViewContainer here
+        // by declaring the model as account.move instead of account.move.line
+        const thread = messaging.models['Thread'].insert({
+            attachments,
+            id: ExpenseData.resId,
+            model: ExpenseData.resModel,
+        });
+        thread.update({ mainAttachment: thread.attachments[0] });
+        this.attachmentPreviewState.thread = thread;
+        console.log(ExpenseData.data.attachment_ids.records[0].data.mimetype);
+    }
+
+    togglePreview() {
+        this.attachmentPreviewState.displayAttachment = !this.attachmentPreviewState.displayAttachment;
+    }
+}
+ExpenseAttachmentListController.components = {
+    ...ExpenseAttachmentListController.components,
+    WebClientViewAttachmentViewContainer,
+};
+ExpenseAttachmentListController.template = 'hr_expense.AttachmentListView';
+
+export class ExpenseAttachmentListRenderer extends ExpenseListRenderer {
+    static template = 'hr_expense.AttachmentListRenderer';
+    setup() {
+        super.setup();
+    }
+
+    findFocusFutureCell(cell, cellIsInGroupRow, direction) {
+        const futureCell = super.findFocusFutureCell(cell, cellIsInGroupRow, direction);
+        if (futureCell) {
+            const dataPointId = futureCell.closest('tr').dataset.id;
+            const record = this.props.list.records.filter(x=>x.id === dataPointId)[0];
+            this.props.setSelectedRecord(record);
+        }
+        return futureCell;
+    }
+}
+ExpenseAttachmentListRenderer.props = [...ExpenseAttachmentListRenderer.props, "setSelectedRecord?"];
+
+export const ExpenseAttachmentListView = {
+    ...listView,
+    Renderer: ExpenseAttachmentListRenderer,
+    Controller: ExpenseAttachmentListController,
+};
+
+export class ExpenseDashboardListRenderer extends ExpenseAttachmentListRenderer {
+    static template = 'hr_expense.DashboardListRenderer';
+    static components = {
+        ...ExpenseAttachmentListRenderer.components,
+        ExpenseDashboard,
+    };
+    setup(){
+        super.setup();
+    }
+}
+ExpenseDashboardListRenderer.props = [...ListRenderer.props, "setSelectedRecord?"];
+
+export class ExpenseDashboardListController extends ExpenseAttachmentListController {
+    setup(){
+        super.setup()
+    }
+}
+
+export const ExpenseDashboardListView = {
+    ...listView,
+    Renderer: ExpenseDashboardListRenderer,
+    Controller: ExpenseDashboardListController,
+};
 
 registry.category('views').add('hr_expense_tree', {
     ...listView,
@@ -82,9 +181,11 @@ registry.category('views').add('hr_expense_tree', {
     Renderer: ExpenseListRenderer,
 });
 
-registry.category('views').add('hr_expense_dashboard_tree', {
+registry.category('views').add('hr_expense_attachment_tree', {
     ...listView,
     buttonTemplate: 'hr_expense.ListButtons',
-    Controller: ExpenseListController,
-    Renderer: ExpenseDashboardListRenderer,
+    Controller: ExpenseAttachmentListController,
+    Renderer: ExpenseAttachmentListRenderer,
 });
+
+registry.category("views").add('hr_expense_dashboard_tree', ExpenseDashboardListView);

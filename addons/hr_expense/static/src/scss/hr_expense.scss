@@ -1,3 +1,56 @@
+.o_expense_list_view {
+    &.o_view_controller > .o_content {
+        overflow: hidden;
+        display: flex;
+        .o_list_renderer {
+            overflow: scroll;
+            height: 100%;
+            flex: 1 1 100%;
+        }
+    }
+
+    .o_attachment_preview {
+        height: 100%;
+        width: 30%;
+
+        .o_attachment_control {
+            position: absolute;
+            top: 8%;
+            background-color: black;
+            opacity: 0.3;
+            margin-top: -15px;
+            transition: all 0.3s;
+            border-radius: 0 30px 30px 0;
+            padding: 15px 15px 15px 5px;
+            &:hover {
+                opacity: 0.7;
+            }
+            &::after {
+                color: white;
+                content: '>>';
+            }
+        }
+
+        &.hidden {
+            width: 0;
+            .o_attachment_control {
+                right: 0;
+                border-radius: 30px 0 0 30px;
+                padding: 15px 0 15px 15px;
+                &::after {
+                    content: '<';
+                }
+                &:hover::after {
+                    content: '<<';
+                }
+            }
+            .o_attachment_control:hover {
+                padding-right: 5px;
+            }
+        }
+    }
+}
+
 .hr_expense {
     @include media-breakpoint-up(md) {
         &.o_list_view, &.o_kanban_renderer {
@@ -48,3 +101,119 @@
 .o_expense_categories td[name="description"] p:last-child {
     margin-bottom: 0;
 }
+
+//.o_list_renderer {
+//    display: flex;
+//    height: 100vh;  /* pleine hauteur fenêtre */
+//    position: relative;
+//    overflow: hidden;
+//  }
+//
+//  /* Cache la checkbox réelle */
+//  #attachmentToggle {
+//    display: none;
+//  }
+//
+//  /* Label bouton toggle, toujours top-right */
+//  label[for="attachmentToggle"] {
+//    position: absolute;
+//    top: 10px;
+//    right: 10px;
+//    background: #007bff;
+//    color: white;
+//    padding: 6px 12px;
+//    border-radius: 4px;
+//    cursor: pointer;
+//    user-select: none;
+//    z-index: 10;
+//  }
+//
+//  /* Table - par défaut 100% largeur, scroll si besoin */
+//  table.o_list {
+//    flex-grow: 0;
+//    flex-shrink: 0;
+//    flex-basis: 100%;
+//    max-width: 100%;
+//    border-collapse: collapse;
+//    height: 100%;
+//    overflow: auto;
+//    border: 1px solid #ccc;
+//    transition: flex-basis 0.3s ease;
+//  }
+//
+//  /* Quand toggle coché, table réduit à 70% */
+//  #attachmentToggle:checked ~ table.o_list {
+//    flex-basis: 70%;
+//    max-width: 70%;
+//  }
+//
+//  /* Sidebar / preview, cachée par défaut */
+//  .o_expense_attachment_preview {
+//    flex-grow: 0;
+//    flex-shrink: 0;
+//    flex-basis: 0;
+//    max-width: 0;
+//    height: 100%;
+//    overflow-y: auto;
+//    background: #f0f0f0;
+//    border-left: 1px solid #ccc;
+//    transition: flex-basis 0.3s ease, max-width 0.3s ease, padding 0.3s ease;
+//    padding: 0;
+//  }
+//
+//  /* Sidebar visible à 30% */
+//  #attachmentToggle:checked ~ .o_expense_attachment_preview {
+//    flex-basis: 30%;
+//    max-width: 30%;
+//    padding: 10px;
+//  }
+//
+//  /* Exemple style simple pour la table */
+//  table.o_list th, table.o_list td {
+//    border: 1px solid #ccc;
+//    padding: 8px;
+//  }
+//
+//.table-container {
+//  flex: 1 1 70%; /* 70% largeur ou plus selon le contenu */
+//  overflow: auto; /* scroll si contenu dépasse */
+//  position: relative;
+//}
+//
+//.o_expense_attachment_preview {
+//  flex: 0 0 30%;
+//  max-width: 30%;
+//  height: 100vh; /* pleine hauteur */
+//  border-left: 1px solid #ccc;
+//  overflow-y: auto;
+//  background: #f9f9f9;
+//}
+//
+//#attachmentToggle {
+//    display: none;
+//}
+//
+//label[for="attachmentToggle"] {
+//    display: inline-block;
+//    background: #007BFF;
+//    color: white;
+//    padding: 8px 12px;
+//    cursor: pointer;
+//    border-radius: 4px;
+//}
+//
+//label[for="attachmentToggle"]::after {
+//    content: " >>";
+//}
+//
+//#attachmentToggle:checked + label::after {
+//    content: " <<";
+//}
+//
+//.o_expense_attachment_preview {
+//    display: block;
+//}
+//
+//#attachmentToggle:checked ~ .o_expense_attachment_preview {
+//    display: none;
+//}

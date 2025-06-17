@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="hr_expense.ExpenseAttachment" owl="1">
+        <input type="checkbox" id="toggle"/>
+        <label for="toggle"/>
+        <div class="o_expense_preview">
+            <t t-if="this.attachmentPreviewState.thread">
+                <WebClientViewAttachmentViewContainer threadId="this.attachmentPreviewState.thread.id" threadModel="this.attachmentPreviewState.thread.model"/>
+            </t>
+        </div>
+    </t>
+</templates>

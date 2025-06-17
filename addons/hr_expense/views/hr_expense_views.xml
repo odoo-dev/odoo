@@ -47,6 +47,11 @@
                 <tree string="Expenses" multi_edit="1" sample="1" js_class="hr_expense_tree" decoration-info="state == 'draft'">
                     <field name="company_id" invisible="1"/>
                     <field name="company_currency_id" invisible="1"/>
+                    <field name="attachment_ids" invisible="1">
+                        <tree>
+                            <field name="mimetype"/>
+                        </tree>
+                    </field>
                     <field name="attachment_number" invisible="True"/>
                     <field name="date" optional="show"/>
                     <field name="product_id" optional="hide"/>

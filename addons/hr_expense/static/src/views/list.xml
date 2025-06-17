@@ -47,8 +47,51 @@
         </xpath>
     </t>
 
+    <t t-name="hr_expense.AttachmentListView" t-inherit="web.ListView" owl="1">
+        <xpath expr="//div[@t-ref='root']" position="attributes" type="add">
+            <attribute name="class" add="o_expense_list_view" separator=" "/>
+        </xpath>
+        <xpath expr="//t[@t-component='props.Renderer']" position="attributes">
+            <attribute name="setSelectedRecord.bind">this.setSelectedRecord</attribute>
+        </xpath>
+        <xpath expr="//Layout" position="inside">
+<!--        <xpath expr="//div[hasclass('o_list_renderer')]" position="inside">-->
+            <t t-call="hr_expense.AttachmentPreview"/>
+        </xpath>
+    </t>
 
-    <t t-name="hr_expense.DashboardListRenderer" t-inherit="hr_expense.ListRenderer" t-inherit-mode="primary" owl="1">
+    <t t-name="hr_expense.AttachmentPreview" owl="1">
+        <div class="o_attachment_preview" t-att-class="{'hidden': !attachmentPreviewState.displayAttachment}">
+            <t t-if="this.attachmentPreviewState.displayAttachment">
+                <t t-if="this.attachmentPreviewState.thread">
+<!--                    <t t-if="this.attachmentPreviewState.thread.type == 'pdf'">-->
+                    <WebClientViewAttachmentViewContainer
+                            threadId="this.attachmentPreviewState.thread.id"
+                            threadModel="this.attachmentPreviewState.thread.model"
+                    />
+                </t>
+                <t t-elif="!this.attachmentPreviewState.selectedRecord">
+                    <p class="text-center">Choose a line to preview its attachments.</p>
+                </t>
+                <t t-else="">
+                    <p class="text-center">No attachments linked.</p>
+                </t>
+            </t>
+            <div class="o_attachment_control" t-on-click="togglePreview"/>
+        </div>
+    </t>
+
+    <t t-name="hr_expense.AttachmentListRenderer" t-inherit="hr_expense.ListRenderer" t-inherit-mode="primary" owl="1">
+<!--        <xpath expr="//div[hasclass('o_list_renderer')]" position="inside">-->
+<!--            <input type="checkbox" id="attachmentToggle"/>-->
+<!--            <label for="attachmentToggle" class="attachment-label"/>-->
+<!--            <div class="o_expense_attachment_preview">-->
+<!--                <p class="jond_attachment">Hello world</p>-->
+<!--            </div>-->
+<!--        </xpath>-->
+    </t>
+
+    <t t-name="hr_expense.DashboardListRenderer" t-inherit="hr_expense.AttachmentListRenderer" t-inherit-mode="primary" owl="1">
         <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
             <ExpenseDashboard/>
         </xpath>
