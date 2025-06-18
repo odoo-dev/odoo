@@ -431,9 +431,9 @@ export class OdooPivot {
      * @param {PivotDimension} dimension
      * @returns {{ value: string | number | boolean, label: string }[]}
      */
-    getPossibleFieldValues(dimension) {
+    getPossibleDimensionValues(dimension) {
         this.assertIsValid();
-        return this.model.getPossibleFieldValues(dimension);
+        return this.model.getPossibleDimensionValues(dimension);
     }
 
     async copyModelWithOriginalDomain() {

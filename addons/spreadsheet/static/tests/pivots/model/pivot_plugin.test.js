@@ -2034,7 +2034,7 @@ test("changing granularity of group by", async () => {
     expect.verifySteps(["date:day"]);
 });
 
-test("pivot.getPossibleFieldValues does not ignore falsy values", async function () {
+test("pivot.getPossibleDimensionValues does not ignore falsy values", async function () {
     const { model } = await createSpreadsheetWithPivot({
         arch: /* xml */ `
                 <pivot>
@@ -2045,7 +2045,7 @@ test("pivot.getPossibleFieldValues does not ignore falsy values", async function
     });
     const pivot = model.getters.getPivot(model.getters.getPivotIds()[0]);
     const barField = pivot.definition.rows[0];
-    expect(pivot.getPossibleFieldValues(barField)).toEqual([
+    expect(pivot.getPossibleDimensionValues(barField)).toEqual([
         { value: false, label: "No" },
         { value: true, label: "Yes" },
     ]);

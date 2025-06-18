@@ -255,7 +255,7 @@ export class OdooPivotModel extends PivotModel {
      * @param {import("@odoo/o-spreadsheet").PivotDimension} dimension
      * @returns {{ value: string | number | boolean, label: string }[]}
      */
-    getPossibleFieldValues(dimension) {
+    getPossibleDimensionValues(dimension) {
         const valuesWithLabels = [];
         const valuesUniqueness = new Set();
         const isCol = this._isCol(dimension.nameWithGranularity);
