@@ -4,6 +4,11 @@
     <record id="payment.payment_provider_hdfc_upi" model="payment.provider">
         <field name="code">hdfc_upi</field>
         <field name="inline_form_view_id" ref="inline_form"/>
+        <field name="available_country_ids" eval="[Command.set([ref('base.in')])]"/>
+        <field name="maximum_amount">100000.00</field>
+        <field name="pending_msg" type="html">
+            <p>Your payment is being processed. You will receive a confirmation shortly.</p>
+        </field>
     </record>
 
 </odoo>

@@ -3,7 +3,6 @@
 import base64
 import logging
 import pprint
-import requests
 
 from datetime import timedelta
 
@@ -116,19 +115,11 @@ class PaymentTransaction(models.Model):
                 _logger.exception("Failed to generate QR code for transaction %s", self.reference)
                 raise ValidationError(_("HDFC UPI: Failed to generate QR code: %s", str(e)))
 
-        # Get inline form values for the payment form
-        inline_form_values = self.provider_id._hdfc_upi_get_inline_form_values(
-            amount=self.amount,
-            currency=self.currency_id,
-            reference=self.reference
-        )
-
         # Update processing values for frontend
         processing_values.update({
             'transaction_id': self.id,
             'merchant_name': self.provider_id.hdfc_upi_merchant_name or 'HDFC UPI',
             'currency_code': self.currency_id.name,
-            'inline_form_values': inline_form_values,
         })
 
         return processing_values
@@ -159,10 +150,7 @@ class PaymentTransaction(models.Model):
 
         try:
             # Make refund request to HDFC UPI API
-            response_data = refund_tx._hdfc_upi_make_request(
-                endpoint='refund',
-                payload=refund_payload
-            )
+            response_data = refund_tx.provider_id._hdfc_upi_make_request('refund', refund_payload)
 
             _logger.info(
                 "Refund request response for transaction with reference %s:\n%s",
@@ -194,33 +182,16 @@ class PaymentTransaction(models.Model):
         if provider_code != 'hdfc_upi' or len(tx) == 1:
             return tx
 
-        # Search by HDFC UPI order number
         order_no = notification_data.get('orderNo')
         if order_no:
             tx = self.search([
                 ('provider_code', '=', 'hdfc_upi'),
                 ('hdfc_upi_order_no', '=', order_no)
             ])
-            if len(tx) == 1:
-                return tx
-
-        # Search by reference if order number not found
-        reference = notification_data.get('reference')
-        if reference:
-            tx = self.search([
-                ('provider_code', '=', 'hdfc_upi'),
-                ('reference', '=', reference)
-            ])
 
         if not tx:
             raise ValidationError(
-                "HDFC UPI: " + _("No transaction found matching reference %s.", reference or order_no)
-            )
-
-        if len(tx) > 1:
-            _logger.warning(
-                "Found %s transactions for HDFC UPI notification with data:\n%s",
-                len(tx), pprint.pformat(notification_data)
+                "HDFC UPI: " + _("No transaction found matching order number %s.", order_no)
             )
 
         return tx
@@ -710,85 +681,6 @@ class PaymentTransaction(models.Model):
             _logger.exception("Error processing refund response for transaction %s", self.reference)
             refund_tx._set_error(f"HDFC UPI: Refund processing failed: {e!s}")
 
-    def _hdfc_upi_make_request(self, endpoint, payload=None, timeout=None):
-        """ Make a request to HDFC UPI API with proper error handling.
-
-        :param str endpoint: API endpoint
-        :param dict payload: Request payload
-        :param float timeout: Request timeout in seconds
-        :return: Response data
-        :rtype: dict
-        :raise: ValidationError if request fails
-        """
-        self.ensure_one()
-
-        # Use default timeout if not specified
-        if timeout is None:
-            timeout = const.API_CONFIG['timeout']
-
-        # Prepare request
-        url = self.provider_id._hdfc_upi_get_api_url(endpoint)
-        headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        }
-
-        # Add authentication headers if required
-        if hasattr(self.provider_id, '_hdfc_upi_get_auth_headers'):
-            headers.update(self.provider_id._hdfc_upi_get_auth_headers())
-
-        try:
-            _logger.info("Making HDFC UPI API request to endpoint: %s", endpoint)
-
-            if payload:
-                _logger.info(
-                    "Request payload for transaction with reference %s:\n%s",
-                    self.reference, pprint.pformat(payload)
-                )
-                response = requests.post(
-                    url,
-                    json=payload,
-                    headers=headers,
-                    timeout=timeout
-                )
-            else:
-                response = requests.get(
-                    url,
-                    headers=headers,
-                    timeout=timeout
-                )
-
-            response.raise_for_status()
-
-            # HDFC always returns plain text (encrypted response), not JSON
-            response_data = response.text.strip()
-
-            _logger.info(
-                "HDFC UPI API response for transaction with reference %s: %s",
-                self.reference, response_data[:100] + ('...' if len(response_data) > 100 else '')
-            )
-            return response_data
-
-        except requests.exceptions.Timeout:
-            error_msg = _("Request timeout while communicating with HDFC UPI")
-            _logger.error("%s for transaction: %s", error_msg, self.reference)
-            raise ValidationError("HDFC UPI: " + error_msg)
-
-        except requests.exceptions.ConnectionError:
-            error_msg = _("Connection error while communicating with HDFC UPI")
-            _logger.error("%s for transaction: %s", error_msg, self.reference)
-            raise ValidationError("HDFC UPI: " + error_msg)
-
-        except requests.exceptions.HTTPError as e:
-            error_msg = _("HTTP error %s while communicating with HDFC UPI", e.response.status_code)
-            _logger.error("%s for transaction: %s", error_msg, self.reference)
-            raise ValidationError("HDFC UPI: " + error_msg)
-
-        except Exception as e:
-            error_msg = _("Unexpected error while communicating with HDFC UPI: %s", str(e))
-            _logger.exception("%s for transaction: %s", error_msg, self.reference)
-            raise ValidationError("HDFC UPI: " + error_msg)
-
     def _hdfc_upi_check_payment_status(self):
         """Check payment status using HDFC UPI Transaction Status Enquiry API.
 
@@ -853,7 +745,7 @@ class PaymentTransaction(models.Model):
                 }
 
             # Make API request to status endpoint
-            response_data = self._hdfc_upi_make_request('status', payload)
+            response_data = self.provider_id._hdfc_upi_make_request('status', payload)
 
             # Process encrypted response - HDFC always returns plain text (encrypted)
             if response_data:

@@ -148,9 +148,9 @@ QR_CODE_CONFIG = {
 # Payment status mapping for HDFC UPI responses
 PAYMENT_STATUS_MAPPING = {
     'pending': ('PENDING'),
-    'done': ('SUCCESS'),
-    'cancel': ('FAILED', 'REJECTED', 'EXPIRED'),
-    'error': ('ERROR', 'UNKNOWN'),
+    'done': ('SUCCESS', 'S', 'Success'),
+    'cancel': ('FAILED', 'Failed', 'FAILURE', 'REJECTED', 'EXPIRED'),
+    'error': ('ERROR', 'UNKNOWN', 'MC04'),
 }
 
 # UPI URL parameters template
@@ -182,13 +182,6 @@ VALIDATION_PATTERNS = {
     'upi_vpa': r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+$',
     'order_number': r'^PQ\d+\d{13}$',
     'refund_number': r'^RF\w+\d{10}$',
-}
-
-# API request configuration
-API_CONFIG = {
-    'timeout': 60,
-    'verify_https': True,
-    'content_type': 'application/json',
 }
 
 # Refund configuration

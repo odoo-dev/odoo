@@ -1,6 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import json
 import logging
 import pprint
 
@@ -10,7 +9,6 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 from odoo.addons.payment_hdfc_upi_qr import const
-from odoo.addons.payment_hdfc_upi_qr import utils as hdfc_upi_utils
 
 _logger = logging.getLogger(__name__)
 
@@ -79,72 +77,46 @@ class PaymentProvider(models.Model):
 
     # === BUSINESS METHODS - PAYMENT FLOW === #
 
-    def _hdfc_upi_make_request(self, endpoint, payload=None, method='POST'):
+    def _hdfc_upi_make_request(self, endpoint, payload=None):
         """ Make a request to HDFC UPI API at the specified endpoint.
 
         Note: self.ensure_one()
 
         :param str endpoint: The endpoint to be reached by the request.
         :param dict payload: The payload of the request.
-        :param str method: The HTTP method of the request.
         :return: The JSON-formatted content of the response.
         :rtype: dict
         :raise: ValidationError if an HTTP error occurs.
         """
         self.ensure_one()
 
-        api_url = self._hdfc_upi_get_api_url(endpoint)
-        timeout = const.API_CONFIG['timeout']
-
+        url = self._hdfc_upi_get_api_url(endpoint)
         headers = {
-            'Content-Type': const.API_CONFIG['content_type'],
+            'Content-Type': 'application/json',
             'Accept': 'application/json',
         }
 
         try:
-            _logger.info("Sending '%s' request to %s:\n%s", method, api_url, pprint.pformat(payload))
-            response = requests.request(
-                method,
-                api_url,
+            _logger.info("Sending 'POST' request to %s:\n%s", url, pprint.pformat(payload))  # will be removed after testing
+            response = requests.post(
+                url,
                 json=payload,
                 headers=headers,
-                timeout=timeout
+                timeout=60
             )
-
-            try:
-                response.raise_for_status()
-            except requests.exceptions.HTTPError:
-                _logger.exception(
-                    "Invalid API request at %s with data:\n%s\nResponse:\n%s",
-                    api_url, pprint.pformat(payload), response.text
-                )
-                error_message = _("API request failed with status %s", response.status_code)
-                try:
-                    error_data = response.json()
-                    if 'message' in error_data:
-                        error_message = error_data['message']
-                except (ValueError, KeyError):
-                    pass
-
-                raise ValidationError(_("HDFC UPI: %s", error_message))
-
-        except requests.exceptions.ConnectionError:
-            _logger.exception("Unable to reach HDFC UPI endpoint at %s", api_url)
-            raise ValidationError("HDFC UPI: " + _("Could not establish connection to the API."))
-        except requests.exceptions.Timeout:
-            _logger.exception("Timeout while connecting to HDFC UPI endpoint at %s", api_url)
-            raise ValidationError("HDFC UPI: " + _("Request timed out. Please try again."))
-        except requests.exceptions.RequestException:
-            _logger.exception("Request error while connecting to HDFC UPI")
-            raise ValidationError("HDFC UPI: " + _("Network error occurred. Please try again."))
-
-        try:
-            response_data = response.json()
-            _logger.info("Response from HDFC UPI API:\n%s", pprint.pformat(response_data))
-            return response_data
-        except ValueError:
-            _logger.error("Invalid JSON response from HDFC UPI API: %s", response.text)
-            raise ValidationError("HDFC UPI: " + _("Invalid response format from API."))
+            response.raise_for_status()
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            _logger.exception("Unable to reach HDFC UPI endpoint at %s", url)
+            raise ValidationError("HDFC UPI: " + _("Could not establish the connection to the API."))
+        except requests.exceptions.HTTPError as err:
+            _logger.exception(
+                "Invalid API request at %s with data:\n%s", url, pprint.pformat(payload)
+            )
+            error_message = err.response.json().get('message')
+            raise ValidationError(
+                "HDFC UPI: " + _("HDFC UPI gave us the following information: '%s'", error_message)
+            )
+        return response.json()
 
     # === BUSINESS METHODS - GETTERS === #
 
@@ -180,39 +152,3 @@ class PaymentProvider(models.Model):
         )
         endpoint_path = const.API_ENDPOINTS.get(endpoint, '')
         return f"{base_url}{endpoint_path}"
-
-    def _hdfc_upi_get_inline_form_values(self, amount=None, currency=None, reference=None):
-        """ Return a serialized JSON of the required values to render the inline form.
-
-        Note: self.ensure_one()
-
-        :param float amount: The transaction amount.
-        :param res.currency currency: The transaction currency.
-        :param str reference: The transaction reference.
-        :return: The JSON serial of the required values to render the inline form.
-        :rtype: str
-        """
-        self.ensure_one()
-
-        # Validate currency
-        if currency and currency.name != 'INR':
-            raise ValidationError(_("HDFC UPI only supports INR currency"))
-
-        # Validate amount
-        if amount:
-            is_valid, error_message = hdfc_upi_utils.validate_transaction_amount(amount, 'INR')
-            if not is_valid:
-                raise ValidationError(_("HDFC UPI: %s", error_message))
-
-        inline_form_values = {
-            'merchant_id': self.hdfc_upi_merchant_id,
-            'merchant_name': hdfc_upi_utils.sanitize_merchant_name(self.hdfc_upi_merchant_name),
-            'merchant_vpa': self.company_id.l10n_in_upi_id,
-            'merchant_category': self.hdfc_upi_merchant_category or '0000',
-            'formatted_amount': hdfc_upi_utils.format_upi_amount(amount) if amount else '0.00',
-            'currency_code': 'INR',
-            'reference': reference or '',
-            'qr_config': const.QR_CODE_CONFIG,
-        }
-
-        return json.dumps(inline_form_values)

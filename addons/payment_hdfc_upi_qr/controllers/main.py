@@ -24,23 +24,12 @@ class HdfcUpiController(http.Controller):
     def hdfc_upi_callback(self, **post):
         """Process the notification data sent by HDFC UPI after a transaction.
 
-        The route is flagged with `save_session=False` to prevent Odoo from assigning a new session
-        to the user if they are redirected to this route with a POST request. Indeed, as the session
-        cookie is created without a `SameSite` attribute, some browsers that don't implement the
-        recommended default `SameSite=Lax` behavior will not include the cookie in the redirection
-        request from the payment provider to Odoo.
-
         HDFC UPI Callback API Details:
         - Request Method: POST
         - Content Type: Application/JSON
         - Query Parameters: meRes (encrypted response), pgMerchantId (merchant ID)
         - Expected Response: HTTP 200
         - Response Format: 21 pipe-separated fields as per HDFC UPI specification
-
-        Security Notes:
-        - csrf=False is justified: External payment gateway callback (PY022 exception)
-        - auth='public' is required: HDFC UPI server callbacks have no Odoo session
-        - All inputs are validated and encrypted data is properly decrypted
 
         :param dict post: POST data containing encrypted response and merchant ID
         :return: HTTP response with status 200 to acknowledge the notification
