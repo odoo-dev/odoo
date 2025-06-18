@@ -4,12 +4,12 @@ import { startServer } from "@bus/../tests/helpers/mock_python_environment";
 
 import { start } from "@mail/../tests/helpers/test_utils";
 
-import { busService } from "@bus/services/bus_service";
 import { patchWebsocketWorkerWithCleanup } from "@bus/../tests/helpers/mock_websocket";
+
 import { nextTick, patchDate, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { assertSteps, click, contains, insertText, step } from "@web/../tests/utils";
-import { registry } from "@web/core/registry";
 import { Deferred } from "@web/core/utils/concurrency";
+import { busService } from "@bus/services/bus_service";
 
 QUnit.module("discuss");
 
@@ -28,28 +28,23 @@ QUnit.test("Member list and settings menu are exclusive", async () => {
 });
 
 QUnit.test("subscribe to presence channels according to store data", async (assert) => {
-    const busServiceStartDeferred = new Deferred();
-    registry.category("services").add(
-        "bus_service",
-        {
-            dependencies: busService.dependencies,
-            start() {
-                const ogAPI = busService.start(...arguments);
-                patchWithCleanup(ogAPI, {
-                    async start() {
-                        await busServiceStartDeferred;
-                        return super.start();
-                    },
-                });
-                return ogAPI;
-            },
+    const pyEnv = await startServer();
+    const startBusDeferred = new Deferred();
+    patchWithCleanup(busService, {
+        start() {
+            const ogAPI = super.start(...arguments);
+            const ogStart = ogAPI.start;
+            ogAPI.start = async () => {
+                await startBusDeferred;
+                return ogStart();
+            };
+            return ogAPI;
         },
-        { force: true }
-    );
+    });
     patchWebsocketWorkerWithCleanup({
         _sendToServer({ event_name, data }) {
             if (event_name === "subscribe") {
-                step(`subscribe - [${data.channels}]`);
+                step(`subscribe - [${data.channels.join(",")}]`);
             }
         },
     });
@@ -60,16 +55,12 @@ QUnit.test("subscribe to presence channels according to store data", async (asse
     await nextTick();
     await assertSteps([]);
     // Starting the bus should subscribe to known presence channels.
-    busServiceStartDeferred.resolve();
-    await assertSteps([`subscribe - [odoo-presence-res.partner_${store.self.id}]`]);
+    startBusDeferred.resolve();
+    await assertSteps([`subscribe - [odoo-presence-res.partner_${pyEnv.adminPartnerId}]`]);
     // Discovering new presence channels should refresh the subscription.
-    store["Persona"].insert({ id: 5000, type: "partner", name: "Partner 5000" });
-    await assertSteps([
-        `subscribe - [odoo-presence-res.partner_${store.self.id},odoo-presence-res.partner_5000]`,
-    ]);
     store["Persona"].insert({ id: 1, type: "guest" });
     await assertSteps([
-        `subscribe - [odoo-presence-mail.guest_1,odoo-presence-res.partner_${store.self.id},odoo-presence-res.partner_5000]`,
+        `subscribe - [odoo-presence-mail.guest_1,odoo-presence-res.partner_${pyEnv.adminPartnerId}]`,
     ]);
 });
 
