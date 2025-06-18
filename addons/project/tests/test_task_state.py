@@ -103,7 +103,7 @@ class TestTaskState(TestProjectCommon):
         (self.task_1 + self.task_2).write({
             'project_id': project_pigs.id
         })
-        # self.task_1._onchange_project_id()
+        self.task_1._onchange_project_id()
         self.assertEqual(self.task_1.state, '01_in_progress', "task_1 state should automatically switch back to in_progress when its project changes")
         self.assertEqual(self.task_2.state, '01_in_progress', "task_2 state should automatically switch back to in_progress when its project changes")
 

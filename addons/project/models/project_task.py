@@ -368,7 +368,7 @@ class ProjectTask(models.Model):
             elif task.display_in_project and task.project_id == task.parent_id.sudo().project_id:
                 task.display_in_project = False
 
-    @api.depends('stage_id', 'depend_on_ids.state')
+    @api.depends('depend_on_ids.state')
     def _compute_state(self):
         for task in self:
             dependent_open_tasks = []
@@ -380,28 +380,7 @@ class ProjectTask(models.Model):
                 if task.state not in CLOSED_STATES:
                     task.state = '04_waiting_normal'
             # if the task as no blocking dependencies and is in waiting_normal, the task goes back to in progress
-            # elif (
-            #     task.state == '04_waiting_normal'
-            #     or not task._is_stage_shared_with_project()
-            #     or (
-            #         self._origin.stage_id != self.stage_id
-            #         and task.state not in CLOSED_STATES
-            #     )
-            # ):
-            #     task.state = '01_in_progress'
-            elif (
-                (task.env.context.get('project_kanban') and task.state not in CLOSED_STATES)
-                or (
-                    not task.env.context.get('project_kanban') and (
-                        task.state == '04_waiting_normal'
-                        or not task._is_stage_shared_with_project()
-                        or (
-                            task._origin.stage_id != task.stage_id
-                            and task.state not in CLOSED_STATES
-                        )
-                    )
-                )
-            ):
+            elif task.state not in CLOSED_STATES:
                 task.state = '01_in_progress'
 
     @api.depends('state')
@@ -423,10 +402,15 @@ class ProjectTask(models.Model):
         """ Return a list of the technical names complementing the CLOSED_STATES, a.k.a the open states """
         return list(set(self._fields['state'].get_values(self.env)) - set(CLOSED_STATES))
 
-    @api.onchange('project_id')
-    def _onchange_project_id(self):
+    @api.onchange('stage_id')
+    def _onchange_stage_id(self):
         if self.state != '04_waiting_normal' and not self._is_stage_shared_with_project():
             self.state = '01_in_progress'
+
+        if self.child_ids:
+            for task in self.child_ids:
+                if self.project_id not in task._origin.stage_id.project_ids:
+                    task.state = '01_in_progress'
 
     def is_blocked_by_dependences(self):
         return any(blocking_task.state not in CLOSED_STATES for blocking_task in self.depend_on_ids)
@@ -1239,9 +1223,8 @@ class ProjectTask(models.Model):
         if 'stage_id' in vals:
             if not 'project_id' in vals and self.filtered(lambda t: not t.project_id):
                 raise UserError(_('You can only set a personal stage on a private task.'))
-            if 'project_id' not in vals:
-                self.filtered(lambda t: (t.state != '04_waiting_normal' and t.state not in CLOSED_STATES)).state = '01_in_progress'
-                # self.filtered(lambda t: (t.state != '04_waiting_normal' and t.state not in CLOSED_STATES)).write({'state': '01_in_progress'})
+
+            self.filtered(lambda t: t.state not in CLOSED_STATES and t.state != '04_waiting_normal').state = '01_in_progress'
             additional_vals.update(self.update_date_end(vals['stage_id']))
             additional_vals['date_last_stage_update'] = now
         task_ids_without_user_set = set()
@@ -1279,6 +1262,9 @@ class ProjectTask(models.Model):
             project = self.env['project.project'].browse(vals.get('project_id'))
             notification_subtype_id = self.env['ir.model.data']._xmlid_to_res_id('project.mt_project_task_new')
             partner_ids = project.message_follower_ids.filtered(lambda follower: notification_subtype_id in follower.subtype_ids.ids).partner_id.ids
+            for task in self:
+                if task.child_ids:
+                    task.child_ids.filtered(lambda t: t.state != '04_waiting_normal' and vals.get('project_id') not in t.stage_id.project_ids.ids).state = '01_in_progress'
             if partner_ids:
                 link_per_project_id = {}
                 for task in self:
@@ -1324,7 +1310,7 @@ class ProjectTask(models.Model):
                         task.state = '04_waiting_normal'
                 task.date_last_stage_update = now
         elif 'project_id' in vals:
-            self.filtered(lambda t: (t.state != '04_waiting_normal') and not (t._is_stage_shared_with_project())).state = '01_in_progress'
+            self.filtered(lambda t: t.state != '04_waiting_normal' and not t._is_stage_shared_with_project()).state = '01_in_progress'
 
         # Do not recompute the state when changing the parent (to avoid resetting the state)
         if 'parent_id' in vals:
