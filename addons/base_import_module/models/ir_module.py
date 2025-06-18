@@ -12,6 +12,7 @@ import zipfile
 from collections import defaultdict
 from io import BytesIO
 from os.path import join as opj
+import traceback
 
 from odoo import api, fields, models, _
 from odoo.exceptions import AccessDenied, AccessError, UserError
@@ -19,7 +20,7 @@ from odoo.http import request
 from odoo.modules.module import adapt_version, MANIFEST_NAMES
 from odoo.osv.expression import is_leaf
 from odoo.release import major_version
-from odoo.tools import convert_csv_import, convert_sql_import, convert_xml_import, exception_to_unicode
+from odoo.tools import convert_csv_import, convert_sql_import, convert_xml_import
 from odoo.tools import file_open, file_open_temporary_directory, ormcache
 
 _logger = logging.getLogger(__name__)
@@ -313,9 +314,10 @@ class IrModule(models.Model):
                         self.sudo()._import_module(mod_name, path, force=force, with_demo=with_demo)
                     except Exception as e:
                         raise UserError(_(
-                            "Error while importing module '%(module)s'.\n\n %(error_message)s \n\n",
-                            module=mod_name, error_message=exception_to_unicode(e),
-                        ))
+                            "Error while importing module '%(module)s'.\n\n\n"
+                            "Hereafter is the complete traceback:\n\n%(error_message)s\n\n",
+                            module=mod_name, error_message=traceback.format_exc(),
+                        )) from e
         return "", module_names
 
     def module_uninstall(self):
