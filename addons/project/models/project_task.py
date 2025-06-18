@@ -380,12 +380,26 @@ class ProjectTask(models.Model):
                 if task.state not in CLOSED_STATES:
                     task.state = '04_waiting_normal'
             # if the task as no blocking dependencies and is in waiting_normal, the task goes back to in progress
+            # elif (
+            #     task.state == '04_waiting_normal'
+            #     or not task._is_stage_shared_with_project()
+            #     or (
+            #         self._origin.stage_id != self.stage_id
+            #         and task.state not in CLOSED_STATES
+            #     )
+            # ):
+            #     task.state = '01_in_progress'
             elif (
-                task.state == '04_waiting_normal'
-                or not task._is_stage_shared_with_project()
+                (task.env.context.get('project_kanban') and task.state not in CLOSED_STATES)
                 or (
-                    self._origin.stage_id != self.stage_id
-                    and task.state not in CLOSED_STATES
+                    not task.env.context.get('project_kanban') and (
+                        task.state == '04_waiting_normal'
+                        or not task._is_stage_shared_with_project()
+                        or (
+                            task._origin.stage_id != task.stage_id
+                            and task.state not in CLOSED_STATES
+                        )
+                    )
                 )
             ):
                 task.state = '01_in_progress'
