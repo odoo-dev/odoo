@@ -242,7 +242,7 @@
                                         <span t-if="record.count_picking_ready.raw_value > 0">
                                             <field name="count_picking_ready"/>
                                             <t t-if="record.code.raw_value === 'incoming'"> To Receive</t>
-                                            <t t-elif="record.code.raw_value === 'outgoing'" t-id="outgoing_label"> To Deliver</t>
+                                            <t t-elif="record.code.raw_value === 'outgoing'" name="outgoing_label"> To Deliver</t>
                                             <t t-else=""> To Process</t>
                                         </span>
                                         <span t-else="">Open</span>

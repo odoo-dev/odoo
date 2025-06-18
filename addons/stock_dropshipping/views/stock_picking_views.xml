@@ -31,8 +31,8 @@
         <field name="model">stock.picking.type</field>
         <field name="inherit_id" ref="stock.stock_picking_type_kanban"/>
         <field name="arch" type="xml">
-            <xpath expr="//t[@t-id='outgoing_label']" position="after">
-                <t t-elif="record.code.raw_value === 'dropship'" t-id="dropship_label"> To Validate</t>
+            <xpath expr="//t[@name='outgoing_label']" position="after">
+                <t t-elif="record.code.raw_value === 'dropship'" name="dropship_label"> To Validate</t>
             </xpath>
         </field>
     </record>
