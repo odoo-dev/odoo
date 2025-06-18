@@ -12,7 +12,7 @@ export class ActionpadWidget extends Component {
         onClickMore: { type: Function, optional: true },
         actionName: String,
         actionToTrigger: Function,
-        fastValidate: Function,
+        fastValidate: { type: Function, optional: true },
         showActionButton: { type: Boolean, optional: true },
     };
     static defaultProps = {

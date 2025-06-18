@@ -26,7 +26,7 @@
                 />
                 <t t-if="this.pos.config.set_fast_payment_methods and this.pos.config.fast_payment_method_ids.length" t-foreach="this.pos.config.fast_payment_method_ids" t-as="paymentMethod" t-key="paymentMethod.id">
                     <button class="pay pay-order-button button btn btn-secondary btn-lg py-3 d-flex align-items-center justify-content-center flex-fill"
-                        t-on-click="props.fastValidate"
+                        t-on-click="() => props.fastValidate(paymentMethod)"
                         t-esc="paymentMethod.name"
                     />
                 </t>

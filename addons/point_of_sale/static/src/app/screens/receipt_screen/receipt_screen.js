@@ -43,7 +43,7 @@ export class ReceiptScreen extends Component {
         });
     }
     get currentOrder() {
-        return this.pos.getOrder();
+        return this.pos.models["pos.order"].getBy("uuid", this.props.orderUuid);
     }
     get orderAmountPlusTip() {
         const order = this.currentOrder;

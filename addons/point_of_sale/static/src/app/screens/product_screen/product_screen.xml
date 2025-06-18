@@ -17,7 +17,7 @@
                             actionName.translate="Payment"
                             actionToTrigger="() => pos.pay()"
                             showActionButton="!currentOrder?.isEmpty()"
-                            fastValidate="fastValidate"
+                            fastValidate="(paymentMethod) => this.fastValidate(paymentMethod)"
                         />
                     </div>
                 </div>
@@ -80,6 +80,7 @@
                 </t>
             </div>
         </div>
+        <div class="virtual-payment-screen"/>
     </t>
 
 </templates>

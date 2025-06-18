@@ -5,7 +5,15 @@ import { useLongPress } from "@point_of_sale/app/hooks/long_press_hook";
 import { useBarcodeReader } from "@point_of_sale/app/hooks/barcode_reader_hook";
 import { _t } from "@web/core/l10n/translation";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
-import { Component, onMounted, useEffect, useState, onWillRender, onWillUnmount } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    useEffect,
+    useState,
+    onWillRender,
+    onWillUnmount,
+    App,
+} from "@odoo/owl";
 import { CategorySelector } from "@point_of_sale/app/components/category_selector/category_selector";
 import { Input } from "@point_of_sale/app/components/inputs/input/input";
 import {
@@ -26,6 +34,8 @@ import { BarcodeVideoScanner } from "@web/core/barcode/barcode_video_scanner";
 import { OptionalProductPopup } from "@point_of_sale/app/components/popups/optional_products_popup/optional_products_popup";
 import { useRouterParamsChecker } from "@point_of_sale/app/hooks/pos_router_hook";
 import { debounce } from "@web/core/utils/timing";
+import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
+import { getTemplate } from "@web/core/templates";
 
 const { DateTime } = luxon;
 
@@ -396,9 +406,17 @@ export class ProductScreen extends Component {
         }
     }
 
-    async fastValidate() {
-        debugger
-        this.paymentScreen.validateOrder(false)
+    async fastValidate(paymentMethod) {
+        const virtualPaymentScreenEl = document.querySelector(".virtual-payment-screen");
+        const app = new App(PaymentScreen, {
+            getTemplate,
+            props: { orderUuid: this.currentOrder.uuid },
+            translateFn: _t,
+            env: this.env,
+        });
+        const paymentScreen = await app.mount(virtualPaymentScreenEl);
+        await paymentScreen.addNewPaymentLine(paymentMethod);
+        await paymentScreen.validateOrder(false);
     }
 }
 
