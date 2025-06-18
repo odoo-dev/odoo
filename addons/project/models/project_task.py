@@ -1262,7 +1262,6 @@ class ProjectTask(models.Model):
         project_link_per_task_id = {}
         if vals.get('project_id'):
             self.filtered(lambda t: vals.get('project_id') not in t.stage_id.project_ids.ids).state = '01_in_progress'
-            # self.filtered(lambda t: vals.get('project_id') not in t.stage_id.project_ids.ids).write({'state': '01_in_progress'})
             project = self.env['project.project'].browse(vals.get('project_id'))
             notification_subtype_id = self.env['ir.model.data']._xmlid_to_res_id('project.mt_project_task_new')
             partner_ids = project.message_follower_ids.filtered(lambda follower: notification_subtype_id in follower.subtype_ids.ids).partner_id.ids
