@@ -155,7 +155,7 @@ export class BottomSheet extends Component {
 
         // Use setTimeout for the initial animation since it has a specific duration
         setTimeout(() => {
-            this.sheetHandleRef.el?.focus();
+            //this.sheetHandleRef.el?.focus();
             this.state.isSnappingEnabled = true;
         }, animationDuration);
     }
