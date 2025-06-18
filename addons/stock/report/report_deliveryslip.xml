@@ -189,7 +189,6 @@
                             </tbody>
                         </table>
                     </div>
-
                     <div t-if="not o.signature" class="oe_structure"></div>
                     <div t-else="" class="mt32 ml64 mr4" name="signature">
                         <div class="offset-8">
