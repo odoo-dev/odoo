@@ -374,26 +374,14 @@ class ProjectTask(models.Model):
             dependent_open_tasks = []
             if task.allow_task_dependencies:
                 dependent_open_tasks = [dependent_task for dependent_task in task.depend_on_ids if dependent_task.state not in CLOSED_STATES]
-            # here we check that the blocked task is not already in a closed state (if the task is already done we don't put it in waiting state)
-            # if task.state not in CLOSED_STATES:
+            # if one of the blocking task is in a blocking state
             if dependent_open_tasks:
                 # here we check that the blocked task is not already in a closed state (if the task is already done we don't put it in waiting state)
                 if task.state not in CLOSED_STATES:
                     task.state = '04_waiting_normal'
-            # elif (
-            #     not (task._is_stage_shared_with_project())
-            #     or (task._origin.project_id != task.project_id and self._origin.stage_id != self.stage_id and task.state not in CLOSED_STATES)
-            #      and ( (task._origin.project_id != task.project_id and self._origin.stage_id != self.stage_id)
-            #      or (task._origin.project_id == task.project_id and self._origin.stage_id != self.stage_id and task.state not in CLOSED_STATES))
-            # ):
-            #     task.state = '01_in_progress'   
-            # elif not (task._is_stage_shared_with_project()) or (task._origin.project_id != task.project_id and self._origin.stage_id != self.stage_id) or (
-            #     (task.stage_id != task._origin.stage_id)
-            #     or task.env.context.get('project_kanban')
-            # ) and task.state not in CLOSED_STATES:
-            #     task.state = '01_in_progress'       
+            # if the task as no blocking dependencies and is in waiting_normal, the task goes back to in progress
             elif (
-                task.state == '04_waiting_normal'  # for remove sub task so not set in_progress
+                task.state == '04_waiting_normal'
                 or not task._is_stage_shared_with_project()
                 or (
                     self._origin.stage_id != self.stage_id
@@ -401,8 +389,6 @@ class ProjectTask(models.Model):
                 )
             ):
                 task.state = '01_in_progress'
- 
-   
 
     @api.depends('state')
     def _compute_is_closed(self):
@@ -686,7 +672,7 @@ class ProjectTask(models.Model):
             project = task.project_id or task.parent_id.project_id
             if project:
                 if project not in task.stage_id.project_ids:
-                    task.stage_id = task.stage_find(project.id, [('fold', '=', False)])   
+                    task.stage_id = task.stage_find(project.id, [('fold', '=', False)])
             else:
                 task.stage_id = False
 
@@ -1239,13 +1225,11 @@ class ProjectTask(models.Model):
         if 'stage_id' in vals:
             if not 'project_id' in vals and self.filtered(lambda t: not t.project_id):
                 raise UserError(_('You can only set a personal stage on a private task.'))
-
-            additional_vals.update(self.update_date_end(vals['stage_id']))
-            additional_vals['date_last_stage_update'] = now
             if 'project_id' not in vals:
                 self.filtered(lambda t: (t.state != '04_waiting_normal' and t.state not in CLOSED_STATES)).state = '01_in_progress'
-                # self.filtered(lambda t: (t.state != '04_waiting_normal' and t.state not in CLOSED_STATES)).write({'state': '01_in_progress'})  # failed test case line number 93
-
+                # self.filtered(lambda t: (t.state != '04_waiting_normal' and t.state not in CLOSED_STATES)).write({'state': '01_in_progress'})
+            additional_vals.update(self.update_date_end(vals['stage_id']))
+            additional_vals['date_last_stage_update'] = now
         task_ids_without_user_set = set()
         if 'user_ids' in vals and 'date_assign' not in vals:
             # prepare update of date_assign after super call
@@ -1275,12 +1259,8 @@ class ProjectTask(models.Model):
 
         # sends an email to the 'Task Creation' subtype subscribers
         # When project_id is changed
-        # breakpoint()
         project_link_per_task_id = {}
         if vals.get('project_id'):
-            # for task in self:
-            #     if not (vals.get('project_id') in task.stage_id.project_ids.ids):
-            #         task.state = '01_in_progress'
             self.filtered(lambda t: vals.get('project_id') not in t.stage_id.project_ids.ids).state = '01_in_progress'
             # self.filtered(lambda t: vals.get('project_id') not in t.stage_id.project_ids.ids).write({'state': '01_in_progress'})
             project = self.env['project.project'].browse(vals.get('project_id'))
@@ -1306,7 +1286,6 @@ class ProjectTask(models.Model):
             vals.update(additional_vals)
         elif additional_vals:
             super(ProjectTask, self.sudo()).write(additional_vals)
-        # breakpoint()    
         result = super().write(vals)
 
         if 'user_ids' in vals:
@@ -1332,7 +1311,7 @@ class ProjectTask(models.Model):
                         task.state = '04_waiting_normal'
                 task.date_last_stage_update = now
         elif 'project_id' in vals:
-            self.filtered(lambda t: (t.state != '04_waiting_normal' and not t._is_stage_shared_with_project)).state = '01_in_progress'
+            self.filtered(lambda t: (t.state != '04_waiting_normal') and not (t._is_stage_shared_with_project())).state = '01_in_progress'
 
         # Do not recompute the state when changing the parent (to avoid resetting the state)
         if 'parent_id' in vals:
@@ -1357,7 +1336,7 @@ class ProjectTask(models.Model):
                     email_layout_xmlid='mail.mail_notification_layout',
                     notify_author_mention=False,
                     record_name=task.display_name,
-               )         
+               )
         return result
 
     def unlink(self):
