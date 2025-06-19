@@ -32,7 +32,7 @@
 
                 <!-- Sheet container -->
                 <div
-                    class="o_bottom_sheet_sheet offcanvas position-relative overflow-hidden"
+                    class="o_bottom_sheet_sheet offcanvas position-relative overflow-hidden bg-light"
                     role="dialog"
                     t-ref="sheet"
                     >
@@ -42,10 +42,10 @@
                         tabindex="-1"
                         t-ref="sheetHandle"
                         role="button"
-                        class="o_bottom_sheet_handle text-center d-flex align-items-center justify-content-center opacity-50 pt-2 pb-1"
+                        class="o_bottom_sheet_handle text-center d-flex align-items-center justify-content-center pt-2 pb-1 opacity-50"
                         t-on-click.stop="slideOut"
                         >
-                        <div class="o_bottom_sheet_handle_bar pt-1 mx-auto rounded-pill d-inline-block px-5 opacity-25"/>
+                        <div class="o_bottom_sheet_handle_bar pt-1 mx-auto rounded-pill d-inline-block px-5 bg-dark"/>
                     </div>
 
                     <!-- Body content -->
