@@ -7906,7 +7906,7 @@ test("edit the kanban color with the colorpicker", async () => {
         })
     ).toHaveCount(12, { message: "the color picker should have 12 children (the colors)" });
 
-    await contains(".o_kanban_colorpicker a.o_kanban_color_9").click();
+    await contains(".o_kanban_colorpicker .o_kanban_color_9").click();
 
     // should write on the color field
     expect.verifySteps(["write-color-9"]);
@@ -7938,7 +7938,7 @@ test("kanban with colorpicker and node with color attribute", async () => {
     });
     expect(getKanbanRecord({ index: 0 })).toHaveClass("o_kanban_color_3");
     await toggleKanbanRecordDropdown(0);
-    await contains(`.o_kanban_colorpicker li[title="Raspberry"] a.o_kanban_color_9`).click();
+    await contains(`.o_kanban_colorpicker .o_kanban_color_9[title="Raspberry"]`).click();
     // should write on the color field
     expect.verifySteps(["write-color-9"]);
     expect(getKanbanRecord({ index: 0 })).toHaveClass("o_kanban_color_9");
@@ -7970,7 +7970,7 @@ test("edit the kanban color with translated colors resulting in the same terms",
     });
 
     await toggleKanbanRecordDropdown(0);
-    await contains(".o_kanban_colorpicker a.o_kanban_color_9").click();
+    await contains(".o_kanban_colorpicker .o_kanban_color_9").click();
     expect(getKanbanRecord({ index: 0 })).toHaveClass("o_kanban_color_9");
 });
 
