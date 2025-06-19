@@ -14,7 +14,7 @@
         position: fixed;
         inset: auto 0 0;
         height: map-get($spacers, 4);
-        background: linear-gradient(transparent, lightgray);
+        background: linear-gradient(transparent, $gray-400);
         z-index: $zindex-offcanvas;
         pointer-events: none;
     }
@@ -48,9 +48,9 @@
         }
 
         &::after {
-            @container scroll-state(scrollable: bottom) {
-                @include has-more-content-visual;
-            }
+            @include has-more-content-visual;
+            opacity: 0;
+            transition: opacity .4s;
         }
     }
 
@@ -160,6 +160,12 @@
             z-index: $zindex-offcanvas;
             transform: translateY(calc((1 - var(--BottomSheet-progress)) * 150%)) translateX(-50%);
             content: "";
+        }
+
+        &::after {
+            @container scroll-state(scrollable: bottom) {
+                opacity: 1;
+            }
         }
     }
 
