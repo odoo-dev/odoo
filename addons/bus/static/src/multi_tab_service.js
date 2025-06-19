@@ -1,5 +1,6 @@
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
+import { Deferred } from "@web/core/utils/concurrency";
 import { EventBus } from "@odoo/owl";
 
 export const multiTabService = {
@@ -13,6 +14,7 @@ export const multiTabService = {
         const onBecomeMainTabHandlers = [];
         let unregistered = false;
         let masterId = null;
+        let electionDeferred = new Deferred();
         let lastHeardFromMaster = Date.now();
         let electionTimeout;
         let heartbeatCheckInterval;
@@ -46,7 +48,7 @@ export const multiTabService = {
 
         function becomeMaster() {
             clearAllTimeouts();
-            masterId = id;
+            setMasterId(id);
             channel.postMessage({ type: "become_main_tab", id: id });
             bus.trigger("become_main_tab");
             setHeartbeatInterval();
@@ -56,6 +58,13 @@ export const multiTabService = {
             clearTimeout(electionTimeout);
             clearInterval(heartbeatCheckInterval);
             clearInterval(heartbeatInterval);
+        }
+
+        function setMasterId(id) {
+            masterId = id;
+            if (electionDeferred) {
+                electionDeferred.resolve(id);
+            }
         }
 
         function setElectionTimeout() {
@@ -85,6 +94,7 @@ export const multiTabService = {
 
         function startElection() {
             clearAllTimeouts();
+            electionDeferred = new Deferred();
             channel.postMessage({ type: "election", id: id });
             bus.trigger("election");
             setElectionTimeout();
@@ -122,6 +132,8 @@ export const multiTabService = {
                 lastHeardFromMaster = Date.now();
                 if (msg.id === masterId) {
                     return;
+                } else if (!masterId) {
+                    setMasterId(msg.id);
                 } else if (masterId === id) {
                     if (msg.id > masterId) {
                         channel.postMessage({ type: "no_longer_main_tab", id: id });
@@ -136,7 +148,7 @@ export const multiTabService = {
                 if (msg.id > id) {
                     clearTimeout(electionTimeout);
                     setHeartbeatCheckInterval();
-                    masterId = msg.id;
+                    setMasterId(msg.id);
                 } else {
                     channel.postMessage({ type: "election", id: id });
                     setElectionTimeout();
@@ -163,7 +175,11 @@ export const multiTabService = {
             get currentTabId() {
                 return id;
             },
-            isOnMainTab() {
+            async isOnMainTab() {
+                if (masterId) {
+                    return masterId === id;
+                }
+                await electionDeferred;
                 return masterId === id;
             },
             /**

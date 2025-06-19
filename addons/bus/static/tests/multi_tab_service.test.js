@@ -1,5 +1,4 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { advanceTime } from "@odoo/hoot-mock";
 import { makeMockEnv, patchWithCleanup, restoreRegistry } from "@web/../tests/web_test_helpers";
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
@@ -8,9 +7,7 @@ describe.current.tags("desktop");
 
 test("multi tab service elects new main on pagehide", async () => {
     const firstTabEnv = await makeMockEnv();
-    // wait for the first tab to become the main tab
-    await advanceTime(5000);
-    expect(firstTabEnv.services.multi_tab.isOnMainTab()).toBe(true);
+    expect(await firstTabEnv.services.multi_tab.isOnMainTab()).toBe(true);
     // Prevent second tab from receiving pagehide event.
     patchWithCleanup(browser, {
         addEventListener(eventName, callback) {
@@ -21,7 +18,7 @@ test("multi tab service elects new main on pagehide", async () => {
     });
     restoreRegistry(registry);
     const secondTabEnv = await makeMockEnv(null, { makeNew: true });
-    expect(secondTabEnv.services.multi_tab.isOnMainTab()).toBe(false);
+    expect(await secondTabEnv.services.multi_tab.isOnMainTab()).toBe(false);
     firstTabEnv.services.multi_tab.bus.addEventListener("no_longer_main_tab", () =>
         expect.step("tab1 no_longer_main_tab")
     );
@@ -34,8 +31,8 @@ test("multi tab service elects new main on pagehide", async () => {
     browser.dispatchEvent(new Event("pagehide"));
 
     await expect.waitForSteps(["tab1 no_longer_main_tab", "tab2 become_main_tab"]);
-    expect(firstTabEnv.services.multi_tab.isOnMainTab()).toBe(false);
-    expect(secondTabEnv.services.multi_tab.isOnMainTab()).toBe(true);
+    expect(await firstTabEnv.services.multi_tab.isOnMainTab()).toBe(false);
+    expect(await secondTabEnv.services.multi_tab.isOnMainTab()).toBe(true);
 });
 
 test("multi tab allow to share values between tabs", async () => {

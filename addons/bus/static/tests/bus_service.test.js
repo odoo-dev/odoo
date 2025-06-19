@@ -427,7 +427,7 @@ test("remove from main tab candidates when version is outdated", async () => {
     );
     startBusService();
     await waitForSteps(["connect"]);
-    expect(getService("multi_tab").isOnMainTab()).toBe(true);
+    expect(await getService("multi_tab").isOnMainTab()).toBe(true);
     MockServer.env["bus.bus"]._simulateDisconnection(
         WEBSOCKET_CLOSE_CODES.CLEAN,
         "OUTDATED_VERSION"
