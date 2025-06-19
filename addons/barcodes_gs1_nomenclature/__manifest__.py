@@ -18,10 +18,10 @@
             'barcodes_gs1_nomenclature/static/src/epc_model.js',
             'barcodes_gs1_nomenclature/static/src/epc_service.js',
         ],
-        'web.qunit_suite_tests': ['barcodes/static/tests/legacy/basic/**/*.js'],
+        'web.qunit_suite_tests': ['barcodes/static/tests/legacy/helpers.js'],
         'web.assets_unit_tests': [
             'barcodes_gs1_nomenclature/static/src/tests/**/*.js',
-            ('remove', 'barcodes_gs1_nomenclature/static/src/tests/legacy/**/*',),  # to remove when all legacy tests are ported
+            ('remove', 'barcodes_gs1_nomenclature/static/src/tests/legacy/**/*'),  # to remove when all legacy tests are ported
         ],
     },
     'author': 'Odoo S.A.',

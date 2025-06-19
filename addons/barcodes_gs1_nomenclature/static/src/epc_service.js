@@ -143,7 +143,7 @@ function toElementString(model){
     const identifiers = Object.entries(aiDict);
     let elementString = "";
 
-    for(identifier in identifiers){
+    for(const identifier in identifiers){
         if(aiDict[identifier] === null){
             elementString += getAi(identifier, model);
         } else {
@@ -205,7 +205,7 @@ function getGs1Checksum(data){
     // Note : same method is used for multiple data structures up to 17 digits (excluding check digits).
     // Cf. https://ref.gs1.org/standards/genspecs/ §7.9.1
     // data = data.padStart(17, '0'); //Maybe not optimal, cheat on i value of incoming for loop instead
-    offset = 17 - data.length;
+    const offset = 17 - data.length;
     let sum = 0;
     for(let i = 0; i < data.length; i++){
         const value = parseInt(data.charAt(i))
@@ -228,7 +228,7 @@ export async function decode(hexString, asElementString = false){
 
     //Find template
     if (header in SCHEME_TEMPLATE && SCHEME_TEMPLATE[header] !== undefined) {
-        const template = SCHEME_TEMPLATE[header];
+        var template = SCHEME_TEMPLATE[header];
     } else {
         return null;
     }
