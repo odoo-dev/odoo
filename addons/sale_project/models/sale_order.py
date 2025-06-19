@@ -227,7 +227,6 @@ class SaleOrder(models.Model):
                 'default_sale_line_id': default_sale_line.id,
                 'default_partner_id': self.partner_id.id,
                 'default_user_ids': [self.env.uid],
-                'default_allow_billable': 1,
                 'hide_allow_billable': True,
                 'default_company_id': self.company_id.id,
                 'generate_milestone': default_sale_line.product_id.service_policy == 'delivered_milestones',
@@ -254,7 +253,6 @@ class SaleOrder(models.Model):
                 **self._context,
                 'default_partner_id': self.partner_id.id,
                 'default_sale_line_id': default_sale_line.id,
-                'default_allow_billable': 1,
             }
         }
         if len(self.with_context(active_test=False).project_ids) == 1:

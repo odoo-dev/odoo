@@ -24,7 +24,7 @@ class ProjectProject(models.Model):
         ])
         return domain
 
-    allow_billable = fields.Boolean("Billable")
+    allow_billable = fields.Boolean("Billable", default=True)
     sale_line_id = fields.Many2one(
         'sale.order.line', 'Sales Order Item', copy=False,
         compute="_compute_sale_line_id", store=True, readonly=False, index='btree_not_null',

@@ -113,7 +113,7 @@ class TestNestedTaskUpdate(TransactionCase):
             'name': 'child',
             'partner_id': False,
             'parent_id': parent.id,
-            'project_id': self.env['project.project'].create({'name': 'proute'}).id,
+            'project_id': self.env['project.project'].create({'name': 'proute', 'allow_billable': False}).id,
         })
         self.assertFalse(child.partner_id)
         parent.write({'partner_id': self.user.partner_id.id})

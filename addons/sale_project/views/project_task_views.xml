@@ -147,7 +147,7 @@
         <field name="inherit_id" ref="project.quick_create_task_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='project_id']" position="attributes">
-                <attribute name="context">{'default_allow_billable': True, 'default_type_ids': [(4, context.get('default_stage_id', False))]}
+                <attribute name="context">{'default_type_ids': [(4, context.get('default_stage_id', False))]}
                 </attribute>
             </xpath>
         </field>
@@ -238,9 +238,6 @@
                 <attribute name="column_invisible">not parent.allow_billable</attribute>
                 <attribute name="invisible">not allow_billable</attribute>
             </xpath>
-            <field name="project_id" position="attributes">
-                <attribute name="context">{'default_allow_billable': True}</attribute>
-            </field>
         </field>
     </record>
 

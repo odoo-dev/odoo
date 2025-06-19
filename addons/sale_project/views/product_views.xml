@@ -16,11 +16,11 @@
                 <div class="o_td_label d-inline-flex" invisible="service_tracking != 'task_global_project'">
                     <label for='project_id'/>
                 </div>
-                <field name="project_id" context="{'default_allow_billable': True}" invisible="service_tracking != 'task_global_project'" nolabel="1" placeholder="Defined on quotation"/>
+                <field name="project_id" invisible="service_tracking != 'task_global_project'" nolabel="1" placeholder="Defined on quotation"/>
                 <div class="o_td_label d-inline-flex" invisible="service_tracking not in ['task_in_project', 'project_only']">
                     <label for='project_template_id'/>
                 </div>
-                <field name="project_template_id" context="{'active_test': False, 'default_allow_billable': True, 'default_is_template': True}" invisible="service_tracking not in ['task_in_project', 'project_only']" nolabel="1" placeholder="Empty project"/>
+                <field name="project_template_id" context="{'active_test': False, 'default_is_template': True}" invisible="service_tracking not in ['task_in_project', 'project_only']" nolabel="1" placeholder="Empty project"/>
                 <field name="service_policy"
                     string="Invoicing Policy"
                     invisible="type != 'service' or sale_ok == False"
