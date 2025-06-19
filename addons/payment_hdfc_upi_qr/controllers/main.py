@@ -2,7 +2,6 @@
 
 import logging
 import pprint
-from datetime import datetime
 
 from werkzeug.exceptions import Forbidden
 
@@ -17,7 +16,6 @@ _logger = logging.getLogger(__name__)
 
 class HdfcUpiController(http.Controller):
     _callback_url = '/payment/hdfc_upi/callback'
-    _get_qr_data_url = '/payment/hdfc_upi/get_qr_data'
     _cancel_transaction_url = '/payment/hdfc_upi/cancel_transaction'
 
     @http.route(_callback_url, type='http', methods=['POST'], auth='public', csrf=False)
@@ -145,80 +143,6 @@ class HdfcUpiController(http.Controller):
         except ValidationError:
             _logger.exception("Unable to process notification for order: %s", order_no)
             raise
-
-    @http.route(f'{_get_qr_data_url}/<int:tx_id>', type='jsonrpc', auth='public')
-    def hdfc_upi_get_qr_data(self, tx_id, **kwargs):
-        """Get QR code data for the transaction (for modal display).
-
-        Retrieves or generates QR code data for the specified transaction,
-        used by the frontend to display the payment QR code to customers.
-
-        :param int tx_id: The transaction ID
-        :param dict kwargs: Additional parameters (unused)
-        :return: QR code data with success status and base64 encoded image
-        :rtype: dict
-        """
-        try:
-            _logger.info("Getting QR data for transaction: %s", tx_id)
-
-            # Get transaction using exists() to avoid access errors
-            tx_sudo = request.env['payment.transaction'].sudo().browse(tx_id).exists()
-
-            if not tx_sudo:
-                _logger.warning("Transaction not found: %s", tx_id)
-                return {'success': False, 'error': 'Transaction not found'}
-
-            if tx_sudo.provider_code != 'hdfc_upi':
-                _logger.warning("Transaction is not HDFC UPI: %s, provider: %s", tx_id, tx_sudo.provider_code)
-                return {'success': False, 'error': 'Invalid payment method'}
-
-            # Generate QR code if not already generated
-            if not tx_sudo.hdfc_upi_qr_code:
-                _logger.info("Generating QR code for transaction: %s", tx_id)
-                try:
-                    tx_sudo._hdfc_upi_generate_qr_code()
-                    _logger.info("QR code generated successfully for transaction: %s", tx_id)
-                except Exception:
-                    _logger.exception("Failed to generate QR code")
-                    return {'success': False, 'error': 'Failed to generate QR code'}
-
-            # Calculate expiry time in seconds from now
-            expiry_seconds = 0
-            if tx_sudo.hdfc_upi_qr_expiry:
-                now = datetime.now()
-                expiry_delta = tx_sudo.hdfc_upi_qr_expiry - now
-                expiry_seconds = max(0, int(expiry_delta.total_seconds()))
-
-            # Convert QR code to data URI
-            qr_code_data = None
-            if tx_sudo.hdfc_upi_qr_code:
-                try:
-                    # Handle both string and bytes
-                    if isinstance(tx_sudo.hdfc_upi_qr_code, bytes):
-                        qr_code_base64 = tx_sudo.hdfc_upi_qr_code.decode('utf-8')
-                    else:
-                        qr_code_base64 = tx_sudo.hdfc_upi_qr_code
-
-                    qr_code_data = f"data:image/png;base64,{qr_code_base64}"
-                except Exception:
-                    _logger.exception("Error creating QR code data URI")
-                    return {'success': False, 'error': 'Failed to process QR code'}
-
-            # Return QR data
-            return {
-                'success': True,
-                'qr_code': qr_code_data,
-                'qr_string': tx_sudo.hdfc_upi_qr_string,
-                'reference': tx_sudo.reference,
-                'amount': tx_sudo.amount,
-                'currency': tx_sudo.currency_id.name,
-                'merchant_name': tx_sudo.provider_id.hdfc_upi_merchant_name,
-                'expiry_seconds': expiry_seconds
-            }
-
-        except Exception:
-            _logger.exception("Unhandled error getting QR data for transaction %s", tx_id)
-            return {'success': False, 'error': 'An unexpected error occurred'}
 
     @http.route(f'{_cancel_transaction_url}/<int:tx_id>', type='jsonrpc', auth='public')
     def hdfc_upi_cancel_transaction(self, tx_id, reason=None, **kwargs):

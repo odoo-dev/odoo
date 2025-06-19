@@ -200,7 +200,13 @@ paymentForm.include({
         this._setupBeforeUnloadHandler();
         this._updateModalContent(processingValues);
         this._bindModalEvents();
-        this._loadQrCode(processingValues.transaction_id);
+
+        // Display QR code from processing values
+        if (processingValues.qr_code_data) {
+            this._displayQrCode(processingValues);
+        } else {
+            this._showUpiStatus("error", _t("Failed to generate QR code. Please try again."));
+        }
     },
 
     /**
@@ -219,53 +225,21 @@ paymentForm.include({
     // #=== QR CODE MANAGEMENT ===#
 
     /**
-     * Load QR code for transaction.
-     *
-     * @private
-     * @param {number} transactionId - The transaction ID.
-     * @return {void}
-     */
-    _loadQrCode(transactionId) {
-        this._showUpiStatus("info", _t("Generating QR code..."));
-
-        const timeout = setTimeout(() => {
-            this._showUpiStatus("error", _t("QR code generation timed out. Please try again."));
-        }, 30000);
-
-        rpc(`/payment/hdfc_upi/get_qr_data/${transactionId}`, {})
-            .then(response => {
-                clearTimeout(timeout);
-                if (response.success) {
-                    this._displayQrCode(response);
-                } else {
-                    this._showUpiStatus("error", response.error || _t("Failed to generate QR code"));
-                }
-            })
-            .catch(error => {
-                clearTimeout(timeout);
-                const errorMessage = error instanceof RPCError ?
-                    error.data?.message || _t("Server error occurred") :
-                    _t("Failed to load QR code");
-                this._showUpiStatus("error", errorMessage);
-            });
-    },
-
-    /**
      * Display QR code in modal.
      *
      * @private
-     * @param {object} qrData - The QR code data.
+     * @param {object} processingValues - The processing values containing QR data.
      * @return {void}
      */
-    _displayQrCode(qrData) {
+    _displayQrCode(processingValues) {
         document.getElementById("qrLoading").style.display = "none";
 
         const qrImage = document.getElementById("qrCodeImage");
-        qrImage.src = qrData.qr_code;
+        qrImage.src = processingValues.qr_code_data;
         qrImage.onload = () => {
             document.getElementById("qrContainer").style.display = "block";
             this._showUpiStatus("info", _t("Scan the QR code to complete your payment"));
-            this._startTimer(qrData.expiry_seconds || 300);
+            this._startTimer(processingValues.expiry_seconds || 300);
             this._startMonitoring(this.upiTransactionId);
         };
         qrImage.onerror = () => {

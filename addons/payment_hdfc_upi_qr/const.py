@@ -163,20 +163,6 @@ UPI_URL_TEMPLATE = (
     "&QRexpire={expiry_time}"
 )
 
-# Timezone configuration
-TIMEZONE_CONFIG = {
-    'ist_timezone': 'Asia/Kolkata',
-    'timezone_offset': '+05:30',
-}
-
-# Encryption configuration
-ENCRYPTION_CONFIG = {
-    'algorithm': 'AES',
-    'mode': 'ECB',
-    'key_encoding': 'md5',
-    'output_format': 'hex_upper',
-}
-
 # Validation patterns
 VALIDATION_PATTERNS = {
     'upi_vpa': r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+$',
@@ -186,8 +172,5 @@ VALIDATION_PATTERNS = {
 
 # Refund configuration
 REFUND_CONFIG = {
-    'time_limit_days': 180,  # 6 months refund window
-    'min_refund_amount': 1.0,
-    'max_refund_attempts': 3,
-    'refund_reference_prefix': 'RF',
+    'time_limit_days': 180,  # 6 months refund window (need to confirm with HDFC)
 }

@@ -5,7 +5,7 @@
         <div name="o_hdfc_upi_component_container" class="o_payment_form">
             <div class="text-center mt-3">
                 <div class="d-flex align-items-center justify-content-center mb-2">
-                    <i class="fa fa-qrcode text-primary me-2 fa-lg" aria-hidden="true"/>
+                    <i class="fa fa-qrcode text-primary me-2 fa-lg"/>
                     <span class="text-muted">UPI QR Code Payment</span>
                 </div>
                 <small class="text-muted d-block mb-3">

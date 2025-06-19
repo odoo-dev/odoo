@@ -4,10 +4,11 @@ import base64
 import logging
 import pprint
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools.image import image_data_uri
 
 from odoo.addons.payment_hdfc_upi_qr import const
 from odoo.addons.payment_hdfc_upi_qr import utils as hdfc_upi_utils
@@ -115,11 +116,23 @@ class PaymentTransaction(models.Model):
                 _logger.exception("Failed to generate QR code for transaction %s", self.reference)
                 raise ValidationError(_("HDFC UPI: Failed to generate QR code: %s", str(e)))
 
+        # Calculate expiry time in seconds from now
+        expiry_seconds = 0
+        if self.hdfc_upi_qr_expiry:
+            now = datetime.now()
+            expiry_delta = self.hdfc_upi_qr_expiry - now
+            expiry_seconds = max(0, int(expiry_delta.total_seconds()))
+
+        # Convert QR code to data URI for frontend
+        qr_code_data = image_data_uri(self.hdfc_upi_qr_code) if self.hdfc_upi_qr_code else None
+
         # Update processing values for frontend
         processing_values.update({
             'transaction_id': self.id,
             'merchant_name': self.provider_id.hdfc_upi_merchant_name or 'HDFC UPI',
             'currency_code': self.currency_id.name,
+            'qr_code_data': qr_code_data,
+            'expiry_seconds': expiry_seconds,
         })
 
         return processing_values

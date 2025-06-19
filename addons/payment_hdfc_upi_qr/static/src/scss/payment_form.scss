@@ -74,14 +74,14 @@ $o-upi-error-color: #f8d7da !default;
         background: #f5f5f5;
         border: none;
         border-radius: 50%;
-        width: 32px;
-        height: 32px;
+        width: 40px;
+        height: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        color: #666;
-        font-size: 18px;
+        color: #474747;
+        font-size: 35px;
         transition: all 0.2s ease;
 
         &:hover {
@@ -134,7 +134,7 @@ $o-upi-error-color: #f8d7da !default;
     margin: 24px 0 16px 0;
 
     .currency {
-        color: #2563eb;
+        color: #1a1a1a;;
     }
 }
 
