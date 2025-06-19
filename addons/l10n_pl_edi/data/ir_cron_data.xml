@@ -12,5 +12,16 @@
             <field name="interval_type">hours</field>
             <field name="nextcall" eval="(datetime.now() + timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"/>
         </record>
+        <record id="cron_auto_fetch_polish_invoices" model="ir.cron">
+            <field name="name">Polish eInvoice: automatically fetch the invoices from ksef</field>
+            <field name="model_id" ref="l10n_pl_edi.model_account_move"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_fetch_polish_invoices()</field>
+            <field name="active" eval="True"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">6</field>
+            <field name="interval_type">hours</field>
+            <field name="nextcall" eval="(datetime.now() + timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
     </data>
 </odoo>

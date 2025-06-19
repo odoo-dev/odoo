@@ -1,7 +1,7 @@
 import base64
-import logging
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
+import logging
 from ..models.l10n_pl_ksef_api import KsefApiService
 
 _logger = logging.getLogger(__name__)

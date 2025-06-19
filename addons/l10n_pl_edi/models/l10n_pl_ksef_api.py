@@ -347,3 +347,51 @@ class KsefApiService:
             return response.json()
         except requests.exceptions.RequestException as e:
             raise UserError(_("Failed to redeem token: %s", e.response.text if e.response else e))
+
+    def get_vendor_bills(self, date_from, date_to, page_size=10, page_offset=0):
+        """
+        Downloads invoice metadata where the company is the Buyer (Subject2).
+
+        :param date_from: Start date in ISO 8601 format (e.g., '2023-12-01T00:00:00+00:00')
+        :param date_to: End date in ISO 8601 format
+        :param page_size: Number of results per page (10-250)
+        :param page_offset: Page index (0 is the first page)
+        """
+        endpoint = f"{self.api_url}/invoices/query/metadata"
+
+        # 1. Prepare Query Parameters (pageOffset, pageSize)
+        # The documentation lists these under "query Parameters"
+        query_params = {
+            'pageOffset': page_offset,
+            'pageSize': page_size
+        }
+
+        # 2. Prepare Request Body (subjectType, dateRange)
+        # The documentation lists these under "Request Body schema"
+        # "Subject2" indicates we are looking for invoices where we are the BUYER.
+        payload = {
+                "subjectType": "Subject2",
+                "dateRange": {
+                    "dateType": "PermanentStorage",
+                    "from": date_from,
+                    "to": date_to
+                }
+
+        }
+
+        response = self._make_request(
+            'POST',
+            endpoint,
+            params=query_params,
+            json=payload,
+            timeout=30
+        )
+
+        print(response.content)
+
+        return response.json()
+
+    def get_invoice_data(self, ksefNumber):
+        endpoint = f"{self.api_url}/invoices/ksef/{ksefNumber}"
+        response = self._make_request('GET', endpoint, headers={}, timeout=10)
+        return response.content

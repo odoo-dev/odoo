@@ -1,8 +1,9 @@
 import base64
 import logging
+from lxml import etree
 from datetime import datetime
 from xml.dom.minidom import parseString
-from odoo import models, fields, _
+from odoo import Command, models, fields, _
 from odoo.tools import float_repr, float_is_zero, file_open, xml_utils
 from odoo.exceptions import UserError
 from ..models.l10n_pl_ksef_api import KsefApiService
@@ -83,6 +84,46 @@ class AccountMove(models.Model):
 
         # Default to Standard VAT invoice
         return 'VAT'
+
+    def _get_ksef_direction(self, root, company):
+        """
+        Identifies if the company is the Buyer or Seller in the XML.
+        Returns 'in' for Vendor Bill, 'out' for Sales Invoice.
+        """
+        # 1. Identify Seller (Podmiot1) and Buyer (Podmiot2) in FA(3)
+        seller_nip = root.xpath(".//*[local-name()='Podmiot1']//*[local-name()='NIP']/text()")
+        buyer_nip = root.xpath(".//*[local-name()='Podmiot2']//*[local-name()='NIP']/text()")
+
+        # Clean the company VAT for comparison (remove country prefix if exists)
+        company_vat = (company.vat or '').replace('PL', '').strip()
+
+        # 2. Compare
+        if buyer_nip and company_vat in buyer_nip[0]:
+            return 'in'  # We are the buyer -> Inbound
+
+        if seller_nip and company_vat in seller_nip[0]:
+            return 'out' # We are the seller -> Outbound
+
+        # 3. Fallback
+        # If using the cron_fetch_vendor_bills, default to 'in'
+        return self.env.context.get('default_move_type', 'in')[:2]
+
+    def _get_move_type_from_ksef(self, root, company):
+        """
+        Combines direction and invoice type to return Odoo move_type.
+        """
+        # Get direction ('in' or 'out')
+        direction = self._get_ksef_direction(root, company)
+
+        # Get KSeF Type (RodzajFaktury)
+        ksef_type = root.xpath(".//*[local-name()='RodzajFaktury']/text()")
+        ksef_type = ksef_type[0] if ksef_type else 'VAT'
+
+        # Map to Odoo
+        if 'KOR' in ksef_type:
+            return f"{direction}_refund"
+
+        return f"{direction}_invoice"
 
     def _get_ksef_related_invoices(self):
         """
@@ -248,7 +289,8 @@ class AccountMove(models.Model):
 
     def _l10n_pl_ksef_render_xml(self):
         """
-        Renders the QWeb template, removes empty lines, and validates against XSD.
+        Renders the QWeb template with the invoice values to generate the XML content.
+        Includes robust error handling and logging.
         """
         self.ensure_one()
         qweb_template = self.env.ref('l10n_pl_edi.fa3_xml_template')
@@ -437,3 +479,145 @@ class AccountMove(models.Model):
         to_update_moves = self.env['account.move'].search([('ksef_status', '=', 'sent')])
         for move in to_update_moves:
             move.action_update_invoice_status()
+
+    def _cron_fetch_polish_invoices(self):
+        """ Cron to fetch vendor bills for all Polish companies with KSeF configured. """
+        # Search for companies with KSeF credentials
+        companies = self.env['res.company'].search([
+            ('l10n_pl_ksef_session_id', '!=', False),
+            ('country_id.code', '=', 'PL')
+        ])
+
+        for company in companies:
+            self.with_company(company)._l10n_pl_ksef_fetch_invoices_for_company(company)
+
+    def _l10n_pl_ksef_fetch_invoices_for_company(self, company):
+        """ Logic to fetch and create moves for a specific company. """
+        mode = self.env['ir.config_parameter'].sudo().get_param('l10n_pl_edi_ksef.mode') or 'prod'
+        service = KsefApiService(
+            company, mode,
+            company.l10n_pl_ksef_session_id,
+            company.l10n_pl_ksef_session_key,
+            company.l10n_pl_ksef_session_iv
+        )
+        date_from = "2024-12-01T00:00:00+00:00" or company.l10n_pl_start_date_to_fetch
+        date_to = fields.Datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00:00")
+        try:
+            invoice_refs = service.get_vendor_bills(date_from, date_to)
+            for invoice in invoice_refs['invoices']:
+                ksefNumber = invoice.get('ksefNumber')
+                # 2. Check if already exists to avoid duplicates
+                existing = self.env['account.move'].search_count([
+                    ('l10n_pl_ksef_number', '=', ksefNumber)
+                ])
+                if existing:
+                    continue
+                xml_content = service.get_invoice_data(ksefNumber)
+                self._l10n_pl_ksef_create_move_from_xml(ksefNumber, xml_content, company)
+                if not self.env.registry.in_test_mode():
+                    self.env.cr.commit()
+
+            company.l10n_pl_start_date_to_fetch = date_to
+
+        except Exception as e:
+            _logger.error("Error fetching KSeF invoices for company %s: %s", company.name, e)
+
+    def _l10n_pl_ksef_create_move_from_xml(self, ksef_number, xml_content, company):
+        """ Creates an empty move, attaches the XML, and triggers decoding. """
+        move = self.create({
+            'company_id': company.id,
+        })
+
+        filename = f"KSeF_{ksef_number}.xml"
+        attachment = self.env['ir.attachment'].create({
+            'name': filename,
+            'raw': xml_content.encode('utf-8') if isinstance(xml_content, str) else xml_content,
+            'res_model': 'account.move',
+            'res_id': move.id,
+            'mimetype': 'application/xml',
+        })
+
+        move.with_context(no_new_invoice=True).message_post(attachment_ids=attachment.ids)
+
+        move._extend_with_attachments(attachment, new=True)
+
+        # Store the reference
+        move.l10n_pl_ksef_number = ksef_number
+        return move
+
+    def _get_edi_decoder(self, file_data, new=False):
+        # Check if this is a Polish FA(3) XML
+        if (self.country_code == 'PL' and
+                file_data['type'] == 'xml' and
+                b"<Faktura" in file_data['content']):
+            return self.decode_fa3_to_moves
+        return super()._get_edi_decoder(file_data, new=new)
+
+    def decode_fa3_to_moves(self, move, file_data, new=False):
+        """ Parses KSeF XML into the move record. """
+        content = file_data['content']
+        try:
+            root = etree.fromstring(content)
+        except etree.XMLSyntaxError:
+            return False
+
+        def get_val(node, tag_name):
+            res = node.xpath(f".//*[local-name()='{tag_name}']")
+            return res[0].text if res and res[0].text else False
+
+        with self._get_edi_creation() as self:
+            # 1. Header Info
+            self.move_type = self._get_move_type_from_ksef(root, self.company_id)
+            self.ref = get_val(root, 'P_2')
+
+            date_str = get_val(root, 'P_1')
+            if date_str:
+                self.invoice_date = fields.Date.to_date(date_str)
+
+            currency_code = get_val(root, 'KodWaluty')
+            if currency_code:
+                self.currency_id = self.env['res.currency'].search([('name', '=', currency_code.upper())], limit=1)
+
+            # 2. Partner Logic
+            seller_node = root.xpath(".//*[local-name()='Podmiot1']")[0]
+            nip = get_val(seller_node, 'NIP')
+            name = get_val(seller_node, 'Nazwa')
+
+            partner = self.env['res.partner'].search([
+                '|', ('vat', '=', nip), ('vat', '=', f'PL{nip}')
+            ], limit=1)
+
+            if not partner and name:
+                partner = self.env['res.partner'].create({
+                    'name': name,
+                    'vat': f'PL{nip}' if nip else False,
+                    'is_company': True,
+                    'country_id': self.env.ref('base.pl').id,
+                })
+            self.partner_id = partner
+
+            # 3. Lines Logic
+            lines_commands = []
+            for line_node in root.xpath(".//*[local-name()='Fa']/*[local-name()='FaWiersz']"):
+                tax_rate = get_val(line_node, 'P_12')
+                tax_ids = []
+                if tax_rate:
+                    domain = [('type_tax_use', '=', 'purchase'), ('company_id', '=', self.company_id.id)]
+                    if tax_rate.lower() == 'zw':
+                        domain.append(('description', 'ilike', 'zw'))
+                    else:
+                        domain.append(('amount', '=', float(tax_rate)))
+                    tax = self.env['account.tax'].search(domain, limit=1)
+                    if tax:
+                        tax_ids = [tax.id]
+
+                lines_commands.append(Command.create({
+                    'name': get_val(line_node, 'P_7') or 'Service',
+                    'quantity': float(get_val(line_node, 'P_8B') or 1.0),
+                    'price_unit': float(get_val(line_node, 'P_9A') or 0.0),
+                    'tax_ids': [Command.set(tax_ids)],
+                }))
+
+            self.invoice_line_ids = lines_commands
+            self.ksef_status = 'accepted'
+        return True

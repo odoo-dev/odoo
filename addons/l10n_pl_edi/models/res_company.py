@@ -18,3 +18,4 @@ class ResCompany(models.Model):
     l10n_pl_ksef_session_id = fields.Char(string="Reference number", readonly=True)
     l10n_pl_ksef_session_key = fields.Binary(string="Session key", readonly=True)
     l10n_pl_ksef_session_iv = fields.Binary(string="Session iv", readonly=True)
+    l10n_pl_start_date_to_fetch = fields.Date(string="start date", help="This date is the date that is used to start the fetching from ksef ")
