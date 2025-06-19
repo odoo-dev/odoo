@@ -114,6 +114,10 @@ export class ChatHub extends Component {
         return true;
     }
 
+    get showChatHub(){
+        return !this.store.discuss?.isActive;
+    }
+
     /** @deprecated */
     shouldDisplayChatWindow(cw) {
         return cw.canShow;

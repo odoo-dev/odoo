@@ -11,7 +11,9 @@ import {
     onRpcBefore,
     openDiscuss,
     openFormView,
+    patchUiSize,
     setupChatHub,
+    SIZES,
     start,
     startServer,
     triggerEvents,
@@ -571,4 +573,24 @@ test("Open chat window from command palette with chat hub compact", async () => 
     await insertText(".o_command_palette_search input", "@");
     await click(".o-mail-DiscussCommand", { text: "John" });
     await contains(".o-mail-ChatWindow", { text: "John" });
+});
+
+test("Chat bubble should not be visible when discuss app is active on mobile", async () => {
+    const pyEnv = await startServer();
+    const johnId = pyEnv["res.users"].create({ name: "John" });
+    const johnPartnerId = pyEnv["res.partner"].create({ user_ids: [johnId], name: "John" });
+    const chatId = pyEnv["discuss.channel"].create({
+        channel_member_ids: [
+            Command.create({ partner_id: serverState.partnerId }),
+            Command.create({ partner_id: johnPartnerId }),
+        ],
+        channel_type: "chat",
+    });
+    patchUiSize({ size: SIZES.SM });
+    setupChatHub({ folded: [chatId] });
+    await start();
+    await openFormView("res.partner", serverState.partnerId);
+    await contains(".o-mail-ChatBubble[name='John']", { count: 1 });
+    await openDiscuss();
+    await contains(".o-mail-ChatBubble[name='John']", { count: 0 });
 });
