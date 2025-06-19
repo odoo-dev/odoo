@@ -14,7 +14,7 @@
         position: fixed;
         inset: auto 0 0;
         height: map-get($spacers, 4);
-        background: linear-gradient(transparent, $gray-400);
+        background: linear-gradient(transparent, #00000050);
         z-index: $zindex-offcanvas;
         pointer-events: none;
     }
@@ -99,10 +99,6 @@
         backface-visibility: hidden;
         perspective: 1000px;
         user-select: none;
-
-        .o_bottom_sheet_handle_bar {
-            background-color: currentColor;
-        }
 
         .o_bottom_sheet_body {
             overflow-y: hidden; // Initially hidden, will be 'auto' when extended
