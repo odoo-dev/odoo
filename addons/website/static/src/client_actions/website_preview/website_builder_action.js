@@ -199,6 +199,7 @@ export class WebsiteBuilderClientAction extends Component {
     get websiteBuilderProps() {
         const builderProps = {
             closeEditor: this.reloadIframeAndCloseEditor.bind(this),
+            editableSelector: "#wrapwrap",
             reloadEditor: this.reloadEditor.bind(this),
             snippetModel: this.snippetModel,
             toggleMobile: this.toggleMobile.bind(this),
