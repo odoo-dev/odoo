@@ -238,9 +238,6 @@ export class SelectMenu extends Component {
                 scrollTo(selectedElement);
             }
         } else {
-            if (this.isBottomSheet) {
-                this.inputRef.el.blur();
-            }
             this.state.searchValue = null;
         }
     }
@@ -254,7 +251,9 @@ export class SelectMenu extends Component {
 
     getItemClass(choice) {
         if (this.isOptionSelected(choice)) {
-            return "o_select_menu_item o_select_active fw-bolder";
+            return `o_select_menu_item fw-bolder ${
+                this.isBottomSheet ? "active" : "o_select_active"
+            }`;
         } else {
             return "o_select_menu_item";
         }

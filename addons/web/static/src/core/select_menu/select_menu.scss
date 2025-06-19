@@ -41,14 +41,12 @@
 
 .o_select_menu_menu {
     background-color: $dropdown-bg;
-    div.o_input {
+    .o_input {
         position: sticky;
         top: $dropdown-padding-y * -1;
         height: 40px;
-        input {
-            cursor: text !important;
-            padding: 5px;
-        }
+        cursor: text !important;
+        padding: 5px;
     }
     .o_select_menu_group {
         background-color: $dropdown-bg;

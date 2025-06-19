@@ -28,6 +28,7 @@
                 menuRef="this.menuRef"
                 position="'bottom-fit'"
                 beforeOpen.bind="onBeforeOpen"
+                focusToggleOnClosed="false"
                 onStateChanged.bind="onStateChanged"
                 navigationOptions="navigationOptions"
                 state="dropdownState"

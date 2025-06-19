@@ -152,7 +152,7 @@
             height: calc(var(--sheet-height) - #{$border-radius-xl * 2});
             width: calc(100% - #{$border-width * 2});
             max-width: map-get($grid-breakpoints, sm) - ($border-width * 2);
-            background: $offcanvas-bg-color;
+            background: $light;
             z-index: $zindex-offcanvas;
             transform: translateY(calc((1 - var(--BottomSheet-progress)) * 150%)) translateX(-50%);
             content: "";

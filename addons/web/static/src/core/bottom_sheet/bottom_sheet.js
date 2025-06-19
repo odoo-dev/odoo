@@ -176,7 +176,7 @@ export class BottomSheet extends Component {
         const newScrollTop = 0;
 
         // Update scroll position
-        this.scrollRailRef.el.scrollTop = newScrollTop;
+        //this.scrollRailRef.el.scrollTop = newScrollTop;
 
         // Re-enable snapping after a short delay
         // Cancel any existing call first
