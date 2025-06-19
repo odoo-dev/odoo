@@ -22,6 +22,7 @@ Wewnętrzny numer wersji OpenGLOBE 1.02
         'base_iban',
         'base_vat',
         'account',
+        'certificate',
     ],
     'auto_install': ['account'],
     'data': [

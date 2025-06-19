@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="l10n_pl_edi_cert_upload_wizard_view_form" model="ir.ui.view">
+        <field name="name">l10n.pl.edi.cert.upload.wizard.form</field>
+        <field name="model">l10n.pl.edi.cert.upload.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Upload KSeF Certificate">
+                <p>
+                    Upload your KSeF public certificate and unencrypted private key.
+                    These must be separate .pem (or .key) files.
+                </p>
+                <group>
+
+                    <field name="certificate_filename" invisible="1"/>
+                    <field name="private_key_filename" invisible="1"/>
+
+                    <field name="certificate_file" widget="binary" filename="certificate_filename" required="1"/>
+                    <field name="private_key_file" widget="binary" filename="private_key_filename" required="1"/>
+                    <field name="certificate_password" password="True"/>
+                </group>
+                <footer>
+                    <button name="action_save_certificate" string="Save &amp; Close" type="object" class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel" data-hotkey="z"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_l10n_pl_edi_cert_upload_wizard" model="ir.actions.act_window">
+        <field name="name">Upload KSeF Certificate</field>
+        <field name="res_model">l10n.pl.edi.cert.upload.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="l10n_pl_edi_cert_upload_wizard_view_form"/>
+    </record>
+</odoo>
