@@ -6,12 +6,7 @@
             <div class="o_form_view_container">
                 <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''" display="display">
                     <t t-set-slot="control-panel-buttons">
-                        <t t-if="env.inDialog" t-call="web.View.Buttons">
-                            <t t-set="buttons" t-value="controlPanelButtons"/>
-                        </t>
-                        <t t-else="" t-call="web.View.ResponsiveButtons">
-                            <t t-set="buttons" t-value="controlPanelButtons"/>
-                        </t>
+                        <t t-call="{{ footerTemplate }}" t-call-context="renderingContext"/>
                     </t>
 
                     <t t-set-slot="control-panel-actions">

@@ -8,7 +8,7 @@ import { SIZES } from "@web/core/ui/ui_service";
 import { user } from "@web/core/user";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { omit } from "@web/core/utils/objects";
-import { createElement, parseXML } from "@web/core/utils/xml";
+import { append, createElement, parseXML } from "@web/core/utils/xml";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { useSetupAction } from "@web/search/action_hook";
 import { Layout } from "@web/search/layout";
@@ -45,12 +45,10 @@ import {
 } from "@odoo/owl";
 import { FetchRecordError } from "@web/model/relational_model/errors";
 import { effect } from "@web/core/utils/reactive";
-import {
-    CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE,
-    CONTROL_PANEL_BUTTONS_ARCH_SEQUENCE,
-} from "@web/search/control_panel/control_panel";
+import { CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE } from "@web/search/control_panel/control_panel";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { StatusBarButtons } from "./status_bar_buttons/status_bar_buttons";
 
 const viewRegistry = registry.category("views");
 
@@ -139,6 +137,7 @@ export class FormController extends Component {
         Widget,
         Dropdown,
         DropdownItem,
+        StatusBarButtons,
     };
 
     static props = {
@@ -239,14 +238,30 @@ export class FormController extends Component {
 
         // select footers that are not in subviews and move them to another arch
         // that will be moved to the dialog's footer (if we are in a dialog)
-        const footers = [...this.archInfo.xmlDoc.querySelectorAll("footer:not(field footer)")];
-        if (footers.length) {
-            this.footerArchInfo = Object.assign({}, this.archInfo);
-            this.footerArchInfo.xmlDoc = createElement("t");
-            this.footerArchInfo.xmlDoc.append(...footers);
-            this.footerArchInfo.arch = this.footerArchInfo.xmlDoc.outerHTML;
-            this.archInfo.arch = this.archInfo.xmlDoc.outerHTML;
+        let xmlDocFooters = [...this.archInfo.xmlDoc.querySelectorAll("footer:not(field footer)")];
+        if (!xmlDocFooters.length) {
+            xmlDocFooters = [createElement("footer", { replace: "0" })];
         }
+        const footerWrapper = createElement("t");
+        for (const footer of xmlDocFooters) {
+            append(footerWrapper, footer);
+        }
+        const staticControlPanelButtons = Object.entries(this.staticControlPanelButtons)
+            .map(([key, button]) => ({
+                id: key,
+                ...button,
+            }))
+            .sort(
+                (btn1, btn2) =>
+                    (btn1.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE) -
+                    (btn2.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE)
+            );
+        const footerTemplates = useViewCompiler(
+            this.props.Compiler || FormCompiler,
+            { Footer: footerWrapper },
+            { staticControlPanelButtons }
+        );
+        this.footerTemplate = footerTemplates.Footer;
 
         const xmlDocButtonBox = this.archInfo.xmlDoc.querySelector(
             "div[name='button_box']:not(field div)"
@@ -377,28 +392,12 @@ export class FormController extends Component {
         return this.props.staticControlPanelButtons;
     }
 
-    get controlPanelButtons() {
-        const staticButtons = Object.entries(this.staticControlPanelButtons).map(
-            ([key, button]) => ({ id: key, ...button })
-        );
-        const footerButtons = this.archInfo.footerButtons.map((button) => ({
-            id: button.id,
-            isAvailable: () => !this.evalViewModifier(button.invisible),
-            sequence: CONTROL_PANEL_BUTTONS_ARCH_SEQUENCE,
-            template: "web.View.Buttons.SingleRecord",
-            props: this.singleRecordViewButtonProps(button),
-        }));
-        let buttons = [...footerButtons];
-        if (this.archInfo.displayGenericButtons) {
-            buttons = [...staticButtons, ...buttons];
-        }
-        return buttons
-            .filter((button) => button.isAvailable === undefined || button.isAvailable.call(this))
-            .sort(
-                (btn1, btn2) =>
-                    (btn1.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE) -
-                    (btn2.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE)
-            );
+    get renderingContext() {
+        const __comp__ = Object.assign(Object.create(this), {
+            this: this,
+            props: { ...this.props, record: this.model.root },
+        });
+        return Object.assign(__comp__, { __comp__ });
     }
 
     singleRecordViewButtonProps(button) {

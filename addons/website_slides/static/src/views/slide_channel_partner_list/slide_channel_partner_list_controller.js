@@ -14,7 +14,7 @@ export default class SlideChannelPartnerListController extends ListController {
         return {
             ...super.staticControlPanelButtons,
             enroll: {
-                isAvailable: () => this.channelId,
+                isVisible: "channelId",
                 template: "website_slides.SlideChannelPartnerListView.Buttons.Enroll",
             },
         };

@@ -56,7 +56,7 @@ export class FormViewDialog extends Component {
                 sequence: 10,
             },
             saveNew: {
-                isAvailable: () => this.props.isToMany,
+                isVisible: this.props.isToMany,
                 template: "web.FormViewDialog.Buttons.SaveNew",
                 sequence: 15,
             },

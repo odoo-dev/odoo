@@ -11,6 +11,10 @@ export class StatusBarButtons extends Component {
     };
     static props = {
         slots: { type: Object, optional: 1 },
+        responsive: { type: Boolean, optional: true },
+    };
+    static defaultProps = {
+        responsive: true,
     };
 
     get visibleSlotNames() {

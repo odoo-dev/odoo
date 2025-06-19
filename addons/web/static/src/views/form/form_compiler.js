@@ -262,22 +262,35 @@ export class FormCompiler extends ViewCompiler {
      */
     compileFooter(el, params) {
         const footer = createElement("t");
+        copyAttributes(el, footer);
+        let slotId = 0;
+        const footerButtons = createElement("StatusBarButtons", {
+            responsive: "!__comp__.env.inDialog",
+        });
         const replace = el.getAttribute("replace");
         if (replace && !exprToBoolean(replace)) {
-            footer.append(
-                createElement("t", {
-                    "t-call": "web.DefaultButtonsSlot",
-                    "t-call-context": "{ props: __comp__.props }",
-                })
-            );
-        }
-        copyAttributes(el, footer);
-        for (const child of el.childNodes) {
-            const compiled = this.compileNode(child, params);
-            if (compiled) {
-                footer.append(compiled);
+            for (const staticButton of params.staticControlPanelButtons) {
+                const slot = createElement("t", {
+                    "t-set-slot": `button_${slotId++}`,
+                    isVisible: staticButton.isVisible || true,
+                });
+                append(slot, createElement("t", { "t-call": staticButton.template }));
+                append(footerButtons, slot);
             }
         }
+        for (const child of el.childNodes) {
+            const compiled = this.compileNode(child, params);
+            if (!compiled || isTextNode(compiled)) {
+                continue;
+            }
+            const slot = createElement("t", {
+                "t-set-slot": `button_${slotId++}`,
+                isVisible: compiled.getAttribute("t-if") || true,
+            });
+            append(slot, compiled);
+            append(footerButtons, slot);
+        }
+        append(footer, footerButtons);
         return footer;
     }
 
@@ -440,6 +453,9 @@ export class FormCompiler extends ViewCompiler {
     compileHeader(el, params) {
         const statusBar = createElement("div");
         statusBar.className = "o_form_statusbar d-flex justify-content-between py-2";
+        const statusBarButtonsWrapper = createElement("div");
+        statusBarButtonsWrapper.className =
+            "o_statusbar_buttons d-flex align-items-center align-content-around flex-wrap gap-1";
         const buttons = [];
         const others = [];
         for (const child of el.childNodes) {
@@ -467,7 +483,8 @@ export class FormCompiler extends ViewCompiler {
             append(slot, button);
             append(statusBarButtons, slot);
         }
-        append(statusBar, statusBarButtons);
+        append(statusBarButtonsWrapper, statusBarButtons);
+        append(statusBar, statusBarButtonsWrapper);
         append(statusBar, others);
         return statusBar;
     }
