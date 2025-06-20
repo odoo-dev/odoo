@@ -113,6 +113,9 @@ class Manager(Thread):
         # Set scheduled actions
         schedule and schedule.every().day.at("00:00").do(helpers.get_certificate_status)
         schedule and schedule.every().day.at("00:00").do(helpers.reset_log_level)
+        # if mount point was held busy by a background process (e.g. apt upgrade)
+        # we need to ensure the system is remounted r/o later.
+        schedule and schedule.every(30).minutes.do(helpers.remount_ro)
 
         # Set up the websocket connection
         ws_client = WebsocketClient(self.ws_channel)
