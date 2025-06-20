@@ -34,7 +34,7 @@ export class Builder extends Component {
         reloadEditor: { type: Function, optional: true },
         onEditorLoad: { type: Function, optional: true },
         installSnippetModule: { type: Function, optional: true },
-        snippetsName: { type: String },
+        snippetModel: { type: Object },
         toggleMobile: { type: Function },
         overlayRef: { type: Function },
         iframeLoaded: { type: Object },
@@ -66,6 +66,7 @@ export class Builder extends Component {
         this.dialog = useService("dialog");
         this.ui = useService("ui");
         this.notification = useService("notification");
+        this.snippetModel = useState(this.props.snippetModel);
 
         const editorBus = new EventBus();
 
@@ -128,6 +129,7 @@ export class Builder extends Component {
                         cleanForSaveHandlers,
                         wrapWithSaveSnippetHandlers
                     ),
+                snippetModel: this.snippetModel,
                 getShared: () => this.editor.shared,
                 updateInvisibleElementsPanel: () => this.updateInvisibleEls(),
                 allowCustomStyle: true,
@@ -137,8 +139,6 @@ export class Builder extends Component {
             this.env.services
         );
         this.props.onEditorLoad(this.editor);
-
-        this.snippetModel = useState(useService("html_builder.snippets"));
 
         onWillStart(async () => {
             await this.snippetModel.load();

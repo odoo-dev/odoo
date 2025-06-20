@@ -33,6 +33,7 @@ import { renderToElement } from "@web/core/utils/render";
 import { isBrowserChrome, isBrowserMicrosoftEdge } from "@web/core/browser/feature_detection";
 import { router } from "@web/core/browser/router";
 import { getScrollingElement } from "@web/core/utils/scrolling";
+import { user } from "@web/core/user";
 
 const websiteSystrayRegistry = registry.category("website_systray");
 
@@ -135,7 +136,7 @@ export class WebsiteBuilderClientAction extends Component {
             if (!this.ui.isSmall) {
                 // preload builder and snippets so clicking on "edit" is faster
                 loadBundle("website.website_builder_assets").then(() => {
-                    this.env.services["html_builder.snippets"].load();
+                    this.snippetModel.load();
                 });
             }
         });
@@ -182,12 +183,30 @@ export class WebsiteBuilderClientAction extends Component {
     get testMode() {
         return false;
     }
-    
+
+    /**
+     * Require `html_builder.assets` to be loaded.
+     */
+    get snippetModel() {
+        if (!this._snippetModel) {
+            this._snippetModel = this.env.services["html_builder.snippets"].makeSnippetModel(
+                "website.snippets",
+                {
+                    context: {
+                        lang: this.websiteService.currentWebsite?.metadata.lang,
+                        user_lang: user.context.lang,
+                    },
+                }
+            );
+        }
+        return this._snippetModel;
+    }
+
     get websiteBuilderProps() {
         const builderProps = {
             closeEditor: this.reloadIframeAndCloseEditor.bind(this),
             reloadEditor: this.reloadEditor.bind(this),
-            snippetsName: "website.snippets",
+            snippetModel: this.snippetModel,
             toggleMobile: this.toggleMobile.bind(this),
             installSnippetModule: this.installSnippetModule.bind(this),
             overlayRef: this.overlayRef,
