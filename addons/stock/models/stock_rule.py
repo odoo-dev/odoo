@@ -688,7 +688,12 @@ class ProcurementGroup(models.Model):
         # Minimum stock rules
         domain = self._get_orderpoint_domain(company_id=company_id)
         orderpoints = self.env['stock.warehouse.orderpoint'].search(domain)
-        orderpoints.sudo()._compute_qty_to_order_computed()
+
+        for batch in split_every(500, orderpoints.ids):
+            batch_records = self.env['stock.warehouse.orderpoint'].browse(batch).sudo()
+            batch_records.sudo()._compute_qty_to_order_computed()
+            self._cr.commit()
+
         orderpoints.sudo()._procure_orderpoint_confirm(use_new_cursor=use_new_cursor, company_id=company_id, raise_user_error=False)
 
         if use_new_cursor:
