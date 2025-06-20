@@ -5,8 +5,20 @@ import { Reactive } from "@web/core/utils/reactive";
 import { escape } from "@web/core/utils/strings";
 import { AddSnippetDialog } from "./add_snippet_dialog";
 import { registry } from "@web/core/registry";
-import { user } from "@web/core/user";
 import { markup } from "@odoo/owl";
+
+export class SnippetModelFactory {
+    constructor(services) {
+        this.services = services;
+    }
+
+    makeSnippetModel(snippetsName, { context = {} } = {}) {
+        return new SnippetModel(this.services, {
+            snippetsName,
+            context,
+        });
+    }
+}
 
 export class SnippetModel extends Reactive {
     constructor(services, { snippetsName, context }) {
@@ -14,8 +26,10 @@ export class SnippetModel extends Reactive {
         this.orm = services.orm;
         this.dialog = services.dialog;
         this.snippetsName = snippetsName;
+        this.uiService = services.ui;
         this.context = context;
         this.loadProm = null;
+        this.beforeReload = null;
 
         this.snippetsByCategory = {
             snippet_groups: [],
@@ -393,18 +407,11 @@ export class SnippetModel extends Reactive {
 }
 
 registry.category("services").add("html_builder.snippets", {
-    dependencies: ["orm", "dialog", "website"],
+    dependencies: ["orm", "dialog"],
 
-    start(env, { orm, dialog, website }) {
-        const services = { orm, dialog, website };
-        const context = {
-            lang: website.currentWebsite?.metadata.lang,
-            user_lang: user.context.lang,
-        };
+    start(env, { orm, dialog }) {
+        const services = { orm, dialog };
 
-        return new SnippetModel(services, {
-            snippetsName: "website.snippets",
-            context,
-        });
+        return new SnippetModelFactory(services);
     },
 });
