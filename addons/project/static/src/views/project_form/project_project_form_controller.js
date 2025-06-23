@@ -4,7 +4,6 @@ import { FormControllerWithHTMLExpander } from '@resource/views/form_with_html_e
 import { ProjectTemplateDropdown } from "../components/project_template_dropdown";
 
 export class ProjectProjectFormController extends FormControllerWithHTMLExpander {
-    static template = "project.ProjectFormView";
     static components = {
         ...FormControllerWithHTMLExpander.components,
         ProjectTemplateDropdown,
@@ -40,6 +39,15 @@ export class ProjectProjectFormController extends FormControllerWithHTMLExpander
                 () => [this.rootRef.el]
             );
         }
+    }
+
+    get staticControlPanelButtons() {
+        return {
+            ...super.staticControlPanelButtons,
+            new: {
+                template: "project.ProjectFormView.Buttons.TemplateDropdown",
+            },
+        };
     }
 
     getStaticActionMenuItems() {

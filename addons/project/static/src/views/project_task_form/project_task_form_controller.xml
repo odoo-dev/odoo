@@ -3,7 +3,7 @@
     <t t-name="project.ProjectTaskFormView.Buttons.TemplateDropdown">
         <ProjectTaskTemplateDropdown
             projectId="props.context.default_project_id"
-            onCreate="() =&gt; this.create()"
+            onCreate="() => this.create()"
             newButtonClasses="'btn btn-outline-primary o_form_button_create'"
             context="props.context"
         />
