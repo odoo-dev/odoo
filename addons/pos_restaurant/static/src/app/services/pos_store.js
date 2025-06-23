@@ -47,19 +47,19 @@ patch(PosStore.prototype, {
         }
         return super.defaultScreen;
     },
-    handlePreparationHistory(srcPrep, destPrep, srcLine, destLine, qty) {
+    handlePreparationHistory(srcPrep, destPrep, srcLine, destLine, qty, srcOrderId = null) {
         const srcKey = srcLine.preparationKey;
         const destKey = destLine.preparationKey;
         const srcQty = srcPrep[srcKey]?.quantity;
 
         if (srcQty) {
             if (srcQty <= qty) {
-                const newPrep = { ...srcPrep[srcKey], uuid: destLine.uuid };
+                const newPrep = { ...srcPrep[srcKey], uuid: destLine.uuid, original_order_id: srcOrderId || null };
                 destPrep[destKey] = newPrep;
                 delete srcPrep[srcKey];
             } else {
                 srcPrep[srcKey].quantity = srcQty - qty;
-                destPrep[destKey] = { ...srcPrep[srcKey], uuid: destLine.uuid, quantity: qty };
+                destPrep[destKey] = { ...srcPrep[srcKey], uuid: destLine.uuid, quantity: qty, original_order_id: srcOrderId || null };
             }
         }
     },
@@ -79,7 +79,8 @@ patch(PosStore.prototype, {
                     destOrder.last_order_preparation_change.lines,
                     orphanLine,
                     destinationLine,
-                    orphanLine.qty
+                    orphanLine.qty,
+                    sourceOrder.id,
                 );
             } else {
                 const serializedLine = orphanLine.serialize();
@@ -94,7 +95,8 @@ patch(PosStore.prototype, {
                     destOrder.last_order_preparation_change.lines,
                     orphanLine,
                     newLine,
-                    orphanLine.qty
+                    orphanLine.qty,
+                    sourceOrder.id,
                 );
             }
 
