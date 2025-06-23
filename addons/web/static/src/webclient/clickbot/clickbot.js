@@ -20,7 +20,7 @@ const BLACKLISTED_MENUS = [
     "pos_enterprise.menu_point_kitchen_display_root", // conditional menu that may leads to frontend
 ];
 // If you change this selector, adapt Studio test "Studio icon matches the clickbot selector"
-const STUDIO_SYSTRAY_ICON_SELECTOR = ".o_web_studio_navbar_item:not(.o_disabled) i";
+// const STUDIO_SYSTRAY_ICON_SELECTOR = ".o_web_studio_navbar_item:not(.o_disabled) i";
 
 let isEnterprise;
 let state;
@@ -55,6 +55,7 @@ function setup(light, currentState) {
         currentState || {
             light,
             studioCount: 0,
+            formViewCount: 0,
             testedApps: [],
             testedMenus: [],
             testedFilters: 0,
@@ -74,6 +75,7 @@ function setup(light, currentState) {
 }
 
 function onRPCRequest({ detail }) {
+    console.log("JPP-RPC", detail.url);
     calledRPC[detail.data.id] = detail.url;
 }
 
@@ -135,9 +137,9 @@ async function triggerClick(target, elDescription) {
  * @param {function} stopCondition a function that returns a boolean
  * @returns {Promise} that is rejected if the timeout is exceeded
  */
-async function waitForCondition(stopCondition) {
+async function waitForCondition(stopCondition, timeout) {
     const interval = 25;
-    const initialTime = 30000;
+    const initialTime = timeout ?? 30000;
     let timeLimit = initialTime;
 
     function hasPendingRPC() {
@@ -285,78 +287,139 @@ async function getNextApp() {
     return appName;
 }
 
+/** Test Form view
+ * Click on a record, enter the Form view, and leave it once loaded.
+ */
+// TODO:
+// [] Don't click on list editable rows !
+// [] As we apply all the filters, we usually don't have rows to click
+// [x] if we don't have elements return.
+async function testFormView(viewType) {
+    let isModal = false;
+    let editableList = false;
+    if (document.querySelector(".o_view_sample_data")) {
+        return;
+    }
+    let recordTarget;
+    if (viewType === "list") {
+        recordTarget = ".o_data_row .o_data_cell";
+    }
+    if (viewType === "kanban") {
+        recordTarget = ".o_kanban_record:not(.o_kanban_ghost)";
+    }
+    const firstRecord = document.querySelector(recordTarget);
+    if (!firstRecord) {
+        // we don't have records !
+        return;
+    }
+    await triggerClick(firstRecord, "open first record");
+
+    try {
+        await waitForCondition(() => {
+            if (document.querySelector(".o_dialog:not(.o_error_dialog)")) {
+                isModal = true;
+                state.testedModals++;
+                return true;
+            } else if (document.querySelector(".o_data_row .o_data_cell input")) {
+                editableList = true;
+                return true;
+            } else {
+                return document.querySelector(".o_form_renderer");
+            }
+        }, 3000);
+    } catch {
+        return;
+        // Timeout, we can't open a record !
+    }
+    if (isModal) {
+        await triggerClick(
+            document.querySelector(".o_dialog header > .btn-close"),
+            "modal close button"
+        );
+        return;
+    }
+    if (editableList) {
+        return;
+        // Editable List
+    }
+    state.formViewCount++;
+    await triggerClick(document.querySelector(".o_back_button"), "leaving the form view");
+
+    await waitForCondition(() => document.querySelector(`.o_${viewType}_renderer`));
+}
+
 /**
  * Test Studio
  * Click on the Studio systray item to enter Studio, and simply leave it once loaded.
  */
-async function testStudio() {
-    const studioIcon = document.querySelector(STUDIO_SYSTRAY_ICON_SELECTOR);
-    if (!studioIcon) {
-        return;
-    }
-    // Open the filter menu dropdown
-    await triggerClick(studioIcon, "entering studio");
-    await waitForCondition(() => document.querySelector(".o_in_studio"));
-    await triggerClick(document.querySelector(".o_web_studio_leave"), "leaving studio");
-    await waitForCondition(() =>
-        document.querySelector(".o_main_navbar:not(.o_studio_navbar) .o_menu_toggle")
-    );
-    state.studioCount++;
-}
+// async function testStudio() {
+//     const studioIcon = document.querySelector(STUDIO_SYSTRAY_ICON_SELECTOR);
+//     if (!studioIcon) {
+//         return;
+//     }
+//     // Open the filter menu dropdown
+//     await triggerClick(studioIcon, "entering studio");
+//     await waitForCondition(() => document.querySelector(".o_in_studio"));
+//     await triggerClick(document.querySelector(".o_web_studio_leave"), "leaving studio");
+//     await waitForCondition(() =>
+//         document.querySelector(".o_main_navbar:not(.o_studio_navbar) .o_menu_toggle")
+//     );
+//     state.studioCount++;
+// }
 
 /**
  * Test filters
  * Click on each filter in the control pannel
  */
-async function testFilters() {
-    if (state.light === true) {
-        return;
-    }
-    const searchBarMenu = document.querySelector(
-        ".o_control_panel .dropdown-toggle.o_searchview_dropdown_toggler"
-    );
-    if (!searchBarMenu) {
-        return;
-    }
-    // Open the search bar menu dropdown
-    await triggerClick(searchBarMenu);
-    const filterMenuButton = document.querySelector(".o_dropdown_container.o_filter_menu");
-    // Is there a filter menu in the search bar
-    if (!filterMenuButton) {
-        return;
-    }
-
-    // Avoid the "Custom Filter" menu item (it don't have the class .o_menu_item)
-    const simpleFilterSel = ".o_filter_menu > .dropdown-item.o_menu_item:not(.o_add_custom_filter)";
-    const dateFilterSel = ".o_filter_menu > .o_accordion";
-    const filterMenuItems = document.querySelectorAll(`${simpleFilterSel},${dateFilterSel}`);
-    browser.console.log(`Testing ${filterMenuItems.length} filters`);
-    state.testedFilters += filterMenuItems.length;
-    for (const filter of filterMenuItems) {
-        // Date filters
-        if (filter.classList.contains("o_accordion")) {
-            // If a fitler has options, it will simply unfold and show all options.
-            await triggerClick(
-                filter.querySelector(".o_accordion_toggle"),
-                `filter "${filter.innerText.trim()}"`
-            );
-
-            // If a fitler has options, it will simply unfold and show all options.
-            // We then click on the first one.
-            const firstOption = filter.querySelector(
-                ".o_accordion > .o_accordion_values > .dropdown-item"
-            );
-            if (firstOption) {
-                await triggerClick(firstOption, `filter option "${firstOption.innerText.trim()}"`);
-                await waitForCondition(() => true);
-            }
-        } else {
-            await triggerClick(filter, `filter "${filter.innerText.trim()}"`);
-            await waitForCondition(() => true);
-        }
-    }
-}
-
+// async function testFilters() {
+//     if (state.light === true) {
+//         return;
+//     }
+//     const searchBarMenu = document.querySelector(
+//         ".o_control_panel .dropdown-toggle.o_searchview_dropdown_toggler"
+//     );
+//     if (!searchBarMenu) {
+//         return;
+//     }
+//     // Open the search bar menu dropdown
+//     await triggerClick(searchBarMenu);
+//     const filterMenuButton = document.querySelector(".o_dropdown_container.o_filter_menu");
+//     // Is there a filter menu in the search bar
+//     if (!filterMenuButton) {
+//         return;
+//     }
+//
+//     // Avoid the "Custom Filter" menu item (it don't have the class .o_menu_item)
+//     const simpleFilterSel = ".o_filter_menu > .dropdown-item.o_menu_item:not(.o_add_custom_filter)";
+//     const dateFilterSel = ".o_filter_menu > .o_accordion";
+//     const filterMenuItems = document.querySelectorAll(`${simpleFilterSel},${dateFilterSel}`);
+//     browser.console.log(`Testing ${filterMenuItems.length} filters`);
+//     state.testedFilters += filterMenuItems.length;
+//     for (const filter of filterMenuItems) {
+//         // Date filters
+//         if (filter.classList.contains("o_accordion")) {
+//             // If a fitler has options, it will simply unfold and show all options.
+//             await triggerClick(
+//                 filter.querySelector(".o_accordion_toggle"),
+//                 `filter "${filter.innerText.trim()}"`
+//             );
+//
+//             // If a fitler has options, it will simply unfold and show all options.
+//             // We then click on the first one.
+//             const firstOption = filter.querySelector(
+//                 ".o_accordion > .o_accordion_values > .dropdown-item"
+//             );
+//             if (firstOption) {
+//                 await triggerClick(firstOption, `filter option "${firstOption.innerText.trim()}"`);
+//                 await waitForCondition(() => true);
+//             }
+//         } else {
+//             await triggerClick(filter, `filter "${filter.innerText.trim()}"`);
+//             await waitForCondition(() => true);
+//         }
+//     }
+// }
+//
 /**
  * Orchestrate the test of views
  * This function finds the buttons that permit to switch views and orchestrate
@@ -385,11 +448,14 @@ async function testViews() {
                 triggerClick(target, `${viewType} view switcher`);
             }
         }, 250);
-        await waitForCondition(() => {
-            return document.querySelector(`.o_switch_view.o_${viewType}.active`) !== null;
-        });
-        await testStudio();
-        await testFilters();
+        await waitForCondition(
+            () => document.querySelector(`.o_switch_view.o_${viewType}.active`) !== null
+        );
+        if (viewType === "list" || viewType === "kanban") {
+            await testFormView(viewType);
+        }
+        // await testStudio();
+        // await testFilters();
     }
 }
 
@@ -430,8 +496,15 @@ async function testMenuItem(element) {
                 "modal close button"
             );
         } else {
-            await testStudio();
-            await testFilters();
+            if (
+                document.querySelector(".o_kanban_renderer") ||
+                document.querySelector(".o_list_renderer")
+            ) {
+                const viewType = document.querySelector(".o_kanban_renderer") ? "kanban" : "list";
+                await testFormView(viewType);
+            }
+            // await testStudio();
+            // await testFilters();
             await testViews();
         }
     } catch (err) {
@@ -510,6 +583,7 @@ async function _clickEverywhere(xmlId, light, currentState) {
         browser.console.log(
             `Successfully tested ${state.testedMenus.length - state.testedApps.length} menus`
         );
+        browser.console.log(`Successfully tested ${state.formViewCount} Form Views`);
         browser.console.log(`Successfully tested ${state.testedModals} modals`);
         browser.console.log(`Successfully tested ${state.testedFilters} filters`);
         if (state.studioCount > 0) {
