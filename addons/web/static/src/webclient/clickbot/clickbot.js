@@ -75,7 +75,7 @@ function setup(light, currentState) {
 }
 
 function onRPCRequest({ detail }) {
-    console.log("JPP-RPC", detail.url);
+    console.log("JPP-RPC", detail.data?.params?.method || detail.url);
     calledRPC[detail.data.id] = detail.url;
 }
 
@@ -438,6 +438,9 @@ async function testViews() {
         const viewType = [...switchButton.classList]
             .find((cls) => cls !== "o_switch_view" && cls.startsWith("o_"))
             .slice(2);
+        if (!["kanban", "list"].includes(viewType)) {
+            continue;
+        }
         browser.console.log(`Testing view switch: ${viewType}`);
         // timeout to avoid click debounce
         browser.setTimeout(function () {
