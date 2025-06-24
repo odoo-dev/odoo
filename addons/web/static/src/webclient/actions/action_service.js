@@ -1108,6 +1108,7 @@ export function makeActionManager(env, router = _router) {
         };
         env.services.dialog.closeAll({ noReload: true });
         env.bus.trigger("ACTION_MANAGER:UPDATE", controller.__info__);
+        env.bus.trigger("ACTION_MANAGER:TYPE", controller?.view?.type);
         await currentActionProm;
     }
 

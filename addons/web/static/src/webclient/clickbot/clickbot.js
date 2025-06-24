@@ -47,6 +47,7 @@ function setup(light, currentState) {
     document.body.appendChild(stopButton);
 
     env.bus.addEventListener("ACTION_MANAGER:UI-UPDATED", uiUpdate);
+    env.bus.addEventListener("ACTION_MANAGER:TYPE", uiUpdateType);
     rpcBus.addEventListener("RPC:REQUEST", onRPCRequest);
     rpcBus.addEventListener("RPC:RESPONSE", onRPCResponse);
     isEnterprise = odoo.info && odoo.info.isEnterprise;
@@ -57,6 +58,7 @@ function setup(light, currentState) {
             studioCount: 0,
             formViewCount: 0,
             rpcStats: {},
+            viewType: "",
             testedApps: [],
             testedMenus: [],
             testedFilters: 0,
@@ -77,7 +79,10 @@ function setup(light, currentState) {
 
 function onRPCRequest({ detail }) {
     const rpc = detail.data?.params?.method || detail.url;
-    console.log("JPP-RPC", rpc);
+    console.log(`JPP-RPC ${state.app} - ${state.viewType} - ${rpc}`);
+    if (rpc === "has_group") {
+        console.log(`JPP-RPC has_group ${detail.data.params.args}`);
+    }
     if (rpc in state.rpcStats) {
         state.rpcStats[rpc]++;
     } else {
@@ -95,6 +100,10 @@ function onRPCResponse({ detail }) {
 
 function uiUpdate() {
     actionCount++;
+}
+
+function uiUpdateType({ detail }) {
+    state.viewType = detail;
 }
 
 function cleanup() {
