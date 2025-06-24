@@ -54,7 +54,7 @@ msgstr ""
 #. module: base_iban
 #. odoo-python
 #: code:addons/base_iban/models/res_partner_bank.py:0
-msgid "The IBAN is invalid, it should begin with the country code"
+msgid "Any journal item on a receivable account must have a due date and vice versa."
 msgstr ""
 
 #. module: base_iban
