@@ -56,6 +56,7 @@ function setup(light, currentState) {
             light,
             studioCount: 0,
             formViewCount: 0,
+            rpcStats: {},
             testedApps: [],
             testedMenus: [],
             testedFilters: 0,
@@ -75,7 +76,13 @@ function setup(light, currentState) {
 }
 
 function onRPCRequest({ detail }) {
-    console.log("JPP-RPC", detail.data?.params?.method || detail.url);
+    const rpc = detail.data?.params?.method || detail.url;
+    console.log("JPP-RPC", rpc);
+    if (rpc in state.rpcStats) {
+        state.rpcStats[rpc]++;
+    } else {
+        state.rpcStats[rpc] = 1;
+    }
     calledRPC[detail.data.id] = detail.url;
 }
 
@@ -591,6 +598,10 @@ async function _clickEverywhere(xmlId, light, currentState) {
         browser.console.log(`Successfully tested ${state.testedFilters} filters`);
         if (state.studioCount > 0) {
             browser.console.log(`Successfully tested ${state.studioCount} views in Studio`);
+        }
+        browser.console.log("RPC Stats");
+        for (const key of Object.keys(state.rpcStats)) {
+            browser.console.log(`${state.rpcStats[key]} - ${key}`);
         }
         browser.console.log(SUCCESS_SIGNAL);
     } catch (err) {
