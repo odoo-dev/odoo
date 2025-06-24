@@ -17,7 +17,7 @@ from odoo.fields import Domain
 from odoo.http import request
 from odoo.modules.module import adapt_version, MANIFEST_NAMES
 from odoo.release import major_version
-from odoo.tools import convert_csv_import, convert_sql_import, convert_xml_import, exception_to_unicode
+from odoo.tools import convert_file, exception_to_unicode
 from odoo.tools import file_open, file_open_temporary_directory, ormcache
 from odoo.tools.misc import topological_sort
 
@@ -116,10 +116,10 @@ class IrModuleModule(models.Model):
         for pattern in terp.get('cloc_exclude', []):
             exclude_list.update(str(p.relative_to(base_dir)) for p in base_dir.glob(pattern) if p.is_file())
 
-        kind_of_files = ['data', 'init_xml']
+        kind_of_files = [('data', True), ('init_xml', True)]
         if with_demo:
-            kind_of_files.append('demo')
-        for kind in kind_of_files:
+            kind_of_files.append(('demo', False))
+        for kind, is_master_data in kind_of_files:
             for filename in terp.get(kind, []):
                 ext = os.path.splitext(filename)[1].lower()
                 if ext not in ('.xml', '.csv', '.sql'):
@@ -129,25 +129,19 @@ class IrModuleModule(models.Model):
                 noupdate = ext == '.csv' and kind == 'init_xml'
                 pathname = opj(path, filename)
                 idref = {}
-                with file_open(pathname, 'rb', env=self.env) as fp:
-                    if ext == '.csv':
-                        convert_csv_import(self.env, module, pathname, fp.read(), idref, mode, noupdate)
-                    elif ext == '.sql':
-                        convert_sql_import(self.env, fp)
-                    elif ext == '.xml':
-                        convert_xml_import(self.env, module, fp, idref, mode, noupdate)
-                        if filename in exclude_list:
-                            for key, value in idref.items():
-                                xml_id = f"{module}.{key}" if '.' not in key else key
-                                name = xml_id.replace('.', '_')
-                                if self.env.ref(f"__cloc_exclude__.{name}", raise_if_not_found=False):
-                                    continue
-                                self.env['ir.model.data'].create([{
-                                    'name': name,
-                                    'model': self.env['ir.model.data']._xmlid_lookup(xml_id)[0],
-                                    'module': "__cloc_exclude__",
-                                    'res_id': value,
-                                }])
+                convert_file(self.env, module, filename, idref, mode, noupdate, pathname=pathname, is_master_data=is_master_data)
+                if filename in exclude_list:
+                    for key, value in idref.items():
+                        xml_id = f"{module}.{key}" if '.' not in key else key
+                        name = xml_id.replace('.', '_')
+                        if self.env.ref(f"__cloc_exclude__.{name}", raise_if_not_found=False):
+                            continue
+                        self.env['ir.model.data'].create([{
+                            'name': name,
+                            'model': self.env['ir.model.data']._xmlid_lookup(xml_id)[0],
+                            'module': "__cloc_exclude__",
+                            'res_id': value,
+                        }])
 
         path_static = opj(path, 'static')
         IrAttachment = self.env['ir.attachment']

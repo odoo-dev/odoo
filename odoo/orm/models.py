@@ -47,6 +47,7 @@ import psycopg2.extensions
 from psycopg2.extras import Json
 
 from odoo.exceptions import AccessError, LockError, MissingError, ValidationError, UserError
+from odoo.modules import module
 from odoo.tools import (
     clean_context, date_utils,
     DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, format_list,
@@ -3915,6 +3916,12 @@ class BaseModel(metaclass=MetaModel):
             # access rights restrictions, and with no context to avoid possible
             # side-effects during admin calls.
             data = Data.search([('model', '=', self._name), ('res_id', 'in', sub_ids)])
+            if self.env.registry.ready \
+                and self.env.uid != SUPERUSER_ID \
+                and not module.current_test \
+                and not self._context.get(MODULE_UNINSTALL_FLAG) \
+                and (master_data := data.filtered('is_master_data')):
+                raise UserError(self.env._("Master data %r should not be deleted", master_data))
             ir_model_data_unlink |= data
 
             # For the same reason, remove the relevant records in ir_attachment
@@ -4422,6 +4429,7 @@ class BaseModel(metaclass=MetaModel):
                 'record': rec,
                 # note: this is not used when updating o2ms above...
                 'noupdate': noupdate,
+                'is_master_data': self.env.context.get('is_master_data'),
             }
             for rec, xid in zip(records, xids)
             if xid and isinstance(xid, str)
@@ -4856,6 +4864,7 @@ class BaseModel(metaclass=MetaModel):
 
         # create records
         if to_create:
+            is_master_data = bool(self.env.context.get('is_master_data'))
             records = self._load_records_create([data['values'] for data in to_create])
             for data, record in zip(to_create, records):
                 data['record'] = record
@@ -4867,7 +4876,9 @@ class BaseModel(metaclass=MetaModel):
                                 'xml_id': f"{data['xml_id']}_{parent_model.replace('.', '_')}",
                                 'record': record[parent_field],
                                 'noupdate': data.get('noupdate', False),
+                                'is_master_data': is_master_data,
                             })
+                    data['is_master_data'] = is_master_data
                     imd_data_list.append(data)
 
         # create or update XMLIDs

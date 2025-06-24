@@ -30,6 +30,7 @@ if typing.TYPE_CHECKING:
     from odoo.api import Environment
     from odoo.sql_db import BaseCursor
     from odoo.tests.result import OdooTestResult
+    from typing import Literal
     from .module_graph import ModuleNode
 
     LoadKind = typing.Literal['data', 'demo']
@@ -55,7 +56,9 @@ def load_data(env: Environment, idref: IdRef, mode: LoadMode, kind: LoadKind, pa
             files.add(filename)
 
             _logger.info("loading %s/%s", package.name, filename)
-            convert_file(env, package.name, filename, idref, mode, noupdate=kind == 'demo')
+            noupdate = kind == 'demo'
+            is_master_data = kind == 'data'
+            convert_file(env, package.name, filename, idref, mode, noupdate=noupdate, is_master_data=is_master_data)
 
     return bool(files)
 

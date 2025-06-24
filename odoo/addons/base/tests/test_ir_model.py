@@ -4,7 +4,9 @@
 from psycopg2 import IntegrityError
 from psycopg2.errors import NotNullViolation
 
-from odoo.exceptions import ValidationError
+from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
+from odoo.exceptions import UserError
+from odoo.modules import module
 from odoo.tests import Form, TransactionCase, HttpCase, tagged
 from odoo.tools import mute_logger
 from odoo import Command
@@ -223,6 +225,38 @@ class TestXMLID(TransactionCase):
                 {'xml_id': xmlid, 'record': records[5]},
             ])
         assert_xmlid(xmlid, records[5], f'The xmlid {xmlid} should have been updated with record (not an update) {records[1]}')
+    
+    def test_master_data_import(self):
+        xmlids = [
+            'base.module_base',  # ir.module.module
+            'base.model_res_partner',  # ir.model
+            'base.field_res_partner__name',  # ir.model.fields
+            'base.selection__res_partner__tz__utc',  # ir.model.fields.selection
+            'base.constraint_ir_model_obj_name_uniq',  # ir.model.constraint
+            'base.model_inherit__ir_cron__ir_actions_server',  # ir.model.inherit
+        ]
+        for xmlid in xmlids:
+            module, name = xmlid.split('.')
+            imd = self.env['ir.model.data'].search([('module', '=', module), ('name', '=', name)])
+            self.assertTrue(imd.is_master_data)
+
+    def test_master_data_unlink(self):
+        partner = self.env['res.partner'].create({'name': 'test'})
+        self.env['ir.model.data']._update_xmlids([
+            {'xml_id': '__export__.test_record_res_partner', 'record': partner, 'is_master_data': True},
+        ])
+
+        old = self.env.registry.ready
+        self.env.registry.ready = True
+        self.addCleanup(setattr, self.env.registry, 'ready', old)
+        module.current_test = False
+        self.addCleanup(setattr, module, 'current_test', True)
+
+        with self.assertRaises(UserError, msg='master data should not be deleted'):
+            partner.unlink()
+
+        partner.with_context(**{MODULE_UNINSTALL_FLAG: True}).unlink()
+        self.assertFalse(partner.exists())
 
 
 @tagged('-at_install', 'post_install')

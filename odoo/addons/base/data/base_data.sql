@@ -84,6 +84,7 @@ CREATE TABLE ir_model_data (
     write_uid integer,
     res_id integer,
     noupdate boolean DEFAULT False,
+    is_master_data boolean DEFAULT False,
     name varchar NOT NULL,
     module varchar NOT NULL,
     model varchar NOT NULL,
@@ -120,21 +121,21 @@ CREATE TABLE res_partner (
 -- Default data
 ---------------------------------
 insert into res_currency (id, name, symbol) VALUES (1, 'USD', '$');
-insert into ir_model_data (name, module, model, noupdate, res_id) VALUES ('USD', 'base', 'res.currency', true, 1);
+insert into ir_model_data (name, module, model, noupdate, res_id, is_master_data) VALUES ('USD', 'base', 'res.currency', true, 1, true);
 select setval('res_currency_id_seq', 1);
 
 insert into res_company (id, name, partner_id, currency_id, create_date) VALUES (1, 'My Company', 1, 1, now() at time zone 'UTC');
-insert into ir_model_data (name, module, model, noupdate, res_id) VALUES ('main_company', 'base', 'res.company', true, 1);
+insert into ir_model_data (name, module, model, noupdate, res_id, is_master_data) VALUES ('main_company', 'base', 'res.company', true, 1, true);
 select setval('res_company_id_seq', 1);
 
 insert into res_partner (id, name, company_id, create_date) VALUES (1, 'My Company', 1, now() at time zone 'UTC');
-insert into ir_model_data (name, module, model, noupdate, res_id) VALUES ('main_partner', 'base', 'res.partner', true, 1);
+insert into ir_model_data (name, module, model, noupdate, res_id, is_master_data) VALUES ('main_partner', 'base', 'res.partner', true, 1, true);
 select setval('res_partner_id_seq', 1);
 
 insert into res_users (id, login, password, active, partner_id, company_id, create_date) VALUES (1, '__system__', NULL, false, 1, 1, now() at time zone 'UTC');
-insert into ir_model_data (name, module, model, noupdate, res_id) VALUES ('user_root', 'base', 'res.users', true, 1);
+insert into ir_model_data (name, module, model, noupdate, res_id, is_master_data) VALUES ('user_root', 'base', 'res.users', true, 1, true);
 select setval('res_users_id_seq', 1);
 
 insert into res_groups (id, name) VALUES (1, '{"en_US": "Employee"}');
-insert into ir_model_data (name, module, model, noupdate, res_id) VALUES ('group_user', 'base', 'res.groups', true, 1);
+insert into ir_model_data (name, module, model, noupdate, res_id, is_master_data) VALUES ('group_user', 'base', 'res.groups', true, 1, true);
 select setval('res_groups_id_seq', 1);

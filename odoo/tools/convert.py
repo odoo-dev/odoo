@@ -628,6 +628,7 @@ def convert_file(
         noupdate=False,
         kind=None,
         pathname=None,
+        is_master_data=False,
 ):
     if kind is not None:
         warnings.warn(
@@ -639,13 +640,13 @@ def convert_file(
         pathname = os.path.join(module, filename)
     ext = os.path.splitext(filename)[1].lower()
 
-    with file_open(pathname, 'rb') as fp:
+    with file_open(pathname, 'rb', env=env) as fp:
         if ext == '.csv':
-            convert_csv_import(env, module, pathname, fp.read(), idref, mode, noupdate)
+            convert_csv_import(env, module, pathname, fp.read(), idref, mode, noupdate, is_master_data)
         elif ext == '.sql':
             convert_sql_import(env, fp)
         elif ext == '.xml':
-            convert_xml_import(env, module, fp, idref, mode, noupdate)
+            convert_xml_import(env, module, fp, idref, mode, noupdate, is_master_data=is_master_data)
         elif ext == '.js':
             pass # .js files are valid but ignored here.
         else:
@@ -664,6 +665,7 @@ def convert_csv_import(
         idref: Optional[IdRef] = None,
         mode: ConvertMode = 'init',
         noupdate=False,
+        is_master_data=False,
 ):
     '''Import csv file :
         quote: "
@@ -701,6 +703,7 @@ def convert_csv_import(
         'install_module': module,
         'install_filename': fname,
         'noupdate': noupdate,
+        'is_master_data': is_master_data,
     }
     result = env[model].with_context(**context).load(fields, datas)
     if any(msg['type'] == 'error' for msg in result['messages']):
@@ -722,6 +725,7 @@ def convert_xml_import(
         mode: ConvertMode = 'init',
         noupdate=False,
         report=None,
+        is_master_data=False,
 ):
     doc = etree.parse(xmlfile)
     schema = os.path.join(config.root_path, 'import_xml.rng')
@@ -743,5 +747,6 @@ def convert_xml_import(
         xml_filename = xmlfile
     else:
         xml_filename = xmlfile.name
+    env = env(context={**env.context, 'is_master_data': is_master_data})
     obj = xml_import(env, module, idref, mode, noupdate=noupdate, xml_filename=xml_filename)
     obj.parse(doc.getroot())

@@ -466,7 +466,7 @@ class IrModel(models.Model):
                 # model._module is the name of the module that last extended model
                 xml_id = model_xmlid(module, model_name)
                 record = self.browse(model_id)
-                data_list.append({'xml_id': xml_id, 'record': record})
+                data_list.append({'xml_id': xml_id, 'record': record, 'is_master_data': True})
         self.env['ir.model.data']._update_xmlids(data_list)
 
     @api.model
@@ -1217,7 +1217,7 @@ class IrModelFields(models.Model):
             ):
                 xml_id = field_xmlid(module, field_model, field_name)
                 record = self.browse(field_id)
-                data_list.append({'xml_id': xml_id, 'record': record})
+                data_list.append({'xml_id': xml_id, 'record': record, 'is_master_data': True})
         self.env['ir.model.data']._update_xmlids(data_list)
 
     @tools.ormcache()
@@ -1450,6 +1450,7 @@ class IrModelInherit(models.Model):
                 {
                     "xml_id": f"{module}.model_inherit__{model_name}__{parent_name}",
                     "record": self.browse(record_id),
+                    "is_master_data": True,
                 }
                 for module in modules
             ]
@@ -1554,7 +1555,7 @@ class IrModelFieldsSelection(models.Model):
                 for m in modules:
                     xml_id = selection_xmlid(m, field.model_name, field.name, value)
                     record = self.browse(selection_ids[field.model_name, field.name, value])
-                    data_list.append({'xml_id': xml_id, 'record': record})
+                    data_list.append({'xml_id': xml_id, 'record': record, 'is_master_data': True})
         self.env['ir.model.data']._update_xmlids(data_list)
 
     def _update_selection(self, model_name, field_name, selection):
@@ -1924,7 +1925,7 @@ class IrModelConstraint(models.Model):
             record = self._reflect_constraint(model, conname, typ, definition, module, message)
             xml_id = '%s.constraint_%s' % (module, conname)
             if record:
-                data_list.append(dict(xml_id=xml_id, record=record))
+                data_list.append(dict(xml_id=xml_id, record=record, is_master_data=True))
             else:
                 self.env['ir.model.data']._load_xmlid(xml_id)
         if data_list:
@@ -2168,6 +2169,7 @@ class IrModelData(models.Model):
     res_id = fields.Many2oneReference(string='Record ID', help="ID of the target record in the database", model_field='model')
     noupdate = fields.Boolean(string='Non Updatable', default=False)
     reference = fields.Char(string='Reference', compute='_compute_reference', readonly=True, store=False)
+    is_master_data = fields.Boolean(string='Is Master Data', default=False)
 
     _name_nospaces = models.Constraint("CHECK(name NOT LIKE '% %')", "External IDs cannot contain spaces")
     _module_name_uniq_index = models.UniqueIndex('(module, name)')
@@ -2308,7 +2310,8 @@ class IrModelData(models.Model):
             prefix, suffix = data['xml_id'].split('.', 1)
             record = data['record']
             noupdate = bool(data.get('noupdate'))
-            rows.add((prefix, suffix, record._name, record.id, noupdate))
+            is_master_data = bool(data.get('is_master_data'))
+            rows.add((prefix, suffix, record._name, record.id, noupdate, is_master_data))
 
         for sub_rows in split_every(self.env.cr.IN_MAX, rows):
             # insert rows or update them
@@ -2348,6 +2351,7 @@ class IrModelData(models.Model):
             'model': '%s',
             'res_id': '%s',
             'noupdate': '%s',
+            'is_master_data': '%s',
         }
 
     def _build_update_xmlids_query(self, sub_rows, update):

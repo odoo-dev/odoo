@@ -78,8 +78,8 @@ def initialize(cr: Cursor) -> None:
         module_id = row[0]
         cr.execute(
             'INSERT INTO ir_model_data'
-            '(name,model,module, res_id, noupdate) VALUES (%s,%s,%s,%s,%s)',
-            ('module_' + i, 'ir.module.module', 'base', module_id, True),
+            '(name,model,module, res_id, noupdate, is_master_data) VALUES (%s,%s,%s,%s,%s,%s)',
+            ('module_' + i, 'ir.module.module', 'base', module_id, True, True),
         )
         dependencies = info['depends']
         for d in dependencies:
@@ -149,8 +149,8 @@ def create_categories(cr: Cursor, categories: list[str]) -> int | None:
             row = cr.fetchone()
             assert row is not None  # for typing
             p_id = row[0]
-            cr.execute('INSERT INTO ir_model_data (module, name, res_id, model, noupdate) \
-                       VALUES (%s, %s, %s, %s, %s)', ('base', xml_id, p_id, 'ir.module.category', True))
+            cr.execute('INSERT INTO ir_model_data (module, name, res_id, model, noupdate, is_master_data) \
+                       VALUES (%s, %s, %s, %s, %s, %s)', ('base', xml_id, p_id, 'ir.module.category', True, True))
         else:
             p_id = row[0]
         assert isinstance(p_id, int)

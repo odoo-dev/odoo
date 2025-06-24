@@ -94,6 +94,8 @@ class IrConfig_Parameter(models.Model):
             if value is not False and value is not None:
                 if str(value) != old:
                     param.write({'value': value})
+            elif self.env['ir.model.data'].search([('res_id', '=', param.id), ('model', '=', 'ir.config_parameter'), ('is_master_data', '=', True)]):
+                param.write({'value': ''})
             else:
                 param.unlink()
             return old
