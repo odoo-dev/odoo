@@ -156,6 +156,17 @@ will update the cost of every lot/serial number in stock."),
     # -------------------------------------------------------------------------
     # Misc.
     # -------------------------------------------------------------------------
+    def _clean_stock(self):
+        """Empty the stock valuation layers in case a product become storable."""
+
+        super()._clean_stock()
+        out_svl_vals_list = []
+        for tmpl in self:
+            description = _("Updating product type %s.", tmpl.display_name)
+            svl_vals, _dummy, _dummy = self.env['product.product']._svl_empty_stock(description, product_template=tmpl)
+            out_svl_vals_list += svl_vals
+        self.env['stock.valuation.layer'].sudo().create(out_svl_vals_list)
+
     def _get_product_accounts(self):
         """ Add the stock accounts related to product to the result of super()
         @return: dictionary which contains information regarding stock accounts and super (income+expense accounts)
