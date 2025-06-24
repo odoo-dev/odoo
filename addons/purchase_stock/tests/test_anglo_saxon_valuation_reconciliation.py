@@ -612,3 +612,52 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
                 {'journal_id': stock_journal_id,    'balance':  -1.79},
             ],
         )
+
+    def test_reconciliation_adjust_purchase_price_after_valuation_multi_currency(self):
+        usd = self.env.ref('base.USD')
+        cny = self.env.ref('base.CNY')
+        self.env['res.currency.rate'].create({
+            'name': fields.Date.today(),
+            'currency_id': cny.id,
+            'rate': 0.17344753743,
+            'company_id': self.env.company.id,
+        })
+        avco_categ = self.stock_account_product_categ
+        avco_categ.property_cost_method = 'average'
+        avco_product = self.env['product.product'].create({
+            'name': 'avco prod',
+            'type': 'product',
+            'categ_id': avco_categ.id,
+            'standard_price': 120.5,
+        })
+        purchase_order_cny = self.env['purchase.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({
+                'product_id': avco_product.id,
+                'product_qty': 1,
+            })]
+        })
+        with Form(purchase_order_cny) as po_form:
+            po_form.currency_id = cny
+        purchase_order_cny.button_confirm()
+        reception = purchase_order_cny.picking_ids
+        reception.move_ids.quantity_done = 1
+        reception.button_validate()
+
+        # inventory_quant = self.env['stock.quant'].search([
+        #     ('location_id', '=', reception.location_dest_id.id),
+        #     ('product_id', '=', avco_product.id),
+        # ])
+        # inventory_quant.inventory_quantity = 0
+        # inventory_quant.with_context(inventory_mode=True).action_apply_inventory
+
+        with Form(purchase_order_cny.order_line) as pol_form:
+            pol_form.price_unit += 50
+        purchase_order_cny.action_create_invoice()
+        bill = purchase_order_cny.invoice_ids
+        bill.invoice_date = fields.Date.today()
+        bill.action_post()
+        stock_input_account = self.company_data['default_account_stock_in']
+        stock_input_amls = self.env['account.move.line'].search([('account_id', '=', stock_input_account.id)], order='id asc')
+        full_reconcile = self.env['account.full.reconcile'].search([])
+        self.assertEqual(full_reconcile.reconciled_line_ids, stock_input_amls)

@@ -1442,6 +1442,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         input_aml = self.env['account.move.line'].search([('account_id', '=', self.stock_input_account.id)])
         self.assertEqual(len(input_aml), 3)
 
+    # Dubious use case
     def test_average_realtime_with_delivery_anglo_saxon_valuation_multicurrency_same_dates(self):
         """ Same than test_average_realtime_with_delivery_anglo_saxon_valuation_multicurrency_different_dates
         but the rates change happens
@@ -1464,12 +1465,6 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         # SetUp currency and rates
         self.cr.execute("UPDATE res_company SET currency_id = %s WHERE id = %s", (self.usd_currency.id, company.id))
         self.env['res.currency.rate'].search([]).unlink()
-        self.env['res.currency.rate'].create({
-            'name': date,
-            'rate': 1.0,
-            'currency_id': self.usd_currency.id,
-            'company_id': company.id,
-        })
 
         eur_rate = self.env['res.currency.rate'].create({
             'name': date,
@@ -1490,6 +1485,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
                     'product_uom': product_avg.uom_po_id.id,
                     'price_unit': 30.0,
                     'date_planned': date,
+                    'taxes_id': False,
                 })
             ],
         })
@@ -1507,25 +1503,29 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         eur_rate.rate = 0.25
 
-        inv = self.env['account.move'].with_context(default_move_type='in_invoice').create({
-            'move_type': 'in_invoice',
-            'invoice_date': date,
-            'date': date,
-            'currency_id': self.eur_currency.id,
-            'partner_id': self.partner_id.id,
-            'invoice_line_ids': [
-                (0, 0, {
-                    'name': product_avg.name,
-                    'price_unit': 30.0,
-                    'product_id': product_avg.id,
-                    'purchase_line_id': line_product_avg.id,
-                    'quantity': 1.0,
-                    'account_id': self.stock_input_account.id,
-                    'tax_ids': [],
-                })
-            ]
-        })
-        self.env['stock.move'].invalidate_model()
+        # inv = self.env['account.move'].with_context(default_move_type='in_invoice').create({
+        #     'move_type': 'in_invoice',
+        #     'invoice_date': date,
+        #     'date': date,
+        #     'currency_id': self.eur_currency.id,
+        #     'partner_id': self.partner_id.id,
+        #     'invoice_line_ids': [
+        #         (0, 0, {
+        #             'name': product_avg.name,
+        #             'price_unit': 30.0,
+        #             'product_id': product_avg.id,
+        #             'purchase_line_id': line_product_avg.id,
+        #             'quantity': 1.0,
+        #             'account_id': self.stock_input_account.id,
+        #             'tax_ids': [],
+        #         })
+        #     ]
+        # })
+        # self.env['stock.move'].invalidate_model()
+        po.action_create_invoice()
+        inv = po.invoice_ids
+        inv.currency_id = self.eur_currency.id,
+        inv.invoice_date = date
         inv.action_post()
         self.assertRecordValues(inv.line_ids, [
             # pylint: disable=C0326

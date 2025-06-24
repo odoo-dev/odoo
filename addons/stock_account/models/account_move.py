@@ -235,6 +235,9 @@ class AccountMove(models.Model):
                         else:
                             (invoice_aml | correction_amls).with_context(no_exchange_difference=True).reconcile()
                             (invoice_aml.filtered(lambda aml: not aml.reconciled) | stock_aml).with_context(no_exchange_difference=True).reconcile()
+                            #(invoice_aml | correction_amls | stock_aml).with_context(no_exchange_difference=True).reconcile()
+                            #((invoice_aml | correction_amls).filtered(lambda aml: not aml.reconciled) | stock_aml).with_context(no_exchange_difference=True).reconcile()
+                            #(invoice_aml | correction_amls | stock_aml).filtered(lambda aml: not aml.reconciled).with_context(no_exchange_different=True).reconcile()
                     else:
                         product_account_moves.reconcile()
 

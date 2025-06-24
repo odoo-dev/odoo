@@ -146,8 +146,21 @@ class StockMove(models.Model):
             rslt['debit_line_vals']['currency_id'] = purchase_currency.id
             rslt['credit_line_vals']['currency_id'] = purchase_currency.id
         else:
-            rslt['credit_line_vals']['amount_currency'] = 0
-            rslt['debit_line_vals']['amount_currency'] = 0
+            # rslt['credit_line_vals']['amount_currency'] = 0
+            # rslt['debit_line_vals']['amount_currency'] = 0
+            convert_date = self._get_currency_convert_date()
+            rslt['credit_line_vals']['amount_currency'] = company_currency._convert(
+                rslt['credit_line_vals']['balance'],
+                purchase_currency,
+                self.company_id,
+                convert_date
+            )
+            rslt['debit_line_vals']['amount_currency'] = company_currency._convert(
+                rslt['debit_line_vals']['balance'],
+                purchase_currency,
+                self.company_id,
+                convert_date
+            )
             rslt['debit_line_vals']['currency_id'] = purchase_currency.id
             rslt['credit_line_vals']['currency_id'] = purchase_currency.id
             if not svl.price_diff_value:
