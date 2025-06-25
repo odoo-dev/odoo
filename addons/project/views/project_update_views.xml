@@ -38,7 +38,7 @@
                             <field name="project_id" invisible="1"/>
                             <field name="color" invisible="1"/>
                             <field name="status" widget="status_with_color"/>
-                            <field name="progress" widget="progressbar" options="{'editable': true}"/>
+                            <field name="progress" widget="progressbar"/>
                         </group>
                         <group>
                             <field name="user_id" widget="many2one_avatar_user" readonly="1"/>
@@ -107,7 +107,7 @@
                 <field name="name"/>
                 <field name="user_id" widget="many2one_avatar_user" class="fw-bolder" optional="show"/>
                 <field name="date" optional="show"/>
-                <field name="progress" string="Progress" widget="progressbar" optional="show"/>
+                <field name="progress" string="Progress" widget="progressbar" readonly="1" optional="show"/>
                 <field name="color" column_invisible="True"/>
                 <field name="status" widget="status_with_color"/>
             </list>

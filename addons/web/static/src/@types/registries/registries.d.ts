@@ -40,7 +40,7 @@ declare module "registries" {
         isDisplayed?: (env: OdooEnv) => boolean;
     }
 
-    export type FormattersRegistryItemShape = (value: any) => any;
+    export type FormattersRegistryItemShape = (value: any, options?: object) => any;
 
     export type FormCompilersRegistryItemShape = Compiler;
 

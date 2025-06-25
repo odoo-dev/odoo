@@ -40,7 +40,7 @@
                         decoration-info="member_status == 'ongoing'"
                         decoration-warning="member_status == 'joined'"
                         decoration-muted="member_status == 'invited'"/>
-                    <field name="completion" string="Progress" widget="progressbar"/>
+                    <field name="completion" string="Progress" widget="progressbar" readonly="1"/>
                     <field name="next_slide_id"/>
                     <field name="channel_user_id" widget="many2one_avatar_user" optional="hide"/>
                     <field name="channel_type" optional="hide"/>
@@ -70,7 +70,7 @@
                             <field name="channel_id" class="fw-bolder fs-5"/>
                             <field name="partner_id"/>
                             <footer class="mt-2">
-                                <field name="completion" widget="progressbar"/>
+                                <field name="completion" widget="progressbar" readonly="1"/>
                                 <field name="channel_user_id" widget="many2one_avatar_user" class="ms-auto"/>
                             </footer>
                         </t>

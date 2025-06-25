@@ -230,6 +230,7 @@
                     <field name="milestone_progress" widget="progressbar"
                         invisible="milestone_progress == 0 or not allow_milestones or is_template"
                         optional="hide"
+                        readonly="1"
                     />
                     <field name="next_milestone_id"
                         decoration-danger="is_milestone_deadline_exceeded" decoration-success="can_mark_milestone_as_done"

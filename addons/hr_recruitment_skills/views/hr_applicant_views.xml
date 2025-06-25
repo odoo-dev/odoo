@@ -16,7 +16,7 @@
                                     <field name="skill_type_id" optional="hidden"/>
                                     <field name="skill_id"/>
                                     <field name="skill_level_id"/>
-                                    <field name="level_progress" widget="progressbar"/>
+                                    <field name="level_progress" widget="progressbar" readonly="1"/>
                                 </list>
                             </field>
                         </div>

@@ -253,8 +253,8 @@
                 <field name="campaign_id" string="Campaign" groups="mass_mailing.group_mass_mailing_campaign" optional="hide"/>
                 <field name="ab_testing_enabled" string="A/B Test" groups="mass_mailing.group_mass_mailing_campaign"/>
                 <field name="sent" sum="Total Sent"/>
-                <field name="clicked" string="Clicked (%)" widget="progressbar" avg="Average of Clicked"/>
-                <field name="bounced" string="Bounced (%)" widget="progressbar" optional="hide" avg="Average of Bounced"/>
+                <field name="clicked" string="Clicked (%)" widget="progressbar" readonly="1" avg="Average of Clicked"/>
+                <field name="bounced" string="Bounced (%)" widget="progressbar" readonly="1" optional="hide" avg="Average of Bounced"/>
                 <field name="state" decoration-info="state in ('draft', 'in_queue')" decoration-success="state in ('sending', 'done')" widget="badge"/>
             </list>
         </field>

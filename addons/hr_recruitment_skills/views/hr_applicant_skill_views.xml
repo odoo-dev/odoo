@@ -26,7 +26,7 @@
                                             context="{'from_skill_level_dropdown': True}" />
                                 </span>
                                 <span style="flex:1">
-                                    <field name="level_progress" widget="progressbar" class="o_hr_skills_progress" invisible="not skill_level_id" />
+                                    <field name="level_progress" widget="progressbar" class="o_hr_skills_progress" invisible="not skill_level_id" readonly="1"/>
                                 </span>
                             </div>
                         </group>

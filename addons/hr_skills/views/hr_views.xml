@@ -93,7 +93,7 @@
                         decoration-warning="valid_to and valid_to &lt;= (context_today() + relativedelta(months=3)).strftime('%Y-%m-%d') and valid_to &gt; (context_today() + relativedelta(days=7)).strftime('%Y-%m-%d')">
                         <field name="skill_id"/>
                         <field name="skill_level_id"/>
-                        <field name="level_progress" widget="progressbar"/>
+                        <field name="level_progress" widget="progressbar" readonly="1"/>
                         <field name="skill_type_id" optional="hidden"/>
                         <field name="valid_to" column_invisible="1"/>
                         <field name="is_certification" column_invisible="1"/>
@@ -158,7 +158,7 @@
                                 <field name="skill_type_id" optional="hidden"/>
                                 <field name="skill_id"/>
                                 <field name="skill_level_id"/>
-                                <field name="level_progress" widget="progressbar"/>
+                                <field name="level_progress" widget="progressbar" readonly="1"/>
                                 <field name="valid_to" column_invisible="1"/>
                             </list>
                         </field>
@@ -222,7 +222,7 @@
                                     <field name="skill_type_id" optional="hidden"/>
                                     <field name="skill_id"/>
                                     <field name="skill_level_id"/>
-                                    <field name="level_progress" widget="progressbar"/>
+                                    <field name="level_progress" widget="progressbar" readonly="1"/>
                                     <field name="valid_to" column_invisible="1"/>
                                 </list>
                             </field>
@@ -297,7 +297,7 @@
         <field name="arch" type="xml">
             <list string="Skill Levels" class="o_skill_level_tree" editable="bottom" default_order="level_progress desc">
                 <field name="name"/>
-                <field name="level_progress" widget="progressbar" options="{'editable': true}"/>
+                <field name="level_progress" widget="progressbar"/>
                 <field name="default_level" widget="boolean_toggle_load"/>
                 <field name="technical_is_new_default" column_invisible="1"/> <!-- needs to be here to be accessible for the front-end -->
             </list>

@@ -43,7 +43,7 @@
                 <field name="end_date"/>
                 <field name="current"/>
                 <field name="target_goal"/>
-                <field name="completeness" widget="progressbar"/>
+                <field name="completeness" widget="progressbar" readonly="1"/>
                 <field name="state" column_invisible="True"/>
                 <field name="line_id" column_invisible="True"/>
             </list>
