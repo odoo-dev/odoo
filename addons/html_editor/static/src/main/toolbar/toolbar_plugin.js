@@ -6,7 +6,7 @@ import { hasTouch } from "@web/core/browser/feature_detection";
 import { registry } from "@web/core/registry";
 import { ToolbarMobile } from "./mobile_toolbar";
 import { debounce } from "@web/core/utils/timing";
-import { omit } from "@web/core/utils/objects";
+import { omit, pick } from "@web/core/utils/objects";
 import { withSequence } from "@html_editor/utils/resource";
 import { _t } from "@web/core/l10n/translation";
 
@@ -180,19 +180,7 @@ export class ToolbarPlugin extends Plugin {
                 closeOnPointerdown: false,
             });
         }
-        this.state = reactive({
-            buttonsActiveState: this.buttonGroups.flatMap((g) =>
-                g.buttons.map((b) => [b.id, false])
-            ),
-            buttonsDisabledState: this.buttonGroups.flatMap((g) =>
-                g.buttons.map((b) => [b.id, false])
-            ),
-            buttonsAvailableState: this.buttonGroups.flatMap((g) =>
-                g.buttons.map((b) => [b.id, true])
-            ),
-            buttonsTitleState: this.buttonGroups.flatMap((g) => g.buttons.map((b) => [b.id, ""])),
-            namespace: undefined,
-        });
+        this.state = reactive({ buttonGroups: [], namespace: undefined });
         this.updateSelection = null;
 
         this.onSelectionChangeActive = true;
@@ -283,15 +271,18 @@ export class ToolbarPlugin extends Plugin {
                 .map((button) => ({
                     ...button,
                     namespaces: button.namespaces || group.namespaces || ["expanded"],
+                    description:
+                        button.description instanceof Function
+                            ? button.description
+                            : () => button.description,
                 })),
         }));
     }
 
     getToolbarInfo() {
         return {
-            buttonGroups: this.buttonGroups,
-            getSelection: () => this.dependencies.selection.getSelectionData(),
             state: this.state,
+            getSelection: () => this.dependencies.selection.getSelectionData(),
             focusEditable: () => this.dependencies.selection.focusEditable(),
         };
     }
@@ -393,22 +384,33 @@ export class ToolbarPlugin extends Plugin {
             return;
         }
         const nodes = this.getFilteredTargetedNodes();
-        for (const buttonGroup of this.buttonGroups) {
-            for (const button of buttonGroup.buttons) {
-                if (!button.namespaces.includes(this.state.namespace)) {
-                    continue;
-                }
-                this.state.buttonsActiveState[button.id] = button.isActive?.(selection, nodes);
-                this.state.buttonsDisabledState[button.id] = button.isDisabled?.(selection, nodes);
-                this.state.buttonsAvailableState[button.id] =
-                    button.isAvailable === undefined || button.isAvailable(selection);
-                this.state.buttonsTitleState[button.id] =
-                    button.description instanceof Function
-                        ? button.description(selection, nodes)
-                        : button.description;
-            }
-        }
         this.updateSelection = null;
+
+        const buttonGroups = this.buttonGroups
+            .map((group) => ({
+                id: group.id,
+                buttons: group.buttons
+                    .filter(
+                        (button) =>
+                            button.namespaces.includes(this.state.namespace) &&
+                            (button.isAvailable === undefined || button.isAvailable(selection))
+                    )
+                    .map((button) => ({
+                        id: button.id,
+                        description: button.description(selection, nodes),
+                        ...(button.Component
+                            ? pick(button, "Component", "props")
+                            : {
+                                  ...pick(button, "run", "icon", "text"),
+                                  isActive: !!button.isActive?.(selection, nodes),
+                                  isDisabled: !!button.isDisabled?.(selection, nodes),
+                              }),
+                    })),
+            }))
+            // Filter out groups left empty
+            .filter((group) => group.buttons.length > 0);
+
+        this.state.buttonGroups = buttonGroups;
     }
 
     closeToolbar() {
