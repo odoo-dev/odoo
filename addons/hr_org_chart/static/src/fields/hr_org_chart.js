@@ -52,7 +52,7 @@ export class HrOrgChart extends Component {
 
         useRecordObserver(async (record) => {
             const newParentId =
-                record.data.parent_id?.id || record.data.employee_parent_id?.id || false;
+                record.data.parent_id?.id || false;
             const newEmployeeId = record.resId || record.data.id || false;
             if (this.lastParent !== newParentId || this.state.employee_id !== newEmployeeId) {
                 this.lastParent = newParentId;

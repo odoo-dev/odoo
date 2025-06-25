@@ -85,7 +85,7 @@ def _jsonable(o):
     else: return True
 
 def check_identity(timeout=10):
-    """ Wrapped method should be an *action method* (called from a button 
+    """ Wrapped method should be an *action method* (called from a button
     type=object), and requires extra security to be executed. This decorator
     checks if the identity (password) has been checked in the last <timeout>
     minutes (1 to 10 minutes), and pops up an identity check wizard if not.
@@ -237,7 +237,7 @@ class ResUsers(models.Model):
         help="If specified, this action will be opened at log on for this user, in addition to the standard menu.")
     log_ids = fields.One2many('res.users.log', 'create_uid', string='User log entries')
     device_ids = fields.One2many('res.device', 'user_id', string='User devices')
-    login_date = fields.Datetime(related='log_ids.create_date', string='Latest authentication', readonly=False)
+    login_date = fields.Datetime(related='log_ids.create_date', string='Latest Login', readonly=False)
     share = fields.Boolean(compute='_compute_share', compute_sudo=True, string='Share User', store=True,
          help="External user with limited access, created only for the purpose of sharing data.")
     companies_count = fields.Integer(compute='_compute_companies_count', string="Number of Companies")
@@ -996,7 +996,14 @@ class ResUsers(models.Model):
             'tag': 'reload_context',
         }
 
-    @check_identity()
+    def action_change_password_wizard(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'target': 'new',
+            'res_model': 'change.password.wizard',
+            'view_mode': 'form',
+        }
+
     def preference_change_password(self):
         return {
             'type': 'ir.actions.act_window',
