@@ -181,16 +181,10 @@ export class ToolbarPlugin extends Plugin {
             });
         }
         this.state = reactive({
-            buttonsActiveState: this.buttonGroups.flatMap((g) =>
-                g.buttons.map((b) => [b.id, false])
-            ),
-            buttonsDisabledState: this.buttonGroups.flatMap((g) =>
-                g.buttons.map((b) => [b.id, false])
-            ),
-            buttonsAvailableState: this.buttonGroups.flatMap((g) =>
-                g.buttons.map((b) => [b.id, true])
-            ),
-            buttonsTitleState: this.buttonGroups.flatMap((g) => g.buttons.map((b) => [b.id, ""])),
+            buttonsActiveState: {},
+            buttonsDisabledState: {},
+            buttonsAvailableState: {},
+            buttonsTitleState: {},
             namespace: undefined,
         });
         this.updateSelection = null;
