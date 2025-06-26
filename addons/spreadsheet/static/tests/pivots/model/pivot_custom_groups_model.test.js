@@ -26,7 +26,7 @@ beforeEach(() => {
 const GROUPED_PRODUCTS = {
     parentField: "product_id",
     name: "GroupedProducts",
-    groups: [{ name: "Group1", values: [37, 41] }],
+    groups: [{ name: "a group", values: [37, 41] }],
 };
 
 describe("Pivot custom groups", () => {
@@ -43,7 +43,7 @@ describe("Pivot custom groups", () => {
 
         // prettier-ignore
         expect(getFormattedValueGrid(model, "A1:E3")).toEqual({
-            A1:"Partner Pivot",  B1: "Group1",       C1: "chair",        D1: "table",        E1: "Total",
+            A1:"Partner Pivot",  B1: "a group",      C1: "chair",        D1: "table",        E1: "Total",
             A2: "",              B2: "Probability",  C2: "Probability",  D2: "Probability",  E2: "Probability",
             A3: "Total",         B3: "131.00",       C3: "100.00",       D3: "50.00",        E3: "281.00",
         });
@@ -63,7 +63,6 @@ describe("Pivot custom groups menu items", () => {
         setSelection(model, "C1:E1"); // "xpad", "chair", "table" column headers
         await doMenuAction(cellMenuRegistry, ["pivot_headers_group"], env);
         const definition = model.getters.getPivotCoreDefinition(pivotId);
-        // ADRM TODO: translate field name ? Keep field id === field name ?
         expect(definition.customFields).toEqual({
             Product2: {
                 parentField: "product_id",
@@ -112,27 +111,27 @@ describe("Pivot custom groups menu items", () => {
     test("Can merge existing group with other values with menu items", async function () {
         const { model, pivotId, env } = await createSpreadsheetWithPivot();
         updatePivot(model, pivotId, {
-            columns: [{ fieldName: "Product2" }],
+            columns: [{ fieldName: "Product2", order: "asc" }],
             rows: [],
             measures: [{ id: "probability:sum", fieldName: "probability", aggregator: "sum" }],
             customFields: {
                 Product2: {
                     parentField: "product_id",
                     name: "Product2",
-                    groups: [{ name: "MyGroup", values: [200, 201] }],
+                    groups: [{ name: "aaGroup", values: [200, 201] }],
                 },
             },
         });
         await waitForDataLoaded(model);
 
-        setSelection(model, "B1:C1"); // "MyGroup", "xPhone" column headers
+        setSelection(model, "B1:C1"); // "aaGroup", "xPad" column headers
         await doMenuAction(cellMenuRegistry, ["pivot_headers_group"], env);
         const definition = model.getters.getPivotCoreDefinition(pivotId);
         expect(definition.customFields).toEqual({
             Product2: {
                 parentField: "product_id",
                 name: "Product2",
-                groups: [{ name: "MyGroup", values: [200, 201, 37] }], // ADRM TODO: shouldn't be a string !
+                groups: [{ name: "aaGroup", values: [200, 201, 41] }],
             },
         });
     });
@@ -140,7 +139,7 @@ describe("Pivot custom groups menu items", () => {
     test("Can remove existing groups with menu items", async function () {
         const { model, pivotId, env } = await createSpreadsheetWithPivot();
         updatePivot(model, pivotId, {
-            columns: [{ fieldName: "Product2" }, { fieldName: "product_id" }],
+            columns: [{ fieldName: "Product2", order: "asc" }, { fieldName: "product_id" }],
             rows: [],
             measures: [{ id: "probability:sum", fieldName: "probability", aggregator: "sum" }],
             customFields: {
@@ -168,7 +167,7 @@ describe("Pivot custom groups menu items", () => {
             },
         });
 
-        setSelection(model, "B2"); // "xphone" column headers
+        setSelection(model, "C2"); // "xpad" column headers
         await doMenuAction(cellMenuRegistry, ["pivot_headers_ungroup"], env);
         await waitForDataLoaded(model);
         definition = model.getters.getPivotCoreDefinition(pivotId);

@@ -60523,14 +60523,14 @@ class ConditionalFormatPlugin extends CorePlugin {
                     const change = applyChange(rule.rule.rangeValues);
                     switch (change.changeType) {
                         case "REMOVE":
-                            this.history.update("cfRules", sheetId, this.cfRules[sheetId].indexOf(rule), "rule", 
+                            this.history.update("cfRules", sheetId, this.cfRules[sheetId].indexOf(rule), "rule",
                             //@ts-expect-error
                             "rangeValues", undefined);
                             break;
                         case "RESIZE":
                         case "MOVE":
                         case "CHANGE":
-                            this.history.update("cfRules", sheetId, this.cfRules[sheetId].indexOf(rule), "rule", 
+                            this.history.update("cfRules", sheetId, this.cfRules[sheetId].indexOf(rule), "rule",
                             //@ts-expect-error
                             "rangeValues", change.range);
                             break;
@@ -60538,7 +60538,7 @@ class ConditionalFormatPlugin extends CorePlugin {
                 }
                 else if (rule.rule.type === "CellIsRule") {
                     for (let i = 0; i < rule.rule.values.length; i++) {
-                        this.history.update("cfRules", sheetId, this.cfRules[sheetId].indexOf(rule), "rule", 
+                        this.history.update("cfRules", sheetId, this.cfRules[sheetId].indexOf(rule), "rule",
                         //@ts-expect-error
                         "values", i, this.getters.adaptFormulaStringDependencies(sheetId, rule.rule.values[i], applyChange));
                     }
@@ -60546,7 +60546,7 @@ class ConditionalFormatPlugin extends CorePlugin {
                 else if (rule.rule.type === "IconSetRule") {
                     for (const inflectionPoint of ["lowerInflectionPoint", "upperInflectionPoint"]) {
                         if (rule.rule[inflectionPoint].type === "formula") {
-                            this.history.update("cfRules", sheetId, this.cfRules[sheetId].indexOf(rule), "rule", 
+                            this.history.update("cfRules", sheetId, this.cfRules[sheetId].indexOf(rule), "rule",
                             //@ts-expect-error
                             inflectionPoint, "value", this.getters.adaptFormulaStringDependencies(sheetId, rule.rule[inflectionPoint].value, applyChange));
                         }
@@ -60556,7 +60556,7 @@ class ConditionalFormatPlugin extends CorePlugin {
                     for (const value of ["minimum", "maximum", "midpoint"]) {
                         const ruleValue = rule.rule[value];
                         if (ruleValue?.type === "formula" && ruleValue?.value) {
-                            this.history.update("cfRules", sheetId, this.cfRules[sheetId].indexOf(rule), "rule", 
+                            this.history.update("cfRules", sheetId, this.cfRules[sheetId].indexOf(rule), "rule",
                             //@ts-expect-error
                             value, "value", this.getters.adaptFormulaStringDependencies(sheetId, ruleValue.value, applyChange));
                         }
@@ -64260,7 +64260,7 @@ class HeaderGroupingPlugin extends CorePlugin {
      *                               | |                    ˅ ˅ | |                  _ _                - [C=>D]
      * Groups:                       ˅ ˅                    _ _ ˅ |                  _ _ _              - [C=>E]
      * Groups:                   _ _ _ _ _              _ _ _ _ _ ˅              _ _ _ _ _ _            - [A=>F]
-  
+
      * @param groups
      * @param start start of the range where to add/remove headers
      * @param end end of the range where to add/remove headers
@@ -66440,7 +66440,7 @@ class Evaluator {
         this.spreadingRelations.addRelation({ resultZone, arrayFormulaPosition: formulaPosition });
         this.assertNoMergedCellsInSpreadZone(formulaPosition, formulaReturn);
         forEachSpreadPositionInMatrix(nbColumns, nbRows, this.checkCollision(formulaPosition));
-        forEachSpreadPositionInMatrix(nbColumns, nbRows, 
+        forEachSpreadPositionInMatrix(nbColumns, nbRows,
         // thanks to the isMatrix check above, we know that formulaReturn is MatrixFunctionReturn
         this.spreadValues(formulaPosition, formulaReturn));
         this.invalidatePositionsDependingOnSpread(formulaPosition.sheetId, resultZone);
@@ -75123,7 +75123,7 @@ class InternalViewport {
      * offset (will find Left) and its width (will find Right) */
     adjustViewportZoneX() {
         this.left = this.searchHeaderIndex("COL", this.offsetX, this.boundaries.left);
-        this.right = Math.min(this.boundaries.right, this.searchHeaderIndex("COL", 
+        this.right = Math.min(this.boundaries.right, this.searchHeaderIndex("COL",
         // if we hit the border of two cells, we want to match the previous
         Math.max(this.viewportWidth + this.snapCorrection.x - 0.1), this.left));
         if (!this.viewportWidth) {
@@ -75140,7 +75140,7 @@ class InternalViewport {
      * offset (will find Top) and its width (will find Bottom) */
     adjustViewportZoneY() {
         this.top = this.searchHeaderIndex("ROW", this.offsetY, this.boundaries.top);
-        this.bottom = Math.min(this.boundaries.bottom, this.searchHeaderIndex("ROW", 
+        this.bottom = Math.min(this.boundaries.bottom, this.searchHeaderIndex("ROW",
         // if we hit the border of two cells, we want to match the previous
         Math.max(this.viewportHeight + this.snapCorrection.y - 0.1, 0), this.top));
         if (!this.viewportHeight) {
@@ -80509,10 +80509,10 @@ class Spreadsheet extends Component {
             //   this.sidePanel.open("ChartPanel");
             // }
             const pivotId = this.env.model.getters.getPivotIds()[0];
-            this.sidePanel.open("PivotSidePanel", { pivotId });
-            setTimeout(() => {
-                document.querySelector(".o-edit-custom-group")?.click();
-            }, 600);
+            // this.sidePanel.open("PivotSidePanel", { pivotId });
+            // setTimeout(() => {
+            //     document.querySelector(".o-edit-custom-group")?.click();
+            // }, 600);
             // this.sidePanel.open("PivotCustomFieldSidePanel", { pivotId: "1" });
             this.checkViewportSize();
             stores.on("store-updated", this, render);
