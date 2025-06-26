@@ -22,22 +22,15 @@ class HdfcUpiController(http.Controller):
     def hdfc_upi_callback(self, **post):
         """Process the notification data sent by HDFC UPI after a transaction.
 
-        HDFC UPI Callback API Details:
-        - Request Method: POST
-        - Content Type: Application/JSON
-        - Query Parameters: meRes (encrypted response), pgMerchantId (merchant ID)
-        - Expected Response: HTTP 200
-        - Response Format: 21 pipe-separated fields as per HDFC UPI specification
-
         :param dict post: POST data containing encrypted response and merchant ID
         :return: HTTP response with status 200 to acknowledge the notification
         :rtype: str
         """
         _logger.info("Notification received from HDFC UPI with data:\n%s", pprint.pformat(post))
 
-        # Get parameters from callback (can be in POST data or query parameters)
-        encrypted_response = post.get('meRes') or request.httprequest.args.get('meRes')
-        merchant_id = post.get('pgMerchantId') or request.httprequest.args.get('pgMerchantId')
+        # Get parameters from callback
+        encrypted_response = post.get('meRes')
+        merchant_id = post.get('pgMerchantId')
 
         if not encrypted_response or not merchant_id:
             _logger.warning("Received notification with missing parameters")
@@ -58,7 +51,7 @@ class HdfcUpiController(http.Controller):
             decrypted_data = self._decrypt_hdfc_response(encrypted_response, provider_sudo)
 
             # Handle the notification data
-            self._handle_hdfc_notification(decrypted_data, provider_sudo)
+            self._handle_hdfc_notification(decrypted_data)
 
         except ValidationError:
             _logger.exception("Unable to handle the notification data; skipping to acknowledge")
@@ -73,7 +66,7 @@ class HdfcUpiController(http.Controller):
         :param recordset provider_sudo: The sudoed payment provider record
         :return: The decrypted response data
         :rtype: str
-        :raise: :class:`odoo.exceptions.ValidationError` if decryption fails
+        :raise ValidationError: If decryption fails.
         """
         if not provider_sudo.hdfc_upi_encryption_key:
             _logger.error("Encryption key not configured for provider: %s", provider_sudo.name)
@@ -83,27 +76,21 @@ class HdfcUpiController(http.Controller):
             decrypted_response = hdfc_upi_utils.decrypt_payload(
                 encrypted_response, provider_sudo.hdfc_upi_encryption_key
             )
-        except (ValueError, TypeError, KeyError) as e:
-            _logger.exception("Error decrypting HDFC UPI response")
+        except ValueError as e:
+            _logger.exception("Invalid encrypted payload format or encoding")
+            raise ValidationError(_("Invalid encrypted payload format: %s", str(e)))
+        except Exception as e:
+            _logger.exception("Decryption failed")
             raise ValidationError(_("Failed to decrypt response: %s", str(e)))
-
-        # Handle different response types from decryption (moved outside try block)
-        if isinstance(decrypted_response, dict):
-            if 'error' in decrypted_response:
-                _logger.error("Decryption error: %s", decrypted_response['error'])
-                raise ValidationError(_("Decryption error: %s", decrypted_response['error']))
-            # Convert dict back to string for processing
-            return str(decrypted_response)
 
         return decrypted_response
 
-    def _handle_hdfc_notification(self, decrypted_data, provider_sudo):
+    def _handle_hdfc_notification(self, decrypted_data):
         """Handle the decrypted notification data from HDFC UPI.
 
         :param str decrypted_data: The decrypted response data
-        :param recordset provider_sudo: The sudoed payment provider record
         :return: None
-        :raise: :class:`odoo.exceptions.ValidationError` if processing fails
+        :raise ValidationError: If processing fails.
         """
         if not decrypted_data:
             raise ValidationError(_("Empty notification data"))
@@ -114,43 +101,37 @@ class HdfcUpiController(http.Controller):
         _logger.info("Parsed %d fields from notification data", len(fields_data))
 
         if len(fields_data) < 21:
-            _logger.warning("Invalid notification format - expected 21 fields, got %d", len(fields_data))
-            raise ValidationError(_("Invalid notification format"))
+            _logger.warning("Invalid notification format - insufficient fields: %d", len(fields_data))
+            raise ValidationError(_("Invalid notification format - insufficient fields"))
 
-        # Extract order number (merchant transaction reference)
+        # Extract order number
         order_no = fields_data[1]
         if not order_no:
             _logger.warning("Order number missing in notification data")
             raise ValidationError(_("Order number missing"))
 
-        try:
-            # Get the transaction using Odoo's standard method
-            tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_notification_data(
-                'hdfc_upi', {'orderNo': order_no}
-            )
+        # Get the transaction using Odoo's standard method
+        tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_notification_data(
+            'hdfc_upi', {'orderNo': order_no}
+        )
 
-            # Use the consolidated parsing method from the transaction model
-            notification_data = tx_sudo._parse_hdfc_notification_fields(fields_data, 'callback')
+        # Use the consolidated parsing method from the transaction model
+        notification_data = tx_sudo._parse_hdfc_notification_fields(fields_data, 'callback')
 
-            _logger.info(
-                "Processing notification for transaction with reference %s:\n%s",
-                tx_sudo.reference, pprint.pformat(notification_data)
-            )
+        _logger.info(
+            "Processing notification for transaction with reference %s:\n%s",
+            tx_sudo.reference, pprint.pformat(notification_data)
+        )
 
-            # Handle the notification data using the standard processing method
-            tx_sudo._process_notification_data(notification_data)
-
-        except ValidationError:
-            _logger.exception("Unable to process notification for order: %s", order_no)
-            raise
+        # Handle the notification data using the standard processing method
+        tx_sudo._process_notification_data(notification_data)
 
     @http.route(f'{_cancel_transaction_url}/<int:tx_id>', type='jsonrpc', auth='public')
-    def hdfc_upi_cancel_transaction(self, tx_id, reason=None, **kwargs):
+    def hdfc_upi_cancel_transaction(self, tx_id, reason=None):
         """Cancel a payment transaction.
 
         :param int tx_id: The transaction ID
         :param str reason: Optional reason for cancellation
-        :param dict kwargs: Additional parameters (unused)
         :return: The result of the cancellation
         :rtype: dict
         """

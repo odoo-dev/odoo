@@ -25,12 +25,32 @@
             </xpath>
             <group name="transaction_partner" position="after">
                 <group string="HDFC UPI Details" invisible="provider_code != 'hdfc_upi'">
-                    <field name="hdfc_upi_order_no"/>
-                    <field name="hdfc_upi_txn_id"/>
-                    <field name="hdfc_upi_customer_ref_no"/>
-                    <field name="hdfc_upi_qr_expiry"/>
-                    <field name="hdfc_upi_payer_vpa"/>
-                    <field name="hdfc_upi_payer_name"/>
+                    <group>
+                        <field name="hdfc_upi_order_no"/>
+                        <field name="hdfc_upi_txn_id"/>
+                        <field name="hdfc_upi_customer_ref_no"/>
+                        <field name="hdfc_upi_qr_expiry"/>
+                        <field name="hdfc_upi_response_code"/>
+                        <field name="hdfc_upi_approval_number"/>
+                        <field name="hdfc_upi_reference_id"/>
+                        <field name="hdfc_upi_txn_date"/>
+                    </group>
+                    <group>
+                        <field name="hdfc_upi_payer_vpa"/>
+                        <field name="hdfc_upi_payer_name"/>
+                        <field name="hdfc_upi_payer_mobile"/>
+                        <field name="hdfc_upi_payer_account_type"/>
+                        <field name="hdfc_upi_payee_vpa"/>
+                        <field name="hdfc_upi_txn_type"/>
+                        <field name="hdfc_upi_txn_ref_url" widget="url"/>
+                    </group>
+                </group>
+                <group string="HDFC UPI Payer Bank Details" invisible="provider_code != 'hdfc_upi'">
+                    <group>
+                        <field name="hdfc_upi_payer_bank_name"/>
+                        <field name="hdfc_upi_payer_account_number"/>
+                        <field name="hdfc_upi_payer_bank_ifsc"/>
+                    </group>
                 </group>
             </group>
         </field>

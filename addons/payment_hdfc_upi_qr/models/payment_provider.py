@@ -10,6 +10,7 @@ from odoo.exceptions import ValidationError
 
 from odoo.addons.payment_hdfc_upi_qr import const
 
+
 _logger = logging.getLogger(__name__)
 
 
@@ -86,7 +87,7 @@ class PaymentProvider(models.Model):
         :param dict payload: The payload of the request.
         :return: The JSON-formatted content of the response.
         :rtype: dict
-        :raise: ValidationError if an HTTP error occurs.
+        :raise ValidationError: If an HTTP error occurs.
         """
         self.ensure_one()
 

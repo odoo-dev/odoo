@@ -138,8 +138,6 @@ TRANSACTION_LIMITS = {
 # QR code configuration
 QR_CODE_CONFIG = {
     'expiry_minutes': 5,
-    'width': 300,
-    'height': 300,
     'version': '01',
     'mode': '15',
     'medium': '06',
@@ -168,9 +166,4 @@ VALIDATION_PATTERNS = {
     'upi_vpa': r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+$',
     'order_number': r'^PQ\d+\d{13}$',
     'refund_number': r'^RF\w+\d{10}$',
-}
-
-# Refund configuration
-REFUND_CONFIG = {
-    'time_limit_days': 180,  # 6 months refund window (need to confirm with HDFC)
 }

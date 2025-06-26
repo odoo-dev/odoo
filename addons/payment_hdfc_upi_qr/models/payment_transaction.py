@@ -19,7 +19,7 @@ _logger = logging.getLogger(__name__)
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
 
-    # === HDFC UPI FIELDS === #
+    # HDFC UPI Fields
     hdfc_upi_order_no = fields.Char(string="Order Number", readonly=True)
     hdfc_upi_txn_id = fields.Char(string="Transaction ID", readonly=True)
     hdfc_upi_customer_ref_no = fields.Char(string="Customer Reference Number", readonly=True)
@@ -29,7 +29,7 @@ class PaymentTransaction(models.Model):
     hdfc_upi_payer_vpa = fields.Char(string="Payer VPA", readonly=True)
     hdfc_upi_payer_name = fields.Char(string="Payer Name", readonly=True)
 
-    # Additional HDFC UPI callback fields for comprehensive tracking
+    # Additional HDFC UPI Extra fields for comprehensive tracking
     hdfc_upi_response_code = fields.Char(string="Response Code", readonly=True)
     hdfc_upi_approval_number = fields.Char(string="Approval Number", readonly=True)
     hdfc_upi_reference_id = fields.Char(string="Reference ID", readonly=True)
@@ -97,6 +97,7 @@ class PaymentTransaction(models.Model):
         :param dict processing_values: The generic processing values of the transaction
         :return: The dict of provider-specific processing values
         :rtype: dict
+        :raise ValidationError: If QR code generation fails
         """
         res = super()._get_specific_processing_values(processing_values)
         if self.provider_code != 'hdfc_upi':
@@ -150,9 +151,6 @@ class PaymentTransaction(models.Model):
         if self.provider_code != 'hdfc_upi':
             return refund_tx
 
-        # Validate refund request before processing
-        self._hdfc_upi_validate_refund_request(refund_tx)
-
         # Prepare refund payload
         refund_payload = self._hdfc_upi_prepare_refund_payload(refund_tx)
 
@@ -189,7 +187,7 @@ class PaymentTransaction(models.Model):
         :param dict notification_data: The notification data sent by the provider
         :return: The transaction if found
         :rtype: recordset of `payment.transaction`
-        :raise: ValidationError if the data match no transaction
+        :raise ValidationError: If the data match no transaction
         """
         tx = super()._get_tx_from_notification_data(provider_code, notification_data)
         if provider_code != 'hdfc_upi' or len(tx) == 1:
@@ -216,6 +214,7 @@ class PaymentTransaction(models.Model):
 
         :param dict notification_data: The notification data sent by the provider
         :return: None
+        :raise ValidationError: If inconsistent data were received.
         """
         super()._process_notification_data(notification_data)
         if self.provider_code != 'hdfc_upi':
@@ -227,32 +226,32 @@ class PaymentTransaction(models.Model):
         )
 
         # Extract and validate notification data according to HDFC UPI specification
-        hdfc_status = notification_data.get('status', '')
-        txn_id = notification_data.get('upiTxnId') or notification_data.get('txnId', '')
-        customer_ref = notification_data.get('customerRefNo', '')
-        payer_vpa = notification_data.get('payerVPA', '')
-        payer_name = notification_data.get('payerName', '')
+        hdfc_status = notification_data.get('status')
+        txn_id = notification_data.get('upiTxnId')
+        customer_ref = notification_data.get('customerRefNo')
+        payer_vpa = notification_data.get('payerVPA')
+        payer_name = notification_data.get('payerName')
 
         # Additional fields from HDFC UPI callback (21 fields total)
-        response_code = notification_data.get('responseCode', '')
-        approval_number = notification_data.get('approvalNumber', '')
-        reference_id = notification_data.get('referenceId', '')
-        txn_date = notification_data.get('txnAuthDate') or notification_data.get('txnDate', '')
-        response_message = notification_data.get('statusDesc') or notification_data.get('responseMessage', '')
+        response_code = notification_data.get('responseCode')
+        approval_number = notification_data.get('approvalNumber')
+        reference_id = notification_data.get('referenceId')
+        txn_date = notification_data.get('txnAuthDate')
+        response_message = notification_data.get('statusDesc')
 
         # Payer bank details (from Additional Field 6)
-        payer_bank_name = notification_data.get('payerBankName', '')
-        payer_account_number = notification_data.get('payerAccountNumber', '')
-        payer_bank_ifsc = notification_data.get('payerBankIFSC', '')
-        payer_mobile = notification_data.get('payerMobile', '')
+        payer_bank_name = notification_data.get('payerBankName')
+        payer_account_number = notification_data.get('payerAccountNumber')
+        payer_bank_ifsc = notification_data.get('payerBankIFSC')
+        payer_mobile = notification_data.get('payerMobile')
 
         # Transaction details (from Additional Field 7)
-        txn_type = notification_data.get('txnType', '')
-        txn_ref_url = notification_data.get('txnRefUrl', '')
+        txn_type = notification_data.get('txnType')
+        txn_ref_url = notification_data.get('txnRefUrl')
 
         # Payee and account details (from Additional Fields 8 & 9)
-        payee_vpa = notification_data.get('payeeVPA', '')
-        payer_account_type = notification_data.get('payerAccountType', '')
+        payee_vpa = notification_data.get('payeeVPA')
+        payer_account_type = notification_data.get('payerAccountType')
 
         # Update transaction with HDFC UPI specific data
         update_vals = {}
@@ -307,7 +306,7 @@ class PaymentTransaction(models.Model):
         if not hdfc_status:
             raise ValidationError("HDFC UPI: " + _("Received data with missing status."))
 
-        # Map HDFC status to Odoo state and process accordingly
+        # Map HDFC status to transaction state and process accordingly
         if hdfc_status in const.PAYMENT_STATUS_MAPPING['done']:
             self._set_done()
             _logger.info(
@@ -351,17 +350,9 @@ class PaymentTransaction(models.Model):
         """ Validate transaction parameters for HDFC UPI processing.
 
         :return: None
-        :raise: ValidationError if validation fails
+        :raise ValidationError: If validation fails
         """
         self.ensure_one()
-
-        # Currency validation
-        if self.currency_id.name != 'INR':
-            raise ValidationError(_(
-                "HDFC UPI: Only Indian Rupee (INR) currency is supported. "
-                "Current transaction currency: %s",
-                self.currency_id.name
-            ))
 
         # Amount validation using utility function
         is_valid, error_message = hdfc_upi_utils.validate_transaction_amount(
@@ -389,113 +380,49 @@ class PaymentTransaction(models.Model):
         specifications.
 
         :return: None
-        :raise: ValidationError if QR code generation fails
+        :raise ValidationError: If QR code generation fails
         """
         self.ensure_one()
 
-        # Check if QR code already exists and is still valid
-        if (self.hdfc_upi_qr_code and self.hdfc_upi_order_no and
-            self.hdfc_upi_qr_expiry and self.hdfc_upi_qr_expiry > fields.Datetime.now() and
-            self.hdfc_upi_qr_string):
-            _logger.info("QR code already exists and is valid for transaction: %s", self.reference)
-            return
+        # Generate unique order number using utility function
+        if not self.hdfc_upi_order_no:
+            self.hdfc_upi_order_no = hdfc_upi_utils.generate_transaction_reference('PQ')
 
-        try:
-            # Generate unique order number using utility function
-            if not self.hdfc_upi_order_no:
-                self.hdfc_upi_order_no = hdfc_upi_utils.generate_transaction_reference('PQ')
+        # Build UPI URL using utility function
+        upi_url = hdfc_upi_utils.build_upi_url(
+            transaction_ref=self.hdfc_upi_order_no,
+            amount=self.amount,
+            payee_name=self.provider_id.hdfc_upi_merchant_name or self.company_id.name,
+            payee_vpa=self.provider_id.company_id.l10n_in_upi_id,
+            merchant_category=self.provider_id.hdfc_upi_merchant_category or '0000'
+        )
 
-            # Get merchant details
-            merchant_vpa = self.provider_id.company_id.l10n_in_upi_id
-            merchant_name = hdfc_upi_utils.sanitize_merchant_name(
-                self.provider_id.hdfc_upi_merchant_name or self.company_id.name
-            )
+        # Set QR expiry time
+        expiry_minutes = const.QR_CODE_CONFIG['expiry_minutes']
+        self.hdfc_upi_qr_expiry = fields.Datetime.now() + timedelta(minutes=expiry_minutes)
 
-            # Build UPI URL using utility function
-            upi_url = hdfc_upi_utils.build_upi_url(
-                transaction_ref=self.hdfc_upi_order_no,
-                amount=self.amount,
-                payee_name=merchant_name,
-                payee_vpa=merchant_vpa,
-                merchant_category=self.provider_id.hdfc_upi_merchant_category or '0000'
-            )
+        # Store UPI URL for QR generation
+        self.hdfc_upi_qr_string = upi_url
 
-            # Set QR expiry time
-            expiry_minutes = const.QR_CODE_CONFIG['expiry_minutes']
-            self.hdfc_upi_qr_expiry = fields.Datetime.now() + timedelta(minutes=expiry_minutes)
+        # Generate QR code using ir.actions.report barcode method
+        barcode = self.env['ir.actions.report'].sudo().barcode(
+            barcode_type="QR",
+            value=upi_url,
+            width=300,
+            height=300
+        )
 
-            # Store UPI URL for QR generation
-            self.hdfc_upi_qr_string = upi_url
+        # Validate barcode generation result
+        if not barcode:
+            raise ValidationError(_("HDFC UPI: Barcode generation returned empty data"))
 
-            # Generate actual QR code image
-            barcode = None
-            try:
-                # Generate QR code using ir.actions.report barcode method
-                barcode = self.env['ir.actions.report'].sudo().barcode(
-                    barcode_type="QR",
-                    value=upi_url,
-                    width=300,
-                    height=300
-                )
+        # Store the QR code as base64
+        self.hdfc_upi_qr_code = base64.b64encode(barcode)
 
-                if barcode:
-                    # Store the QR code as base64
-                    self.hdfc_upi_qr_code = base64.b64encode(barcode)
-
-                    _logger.info(
-                        "QR code generated successfully for transaction: %s, size: %s bytes",
-                        self.id, len(self.hdfc_upi_qr_code)
-                    )
-                else:
-                    _logger.error("Barcode generation returned empty data for transaction: %s", self.id)
-
-            except ImportError:
-                _logger.warning("QR code library not available for transaction: %s", self.reference)
-            except (ValueError, TypeError) as qr_error:
-                _logger.error("Failed to generate QR code image: %s", qr_error)
-
-            _logger.info(
-                "Generated UPI QR code for transaction %s with amount ₹%s",
-                self.reference, self.amount
-            )
-
-        except Exception as e:
-            _logger.exception("Failed to generate QR code for transaction %s", self.reference)
-            raise ValidationError(_("HDFC UPI: Failed to generate UPI QR code: %s", str(e)))
-
-    def _hdfc_upi_validate_refund_request(self, refund_tx):
-        """ Validate refund request parameters.
-
-        :param recordset refund_tx: The refund transaction
-        :return: None
-        :raise: ValidationError if validation fails
-        """
-        self.ensure_one()
-
-        # Check if transaction is eligible for refund
-        if self.state != 'done':
-            raise ValidationError(_("HDFC UPI: Cannot refund a transaction that is not completed"))
-
-        if not self.provider_reference:
-            raise ValidationError(_("HDFC UPI: Cannot refund transaction without provider reference"))
-
-        # Validate refund amount
-        if refund_tx.amount <= 0:
-            raise ValidationError(_("HDFC UPI: Refund amount must be positive"))
-
-        if refund_tx.amount > self.amount:
-            raise ValidationError(_("HDFC UPI: Refund amount cannot exceed original transaction amount"))
-
-        # Check if refund is within allowed time limit (if any)
-        refund_time_limit = const.REFUND_CONFIG.get('time_limit_days')
-        if refund_time_limit:
-            max_refund_date = self.create_date + timedelta(days=refund_time_limit)
-            if fields.Datetime.now() > max_refund_date:
-                raise ValidationError(
-                    _("HDFC UPI: Refund request is beyond the allowed time limit of %d days", refund_time_limit)
-                )
-
-        _logger.info("Refund validation passed for transaction: %s", self.reference)
+        _logger.info(
+            "Generated UPI QR code for transaction %s with amount ₹%s",
+            self.reference, self.amount
+        )
 
     def _hdfc_upi_prepare_refund_payload(self, refund_tx):
         """ Prepare refund request payload for HDFC UPI API.
@@ -505,6 +432,7 @@ class PaymentTransaction(models.Model):
         :param recordset refund_tx: The refund transaction
         :return: The refund request payload
         :rtype: dict
+        :raise ValidationError: If required fields are missing or encryption key is not configured
         """
         self.ensure_one()
 
@@ -518,9 +446,9 @@ class PaymentTransaction(models.Model):
             'newOrderNo': refund_reference,
             'originalOrderNo': self.hdfc_upi_order_no,
             'originalTrnRefNo': self.hdfc_upi_txn_id or self.provider_reference,
-            'originalCustRefNo': self.hdfc_upi_customer_ref_no or '',
+            'originalCustRefNo': self.hdfc_upi_customer_ref_no,
             'remarks': 'Customer Request',
-            'refundAmount': hdfc_upi_utils.format_upi_amount(refund_tx.amount),
+            'refundAmount': -refund_tx.amount,  # The amount is negative for refund transactions
             'currency': 'INR',
             'paymentType': 'P2P',
             'transactionType': 'PAY',
@@ -538,7 +466,7 @@ class PaymentTransaction(models.Model):
 
         # Validate required fields
         for field_name, field_value in request_fields.items():
-            if field_name in ['pgMerchantId', 'newOrderNo', 'originalOrderNo', 'refundAmount', 'currency']:
+            if field_name in ['pgMerchantId', 'newOrderNo', 'originalOrderNo', 'originalCustRefNo', 'refundAmount', 'currency']:
                 if not field_value or field_value == 'NA':
                     raise ValidationError(
                         _("HDFC UPI Refund: Required field '%s' is missing or invalid", field_name)
@@ -554,26 +482,15 @@ class PaymentTransaction(models.Model):
             self.reference
         )
 
-        # Build encrypted payload if encryption is enabled
-        if (hasattr(self.provider_id, 'hdfc_upi_encryption_key') and
-            self.provider_id.hdfc_upi_encryption_key):
+        # Build encrypted payload - encryption key is required
+        if not self.provider_id.hdfc_upi_encryption_key:
+            raise ValidationError(_("HDFC UPI Refund: Encryption key is required but not configured"))
 
-            payload = hdfc_upi_utils.build_encrypted_request_payload(
-                request_string,
-                self.provider_id.hdfc_upi_merchant_id,
-                self.provider_id.hdfc_upi_encryption_key
-            )
-        else:
-            # Fallback payload for testing
-            payload = {
-                'merchantId': self.provider_id.hdfc_upi_merchant_id,
-                'originalTransactionId': self.provider_reference or self.hdfc_upi_txn_id,
-                'originalOrderNo': self.hdfc_upi_order_no,
-                'refundOrderNo': refund_reference,
-                'refundAmount': hdfc_upi_utils.format_upi_amount(refund_tx.amount),
-                'currency': refund_tx.currency_id.name,
-                'reason': 'Customer Request',
-            }
+        payload = hdfc_upi_utils.build_encrypted_request_payload(
+            request_string,
+            self.provider_id.hdfc_upi_merchant_id,
+            self.provider_id.hdfc_upi_encryption_key
+        )
 
         _logger.info(
             "Prepared refund payload for transaction with reference %s",
@@ -590,6 +507,7 @@ class PaymentTransaction(models.Model):
         :param recordset refund_tx: The refund transaction
         :param dict response_data: The API response data
         :return: None
+        :raise ValidationError: If response is empty, invalid format, or encryption key is missing
         """
         self.ensure_one()
 
@@ -606,8 +524,7 @@ class PaymentTransaction(models.Model):
             raise ValidationError(_("HDFC UPI Refund: Invalid response format received"))
 
         # Check if encryption is enabled
-        if not (hasattr(self.provider_id, 'hdfc_upi_encryption_key') and
-                self.provider_id.hdfc_upi_encryption_key):
+        if not self.provider_id.hdfc_upi_encryption_key:
             raise ValidationError(_("HDFC UPI Refund: Encrypted response received but no encryption key configured"))
 
         try:
@@ -617,18 +534,6 @@ class PaymentTransaction(models.Model):
                 self.provider_id.hdfc_upi_encryption_key
             )
 
-        except Exception as decrypt_error:
-            _logger.exception("Error decrypting refund response for transaction %s", self.reference)
-            refund_tx._set_error(f"HDFC UPI: Refund decryption failed: {decrypt_error!s}")
-            return
-
-        # Validate decryption result
-        if isinstance(decrypted_response, dict) and 'error' in decrypted_response:
-            raise ValidationError(
-                _("HDFC UPI Refund: Decryption failed: %s", decrypted_response['error'])
-            )
-
-        try:
             # Parse the decrypted pipe-separated response
             parsed_response = refund_tx._parse_hdfc_notification_fields(
                 decrypted_response, 'refund'
@@ -647,7 +552,7 @@ class PaymentTransaction(models.Model):
 
             # Process successful response
             refund_status = parsed_response.get('status', '').upper()
-            refund_txn_id = parsed_response.get('upiTxnId') or parsed_response.get('txnId')
+            refund_txn_id = parsed_response.get('upiTxnId')
 
             # Update refund transaction with response data
             update_vals = {
@@ -661,33 +566,56 @@ class PaymentTransaction(models.Model):
             if parsed_response.get('customerRefNo'):
                 update_vals['hdfc_upi_customer_ref_no'] = parsed_response.get('customerRefNo')
 
-            # Set transaction state based on status
-            if refund_status in ['SUCCESS', 'COMPLETED', 'S']:
-                # Refund completed successfully
+            # Update transaction data first
+            if update_vals:
                 refund_tx.write(update_vals)
+
+            # Set transaction state based on status using the same mapping as notification processing
+            if not refund_status:
+                refund_tx._set_error("HDFC UPI: " + _("Received refund response with missing status"))
+                return
+
+            # Map HDFC status to transaction state and process accordingly
+            if refund_status in const.PAYMENT_STATUS_MAPPING['done']:
                 refund_tx._set_done()
-                _logger.info("Refund completed successfully for transaction: %s", self.reference)
-
-            elif refund_status in ['PENDING', 'PROCESSING', 'ACCEPTED']:
-                # Refund is being processed
-                refund_tx.write(update_vals)
+                # Immediately post-process the transaction as the post-processing will not be
+                # triggered by a customer browsing the transaction from the portal.
+                self.env.ref('payment.cron_post_process_payment_tx')._trigger()
+                _logger.info(
+                    "Refund completed successfully for transaction: %s, Status: %s, TXN ID: %s",
+                    self.reference, refund_status, refund_txn_id
+                )
+            elif refund_status in const.PAYMENT_STATUS_MAPPING['pending']:
                 refund_tx._set_pending()
-                _logger.info("Refund is being processed for transaction: %s", self.reference)
-
-            elif refund_status in ['FAILED', 'REJECTED', 'F']:
-                # Refund failed
-                error_message = parsed_response.get('statusDesc', 'Refund failed')
-                refund_tx.write(update_vals)
-                refund_tx._set_error(f"HDFC UPI: {error_message}")
-                _logger.error("Refund failed for transaction %s: %s", self.reference, error_message)
-
-            else:
-                # Unknown status, set as pending and log
-                refund_tx.write(update_vals)
-                refund_tx._set_pending()
+                _logger.info(
+                    "Refund is being processed for transaction: %s, Status: %s",
+                    self.reference, refund_status
+                )
+            elif refund_status in const.PAYMENT_STATUS_MAPPING['cancel']:
+                cancel_message = parsed_response.get('statusDesc', 'Refund was cancelled')
+                refund_tx._set_canceled(
+                    "HDFC UPI: " + _("Refund was cancelled: %s", cancel_message)
+                )
+                _logger.info(
+                    "Refund was cancelled for transaction: %s, Status: %s, Response Code: %s, Reason: %s",
+                    self.reference, refund_status, response_code, cancel_message
+                )
+            elif refund_status in const.PAYMENT_STATUS_MAPPING['error']:
+                error_message = parsed_response.get('statusDesc', 'Refund processing failed')
+                refund_tx._set_error(
+                    "HDFC UPI: " + _("An error occurred during refund processing: %s", error_message)
+                )
                 _logger.warning(
-                    "Unknown refund status '%s' for transaction: %s",
-                    refund_status, self.reference
+                    "Refund underwent an error for transaction: %s, Status: %s, Response Code: %s, Reason: %s",
+                    self.reference, refund_status, response_code, error_message
+                )
+            else:  # Classify unsupported refund status as the `error` tx state
+                _logger.warning(
+                    "Received refund response for transaction: %s with invalid status: %s, response code: %s",
+                    self.reference, refund_status, response_code
+                )
+                refund_tx._set_error(
+                    "HDFC UPI: " + _("Received refund response with invalid status: %s", refund_status)
                 )
 
         except Exception as e:
@@ -717,8 +645,8 @@ class PaymentTransaction(models.Model):
             request_fields = {
                 'pgMerchantId': self.provider_id.hdfc_upi_merchant_id,
                 'orderNo': self.hdfc_upi_order_no,
-                'upiTxnId': self.hdfc_upi_txn_id or '',
-                'rrn': self.hdfc_upi_customer_ref_no or '',
+                'upiTxnId': self.hdfc_upi_txn_id,
+                'rrn': self.hdfc_upi_customer_ref_no,
                 'additionalField1': 'NA',
                 'additionalField2': 'NA',
                 'additionalField3': 'NA',
@@ -741,51 +669,32 @@ class PaymentTransaction(models.Model):
                 self.reference
             )
 
-            # Build encrypted payload if encryption is enabled
-            if (hasattr(self.provider_id, 'hdfc_upi_encryption_key') and
-                self.provider_id.hdfc_upi_encryption_key):
+            # Build encrypted payload - encryption key is required
+            if not self.provider_id.hdfc_upi_encryption_key:
+                _logger.error("HDFC UPI Status Enquiry: Encryption key is required but not configured")
+                return False
 
-                payload = hdfc_upi_utils.build_encrypted_request_payload(
-                    request_string,
-                    self.provider_id.hdfc_upi_merchant_id,
-                    self.provider_id.hdfc_upi_encryption_key
-                )
-            else:
-                # Fallback to simple payload for testing
-                payload = {
-                    'orderNo': self.hdfc_upi_order_no,
-                    'merchantId': self.provider_id.hdfc_upi_merchant_id,
-                }
+            payload = hdfc_upi_utils.build_encrypted_request_payload(
+                request_string,
+                self.provider_id.hdfc_upi_merchant_id,
+                self.provider_id.hdfc_upi_encryption_key
+            )
 
             # Make API request to status endpoint
             response_data = self.provider_id._hdfc_upi_make_request('status', payload)
 
             # Process encrypted response - HDFC always returns plain text (encrypted)
             if response_data:
-                # Check if encryption is enabled
-                if (hasattr(self.provider_id, 'hdfc_upi_encryption_key') and
-                    self.provider_id.hdfc_upi_encryption_key):
+                # Decrypt the plain text response
+                decrypted_response = hdfc_upi_utils.decrypt_payload(
+                    response_data,
+                    self.provider_id.hdfc_upi_encryption_key
+                )
 
-                    # Decrypt the plain text response
-                    decrypted_response = hdfc_upi_utils.decrypt_payload(
-                        response_data,
-                        self.provider_id.hdfc_upi_encryption_key
-                    )
-
-                    if isinstance(decrypted_response, dict) and 'error' in decrypted_response:
-                        _logger.error(
-                            "Status enquiry decryption failed for transaction %s: %s",
-                            self.reference, decrypted_response['error']
-                        )
-                        return False
-
-                    # Parse the decrypted pipe-separated response
-                    parsed_data = self._parse_hdfc_notification_fields(
-                        decrypted_response, 'status_enquiry'
-                    )
-                else:
-                    _logger.warning("Encrypted response received but no encryption key configured")
-                    return False
+                # Parse the decrypted pipe-separated response
+                parsed_data = self._parse_hdfc_notification_fields(
+                    decrypted_response, 'status_enquiry'
+                )
 
                 # Check for error codes
                 response_code = parsed_data.get('responseCode', '')
@@ -813,19 +722,6 @@ class PaymentTransaction(models.Model):
             _logger.exception("Status check failed for transaction %s", self.reference)
             return False
 
-    def _hdfc_upi_is_qr_expired(self):
-        """ Check if the QR code has expired.
-
-        :return: True if expired, False otherwise
-        :rtype: bool
-        """
-        self.ensure_one()
-
-        if not self.hdfc_upi_qr_expiry:
-            return True
-
-        return self.hdfc_upi_qr_expiry <= fields.Datetime.now()
-
     # === CONSOLIDATED NOTIFICATION PARSING === #
 
     def _parse_hdfc_notification_fields(self, fields_data, api_type='callback'):
@@ -842,7 +738,7 @@ class PaymentTransaction(models.Model):
         :param str api_type: Type of API ('callback', 'status_enquiry', 'refund')
         :return: Dictionary of parsed notification data
         :rtype: dict
-        :raise: ValidationError if field parsing fails
+        :raise ValidationError: If field parsing fails
         """
         self.ensure_one()
 
@@ -860,7 +756,6 @@ class PaymentTransaction(models.Model):
                 "HDFC UPI %s: Invalid field count - expected 21 fields, got %d",
                 api_type.upper(), len(fields_list)
             )
-            # Don't raise error for backward compatibility, but log warning
 
         # Use the RESPONSE_FIELDS constant for consistent field mapping
         field_names = const.RESPONSE_FIELDS
