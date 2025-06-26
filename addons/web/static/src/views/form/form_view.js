@@ -15,23 +15,38 @@ export const formView = {
     Compiler: FormCompiler,
     staticControlPanelButtons: {
         save: {
-            isVisible: "model.root.isInEdition and env.inDialog",
+            isAvailable() {
+                return this.model.root.isInEdition && this.env.inDialog;
+            },
+            // isVisible: "model.root.isInEdition and env.inDialog",
             template: "web.FormView.Buttons.Save",
             sequence: 10,
         },
         discard: {
-            isVisible: "model.root.isInEdition and env.inDialog",
+            isAvailable() {
+                return this.model.root.isInEdition && this.env.inDialog;
+            },
+            // isVisible: "model.root.isInEdition and env.inDialog",
             template: "web.FormView.Buttons.Discard",
             sequence: 20,
         },
         remove: {
-            isVisible: "model.root.isInEdition and props.removeRecord and env.inDialog",
+            isAvailable() {
+                return this.model.root.isInEdition && this.props.removeRecord && this.env.inDialog;
+            },
+            // isVisible: "model.root.isInEdition and props.removeRecord and env.inDialog",
             template: "web.FormView.Buttons.Remove",
             sequence: 30,
         },
         new: {
-            isVisible:
-                "canCreate and (!env.inDialog or (env.inDialog and !model.root.isInEdition))",
+            isAvailable() {
+                return (
+                    this.canCreate &&
+                    (!this.env.inDialog || (this.env.inDialog && !this.model.root.isInEdition))
+                );
+            },
+            // isVisible:
+            //     "canCreate and (!env.inDialog or (env.inDialog and !model.root.isInEdition))",
             template: "web.FormView.Buttons.New",
             sequence: 40,
         },

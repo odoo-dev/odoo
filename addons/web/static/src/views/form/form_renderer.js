@@ -53,6 +53,7 @@ export class FormRenderer extends Component {
         saveRecord: { type: Function, optional: true },
         setFieldAsDirty: { type: Function, optional: true },
         slots: { type: Object, optional: true },
+        staticControlPanelButtons: { type: Array, optional: true },
     };
     static defaultProps = {
         activeNotebookPages: {},
@@ -137,5 +138,9 @@ export class FormRenderer extends Component {
 
     get shouldAutoFocus() {
         return !hasTouch() && !this.props.archInfo.disableAutofocus;
+    }
+
+    get staticControlPanelButtons() {
+        return this.props.staticControlPanelButtons;
     }
 }

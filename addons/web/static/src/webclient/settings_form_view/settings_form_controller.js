@@ -55,11 +55,13 @@ export class SettingsFormController extends formView.Controller {
             ...this.props.staticControlPanelButtons,
             save: {
                 ...this.props.staticControlPanelButtons.save,
-                isVisible: "model.root.isInEdition",
+                isAvailable: () => this.model.root.isInEdition,
+                // isVisible: "model.root.isInEdition",
             },
             discard: {
                 ...this.props.staticControlPanelButtons.discard,
-                isVisible: "model.root.isInEdition",
+                isAvailable: () => this.model.root.isInEdition,
+                // isVisible: "model.root.isInEdition",
             },
         };
     }

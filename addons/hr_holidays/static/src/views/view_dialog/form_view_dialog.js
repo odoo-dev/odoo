@@ -109,37 +109,58 @@ export class TimeOffFormViewDialog extends FormViewDialog {
             staticControlPanelButtons: {
                 ...this.staticControlPanelButtons,
                 save: {
-                    isVisible: "canSave",
+                    isAvailable() {
+                        return this.canSave;
+                    },
+                    // isVisible: "canSave",
                     template: "hr_holidays.FormViewDialog.Buttons.Save",
                     sequence: 10,
                 },
                 approve: {
-                    isVisible: "canApprove",
+                    isAvailable() {
+                        return this.canApprove;
+                    },
+                    // isVisible: "canApprove",
                     template: "hr_holidays.FormViewDialog.Buttons.Approve",
                     sequence: 15,
                 },
                 validate: {
-                    isVisible: "canValidate",
+                    isAvailable() {
+                        return this.canValidate;
+                    },
+                    // isVisible: "canValidate",
                     template: "hr_holidays.FormViewDialog.Buttons.Validate",
                     sequence: 20,
                 },
                 refuse: {
-                    isVisible: "canRefuse",
+                    isAvailable() {
+                        return this.canRefuse;
+                    },
+                    // isVisible: "canRefuse",
                     template: "hr_holidays.FormViewDialog.Buttons.Refuse",
                     sequence: 25,
                 },
                 discard: {
-                    isVisible: "canClose",
+                    isAvailable() {
+                        return this.canClose;
+                    },
+                    // isVisible: "canClose",
                     template: "hr_holidays.FormViewDialog.Buttons.Discard",
                     sequence: 30,
                 },
                 deleteTimeOff: {
-                    isVisible: "canDelete",
+                    isAvailable() {
+                        return this.canDelete;
+                    },
+                    // isVisible: "canDelete",
                     template: "hr_holidays.FormViewDialog.Buttons.DeleteTimeOff",
                     sequence: 35,
                 },
                 cancelTimeOff: {
-                    isVisible: "canCancel",
+                    isAvailable() {
+                        return this.canCancel;
+                    },
+                    // isVisible: "canCancel",
                     template: "hr_holidays.FormViewDialog.Buttons.CancelTimeOff",
                     sequence: 40,
                 },

@@ -266,17 +266,19 @@ export class FormCompiler extends ViewCompiler {
         let slotId = 0;
         const footerButtons = createElement("StatusBarButtons", {
             responsive: "!__comp__.env.inDialog",
+            staticButtonsEvalContext: "__comp__",
         });
         const replace = el.getAttribute("replace");
         if (replace && !exprToBoolean(replace)) {
-            for (const staticButton of params.staticControlPanelButtons) {
-                const slot = createElement("t", {
-                    "t-set-slot": `button_${slotId++}`,
-                    isVisible: staticButton.isVisible || true,
-                });
-                append(slot, createElement("t", { "t-call": staticButton.template }));
-                append(footerButtons, slot);
-            }
+            footerButtons.setAttribute("staticButtons", "__comp__.controlPanelButtons");
+            // for (const staticButton of params.staticControlPanelButtons) {
+            //     const slot = createElement("t", {
+            //         "t-set-slot": `button_${slotId++}`,
+            //         isVisible: staticButton.isVisible || true,
+            //     });
+            //     append(slot, createElement("t", { "t-call": staticButton.template }));
+            //     append(footerButtons, slot);
+            // }
         }
         for (const child of el.childNodes) {
             const compiled = this.compileNode(child, params);

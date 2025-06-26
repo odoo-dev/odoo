@@ -238,29 +238,30 @@ export class FormController extends Component {
 
         // select footers that are not in subviews and move them to another arch
         // that will be moved to the dialog's footer (if we are in a dialog)
-        let xmlDocFooters = [...this.archInfo.xmlDoc.querySelectorAll("footer:not(field footer)")];
-        if (!xmlDocFooters.length) {
-            xmlDocFooters = [createElement("footer", { replace: "0" })];
+        let footers = [...this.archInfo.xmlDoc.querySelectorAll("footer:not(field footer)")];
+        if (!footers.length) {
+            footers = [createElement("footer", { replace: "0" })];
         }
-        const footerWrapper = createElement("t");
-        for (const footer of xmlDocFooters) {
-            append(footerWrapper, footer);
-        }
-        const staticControlPanelButtons = Object.entries(this.staticControlPanelButtons)
-            .map(([key, button]) => ({
-                id: key,
-                ...button,
-            }))
-            .sort(
-                (btn1, btn2) =>
-                    (btn1.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE) -
-                    (btn2.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE)
-            );
-        const footerTemplates = useViewCompiler(
-            this.props.Compiler || FormCompiler,
-            { Footer: footerWrapper },
-            { staticControlPanelButtons }
-        );
+        // this.footerArchInfo = Object.assign({}, this.archInfo);
+        // this.footerArchInfo.xmlDoc = createElement("t");
+        // this.footerArchInfo.xmlDoc.append(...footers);
+        // this.footerArchInfo.arch = this.footerArchInfo.xmlDoc.outerHTML;
+        // this.archInfo.arch = this.archInfo.xmlDoc.outerHTML;
+        // const staticControlPanelButtons = Object.entries(this.staticControlPanelButtons)
+        //     .map(([key, button]) => ({
+        //         id: key,
+        //         ...button,
+        //     }))
+        //     .sort(
+        //         (btn1, btn2) =>
+        //             (btn1.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE) -
+        //             (btn2.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE)
+        //     );
+        const footersWrapper = createElement("t");
+        footersWrapper.append(...footers);
+        const footerTemplates = useViewCompiler(this.props.Compiler, {
+            Footer: footersWrapper,
+        });
         this.footerTemplate = footerTemplates.Footer;
 
         const xmlDocButtonBox = this.archInfo.xmlDoc.querySelector(
@@ -390,6 +391,20 @@ export class FormController extends Component {
 
     get staticControlPanelButtons() {
         return this.props.staticControlPanelButtons;
+    }
+
+    get controlPanelButtons() {
+        return Object.entries(this.staticControlPanelButtons)
+            .map(([key, button]) => ({
+                id: key,
+                ...button,
+            }))
+            .filter((btn) => (btn.isAvailable ? btn.isAvailable.call(this) : true))
+            .sort(
+                (btn1, btn2) =>
+                    (btn1.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE) -
+                    (btn2.sequence || CONTROL_PANEL_BUTTONS_DEFAULT_SEQUENCE)
+            );
     }
 
     get renderingContext() {

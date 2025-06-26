@@ -3,6 +3,7 @@
 
     <t t-name="web.StatusBarButtons">
         <t t-if="props.responsive and env.isSmall">
+            <!-- TODO: visibleStaticButtons -->
             <t t-set="firstSlot" t-value="visibleSlotNames[0]" />
             <t t-set="otherSlots" t-value="visibleSlotNames.slice(1)" />
             <t t-if="firstSlot" t-slot="{{ firstSlot }}" />
@@ -20,6 +21,9 @@
             </Dropdown>
         </t>
         <t t-else="">
+            <t t-foreach="visibleStaticButtons" t-as="button" t-key="button.id">
+                <t t-call="{{ button.template }}" t-call-context="props.staticButtonsEvalContext"/>
+            </t>
             <t t-foreach="visibleSlotNames" t-as="slot" t-key="slot">
                 <t t-slot="{{ slot }}" />
             </t>

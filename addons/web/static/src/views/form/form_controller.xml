@@ -7,6 +7,7 @@
                 <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''" display="display">
                     <t t-set-slot="control-panel-buttons">
                         <t t-call="{{ footerTemplate }}" t-call-context="renderingContext"/>
+                        <!-- <t t-component="props.Renderer" record="model.root" Compiler="props.Compiler" readonly="props.readonly" archInfo="footerArchInfo" staticControlPanelButtons="staticControlPanelButtons"/> -->
                     </t>
 
                     <t t-set-slot="control-panel-actions">
