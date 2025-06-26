@@ -7,6 +7,7 @@ class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
     l10n_in_hsn_code = fields.Char(string="HSN/SAC Code", compute="_compute_l10n_in_hsn_code", store=True, readonly=False, copy=False)
+    l10n_in_pan_entity_id = fields.Many2one(related="partner_id.l10n_in_pan_entity_id")
 
     # withholding related fields
     l10n_in_withhold_tax_amount = fields.Monetary(string="TDS Tax Amount", compute='_compute_l10n_in_withhold_tax_amount')
