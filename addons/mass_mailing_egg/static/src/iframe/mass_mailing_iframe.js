@@ -1,17 +1,9 @@
 import { parseHTML } from "@html_editor/utils/html";
-import {
-    Component,
-    onMounted,
-    onWillDestroy,
-    status,
-    useRef,
-    useState,
-    useSubEnv,
-} from "@odoo/owl";
+import { Component, onMounted, onWillDestroy, status, useState, useSubEnv } from "@odoo/owl";
 import { LazyComponent, loadBundle } from "@web/core/assets";
 import { Deferred } from "@web/core/utils/concurrency";
 import { uniqueId } from "@web/core/utils/functions";
-import { useChildRef, useService } from "@web/core/utils/hooks";
+import { useChildRef, useForwardRefToParent, useService } from "@web/core/utils/hooks";
 import { renderToString } from "@web/core/utils/render";
 import { user } from "@web/core/user";
 import { LocalOverlayContainer } from "@html_editor/local_overlay_container";
@@ -29,7 +21,15 @@ export class MassMailingIframe extends Component {
     static props = {
         config: { type: Object },
         themeOptions: { type: Object },
+        onIframeLoad: { type: Function },
+        iframeRef: { type: Function },
+        showThemeSelector: { type: Boolean },
         readonly: { type: Boolean, optional: true },
+        onEditorLoad: { type: Function, optional: true },
+        onBlur: { type: Function, optional: true },
+    };
+    static defaultProps = {
+        onEditorLoad: () => {},
     };
 
     setup() {
@@ -41,7 +41,7 @@ export class MassMailingIframe extends Component {
          */
         this.hotkeyService = useService("hotkey");
         this.overlayRef = useChildRef();
-        this.iframeRef = useRef("iframeRef");
+        this.iframeRef = useForwardRefToParent("iframeRef");
         useSubEnv({
             localOverlayContainerKey: uniqueId("mass_mailing_iframe"),
         });
@@ -63,6 +63,7 @@ export class MassMailingIframe extends Component {
             this.state.showFullscreen = false;
         } else if (!this.props.readonly) {
             this.editor = new Editor(this.props.config, this.env.services);
+            this.props.onEditorLoad(this.editor);
             onWillDestroy(() => {
                 this.editor.destroy(true);
             });
@@ -110,6 +111,7 @@ export class MassMailingIframe extends Component {
             this.iframeRef.el.removeAttribute("is-ready");
         });
         this.iframeLoaded.resolve(this.iframeRef.el);
+        this.props.onIframeLoad(this.iframeLoaded);
         this.state.ready = true;
     }
 
@@ -149,6 +151,12 @@ export class MassMailingIframe extends Component {
         ]);
     }
 
+    onBlur(ev) {
+        if (!this.props.readonly) {
+            this.props.onBlur(ev);
+        }
+    }
+
     /**
      * Render a template in the realm of the iframe document, to avoid OWL
      * component validation errors (an Element created from the parent document
@@ -171,6 +179,11 @@ export class MassMailingIframe extends Component {
     }
 
     getBuilderProps() {
+        // TODO EGGMAIL: clean plugins providing to builder (bordel)
+        // TODO EGGMAIL: deleteme with master rebase (FUCK)
+        const config = this.props.config;
+        const Plugins = config.Plugins ?? [];
+        delete config.Plugins;
         return {
             overlayRef: this.overlayRef,
             iframeLoaded: this.iframeLoaded,
@@ -181,7 +194,7 @@ export class MassMailingIframe extends Component {
             },
             // codeView => make it an available option in the builder (optional), only in debug?
             // getThemeTab => provide DesignTab
-            Plugins: registry.category("builder-plugins").getAll(),
+            Plugins: [...Plugins, ...registry.category("builder-plugins").getAll()],
             // Plugins => provide plugins selection, properly filter excluded Plugins
             isMobile: false, // TODO EGGMAIL: investigate, is it the mobile display feature or the current page state
             isTranslation: false, // TODO EGGMAIL: investigate, do we need that for mass_mailing?
@@ -190,6 +203,7 @@ export class MassMailingIframe extends Component {
             toggleFullscreen: () => {
                 this.state.showFullscreen = !this.state.showFullscreen;
             },
+            onEditorLoad: this.props.onEditorLoad,
         };
     }
 
