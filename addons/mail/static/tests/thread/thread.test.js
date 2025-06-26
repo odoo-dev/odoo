@@ -933,7 +933,7 @@ test("Update unread counter when receiving new message", async () => {
         channel_member_ids: [
             Command.create({
                 message_unread_counter: 1,
-                partner_id: serverState.partnerId
+                partner_id: serverState.partnerId,
             }),
             Command.create({ partner_id: partnerId }),
         ],
