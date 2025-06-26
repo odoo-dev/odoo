@@ -1274,10 +1274,13 @@ class MrpProduction(models.Model):
         # waiting for a preproduction move before assignement
         is_waiting = self.warehouse_id.manufacture_steps != 'mrp_one_step' and self.picking_ids.filtered(lambda p: p.picking_type_id == self.warehouse_id.pbm_type_id and p.state not in ('done', 'cancel'))
 
-        for move in (
+        moves_to_set_quantity_done = (
             self.move_raw_ids.filtered(lambda m: not is_waiting or m.product_id.tracking == 'none')
             | self.move_finished_ids.filtered(lambda m: m.product_id != self.product_id or m.product_id.tracking == 'serial')
-        ):
+        )
+
+        moves_grouped_by_quantity_done = defaultdict(lambda: self.env['stock.move'])
+        for move in moves_to_set_quantity_done:
             # picked + manual means the user set the quantity manually
             if move.manual_consumption and move.picked:
                 continue
@@ -1287,7 +1290,12 @@ class MrpProduction(models.Model):
                 continue
 
             new_qty = float_round((self.qty_producing - self.qty_produced) * move.unit_factor, precision_rounding=move.product_uom.rounding)
-            move._set_quantity_done(new_qty)
+            moves_grouped_by_quantity_done[new_qty] |= move
+
+        for new_qty, moves in moves_grouped_by_quantity_done.items():
+            moves._set_quantity_done(new_qty)
+
+        for move in moves_to_set_quantity_done:
             if (not move.manual_consumption or pick_manual_consumption_moves) \
                     and move.quantity \
                     and (move.product_id != self.product_id or not move.production_id or move.product_id.tracking != 'serial'):
