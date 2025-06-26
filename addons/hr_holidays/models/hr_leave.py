@@ -730,10 +730,10 @@ Attempting to double-book your time off won't magically make your vacation 2x be
 
             for values in vals_list:
                 employee_id = values.get('employee_id', False)
-                leave_type_id = values.get('holiday_status_id')
+                leave_type_id = values.get('holiday_status_id', False)
 
                 # Handle double validation
-                if mapped_validation_type[leave_type_id] == 'both':
+                if mapped_validation_type.get(leave_type_id) == 'both':
                     self._check_double_validation_rules(employee_id, values.get('state', False))
 
         if any(not vals.get('employee_id') for vals in vals_list):
