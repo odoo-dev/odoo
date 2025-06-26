@@ -9,6 +9,7 @@ import { debounce } from "@web/core/utils/timing";
 import { omit, pick } from "@web/core/utils/objects";
 import { withSequence } from "@html_editor/utils/resource";
 import { _t } from "@web/core/l10n/translation";
+import { memoize } from "@web/core/utils/functions";
 
 /** @typedef { import("@html_editor/core/selection_plugin").EditorSelection } EditorSelection */
 /** @typedef { import("@html_editor/core/user_command_plugin").UserCommand } UserCommand */
@@ -120,6 +121,8 @@ import { _t } from "@web/core/l10n/translation";
 
 /** Delay in ms for toolbar open after keyup, double click or triple click. */
 const DELAY_TOOLBAR_OPEN = 300;
+/** Number of buttons below which toolbar will open directly in its expanded form */
+const MIN_SIZE_FOR_COMPACT = 7;
 
 /**
  * @typedef { Object } ToolbarShared
@@ -152,10 +155,10 @@ export class ToolbarPlugin extends Plugin {
             description: _t("Expand toolbar"),
             icon: "oi-ellipsis-v",
         },
-        toolbar_namespaces: withSequence(100, {
-            id: "compact",
-            isApplied: () => !this.isToolbarExpanded,
-        }),
+        toolbar_namespaces: [
+            withSequence(99, { id: "compact", isApplied: () => !this.isToolbarExpanded }),
+            withSequence(100, { id: "expanded", isApplied: () => true }),
+        ],
     };
 
     setup() {
@@ -167,6 +170,7 @@ export class ToolbarPlugin extends Plugin {
             groupIds.add(group.id);
         }
         this.buttonGroups = this.getButtonGroups();
+        this.buttonsByNamespace = this.getButtonsByNamespace();
 
         this.isMobileToolbar = hasTouch() && window.visualViewport;
 
@@ -234,6 +238,7 @@ export class ToolbarPlugin extends Plugin {
             });
         }
         this.isToolbarExpanded = false;
+        this.shouldDisplayCompactToolbar = this.makeShouldDisplayCompactToolbar();
     }
 
     destroy() {
@@ -277,6 +282,23 @@ export class ToolbarPlugin extends Plugin {
                             : () => button.description,
                 })),
         }));
+    }
+
+    getButtonsByNamespace() {
+        const namespaces = this.getResource("toolbar_namespaces").map((ns) => ns.id);
+        const buttonsByNamespace = {};
+        for (const namespace of namespaces) {
+            buttonsByNamespace[namespace] = this.buttonGroups.flatMap((group) =>
+                group.buttons.filter((btn) => btn.namespaces.includes(namespace))
+            );
+        }
+        buttonsByNamespace["compact+expanded"] = [
+            ...new Set([
+                ...buttonsByNamespace["compact"].slice(0, -1), // ellipsis button not included
+                ...buttonsByNamespace["expanded"],
+            ]),
+        ];
+        return buttonsByNamespace;
     }
 
     getToolbarInfo() {
@@ -371,19 +393,20 @@ export class ToolbarPlugin extends Plugin {
     updateNamespace(targetedNodes) {
         const namespaces = this.getResource("toolbar_namespaces");
         const activeNamespace = namespaces.find((ns) => ns.isApplied(targetedNodes));
-        this.state.namespace = activeNamespace?.id || "expanded";
+        this.state.namespace = activeNamespace?.id;
     }
 
+    /**
+     * @param {EditorSelection} selection
+     * @param {Node[]} targetedNodes
+     */
     updateButtonsStates(selection, targetedNodes) {
+        const availableButtons = this.getAvailableButtonsSet(selection);
         const buttonGroups = this.buttonGroups
             .map((group) => ({
                 id: group.id,
                 buttons: group.buttons
-                    .filter(
-                        (button) =>
-                            button.namespaces.includes(this.state.namespace) &&
-                            (button.isAvailable === undefined || button.isAvailable(selection))
-                    )
+                    .filter((button) => availableButtons.has(button))
                     .map((button) => ({
                         id: button.id,
                         description: button.description(selection, targetedNodes),
@@ -400,6 +423,59 @@ export class ToolbarPlugin extends Plugin {
             .filter((group) => group.buttons.length > 0);
 
         this.state.buttonGroups = buttonGroups;
+    }
+
+    getAvailableButtonsSet(selection) {
+        const isAvailable = memoize(
+            (button) => button.isAvailable === undefined || button.isAvailable(selection)
+        );
+        if (this.state.namespace === "compact" && !this.shouldDisplayCompactToolbar(isAvailable)) {
+            this.state.namespace = "compact+expanded";
+        }
+        return new Set(this.buttonsByNamespace[this.state.namespace].filter(isAvailable));
+    }
+
+    /**
+     * We only display the toolbar in its compact form if the union of compact
+     * and expanded namespaces is larger than a threshold, and bigger than the
+     * compact version itself. Otherwise, we display the union of compact and
+     * expanded namespaces.
+     *
+     * @returns {(isAvailable: (button) => boolean) => boolean}
+     */
+    makeShouldDisplayCompactToolbar() {
+        // First we try to compare the compact and merged versions of the
+        // toolbar without the influence of buttons availability (which depends
+        // on the selection).
+        const compact = this.buttonsByNamespace["compact"];
+        const merged = this.buttonsByNamespace["compact+expanded"];
+        const mergedMaximumSize = merged.length;
+        if (mergedMaximumSize < MIN_SIZE_FOR_COMPACT) {
+            // If the merged size is always smaller than the threshold, we can
+            // always display the merged version directly (i.e. never display the compact one).
+            return () => false;
+        }
+        const isAlwaysAvailable = (button) => button.isAvailable === undefined;
+        const mergedMinimumSize = merged.filter(isAlwaysAvailable).length;
+        const compactMaximumSize = compact.length;
+        if (mergedMinimumSize >= MIN_SIZE_FOR_COMPACT && mergedMinimumSize > compactMaximumSize) {
+            // The merged version is always bigger than the threshold and the
+            // compact version.
+            // Always display the compact version first (i.e. never display the merged one).
+            return () => true;
+        }
+        // Comparison between compact and merged versions depend on buttons
+        // availability and must be evaluated at each toolbar update.
+        return (isAvailable) => {
+            const compactSize = compact.filter(isAvailable).length;
+            const mergedSize = merged.filter(isAvailable).length;
+            return (
+                // Merged version is big enough
+                mergedSize >= MIN_SIZE_FOR_COMPACT &&
+                // Merged version is bigger than the compact version
+                mergedSize > compactSize
+            );
+        };
     }
 
     closeToolbar() {
