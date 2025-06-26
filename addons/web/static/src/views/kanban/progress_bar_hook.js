@@ -49,9 +49,17 @@ class ProgressBarState {
         this.activeBars = activeBars;
         this._aggregateValues = [];
         this._pbCounts = null;
+        this.isReady = false;
     }
 
     getGroupInfo(group) {
+        if (!this.isReady) {
+            // progressbar isn't loaded yet
+            return {
+                activeBar: null,
+                bars: [],
+            };
+        }
         if (!this._groupsInfo[group.id]) {
             const aggValues = _findGroup(
                 this._aggregateValues,
@@ -305,6 +313,7 @@ class ProgressBarState {
                 context,
             });
             this._pbCounts = res;
+            this.isReady = true;
         }
     }
 
@@ -343,21 +352,15 @@ export function useProgressBar(progressAttributes, model, aggregateFields, activ
         new ProgressBarState(progressAttributes, model, aggregateFields, activeBars)
     );
 
-    let prom;
     const onWillLoadRoot = model.hooks.onWillLoadRoot;
     model.hooks.onWillLoadRoot = (config) => {
         onWillLoadRoot();
-        prom = progressBarState.loadProgressBar({
+        progressBarState.loadProgressBar({
             context: config.context,
             domain: config.domain,
             groupBy: config.groupBy,
             resModel: config.resModel,
         });
-    };
-    const onRootLoaded = model.hooks.onRootLoaded;
-    model.hooks.onRootLoaded = async (root) => {
-        await onRootLoaded(root);
-        return prom;
     };
 
     return progressBarState;

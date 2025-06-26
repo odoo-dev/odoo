@@ -18563,7 +18563,7 @@ test(`cache web_search_read`, async () => {
     expect(queryAllTexts(`.o_list_char`)).toEqual(["blip", "gnap11", "blip", "plop", "plop2"]);
 });
 
-test(`cache web_search_read (onUpdate called after anoter load)`, async () => {
+test(`cache web_search_read (onUpdate called after another load)`, async () => {
     const searchReadDefs = [null, new Deferred(), new Deferred()];
     let webSearchReadCount = 0;
     onRpc("web_search_read", () => searchReadDefs[webSearchReadCount++]);
