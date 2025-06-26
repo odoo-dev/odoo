@@ -510,10 +510,11 @@ export class PaymentScreen extends Component {
             return false;
         }
 
-        if (!this.currentOrder.presetRequirementsFilled) {
+        const { filled, field, message } = this.currentOrder.presetRequirementsFilled;
+        if (!filled) {
             this.dialog.add(AlertDialog, {
-                title: _t("Customer required"),
-                body: _t("Please add a valid customer to the order."),
+                title: _t("%s required", field),
+                body: _t(message),
             });
             return false;
         }

@@ -129,13 +129,18 @@ export class PosOrder extends Base {
     }
 
     get presetRequirementsFilled() {
-        return (
-            (!this.preset_id?.needsPartner ||
-                (this.partner_id?.name && (this.partner_id?.street || this.partner_id?.street2))) &&
-            (!this.preset_id?.needsName || this.partner_id?.name || this.floating_order_name) &&
-            (!this.preset_id?.needsSlot || this.preset_time)
-        );
+        if (
+            this.preset_id?.needsPartner && !(this.partner_id?.name && (this.partner_id?.street || this.partner_id?.street2)) ||
+            this.preset_id?.needsName && !(this.partner_id?.name || this.floating_order_name)
+        ) {
+            return { filled: false, field: "Customer", message: "Please add a valid customer to the order." };
+        }
+        if (this.preset_id?.needsSlot && !this.preset_time) {
+            return { filled: false, field: "Slot", message: "Please select a time slot before proceeding." };
+        }
+        return { filled: true };
     }
+
 
     getEmailItems() {
         return [_t("the receipt")].concat(this.isToInvoice() ? [_t("the invoice")] : []);
