@@ -20,3 +20,4 @@ from . import res_partner
 from . import res_users
 from . import digest_digest
 from . import ir_ui_menu
+from . import ir_actions_report
