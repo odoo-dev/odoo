@@ -757,7 +757,6 @@ test("Thread messages are only loaded once", async () => {
     await waitForSteps([`load messages - ${channelIds[0]}`, `load messages - ${channelIds[1]}`]);
 });
 
-test.tags("focus required");
 test("Opening thread with needaction messages should mark all messages of thread as read", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
@@ -933,7 +932,7 @@ test("Update unread counter when receiving new message", async () => {
         channel_member_ids: [
             Command.create({
                 message_unread_counter: 1,
-                partner_id: serverState.partnerId
+                partner_id: serverState.partnerId,
             }),
             Command.create({ partner_id: partnerId }),
         ],
