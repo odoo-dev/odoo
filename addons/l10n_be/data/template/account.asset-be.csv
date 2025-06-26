@@ -1,0 +1,3 @@
+"id","account_asset_id","account_depreciation_id","account_depreciation_expense_id","name","method_number","method_period"
+"asset_software","a210000","a210000","a6301","Software","3","12"
+"asset_building","a220000","a220000","a6301","Buildings","30","12"
