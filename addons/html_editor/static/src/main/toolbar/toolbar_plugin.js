@@ -6,7 +6,7 @@ import { hasTouch } from "@web/core/browser/feature_detection";
 import { registry } from "@web/core/registry";
 import { ToolbarMobile } from "./mobile_toolbar";
 import { debounce } from "@web/core/utils/timing";
-import { omit } from "@web/core/utils/objects";
+import { omit, pick } from "@web/core/utils/objects";
 import { withSequence } from "@html_editor/utils/resource";
 import { _t } from "@web/core/l10n/translation";
 
@@ -180,13 +180,7 @@ export class ToolbarPlugin extends Plugin {
                 closeOnPointerdown: false,
             });
         }
-        this.state = reactive({
-            buttonsActiveState: {},
-            buttonsDisabledState: {},
-            buttonsAvailableState: {},
-            buttonsTitleState: {},
-            namespace: undefined,
-        });
+        this.state = reactive({ namespace: undefined, buttonGroups: [] });
         this.updateSelection = null;
 
         this.onSelectionChangeActive = true;
@@ -283,9 +277,8 @@ export class ToolbarPlugin extends Plugin {
 
     getToolbarInfo() {
         return {
-            buttonGroups: this.buttonGroups,
-            getSelection: () => this.dependencies.selection.getSelectionData(),
             state: this.state,
+            getSelection: () => this.dependencies.selection.getSelectionData(),
             focusEditable: () => this.dependencies.selection.focusEditable(),
         };
     }
@@ -387,22 +380,37 @@ export class ToolbarPlugin extends Plugin {
             return;
         }
         const nodes = this.getFilteredTargetedNodes();
-        for (const buttonGroup of this.buttonGroups) {
-            for (const button of buttonGroup.buttons) {
-                if (!button.namespaces.includes(this.state.namespace)) {
-                    continue;
-                }
-                this.state.buttonsActiveState[button.id] = button.isActive?.(selection, nodes);
-                this.state.buttonsDisabledState[button.id] = button.isDisabled?.(selection, nodes);
-                this.state.buttonsAvailableState[button.id] =
-                    button.isAvailable === undefined || button.isAvailable(selection);
-                this.state.buttonsTitleState[button.id] =
-                    button.description instanceof Function
-                        ? button.description(selection, nodes)
-                        : button.description;
-            }
-        }
         this.updateSelection = null;
+
+        const buttonGroups = this.buttonGroups
+            .map((group) => ({
+                id: group.id,
+                buttons: group.buttons
+                    // TODO: refactor this filter function into one that handles the "compact" x "expanded" namespaces
+                    .filter(
+                        (button) =>
+                            button.namespaces.includes(this.state.namespace) &&
+                            (button.isAvailable === undefined || button.isAvailable(selection))
+                    )
+                    .map((button) => ({
+                        id: button.id,
+                        description:
+                            button.description instanceof Function
+                                ? button.description(selection, nodes)
+                                : button.description,
+                        ...(button.Component
+                            ? pick(button, "Component", "props")
+                            : {
+                                  ...pick(button, "run", "icon", "text"),
+                                  isActive: Boolean(button.isActive?.(selection, nodes)),
+                                  isDisabled: Boolean(button.isDisabled?.(selection, nodes)),
+                              }),
+                    })),
+            }))
+            // Filter out groups left empty
+            .filter((group) => group.buttons.length > 0);
+
+        this.state.buttonGroups = buttonGroups;
     }
 
     closeToolbar() {
