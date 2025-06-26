@@ -657,3 +657,29 @@ registry.category("web_tour.tours").add("test_customer_alone_saved", {
             ProductScreen.customerIsSelected("Deco Addict"),
         ].flat(),
 });
+
+registry.category("web_tour.tours").add("test_preset_timing_restaurant_dialog", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            FloorScreen.clickTable("5"),
+            ProductScreen.clickDisplayedProduct("Coca-Cola"),
+            ProductScreen.selectPreset("Eat in", "Takeaway"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
+            {
+                content: "Customer required dialog appears",
+                trigger: '.modal-dialog:contains("Please add a valid customer to the order.")',
+            },
+            Dialog.confirm(),
+            PaymentScreen.clickPartnerButton(),
+            PaymentScreen.clickCustomer("A simple PoS man!"),
+            PaymentScreen.clickValidate(),
+            {
+                content: "Slot required dialog appears",
+                trigger: '.modal-dialog:contains("Please select a time slot before proceeding.")',
+            },
+            Dialog.confirm(),
+        ].flat(),
+});
