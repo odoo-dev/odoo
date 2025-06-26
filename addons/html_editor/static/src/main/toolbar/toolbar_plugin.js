@@ -9,6 +9,7 @@ import { debounce } from "@web/core/utils/timing";
 import { omit, pick } from "@web/core/utils/objects";
 import { withSequence } from "@html_editor/utils/resource";
 import { _t } from "@web/core/l10n/translation";
+import { memoize } from "@web/core/utils/functions";
 
 /** @typedef { import("@html_editor/core/selection_plugin").EditorSelection } EditorSelection */
 /** @typedef { import("@html_editor/core/user_command_plugin").UserCommand } UserCommand */
@@ -120,6 +121,8 @@ import { _t } from "@web/core/l10n/translation";
 
 /** Delay in ms for toolbar open after keyup, double click or triple click. */
 const DELAY_TOOLBAR_OPEN = 300;
+/** Number of buttons below which toolbar will open directly in its expanded form */
+const BUTTON_COUNT_THRESHOLD = 7;
 
 /**
  * @typedef { Object } ToolbarShared
@@ -152,10 +155,10 @@ export class ToolbarPlugin extends Plugin {
             description: _t("Expand toolbar"),
             icon: "oi-ellipsis-v",
         },
-        toolbar_namespaces: withSequence(100, {
-            id: "compact",
-            isApplied: () => !this.isToolbarExpanded,
-        }),
+        toolbar_namespaces: [
+            withSequence(99, { id: "compact", isApplied: () => !this.isToolbarExpanded }),
+            withSequence(100, { id: "expanded", isApplied: () => this.isToolbarExpanded }),
+        ],
     };
 
     setup() {
@@ -167,6 +170,7 @@ export class ToolbarPlugin extends Plugin {
             groupIds.add(group.id);
         }
         this.buttonGroups = this.getButtonGroups();
+        this.buttonsByNamespace = this.getButtonsByNamespace();
 
         this.isMobileToolbar = hasTouch() && window.visualViewport;
 
@@ -271,8 +275,24 @@ export class ToolbarPlugin extends Plugin {
                 .map((button) => ({
                     ...button,
                     namespaces: button.namespaces || group.namespaces || ["expanded"],
+                    isAvailable: button.isAvailable ?? (() => true),
+                    description:
+                        button.description instanceof Function
+                            ? button.description
+                            : () => button.description,
                 })),
         }));
+    }
+
+    getButtonsByNamespace() {
+        const namespaces = this.getResource("toolbar_namespaces").map((ns) => ns.id);
+        const buttonsByNamespace = {};
+        for (const namespace of namespaces) {
+            buttonsByNamespace[namespace] = this.buttonGroups.flatMap((group) =>
+                group.buttons.filter((btn) => btn.namespaces.includes(namespace))
+            );
+        }
+        return buttonsByNamespace;
     }
 
     getToolbarInfo() {
@@ -361,7 +381,7 @@ export class ToolbarPlugin extends Plugin {
         const targetedNodes = this.getFilteredTargetedNodes();
         const namespaces = this.getResource("toolbar_namespaces");
         const activeNamespace = namespaces.find((ns) => ns.isApplied(targetedNodes));
-        this.state.namespace = activeNamespace?.id || "expanded";
+        this.state.namespace = activeNamespace?.id;
     }
 
     updateButtonsStates(selection) {
@@ -382,22 +402,15 @@ export class ToolbarPlugin extends Plugin {
         const nodes = this.getFilteredTargetedNodes();
         this.updateSelection = null;
 
+        const availableButtons = this.getAvailableButtonsSet(selection, this.state.namespace);
         const buttonGroups = this.buttonGroups
             .map((group) => ({
                 id: group.id,
                 buttons: group.buttons
-                    // TODO: refactor this filter function into one that handles the "compact" x "expanded" namespaces
-                    .filter(
-                        (button) =>
-                            button.namespaces.includes(this.state.namespace) &&
-                            (button.isAvailable === undefined || button.isAvailable(selection))
-                    )
+                    .filter((button) => availableButtons.has(button))
                     .map((button) => ({
                         id: button.id,
-                        description:
-                            button.description instanceof Function
-                                ? button.description(selection, nodes)
-                                : button.description,
+                        description: button.description(selection, nodes),
                         ...(button.Component
                             ? pick(button, "Component", "props")
                             : {
@@ -411,6 +424,38 @@ export class ToolbarPlugin extends Plugin {
             .filter((group) => group.buttons.length > 0);
 
         this.state.buttonGroups = buttonGroups;
+    }
+
+    getAvailableButtonsSet(selection, namespace) {
+        if (namespace === "compact") {
+            return this.getAvailableButtonsCompact(selection, namespace);
+        }
+        return new Set(
+            this.buttonsByNamespace[namespace].filter((btn) => btn.isAvailable(selection))
+        );
+    }
+
+    /**
+     * We only display the toolbar in its compact form if the union of compact
+     * and expanded namespaces is larger than a threshold, and bigger than the
+     * compact version itself. In other words, we skip the compact toolbar
+     * display if the expanded version is compact enough.
+     */
+    getAvailableButtonsCompact(selection) {
+        const isAvailable = memoize((button) => button.isAvailable(selection));
+        const getAvailableButtonsSet = (namespace) =>
+            new Set(this.buttonsByNamespace[namespace].filter(isAvailable));
+
+        const compactButtons = getAvailableButtonsSet("compact");
+        const expandedButtons = getAvailableButtonsSet("expanded");
+        const union = new Set([...compactButtons, ...expandedButtons]);
+        // Remove the ellipsis button
+        union.delete(this.buttonsByNamespace["compact"].at(-1));
+        if (union.size < BUTTON_COUNT_THRESHOLD || union.size <= compactButtons.size) {
+            this.state.namespace = "compact+expanded";
+            return union;
+        }
+        return compactButtons;
     }
 
     closeToolbar() {
