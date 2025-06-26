@@ -28,7 +28,18 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_journal_suspense_account_id': 'tr102999',
                 'account_sale_tax_id': 'tr_s_20',
                 'account_purchase_tax_id': 'tr_p_20',
+                'deferred_expense_account_id': 'tr180',
+                'deferred_revenue_account_id': 'tr380',
                 'expense_account_id': 'tr150',
                 'income_account_id': 'tr600',
             },
         }
+
+    def _post_load_data(self, template_code, company, template_data):
+        result = super()._post_load_data(template_code, company, template_data)
+
+        if template_code == 'tr':
+            for xmlid in ['tr790', 'tr791', 'tr792', 'tr793', 'tr794', 'tr795', 'tr796', 'tr797', 'tr798', 'tr799']:
+                self.ref(xmlid).active = False
+
+        return result
