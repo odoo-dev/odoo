@@ -13,6 +13,8 @@ import { CalendarYearRenderer } from "@web/views/calendar/calendar_year/calendar
 
 const FAKE_PROPS = {
     model: FAKE_MODEL,
+    getCalendarData: () => FAKE_MODEL.data,
+    initialDate: FAKE_MODEL.date,
     createRecord() {},
     deleteRecord() {},
     editRecord() {},

@@ -12,7 +12,8 @@ import {
     swipeLeft,
     swipeRight,
 } from "@web/../tests/web_test_helpers";
-import { ActionSwiper } from "@web/core/action_swiper/action_swiper";
+import { ACTIONSWIPER_ANIMATION_LENGTH, ActionSwiper } from "@web/core/action_swiper/action_swiper";
+import { browser } from "@web/core/browser/browser";
 import { Deferred } from "@web/core/utils/concurrency";
 
 beforeEach(() => mockTouch(true));
@@ -27,6 +28,28 @@ test("render only its target if no props is given", async () => {
         static template = xml`
                 <div class="d-flex">
                     <ActionSwiper>
+                        <div class="target-component"/>
+                    </ActionSwiper>
+                </div>
+            `;
+    }
+    await mountWithCleanup(Parent);
+    expect("div.o_actionswiper").toHaveCount(0);
+    expect("div.target-component").toHaveCount(1);
+});
+
+test("render only its target on non-touch devices", async () => {
+    mockTouch(false);
+    // mockTouch(false) don't work well with hasTouch() because browser.ontouchstart is null
+    patchWithCleanup(browser, {
+        ontouchstart: undefined
+    })
+    class Parent extends Component {
+        static props = ["*"];
+        static components = { ActionSwiper };
+        static template = xml`
+                <div class="d-flex">
+                    <ActionSwiper onLeftSwipe="{action: () => {}, icon: 'fa-circle', bgColor: 'bg-warning'}">
                         <div class="target-component"/>
                     </ActionSwiper>
                 </div>
@@ -141,7 +164,7 @@ test("can perform actions by swiping to the right", async () => {
         },
     });
     await dragHelper.drop();
-    await animationFrame();
+    await advanceTime(ACTIONSWIPER_ANIMATION_LENGTH);
     expect(targetContainer.style.transform).not.toInclude("translateX", {
         message: "target does not have a translate value",
     });
@@ -212,6 +235,7 @@ test("can perform actions by swiping in both directions", async () => {
     });
 
     await dragHelper.drop();
+    await advanceTime(ACTIONSWIPER_ANIMATION_LENGTH);
 
     expect(targetContainer.style.transform).not.toInclude("translateX", {
         message: "target does not have a translate value",
@@ -266,11 +290,9 @@ test("invert the direction of swipes when language is rtl", async () => {
     await mountWithCleanup(Parent);
     // Touch ends once the half of the distance has been crossed to the left
     await swipeLeft(".o_actionswiper");
-    await advanceTime(500);
     // In rtl languages, actions are permuted
     expect.verifySteps(["onRightSwipe"]);
     await swipeRight(".o_actionswiper");
-    await advanceTime(500);
     // In rtl languages, actions are permuted
     expect.verifySteps(["onLeftSwipe"]);
 });
@@ -347,6 +369,7 @@ test("swiping when the swiper contains scrollable areas", async () => {
         },
     });
     await dragHelper.drop();
+    await advanceTime(ACTIONSWIPER_ANIMATION_LENGTH);
 
     dragHelper = await contains(largeText).drag({
         position: {
@@ -365,6 +388,7 @@ test("swiping when the swiper contains scrollable areas", async () => {
             "the swiper has not swiped to the right because the scrollable element was scrollable to the left",
     });
     await dragHelper.drop();
+    await advanceTime(ACTIONSWIPER_ANIMATION_LENGTH);
     // The scrollable element is set at its left limit
     scrollable.scrollLeft = 0;
     await hover(largeText, {
@@ -390,7 +414,7 @@ test("swiping when the swiper contains scrollable areas", async () => {
             "the swiper has swiped to the right because the scrollable element couldn't scroll anymore to the left",
     });
     await dragHelper.drop();
-    await advanceTime(500);
+    await advanceTime(ACTIONSWIPER_ANIMATION_LENGTH);
     expect.verifySteps(["onRightSwipe"]);
 
     dragHelper = await contains(largeText).drag({
@@ -410,6 +434,7 @@ test("swiping when the swiper contains scrollable areas", async () => {
             "the swiper has not swiped to the left because the scrollable element was scrollable to the right",
     });
     await dragHelper.drop();
+    await advanceTime(ACTIONSWIPER_ANIMATION_LENGTH);
 
     // The scrollable element is set at its right limit
     scrollable.scrollLeft = scrollable.scrollWidth - scrollable.getBoundingClientRect().right;
@@ -436,7 +461,7 @@ test("swiping when the swiper contains scrollable areas", async () => {
             "the swiper has swiped to the left because the scrollable element couldn't scroll anymore to the right",
     });
     await dragHelper.drop();
-    await advanceTime(500);
+    await advanceTime(ACTIONSWIPER_ANIMATION_LENGTH);
     expect.verifySteps(["onLeftSwipe"]);
 });
 
@@ -512,6 +537,7 @@ test("preventing swipe on scrollable areas when language is rtl", async () => {
             "the swiper has not swiped to the right because the scrollable element was scrollable to the left",
     });
     await dragHelper.drop();
+    await advanceTime(ACTIONSWIPER_ANIMATION_LENGTH);
 
     // The scrollable element is set at its left limit
     scrollable.scrollLeft = 0;
@@ -538,7 +564,7 @@ test("preventing swipe on scrollable areas when language is rtl", async () => {
             "the swiper has swiped to the right because the scrollable element couldn't scroll anymore to the left",
     });
     await dragHelper.drop();
-    await advanceTime(500);
+    await advanceTime(ACTIONSWIPER_ANIMATION_LENGTH);
     // In rtl languages, actions are permuted
     expect.verifySteps(["onLeftSwipe"]);
     // LEFT => RIGHT trigger
@@ -565,6 +591,7 @@ test("preventing swipe on scrollable areas when language is rtl", async () => {
             "the swiper has not swiped to the left because the scrollable element was scrollable to the right",
     });
     await dragHelper.drop();
+    await advanceTime(ACTIONSWIPER_ANIMATION_LENGTH);
     // The scrollable element is set at its right limit
     scrollable.scrollLeft = scrollable.scrollWidth - scrollable.getBoundingClientRect().right;
     await hover(largeText, {
@@ -590,46 +617,10 @@ test("preventing swipe on scrollable areas when language is rtl", async () => {
             "the swiper has swiped to the left because the scrollable element couldn't scroll anymore to the right",
     });
     await dragHelper.drop();
-    await advanceTime(500);
+    await advanceTime(ACTIONSWIPER_ANIMATION_LENGTH);
 
     // In rtl languages, actions are permuted
     expect.verifySteps(["onRightSwipe"]);
-});
-
-test("swipeInvalid prop prevents swiping", async () => {
-    expect.assertions(2);
-
-    class Parent extends Component {
-        static props = ["*"];
-        static components = { ActionSwiper };
-        static template = xml`
-                <div class="d-flex">
-                    <ActionSwiper onRightSwipe = "{
-                        action: () => this.onRightSwipe(),
-                        icon: 'fa-circle',
-                        bgColor: 'bg-warning',
-                    }" swipeInvalid = "swipeInvalid">
-                        <div class="target-component" style="width: 200px; height: 80px">Test</div>
-                    </ActionSwiper>
-                </div>
-            `;
-        onRightSwipe() {
-            expect.step("onRightSwipe");
-        }
-        swipeInvalid() {
-            expect.step("swipeInvalid");
-            return true;
-        }
-    }
-    await mountWithCleanup(Parent);
-    const targetContainer = queryFirst(".o_actionswiper_target_container");
-    // Touch ends once the half of the distance has been crossed
-    await swipeRight(".o_actionswiper");
-
-    expect(targetContainer.style.transform).not.toInclude("translateX", {
-        message: "target doesn't have translateX after action is performed",
-    });
-    expect.verifySteps(["swipeInvalid"]);
 });
 
 test("action should be done before a new render", async () => {
@@ -673,6 +664,5 @@ test("action should be done before a new render", async () => {
     await swipeRight(".o_actionswiper");
     executingAction = true;
     await prom;
-    await animationFrame();
-    expect.verifySteps(["action done", "ActionSwiper patched"]);
+    await expect.waitForSteps(["action done", "ActionSwiper patched"]);
 });
