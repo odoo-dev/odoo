@@ -310,14 +310,15 @@ export class ToolbarPlugin extends Plugin {
     }
 
     updateToolbar(selectionData = this.dependencies.selection.getSelectionData()) {
-        this.updateNamespace();
+        const targetedNodes = this.getFilteredTargetedNodes();
+        this.updateNamespace(targetedNodes);
         if (!this.config.disableFloatingToolbar) {
-            this.updateToolbarVisibility(selectionData);
+            this.updateToolbarVisibility(selectionData, targetedNodes);
             if (!this.overlay.isOpen) {
                 return;
             }
         }
-        this.updateButtonsStates(selectionData.editableSelection);
+        this.updateButtonsStates(selectionData.editableSelection, targetedNodes);
     }
 
     getFilteredTargetedNodes() {
@@ -331,8 +332,8 @@ export class ToolbarPlugin extends Plugin {
             );
     }
 
-    updateToolbarVisibility(selectionData) {
-        if (this.shouldBeVisible(selectionData)) {
+    updateToolbarVisibility(selectionData, targetedNodes) {
+        if (this.shouldBeVisible(selectionData, targetedNodes)) {
             // Do not reposition the toolbar if it's already open.
             if (!this.overlay.isOpen) {
                 const props = { toolbar: this.getToolbarInfo(), class: "shadow rounded my-2" };
@@ -343,7 +344,7 @@ export class ToolbarPlugin extends Plugin {
         }
     }
 
-    shouldBeVisible(selectionData) {
+    shouldBeVisible(selectionData, targetedNodes) {
         const inEditable =
             selectionData.currentSelectionIsInEditable &&
             !selectionData.documentSelectionIsProtected &&
@@ -366,7 +367,7 @@ export class ToolbarPlugin extends Plugin {
                 fn(selectionData)
             );
         }
-        return !!this.getFilteredTargetedNodes().length;
+        return !!targetedNodes.length;
     }
 
     shouldPreventClosing() {
@@ -377,29 +378,27 @@ export class ToolbarPlugin extends Plugin {
         return preventClosing?.dataset?.preventClosingOverlay === "true";
     }
 
-    updateNamespace() {
-        const targetedNodes = this.getFilteredTargetedNodes();
+    updateNamespace(targetedNodes) {
         const namespaces = this.getResource("toolbar_namespaces");
         const activeNamespace = namespaces.find((ns) => ns.isApplied(targetedNodes));
         this.state.namespace = activeNamespace?.id;
     }
 
-    updateButtonsStates(selection) {
+    updateButtonsStates(selection, targetedNodes) {
         if (!this.updateSelection) {
             queueMicrotask(() => {
                 if (!this.isDestroyed) {
-                    this._updateButtonsStates();
+                    this._updateButtonsStates(targetedNodes);
                 }
             });
         }
         this.updateSelection = selection;
     }
-    _updateButtonsStates() {
+    _updateButtonsStates(targetedNodes) {
         const selection = this.updateSelection;
         if (!selection) {
             return;
         }
-        const nodes = this.getFilteredTargetedNodes();
         this.updateSelection = null;
 
         const availableButtons = this.getAvailableButtonsSet(selection, this.state.namespace);
@@ -410,13 +409,13 @@ export class ToolbarPlugin extends Plugin {
                     .filter((button) => availableButtons.has(button))
                     .map((button) => ({
                         id: button.id,
-                        description: button.description(selection, nodes),
+                        description: button.description(selection, targetedNodes),
                         ...(button.Component
                             ? pick(button, "Component", "props")
                             : {
                                   ...pick(button, "run", "icon", "text"),
-                                  isActive: Boolean(button.isActive?.(selection, nodes)),
-                                  isDisabled: Boolean(button.isDisabled?.(selection, nodes)),
+                                  isActive: !!button.isActive?.(selection, targetedNodes),
+                                  isDisabled: !!button.isDisabled?.(selection, targetedNodes),
                               }),
                     })),
             }))
