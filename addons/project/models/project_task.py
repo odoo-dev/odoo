@@ -1846,6 +1846,24 @@ class ProjectTask(models.Model):
             'domain': [('recurrence_id', 'in', self.recurrence_id.ids)],
         }
 
+    def action_share_task(self):
+        if any(task.is_template for task in self):
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'type': 'warning',
+                    'message': self.env._('This action cannot be performed on task templates.'),
+                }
+            }
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'portal.share',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'dialog_size': 'medium'},
+        }
+
     def action_project_sharing_recurring_tasks(self):
         self.ensure_one()
         recurrent_tasks = self.env['project.task'].search([('recurrence_id', 'in', self.recurrence_id.ids)])
