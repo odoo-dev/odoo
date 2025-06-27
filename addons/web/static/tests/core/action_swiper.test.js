@@ -596,42 +596,6 @@ test("preventing swipe on scrollable areas when language is rtl", async () => {
     expect.verifySteps(["onRightSwipe"]);
 });
 
-test("swipeInvalid prop prevents swiping", async () => {
-    expect.assertions(2);
-
-    class Parent extends Component {
-        static props = ["*"];
-        static components = { ActionSwiper };
-        static template = xml`
-                <div class="d-flex">
-                    <ActionSwiper onRightSwipe = "{
-                        action: () => this.onRightSwipe(),
-                        icon: 'fa-circle',
-                        bgColor: 'bg-warning',
-                    }" swipeInvalid = "swipeInvalid">
-                        <div class="target-component" style="width: 200px; height: 80px">Test</div>
-                    </ActionSwiper>
-                </div>
-            `;
-        onRightSwipe() {
-            expect.step("onRightSwipe");
-        }
-        swipeInvalid() {
-            expect.step("swipeInvalid");
-            return true;
-        }
-    }
-    await mountWithCleanup(Parent);
-    const targetContainer = queryFirst(".o_actionswiper_target_container");
-    // Touch ends once the half of the distance has been crossed
-    await swipeRight(".o_actionswiper");
-
-    expect(targetContainer.style.transform).not.toInclude("translateX", {
-        message: "target doesn't have translateX after action is performed",
-    });
-    expect.verifySteps(["swipeInvalid"]);
-});
-
 test("action should be done before a new render", async () => {
     let executingAction = false;
     const prom = new Deferred();

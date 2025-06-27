@@ -79,3 +79,10 @@ $o-cw-filter-avatar-size: 20px;
         }
     }
 }
+
+.o_actionswiper_right_swipe_area, .o_actionswiper_left_swipe_area {
+    max-width: unset !important;
+    .o_calendar_widget {
+        width: 100%;
+    }
+}

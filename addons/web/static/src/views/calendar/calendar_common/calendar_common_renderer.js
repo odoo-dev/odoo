@@ -54,6 +54,7 @@ export class CalendarCommonRenderer extends Component {
     static headerTemplate = "web.CalendarCommonRendererHeader";
     static props = {
         model: Object,
+        initialDate: Object,
         isWeekendVisible: { type: Boolean, optional: true },
         createRecord: Function,
         editRecord: Function,
@@ -103,7 +104,7 @@ export class CalendarCommonRenderer extends Component {
             // fc is blocked by safePrevent in onPointerDown (draggable_hook_builder.js)
             dateClick: this.props.model.hasMultiCreate ? () => {} : this.onDateClick,
             dayCellClassNames: this.getDayCellClassNames,
-            initialDate: this.props.model.date.toISO(),
+            initialDate: this.props.initialDate.toISO(),
             initialView: SCALE_TO_FC_VIEW[this.props.model.scale],
             direction: localization.direction,
             droppable: true,

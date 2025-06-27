@@ -15,6 +15,7 @@ export class CalendarYearRenderer extends Component {
     static template = "web.CalendarYearRenderer";
     static props = {
         model: Object,
+        initialDate: Object,
         createRecord: Function,
         editRecord: Function,
         deleteRecord: Function,
@@ -43,7 +44,7 @@ export class CalendarYearRenderer extends Component {
             dayHeaderFormat: "EEEEE",
             dateClick: this.onDateClick,
             dayCellClassNames: this.getDayCellClassNames,
-            initialDate: this.props.model.date.toISO(),
+            initialDate: this.props.initialDate.toISO(),
             initialView: "dayGridMonth",
             direction: localization.direction,
             droppable: true,
