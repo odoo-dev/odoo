@@ -416,8 +416,8 @@ export class CalendarModel extends Model {
     /**
      * @protected
      */
-    async updateData(data) {
-        data.range = this.computeRange();
+    async updateData(data, range) {
+        data.range = range || this.computeRange();
         let unusualDaysProm;
         if (this.meta.showUnusualDays) {
             unusualDaysProm = this.loadUnusualDays(data).then((unusualDays) => {
