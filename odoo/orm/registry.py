@@ -435,7 +435,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
                     # Field(_base_fields__=...); restore it to force its setup
                     name = field.name
                     base_fields = field._base_fields__
-
+                    assert field._toplevel
                     field.__dict__.clear()
                     field.__init__(_base_fields__=base_fields)
                     field._toplevel = True
