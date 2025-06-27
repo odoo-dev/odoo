@@ -185,10 +185,9 @@ export class ToolbarPlugin extends Plugin {
             });
         }
         this.state = reactive({ namespace: undefined, buttonGroups: [] });
-        this.updateSelection = null;
 
         this.onSelectionChangeActive = true;
-        this.debouncedUpdateToolbar = debounce(this.updateToolbar, DELAY_TOOLBAR_OPEN);
+        this.debouncedUpdateToolbar = debounce(this._updateToolbar, DELAY_TOOLBAR_OPEN);
 
         if (this.isMobileToolbar) {
             this.addDomListener(this.editable, "pointerup", () => {
@@ -243,6 +242,7 @@ export class ToolbarPlugin extends Plugin {
 
     destroy() {
         this.debouncedUpdateToolbar.cancel();
+        this.updateToolbar.cancel();
         this.overlay.close();
         super.destroy();
     }
@@ -309,7 +309,13 @@ export class ToolbarPlugin extends Plugin {
         }
     }
 
-    updateToolbar(selectionData = this.dependencies.selection.getSelectionData()) {
+    /**
+     * Different handlers might call updateToolbar (e.g. step added and
+     * selection change) in the same tick. To avoid unnecessary updates, we
+     * batch the calls.
+     */
+    updateToolbar = debounce(this._updateToolbar, 0, { trailing: true });
+    _updateToolbar(selectionData = this.dependencies.selection.getSelectionData()) {
         const targetedNodes = this.getFilteredTargetedNodes();
         this.updateNamespace(targetedNodes);
         if (!this.config.disableFloatingToolbar) {
@@ -385,22 +391,6 @@ export class ToolbarPlugin extends Plugin {
     }
 
     updateButtonsStates(selection, targetedNodes) {
-        if (!this.updateSelection) {
-            queueMicrotask(() => {
-                if (!this.isDestroyed) {
-                    this._updateButtonsStates(targetedNodes);
-                }
-            });
-        }
-        this.updateSelection = selection;
-    }
-    _updateButtonsStates(targetedNodes) {
-        const selection = this.updateSelection;
-        if (!selection) {
-            return;
-        }
-        this.updateSelection = null;
-
         const availableButtons = this.getAvailableButtonsSet(selection, this.state.namespace);
         const buttonGroups = this.buttonGroups
             .map((group) => ({
