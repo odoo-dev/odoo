@@ -16,6 +16,12 @@
                         <div class="content-group">
                             <div class="mt16">
                                 <div class="o_row">
+                                    <button name="%(l10n_es_edi_verifactu_certificate_action)d" type="action"
+                                            icon="oi-arrow-right" class="oe_link">
+                                        Manage certificates
+                                    </button>
+                                </div>
+                                <div class="o_row mt16">
                                     <label for="l10n_es_edi_verifactu_test_environment" class="o_light_label"
                                            string="Test Environment"/>
                                     <field name="l10n_es_edi_verifactu_test_environment"/>
@@ -27,8 +33,10 @@
                                     The data is sent to the tax agency.
                                 </div>
                                 <br/>
-                                <div>
-                                    <button name="%(l10n_es_edi_verifactu_certificate_action)d" type="action" class="oe_link">Manage certificates</button>
+                                <div class="o_row mt8">
+                                    <label for="l10n_es_edi_verifactu_special_vat_regime" class="col-lg-6 o_light_label"
+                                           string="Special VAT Regime"/>
+                                    <field name="l10n_es_edi_verifactu_special_vat_regime"/>
                                 </div>
                             </div>
                         </div>

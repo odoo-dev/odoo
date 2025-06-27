@@ -18,10 +18,6 @@ class TestL10nEsEdiVerifactuDocument(TestL10nEsEdiVerifactuCommon):
         cls.fakenow = datetime.datetime(2024, 12, 5)
         cls.startClassPatcher(freeze_time(cls.fakenow))
 
-        # Use the VAT / NIF that was used to generate the responses
-        # This is needed to have the correct record identifiers on the invoices
-        cls.company.vat = 'A39200019'
-
     def test_record_identifier(self):
         invoice = self._create_dummy_invoice(name='INV/2019/00006', invoice_date='2024-12-11')
         with self._mock_last_document(None):
@@ -31,7 +27,7 @@ class TestL10nEsEdiVerifactuDocument(TestL10nEsEdiVerifactuCommon):
             'NumSerieFactura': 'INV/2019/00006',
             'FechaExpedicionFactura': '11-12-2024',
         }
-        record_identifier = document.record_identifier
+        record_identifier = document._get_record_identifier()
         self.assertDictEqual(record_identifier, expected_record_identifier | record_identifier)
 
     def test_cannot_delete_chained_document(self):
@@ -173,9 +169,14 @@ class TestL10nEsEdiVerifactuDocument(TestL10nEsEdiVerifactuCommon):
         self.assertRecordValues(invoice, [expected_record_values])
 
     def test_batch_single_accepted_cancellation(self):
-        invoice = self._create_dummy_invoice(name='INV/2019/00047', invoice_date='2024-12-30')
+        invoice = self._create_dummy_invoice(name='INV/2019/00026', invoice_date='2024-12-30')
         with self._mock_last_document(None):
-            document = invoice._l10n_es_edi_verifactu_create_documents(cancellation=True)[invoice]
+            submission_document = invoice._l10n_es_edi_verifactu_create_documents()[invoice]
+        self.assertFalse(submission_document.errors)
+        with self._mock_zeep_registration_operation('l10n_es_edi_verifactu/tests/responses/batch_single_accepted_registration.json'):
+            submission_document._send_as_batch()
+        self.assertEqual(invoice.l10n_es_edi_verifactu_state, 'accepted')
+        document = invoice._l10n_es_edi_verifactu_create_documents(cancellation=True)[invoice]
         with self._mock_zeep_registration_operation('l10n_es_edi_verifactu/tests/responses/batch_single_accepted_cancellation.json'):
             _batch_xml, info = document._send_as_batch()
 

@@ -32,7 +32,7 @@ class ResCompany(models.Model):
         help="The Datetime at which the next submission to the AEAT can be made.",
     )
     l10n_es_edi_verifactu_special_vat_regime = fields.Selection(
-        string="Special VAT Regime",
+        string="Veri*Factu VAT Regime",
         selection=[
             ('simplified', "Simplified Regime"),
             ('reagyp', "REAGYP (Special Regime for Agriculture, Livestock and Fisheries)"),
@@ -65,17 +65,6 @@ class ResCompany(models.Model):
                 'QR': 'https://www2.agenciatributaria.gob.es/wlpl/TIKE-CONT/ValidarQR'
             }
         return endpoints
-
-    def _l10n_es_edi_verifactu_get_values(self):
-        self.ensure_one()
-        errors = []
-        name = self.name[:120]
-        nif = (self.vat or '').removeprefix('ES')
-        return {
-            'name': name,
-            'NIF': nif,
-            'errors': errors,
-        }
 
     def _l10n_es_edi_verifactu_get_certificate(self):
         self.ensure_one()

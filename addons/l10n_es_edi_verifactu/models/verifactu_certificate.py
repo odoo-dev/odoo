@@ -11,7 +11,7 @@ from odoo.exceptions import ValidationError
 from odoo.addons.account.tools.certificate import load_key_and_certificates
 
 
-class Certificate(models.Model):
+class L10nEsEdiVerifactuDocument(models.Model):
     _name = 'l10n_es_edi_verifactu.certificate'
     _description = 'Personal Digital Certificate'
     _order = 'date_start desc, id desc'
@@ -81,6 +81,12 @@ class Certificate(models.Model):
         for certificate in certificates:
             try:
                 _pem_certificate, _pem_private_key, certif = certificate._decode_certificate()
+                if not certif:
+                    raise ValidationError(_(
+                        "There has been a problem with the certificate, some usual problems can be:\n"
+                        "- The password given or the certificate are not valid.\n"
+                        "- The certificate content is invalid."
+                    ))
                 cert_date_start = spain_tz.localize(certif.not_valid_before)
                 cert_date_end = spain_tz.localize(certif.not_valid_after)
             except ValueError:

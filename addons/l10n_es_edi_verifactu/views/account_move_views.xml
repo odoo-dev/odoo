@@ -111,6 +111,7 @@
                             <field name="l10n_es_edi_verifactu_required" invisible="1"/>
                             <field name="l10n_es_edi_verifactu_available_clave_regimens" invisible="1"/>
                             <field name="l10n_es_edi_verifactu_clave_regimen"
+                                   readonly="state != 'draft'"
                                    widget="dynamic_selection"
                                    options="{'available_field': 'l10n_es_edi_verifactu_available_clave_regimens'}"/>
                             <field name="l10n_es_edi_verifactu_state"

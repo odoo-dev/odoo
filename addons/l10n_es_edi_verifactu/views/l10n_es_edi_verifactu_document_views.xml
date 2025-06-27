@@ -21,7 +21,6 @@
                             </group>
                             <group name="bottom" colspan="2">
                                 <field name="errors"/>
-                                <field name="record_identifier" string="Record Identifier" widget="jsonb" groups="base.group_no_one"/>
                             </group>
                         </group>
                     </sheet>
