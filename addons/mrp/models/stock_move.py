@@ -641,6 +641,10 @@ class StockMove(models.Model):
             'move_orig_ids': [Command.link(m.id) for m in self.mapped('move_orig_ids')],
             'move_dest_ids': [Command.link(m.id) for m in self.mapped('move_dest_ids')],
             'procure_method': self.procure_method,
+            'quantity': 0,
+            'is_done': False,
+            'scrapped': False,
+            'delay_alert_date': False,
         }
 
     def _get_source_document(self):
