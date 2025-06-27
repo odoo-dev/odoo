@@ -133,7 +133,6 @@ export class OdooPivotModel extends PivotModel {
      * @param {PivotDomain} domain
      */
     getPivotCellValue(measure, domain) {
-        console.log("getPivotCellValue", domain);
         if (domain.some((node) => node.value === NO_RECORD_AT_THIS_POSITION)) {
             return "";
         }
@@ -520,7 +519,6 @@ export class OdooPivotModel extends PivotModel {
             const subTree = tree.directSubTrees.get(subTreeKey);
             rows.push(...this._getSpreadsheetRows(subTree));
         });
-        console.log("Rows for pivot:", rows);
         return rows;
     }
 
@@ -700,6 +698,9 @@ export class OdooPivotModel extends PivotModel {
     }
 
     _aggretateSubGroups(subGroups, measures) {
+        if (subGroups.length === 1) {
+            return subGroups[0];
+        }
         const subGroup = { ...subGroups[0] };
         for (const measure of measures) {
             const aggregator = measure.split(":")[1];
@@ -754,15 +755,15 @@ export class OdooPivotModel extends PivotModel {
                 return 1;
             }
             const aValue = subGroupA[groupBy];
-            const aLabel = Array.isArray(aValue) ? aValue[1] : aValue;
             const bValue = subGroupB[groupBy];
-            const bLabel = Array.isArray(bValue) ? bValue[1] : bValue;
-            // ADRM TODO unstring
             if (aValue === false) {
                 return order === "asc" ? 1 : -1;
             } else if (bValue === false) {
                 return order === "asc" ? -1 : 1;
             }
+
+            const aLabel = (Array.isArray(aValue) ? aValue[1] : String(aValue)).toLowerCase();
+            const bLabel = (Array.isArray(bValue) ? bValue[1] : String(bValue)).toLowerCase();
             return order === "asc" ? aLabel.localeCompare(bLabel) : bLabel.localeCompare(aLabel);
         };
 
@@ -837,14 +838,8 @@ export class OdooPivotModel extends PivotModel {
                 const group =
                     customField.groups.find((g) => g.values.includes(parentValue)) ||
                     customField.groups.find((g) => g.isOtherGroup);
-                const value = group ? group.name : parentValue;
-                const label = group ? group.name : subGroup[parentFieldName][1];
 
-                if (Array.isArray(subGroup[parentFieldName])) {
-                    subGroup[groupBy] = [value, label];
-                } else {
-                    subGroup[groupBy] = value;
-                }
+                subGroup[groupBy] = group ? group.name : subGroup[parentFieldName];
             }
         }
 
@@ -858,8 +853,6 @@ export class OdooPivotModel extends PivotModel {
             this._aggretateSubGroups(subGroups, params.measureSpecs)
         );
         const sortedSubGroups = this._sortCustomFieldsInSubGroups(groupBys, aggregatedSubgroups);
-
-        console.log("Sorted subGroups for custom fields:", sortedSubGroups);
 
         return { rowGroupBy, colGroupBy, group, subGroups: sortedSubGroups };
     }
