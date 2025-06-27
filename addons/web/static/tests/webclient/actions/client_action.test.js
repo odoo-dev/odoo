@@ -278,6 +278,35 @@ test("ClientAction receives arbitrary props from doAction", async () => {
     });
 });
 
+test("ClientAction with extractProps", async () => {
+    expect.assertions(1);
+    defineActions([
+        {
+            id: 128,
+            name: "My Client Action",
+            tag: "SomeClientAction",
+            type: "ir.actions.client",
+            params: {
+                my_prop: "coucou",
+            },
+        },
+    ]);
+    class ClientAction extends Component {
+        static template = xml`<div></div>`;
+        static props = ["*"];
+        static extractProps(action) {
+            return { myProp: action.params.my_prop };
+        }
+
+        setup() {
+            expect(this.props.myProp).toBe("coucou");
+        }
+    }
+    actionRegistry.add("SomeClientAction", ClientAction);
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(128);
+});
+
 test("test display_notification client action", async () => {
     await mountWithCleanup(WebClient);
     await getService("action").doAction(1);

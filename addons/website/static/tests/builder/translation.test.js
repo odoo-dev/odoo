@@ -21,10 +21,12 @@ const websiteServiceInTranslateMode = {
     },
     // Minimal context to avoid crashes.
     context: { showNewContentModal: false },
-    websites: [{
-        id: 1,
-        metadata: {},
-    }],
+    websites: [
+        {
+            id: 1,
+            metadata: {},
+        },
+    ],
 };
 
 test("systray in translate mode", async () => {
@@ -209,9 +211,8 @@ async function setupSidebarBuilderForTranslation(options) {
         },
     });
     patchWithCleanup(WebsiteBuilder.prototype, {
-        setup() {
-            super.setup();
-            this.translation = true;
+        get editTranslations() {
+            return true;
         },
     });
     const { getEditor, getEditableContent, getIframeEl, openBuilderSidebar } =
