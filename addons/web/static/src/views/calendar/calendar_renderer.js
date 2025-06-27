@@ -24,6 +24,12 @@ export class CalendarRenderer extends Component {
         onSquareSelection: Function,
         cleanSquareSelection: Function,
     };
+    setup() {
+        this.LONG_TOUCH_THRESHOLD = 400;
+    }
+    get initialDate() {
+        return this.props.model.date;
+    }
     get concreteRenderer() {
         return this.constructor.components[this.props.model.scale];
     }
@@ -31,29 +37,45 @@ export class CalendarRenderer extends Component {
         if (this.props.model.scale === "year") {
             return {
                 model: this.props.model,
+                initialDate: this.initialDate,
                 isWeekendVisible: this.props.isWeekendVisible,
                 createRecord: this.props.createRecord,
                 editRecord: this.props.editRecord,
                 deleteRecord: this.props.deleteRecord,
+                longPressDelay: this.LONG_TOUCH_THRESHOLD
             };
         }
-        return this.props;
+        return {
+            ...this.props,
+            initialDate: this.initialDate,
+            longPressDelay: this.LONG_TOUCH_THRESHOLD
+        };
     }
     get calendarKey() {
         return `${this.props.model.scale}_${this.props.model.date.valueOf()}`;
     }
     get actionSwiperProps() {
         return {
-            onLeftSwipe: this.env.isSmall
-                ? { action: () => this.props.setDate("next") }
-                : undefined,
-            onRightSwipe: this.env.isSmall
-                ? { action: () => this.props.setDate("previous") }
-                : undefined,
-            animationOnMove: false,
+            onLeftSwipe: this.getSwiperProps("next"),
+            onRightSwipe: this.getSwiperProps("previous"),
             animationType: "forwards",
-            swipeDistanceRatio: 6,
-            swipeInvalid: () => Boolean(document.querySelector(".o_event.fc-mirror")),
+            enabledDuration: this.LONG_TOUCH_THRESHOLD
+        };
+    }
+    getSwiperProps(direction) {
+        const targetDate = this.initialDate[direction === "next" ? "plus" : "minus"]({
+            [`${this.props.model.scale}s`]: 1,
+        });
+        return {
+            action: () => this.props.setDate(direction),
+            slot: {
+                component: this.concreteRenderer,
+                props: {
+                    ...this.concreteRendererProps,
+                    initialDate: targetDate,
+                    isDisabled: true
+                },
+            },
         };
     }
 }
