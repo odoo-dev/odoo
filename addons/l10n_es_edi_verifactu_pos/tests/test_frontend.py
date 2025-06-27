@@ -23,10 +23,10 @@ class TestL10nEsEdiVerifactuPosFrontend(TestL10nEsEdiVerifactuPosCommon, TestPoi
         refund = orders[0]
         order = orders[1]
 
-        self.assertTrue(order.l10n_es_edi_verifactu_document_ids.json_attachment_id)
+        self.assertTrue(order.l10n_es_edi_verifactu_document_ids.json_attachment_base64)
 
         self.assertEqual(refund.l10n_es_edi_verifactu_refund_reason, 'R1')
-        self.assertTrue(refund.l10n_es_edi_verifactu_document_ids.json_attachment_id)
+        self.assertTrue(refund.l10n_es_edi_verifactu_document_ids.json_attachment_base64)
 
     def test_tour_invoice_with_refund_reason(self):
         # If the simplified invoice journal is set then all orders are invoiced by default
@@ -46,7 +46,7 @@ class TestL10nEsEdiVerifactuPosFrontend(TestL10nEsEdiVerifactuPosCommon, TestPoi
         order = orders[1]
         order_move = order.account_move
 
-        self.assertTrue(order_move.l10n_es_edi_verifactu_document_ids.json_attachment_id)
+        self.assertTrue(order_move.l10n_es_edi_verifactu_document_ids.json_attachment_base64)
 
         self.assertEqual(refund_move.l10n_es_edi_verifactu_refund_reason, 'R1')
-        self.assertTrue(refund_move.l10n_es_edi_verifactu_document_ids.json_attachment_id)
+        self.assertTrue(refund_move.l10n_es_edi_verifactu_document_ids.json_attachment_base64)

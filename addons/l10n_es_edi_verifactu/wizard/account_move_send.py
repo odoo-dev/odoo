@@ -31,25 +31,48 @@ class AccountMoveSend(models.TransientModel):
         values['l10n_es_edi_verifactu_send'] = self.l10n_es_edi_verifactu_send_checkbox
         return values
 
-    @api.depends('move_ids.l10n_es_edi_verifactu_state')
+    def _l10n_es_edi_verifactu_get_move_info(self):
+        # EXTENDS 'account'
+        self.ensure_one()
+        # We do not support sending a registration for already registered move or in case we are waiting to send a document already
+        verifactu_moves = self.move_ids.filtered(lambda move: move.l10n_es_edi_verifactu_required)
+        waiting_moves = verifactu_moves.filtered(lambda m: m.l10n_es_edi_verifactu_document_ids._filter_waiting())
+        registered_moves = verifactu_moves.filtered(
+            lambda m: m.l10n_es_edi_verifactu_state in ('registered_with_errors', 'accepted')
+        )
+        return {
+            'verifactu_moves': verifactu_moves,
+            'waiting_moves': waiting_moves,
+            'registered_moves': registered_moves,
+            'moves_to_send': verifactu_moves - waiting_moves - registered_moves,
+        }
+
+    @api.depends('move_ids.l10n_es_edi_verifactu_required', 'move_ids.l10n_es_edi_verifactu_state')
     def _compute_l10n_es_edi_verifactu_compute_checkbox(self):
         for wizard in self:
-            any_moves_require_verifactu = any(wizard.move_ids.mapped('l10n_es_edi_verifactu_required'))
-            enable = any_moves_require_verifactu or any(move.country_code == 'ES' for move in wizard.move_ids)
-            checked_by_default = enable and any_moves_require_verifactu
-            readonly = not enable
+            move_info = wizard._l10n_es_edi_verifactu_get_move_info()
+            enable = move_info['verifactu_moves']
+            checked_by_default = move_info['moves_to_send']
             wizard.l10n_es_edi_verifactu_send_enable = enable
             wizard.l10n_es_edi_verifactu_send_checkbox = checked_by_default
-            wizard.l10n_es_edi_verifactu_send_readonly = readonly
+            wizard.l10n_es_edi_verifactu_send_readonly = not enable or not move_info['moves_to_send']
 
     @api.depends('l10n_es_edi_verifactu_send_readonly')
     def _compute_l10n_es_edi_verifactu_warnings(self):
         for wizard in self:
-            waiting_moves = wizard.move_ids.filtered(lambda m: m.l10n_es_edi_verifactu_document_ids._filter_waiting())
-            wizard.l10n_es_edi_verifactu_warnings = _(
-                "The following entries will be skipped. They are already waiting to send Veri*Factu records to the AEAT: %s",
-                ', '.join(waiting_moves.mapped('name'))
-            ) if waiting_moves else False
+            warnings = []
+            move_info = wizard._l10n_es_edi_verifactu_get_move_info()
+            if move_info['waiting_moves']:
+                warnings.append(_(
+                    "The following entries will be skipped. They are already waiting to send Veri*Factu records to the AEAT: %s",
+                    ', '.join(move_info['waiting_moves'].mapped('name'))
+                ))
+            if move_info['registered_moves']:
+                warnings.append(_(
+                    "The following entries will be skipped. They are already registered with the AEAT: %s",
+                    ', '.join(move_info['registered_moves'].mapped('name'))
+                ))
+            wizard.l10n_es_edi_verifactu_warnings = '\n'.join(warnings) if warnings else False
 
     @api.model
     def _call_web_service_before_invoice_pdf_render(self, invoices_data):

@@ -2,7 +2,7 @@
     "Cabecera": {
         "ObligadoEmision": {
             "NombreRazon": "company_1_data",
-            "NIF": "59962470K"
+            "NIF": "A39200019"
         },
         "RemisionVoluntaria": {
             "Incidencia": "N"
@@ -12,7 +12,7 @@
         "RegistroAlta": {
             "IDVersion": "1.0",
             "IDFactura": {
-                "IDEmisorFactura": "59962470K",
+                "IDEmisorFactura": "A39200019",
                 "NumSerieFactura": "INV/2019/00001",
                 "FechaExpedicionFactura": "30-01-2019"
             },
@@ -74,7 +74,7 @@
             },
             "FechaHoraHusoGenRegistro": "2024-12-05T01:00:00+01:00",
             "TipoHuella": "01",
-            "Huella": "BEB45FCE756520FA6C3982AAD761348D4C612E9E7F38D3D3647070CB8EAE6A3C"
+            "Huella": "5C201D0C0BE2C453A6427400380310D7E94BA356313DB2EFFAFD2DAC4DA2744C"
         }
     }]
 }

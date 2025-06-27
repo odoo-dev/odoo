@@ -79,7 +79,7 @@ class PosOrder(models.Model):
             state = order.l10n_es_edi_verifactu_document_ids._get_state()
             order.l10n_es_edi_verifactu_state = state
 
-    @api.depends('l10n_es_edi_verifactu_document_ids', 'l10n_es_edi_verifactu_document_ids.record_identifier')
+    @api.depends('l10n_es_edi_verifactu_document_ids', 'l10n_es_edi_verifactu_document_ids.json_attachment_base64')
     def _compute_l10n_es_edi_verifactu_qr_code(self):
         for order in self:
             invoice = order.account_move
@@ -189,7 +189,7 @@ class PosOrder(models.Model):
             'substituted_document': None,
             'substituted_document_reversal_document': None,
             'documents': documents,
-            'record_identifier': documents._get_last('submission').record_identifier,
+            'record_identifier': documents._get_last('submission')._get_record_identifier(),
             'verifactu_tax_type': verifactu_tax_type,
             'clave_regimen': clave_regimen,
         })

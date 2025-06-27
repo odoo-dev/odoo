@@ -1,5 +1,7 @@
 import datetime
+import json
 
+from base64 import b64encode
 from freezegun import freeze_time
 
 from odoo import Command
@@ -115,13 +117,11 @@ class TestL10nEsEdiVerifactuJson(TestL10nEsEdiVerifactuCommon):
                 'move_ids': [Command.set((invoice.id,))],
                 'date': '2019-02-10',
                 'journal_id': invoice.journal_id.id,
+                'l10n_es_edi_verifactu_refund_reason': 'R1',
             }
         ).reverse_moves()
         credit_note = invoice.reversal_move_id
-        credit_note.write({
-            'l10n_es_edi_verifactu_refund_reason': 'R1',
-            'invoice_date': '2019-02-11',
-        })
+        credit_note.invoice_date = '2019-02-11'
         credit_note.action_post()
 
         with self._mock_last_document(None):
@@ -158,6 +158,8 @@ class TestL10nEsEdiVerifactuJson(TestL10nEsEdiVerifactuCommon):
                 'move_ids': [Command.set((invoice.id,))],
                 'date': '2019-02-10',
                 'journal_id': invoice.journal_id.id,
+                # By default:
+                # 'l10n_es_edi_verifactu_refund_reason': 'R1',
             }
         ).reverse_moves(is_modify=True)
 
@@ -169,12 +171,9 @@ class TestL10nEsEdiVerifactuJson(TestL10nEsEdiVerifactuCommon):
             batch_dict, _info = document._send_as_batch()
         self.assertEqual(batch_dict, self._json_file_to_dict('l10n_es_edi_verifactu/tests/files/test_invoice_1_reversal_for_substitution.json'))
 
-        substitution_move = invoice.l10n_es_edi_verifactu_substitution_move_id
+        substitution_move = invoice.l10n_es_edi_verifactu_substitution_move_ids
         substitution_move.invoice_line_ids[0].price_unit = 50
-        substitution_move.write({
-            'l10n_es_edi_verifactu_refund_reason': 'R1',
-            'invoice_date': '2019-02-11',
-        })
+        substitution_move.invoice_date = '2019-02-11'
         substitution_move.action_post()
         with self._mock_last_document(None):
             document = substitution_move._l10n_es_edi_verifactu_create_documents()[substitution_move]
@@ -235,7 +234,7 @@ class TestL10nEsEdiVerifactuJson(TestL10nEsEdiVerifactuCommon):
             document = invoice._l10n_es_edi_verifactu_create_documents()[invoice]
         self.assertFalse(document.errors)
 
-        expected_qr_code_url = '/report/barcode/?barcode_type=QR&value=https%3A%2F%2Fprewww2.aeat.es%2Fwlpl%2FTIKE-CONT%2FValidarQR%3Fnif%3D59962470K%26numserie%3DINV%252F2019%252F00001%26fecha%3D30-01-2019%26importe%3D1100.00&barLevel=M&width=180&height=180'
+        expected_qr_code_url = '/report/barcode/?barcode_type=QR&value=https%3A%2F%2Fprewww2.aeat.es%2Fwlpl%2FTIKE-CONT%2FValidarQR%3Fnif%3DA39200019%26numserie%3DINV%252F2019%252F00001%26fecha%3D30-01-2019%26importe%3D1100.00&barLevel=M&width=180&height=180'
         self.assertEqual(invoice.l10n_es_edi_verifactu_qr_code, expected_qr_code_url)
 
         with self._mock_zeep_registration_operation_certificate_issue():
@@ -311,8 +310,9 @@ class TestL10nEsEdiVerifactuJson(TestL10nEsEdiVerifactuCommon):
         invoices = self.env['account.move'].create([
             {
                 'move_type': 'out_invoice',
-                'invoice_date': '2019-02-01',
+                'invoice_date': '2024-12-30',
                 'date': '2019-01-30',
+                'name': 'INV/2019/00026',
                 'partner_id': self.partner_b.id,  # Spanish customer
                 'invoice_line_ids': [
                     Command.create({'product_id': self.product_1.id, 'price_unit': 100.0, 'tax_ids': [Command.set(self.tax21_goods.ids)]}),
@@ -322,7 +322,7 @@ class TestL10nEsEdiVerifactuJson(TestL10nEsEdiVerifactuCommon):
             },
             {
                 'move_type': 'out_invoice',
-                'invoice_date': '2019-02-02',
+                'invoice_date': '2019-02-01',
                 'date': '2019-01-30',
                 'partner_id': self.partner_b.id,  # Spanish customer
                 'invoice_line_ids': [
@@ -345,30 +345,39 @@ class TestL10nEsEdiVerifactuJson(TestL10nEsEdiVerifactuCommon):
         ])
         invoices.action_post()
 
-        previous_record_identifier = {
-            'IDEmisorFactura': '59962470K',
-            'NumSerieFactura': 'INV/2018/00001',
-            'FechaExpedicionFactura': '01-01-2018',
-            'Huella': 'FA5DC48A0640BEB02A05160FD30020D1EA67FC1B400800ECDD9FC785E137C864',
-        }
-
         # We create a dummy document for the record identifier only
-        dummy_start_document = self.env['l10n_es_edi_verifactu.document'].create([{
+        dummy_start_document_dict = {
+            'RegistroAnulacion': {
+                'IDFactura': {
+                    'IDEmisorFacturaAnulada': '59962470K',
+                    'NumSerieFacturaAnulada': 'INV/2018/00001',
+                    'FechaExpedicionFacturaAnulada': '01-01-2018',
+                },
+                'Huella': 'FA5DC48A0640BEB02A05160FD30020D1EA67FC1B400800ECDD9FC785E137C864',
+                'FechaHoraHusoGenRegistro': "  2024-01-01T19:20:30+01:00  ",
+            },
+        }
+        dummy_start_document = self.env['l10n_es_edi_verifactu.document'].sudo().create([{
             'company_id': self.company.id,
             'document_type': 'submission',
-            'record_identifier': previous_record_identifier,
+            'json_attachment_base64': b64encode(json.dumps(dummy_start_document_dict, indent=4).encode()),
         }])
         with self._mock_last_document(dummy_start_document):
-            document0 = invoices[0]._l10n_es_edi_verifactu_create_documents()[invoices[0]]
-            self.assertFalse(document0.errors)
+            document1_reversed = invoices[0]._l10n_es_edi_verifactu_create_documents()[invoices[0]]
+            self.assertFalse(document1_reversed.errors)
+        # Register the invoice so that we can create a cancellation for it
+        with self._mock_zeep_registration_operation('l10n_es_edi_verifactu/tests/responses/batch_single_accepted_registration.json'):
+            batch_dict, _info = document1_reversed._send_as_batch()
+        self.assertEqual(invoices[0].l10n_es_edi_verifactu_state, 'accepted')
+
         # We do not use `_mock_last_document` in the following to check that it works w/o mocking
-        document1 = invoices[1]._l10n_es_edi_verifactu_create_documents(cancellation=True)[invoices[1]]
+        document0 = invoices[1]._l10n_es_edi_verifactu_create_documents()[invoices[1]]
+        self.assertFalse(document0.errors)
+        document1 = invoices[0]._l10n_es_edi_verifactu_create_documents(cancellation=True)[invoices[0]]
         self.assertFalse(document1.errors)
         document2 = invoices[2]._l10n_es_edi_verifactu_create_documents()[invoices[2]]
         self.assertFalse(document2.errors)
-        documents = self.env['l10n_es_edi_verifactu.document'].browse([
-            document0.id, document1.id, document2.id,
-        ])
+        documents = document0 + document1 + document2
 
         with self._mock_zeep_registration_operation_certificate_issue():
             batch_dict, _info = documents._send_as_batch()
@@ -377,8 +386,9 @@ class TestL10nEsEdiVerifactuJson(TestL10nEsEdiVerifactuCommon):
     def test_invoice_cancellation_1(self):
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
-            'invoice_date': '2019-01-30',
+            'invoice_date': '2024-12-30',
             'date': '2019-01-30',
+            'name': 'INV/2019/00026',
             'partner_id': self.partner_b.id,  # Spanish customer
             'invoice_line_ids': [
                 Command.create({'product_id': self.product_1.id, 'price_unit': 100.0, 'tax_ids': [Command.set(self.tax21_goods.ids)]}),
@@ -389,10 +399,16 @@ class TestL10nEsEdiVerifactuJson(TestL10nEsEdiVerifactuCommon):
         invoice.action_post()
 
         with self._mock_last_document(None):
-            document = invoice._l10n_es_edi_verifactu_create_documents(cancellation=True)[invoice]
-        self.assertFalse(document.errors)
+            invoice_document = invoice._l10n_es_edi_verifactu_create_documents()[invoice]
+        self.assertFalse(invoice_document.errors)
+        with self._mock_zeep_registration_operation('l10n_es_edi_verifactu/tests/responses/batch_single_accepted_registration.json'):
+            batch_dict, _info = invoice_document._send_as_batch()
+        self.assertEqual(invoice.l10n_es_edi_verifactu_state, 'accepted')
+
+        cancellation_document = invoice._l10n_es_edi_verifactu_create_documents(cancellation=True)[invoice]
+        self.assertFalse(cancellation_document.errors)
         with self._mock_zeep_registration_operation_certificate_issue():
-            batch_dict, _info = document._send_as_batch()
+            batch_dict, _info = cancellation_document._send_as_batch()
         self.assertEqual(batch_dict, self._json_file_to_dict('l10n_es_edi_verifactu/tests/files/test_invoice_cancellation_1.json'))
 
     def test_invoice_simplified_partner(self):

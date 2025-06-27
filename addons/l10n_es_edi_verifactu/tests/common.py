@@ -33,7 +33,9 @@ class TestL10nEsEdiVerifactuCommon(AccountTestInvoicingCommon):
         cls.company.write({
             'country_id': cls.env.ref('base.es').id,
             'state_id': cls.env.ref('base.state_es_z').id,
-            'vat': 'ES59962470K',
+            # Use the VAT / NIF that was used to generate the responses
+            # This is needed to have the correct record identifiers on the invoices
+            'vat': 'ESA39200019',
             'l10n_es_edi_verifactu_required': True,
             'l10n_es_edi_verifactu_certificate_ids': [Command.set(cls.certificate.ids)],
             'l10n_es_edi_verifactu_test_environment': True,
@@ -97,7 +99,7 @@ class TestL10nEsEdiVerifactuCommon(AccountTestInvoicingCommon):
 
     def _mock_zeep_registration_operation_function(self, register_function):
         request_function_path = 'odoo.addons.l10n_es_edi_verifactu.models.verifactu_document.L10nEsEdiVerifactuDocument._get_zeep_registration_operations'
-        return mock.patch(request_function_path, return_value=register_function)
+        return mock.patch(request_function_path, return_value=(register_function, {}))
 
     def _mock_zeep_registration_operation(self, response_file_json):
         # Note: The real result is of type 'odoo.tools.zeep.client.SerialProxy'; here it is a dict

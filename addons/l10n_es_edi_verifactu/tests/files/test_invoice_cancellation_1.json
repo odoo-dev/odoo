@@ -2,7 +2,7 @@
     "Cabecera": {
         "ObligadoEmision": {
             "NombreRazon": "company_1_data",
-            "NIF": "59962470K"
+            "NIF": "A39200019"
         },
         "RemisionVoluntaria": {
             "Incidencia": "N"
@@ -12,14 +12,19 @@
         "RegistroAnulacion": {
             "IDVersion": "1.0",
             "IDFactura": {
-                "IDEmisorFacturaAnulada": "59962470K",
-                "NumSerieFacturaAnulada": "INV/2019/00001",
-                "FechaExpedicionFacturaAnulada": "30-01-2019"
+                "IDEmisorFacturaAnulada": "A39200019",
+                "NumSerieFacturaAnulada": "INV/2019/00026",
+                "FechaExpedicionFacturaAnulada": "30-12-2024"
             },
-            "SinRegistroPrevio": "S",
+            "SinRegistroPrevio": "N",
             "RechazoPrevio": "N",
             "Encadenamiento": {
-                "PrimerRegistro": "S"
+                "RegistroAnterior": {
+                    "IDEmisorFactura": "A39200019",
+                    "NumSerieFactura": "INV/2019/00026",
+                    "FechaExpedicionFactura": "30-12-2024",
+                    "Huella": "1425E9858EA8FF70E70CC35B7ADA9B0FB31FCC5AA0867C15C43641E57BD7F3CF"
+                }
             },
             "SistemaInformatico": {
                 "NombreRazon": "ODOO ERP SP SL",
@@ -34,7 +39,7 @@
             },
             "FechaHoraHusoGenRegistro": "2024-12-05T01:00:00+01:00",
             "TipoHuella": "01",
-            "Huella": "D441E2DF00136CA10A50A0D8707CA8B14AE56763D28C07A8BC5B78D0E98BB24C"
+            "Huella": "F17D3B947483B817E20F83110B76F877183C17B918EA5754150AA2FCA04641A4"
         }
     }]
 }

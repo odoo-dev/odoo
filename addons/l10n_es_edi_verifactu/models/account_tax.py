@@ -84,7 +84,7 @@ class AccountTax(models.Model):
         oss_tag = self.env.ref('l10n_eu_oss.tag_oss', raise_if_not_found=False)
 
         regimen_key = None
-        if VAT and special_regime == 'simplified' and self.l10n_es_is_simplified:
+        if VAT and special_regime == 'simplified':
             # simplified
             regimen_key = '20_iva'
         elif VAT and special_regime == 'reagyp':

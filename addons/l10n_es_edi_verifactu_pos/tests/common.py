@@ -21,7 +21,3 @@ class TestL10nEsEdiVerifactuPosCommon(TestL10nEsEdiVerifactuCommon, TestPoSCommo
             'company_id': cls.company.id,
             'available_in_pos': True,
         })
-
-        # Use the VAT / NIF that was used to generate the responses
-        # This is needed to have the correct record identifiers on the invoices
-        cls.company.vat = 'ESA39200019'
