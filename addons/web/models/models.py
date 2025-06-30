@@ -15,7 +15,8 @@ import pytz
 from odoo import api, models
 from odoo.fields import Command, Date, Domain
 from odoo.api import NewId
-from odoo.models import regex_order, READ_GROUP_DISPLAY_FORMAT, READ_GROUP_NUMBER_GRANULARITY, READ_GROUP_TIME_GRANULARITY, BaseModel
+from odoo.models import READ_GROUP_DISPLAY_FORMAT, READ_GROUP_NUMBER_GRANULARITY, READ_GROUP_TIME_GRANULARITY, BaseModel
+from odoo.orm.utils import OrderSpecification
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, date_utils, get_lang, unique, OrderedSet
 from odoo.exceptions import AccessError, UserError
 from odoo.tools.translate import LazyTranslate
@@ -369,17 +370,12 @@ class Base(models.AbstractModel):
 
         # dict to help creating order compatible with _read_group and for search
         dict_order: dict[str, str] = {}  # {fname_and_property: "<direction> <nulls>"}
-        for order_part in (order.split(',') if order else ()):
-            order_match = regex_order.match(order_part)
-            if not order_match:
-                raise ValueError(f"Invalid order {order!r} for web_read_group()")
-            fname_and_property = order_match['field']
-            if order_match['property']:
-                fname_and_property = f"{fname_and_property}.{order_match['property']}"
-            direction = (order_match['direction'] or 'ASC').upper()
-            if order_match['nulls']:
-                direction = f"{direction} {order_match['nulls'].upper()}"
-            dict_order[fname_and_property] = direction
+        if order:
+            for order_expr in OrderSpecification.fromstring(order):
+                order_expr = order_expr.field_expr.expression
+                direction = 'ASC' if order_expr.asc else 'DESC'
+                nulls = 'NULLS LAST' if order_expr.nulls_last else 'NULLS FIRST'
+                dict_order[order_expr] = f"{direction} {nulls}"
 
         # First level of grouping
         first_groupby = [groupby[0]]
@@ -733,8 +729,7 @@ class Base(models.AbstractModel):
             not offset and (not limit or len(groups) < limit)
             and self._formatted_read_group_field_expand(groupby)
         ):
-            # It doesn't respect the order with aggregates inside
-            expand_groups = self._formatted_read_group_expand(domain, groups, groupby[0], aggregates, order)
+            expand_groups = self._formatted_read_group_expand(domain, groups, groupby, aggregates, order)
             if not limit or len(expand_groups) < limit:
                 # Ditch the result of expand_groups because the limit is reached and to avoid
                 # returning inconsistent result inside length of web_read_group
@@ -777,12 +772,11 @@ class Base(models.AbstractModel):
             return field
         return None
 
-    def _formatted_read_group_expand(self, domain, groups, groupby_spec, aggregates, order):
+    def _formatted_read_group_expand(self, domain, groups, groupby, aggregates, order):
         """ Expand the result of _read_group for the webclient to show empty groups
         for some view types (e.g. empty column for kanban view). See `Field.group_expand` attribute.
         """
-        field_name = groupby_spec.split('.')[0].split(':')[0]
-        field = self._fields[field_name]
+        field = self._formatted_read_group_field_expand(groupby)
 
         # determine all groups that should be returned
         values = [group_value for group_value, *__ in groups if group_value]
@@ -801,7 +795,8 @@ class Base(models.AbstractModel):
             # groups is a list of values
             expand_values = field.determine_group_expand(self, values, domain)
 
-        if (groupby_spec + ' desc') in order.lower():
+        # TODO: manage order
+        if (groupby[0] + ' desc') in order.lower():
             expand_values = reversed(expand_values)
 
         empty_aggregates = tuple(self._read_group_empty_value(spec) for spec in aggregates)

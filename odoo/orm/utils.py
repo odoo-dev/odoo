@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import re
+from typing import Iterable, Iterator
 import warnings
 from collections.abc import Set as AbstractSet
 
@@ -147,3 +150,101 @@ class OriginIds:
 
 
 origin_ids = OriginIds
+
+
+order_re = re.compile(r'''
+(?P<field_expr>[\w\.]+)(\s+(?P<direction>desc|asc))?(\s+(?P<nulls>nulls\s+first|last))?
+''', re.IGNORECASE | re.VERBOSE)
+field_expr_re = re.compile(r'(?P<fname>\w+)(\.(?P<remaining_path>[\w.]+))?(\:(?P<func>\w+))?')
+
+
+class FieldExpression:
+    __slots__ = ('fname', 'remaining_path', 'func', 'expression')
+
+    def __init__(self, fname: str, remaining_path=None, func=None):
+        self.fname: str = fname
+        self.remaining_path: str = remaining_path
+        self.func: str = func
+
+        expression = fname
+        if remaining_path:
+            expression = f"{expression}.{remaining_path}"
+        if func:
+            expression = f"{expression}:{func}"
+        self.expression: str = expression
+
+    def __str__(self):
+        return self.expression
+
+    def __eq__(self, value):
+        return self.expression == value.expression
+
+    def __hash__(self):
+        return hash(self.expression)
+
+    @classmethod
+    def fromstring(cls, field_expr: str) -> FieldExpression:
+        expr_match = field_expr_re.fullmatch(field_expr)
+        if not expr_match:
+            raise ValueError(f'Invalid field expression {field_expr!r}')
+        return FieldExpression(**expr_match.groupdict())
+
+
+class OrderExpression:
+    __slots__ = ('field_expr', 'asc', 'nulls_last')
+
+    def __init__(self, field_expr: FieldExpression, asc: bool = True, nulls_last: bool = True):
+        self.field_expr = field_expr
+        self.asc = asc
+        self.nulls_last = nulls_last
+
+    @classmethod
+    def fromstring(cls, order_part: str) -> OrderExpression:
+        order_part_match = order_re.fullmatch(order_part.strip())
+        if not order_part_match:
+            raise ValueError(f'Invalid order expression {order_part!r}.')
+
+        field_expr = order_part_match['field_expr']
+        direction = order_part_match['direction']
+        nulls = order_part_match['nulls']
+        return OrderExpression(
+            FieldExpression.fromstring(field_expr),
+            asc=(not direction or direction.upper() == 'ASC'),
+            nulls_last=(not nulls or nulls.upper() == 'NULLS LAST'),
+        )
+
+    def __invert__(self):
+        return OrderExpression(self._field_expr, not self._asc, not self._nulls_last)
+
+
+class OrderSpecification:
+    """ Order helper """
+    __slots__ = ('_order_expressions',)
+
+    def __init__(self, order_expressions: Iterable[OrderExpression]):
+        self._order_expressions = {
+            order_expression.field_expr: order_expression
+            for order_expression in order_expressions
+        }
+
+    @classmethod
+    def fromstring(cls, order: str) -> OrderSpecification:
+        try:
+            return OrderSpecification(
+                OrderExpression.fromstring(order_part)
+                for order_part in order.split(',')
+            )
+        except ValueError as e:
+            raise ValueError(
+                f"Invalid \"order\" specified ({order}): {e}"
+                " A valid \"order\" specification is a comma-separated list of valid field names"
+                " (optionally followed by asc/desc for the direction)",
+            ) from e
+
+    def __invert__(self):
+        return OrderSpecification(
+            ~order_expression for order_expression in self._order_expressions.values()
+        )
+
+    def __iter__(self) -> Iterator[OrderExpression]:
+        return iter(self._order_expressions.values())

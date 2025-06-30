@@ -69,7 +69,7 @@ from .fields_textual import Char
 
 from .identifiers import NewId
 from .utils import (
-    OriginIds, check_object_name, parse_field_expr,
+    OrderSpecification, OriginIds, check_object_name, parse_field_expr,
     COLLECTION_TYPES, SQL_OPERATORS,
     READ_GROUP_ALL_TIME_GRANULARITY, READ_GROUP_TIME_GRANULARITY, READ_GROUP_NUMBER_GRANULARITY,
     SUPERUSER_ID,
@@ -90,18 +90,6 @@ _lt = LazyTranslate('base')
 _logger = logging.getLogger('odoo.models')
 _unlink = logging.getLogger('odoo.models.unlink')
 
-regex_order = re.compile(r'''
-    ^
-    (\s*
-        (?P<term>((?P<field>[a-z0-9_]+|"[a-z0-9_]+")(\.(?P<property>[a-z0-9_]+))?(:(?P<func>[a-z_]+))?))
-        (\s+(?P<direction>desc|asc))?
-        (\s+(?P<nulls>nulls\ first|nulls\ last))?
-        \s*
-        (,|$)
-    )+
-    (?<!,)
-    $
-''', re.IGNORECASE | re.VERBOSE)
 regex_field_agg = re.compile(r'(\w+)(?::(\w+)(?:\((\w+)\))?)?')  # For read_group
 regex_read_group_spec = re.compile(r'(\w+)(\.(\w+))?(?::(\w+))?$')  # For _read_group
 
@@ -1846,23 +1834,18 @@ class BaseModel(metaclass=MetaModel):
             return SQL()
 
         orderby_terms = []
+        order_spec = OrderSpecification.fromstring(order)
+        for order_expr in order_spec:
+            term = str(order_expr.field_expr)
 
-        for order_part in order.split(','):
-            order_match = regex_order.match(order_part)
-            if not order_match:
-                raise ValueError(f"Invalid order {order!r} for _read_group()")
-            term = order_match['term']
-            direction = (order_match['direction'] or 'ASC').upper()
-            nulls = (order_match['nulls'] or '').upper()
-
-            sql_direction = SQL(direction) if direction in ('ASC', 'DESC') else SQL()
-            sql_nulls = SQL(nulls) if nulls in ('NULLS FIRST', 'NULLS LAST') else SQL()
+            sql_direction = SQL('DESC') if not order_expr.asc else SQL()
+            sql_nulls = SQL('NULLS FIRST') if not order_expr.nulls_last else SQL()
 
             if term not in groupby_terms:
                 try:
                     sql_expr = self._read_group_select(term, query)
                 except ValueError as e:
-                    raise ValueError(f"Order term {order_part!r} is not a valid aggregate nor valid groupby") from e
+                    raise ValueError(f"Invalid order {order!r}, {order_expr.field_expr.expression!r} is not a valid aggregate nor valid groupby") from e
                 orderby_terms.append(SQL("%s %s %s", sql_expr, sql_direction, sql_nulls))
                 continue
 
@@ -4907,15 +4890,6 @@ class BaseModel(metaclass=MetaModel):
             query.add_where(domain._to_sql(self, self._table, query))
         return query
 
-    def _check_qorder(self, word: str) -> None:
-        if not regex_order.match(word):
-            raise UserError(_(
-                "Invalid \"order\" specified (%s)."
-                " A valid \"order\" specification is a comma-separated list of valid field names"
-                " (optionally followed by asc/desc for the direction)",
-                word,
-            ))
-
     @api.model
     def _apply_ir_rules(self, query: Query, mode: str = 'read') -> None:
         """Add what's missing in ``query`` to implement all appropriate ir.rules
@@ -4942,30 +4916,18 @@ class BaseModel(metaclass=MetaModel):
         order = order or self._order
         if not order:
             return SQL()
-        self._check_qorder(order)
+        order_spec = OrderSpecification.fromstring(order or self._order)
+        if reverse:
+            order_spec = ~order_spec
 
         alias = alias or self._table
 
         terms = []
-        for order_part in order.split(','):
-            order_match = regex_order.match(order_part)
-            assert order_match is not None, "No match found"
-            field_name = order_match['field']
+        for order_expression in order_spec:
+            sql_direction = SQL('DESC') if not order_expression.asc else SQL()
+            sql_nulls = SQL('NULLS FIRST') if not order_expression.nulls_last else SQL()
 
-            direction = (order_match['direction'] or '').upper()
-            nulls = (order_match['nulls'] or '').upper()
-            if reverse:
-                direction = 'ASC' if direction == 'DESC' else 'DESC'
-                if nulls:
-                    nulls = 'NULLS LAST' if nulls == 'NULLS FIRST' else 'NULLS FIRST'
-
-            sql_direction = SQL(direction) if direction in ('ASC', 'DESC') else SQL()
-            sql_nulls = SQL(nulls) if nulls in ('NULLS FIRST', 'NULLS LAST') else SQL()
-
-            if property_name := order_match['property']:
-                # field_name is an expression
-                field_name = f"{field_name}.{property_name}"
-            term = self._order_field_to_sql(alias, field_name, sql_direction, sql_nulls, query)
+            term = self._order_field_to_sql(alias, order_expression.field_expr.expression, sql_direction, sql_nulls, query)
             if term:
                 terms.append(term)
 
@@ -5985,21 +5947,15 @@ class BaseModel(metaclass=MetaModel):
 
     @api.model
     def _sorted_order_to_function(self, order: str) -> Callable[[BaseModel], tuple]:
-        def order_to_function(order_part):
-            order_match = regex_order.match(order_part)
-            if not order_match:
-                raise ValueError(f"Invalid order {order!r} to sort")
-            field_name = order_match['field']
-            property_name = order_match['property']
-            reverse = (order_match['direction'] or '').upper() == 'DESC'
-            nulls = (order_match['nulls'] or '').upper()
-            if nulls:
-                nulls_first = nulls == 'NULLS FIRST'
-            else:
-                nulls_first = reverse
 
+        def order_to_function(order_expr):
+            reverse = not order_expr.desc
+            nulls_first = not order_expr.nulls_last
+            field_expr = order_expr.field_expr
+
+            field_name = field_expr.fname
+            property_name = field_expr.remaining_path
             field = self._fields[field_name]
-            field_expr = f'{field_name}.{property_name}' if property_name else field_name
             if field.type == 'many2one' and (not property_name or property_name == 'id'):
                 seen = self.env.context.get('__m2o_order_seen_sorted', ())
                 if field in seen:
@@ -6013,11 +5969,11 @@ class BaseModel(metaclass=MetaModel):
                         return None
                     return func_comodel(value)
             elif field.relational:
-                raise ValueError(f"Invalid order on relational field {order_part!r} to sort")
+                raise ValueError(f"Invalid order {order!r}, cannot sort on X2many fields")
             elif field.type == 'boolean':
-                getter = field.expression_getter(field_expr)
+                getter = field.expression_getter(order_expr.field_expr.expression)
             else:
-                raw_getter = field.expression_getter(field_expr)
+                raw_getter = field.expression_getter(order_expr.field_expr.expression)
 
                 def getter(rec):
                     value = raw_getter(rec)
@@ -6031,8 +5987,8 @@ class BaseModel(metaclass=MetaModel):
             return lambda rec: comparator(getter(rec))
 
         item_makers = [
-            order_to_function(order_part)
-            for order_part in order.split(',')
+            order_to_function(order_expr)
+            for order_expr in OrderSpecification(order)
         ]
         return lambda rec: tuple(fn(rec) for fn in item_makers)
 

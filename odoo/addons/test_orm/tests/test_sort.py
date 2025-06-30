@@ -96,6 +96,7 @@ class TestSort(TransactionCase):
             'country_id DESC NULLS FIRST, id',
             'country_id ASC NULLS LAST, id',
             'country_id DESC NULLS LAST, id',
+            'country_id.id, id',
             'name ASC, id',
             'name DESC, id',
             'name ASC NULLS FIRST, id',

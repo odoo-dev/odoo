@@ -15,6 +15,7 @@ from psycopg2.extras import Json
 from odoo import api, fields, models, tools
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Command, Domain
+from odoo.orm.utils import OrderSpecification
 from odoo.tools import frozendict, reset_cached_properties, split_every, sql, unique, OrderedSet, SQL
 from odoo.tools.safe_eval import safe_eval, datetime, dateutil, time
 from odoo.tools.translate import _, LazyTranslate
@@ -34,7 +35,6 @@ ACCESS_ERROR_NOGROUP = _lt("No group currently allows this operation.")
 ACCESS_ERROR_RESOLUTION = _lt("Contact your administrator to request access if necessary.")
 
 MODULE_UNINSTALL_FLAG = '_force_unlink'
-RE_ORDER_FIELDS = re.compile(r'"?(\w+)"?\s*(?:asc|desc)?', flags=re.I)
 
 # base environment for doing a safe_eval
 SAFE_EVAL_BASE = {
@@ -280,8 +280,8 @@ class IrModel(models.Model):
     def _check_order(self):
         for model in self:
             try:
-                model._check_qorder(model.order)  # regex check for the whole clause ('is it valid sql?')
-            except UserError as e:
+                order_spec = OrderSpecification.fromstring(model.order)
+            except ValueError as e:
                 raise ValidationError(str(e))
             # add MAGIC_COLUMNS to 'stored_fields' in case 'model' has not been
             # initialized yet, or 'field_id' is not up-to-date in cache
@@ -296,10 +296,12 @@ class IrModel(models.Model):
                     if fval.inherited and fval.base_field.store
                 )
 
-            order_fields = RE_ORDER_FIELDS.findall(model.order)
-            for field in order_fields:
-                if field not in stored_fields:
-                    raise ValidationError(_("Unable to order by %s: fields used for ordering must be present on the model and stored.", field))
+            for order_part in order_spec:
+                field_expr = order_part.field_expr
+                if field_expr.remaining_path and field_expr.remaining_path != 'id':
+                    raise ValidationError(_("Unable to order by %s: order cannot contain field path", field_expr))
+                if field_expr.fname not in stored_fields:
+                    raise ValidationError(_("Unable to order by %s: fields used for ordering must be present on the model and stored.", field_expr.fname))
 
     @api.constrains('fold_name')
     def _check_fold_name(self):
