@@ -61,6 +61,7 @@ import { TableOfContentPlugin } from "@html_editor/others/embedded_components/pl
 import { VideoPlugin } from "@html_editor/others/embedded_components/plugins/video_plugin/video_plugin";
 import { QWebPlugin } from "./others/qweb_plugin";
 import { EditorVersionPlugin } from "./core/editor_version_plugin";
+import { EmbeddedFilePlugin } from "./others/embedded_components/plugins/embedded_file_plugin/embedded_file_plugin";
 
 /**
  * @typedef { Object } SharedMethods
@@ -157,7 +158,6 @@ export const MAIN_PLUGINS = [
     TextDirectionPlugin,
     InlineCodePlugin,
     TableResizePlugin,
-    FilePlugin,
 ];
 
 export const COLLABORATION_PLUGINS = [
@@ -171,7 +171,10 @@ export const EMBEDDED_COMPONENT_PLUGINS = [
     EmbeddedComponentPlugin,
     TableOfContentPlugin,
     VideoPlugin,
+    EmbeddedFilePlugin,
 ];
+
+export const NON_EMBEDDED_COMPONENT_PLUGINS = [FilePlugin];
 
 export const DYNAMIC_PLACEHOLDER_PLUGINS = [DynamicPlaceholderPlugin, QWebPlugin];
 

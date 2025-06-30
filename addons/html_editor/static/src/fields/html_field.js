@@ -6,6 +6,7 @@ import {
     DYNAMIC_PLACEHOLDER_PLUGINS,
     EMBEDDED_COMPONENT_PLUGINS,
     MAIN_PLUGINS,
+    NON_EMBEDDED_COMPONENT_PLUGINS,
 } from "@html_editor/plugin_sets";
 import {
     MAIN_EMBEDDINGS,
@@ -218,7 +219,9 @@ export class HtmlField extends Component {
                 ...MAIN_PLUGINS,
                 ...(this.props.isCollaborative ? COLLABORATION_PLUGINS : []),
                 ...(this.props.dynamicPlaceholder ? DYNAMIC_PLACEHOLDER_PLUGINS : []),
-                ...(this.props.embeddedComponents ? EMBEDDED_COMPONENT_PLUGINS : []),
+                ...(this.props.embeddedComponents
+                    ? EMBEDDED_COMPONENT_PLUGINS
+                    : NON_EMBEDDED_COMPONENT_PLUGINS),
             ],
             classList: this.classList,
             onChange: this.onChange.bind(this),

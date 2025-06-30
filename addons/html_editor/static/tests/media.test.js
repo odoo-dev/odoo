@@ -6,6 +6,8 @@ import { setupEditor } from "./_helpers/editor";
 import { getContent } from "./_helpers/selection";
 import { insertText } from "./_helpers/user_actions";
 import { expectElementCount } from "./_helpers/ui_expectations";
+import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
+import { FilePlugin } from "@html_editor/main/media/file_plugin";
 
 test("Can replace an image", async () => {
     onRpc("ir.attachment", "search_read", () => [
@@ -46,7 +48,7 @@ test("Replace an image with link by a document should remove the link", async ()
     const env = await makeMockEnv();
     await setupEditor(
         `<p><a href="http://test.com"><img class="img-fluid" src="/web/static/img/logo.png"></a></p>`,
-        { env }
+        { env, config: { Plugins: [...MAIN_PLUGINS, FilePlugin] } }
     );
     expect("img[src='/web/static/img/logo.png']").toHaveCount(1);
     await click("img");
