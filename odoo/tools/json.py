@@ -70,5 +70,5 @@ def json_default(obj):
     if isinstance(obj, ReadonlyDict):
         return dict(obj)
     if isinstance(obj, bytes):
-        return base64.b64encode(obj).decode()
+        return obj.decode()
     return str(obj)
