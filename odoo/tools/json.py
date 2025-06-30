@@ -2,6 +2,7 @@
 from datetime import date, datetime
 import json as json_
 import re
+import base64
 
 import markupsafe
 from .func import lazy
@@ -69,5 +70,5 @@ def json_default(obj):
     if isinstance(obj, ReadonlyDict):
         return dict(obj)
     if isinstance(obj, bytes):
-        return obj.decode()
+        return base64.b64encode(obj).decode()
     return str(obj)
