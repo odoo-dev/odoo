@@ -126,6 +126,10 @@ def setup_product_combo_items(self):
                     "product_id": combo_product_5.id,
                     "extra_price": 2,
                 }),
+                Command.create({
+                    "product_id": self.configurable_chair.product_variant_id.id,
+                    "extra_price": 0,
+                })
             ],
         }
     )

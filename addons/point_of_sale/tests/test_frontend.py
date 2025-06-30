@@ -286,6 +286,29 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
         })
         chair_color_line.product_template_value_ids[1].is_custom = True
 
+        cls.chair_addons_attribute = env['product.attribute'].create({
+            'name': 'Add-ons',
+            'display_type': 'multi',
+            'create_variant': 'no_variant',
+        })
+        cls.chair_addon_cushion = env['product.attribute.value'].create({
+            'name': 'Cushion',
+            'attribute_id': cls.chair_addons_attribute.id,
+        })
+        cls.chair_addon_cupholder = env['product.attribute.value'].create({
+            'name': 'Cup Holder',
+            'attribute_id': cls.chair_addons_attribute.id,
+        })
+        cls.chair_addon_headrest = env['product.attribute.value'].create({
+            'name': 'Headrest',
+            'attribute_id': cls.chair_addons_attribute.id,
+        })
+        env['product.template.attribute.line'].create({
+            'product_tmpl_id': cls.configurable_chair.id,
+            'attribute_id': cls.chair_addons_attribute.id,
+            'value_ids': [(6, 0, [cls.chair_addon_cushion.id, cls.chair_addon_cupholder.id, cls.chair_addon_headrest.id])]
+        })
+
         fixed_pricelist = env['product.pricelist'].create({
             'name': 'Fixed',
             'item_ids': [(0, 0, {
@@ -1028,6 +1051,11 @@ class TestUi(TestPointOfSaleHttpCommon):
         # In the future we might want to test also if:
         #   - the combo lines are correctly stored in and restored from local storage
         #   - the combo lines are correctly shared between the pos configs ( in cross ordering )
+
+    def test_combo_edit_orderline(self):
+        setup_product_combo_items(self)
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_pos_tour('ProductComboEditOrderline')
 
     def test_07_pos_barcodes_scan(self):
         barcode_rule = self.env.ref("point_of_sale.barcode_rule_client")

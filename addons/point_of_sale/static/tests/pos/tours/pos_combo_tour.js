@@ -9,6 +9,7 @@ import { inLeftSide } from "@point_of_sale/../tests/pos/tours/utils/common";
 import * as Chrome from "@point_of_sale/../tests/pos/tours/utils/chrome_util";
 import { registry } from "@web/core/registry";
 import * as Numpad from "@point_of_sale/../tests/generic_helpers/numpad_util";
+import * as ProductConfigurator from "@point_of_sale/../tests/pos/tours/utils/product_configurator_util";
 
 registry.category("web_tour.tours").add("ProductComboPriceTaxIncludedTour", {
     steps: () =>
@@ -162,5 +163,160 @@ registry.category("web_tour.tours").add("ProductComboChangePricelist", {
             ]),
             ProductScreen.totalAmountIs("42.60"),
             ProductScreen.isShown(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("ProductComboEditOrderline", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+
+            // Select 'Combo Product 2' (Combo 2)
+            ProductScreen.clickDisplayedProduct("Office Combo"),
+            combo.select("Combo Product 2"),
+            combo.isSelected("Combo Product 2"),
+
+            // Select 'Configurable Chair' (Combo 2) + Confim --> Selected combo item
+            combo.select("Configurable Chair"),
+            ProductConfigurator.selectedColor("Red"),
+            ProductConfigurator.selectedSelect("Metal"),
+            ProductConfigurator.selectedRadio("Leather"),
+
+            ProductConfigurator.pickColor("Blue"),
+            ProductConfigurator.pickSelect("Wood"),
+            ProductConfigurator.pickRadio("Other"),
+            ProductConfigurator.fillCustomAttribute("Azerty"),
+            ProductConfigurator.pickMulti("Cushion"),
+            ProductConfigurator.pickMulti("Headrest"),
+
+            ProductConfigurator.selectedColor("Blue"),
+            ProductConfigurator.selectedSelect("Wood"),
+            ProductConfigurator.selectedRadio("Other"),
+            ProductConfigurator.selectedCustomAttribute("Azerty"),
+            ProductConfigurator.selectedMulti("Cushion"),
+            ProductConfigurator.selectedMulti("Headrest"),
+            Dialog.confirm(/^Add$/),
+            combo.isSelected("Configurable Chair"),
+
+            // Select again 'Configurable Chair' (Combo 2) + Discard --> Not selected but keep the attributes
+            combo.select("Configurable Chair"),
+            ProductConfigurator.selectedColor("Blue"),
+            ProductConfigurator.selectedSelect("Wood"),
+            ProductConfigurator.selectedRadio("Other"),
+            ProductConfigurator.selectedCustomAttribute("Azerty"),
+            ProductConfigurator.selectedMulti("Cushion"),
+            ProductConfigurator.selectedMulti("Headrest"),
+            Dialog.discard(),
+            combo.isNotSelected("Configurable Chair"),
+
+            // Select one more time 'Configurable Chair' (Combo 2) --> Check default attributes
+            combo.select("Configurable Chair"),
+            ProductConfigurator.selectedColor("Blue"),
+            ProductConfigurator.selectedSelect("Wood"),
+            ProductConfigurator.selectedRadio("Other"),
+            ProductConfigurator.selectedCustomAttribute("Azerty"),
+            ProductConfigurator.selectedMulti("Cushion"),
+            ProductConfigurator.selectedMulti("Headrest"),
+            Dialog.confirm(/^Add$/),
+            combo.isSelected("Configurable Chair"),
+
+            // Select 'Combo Product 4' (Combo 2) --> Remove 'Configurable Chair' (Combo 2)
+            combo.select("Combo Product 4"),
+            combo.isSelected("Combo Product 4"),
+            combo.isNotSelected("Configurable Chair"),
+
+            // Reopen 'Configurable Chair' (Combo 2) --> Check default attributes
+            combo.select("Configurable Chair"),
+            ProductConfigurator.selectedColor("Blue"),
+            ProductConfigurator.selectedSelect("Wood"),
+            ProductConfigurator.selectedRadio("Other"),
+            ProductConfigurator.selectedCustomAttribute("Azerty"),
+            ProductConfigurator.selectedMulti("Cushion"),
+            ProductConfigurator.selectedMulti("Headrest"),
+            Dialog.confirm(/^Add$/),
+            combo.isSelected("Configurable Chair"),
+            combo.isNotSelected("Combo Product 4"),
+
+            // Select 'Combo Product 6' (Combo 3)
+            combo.select("Combo Product 6"),
+            combo.isSelected("Combo Product 6"),
+
+            // Add to order
+            Dialog.confirm("Add to Order"),
+            inLeftSide([
+                ...ProductScreen.orderComboLineHas("Combo Product 2", "1.0"),
+                ...ProductScreen.orderComboLineHas(
+                    "Configurable Chair",
+                    "1.0",
+                    "",
+                    "Blue, Wood, Fabrics: Other: Azerty, Cushion, Headrest"
+                ),
+                ...ProductScreen.orderComboLineHas("Combo Product 6", "1.0"),
+            ]),
+
+            // Edit Combo Line 'Configurable Chair'
+            ProductScreen.longPressOrderline("Configurable Chair"),
+            ProductConfigurator.selectedColor("Blue"),
+            ProductConfigurator.selectedSelect("Wood"),
+            ProductConfigurator.selectedRadio("Other"),
+            ProductConfigurator.selectedCustomAttribute("Azerty"),
+            ProductConfigurator.selectedMulti("Cushion"),
+            ProductConfigurator.selectedMulti("Headrest"),
+
+            ProductConfigurator.fillCustomAttribute("New free text"),
+            ProductConfigurator.pickMulti("Cushion"),
+            ProductConfigurator.pickMulti("Cup Holder"),
+            Dialog.confirm(/^Add$/),
+
+            inLeftSide([
+                ...ProductScreen.orderComboLineHas("Combo Product 2", "1.0"),
+                ...ProductScreen.orderComboLineHas(
+                    "Configurable Chair",
+                    "1.0",
+                    "",
+                    "Blue, Wood, Fabrics: Other: New free text, Cup Holder, Headrest"
+                ),
+                ...ProductScreen.orderComboLineHas("Combo Product 6", "1.0"),
+            ]),
+
+            // Edit Combo
+            ProductScreen.longPressOrderline("Office Combo"),
+            combo.isSelected("Combo Product 2"),
+            combo.isSelected("Configurable Chair"),
+            combo.isSelected("Combo Product 6"),
+
+            // Edit one last time 'Configurable Chair' (Combo 2)
+            combo.select("Configurable Chair"),
+            ProductConfigurator.selectedColor("Blue"),
+            ProductConfigurator.selectedSelect("Wood"),
+            ProductConfigurator.selectedRadio("Other"),
+            ProductConfigurator.selectedCustomAttribute("New free text"),
+            ProductConfigurator.selectedMulti("Cup Holder"),
+            ProductConfigurator.selectedMulti("Headrest"),
+
+            ProductConfigurator.pickColor("Red"),
+            ProductConfigurator.pickSelect("Metal"),
+            ProductConfigurator.fillCustomAttribute("Last one"),
+            Dialog.confirm(/^Add$/),
+            combo.isSelected("Configurable Chair"),
+
+            // Select 'Combo Product 7' (Combo 3) --> Remove 'Combo Product 6' (Combo 3)
+            combo.select("Combo Product 7"),
+            combo.isSelected("Combo Product 7"),
+            combo.isNotSelected("Combo Product 6"),
+
+            // Update order
+            Dialog.confirm("Add to Order"),
+            inLeftSide([
+                ...ProductScreen.orderComboLineHas("Combo Product 2", "1.0"),
+                ...ProductScreen.orderComboLineHas(
+                    "Configurable Chair",
+                    "1.0",
+                    "",
+                    "Red, Metal, Fabrics: Other: Last one, Cup Holder, Headrest"
+                ),
+                ...ProductScreen.orderComboLineHas("Combo Product 7", "1.0"),
+            ]),
         ].flat(),
 });

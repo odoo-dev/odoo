@@ -11,16 +11,33 @@ export class ComboConfiguratorPopup extends Component {
         productTemplate: Object,
         getPayload: Function,
         close: Function,
+        defaultComboLineIds: { type: Object, optional: true },
     };
 
     setup() {
         this.pos = usePos();
+        const defaultAttributes = this.props.productTemplate.combo_ids.map((combo) => {
+            const defaultCombo = this.props.defaultComboLineIds?.[combo.id];
+            return [
+                combo.id,
+                {
+                    combo_item_id: defaultCombo?.id || 0,
+                    attribute_value_ids: defaultCombo?.orderline.attribute_value_ids || [],
+                    custom_attribute_value_ids:
+                        defaultCombo?.orderline.custom_attribute_value_ids || [],
+                },
+            ];
+        });
         this.state = useState({
             combo: Object.fromEntries(
-                this.props.productTemplate.combo_ids.map((combo) => [combo.id, 0])
+                this.props.productTemplate.combo_ids.map((combo) => [
+                    combo.id,
+                    this.props.defaultComboLineIds?.[combo.id]?.id || 0,
+                ])
             ),
             // configuration: id of combo_item -> ProductConfiguratorPopup payload
             configuration: {},
+            defaultAttributes: Object.fromEntries(defaultAttributes),
         });
 
         onMounted(() => {
@@ -83,12 +100,45 @@ export class ComboConfiguratorPopup extends Component {
     async onClickProduct({ product, combo_item }, ev) {
         const productTmpl = product.product_tmpl_id;
         if (productTmpl.needToConfigure()) {
+            const defaultComboItemId = this.state.defaultAttributes[combo_item.combo_id.id];
+            const comboAttributeIds = defaultComboItemId.attribute_value_ids;
+            const comboCustomAttributeIds = defaultComboItemId.custom_attribute_value_ids;
             const payload = await this.pos.openConfigurator(product.product_tmpl_id, {
                 hideAlwaysVariants: true,
                 forceVariantValue: product.product_template_variant_value_ids,
+                defaultAttributeIds:
+                    comboAttributeIds.length > 0 &&
+                    defaultComboItemId.combo_item_id === combo_item.id
+                        ? comboAttributeIds
+                        : undefined,
+                defaultCustomAttributeIds:
+                    comboCustomAttributeIds.length > 0 &&
+                    defaultComboItemId.combo_item_id === combo_item.id
+                        ? comboCustomAttributeIds
+                        : undefined,
             });
             if (payload) {
                 this.state.configuration[combo_item.id] = payload;
+
+                defaultComboItemId.combo_item_id = combo_item.id;
+                comboAttributeIds.length = 0;
+                comboCustomAttributeIds.length = 0;
+                for (const attrId of payload.attribute_value_ids) {
+                    // Unkown
+                    const attr = this.pos.models["product.template.attribute.value"].get(attrId);
+                    if (!attr) {
+                        continue;
+                    }
+                    comboAttributeIds.push(attr);
+
+                    // Custom attribute
+                    if (attr.is_custom) {
+                        comboCustomAttributeIds.push({
+                            custom_product_template_attribute_value_id: attr,
+                            custom_value: payload.attribute_custom_values[attrId] || "",
+                        });
+                    }
+                }
             } else {
                 // Do not select the product if configuration popup is cancelled.
                 this.state.combo[combo_item.combo_id.id] = 0;
