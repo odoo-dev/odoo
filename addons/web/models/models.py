@@ -731,10 +731,10 @@ class Base(models.AbstractModel):
         # be used only when there are few groups (or without limit for the kanban view).
         if (
             not offset and (not limit or len(groups) < limit)
-            and self._web_read_group_field_expand(groupby)
+            and self._formatted_read_group_field_expand(groupby)
         ):
             # It doesn't respect the order with aggregates inside
-            expand_groups = self._web_read_group_expand(domain, groups, groupby[0], aggregates, order)
+            expand_groups = self._formatted_read_group_expand(domain, groups, groupby[0], aggregates, order)
             if not limit or len(expand_groups) < limit:
                 # Ditch the result of expand_groups because the limit is reached and to avoid
                 # returning inconsistent result inside length of web_read_group
@@ -747,12 +747,12 @@ class Base(models.AbstractModel):
             if not isinstance(fill_temporal, dict):
                 fill_temporal = {}
             # This assumes that existing data is sorted by field 'groupby_name'
-            groups = self._web_read_group_fill_temporal(groups, groupby, aggregates, **fill_temporal)
+            groups = self._formatted_read_group_fill_temporal(groups, groupby, aggregates, **fill_temporal)
 
-        return self._web_read_group_format(groupby, aggregates, groups)
+        return self._formatted_read_group_format(groupby, aggregates, groups)
 
     def _web_pre_process_aggregates(self, aggregates):
-        # Avoid recordset in _web_read_group_format as aggregate + Add currency_field aggregates for monetary aggregates
+        # Avoid recordset in _formatted_read_group_format as aggregate + Add currency_field aggregates for monetary aggregates
         return tuple(OrderedSet(
             [agg.replace(':recordset', ':array_agg') for agg in aggregates]
             + list(self._get_mapping_currency_aggregates(aggregates).values())
@@ -766,7 +766,7 @@ class Base(models.AbstractModel):
             if field.type == 'monetary'
         }
 
-    def _web_read_group_field_expand(self, groupby):
+    def _formatted_read_group_field_expand(self, groupby):
         """ Return the field that should be expand """
         if (
             len(groupby) == 1
@@ -777,7 +777,7 @@ class Base(models.AbstractModel):
             return field
         return None
 
-    def _web_read_group_expand(self, domain, groups, groupby_spec, aggregates, order):
+    def _formatted_read_group_expand(self, domain, groups, groupby_spec, aggregates, order):
         """ Expand the result of _read_group for the webclient to show empty groups
         for some view types (e.g. empty column for kanban view). See `Field.group_expand` attribute.
         """
@@ -819,7 +819,7 @@ class Base(models.AbstractModel):
         return [(value, *aggregate_values) for value, aggregate_values in result.items()]
 
     @api.model
-    def _web_read_group_fill_temporal(self, groups, groupby, aggregates, fill_from=False, fill_to=False, min_groups=False):
+    def _formatted_read_group_fill_temporal(self, groups, groupby, aggregates, fill_from=False, fill_to=False, min_groups=False):
         """Helper method for filling date/datetime 'holes' in a result for the first groupby.
 
         We are in a use case where data are grouped by a date field (typically
@@ -979,7 +979,7 @@ class Base(models.AbstractModel):
 
         return result
 
-    def _web_read_group_format(
+    def _formatted_read_group_format(
         self,
         groupby: tuple[str, ...],
         aggregates: tuple[str, ...],
@@ -993,13 +993,13 @@ class Base(models.AbstractModel):
         column_iterator = zip(*groups)
 
         for groupby_spec, values in zip(groupby, column_iterator):
-            formatter = self._web_read_group_groupby_formatter(groupby_spec, values)
+            formatter = self._formatted_read_group_groupby_formatter(groupby_spec, values)
             for value, dict_group in zip(values, result, strict=True):
                 dict_group[groupby_spec], additional_domain = formatter(value)
                 dict_group['__extra_domains'].append(additional_domain)
 
             # Add fold information only if read_group_expand is activated (for kanban/list)
-            if ((field := self._web_read_group_field_expand(groupby)) and field.relational):
+            if ((field := self._formatted_read_group_field_expand(groupby)) and field.relational):
                 model = self.env[field.comodel_name]
                 fold_name = model._fold_name
                 if fold_name not in model._fields:
@@ -1024,7 +1024,7 @@ class Base(models.AbstractModel):
 
         return result
 
-    def _web_read_group_groupby_formatter(self, groupby_spec, values):
+    def _formatted_read_group_groupby_formatter(self, groupby_spec, values):
         """ Return a formatter method that returns value/label and the domain that the group
         value represent """
         field_name = groupby_spec.split(':')[0].split('.')[0]
@@ -1111,11 +1111,11 @@ class Base(models.AbstractModel):
             raise ValueError(f"{granularity!r} isn't a valid granularity")
 
         if field.type == "properties":
-            return self._web_read_group_groupby_properties_formatter(groupby_spec, values)
+            return self._formatted_read_group_groupby_properties_formatter(groupby_spec, values)
 
         return lambda value: (value, [(field_name, '=', value)])
 
-    def _web_read_group_groupby_properties_formatter(self, groupby_spec, values):
+    def _formatted_read_group_groupby_properties_formatter(self, groupby_spec, values):
         if '.' not in groupby_spec:
             raise ValueError('You must choose the property you want to group by.')
 
