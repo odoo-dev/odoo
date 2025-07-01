@@ -112,7 +112,7 @@ def _eval_xml(self, node, env):
                 rec_id = m.groups()[0]
                 xid = self.make_xml_id(rec_id)
                 if (record_id := self.idref.get(xid)) is None:
-                    record_id = self.idref[xid] = self.id_get(xid)
+                    record_id = self.id_get(xid)
                 # So funny story: in Python 3, bytes(n: int) returns a
                 # bytestring of n nuls. In Python 2 it obviously returns the
                 # stringified number, which is what we're expecting here
@@ -537,6 +537,9 @@ form: module.record_id""" % (xml_id,)
         return self._tag_record(record)
 
     def id_get(self, id_str, raise_if_not_found=True):
+        id_str = self.make_xml_id(id_str)
+        if id_str in self.idref:
+            return self.idref[id_str]
         res = self.model_id_get(id_str, raise_if_not_found)
         return res and res[1]
 
