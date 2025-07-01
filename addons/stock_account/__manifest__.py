@@ -41,6 +41,7 @@ Dashboard / Reports for Warehouse Management includes:
         'wizard/stock_request_count.xml',
         'wizard/stock_quantity_history.xml',
         'report/account_invoice_report_view.xml',
+        'report/stock_valuation.xml',
     ],
     'installable': True,
     'auto_install': True,

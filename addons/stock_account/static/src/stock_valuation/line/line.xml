@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="stock_account.StockValuationReport.InventoryValuationLine">
+        <tr t-att-class="cssClass">
+            <td class="line_name" t-on-click="onClickToggle">
+                <div class="wrapper">
+                    <button t-attf-class="btn btn_foldable#{props.sublines ? '' : '_empty'}"
+                            t-att-tabindex="props.lines ? 0 : -1">
+                        <i t-if="props.sublines"
+                           t-attf-class="fa fa-caret-#{state.displaySublines ? 'down' : 'right'}"/>
+                    </button>
+                    <span t-if="props.label" t-out="props.label"/>
+                </div>
+            </td>
+            <td>
+                <a t-if="!displayTotalOnSeparateLine" href="#"
+                   t-on-click="onClick"
+                   t-out="formattedValue"/>
+            </td>
+        </tr>
+        <t t-if="state.displaySublines">
+            <t t-foreach="props.sublines" t-as="line" t-key="line.id">
+                <StockValuationReportLine
+                    label="line.display_name"
+                    line="line"
+                    sublines="line.lines"
+                    level="props.level + 2"
+                    onClickMethod="props.onClickMethod"
+                    value="line.value"/>
+            </t>
+        </t>
+        <t t-if="displayTotalOnSeparateLine">
+            <StockValuationReportLine
+                class="'total'"
+                label="'Total'"
+                level="props.level"
+                onClickMethod.bind="props.onClickMethod"
+                value="props.value"/>
+        </t>
+    </t>
+</templates>

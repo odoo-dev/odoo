@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_stock_valuation" model="ir.actions.client">
+        <field name="name">Stock Valuation</field>
+        <field name="tag">stock_valuation_report</field>
+        <field name="res_model">stock_account.stock.valuation.report</field>
+        <field name="path">stock-valuation</field>
+        <field name="context">{'model': 'stock_account.stock.valuation.report'}</field>
+    </record>
+
+    <menuitem id="menu_action_stock_account_report_stock_valuation"
+              name="Stock Valuation"
+              action="action_report_stock_valuation"
+              parent="account.account_reports_legal_statements_menu"
+              groups="account.group_account_readonly"/>
+</odoo>
