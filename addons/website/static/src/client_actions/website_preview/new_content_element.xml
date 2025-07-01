@@ -2,17 +2,22 @@
 <templates xml:space="preserve">
 
 <t t-name="website.NewContentElement">
-    <div class="o_new_content_element col-md-4 mb8" t-att-name="props.name">
-        <button
-                t-on-click.prevent.stop="onClick"
-                class="btn w-100"
-                t-att-class="props.status === MODULE_STATUS.NOT_INSTALLED ? 'o_uninstalled_module' : ''"
-                t-att-title="props.title"
-                t-att-aria-label="props.title"
-                t-att-data-module-xml-id="props.moduleXmlId">
-            <t t-slot="default"/>
-        </button>
-    </div>
+    <button
+    t-att-name="props.name"
+            t-on-click.prevent.stop="onClick"
+            class="o_new_content_element btn d-flex align-items-center gap-2 w-100"
+            t-att-class="props.status === MODULE_STATUS.NOT_INSTALLED ? 'o_uninstalled_module' : ''"
+            t-att-title="props.title"
+            t-att-aria-label="props.title"
+            t-att-data-module-xml-id="props.moduleXmlId">
+        <div class="o_new_content_element_image_container d-flex align-items-center justify-content-center border rounded">
+            <t t-slot="icon"/>
+        </div>
+        <div class="text-start">
+            <div><t t-slot="label"/></div>
+            <small class="o_new_content_element_subtitle text-muted"><t t-slot="subtitle"/></small>
+        </div>
+    </button>
 </t>
 
 </templates>

@@ -2,9 +2,48 @@
 <templates xml:space="preserve">
 
 <t t-name="website.NewContentSystrayItem">
-    <div class="o_menu_systray_item o_new_content_container d-none d-md-flex" t-on-click="onClick">
-        <button accesskey="c" class="o-website-btn-custo-secondary btn d-flex align-items-center rounded-0 border-0 px-3">New</button>
-        <NewContentModal t-if="websiteContext.showNewContentModal" onNewPage="props.onNewPage"/>
+    <div class="o_menu_systray_item o_new_content_container d-none d-md-flex" >
+        <a
+            role="button"
+            href="#"
+            t-attf-class="dropdown-toggle btn px-2"
+            data-bs-toggle="dropdown"
+            accesskey="c"
+        >
+            New
+        </a>
+        <div class="dropdown-menu o_new_content_popover bg-white mt-2 px-2 w-50" role="menu">
+            <NewContentElement t-if="isDesigner"
+                    name.translate="New Page"
+                    onClick="() => props.onNewPage()"
+                    title.translate="New Page">
+                <t t-set-slot="icon">
+                    <i class="oi oi-plus"/>
+                </t>
+                <t t-set-slot="label">
+                    Blank page
+                </t>
+            </NewContentElement>
+            <div class="o_new_content_popover_container">
+                <t t-foreach="sortedNewContentElements" t-as="element" t-key="element.moduleXmlId" t-if="'isDisplayed' in element ? element.isDisplayed : isSystem ">
+                    <NewContentElement onClick="() => this.onClickNewContent(element)"
+                        status="element.status"
+                        title="element.title"
+                        moduleXmlId="element.moduleXmlId">
+                        <t t-set-slot="icon">
+                            <t t-call="{{ element.icon }}"/>
+                        </t>
+                        <t t-set-slot="label">
+                            <t t-esc="element.title"/>
+                        </t>
+                        <t t-set-slot="subtitle">
+                            <t t-esc="element.subtitle"/>
+                        </t>
+                    </NewContentElement>
+                </t>
+            </div>
+        </div>
+        <!-- <NewContentModal t-if="websiteContext.showNewContentModal" onNewPage="props.onNewPage"/> -->
     </div>
 </t>
 
