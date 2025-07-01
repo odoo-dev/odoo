@@ -1,3 +1,6 @@
+// @odoo-module ignore
+// eslint-disable-next-line no-undef
+importScripts("/web/static/src/serviceworker/rpc.js");
 /* eslint-disable no-restricted-globals */
 const cacheName = "odoo-sw-cache";
 const cachedRequests = ["/web/offline"];

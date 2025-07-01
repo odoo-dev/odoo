@@ -11,9 +11,25 @@ self.addEventListener("notificationclick", (event) => {
         }
     }
 });
-self.addEventListener("push", (event) => {
-    const notification = event.data.json();
-    self.registration.showNotification(notification.title, notification.options || {});
+self.addEventListener("push", async (event) => {
+    event.waitUntil(
+        (async () => {
+            // check if we need to unsubscribe from webpush
+            // web/static/src/serviceworker/rpc.js
+            // eslint-disable-next-line no-undef
+            const connectedBackend = await isConnected();
+            if (!connectedBackend) {
+                const subscription = await self.registration.pushManager.getSubscription();
+                await subscription?.unsubscribe?.();
+                return;
+            }
+            const notification = event.data.json();
+            await self.registration.showNotification(
+                notification.title,
+                notification.options || {}
+            );
+        })()
+    );
 });
 self.addEventListener("pushsubscriptionchange", async (event) => {
     const subscription = await self.registration.pushManager.subscribe(
