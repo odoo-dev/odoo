@@ -690,28 +690,6 @@ def convert_csv_import(env, module, fname, csvcontent, idref=None, mode='init',
 
 def convert_xml_import(env, module, xmlfile, idref=None, mode='init', noupdate=False, report=None):
     doc = etree.parse(xmlfile)
-    tree = doc.getroot()
-    seen = {}
-    for rec in tree.xpath('.//record[@skip_unique_constraint]'):
-        model = rec.get("model")
-        if model not in env:
-            continue
-        skip_val = rec.get("skip_unique_constraint")
-        seen.setdefault(model, set())
-        for field in rec.xpath(f'./field[@name="{skip_val}"]'):
-            original_name = field.text
-            original_name = (field.text or '').strip()
-            if not original_name:
-                continue
-            new_name = original_name
-            i = 0
-            while new_name in seen[model] or env[f'{model}'].search_count([(f'{skip_val}', '=', new_name)]):
-                i += 1
-                new_name = f"{original_name} ({i})"
-            seen[model].add(new_name)
-            if new_name != original_name:
-                field.text = new_name
-
     schema = os.path.join(config.root_path, 'import_xml.rng')
     relaxng = etree.RelaxNG(etree.parse(schema))
     try:

@@ -62,6 +62,35 @@ class IrModuleModule(models.Model):
             if attachment:
                 module.icon_image = attachment.datas
 
+    def _adjust_xml_unicity(self, xml_content):
+        tree = lxml.etree.fromstring(xml_content)
+        changed = False
+        seen = {}
+        for rec in tree.xpath('.//record[@skip_unique_constraint]'):
+            model = rec.get("model")
+            if model not in self.env:
+                continue
+            skip_val = rec.get("skip_unique_constraint")
+            seen.setdefault(model, set())
+            for field in rec.xpath(f'./field[@name="{skip_val}"]'):
+                original_name = field.text
+                original_name = (field.text or '').strip()
+                if not original_name:
+                    continue
+                new_name = original_name
+                i = 0
+                while new_name in seen[model] or self.env[f'{model}'].search_count([(f'{skip_val}', '=', new_name)]):
+                    i += 1
+                    new_name = f"{original_name} ({i})"
+                seen[model].add(new_name)
+                if new_name != original_name:
+                    field.text = new_name
+                    changed = True
+
+        if changed:
+            return lxml.etree.tostring(tree, pretty_print=True, xml_declaration=True, encoding='utf-8')
+        return xml_content
+
     def _import_module(self, module, path, force=False, with_demo=False):
         # Do not create a bridge module for these neutralizations.
         # Do not involve specific website during import by resetting
@@ -139,6 +168,10 @@ class IrModuleModule(models.Model):
                     elif ext == '.sql':
                         convert_sql_import(self.env, fp)
                     elif ext == '.xml':
+                        xml_content = fp.read()
+                        if (new_xml_content := self._adjust_xml_unicity(xml_content)):
+                            fp = BytesIO(new_xml_content)
+                            fp.name = pathname
                         convert_xml_import(self.env, module, fp, idref, mode, noupdate)
                         if filename in exclude_list:
                             for key, value in idref.items():
