@@ -275,7 +275,6 @@ export class ToolbarPlugin extends Plugin {
                 .map((button) => ({
                     ...button,
                     namespaces: button.namespaces || group.namespaces || ["expanded"],
-                    isAvailable: button.isAvailable ?? (() => true),
                     description:
                         button.description instanceof Function
                             ? button.description
@@ -419,9 +418,27 @@ export class ToolbarPlugin extends Plugin {
         if (namespace === "compact") {
             return this.getAvailableButtonsCompact(selection, namespace);
         }
-        return new Set(
-            this.buttonsByNamespace[namespace].filter((btn) => btn.isAvailable(selection))
+        const isAvailable = (button) =>
+            button.isAvailable === undefined || button.isAvailable(selection);
+        return new Set(this.buttonsByNamespace[namespace].filter(isAvailable));
+    }
+
+    shouldSkipCompactToolbar(compactToolbarSize, completeToolbarSize) {
+        return (
+            completeToolbarSize < BUTTON_COUNT_THRESHOLD ||
+            completeToolbarSize <= compactToolbarSize
         );
+    }
+
+    shouldNeverSkipCompactForm() {
+        const isAlwaysAvailable = (button) => button.isAvailable === undefined;
+        const minimumSizeUnion =
+            new Set([
+                ...this.buttonsByNamespace["compact"].filter(isAlwaysAvailable),
+                ...this.buttonsByNamespace["expanded"].filter(isAlwaysAvailable),
+            ]).size - 1;
+        const maximumSizeCompact = this.buttonsByNamespace["compact"].length;
+        return !this.shouldSkipCompactToolbar(maximumSizeCompact, minimumSizeUnion);
     }
 
     /**
@@ -431,16 +448,25 @@ export class ToolbarPlugin extends Plugin {
      * display if the expanded version is compact enough.
      */
     getAvailableButtonsCompact(selection) {
-        const isAvailable = memoize((button) => button.isAvailable(selection));
+        const isAvailable = (btn) => btn.isAvailable === undefined || btn.isAvailable(selection);
+
+        // ==== EVIL OPTIMIZATION
+        this.shouldNeverSkip ??= this.shouldNeverSkipCompactForm();
+        if (this.shouldNeverSkip) {
+            return new Set(this.buttonsByNamespace["compact"].filter(isAvailable));
+        }
+        // =======
+
+        const memoizedIsAvailable = memoize(isAvailable);
         const getAvailableButtonsSet = (namespace) =>
-            new Set(this.buttonsByNamespace[namespace].filter(isAvailable));
+            new Set(this.buttonsByNamespace[namespace].filter(memoizedIsAvailable));
 
         const compactButtons = getAvailableButtonsSet("compact");
         const expandedButtons = getAvailableButtonsSet("expanded");
         const union = new Set([...compactButtons, ...expandedButtons]);
         // Remove the ellipsis button
         union.delete(this.buttonsByNamespace["compact"].at(-1));
-        if (union.size < BUTTON_COUNT_THRESHOLD || union.size <= compactButtons.size) {
+        if (this.shouldSkipCompactToolbar(compactButtons.size, union.size)) {
             this.state.namespace = "compact+expanded";
             return union;
         }
