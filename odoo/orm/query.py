@@ -6,8 +6,11 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
     from .models import BaseModel
+    from .fields import Field
 
-from odoo.tools.sql import SQL, make_identifier
+from odoo.tools.sql import IDENT_RE, SQL, make_identifier
+
+from .utils import parse_field_expr
 
 
 def _sql_from_table(alias: str, table: SQL) -> SQL:
@@ -153,6 +156,11 @@ class Query:
         return next(iter(self._joins))
 
     @property
+    def alias(self) -> TableSQL:
+        """ Return the query's main table as an alias object. """
+        return TableSQL(self._model, self.table, self)
+
+    @property
     def from_clause(self) -> SQL:
         """ Return the FROM clause of ``self``, without the FROM keyword. """
         return SQL(" ").join(
@@ -269,3 +277,63 @@ class Query:
 
     def __iter__(self) -> Iterator[int]:
         return iter(self.get_result_ids())
+
+
+class TableSQL(SQL):
+    """ Helper object to generate SQL table and field expressions. """
+    __slots__ = ('_alias', '_model', '_query')
+
+    def __init__(self, model: BaseModel | None, alias: str, query: Query):
+        assert alias.isidentifier() or IDENT_RE.match(alias), f"{alias!r} invalid for SQL.identifier()"
+        self._model = model
+        self._alias = alias
+        self._query = query
+
+    @property
+    def _sql_tuple(self):
+        return (f'"{self._alias}"', (), ())
+
+    def __getattr__(self, field_name: str) -> SQL:
+        if (model := self._model) is None:
+            return SQL.identifier(self._alias, field_name)
+        field = model._fields.get(field_name)
+        if field is None:
+            raise ValueError(f"Invalid field {field_name!r} in model {model._name!r}")
+        return FieldSQL(self._model, self._alias, field, self._query)
+
+    def __getitem__(self, field_expr: str) -> SQL:
+        field_name, property_name = parse_field_expr(field_expr)
+        sql_field = getattr(self, field_name)
+        return sql_field[property_name] if property_name else sql_field
+
+
+class FieldSQL(SQL):
+    """ Helper object that represents a field's SQL expression. """
+    __slots__ = ('_alias', '_field', '_model', '_query')
+
+    def __init__(self, model: BaseModel, alias: str, field: Field, query: Query):
+        self._model = model
+        self._alias = alias
+        self._field = field
+        self._query = query
+
+    @property
+    def _sql_tuple(self):
+        return self._model._field_to_sql(self._alias, self._field.name, self._query)._sql_tuple
+
+    def __getattr__(self, property_name: str) -> SQL:
+        if self._field.type == 'many2one':
+            # special case
+            comodel, coalias = self._field.join(self._model, self._alias, self._query)
+            field = comodel._fields.get(property_name)
+            if field is None:
+                raise ValueError(f"Invalid field {property_name!r} in model {comodel._name!r}")
+            return FieldSQL(comodel, coalias, field, self._query)
+
+        field_expr = f"{self._field.name}.{property_name}"
+        return self._model._field_to_sql(self._alias, field_expr, self._query)
+
+    def __getitem__(self, field_expr: str) -> SQL:
+        field_name, property_name = parse_field_expr(field_expr)
+        sql_field = getattr(self, field_name)
+        return sql_field[property_name] if property_name else sql_field

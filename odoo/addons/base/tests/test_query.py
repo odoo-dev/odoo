@@ -122,3 +122,65 @@ class TestQuery(TransactionCase):
         self.assertEqual(list(query), records.ids)
         self.cr.execute(query.select())
         self.assertEqual([row[0] for row in self.cr.fetchall()], records.ids)
+
+    def test_raw_aliases(self):
+        query = Query(None, 'foo', SQL('SELECT id FROM table'))
+        table = query.alias
+        self.assertIsInstance(table, SQL)
+        self.assertEqual(table, SQL('"foo"'))
+
+        column = table.stuff
+        self.assertIsInstance(column, SQL)
+        self.assertEqual(column, SQL('"foo"."stuff"'))
+
+    def test_model_aliases(self):
+        model = self.env['res.partner.category']
+        query = Query(model)
+        category = query.alias
+        self.assertIsInstance(category, SQL)
+        self.assertEqual(category, SQL('"res_partner_category"'))
+        self.assertEqual(category._alias, 'res_partner_category')
+        self.assertEqual(category._model, model)
+        self.assertEqual(category._query, query)
+
+        active = category.active
+        self.assertIsInstance(active, SQL)
+        self.assertEqual(active, SQL('"res_partner_category"."active"'))
+
+        # name is translated, check that 'category' delegates to the field
+        self.assertTrue(model._fields['name'].translate)
+        name = category.name
+        self.assertIsInstance(name, SQL)
+        self.assertEqual(name, SQL('"res_partner_category"."name"->>%s', self.env.lang or 'en_US'))
+
+        model = self.env['res.partner']
+        query = Query(model)
+        partner = query.alias
+        self.assertIsInstance(partner, SQL)
+        self.assertEqual(partner, SQL('"res_partner"'))
+
+        # property access on field
+        create_date = partner.create_date
+        self.assertIsInstance(create_date, SQL)
+        self.assertEqual(create_date, SQL('"res_partner"."create_date"'))
+
+        create_month = create_date.month_number
+        self.assertIsInstance(create_month, SQL)
+        self.assertEqual(create_month, SQL('date_part(%s, "res_partner"."create_date")', 'month'))
+
+        # automatic LEFT JOIN on many2one field
+        company = partner.company_id
+        self.assertIsInstance(company, SQL)
+        self.assertEqual(company, SQL('"res_partner"."company_id"'))
+
+        company_name = company.name
+        self.assertIsInstance(company_name, SQL)
+        self.assertEqual(company_name, SQL('"res_partner__company_id"."name"'))
+
+        with self.assertQueries(['''
+            SELECT "res_partner__company_id"."name"
+            FROM "res_partner"
+            LEFT JOIN "res_company" AS "res_partner__company_id"
+                ON ("res_partner"."company_id" = "res_partner__company_id"."id")
+        ''']):
+            self.env.execute_query(query.select(company_name))
