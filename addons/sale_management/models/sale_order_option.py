@@ -98,7 +98,7 @@ class SaleOrderOption(models.Model):
             if not option.product_id:
                 continue
             # To compute the discount a so line is created in cache
-            values = option._get_values_to_add_to_order()
+            values = option.with_context(from_compute_discout=True)._get_values_to_add_to_order()
             new_sol = self.env['sale.order.line'].new(values)
             new_sol._compute_discount()
             option.discount = new_sol.discount
