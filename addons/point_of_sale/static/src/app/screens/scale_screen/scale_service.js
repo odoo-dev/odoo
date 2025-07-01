@@ -104,11 +104,12 @@ export class PosScaleService extends Reactive {
     get isWeightValid() {
         // LNE requires that the weight changes from the previously
         // added value before another product is allowed to be added.
+        //debugger;
         return (
-            !this.lastWeight ||
+            (!this.lastWeight ||
             floatCompare(this.weight, this.lastWeight, {
                 decimals: this._roundingDecimalPlaces,
-            }) !== 0
+            }) !== 0) && this.netWeight && this.netWeight > 0
         );
     }
 
