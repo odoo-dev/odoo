@@ -77,6 +77,17 @@ class StockMove(models.Model):
             else:
                 move.value = 0
 
+    def _get_remaining_qty(self):
+        """Returns the quantity currently in stock"""
+        self.ensure_one()
+        moves_stack, last_move_qty = self.product_id._run_fifo_get_stack()
+        moves_stack = self.env['stock.move'].concat(*moves_stack)
+        if self not in moves_stack:
+            return 0
+        if self == moves_stack[-1:]:
+            return last_move_qty
+        return self.quantity
+
     def _get_value(self, forced_std_price=False):
         """Returns the value and the quantity valued on the move
         In priority order:

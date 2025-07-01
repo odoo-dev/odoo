@@ -204,10 +204,7 @@ class ProductProduct(models.Model):
                 quantity -= out_qty
         return avco_value
 
-    def _run_fifo(self, quantity):
-        """ Returns the value for the next outgoing product base on the qty give as argument."""
-        self.ensure_one()
-        fifo_cost = 0
+    def _run_fifo_get_stack(self):
         fifo_stack = []
         fifo_stack_size = self.qty_available  # Problem: Missing qty out but not invoiced
 
@@ -216,13 +213,22 @@ class ProductProduct(models.Model):
             ('is_in', '=', True),
         ], order='date asc', limit=fifo_stack_size)
 
+        remaining_qty_on_last_move = 0
         # Go to the bottom of the stack
         while fifo_stack_size >= 0 and moves_in:
             move = moves_in[0]
             moves_in = moves_in[1:]
             in_qty = sum(move._get_in_move_lines().mapped('quantity'))
             fifo_stack.append(move)
+            remaining_qty_on_last_move = min(in_qty, fifo_stack_size)
             fifo_stack_size -= in_qty
+        return fifo_stack, remaining_qty_on_last_move
+
+    def _run_fifo(self, quantity):
+        """ Returns the value for the next outgoing product base on the qty give as argument."""
+        self.ensure_one()
+        fifo_cost = 0
+        fifo_stack, __ = self._run_fifo_get_stack()
 
         # Going up to get the quantity in the argument
         while quantity >= 0 and fifo_stack:
