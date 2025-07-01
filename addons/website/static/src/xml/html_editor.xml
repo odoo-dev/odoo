@@ -29,6 +29,7 @@
         placeholder.translate="Type your URL"
         inputClass="'o_we_href_input_link border-dark-subtle form-control form-control-sm'"
         t-on-keydown="onKeydownEnter"
+        t-on-input="onChange"
         updateValue.bind="updateValue"
     >
         <t t-set-slot="urlOption" t-slot-scope="urlOptionScope">
