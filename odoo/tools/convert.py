@@ -537,11 +537,6 @@ form: module.record_id""" % (xml_id,)
         return self._tag_record(record)
 
     def id_get(self, id_str, raise_if_not_found=True):
-        if '.' not in id_str:
-            id_str = '%s.%s' % (self.module, id_str)
-        if id_str in self.idref:
-            
-            return self.idref[id_str]
         res = self.model_id_get(id_str, raise_if_not_found)
         return res and res[1]
 
