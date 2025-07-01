@@ -9,6 +9,18 @@
                     <span t-esc="visitor.history"/>
                 </div>
             </div>
+            <div t-if="recentConversations.length" class="d-flex flex-column bg-inherit gap-1">
+                <h3 class="pt-3">Recent conversations</h3>
+                <t t-foreach="recentConversations" t-as="thread" t-key="thread.localId">
+                    <button
+                        class="btn btn-sm btn-secondary d-flex align-items-center justify-content-center gap-1 rounded-3"
+                        t-on-click="()=>thread.open()"
+                    >
+                        <i class="fa fa-external-link opacity-75"/>
+                        <span class="ms-1 fw-bold" t-esc="thread.displayName"/>
+                    </button>
+                </t>
+            </div>
         </xpath>
     </t>
 </templates>

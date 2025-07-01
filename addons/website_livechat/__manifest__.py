@@ -26,6 +26,11 @@
             "website/static/src/**/common/**/*",
             "website_livechat/static/src/**/common/**/*",
         ],
+        'im_livechat.embed_assets_unit_tests_setup': [
+            ('remove', 'website_livechat/static/**'),
+            'website_livechat/static/tests/website_livechat_test_helpers.js',
+            'website_livechat/static/tests/mock_server/**/*',
+        ],
         "mail.assets_public": [
             "website_livechat/static/src/**/common/**/*",
         ],
