@@ -13,7 +13,7 @@ import * as ProductScreenPos from "@point_of_sale/../tests/tours/utils/product_s
 import * as ProductScreenResto from "@pos_restaurant/../tests/tours/utils/product_screen_util";
 import * as Order from "@point_of_sale/../tests/tours/utils/generic_components/order_widget_util";
 import * as TicketScreen from "@point_of_sale/../tests/tours/utils/ticket_screen_util";
-import { inLeftSide, negateStep, waitForLoading } from "@point_of_sale/../tests/tours/utils/common";
+import { inLeftSide, negateStep } from "@point_of_sale/../tests/tours/utils/common";
 import { registry } from "@web/core/registry";
 import * as Numpad from "@point_of_sale/../tests/tours/utils/numpad_util";
 import { delay } from "@odoo/hoot-dom";
@@ -740,7 +740,7 @@ registry.category("web_tour.tours").add("test_book_and_release_table", {
             Dialog.confirm("Open Register"),
             FloorScreen.clickTable("5"),
             ProductScreen.bookOrReleaseTable(),
-            waitForLoading(),
+            Chrome.isSynced(),
             {
                 content: "Check if order has a server ID",
                 trigger: "body",
@@ -754,6 +754,7 @@ registry.category("web_tour.tours").add("test_book_and_release_table", {
             },
             FloorScreen.clickTable("5"),
             ProductScreen.bookOrReleaseTable(),
-            waitForLoading(),
+            Chrome.isSynced(),
+            FloorScreen.isShown(),
         ].flat(),
 });
