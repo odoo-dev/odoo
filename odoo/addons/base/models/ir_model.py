@@ -12,7 +12,7 @@ from operator import itemgetter
 
 from psycopg2.extras import Json
 
-from odoo import api, fields, models, tools
+from odoo import api, fields, models, tools, modules
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Command, Domain
 from odoo.tools import frozendict, reset_cached_properties, split_every, sql, unique, OrderedSet, SQL
@@ -43,6 +43,7 @@ SAFE_EVAL_BASE = {
     'time': time,
 }
 
+from odoo.modules.loading import TEST_COUNT
 
 def make_compute(text, deps):
     """ Return a compute function from its code body and dependencies. """
@@ -2209,6 +2210,9 @@ class IrModelData(models.Model):
         result = self.env.cr.fetchone()
         if not (result and result[1]):
             raise ValueError('External ID not found in the system: %s' % xmlid)
+        # when not in current test
+        if not modules.module.current_test:
+            TEST_COUNT[0] += 1
         return result
 
     @api.model

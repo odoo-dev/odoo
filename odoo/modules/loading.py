@@ -36,6 +36,8 @@ if typing.TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
+TEST_COUNT = [0]
+
 
 def load_data(env: Environment, idref: IdRef, mode: LoadMode, kind: LoadKind, package: ModuleNode) -> bool:
     """
@@ -577,6 +579,8 @@ def load_modules(
 
         # STEP 10: check that we can trust nullable columns
         registry.check_null_constraints(cr)
+
+        _logger.warning("TEST COUNT: %s", TEST_COUNT[0])
 
 
 def reset_modules_state(db_name: str) -> None:
