@@ -69,9 +69,10 @@ class TestL10nEsEdiVerifactuCommon(AccountTestInvoicingCommon):
         cls.tax0_no_sujeto = cls.tax0_no_sujeto_loc.copy()
         cls.tax0_no_sujeto.l10n_es_type = 'no_sujeto'
 
+        # TODO: check for tour
         # Everything in the tests should be possible without being administrator.
         # We do not want to hide access errors the user may have in production (i.e. with access to the certificates)
-        cls.user.groups_id = [Command.unlink(cls.env.ref('base.group_system').id)]
+        # cls.user.groups_id = [Command.unlink(cls.env.ref('base.group_system').id)]
 
     @classmethod
     def _read_file(cls, path, *args):
