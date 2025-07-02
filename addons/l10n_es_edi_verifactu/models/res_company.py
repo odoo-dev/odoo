@@ -19,6 +19,16 @@ class ResCompany(models.Model):
         default=True,
         copy=False,
     )
+    l10n_es_edi_verifactu_mock_environment = fields.Selection(
+        string="Veri*Factu Mock Environment",
+        selection=[
+            ('rejected', "Rejected"),
+            ('registered_with_errors', "Registered with Errors"),
+            ('accepted', "Accepted"),
+        ],
+        default='accepted',
+        copy=False,
+    )
     l10n_es_edi_verifactu_chain_sequence_id = fields.Many2one(
         comodel_name='ir.sequence',
         string="Veri*Factu Document Chain Sequence",

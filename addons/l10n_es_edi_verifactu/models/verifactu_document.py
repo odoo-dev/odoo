@@ -7,7 +7,9 @@ import contextlib
 import hashlib
 import logging
 import math
+import random
 import requests.exceptions
+import string
 import json
 
 from odoo import _, api, fields, models
@@ -1031,11 +1033,33 @@ class L10nEsEdiVerifactuDocument(models.Model):
         document_dict_list = [document._get_document_dict() for document in self]
         batch_dict = self.with_company(sender_company)._get_batch_dict(document_dict_list, incident=incident)
 
-        info = self.with_company(sender_company)._send_batch(batch_dict)
+        mock_state = sender_company.l10n_es_edi_verifactu_mock_environment
+        if mock_state:
+            info = {
+                'state': mock_state,
+                'waiting_time_seconds': 60,
+                'response_csv': ''.join(random.choices(string.ascii_uppercase + string.digits, k=16)),
+                'errors': [],
+            }
+        else:
+            info = self.with_company(sender_company)._send_batch(batch_dict)
 
         # Store the information from the response split over the individual documents
         for document in self:
-            response_info = document._get_response_info(info)
+            if mock_state:
+                response_info = {
+                    'state': mock_state,
+                    'response_csv': info['response_csv'],
+                    'cancellation': 'RegistroAnulacion' in document._get_document_dict(),
+                    'waiting_time_seconds': info['waiting_time_seconds'],
+                    'errors': [],
+                }
+                if mock_state == 'registered_with_errors':
+                    response_info['errors'].append('[2001] El NIF del bloque Destinatarios no está identificado en el censo de la AEAT.')
+                elif mock_state == 'rejected':
+                    response_info['errors'].append('[1109] El NIF no está identificado en el censo de la AEAT')
+            else:
+                response_info = document._get_response_info(info)
 
             # The errors have to be formatted (as HTML) before storing them on the document
             errors_html = False
