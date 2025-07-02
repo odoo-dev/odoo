@@ -99,6 +99,7 @@ export class OptionsContainer extends BaseOptionComponent {
 
     toggle() {
         this.state.folded = !this.state.folded;
+        this.props.editingElement.folded = this.state.folded;
     }
 
     selectElement() {
