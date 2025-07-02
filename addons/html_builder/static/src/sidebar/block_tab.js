@@ -15,6 +15,7 @@ export class BlockTab extends Component {
     static components = { Snippet, CustomInnerSnippet };
     static props = {
         snippetModel: { type: Object },
+        getExternalScollableAncestor: { type: Function, optional: true },
     };
 
     setup() {
@@ -200,6 +201,7 @@ export class BlockTab extends Component {
             this.document.defaultView !== window ? this.document.defaultView : false;
 
         const scrollingElement = () =>
+            this.props.getExternalScollableAncestor?.() ||
             this.shared.dropzone.getDropRootElement() ||
             this.editable.querySelector(".o_notebook") ||
             getScrollingElement(this.document) ||
