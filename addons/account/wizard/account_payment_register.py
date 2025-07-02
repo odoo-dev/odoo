@@ -181,7 +181,7 @@ class AccountPaymentRegister(models.TransientModel):
             move = lines.move_id
             label = move.payment_reference or move.ref or move.name
         else:
-            label = self.company_id.get_next_batch_payment_communication()
+            label = self.company_id.get_next_group_payment_communication()
         return label
 
     @api.model

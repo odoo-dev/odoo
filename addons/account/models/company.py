@@ -167,6 +167,20 @@ class ResCompany(models.Model):
             'prefix': 'BATCH/%(year)s/',
         }),
     )
+    
+    group_payment_sequence_id = fields.Many2one(
+        comodel_name='ir.sequence',
+        readonly=True,
+        copy=False,
+        default=lambda self: self.env['ir.sequence'].sudo().create({
+            'name': _("Group Payment Number Sequence"),
+            'implementation': 'no_gap',
+            'padding': 5,
+            'use_date_range': True,
+            'company_id': self.id,
+            'prefix': 'PAY/%(year)s/',
+        }),
+    )
 
     #Fields of the setup step for opening move
     account_opening_move_id = fields.Many2one(string='Opening Journal Entry', comodel_name='account.move', help="The journal entry containing the initial balance of all this company's accounts.")
@@ -277,6 +291,14 @@ class ResCompany(models.Model):
         '''
         self.ensure_one()
         return self.sudo().batch_payment_sequence_id.next_by_id()
+    
+    def get_next_group_payment_communication(self):
+        '''
+        When in need of a group payment communication reference (several invoices paid at the same time)
+        use group_payment_sequence_id to get it (eventually create it first): e.g PAY/2025/00001
+        '''
+        self.ensure_one()
+        return self.sudo().group_payment_sequence_id.next_by_id()
 
     def _get_company_root_delegated_field_names(self):
         return super()._get_company_root_delegated_field_names() + [
