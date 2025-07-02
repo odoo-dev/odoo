@@ -10,6 +10,7 @@ class AccountChartTemplate(models.AbstractModel):
 
     def _post_load_data(self, template_code, company, template_data):
         super()._post_load_data(template_code, company, template_data)
+        # TODO: Set company_id field.
         company = company or self.env.company
         fields_name = self.env['product.category']._get_stock_account_property_field_names()
         ProductCategory = self.env['product.category'].with_company(company.id)

@@ -10,4 +10,13 @@
             </field>
         </field>
     </record>
+    <record model="ir.actions.server" id="action_closing">
+        <field name="name">Closing</field>
+        <field name="model_id" ref="model_res_company"/>
+        <field name="binding_model_id" ref="model_res_company" />
+        <field name="state">code</field>
+        <field name="code">
+action = records.post_stock_valuation(periodic_cogs=True)
+        </field>
+    </record>
 </odoo>

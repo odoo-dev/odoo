@@ -55,7 +55,7 @@ class StockMove(models.Model):
     def _get_price_unit(self):
         """ Returns the unit price to value this stock move """
         self.ensure_one()
-        return 0
+        return self._get_value() / self.quantity
 
     @api.model
     def _get_valued_types(self):
