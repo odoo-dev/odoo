@@ -161,7 +161,101 @@ export class ToolbarPlugin extends Plugin {
         ],
     };
 
+    addTestingBox() {
+        if (this.document.querySelector(".testing_box")) {
+            return;
+        }
+        const testingBox = this.document.createElement("div");
+        testingBox.className = "testing_box";
+
+        // Add CSS styles for 3-column layout
+        const style = this.document.createElement("style");
+        style.textContent = `
+            .testing_box {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 5px;
+                padding: 10px;
+                border: 1px solid #ccc;
+                margin: 10px 0;
+            }
+            .testing_box_item {
+                display: flex;
+                align-items: center;
+                gap: 2px;
+            }
+            .testing_box_buttons {
+                grid-column: 1 / -1;
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                margin-top: 10px;
+            }
+            .testing_box_button {
+                padding: 5px 10px;
+                border: 1px solid #ccc;
+                background: #f8f9fa;
+                cursor: pointer;
+                border-radius: 3px;
+            }
+            .testing_box_button:hover {
+                background: #e9ecef;
+            }
+        `;
+        this.document.head.appendChild(style);
+
+        this.buttonGroups = this.getButtonGroups();
+        const buttonsByNamespace = this.getButtonsByNamespace();
+        delete this.buttonGroups;
+        this.testingBox = testingBox;
+        this.editable.closest(".o_field_html").before(testingBox);
+        for (const { id } of buttonsByNamespace["compact+expanded"]) {
+            const row = this.document.createElement("div");
+            row.className = "testing_box_item";
+            const label = this.document.createElement("label");
+            label.setAttribute("for", id);
+            label.textContent = id;
+            const checkbox = this.document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.id = id;
+            checkbox.checked = true;
+            row.append(checkbox, label);
+            testingBox.append(row);
+        }
+
+        // Create buttons container
+        const buttonsContainer = this.document.createElement("div");
+        buttonsContainer.className = "testing_box_buttons";
+
+        const refreshButton = this.document.createElement("button");
+        refreshButton.className = "testing_box_button";
+        refreshButton.textContent = "Refresh";
+        refreshButton.onclick = () => this.window.refreshEditor();
+
+        const clearButton = this.document.createElement("button");
+        clearButton.className = "testing_box_button";
+        clearButton.textContent = "Uncheck All";
+        clearButton.onclick = () => {
+            for (const checkbox of this.document.querySelectorAll(".testing_box_item input")) {
+                checkbox.checked = false;
+            }
+        };
+
+        const checkAllButton = this.document.createElement("button");
+        checkAllButton.className = "testing_box_button";
+        checkAllButton.textContent = "Check All";
+        checkAllButton.onclick = () => {
+            for (const checkbox of this.document.querySelectorAll(".testing_box_item input")) {
+                checkbox.checked = true;
+            }
+        };
+
+        buttonsContainer.append(refreshButton, clearButton, checkAllButton);
+        testingBox.append(buttonsContainer);
+    }
+
     setup() {
+        this.addTestingBox();
         const groupIds = new Set();
         for (const group of this.getResource("toolbar_groups")) {
             if (groupIds.has(group.id)) {
@@ -253,7 +347,11 @@ export class ToolbarPlugin extends Plugin {
      */
     getButtons() {
         /** @type {ToolbarItem[]} */
-        const toolbarItems = this.getResource("toolbar_items");
+        let toolbarItems = this.getResource("toolbar_items");
+        toolbarItems = toolbarItems.filter((item) => {
+            const checkbox = this.document.getElementById(item.id);
+            return checkbox ? checkbox.checked : true;
+        });
 
         /** @returns {ToolbarCommandButton} */
         const commandItemToButton = (/** @type {ToolbarCommandItem}*/ item) => {
