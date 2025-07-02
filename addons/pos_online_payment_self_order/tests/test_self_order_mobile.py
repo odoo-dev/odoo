@@ -35,9 +35,6 @@ class TestSelfOrderMobile(SelfOrderCommonTest, OnlinePaymentCommon):
             'self_ordering_service_mode': 'table',
             'self_order_online_payment_method_id': self.online_payment_method.id,
         })
-        self.pos_config.write({
-            'self_ordering_pay_after': 'meal',
-        })
         self.pos_config.with_user(self.pos_user).open_ui()
         self.pos_config.current_session_id.set_opening_control(0, "")
         self_route = self.pos_config._get_self_order_route()
@@ -51,9 +48,23 @@ class TestSelfOrderMobile(SelfOrderCommonTest, OnlinePaymentCommon):
         self.pos_config.write({
             'self_ordering_mode': 'kiosk',
             'self_ordering_service_mode': 'counter',
-            'self_order_online_payment_method_id': self.online_payment_method.id,
+            'payment_method_ids': [(6, 0, self.online_payment_method.ids)],
             'use_presets': False,
         })
         self.pos_config.with_user(self.pos_user).open_ui()
         self.pos_config.current_session_id.set_opening_control(0, "")
         self.start_tour(self_route, "test_online_payment_kiosk_qr_code")
+
+    def test_kiosk_without_online_payment(self):
+        """
+        Verify that kiosk should not ask for payment when valid payment method is not setup
+        """
+        self_route = self.pos_config._get_self_order_route()
+        self.pos_config.write({
+            'self_ordering_mode': 'kiosk',
+            'self_ordering_service_mode': 'counter',
+            'use_presets': False,
+        })
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.pos_config.current_session_id.set_opening_control(0, "")
+        self.start_tour(self_route, "test_kiosk_without_online_payment")
