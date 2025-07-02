@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_home" name="Surveys" inherit_id="portal.portal_my_home">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="portal_service_category_enable" t-value="True"/>
+        </xpath>
+        <div id="portal_service_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Surveys</t>
+                <t t-set="url" t-value="'/my/surveys'"/>
+                <t t-set="text">Follow and view your surveys</t>
+                <t t-set="placeholder_count" t-value="'survey_count'"/>
+            </t>
+        </div>
+    </template>
+
+    <template id="portal_my_surveys" name="My Surveys">
+        <t t-call="portal.portal_layout">
+            <t t-if="not surveys">
+                <div class="alert alert-warning" role="alert">
+                    There are no surveys.
+                </div>
+            </t>
+            <t t-if="surveys" t-call="portal.portal_table">
+                <tbody>
+                    <tr>
+                        <th>
+                            Survey name
+                        </th>
+                        <th class="text-end">
+                            state
+                        </th>
+                    </tr>
+                    <tr t-foreach="surveys" t-as="survey">
+                        <td>
+                            <a t-att-href="survey.get_survey_save_url()" target="_blank"><t t-esc="survey.survey_id.display_name"/></a>
+                        </td>
+                        <td class="text-end">
+                            <t t-out="survey.state"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </t>
+        </t>
+    </template>
+</odoo>

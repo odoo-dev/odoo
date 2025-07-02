@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="survey_fill_form_in_progress" inherit_id="survey.survey_fill_form_in_progress">
+        <xpath expr="//t[@t-if=&quot;survey.questions_layout == &apos;one_page&apos;&quot;]//button[@type='submit']" position="before">
+            <button id="save_progress" type="button" class="btn btn-primary">
+                <span>Save progress</span>
+            </button>
+        </xpath>
+        <xpath expr="//t[@t-if=&quot;survey.questions_layout == &apos;page_per_section&apos;&quot;]//button[@type='submit']" position="before">
+            <t t-set="has_only_sections" t-value="True"/>
+            <t t-foreach="page.question_ids" t-as="question">
+                <t t-if="not question.is_page">
+                    <t t-set="has_only_sections" t-value="False"/>
+                </t>
+            </t>
+            <button t-if="not has_only_sections" id="save_progress" type="button" class="btn btn-primary">
+                <span>Save progress</span>
+            </button>
+        </xpath>
+        <xpath expr="//div[@t-if=&quot;survey.questions_layout == &apos;page_per_question&apos;&quot;]//button[@type='submit']" position="before">
+            <button t-if="not question.is_page" id="save_progress" type="button" class="btn btn-primary">
+                <span>Save progress</span>
+            </button>
+        </xpath>
+    </template>
+</odoo>

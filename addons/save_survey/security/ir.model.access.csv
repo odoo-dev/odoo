@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_survey_survey_portal,survey_survey_portal,survey.model_survey_survey,base.group_portal,1,0,0,0
+access_survey_user_input_portal,survey_user_input_portal,survey.model_survey_user_input,base.group_portal,1,0,0,0
