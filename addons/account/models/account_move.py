@@ -1800,8 +1800,7 @@ class AccountMove(models.Model):
     def _compute_show_reset_to_draft_button(self):
         for move in self:
             move.show_reset_to_draft_button = (
-                not self._is_move_restricted(move) \
-                and not move.inalterable_hash
+                not move.inalterable_hash
                 and (move.state == 'cancel' or (move.state == 'posted' and not move.need_cancel_request))
             )
 
