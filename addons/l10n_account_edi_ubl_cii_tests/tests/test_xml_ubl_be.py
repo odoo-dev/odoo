@@ -291,7 +291,9 @@ class TestUBLBE(TestUBLCommon, TestAccountMoveSendCommon):
                     'quantity': 1,
                     'product_id': False,
                     'price_unit': 0.30,
+                    'amount_currency': -0.30,
                     'balance': -0.15,
+                    'currency_id': self.other_currency.id,
                 }
             },
         ]

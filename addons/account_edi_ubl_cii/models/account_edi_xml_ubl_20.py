@@ -819,24 +819,24 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             if incoterm:
                 invoice_values['invoice_incoterm_id'] = incoterm.id
 
-        # ==== Document level AllowanceCharge, Prepaid Amounts, Payable Rounding Amount, Invoice Lines ====
+        # ==== Document level AllowanceCharge, Prepaid Amounts, Invoice Lines, Payable Rounding Amount ====
         allowance_charges_line_vals, allowance_charges_logs = self._import_document_allowance_charges(tree, invoice, invoice.journal_id.type, qty_factor)
         logs += self._import_prepaid_amount(invoice, tree, './{*}LegalMonetaryTotal/{*}PrepaidAmount', qty_factor)
-        logs += self._import_rounding_amount(invoice, tree, './{*}LegalMonetaryTotal/{*}PayableRoundingAmount', qty_factor)
         line_tag = (
             'InvoiceLine'
             if invoice.move_type in ('in_invoice', 'out_invoice') or qty_factor == -1
             else 'CreditNoteLine'
         )
         invoice_line_vals, line_logs = self._import_invoice_lines(invoice, tree, './{*}' + line_tag, qty_factor)
-        line_vals = allowance_charges_line_vals + invoice_line_vals
+        rounding_line_vals, rounding_logs = self._import_rounding_amount(invoice, tree, './{*}LegalMonetaryTotal/{*}PayableRoundingAmount', qty_factor)
+        line_vals = allowance_charges_line_vals + invoice_line_vals + rounding_line_vals
 
         invoice_values = {
             **invoice_values,
             'invoice_line_ids': [Command.create(line_value) for line_value in line_vals],
         }
         invoice.write(invoice_values)
-        logs += partner_logs + currency_logs + line_logs + allowance_charges_logs
+        logs += partner_logs + currency_logs + line_logs + allowance_charges_logs + rounding_logs
         return logs
 
     def _get_tax_nodes(self, tree):
