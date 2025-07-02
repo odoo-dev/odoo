@@ -11,15 +11,23 @@
             </div>
             <div t-if="recentConversations.length" class="d-flex flex-column bg-inherit gap-1">
                 <h3 class="pt-3">Recent conversations</h3>
-                <t t-foreach="recentConversations" t-as="thread" t-key="thread.localId">
+                <div class="btn btn-group o-rounded-bubble d-flex flex-column w-100 p-0 m-0">
                     <button
-                        class="btn btn-sm btn-secondary d-flex align-items-center justify-content-center gap-1 rounded-3"
+                        t-foreach="recentConversations" t-as="thread" t-key="thread.localId"
+                        class="btn btn-sm btn-secondary btn-group-item d-flex align-items-center justify-content-center gap-1 w-100 m-0 py-1"
                         t-on-click="()=>thread.open()"
+                        t-att-class="{
+                            'o-rounded-top-bubble': thread_first,
+                            'o-rounded-bottom-bubble': thread_last,
+                            'rounded-top-0': !thread_first,
+                            'rounded-bottom-0': !thread_last,
+                        }"
                     >
                         <i class="fa fa-external-link opacity-75"/>
                         <span class="ms-1 fw-bold" t-esc="thread.displayName"/>
+                        <span t-if="thread.livechat_end_dt" class="o-xsmaller text-muted" t-out="CLOSED_ON_TEXT(thread)"/>
                     </button>
-                </t>
+                </div>
             </div>
         </xpath>
     </t>
