@@ -18241,18 +18241,17 @@ window.print = function () {
           overlayManager.close(dialog);
         }
       });
-      return;
+    } else {
+      const activeServiceOnEntry = activeService;
+      activeService.renderPages().then(function () {
+        return activeServiceOnEntry.performPrint();
+      }).catch(function () {}).then(function () {
+        if (activeServiceOnEntry.active) {
+          // ODOO Patch: https://github.com/mozilla/pdf.js/issues/10630#issuecomment-855754913
+          setTimeout(abort, 1000);
+        }
+      });
     }
-
-    const activeServiceOnEntry = activeService;
-    activeService.renderPages().then(function () {
-      return activeServiceOnEntry.performPrint();
-    }).catch(function () {}).then(function () {
-      if (activeServiceOnEntry.active) {
-        // ODOO Patch: https://github.com/mozilla/pdf.js/issues/10630#issuecomment-855754913
-        setTimeout(abort, 1000);
-      }
-    });
   }
 };
 
