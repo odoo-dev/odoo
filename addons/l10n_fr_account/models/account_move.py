@@ -19,3 +19,16 @@ class AccountMove(models.Model):
     def _compute_l10n_fr_is_company_french(self):
         for record in self:
             record.l10n_fr_is_company_french = record.country_code in record.company_id._get_france_country_codes()
+
+    @api.depends('delivery_date')
+    def _compute_show_delivery_date(self):
+        for move in self:
+            move.show_delivery_date = True
+
+    @api.depends('invoice_date')
+    def _compute_delivery_date(self):
+        # EXTENDS 'account'
+        super()._compute_delivery_date()
+        for move in self:
+            if not move.delivery_date:
+                move.delivery_date = move.invoice_date
