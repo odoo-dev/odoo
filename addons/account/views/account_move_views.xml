@@ -308,6 +308,7 @@
                     <field name="name"/>
                     <field name="ref"/>
                     <field name="invoice_date"/>
+                    <field name="move_id" string="Journal Item Amount" filter_domain="['|',('debit', '=', self), ('credit', '=', self)]"/>
                     <field name="date"/>
                     <field name="date_maturity" string="Due Date"/>
                     <field name="discount_date" string="Discount Date"/>
