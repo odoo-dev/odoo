@@ -270,6 +270,8 @@ export class MassMailingIframe extends Component {
     }
 
     getBuilderProps() {
+        const getExternalScrollableAncestor = () =>
+            !this.showFullscreen && this.iframeRef.el && closestScrollableY(this.iframeRef.el);
         return {
             overlayRef: this.overlayRef,
             iframeLoaded: this.iframeLoaded,
@@ -277,6 +279,7 @@ export class MassMailingIframe extends Component {
             snippetModel: this.snippetModel,
             config: {
                 ...this.props.config,
+                getExternalScrollableAncestor,
             },
             // codeView => make it an available option in the builder (optional), only in debug?
             // getThemeTab => provide DesignTab
@@ -288,8 +291,7 @@ export class MassMailingIframe extends Component {
                 this.state.showFullscreen = !this.state.showFullscreen;
             },
             onEditorLoad: this.props.onEditorLoad,
-            getExternalScollableAncestor: () =>
-                !this.showFullscreen && this.iframeRef.el && closestScrollableY(this.iframeRef.el),
+            getExternalScrollableAncestor,
         };
     }
 

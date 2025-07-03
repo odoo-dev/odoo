@@ -45,7 +45,7 @@ export class Builder extends Component {
         getThemeTab: { type: Function, optional: true },
         editableSelector: { type: String },
         toggleFullscreen: { type: Function, optional: true },
-        getExternalScollableAncestor: { type: Function, optional: true },
+        getExternalScrollableAncestor: { type: Function, optional: true },
     };
     static defaultProps = {
         onEditorLoad: () => {},
