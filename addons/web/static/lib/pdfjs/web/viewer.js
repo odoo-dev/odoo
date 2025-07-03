@@ -18201,7 +18201,7 @@ PDFPrintService.prototype = {
         }
 
         print.call(window);
-        setTimeout(resolve, 20);
+        setTimeout(resolve, 10000);
       }, 0);
     });
   },
