@@ -597,6 +597,16 @@ class AccountMove(models.Model):
         string='Terms and Conditions',
         compute='_compute_narration', store=True, readonly=False,
     )
+    status_move_sent = fields.Selection(
+        selection=[
+            ('not_sent', "Not Sent"),
+            ('sent', "Sent"),
+        ],
+        readonly=True,
+        string="Sent Status",
+        default='not_sent',
+        compute='_compute_status_move_sent',
+    )
     is_move_sent = fields.Boolean(
         readonly=True,
         copy=False,
@@ -753,6 +763,11 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
+
+    @api.depends('is_move_sent')
+    def _compute_status_move_sent(self):
+        for move in self:
+            move.status_move_sent = 'sent' if move.is_move_sent else 'not_sent'
 
     @api.depends('move_type', 'partner_id')
     def _compute_invoice_default_sale_person(self):
