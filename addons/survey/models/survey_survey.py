@@ -787,7 +787,7 @@ class SurveySurvey(models.Model):
                 else pages_or_questions[current_page_index + 1:]
             for question in question_candidates.sorted(reverse=go_back):
                 # pages with description are potential questions to display (are part of question_candidates)
-                if question.is_page:
+                if question.is_page and question not in inactive_questions:
                     contains_active_question = any(sub_question not in inactive_questions for sub_question in question.question_ids)
                     is_description_section = not question.question_ids and not is_html_empty(question.description)
                     if contains_active_question or is_description_section:
@@ -890,7 +890,7 @@ class SurveySurvey(models.Model):
     def _get_conditional_maps(self):
         triggering_answers_by_question = defaultdict(lambda: self.env['survey.question.answer'])
         triggered_questions_by_answer = defaultdict(lambda: self.env['survey.question'])
-        for question in self.question_ids:
+        for question in self.question_and_page_ids:
             triggering_answers_by_question[question] |= question.triggering_answer_ids
 
             for triggering_answer_id in question.triggering_answer_ids:

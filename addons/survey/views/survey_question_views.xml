@@ -191,9 +191,9 @@
                                    options="{'embedded_components': false}"
                                    placeholder="e.g. Guidelines, instructions, picture, ... to help attendees answer"/>
                         </page>
-                        <page string="Options" name="options" invisible="is_page">
+                        <page string="Options" name="options">
                             <group>
-                                <group string="Answers" invisible="question_type == 'scale'">
+                                <group string="Answers" invisible="question_type == 'scale' or is_page">
                                     <!-- Global validation setting -->
                                     <field name="validation_required"
                                            invisible="question_type not in ['char_box', 'numerical_box', 'date', 'datetime']"/>
@@ -254,7 +254,7 @@
                                     />
                                 </group>
                             </group>
-                            <group>
+                            <group invisible="is_page">
                                 <group string="Constraints">
                                     <field name="constr_mandatory" string="Mandatory Answer"/>
                                     <field name="constr_error_msg"
