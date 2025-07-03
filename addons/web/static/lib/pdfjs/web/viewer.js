@@ -18190,8 +18190,8 @@ PDFPrintService.prototype = {
       img.onerror = reject;
     });
   },
-
-  performPrint() {
+  // ODOO Patch: fix print preview on mobile devices: https://github.com/mozilla/pdf.js/issues/12020
+  performPrint(renderDelay) {
     this.throwIfInactive();
     return new Promise(resolve => {
       setTimeout(() => {
@@ -18201,8 +18201,12 @@ PDFPrintService.prototype = {
         }
 
         print.call(window);
+        // ODOO Patch: fix print preview on mobile devices: https://github.com/mozilla/pdf.js/issues/12020
+        // Delay promise resolution in case print() was not synchronous.
+        // On Android and iOS, it seems that the preview dialog re-renders the entire PDF in the preview,
+        // which can obviously take some time, so we need to add this time to the overall duration of the asynchronous print.
         setTimeout(resolve, 20);
-      }, 0);
+      }, 20);
     });
   },
 
@@ -18245,8 +18249,11 @@ window.print = function () {
     }
 
     const activeServiceOnEntry = activeService;
+    // ODOO Patch: fix print preview on mobile devices: https://github.com/mozilla/pdf.js/issues/12020
+    const beforePrintTime = new Date().getTime();
     activeService.renderPages().then(function () {
-      return activeServiceOnEntry.performPrint();
+      // ODOO Patch: fix print preview on mobile devices: https://github.com/mozilla/pdf.js/issues/12020
+      return activeServiceOnEntry.performPrint(new Date().getTime() - beforePrintTime);
     }).catch(function () {}).then(function () {
       if (activeServiceOnEntry.active) {
         // ODOO Patch: https://github.com/mozilla/pdf.js/issues/10630#issuecomment-855754913
