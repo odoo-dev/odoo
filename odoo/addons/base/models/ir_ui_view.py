@@ -878,14 +878,17 @@ actual arch.
         return locate_node(arch, spec)
 
     def inherit_branding(self, specs_tree):
-        for node in specs_tree.iterchildren(tag=etree.Element):
-            xpath = node.getroottree().getpath(node)
+        stack = list(specs_tree.iterchildren(tag=etree.Element, reversed=True))
+        while stack:
+            node = stack.pop()
             if node.tag == 'data' or node.tag == 'xpath' or node.get('position'):
-                self.inherit_branding(node)
+                stack.append(node)
             elif node.get('t-field'):
+                xpath = node.getroottree().getpath(node)
                 node.set('data-oe-xpath', xpath)
-                self.inherit_branding(node)
+                stack.append(node)
             else:
+                xpath = node.getroottree().getpath(node)
                 node.set('data-oe-id', str(self.id))
                 node.set('data-oe-xpath', xpath)
                 node.set('data-oe-model', 'ir.ui.view')
