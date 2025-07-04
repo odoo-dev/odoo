@@ -785,8 +785,6 @@ export class RelationalModel extends Model {
                 }
             });
         }
-        // Filter fieldsToAggregate to allow only those with no_aggregator !== "1"
-        // Not able to access the the attribute value of (no_aggregator)...
         const aggregates = getAggregateSpecifications(
             pick(config.fields, ...config.fieldsToAggregate)
         );

@@ -46,4 +46,14 @@ export class PurchaseOrderLineCompareListRenderer extends ListRenderer {
         }
         return classNames;
     }
+
+    formatGroupAggregate(group, column) {
+        // Override to handle where aggregator isn't needed (e.g. comparison view)
+        if (["1", "true", "True"].includes(column.attrs.no_aggregator)) {
+            return {
+                value: "",
+            };
+        }
+        return super.formatGroupAggregate(group, column);
+    }
 }
