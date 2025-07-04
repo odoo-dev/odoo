@@ -46,7 +46,7 @@ class AccountMoveSend(models.TransientModel):
     mail_template_id = fields.Many2one(
         comodel_name='mail.template',
         string="Use template",
-        domain="[('model', '=', 'account.move')]",
+        domain="[('model', '=', 'account.move'), '|', ('user_id','=', False), ('user_id', '=', uid)]",
     )
     mail_lang = fields.Char(
         string="Lang",
