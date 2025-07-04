@@ -141,6 +141,20 @@ export class TourAutomatic {
                 end();
             },
         });
+
+        const beforeUnloadHandler = () => {
+            if (!this.allowUnload) {
+                const message = `
+                    Be sure to use { expectUnloadPage: true } for any step
+                    that involves firing a beforeUnload event.
+                    This avoid a non-deterministic behavior by explicitly stopping
+                    the tour that might continue before the page is unloaded.
+                `.replace(/^\s+/gm, "");
+                this.throwError(message);
+            }
+        };
+        window.addEventListener("beforeunload", beforeUnloadHandler);
+
         if (this.debugMode && this.currentIndex === 0) {
             // Starts the tour with a debugger to allow you to choose devtools configuration.
             // eslint-disable-next-line no-debugger
