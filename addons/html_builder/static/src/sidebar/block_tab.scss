@@ -179,3 +179,9 @@ body.modal-open:has(.o_block_tab) {
         }
     }
 }
+
+.modal-open:has(.o_block_tab) {
+    .o_snippet {
+        z-index: 1056;
+    }
+}
