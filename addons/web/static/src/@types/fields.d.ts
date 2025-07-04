@@ -14,6 +14,7 @@ declare module "fields" {
         sortable: boolean;
         store: boolean;
         string: string;
+        no_aggregator?: boolean;
         type: T;
     }
 

@@ -283,6 +283,10 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
             activeFields[fieldName] = activeField;
         }
 
+        if(fieldNode.attrs && fieldNode.attrs.no_aggregator) {
+            activeFields[fieldName].no_aggregator = fieldNode.attrs.no_aggregator;
+        }
+
         if (fieldNode.field) {
             let fieldDependencies = fieldNode.field.fieldDependencies;
             if (typeof fieldDependencies === "function") {

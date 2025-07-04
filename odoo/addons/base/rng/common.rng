@@ -212,6 +212,7 @@
             <rng:optional><rng:attribute name="password"/></rng:optional>
             <rng:optional><rng:attribute name="comparator"/></rng:optional>
             <rng:optional><rng:attribute name="sum"/></rng:optional>
+            <rng:optional><rng:attribute name="no_aggregator"/></rng:optional>
             <rng:optional><rng:attribute name="bold"/></rng:optional>
             <rng:optional><rng:attribute name="avg"/></rng:optional>
             <rng:optional><rng:attribute name="select"/></rng:optional>
