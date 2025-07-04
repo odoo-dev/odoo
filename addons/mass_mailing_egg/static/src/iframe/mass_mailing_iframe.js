@@ -1,6 +1,7 @@
 import { parseHTML } from "@html_editor/utils/html";
 import {
     Component,
+    markup,
     onMounted,
     onWillDestroy,
     onWillUpdateProps,
@@ -21,6 +22,7 @@ import { Editor } from "@html_editor/editor";
 import { useThrottleForAnimation } from "@web/core/utils/timing";
 import { closestScrollableY } from "@web/core/utils/scrolling";
 import { _t } from "@web/core/l10n/translation";
+import { MassMailingMobilePreviewDialog } from "../mobile_preview_dialog/mobile_preview_dialog";
 
 const IFRAME_VALUE_SELECTOR = ".o_mass_mailing_value";
 
@@ -41,6 +43,7 @@ export class MassMailingIframe extends Component {
         readonly: { type: Boolean, optional: true },
         onEditorLoad: { type: Function, optional: true },
         onBlur: { type: Function, optional: true },
+        extraClass: { type: String, optional: true},
     };
     static defaultProps = {
         onEditorLoad: () => {},
@@ -55,6 +58,7 @@ export class MassMailingIframe extends Component {
          * => readonly does nothing?
          */
         this.hotkeyService = useService("hotkey");
+        this.dialog = useService("dialog");
         this.overlayRef = useChildRef();
         this.iframeRef = useForwardRefToParent("iframeRef");
         this.sidebarRef = useRef("sidebarRef");
@@ -62,6 +66,7 @@ export class MassMailingIframe extends Component {
             localOverlayContainerKey: uniqueId("mass_mailing_iframe"),
         });
         this.state = useState({
+            isMobile: false,
             ready: false,
         });
         this.iframeLoaded = new Deferred();
@@ -297,8 +302,8 @@ export class MassMailingIframe extends Component {
             },
             // codeView => make it an available option in the builder (optional), only in debug?
             // Plugins => provide plugins selection, properly filter excluded Plugins
-            isMobile: false, // TODO EGGMAIL: investigate, is it the mobile display feature or the current page state
-            toggleMobile: () => {}, // TODO EGGMAIL: is it the mobile display feature?
+            isMobile: this.state.isMobile,
+            toggleMobile: this.toggleMobile.bind(this),
             editableSelector: IFRAME_VALUE_SELECTOR,
             toggleFullscreen: () => {
                 this.state.showFullscreen = !this.state.showFullscreen;
@@ -328,5 +333,16 @@ export class MassMailingIframe extends Component {
     retargetLink(link) {
         link.setAttribute("target", "_blank");
         link.setAttribute("rel", "noreferrer");
+    }
+
+    toggleMobile(ev) {
+        this.state.isMobile = true;
+        this.mobilePreview = this.dialog.add(MassMailingMobilePreviewDialog, {
+            title: _t("Mobile Preview"),
+            value: markup(this.props.config.content),
+            IframeComponent: MassMailingIframe,
+        }, {
+            onClose: () => this.state.isMobile = false,
+        });
     }
 }
