@@ -956,12 +956,16 @@ class FilesystemSessionStore(sessions.FilesystemSessionStore):
         session.should_rotate = False
         self.save(session)
 
+    def remove_sid_pre_process(self, sid):
+        pass
+
     def vacuum(self, max_lifetime=SESSION_LIFETIME):
         threshold = time.time() - max_lifetime
         for fname in glob.iglob(os.path.join(root.session_store.path, '*', '*')):
             path = os.path.join(root.session_store.path, fname)
             with contextlib.suppress(OSError):
                 if os.path.getmtime(path) < threshold:
+                    self.remove_sid_pre_process(path.split(os.sep)[-1])
                     os.unlink(path)
 
     def generate_key(self, salt=None):
@@ -999,6 +1003,7 @@ class FilesystemSessionStore(sessions.FilesystemSessionStore):
                 files_to_unlink.extend(glob.glob(normalized_path))
         for fn in files_to_unlink:
             with contextlib.suppress(OSError):
+                self.remove_sid_pre_process(fn.split(os.sep)[-1])
                 os.unlink(fn)
 
 

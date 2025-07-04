@@ -5,6 +5,7 @@ import json
 import logging as logger
 
 from odoo import api, fields, models
+from odoo.http import request, Session, FilesystemSessionStore, SESSION_LIFETIME
 from ..tools.jwt import generate_vapid_keys, InvalidVapidError
 
 _logger = logger.getLogger(__name__)
@@ -65,12 +66,14 @@ class MailPushDevice(models.Model):
                     'partner_id': self.env.user.partner_id,
                 })
         else:
-            self.sudo().create([{
+            mail_push_device = self.sudo().create([{
                 'endpoint': endpoint,
                 'expiration_time': kw.get('expirationTime'),
                 'keys': json.dumps(browser_keys),
                 'partner_id': self.env.user.partner_id.id,
             }])
+            if request:
+                request.session['mail_push_device'] = mail_push_device.id
 
     @api.model
     def unregister_devices(self, **kw):
@@ -87,3 +90,33 @@ class MailPushDevice(models.Model):
         ir_params_sudo = self.env['ir.config_parameter'].sudo()
         db_public_key = ir_params_sudo.get_param('mail.web_push_vapid_public_key')
         return db_public_key == sw_public_key
+
+
+class SessionMailPushDevice(Session):
+
+    def logout(self, keep_db=False):
+        if self['mail_push_device']:
+            self.env['mail_push_device'].sudo.browse(self['mail_push_device']).unlink()
+        super().logout(self, keep_db=keep_db)
+
+
+class FilesystemSessionStoreMailPushDecide(FilesystemSessionStore):
+
+    mail_push_device_to_remove = []
+
+    def remove_sid_pre_process(self, sid):
+        mail_push_device = self.get(sid)['mail_push_device']
+        if mail_push_device:
+            self.mail_push_device_to_remove.append(mail_push_device)
+
+    def vacuum(self, max_lifetime=SESSION_LIFETIME):
+        super().vacuum(self, max_lifetime=max_lifetime)
+        if len(self.mail_push_device_to_remove) > 0:
+            self.env['mail_push_device'].sudo.browse(self.mail_push_device_to_remove).unlink()
+            self.mail_push_device_to_remove.clear()
+
+    def delete_from_identifiers(self, identifiers):
+        super().delete_from_identifiers(self, identifiers)
+        if len(self.mail_push_device_to_remove) > 0:
+            self.env['mail_push_device'].sudo.browse(self.mail_push_device_to_remove).unlink()
+            self.mail_push_device_to_remove.clear()
