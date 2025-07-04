@@ -848,6 +848,8 @@ class Environment(Mapping):
         for model_name in OrderedSet(field.model_name for field in self.cache.get_dirty_fields()):
             self[model_name].flush_model()
 
+        assert len(self.cache.get_dirty_fields()) == 0
+
     def is_protected(self, field, record):
         """ Return whether `record` is protected against invalidation or
             recomputation for `field`.
