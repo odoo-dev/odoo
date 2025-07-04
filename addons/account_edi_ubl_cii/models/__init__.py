@@ -13,3 +13,4 @@ from . import account_edi_xml_ubl_a_nz
 from . import account_edi_xml_ubl_sg
 from . import ir_actions_report
 from . import mail_template
+from . import res_partner

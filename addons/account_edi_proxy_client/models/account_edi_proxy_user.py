@@ -51,6 +51,7 @@ class AccountEdiProxyClientUser(models.Model):
     private_key = fields.Binary(required=True, attachment=False, groups="base.group_system", help="The key to encrypt all the user's data")
     private_key_filename = fields.Char(compute='_compute_private_key_filename')
     refresh_token = fields.Char(groups="base.group_system")
+    proxy_type = fields.Selection(selection=[])  # to override
 
     _sql_constraints = [
         ('unique_id_client', 'unique(id_client)', 'This id_client is already used on another user.'),

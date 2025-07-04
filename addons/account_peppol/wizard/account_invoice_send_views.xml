@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="account_invoice_send_inherit_account_peppol_form">
+            <field name="name">account.invoice.send.form.inherited.account_peppol</field>
+            <field name="model">account.invoice.send</field>
+            <field name="inherit_id" ref="account.account_invoice_send_wizard_form"/>
+            <field name="arch" type="xml">
+                <div class="alert alert-warning" role="alert" attrs="{'invisible': [('peppol_warning', '=', False)]}">
+                    <field name="peppol_warning"/>
+                </div>
+
+                <xpath expr="//div[@name='option_email']" position='before'>
+                    <div name="option_peppol" attrs="{'invisible': [('enable_peppol', '=', False)]}">
+                        <field name="checkbox_send_peppol" />
+                        <b><label for="checkbox_send_peppol"/></b>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

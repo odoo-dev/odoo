@@ -12,6 +12,7 @@ class AccountInvoiceSend(models.TransientModel):
     _inherits = {'mail.compose.message':'composer_id'}
     _description = 'Account Invoice Send'
 
+    company_id = fields.Many2one(comodel_name='res.company', compute='_compute_company_id', store=True)
     is_email = fields.Boolean('Email', default=lambda self: self.env.company.invoice_is_email)
     invoice_without_email = fields.Text(compute='_compute_invoice_without_email', string='invoice(s) that will not be sent')
     is_print = fields.Boolean('Print', default=lambda self: self.env.company.invoice_is_print)
@@ -47,6 +48,13 @@ class AccountInvoiceSend(models.TransientModel):
             'composer_id': composer.id,
         })
         return res
+
+    @api.depends('invoice_ids')
+    def _compute_company_id(self):
+        for wizard in self:
+            if len(wizard.invoice_ids.company_id) > 1:
+                raise UserError(_("You can only send from the same company."))
+            wizard.company_id = wizard.invoice_ids.company_id.id
 
     @api.onchange('invoice_ids')
     def _compute_composition_mode(self):
