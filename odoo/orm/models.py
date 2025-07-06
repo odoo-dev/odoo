@@ -4888,6 +4888,10 @@ class BaseModel(metaclass=MetaModel):
         :return: the query expressing the given domain as provided in domain
         """
         domain = Domain(domain)
+        domain_uses.update({
+            (cond._field(self).type, cond.operator, type(cond.value)): 1
+            for cond in domain.iter_conditions()
+        })
 
         # if the object has an active field ('active', 'x_active'), filter out all
         # inactive records unless they were explicitly asked for
@@ -4904,6 +4908,10 @@ class BaseModel(metaclass=MetaModel):
             return self.browse()._as_query()
         query = Query(self.env, self._table, self._table_sql)
         if not domain.is_true():
+            domain_gen.update({
+                (cond._field(self).type, cond.operator, type(cond.value)): 1
+                for cond in domain.iter_conditions()
+            })
             query.add_where(domain._to_sql(self, self._table, query))
         return query
 
@@ -5077,6 +5085,10 @@ class BaseModel(metaclass=MetaModel):
         if sec_domain.is_false() or (not limit and limit is not None and limit is not False):
             return self.browse()._as_query()
         if not sec_domain.is_true():
+            domain_sec.update({
+                (cond._field(self).type, cond.operator, type(cond.value)): 1
+                for cond in domain_sec.iter_conditions()
+            })
             query.add_where(sec_domain._to_sql(self.sudo(), self._table, query))
 
         if order:
@@ -6816,3 +6828,17 @@ def get_columns_from_sql_diagnostics(cr, diagnostics, *, check_registry=False) -
     """, diagnostics.constraint_name, diagnostics.table_name))
     columns = cr.fetchone()
     return columns[0] if columns else []
+
+from collections import Counter
+import atexit
+from pprint import pprint
+domain_uses = Counter()
+domain_gen = Counter()
+domain_sec = Counter()
+
+@atexit.register
+def _log_domain_use():
+    pprint("Use")
+    pprint(domain_uses.most_common())
+    pprint(domain_gen.most_common())
+    pprint(domain_sec.most_common())
