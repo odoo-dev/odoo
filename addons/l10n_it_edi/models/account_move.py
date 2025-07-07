@@ -395,7 +395,7 @@ class AccountMove(models.Model):
                     downpayment_moves_description = ', '.join(downpayment_moves.mapped('name'))
                     sep = ', ' if description else ''
                     description = f"{description}{sep}{downpayment_moves_description}"
-            description = description or "NO NAME"
+            description = description.replace('\n', ' ').strip() or "NO NAME"
 
             # Price unit.
             if quantity:
