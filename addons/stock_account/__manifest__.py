@@ -23,12 +23,12 @@ Dashboard / Reports for Warehouse Management includes:
     'category': 'Supply Chain/Inventory',
     'sequence': 16,
     'demo': [
-        'data/stock_account_demo.xml',
     ],
     'data': [
         'security/stock_account_security.xml',
         'security/ir.model.access.csv',
         'data/stock_account_data.xml',
+        'data/stock_account_demo.xml',
         'views/stock_account_views.xml',
         'views/res_config_settings_views.xml',
         'data/product_data.xml',
@@ -41,7 +41,7 @@ Dashboard / Reports for Warehouse Management includes:
         'wizard/stock_request_count.xml',
         'wizard/stock_quantity_history.xml',
         'report/account_invoice_report_view.xml',
-        'report/stock_valuation.xml',
+        'report/stock_valuation_report.xml',
     ],
     'installable': True,
     'auto_install': True,

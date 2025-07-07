@@ -99,7 +99,6 @@ class ResCompany(models.Model):
         if not products_periodic:
             return
 
-        # Beginning Inventory
         amls_value = self.env['account.move.line']._read_group(
             domain=[
                 ('account_id', '=', purchase_account.id), ('parent_state', '=', 'posted'),
