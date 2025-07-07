@@ -1,18 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="product.product_category_furniture" model="product.category">
-            <field name="property_cost_method">average</field>
+        <record id="category_standard" model="product.category">
+            <field name="name">Standard</field>
+            <field name="property_cost_method">standard</field>
+            <field name="property_valuation">periodic</field>
         </record>
-        <record id="product.product_category_office" model="product.category">
-            <field name="property_cost_method">average</field>
+        <record id="category_standard_realtime" model="product.category">
+            <field name="name">Standard Perpetual</field>
+            <field name="property_cost_method">standard</field>
+            <field name="property_valuation">real_time</field>
         </record>
-        <record id="product.product_category_outdoor_furniture" model="product.category">
+        <record id="category_avco" model="product.category">
+            <field name="name">Avco</field>
             <field name="property_cost_method">average</field>
+            <field name="property_valuation">periodic</field>
         </record>
-
-        <record id="product.product_category_construction" model="product.category">
+        <record id="category_avco_realtime" model="product.category">
+            <field name="name">Avco Perpetual</field>
+            <field name="property_cost_method">average</field>
+            <field name="property_valuation">real_time</field>
+        </record>
+        <record id="category_fifo" model="product.category">
+            <field name="name">Fifo</field>
             <field name="property_cost_method">fifo</field>
+            <field name="property_valuation">periodic</field>
+        </record>
+        <record id="category_fifo_realtime" model="product.category">
+            <field name="name">Fifo Perpetual</field>
+            <field name="property_cost_method">fifo</field>
+            <field name="property_valuation">real_time</field>
+        </record>
+        <record id="product_standard" model="product.product">
+            <field name="name">Standard</field>
+            <field name="is_storable">True</field>
+            <field name="categ_id" ref="category_standard"/>
+            <field name="standard_price">100.0</field>
+            <field name="list_price">120.0</field>
+        </record>
+        <record id="product_standard_realtime" model="product.product">
+            <field name="name">Standard Perpetual</field>
+            <field name="is_storable">True</field>
+            <field name="categ_id" ref="category_standard_realtime"/>
+            <field name="standard_price">100.0</field>
+            <field name="list_price">120.0</field>
+        </record>
+        <record id="product_avco" model="product.product">
+            <field name="name">Avco</field>
+            <field name="is_storable">True</field>
+            <field name="categ_id" ref="category_avco"/>
+            <field name="standard_price">100.0</field>
+            <field name="list_price">120.0</field>
+        </record>
+        <record id="product_avco_realtime" model="product.product">
+            <field name="name">Avco Perpetual</field>
+            <field name="is_storable">True</field>
+            <field name="categ_id" ref="category_avco_realtime"/>
+            <field name="standard_price">100.0</field>
+            <field name="list_price">120.0</field>
+        </record>
+        <record id="product_fifo" model="product.product">
+            <field name="name">Fifo</field>
+            <field name="is_storable">True</field>
+            <field name="categ_id" ref="category_fifo"/>
+            <field name="standard_price">100.0</field>
+            <field name="list_price">120.0</field>
+        </record>
+        <record id="product_fifo_realtime" model="product.product">
+            <field name="name">Fifo Perpetual</field>
+            <field name="is_storable">True</field>
+            <field name="categ_id" ref="category_fifo_realtime"/>
+            <field name="standard_price">100.0</field>
+            <field name="list_price">120.0</field>
         </record>
     </data>
 </odoo>
