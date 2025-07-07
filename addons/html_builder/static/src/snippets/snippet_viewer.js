@@ -26,9 +26,11 @@ export class SnippetViewer extends Component {
         this.dialog = useService("dialog");
         this.content = useRef("content");
 
-        this.websiteService = useService("website");
-        this.innerWebsiteEditService =
-            this.websiteService.websiteRootInstance?.bindService("website_edit");
+        if (this.props.snippetModel.snippetsName.includes("website")) {
+            this.websiteService = useService("website");
+            this.innerWebsiteEditService =
+                this.websiteService.websiteRootInstance?.bindService("website_edit");
+        }
         this.previousSearch = "";
 
         const updatePreview = () => {
