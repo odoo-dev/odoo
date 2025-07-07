@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="unicommerce_account" model="unicommerce.account">
+            <field name="name">Unicommerce Account</field>
+        </record>
+</odoo>

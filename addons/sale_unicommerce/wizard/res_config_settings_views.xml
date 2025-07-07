@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.sale</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="10"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/app[@name='sale_management']/block[@id='connectors_setting_container']" position="inside">
+                <setting id="unicommerce_connector" help="Import Unicommerce orders and sync deliveries">
+                    <field name="module_sale_unicommerce" widget="upgrade_boolean"/>
+                    <div class="content-group" name="unicommerce_connector" invisible="not module_sale_unicommerce">
+                        <div class="mt16">
+                            <div>
+                                <!-- <button
+                                    string="Unicommerce Accounts"
+                                    type="action"
+                                    name="%(sale_unicommerce.action_marketplace_offer)d"
+                                    icon="oi-arrow-right"
+                                    class="btn-link"
+                                    invisible="0"
+                                />                                 -->
+                                <button
+                                    string="Link My Account"
+                                    type="action"
+                                    name="%(sale_unicommerce.link_account_action)d"
+                                    icon="oi-arrow-right"
+                                    class="btn-link"
+                                    invisible="0"
+                                />                                
+                            </div>
+                        </div>
+                    </div>
+                </setting>                
+            </xpath>
+        </field>   
+    </record>
+</odoo>

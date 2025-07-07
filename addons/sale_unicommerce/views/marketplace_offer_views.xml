@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_marketplace_offer_list" model="ir.ui.view">
+        <field name="name">marketplace.offer.list</field>
+        <field name="model">marketplace.offer</field>
+        <field name="arch" type="xml">
+              <list>
+                  <field name="name"/>
+                  <field name="sku"/>
+                  <field name="price"/>
+                  <field name="barcode"/>
+                  <field name="product_id"/>
+                  <field name="available_quantity"/>
+                  <field name="inventory_policy"/>
+                  <field name="inventory_management"/>
+                  <field name="inventory_item_id"/>
+                  <field name="processed"/>
+                  <field name="code"/>
+                  <field name="marketplace_id"/>
+              </list>
+        </field>
+    </record>
+  
+    <record id="action_marketplace_offer" model="ir.actions.act_window">
+        <field name="name">Marketplace Offers</field>
+        <field name="res_model">marketplace.offer</field>
+        <field name="view_mode">list,form</field>
+    </record>
+  </odoo>
+  
