@@ -1,0 +1,12 @@
+<rng:grammar
+    xmlns:rng="http://relaxng.org/ns/structure/1.0"
+    datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+    <rng:include href="common.rng"/>
+    <rng:define name="field" combine="interleave">
+        <rng:element name="field">
+            <rng:optional><rng:attribute name="no_aggregator"/></rng:optional>
+        </rng:element>
+    </rng:define>
+
+</rng:grammar>
