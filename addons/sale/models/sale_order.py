@@ -6,6 +6,7 @@ import logging
 from collections import defaultdict
 from datetime import timedelta
 from itertools import groupby
+from markupsafe import Markup
 
 from odoo import SUPERUSER_ID, _, api, fields, models
 from odoo.exceptions import (
@@ -1801,6 +1802,29 @@ class SaleOrder(models.Model):
                 recipients, partner=self.partner_id, reason=_("Customer")
             )
         return recipients
+
+    def _get_customer_payment_status_message(self):
+        self.ensure_one()
+        tx = self.get_portal_last_transaction()
+        currency = self.currency_id
+        amount_remaining = currency.round(self.amount_total - self.amount_paid)
+        amount_with_tx = currency.round(self.amount_paid + (tx.amount if tx else 0))
+
+        if tx and tx.state == 'pending':
+            if amount_with_tx >= self.amount_total and self.state in ('draft', 'sent'):
+                return Markup(_("Your order will be confirmed once the payment is confirmed."))
+            else:
+                remaining = currency.round(self.amount_total - self.amount_paid - tx.amount)
+                return Markup(_("Once confirmed, <strong>%(amount)s</strong> will remain to be paid.") % {
+                    'amount': format_amount(self.env, remaining, currency)
+                })
+        else:
+            msg = _("has been confirmed.")
+            if amount_remaining > 0:
+                msg += "<br/>" + _("<strong>%(amount)s</strong> remains to be paid.") % {
+                    'amount': format_amount(self.env, amount_remaining, currency)
+                }
+            return Markup(msg)
 
     # PAYMENT #
 
