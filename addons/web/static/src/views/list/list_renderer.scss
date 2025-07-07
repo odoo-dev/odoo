@@ -125,7 +125,7 @@
         }
 
         tbody > tr > td:not(.o_list_record_selector) {
-            &:not(.o_handle_cell):not(.o_list_button):not(.o_list_record_remove):not(.o_list_record_open_form_view) {
+            &:not(.o_handle_cell):not(.o_list_button):not(.o_list_record_remove):not(.o_list_record_open_form_view):not(.o_list_section_options) {
                 --fieldWidget-display: block; // Will affect inner components (see fields.scss)
 
                 display: table-cell;
@@ -227,7 +227,7 @@
             }
         }
 
-        .o_list_record_remove, .o_handle_cell, .o_list_record_open_form_view {
+        .o_list_record_remove, .o_handle_cell, .o_list_record_open_form_view, .o_list_section_options {
             width: 1px;  // to prevent the column to expand
         }
 
@@ -238,7 +238,7 @@
             }
         }
 
-        .o_list_record_remove button, .o_list_record_open_form_view button {
+        .o_list_record_remove button, .o_list_record_open_form_view button, .o_list_section_options button {
             padding: 0px;
             background: none;
             border-style: none;

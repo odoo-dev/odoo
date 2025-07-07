@@ -2233,4 +2233,8 @@ export class ListRenderer extends Component {
             this.toggleRecordSelection(record);
         }
     }
+
+    getListRecords(list) {
+        return list.records;
+    }
 }
