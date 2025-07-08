@@ -1942,15 +1942,8 @@ def _operator_access_rule_domain(condition, model):
     return DomainCustom(filtered=filtered_access, optimize_func=optimize_sql)
 
 
-@operator_optimization(['any', 'not any'], level=OptimizationLevel.FULL)
-def _optimize_any_with_rights(condition, model):
-    if model.env.su or condition._field(model).bypass_search_access:
-        return DomainCondition(condition.field_expr, condition.operator + '!', condition.value)
-    return condition
-
-
 @field_type_optimization(['many2one'], level=OptimizationLevel.FULL)
-def _optimize_m2o_bypass_comodel_id_lookup(condition, model):
+def _security_any_relational_m2o(condition, model):
     """Avoid comodel's subquery, if it can be compared with the field directly"""
     operator = condition.operator
     if (
@@ -1982,29 +1975,66 @@ def _optimize_m2o_bypass_comodel_id_lookup(condition, model):
         if operator == 'not any!':
             domain = ~domain
         return domain
+    if operator in ('any', 'not any'):
+        # add security for 'any'
+        value = condition.value
+        if isinstance(value, Domain):
+            field = condition._field(model)
+            comodel = model.env[field.comodel_name].with_context(active_test=False)
+            value = comodel._search_domain(value, active_test=False, bypass_access=field.bypass_search_access)
+            value = value._optimize(comodel, OptimizationLevel.FULL)
+        operator = 'any!' if operator == 'any' else 'not any!'
+        return DomainCondition(condition.field_expr, operator, value)
     return condition
 
 
 @field_type_optimization(['one2many', 'many2many'], level=OptimizationLevel.FULL)
-def _optimize_x2m_in_operator(condition, model):
+def _security_any_relational_x2m(condition, model):
     """For x2m fields, we always will generate a query so we can express it as
     the "any!" operator directly.
     """
-    if condition.operator not in ('in', 'not in'):
+    if condition.operator in ('any!', 'not any!'):
         return condition
     field_expr = condition.field_expr
-    ids = condition.value
-    # rewrite condition (field_expr, 'in', ids), then negate in the case 'not in'
-    domain = Domain.FALSE
-    if False in ids:
-        # x2m in {False, ...} => x2m not any! (Domain.TRUE) or x2m in {...}
-        domain |= Domain(field_expr, 'not any!', Domain.TRUE)
-        ids = ids - {False}
-    if ids:
-        # x2m in ids => x2m any! (ids_as_query)
-        comodel = model.env[condition._field(model).comodel_name]
-        domain |= Domain(field_expr, 'any!', comodel.browse(ids)._as_query(ordered=False))
-    return domain if condition.operator == 'in' else ~domain
+    operator = condition.operator
+
+    if operator in ('any', 'not any'):
+        value = condition.value
+        operator += '!'
+        field = condition._field(model)
+        comodel = model.env[field.comodel_name].with_context(**field.context)
+        field_domain = field.get_comodel_domain(model)
+        if isinstance(value, Domain):
+            value &= field_domain
+            if field.type == 'one2many':
+                inverse_field = comodel._fields[field.inverse_name]
+                if inverse_field not in comodel.env.registry.not_null_fields:
+                    # XXX here? not required if we use exists
+                    value &= DomainCondition(field.inverse_name, '!=', False)
+            value = comodel._search_domain(value, active_test=comodel.env.context.get('active_test', True), bypass_access=field.bypass_search_access)
+            value = value._optimize(comodel, OptimizationLevel.FULL)
+        elif isinstance(value, Query):
+            comodel = comodel.sudo()
+            field_domain = field_domain._optimize(comodel, OptimizationLevel.FULL)
+            if not field_domain.is_true():
+                value.add_where(field_domain.to_sql(comodel, comodel._table, value))
+        return DomainCondition(field_expr, operator, value)
+
+    if operator in ('in', 'not in'):
+        ids = condition.value
+        # rewrite condition (field_expr, 'in', ids), then negate in the case 'not in'
+        domain = Domain.FALSE
+        if False in ids:
+            # x2m in {False, ...} => x2m not any! (Domain.TRUE) or x2m in {...}
+            domain |= Domain(field_expr, 'not any!', Domain.TRUE)
+            ids = ids - {False}
+        if ids:
+            # x2m in ids => x2m any! (ids_as_query)
+            comodel = model.env[condition._field(model).comodel_name]
+            domain |= Domain(field_expr, 'any!', comodel.browse(ids)._as_query(ordered=False))
+        return domain if operator == 'in' else ~domain
+
+    return domain
 
 
 # --------------------------------------------------
