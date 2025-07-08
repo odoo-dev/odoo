@@ -7,10 +7,7 @@ export class SetupEditorPlugin extends Plugin {
     static shared = ["getEditableAreas"];
     resources = {
         clean_for_save_handlers: this.cleanForSave.bind(this),
-        normalize_handlers: [
-            withSequence(0, this.setContenteditable.bind(this)),
-            this.setUserSelectNone.bind(this),
-        ],
+        normalize_handlers: withSequence(0, this.setContenteditable.bind(this)),
     };
 
     setup() {
@@ -84,12 +81,6 @@ export class SetupEditorPlugin extends Plugin {
 
         const uneditableEls = root.querySelectorAll(".o_not_editable");
         uneditableEls.forEach((el) => el.setAttribute("contenteditable", false));
-    }
-
-    setUserSelectNone(root = this.editable) {
-        [...root.querySelectorAll(".btn")]
-            .filter((btn) => !btn.isContentEditable)
-            .forEach((btn) => (btn.style.userSelect = "none"));
     }
 
     /**
