@@ -17,7 +17,7 @@
         <field name="inherit_id" ref="account.view_account_list"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='account_type']" position="after">
-                <field name="l10n_in_tds_tcs_section_id" optional="hide"/>
+                <field name="l10n_in_tds_tcs_section_id" optional="hide" invisible="company_fiscal_country_code != 'IN'"/>
             </xpath>
         </field>
     </record>
