@@ -11,7 +11,19 @@
         cursor: text;
     }
 
-    [contenteditable=false] .btn {
-        cursor: pointer;
+    [contenteditable=false], &[contenteditable=false] {
+        &.btn, .btn {
+            user-select: none;
+            cursor: pointer;
+        }
+
+        [contenteditable=true] {
+            &.btn, .btn {
+                user-select: auto;
+                cursor: text;
+            }
+        }
+
     }
+
 }
