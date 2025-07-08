@@ -495,7 +495,7 @@ class IrAttachment(models.Model):
         if values and any(self._inaccessible_comodel_records({values.get('res_model'): [values.get('res_id')]}, mode)):
             raise AccessError(_("Sorry, you are not allowed to access this document."))
 
-    def _check_access(self, operation):
+    def _access_domain(self, operation: str, user_domain: Domain | None = None) -> Domain:
         """Check access for attachments.
 
         Rules:
@@ -506,70 +506,141 @@ class IrAttachment(models.Model):
         - If we don't have a referenced record, the attachment is accessible to
           the administrator and the creator of the attachment.
         """
-        res = super()._check_access(operation)
-        remaining = self
-        error_func = None
-        forbidden_ids = OrderedSet()
-        if res:
-            forbidden, error_func = res
-            if forbidden == self:
-                return res
-            remaining -= forbidden
-            forbidden_ids.update(forbidden._ids)
-        elif not self:
-            return None
+        main_domain = super()._access_domain(operation, user_domain)
+        if main_domain.is_false() or self.env.su:
+            return main_domain
+        if self.env.context.get('_read_groupby'):
+            raise ValueError("Cannot group by ir.attachment")
+
+        has_user_domain = user_domain is not None
+        user_domain = user_domain.optimize(self) if has_user_domain else Domain.TRUE
 
         if operation in ('create', 'unlink'):
             # check write operation instead of unlinking and creating for
             # related models and field access
             operation = 'write'
 
-        # collect the records to check (by model)
-        model_ids = defaultdict(set)            # {model_name: set(ids)}
-        att_model_ids = []                      # [(att_id, (res_model, res_id))]
-        # DLE P173: `test_01_portal_attachment`
-        remaining = remaining.sudo()
-        remaining.fetch(SECURITY_FIELDS)  # fetch only these fields
-        for attachment in remaining:
-            if attachment.public and operation == 'read':
-                continue
-            att_id = attachment.id
-            res_model, res_id = attachment.res_model, attachment.res_id
-            if not self.env.is_system():
-                if not res_id and attachment.create_uid.id != self.env.uid:
-                    forbidden_ids.add(att_id)
-                    continue
-                if res_field := attachment.res_field:
-                    try:
-                        field = self.env[res_model]._fields[res_field]
-                    except KeyError:
-                        # field does not exist
-                        field = None
-                    if field is None or not self.has_field_access(field, operation):
-                        forbidden_ids.add(att_id)
-                        continue
-            if res_model and res_id:
-                model_ids[res_model].add(res_id)
-                att_model_ids.append((att_id, (res_model, res_id)))
-        forbidden_res_model_id = set(self._inaccessible_comodel_records(model_ids, operation))
-        forbidden_ids.update(att_id for att_id, res in att_model_ids if res in forbidden_res_model_id)
+        # General access rules
+        # - public == True are always accessible for reading
+        sec_domain = Domain('public', '=', True) if operation == 'read' else Domain.FALSE
+        # - res_id == False needs to be system user or creator
+        res_ids = has_user_domain and condition_values(self, 'res_id', user_domain)
+        if not res_ids or False in res_ids:
+            if self.env.is_system():
+                sec_domain |= Domain('res_id', '=', False)
+            else:
+                sec_domain |= Domain('res_id', '=', False) & Domain('create_uid', '=', self.env.uid)
 
-        if forbidden_ids:
-            forbidden = self.browse(forbidden_ids)
-            forbidden.invalidate_recordset(SECURITY_FIELDS)  # avoid cache pollution
-            if error_func is None:
-                def error_func():
-                    return AccessError(self.env._(
-                        "Sorry, you are not allowed to access this document. "
-                        "Please contact your system administrator.\n\n"
-                        "(Operation: %(operation)s)\n\n"
-                        "Records: %(records)s, User: %(user)s",
-                        operation=operation,
-                        records=forbidden[:6],
-                        user=self.env.uid,
-                    ))
-            return forbidden, error_func
-        return None
+        # Search by res_model and res_id, filter using permissions from res_model
+        # - res_id != False needs to check access on the linked res_model record
+        # - res_field != False needs to check field access on the res_model
+        if (
+            has_user_domain
+            and (res_model_names := condition_values(self, 'res_model', user_domain))
+            and 0 < len(res_model_names or ()) <= 5
+        ):
+            res_fields = condition_values(self, 'res_field', user_domain)
+            check_field_access = not self.env.is_system() and tuple(res_fields or ()) != (False,)
+            env = self.with_context(active_test=False).env
+            for res_model_name in res_model_names:
+                comodel = env.get(res_model_name)
+                if comodel is None:
+                    continue
+                codomain = Domain('res_model', '=', comodel._name)
+                comodel_res_ids = condition_values(self, 'res_id', user_domain.map_conditions(
+                    lambda cond: codomain & cond if cond.field_expr == 'res_model' else cond
+                ))
+                if comodel_res_ids is not None:
+                    if not comodel_res_ids:
+                        continue
+                    comodel_res_ids = comodel.browse(comodel_res_ids)._filtered_access('read').ids
+                    codomain &= Domain('res_id', 'in', comodel_res_ids)
+                else:
+                    query = comodel._search(Domain.TRUE)
+                    if query.is_empty():
+                        continue
+                    if query.where_clause:
+                        codomain &= Domain('res_id', 'in', query)
+                if check_field_access:
+                    accessible_fields = [
+                        field.name
+                        for field in comodel._fields.values()
+                        if field.type == 'binary' or (field.relational and field.comodel_name == self._name)
+                        if comodel._has_field_access(field, 'read')
+                    ]
+                    accessible_fields.append(False)
+                    codomain &= Domain('res_field', 'in', accessible_fields)
+                sec_domain |= codomain
+            return main_domain & sec_domain
+        else:
+            # We do not have a small restriction on res_model. We still need to
+            # support other queries such as: `('id', 'in' ...)`.
+            # Restrict with user_domain and add all attachments linked to a model.
+            comodel_access = {}  # cache for the predicate
+            if not has_user_domain:
+                user_domain = Domain('id', 'in', self.ids)
+
+            def attachment_predicate(attachment_to_check: IrAttachment):
+                if (val := comodel_access.get(attachment_to_check.id)) is not None:
+                    return val
+
+                attachments = attachment_to_check.with_context(active_test=False).sudo()
+                if not comodel_access:
+                    # first call, compute for all ids
+                    attachments |= attachments.browse(condition_values(attachments, 'id', user_domain))
+                for id_ in attachments._ids:
+                    comodel_access[id_] = False
+                # check main_domain
+                attachments = attachments.filtered_domain(main_domain)
+                # check sec_domain
+                accessible = attachments.filtered_domain(sec_domain)
+                for id_ in accessible._ids:
+                    comodel_access[id_] = True
+                attachments -= accessible
+                if not attachments:
+                    return comodel_access[attachment_to_check.id]
+
+                model_ids: defaultdict[str, OrderedSet[int]] = defaultdict(OrderedSet)
+                att_model_ids: list[tuple[int, tuple[str, int]]] = []
+                check_field_access = not self.env.is_system()
+                attachments.fetch(SECURITY_FIELDS)
+                for attachment in attachments:
+                    res_model, res_id = attachment.res_model, attachment.res_id
+                    if not res_model or not res_id:
+                        continue
+                    if check_field_access and (res_field := attachment.res_field):
+                        try:
+                            comodel = self.env[res_model]
+                            field = comodel._fields[res_field]
+                        except KeyError:
+                            # field does not exist
+                            continue
+                        if not comodel._has_field_access(field, operation):
+                            continue
+                    model_ids[res_model].add(res_id)
+                    att_model_ids.append((attachment.id, (res_model, res_id)))
+                forbidden_res_model_id = set(self._inaccessible_comodel_records(model_ids, operation))
+                inaccessible_ids = []
+                for id_, res in att_model_ids:
+                    if res in forbidden_res_model_id:
+                        inaccessible_ids.append(id_)
+                    else:
+                        comodel_access[id_] = True
+                attachments.browse(inaccessible_ids).sudo(False).invalidate_recordset(SECURITY_FIELDS)  # avoid cache pollution
+
+                return comodel_access[attachment_to_check.id]
+
+            def attachment_optimize(custom_domain, model):
+                assert model._name == 'ir.attachment'
+                comodel_optimize_domain = main_domain & user_domain
+                records = model.sudo().search_fetch(comodel_optimize_domain, SECURITY_FIELDS)
+                accessible = records.filtered_domain(custom_domain)
+                return Domain('id', 'in', accessible._as_query(ordered=False))
+
+            return Domain.custom(
+                optimize=attachment_optimize,
+                predicate=attachment_predicate,
+            )
 
     def _inaccessible_comodel_records(self, model_and_ids: dict[str, Collection[int]], operation: str):
         # check access rights on the records
@@ -603,82 +674,25 @@ class IrAttachment(models.Model):
     @api.model
     def _search(self, domain, offset=0, limit=None, order=None, *, active_test=True, bypass_access=False):
         assert not self._active_name, "active name not supported on ir.attachment"
-        disable_binary_fields_attachments = False
-        domain = Domain(domain)
+        domain = Domain(domain).optimize(self)
         if (
             not self.env.context.get('skip_res_field_check')
             and not any(d.field_expr in ('id', 'res_field') for d in domain.iter_conditions())
             and not bypass_access
         ):
-            disable_binary_fields_attachments = True
             domain &= Domain('res_field', '=', False)
-
-        domain = domain.optimize(self)
-        if self.env.su or bypass_access or domain.is_false():
+        if limit is None or self.env.su or bypass_access or domain.is_false():
             return super()._search(domain, offset, limit, order, active_test=active_test, bypass_access=bypass_access)
-        if self.env.context.get('_read_groupby'):
-            raise ValueError("Cannot group by ir.attachment")
 
-        # General access rules
-        # - public == True are always accessible
-        sec_domain = Domain('public', '=', True)
-        # - res_id == False needs to be system user or creator
-        res_ids = condition_values(self, 'res_id', domain)
-        if not res_ids or False in res_ids:
-            if self.env.is_system():
-                sec_domain |= Domain('res_id', '=', False)
-            else:
-                sec_domain |= Domain('res_id', '=', False) & Domain('create_uid', '=', self.env.uid)
-
-        # Search by res_model and res_id, filter using permissions from res_model
-        # - res_id != False needs then check access on the linked res_model record
-        # - res_field != False needs to check field access on the res_model
-        res_model_names = condition_values(self, 'res_model', domain)
-        if 0 < len(res_model_names or ()) <= 5:
-            env = self.with_context(active_test=False).env
-            for res_model_name in res_model_names:
-                comodel = env.get(res_model_name)
-                if comodel is None:
-                    continue
-                codomain = Domain('res_model', '=', comodel._name)
-                comodel_res_ids = condition_values(self, 'res_id', domain.map_conditions(
-                    lambda cond: codomain & cond if cond.field_expr == 'res_model' else cond
-                ))
-                query = comodel._search(Domain('id', 'in', comodel_res_ids) if comodel_res_ids else Domain.TRUE)
-                if query.is_empty():
-                    continue
-                if query.where_clause:
-                    codomain &= Domain('res_id', 'in', query)
-                if not disable_binary_fields_attachments and not self.env.is_system():
-                    accessible_fields = [
-                        field.name
-                        for field in comodel._fields.values()
-                        if field.type == 'binary' or (field.relational and field.comodel_name == self._name)
-                        if comodel.has_field_access(field, 'read')
-                    ]
-                    accessible_fields.append(False)
-                    codomain &= Domain('res_field', 'in', accessible_fields)
-                sec_domain |= codomain
-
-            return super()._search(domain & sec_domain, offset, limit, order, active_test=active_test)
-
-        # We do not have a small restriction on res_model. We still need to
-        # support other queries such as: `('id', 'in' ...)`.
-        # Restrict with domain and add all attachments linked to a model.
-        domain &= sec_domain | Domain('res_model', '!=', False)
-        domain = domain.optimize_full(self)
-        ordered = bool(order)
-        if limit is None:
-            records = self.sudo().with_context(active_test=False).search_fetch(
-                domain, SECURITY_FIELDS, order=order).sudo(False)
-            return records._filtered_access('read')[offset:]._as_query(ordered)
         # Fetch by small batches
         sub_offset = 0
         limit += offset
         result = []
+        ordered = bool(order)
         if not ordered:
             # By default, order by model to batch access checks.
             order = 'res_model nulls first, id'
+        domain = domain.optimize_full(self)
         while len(result) < limit:
             records = self.sudo().with_context(active_test=False).search_fetch(
                 domain,
