@@ -10,7 +10,6 @@ import { whenReady } from "@odoo/owl";
 registerWebsitePreviewTour('rte_translator', {
     url: '/',
     edition: true,
-    wait_for: whenReady(),
 }, () => [
 ...goToTheme(),
 {

@@ -66,7 +66,6 @@ const TourSchema = {
     name: { type: String, optional: true },
     steps: Function,
     url: { type: String, optional: true },
-    wait_for: { type: [Function, Object], optional: true },
 };
 
 registry.category("web_tour.tours").addValidation(TourSchema);
@@ -108,7 +107,6 @@ export const tourService = {
                 ...tour,
                 steps: tour.steps(),
                 name: tourName,
-                wait_for: tour.wait_for || Promise.resolve(),
             };
         }
 
@@ -285,7 +283,6 @@ export const tourService = {
         }
 
         odoo.startTour = startTour;
-        odoo.isTourReady = (tourName) => getTourFromRegistry(tourName).wait_for.then(() => true);
 
         return {
             startTour,

@@ -2306,7 +2306,7 @@ class HttpCase(TransactionCase):
                 ],
             }
 
-    def browser_js(self, url_path, code, ready='', login=None, timeout=60, cookies=None, error_checker=None, watch=False, success_signal=DEFAULT_SUCCESS_SIGNAL, debug=False, cpu_throttling=None, **kw):
+    def browser_js(self, url_path, code, login=None, timeout=60, cookies=None, error_checker=None, watch=False, success_signal=DEFAULT_SUCCESS_SIGNAL, debug=False, cpu_throttling=None, **kw):
         """ Test JavaScript code running in the browser.
 
         To signal success test do: `console.log()` with the expected `success_signal`. Default is "test successful"
@@ -2315,7 +2315,6 @@ class HttpCase(TransactionCase):
 
         :param string url_path: URL path to load the browser page on
         :param string code: JavaScript code to be executed
-        :param string ready: JavaScript object to wait for before proceeding with the test
         :param string login: logged in user which will execute the test. e.g. 'admin', 'demo'
         :param int timeout: maximum time to wait for the test to complete (in seconds). Default is 60 seconds
         :param dict cookies: dictionary of cookies to set before loading the page
@@ -2394,12 +2393,8 @@ class HttpCase(TransactionCase):
                     'Throttling browser CPU to %sx slowdown and extending timeout to %s sec', cpu_throttling, timeout)
                 browser._websocket_request('Emulation.setCPUThrottlingRate', params={'rate': cpu_throttling})
 
-            browser.navigate_to(url, wait_stop=not bool(ready))
+            browser.navigate_to(url)
             atexit.callback(browser.stop)
-
-            # Needed because tests like test01.js (qunit tests) are passing a ready
-            # code = ""
-            self.assertTrue(browser._wait_ready(ready), 'The ready "%s" code was always falsy' % ready)
 
             error = False
             try:
@@ -2427,7 +2422,6 @@ class HttpCase(TransactionCase):
             'delayToCheckUndeterminisms': kwargs.pop('delay_to_check_undeterminisms', int(os.getenv("ODOO_TOUR_DELAY_TO_CHECK_UNDETERMINISMS", "0")) or 0),
         }
         code = kwargs.pop('code', f"odoo.startTour({tour_name!r}, {json.dumps(options)})")
-        ready = kwargs.pop('ready', f"odoo.isTourReady({tour_name!r})")
         timeout = kwargs.pop('timeout', 60)
 
         if step_delay is not None:
@@ -2443,7 +2437,7 @@ class HttpCase(TransactionCase):
         with patch.object(Users, 'tour_enabled', False),\
                 patch.object(Users, '_post_model_setup__', setup),\
                 patch.object(Users, '_compute_tour_enabled', lambda _: None):
-            self.browser_js(url_path=url_path, code=code, ready=ready, timeout=timeout, success_signal="tour succeeded", **kwargs)
+            self.browser_js(url_path=url_path, code=code, timeout=timeout, success_signal="tour succeeded", **kwargs)
 
     def profile(self, **kwargs):
         """
