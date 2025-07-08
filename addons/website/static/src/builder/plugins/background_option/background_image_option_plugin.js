@@ -148,7 +148,7 @@ export class SelectFilterColorAction extends StyleAction {
                 editingElement.prepend(filterEl);
             }
         }
-        this.dependencies.builderActions.getAction("styleAction").apply({
+        super.apply({
             editingElement: filterEl,
             params: {
                 mainParam: "background-color",

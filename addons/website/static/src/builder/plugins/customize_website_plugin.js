@@ -416,8 +416,7 @@ export class CustomizeBodyBgTypeAction extends BuilderAction {
     static id = "customizeBodyBgType";
     static dependencies = ["builderActions", "history", "customizeWebsite"];
     isApplied({ value }) {
-        const getAction = this.dependencies.builderActions.getAction;
-        const currentValue = getAction("customizeBodyBgType").getValue();
+        const currentValue = this.getValue();
         // NONE has no extra quote, other values have
         return [`'${value}'`, value].includes(currentValue);
     }
@@ -433,7 +432,7 @@ export class CustomizeBodyBgTypeAction extends BuilderAction {
     }
     async load({ editingElement: el, params, value, historyImageSrc }) {
         const getAction = this.dependencies.builderActions.getAction;
-        const oldValue = getAction("customizeBodyBgType").getValue({ params });
+        const oldValue = this.getValue({ params });
         const oldImageSrc =
             this.dependencies.customizeWebsite.getWebsiteVariableValue("body-image");
         let imageSrc = "";
@@ -459,12 +458,10 @@ export class CustomizeBodyBgTypeAction extends BuilderAction {
         if (imageSrc === NO_IMAGE_SELECTION) {
             return;
         }
-        const getAction = this.dependencies.builderActions.getAction;
         this.dependencies.history.addCustomMutation({
             apply: () => {
                 this.services.ui.block({ delay: 2500 });
-                getAction("customizeBodyBgType")
-                    .load({ editingElement, params, value, historyImageSrc: imageSrc })
+                this.load({ editingElement, params, value, historyImageSrc: imageSrc })
                     .then(() => {
                         this.dispatchTo("trigger_dom_updated");
                     })
@@ -472,13 +469,12 @@ export class CustomizeBodyBgTypeAction extends BuilderAction {
             },
             revert: () => {
                 this.services.ui.block({ delay: 2500 });
-                getAction("customizeBodyBgType")
-                    .load({
-                        editingElement,
-                        params,
-                        value: oldValue,
-                        historyImageSrc: oldImageSrc,
-                    })
+                this.load({
+                    editingElement,
+                    params,
+                    value: oldValue,
+                    historyImageSrc: oldImageSrc,
+                })
                     .then(() => {
                         this.dispatchTo("trigger_dom_updated");
                     })
