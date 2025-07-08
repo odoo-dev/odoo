@@ -160,6 +160,7 @@ export class Builder extends Component {
                     ev.stopPropagation();
                 }
             };
+
             this.editor.attachTo(this.editableEl);
             this.editableEl.addEventListener("dragstart", this.onDragStart);
         });
