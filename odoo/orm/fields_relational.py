@@ -833,43 +833,25 @@ class _RelationalMulti(_Relational):
 
     def condition_to_sql(self, table: TableSQL, field_expr: str, operator: str, value) -> SQL:
         assert field_expr == self.name, "Supporting condition only to field"
-        comodel = table._model.env[self.comodel_name]
         if not self.store:
             raise ValueError(f"Cannot convert {self} to SQL because it is not stored")
+        assert operator in ('any!', 'not any!'), \
+            f"Relational field {self} expects 'any!' operator"
 
-        assert operator in ('any', 'not any', 'any!', 'not any!'), \
-            f"Relational field {self} expects 'any' operator"
-        exists = operator in ('any', 'any!')
-
-        if isinstance(value, SQL):
-            # wrap SQL into a simple query
-            comodel = comodel.sudo()
-            value = Domain('id', 'any', value)
-        coquery = self._get_query_for_condition_value(table._model, comodel, operator, value)
-        return self._condition_to_sql_relational(table, exists, coquery)
-
-    def _get_query_for_condition_value(self, model: BaseModel, comodel: BaseModel, operator: str, value: Domain | Query) -> Query:
-        """ Return Query run on the comodel with the field.domain injected."""
-        field_domain = self.get_comodel_domain(model)
+        comodel = table._model.env[self.comodel_name].sudo()
         if isinstance(value, Domain):
-            domain = value & field_domain
-            bypass_access = self.bypass_search_access or operator in ('any!', 'not any!')
-            if bypass_access and domain.is_condition('id', value=Query):
-                # ('id', 'any!', Query), so we can just use the query
-                query = domain.value
-            else:
-                comodel = comodel.with_context(**self.context)
-                query = comodel._search(domain, bypass_access=bypass_access)
-            assert isinstance(query, Query)
-            return query
-        if isinstance(value, Query):
-            # add the field_domain to the query
-            domain = field_domain.optimize_full(comodel)
-            if not domain.is_true():
-                # TODO should clone/copy Query value
-                value.add_where(domain._to_sql(value.table._with_model(comodel)))
-            return value
-        raise NotImplementedError(f"Cannot build query for {value}")
+            coquery = comodel._search(value, active_test=False)
+        elif isinstance(value, Query):
+            coquery = value
+        elif isinstance(value, SQL):
+            coquery = comodel._search(Domain('id', 'any!', value), active_test=False)
+        else:
+            assert False, f"Unimplemented condition on {self} for {type(value)}"
+
+        exists = operator == 'any!'
+        if coquery.is_empty():
+            return Domain(not exists)._to_sql(table)
+        return self._condition_to_sql_relational(table, exists, coquery)
 
     def _condition_to_sql_relational(self, table: TableSQL, exists: bool, coquery: Query) -> SQL:
         raise NotImplementedError
@@ -1210,25 +1192,7 @@ class One2many(_RelationalMulti):
         table._query.add_join(kind, coalias, cotable_sql, condition)
         return coalias
 
-    def _get_query_for_condition_value(self, model: BaseModel, comodel: BaseModel, operator, value) -> Query:
-        inverse_field = comodel._fields[self.inverse_name]
-        if inverse_field not in comodel.env.registry.not_null_fields:
-            # In the condition, one must avoid subqueries to return
-            # NULL values, since it makes the IN test NULL instead
-            # of FALSE.  This may discard expected results, as for
-            # instance "id NOT IN (42, NULL)" is never TRUE.
-            if isinstance(value, Domain):
-                value &= Domain(inverse_field.name, 'not in', {False})
-            else:
-                coquery = super()._get_query_for_condition_value(model, comodel, operator, value)
-                coquery.add_where(SQL("%s IS NOT NULL", coquery.table[inverse_field.name]))
-                return coquery
-        return super()._get_query_for_condition_value(model, comodel, operator, value)
-
     def _condition_to_sql_relational(self, table: TableSQL, exists: bool, coquery: Query) -> SQL:
-        if coquery.is_empty():
-            return SQL("FALSE") if exists else SQL("TRUE")
-
         model = table._model
         comodel = model.env[self.comodel_name].sudo()
         inverse_field = comodel._fields[self.inverse_name]
@@ -1836,8 +1800,7 @@ class Many2many(_RelationalMulti):
         return coalias
 
     def _condition_to_sql_relational(self, table: TableSQL, exists: bool, coquery: Query) -> SQL:
-        if coquery.is_empty():
-            return SQL("FALSE") if exists else SQL("TRUE")
+        assert not coquery.is_empty()
         rel_table, rel_id1, rel_id2 = self.relation, self.column1, self.column2
         rel_alias = table._make_alias(self.name)
         if not coquery.where_clause:
