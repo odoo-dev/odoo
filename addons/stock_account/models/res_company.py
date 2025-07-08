@@ -1,4 +1,6 @@
-from odoo import _, fields, models, Command
+from dateutil.relativedelta import relativedelta
+from odoo import _, api, fields, models, Command
+from odoo.fields import Domain
 
 
 class ResCompany(models.Model):
@@ -12,6 +14,25 @@ class ResCompany(models.Model):
     account_production_wip_account_id = fields.Many2one('account.account', string='Production WIP Account', check_company=True)
     account_production_wip_overhead_account_id = fields.Many2one('account.account', string='Production WIP Overhead Account', check_company=True)
 
+    inventory_period = fields.Selection(
+        string='Inventory Period',
+        selection=[
+            ('manual', 'Manual'),
+            ('daily', 'Daily'),
+            ('monthly', 'Monthly'),
+        ],
+        default='manual',
+        required=True)
+
+    inventory_valuation = fields.Selection(
+        string='Valuation',
+        selection=[
+            ('periodic', 'Periodic (at closing)'),
+            ('real_time', 'Perpetual (at invoicing)'),
+        ],
+        default='periodic',
+    )
+
     cost_method = fields.Selection(
         string="Cost Method",
         selection=[
@@ -22,6 +43,43 @@ class ResCompany(models.Model):
         default='standard',
         required=True,
     )
+
+    def stock_value(self, products=False, product_categories=False):
+        self.ensure_one()
+        if products:
+            return sum(products.with_company(self).mapped('total_value'))
+        domain = Domain([('is_storable', '=', True)])
+        if product_categories:
+            domain = domain & Domain([('categ_id', 'in', product_categories.ids)])
+            products = self.env['product.product'].with_company(self).search(domain)
+        else:
+            products = self.env['product.product'].with_company(self).search(domain)
+        return sum(products.mapped('total_value'))
+
+    def stock_accounting_value(self, products=False, product_categories=False):
+        self.ensure_one()
+        fiscal_year_date_from = self.compute_fiscalyear_dates(fields.Date.today())['date_from']
+        stock_valuation_account = self.account_stock_valuation_id
+        domain = Domain([
+            ('account_id', '=', stock_valuation_account.id), ('parent_state', '=', 'posted'),
+            ('company_id', '=', self.id),
+            ('date', '>', fiscal_year_date_from),
+        ])
+        if products:
+            domain = domain & Domain([('product_id', 'in', products.ids)])
+        elif product_categories:
+            domain = domain & Domain([('product_id.categ_id', 'in', product_categories.ids)])
+        amls = self.env['account.move.line'].search(domain)
+        return sum(amls.mapped('balance'))
+
+    @api.model
+    def _cron_post_stock_valuation(self):
+        # get the last day of the current month
+        domain = Domain([('inventory_period', '=', 'daily')])
+        if fields.Date.today() == fields.Date.today() + relativedelta(day=31):
+            domain = domain & Domain([('inventory_period', '=', 'monthly')])
+        companies = self.env['res.company'].search(domain)
+        companies.post_stock_valuation()
 
     def post_stock_valuation(self, periodic_cogs=False):
         for company in self:
@@ -36,31 +94,23 @@ class ResCompany(models.Model):
                 stock_variation_account = company.expense_account_id
                 purchase_account = company.account_stock_variation_id
 
-            company._post_stock_valuation_account(products, fiscal_year_date_from, stock_valuation_account, stock_variation_account)
+            company._post_stock_valuation_account(products, stock_valuation_account, stock_variation_account)
             if periodic_cogs:
                 company._post_periodic_cogs(products, fiscal_year_date_from, purchase_account, stock_variation_account)
 
-    def _post_stock_valuation_account(self, products, fiscal_year_date_from, stock_valuation_account, stock_variation_account):
+    def _post_stock_valuation_account(self, products, stock_valuation_account, stock_variation_account):
         """ Update the stock valuation account.
         - For products with periodic valuation, update the stock valuation base on the current balance and the inventory value
         - For products with perpetual valuation, Correct the COGS mistakes base on the accounting value and the real inventory value
         """
         if not products:
             return
-        inventory_value = sum(products.mapped('total_value'))
-        amls_value = self.env['account.move.line']._read_group(
-            domain=[
-                ('account_id', '=', stock_valuation_account.id), ('parent_state', '=', 'posted'),
-                ('company_id', '=', self.id),
-                ('date', '>', fiscal_year_date_from),
-            ],
-            groupby=['account_id'],
-            aggregates=['balance:sum'],
-        )
+        inventory_value = self.stock_value(products)
+        amls_value = self.stock_accounting_value()
 
         inventory_variation = inventory_value
         if amls_value:
-            inventory_variation -= amls_value[0][1]
+            inventory_variation -= amls_value
 
         if inventory_variation != 0:
             move_vals = {
@@ -99,17 +149,15 @@ class ResCompany(models.Model):
         if not products_periodic:
             return
 
-        amls_value = self.env['account.move.line']._read_group(
+        amls = self.env['account.move.line'].search(
             domain=[
                 ('account_id', '=', purchase_account.id), ('parent_state', '=', 'posted'),
                 ('company_id', '=', self.id),
                 ('date', '>', fiscal_year_date_from),
                 '|', ('product_id', 'in', products_periodic.ids), ('name', '=', _('COGS counter balance')),
-            ],
-            groupby=['account_id'],
-            aggregates=['balance:sum'],
+            ]
         )
-        amls_value = amls_value[0][1] if amls_value else 0
+        amls_value = sum(amls.mapped('balance')) if amls else 0
         if not amls_value:
             return
         cogs_counter_balance = amls_value
