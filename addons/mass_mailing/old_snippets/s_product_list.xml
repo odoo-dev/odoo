@@ -4,6 +4,7 @@
 <template id="s_product_list" name="Items">
     <section class="s_mail_product_list o_mail_snippet_general">
         <div class="container">
+            <h2 class="h3-fs">Our finest selection</h2>
             <div class="row">
                 <div class="col-md-4 o_cc pt16 pb16">
                     <a href="">
