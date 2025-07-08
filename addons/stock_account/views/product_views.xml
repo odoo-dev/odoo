@@ -34,7 +34,7 @@
                 <group name="account_property" position="inside">
                     <group name="account_stock_property" string="Accounting Stock Valuation" groups="account.group_account_readonly">
                         <field name="property_stock_valuation_account_id" string="Stock Account" options="{'no_create': True}" required="property_valuation == 'real_time'"/>
-                        <label for="property_stock_variation_account_id" invisible="not anglo_saxon_accounting" string="Purchase Account"/>
+                        <label for="property_stock_variation_account_id" invisible="not anglo_saxon_accounting" string="COGS Account"/>
                         <label for="property_stock_variation_account_id" invisible="anglo_saxon_accounting" string="Stock Variation Account"/>
                         <div>
                             <field name="property_stock_variation_account_id" options="{'no_create': True}"/>

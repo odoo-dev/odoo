@@ -89,14 +89,11 @@ class ResCompany(models.Model):
 
             stock_valuation_account = company.account_stock_valuation_id
             stock_variation_account = company.account_stock_variation_id
-            purchase_account = self.env['account.account']
-            if company.anglo_saxon_accounting:
-                stock_variation_account = company.expense_account_id
-                purchase_account = company.account_stock_variation_id
+            expense_account = company.expense_account_id
 
             company._post_stock_valuation_account(products, stock_valuation_account, stock_variation_account)
             if periodic_cogs:
-                company._post_periodic_cogs(products, fiscal_year_date_from, purchase_account, stock_variation_account)
+                company._post_periodic_cogs(products, fiscal_year_date_from, expense_account, stock_variation_account)
 
     def _post_stock_valuation_account(self, products, stock_valuation_account, stock_variation_account):
         """ Update the stock valuation account.
@@ -135,7 +132,7 @@ class ResCompany(models.Model):
             am = self.env['account.move'].create(move_vals)
             am._post()
 
-    def _post_periodic_cogs(self, products, fiscal_year_date_from, purchase_account, stock_variation_account):
+    def _post_periodic_cogs(self, products, fiscal_year_date_from, expense_account, stock_variation_account):
         """ The `_post_stock_valuation_account` use the COGS account in order to balance the stock valuation account.
         However, the products could remains in stock and are not sold yet. This method counter balance the COGS account
         with the inventory value.
@@ -151,7 +148,7 @@ class ResCompany(models.Model):
 
         amls = self.env['account.move.line'].search(
             domain=[
-                ('account_id', '=', purchase_account.id), ('parent_state', '=', 'posted'),
+                ('account_id', '=', expense_account.id), ('parent_state', '=', 'posted'),
                 ('company_id', '=', self.id),
                 ('date', '>', fiscal_year_date_from),
                 '|', ('product_id', 'in', products_periodic.ids), ('name', '=', _('COGS counter balance')),
@@ -176,7 +173,7 @@ class ResCompany(models.Model):
             'credit': cogs_counter_balance if cogs_counter_balance < 0 else 0,
         }))
         move_vals['line_ids'].append(Command.create({
-            'account_id': purchase_account.id,
+            'account_id': expense_account.id,
             'name': _('COGS counter balance'),
             'debit': -cogs_counter_balance if cogs_counter_balance > 0 else 0,
             'credit': cogs_counter_balance if cogs_counter_balance < 0 else 0,

@@ -180,8 +180,8 @@ class TestStockValuationStandard(TestStockValuationCommon):
         move2 = self._make_in_move(self.product1, 10)
         move3 = self._make_out_move(self.product1, 15)
 
-        self.assertEqual(self.product1.value_svl, 50)
-        self.assertEqual(self.product1.quantity_svl, 5)
+        self.assertEqual(self.product1.total_value, 50)
+        self.assertEqual(self.product1.quantity_available, 5)
 
     def test_change_in_past_increase_in_1(self):
         self.product1.product_tmpl_id.categ_id.property_valuation = 'manual_periodic'
