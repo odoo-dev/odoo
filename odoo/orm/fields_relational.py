@@ -485,7 +485,7 @@ class Many2one(_Relational):
         return cotable[property_name]
 
     def condition_to_sql(self, table: TableSQL, field_expr: str, operator: str, value) -> SQL:
-        if operator not in ('any', 'not any', 'any!', 'not any!') or field_expr != self.name:
+        if operator not in ('any!', 'not any!') or field_expr != self.name:
             # for other operators than 'any', just generate condition based on column type
             return super().condition_to_sql(table, field_expr, operator, value)
 
