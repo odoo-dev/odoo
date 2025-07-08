@@ -39,6 +39,7 @@ registry.category('web_tour.tours').add('shop_update_cart', {
             content: "add suggested",
             trigger: '.js_cart_lines:has(a:contains("Storage Box")) button:contains("Add to cart")',
             run: "click",
+            expectUnloadPage: true,
         },
         {
             trigger: '#cart_products a[name="o_cart_line_product_link"]>h6:contains("Storage Box")',

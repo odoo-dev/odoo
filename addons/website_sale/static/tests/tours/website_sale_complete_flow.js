@@ -380,6 +380,7 @@ import { pay } from "@website_sale/js/tours/tour_utils";
         content: "Click on Confirm button to save the address",
         trigger: 'a[name="website_sale_main_button"]',
         run: "click",
+        expectUnloadPage: true,
     },
         tourUtils.confirmOrder(),
     {

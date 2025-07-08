@@ -163,10 +163,12 @@ registry.category("web_tour.tours").add('project_todo_main_functions', {
     trigger: 'button[name="action_convert_to_task"]',
     content: 'Convert the todo to a task',
     run: "click",
+    expectUnloadPage: true,
 }, {
     trigger: ".o_form_view .breadcrumb-item:last-child",
     content: markup("Let's go back to the <b>kanban view</b> to have an overview of tasks linked to project chosen."),
     run: "click",
+    expectUnloadPage: true,
 }, {
     trigger: ".o_kanban_view",
 }]});

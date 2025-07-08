@@ -1,5 +1,4 @@
 import * as hoot from "@odoo/hoot-dom";
-import { waitForStable } from "@web/core/macro";
 
 export class TourHelpers {
     /**
@@ -266,7 +265,7 @@ export class TourHelpers {
      * If the input is still checked after the click, an error is thrown.
      *
      * @param {string|Node} selector
-     * @example
+     * @examplegoToUrl
      *  run: "uncheck", // Unchecks the action element
      * @example
      *  run: "uncheck input[type=checkbox]", // Unchecks the selector
@@ -286,8 +285,6 @@ export class TourHelpers {
     async goToUrl(url) {
         const linkEl = document.createElement("a");
         linkEl.href = url;
-        //We want DOM is stable before quit it.
-        await waitForStable();
         await hoot.click(linkEl);
     }
 

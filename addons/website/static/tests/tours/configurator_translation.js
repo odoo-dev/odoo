@@ -19,10 +19,12 @@ registry.category("web_tour.tours").add('configurator_translation', {
         run() {
             window.history.back();
         },
+        expectUnloadPage: true,
     }, {
         content: "return to description screen",
         trigger: 'button.o_configurator_show',
         run: "click",
+        expectUnloadPage: true,
     },
     // Description screen
     {
@@ -69,6 +71,7 @@ registry.category("web_tour.tours").add('configurator_translation', {
         content: "Wait until the configurator is finished",
         trigger: ".o_website_preview[data-view-xmlid='website.homepage']",
         timeout: 30000,
+        expectUnloadPage: true,
     }, {
         content: "Check if the current interface language is active and monkey patch terms",
         trigger: "body",

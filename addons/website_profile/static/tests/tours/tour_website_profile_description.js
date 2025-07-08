@@ -11,6 +11,7 @@ registry.category("web_tour.tours").add('website_profile_description', {
         content: "Edit profile",
         trigger: "a:contains('EDIT PROFILE')",
         run: "click",
+        expectUnloadPage: true,
     }, {
         content: "Add some content",
         trigger: ".odoo-editor-editable p",

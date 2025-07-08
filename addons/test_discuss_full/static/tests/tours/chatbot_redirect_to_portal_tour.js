@@ -18,6 +18,7 @@ registry.category("web_tour.tours").add("test_mail_full.chatbot_redirect_to_port
         },
         {
             trigger: ".o-livechat-root:shadow .o-mail-Message:contains('Go to the portal page')",
+            expectUnloadPage: true,
         },
         {
             trigger: ".o-livechat-root:shadow .o-mail-Message:last:contains('Tadam')",

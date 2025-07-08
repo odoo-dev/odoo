@@ -129,6 +129,7 @@ registry.category("web_tour.tours").add("discuss_channel_public_tour.js", {
             run() {
                 location.reload();
             },
+            expectUnloadPage: true,
         },
         {
             content: "Remove reaction",
@@ -141,6 +142,7 @@ registry.category("web_tour.tours").add("discuss_channel_public_tour.js", {
             run() {
                 location.reload();
             },
+            expectUnloadPage: true,
         },
         {
             trigger: ".o-mail-Message:not(:has(.o-mail-MessageReaction))",

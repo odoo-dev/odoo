@@ -61,6 +61,7 @@ registry.category("web_tour.tours").add("website_livechat.chatbot_redirect", {
                     );
                 }
             },
+            expectUnloadPage: true,
         },
     ],
 });

@@ -159,6 +159,7 @@ registry.category("web_tour.tours").add('test_error_website', {
         run: function () {
                 window.location.href = window.location.origin + '/test_view_access_error?debug=0';
         },
+        expectUnloadPage: true,
     },
     {
         trigger: 'h1:contains("403: Forbidden")',
@@ -169,6 +170,7 @@ registry.category("web_tour.tours").add('test_error_website', {
         run: function () {
                 window.location.href = window.location.origin + '/test_view_access_error?debug=1';
         },
+        expectUnloadPage: true,
     },
     {
         trigger: 'h1:contains("403: Forbidden")',

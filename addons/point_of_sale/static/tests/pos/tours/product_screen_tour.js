@@ -686,7 +686,7 @@ registry.category("web_tour.tours").add("test_product_create_update_from_fronten
             ProductScreen.clickInfoProduct(
                 "Test Frontend Product",
                 [
-                    Dialog.confirm("Edit", ".btn-secondary"),
+                    Dialog.confirm("Edit", { button: ".btn-secondary" }),
                     // Verify that the "Edit Product" dialog is displayed.
                     Dialog.is({ title: "Edit Product" }),
 
@@ -791,7 +791,7 @@ registry.category("web_tour.tours").add("test_remove_archived_product_from_cache
             PaymentScreen.clickValidate(),
             ReceiptScreen.isShown(),
             Chrome.clickMenuOption("Close Register"),
-            Dialog.confirm("Close Register"),
+            Dialog.confirm("Close Register", { expectUnloadPage: true }),
             Utils.selectButton("Backend"),
             BackendUtils.openProductForm("A Test Product"),
             {

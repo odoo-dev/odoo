@@ -146,6 +146,7 @@ registry.category('web_tour.tours').add('donation_snippet_use_2', {
             content: "Donate using the selected amount",
             trigger: ".s_donation_donate_btn",
             run: "click",
+            expectUnloadPage: true,
         },
         {
             content: "Click on the 'Amount to donate' input field",

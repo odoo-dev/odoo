@@ -66,6 +66,7 @@ webTours.add("check_shipping_discount", {
             content: "pay with eWallet",
             trigger: "form[name=claim_reward] a.btn-primary:contains(Pay with eWallet)",
             run: "click",
+            expectUnloadPage: true,
         },
         waitForPaymentPage,
         ...assertRewardAmounts({ discount: "- 304.00" }),
@@ -76,6 +77,7 @@ webTours.add("check_shipping_discount", {
             content: "confirm shipping method",
             trigger: ".o_total_card a[name=website_sale_main_button]",
             run: "click",
+            expectUnloadPage: true,
         },
         ...pay(),
     ],
@@ -84,7 +86,7 @@ webTours.add("check_shipping_discount", {
 webTours.add("update_shipping_after_discount", {
     url: "/shop",
     steps: () => [
-        ...addToCart({ productName: "Plumbus" }),
+        ...addToCart({ productName: "Plumbus", expectUnloadPage: true }),
         goToCart(),
         {
             content: "use eWallet to check it doesn't impact `free_over` shipping",
@@ -114,6 +116,7 @@ webTours.add("update_shipping_after_discount", {
             content: "apply discount code",
             trigger: "form[name=coupon_code] .a-submit",
             run: "click",
+            expectUnloadPage: true,
         },
         ...assertCartAmounts({
             total: "0.00", // $50 total is covered by eWallet
