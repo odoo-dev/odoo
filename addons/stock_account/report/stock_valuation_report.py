@@ -32,7 +32,7 @@ class StockValuationReport(models.AbstractModel):
         return {}
 
     def _get_report_data(self, product_category=False, warehouse=False):
-        stock_initial = 3000 # TODO: to compute correctly.
+        stock_initial = self.env.company.stock_accounting_value(product_categories=product_category)
         inventory_valuation_data = self._compute_inventory_valuation(product_category)
         accounting_stock_valuation = inventory_valuation_data['value']
 
@@ -65,17 +65,18 @@ class StockValuationReport(models.AbstractModel):
         valuation_lines_by_category = defaultdict(list)
         total = 0
         for product in products:
-            if not product.total_value:
+            value = self.env.company.stock_value(products=product)
+            if not value:
                 continue
             product_valuation_line = {
                 'res_model': 'product.product',
                 'id': product.id,
                 'display_name': product.display_name,
                 'name': product.name,
-                'value': product.total_value
+                'value': value,
             }
             valuation_lines_by_category[product.categ_id].append(product_valuation_line)
-            total += product.total_value
+            total += value
 
         product_category_valuation_lines = [
             {

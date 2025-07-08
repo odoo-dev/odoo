@@ -305,23 +305,6 @@ class ResCompany(models.Model):
 
     # Inventory
     anglo_saxon_accounting = fields.Boolean(string="Use anglo-saxon accounting")
-    inventory_period = fields.Selection(
-        string='Inventory Period',
-        selection=[
-            ('manual', 'Manual'),
-            ('daily', 'Daily'),
-            ('monthly', 'Monthly'),
-        ],
-        default='manual',
-        required=True)
-    inventory_valuation = fields.Selection(
-        string='Valuation',
-        selection=[
-            ('periodic', 'Periodic (at closing)'),
-            ('real_time', 'Perpetual (at invoicing)'),
-        ],
-        default='periodic',
-    )
 
     def get_next_batch_payment_communication(self):
         '''
