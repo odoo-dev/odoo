@@ -603,6 +603,12 @@ class AccountMove(models.Model):
         tracking=True,
         help="It indicates that the invoice/payment has been sent or the PDF has been generated.",
     )
+
+    move_sent_state = fields.Selection(
+        selection=[('not_sent', "Not Sent"), ('sent', "Sent")],
+        compute='_compute_move_sent_state',
+    )
+
     is_being_sent = fields.Boolean(
         help="Is the move being sent asynchronously",
         compute='_compute_is_being_sent'
@@ -1723,6 +1729,11 @@ class AccountMove(models.Model):
                 narration = _('Terms & Conditions: %s', baseurl)
                 del context
             move.narration = narration or False
+
+    @api.depends('is_move_sent')
+    def _compute_move_sent_state(self):
+        for move in self:
+            move.move_sent_state = 'sent' if move.is_move_sent else 'not_sent'
 
     def _get_partner_credit_warning_exclude_amount(self):
         # to extend in module 'sale'; see there for details
