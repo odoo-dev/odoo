@@ -16,12 +16,3 @@ class AccountChartTemplate(models.AbstractModel):
             'account_production_wip_overhead_account_id': 'cost_of_production',
         })
         return res
-
-    def _load_wip_accounts(self, company, template_data):
-        company = company or self.env.company
-        if company.id in template_data:
-            company_data = template_data[company.id]
-            if 'account_production_wip_account_id' in company_data:
-                company.account_production_wip_account_id = self.ref(company_data['account_production_wip_account_id'])
-            if 'account_production_wip_overhead_account_id' in company_data:
-                company.account_production_wip_overhead_account_id = self.ref(company_data['account_production_wip_overhead_account_id'])
