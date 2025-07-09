@@ -8,7 +8,6 @@ class StockValuationReport(models.AbstractModel):
         data = super()._get_report_data(product_category, warehouse)
         not_invoiced_received_data = self._compute_goods_received_not_invoiced(product_category)
         data['not_invoiced_received_goods'] = not_invoiced_received_data
-        data['accounting_stock_valuation'] -= not_invoiced_received_data['value']
         return data
 
     def _compute_goods_received_not_invoiced(self, product_category):
