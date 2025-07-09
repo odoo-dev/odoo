@@ -1,5 +1,5 @@
 import { Plugin } from "@html_editor/plugin";
-import { unwrapContents } from "@html_editor/utils/dom";
+import { removeClass, toggleClass, unwrapContents } from "@html_editor/utils/dom";
 import { closestElement, descendants, selectElements } from "@html_editor/utils/dom_traversal";
 import { findInSelection, callbacksForCursorUpdate } from "@html_editor/utils/selection";
 import { _t } from "@web/core/l10n/translation";
@@ -242,6 +242,8 @@ export class LinkPlugin extends Plugin {
             ":has(>[data-oe-model])",
         ],
 
+        system_classes: ["non-editable-btn"],
+
         /** Handlers */
         beforeinput_handlers: withSequence(5, this.onBeforeInput.bind(this)),
         input_handlers: this.onInputDeleteNormalizeLink.bind(this),
@@ -250,8 +252,12 @@ export class LinkPlugin extends Plugin {
         before_paste_handlers: this.updateCurrentLinkSyncState.bind(this),
         after_paste_handlers: this.onPasteNormalizeLink.bind(this),
         selectionchange_handlers: this.handleSelectionChange.bind(this),
-        clean_for_save_handlers: ({ root }) => this.removeEmptyLinks(root),
-        normalize_handlers: this.normalizeLink.bind(this),
+        clean_for_save_handlers: [
+            ({ root }) => this.removeEmptyLinks(root),
+            ({ root }) => this.clearNonEditableButtons(root),
+        ],
+
+        normalize_handlers: [this.normalizeLink.bind(this), this.setUneditableButtons.bind(this)],
         after_insert_handlers: this.handleAfterInsert.bind(this),
 
         /** Overrides */
@@ -682,6 +688,18 @@ export class LinkPlugin extends Plugin {
                 this.dependencies.color.colorElement(newFont, color, "color");
             }
         }
+    }
+
+    setUneditableButtons(root) {
+        for (const button of selectElements(root, ".btn")) {
+            toggleClass(button, "non-editable-btn", !button.isContentEditable);
+        }
+    }
+
+    clearNonEditableButtons(root) {
+        root.querySelectorAll(".non-editable-btn").forEach((btn) =>
+            removeClass(btn, "non-editable-btn")
+        );
     }
 
     handleSelectionChange(selectionData) {

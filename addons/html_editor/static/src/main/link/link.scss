@@ -9,21 +9,12 @@
     .btn {
         user-select: auto;
         cursor: text;
-    }
 
-    [contenteditable=false], &[contenteditable=false] {
-        &.btn, .btn {
+        &.non-editable-btn {
             user-select: none;
             cursor: pointer;
-        }
 
-        [contenteditable=true] {
-            &.btn, .btn {
-                user-select: auto;
-                cursor: text;
-            }
         }
-
     }
 
 }
