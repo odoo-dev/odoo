@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="unicommerce_shopify_channel" model="unicommerce.channel">
+            <field name="name">Shopify</field>
+            <field name="code">shopify</field>
+        </record>
+        <record id="unicommerce_amazon_channel" model="unicommerce.channel">
+            <field name="name">Amazon</field>
+            <field name="code">amazon</field>
+        </record>
+    </data>
+</odoo>

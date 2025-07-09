@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="link_account_action" model="ir.actions.act_window">
+        <field name="name">Unicommerce Accounts</field>
+        <field name="res_model">unicommerce.account</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="link_account_form" model="ir.ui.view">
+        <field name="name">Unicommerce Account Form</field>
+        <field name="model">unicommerce.account</field>
+        <field name="priority">999</field>
+        <field name="arch" type="xml">
+            <form create='false'>
+                <header>
+                    <button string="Test connection"
+                        type="object"
+                        name="action_link_account"
+                        class="btn-primary"
+                        invisible="state == 'connected'"
+                    />
+                    <button string="Push product"
+                        type="object"
+                        name="upload_items_to_unicommerce"
+                        class="btn-primary"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_offers"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-cubes">
+                            <field name="offer_count"
+                                   widget="statinfo"
+                                   string="Products"/>
+                        </button>
+                        <button name="action_view_orders"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-list">
+                            <field name="order_count"
+                                   widget="statinfo"
+                                   string="Orders"/>
+                        </button>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <h1 class="m-0 d-flex align-items-center flex-wrap">
+                            <field name="username"
+                                   options="{'line_breaks': False}"
+                                   widget="text"
+                                   class="o_task_name text-truncate pe-3"/>
+                        </h1>
+                        <field name="state"
+                               widget="badge"
+                               decoration-success="state == 'connected'"
+                               class="ms-2" />
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="password" password="True"/>
+                            <field name="client_id" />
+                            <field name="tenant" />
+                            <field name="grant_type" />
+                        </group>
+                        <group>
+                            <field name="channel_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                       <page string="Configuration">
+                            <group>
+                                <field name="access_token"/>
+                                <field name="refresh_token"/>
+                            </group>
+                       </page>
+
+                       <page string="Order Management">
+                            <group>
+                                <div class="g-col-sm-2">
+                                    <!-- Sync Product Catalog -->
+                                    <div class="d-flex align-items-center mb-2" style="gap: 8px;">
+                                        <span class="fw-bold" style="font-size: 16px; white-space: nowrap;">SYNC Products</span>
+                                        <button name="action_sync_products"
+                                                type="object"
+                                                class="oe_link ms-0 ps-0"
+                                                icon="fa-refresh"
+                                                title="Sync Products Now"/>
+                                        <field name="last_product_sync_datetime"
+                                               widget="datetime"
+                                               readonly="1"
+                                               class="ms-2"
+                                               options="{'format': 'datetime'}"/>
+                                    </div>
+
+                                    <!-- Sync Inventory -->
+                                    <div class="d-flex align-items-center mb-2" style="gap: 8px;">
+                                        <span class="fw-bold" style="font-size: 16px; white-space: nowrap;">SYNC Inventory</span>
+                                        <button name="action_update_inventory"
+                                                type="object"
+                                                class="oe_link ms-0 ps-0"
+                                                icon="fa-refresh"
+                                                title="Sync Inventory Now"/>
+                                        <field name="last_inventory_sync_datetime"
+                                               widget="datetime"
+                                               readonly="1"
+                                               class="ms-2"
+                                               options="{'format': 'datetime'}"/>
+                                    </div>
+
+                                    <!-- Sync Orders -->
+                                    <div class="d-flex align-items-center mb-2" style="gap: 8px;">
+                                        <span class="fw-bold" style="font-size: 16px; white-space: nowrap;">SYNC Orders</span>
+                                        <button name="action_sync_orders"
+                                                type="object"
+                                                class="oe_link ms-0 ps-0"
+                                                icon="fa-refresh"
+                                                title="Sync Orders Now"/>
+                                        <field name="last_so_sync_datetime"
+                                               widget="datetime"
+                                               readonly="1"
+                                               class="ms-2"
+                                               options="{'format': 'datetime'}"/>
+                                    </div>
+                                </div>
+                            </group>
+                       </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+</odoo>

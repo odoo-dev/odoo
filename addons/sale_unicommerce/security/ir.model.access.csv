@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_unicommerce_account,access.unicommerce.account,model_unicommerce_account,base.group_user,1,1,1,1
+access_unicommerce_channel,access.unicommerce.channel,model_unicommerce_channel,base.group_user,1,1,1,1
+access_marketplace_offer,access_marketplace_offer,model_marketplace_offer,base.group_user,1,1,1,1
