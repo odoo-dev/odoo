@@ -130,6 +130,3 @@ class ProductCategory(models.Model):
         check_company=True,
         help="""This account will be used as a valuation counterpart for both components and final products for manufacturing orders.
                 If there are any workcenter/employee costs, this value will remain on the account once the production is completed.""")
-
-    def _get_stock_account_property_field_names(self):
-        return super()._get_stock_account_property_field_names() + ['property_stock_account_production_cost_id']

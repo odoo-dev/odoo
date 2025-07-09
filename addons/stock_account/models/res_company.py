@@ -72,15 +72,6 @@ class ResCompany(models.Model):
         amls = self.env['account.move.line'].search(domain)
         return sum(amls.mapped('balance'))
 
-    @api.model
-    def _cron_post_stock_valuation(self):
-        # get the last day of the current month
-        domain = Domain([('inventory_period', '=', 'daily')])
-        if fields.Date.today() == fields.Date.today() + relativedelta(day=31):
-            domain = domain & Domain([('inventory_period', '=', 'monthly')])
-        companies = self.env['res.company'].search(domain)
-        companies.post_stock_valuation()
-
     def post_stock_valuation(self, periodic_cogs=False):
         for company in self:
             fiscal_year_date_from = company.compute_fiscalyear_dates(fields.Date.today())['date_from']
@@ -94,6 +85,15 @@ class ResCompany(models.Model):
             company._post_stock_valuation_account(products, stock_valuation_account, stock_variation_account)
             if periodic_cogs:
                 company._post_periodic_cogs(products, fiscal_year_date_from, expense_account, stock_variation_account)
+
+    @api.model
+    def _cron_post_stock_valuation(self):
+        # get the last day of the current month
+        domain = Domain([('inventory_period', '=', 'daily')])
+        if fields.Date.today() == fields.Date.today() + relativedelta(day=31):
+            domain = domain & Domain([('inventory_period', '=', 'monthly')])
+        companies = self.env['res.company'].search(domain)
+        companies.post_stock_valuation()
 
     def _post_stock_valuation_account(self, products, stock_valuation_account, stock_variation_account):
         """ Update the stock valuation account.
@@ -180,3 +180,11 @@ class ResCompany(models.Model):
         }))
         am = self.env['account.move'].create(move_vals)
         am._post()
+
+    def _set_category_defaults(self):
+        for company in self:
+            self.env['ir.default'].set('product.category', 'property_valuation', company.inventory_valuation, company_id=company.id)
+            self.env['ir.default'].set('product.category', 'property_cost_method', company.cost_method, company_id=company.id)
+            self.env['ir.default'].set('product.category', 'property_stock_journal', company.account_stock_journal_id.id, company_id=company.id)
+            self.env['ir.default'].set('product.category', 'property_stock_valuation_account_id', company.account_stock_valuation_id.id, company_id=company.id)
+            self.env['ir.default'].set('product.category', 'property_stock_variation_account_id', company.account_stock_variation_id.id, company_id=company.id)

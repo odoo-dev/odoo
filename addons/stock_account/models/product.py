@@ -307,37 +307,3 @@ class ProductCategory(models.Model):
     @api.depends_context('company')
     def _compute_anglo_saxon_accounting(self):
         self.anglo_saxon_accounting = self.env.company.anglo_saxon_accounting
-
-    @api.model
-    def _get_stock_account_property_field_names(self):
-        return self._get_mandatory_stock_account_property_field_names()
-
-    @api.model
-    def _get_mandatory_stock_account_property_field_names(self):
-        return [
-            'property_stock_valuation_account_id',
-            'property_stock_variation_account_id',
-        ]
-
-    @api.model
-    def _create_default_stock_accounts_properties(self):
-        IrDefault = self.env['ir.default']
-        company = self.env.ref('base.main_company')
-        stock_variation_field = self.env['ir.model.fields'].search([
-            ('model', '=', 'product.category'),
-            ('name', '=', 'property_stock_variation_account_id'),
-        ])
-        stock_variation_property = IrDefault.search([
-            ('field_id', '=', stock_variation_field.id),
-            ('company_id', '=', company.id),
-        ])
-        if not stock_variation_property:
-            IrDefault._load_records([{
-                'xml_id': 'stock_account.property_stock_variation_account_id',
-                'noupdate': True,
-                'values': {
-                    'field_id': stock_variation_field.id,
-                    'json_value': 'false',
-                    'company_id': company.id,
-                },
-            }])
