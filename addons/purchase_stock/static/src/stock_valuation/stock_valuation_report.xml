@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates>
     <t t-inherit="stock_account.StockValuationReport" t-inherit-mode="extension">
-        <xpath expr="//t[@t-call='stock_account.StockValuationReport.InventoryValuation']" position="after">
+        <xpath expr="//t[@t-call='stock_account.StockValuationReport.EmptyLine']" position="after">
             <t t-call="stock_account.StockValuationReport.EmptyLine"/>
             <t t-call="purchase_stock.StockValuationReport.NotInvoicedValuation"/>
         </xpath>

@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from odoo import api, models
+from odoo import _, api, models
 
 
 class StockValuationReport(models.AbstractModel):
@@ -32,9 +32,9 @@ class StockValuationReport(models.AbstractModel):
         return {}
 
     def _get_report_data(self, product_category=False, warehouse=False):
-        stock_initial = self.env.company.stock_accounting_value(product_categories=product_category)
         inventory_valuation_data = self._compute_inventory_valuation(product_category)
-        accounting_stock_valuation = inventory_valuation_data['value']
+        accounting_valuation_data = self._compute_accounting_valuation()
+        inventory_variation = self._compute_inventory_variation()
 
         # # - Work In Progress: total of the ongoing MO:
         # #   - An entry by MO;
@@ -46,26 +46,44 @@ class StockValuationReport(models.AbstractModel):
         #     'total': 500,
         # }
 
-        data = {
+        return {
             'company_id': self.env.company.id,
             'currency_id': self.env.company.currency_id.id,
-            'accounting_stock_valuation': accounting_stock_valuation,
+            'accounting_stock_valuation': accounting_valuation_data,
             'inventory_valuation': inventory_valuation_data,
-            'stock_initial': stock_initial,
-            'stock_variation': accounting_stock_valuation - stock_initial,
+            'inventory_variation': inventory_variation,
         }
-        return data
+
+    def _compute_inventory_variation(self):
+        stock_value = self.env.company.stock_value()[0]
+        accounting_stock_value = self.env.company.stock_accounting_value()[0]
+        return stock_value - accounting_stock_value
+
+    def _compute_accounting_valuation(self):
+        initial_value, amls = self.env.company.stock_accounting_value()
+        amls_lines = [
+            {
+                'res_model': 'account.move.line',
+                'id': aml.id,
+                'display_name': aml.display_name,
+                'name': aml.name,
+                'value': -aml.balance,
+            } for aml in amls
+        ]
+        initial_value_name = _('Accounting Stock Valuation')
+        return {
+            'display_name': initial_value_name,
+            'name': initial_value_name,
+            'value': -initial_value,
+            'lines': amls_lines,
+        }
 
     def _compute_inventory_valuation(self, product_category):
         """ Compute inventory valuation, product by product."""
-        domain = []
-        if product_category:
-            domain = [('categ_id', '=', product_category.id)]
-        products = self.env['product.product'].search(domain)
+        total, products = self.env.company.stock_value()
         valuation_lines_by_category = defaultdict(list)
-        total = 0
         for product in products:
-            value = self.env.company.stock_value(products=product)
+            value = product.total_value
             if not value:
                 continue
             product_valuation_line = {
@@ -76,7 +94,6 @@ class StockValuationReport(models.AbstractModel):
                 'value': value,
             }
             valuation_lines_by_category[product.categ_id].append(product_valuation_line)
-            total += value
 
         product_category_valuation_lines = [
             {
@@ -87,6 +104,7 @@ class StockValuationReport(models.AbstractModel):
                 'lines': product_lines,
             } for (categ, product_lines) in valuation_lines_by_category.items()
         ]
+
         return {
             'lines': product_category_valuation_lines,
             'value': total,

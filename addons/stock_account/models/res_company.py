@@ -54,7 +54,7 @@ class ResCompany(models.Model):
             products = self.env['product.product'].with_company(self).search(domain)
         else:
             products = self.env['product.product'].with_company(self).search(domain)
-        return sum(products.mapped('total_value'))
+        return sum(products.mapped('total_value')), products
 
     def stock_accounting_value(self, products=False, product_categories=False):
         self.ensure_one()
@@ -70,7 +70,7 @@ class ResCompany(models.Model):
         elif product_categories:
             domain = domain & Domain([('product_id.categ_id', 'in', product_categories.ids)])
         amls = self.env['account.move.line'].search(domain)
-        return sum(amls.mapped('balance'))
+        return sum(amls.mapped('balance')), amls
 
     def post_stock_valuation(self, periodic_cogs=False):
         for company in self:
@@ -102,8 +102,8 @@ class ResCompany(models.Model):
         """
         if not products:
             return
-        inventory_value = self.stock_value(products)
-        amls_value = self.stock_accounting_value()
+        inventory_value, __ = self.stock_value(products)
+        amls_value, __ = self.stock_accounting_value()
 
         inventory_variation = inventory_value
         if amls_value:

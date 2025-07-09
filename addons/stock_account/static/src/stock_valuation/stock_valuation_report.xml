@@ -23,6 +23,8 @@
                     <table class="table table-borderless table-hover w-print-100">
                         <tbody>
                             <t t-call="stock_account.StockValuationReport.InventoryValuation"/>
+                            <t t-call="stock_account.StockValuationReport.InventoryAccountingValuation"/>
+                            <t t-call="stock_account.StockValuationReport.InventoryVariation"/>
                             <t t-call="stock_account.StockValuationReport.EmptyLine"/>
                             <!-- <t t-call="stock_account.StockValuationReport.Footer"/> -->
                         </tbody>
@@ -43,6 +45,22 @@
             onClickMethod.bind="openStockReport"
             sublines="data.inventory_valuation.lines"
             value="data.inventory_valuation.value"/>
+    </t>
+
+    <t t-name="stock_account.StockValuationReport.InventoryAccountingValuation">
+        <StockValuationReportLine
+            label="'Inventory Accounting Valuation'"
+            level="0"
+            onClickMethod.bind="openStockReport"
+            sublines="data.accounting_stock_valuation.lines"
+            value="data.accounting_stock_valuation.value"/>
+    </t>
+
+    <t t-name="stock_account.StockValuationReport.InventoryVariation">
+        <StockValuationReportLine
+            label="'Inventory Variation'"
+            level="0"
+            value="data.inventory_variation"/>
     </t>
 
     <t t-name="stock_account.StockValuationReport.Footer">
