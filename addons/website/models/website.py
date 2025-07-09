@@ -83,7 +83,7 @@ class Website(models.Model):
         return self.env.ref('base.main_company').social_facebook
 
     def _default_social_github(self):
-        return self.env.ref('base.main_company').social_github
+        return self.env.ref('base.main_company').social_facebook
 
     def _default_social_linkedin(self):
         return self.env.ref('base.main_company').social_linkedin
