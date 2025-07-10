@@ -83,6 +83,7 @@ class ProductTemplate(models.Model):
         """
         accounts = super()._get_product_accounts()
         AccountAccount = self.env['account.account']
+
         accounts.update({
             'stock_valuation': (
                 self.categ_id.property_stock_valuation_account_id
@@ -95,6 +96,13 @@ class ProductTemplate(models.Model):
                 or AccountAccount
             ),
         })
+        company = self.company_id or self.env.company
+        if company.anglo_saxon_accounting and self.is_storable:
+            accounts['expense'] = (
+                self.property_account_expense_id
+                or self.categ_id.property_cogs_account_id
+                or company.account_cogs_id
+            )
         return accounts
 
     def get_product_accounts(self, fiscal_pos=None):
@@ -299,6 +307,9 @@ class ProductCategory(models.Model):
         'account.account', 'Stock Valuation Account', company_dependent=True, ondelete='restrict',
         check_company=True,
         help="""When automated inventory valuation is enabled on a product, this account will hold the current value of the products.""",)
+    property_cogs_account_id = fields.Many2one(
+        'account.account', 'Cost of Goods Sold Account', company_dependent=True, ondelete='restrict',
+        check_company=True,)
     property_price_difference_account_id = fields.Many2one(
         'account.account', 'Price Difference Account', company_dependent=True, ondelete='restrict',
         check_company=True,
