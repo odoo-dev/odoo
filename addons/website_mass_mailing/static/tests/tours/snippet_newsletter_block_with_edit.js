@@ -13,7 +13,7 @@ registerWebsitePreviewTour('snippet_newsletter_block_with_edit', {
     ...insertSnippet({
         id: 's_newsletter_block',
         name: 'Newsletter Block',
-        groupName: "Contact & Forms",
+        groupName: "Contact",
     }),
     {
         content: 'Wait for the list id to be set.',

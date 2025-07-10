@@ -858,7 +858,7 @@ registerWebsitePreviewTour(
         ...insertSnippet({
             id: "s_title_form",
             name: "Title - Form",
-            groupName: "Contact & Forms",
+            groupName: "Contact",
         }),
         {
             trigger: ":iframe .s_website_form_field",
@@ -1105,7 +1105,7 @@ registerWebsitePreviewTour(
         ...insertSnippet({
             id: "s_title_form",
             name: "Title - Form",
-            groupName: "Contact & Forms",
+            groupName: "Contact",
         }),
         {
             content: "Select form by clicking on an input field",

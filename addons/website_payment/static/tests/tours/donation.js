@@ -16,7 +16,7 @@ registerWebsitePreviewTour(
         ...insertSnippet({
             id: "s_donation",
             name: "Donation",
-            groupName: "Contact & Forms",
+            groupName: "Contact",
         }),
         ...clickOnSave(),
     ]

@@ -379,7 +379,7 @@
                     <keywords>menu, pricing, shop, table, cart, product, cost, charges, fees, rates, prices, expenses</keywords>
                 </t>
 
-                <!-- Contact & Forms group -->
+                <!-- Contact group -->
                 <t t-snippet="website.s_title_form" string="Title - Form" t-forbid-sanitize="form" t-thumbnail="/website/static/src/img/snippets_thumbs/s_website_form.svg" group="contact_and_forms">
                     <keywords>contact, collect, submission, input, fields, questionnaire, survey, registration, request</keywords>
                 </t>

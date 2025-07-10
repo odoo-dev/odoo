@@ -11,7 +11,7 @@ registerWebsitePreviewTour("snippet_newsletter_popup_edition", {
     ...insertSnippet({
         id: 's_newsletter_subscribe_popup',
         name: 'Newsletter Popup',
-        groupName: "Contact & Forms",
+        groupName: "Contact",
     }),
     {
         content: "Check the modal is opened for edition",
