@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="hr_attendance_ruleset_view_search" model="ir.ui.view">
+        <field name="name">hr.attendance.ruleset.search</field>
+        <field name="model">hr.attendance.ruleset</field>
+        <field name="arch" type="xml">
+            <search string="Attendance Rulesets">
+                <field name="name" string="Ruleset Name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="country_id"/>
+                <separator/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Company" name="groupby_company" domain="[]" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                    <filter string="Country" name="groupby_country" domain="[]" context="{'group_by': 'country_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="hr_attendance_ruleset_view_list" model="ir.ui.view">
+        <field name="name">hr.attendance.ruleset.list</field>
+        <field name="model">hr.attendance.ruleset</field>
+        <field name="arch" type="xml">
+            <list string="Attendance Rulesets">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="country_id" optional="show"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="hr_attendance_ruleset_view_form" model="ir.ui.view">
+        <field name="name">hr.attendance.ruleset.form</field>
+        <field name="model">hr.attendance.ruleset</field>
+        <field name="arch" type="xml">
+            <form string="Attendance Ruleset">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="active"/>
+                    <group>
+                        <group>
+                            <field name="name" placeholder="e.g., Standard Belgian Overtime Rules"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="active" widget="boolean_toggle"/>
+                            <field name="country_id"/>
+                            <field name="sequence"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Attendance Rules" name="attendance_rules">
+                            <field name="rule_ids">
+                                <list string="Attendance Rules" editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name" required="1"/>
+                                    <field name="condition_type" required="1"/>
+                                    <field name="threshold_hours" optional="show"/>
+                                    <field name="compensation_type" required="1"/>
+                                    <field name="pay_rate_multiplier" optional="show"/>
+                                    <field name="time_off_allocation_rate" optional="show"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                    <field name="company_id" invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="hr_attendance_ruleset_action" model="ir.actions.act_window">
+        <field name="name">Attendance Rulesets</field>
+        <field name="res_model">hr.attendance.ruleset</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="hr_attendance_ruleset_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Attendance Ruleset.
+            </p><p>
+                Attendance rulesets group together individual rules for calculating overtime or applying specific pay rates based on attendance times. Assign a ruleset to an employee's contract.
+            </p>
+        </field>
+    </record>
+
+    <menuitem
+        id="hr_attendance_ruleset_menu"
+        name="Attendance Rulesets"
+        action="hr_attendance_ruleset_action"
+        parent="hr_attendance.menu_hr_attendance_settings"
+        sequence="30"/>
+
+</odoo>
