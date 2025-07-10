@@ -1,3 +1,4 @@
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
@@ -24,16 +25,21 @@ export class StockValuationReport extends Component {
 
     setup() {
         this.controller = useState(new StockValuationReportController(this.props.action));
-        this.state = useState({ displayInventoryValuationLine: false })
+        this.state = useState({
+            displayInventoryValuationLine: false,
+            displayAccrual: false
+        })
         this.data = {};
         this.orm = useService("orm");
         this.actionService = useService("action");
+        this._t = _t;
 
         onWillStart(async () => {
             await this.loadReportData();
         })
 
         useChildSubEnv({
+            _t,
             controller: this.controller,
             formatMonetary: this.formatMonetary.bind(this),
         });
@@ -42,6 +48,7 @@ export class StockValuationReport extends Component {
     async loadReportData() {
         const res = await this.orm.call('stock_account.stock.valuation.report', "get_report_values");
         this.data = res.data;
+        this.data.accrual = this._getAccrual();
         this.controller.load(this.data);
     }
 
@@ -49,6 +56,10 @@ export class StockValuationReport extends Component {
         return formatMonetary(value, {
             currencyId: this.data.currency_id,
         });
+    }
+
+    _getAccrual() {
+        return { label: _t("Accrual"), lines: [], value: 0 };
     }
 
     // Getters -----------------------------------------------------------------

@@ -19,6 +19,7 @@
                 </t>
             </ControlPanel>
             <div class="o_content">
+                <div id="warnings" class="warnings d-print-none"/>
                 <div class="mx-auto fit-content w-print-100">
                     <table class="table table-borderless table-hover w-print-100">
                         <tbody>
@@ -27,6 +28,7 @@
                             <t t-call="stock_account.StockValuationReport.InventoryVariation"/>
                             <t t-call="stock_account.StockValuationReport.EmptyLine"/>
                             <!-- <t t-call="stock_account.StockValuationReport.Footer"/> -->
+                            <t t-call="stock_account.StockValuationReport.Accrual"/>
                         </tbody>
                     </table>
                 </div>
@@ -40,7 +42,7 @@
 
     <t t-name="stock_account.StockValuationReport.InventoryValuation">
         <StockValuationReportLine
-            label="'Inventory Valuation'"
+            label="_t('Inventory Valuation')"
             level="0"
             onClickMethod.bind="openStockReport"
             sublines="data.inventory_valuation.lines"
@@ -49,7 +51,7 @@
 
     <t t-name="stock_account.StockValuationReport.InventoryAccountingValuation">
         <StockValuationReportLine
-            label="'Inventory Accounting Valuation'"
+            label="_t('Inventory Accounting Valuation')"
             level="0"
             onClickMethod.bind="openStockReport"
             sublines="data.accounting_stock_valuation.lines"
@@ -58,7 +60,7 @@
 
     <t t-name="stock_account.StockValuationReport.InventoryVariation">
         <StockValuationReportLine
-            label="'Inventory Variation'"
+            label="_t('Inventory Variation')"
             level="0"
             value="data.inventory_variation"/>
     </t>
@@ -88,5 +90,15 @@
                 <div t-out="stockVariation"/>
             </td>
         </tr>
+    </t>
+
+    <t t-name="stock_account.StockValuationReport.Accrual">
+        <!-- <t t-if="state.displayAccrual"> -->
+        <t t-if="data.accrual.lines.length">
+            <StockValuationReportLine
+                label="_t('Accrual')"
+                sublines="data.accrual.lines"
+                level="0"/>
+        </t>
     </t>
 </templates>
