@@ -10,7 +10,7 @@ class StockMove(models.Model):
     _inherit = "stock.move"
 
     def _filter_anglo_saxon_moves(self, product):
-        res = super(StockMove, self)._filter_anglo_saxon_moves(product)
+        res = super()._filter_anglo_saxon_moves(product)
         res += self.filtered(lambda m: m.bom_line_id.bom_id.product_tmpl_id.id == product.product_tmpl_id.id)
         return res
 

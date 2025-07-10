@@ -120,6 +120,7 @@ class ProductProduct(models.Model):
             if byproduct_cost_share:
                 total *= float_round(1 - byproduct_cost_share / 100, precision_rounding=0.0001)
             return bom.product_uom_id._compute_price(total / bom.product_qty, self.uom_id)
+        return 0.0
 
 
 class ProductCategory(models.Model):

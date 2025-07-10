@@ -25,6 +25,8 @@ class AccountMoveLine(models.Model):
 
             if line.product_id.valuation == 'real_time' and accounts['stock_valuation']:
                 line.account_id = accounts['stock_valuation']
+            elif line.company_id.anglo_saxon_accounting and accounts['stock_variation']:
+                line.account_id = accounts['stock_variation']
 
     @api.onchange('product_id')
     def _inverse_product_id(self):

@@ -108,8 +108,8 @@ class AccountMove(models.Model):
                 # Retrieve accounts needed to generate the COGS.
                 accounts = line.product_id.product_tmpl_id.get_product_accounts(fiscal_pos=move.fiscal_position_id)
                 stock_account = accounts['stock_valuation']
-                stock_variation_account = accounts['stock_variation'] or move.journal_id.default_account_id
-                if not stock_account or not stock_variation_account:
+                credit_expense_account = accounts['expense'] or move.journal_id.default_account_id
+                if not stock_account or not credit_expense_account:
                     continue
 
                 # Compute accounting fields.
@@ -146,7 +146,7 @@ class AccountMove(models.Model):
                     'quantity': line.quantity,
                     'price_unit': -price_unit,
                     'amount_currency': amount_currency,
-                    'account_id': stock_variation_account.id,
+                    'account_id': credit_expense_account.id,
                     'analytic_distribution': line.analytic_distribution,
                     'display_type': 'cogs',
                     'tax_ids': [],
