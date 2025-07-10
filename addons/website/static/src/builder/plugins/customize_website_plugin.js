@@ -488,23 +488,6 @@ export class CustomizeBodyBgTypeAction extends BuilderAction {
     }
 }
 
-export class RemoveFontAction extends BuilderAction {
-    static id = "removeFont";
-    static dependencies = ["builderActions"];
-    setup() {
-        this.preview = false;
-    }
-    async apply({ params }) {
-        // TODO
-        const getAction = this.dependencies.builderActions.getAction;
-        await getAction("customizeWebsiteVariable").load({
-            params: {
-                mainParam: params.variable,
-            },
-        });
-    }
-}
-
 export class WebsiteConfigAction extends BuilderAction {
     static id = "websiteConfig";
     static dependencies = ["customizeWebsite"];
