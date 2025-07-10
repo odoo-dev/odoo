@@ -13,7 +13,7 @@
                 </div>
             </td>
             <td>
-                <a t-if="!displayTotalOnSeparateLine" href="#"
+                <a t-if="!displayTotalOnSeparateLine &amp;&amp; props.value" href="#"
                    t-on-click="onClick"
                    t-out="formattedValue"/>
             </td>
@@ -25,17 +25,12 @@
                     line="line"
                     sublines="line.lines"
                     level="props.level + 2"
-                    onClickMethod="props.onClickMethod"
+                    onClickMethod="props.onClickMethod || line.method"
                     value="line.value"/>
             </t>
         </t>
         <t t-if="displayTotalOnSeparateLine">
-            <StockValuationReportLine
-                class="'total'"
-                label="'Total'"
-                level="props.level"
-                onClickMethod.bind="props.onClickMethod"
-                value="props.value"/>
+            <StockValuationReportLine t-props="totalProps"/>
         </t>
     </t>
 </templates>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates>
-    <t t-inherit="stock_account.StockValuationReport" t-inherit-mode="extension">
+    <!-- <t t-inherit="stock_account.StockValuationReport" t-inherit-mode="extension">
         <xpath expr="//t[@t-call='stock_account.StockValuationReport.EmptyLine']" position="after">
             <t t-call="stock_account.StockValuationReport.EmptyLine"/>
             <t t-call="sale_stock.StockValuationReport.NotInvoicedValuation"/>
@@ -9,10 +9,10 @@
 
     <t t-name="sale_stock.StockValuationReport.NotInvoicedValuation">
         <StockValuationReportLine
-            label="'Goods Received Not Invoiced'"
+            label="_t('Goods Received Not Invoiced')"
             level="0"
             onClickMethod.bind="openSaleOrder"
             sublines="data.not_invoiced_delivered_goods.lines"
             value="data.not_invoiced_delivered_goods.value"/>
-    </t>
+    </t> -->
 </templates>

@@ -10,7 +10,7 @@ export class StockValuationReportLine extends Component {
         line: { type: Object, optional: true },
         sublines: { type: Array, optional: true },
         onClickMethod: { type: Function, optional: true },
-        value: Number,
+        value: { type: Number, optional: true },
     };
     static defaultProps = {
         level: 0,
@@ -18,6 +18,30 @@ export class StockValuationReportLine extends Component {
 
     setup() {
         this.state = useState({ displaySublines: false });
+
+        this.totalProps = {
+            class: "total",
+            label: this.env._t("Total"),
+            level: this.props.level,
+            value: this.props.value,
+        };
+        if (this.props.onClickMethod) {
+            this.totalProps.onClickMethod = this.props.onClickMethod.bind(this);
+        }
+    }
+
+    getSublineProps(line) {
+        const props = {
+            label: line.display_name,
+            line: line,
+            sublines: line.lines,
+            level: this.props.level + 2,
+            value: line.value,
+        };
+        if (this.props.onClickMethod) {
+            props.onClickMethod = props.onClickMethod;
+        }
+        return props;
     }
 
     // Getters -----------------------------------------------------------------

@@ -10,6 +10,17 @@ patch(StockValuationReport.prototype, {
         this.saleOrderIds = this.data.not_invoiced_delivered_goods.lines.map((line) => line.id);
     },
 
+    _getAccrual() {
+        const accrual = super._getAccrual();
+        const notInvoicedDeliveredGoods = this.data.not_invoiced_delivered_goods;
+        notInvoicedDeliveredGoods.display_name = _t("Goods Delivered Not Invoiced");
+        notInvoicedDeliveredGoods.method = this.openSaleOrder.bind(this);
+        notInvoicedDeliveredGoods.id = undefined; // TODO: find better solution
+        accrual.value += notInvoicedDeliveredGoods.value;
+        accrual.lines.push(notInvoicedDeliveredGoods);
+        return accrual;
+    },
+
     // On Click Methods --------------------------------------------------------
     openSaleOrder(line=false) {
         const action = {
@@ -19,7 +30,7 @@ patch(StockValuationReport.prototype, {
             views: [[false, "list"], [false, "form"]],
             target: "current",
         }
-        if (line) {
+        if (line?.id) {
             action.views = [[false, "form"]],
             action.res_id = line.id;
         } else {
