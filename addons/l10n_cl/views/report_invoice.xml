@@ -222,6 +222,14 @@
 
     </template>
 
+    <template id="report_invoice_document_copy" inherit_id="account.report_invoice_document">
+        <xpath expr="//div[contains(@class, 'page')]" position="after">
+            <t t-if="is_copy">
+                <t t-call="l10n_cl.copy_footer"/>
+            </t>
+        </xpath>
+    </template>
+
     <!-- FIXME: Temp fix to allow fetching invoice_documemt in Studio Reports with localisation -->
     <template id="report_invoice" inherit_id="account.report_invoice">
         <xpath expr="//t[@t-call='account.report_invoice_document']" position="after">

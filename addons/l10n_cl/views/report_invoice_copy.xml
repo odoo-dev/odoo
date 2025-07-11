@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_invoice_copy">
+        <t t-set="is_copy" t-value="True"/>
+        <t t-call="l10n_cl.report_invoice"/>
+    </template>
+
+    <template id="copy_footer">
+        <div class="mt32" style="border: 2px solid black; padding: 10px;">
+            <div class="row">
+                <div class="col-6">
+                    <p><strong>Nombre:</strong> ______________________________________________</p>
+                    <p><strong>RUT:</strong> ______________________ <strong>FECHA:</strong> __________________</p>
+                    <p><strong>Recinto:</strong> __________________ <strong>FIRMA:</strong> ___________________</p>
+                </div>
+                <div class="col-6">
+                    <p style="font-size: 10px;">
+                        El acuse de recibo que se declara en este acto, de acuerdo a lo dispuesto en la letra b) del Art. 4º y la letra c) del Art. 5º de la Ley 19.983, acredita que la entrega de mercadería(s) o servicio(s)
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <strong>CEDIBLE</strong>
+        </div>
+
+  </template>
+</odoo>
