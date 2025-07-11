@@ -219,7 +219,7 @@ class ProductProduct(models.Model):
         moves_in = self.env['stock.move'].search([
             ('product_id', '=', self.id),
             ('is_in', '=', True),
-        ], order='date asc', limit=fifo_stack_size)
+        ], order='date desc, id', limit=fifo_stack_size)
 
         remaining_qty_on_last_move = 0
         # Go to the bottom of the stack

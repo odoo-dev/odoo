@@ -109,8 +109,7 @@ class StockMove(models.Model):
         remaining_qty -= account_move_qty
         quotation_value, quotation_qty = self._get_value_from_quotation(remaining_qty)
         remaining_qty -= quotation_qty
-        std_price = forced_std_price or self.product_id.standard_price
-        std_price_value = std_price * remaining_qty
+        std_price_value = self._get_value_from_std_price(remaining_qty, forced_std_price)
         return account_move_value + quotation_value + std_price_value, valued_qty
 
     def _get_value_from_account_move(self, quantity):
@@ -118,6 +117,10 @@ class StockMove(models.Model):
 
     def _get_value_from_quotation(self, quantity):
         return 0, 0
+
+    def _get_value_from_std_price(self, quantity, std_price=False):
+        std_price = std_price or self.product_id.standard_price
+        return std_price * quantity
 
     def _get_move_directions(self):
         move_in_ids = set()
