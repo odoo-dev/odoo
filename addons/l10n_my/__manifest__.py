@@ -12,11 +12,14 @@ This is the base module to manage the accounting chart for Malaysia in Odoo.
 ==============================================================================
     """,
     'depends': [
+        'account_qr_code_emv',
         'account',
     ],
     'auto_install': ['account'],
     'data': [
         'data/account_tax_report_data.xml',
+
+        'views/res_bank_views.xml',
     ],
     'demo': [
         'demo/demo_company.xml',
