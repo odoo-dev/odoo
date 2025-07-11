@@ -32,6 +32,7 @@ from difflib import HtmlDiff
 from functools import reduce, wraps
 from itertools import islice, groupby as itergroupby
 from operator import itemgetter
+from types import MappingProxyType
 
 import babel
 import babel.dates
@@ -928,52 +929,11 @@ def dumpstacks(sig=None, frame=None, thread_idents=None, log_level=logging.INFO)
     _logger.log(log_level, "\n".join(code))
 
 
-def freehash(arg: typing.Any) -> int:
-    try:
-        return hash(arg)
-    except Exception:
-        if isinstance(arg, Mapping):
-            return hash(frozendict(arg))
-        elif isinstance(arg, Iterable):
-            return hash(frozenset(freehash(item) for item in arg))
-        else:
-            return id(arg)
-
-
 def clean_context(context: dict[str, typing.Any]) -> dict[str, typing.Any]:
     """ This function take a dictionary and remove each entry with its key
     starting with ``default_``
     """
     return {k: v for k, v in context.items() if not k.startswith('default_')}
-
-
-class frozendict(dict[K, T], typing.Generic[K, T]):
-    """ An implementation of an immutable dictionary. """
-    __slots__ = ()
-
-    def __delitem__(self, key):
-        raise NotImplementedError("'__delitem__' not supported on frozendict")
-
-    def __setitem__(self, key, val):
-        raise NotImplementedError("'__setitem__' not supported on frozendict")
-
-    def clear(self):
-        raise NotImplementedError("'clear' not supported on frozendict")
-
-    def pop(self, key, default=None):
-        raise NotImplementedError("'pop' not supported on frozendict")
-
-    def popitem(self):
-        raise NotImplementedError("'popitem' not supported on frozendict")
-
-    def setdefault(self, key, default=None):
-        raise NotImplementedError("'setdefault' not supported on frozendict")
-
-    def update(self, *args, **kwargs):
-        raise NotImplementedError("'update' not supported on frozendict")
-
-    def __hash__(self) -> int:  # type: ignore
-        return hash(frozenset((key, freehash(val)) for key, val in self.items()))
 
 
 class Collector(dict[K, tuple[T, ...]], typing.Generic[K, T]):
@@ -1646,43 +1606,15 @@ def format_duration(value: float) -> str:
 consteq = hmac_lib.compare_digest
 
 
-class ReadonlyDict(Mapping[K, T], typing.Generic[K, T]):
-    """Helper for an unmodifiable dictionary, not even updatable using `dict.update`.
-
-    This is similar to a `frozendict`, with one drawback and one advantage:
-
-    - `dict.update` works for a `frozendict` but not for a `ReadonlyDict`.
-    - `json.dumps` works for a `frozendict` by default but not for a `ReadonlyDict`.
-
-    This comes from the fact `frozendict` inherits from `dict`
-    while `ReadonlyDict` inherits from `collections.abc.Mapping`.
-
-    So, depending on your needs,
-    whether you absolutely must prevent the dictionary from being updated (e.g., for security reasons)
-    or you require it to be supported by `json.dumps`, you can choose either option.
-
-        E.g.
-          data = ReadonlyDict({'foo': 'bar'})
-          data['baz'] = 'xyz' # raises exception
-          data.update({'baz', 'xyz'}) # raises exception
-          dict.update(data, {'baz': 'xyz'}) # raises exception
+def frozendict(mapping=(), /, **kw):
     """
-    __slots__ = ('_data__',)
+    The reference to the newly created internal dictionary is not
+    accessible, which guarantees immutability.
+    """
+    return MappingProxyType(dict(mapping, **kw))
 
-    def __init__(self, data):
-        self._data__ = dict(data)
-
-    def __contains__(self, key: K):
-        return key in self._data__
-
-    def __getitem__(self, key: K) -> T:
-        return self._data__[key]
-
-    def __len__(self):
-        return len(self._data__)
-
-    def __iter__(self):
-        return iter(self._data__)
+# TODO deprecate ``ReadonlyDict``
+ReadonlyDict = frozendict
 
 
 class DotDict(dict):
