@@ -17,8 +17,8 @@ class ResPartner(models.Model):
             ('ubl_bis3', "BIS Billing 3.0"),
             ('xrechnung', "XRechnung CIUS"),
             ('nlcius', "NLCIUS"),
-            ('ubl_a_nz', "BIS Billing 3.0 A-NZ"),
-            ('ubl_sg', "BIS Billing 3.0 SG"),
+            ('ubl_a_nz', "BIS Billing 3.0 A-NZ (Deprecated)"),
+            ('ubl_sg', "BIS Billing 3.0 SG (Deprecated)"),
         ],
     )
     is_ubl_format = fields.Boolean(compute='_compute_is_ubl_format')

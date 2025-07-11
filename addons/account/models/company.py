@@ -33,9 +33,9 @@ MONTH_SELECTION = [
 # List of countries where Peppol should be used by default.
 # !!! KEEP ALIGNED WITH ACCOUNT_PEPPOL MANIFEST -> COUNTRIES
 PEPPOL_DEFAULT_COUNTRIES = [
-    'AT', 'BE', 'CH', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI',
+    'AT', 'AU', 'BE', 'CH', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI',
     'FR', 'GR', 'IE', 'IS', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL',
-    'NO', 'PL', 'PT', 'RO', 'SE', 'SI',
+    'NO', 'PL', 'PT', 'RO', 'SE', 'SI', 'NZ',
 ]
 
 # List of countries where Peppol footnote will be added when sending by mail.

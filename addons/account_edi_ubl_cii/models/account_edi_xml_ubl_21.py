@@ -51,9 +51,11 @@ class AccountEdiXmlUBL21(models.AbstractModel):
             'ubl_sg': 'urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:sg:3.0',
             'xrechnung': 'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0',
             'ubl_a_nz': 'urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:aunz:3.0',
+            'efaktura_rs': 'urn:cen.eu:en16931:2017#compliant#urn:mfin.gov.rs:srbdt:2022#conformant#urn:mfin.gov.rs:srbdtext:2022',
             'pint_jp': 'urn:peppol:pint:billing-1@jp-1',
             'pint_sg': 'urn:peppol:pint:billing-1@sg-1',
             'pint_my': 'urn:peppol:pint:billing-1@my-1',
+            'pint_anz': 'urn:peppol:pint:billing-1@aunz-1',
         }
 
     # -------------------------------------------------------------------------

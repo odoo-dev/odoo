@@ -66,11 +66,6 @@ class AccountEdiXmlUBLPINTANZ(models.AbstractModel):
             vals['tax_scheme_vals'] = {'id': 'GST'}
         return vals_list
 
-    def _get_customization_ids(self):
-        vals = super()._get_customization_ids()
-        vals['pint_anz'] = 'urn:peppol:pint:billing-1@aunz-1'
-        return vals
-
     def _get_partner_party_legal_entity_vals_list(self, partner):
         # EXTENDS account.edi.xml.ubl_bis3
         vals_list = super()._get_partner_party_legal_entity_vals_list(partner)

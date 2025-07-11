@@ -96,7 +96,7 @@ class ResCompany(models.Model):
         error_message = _(
             "Please enter the mobile number in the correct international format.\n"
             "For example: +32123456789, where +32 is the country code.\n"
-            "Currently, only European countries are supported.")
+            "Currently, only European countries, Australia and New-Zealand are supported.")
 
         self._check_phonenumbers_import()
 
@@ -267,6 +267,10 @@ class ResCompany(models.Model):
                     "AU-NZ Peppol BIS Billing 3.0 Invoice",
                 "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:aunz:3.0::2.1":
                     "AU-NZ Peppol BIS Billing 3.0 CreditNote",
+                "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:peppol:pint:billing-1@aunz-1::2.1":
+                    "AU-NZ PINT Invoice",
+                "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:peppol:pint:billing-1@aunz-1::2.1":
+                    "AU-NZ PINT CreditNote",
             }
         }
 
