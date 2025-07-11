@@ -184,7 +184,6 @@ class ProductProduct(models.Model):
         # TODO remove at the end and do at real time
         self.ensure_one()
         # Get value and quantity from last closing
-        # TODO
         quantity = 0
         value = 0
         # Get value and quantity for all incoming
@@ -202,7 +201,8 @@ class ProductProduct(models.Model):
         moves.sorted('date')
         for move in moves:
             if move.is_in:
-                in_value, in_qty = move._get_value(avco_value)
+                # TODO use _get_value when searching in past
+                in_value, in_qty = move.value, sum(move._get_in_move_lines().mapped('quantity'))
                 value += in_value
                 quantity += in_qty
                 avco_value = value / quantity if quantity else 0
@@ -214,12 +214,15 @@ class ProductProduct(models.Model):
 
     def _run_fifo_get_stack(self):
         fifo_stack = []
-        fifo_stack_size = self.qty_available  # Problem: Missing qty out but not invoiced
+        fifo_stack_size = int(self.qty_available)  # Problem: Missing qty out but not invoiced
+        if fifo_stack_size <= 0:
+            return fifo_stack, 0
 
         moves_in = self.env['stock.move'].search([
             ('product_id', '=', self.id),
             ('is_in', '=', True),
-        ], order='date desc, id', limit=fifo_stack_size)
+        ], order='date desc, id', limit=fifo_stack_size * 10)
+        # TODO: fetch more if 100 is not enough
 
         remaining_qty_on_last_move = 0
         # Go to the bottom of the stack
@@ -241,7 +244,8 @@ class ProductProduct(models.Model):
         # Going up to get the quantity in the argument
         while quantity >= 0 and fifo_stack:
             move = fifo_stack.pop()
-            in_value, in_qty = move._get_value()
+            # TODO use _get_value when searching in past
+            in_value, in_qty = move.value, sum(move._get_in_move_lines().mapped('quantity'))
             if in_qty > quantity:
                 in_value = in_value * quantity / in_qty
                 in_qty = quantity

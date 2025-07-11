@@ -68,6 +68,7 @@ class MrpProduction(models.Model):
         """Set a price unit on the finished move according to `consumed_moves`.
         """
         super()._cal_price(consumed_moves)
+        consumed_moves._set_value()
         work_center_cost = 0
         finished_move = self.move_finished_ids.filtered(
             lambda x: x.product_id == self.product_id and x.state not in ('done', 'cancel') and x.quantity > 0)
@@ -90,6 +91,7 @@ class MrpProduction(models.Model):
                     byproduct.price_unit = total_cost * byproduct.cost_share / 100 / byproduct.product_uom._compute_quantity(byproduct.quantity, byproduct.product_id.uom_id)
             if finished_move.product_id.cost_method in ('fifo', 'average'):
                 finished_move.price_unit = total_cost * float_round(1 - byproduct_cost_share / 100, precision_rounding=0.0001) / quantity
+        self.move_finished_ids._set_value()
         return True
 
     def _get_backorder_mo_vals(self):

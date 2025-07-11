@@ -142,8 +142,8 @@ class AccountMove(models.Model):
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
-    def _get_moves(self):
-        return self.sale_line_ids.move_ids.filtered(lambda m: m.is_valued)
+    def _get_stock_moves(self):
+        return self.sale_line_ids.move_ids
 
     def _sale_can_be_reinvoice(self):
         self.ensure_one()
