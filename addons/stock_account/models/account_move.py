@@ -35,7 +35,11 @@ class AccountMove(models.Model):
         self.env['account.move.line'].create(self._stock_account_prepare_anglo_saxon_out_lines_vals())
 
         # Post entries.
-        return super()._post(soft)
+        res = super()._post(soft)
+
+        self.line_ids._get_stock_moves()._set_value()
+
+        return res
 
     def button_draft(self):
         res = super().button_draft()
@@ -159,3 +163,6 @@ class AccountMove(models.Model):
         to optimize computations that only depend on account.move and not account.move.line
         """
         return self.env.context
+
+    def _get_related_stock_moves(self):
+        return self.env['stock.move']

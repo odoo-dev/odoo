@@ -7,6 +7,7 @@ from . import account_move_line
 from . import analytic_account
 from . import res_company
 from . import product
+from . import stock_adjust_valuation
 from . import stock_move
 from . import stock_location
 from . import stock_lot

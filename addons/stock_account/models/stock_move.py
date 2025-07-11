@@ -18,7 +18,9 @@ class StockMove(models.Model):
         string="Update quantities on SO/PO", copy=True,
         help='Trigger a decrease of the delivered/received quantity in the associated Sale Order/Purchase Order')
     company_currency_id = fields.Many2one('res.currency', related='company_id.currency_id', string='Company Currency', readonly=True)
-    value = fields.Monetary("Value", currency_field='company_currency_id')
+    value = fields.Monetary(
+        "Value", currency_field='company_currency_id',
+        help="The current value of the move. It's zero if the move is not valued.")
     price_unit = fields.Float("Price Unit")
     is_in = fields.Boolean(string='Is Incoming (valued)', compute='_compute_is_in', store=True)
     is_out = fields.Boolean(string='Is Outgoing (valued)', compute='_compute_is_out', store=True)
@@ -44,12 +46,24 @@ class StockMove(models.Model):
         for move in self:
             move.is_valued = move.is_in or move.is_out
 
+    def action_adjust_valuation(self):
+        action = self.env['ir.actions.act_window']._for_xml_id("stock_account.stock_adjust_valuation_action")
+        product = self.product_id if len(self.product_id) == 1 else False
+        if product:
+            action['name'] = _('Adjust Valuation: %(product)s', product=product.display_name)
+        action['target'] = 'new'
+        action['context'] = {
+            'default_move_ids': self.ids,
+            'default_product_id': product.id if product else False,
+        }
+        return action
+
     def _action_done(self, cancel_backorder=False):
-        moves_out = self.filtered(lambda m: m._is_out())
+        moves_out = self.filtered(lambda m: m.is_out)
         moves_out._set_value()
         moves = super()._action_done(cancel_backorder=cancel_backorder)
         moves_in = moves.filtered(lambda m: m.is_in)
-        moves_in.product_id._update_standard_price()
+        moves_in._set_value()
         return moves
 
     def _get_price_unit(self):
@@ -71,11 +85,23 @@ class StockMove(models.Model):
     def _set_value(self):
         """Set the value of the move"""
         # TODO groupby product to avoid using twice the same stack
+        product_to_recompute = set()
         for move in self:
+            if move.state != 'done' or not move.is_valued:
+                continue
+            # Incoming moves
+            if move.is_in:
+                move.value = move._get_value()[0]
+                product_to_recompute.add(move.product_id.id)
+                continue
+            # Outgoing moves
             if move.product_id.cost_method == 'fifo':
                 move.value = move.product_id._run_fifo(move.quantity)
             else:
-                move.value = 0
+                move.value = move.product_id.standard_price * move.quantity
+
+        # Recompute the standard price
+        self.env['product.product'].browse(product_to_recompute)._update_standard_price()
 
     def _get_remaining_qty(self):
         """Returns the quantity currently in stock"""
@@ -223,10 +249,6 @@ class StockMove(models.Model):
         return (self.location_id.usage == 'customer' or (self.location_id.usage == 'transit' and not self.location_id.company_id)) \
            and (self.location_dest_id.usage == 'supplier' or (self.location_dest_id.usage == 'transit' and not self.location_dest_id.company_id))
 
-    def _product_price_update(self):
-        """ Outgoing moves lot valuation should recompute the standard price of the product as the
-        layer price unit may differ from the product price unit """
-        return
 
     def _should_exclude_for_valuation(self):
         """Determines if this move should be excluded from valuation based on its partner.

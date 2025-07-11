@@ -23,3 +23,6 @@ class AccountMoveLine(models.Model):
         relevant_qty = self.quantity
 
         return price_unit_val_dif, relevant_qty
+
+    def _get_stock_moves(self):
+        return self.purchase_line_id.move_ids

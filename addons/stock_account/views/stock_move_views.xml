@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+
+    <record model="ir.actions.server" id="stock_move_action_adjust_valuation">
+        <field name="name">Adjust Valuation</field>
+        <field name="model_id" ref="model_stock_move"/>
+        <field name="binding_model_id" ref="model_stock_move"/>
+        <field name="state">code</field>
+        <field name="code">
+action = records.action_adjust_valuation()
+        </field>
+    </record>
+</odoo>

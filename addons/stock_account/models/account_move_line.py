@@ -67,7 +67,7 @@ class AccountMoveLine(models.Model):
             return self.product_id.standard_price
 
         # FIFO
-        moves = self._get_moves()
+        moves = self._get_stock_moves()
         moves_value = sum(moves.mapped('value'))
         moves_quantity = sum(moves.mapped('quantity'))
         # TODO handle returns ect
@@ -89,5 +89,5 @@ class AccountMoveLine(models.Model):
             return self.product_id.categ_id.property_stock_valuation_account_id
         return super()._get_exchange_account(company, amount)
 
-    def _get_moves(self):
+    def _get_stock_moves(self):
         return self.env['stock.move']
