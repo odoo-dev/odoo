@@ -8,10 +8,6 @@ from odoo.tools import float_compare
 class StockMove(models.Model):
     _inherit = 'stock.move'
 
-    def _should_force_price_unit(self):
-        self.ensure_one()
-        return self.is_subcontract or super()._should_force_price_unit()
-
     def _generate_valuation_lines_data(self, partner_id, qty, debit_value, credit_value, debit_account_id, credit_account_id, svl_id, description):
         rslt = super()._generate_valuation_lines_data(partner_id, qty, debit_value, credit_value, debit_account_id, credit_account_id, svl_id, description)
 
