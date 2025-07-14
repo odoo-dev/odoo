@@ -289,7 +289,7 @@ export class Navigator {
      */
     _updateActiveItemIndex(index) {
         if (this.items[index]) {
-            this.items[index].setActive();
+            this.items[index].setActive(false);
         } else {
             this.activeItemIndex = -1;
             this.activeItem = null;

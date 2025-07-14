@@ -275,3 +275,25 @@ test("items are focused only on mousemove, not on mouseenter", async () => {
     await animationFrame();
     expect(".three").toHaveClass("focus");
 });
+
+test.debug("test", async () => {
+    class TestComp extends Component {
+        static props = [];
+        static template = xml`
+            <div class="container" t-ref="containerRef">
+                <t t-if="state.showButton">
+                    <button class="o-navigable" t-on-click="">click me</button>
+                </t>
+                <input class="o-navigable"/>
+            </div>
+        `;
+
+        setup() {
+            this.navigation = useNavigation("containerRef");
+            this.state = useState({ showButton: true });
+            onMounted(() => this.navigation.items[0].setActive());
+        }
+    }
+
+    const component = await mountWithCleanup(TestComp);
+});
