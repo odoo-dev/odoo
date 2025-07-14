@@ -254,7 +254,7 @@ class ProductProduct(models.Model):
             return
         for product in self:
             if (
-                product.type == "consu" and product.is_storable and product.qty_available > 0
+                product.type == "consu" and product.is_storable and product.qty_available >= 0
             ):
                 warehouse = self.env['stock.warehouse'].search(
                     [('company_id', '=', self.env.company.id)], limit=1

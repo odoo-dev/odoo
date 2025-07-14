@@ -6,7 +6,8 @@ class StockAdjustValuation(models.Model):
     _description = 'Inventory Valuation Adjustment'
 
     product_id = fields.Many2one('product.product', string='Product')
-    move_ids = fields.Many2many('stock.move', string='Moves')
+    move_ids = fields.Many2many(
+        'stock.move', 'stock_move_adjustment_rel', 'adjustment_id', 'move_id', string='Moves')
     company_id = fields.Many2one(
         'res.company', string='Company', required=True,
         default=lambda self: self.env.company)
@@ -18,6 +19,7 @@ class StockAdjustValuation(models.Model):
     new_value_by_unit = fields.Monetary(
         string='New Value by Unit', currency_field='currency_id',
         compute="_compute_new_value_by_unit")
+    extra_value = fields.Float(string='Extra Value', compute="_compute_extra_value")
     currency_id = fields.Many2one('res.currency', string='Currency', related="company_id.currency_id")
     date = fields.Datetime(string='Date', required=True, default=fields.Datetime.now)
     description = fields.Text(string='Comment')
@@ -31,6 +33,10 @@ class StockAdjustValuation(models.Model):
     def _compute_current_value(self):
         for revaluation in self:
             revaluation.current_value = sum(move._get_value()[0] for move in revaluation.move_ids)
+
+    def _compute_extra_value(self):
+        for revaluation in self:
+            revaluation.extra_value = revaluation.new_value - revaluation.current_value
 
     @api.depends('new_value', 'quantity')
     def _compute_new_value_by_unit(self):

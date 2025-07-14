@@ -60,8 +60,8 @@ class StockQuant(models.Model):
                 quantity = quant.lot_id.with_company(quant.company_id).quantity_svl
                 value_svl = quant.lot_id.with_company(quant.company_id).value_svl
             else:
-                quantity = quant.product_id.with_company(quant.company_id).quantity_svl
-                value_svl = quant.product_id.with_company(quant.company_id).value_svl
+                quantity = quant.product_id.with_company(quant.company_id).qty_available
+                value_svl = quant.product_id.with_company(quant.company_id).total_value
             if quant.product_id.uom_id.is_zero(quantity):
                 continue
             quant.value = quant.quantity * value_svl / quantity
