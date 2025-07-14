@@ -30,6 +30,18 @@ class AccountMoveLine(models.Model):
             ("sale_cdnur_exp_wop", "CDNUR(EXP-WOP)"),
             ("sale_nil_rated", "Nil Rated"),
             ("sale_out_of_scope", "Out of Scope"),
+            ("purchase_b2b_regular", "B2B Regular"),
+            ("purchase_b2c_regular", "B2C Regular"),
+            ("purchase_b2b_rcm", "B2B RCM"),
+            ("purchase_b2c_rcm", "B2C RCM"),
+            ("purchase_imp_services", "IMP(service)"),
+            ("purchase_imp_goods", "IMP(goods)"),
+            ("purchase_cdnr_regular", "CDNR"),
+            ("purchase_cdnur_regular", "CDNUR"),
+            ("purchase_cdnr_rcm", "CDNR RCM"),
+            ("purchase_cdnur_rcm", "CDNUR RCM"),
+            ("purchase_nil_rated", "Nil Rated"),
+            ("purchase_out_of_scope", "Out of Scope"),
             ],
         string="GSTR Section",
         index=True,
@@ -95,6 +107,9 @@ class AccountMoveLine(models.Model):
 
         def is_invoice(move):
             return move.is_inbound() and not move.debit_origin_id
+
+        def is_move_bill(move):
+            return move.is_outbound() and not move.debit_origin_id
 
         def get_transaction_type(move):
             return 'intra_state' if move.l10n_in_state_id == move.company_id.state_id else 'inter_state'
@@ -200,14 +215,86 @@ class AccountMoveLine(models.Model):
             # If none of the above match, default to out of scope
             return 'sale_out_of_scope'
 
+        def get_purchase_section(line, tax_tags_dict):
+            move = line.move_id
+            gst_treatment = move.l10n_in_gst_treatment
+            line_tags = line.tax_tag_ids.ids
+            is_bill = is_move_bill(move)
+
+            # If no relevant tags are found, or the tags do not match any category, mark as out of scope
+            if not line_tags or not any(tags_have_categ(line_tags, c) for c in tax_tags_dict):
+                return 'purchase_out_of_scope'
+
+            # Nil rated purchases
+            if gst_treatment != 'overseas' and tags_have_categ(line_tags, 'nil'):
+                return 'purchase_nil_rated'
+
+            if is_bill:
+                # B2B Regular and Reverse Charge purchases
+                if gst_treatment in ('regular', 'composition', 'uin_holders') and tags_have_categ(line_tags, 'gst'):
+                    if is_reverse_charge_tax(line):
+                        return 'purchase_b2b_rcm'
+                    return 'purchase_b2b_regular'
+
+                if gst_treatment == 'special_economic_zone' and tags_have_categ(line_tags, 'export_sez'):
+                    return 'purchase_b2b_regular'
+
+                # B2C: Unregistered or Consumer sales with gst tags
+                if gst_treatment in ('unregistered', 'consumer') and tags_have_categ(line_tags, 'gst'):
+                    if is_reverse_charge_tax(line):
+                        return 'purchase_b2c_rcm'
+                    return 'purchase_b2c_regular'
+
+                # export service type products purchases
+                if line.l10n_in_hsn_code and line.l10n_in_hsn_code.startswith('99') and gst_treatment == 'overseas' and tags_have_categ(line_tags, 'export_sez'):
+                    return 'purchase_imp_services'
+
+                # export goods type products purchases
+                if not (line.l10n_in_hsn_code and line.l10n_in_hsn_code.startswith('99')) and gst_treatment == 'overseas' and tags_have_categ(line_tags, 'export_sez'):
+                    return 'purchase_imp_goods'
+
+            if not is_bill:
+                # credit notes for b2b purchases
+                if gst_treatment in ('regular', 'composition', 'uin_holders') and tags_have_categ(line_tags, 'gst'):
+                    if is_reverse_charge_tax(line):
+                        return 'purchase_cdnr_rcm'
+                    return 'purchase_cdnr_regular'
+
+                if gst_treatment == 'special_economic_zone' and tags_have_categ(line_tags, 'export_sez'):
+                    return 'purchase_cdnr_regular'
+
+                if gst_treatment == 'deemed_export' and tags_have_categ(line_tags, 'gst'):
+                    return 'purchase_cdnr_regular'
+
+                # credit notes for b2c purchases
+                if gst_treatment in ('unregistered', 'consumer') and tags_have_categ(line_tags, 'gst'):
+                    if is_reverse_charge_tax(line):
+                        return 'purchase_cdnur_rcm'
+                    return 'purchase_cdnur_regular'
+
+                if gst_treatment == 'overseas' and tags_have_categ(line_tags, 'export_sez'):
+                    return 'purchase_cdnur_regular'
+
+            # If none of the above match, default to out of scope
+            return 'purchase_out_of_scope'
+
         indian_sale_moves_lines = self.filtered(
             lambda l: l.move_id.country_code == 'IN'
             and l.move_id.is_sale_document(include_receipts=True)
             and l.display_type in ('product', 'tax')
         )
-        if not indian_sale_moves_lines:
+        indian_moves_purchase_lines = self.filtered(
+            lambda l: l.move_id.country_code == 'IN'
+            and l.move_id.is_purchase_document(include_receipts=True)
+            and l.display_type in ('product', 'tax')
+        )
+        if not indian_sale_moves_lines and not indian_moves_purchase_lines:
+            # No Indian sale or purchase lines to process
             return
         tax_tags_dict = self._get_l10n_in_tax_tag_ids()
 
         for move_line in indian_sale_moves_lines:
             move_line.l10n_in_gstr_section = get_sales_section(move_line, tax_tags_dict)
+
+        for move_line in indian_moves_purchase_lines:
+            move_line.l10n_in_gstr_section = get_purchase_section(move_line, tax_tags_dict)
