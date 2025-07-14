@@ -178,7 +178,7 @@ class ProductProduct(models.Model):
             return self.standard_price * quantity
         return self._run_fifo(quantity)
 
-    def _run_avco(self):
+    def _run_avco(self, method="realtime"):
         """ Recompute the average cost of the product base on the last closing
         inventory value and all the incoming moves during the period."""
         # TODO remove at the end and do at real time
@@ -194,11 +194,11 @@ class ProductProduct(models.Model):
         moves_out = self.env['stock.move'].search([
             ('product_id', '=', self.id),
             ('is_out', '=', True),
-        ]) if self.valuation == 'real_time' else self.env['stock.move']
+        ]) if method == "realtime" else self.env['stock.move']
         # TODO convert to company UoM
         avco_value = 0
         moves = moves_in | moves_out
-        moves.sorted('date')
+        moves = moves.sorted('date')
         for move in moves:
             if move.is_in:
                 # TODO use _get_value when searching in past

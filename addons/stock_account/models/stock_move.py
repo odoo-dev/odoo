@@ -21,10 +21,26 @@ class StockMove(models.Model):
     value = fields.Monetary(
         "Value", currency_field='company_currency_id',
         help="The current value of the move. It's zero if the move is not valued.")
+    # Useful for testing and custom valuation
+    value_manual = fields.Monetary(
+        "Manual Value", currency_field='company_currency_id',
+        compute="_compute_value_manual", inverse="_inverse_value_manual")
+
+    # To remove and only use value
     price_unit = fields.Float("Price Unit")
     is_in = fields.Boolean(string='Is Incoming (valued)', compute='_compute_is_in', store=True)
     is_out = fields.Boolean(string='Is Outgoing (valued)', compute='_compute_is_out', store=True)
     is_valued = fields.Boolean(string='Is Valued', compute='_compute_is_valued')
+
+    adjusted_valuation_ids = fields.Many2many(
+        'stock.adjust.valuation', 'stock_move_adjustment_rel', 'move_id', 'adjustment_id',
+        string='Adjusted Valuations', copy=False)
+
+    remaining_qty = fields.Float(
+        string='Remaining Quantity', compute='_compute_remaining_qty')
+    remaining_value = fields.Monetary(
+        currency_field='company_currency_id',
+        string='Remaining Value', compute='_compute_remaining_value')
 
     @api.depends('state', 'move_line_ids')
     def _compute_is_in(self):
@@ -42,9 +58,50 @@ class StockMove(models.Model):
                 continue
             move.is_out = move._is_out()
 
+    @api.depends('state', 'move_line_ids')
     def _compute_is_valued(self):
         for move in self:
             move.is_valued = move.is_in or move.is_out
+
+    def _compute_value_manual(self):
+        for move in self:
+            move.value_manual = move.value
+
+    def _compute_remaining_qty(self):
+        products = self.env['product.product'].search([])
+        remaining_by_product = {product: product._run_fifo_get_stack() for product in products}
+
+        for product, moves in self.grouped('product_id').items():
+            fifo_stack = remaining_by_product.get(product)
+            if not fifo_stack or not fifo_stack[0]:
+                moves.remaining_qty = 0
+                continue
+            moves_fifo_stack = fifo_stack[0]
+            last_move_of_stack = fifo_stack[0][-1]
+            for move in moves:
+                move_in_stack = move in moves_fifo_stack
+                if move_in_stack and move == last_move_of_stack:
+                    # TODO UoM conversion
+                    move.remaining_qty = fifo_stack[-1]
+                elif move_in_stack:
+                    move.remaining_qty = move.quantity
+                else:
+                    move.remaining_qty = 0
+
+    def _compute_remaining_value(self):
+        for move in self:
+            ratio = move.remaining_qty / move.quantity
+            move.remaining_value = ratio * move.value if ratio else 0
+
+    def _inverse_value_manual(self):
+        for move in self:
+            if move.manual_value != move.value:
+                self.env['stock.adjust.valuation'].create({
+                    'move_ids': move.id,
+                    'new_value': move.value_manual,
+                    'description': _('Manual adjustment by %(user)s', user=self.env.user.name),
+                })
+                move._set_value()
 
     def action_adjust_valuation(self):
         action = self.env['ir.actions.act_window']._for_xml_id("stock_account.stock_adjust_valuation_action")
@@ -86,6 +143,7 @@ class StockMove(models.Model):
         """Set the value of the move"""
         # TODO groupby product to avoid using twice the same stack
         product_to_recompute = set()
+
         for move in self:
             if move.state != 'done' or not move.is_valued:
                 continue
@@ -103,17 +161,6 @@ class StockMove(models.Model):
         # Recompute the standard price
         self.env['product.product'].browse(product_to_recompute)._update_standard_price()
 
-    def _get_remaining_qty(self):
-        """Returns the quantity currently in stock"""
-        self.ensure_one()
-        moves_stack, last_move_qty = self.product_id._run_fifo_get_stack()
-        moves_stack = self.env['stock.move'].concat(*moves_stack)
-        if self not in moves_stack:
-            return 0
-        if self == moves_stack[-1:]:
-            return last_move_qty
-        return self.quantity
-
     def _get_value(self, forced_std_price=False):
         """Returns the value and the quantity valued on the move
         In priority order:
@@ -129,20 +176,23 @@ class StockMove(models.Model):
         # 1. take from Invoice/Bills
         # 2. from SO/PO lines
         # 3. standard_price
-
         valued_qty = remaining_qty = sum(self._get_in_move_lines().mapped('quantity'))
         account_move_value, account_move_qty = self._get_value_from_account_move(remaining_qty)
         remaining_qty -= account_move_qty
         quotation_value, quotation_qty = self._get_value_from_quotation(remaining_qty)
         remaining_qty -= quotation_qty
         std_price_value = self._get_value_from_std_price(remaining_qty, forced_std_price)
-        return account_move_value + quotation_value + std_price_value, valued_qty
+        extra_value = self._get_value_from_extra()
+        return account_move_value + quotation_value + std_price_value + extra_value, valued_qty
 
     def _get_value_from_account_move(self, quantity):
         return 0, 0
 
     def _get_value_from_quotation(self, quantity):
         return 0, 0
+
+    def _get_value_from_extra(self):
+        return sum(self.adjusted_valuation_ids.mapped('extra_value'))
 
     def _get_value_from_std_price(self, quantity, std_price=False):
         std_price = std_price or self.product_id.standard_price
