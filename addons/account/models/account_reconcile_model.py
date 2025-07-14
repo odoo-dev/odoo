@@ -375,6 +375,11 @@ class AccountReconcileModel(models.Model):
                 elif record.payment_tolerance_type == 'fixed_amount' and record.payment_tolerance_param < 0:
                     raise ValidationError(_("A payment tolerance defined as an amount should always be higher than 0"))
 
+    @api.onchange('rule_type', 'allow_payment_tolerance', 'payment_tolerance_param')
+    def _onchange_rule_type_allow_payment_tolerance_ayment_tolerance_param(self):
+        if self.rule_type == 'invoice_matching' and (not self.allow_payment_tolerance or self.allow_payment_tolerance and self.payment_tolerance_param == 0.0):
+            self.line_ids.unlink()
+
     def copy_data(self, default=None):
         default = dict(default or {})
         vals_list = super().copy_data(default)
