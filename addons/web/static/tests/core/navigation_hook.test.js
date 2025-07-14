@@ -276,7 +276,7 @@ test("items are focused only on mousemove, not on mouseenter", async () => {
     expect(".three").toHaveClass("focus");
 });
 
-test.debug("test", async () => {
+test.skip("test", async () => {
     class TestComp extends Component {
         static props = [];
         static template = xml`
