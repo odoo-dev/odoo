@@ -3,7 +3,7 @@
 
 from odoo import Command
 from odoo.exceptions import AccessError, UserError
-from odoo.tests import tagged, common, Form
+from odoo.tests import tagged, common, Form, HttpCase
 from odoo.tools import float_compare, float_is_zero
 
 
@@ -966,3 +966,18 @@ class TestRepair(common.TransactionCase):
         self.assertFalse(copied_without_access.create_repair)
         copied_with_access = product_templ.copy().with_user(mitchell_user)
         self.assertTrue(copied_with_access.create_repair)
+
+
+@tagged('post_install', '-at_install')
+class TestRepairHttp(HttpCase):
+
+    def test_repair_without_product_in_parts(self):
+        product = self.env['product.product'].create({'name': 'Test Product'})
+        partner = self.env['res.partner'].create({'name': 'Test Partner'})
+
+        self.start_tour("/odoo/repairs", "test_repair_without_product_in_parts", login='admin')
+        repair_order = self.env['repair.order'].search([
+            ('partner_id', '=', partner.id),
+            ('move_ids.product_id.id', '=', product.id),
+        ], limit=1)
+        self.assertTrue(repair_order)
