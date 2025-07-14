@@ -1,10 +1,20 @@
 /**
- *  @typedef {{
- *      originalProperties: Map<string, PropertyDescriptor>;
- *      skeleton: object;
- *      extensions: Set<object>;
- *  }} PatchDescription
- */
+@typedef {{
+    originalProperties: Map<keyof object, PropertyDescriptor>;
+    skeleton: object;
+    extensions: Set<object>;
+}} PatchDescription
+*/
+
+/**
+@typedef {new (...args: any[]) => any} AnyCtor
+*/
+
+/**
+@template T
+@template U
+@typedef {Partial<T> & U & ThisType<T & U>} Extension
+*/
 
 /** @type {WeakMap<object, PatchDescription>} */
 const patchDescriptions = new WeakMap();
@@ -43,7 +53,7 @@ function isClassPrototype(objToPatch) {
 /**
  * Traverse the prototype chain to find a potential property.
  * @param {object} objToPatch
- * @param {string} key
+ * @param {keyof object} key
  * @returns {object}
  */
 function findAncestorPropertyDescriptor(objToPatch, key) {
@@ -57,16 +67,42 @@ function findAncestorPropertyDescriptor(objToPatch, key) {
 }
 
 /**
- * Patch an object
+ * Patch an object with the object initializer notation.
+ *
+ * ```
+ * // patch an object.
+ * patch(obj, {
+ *     exec() {
+ *         super.exec();
+ *         // Do something more.
+ *     },
+ * });
+ * ```
  *
  * If the intent is to patch a class, don't forget to patch the prototype, unless
  * you want to patch static properties/methods.
  *
- * @template T
- * @template {Partial<T>} U
+ * ```
+ * // patch the properties of a class instance.
+ * patch(OriginalClass.prototype, {
+ *     instanceMethod() {
+ *         super.instanceMethod();
+ *         // Do something more.
+ *     }
+ * });
+ * // patch the static properties of a class.
+ * patch(OriginalClass, {
+ *     staticMethod() {
+ *         super.staticMethod();
+ *         // Do something more.
+ *     }
+ * });
+ * ```
+ *
+ * @template {object} T
+ * @template {object} U
  * @param {T} objToPatch The object to patch
- * @param {U} extension The object containing the patched properties
- * @returns {() => void} Returns an unpatch function
+ * @param {Extension<T, U>} extension The object containing the patched properties
  */
 export function patch(objToPatch, extension) {
     if (typeof extension === "string") {
@@ -78,12 +114,13 @@ export function patch(objToPatch, extension) {
     const description = getPatchDescription(objToPatch);
     description.extensions.add(extension);
 
-    const properties = Object.getOwnPropertyDescriptors(extension);
-    for (const [key, newProperty] of Object.entries(properties)) {
-        const oldProperty = Object.getOwnPropertyDescriptor(objToPatch, key);
+    for (const key of Reflect.ownKeys(extension)) {
+        const newProperty = Reflect.getOwnPropertyDescriptor(extension, key);
+        const oldProperty = Reflect.getOwnPropertyDescriptor(objToPatch, key);
+
         if (oldProperty) {
             // Store the old property on the skeleton.
-            Object.defineProperty(description.skeleton, key, oldProperty);
+            Reflect.defineProperty(description.skeleton, key, oldProperty);
         }
 
         if (!description.originalProperties.has(key)) {
@@ -108,12 +145,12 @@ export function patch(objToPatch, extension) {
         }
 
         // Replace the old property by the new one.
-        Object.defineProperty(objToPatch, key, newProperty);
+        Reflect.defineProperty(objToPatch, key, newProperty);
     }
 
     // Sets the current skeleton as the extension's prototype to make
     // `super` keyword working and then set extension as the new skeleton.
-    description.skeleton = Object.setPrototypeOf(extension, description.skeleton);
+    description.skeleton = Reflect.setPrototypeOf(extension, description.skeleton);
 
     return () => {
         // Remove the description to start with a fresh base.
@@ -122,10 +159,10 @@ export function patch(objToPatch, extension) {
         for (const [key, property] of description.originalProperties) {
             if (property) {
                 // Restore the original property on the `objToPatch` object.
-                Object.defineProperty(objToPatch, key, property);
+                Reflect.defineProperty(objToPatch, key, property);
             } else {
                 // Or remove the property if it did not exist at first.
-                delete objToPatch[key];
+                Reflect.deleteProperty(objToPatch, key);
             }
         }
 

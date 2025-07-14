@@ -868,4 +868,16 @@ describe("other", () => {
         fn();
         expect.verifySteps(["patched", "original"]);
     });
+
+    test("patch with a symbol", () => {
+        const s = Symbol("SYMBOL");
+        const o = {};
+        expect(o[s]).toBe(undefined);
+
+        const unpatch = patch(o, { [s]: 1234 });
+        expect(o[s]).toBe(1234);
+
+        unpatch();
+        expect(o[s]).toBe(undefined);
+    });
 });
