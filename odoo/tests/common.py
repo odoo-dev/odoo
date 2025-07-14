@@ -1002,6 +1002,7 @@ class TransactionCase(BaseCase):
     """
     muted_registry_logger = mute_logger(odoo.orm.registry._logger.name)
     freeze_time = None
+    faketime_mode = False
 
     @classmethod
     def _gc_filestore(cls):
@@ -1012,6 +1013,30 @@ class TransactionCase(BaseCase):
         with Registry(get_db_name()).cursor() as cr:
             gc_env = api.Environment(cr, api.SUPERUSER_ID, {})
             gc_env['ir.attachment']._gc_file_store_unsafe()
+
+    @classmethod
+    def setup_now(cls):
+        cls.cr.execute("SELECT (now() AT TIME ZONE 'UTC');")
+        server_now = cls.cr.fetchone()[0]
+        time_offset = (datetime.now() - server_now).total_seconds()
+        if time_offset > 10:
+            _logger.info("Time offset of %s seconds detected, assuming faketime mode.", time_offset)
+            cls.faketime_mode = True
+            cls.cr.execute("""
+                CREATE OR REPLACE FUNCTION public.now()
+                    RETURNS timestamp with time zone AS $$
+                    BEGIN
+                        RETURN pg_catalog.now() +  %s * interval '1 second';
+                    END;
+                    $$ LANGUAGE plpgsql;
+            """, (int(time_offset), ))
+            cls.cr.execute("SET search_path = public, pg_catalog;")
+
+            def restore_now():
+                cls.cr.execute("SET search_path TO DEFAULT;")
+                cls.cr.execute("DROP FUNCTION public.now;")
+            cls.addClassCleanup(restore_now)
+
 
     @classmethod
     def setUpClass(cls):
@@ -1053,6 +1078,7 @@ class TransactionCase(BaseCase):
         cls.cr = cls.registry.cursor()
         cls.cr._now = datetime.now()
         cls.addClassCleanup(cast(Cursor, cls.cr).close)
+        cls.setup_now()
 
         def check_cursor_stack():
             for cursor in test_cursor.TestCursor._cursors_stack:
