@@ -690,8 +690,13 @@ class _RelationalMulti(_Relational):
 
     def get_depends(self, model):
         depends, depends_context = super().get_depends(model)
-        if not self.compute and isinstance(domain := self.domain, (list, Domain)):
-            domain = Domain(domain)
+        if not self.compute:
+            if isinstance(domain := self.domain, (list, Domain)):
+                domain = Domain(domain)
+            else:
+                domain = Domain.TRUE
+            if self.type == 'one2many':
+                domain &= self._additional_domain(model.env)
             depends = unique(itertools.chain(depends, (
                 self.name + '.' + condition.field_expr
                 for condition in domain.iter_conditions()
