@@ -50,17 +50,17 @@ class ResCompany(models.Model):
         required=True,
     )
 
-    def stock_value(self, products=False, product_categories=False):
+    def stock_value(self, products=False, product_categories=False, to_date=False):
         self.ensure_one()
         if products:
             return sum(products.with_company(self).mapped('total_value')), products
         domain = Domain([('is_storable', '=', True)])
         if product_categories:
             domain = domain & Domain([('categ_id', 'in', product_categories.ids)])
-            products = self.env['product.product'].with_company(self).search(domain)
-        else:
-            products = self.env['product.product'].with_company(self).search(domain)
-        return sum(products.mapped('total_value')), products
+        products = self.env['product.product'].with_company(self).search(domain)
+        products = products.with_context(company=self, to_date=to_date)
+        sum_total_value = sum(products.mapped('total_value'))
+        return sum_total_value, products
 
     def stock_accounting_value(self, products=False, product_categories=False):
         self.ensure_one()

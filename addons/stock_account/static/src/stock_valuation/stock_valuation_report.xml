@@ -93,11 +93,10 @@
     </t>
 
     <t t-name="stock_account.StockValuationReport.Accrual">
-        <!-- <t t-if="state.displayAccrual"> -->
-        <t t-if="data.accrual.lines.length">
-            <StockValuationReportLine
+        <t t-if="accrual.lines.length">
+            <StockValuationReportToggleLine
                 label="_t('Accrual')"
-                sublines="data.accrual.lines"
+                sublines="accrual.lines"
                 level="0"/>
         </t>
     </t>

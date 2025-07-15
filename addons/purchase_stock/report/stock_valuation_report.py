@@ -4,18 +4,20 @@ from odoo import models
 class StockValuationReport(models.AbstractModel):
     _inherit = 'stock_account.stock.valuation.report'
 
-    def _get_report_data(self, product_category=False, warehouse=False):
-        data = super()._get_report_data(product_category, warehouse)
-        not_invoiced_received_data = self._compute_goods_received_not_invoiced(product_category)
+    def _get_report_data(self, date=False, product_category=False, warehouse=False):
+        data = super()._get_report_data(date, product_category, warehouse)
+        not_invoiced_received_data = self._compute_goods_received_not_invoiced(date, product_category)
         data['not_invoiced_received_goods'] = not_invoiced_received_data
         return data
 
-    def _compute_goods_received_not_invoiced(self, product_category):
+    def _compute_goods_received_not_invoiced(self, date=False, product_category=False):
         """ Compute valuation for already received but not invoiced yet goods,
         purchase order by purchase order."""
         domain = [('qty_to_invoice', '!=', 0)]
         if product_category:
             domain += [('product_id.categ_id', '=', product_category.id)]
+        if date:
+            domain += [('date_approve', '<=', date)]
         purchase_order_lines = self.env['purchase.order.line'].search(domain)
         purchase_orders = purchase_order_lines.order_id
         not_invoiced_received_lines = []
