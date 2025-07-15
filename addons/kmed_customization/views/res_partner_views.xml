@@ -1,0 +1,20 @@
+<odoo>
+    <data>
+        <record id="view_partners_form_contact_base" model="ir.ui.view">
+            <field name="name">view.res.partner.form.contact.base</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form" />
+            <field eval="11" name="priority" />
+            <field name="arch" type="xml">
+                <data>
+
+                    <xpath expr="//page[@name='contact_addresses']//form//field[@name='name']"
+                        position="attributes">
+                        <attribute name="required">1</attribute>
+                    </xpath>
+
+                </data>
+            </field>
+        </record>
+    </data>
+</odoo>
