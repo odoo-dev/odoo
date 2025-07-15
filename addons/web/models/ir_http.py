@@ -143,6 +143,7 @@ class IrHttp(models.AbstractModel):
             })
             # We need sudo since a user may not have access to ancestor companies
             # We use `_get_company_ids` because it is cached and we sudo it because env.user return a sudo user.
+            self.env.registry.clear_cache()
             user_companies = self.env['res.company'].browse(user._get_company_ids()).sudo()
             disallowed_ancestor_companies_sudo = user_companies.parent_ids - user_companies
             all_companies_in_hierarchy_sudo = disallowed_ancestor_companies_sudo + user_companies
