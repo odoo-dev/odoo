@@ -13,7 +13,7 @@ class StockReturnPickingLine(models.TransientModel):
     product_id = fields.Many2one('product.product', string="Product", required=True)
     move_quantity = fields.Float(related="move_id.quantity", string="Move Quantity")
     quantity = fields.Float("Quantity", digits='Product Unit', default=1, required=True)
-    uom_id = fields.Many2one('uom.uom', string='Unit', related='product_id.uom_id')
+    uom_id = fields.Many2one('uom.uom', string='Unit', related='move_id.product_uom')
     wizard_id = fields.Many2one('stock.return.picking', string="Wizard")
     move_id = fields.Many2one('stock.move', "Move")
 
@@ -23,7 +23,7 @@ class StockReturnPickingLine(models.TransientModel):
             'name': picking.name,
             'product_id': self.product_id.id,
             'product_uom_qty': self.quantity,
-            'product_uom': self.product_id.uom_id.id,
+            'product_uom': self.move_id.product_uom.id,
             'picking_id': picking.id,
             'state': 'draft',
             'date': fields.Datetime.now(),
@@ -126,7 +126,7 @@ class StockReturnPicking(models.TransientModel):
             'product_id': stock_move.product_id.id,
             'quantity': 0,
             'move_id': stock_move.id,
-            'uom_id': stock_move.product_id.uom_id.id,
+            'uom_id': stock_move.product_uom.id,
         }
 
     def _prepare_picking_default_values(self):
