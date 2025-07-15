@@ -762,6 +762,15 @@ class Environment(Mapping):
         for model_name in OrderedSet(field.model_name for field in self.cache.get_dirty_fields()):
             self[model_name].flush_model()
 
+        remaining_fields = [
+            (field, id_)
+            for field, ids in self.all.tocompute.items() 
+            for id_ in ids
+            if id_
+        ]
+        if remaining_fields:
+            _logger.warning('Remaining records to recompute: %s', remaining_fields)
+
     def is_protected(self, field, record):
         """ Return whether `record` is protected against invalidation or
             recomputation for `field`.
