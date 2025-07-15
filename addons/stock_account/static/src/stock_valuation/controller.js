@@ -1,4 +1,6 @@
+import { reactive } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+const { DateTime } = luxon;
 
 
 export class StockValuationReportController {
@@ -7,11 +9,33 @@ export class StockValuationReportController {
         this.actionService = useService("action");
         this.dialog = useService("dialog");
         this.orm = useService("orm");
+        this.state = reactive({
+            date: DateTime.now(),
+        });
     }
 
-    load(data) {
-        this.currencyId = data.currency_id;
-        this.companyId = data.company_id;
+    async load() {
+        await this.loadReportData();
+        this.currencyId = this.data.currency_id;
+        this.companyId = this.data.company_id;
+    }
+
+    async loadReportData() {
+        const kwargs = {
+            date: this.state.date.toFormat("yyyy-MM-dd"),
+        };
+        const res = await this.orm.call(
+            "stock_account.stock.valuation.report",
+            "get_report_values",
+            [],
+            kwargs
+        );
+        this.data = res.data;
+    }
+
+    async setDate(date) {
+        this.state.date = date;
+        await this.loadReportData();
     }
 
     // Actions -----------------------------------------------------------------

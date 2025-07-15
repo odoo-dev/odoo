@@ -11,6 +11,7 @@ import { StockValuationReportButtonsBar } from "../stock_valuation/buttons_bar/b
 import { StockValuationReportController } from "../stock_valuation/controller"
 import { StockValuationReportFilters } from "../stock_valuation/filters/filters"
 import { StockValuationReportLine } from "../stock_valuation/line/line"
+import { StockValuationReportToggleLine } from "../stock_valuation/line/toggle_line"
 
 
 export class StockValuationReport extends Component {
@@ -21,21 +22,20 @@ export class StockValuationReport extends Component {
         StockValuationReportButtonsBar,
         StockValuationReportFilters,
         StockValuationReportLine,
+        StockValuationReportToggleLine,
     };
 
     setup() {
         this.controller = useState(new StockValuationReportController(this.props.action));
         this.state = useState({
             displayInventoryValuationLine: false,
-            displayAccrual: false
         })
-        this.data = {};
         this.orm = useService("orm");
         this.actionService = useService("action");
         this._t = _t;
 
         onWillStart(async () => {
-            await this.loadReportData();
+            await this.controller.load(this.data);
         })
 
         useChildSubEnv({
@@ -45,32 +45,29 @@ export class StockValuationReport extends Component {
         });
     }
 
-    async loadReportData() {
-        const res = await this.orm.call('stock_account.stock.valuation.report', "get_report_values");
-        this.data = res.data;
-        this.data.accrual = this._getAccrual();
-        this.controller.load(this.data);
-    }
-
     formatMonetary(value) {
         return formatMonetary(value, {
             currencyId: this.data.currency_id,
         });
     }
 
-    _getAccrual() {
+    get accrual() {
         return { label: _t("Accrual"), lines: [], value: 0 };
     }
 
     // Getters -----------------------------------------------------------------
-    get inventoryValuation() {
-        return formatMonetary(this.data.inventory_valuation.value, {
-            currencyId: this.data.currency_id,
-        });
+    get data() {
+        return this.controller.data || {};
     }
 
     get accountingStockValuation() {
         return this.formatMonetary(this.data.accounting_stock_valuation);
+    }
+
+    get inventoryValuation() {
+        return formatMonetary(this.data.inventory_valuation.value, {
+            currencyId: this.data.currency_id,
+        });
     }
 
     get stockInitial() {

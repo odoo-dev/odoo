@@ -8,9 +8,9 @@ class StockValuationReport(models.AbstractModel):
     _description = 'Stock Valuation'
 
     @api.model
-    def get_report_values(self):
+    def get_report_values(self, date=False):
         report_values = {
-            'data': self._get_report_data(),
+            'data': self._get_report_data(date=date),
             'context': self._get_report_context(),
         }
         return report_values
@@ -31,8 +31,8 @@ class StockValuationReport(models.AbstractModel):
         # TODO: set default warehouse ? Default category ?
         return {}
 
-    def _get_report_data(self, product_category=False, warehouse=False):
-        inventory_valuation_data = self._compute_inventory_valuation(product_category)
+    def _get_report_data(self, date=False, product_category=False, warehouse=False):
+        inventory_valuation_data = self._compute_inventory_valuation(date, product_category)
         accounting_valuation_data = self._compute_accounting_valuation()
         inventory_variation = self._compute_inventory_variation()
 
@@ -78,9 +78,9 @@ class StockValuationReport(models.AbstractModel):
             'lines': amls_lines,
         }
 
-    def _compute_inventory_valuation(self, product_category):
+    def _compute_inventory_valuation(self, date, product_category):
         """ Compute inventory valuation, product by product."""
-        total, products = self.env.company.stock_value()
+        total, products = self.env.company.stock_value(to_date=date)
         valuation_lines_by_category = defaultdict(list)
         for product in products:
             value = product.total_value

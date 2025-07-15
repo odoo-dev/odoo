@@ -5,19 +5,15 @@ import { StockValuationReport } from "@stock_account/stock_valuation/stock_valua
 
 
 patch(StockValuationReport.prototype, {
-    async loadReportData() {
-        await super.loadReportData();
-        this.purchaseOrderIds = this.data.not_invoiced_received_goods.lines.map((line) => line.id);
-    },
-
-    _getAccrual() {
-        const accrual = super._getAccrual();
+    get accrual() {
+        const accrual = super.accrual;
         const notInvoicedReceivedGoods = this.data.not_invoiced_received_goods;
         notInvoicedReceivedGoods.display_name = _t("Goods Received Not Invoiced");
         notInvoicedReceivedGoods.method = this.openPurchaseOrder.bind(this);
-        notInvoicedReceivedGoods.id = 0; // TODO: find better solution
+        notInvoicedReceivedGoods.index = accrual.lines.length;
         accrual.lines.push(this.data.not_invoiced_received_goods);
         accrual.value += this.data.not_invoiced_received_goods.value;
+        this.purchaseOrderIds = notInvoicedReceivedGoods.lines.map((line) => line.id);
         return accrual;
     },
 

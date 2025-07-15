@@ -19,7 +19,7 @@
             </td>
         </tr>
         <t t-if="state.displaySublines">
-            <t t-foreach="props.sublines" t-as="line" t-key="line.id">
+            <t t-foreach="props.sublines" t-as="line" t-key="line.id || line.index">
                 <StockValuationReportLine
                     label="line.display_name"
                     line="line"
