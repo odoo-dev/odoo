@@ -116,7 +116,8 @@ class StockMove(models.Model):
         return action
 
     def _action_done(self, cancel_backorder=False):
-        moves_out = self.filtered(lambda m: m.is_out)
+        # Use _is_out() instead of is_out since the move is not done
+        moves_out = self.filtered(lambda m: m._is_out())
         moves_out._set_value()
         moves = super()._action_done(cancel_backorder=cancel_backorder)
         moves_in = moves.filtered(lambda m: m.is_in)
@@ -145,14 +146,14 @@ class StockMove(models.Model):
         product_to_recompute = set()
 
         for move in self:
-            if move.state != 'done' or not move.is_valued:
-                continue
             # Incoming moves
             if move.is_in:
                 move.value = move._get_value()[0]
                 product_to_recompute.add(move.product_id.id)
                 continue
             # Outgoing moves
+            if not move._is_out():
+                continue
             if move.product_id.cost_method == 'fifo':
                 move.value = move.product_id._run_fifo(move.quantity)
             else:
@@ -161,7 +162,7 @@ class StockMove(models.Model):
         # Recompute the standard price
         self.env['product.product'].browse(product_to_recompute)._update_standard_price()
 
-    def _get_value(self, forced_std_price=False):
+    def _get_value(self, forced_std_price=False, date=False):
         """Returns the value and the quantity valued on the move
         In priority order:
         - Take value from accounting documents (invoices, bills)

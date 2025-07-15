@@ -148,6 +148,8 @@ class ProductProduct(models.Model):
             product.avg_cost = product.total_value / qty_available if qty_available else 0.0
 
     def write(self, vals):
+        if 'standard_price' in vals and not self.env.context.get('disable_auto_revaluation'):
+            self._change_standard_price(vals['standard_price'])
         if 'lot_valuated' in vals:
             # lot_valuated must be updated from the ProductTemplate
             self.product_tmpl_id.write({'lot_valuated': vals.pop('lot_valuated')})
@@ -172,6 +174,17 @@ class ProductProduct(models.Model):
     # -------------------------------------------------------------------------
     # Private
     # -------------------------------------------------------------------------
+
+    def _change_standard_price(self, new_price):
+        return
+        for product in self:
+            if self.cost_method != 'average':
+                continue
+            self.env['stock.adjust.valuation'].create({
+                'product_id': product.id,
+                'new_value': new_price,
+                'company_id': self.env.company.id,
+            })
 
     def _get_cogs_value(self, quantity):
         if self.cost_method in ['standard', 'average']:
@@ -238,12 +251,13 @@ class ProductProduct(models.Model):
     def _run_fifo(self, quantity):
         """ Returns the value for the next outgoing product base on the qty give as argument."""
         self.ensure_one()
+
         fifo_cost = 0
         fifo_stack, __ = self._run_fifo_get_stack()
 
         # Going up to get the quantity in the argument
-        while quantity >= 0 and fifo_stack:
-            move = fifo_stack.pop()
+        while quantity > 0 and fifo_stack:
+            move = fifo_stack.pop(0)
             # TODO use _get_value when searching in past
             in_value, in_qty = move.value, sum(move._get_in_move_lines().mapped('quantity'))
             if in_qty > quantity:
@@ -257,7 +271,7 @@ class ProductProduct(models.Model):
         for product in self:
             if product.cost_method == 'standard':
                 continue
-            product.standard_price = product._run_avco()
+            product.with_context(disable_auto_revaluation=True).standard_price = product._run_avco()
 
     def _update_lots_standard_price(self):
         grouped_lots = self.env['stock.lot']._read_group(
@@ -265,7 +279,7 @@ class ProductProduct(models.Model):
             ['product_id'], ['id:recordset']
         )
         for product, lots in grouped_lots:
-            lots.with_context(disable_auto_svl=True).write({"standard_price": product.standard_price})
+            lots.with_context(disable_auto_revaluation=True).write({"standard_price": product.standard_price})
 
 
 class ProductCategory(models.Model):
