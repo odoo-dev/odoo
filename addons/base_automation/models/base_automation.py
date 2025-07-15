@@ -650,10 +650,11 @@ class BaseAutomation(models.Model):
             except LockError:
                 return
             automations = self.with_context(active_test=True).search([('trigger', 'in', TIME_TRIGGERS)])
+            interval, interval_type = self._get_cron_interval(automations)
             cron.write({
                 'active': bool(automations),
-                'interval_type': 'minutes',
-                'interval_number': self._get_cron_interval(automations),
+                'interval_type': interval_type,
+                'interval_number': interval,
             })
 
     def _update_registry(self):
@@ -704,7 +705,12 @@ class BaseAutomation(models.Model):
 
         # Minimum 1 minute, maximum 4 hours, 10% tolerance, ignore automations with no delay
         delays = [d for d in automations.mapped(get_delay) if d]
-        return min(max(1, min(delays) // 10), 4 * 60) if delays else 4 * 60
+        interval = min(max(1, min(delays) // 10), 4 * 60) if delays else 4 * 60
+        interval_type = 'minutes'
+        if interval % 60 == 0:
+            interval //= 60
+            interval_type = 'hours'
+        return interval, interval_type
 
     def _filter_pre(self, records, feedback=False):
         """ Filter the records that satisfy the precondition of automation ``self``. """
