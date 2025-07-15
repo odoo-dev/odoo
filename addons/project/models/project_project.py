@@ -254,7 +254,7 @@ class ProjectProject(models.Model):
         """
         for project in self:
             account = project.account_id
-            if project.partner_id and project.partner_id.company_id and project.company_id != project.partner_id.company_id:
+            if project.partner_id and project.partner_id.company_id and project.company_id and project.company_id != project.partner_id.company_id:
                 raise UserError(_('The project and the associated partner must be linked to the same company.'))
             if not account or not account.company_id:
                 continue
