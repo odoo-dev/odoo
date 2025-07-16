@@ -2,6 +2,7 @@ import { Interaction } from '@web/public/interaction';
 import { registry } from '@web/core/registry';
 import { _t } from '@web/core/l10n/translation';
 import { rpc } from '@web/core/network/rpc';
+import { addLoadingEffect } from "@web/core/utils/ui";
 
 export class AddToCartSnippet extends Interaction {
     static selector = '.s_add_to_cart_btn';
@@ -17,17 +18,30 @@ export class AddToCartSnippet extends Interaction {
         const isCombo = dataset.productType === 'combo';
         const showQuantity = Boolean(dataset.showQuantity);
         const action = dataset.action;
+        this.restoreBtnLoading = addLoadingEffect(ev.currentTarget);
 
-        if (productId) {
-            const isAddToCartAllowed = await this.waitFor(rpc(
-                '/shop/product/is_add_to_cart_allowed', { product_id: productId }
-            ));
-            if (!isAddToCartAllowed) {
-                this.services.notification.add(
-                    _t("This product does not exist therefore it cannot be added to cart."),
-                    { title: _t("User Error"), type: 'warning' }
-                );
-                return;
+        try {
+            if (productId) {
+                const isAddToCartAllowed = await this.waitFor(rpc(
+                    '/shop/product/is_add_to_cart_allowed', { product_id: productId }
+                ));
+                if (!isAddToCartAllowed) {
+                    this.services.notification.add(
+                        _t("This product does not exist therefore it cannot be added to cart."),
+                        { title: _t("User Error"), type: 'warning' }
+                    );
+                    return;
+                }
+            }
+        } catch (error) {
+            console.error("Error during add to cart:", error);
+            this.notification.add(
+                _t('An error occurred while adding the product to the cart.'),
+                { title: 'Error', type: 'danger' }
+            );
+        } finally {
+            if (this.restoreBtnLoading) {
+                this.restoreBtnLoading()
             }
         }
 
