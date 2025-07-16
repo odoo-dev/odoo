@@ -22,10 +22,6 @@
         'demo/im_livechat_session_11.xml',
     ],
     'assets': {
-        "im_livechat.assets_embed_core": [
-            "website/static/src/**/common/**/*",
-            "website_livechat/static/src/**/common/**/*",
-        ],
         'im_livechat.embed_assets_unit_tests_setup': [
             ('remove', 'website_livechat/static/**'),
             "web/static/tests/public/helpers.js",
@@ -34,22 +30,18 @@
             "website/static/tests/mock_server/**/*",
             "website_livechat/static/tests/mock_server/**/*",
         ],
-        "mail.assets_public": [
+        "mail.assets_common": [
             "website_livechat/static/src/**/common/**/*",
         ],
-        'website.assets_wysiwyg': [
-            "website/static/src/**/common/**/*",
+        "mail.assets_frontend": [
+            "website_livechat/static/src/**/frontend/**/*",
+        ],
+        "mail.assets_web": [
+            "website_livechat/static/src/**/web/**/*",
+            "website_livechat/static/src/js/**/*",
         ],
         'website.assets_editor': [
             'website_livechat/static/src/js/**/*',
-        ],
-        'web.assets_frontend': [
-            "website_livechat/static/src/**/common/**/*",
-            'website_livechat/static/src/**/frontend/**/*',
-        ],
-        'web.assets_backend': [
-            "website_livechat/static/src/**/common/**/*",
-            'website_livechat/static/src/**/*',
         ],
         'web.assets_unit_tests': [
             'website_livechat/static/tests/**/*',

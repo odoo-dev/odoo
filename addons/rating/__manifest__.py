@@ -19,21 +19,17 @@ This module allows a customer to give rating.
     ],
     'installable': True,
     'assets': {
-        'web.assets_backend': [
-            "rating/static/src/core/common/**/*",
-            "rating/static/src/core/web/**/*",
-        ],
         'web.assets_frontend': [
             'rating/static/src/scss/rating_templates.scss',
         ],
         'web.assets_unit_tests': [
             'rating/static/tests/**/*',
         ],
-        "mail.assets_public": [
+        "mail.assets_common": [
             "rating/static/src/core/common/**/*",
         ],
-        "portal.assets_chatter": [
-            "rating/static/src/core/common/**/*",
+        "mail.assets_web": [
+            "rating/static/src/core/web/**/*",
         ],
     },
     'author': 'Odoo S.A.',
