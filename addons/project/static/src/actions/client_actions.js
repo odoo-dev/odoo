@@ -11,6 +11,7 @@ export function showTemplateUndoNotification(
         undoMethod = "action_undo_convert_to_template",
         actionType = "success",
         undoCallback,
+        tempResModel,
     }
 ) {
     const undoNotification = env.services.notification.add(_t(message), {
@@ -20,12 +21,15 @@ export function showTemplateUndoNotification(
                 name: _t("Undo"),
                 icon: "fa-undo",
                 onClick: async () => {
-                    const res = await env.services.orm.call(model, undoMethod, [recordId]);
+                    const targetModel = tempResModel || model;
+                    const res = await env.services.orm.call(targetModel, undoMethod, [recordId])
                     if (undoCallback) {
                         await env.services.orm.call(model, undoCallback.method, undoCallback.args);
                     }
                     if (res && undoMethod !== "unlink") {
-                        env.services.action.doAction(res);
+                        const restoreController =
+                            env.services.action.currentController.config.breadcrumbs?.at(-2);
+                        restoreController?.onSelected();
                     } else if (undoMethod === "unlink") {
                         // Taking out the controller to be restored after unlinking the record
                         const restoreController =
@@ -76,9 +80,9 @@ export async function showTemplateFormView(
     const action = await env.services.orm.call(model, method, [recordId]);
     await env.services.action.doAction({
         type: "ir.actions.act_window",
-        res_model: model,
+        res_model: "project.project.template",
         views: [[false, "form"]],
-        res_id: action.params.project_id,
+        res_id: action.params.record_id,
     });
     await env.services.action.doAction(action);
 }
@@ -124,10 +128,11 @@ registry.category("actions").add("project_template_show_notification", (env, act
     const params = action.params || {};
     showTemplateUndoNotification(env, {
         model: "project.project",
-        recordId: params.project_id,
+        recordId: params.record_id,
         message: params.message || _t("Project converted to template."),
         undoMethod: params.undo_method,
         undoCallback: params.callback_data || null,
+        tempResModel: params.temp_res_model,
     });
     return params.next;
 });

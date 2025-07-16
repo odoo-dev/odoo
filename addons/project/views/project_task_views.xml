@@ -332,9 +332,10 @@
                     <field name="html_field_history_metadata" invisible="1"/>
                     <field name="is_template" invisible="1"/>
                     <header>
-                        <field name="stage_id" widget="statusbar_duration" options="{'clickable': '1', 'fold_field': 'fold'}" invisible="not project_id and not stage_id"/>
+                        <field name="stage_id" widget="statusbar_duration" options="{'clickable': '1', 'fold_field': 'fold'}" invisible="not project_id or project_template_id"/>
+                        <field name="stage_id" widget="statusbar_duration" options="{'clickable': '1', 'fold_field': 'fold'}" domain="[('project_template_ids', '=', project_template_id)]" invisible="not project_template_id"/>
                         <field name="state" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" invisible="1"/>
-                        <field name="personal_stage_type_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" invisible="project_id" domain="[('user_id', '=', uid)]" string="Personal Stage"/>
+                        <field name="personal_stage_type_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" invisible="project_id or project_template_id" domain="[('user_id', '=', uid)]" string="Personal Stage"/>
                     </header>
                     <!-- Used in inherited views to display the eventual warnings -->
                     <t name="warning_section"/>
@@ -408,9 +409,14 @@
                     <group>
                         <group>
                             <field name="project_id"
-                                domain="[('active', '=', True), '|', ('company_id', '=', False), ('company_id', '=?', company_id), ('is_template', 'in', [is_template, False])]"
-                                required="parent_id or child_ids or is_template"
+                                domain="[('active', '=', True), '|', ('company_id', '=', False), ('company_id', '=?', company_id)]"
+                                invisible="is_template and project_template_id"
+                                required="(parent_id or child_ids) and not project_template_id"
                                 widget="project"/>
+                            <field name="project_template_id"
+                                domain="[('active', '=', True), '|', ('company_id', '=', False), ('company_id', '=?', company_id)]"
+                                required="(parent_id or child_ids) and not project_id"
+                                invisible="not (is_template and project_template_id)"/>
                             <field name="milestone_id"
                                 placeholder="e.g. Product Launch"
                                 context="{'default_project_id': project_id}"
@@ -419,7 +425,7 @@
                                 class="o_task_user_field"
                                 options="{'no_open': True}"
                                 widget="many2many_avatar_user"/>
-                            <field name="role_ids" invisible="not (is_template and has_project_template)" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="Assign at project creation"/>
+                            <field name="role_ids" invisible="not (is_template and project_template_id)" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="Assign at project creation"/>
                         </group>
                         <group>
                             <field name="active" invisible="1"/>
@@ -453,11 +459,12 @@
                         <page name="description_page" string="Description">
                             <field name="description" type="html" options="{'collaborative': true, 'resizable': false}" placeholder="Add details about this task..."/>
                         </page>
-                        <page name="sub_tasks_page" string="Sub-tasks" invisible="not project_id">
+                        <page name="sub_tasks_page" string="Sub-tasks" invisible="not (project_id or project_template_id)">
                             <field name="child_ids"
                                    mode="list,kanban"
                                    context="{
                                         'default_project_id': project_id,
+                                        'default_project_template_id': project_template_id,
                                         'default_user_ids': user_ids,
                                         'default_parent_id': id,
                                         'default_partner_id': partner_id,
@@ -481,7 +488,8 @@
                                     <field name="name" widget="name_with_subtask_count"/>
                                     <field name="subtask_count" column_invisible="True"/>
                                     <field name="closed_subtask_count" column_invisible="True"/>
-                                    <field name="project_id" string="Project" optional="hide" required="1" options="{'no_open': 1}" widget="project"/>
+                                    <field name="project_template_id" string="Project" required="not project_id" optional="show" options="{'no_open': 1}" column_invisible="not parent.is_template"/>
+                                    <field name="project_id" string="Project" required="not project_template_id" optional="show" options="{'no_open': 1}" widget="project" column_invisible="parent.is_template"/>
                                     <field name="milestone_id"
                                         optional="hide"
                                         context="{'default_project_id': project_id}"
@@ -557,9 +565,9 @@
                                     <field name="parent_id" invisible="not project_id" groups="base.group_no_one" context="{'search_view_ref' : 'project.view_task_search_form', 'search_default_project_id': project_id, 'default_project_id': project_id}"/>
                                     <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
                                     <field name="sequence" groups="base.group_no_one"/>
-                                    <field name="email_cc" groups="base.group_no_one" invisible="is_template"/>
+                                    <field name="email_cc" groups="base.group_no_one"/>
                                 </group>
-                                <group invisible="is_template">
+                                <group>
                                     <field name="date_assign" groups="base.group_no_one"/>
                                     <field name="date_last_stage_update" groups="base.group_no_one"/>
                                 </group>
@@ -600,11 +608,18 @@
                         <field name="display_name" string= "Task Title" placeholder="e.g. Send Invitations" required="1"/>
                         <field name="project_id"
                                widget="project"
-                               invisible="context.get('default_project_id', False)"
+                               invisible="context.get('default_project_id', False) or context.get('default_is_template', False)"
                                placeholder="Private"
                                class="o_project_task_project_field"
-                               domain="[('type_ids', 'in', context.get('default_stage_id')), ('is_template', 'in', [is_template, False])] if context.get('default_stage_id') else [('is_template', 'in', [is_template, False])]"
-                               required="is_template"
+                               domain="[('type_ids', 'in', context['default_stage_id'])] if context.get('default_stage_id') else []"
+                               required="(parent_id or child_ids) and not project_template_id"
+                        />
+                        <field name="project_template_id"
+                               invisible="not context.get('default_is_template', False) or context.get('default_project_template_id', False)"
+                               placeholder="Private"
+                               class="o_project_task_project_field"
+                               domain="[('type_ids', 'in', context['default_stage_id'])] if context.get('default_stage_id') else []"
+                               required="(parent_id or child_ids) and not project_id"
                         />
                         <field name="user_ids" options="{'no_open': True}"
                             widget="many2many_avatar_user"/>
@@ -674,7 +689,8 @@
                                 <field name="name" class="fw-bold fs-5"/>
                                 <div class="text-muted d-flex flex-column">
                                     <field t-if="record.parent_id.raw_value" invisible="context.get('default_parent_id', False)" name="parent_id"/>
-                                    <field invisible="context.get('default_project_id', False)" name="project_id" options="{'no_open': True}"/>
+                                    <field invisible="context.get('default_project_id', False) or context.get('default_project_template_id', False)" name="project_id" options="{'no_open': True}"/>
+                                    <field invisible="1" name="project_template_id" options="{'no_open': True}"/>
                                     <field name="partner_id" invisible="context.get('default_is_template', False)"/>
                                     <field t-if="record.allow_milestones.raw_value and record.milestone_id.raw_value" t-att-class="record.has_late_and_unreached_milestone.raw_value and !record.state.raw_value.startsWith('1_') ? 'text-danger' : ''" name="milestone_id" options="{'no_open': True}"/>
                                 </div>
@@ -690,10 +706,10 @@
                                             <span class="fa fa-fw fa-meh-o text-warning rating_face" t-elif="record.rating_avg.raw_value &gt;= 2.33" title="Average Rating: Neutral" role="img" aria-label="Neutral face"/>
                                             <span class="fa fa-fw fa-frown-o text-danger rating_face" t-else="" title="Average Rating: Unhappy" role="img" aria-label="Unhappy face"/>
                                         </b>
-                                        <a t-if="!record.project_id.raw_value" class="text-muted" style="font-size: 17px; margin-left: 1.5px">
+                                        <a t-if="!(record.project_id.raw_value or record.project_template_id.raw_value)" class="text-muted" style="font-size: 17px; margin-left: 1.5px">
                                             <i title="Private Task" class="fa fa-lock"/>
                                         </a>
-                                        <t t-if="record.project_id.raw_value and record.subtask_count.raw_value">
+                                        <t t-if="(record.project_id.raw_value or record.project_template_id) and record.subtask_count.raw_value">
                                             <widget name="subtask_counter" class="me-1"/>
                                         </t>
                                         <field name="priority" class="pt-1" widget="priority"/>
@@ -1319,7 +1335,7 @@
                 </field>
                 <field name="partner_id" position="replace"/>
                 <field name="user_ids" position="after">
-                    <field name="role_ids" optional="hide" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" invisible="not (is_template and has_project_template)"/>
+                    <field name="role_ids" optional="hide" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" invisible="not (is_template and project_template_id)"/>
                 </field>
             </field>
         </record>
@@ -1331,9 +1347,12 @@
             <field name="mode">primary</field>
             <field name="arch" type="xml">
                 <kanban position="attributes">
-                    <attribute name="default_group_by">project_id</attribute>
+                    <attribute name="default_group_by">project_template_id</attribute>
                 </kanban>
                 <xpath expr="//templates//field[@name='partner_id']" position="replace"/>
+                <xpath expr="//templates//field[@name='project_id']" position="replace">
+                    <field name="project_template_id" options="{'no_open': True}"/>
+                </xpath>
             </field>
         </record>
 
@@ -1347,7 +1366,7 @@
                 <filter name="closed_on" position="replace"/>
                 <filter name="customer" position="replace"/>
                 <filter name="unassigned" position="after">
-                    <filter name="task_templates" string="Task Templates" domain="[('has_project_template', '=', False)]" invisible="1"/>
+                    <filter name="task_templates" string="Task Templates" domain="[('project_template_id', '=', False)]" invisible="1"/>
                 </filter>
                 <field name="user_ids" position="after">
                    <field name="role_ids"/>
