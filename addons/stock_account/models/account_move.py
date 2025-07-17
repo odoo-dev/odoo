@@ -32,7 +32,7 @@ class AccountMove(models.Model):
             return super()._post(soft)
 
         # Create additional COGS lines for customer invoices.
-        self.env['account.move.line'].create(self._stock_account_prepare_anglo_saxon_out_lines_vals())
+        self.env['account.move.line'].create(self._stock_account_prepare_realtime_out_lines_vals())
 
         # Post entries.
         res = super()._post(soft)
@@ -62,7 +62,7 @@ class AccountMove(models.Model):
     # COGS METHODS
     # -------------------------------------------------------------------------
 
-    def _stock_account_prepare_anglo_saxon_out_lines_vals(self):
+    def _stock_account_prepare_realtime_out_lines_vals(self):
         ''' Prepare values used to create the journal items (account.move.line) corresponding to the Cost of Good Sold
         lines (COGS) for customer invoices.
 
@@ -81,7 +81,7 @@ class AccountMove(models.Model):
         This method computes values used to make two additional journal items:
 
         ---------------------------------------------------------------
-        500000 COGS                                 | 9.0   |
+        500000 COGS (stock variation)               | 9.0   |
         ---------------------------------------------------------------
         110100 Stock Account                        |       | 9.0
         ---------------------------------------------------------------
@@ -98,7 +98,7 @@ class AccountMove(models.Model):
             # Make the loop multi-company safe when accessing models like product.product
             move = move.with_company(move.company_id)
 
-            if not move.is_sale_document(include_receipts=True) or not move.company_id.anglo_saxon_accounting:
+            if not move.is_sale_document(include_receipts=True):
                 continue
 
             anglo_saxon_price_ctx = move._get_anglo_saxon_price_ctx()
@@ -106,7 +106,7 @@ class AccountMove(models.Model):
             for line in move.invoice_line_ids:
 
                 # Filter out lines being not eligible for COGS.
-                if not line._eligible_for_cogs() or line.product_id.valuation != 'real_time':
+                if not line._eligible_for_stock_account() or line.product_id.valuation != 'real_time':
                     continue
 
                 # Retrieve accounts needed to generate the COGS.

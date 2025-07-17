@@ -32,9 +32,9 @@ class AccountMoveLine(models.Model):
     def _inverse_product_id(self):
         super(AccountMoveLine, self.filtered(lambda l: l.display_type != 'cogs'))._inverse_product_id()
 
-    def _eligible_for_cogs(self):
+    def _eligible_for_stock_account(self):
         self.ensure_one()
-        return self.product_id.is_storable and self.company_id.anglo_saxon_accounting
+        return self.product_id.is_storable
 
     def _get_gross_unit_price(self):
         if self.product_uom_id.is_zero(self.quantity):

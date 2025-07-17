@@ -73,8 +73,8 @@ class AccountMoveLine(models.Model):
         if self.is_landed_costs_line and self.product_id and self.product_type != 'service':
             self.is_landed_costs_line = False
 
-    def _eligible_for_cogs(self):
-        return super()._eligible_for_cogs() or (
+    def _eligible_for_stock_account(self):
+        return super()._eligible_for_stock_account() or (
             self.product_id.type == "service"
             and self.product_id.landed_cost_ok
             and self.product_id.valuation == "real_time"
