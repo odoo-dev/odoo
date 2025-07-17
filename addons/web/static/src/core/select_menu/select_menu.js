@@ -284,7 +284,7 @@ export class SelectMenu extends Component {
     getSelectedChoice(props) {
         const choices = [...props.choices, ...props.groups.flatMap((g) => g.choices || [])];
         if (!this.props.multiSelect) {
-            return choices.find((c) => c.value === props.value);
+            return choices.find((c) => c !== undefined && c.value === props.value);
         }
 
         const valueSet = new Set(props.value);
