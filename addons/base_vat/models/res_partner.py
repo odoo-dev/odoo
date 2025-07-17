@@ -100,7 +100,7 @@ class ResPartner(models.Model):
     @api.model
     def _run_vat_checks(self, country, vat, partner_name='', validation='error'):
         """ OVERRIDE """
-        if not country or not vat:
+        if not vat:
             return vat, False
         if len(vat) == 1:
             if vat == '/' or not validation:
@@ -110,7 +110,10 @@ class ResPartner(models.Model):
             if validation == 'error':
                 raise ValidationError(_("To explicitly indicate no (valid) VAT, use '/' instead. "))
         vat_prefix, vat_number = self._split_vat(vat)
-
+        if not country:
+            country = self.env['res.country'].search([('code', '=', vat_prefix)], limit=1)
+        if not country:
+            return vat, False
         if vat_prefix == 'EU' and country not in self.env.ref('base.europe').country_ids:
             # Foreign companies that trade with non-enterprises in the EU
             # may have a VATIN starting with "EU" instead of a country code.
