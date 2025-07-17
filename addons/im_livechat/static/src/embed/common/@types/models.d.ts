@@ -3,9 +3,9 @@ declare module "models" {
         disableChatbotAnswers: boolean;
     }
     export interface Store {
+        active_livechat_channel: LivechatChannel;
         activeLivechats: Thread[];
         guest_token: null;
-        livechat_available: boolean;
         livechat_rule: LivechatChannelRule;
     }
     export interface Thread {

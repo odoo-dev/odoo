@@ -32,7 +32,7 @@ export class AutopopupService {
             !expirableStorage.getItem(AutopopupService.STORAGE_KEY) &&
                 !this.ui.isSmall &&
                 this.storeService.livechat_rule?.action === "auto_popup" &&
-                this.storeService.livechat_available &&
+                this.storeService.active_livechat_channel &&
                 this.storeService.activeLivechats.length === 0
         );
     }

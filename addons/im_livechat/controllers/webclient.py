@@ -62,7 +62,7 @@ class WebClient(WebclientController):
                     lang=request.env["chatbot.script"]._get_chatbot_language()
                 )
                 store.add_global_values(livechat_rule=Store.One(matching_rule))
-            store.add_global_values(
-                livechat_available=matching_rule.action != "hide_button"
-                and bool(matching_rule.chatbot_script_id or channel.available_operator_ids)
-            )
+            if matching_rule.action != "hide_button" and bool(
+                matching_rule.chatbot_script_id or channel.available_operator_ids
+            ):
+                store.add_global_values(active_livechat_channel=Store.One(channel))

@@ -29,7 +29,7 @@ const StorePatch = {
             eager: true,
         });
         this.livechat_rule = fields.One("im_livechat.channel.rule");
-        this.livechat_available = false;
+        this.active_livechat_channel = fields.One("im_livechat.channel");
     },
 };
 patch(Store.prototype, StorePatch);

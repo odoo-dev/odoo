@@ -217,8 +217,27 @@ patch(mailDataHelpers, {
             );
         }
     },
-    _process_request_for_all(store) {
+    _process_request_for_all(store, name, params) {
         super._process_request_for_all(...arguments);
-        store.add({ livechat_available: true });
+        if (name === "init_livechat") {
+            store.add({
+                active_livechat_channel: mailDataHelpers.Store.one(
+                    this.env["im_livechat.channel"].browse(params),
+                    makeKwArgs({
+                        fields: [
+                            "header_background_color",
+                            "button_background_color",
+                            "title_color",
+                            "button_text_color",
+                            "button_text",
+                            "input_placeholder",
+                            "default_message",
+                            "name",
+                            "review_link",
+                        ],
+                    })
+                ),
+            });
+        }
     },
 });

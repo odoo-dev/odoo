@@ -37,7 +37,7 @@ export class LivechatButton extends Component {
 
     get isShown() {
         return (
-            this.store.livechat_available &&
+            this.store.active_livechat_channel &&
             this.store.activeLivechats.length === 0 &&
             this.livechatService.options.channel_id
         );
