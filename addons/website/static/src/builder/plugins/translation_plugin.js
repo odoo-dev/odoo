@@ -51,6 +51,7 @@ function findOEditable(containerEl) {
 export class TranslationPlugin extends Plugin {
     static id = "translation";
     static dependencies = ["history"];
+    static shared = ["getElToTranslationInfoMap"];
 
     resources = {
         clean_for_save_handlers: this.cleanForSave.bind(this),
@@ -204,6 +205,10 @@ export class TranslationPlugin extends Plugin {
             textEditEl.classList.add("o_translatable_text");
             textEditEl.classList.remove("o_text_content_invisible");
         }
+    }
+
+    getElToTranslationInfoMap() {
+        return this.elToTranslationInfoMap;
     }
 
     handleSelectTranslation(editableEls) {

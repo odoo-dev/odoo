@@ -9,7 +9,9 @@ import { reactive } from "@odoo/owl";
 
 export class CustomizeTranslationTabPlugin extends Plugin {
     static id = "customizeTranslationTab";
-    static shared = ["getTranslationState"];
+    static dependencies = ["translation"];
+    static shared = ["getTranslationState", "getElToTranslationInfoAttrMap"];
+
     resources = {
         builder_actions: {
             TranslateToAction,
@@ -37,6 +39,10 @@ export class CustomizeTranslationTabPlugin extends Plugin {
         return this.translationState;
     }
 
+    getElToTranslationInfoAttrMap() {
+        return this.dependencies.translation.getElToTranslationInfoMap();
+    }
+
     getTranslationOptionBlock(id, name, options) {
         options.selector = "*";
         return {
@@ -57,6 +63,8 @@ class TranslateToAction extends BuilderAction {
 
     async apply({ editingElement: bodyEl }) {
         const translationState = this.dependencies.customizeTranslationTab.getTranslationState();
+        this.elToTranslationInfoMap =
+            this.dependencies.customizeTranslationTab.getElToTranslationInfoAttrMap();
         try {
             translationState.isLoading = true;
             const language = this.services.website.currentWebsite.metadata.lang;
@@ -97,10 +105,14 @@ class TranslateToAction extends BuilderAction {
         );
     }
 
-    generateTranslationChunks(container, limit = 2000) {
+    generateTranslationChunks(container, limit = 10000) {
         const elements = Array.from(
             container.querySelectorAll("[data-oe-translation-state='to_translate']")
-        ).filter((el) => !el.closest(".o_not_editable, .o_frontend_to_backend_buttons"));
+        ).filter(
+            (el) =>
+                !el.closest(".o_not_editable, .o_frontend_to_backend_buttons") &&
+                !el.classList.contains("o_translatable_attribute")
+        );
         const translationChunks = [];
         let currentChunk = [];
         let currentLength = 0;
