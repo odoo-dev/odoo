@@ -4046,6 +4046,9 @@
                 .join("");
         }
         translate(str, translationCtx) {
+            if (!translationCtx) {
+                console.warn(`Missing context: "${str}" in ${this.templateName}`);
+            }
             const match = translationRE.exec(str);
             return match[1] + this.translateFn(match[2], translationCtx) + match[3];
         }
