@@ -6,5 +6,10 @@
                 <i class="fa fa fa-circle-o text-700 mx-1"/><t t-esc="disconnectedText"/>
             </div>
         </xpath>
+        <xpath expr="//*[@name='content']" position="before">
+            <div t-if="props.thread?.livechatWelcomeMessage" class="bg-100 py-3">
+                <Message message="props.thread.livechatWelcomeMessage" hasActions="false" thread="props.thread"/>
+            </div>
+        </xpath>
     </t>
 </templates>

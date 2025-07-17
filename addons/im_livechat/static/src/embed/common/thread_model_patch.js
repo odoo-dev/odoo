@@ -36,19 +36,6 @@ patch(Thread.prototype, {
                 }
             },
         });
-        this.livechatWelcomeMessage = fields.One("mail.message", {
-            compute() {
-                if (this.hasWelcomeMessage) {
-                    const livechatService = this.store.env.services["im_livechat.livechat"];
-                    return {
-                        id: -0.2 - this.id,
-                        body: livechatService.options.default_message,
-                        thread: this,
-                        author_id: this.livechat_operator_id,
-                    };
-                }
-            },
-        });
         /**
          * Deferred that resolves once a newly persisted thread is ready to swap
          * with its temporary counterpart (i.e. when the actions following the
@@ -57,7 +44,6 @@ patch(Thread.prototype, {
          * @type {Deferred}
          */
         this.readyToSwapDeferred = new Deferred();
-        this.chatbot = fields.One("Chatbot");
         this._toggleChatbot = fields.Attr(false, {
             compute() {
                 return this.chatbot && !this.livechat_end_dt;
@@ -80,7 +66,6 @@ patch(Thread.prototype, {
                     : null;
             },
         });
-        this.requested_by_operator = false;
     },
     /** @returns {boolean} */
     get isLastMessageFromCustomer() {
@@ -90,21 +75,11 @@ patch(Thread.prototype, {
     get membersThatCanSeen() {
         return super.membersThatCanSeen.filter((member) => member.livechat_member_type !== "bot");
     },
-
-    get avatarUrl() {
-        if (this.channel_type === "livechat") {
-            return this.livechat_operator_id.avatarUrl;
-        }
-        return super.avatarUrl;
-    },
     get displayName() {
         if (this.channel_type === "livechat" && this.livechat_operator_id) {
             return this.getPersonaName(this.livechat_operator_id);
         }
         return super.displayName;
-    },
-    get hasWelcomeMessage() {
-        return this.channel_type === "livechat" && !this.chatbot && !this.requested_by_operator;
     },
     /** @returns {Promise<import("models").Message} */
     async post(body, postData, extraData = {}) {

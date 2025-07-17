@@ -574,7 +574,6 @@ export class FormCompiler extends ViewCompiler {
                 append(pageSlot, this.compileNode(contents, { ...params, currentSlot: pageSlot }));
             }
         }
-
         return noteBook;
     }
 

@@ -213,7 +213,6 @@ For more specific needs, you may also assign custom-defined actions
             ("include", "mail.assets_common"),
             "mail/static/src/core/web_portal/**/*",
             "mail/static/src/**/web_portal/**/*",
-            ("remove", "mail/static/src/**/web_portal/**/*.dark.scss"),
         ],
         "mail.assets_web": [
             ("include", "mail.assets_public_web"),

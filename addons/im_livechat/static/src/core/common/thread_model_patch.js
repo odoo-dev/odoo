@@ -7,26 +7,14 @@ import { patch } from "@web/core/utils/patch";
 patch(Thread.prototype, {
     setup() {
         super.setup();
+        this.livechat_agent_partner_ids = fields.Many("res.partner");
+        this.livechat_bot_partner_ids = fields.Many("res.partner");
+        this.livechat_customer_guest_ids = fields.Many("mail.guest");
+        this.livechat_customer_partner_ids = fields.Many("res.partner");
         this.livechat_end_dt = fields.Datetime();
         this.livechat_operator_id = fields.One("res.partner");
         this.livechatVisitorMember = fields.One("discuss.channel.member", {
-            compute() {
-                if (this.channel_type !== "livechat") {
-                    return;
-                }
-                // For livechat threads, the correspondent is the first
-                // channel member that is not the operator.
-                const orderedChannelMembers = [...this.channel_member_ids].sort(
-                    (a, b) => a.id - b.id
-                );
-                const isFirstMemberOperator = orderedChannelMembers[0]?.persona.eq(
-                    this.livechat_operator_id
-                );
-                const visitor = isFirstMemberOperator
-                    ? orderedChannelMembers[1]
-                    : orderedChannelMembers[0];
-                return visitor;
-            },
+            inverse: "threadAsLivechatVisitorMember",
         });
         /** @type {true|undefined} */
         this.open_chat_window = fields.Attr(undefined, {
@@ -38,11 +26,39 @@ patch(Thread.prototype, {
                 }
             },
         });
+        this.livechatWelcomeMessage = fields.One("mail.message", {
+            compute() {
+                if (this.hasWelcomeMessage) {
+                    const livechatService = this.store.env.services["im_livechat.livechat"];
+                    return {
+                        id: -0.2 - this.id,
+                        body: livechatService.options.default_message,
+                        thread: this,
+                        author_id: this.livechat_operator_id,
+                    };
+                }
+            },
+        });
+        this.requested_by_operator = false;
     },
     get autoOpenChatWindowOnNewMessage() {
         return (
             (this.channel_type === "livechat" && !this.store.chatHub.compact) ||
             super.autoOpenChatWindowOnNewMessage
+        );
+    },
+    get isTransient() {
+        if (this.id instanceof String && this.id.startsWith("im_livechat.preview_")) {
+            return true;
+        }
+        return super.isTransient;
+    },
+    get hasWelcomeMessage() {
+        return (
+            this.channel_type === "livechat" &&
+            this.isSelfCustomer &&
+            !this.livechat_bot_partner_ids.length &&
+            !this.requested_by_operator
         );
     },
     get showCorrespondentCountry() {
@@ -69,6 +85,15 @@ patch(Thread.prototype, {
         return this.channel_type === "livechat" && this.livechat_end_dt
             ? _t("This livechat conversation has ended")
             : "";
+    },
+    get isSelfCustomer() {
+        return (
+            this.store.self_partner?.in(this.livechat_customer_partner_ids) ??
+            this.store.self_guest.in(this.livechat_customer_guest_ids)
+        );
+    },
+    get isSelfAgent() {
+        return this.store.self_partner?.in(this.livechat_agent_partner_ids);
     },
     /**
      * @override
