@@ -79,14 +79,14 @@ $o-mail-DiscussSidebarChannel-borderOpacity: .05;
     font-size: 0.4rem;
     left: -3px;
 
-    .o-mail-DiscussSidebarChannel-container.o-bordered & {
-        &.o-mail-DiscussSidebarChannel, &.o-compact {
-            filter: drop-shadow(1px 2px 0px $white) drop-shadow(-1px 1px 0px $white) drop-shadow(1px -1px 0px $white) drop-shadow(-1px -2px 0px $white);
-        }
-    }
-
     .o-mail-DiscussSidebarSubchannel &:not(.o-compact) {
         left: map-get($spacers, 2) + map-get($spacers, 1) / 2;
+    }
+}
+
+.o-mail-DiscussSidebarChannel-container.o-bordered {
+    .o-mail-DiscussSidebarChannel .o-mail-DiscussSidebar-unreadIndicator, .o-mail-DiscussSidebar-unreadIndicator.o-compact {
+        filter: drop-shadow(1px 2px 0px $white) drop-shadow(-1px 1px 0px $white) drop-shadow(1px -1px 0px $white) drop-shadow(-1px -2px 0px $white);
     }
 }
 
