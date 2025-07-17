@@ -93,6 +93,9 @@ class ResCompany(models.Model):
             if company.anglo_saxon_accounting:
                 purchase_account = company.account_stock_variation_id
                 company._post_periodic_cogs(products, fiscal_year_date_from, purchase_account, counter_balance_account)
+            else:
+                realtime_products = products.filtered(lambda p: p.valuation == 'real_time')
+                company._post_periodic_expense(realtime_products, fiscal_year_date_from, stock_valuation_account, company.account_stock_variation_id, company.expense_account_id)
 
     @api.model
     def _cron_post_stock_valuation(self):
@@ -140,6 +143,58 @@ class ResCompany(models.Model):
             am = self.env['account.move'].create(move_vals)
             am._post()
 
+    def _post_periodic_expense(self, products, fiscal_year_date_from, stock_valuation_account, stock_variation_account, expense_account):
+        """ The `_post_stock_valuation_account` use the COGS account in order to balance the stock valuation account.
+        However, the products could remains in stock and are not sold yet. This method counter balance the COGS account
+        with the inventory value.
+        """
+        if self.anglo_saxon_accounting:
+            return
+        existing_am = self.env['account.move'].search([
+            ('line_ids.account_id', '=', expense_account.id),
+            ('line_ids.account_id', '=', stock_variation_account.id),
+            ('date', '>', fiscal_year_date_from),
+            ('state', '=', 'posted'),
+            ('company_id', '=', self.id),
+        ])
+
+        inventory_variation_balance = sum(line.balance for line in existing_am.line_ids if line.account_id == stock_variation_account)
+        inventory_value = self.stock_value(products)[0] if products else 0
+        inventory_value_at_beginning = self.env['account.move.line']._read_group(
+            domain=[
+                ('account_id', '=', stock_valuation_account.id),
+                ('parent_state', '=', 'posted'),
+                ('company_id', '=', self.id),
+                ('date', '<=', fiscal_year_date_from),
+            ],
+            groupby=['account_id'],
+            aggregates=['balance:sum'],
+        )
+        balance = inventory_value - (inventory_value_at_beginning[0]['balance'] if inventory_value_at_beginning else 0) - inventory_variation_balance
+        if not balance:
+            return
+        move_vals = {
+            'journal_id': self.account_stock_journal_id.id,
+            'date': fields.Date.context_today(self),
+            'ref': _('Balance expense with inventory variation'),
+            'line_ids': [],
+            'move_type': 'entry',
+        }
+        move_vals['line_ids'].append(Command.create({
+            'account_id': stock_variation_account.id,
+            'name': _('Counter balance expense with inventory variation'),
+            'debit': balance if balance > 0 else 0,
+            'credit': balance if balance < 0 else 0,
+        }))
+        move_vals['line_ids'].append(Command.create({
+            'account_id': expense_account.id,
+            'name': _('Counter balance expense with inventory variation'),
+            'debit': balance if balance < 0 else 0,
+            'credit': balance if balance > 0 else 0,
+        }))
+        am = self.env['account.move'].create(move_vals)
+        am._post()
+
     def _post_periodic_cogs(self, products, fiscal_year_date_from, purchase_account, cogs_account):
         """ The `_post_stock_valuation_account` use the COGS account in order to balance the stock valuation account.
         However, the products could remains in stock and are not sold yet. This method counter balance the COGS account
@@ -177,8 +232,8 @@ class ResCompany(models.Model):
         move_vals['line_ids'].append(Command.create({
             'account_id': purchase_account.id,
             'name': _('COGS counter balance'),
-            'debit': -cogs_counter_balance if cogs_counter_balance > 0 else 0,
-            'credit': cogs_counter_balance if cogs_counter_balance < 0 else 0,
+            'debit': cogs_counter_balance if cogs_counter_balance < 0 else 0,
+            'credit': cogs_counter_balance if cogs_counter_balance > 0 else 0,
         }))
         am = self.env['account.move'].create(move_vals)
         am._post()
