@@ -532,19 +532,13 @@ class Im_LivechatChannel(models.Model):
             "review_link": self.review_link,
         }
 
-    def get_livechat_info(self, username=None):
+    def get_livechat_info(self):
         self.ensure_one()
-
-        if username is None:
-            username = _('Visitor')
-        info = {}
-        info['available'] = self.chatbot_script_count or len(self.available_operator_ids) > 0
-        info['server_url'] = self.get_base_url()
-        info["websocket_worker_version"] = WebsocketConnectionHandler._VERSION
-        if info['available']:
-            info['options'] = self._get_channel_infos()
-            info['options']["default_username"] = username
-        return info
+        return {
+            "available": self.chatbot_script_count or self.available_operator_ids,
+            "server_url": self.get_base_url(),
+            "websocket_worker_version": WebsocketConnectionHandler._VERSION,
+        }
 
 
 class Im_LivechatChannelRule(models.Model):

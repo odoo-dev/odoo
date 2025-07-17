@@ -47,7 +47,7 @@ export class FeedbackPanel extends Component {
     get allowNewSession() {
         return (
             this.store.livechat_rule?.action !== "hide_button" &&
-            this.livechatService.options.channel_id
+            this.store.livechat_options.channel_id
         );
     }
 
@@ -58,7 +58,7 @@ export class FeedbackPanel extends Component {
             channel_id: this.props.thread.id,
         });
         this.state.step = this.STEP.THANKS;
-        const link = this.livechatService.options.review_link;
+        const link = this.store.livechat_options.review_link;
         if (this.state.rating === this.RATING.GOOD && link) {
             window.open(link, "_blank", "noopener");
         }

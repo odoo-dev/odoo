@@ -217,8 +217,24 @@ patch(mailDataHelpers, {
             );
         }
     },
-    _process_request_for_all(store) {
+    _process_request_for_all(store, name, params) {
         super._process_request_for_all(...arguments);
-        store.add({ livechat_available: true });
+        if (name === "init_livechat") {
+            store.add({
+                livechat_available: true,
+                livechat_options: {
+                    header_background_color: "#875A7B",
+                    button_background_color: "#875A7B",
+                    title_color: "#FFFFFF",
+                    button_text_color: "#FFFFFF",
+                    button_text: "Have a Question? Chat with us.",
+                    input_placeholder: false,
+                    default_message: "Hello, how may I help you?",
+                    channel_name: "YourWebsite.com",
+                    channel_id: params,
+                    review_link: "https://www.odoo.com",
+                },
+            });
+        }
     },
 });

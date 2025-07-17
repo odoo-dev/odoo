@@ -66,3 +66,4 @@ class WebClient(WebclientController):
                 livechat_available=matching_rule.action != "hide_button"
                 and bool(matching_rule.chatbot_script_id or channel.available_operator_ids)
             )
+            store.add_global_values(livechat_options=channel._get_channel_infos())

@@ -29,10 +29,9 @@ patch(Thread.prototype, {
         this.livechatWelcomeMessage = fields.One("mail.message", {
             compute() {
                 if (this.hasWelcomeMessage) {
-                    const livechatService = this.store.env.services["im_livechat.livechat"];
                     return {
                         id: -0.2 - this.id,
-                        body: livechatService.options.default_message,
+                        body: this.store.livechat_options.default_message,
                         thread: this,
                         author_id: this.livechat_operator_id,
                     };

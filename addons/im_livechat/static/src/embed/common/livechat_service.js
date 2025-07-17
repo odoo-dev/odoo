@@ -3,10 +3,9 @@ import { expirableStorage } from "@im_livechat/core/common/expirable_storage";
 import { reactive } from "@odoo/owl";
 import { rpc } from "@web/core/network/rpc";
 
+import { canLoadLivechat } from "@im_livechat/embed/common/misc";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { session } from "@web/session";
-import { canLoadLivechat } from "@im_livechat/embed/common/misc";
 
 export const RATING = Object.freeze({
     GOOD: 5,
@@ -41,10 +40,12 @@ export class LivechatService {
     }
 
     async initialize() {
-        this.store.fetchStoreData("init_livechat", this.options.channel_id, { readonly: false });
-        if (this.options.chatbot_test_store) {
+        this.store.fetchStoreData("init_livechat", this.store.livechat_options.channel_id, {
+            readonly: false,
+        });
+        if (this.store.livechat_options.chatbot_test_store) {
             await this.store.chatHub.initPromise;
-            this.store.insert(this.options.chatbot_test_store);
+            this.store.insert(this.store.livechat_options.chatbot_test_store);
         }
     }
 
@@ -114,8 +115,8 @@ export class LivechatService {
         const { store_data, channel_id } = await rpc(
             "/im_livechat/get_session",
             {
-                channel_id: this.options.channel_id,
-                anonymous_name: this.options.default_username ?? _t("Visitor"),
+                channel_id: this.store.livechat_options.channel_id,
+                anonymous_name: _t("Visitor"),
                 chatbot_script_id:
                     originThread?.chatbot?.script.id ??
                     this.store.livechat_rule?.chatbot_script_id?.id,
@@ -137,10 +138,6 @@ export class LivechatService {
             ONE_DAY_TTL * 7
         );
         return thread;
-    }
-
-    get options() {
-        return session.livechatData?.options ?? {};
     }
 }
 

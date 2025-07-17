@@ -67,10 +67,9 @@ class LivechatController(http.Controller):
         return request.render('im_livechat.support_page', {'channel': channel})
 
     @http.route('/im_livechat/loader/<int:channel_id>', type='http', auth='public')
-    def loader(self, channel_id, **kwargs):
-        username = kwargs.get("username", _("Visitor"))
+    def loader(self, channel_id):
         channel = request.env['im_livechat.channel'].sudo().browse(channel_id)
-        info = channel.get_livechat_info(username=username)
+        info = channel.get_livechat_info()
         return request.render('im_livechat.loader', {'info': info}, headers=[('Content-Type', 'application/javascript')])
 
     def _get_guest_name(self):

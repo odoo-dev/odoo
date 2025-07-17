@@ -48,23 +48,7 @@ export async function loadDefaultEmbedConfig() {
         user_ids: [serverState.userId],
     });
     patchWithCleanup(session, {
-        livechatData: {
-            can_load_livechat: true,
-            serverUrl: window.origin,
-            options: {
-                header_background_color: "#875A7B",
-                button_background_color: "#875A7B",
-                title_color: "#FFFFFF",
-                button_text_color: "#FFFFFF",
-                button_text: "Have a Question? Chat with us.",
-                input_placeholder: false,
-                default_message: "Hello, how may I help you?",
-                channel_name: "YourWebsite.com",
-                channel_id: livechatChannelId,
-                default_username: "Visitor",
-                review_link: "https://www.odoo.com",
-            },
-        },
+        livechatData: { can_load_livechat: true, serverUrl: window.origin },
     });
     return livechatChannelId;
 }

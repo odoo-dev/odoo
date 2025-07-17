@@ -39,7 +39,7 @@ export class LivechatButton extends Component {
         return (
             this.store.livechat_available &&
             this.store.activeLivechats.length === 0 &&
-            this.livechatService.options.channel_id
+            this.store.livechat_options.channel_id
         );
     }
 }
