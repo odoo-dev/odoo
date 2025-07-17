@@ -97,9 +97,9 @@ class StockValuationReport(models.AbstractModel):
 
         product_category_valuation_lines = [
             {
-                'res_model': 'product.category',
-                'id': categ.id,
-                'display_name': categ.display_name,
+                'res_model': 'product.category' if categ else False,
+                'id': categ.id if categ else False,
+                'display_name': categ.display_name if categ else _('Product without category'),
                 'value': sum([line['value'] for line in product_lines]),
                 'lines': product_lines,
             } for (categ, product_lines) in valuation_lines_by_category.items()
