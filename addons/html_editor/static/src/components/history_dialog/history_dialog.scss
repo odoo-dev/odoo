@@ -1,4 +1,34 @@
 .html-history-dialog {
+    .history-view-top-bar {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        background-color: #f7f7f7;
+        border-bottom: 1px solid #ddd;
+
+        >div {
+            flex-grow: 6;
+            &.toggle-view-btns {
+                flex-grow: 1;
+                padding-right: 10px;
+                width: 220px;
+            }
+            &:last-child {
+                flex-grow: 1;
+                text-align: right;
+                width: 180px;
+            }
+        }
+    }
+    .history-view-inner {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-top: 0;
+    }
+}
+
+// old csss todo: clean unnecessary styles
+.html-history-dialog {
     .history-container {
         --border-color: #ddd;
         margin-left: 240px;

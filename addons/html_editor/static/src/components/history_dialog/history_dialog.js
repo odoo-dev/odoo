@@ -34,6 +34,8 @@ export class HistoryDialog extends Component {
 
     state = useState({
         revisionsData: [],
+        currentView: "content", // "content" or "comparison"
+        isComparisonSplit: true, // true for side-by-side, false for unified diff
         revisionContent: null,
         revisionComparison: null,
         revisionId: null,
@@ -44,9 +46,19 @@ export class HistoryDialog extends Component {
         this.size = "xl";
         this.title = this.props.title;
         this.orm = useService("orm");
-        this.notebookTabs = [_t("Content"), _t("Comparison")];
+        console.log("setup", this.props);
+        // We include the current document version as the first revision,
+        // and we shift the rest of the metadata to be more logical for the user.
+        let revisionId = -1;
+        const revisionData = [];
+        for (const metadata of this.props.historyMetadata) {
+            revisionData.push({ ...metadata, revision_id: revisionId });
+            revisionId = metadata["revision_id"];
+        }
+        console.log("revisionData", [...revisionData]);
+        this.state.revisionsData = revisionData;
 
-        onMounted(() => this.init());
+        onMounted(() => this.updateCurrentRevision(this.state.revisionsData[0]["revision_id"]));
     }
 
     getConfig(value) {
@@ -56,12 +68,8 @@ export class HistoryDialog extends Component {
         };
     }
 
-    async init() {
-        this.state.revisionsData = this.props.historyMetadata;
-        await this.updateCurrentRevision(this.props.historyMetadata[0]["revision_id"]);
-    }
-
     async updateCurrentRevision(revisionId) {
+        console.log("updateCurrentRevision", revisionId);
         if (this.state.revisionId === revisionId) {
             return;
         }
@@ -69,11 +77,15 @@ export class HistoryDialog extends Component {
         this.state.revisionId = revisionId;
         this.state.revisionContent = await this.getRevisionContent(revisionId);
         this.state.revisionComparison = await this.getRevisionComparison(revisionId);
+        this.state.revisionComparisonSplit = await this.getRevisionComparisonSplit(revisionId);
         this.state.revisionLoading = false;
     }
 
     getRevisionComparison = memoize(
         async function getRevisionComparison(revisionId) {
+            if (revisionId === -1) {
+                return "";
+            }
             const comparison = await this.orm.call(
                 this.props.recordModel,
                 "html_field_history_get_comparison_at_revision",
@@ -83,8 +95,47 @@ export class HistoryDialog extends Component {
         }.bind(this)
     );
 
+    getRevisionComparisonSplit = memoize(
+        async function getRevisionComparisonSplit(revisionId) {
+            if (revisionId === -1) {
+                return "";
+            }
+            let unifiedDiffString = await this.orm.call(
+                this.props.recordModel,
+                "html_field_history_get_unified_diff_at_revision",
+                [this.props.recordId, this.props.versionedFieldName, revisionId]
+            );
+            //remove unnecessary linebreaks
+            unifiedDiffString = unifiedDiffString.replace(/^\s*[\r\n]/gm, "");
+            console.log("====== unifiedDiffString =========");
+            console.log("", unifiedDiffString);
+            console.log("==================================");
+            // eslint-disable-next-line no-undef
+            const diffHtml = Diff2Html.html(unifiedDiffString, {
+                drawFileList: false,
+                matching: "lines",
+                outputFormat: "side-by-side",
+            });
+            console.log("========== diffHtml ==============");
+            console.log(diffHtml);
+            console.log("==================================");
+            return markup(diffHtml);
+        }.bind(this)
+    );
+
     getRevisionContent = memoize(
         async function getRevisionContent(revisionId) {
+            if (revisionId === -1) {
+                const curentContent = await this.orm.read(
+                    this.props.recordModel,
+                    [this.props.recordId],
+                    [this.props.versionedFieldName]
+                );
+                if (!curentContent || !curentContent.length) {
+                    return this.props.noContentHelper;
+                }
+                return markup(curentContent[0][this.props.versionedFieldName]);
+            }
             const content = await this.orm.call(
                 this.props.recordModel,
                 "html_field_history_get_content_at_revision",
@@ -105,8 +156,18 @@ export class HistoryDialog extends Component {
      * Getters
      **/
     getRevisionDate(revision) {
+        if (!revision || !revision["create_date"]) {
+            console.warn(" getRevisionDate : emty rev", revision);
+            return "--";
+        }
         return formatDateTime(
-            DateTime.fromISO(revision["create_date"], { zone: "utc" }).setZone(user.tz)
+            DateTime.fromISO(revision["create_date"], { zone: "utc" }).setZone(user.tz),
+            { showSeconds: false }
         );
+    }
+
+    get currentRevision() {
+        const id = this.state?.revisionId || this.state.revisionsData[0]["revision_id"];
+        return this.state.revisionsData.find((revision) => revision["revision_id"] === id);
     }
 }

@@ -372,6 +372,7 @@ export function formatDateTime(value, options = {}) {
             format = getCondensedFormat(format);
         }
     }
+    console.log("formatDateTime", format);
     return value.setZone(options.tz || "default").toFormat(format);
 }
 
