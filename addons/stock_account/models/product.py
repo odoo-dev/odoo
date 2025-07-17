@@ -141,8 +141,10 @@ class ProductProduct(models.Model):
 
         for product in self:
             qty_available = product.sudo(False).qty_available
-            if product.cost_method in ['standard', 'average']:
+            if product.cost_method == 'standard':
                 product.total_value = product.standard_price * qty_available
+            elif product.cost_method == 'average':
+                product.total_value = product._run_avco()[1]
             else:
                 product.total_value = product._run_fifo(qty_available)
             product.avg_cost = product.total_value / qty_available if qty_available else 0.0
@@ -198,7 +200,6 @@ class ProductProduct(models.Model):
         self.ensure_one()
         # Get value and quantity from last closing
         quantity = 0
-        value = 0
         # Get value and quantity for all incoming
         moves_in = self.env['stock.move'].search([
             ('product_id', '=', self.id),
@@ -210,20 +211,21 @@ class ProductProduct(models.Model):
         ]) if method == "realtime" else self.env['stock.move']
         # TODO convert to company UoM
         avco_value = 0
+        avco_total_value = 0
         moves = moves_in | moves_out
         moves = moves.sorted('date')
         for move in moves:
             if move.is_in:
                 # TODO use _get_value when searching in past
                 in_value, in_qty = move.value, sum(move._get_in_move_lines().mapped('quantity'))
-                value += in_value
+                avco_total_value += in_value
                 quantity += in_qty
-                avco_value = value / quantity if quantity else 0
+                avco_value = avco_total_value / quantity if quantity else 0
             else:
                 out_qty = sum(move._get_out_move_lines().mapped('quantity'))
-                value -= out_qty * avco_value
+                avco_total_value -= out_qty * avco_value
                 quantity -= out_qty
-        return avco_value
+        return avco_value, avco_total_value
 
     def _run_fifo_get_stack(self):
         fifo_stack = []
@@ -271,7 +273,7 @@ class ProductProduct(models.Model):
         for product in self:
             if product.cost_method == 'standard':
                 continue
-            product.with_context(disable_auto_revaluation=True).standard_price = product._run_avco()
+            product.with_context(disable_auto_revaluation=True).standard_price = product._run_avco()[0]
 
     def _update_lots_standard_price(self):
         grouped_lots = self.env['stock.lot']._read_group(
