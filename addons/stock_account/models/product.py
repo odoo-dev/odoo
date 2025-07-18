@@ -158,35 +158,32 @@ class ProductProduct(models.Model):
         return super().write(vals)
 
     # -------------------------------------------------------------------------
-    # Actions
-    # -------------------------------------------------------------------------
-    def action_revaluation(self):
-        self.ensure_one()
-        ctx = dict(self.env.context, default_product_id=self.id, default_company_id=self.env.company.id)
-        return {
-            'name': _('Product Revaluation - %s', self.display_name),
-            'view_mode': 'form',
-            'res_model': 'stock.valuation.layer.revaluation',
-            'view_id': self.env.ref('stock_account.stock_valuation_layer_revaluation_form_view').id,
-            'type': 'ir.actions.act_window',
-            'context': ctx,
-            'target': 'new',
-        }
-
-    # -------------------------------------------------------------------------
     # Private
     # -------------------------------------------------------------------------
 
     def _change_standard_price(self, new_price):
-        return
         for product in self:
-            if self.cost_method != 'average':
+            if self.cost_method != 'average' or product.standard_price == new_price:
                 continue
-            self.env['stock.adjust.valuation'].create({
+            self.env['product.value'].create({
                 'product_id': product.id,
-                'new_value': new_price,
-                'company_id': self.env.company.id,
+                'value': new_price,
+                'company_id': product.company_id or self.env.company.id,
+                'date': fields.Datetime.now(),
+                'description': _('Price update from %(old_price)s to %(new_price)s by %(user)s',
+                    old_price=product.standard_price, new_price=new_price, user=self.env.user.name)
             })
+        return
+
+    def _get_remaining_moves(self):
+        moves_qty_by_product = {}
+        for product in self:
+            moves, remaining_qty = product._run_fifo_get_stack()
+            moves = self.env['stock.move'].concat(*moves)
+            qty_by_move = {m: m.quantity for m in moves[:-1]}
+            qty_by_move[moves[-1]] = remaining_qty
+            moves_qty_by_product[product] = qty_by_move
+        return moves_qty_by_product
 
     def _get_cogs_value(self, quantity):
         if self.cost_method in ['standard', 'average']:
@@ -210,11 +207,25 @@ class ProductProduct(models.Model):
             ('is_out', '=', True),
         ]) if method == "realtime" else self.env['stock.move']
         # TODO convert to company UoM
+        product_values = self.env['product.value'].search([
+            ('product_id', '=', self.id),
+        ], order="date")
         avco_value = 0
         avco_total_value = 0
         moves = moves_in | moves_out
         moves = moves.sorted('date')
+
+        # If the last value was defined by the user just return it
+        if product_values and moves_in and product_values[-1].date > moves_in[-1].date:
+            avco_value = product_values[-1].value
+            return avco_value, avco_value * self.qty_available
+
         for move in moves:
+            if product_values and move.date > product_values[0].date:
+                product_value = product_values[0]
+                product_values = product_values[1:]
+                avco_value = product_value.value
+                avco_total_value = avco_value * quantity
             if move.is_in:
                 # TODO use _get_value when searching in past
                 in_value, in_qty = move.value, sum(move._get_in_move_lines().mapped('quantity'))
@@ -225,6 +236,7 @@ class ProductProduct(models.Model):
                 out_qty = sum(move._get_out_move_lines().mapped('quantity'))
                 avco_total_value -= out_qty * avco_value
                 quantity -= out_qty
+
         return avco_value, avco_total_value
 
     def _run_fifo_get_stack(self):

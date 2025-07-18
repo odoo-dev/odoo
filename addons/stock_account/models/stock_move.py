@@ -32,10 +32,6 @@ class StockMove(models.Model):
     is_out = fields.Boolean(string='Is Outgoing (valued)', compute='_compute_is_out', store=True)
     is_valued = fields.Boolean(string='Is Valued', compute='_compute_is_valued')
 
-    adjusted_valuation_ids = fields.Many2many(
-        'stock.adjust.valuation', 'stock_move_adjustment_rel', 'move_id', 'adjustment_id',
-        string='Adjusted Valuations', copy=False)
-
     remaining_qty = fields.Float(
         string='Remaining Quantity', compute='_compute_remaining_qty')
     remaining_value = fields.Monetary(
@@ -68,50 +64,42 @@ class StockMove(models.Model):
             move.value_manual = move.value
 
     def _compute_remaining_qty(self):
-        products = self.env['product.product'].search([])
-        remaining_by_product = {product: product._run_fifo_get_stack() for product in products}
+        products = self.product_id
+        remaining_by_product = products._get_remaining_moves()
 
-        for product, moves in self.grouped('product_id').items():
-            fifo_stack = remaining_by_product.get(product)
-            if not fifo_stack or not fifo_stack[0]:
-                moves.remaining_qty = 0
-                continue
-            moves_fifo_stack = fifo_stack[0]
-            last_move_of_stack = fifo_stack[0][-1]
-            for move in moves:
-                move_in_stack = move in moves_fifo_stack
-                if move_in_stack and move == last_move_of_stack:
-                    # TODO UoM conversion
-                    move.remaining_qty = fifo_stack[-1]
-                elif move_in_stack:
-                    move.remaining_qty = move.quantity
-                else:
-                    move.remaining_qty = 0
+        for move in self:
+            move.remaining_qty = remaining_by_product.get(move.product_id, {}).get(move, 0)
 
     def _compute_remaining_value(self):
         for move in self:
-            ratio = move.remaining_qty / move.quantity
-            move.remaining_value = ratio * move.value if ratio else 0
+            if not move.is_in:
+                move.remaining_value = 0
+                continue
+            ratio = move.remaining_qty / move.quantity if move.quantity else 0
+            if move.product_id.cost_method == 'fifo':
+                move.remaining_value = ratio * move.value if ratio else 0
+            else:
+                move.remaining_value = move.remaining_qty * move.product_id.standard_price
 
     def _inverse_value_manual(self):
         for move in self:
-            if move.manual_value != move.value:
-                self.env['stock.adjust.valuation'].create({
-                    'move_ids': move.id,
-                    'new_value': move.value_manual,
-                    'description': _('Manual adjustment by %(user)s', user=self.env.user.name),
-                })
-                move._set_value()
+            if move.manual_value == move.value:
+                continue
+            self.env['product.value'].create({
+                'move_id': move.id,
+                'value': move.manual_value,
+                'company_id': move.company_id.id,
+            })
+            move._set_value()
 
     def action_adjust_valuation(self):
-        action = self.env['ir.actions.act_window']._for_xml_id("stock_account.stock_adjust_valuation_action")
+        action = self.env['ir.actions.act_window']._for_xml_id("stock_account.stock_move_revaluation_action")
         product = self.product_id if len(self.product_id) == 1 else False
         if product:
             action['name'] = _('Adjust Valuation: %(product)s', product=product.display_name)
         action['target'] = 'new'
         action['context'] = {
-            'default_move_ids': self.ids,
-            'default_product_id': product.id if product else False,
+            'default_move_id': self.id,
         }
         return action
 
@@ -178,22 +166,29 @@ class StockMove(models.Model):
         # 2. from SO/PO lines
         # 3. standard_price
         valued_qty = remaining_qty = sum(self._get_in_move_lines().mapped('quantity'))
+
+        manual_value = self.env['product.value'].search([('move_id', '=', self.id)], order="date", limit=1)
+        if manual_value:
+            return manual_value.value, valued_qty
+
+        # 1. take from Invoice/Bills
         account_move_value, account_move_qty = self._get_value_from_account_move(remaining_qty)
         remaining_qty -= account_move_qty
+
+        # 2. from SO/PO lines
         quotation_value, quotation_qty = self._get_value_from_quotation(remaining_qty)
         remaining_qty -= quotation_qty
+
+        # 3. standard_price
         std_price_value = self._get_value_from_std_price(remaining_qty, forced_std_price)
-        extra_value = self._get_value_from_extra()
-        return account_move_value + quotation_value + std_price_value + extra_value, valued_qty
+
+        return account_move_value + quotation_value + std_price_value, valued_qty
 
     def _get_value_from_account_move(self, quantity):
         return 0, 0
 
     def _get_value_from_quotation(self, quantity):
         return 0, 0
-
-    def _get_value_from_extra(self):
-        return sum(self.adjusted_valuation_ids.mapped('extra_value'))
 
     def _get_value_from_std_price(self, quantity, std_price=False):
         std_price = std_price or self.product_id.standard_price
@@ -299,7 +294,6 @@ class StockMove(models.Model):
         self.ensure_one()
         return (self.location_id.usage == 'customer' or (self.location_id.usage == 'transit' and not self.location_id.company_id)) \
            and (self.location_dest_id.usage == 'supplier' or (self.location_dest_id.usage == 'transit' and not self.location_dest_id.company_id))
-
 
     def _should_exclude_for_valuation(self):
         """Determines if this move should be excluded from valuation based on its partner.
