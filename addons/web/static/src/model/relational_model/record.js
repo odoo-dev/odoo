@@ -181,6 +181,30 @@ export class Record extends DataPoint {
         return this._checkValidity({ displayNotification });
     }
 
+    copyRawData() {
+        const data = {};
+        for (const [name, value] of Object.entries(this.data)) {
+            switch (this.fields[name].type) {
+                case "date":
+                    data[name] = value && serializeDate(value);
+                    break;
+                case "datetime":
+                    data[name] = value && serializeDateTime(value);
+                    break;
+                case "many2one":
+                    data[name] = value && value.id;
+                    break;
+                case "many2many":
+                case "one2many":
+                    data[name] = value._getCommands({ withReadonly: true });
+                    break;
+                default:
+                    data[name] = value;
+            }
+        }
+        return data;
+    }
+
     delete() {
         return this.model.mutex.exec(async () => {
             const unlinked = await this.model.orm.unlink(this.resModel, [this.resId], {

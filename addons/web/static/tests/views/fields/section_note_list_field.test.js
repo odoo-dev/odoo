@@ -68,6 +68,11 @@ test("can add a line in a section", async () => {
                     options="{'display_type_field': 'display_type', 'section_content_field': 'name', 'note_content_field': 'name'}"
                 >
                     <list editable="bottom">
+                        <control>
+                            <create name="add_line_control" string="Add a line"/>
+                            <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                            <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                        </control>
                         <field name="sequence" widget="handle"/>
                         <field name="name"/>
                         <field name="display_type" column_invisible="1"/>
@@ -126,6 +131,11 @@ test("can add a line in a subsection", async () => {
                     options="{'display_type_field': 'display_type', 'section_content_field': 'name', 'note_content_field': 'name'}"
                 >
                     <list editable="bottom">
+                        <control>
+                            <create name="add_line_control" string="Add a line"/>
+                            <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                            <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                        </control>
                         <field name="sequence" widget="handle"/>
                         <field name="name"/>
                         <field name="display_type" column_invisible="1"/>
@@ -184,6 +194,11 @@ test("can add a subsection in a section", async () => {
                     options="{'display_type_field': 'display_type', 'section_content_field': 'name', 'note_content_field': 'name'}"
                 >
                     <list editable="bottom">
+                        <control>
+                            <create name="add_line_control" string="Add a line"/>
+                            <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                            <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                        </control>
                         <field name="sequence" widget="handle"/>
                         <field name="name"/>
                         <field name="display_type" column_invisible="1"/>
@@ -243,6 +258,11 @@ test("can't add a subsection in a subsection", async () => {
                     options="{'display_type_field': 'display_type', 'section_content_field': 'name', 'note_content_field': 'name'}"
                 >
                     <list editable="bottom">
+                        <control>
+                            <create name="add_line_control" string="Add a line"/>
+                            <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                            <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                        </control>
                         <field name="sequence" widget="handle"/>
                         <field name="name"/>
                         <field name="display_type" column_invisible="1"/>
@@ -274,6 +294,11 @@ test("can't add a subsection if value not in selection", async () => {
                     options="{'display_type_field': 'display_type', 'section_content_field': 'name', 'note_content_field': 'name'}"
                 >
                     <list editable="bottom">
+                        <control>
+                            <create name="add_line_control" string="Add a line"/>
+                            <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                            <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                        </control>
                         <field name="sequence" widget="handle"/>
                         <field name="name"/>
                         <field name="display_type" column_invisible="1"/>
@@ -299,6 +324,11 @@ test("can delete sections", async () => {
                     options="{'display_type_field': 'display_type', 'section_content_field': 'name', 'note_content_field': 'name'}"
                 >
                     <list editable="bottom">
+                        <control>
+                            <create name="add_line_control" string="Add a line"/>
+                            <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                            <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                        </control>
                         <field name="sequence" widget="handle"/>
                         <field name="name"/>
                         <field name="display_type" column_invisible="1"/>
@@ -340,6 +370,11 @@ test("can delete subsections", async () => {
                     options="{'display_type_field': 'display_type', 'section_content_field': 'name', 'note_content_field': 'name'}"
                 >
                     <list editable="bottom">
+                        <control>
+                            <create name="add_line_control" string="Add a line"/>
+                            <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                            <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                        </control>
                         <field name="sequence" widget="handle"/>
                         <field name="name"/>
                         <field name="display_type" column_invisible="1"/>
@@ -392,6 +427,11 @@ test("can duplicate sections", async () => {
                     options="{'display_type_field': 'display_type', 'section_content_field': 'name', 'note_content_field': 'name'}"
                 >
                     <list editable="bottom">
+                        <control>
+                            <create name="add_line_control" string="Add a line"/>
+                            <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                            <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                        </control>
                         <field name="sequence" widget="handle"/>
                         <field name="name"/>
                         <field name="display_type" column_invisible="1"/>
@@ -452,6 +492,11 @@ test("can duplicate subsections", async () => {
                     options="{'display_type_field': 'display_type', 'section_content_field': 'name', 'note_content_field': 'name'}"
                 >
                     <list editable="bottom">
+                        <control>
+                            <create name="add_line_control" string="Add a line"/>
+                            <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                            <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                        </control>
                         <field name="sequence" widget="handle"/>
                         <field name="name"/>
                         <field name="display_type" column_invisible="1"/>
@@ -530,6 +575,11 @@ test("can resequence records inside sections", async () => {
                     options="{'display_type_field': 'display_type', 'section_content_field': 'name', 'note_content_field': 'name'}"
                 >
                     <list editable="bottom">
+                        <control>
+                            <create name="add_line_control" string="Add a line"/>
+                            <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                            <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                        </control>
                         <field name="sequence" widget="handle"/>
                         <field name="name"/>
                         <field name="display_type" column_invisible="1"/>
@@ -619,6 +669,11 @@ test("resequence can be discarded", async () => {
                     options="{'display_type_field': 'display_type', 'section_content_field': 'name', 'note_content_field': 'name'}"
                 >
                     <list editable="bottom">
+                        <control>
+                            <create name="add_line_control" string="Add a line"/>
+                            <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                            <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                        </control>
                         <field name="sequence" widget="handle"/>
                         <field name="name"/>
                         <field name="display_type" column_invisible="1"/>
@@ -690,6 +745,11 @@ test("can resequence sections", async () => {
                     options="{'display_type_field': 'display_type', 'section_content_field': 'name', 'note_content_field': 'name'}"
                 >
                     <list editable="bottom">
+                        <control>
+                            <create name="add_line_control" string="Add a line"/>
+                            <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                            <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                        </control>
                         <field name="sequence" widget="handle"/>
                         <field name="name"/>
                         <field name="display_type" column_invisible="1"/>
@@ -726,6 +786,11 @@ test("add note", async () => {
                     options="{'display_type_field': 'display_type', 'section_content_field': 'name', 'note_content_field': 'name'}"
                 >
                     <list editable="bottom">
+                        <control>
+                            <create name="add_line_control" string="Add a line"/>
+                            <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                            <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                        </control>
                         <field name="sequence" widget="handle"/>
                         <field name="name"/>
                         <field name="display_type" column_invisible="1"/>

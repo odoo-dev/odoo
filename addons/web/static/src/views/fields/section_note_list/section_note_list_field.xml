@@ -88,7 +88,7 @@
                 <td/>
             </t>
             <td class="o_list_section_options w-print-0 p-print-0 text-center">
-                <Dropdown position="'bottom-end'">
+                <Dropdown position="'bottom-end'" t-if="!props.readonly">
                     <button class="btn">
                         <i class="fa fa-cog"/>
                     </button>
@@ -104,9 +104,11 @@
                         <DropdownItem onSelected="() => this.duplicateSection(hierarchyItem)">
                             <i class="me-1 fa fa-fw fa-clone"/><span>Duplicate</span>
                         </DropdownItem>
-                        <DropdownItem class="'text-danger'" onSelected="() => this.deleteSection(hierarchyItem)">
-                            <i class="me-1 fa fa-fw fa-trash"/><span>Delete</span>
-                        </DropdownItem>
+                        <t t-if="this.displayDeleteIcon(record)">
+                            <DropdownItem class="'text-danger'" onSelected="() => this.deleteSection(hierarchyItem)">
+                                <i class="me-1 fa fa-fw fa-trash"/><span>Delete</span>
+                            </DropdownItem>
+                        </t>
                     </t>
                 </Dropdown>
             </td>

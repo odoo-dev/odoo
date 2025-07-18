@@ -1,4 +1,4 @@
-import { _t } from "@web/core/l10n/translation";
+import { onWillRender } from "@odoo/owl";
 import { x2ManyCommands } from "@web/core/orm_service";
 import { registry } from "@web/core/registry";
 import { mergeClasses } from "@web/core/utils/classname";
@@ -39,8 +39,11 @@ class HierarchyItem {
     }
 
     get index() {
-        const prop = this.isSection ? "childSections" : "childItems";
-        return this.parent[prop].indexOf(this) + 1;
+        if (this.isSection) {
+            return this.parent.childSections.indexOf(this) + 1;
+        } else {
+            return this.parent.childItems.indexOf(this) + 1;
+        }
     }
 
     get isLastChildItem() {
@@ -92,8 +95,11 @@ class HierarchyItem {
     }
 
     addChild(item) {
-        const prop = item.isSection ? "childSections" : "childItems";
-        this[prop].push(item);
+        if (item.isSection) {
+            this.childSections.push(item);
+        } else {
+            this.childItems.push(item);
+        }
     }
 }
 
@@ -109,20 +115,10 @@ class SectionListRenderer extends ListRenderer {
 
     setup() {
         super.setup();
-        this.controls = [
-            ...this.controls,
-            {
-                type: "create",
-                string: _t("Add section"),
-                context: this.makeSectionCreationContext(false),
-            },
-            {
-                type: "create",
-                string: _t("Add note"),
-                context: this.makeNoteCreationContext(),
-            },
-        ];
         this.itemMap = {};
+        onWillRender(() => {
+            this.itemMap = this.buildHierarchy(this.props.list);
+        });
     }
 
     /**
@@ -131,22 +127,14 @@ class SectionListRenderer extends ListRenderer {
      */
     async addRowInSection(item, isSubSection) {
         await this.props.list.leaveEditMode();
-        await this.props.list.model.mutex.exec(async () => {
-            const moveAfterRecord = (
-                isSubSection
-                    ? item.records
-                    : [item.record, ...item.childItems.map((it) => it.record)]
-            ).at(-1);
-            const context = isSubSection ? this.makeSectionCreationContext(true) : {};
-            const newRecord = await this.props.list._createNewRecordDatapoint({
-                context,
-                manuallyAdded: true,
-                mode: "edit",
-            });
-            await this.props.list._addRecord(newRecord, {});
-            await this.props.list._resequence(newRecord.id, moveAfterRecord.id);
-            await this.props.list._onUpdate();
-        });
+        const targetRecord = (
+            isSubSection
+                ? item.records
+                : [item.record, ...item.childItems.map((it) => it.record)]
+        ).at(-1);
+        const index = this.props.list.records.indexOf(targetRecord);
+        const context = isSubSection ? this.makeSectionCreationContext(true) : {};
+        await this.props.list.addNewRecordAtIndex(index, { context });
     }
 
     buildHierarchy(list) {
@@ -170,8 +158,7 @@ class SectionListRenderer extends ListRenderer {
                 parent = item;
             }
         }
-
-        return { hierarchy, itemMap };
+        return itemMap;
     }
 
     /**
@@ -194,14 +181,11 @@ class SectionListRenderer extends ListRenderer {
             }
         }
         if (this.activeActions.onDelete) {
-            const method = this.props.isM2M ? "unlink" : "delete";
+            const method = this.activeActions.unlink ? "unlink" : "delete";
             const commands = item.records.map((r) =>
                 x2ManyCommands[method](r.resId || r._virtualId)
             );
-            await this.props.list.model.mutex.exec(async () => {
-                await this.props.list._applyCommands(commands);
-                await this.props.list._onUpdate();
-            });
+            await this.props.list.applyCommands(commands);
         }
     }
 
@@ -209,23 +193,22 @@ class SectionListRenderer extends ListRenderer {
      * @param {HierarchyItem} item
      */
     async duplicateSection(item) {
-        await this.props.list.model.mutex.exec(async () => {
-            const promises = [];
-            for (const record of item.records) {
-                const data = { ...record.data };
-                if (this.props.list.handleField) {
-                    data[this.props.list.handleField] = this.props.list.records.length + 1;
-                }
-                const copiedRecord = this.props.list._createRecordDatapoint(data, {
-                    virtualId: getId("virtual"),
-                    manuallyAdded: true,
-                });
-                const addingPromise = this.props.list._addRecord(copiedRecord);
-                promises.push(addingPromise);
+        if (this.editedRecord && this.editedRecord !== item) {
+            const left = await this.props.list.leaveEditMode();
+            if (!left) {
+                return;
             }
-            await Promise.all(promises);
-            await this.props.list._onUpdate();
-        });
+        }
+
+        const commands = [];
+        for (const record of item.records) {
+            const data = record.copyRawData();
+            if (this.props.list.handleField) {
+                record.data[this.props.list.handleField] = this.props.list.records.length + 1;
+            }
+            commands.push(x2ManyCommands.create(getId("virtual"), data));
+        }
+        await this.props.list.applyCommands(commands);
     }
 
     editNextRecord(record, group) {
@@ -239,13 +222,6 @@ class SectionListRenderer extends ListRenderer {
 
     getHierarchyItem(id) {
         return this.itemMap[id];
-    }
-
-    getListRecords(list) {
-        const { hierarchy, itemMap } = this.buildHierarchy(list);
-        this.itemMap = itemMap;
-        this.hierarchy = hierarchy;
-        return hierarchy.records;
     }
 
     getNoteCellClass(column, record) {
@@ -357,31 +333,6 @@ export const sectionNoteListField = {
             noteContentField: staticInfo.options.note_content_field,
             sectionContentField: staticInfo.options.section_content_field,
         };
-    },
-    relatedFields: (info) => {
-        const relatedFields = [];
-        if (info.options.displayTypeField) {
-            relatedFields.push({
-                name: info.options.displayTypeField,
-                type: "selection",
-                readonly: false,
-            });
-        }
-        if (info.options.note_content_field) {
-            relatedFields.push({
-                name: info.options.note_content_field,
-                type: "text",
-                readonly: false,
-            });
-        }
-        if (info.options.section_content_field) {
-            relatedFields.push({
-                name: info.options.section_content_field,
-                type: "char",
-                readonly: false,
-            });
-        }
-        return relatedFields;
     },
 };
 registry.category("fields").add("section_note_list", sectionNoteListField);
