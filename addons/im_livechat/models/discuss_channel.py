@@ -52,6 +52,7 @@ class DiscussChannel(models.Model):
         compute="_compute_livechat_agent_partner_ids",
         store=True,
     )
+    livechat_main_agent_partner_id = fields.Many2one("res.partner", compute="_compute_livechat_main_agent_partner_id")
     livechat_bot_partner_ids = fields.Many2many(
         "res.partner",
         string="Bots",
@@ -301,6 +302,14 @@ class DiscussChannel(models.Model):
         for channel in self:
             channel.livechat_week_day = str(channel.create_date.weekday())
 
+    def _compute_livechat_main_agent_partner_id(self):
+        for channel in self:
+            channel.livechat_main_agent_partner_id = (
+                channel.livechat_agent_history_ids.filtered(lambda h: h.member_id)
+                .sorted("create_date")[-1:]
+                .partner_id
+            )
+
     def _sync_field_names(self):
         field_names = super()._sync_field_names()
         field_names[None].append(
@@ -332,6 +341,12 @@ class DiscussChannel(models.Model):
                 self.env["discuss.channel"]._store_livechat_operator_id_fields(),
                 sudo=True,
             ),
+            Store.Many(
+                "livechat_agent_partner_ids",
+                self.env["discuss.channel"]._store_livechat_operator_id_fields(),
+                sudo=True,
+            ),
+            Store.One("livechat_main_agent_partner_id", self.env["discuss.channel"]._store_livechat_operator_id_fields()),
         ]
         if target.is_internal(self.env):
             fields.append(Store.One("livechat_channel_id", ["name"], sudo=True))

@@ -9,6 +9,7 @@ patch(Thread.prototype, {
         super.setup();
         this.livechat_end_dt = fields.Datetime();
         this.livechat_operator_id = fields.One("res.partner");
+        this.livechat_agent_partner_ids = fields.Many("res.partner");
         this.livechatVisitorMember = fields.One("discuss.channel.member", {
             compute() {
                 if (this.channel_type !== "livechat") {
@@ -19,8 +20,8 @@ patch(Thread.prototype, {
                 const orderedChannelMembers = [...this.channel_member_ids].sort(
                     (a, b) => a.id - b.id
                 );
-                const isFirstMemberOperator = orderedChannelMembers[0]?.persona.eq(
-                    this.livechat_operator_id
+                const isFirstMemberOperator = orderedChannelMembers[0]?.persona.in(
+                    this.livechat_agent_partner_ids
                 );
                 const visitor = isFirstMemberOperator
                     ? orderedChannelMembers[1]
