@@ -76,8 +76,6 @@ Help your customers with this chat, and analyse their feedback.
         'web.assets_frontend': [
             'web/static/src/views/fields/file_handler.*',
             'web/static/src/views/fields/formatters.js',
-            ('include', 'im_livechat.assets_embed_core'),
-            'im_livechat/static/src/embed/frontend/**/*',
         ],
         'web.assets_backend': [
             'im_livechat/static/src/js/colors_reset_button/*',
@@ -87,9 +85,6 @@ Help your customers with this chat, and analyse their feedback.
             ('remove', 'im_livechat/static/src/views/lazy/**/*'),
             'im_livechat/static/src/scss/im_livechat_history.scss',
             'im_livechat/static/src/scss/im_livechat_form.scss',
-            'im_livechat/static/src/core/common/**/*',
-            'im_livechat/static/src/core/public_web/**/*',
-            'im_livechat/static/src/core/web/**/*',
         ],
         'web.assets_backend_lazy': [
             "im_livechat/static/src/views/lazy/**/*",
@@ -105,18 +100,23 @@ Help your customers with this chat, and analyse their feedback.
         'web.assets_tests': [
             'im_livechat/static/tests/tours/**/*',
         ],
-        'im_livechat.assets_embed_core': [
-            ('remove', 'web/static/src/core/browser/title_service.js'),
-            'mail/static/src/model/**/*',
-            'mail/static/src/core/common/**/*',
-            'mail/static/src/discuss/core/common/*',
-            'mail/static/src/discuss/call/common/**',
-            'mail/static/src/discuss/typing/**/*',
-            'mail/static/src/utils/common/**/*',
-            ('remove', 'mail/static/src/**/*.dark.scss'),
-            "rating/static/src/core/common/**/*",
-            'im_livechat/static/src/core/common/**/*',
-            'im_livechat/static/src/embed/common/**/*',
+        "mail.assets_common": [
+            "im_livechat/static/src/core/common/**/*",
+        ],
+        "mail.assets_frontend": [
+            ('include', 'im_livechat.assets_embed_common'),
+            'im_livechat/static/src/embed/frontend/**/*',
+        ],
+        "mail.assets_public_web": [
+            "im_livechat/static/src/core/public_web/**/*",
+        ],
+        "mail.assets_web": [
+            "im_livechat/static/src/core/web/**/*",
+        ],
+        'im_livechat.assets_embed_common': [
+            ("remove", "web/static/src/core/browser/title_service.js"),
+            ("include", "mail.assets_common"),
+            "im_livechat/static/src/embed/common/**/*",
         ],
         'im_livechat.assets_embed_external': [
             ('include', 'web._assets_helpers'),
@@ -143,7 +143,7 @@ Help your customers with this chat, and analyse their feedback.
             ('remove', 'bus/static/src/outdated_page_watcher_service.js'),
             ('remove', 'bus/static/src/services/assets_watchdog_service.js'),
             ('remove', 'bus/static/src/simple_notification_service.js'),
-            ('include', 'im_livechat.assets_embed_core'),
+            ("include", "im_livechat.assets_embed_common"),
             'im_livechat/static/src/embed/external/**/*',
         ],
         'im_livechat.assets_embed_cors': [

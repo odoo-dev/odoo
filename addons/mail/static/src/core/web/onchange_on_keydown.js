@@ -55,21 +55,19 @@ TextField.props = {
 };
 
 const charExtractProps = charField.extractProps;
-charField.extractProps = (fieldInfo) => {
-    return Object.assign(charExtractProps(fieldInfo), {
+charField.extractProps = (fieldInfo) =>
+    Object.assign(charExtractProps(fieldInfo), {
         onchangeOnKeydown: exprToBoolean(fieldInfo.attrs.onchange_on_keydown),
         keydownDebounceDelay: fieldInfo.attrs.keydown_debounce_delay
             ? Number(fieldInfo.attrs.keydown_debounce_delay)
             : 2000,
     });
-};
 
 const textExtractProps = textField.extractProps;
-textField.extractProps = (fieldInfo) => {
-    return Object.assign(textExtractProps(fieldInfo), {
+textField.extractProps = (fieldInfo) =>
+    Object.assign(textExtractProps(fieldInfo), {
         onchangeOnKeydown: exprToBoolean(fieldInfo.attrs.onchange_on_keydown),
         keydownDebounceDelay: fieldInfo.attrs.keydown_debounce_delay
             ? Number(fieldInfo.attrs.keydown_debounce_delay)
             : 2000,
     });
-};

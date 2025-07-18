@@ -3,7 +3,7 @@ import { CharField, charField } from "@web/views/fields/char/char_field";
 
 // Ensure that in Hoot tests, this module is loaded after `@mail/js/onchange_on_keydown`
 // (needed because that module patches `charField`).
-import "@mail/js/onchange_on_keydown";
+import "@mail/core/web/onchange_on_keydown";
 
 export class CharWithPlaceholderField extends CharField {
     static template = "account.CharWithPlaceholderField";

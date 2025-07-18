@@ -1,5 +1,7 @@
 import { threadActionsRegistry } from "@mail/core/common/thread_actions";
 import { patch } from "@web/core/utils/patch";
+import "@mail/discuss/core/common/thread_actions";
+import "@mail/discuss/call/common/thread_actions";
 
 patch(threadActionsRegistry.get("invite-people"), {
     condition(component) {
