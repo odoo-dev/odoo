@@ -1,0 +1,6 @@
+<templates xml:space="preserve">
+    <t t-name="html_editor.WebsiteForumWysiwyg">
+        <ResizableWysiwyg t-props="wysiwygProps" />
+        <Resizer t-props="resizerProps" />
+    </t>
+</templates>
