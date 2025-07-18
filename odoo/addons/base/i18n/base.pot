@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.4+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-03 12:30+0000\n"
-"PO-Revision-Date: 2025-07-03 12:30+0000\n"
+"POT-Creation-Date: 2025-07-17 15:52+0000\n"
+"PO-Revision-Date: 2025-07-17 15:52+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -8234,6 +8234,13 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_my_edi_pos
+msgid ""
+"\n"
+"This modules allows the user to send consolidated invoices to the MyInvois system when using the POS app.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_my_edi
 msgid ""
 "\n"
@@ -11444,6 +11451,11 @@ msgid "Allows the usage of quality checks within the barcode views"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_tr_nilvera_edispatch
+msgid "Allows the users to create the UBL 1.2.1 e-Dispatch file"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_web_map
 msgid "Allows the viewing of records on a map"
 msgstr ""
@@ -11756,6 +11768,11 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_partner__tz__america/costa_rica
 msgid "America/Costa_Rica"
+msgstr ""
+
+#. module: base
+#: model:ir.model.fields.selection,name:base.selection__res_partner__tz__america/coyhaique
+msgid "America/Coyhaique"
 msgstr ""
 
 #. module: base
@@ -15191,7 +15208,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
 msgid ""
 "CSV format: you may edit it directly with your favorite spreadsheet software,\n"
-"                                the rightmost column (value) contains the translations"
+"                                    the rightmost column (value) contains the translations"
 msgstr ""
 
 #. module: base
@@ -16519,6 +16536,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/base/models/ir_mail_server.py:0
 msgid "Connection Test Successful!"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,summary:base.module_l10n_my_edi_pos
+msgid "Consolidated E-invoicing using MyInvois"
 msgstr ""
 
 #. module: base
@@ -21411,6 +21433,13 @@ msgid "Function"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_in_reports_gstr_document_summary
+msgid ""
+"Functionality to manage GSTR Document Summary (Table 13) for India GST "
+"returns."
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_theme_loftspace
 msgid "Furniture, Toys, Games, Kids, Boys, Girls, Stores"
 msgstr ""
@@ -21509,6 +21538,11 @@ msgstr ""
 #. module: base
 #: model:res.country,vat_label:base.in
 msgid "GSTIN"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,summary:base.module_l10n_in_reports_gstr_document_summary
+msgid "GSTR Document Summary Management"
 msgstr ""
 
 #. module: base
@@ -23331,6 +23365,11 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in_ewaybill_irn
 msgid "Indian - E-waybill thru IRN"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_in_reports_gstr_document_summary
+msgid "Indian - GSTR Document Summary"
 msgstr ""
 
 #. module: base
@@ -25818,6 +25857,11 @@ msgid "Malaysia - E-invoicing"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_my_edi_pos
+msgid "Malaysia - E-invoicing (POS)"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_my_hr_payroll
 msgid "Malaysia - Payroll"
 msgstr ""
@@ -26732,6 +26776,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_rule_search
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_search
 #: model_terms:ir.ui.view,arch_db:base.view_view_search
+#: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
 msgid "Model"
 msgstr ""
 
@@ -26968,6 +27013,7 @@ msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_category__module_ids
+#: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
 msgid "Modules"
 msgstr ""
 
@@ -27509,6 +27555,11 @@ msgid "No default view of type '%s' could be found!"
 msgstr ""
 
 #. module: base
+#: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
+msgid "No file could be exported."
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_sequence__implementation__no_gap
 msgid "No gap"
 msgstr ""
@@ -27558,12 +27609,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/base/models/ir_actions.py:0
 msgid "No spaces allowed in view_mode: “%s”"
-msgstr ""
-
-#. module: base
-#. odoo-python
-#: code:addons/translate.py:0
-msgid "No translatable terms were found in %s."
 msgstr ""
 
 #. module: base
@@ -36528,7 +36573,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
 msgid ""
 "This file was generated using the universal <strong>Unicode/UTF-8</strong> file encoding, please be sure to view and edit\n"
-"                           using the same encoding."
+"                               using the same encoding."
 msgstr ""
 
 #. module: base
@@ -37553,6 +37598,11 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_tr_hr_payroll_account
 msgid "Türkiye - Payroll with Accounting"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_tr_nilvera_edispatch
+msgid "Türkiye - e-Irsaliye (e-Dispatch)"
 msgstr ""
 
 #. module: base
@@ -40081,7 +40131,17 @@ msgstr ""
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
+msgid "do not contain translatable terms.<br/>"
+msgstr ""
+
+#. module: base
+#: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
 msgid "documentation"
+msgstr ""
+
+#. module: base
+#: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
+msgid "does not contain translatable terms.<br/>"
 msgstr ""
 
 #. module: base
