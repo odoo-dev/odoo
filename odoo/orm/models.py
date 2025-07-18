@@ -5990,10 +5990,10 @@ class BaseModel(metaclass=MetaModel):
         # convert monetary fields after other columns for correct value rounding
         for field, value in sorted(field_values, key=lambda item: item[0].write_sequence):
             value = field.convert_to_cache(value, self, validate)
-            field._update_cache(self, value)
-
-            # set inverse fields on new records in the comodel
             if field.relational:
+                field._update_inverse(field.convert_to_record(value, self), self)
+
+                # set inverse fields on new records in the comodel
                 inv_recs = self[field.name].filtered(lambda r: not r.id)
                 if not inv_recs:
                     continue
@@ -6001,6 +6001,8 @@ class BaseModel(metaclass=MetaModel):
                 # x2many fields should add self, while many2one fields should replace with self
                 for invf in self.pool.field_inverses[field]:
                     invf._update_inverse(inv_recs, self)
+            else:
+                field._update_cache(self, value)
 
     def _convert_to_record(self, values):
         """ Convert the ``values`` dictionary from the cache format to the

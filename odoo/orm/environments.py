@@ -446,7 +446,12 @@ class Environment(Mapping[str, "BaseModel"]):
             if key == 'company':
                 return self.company.id
             elif key == 'uid':
-                return self.uid if field.compute_sudo else (self.uid, self.su)
+                if (
+                    field.compute_sudo or
+                    (field.type in ('one2many', 'many2many') and field.store)
+                ):
+                    return self.uid
+                return (self.uid, self.su)
             elif key == 'lang':
                 return get_context('lang') or None
             elif key == 'active_test':

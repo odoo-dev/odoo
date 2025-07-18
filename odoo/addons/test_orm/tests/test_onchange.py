@@ -191,6 +191,7 @@ class TestOnchange(SavepointCaseWithUserDemo):
             ],
         }
         self.env.invalidate_all()
+        print("START")
         result = self.Discussion.onchange(values, ['name'], fields_spec)
         self.assertIn('messages', result['value'])
         self.assertEqual(result['value']['messages'], [

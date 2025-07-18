@@ -2603,10 +2603,6 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         # check that the demo user sees the same messages
         self.assertEqual(demo_discussion.messages, discussion.messages)
 
-        # See YTI FIXME
-        self.env.flush_all()
-        self.env.invalidate_all()
-
         # add a message as user demo
         messages = demo_discussion.messages
         message = messages.create({'discussion': discussion.id})
@@ -2624,8 +2620,6 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         move1 = self.env['test_orm.move'].create({})
         move2 = self.env['test_orm.move'].create({})
         line = self.env['test_orm.move_line'].create({'move_id': move1.id})
-        self.env.flush_all()
-        self.env.invalidate_all()
 
         line.with_context(prefetch_fields=False).move_id
 

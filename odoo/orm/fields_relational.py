@@ -392,7 +392,7 @@ class Many2one(_Relational):
             return
 
         # remove records from the cache of one2many fields of old corecords
-        self._remove_inverses(records, cache_value)
+        self._remove_inverses(records)
 
         # update the cache of self
         self._update_cache(records, cache_value, dirty=True)
@@ -400,7 +400,7 @@ class Many2one(_Relational):
         # update the cache of one2many fields of new corecord
         self._update_inverses(records, cache_value)
 
-    def _remove_inverses(self, records: BaseModel, value):
+    def _remove_inverses(self, records: BaseModel):
         """ Remove `records` from the cached values of the inverse fields (o2m) of `self`. """
         inverse_fields = records.pool.field_inverses[self]
         if not inverse_fields:
@@ -409,36 +409,67 @@ class Many2one(_Relational):
         record_ids = set(records._ids)
         # align(id) returns a NewId if records are new, a real id otherwise
         align = (lambda id_: id_) if all(record_ids) else (lambda id_: id_ and NewId(id_))
-        field_cache = self._get_cache(records.env)
-        corecords = records.env[self.comodel_name].browse(
+        env = records.env
+        field_cache = self._get_cache(env)
+        corecords = env[self.comodel_name].browse(
             align(coid) for record_id in records._ids
             if (coid := field_cache.get(record_id)) is not None
         )
 
         for invf in inverse_fields:
-            inv_cache = invf._get_cache(corecords.env)
-            for corecord in corecords:
-                ids0 = inv_cache.get(corecord.id)
-                if ids0 is not None:
-                    ids1 = tuple(id_ for id_ in ids0 if id_ not in record_ids)
-                    invf._update_cache(corecord, ids1)
+            cache = env.transaction.field_data.get(invf)
+            if not cache:
+                return
+
+            caches = cache.values() if invf in env._field_depends_context else (cache,)
+
+            for inv_cache in caches:
+                for corecord in corecords:
+                    corecord_id = corecord.id
+                    ids0 = inv_cache.get(corecord_id)
+                    if ids0 is not None:
+                        inv_cache[corecord_id] = tuple(id_ for id_ in ids0 if id_ not in record_ids)
 
     def _update_inverses(self, records: BaseModel, value):
         """ Add `records` to the cached values of the inverse fields (o2m) of `self`. """
         if value is None:
             return
+        inverse_fields = records.pool.field_inverses[self]
+        if not inverse_fields:
+            return
         corecord = self.convert_to_record(value, records)
-        for invf in records.pool.field_inverses[self]:
+        corecord_id = corecord.id
+        env = records.env
+
+        for invf in inverse_fields:
+
             valid_records = records.filtered_domain(invf.get_comodel_domain(corecord))
             if not valid_records:
                 continue
-            ids0 = invf._get_cache(corecord.env).get(corecord.id)
-            # if the value for the corecord is not in cache, but this is a new
-            # record, assign it anyway, as you won't be able to fetch it from
-            # database (see `test_sale_order`)
-            if ids0 is not None or not corecord.id:
-                ids1 = tuple(unique((ids0 or ()) + valid_records._ids))
-                invf._update_cache(corecord, ids1)
+
+            if invf not in env._field_depends_context:
+                current_cache = invf._get_cache(env)
+                ids0 = current_cache.get(corecord_id)
+                # if the value for the corecord is not in cache, but this is a new
+                # record, assign it anyway, as you won't be able to fetch it from
+                # database (see `test_sale_order`)
+                if ids0 is not None or not corecord_id:
+                    current_cache[corecord_id] = tuple(unique((ids0 or ()) + valid_records._ids))
+            else:
+
+                caches = env.transaction.field_data.get(invf)
+                if not caches:
+                    return
+
+                # context_dependencies = invf._get_extra_depends_context(env)
+                for key_cache, current_cache in caches.items():
+                    ids0 = current_cache.get(corecord_id)
+                    # if the value for the corecord is not in cache, but this is a new
+                    # record, assign it anyway, as you won't be able to fetch it from
+                    # database (see `test_sale_order`)
+                    # TODO: that should depends on the context with filtered_domain
+                    if ids0 is not None or not corecord_id:
+                        current_cache[corecord_id] = tuple(unique((ids0 or ()) + valid_records._ids))
 
     def to_sql(self, model: BaseModel, alias: str, flush: bool = True) -> SQL:
         sql_field = super().to_sql(model, alias, flush)
@@ -536,21 +567,17 @@ class _RelationalMulti(_Relational):
 
     def _update_inverse(self, records, value):
         new_id = value.id
+        # TODO: not correct
         assert not new_id, "Field._update_inverse can only be called with a new id"
-        field_cache = self._get_cache(records.env)
+        patches = records.env.transaction.field_data_patches[self]
         for record_id in records._ids:
-            assert not record_id, "Field._update_inverse can only be called with new records"
-            cache_value = field_cache.get(record_id, SENTINEL)
-            if cache_value is SENTINEL:
-                records.env.transaction.field_data_patches[self][record_id].append(new_id)
-            else:
-                field_cache[record_id] = tuple(unique(cache_value + (new_id,)))
+            patches[record_id].append(new_id)
 
     def _update_cache(self, records, cache_value, dirty=False):
         field_patches = records.env.transaction.field_data_patches.get(self)
         if field_patches and records:
             for record in records:
-                ids = field_patches.pop(record.id, ())
+                ids = field_patches.get(record.id, ())
                 if ids:
                     value = tuple(unique(itertools.chain(cache_value, ids)))
                 else:
@@ -688,6 +715,15 @@ class _RelationalMulti(_Relational):
     def convert_to_display_name(self, value, record):
         raise NotImplementedError()
 
+    def _get_extra_depends_context(self, env):
+        comodel = env.registry[self.comodel_name]
+        depends_context = ('uid',)
+        if 'company_ids' in comodel._fields or 'company_id' in comodel._fields:
+            depends_context += ('allowed_company_ids',)
+        if comodel._active_name and self.context.get('active_test', True):
+            depends_context += ('active_test',)
+        return depends_context
+
     def get_depends(self, model):
         depends, depends_context = super().get_depends(model)
         if not self.compute:
@@ -701,6 +737,10 @@ class _RelationalMulti(_Relational):
                 self.name + '.' + condition.field_expr
                 for condition in domain.iter_conditions()
             )))
+
+        if self.store:
+            depends_context += self._get_extra_depends_context(model.env)
+
         return depends, depends_context
 
     def create(self, record_values):
@@ -913,6 +953,8 @@ class One2many(_RelationalMulti):
         return super().__get__(records, owner)
 
     def read(self, records):
+        # TODO: can we check other subcache to get the info faster and avoid making a search if needed?
+
         # retrieve the lines in the comodel
         context = {'active_test': False}
         context.update(self.context)
