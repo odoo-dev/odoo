@@ -4203,4 +4203,27 @@
             </t>
         </xpath>
     </template>
+
+    <template id="footer_custom_with_shop_categories" inherit_id="website.footer_custom_placeholder" name="Default footer with shop categories" active="True">
+            <xpath expr="." position="inside">
+                <div class="col-lg-2 pt24 pb24">
+                    <h5 class="mb-3">Shop</h5>
+                    <div class="s_categories_inline o_not_editable" data-layout="list" data-alignment="left" data-label="inside" data-format="grid" data-shadow="true" style="--o-we-sale-img-size: 100px;" contenteditable="false" data-snippet="s_categories_inline" data-name="Shop Categories">
+                        <div class="s_categories_inline_wrap d-contents">
+                            <div class="dynamic_snippet_template o_not_editable rounded-5 gap-3" style="--columns: 3;" contenteditable="false">
+                                <p class="o_placeholder_wrap mb-0">
+                                    <span class="placeholder placeholder-sm col-7 bg-primary"/>
+                                    <span class="placeholder placeholder-sm col-8 bg-primary"/>
+                                    <span class="placeholder placeholder-sm col-6 bg-primary"/>
+                                    <span class="placeholder placeholder-sm col-7 bg-primary"/>
+                                    <span class="placeholder placeholder-sm col-5 bg-primary"/>
+                                    <span class="placeholder placeholder-sm col-8 bg-primary"/>
+                                    <span class="placeholder placeholder-sm col-6 bg-primary"/>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+    </template>
 </odoo>

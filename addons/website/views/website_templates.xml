@@ -1735,12 +1735,14 @@
 </template>
 
 <!-- Footer templates -->
+<template id="footer_custom_placeholder" name="placeholder test"/>
 <template id="footer_custom" inherit_id="website.layout" name="Default" active="True">
     <xpath expr="//div[@id='footer']" position="replace">
         <div id="footer" class="oe_structure oe_structure_solo" t-ignore="true" t-if="not no_footer">
             <section class="s_text_block pt40 pb16" data-snippet="s_text_block" data-name="Text">
                 <div class="container">
                     <div class="row">
+                        <t t-call="website.footer_custom_placeholder"/>
                         <div class="col-lg-2 pt24 pb24">
                             <h5 class="mb-3">Useful Links</h5>
                             <ul class="list-unstyled">
@@ -1756,7 +1758,7 @@
                                 <li><a href="/contactus">Contact us</a></li>
                             </ul>
                         </div>
-                        <div class="col-lg-5 pt24 pb24">
+                        <div class="col pt24 pb24">
                             <h5 class="mb-3">About us</h5>
                             <p>We are a team of passionate people whose goal is to improve everyone's life through disruptive products. We build great products to solve your business problems.
                             <br/><br/>Our products are designed for small to medium size companies willing to optimize their performance.</p>
@@ -2323,6 +2325,7 @@
 
 <template id="footer_language_selector_inline" name="Footer Language Selector Inline" inherit_id="portal.footer_language_selector" active="True">
     <xpath expr="//t[@id='language_selector_call']" position="replace">
+    <div class="col">oui</div>
         <t id="language_selector_call" t-call="website.language_selector_inline"/>
     </xpath>
 </template>
