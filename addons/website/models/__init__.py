@@ -9,6 +9,7 @@ from . import ir_binary
 from . import ir_http
 from . import ir_model
 from . import ir_model_data
+from . import ir_model_fields
 from . import ir_module_module
 from . import ir_qweb
 from . import ir_qweb_fields
