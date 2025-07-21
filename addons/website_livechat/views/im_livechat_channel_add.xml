@@ -8,6 +8,14 @@
         <form js_class="website_new_content_form">
             <group>
                 <field name="name" string="Channel Name"/>
+                <field name="rule_ids">
+                    <list>
+                        <field name="regex_url"/>
+                        <field name="action"/>
+                        <field name="auto_popup_timer"/>
+                        <field name="chatbot_enabled_condition"/>
+                    </list>
+                </field>
             </group>
         </form>
     </field>
