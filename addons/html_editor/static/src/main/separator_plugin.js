@@ -32,6 +32,7 @@ export class SeparatorPlugin extends Plugin {
         }),
         force_not_editable_selector: "hr",
         contenteditable_to_remove_selector: "hr[contenteditable]",
+        markdown_shortcuts: [{ pattern: /^---\s?$/, commandId: "insertSeparator" }],
         /** Handlers */
         selectionchange_handlers: this.handleSelectionInHr.bind(this),
         deselect_custom_selected_nodes_handlers: this.deselectHR.bind(this),
