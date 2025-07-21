@@ -1,0 +1,33 @@
+.s_marquee_text .marquee-text {
+    white-space: nowrap;
+    overflow: hidden;
+    display: block;
+    width: 100%;
+    animation: scroll-left 10s linear infinite;
+
+    &[data-direction="right"] {
+        animation-name: scroll-right;
+    }
+
+    &[data-speed="slow"] {
+        animation-duration: 15s;
+    }
+
+    &[data-speed="fast"] {
+        animation-duration: 5s;
+    }
+
+    &[data-speed="normal"] {
+        animation-duration: 10s;
+    }
+}
+
+@keyframes scroll-left {
+    from { transform: translateX(100%); }
+    to { transform: translateX(-100%); }
+}
+
+@keyframes scroll-right {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+}

@@ -168,6 +168,9 @@
                     <t t-snippet="website.s_progress_bar" string="Progress Bar" t-thumbnail="/website/static/src/img/snippets_thumbs/s_progress_bar.svg">
                         <keywords>evolution, growth</keywords>
                     </t>
+                    <t t-snippet="website.s_marquee_text" string="Marquee Text" t-thumbnail="/website/static/src/img/snippets_thumbs/s_hr.svg">
+                        <keywords>marquee, scrolling text</keywords>    
+                    </t>
                     <t t-snippet="website.s_badge" string="Badge" t-thumbnail="/website/static/src/img/snippets_thumbs/s_badge.svg"/>
                     <t t-snippet="website.s_blockquote" string="Blockquote" t-thumbnail="/website/static/src/img/snippets_thumbs/s_blockquote.svg">
                         <keywords>cite</keywords>

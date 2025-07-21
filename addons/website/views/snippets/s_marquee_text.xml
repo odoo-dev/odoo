@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Marquee Snippet Template -->
+    <template id="s_marquee_text" name="Marquee Text Snippet">
+        <div class="s_marquee_text" data-snippet="s_marquee_text" data-name="Marquee Text">
+            <div class="marquee-text" data-direction="left" data-speed="normal">Scrolling Text Here</div>
+        </div>
+    </template>
+
+    <!-- Sidebar Options Template -->
+    <template id="s_marquee_text_options" inherit_id="website.snippet_options">
+        <xpath expr="." position="inside">
+            <div data-js="marquee" data-selector=".s_marquee_text">
+                <we-input string="Text" data-marquee-text="" />
+                <we-colorpicker string="Text Color" data-css-property="color"
+                    data-apply-to=".marquee-text" />
+                <we-colorpicker string="Background" data-css-property="background-color"
+                    data-apply-to=".marquee-text" />
+                <we-select string="Direction">
+                    <we-button data-marquee-direction="left">Left</we-button>
+                    <we-button data-marquee-direction="right">Right</we-button>
+                </we-select>
+                <we-select string="Speed">
+                    <we-button data-marquee-speed="slow">Slow</we-button>
+                    <we-button data-marquee-speed="normal">Normal</we-button>
+                    <we-button data-marquee-speed="fast">Fast</we-button>
+                </we-select>
+            </div>
+        </xpath>
+    </template>
+    <record id="website.s_marquee_text_000_scss" model="ir.asset">
+        <field name="name">Marquee Text Scss</field>
+        <field name="bundle">web.assets_frontend</field>
+        <field name="path">website/static/src/snippets/s_marquee_text/000.scss</field>
+    </record>
+    <record id="website.s_marquee_text_000_js" model="ir.asset">
+        <field name="name">Marquee Text JS</field>
+        <field name="bundle">web.assets_frontend</field>
+        <field name="path">website/static/src/snippets/s_marquee_text/000.js</field>
+    </record>
+
+</odoo>
