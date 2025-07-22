@@ -32,7 +32,6 @@ Dashboard / Reports for Warehouse Management includes:
         'views/stock_account_views.xml',
         'views/res_config_settings_views.xml',
         'views/report_invoice.xml',
-        'views/res_company_views.xml',
         'views/stock_quant_views.xml',
         'views/product_views.xml',
         'views/stock_location_views.xml',

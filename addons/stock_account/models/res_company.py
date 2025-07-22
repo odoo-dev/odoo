@@ -2,6 +2,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import Command, _, api, fields, models
 from odoo.fields import Domain
+from odoo.odoo.exceptions import UserError
 
 
 class ResCompany(models.Model):
@@ -51,11 +52,56 @@ class ResCompany(models.Model):
         required=True,
     )
 
+    def action_close_stock_valuation(self, auto_post=False, periodic_cogs=False):
+        self.ensure_one()
+        moves_vals = []
+        fiscal_year_date_from = self.compute_fiscalyear_dates(fields.Date.today())['date_from']
+        products = self.env['product.product'].with_company(self).search([('is_storable', '=', True)])
+
+        stock_valuation_account = self.account_stock_valuation_id
+        counter_balance_account = self.account_stock_variation_id
+        if self.anglo_saxon_accounting:
+            counter_balance_account = self.account_cogs_id
+
+        vals = self._get_stock_valuation_account_vals(products, stock_valuation_account, counter_balance_account)
+        if vals:
+            moves_vals.append(vals)
+
+        if self.anglo_saxon_accounting:
+            purchase_account = self.account_stock_variation_id
+            vals = self._get_periodic_cogs_vals(products, fiscal_year_date_from, purchase_account, counter_balance_account)
+            if vals:
+                moves_vals.append(vals)
+        else:
+            realtime_products = products.filtered(lambda p: p.valuation == 'real_time')
+            vals = self._get_periodic_expense_vals(realtime_products, fiscal_year_date_from, stock_valuation_account, self.account_stock_variation_id, self.expense_account_id)
+            if vals:
+                moves_vals.append(vals)
+
+        if not moves_vals:
+            # No account moves to create, so nothing to display.
+            raise UserError(_("Nothing to close"))
+
+        account_moves = self.env['account.move'].create(moves_vals)
+
+        if auto_post:
+            account_moves.post()
+
+        action = {
+            'type': 'ir.actions.act_window',
+            'name': _("Journal Items"),
+            'res_model': 'account.move',
+            'domain': [('id', 'in', account_moves.ids)],
+            'views': [(False, 'list'), (False, 'form')],
+        }
+        if len(account_moves.ids) == 1:
+            action.update({
+                'res_id': account_moves[0].id,
+                'views': [(False, 'form')],
+            })
+        return action
+
     def stock_value(self, products=None, product_categories=None, at_date=None):
-        """ Returns the inventory value of the products. Base on quantity in inventory
-        and the value on available accounting documents.
-        The result is grouped by account (defined on the product).
-        """
         self.ensure_one()
         total_value_by_account: dict = {
             'value': 0.0,
@@ -123,25 +169,6 @@ class ResCompany(models.Model):
             }
         return res
 
-    def post_stock_valuation(self, periodic_cogs=False):
-        for company in self:
-            fiscal_year_date_from = company.compute_fiscalyear_dates(fields.Date.today())['date_from']
-
-            products = self.env['product.product'].with_company(company).search([('is_storable', '=', True)])
-
-            stock_valuation_account = company.account_stock_valuation_id
-            counter_balance_account = company.account_stock_variation_id
-            if company.anglo_saxon_accounting:
-                counter_balance_account = company.account_cogs_id
-
-            company._post_stock_valuation_account(products, stock_valuation_account, counter_balance_account)
-            if company.anglo_saxon_accounting:
-                purchase_account = company.account_stock_variation_id
-                company._post_periodic_cogs(products, fiscal_year_date_from, purchase_account, counter_balance_account)
-            else:
-                realtime_products = products.filtered(lambda p: p.valuation == 'real_time')
-                company._post_periodic_expense(realtime_products, fiscal_year_date_from, stock_valuation_account, company.account_stock_variation_id, company.expense_account_id)
-
     @api.model
     def _cron_post_stock_valuation(self):
         # get the last day of the current month
@@ -149,16 +176,11 @@ class ResCompany(models.Model):
         if fields.Date.today() == fields.Date.today() + relativedelta(day=31):
             domain = domain & Domain([('inventory_period', '=', 'monthly')])
         companies = self.env['res.company'].search(domain)
-        companies.post_stock_valuation()
+        companies.action_close_stock_valuation(auto_post=True)
 
-    def _post_stock_valuation_account(self, products, stock_valuation_account, stock_variation_account):
-        """ Update the stock valuation account.
-        - For products with periodic valuation, update the stock valuation base on the current balance and the inventory value
-        - For products with perpetual valuation, Correct the COGS mistakes base on the accounting value and the real inventory value
-        """
+    def _get_stock_valuation_account_vals(self, products, stock_valuation_account, stock_variation_account):
         if not products:
-            return
-        import pudb; pudb.set_trace()
+            return False
         inventory_value = self.stock_value(products)['value']
         amls_value = self.stock_accounting_value()['value']
 
@@ -166,39 +188,32 @@ class ResCompany(models.Model):
         if amls_value:
             inventory_variation -= amls_value
 
-        if inventory_variation != 0:
-            move_vals = {
-                'journal_id': self.account_stock_journal_id.id,
-                'date': fields.Date.context_today(self),
-                'ref': _('Stock Valuation Closing'),
-                'line_ids': [],
-                'move_type': 'entry',
-            }
-            move_vals['line_ids'].append(Command.create({
-                'account_id': stock_variation_account.id,
-                'name': _('Stock Variation'),
-                'debit': -inventory_variation if inventory_variation > 0 else 0,
-                'credit': inventory_variation if inventory_variation < 0 else 0,
-            }))
-            move_vals['line_ids'].append(Command.create({
-                'account_id': stock_valuation_account.id,
-                'name': _('Stock Variation'),
-                'debit': inventory_variation if inventory_variation > 0 else 0,
-                'credit': -inventory_variation if inventory_variation < 0 else 0,
-            }))
-            am = self.env['account.move'].create(move_vals)
-            am._post()
+        if inventory_variation == 0:
+            return False
+        move_vals = {
+            'journal_id': self.account_stock_journal_id.id,
+            'date': fields.Date.context_today(self),
+            'ref': _('Stock Valuation Closing'),
+            'line_ids': [],
+            'move_type': 'entry',
+        }
+        move_vals['line_ids'].append(Command.create({
+            'account_id': stock_variation_account.id,
+            'name': _('Stock Variation'),
+            'debit': -inventory_variation if inventory_variation > 0 else 0,
+            'credit': inventory_variation if inventory_variation < 0 else 0,
+        }))
+        move_vals['line_ids'].append(Command.create({
+            'account_id': stock_valuation_account.id,
+            'name': _('Stock Variation'),
+            'debit': inventory_variation if inventory_variation > 0 else 0,
+            'credit': -inventory_variation if inventory_variation < 0 else 0,
+        }))
+        return move_vals
 
-    def _post_specific_location_account(self):
-        return
-
-    def _post_periodic_expense(self, products, fiscal_year_date_from, stock_valuation_account, stock_variation_account, expense_account):
-        """ The `_post_stock_valuation_account` use the COGS account in order to balance the stock valuation account.
-        However, the products could remains in stock and are not sold yet. This method counter balance the COGS account
-        with the inventory value.
-        """
+    def _get_periodic_expense_vals(self, products, fiscal_year_date_from, stock_valuation_account, stock_variation_account, expense_account):
         if self.anglo_saxon_accounting:
-            return
+            return False
         existing_am = self.env['account.move'].search([
             ('line_ids.account_id', '=', expense_account.id),
             ('line_ids.account_id', '=', stock_variation_account.id),
@@ -219,9 +234,10 @@ class ResCompany(models.Model):
             groupby=['account_id'],
             aggregates=['balance:sum'],
         )
-        balance = inventory_value - (inventory_value_at_beginning[0]['balance'] if inventory_value_at_beginning else 0) - inventory_variation_balance
+        balance = inventory_value_at_beginning[0]['balance'] if inventory_value_at_beginning else 0
+        balance = inventory_value - balance - inventory_variation_balance
         if not balance:
-            return
+            return False
         move_vals = {
             'journal_id': self.account_stock_journal_id.id,
             'date': fields.Date.context_today(self),
@@ -241,16 +257,11 @@ class ResCompany(models.Model):
             'debit': balance if balance < 0 else 0,
             'credit': balance if balance > 0 else 0,
         }))
-        am = self.env['account.move'].create(move_vals)
-        am._post()
+        return move_vals
 
-    def _post_periodic_cogs(self, products, fiscal_year_date_from, purchase_account, cogs_account):
-        """ The `_post_stock_valuation_account` use the COGS account in order to balance the stock valuation account.
-        However, the products could remains in stock and are not sold yet. This method counter balance the COGS account
-        with the inventory value.
-        """
+    def _get_periodic_cogs_vals(self, products, fiscal_year_date_from, purchase_account, cogs_account):
         if not self.anglo_saxon_accounting:
-            return
+            return False
 
         amls = self.env['account.move.line'].search(
             domain=[
@@ -262,7 +273,7 @@ class ResCompany(models.Model):
         )
         amls_value = sum(amls.mapped('balance')) if amls else 0
         if not amls_value:
-            return
+            return False
         cogs_counter_balance = amls_value
 
         move_vals = {
@@ -284,8 +295,7 @@ class ResCompany(models.Model):
             'debit': cogs_counter_balance if cogs_counter_balance < 0 else 0,
             'credit': cogs_counter_balance if cogs_counter_balance > 0 else 0,
         }))
-        am = self.env['account.move'].create(move_vals)
-        am._post()
+        return move_vals
 
     def _set_category_defaults(self):
         for company in self:
