@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="select_report_printers_wizard_form_view" model="ir.ui.view">
+        <field name="name">select.report.printers.wizard.form</field>
+        <field name="model">select.report.printers.wizard</field>
+        <field name="arch" type="xml">
+            <form js_class="select_report_printer_wizard">
+                <group>
+                    <field name="printer_ids" string="Printers" widget="many2many_tags"/>
+                </group>
+                <footer>
+                    <button string="Print" class="btn-primary" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
