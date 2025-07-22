@@ -66,6 +66,14 @@ class HierarchyItem {
         return this.type === DISPLAY_TYPES.SECTION;
     }
 
+    get isSubSection() {
+        return this.type === DISPLAY_TYPES.SUBSECTION;
+    }
+
+    get isRecord() {
+        return this.type === DISPLAY_TYPES.RECORD;
+    }
+
     get records() {
         if (this.isRoot) {
             return [
@@ -103,7 +111,7 @@ class HierarchyItem {
     }
 }
 
-class SectionListRenderer extends ListRenderer {
+export class SectionListRenderer extends ListRenderer {
     static props = [
         ...super.props,
         "isM2M",
