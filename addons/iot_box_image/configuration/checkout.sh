@@ -13,7 +13,14 @@ echo "addons/iot_drivers" >> .git/info/sparse-checkout
 
 git fetch "${localremote}" "${localbranch}" --depth=1
 git reset "${localremote}"/"${localbranch}" --hard
-sudo git clean -dfx
+
+echo "BEFORE CLEAN"
+echo "BEFORE CLEAN" 1>&2
+
+git clean -dfx
+
+echo "AFTER CLEAN"
+echo "AFTER CLEAN" 1>&2
 
 if [ -d /home/pi/odoo/addons/point_of_sale ]; then
   # TODO: remove this when v18.0 is deprecated (point_of_sale/tools/posbox/ -> iot_box_image/)
@@ -26,7 +33,13 @@ if [ -d /home/pi/odoo/addons/point_of_sale ]; then
   fi
 fi
 
+echo "BEFORE IF"
+echo "BEFORE IF" 1>&2
 if [ -d /home/pi/odoo/addons/iot_drivers ]; then
   # TODO: remove this when v18.0 is deprecated (hw_drivers/,hw_posbox_homepage/ -> iot_drivers/)
+  echo "RUNNING SED"
+  echo "RUNNING SED" 1>&2
   sed -i 's|hw_drivers.*hw_posbox_homepage|iot_drivers|g' /home/pi/odoo.conf
+  echo "RAN SED"
+  echo "RAN SED" 1>&2
 fi
