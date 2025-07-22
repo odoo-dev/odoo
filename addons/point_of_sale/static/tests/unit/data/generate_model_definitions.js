@@ -119,6 +119,10 @@ export class PosConfig extends models.ServerModel {
             deleted_record_ids: {},
         };
     }
+
+    notify_synchronisation() {
+        return;
+    }
 }
 
 export class AccountMove extends models.ServerModel {
