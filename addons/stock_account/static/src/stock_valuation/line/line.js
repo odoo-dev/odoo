@@ -18,10 +18,6 @@ export class StockValuationReportLine extends Component {
 
     setup() {
         this.state = useState({ displaySublines: false });
-
-        if (this.props.onClickMethod) {
-            this.totalProps.onClickMethod = this.props.onClickMethod.bind(this);
-        }
     }
 
     // Getters -----------------------------------------------------------------
