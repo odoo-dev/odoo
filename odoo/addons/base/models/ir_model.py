@@ -573,7 +573,15 @@ class IrModelFields(models.Model):
     sanitize_form = fields.Boolean(string='Sanitize HTML Form', default=True)
     strip_style = fields.Boolean(string='Strip Style Attribute', default=False)
     strip_classes = fields.Boolean(string='Strip Class Attribute', default=False)
-
+    aggregator = fields.Selection(
+        selection=[
+            ('sum', 'Sum'),
+            ('avg', 'Average'),
+            ('min', 'Minimum'),
+            ('max', 'Maximum'),
+        ],
+        compute='_compute_aggregator', store=True, precompute=True,
+    )
 
     @api.depends('relation', 'relation_field')
     def _compute_relation_field_id(self):
@@ -608,6 +616,38 @@ class IrModelFields(models.Model):
     def _compute_copied(self):
         for rec in self:
             rec.copied = (rec.ttype != 'one2many') and not (rec.related or rec.compute)
+
+    @api.depends('ttype', 'store', 'related')
+    def _compute_aggregator(self):
+
+        def _related_to_store_field(record):
+            if not record.related:
+                False
+            names = record.related.split('.')[::-1]
+            model_name = self.model or self.model_id.model
+            while names:
+                name = names.pop()
+                field_record = self._get(model_name, name)
+                if not field_record:  # invalidate related
+                    return False
+                if field_record.related and not field_record.store:
+                    names.extend(field_record.related.split('.')[::-1])
+                    continue
+                if not field_record.store:
+                    return False
+                if field_record.relational:  # Not the case for the final one
+                    model_name = field_record.relation
+            return True
+
+        for rec in self.filtered(lambda r: r.state == 'manual'):
+            if (
+                # See AGGREGATABLE_FIELD_TYPES in web/.../utils.js
+                rec.ttype not in ('float', 'integer', 'monetary')
+                or (not rec.store and not _related_to_store_field(rec))
+            ):
+                rec.aggregator = False
+            elif not rec.aggregator:
+                rec.aggregator = 'sum'
 
     @api.depends()
     def _in_modules(self):
@@ -1136,6 +1176,7 @@ class IrModelFields(models.Model):
             'readonly': bool(field.readonly),
             'required': bool(field.required),
             'selectable': bool(field.search or field.store),
+            'aggregator': field._description_aggregator(self.env),
             'size': getattr(field, 'size', None),
             'translate': bool(field.translate),
             'company_dependent': bool(field.company_dependent),
@@ -1157,8 +1198,6 @@ class IrModelFields(models.Model):
 
     def _reflect_fields(self, model_names):
         """ Reflect the fields of the given models. """
-        cr = self.env.cr
-
         for model_name in model_names:
             model = self.env[model_name]
             by_label = {}
