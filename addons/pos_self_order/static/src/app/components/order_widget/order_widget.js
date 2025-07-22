@@ -101,7 +101,10 @@ export class OrderWidget extends Component {
         const currentPage = this.router.activeSlot;
         if (this.shouldGoBack()) {
             if (currentPage === "product_list") {
-                const targetPage = this.selfOrder.hasPresets() ? "location" : "default";
+                const targetPage =
+                    this.selfOrder.hasPresets() && !this.selfOrder.currentOrder.preset_id
+                        ? "location"
+                        : "default";
                 this.router.navigate(targetPage);
             } else {
                 this.router.back();
