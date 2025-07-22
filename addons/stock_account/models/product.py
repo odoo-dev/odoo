@@ -135,6 +135,7 @@ class ProductProduct(models.Model):
              "to the totaled value of the product's valuation layers")
 
     @api.depends_context('to_date', 'company')
+    @api.depends('qty_available')
     def _compute_value(self):
         """Compute totals of multiple svl related values"""
         company_id = self.env.company
@@ -183,7 +184,8 @@ class ProductProduct(models.Model):
             moves, remaining_qty = product._run_fifo_get_stack()
             moves = self.env['stock.move'].concat(*moves)
             qty_by_move = {m: m.quantity for m in moves[:-1]}
-            qty_by_move[moves[-1]] = remaining_qty
+            if moves:
+                qty_by_move[moves[-1]] = remaining_qty
             moves_qty_by_product[product] = qty_by_move
         return moves_qty_by_product
 
@@ -246,7 +248,6 @@ class ProductProduct(models.Model):
                 out_qty = sum(move._get_out_move_lines().mapped('quantity'))
                 avco_total_value -= out_qty * avco_value
                 quantity -= out_qty
-
         return avco_value, avco_total_value
 
     def _run_fifo_get_stack(self, at_date=None):
