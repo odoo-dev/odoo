@@ -97,6 +97,10 @@ class L10nInEwaybill(models.Model):
         ('3', "Air"),
         ('4', "Ship or Ship Cum Road/Rail")
     ], string="Transportation Mode", copy=False, tracking=True, default='1')
+    port_code_id = fields.Many2one(
+        related='account_move_id.l10n_in_shipping_port_code_id',
+        string="Port Address",
+    )
 
     # Vehicle Number and Type required when transportation mode is By Road.
     vehicle_no = fields.Char("Vehicle Number", copy=False, tracking=True)
@@ -151,7 +155,7 @@ class L10nInEwaybill(models.Model):
     # ------------Generic compute methods to be overriden in l10n_in_ewaybill_stock module---------------
 
     def _get_ewaybill_dependencies(self):
-        return ['account_move_id']
+        return ['account_move_id', 'mode']
 
     def _get_ewaybill_document_details(self):
         """
@@ -406,6 +410,18 @@ class L10nInEwaybill(models.Model):
             return [_("Set GST Treatment for in %s", partner.display_name)]
         return []
 
+    def _get_l10n_in_ewaybill_port_partner(self):
+        """Returns a virtual partner record with port details."""
+        state_id = self.port_code_id.state_id
+        return self.env['res.partner'].new({
+            'name': self.port_code_id.name,
+            'street': self.port_code_id.name,
+            'city': 'Mumbai',
+            'zip': '999999',
+            'state_id': state_id.id,
+            'country_id': state_id.country_id.id,
+        })
+
     def _get_billing_partner(self):
         if self._is_incoming():
             partner = self.partner_bill_from_id
@@ -630,7 +646,18 @@ class L10nInEwaybill(models.Model):
                         "Place": lambda p: p.city and p.city[:50] or "",
                         "Pincode": lambda p: int(p.zip) if p.country_id.code == "IN" else 999999,
                     }.items(),
-                    partner_detail={'from': self.partner_ship_from_id, 'to': self.partner_ship_to_id}.items()
+                    partner_detail={
+                        'from': (
+                            self.sub_type_code == '2' and self.mode in ['3', '4']
+                            and self._get_l10n_in_ewaybill_port_partner()
+                            or self.partner_ship_from_id
+                        ),
+                        'to': (
+                            self.sub_type_code == '3' and self.mode in ['3', '4']
+                            and self._get_l10n_in_ewaybill_port_partner()
+                            or self.partner_ship_to_id
+                        )
+                    }.items(),
                 ),
                 "actToStateCode": self._get_partner_state_code(self.partner_ship_to_id),
                 "actFromStateCode": self._get_partner_state_code(self.partner_ship_from_id),

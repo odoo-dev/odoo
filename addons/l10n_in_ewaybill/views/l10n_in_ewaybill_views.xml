@@ -86,10 +86,23 @@
                         <group>
                             <field name="partner_ship_from_id"
                                    force_save="1"
+                                   invisible="sub_type_code == '2' and mode in ('3', '4')"
                                    readonly="state == 'pending' and not is_ship_from_editable or state != 'pending'"/>
+                            <field name="port_code_id" string="Dispatch From (Port)"
+                                   invisible="sub_type_code != '2' or mode not in ('3', '4')"
+                                   required="sub_type_code == '2' and mode in ('3', '4')"
+                                   readonly="1"
+                                   help="Update Port Address from Vendor Bill"/>
+
                             <field name="partner_ship_to_id"
                                    force_save="1"
+                                   invisible="sub_type_code == '3' and mode in ('3', '4')"
                                    readonly="state == 'pending' and not is_ship_to_editable or state != 'pending'"/>
+                            <field name="port_code_id" string="Ship To (Port)"
+                                   invisible="sub_type_code != '3' or mode not in ('3', '4')"
+                                   required="sub_type_code == '3' and mode in ('3', '4')"
+                                   readonly="1"
+                                   help="Update Port Address from Invoice"/>
                         </group>
                     </group>
                     <group name="transporter" string="Transporter Details">

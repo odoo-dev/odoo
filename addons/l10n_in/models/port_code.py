@@ -9,6 +9,8 @@ class L10n_InPortCode(models.Model):
 
     code = fields.Char(string="Port Code", required=True)
     name = fields.Char(string="Port", required=True)
+    city = fields.Char(string="City", default='Gandhinagar')
+    zip = fields.Char(string="Zip Code", default='999999')
     state_id = fields.Many2one('res.country.state', string="State")
 
     _code_uniq = models.Constraint(

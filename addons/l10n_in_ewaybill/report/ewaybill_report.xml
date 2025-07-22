@@ -112,7 +112,13 @@
                                             <t t-out="doc.partner_bill_from_id.state_id.name"/><br/>
                                             <br/>
                                             ::Dispatch From:: <br/><br/>
-                                            <span t-field="doc.partner_ship_from_id"
+                                            <t t-set="dispatch_from_partner"
+                                               t-value="(
+                                                    doc.sub_type_code == '2' and doc.mode in ['3', '4']
+                                                    and doc._get_l10n_in_ewaybill_port_partner()
+                                                    or doc.partner_ship_from_id
+                                               )"/>
+                                            <span t-out="dispatch_from_partner"
                                                   t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'
                                             />
                                         </td>
@@ -123,7 +129,13 @@
                                             <t t-out="doc.partner_bill_to_id.state_id.name"/><br/>
                                             <br/>
                                             ::Ship To:: <br/><br/>
-                                            <span t-field="doc.partner_ship_to_id"
+                                            <t t-set="ship_to_partner"
+                                               t-value="(
+                                                    doc.sub_type_code == '3' and doc.mode in ['3', '4']
+                                                    and doc._get_l10n_in_ewaybill_port_partner()
+                                                    or doc.partner_ship_to_id
+                                               )"/>
+                                            <span t-out="ship_to_partner"
                                                   t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
                                         </td>
                                     </tr>
