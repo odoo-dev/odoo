@@ -39,10 +39,13 @@ export class StockValuationReportController {
     }
 
     // Actions -----------------------------------------------------------------
-    actionGenerateEntry() {
+    async actionGenerateEntry() {
         const periodicCOGS = true; // TODO: make it truly optional.
         const args = [[this.companyId], periodicCOGS];
-        return this.orm.call("res.company", "post_stock_valuation", args);
+        const action = await this.orm.call("res.company", "action_post_stock_valuation", args);
+        if (action) {
+            this.actionService.doAction(action);
+        }
     }
 
     actionPrintReport(format="pdf") {
