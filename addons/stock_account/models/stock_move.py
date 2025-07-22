@@ -5,6 +5,7 @@ from collections import defaultdict
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.orm.domains import Domain
 from odoo.tools import float_is_zero, OrderedSet
 
 import logging
@@ -150,7 +151,7 @@ class StockMove(models.Model):
         # Recompute the standard price
         self.env['product.product'].browse(product_to_recompute)._update_standard_price()
 
-    def _get_value(self, forced_std_price=False, date=False):
+    def _get_value(self, forced_std_price=False, at_date=False):
         """Returns the value and the quantity valued on the move
         In priority order:
         - Take value from accounting documents (invoices, bills)
@@ -166,31 +167,44 @@ class StockMove(models.Model):
         # 2. from SO/PO lines
         # 3. standard_price
         valued_qty = remaining_qty = sum(self._get_in_move_lines().mapped('quantity'))
+        value = 0
 
-        manual_value = self.env['product.value'].search([('move_id', '=', self.id)], order="date", limit=1)
-        if manual_value:
-            return manual_value.value, valued_qty
+        manual_value, manual_qty = self._get_manual_value(remaining_qty, at_date)
+        value += manual_value
+        remaining_qty -= manual_qty
 
         # 1. take from Invoice/Bills
-        account_move_value, account_move_qty = self._get_value_from_account_move(remaining_qty)
+        account_move_value, account_move_qty = self._get_value_from_account_move(remaining_qty, at_date)
+        value += account_move_value
         remaining_qty -= account_move_qty
 
         # 2. from SO/PO lines
-        quotation_value, quotation_qty = self._get_value_from_quotation(remaining_qty)
+        quotation_value, quotation_qty = self._get_value_from_quotation(remaining_qty, at_date)
+        value += quotation_value
         remaining_qty -= quotation_qty
 
         # 3. standard_price
-        std_price_value = self._get_value_from_std_price(remaining_qty, forced_std_price)
+        std_price_value = self._get_value_from_std_price(remaining_qty, forced_std_price, at_date)
+        value += std_price_value
 
-        return account_move_value + quotation_value + std_price_value, valued_qty
+        return value, valued_qty
 
-    def _get_value_from_account_move(self, quantity):
+    def _get_manual_value(self, quantity, at_date=None):
+        domain = Domain([('move_id', '=', self.id)])
+        if at_date:
+            domain &= Domain([('date', '<=', at_date)])
+        manual_value = self.env['product.value'].search(domain, order="date", limit=1)
+        if manual_value:
+            return manual_value.value, quantity
         return 0, 0
 
-    def _get_value_from_quotation(self, quantity):
+    def _get_value_from_account_move(self, quantity, at_date=None):
         return 0, 0
 
-    def _get_value_from_std_price(self, quantity, std_price=False):
+    def _get_value_from_quotation(self, quantity, at_date=None):
+        return 0, 0
+
+    def _get_value_from_std_price(self, quantity, std_price=False, at_date=None):
         std_price = std_price or self.product_id.standard_price
         return std_price * quantity
 

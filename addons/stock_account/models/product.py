@@ -3,6 +3,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.orm.domains import Domain
 from odoo.tools import float_is_zero, float_repr, float_round, float_compare
 from odoo.exceptions import ValidationError
 from collections import defaultdict
@@ -140,13 +141,14 @@ class ProductProduct(models.Model):
         self.company_currency_id = company_id.currency_id
 
         for product in self:
+            at_date = product.env.context.get('to_date')
             qty_available = product.sudo(False).qty_available
             if product.cost_method == 'standard':
                 product.total_value = product.standard_price * qty_available
             elif product.cost_method == 'average':
-                product.total_value = product._run_avco()[1]
+                product.total_value = product._run_avco(at_date=at_date)[1]
             else:
-                product.total_value = product._run_fifo(qty_available)
+                product.total_value = product._run_fifo(qty_available, at_date=at_date)
             product.avg_cost = product.total_value / qty_available if qty_available else 0.0
 
     def write(self, vals):
@@ -190,7 +192,7 @@ class ProductProduct(models.Model):
             return self.standard_price * quantity
         return self._run_fifo(quantity)
 
-    def _run_avco(self, method="realtime"):
+    def _run_avco(self, at_date=None, method="realtime"):
         """ Recompute the average cost of the product base on the last closing
         inventory value and all the incoming moves during the period."""
         # TODO remove at the end and do at real time
@@ -198,18 +200,24 @@ class ProductProduct(models.Model):
         # Get value and quantity from last closing
         quantity = 0
         # Get value and quantity for all incoming
-        moves_in = self.env['stock.move'].search([
+        moves_domain = Domain([
             ('product_id', '=', self.id),
-            ('is_in', '=', True),
         ])
-        moves_out = self.env['stock.move'].search([
-            ('product_id', '=', self.id),
-            ('is_out', '=', True),
-        ]) if method == "realtime" else self.env['stock.move']
+        if at_date:
+            moves_domain &= Domain([
+                ('date', '<=', at_date),
+            ])
+        moves_in = self.env['stock.move'].search(moves_domain & Domain([('is_in', '=', True)]))
+        moves_out = self.env['stock.move'].search(moves_domain & Domain([('is_out', '=', True)])) if method == "realtime" else self.env['stock.move']
         # TODO convert to company UoM
-        product_values = self.env['product.value'].search([
+        product_value_domain = Domain([
             ('product_id', '=', self.id),
-        ], order="date")
+        ])
+        if at_date:
+            product_value_domain &= Domain([
+                ('date', '<=', at_date),
+            ])
+        product_values = self.env['product.value'].search(product_value_domain, order="date")
         avco_value = 0
         avco_total_value = 0
         moves = moves_in | moves_out
@@ -218,7 +226,7 @@ class ProductProduct(models.Model):
         # If the last value was defined by the user just return it
         if product_values and moves_in and product_values[-1].date > moves_in[-1].date:
             avco_value = product_values[-1].value
-            return avco_value, avco_value * self.qty_available
+            return avco_value, avco_value * self.with_context(to_date=at_date).qty_available
 
         for move in moves:
             if product_values and move.date > product_values[0].date:
@@ -227,8 +235,10 @@ class ProductProduct(models.Model):
                 avco_value = product_value.value
                 avco_total_value = avco_value * quantity
             if move.is_in:
-                # TODO use _get_value when searching in past
-                in_value, in_qty = move.value, sum(move._get_in_move_lines().mapped('quantity'))
+                in_qty = sum(move._get_in_move_lines().mapped('quantity'))
+                in_value = move.value
+                if at_date:
+                    in_value = move._get_value(at_date=at_date)[0]
                 avco_total_value += in_value
                 quantity += in_qty
                 avco_value = avco_total_value / quantity if quantity else 0
@@ -239,16 +249,19 @@ class ProductProduct(models.Model):
 
         return avco_value, avco_total_value
 
-    def _run_fifo_get_stack(self):
+    def _run_fifo_get_stack(self, at_date=None):
         fifo_stack = []
-        fifo_stack_size = int(self.qty_available)  # Problem: Missing qty out but not invoiced
+        fifo_stack_size = int(self.with_context(to_date=at_date).qty_available)
         if fifo_stack_size <= 0:
             return fifo_stack, 0
 
-        moves_in = self.env['stock.move'].search([
+        moves_in_domain = Domain([
             ('product_id', '=', self.id),
             ('is_in', '=', True),
-        ], order='date desc, id', limit=fifo_stack_size * 10)
+        ])
+        if at_date:
+            moves_in_domain &= Domain([('date', '<=', at_date)])
+        moves_in = self.env['stock.move'].search(moves_in_domain, order='date desc, id', limit=fifo_stack_size * 10)
         # TODO: fetch more if 100 is not enough
 
         remaining_qty_on_last_move = 0
@@ -262,18 +275,20 @@ class ProductProduct(models.Model):
             fifo_stack_size -= in_qty
         return fifo_stack, remaining_qty_on_last_move
 
-    def _run_fifo(self, quantity):
+    def _run_fifo(self, quantity, at_date=None):
         """ Returns the value for the next outgoing product base on the qty give as argument."""
         self.ensure_one()
 
         fifo_cost = 0
-        fifo_stack, __ = self._run_fifo_get_stack()
+        fifo_stack, __ = self._run_fifo_get_stack(at_date=at_date)
 
         # Going up to get the quantity in the argument
         while quantity > 0 and fifo_stack:
             move = fifo_stack.pop(0)
-            # TODO use _get_value when searching in past
-            in_value, in_qty = move.value, sum(move._get_in_move_lines().mapped('quantity'))
+            in_qty = sum(move._get_in_move_lines().mapped('quantity'))
+            in_value = move.value
+            if at_date:
+                in_value = move._get_value(at_date=at_date)[0]
             if in_qty > quantity:
                 in_value = in_value * quantity / in_qty
                 in_qty = quantity
