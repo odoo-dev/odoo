@@ -123,6 +123,7 @@ class ProductProduct(models.Model):
              "to the totaled value of the product's valuation layers")
 
     @api.depends_context('to_date', 'company')
+    @api.depends('qty_available')
     def _compute_value(self):
         """Compute totals of multiple svl related values"""
         company_id = self.env.company
@@ -212,11 +213,11 @@ class ProductProduct(models.Model):
         if at_date:
             product_value_domain &= Domain([('date', '<=', at_date)])
 
-        product_values = self.env['product.value'].search(product_value_domain, order="date")
+        product_values = self.env['product.value'].search(product_value_domain, order='date, id')
         avco_value = 0
         avco_total_value = 0
         moves = moves_in | moves_out
-        moves = moves.sorted('date')
+        moves = moves.sorted('date, id')
 
         # If the last value was defined by the user just return it
         if product_values and moves_in and product_values[-1].date > moves_in[-1].date:
@@ -240,14 +241,16 @@ class ProductProduct(models.Model):
                 if lot:
                     total_qty = move._get_valued_qty(lot)
                     in_value = in_value * in_qty / total_qty
-                avco_total_value += in_value
                 quantity += in_qty
+                if quantity - in_qty <= 0 <= quantity:
+                    avco_total_value = in_value * quantity / in_qty
+                else:
+                    avco_total_value += in_value
                 avco_value = avco_total_value / quantity if quantity else 0
             if move.is_out or move.is_dropship:
                 out_qty = move._get_valued_qty()
                 avco_total_value -= out_qty * avco_value
                 quantity -= out_qty
-
         return avco_value, avco_total_value
 
     def _run_fifo_get_stack(self, lot=None, at_date=None, location=None):

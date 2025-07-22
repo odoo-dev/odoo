@@ -93,11 +93,11 @@ class StockMove(models.Model):
 
     def _inverse_value_manual(self):
         for move in self:
-            if move.manual_value == move.value:
+            if move.value_manual == move.value:
                 continue
             self.env['product.value'].create({
                 'move_id': move.id,
-                'value': move.manual_value,
+                'value': move.value_manual,
                 'company_id': move.company_id.id,
             })
             move._set_value()
@@ -228,7 +228,7 @@ class StockMove(models.Model):
         domain = Domain([('move_id', '=', self.id)])
         if at_date:
             domain &= Domain([('date', '<=', at_date)])
-        manual_value = self.env['product.value'].search(domain, order="date", limit=1)
+        manual_value = self.env['product.value'].search(domain, order='date desc, id desc', limit=1)
         if manual_value:
             return manual_value.value, quantity
         return 0, 0
