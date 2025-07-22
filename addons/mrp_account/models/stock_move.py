@@ -9,7 +9,7 @@ from odoo import models
 class StockMove(models.Model):
     _inherit = "stock.move"
 
-    def _get_value(self, forced_std_price=False):
+    def _get_value(self, forced_std_price=False, at_date=False):
         self.ensure_one()
         if self.production_id:
             valued_qty = sum(self._get_in_move_lines().mapped('quantity'))

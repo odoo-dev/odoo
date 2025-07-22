@@ -105,13 +105,15 @@ class StockMove(models.Model):
     # Valuation
     # --------------------------------------------------------
 
-    def _get_value_from_account_move(self, quantity):
+    def _get_value_from_account_move(self, quantity, at_date=None):
         if not (self.purchase_line_id and self.is_in and self.purchase_line_id):
             return 0, 0
 
         quantity = 0
         value = 0
         for aml in self.purchase_line_id.invoice_lines:
+            if at_date and aml.date > at_date:
+                continue
             if aml.move_id.state != 'posted':
                 continue
             if aml.move_type == 'in_invoice':
@@ -123,13 +125,15 @@ class StockMove(models.Model):
 
         return value, quantity
 
-    def _get_value_from_quotation(self, quantity):
+    def _get_value_from_quotation(self, quantity, at_date=None):
         # TODO: Start from global value
-        if self.purchase_line_id and self.is_in:
-            price_unit = self.purchase_line_id._get_stock_move_price_unit()
-            quantity = min(quantity, self.quantity)
-            return price_unit * quantity, quantity
-        return super()._get_value_from_quotation(quantity)
+        if not self.purchase_line_id or not self.is_in:
+            return super()._get_value_from_quotation(quantity)
+        if at_date and self.purchase_line_id.order_id.date_order > at_date:
+            return super()._get_value_from_quotation(quantity)
+        price_unit = self.purchase_line_id._get_stock_move_price_unit()
+        quantity = min(quantity, self.quantity)
+        return price_unit * quantity, quantity
 
     def _get_related_invoices(self):
         """ Overridden to return the vendor bills related to this stock move.

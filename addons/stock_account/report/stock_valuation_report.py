@@ -80,7 +80,7 @@ class StockValuationReport(models.AbstractModel):
 
     def _compute_inventory_valuation(self, date, product_category):
         """ Compute inventory valuation, product by product."""
-        total, products = self.env.company.stock_value(to_date=date)
+        total, products = self.env.company.stock_value(at_date=date)
         valuation_lines_by_category = defaultdict(list)
         for product in products:
             value = product.total_value
