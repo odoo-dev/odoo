@@ -310,7 +310,8 @@ class Slide(models.Model):
     @api.depends('website_message_ids.res_id', 'website_message_ids.model', 'website_message_ids.message_type')
     def _compute_comments_count(self):
         for slide in self:
-            slide.comments_count = len(slide.website_message_ids)
+            empty_messages = slide.website_message_ids._filter_empty()
+            slide.comments_count = len(slide.website_message_ids - empty_messages)
 
     @api.depends('slide_views', 'public_views')
     def _compute_total(self):

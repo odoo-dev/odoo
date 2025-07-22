@@ -16,6 +16,9 @@ const PortalComposer = portalComposer.PortalComposer;
  **/
 const RatingPopupComposer = publicWidget.Widget.extend({
     selector: '.o_rating_popup_composer',
+    events: {
+        'hidden.bs.modal': '_onModalHidden',
+    },
     custom_events: {
         reload_rating_popup_composer: '_onReloadRatingPopupComposer',
     },
@@ -132,6 +135,10 @@ const RatingPopupComposer = publicWidget.Widget.extend({
         };
         Object.assign(data, defaultOptions);
         this.options = Object.assign(this.options, data);
+    },
+
+    _onModalHidden: function () {
+        this._reloadRatingPopupComposer();
     },
 });
 

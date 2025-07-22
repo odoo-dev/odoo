@@ -77,3 +77,42 @@ class SlidesPortalChatter(PortalChatter):
             'default_attachment_ids': message.attachment_ids.sudo().read(['id', 'name', 'mimetype', 'file_size', 'access_token']),
             'force_submit_url': '/slides/mail/update_comment',
         }
+
+    @http.route(
+        "/slides/mail/delete_comment", methods=["POST"], type="json", auth="public"
+    )
+    def mail_delete_message(self, thread_model, thread_id, message_id, **kwargs):
+        if thread_model != "slide.channel":
+            raise Forbidden()
+        thread_id = int(thread_id)
+
+        pid = int(kwargs["pid"]) if kwargs.get("pid") else False
+        channel = request.env["slide.channel"]._get_thread_with_access(
+            thread_id,
+            request.env["slide.channel"]._mail_post_access,
+            token=kwargs.get("token"),
+            hash=kwargs.get("hash"),
+            pid=pid,
+        )
+        if not channel:
+            raise Forbidden()
+        message = request.env["mail.message"]._get_with_access(
+            message_id, "create", **kwargs
+        )
+        if not message or not (message.sudo().is_current_user_or_guest_author or request.env.user._is_admin()):
+            raise NotFound()
+        res = {}
+        if message.sudo().is_current_user_or_guest_author:
+            res.update({
+                "default_message_id": False,
+                "default_message": False,
+                "default_rating_value": 4.0,
+                "default_attachment_ids": False,
+            })
+
+        message.unlink()
+        res.update({
+            "rating_avg": channel.rating_avg,
+            "rating_count": channel.rating_count,
+        })
+        return res

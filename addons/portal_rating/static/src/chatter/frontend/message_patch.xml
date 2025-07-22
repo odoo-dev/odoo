@@ -12,7 +12,7 @@
             <!--Only possible if a rating is link to the message, for now we can't comment if no rating
                 is link to the message (because publisher comment data
                 is on the rating.rating model - one comment max) -->
-            <div t-if="message.rating and message.rating.id" class="o_wrating_publisher_container">
+            <div t-if="message.rating and message.rating.id and props.hasActions" class="o_wrating_publisher_container">
                 <button t-if="store.self.is_user_publisher"
                     t-attf-class="btn px-2 my-2 btn-sm border o_wrating_js_publisher_comment_btn {{ message.rating.publisher_comment !== '' ? 'd-none' : '' }}"
                     t-att-data-mes_index="message.rating.mes_index"

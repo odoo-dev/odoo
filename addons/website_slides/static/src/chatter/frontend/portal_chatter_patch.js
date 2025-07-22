@@ -13,10 +13,17 @@ patch(PortalChatter.prototype, {
     async _reloadChatterContent(data) {
         super._reloadChatterContent(...arguments);
         if (this.props.resModel === "slide.channel") {
-            document.querySelector("#review-tab").textContent = _t(
-                "Reviews (%s)",
-                data.rating_count || data["mail.thread"][0].rating_count
-            );
+            const rating_count =
+                data.rating_count ||
+                (data["mail.thread"]?.length && data["mail.thread"][0].rating_count);
+            if (rating_count) {
+                document.querySelector("#review-tab").textContent = _t(
+                    "Reviews (%s)",
+                    data.rating_count || data["mail.thread"][0].rating_count
+                );
+            } else {
+                document.querySelector("#review-tab").textContent = _t("Reviews");
+            }
         }
     },
 });
