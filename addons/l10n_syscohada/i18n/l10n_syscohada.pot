@@ -16,6 +16,11 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: l10n_syscohada
+#: model:ir.model,name:l10n_syscohada.model_account_chart_template
+msgid "Account Chart Template"
+msgstr ""
+
+#. module: l10n_syscohada
 #: model:ir.ui.menu,name:l10n_syscohada.account_reports_syscohada_statements_menu
 msgid "Syscohada"
 msgstr ""

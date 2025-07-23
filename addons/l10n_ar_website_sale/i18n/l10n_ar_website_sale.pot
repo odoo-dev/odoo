@@ -74,6 +74,11 @@ msgid "Number"
 msgstr ""
 
 #. module: l10n_ar_website_sale
+#: model:ir.model,name:l10n_ar_website_sale.model_sale_order
+msgid "Sales Order"
+msgstr ""
+
+#. module: l10n_ar_website_sale
 #: model:ir.model,name:l10n_ar_website_sale.model_website
 msgid "Website"
 msgstr ""

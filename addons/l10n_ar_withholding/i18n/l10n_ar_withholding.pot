@@ -131,6 +131,11 @@ msgid "Display Name"
 msgstr ""
 
 #. module: l10n_ar_withholding
+#: model:ir.model,name:l10n_ar_withholding.model_account_tax
+msgid "ETA tax codes mixin"
+msgstr ""
+
+#. module: l10n_ar_withholding
 #: model:ir.model.fields,field_description:l10n_ar_withholding.field_l10n_ar_payment_register_withholding__id
 msgid "ID"
 msgstr ""
@@ -216,7 +221,6 @@ msgid "Supplier"
 msgstr ""
 
 #. module: l10n_ar_withholding
-#: model:ir.model,name:l10n_ar_withholding.model_account_tax
 #: model:ir.model.fields,field_description:l10n_ar_withholding.field_l10n_ar_payment_register_withholding__tax_id
 #: model_terms:ir.ui.view,arch_db:l10n_ar_withholding.view_account_payment_form
 msgid "Tax"

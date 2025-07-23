@@ -26,6 +26,11 @@ msgid ""
 msgstr ""
 
 #. module: l10n_be_pos_sale
+#: model:ir.model,name:l10n_be_pos_sale.model_pos_session
+msgid "Point of Sale Session"
+msgstr ""
+
+#. module: l10n_be_pos_sale
 #. odoo-javascript
 #: code:addons/l10n_be_pos_sale/static/src/js/PaymentScreen.js:0
 #, python-format

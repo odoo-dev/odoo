@@ -138,6 +138,6 @@ msgid "Shipping Address:"
 msgstr ""
 
 #. module: l10n_din5008_sale
-#: model_terms:ir.ui.view,arch_db:l10n_din5008_sale.report_saleorder_document
+#: model_terms:ir.ui.view,arch_db:l10n_din5008_sale.external_layout_din5008_saleorder
 msgid "Tax ID"
 msgstr ""

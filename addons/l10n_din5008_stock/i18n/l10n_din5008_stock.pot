@@ -35,7 +35,7 @@ msgid "L10N Din5008 Addresses"
 msgstr ""
 
 #. module: l10n_din5008_stock
-#: model_terms:ir.ui.view,arch_db:l10n_din5008_stock.report_deliveryslip
+#: model_terms:ir.ui.view,arch_db:l10n_din5008_stock.external_layout_din5008_deliveryslip
 msgid "Tax ID"
 msgstr ""
 

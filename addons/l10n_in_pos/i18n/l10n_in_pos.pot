@@ -16,21 +16,34 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: l10n_in_pos
+#. odoo-python
 #: code:addons/l10n_in_pos/models/pos_config.py:0
 #, python-format
 msgid "Go to Company configuration"
 msgstr ""
 
 #. module: l10n_in_pos
-#. openerp-web
-#: code:addons/l10n_in_pos/static/src/xml/pos_receipt.xml:0
+#. odoo-javascript
+#: code:addons/l10n_in_pos/static/src/overrides/components/pos_receipt.xml:0
 #, python-format
 msgid "HSN Code:"
 msgstr ""
 
 #. module: l10n_in_pos
-#. openerp-web
-#: code:addons/l10n_in_pos/static/src/xml/pos_receipt.xml:0
+#: model:ir.model,name:l10n_in_pos.model_account_move
+msgid "Journal Entry"
+msgstr ""
+
+#. module: l10n_in_pos
+#: model:ir.model.fields,field_description:l10n_in_pos.field_account_bank_statement_line__l10n_in_pos_session_ids
+#: model:ir.model.fields,field_description:l10n_in_pos.field_account_move__l10n_in_pos_session_ids
+#: model:ir.model.fields,field_description:l10n_in_pos.field_account_payment__l10n_in_pos_session_ids
+msgid "POS Sessions"
+msgstr ""
+
+#. module: l10n_in_pos
+#. odoo-javascript
+#: code:addons/l10n_in_pos/static/src/overrides/components/pos_receipt.xml:0
 #, python-format
 msgid "Phone:"
 msgstr ""
@@ -46,6 +59,12 @@ msgid "Point of Sale Orders"
 msgstr ""
 
 #. module: l10n_in_pos
+#: model:ir.model,name:l10n_in_pos.model_pos_session
+msgid "Point of Sale Session"
+msgstr ""
+
+#. module: l10n_in_pos
+#. odoo-python
 #: code:addons/l10n_in_pos/models/pos_config.py:0
 #, python-format
 msgid ""

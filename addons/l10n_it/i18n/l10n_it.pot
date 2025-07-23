@@ -161,6 +161,11 @@ msgid ""
 msgstr ""
 
 #. module: l10n_it
+#: model:ir.model,name:l10n_it.model_account_tax
+msgid "ETA tax codes mixin"
+msgstr ""
+
+#. module: l10n_it
 #: model:account.report.line,name:l10n_it.tax_annual_report_line_va5_section_1
 msgid "Equipment purchases"
 msgstr ""
@@ -420,7 +425,6 @@ msgstr ""
 #: model:account.report.column,name:l10n_it.tax_annual_report_vat_tax_va
 #: model:account.report.column,name:l10n_it.tax_annual_report_vat_tax_ve
 #: model:account.report.column,name:l10n_it.tax_annual_report_vat_tax_vf
-#: model:ir.model,name:l10n_it.model_account_tax
 msgid "Tax"
 msgstr ""
 

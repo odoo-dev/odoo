@@ -268,7 +268,7 @@ msgstr ""
 
 #. module: l10n_din5008
 #: model_terms:ir.ui.view,arch_db:l10n_din5008.external_layout_din5008
-#: model_terms:ir.ui.view,arch_db:l10n_din5008.report_invoice_document
+#: model_terms:ir.ui.view,arch_db:l10n_din5008.external_layout_din5008_account_move
 msgid "Tax ID"
 msgstr ""
 

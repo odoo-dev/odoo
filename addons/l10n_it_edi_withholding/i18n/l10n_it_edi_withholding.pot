@@ -26,6 +26,11 @@ msgid "All Taxes Included"
 msgstr ""
 
 #. module: l10n_it_edi_withholding
+#: model_terms:ir.ui.view,arch_db:l10n_it_edi_withholding.account_invoice_line_it_FatturaPA_withholding
+msgid "AswCassPre"
+msgstr ""
+
+#. module: l10n_it_edi_withholding
 #. odoo-python
 #: code:addons/l10n_it_edi_withholding/models/account_move.py:0
 #, python-format
@@ -119,6 +124,11 @@ msgid "EPPI pension fund for industrial experts"
 msgstr ""
 
 #. module: l10n_it_edi_withholding
+#: model:ir.model,name:l10n_it_edi_withholding.model_account_tax
+msgid "ETA tax codes mixin"
+msgstr ""
+
+#. module: l10n_it_edi_withholding
 #. odoo-python
 #: code:addons/l10n_it_edi_withholding/models/account_move.py:0
 #, python-format
@@ -209,11 +219,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_it_edi_withholding.account_invoice_it_FatturaPA_export_withholding
 #: model_terms:ir.ui.view,arch_db:l10n_it_edi_withholding.account_invoice_line_it_FatturaPA_withholding
 msgid "SI"
-msgstr ""
-
-#. module: l10n_it_edi_withholding
-#: model:ir.model,name:l10n_it_edi_withholding.model_account_tax
-msgid "Tax"
 msgstr ""
 
 #. module: l10n_it_edi_withholding

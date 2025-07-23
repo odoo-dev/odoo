@@ -16,6 +16,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: l10n_fi_sale
+#. odoo-python
 #: code:addons/l10n_fi_sale/models/sale.py:0
 #, python-format
 msgid "Reference must contain numeric characters"

@@ -19,14 +19,14 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_tr_nilvera.res_config_settings_view_form
 msgid ""
 "<i title=\"Go to Nilvera portal\" role=\"img\" aria-label=\"Go to Nilvera portal\" class=\"fa fa-external-link-square fa-fw\"/>\n"
-"                                Nilvera portal"
+"                                    Nilvera portal"
 msgstr ""
 
 #. module: l10n_tr_nilvera
 #: model_terms:ir.ui.view,arch_db:l10n_tr_nilvera.res_config_settings_view_form
 msgid ""
 "<i title=\"Test connection\" role=\"img\" aria-label=\"Test connection\" class=\"fa fa-plug fa-fw\"/>\n"
-"                                Test connection"
+"                                    Test connection"
 msgstr ""
 
 #. module: l10n_tr_nilvera
@@ -220,6 +220,11 @@ msgid "Name"
 msgstr ""
 
 #. module: l10n_tr_nilvera
+#: model_terms:ir.ui.view,arch_db:l10n_tr_nilvera.res_config_settings_view_form
+msgid "Nilvera"
+msgstr ""
+
+#. module: l10n_tr_nilvera
 #: model:ir.model.fields,field_description:l10n_tr_nilvera.field_account_journal__l10n_tr_nilvera_api_key
 #: model:ir.model.fields,field_description:l10n_tr_nilvera.field_res_company__l10n_tr_nilvera_api_key
 #: model:ir.model.fields,field_description:l10n_tr_nilvera.field_res_config_settings__l10n_tr_nilvera_api_key
@@ -305,6 +310,11 @@ msgstr ""
 #. module: l10n_tr_nilvera
 #: model:ir.model.fields,field_description:l10n_tr_nilvera.field_l10n_tr_nilvera_alias__partner_id
 msgid "Partner"
+msgstr ""
+
+#. module: l10n_tr_nilvera
+#: model:ir.model,name:l10n_tr_nilvera.model_uom_uom
+msgid "Product Unit of Measure"
 msgstr ""
 
 #. module: l10n_tr_nilvera

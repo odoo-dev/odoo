@@ -132,6 +132,11 @@ msgid "Account Move Send"
 msgstr ""
 
 #. module: l10n_hu_edi
+#: model:ir.model,name:l10n_hu_edi.model_account_debit_note
+msgid "Add Debit Note wizard"
+msgstr ""
+
+#. module: l10n_hu_edi
 #. odoo-python
 #: code:addons/l10n_hu_edi/models/account_move.py:0
 #, python-format
@@ -397,6 +402,11 @@ msgstr ""
 #. module: l10n_hu_edi
 #: model:ir.model.fields.selection,name:l10n_hu_edi.selection__l10n_hu_edi_cancellation__code__erratic_invoice_number
 msgid "ERRATIC_INVOICE_NUMBER - Erroneous invoice number"
+msgstr ""
+
+#. module: l10n_hu_edi
+#: model:ir.model,name:l10n_hu_edi.model_account_tax
+msgid "ETA tax codes mixin"
 msgstr ""
 
 #. module: l10n_hu_edi
@@ -1197,11 +1207,6 @@ msgstr ""
 #. module: l10n_hu_edi
 #: model:ir.model.fields.selection,name:l10n_hu_edi.selection__account_tax__l10n_hu_tax_type__travel_agency
 msgid "TRAVEL_AGENCY - Profit-margin based regime for travel agencies"
-msgstr ""
-
-#. module: l10n_hu_edi
-#: model:ir.model,name:l10n_hu_edi.model_account_tax
-msgid "Tax"
 msgstr ""
 
 #. module: l10n_hu_edi

@@ -44,8 +44,8 @@
                     Rounding / التقريب
                     <span t-esc="props.formatCurrency(props.data.rounding_applied)" class="pos-receipt-right-align"/>
                 </div>
-                <div class="pos-receipt-amount">
-                    To Pay
+                <div class="pos-receipt-amount" t-translation="off">
+                    To Pay / للسداد
                     <span t-esc="props.formatCurrency(props.data.amount_total + props.data.rounding_applied)" class="pos-receipt-right-align"/>
                 </div>
             </t>

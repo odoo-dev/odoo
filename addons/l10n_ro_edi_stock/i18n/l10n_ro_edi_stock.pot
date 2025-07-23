@@ -1242,13 +1242,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_ro_edi_stock/models/stock_picking.py:0
 #, python-format
-msgid "The delivery carrier partner has to be located in Romania."
-msgstr ""
-
-#. module: l10n_ro_edi_stock
-#. odoo-python
-#: code:addons/l10n_ro_edi_stock/models/stock_picking.py:0
-#, python-format
 msgid ""
 "The delivery carrier partner is missing following fields: %(field_names)s"
 msgstr ""

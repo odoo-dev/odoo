@@ -71,6 +71,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_fr_facturx_chorus_pro/models/account_edi_xml_ubl_bis3.py:0
 #, python-format
+msgid "The BIC of the payee's bank is mandatory when invoicing to Chorus Pro."
+msgstr ""
+
+#. module: l10n_fr_facturx_chorus_pro
+#. odoo-python
+#: code:addons/l10n_fr_facturx_chorus_pro/models/account_edi_xml_ubl_bis3.py:0
+#, python-format
 msgid ""
 "The siret is mandatory for french suppliers when invoicing to Chorus Pro."
 msgstr ""
