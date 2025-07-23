@@ -662,3 +662,24 @@ class ResUsers(models.Model):
     @api.model
     def _get_mail_server_setup_end_action(self, smtp_server):
         raise NotImplementedError()
+
+    def _webpush_notification(self, body, model, res_id, icon, title='Odoo', author=None, extra_payload=None):
+        if extra_payload is None:
+            extra_payload = {}
+        devices, private_key, public_key = self.env['mail.thread']._web_push_get_partners_parameters(self.partner_id.ids)
+        if devices:
+            payload_webpush = {
+                'title': title,
+                'options': {
+                    'vibrate': [100, 50, 100],
+                    'tag': f'{model}_{res_id}',
+                    'body': body,
+                    'icon': icon or '/web/static/img/odoo-icon-192x192.png',
+                    'data': {
+                        'author_name': author.name if author and author.name else self.env.ref('base.partner_root').name,
+                        'model': model or 'res.users',
+                        'res_id': res_id or self.id,
+                    },
+                }
+            } | extra_payload
+            self.env['mail.thread']._web_push_send_notification(devices, private_key, public_key, payload=payload_webpush)
