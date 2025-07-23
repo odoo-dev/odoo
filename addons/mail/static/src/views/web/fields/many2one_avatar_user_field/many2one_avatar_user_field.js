@@ -49,6 +49,8 @@ export class Many2OneAvatarUserField extends WithUserChatter(Many2OneAvatarField
     static template = "mail.Many2OneAvatarUserField";
     static props = {
         ...Many2OneAvatarField.props,
+        context: { type: String, optional: true },
+        domain: { type: [Array, Function], optional: true },
         withCommand: { type: Boolean, optional: true },
     };
 }
@@ -60,6 +62,8 @@ export const many2OneAvatarUserField = {
     listViewWidth: [110],
     extractProps(fieldInfo, dynamicInfo) {
         const props = many2OneAvatarField.extractProps(...arguments);
+        props.context = fieldInfo.context;
+        props.domain = dynamicInfo.domain;
         props.withCommand = fieldInfo.viewType === "form" || fieldInfo.viewType === "list";
         return props;
     },
