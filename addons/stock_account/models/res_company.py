@@ -1,5 +1,6 @@
 from dateutil.relativedelta import relativedelta
-from odoo import _, api, fields, models, Command
+
+from odoo import Command, _, api, fields, models
 from odoo.fields import Domain
 
 
@@ -50,34 +51,77 @@ class ResCompany(models.Model):
         required=True,
     )
 
-    def stock_value(self, products=None, product_categories=None, at_date=False):
+    def stock_value(self, products=None, product_categories=None, at_date=None):
+        """ Returns the inventory value of the products. Base on quantity in inventory
+        and the value on available accounting documents.
+        The result is grouped by account (defined on the product).
+        """
         self.ensure_one()
+        total_value_by_account: dict = {
+            'value': 0.0,
+            'accounts': {},
+        }
         if products:
-            products = products.with_context(company=self, to_date=at_date)
-            return sum(products.mapped('total_value')), products
+            products = products.with_company(self).with_context(to_date=at_date)
+            return total_value_by_account
         domain = Domain([('is_storable', '=', True)])
         if product_categories:
             domain = domain & Domain([('categ_id', 'in', product_categories.ids)])
         products = self.env['product.product'].with_company(self).search(domain)
-        products = products.with_context(company=self, to_date=at_date)
-        sum_total_value = sum(products.mapped('total_value'))
-        return sum_total_value, products
+        products = products.with_company(self).with_context(to_date=at_date)
+        for product in products:
+            account = product._get_product_accounts()['stock_valuation']
+            product_value = product.total_value
+            if account not in total_value_by_account['accounts']:
+                total_value_by_account['accounts'][account] = {
+                    'value': 0.0,
+                    'products': {},
+                }
+            account_dict = total_value_by_account['accounts'][account]
+            account_dict['products'][product] = product_value
+            account_dict['value'] += product_value
+            total_value_by_account['value'] += product_value
+        return total_value_by_account
 
-    def stock_accounting_value(self, products=None, product_categories=None):
+    def stock_accounting_value(self, products=None, product_categories=None, at_date=None):
+        """ Return the inventory accounting value for the company
+        result: dict with format {
+            'value': global value for the company
+            'accounts': {
+                'account_name': {
+                    'value': total value for this account
+                    'amls': recorset of all account move lines in this account
+                }
+            }
+        }
+        """
         self.ensure_one()
-        fiscal_year_date_from = self.compute_fiscalyear_dates(fields.Date.today())['date_from']
-        stock_valuation_account = self.account_stock_valuation_id
+        if not products:
+            products = self.env['product.product'].with_company(self).search([('is_storable', '=', True)])
+        stock_valuation_accounts_ids = set()
+        for product in products:
+            account = product._get_product_accounts()['stock_valuation']
+            stock_valuation_accounts_ids.add(account.id)
+        stock_valuation_accounts = self.env['account.account'].browse(stock_valuation_accounts_ids)
         domain = Domain([
-            ('account_id', '=', stock_valuation_account.id), ('parent_state', '=', 'posted'),
+            ('account_id', 'in', stock_valuation_accounts.ids), ('parent_state', '=', 'posted'),
             ('company_id', '=', self.id),
-            ('date', '>', fiscal_year_date_from),
         ])
+        if at_date:
+            domain = domain & Domain([('date', '<=', at_date)])
         if products:
             domain = domain & Domain([('product_id', 'in', products.ids)])
         elif product_categories:
             domain = domain & Domain([('product_id.categ_id', 'in', product_categories.ids)])
-        amls = self.env['account.move.line'].search(domain)
-        return sum(amls.mapped('balance')), amls
+        amls_group = self.env['account.move.line']._read_group(domain, ['account_id'], ['balance:sum', 'id:recordset'])
+        res = {'value': 0.0, 'accounts': {}}
+        for account, (balance, amls) in amls_group:
+            res['value'] += balance
+            res['accounts'][account] = {
+                'value': balance,
+                'account_move_lines': amls,
+            }
+        return res
 
     def post_stock_valuation(self, periodic_cogs=False):
         for company in self:
@@ -114,8 +158,9 @@ class ResCompany(models.Model):
         """
         if not products:
             return
-        inventory_value = self.stock_value(products)[0]
-        amls_value = self.stock_accounting_value()[0]
+        import pudb; pudb.set_trace()
+        inventory_value = self.stock_value(products)['value']
+        amls_value = self.stock_accounting_value()['value']
 
         inventory_variation = inventory_value
         if amls_value:
@@ -143,6 +188,9 @@ class ResCompany(models.Model):
             }))
             am = self.env['account.move'].create(move_vals)
             am._post()
+
+    def _post_specific_location_account(self):
+        return
 
     def _post_periodic_expense(self, products, fiscal_year_date_from, stock_valuation_account, stock_variation_account, expense_account):
         """ The `_post_stock_valuation_account` use the COGS account in order to balance the stock valuation account.

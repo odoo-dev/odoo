@@ -55,12 +55,17 @@ class StockValuationReport(models.AbstractModel):
         }
 
     def _compute_inventory_variation(self):
-        stock_value = self.env.company.stock_value()[0]
-        accounting_stock_value = self.env.company.stock_accounting_value()[0]
+        stock_value = self.env.company.stock_value()['value']
+        accounting_stock_value = self.env.company.stock_accounting_value()['value']
         return stock_value - accounting_stock_value
 
     def _compute_accounting_valuation(self):
-        initial_value, amls = self.env.company.stock_accounting_value()
+        accounting_data = self.env.company.stock_accounting_value()
+        initial_value = accounting_data['value']
+        amls = self.env['account.move.line']
+
+        for dummy, account_move_lines in accounting_data['accounts']:
+            amls |= account_move_lines
         amls_lines = [
             {
                 'res_model': 'account.move.line',
@@ -80,34 +85,44 @@ class StockValuationReport(models.AbstractModel):
 
     def _compute_inventory_valuation(self, date, product_category):
         """ Compute inventory valuation, product by product."""
-        total, products = self.env.company.stock_value(at_date=date)
-        valuation_lines_by_category = defaultdict(list)
-        for product in products:
-            value = product.total_value
-            if not value:
-                continue
-            product_valuation_line = {
-                'res_model': 'product.product',
-                'id': product.id,
-                'display_name': product.display_name,
-                'name': product.name,
-                'value': value,
-            }
-            valuation_lines_by_category[product.categ_id].append(product_valuation_line)
+        inventory_data = self.env.company.stock_value(at_date=date)
+        valuation_line_by_account = []
 
-        product_category_valuation_lines = [
-            {
-                'res_model': 'product.category' if categ else False,
-                'id': categ.id if categ else False,
-                'display_name': categ.display_name if categ else _('Product without category'),
-                'value': sum([line['value'] for line in product_lines]),
-                'lines': product_lines,
-            } for (categ, product_lines) in valuation_lines_by_category.items()
-        ]
+        for account, details in inventory_data['accounts'].items():
+            valuation_lines_by_category = defaultdict(list)
+            products = details['products']
+            for product, value in products.items():
+                if not value:
+                    continue
+                product_valuation_line = {
+                    'res_model': 'product.product',
+                    'id': product.id,
+                    'display_name': product.display_name,
+                    'name': product.name,
+                    'value': value,
+                }
+                valuation_lines_by_category[product.categ_id].append(product_valuation_line)
 
+            product_category_valuation_lines = [
+                {
+                    'res_model': 'product.category' if categ else False,
+                    'id': categ.id if categ else False,
+                    'display_name': categ.display_name if categ else _('Product without category'),
+                    'value': sum(line['value'] for line in product_lines),
+                    'lines': product_lines,
+                } for (categ, product_lines) in valuation_lines_by_category.items()
+            ]
+            valuation_line_by_account.append({
+                'res_model': 'account.account',
+                'id': account.id,
+                'display_name': account.display_name,
+                'name': account.name,
+                'value': details['value'],
+                'lines': product_category_valuation_lines,
+            })
         return {
-            'lines': product_category_valuation_lines,
-            'value': total,
+            'lines': valuation_line_by_account,
+            'value': inventory_data['value'],
         }
 
     def action_print_as_pdf(self):
