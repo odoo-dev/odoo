@@ -375,6 +375,8 @@ class ResCompany(models.Model):
         res = super().write(values)
 
         # Archiving a company should also archive all of its branches
+        if 'active' in values and values['active'] is True:
+            self.env.registry.clear_cache()
         if values.get('active') is False:
             self.child_ids.active = False
 
