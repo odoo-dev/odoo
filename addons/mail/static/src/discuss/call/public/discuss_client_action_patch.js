@@ -16,6 +16,10 @@ patch(DiscussClientAction.prototype, {
         }
         const mute = browser.localStorage.getItem("discuss_call_preview_join_mute") === "true";
         const camera = browser.localStorage.getItem("discuss_call_preview_join_video") === "true";
+        const blur = browser.localStorage.getItem("mail_user_setting_use_blur");
+        if (blur) {
+            this.store.settings.useBlur = blur === "true";
+        }
         await this.rtc.toggleCall(this.store.discuss_public_thread, { audio: !mute, camera });
     },
     async restoreDiscussThread() {
