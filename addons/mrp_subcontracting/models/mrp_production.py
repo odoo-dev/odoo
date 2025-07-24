@@ -94,4 +94,4 @@ class MrpProduction(models.Model):
         return self.move_finished_ids.move_dest_ids.filtered(lambda m: m.is_subcontract)
 
     def _get_writeable_fields_portal_user(self):
-        return ['move_line_raw_ids', 'lot_producing_id', 'subcontracting_has_been_recorded', 'qty_producing', 'product_qty']
+        return ['move_line_raw_ids', 'lot_producing_ids', 'subcontracting_has_been_recorded', 'qty_producing', 'product_qty']
