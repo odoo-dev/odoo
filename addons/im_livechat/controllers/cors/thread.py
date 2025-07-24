@@ -13,7 +13,16 @@ class LivechatThreadController(ThreadController):
 
     @route("/im_livechat/cors/message/update_content", methods=["POST"], type="jsonrpc", auth="public", cors="*")
     def livechat_message_update_content(
-        self, guest_token, message_id, body, attachment_ids, attachment_tokens=None, partner_ids=None
+        self,
+        guest_token,
+        message_id,
+        body,
+        attachment_ids,
+        attachment_tokens=None,
+        partner_ids=None,
+        **kwargs,
     ):
         force_guest_env(guest_token)
-        return self.mail_message_update_content(message_id, body, attachment_ids, attachment_tokens, partner_ids)
+        return self.mail_message_update_content(
+            message_id, body, attachment_ids, attachment_tokens, partner_ids, **kwargs
+        )

@@ -177,7 +177,8 @@ test("Editing message keeps the mentioned channels", async () => {
     await contains(".o-mail-Discuss-threadName", { value: "other" });
 });
 
-test.skip("Can edit message comment in chatter", async () => {
+test.multi(1000);
+test("Can edit message comment in chatter", async () => {
     // Fails on runbot often because race condition between RPC returns and bus notifications,
     // leading to late steps receiving old bus notifications and therefore assertion error.
     // This happens with heavy CPU load, e.g. when test takes around 2.5 seconds to run rather

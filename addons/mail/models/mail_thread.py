@@ -4785,6 +4785,11 @@ class MailThread(models.AbstractModel):
             # sudo: mail.message.translation - discarding translations of message after editing it
             self.env["mail.message.translation"].sudo().search([("message_id", "=", message.id)]).unlink()
             res.append({"translationValue": False})
+        if data_response_id := kwargs.pop("data_response_id"):
+            partner, guest = self.env["res.partner"]._get_current_persona()
+            store = Store(message, res, bus_channel=partner or guest)
+            store.data_id = data_response_id
+            store.resolve_data_request(message=message).bus_send()
         Store(message, res, bus_channel=message._bus_channel()).bus_send()
 
     # ------------------------------------------------------
@@ -4883,7 +4888,7 @@ class MailThread(models.AbstractModel):
 
     @api.model
     def _get_allowed_message_update_params(self):
-        return {"attachment_ids", "body", "partner_ids"}
+        return {"attachment_ids", "body", "data_response_id", "partner_ids"}
 
     @api.model
     def _get_allowed_access_params(self):

@@ -671,7 +671,9 @@ async function mail_message_update_content(request) {
     /** @type {import("mock_models").MailMessage} */
     const MailMessage = this.env["mail.message"];
 
-    const { attachment_ids, body, message_id } = await parseRequestParams(request);
+    const { attachment_ids, body, data_response_id, message_id } = await parseRequestParams(
+        request
+    );
     const [message] = MailMessage.browse(message_id);
     const msg_values = {};
     if (body !== null) {
@@ -696,18 +698,27 @@ async function mail_message_update_content(request) {
         msg_values.attachment_ids = attachment_ids;
     }
     MailMessage.write([message_id], msg_values);
+    const stroreFields = {
+        attachment_ids: mailDataHelpers.Store.many(IrAttachment.browse(message.attachment_ids)),
+        body: ["markup", message.body],
+        partner_ids: mailDataHelpers.Store.many(
+            this.env["res.partner"].browse(message.partner_ids),
+            makeKwArgs({ fields: ["avatar_128", "name"] })
+        ),
+        pinned_at: message.pinned_at,
+    };
+    if (data_response_id) {
+        const store = new mailDataHelpers.Store(MailMessage.browse(message.id), stroreFields);
+        store.data_id = data_response_id;
+        store.resolve_data_request({ message: mailDataHelpers.Store.one(message) });
+        const [partner, guest] = this.env["res.partner"]._get_current_persona();
+        BusBus._sendone(partner || guest, "mail.record/insert", store.get_result());
+    }
+
     BusBus._sendone(
         MailMessage._bus_notification_target(message.id),
         "mail.record/insert",
-        new mailDataHelpers.Store(MailMessage.browse(message.id), {
-            attachment_ids: mailDataHelpers.Store.many(IrAttachment.browse(message.attachment_ids)),
-            body: ["markup", message.body],
-            partner_ids: mailDataHelpers.Store.many(
-                this.env["res.partner"].browse(message.partner_ids),
-                makeKwArgs({ fields: ["avatar_128", "name"] })
-            ),
-            pinned_at: message.pinned_at,
-        }).get_result()
+        new mailDataHelpers.Store(MailMessage.browse(message.id), stroreFields).get_result()
     );
     return new mailDataHelpers.Store(
         MailMessage.browse(message_id),
