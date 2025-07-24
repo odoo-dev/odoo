@@ -261,7 +261,7 @@ class ProductProduct(models.Model):
         ])
         if at_date:
             moves_in_domain &= Domain([('date', '<=', at_date)])
-        moves_in = self.env['stock.move'].search(moves_in_domain, order='date desc, id', limit=fifo_stack_size * 10)
+        moves_in = self.env['stock.move'].search(moves_in_domain, order='date desc, id desc', limit=fifo_stack_size * 10)
         # TODO: fetch more if 100 is not enough
 
         remaining_qty_on_last_move = 0
