@@ -1494,7 +1494,7 @@ class StockQuant(models.Model):
             if lot_id.company_id:
                 internal_domain = expression.AND([internal_domain, [('company_id', '=', company_id.id)]])
             quants = self.env['stock.quant'].search([('product_id', '=', product_id.id),
-                                                     ('lot_id', '=', lot_id.id),
+                                                     ('lot_id', 'in', lot_id.ids),
                                                      ('quantity', '!=', 0),
                                                      '|', ('location_id.usage', '=', 'customer'),
                                                            *internal_domain])

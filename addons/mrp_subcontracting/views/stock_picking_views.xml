@@ -19,6 +19,9 @@
                 <field name="is_subcontract" column_invisible="True"/>
                 <button name="action_show_details" invisible="not is_subcontract" type="object" icon="fa-list" width="0.1" title="Details"/>
             </xpath>
+            <xpath expr="//field[@name='move_ids_without_package']/list//field[@name='quantity']" position="attributes">
+                <attribute name="readonly" separator="or" add="has_tracking != 'none'"/>
+            </xpath>
         </field>
     </record>
 </odoo>
