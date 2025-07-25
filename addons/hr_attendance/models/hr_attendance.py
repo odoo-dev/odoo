@@ -151,10 +151,57 @@ class HrAttendance(models.Model):
                     att_progress_values[att_id] = overtime_reservoir
                     negative_overtime_attendances[att_id] = True
         for attendance in self:
+            if attendance.employee_id.is_flexible:
+                calendar = attendance.employee_id.resource_calendar_id
+                resource = attendance.employee_id.resource_id
+                if not calendar or not resource:
+                    attendance.overtime_hours = 0.0
+                    continue
+                expected_hours = calendar.get_work_hours_count(
+                    attendance.check_in,
+                    attendance.check_out,
+                    resource.id
+                )
+                expected_hours = 8
+                attendance.overtime_hours = attendance.worked_hours - expected_hours
+                continue
+                
+
+            calendar = attendance.employee_id.resource_calendar_id
+            resource = attendance.employee_id.resource_id
+            tz = timezone(resource.tz) if not calendar else timezone(calendar.tz)
+            if attendance.check_in:
+                check_in_tz = attendance.check_in.astimezone(tz)
+            if attendance.check_out:
+                check_out_tz = attendance.check_out.astimezone(tz)
+            if not calendar or not resource:
+                attendance.overtime_hours = 0.0
+                continue
+
+            attendance_intervals = Intervals([(check_in_tz, check_out_tz, attendance)])
+
+            # Hours
+            planned_intervals = calendar._attendance_intervals_batch(check_in_tz, check_out_tz, resource, lunch=False)
+
+            # Lunch
+            excluded_intervals = calendar._attendance_intervals_batch(check_in_tz, check_out_tz, resource, lunch=True)
+
+            # Temps travaillé réellement prévu
+            planned_work = attendance_intervals & planned_intervals
+            valid_work = planned_work - excluded_intervals
+
+            normal_seconds = sum((i[1] - i[0]).total_seconds() for i in valid_work)
+            worked_seconds = attendance.worked_hours * 3600
+
+            # Heures supplémentaires = tout ce qui dépasse les heures normales
+            overtime_seconds = worked_seconds - normal_seconds
+            overtime_hours = max(overtime_seconds / 3600.0, 0.0)
+
             if negative_overtime_attendances[attendance.id]:
                 attendance.overtime_hours = att_progress_values.get(attendance.id, 0)
             else:
-                attendance.overtime_hours = attendance.worked_hours * ((100 - att_progress_values.get(attendance.id, 100)) / 100)
+                # attendance.overtime_hours = attendance.worked_hours * ((100 - att_progress_values.get(attendance.id, 100)) / 100)
+                attendance.overtime_hours = overtime_hours
 
     @api.depends('employee_id', 'overtime_status', 'overtime_hours')
     def _compute_validated_overtime_hours(self):
@@ -214,11 +261,26 @@ class HrAttendance(models.Model):
                 tz = timezone(resource.tz) if not calendar else timezone(calendar.tz)
                 check_in_tz = attendance.check_in.astimezone(tz)
                 check_out_tz = attendance.check_out.astimezone(tz)
-                lunch_intervals = []
-                if not attendance.employee_id.is_flexible:
-                    lunch_intervals = attendance.employee_id._employee_attendance_intervals(check_in_tz, check_out_tz, lunch=True)
-                attendance_intervals = Intervals([(check_in_tz, check_out_tz, attendance)]) - lunch_intervals
-                delta = sum((i[1] - i[0]).total_seconds() for i in attendance_intervals)
+                if attendance.employee_id.is_flexible:
+                    delta = (check_out_tz - check_in_tz).total_seconds()
+                    attendance.worked_hours = delta / 3600.0
+                    continue
+                attendance_intervals = Intervals([(check_in_tz, check_out_tz, attendance)])
+
+                # Get breaks/lunch
+                excluded_intervals = []
+                if calendar:
+                    breaks_dict = calendar._attendance_intervals_batch(
+                        check_in_tz,
+                        check_out_tz,
+                        resource,
+                        lunch=True
+                    )
+                    excluded_intervals = breaks_dict.get(resource.id, [])
+
+                valid_intervals = attendance_intervals - Intervals(excluded_intervals)
+
+                delta = sum((i[1] - i[0]).total_seconds() for i in valid_intervals)
                 attendance.worked_hours = delta / 3600.0
             else:
                 attendance.worked_hours = False
