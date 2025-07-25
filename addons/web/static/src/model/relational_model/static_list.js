@@ -201,9 +201,19 @@ export class StaticList extends DataPoint {
      * @param {Object} [options]
      * @param {boolean} [options.canAddOverLimit]
      * @param {boolean} [options.sort]
+     * @param {boolean} [options.withResequence]
      * @returns {Promise<void>}
      */
     applyCommands(commands, options = {}) {
+        if (options.withResequence) {
+            let sequenceMin = this.records.map((record) => record.data.sequence)[0];
+            const recordsToReSequence = this.records.slice(1).map((record) => record.data);
+            const newRecords = commands.map((command) => command[2])
+            for (const record of recordsToReSequence.concat(newRecords)) {
+                record.sequence = sequenceMin++;
+            }
+        }
+
         return this.model.mutex.exec(async () => {
             await this._applyCommands(commands, omit(options, "sort"));
             if (options.sort) {

@@ -312,7 +312,7 @@ export class SectionAndNoteText extends Component {
 
 export class ListSectionAndNoteText extends SectionAndNoteText {
     get componentToUse() {
-        return this.props.record.data.display_type !== "line_section"
+        return !['line_section', 'line_subsection'].includes(this.props.record.data.display_type)
             ? ListTextField
             : super.componentToUse;
     }

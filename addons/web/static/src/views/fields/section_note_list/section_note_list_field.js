@@ -9,6 +9,7 @@ import { ListRenderer } from "@web/views/list/list_renderer";
 const DISPLAY_TYPES = {
     NOTE: "line_note",
     RECORD: "record",
+    PRODUCT: "product",
     ROOT: Symbol("root"),
     SECTION: "line_section",
     SUBSECTION: "line_subsection",
@@ -71,7 +72,7 @@ class HierarchyItem {
     }
 
     get isRecord() {
-        return this.type === DISPLAY_TYPES.RECORD;
+        return this.type === DISPLAY_TYPES.RECORD || this.type === DISPLAY_TYPES.PRODUCT;
     }
 
     get records() {
@@ -211,12 +212,9 @@ export class SectionListRenderer extends ListRenderer {
         const commands = [];
         for (const record of item.records) {
             const data = record.copyRawData();
-            if (this.props.list.handleField) {
-                record.data[this.props.list.handleField] = this.props.list.records.length + 1;
-            }
             commands.push(x2ManyCommands.create(getId("virtual"), data));
         }
-        await this.props.list.applyCommands(commands);
+        await this.props.list.applyCommands(commands, { withResequence: true });
     }
 
     editNextRecord(record, group) {

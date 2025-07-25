@@ -192,7 +192,10 @@ export class Record extends DataPoint {
                     data[name] = value && serializeDateTime(value);
                     break;
                 case "many2one":
-                    data[name] = value && value.id;
+                    data[name] = value && {
+                        id: value.id,
+                        display_name: value?.display_name ? value.display_name : "Unnamed",
+                    };
                     break;
                 case "many2many":
                 case "one2many":
