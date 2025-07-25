@@ -658,5 +658,28 @@ test("list datetime: column widths (show_time=false)", async () => {
     });
 
     expect(queryAllTexts(".o_data_row:eq(0) .o_data_cell")).toEqual(["Feb 8, 2017", "partner,1"]);
-    expect(queryAllProperties(".o_list_table thead th", "offsetWidth")).toEqual([40, 83, 677]);
+    expect(queryAllProperties(".o_list_table thead th", "offsetWidth")).toEqual([40, 99, 661]);
+});
+
+test("list datetime: column widths (numeric format)", async () => {
+    await resize({ width: 800 });
+    document.body.style.fontFamily = "sans-serif";
+    resetDateFieldWidths();
+    after(resetDateFieldWidths);
+
+    await mountView({
+        type: "list",
+        resModel: "partner",
+        arch: /* xml */ `
+            <list>
+                <field name="datetime" widget="datetime" options="{'numeric': true }" />
+                <field name="display_name" />
+            </list>`,
+    });
+
+    expect(queryAllTexts(".o_data_row:eq(0) .o_data_cell")).toEqual([
+        "02/08/2017 11:00:00",
+        "partner,1",
+    ]);
+    expect(queryAllProperties(".o_list_table thead th", "offsetWidth")).toEqual([40, 144, 616]);
 });

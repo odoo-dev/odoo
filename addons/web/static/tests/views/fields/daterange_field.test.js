@@ -19,7 +19,6 @@ import {
     clickSave,
     contains,
     defineModels,
-    defineParams,
     fields,
     models,
     mountView,
@@ -885,19 +884,13 @@ test("list daterange: column widths", async () => {
 
     expect(".o_data_row").toHaveCount(1);
     const columnWidths = queryAllProperties(".o_list_table thead th", "offsetWidth");
-    expect(columnWidths).toEqual([40, 187, 310, 263]);
+    expect(columnWidths).toEqual([40, 220, 396, 144]);
 });
 
-test("list daterange: column widths (fancy format)", async () => {
+test("list daterange: column widths (numeric format)", async () => {
     await resize({ width: 800 });
     document.body.style.fontFamily = "sans-serif";
 
-    defineParams({
-        lang_parameters: {
-            date_format: "%a, %d %B %Y",
-            time_format: "%H:%M:%S %p",
-        },
-    });
     resetDateFieldWidths();
     after(resetDateFieldWidths);
 
@@ -919,12 +912,12 @@ test("list daterange: column widths (fancy format)", async () => {
 
     expect(".o_data_row").toHaveCount(1);
     expect(queryAllTexts(".o_data_cell")).toEqual([
-        "Fri, 03 February 2017\nSat, 04 February 2017",
-        "Wed, 08 February 2017 15:30:00 PM\nThu, 09 February 2017 22:30:00 PM",
+        "02/03/2017\n02/04/2017",
+        "02/08/2017 15:30:00\n02/09/2017 22:30:00",
         "",
     ]);
     const columnWidths = queryAllProperties(".o_list_table thead th", "offsetWidth");
-    expect(columnWidths).toEqual([40, 375, 549, 100]);
+    expect(columnWidths).toEqual([40, 187, 310, 263]);
 });
 
 test("list daterange: column widths (show_time=false)", async () => {
@@ -951,7 +944,7 @@ test("list daterange: column widths (show_time=false)", async () => {
     expect(".o_data_row").toHaveCount(1);
     expect(queryAllTexts(".o_data_cell")).toEqual(["Feb 8, 2017\nFeb 9, 2017", ""]);
     const columnWidths = queryAllProperties(".o_list_table thead th", "offsetWidth");
-    expect(columnWidths).toEqual([40, 187, 573]);
+    expect(columnWidths).toEqual([40, 219, 541]);
 });
 
 test("list daterange: column widths (no record)", async () => {
@@ -977,7 +970,7 @@ test("list daterange: column widths (no record)", async () => {
 
     expect(".o_data_row").toHaveCount(0);
     const columnWidths = queryAllProperties(".o_list_table thead th", "offsetWidth");
-    expect(columnWidths).toEqual([40, 187, 310, 263]);
+    expect(columnWidths).toEqual([40, 220, 396, 144]);
 });
 
 test.tags("desktop");

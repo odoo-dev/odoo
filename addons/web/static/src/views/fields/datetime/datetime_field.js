@@ -403,6 +403,8 @@ export const dateField = {
         minPrecision: options.min_precision,
         maxPrecision: options.max_precision,
     }),
+    listViewWidth: ({ options }) =>
+        options.numeric ? FIELD_WIDTHS.numeric_date : FIELD_WIDTHS.date,
     fieldDependencies: ({ type, attrs, options }) => {
         const deps = [];
         if (options[START_DATE_FIELD_OPTION]) {
@@ -483,8 +485,12 @@ export const dateTimeField = {
         };
     },
     supportedTypes: ["datetime"],
-    listViewWidth: ({ options }) =>
-        exprToBoolean(options.show_time ?? true) ? FIELD_WIDTHS.datetime : FIELD_WIDTHS.date,
+    listViewWidth: ({ options }) => {
+        if (!exprToBoolean(options.show_time ?? true)) {
+            return dateField.listViewWidth({ options });
+        }
+        return options.numeric ? FIELD_WIDTHS.numeric_datetime : FIELD_WIDTHS.datetime;
+    },
 };
 
 export const dateRangeField = {
@@ -522,12 +528,10 @@ export const dateRangeField = {
     ],
     supportedTypes: ["date", "datetime"],
     listViewWidth: ({ type, options }) => {
-        let width;
-        if (type === "datetime" && exprToBoolean(options.show_time ?? true)) {
-            width = FIELD_WIDTHS.datetime;
-        } else {
-            width = FIELD_WIDTHS.date;
-        }
+        const width =
+            type === "datetime"
+                ? dateTimeField.listViewWidth({ options })
+                : dateField.listViewWidth({ options });
         return 2 * width + 30; // 30px for the arrow and the gaps
     },
     isValid: (record, fieldname, fieldInfo) => {
