@@ -249,6 +249,11 @@ registry.category("web_tour.tours").add('totp_login_device', {
     trigger: "button:contains(Log in)",
     run: "click",
     expectUnloadPage: true,
+},{
+    trigger: 'html',
+    async run() {
+        await new Promise(r => setTimeout(r, 1000));
+    }
 },
 {
     content: "check we're logged in",
