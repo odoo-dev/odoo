@@ -1,4 +1,3 @@
-from collections import defaultdict
 from dateutil.relativedelta import relativedelta
 
 from odoo import Command, _, api, fields, models
@@ -53,31 +52,23 @@ class ResCompany(models.Model):
         required=True,
     )
 
-    def action_close_stock_valuation(self, auto_post=False, periodic_cogs=False):
+    def action_close_stock_valuation(self, auto_post=False, periodic_cogs=False, periodic_variation=True):
         self.ensure_one()
         moves_vals = []
-        fiscal_year_date_from = self.compute_fiscalyear_dates(fields.Date.today())['date_from']
-        products = self.env['product.product'].with_company(self).search([('is_storable', '=', True)])
+        accounts_by_product = self._get_accounts_by_product()
 
-        stock_valuation_account = self.account_stock_valuation_id
-        counter_balance_account = self.account_stock_variation_id
-        if self.anglo_saxon_accounting:
-            counter_balance_account = self.account_cogs_id
-
-        vals_list = self._get_stock_valuation_account_vals(products)
+        vals_list = self._get_stock_valuation_account_vals(accounts_by_product)
         if vals_list:
             moves_vals += vals_list
 
-        if self.anglo_saxon_accounting:
-            purchase_account = self.account_stock_variation_id
-            vals = self._get_periodic_cogs_vals(products, fiscal_year_date_from, purchase_account, counter_balance_account)
-            if vals:
-                moves_vals.append(vals)
-        else:
-            realtime_products = products.filtered(lambda p: p.valuation == 'real_time')
-            vals = self._get_periodic_expense_vals(realtime_products, fiscal_year_date_from, stock_valuation_account, self.account_stock_variation_id, self.expense_account_id)
-            if vals:
-                moves_vals.append(vals)
+        if self.anglo_saxon_accounting and periodic_cogs:
+            vals_list = self._get_periodic_cogs_vals(accounts_by_product)
+            if vals_list:
+                moves_vals += vals_list
+        if not self.anglo_saxon_accounting and periodic_variation:
+            vals_list = self._get_periodic_expense_vals(accounts_by_product)
+            if vals_list:
+                moves_vals += vals_list
 
         if not moves_vals:
             # No account moves to create, so nothing to display.
@@ -86,7 +77,7 @@ class ResCompany(models.Model):
         account_moves = self.env['account.move'].create(moves_vals)
 
         if auto_post:
-            account_moves.post()
+            account_moves._post()
 
         action = {
             'type': 'ir.actions.act_window',
@@ -102,7 +93,7 @@ class ResCompany(models.Model):
             })
         return action
 
-    def stock_value(self, products=None, product_categories=None, at_date=None):
+    def stock_value(self, accounts_by_product=None, at_date=None):
         """ result: dict with format {
             'value': global value for the company
             'accounts': {
@@ -122,16 +113,11 @@ class ResCompany(models.Model):
             'value': 0.0,
             'accounts': {},
         }
-        if products:
-            products = products.with_company(self).with_context(to_date=at_date)
-        domain = Domain([('is_storable', '=', True)])
-        if product_categories:
-            domain = domain & Domain([('categ_id', 'in', product_categories.ids)])
-        products = self.env['product.product'].with_company(self).search(domain)
-        products = products.with_company(self).with_context(to_date=at_date)
-        for product in products:
-            account = product._get_product_accounts()['stock_valuation']
-            product_value = product.total_value
+        if not accounts_by_product:
+            accounts_by_product = self._get_accounts_by_product()
+        for product, accounts in accounts_by_product.items():
+            account = accounts['valuation']
+            product_value = product.with_context(to_date=at_date).total_value
             if account not in total_value_by_account['accounts']:
                 total_value_by_account['accounts'][account] = {
                     'value': 0.0,
@@ -143,7 +129,7 @@ class ResCompany(models.Model):
             total_value_by_account['value'] += product_value
         return total_value_by_account
 
-    def stock_accounting_value(self, products=None, product_categories=None, at_date=None):
+    def stock_accounting_value(self, accounts_by_product=None, at_date=None):
         """ Return the inventory accounting value for the company
         result: dict with format {
             'value': global value for the company
@@ -165,16 +151,15 @@ class ResCompany(models.Model):
         }
         """
         self.ensure_one()
+        if not accounts_by_product:
+            accounts_by_product = self._get_accounts_by_product()
         account_data = {
             'value': 0.0,
             'accounts': {},
         }
-        if not products:
-            products = self.env['product.product'].with_company(self).search([('is_storable', '=', True)])
         stock_valuation_accounts_ids = set()
-        for product in products:
-            account = product._get_product_accounts()['stock_valuation']
-            stock_valuation_accounts_ids.add(account.id)
+        for product, accounts in accounts_by_product.items():
+            stock_valuation_accounts_ids.add(accounts['valuation'].id)
         stock_valuation_accounts = self.env['account.account'].browse(stock_valuation_accounts_ids)
         domain = Domain([
             ('account_id', 'in', stock_valuation_accounts.ids), ('parent_state', '=', 'posted'),
@@ -182,10 +167,6 @@ class ResCompany(models.Model):
         ])
         if at_date:
             domain = domain & Domain([('date', '<=', at_date)])
-        if products:
-            domain = domain & Domain(['|', ('product_id', 'in', products.ids), ('product_id', '=', False)])
-        elif product_categories:
-            domain = domain & Domain([('product_id.categ_id', 'in', product_categories.ids)])
         amls_group = self.env['account.move.line']._read_group(domain, ['account_id', 'product_id'], ['balance:sum', 'id:recordset'])
         for account, product, balance, amls in amls_group:
             account_data['value'] += balance
@@ -216,149 +197,218 @@ class ResCompany(models.Model):
         companies = self.env['res.company'].search(domain)
         companies.action_close_stock_valuation(auto_post=True)
 
-    def _get_stock_valuation_account_vals(self, products):
-        move_vals_list = []
+    def _get_accounts_by_product(self, products=None):
         if not products:
+            products = self.env['product.product'].with_company(self).search([('is_storable', '=', True)])
+
+        accounts_by_product = {}
+        for product in products:
+            accounts = product._get_product_accounts()
+            accounts_by_product[product] = {
+                'valuation': accounts['stock_valuation'],
+                'variation': accounts['stock_variation'],
+                'expense': accounts['expense'],
+            }
+        return accounts_by_product
+
+    def _get_company_accounting_value(self, account, details):
+        return details['accounts'].get(account, {}).get('company', {}).get('value', 0)
+
+    def _get_product_inventory_value(self, product, account, details):
+        return details['accounts'].get(account, {}).get('product', {}).get(product, 0)
+
+    def _get_product_accounting_value(self, product, account, details):
+        return details['accounts'].get(account, {}).get('product', {}).get(product, {}).get('value', 0)
+
+    def _get_stock_valuation_account_vals(self, accounts_by_product):
+        move_vals_list = []
+        if not accounts_by_product:
             return move_vals_list
 
         company_valuation_acc = self.account_stock_valuation_id
-        company_variation_acc = self.account_stock_variation_id
+        if self.anglo_saxon_accounting:
+            company_variation_acc = self.account_cogs_id
+        else:
+            company_variation_acc = self.account_stock_variation_id
 
-        inventory_data = self.stock_value(products)
-        accounting_data = self.stock_accounting_value()
+        inventory_data = self.stock_value(accounts_by_product)
+        accounting_data = self.stock_accounting_value(accounts_by_product)
 
+        # 1. Company Variation
         company_inventory_variation = 0
         product_specific_valorisation_list = []
-
-        company_inventory_data = inventory_data['accounts'].get(company_valuation_acc, {}).get('products', {})
-        for product in products:
-            product_accounts = product._get_product_accounts()
-            product_valuation_acc = product_accounts['stock_valuation']
-            product_variation_acc = product_accounts['stock_variation']
+        for product, accounts in accounts_by_product.items():
+            product_valuation_acc = accounts['valuation']
+            product_variation_acc = accounts['variation']
+            if self.anglo_saxon_accounting:
+                product_variation_acc = accounts['expense']
 
             if product_valuation_acc == company_valuation_acc and product_variation_acc == company_variation_acc:
-                company_inventory_variation += company_inventory_data.get(product, 0)
+                company_inventory_variation += self._get_product_inventory_value(product, product_valuation_acc, inventory_data)
+                company_inventory_variation -= self._get_product_accounting_value(product, product_valuation_acc, accounting_data)
                 continue
 
-            product_specific_valorisation_list.append(product)
+            product_specific_valorisation_list.append([product, product_valuation_acc, product_variation_acc])
 
-        company_accounting_valuation = accounting_data['accounts'].get(company_valuation_acc, {}).get('company', {}).get('value')
+        # Also remove the value that is not product specific
+        company_accounting_valuation = self._get_company_accounting_value(company_valuation_acc, accounting_data)
         if company_accounting_valuation:
             company_inventory_variation -= company_accounting_valuation
 
         if company_inventory_variation:
-            move_vals = {
-                'journal_id': self.account_stock_journal_id.id,
-                'date': fields.Date.context_today(self),
-                'ref': _('Stock Valuation Closing'),
-                'line_ids': [],
-                'move_type': 'entry',
-            }
-            move_vals['line_ids'].append(Command.create({
-                'account_id': company_variation_acc.id,
-                'name': _('Stock Variation'),
-                'debit': -company_inventory_variation if company_inventory_variation > 0 else 0,
-                'credit': company_inventory_variation if company_inventory_variation < 0 else 0,
-            }))
-            move_vals['line_ids'].append(Command.create({
-                'account_id': company_valuation_acc.id,
-                'name': _('Stock Variation'),
-                'debit': company_inventory_variation if company_inventory_variation > 0 else 0,
-                'credit': -company_inventory_variation if company_inventory_variation < 0 else 0,
-            }))
+            move_vals = self._prepare_inventory_am_vals(
+                company_valuation_acc,
+                company_variation_acc,
+                company_inventory_variation,
+                _('Stock Variation Closing: %(company)s', company=self.display_name),
+            )
             move_vals_list.append(move_vals)
 
         if not product_specific_valorisation_list:
             return move_vals_list
 
-        for product in product_specific_valorisation_list:
-            pass
+        # 2. Product Specific Variation
+        for product, valuation_acc, variation_acc in product_specific_valorisation_list:
+            inventory_value = self._get_product_inventory_value(product, valuation_acc, inventory_data)
+            account_value = self._get_product_accounting_value(product, variation_acc, accounting_data)
+            variation = inventory_value - account_value
+            if not variation:
+                continue
+            move_vals = self._prepare_inventory_am_vals(
+                valuation_acc,
+                variation_acc,
+                variation,
+                _('Stock Variation Closing: %(product)s', product=product.display_name),
+                product_id=product.id,
+            )
+            move_vals_list.append(move_vals)
+        return move_vals_list
+
+    def _get_periodic_expense_vals(self, accounts_by_product):
+        """ In periodic perpetual the inventory variation is never posted.
+        This method compute the variation for a period and post it.
+        """
+        if self.anglo_saxon_accounting:
+            return []
+        fiscal_year_date_from = self.compute_fiscalyear_dates(fields.Date.today())['date_from']
+        product_ids = set()
+        valuation_account_ids = set()
+        variation_account_ids = set()
+        for product, accounts in accounts_by_product.items():
+            if product.valuation != 'real_time':
+                continue
+            product_ids.add(product.id)
+            valuation_account_ids.add(accounts['valuation'].id)
+            variation_account_ids.add(accounts['variation'].id)
+
+        valuation_over_period = self.env['account.move.line']._read_group(
+            domain=[
+                ('account_id', 'in', valuation_account_ids),
+                ('product_id', 'in', product_ids),
+                ('date', '>=', fiscal_year_date_from),
+                ('parent_state', '=', 'posted'),
+                ('company_id', '=', self.id),
+            ],
+            groupby=['product_id', 'account_id'],
+            aggregates=['balance:sum'],
+        )
+        valuation_over_period = {
+            (product, account): balance
+            for product, account, balance in valuation_over_period
+        }
+        existing_posted_variations = self.env['account.move.line']._read_group(
+            domain=[
+                ('account_id', 'in', variation_account_ids),
+                ('product_id', 'in', product_ids),
+                ('date', '>=', fiscal_year_date_from),
+                ('parent_state', '=', 'posted'),
+                ('company_id', '=', self.id),
+            ],
+            groupby=['product_id', 'account_id'],
+            aggregates=['balance:sum'],
+        )
+        existing_posted_variations = {
+            (product, account): balance
+            for product, account, balance in existing_posted_variations
+        }
+
+        move_vals_list = []
+
+        for product in self.env['product.product'].browse(product_ids):
+            valuation_acc = accounts_by_product[product]['valuation']
+            variation_acc = accounts_by_product[product]['variation']
+            expense_acc = accounts_by_product[product]['expense']
+
+            balance = valuation_over_period.get((product, valuation_acc), 0) - existing_posted_variations.get((product, variation_acc), 0)
+            if not balance:
+                continue
+            move_vals = self._prepare_inventory_am_vals(
+                variation_acc,
+                expense_acc,
+                balance,
+                _('Inventory Variation'),
+                product_id=product.id,
+            )
+            move_vals_list.append(move_vals)
 
         return move_vals_list
 
-    def _get_periodic_expense_vals(self, products, fiscal_year_date_from, stock_valuation_account, stock_variation_account, expense_account):
-        if self.anglo_saxon_accounting:
-            return False
-        existing_am = self.env['account.move'].search([
-            ('line_ids.account_id', '=', expense_account.id),
-            ('line_ids.account_id', '=', stock_variation_account.id),
-            ('date', '>', fiscal_year_date_from),
-            ('state', '=', 'posted'),
-            ('company_id', '=', self.id),
-        ])
-
-        inventory_variation_balance = sum(line.balance for line in existing_am.line_ids if line.account_id == stock_variation_account)
-        inventory_value = self.stock_value(products)[0] if products else 0
-        inventory_value_at_beginning = self.env['account.move.line']._read_group(
-            domain=[
-                ('account_id', '=', stock_valuation_account.id),
-                ('parent_state', '=', 'posted'),
-                ('company_id', '=', self.id),
-                ('date', '<=', fiscal_year_date_from),
-            ],
-            groupby=['account_id'],
-            aggregates=['balance:sum'],
-        )
-        balance = inventory_value_at_beginning[0]['balance'] if inventory_value_at_beginning else 0
-        balance = inventory_value - balance - inventory_variation_balance
-        if not balance:
-            return False
-        move_vals = {
-            'journal_id': self.account_stock_journal_id.id,
-            'date': fields.Date.context_today(self),
-            'ref': _('Balance expense with inventory variation'),
-            'line_ids': [],
-            'move_type': 'entry',
-        }
-        move_vals['line_ids'].append(Command.create({
-            'account_id': stock_variation_account.id,
-            'name': _('Counter balance expense with inventory variation'),
-            'debit': balance if balance > 0 else 0,
-            'credit': balance if balance < 0 else 0,
-        }))
-        move_vals['line_ids'].append(Command.create({
-            'account_id': expense_account.id,
-            'name': _('Counter balance expense with inventory variation'),
-            'debit': balance if balance < 0 else 0,
-            'credit': balance if balance > 0 else 0,
-        }))
-        return move_vals
-
-    def _get_periodic_cogs_vals(self, products, fiscal_year_date_from, purchase_account, cogs_account):
+    def _get_periodic_cogs_vals(self, accounts_by_product):
         if not self.anglo_saxon_accounting:
             return False
 
-        amls = self.env['account.move.line'].search(
+        purchase_accounts = self.env['acount.acount']
+        product_ids = set()
+        for product, accounts in accounts_by_product.items():
+            if product.valuation != 'periodic':
+                continue
+            product_ids.add(product.id)
+            purchase_accounts += accounts['variation']
+        amls_group = self.env['account.move.line']._read_group(
             domain=[
-                ('account_id', '=', purchase_account.id), ('parent_state', '=', 'posted'),
+                ('account_id', 'in', purchase_accounts.ids), ('parent_state', '=', 'posted'),
                 ('company_id', '=', self.id),
-                ('date', '>', fiscal_year_date_from),
-                '|', ('product_id.is_storable', '=', True), ('name', '=', _('COGS counter balance')),
+                ('product_id', 'in', product_ids),
             ],
+            groupby=['product_id'],
+            aggregates=['balance:sum'],
         )
-        amls_value = sum(amls.mapped('balance')) if amls else 0
-        if not amls_value:
-            return False
-        cogs_counter_balance = amls_value
+        am_vals_list = []
+        for product, balance in amls_group:
+            if not balance:
+                continue
+            cogs_acc = accounts_by_product[product]['expense']
+            purchase_acc = accounts_by_product[product]['variation']
+            move_vals = self._prepare_inventory_am_vals(
+                cogs_acc,
+                purchase_acc,
+                balance,
+                _('Stock Valuation Closing: Empty purchase account'),
+                product_id=product.id)
+            am_vals_list.append(move_vals)
+        return am_vals_list
 
+    def _prepare_inventory_am_vals(self, debit_acc, credit_acc, balance, ref, product_id=False):
         move_vals = {
             'journal_id': self.account_stock_journal_id.id,
             'date': fields.Date.context_today(self),
-            'ref': _('Stock Valuation Closing. Adjust COGS account'),
+            'ref': ref,
             'line_ids': [],
             'move_type': 'entry',
         }
         move_vals['line_ids'].append(Command.create({
-            'account_id': cogs_account.id,
-            'name': _('COGS counter balance'),
-            'debit': cogs_counter_balance if cogs_counter_balance > 0 else 0,
-            'credit': cogs_counter_balance if cogs_counter_balance < 0 else 0,
+            'account_id': credit_acc.id,
+            'name': ref,
+            'debit': -balance if balance > 0 else 0,
+            'credit': balance if balance < 0 else 0,
+            'product_id': product_id,
         }))
         move_vals['line_ids'].append(Command.create({
-            'account_id': purchase_account.id,
-            'name': _('COGS counter balance'),
-            'debit': cogs_counter_balance if cogs_counter_balance < 0 else 0,
-            'credit': cogs_counter_balance if cogs_counter_balance > 0 else 0,
+            'account_id': debit_acc.id,
+            'name': ref,
+            'debit': balance if balance > 0 else 0,
+            'credit': -balance if balance < 0 else 0,
+            'product_id': product_id,
         }))
         return move_vals
 

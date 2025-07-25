@@ -42,7 +42,7 @@ export class StockValuationReportController {
     async actionGenerateEntry() {
         const periodicCOGS = true; // TODO: make it truly optional.
         const autoPost = false;
-        const args = [[this.companyId], periodicCOGS];
+        const args = [[this.companyId], autoPost, periodicCOGS];
         const action = await this.orm.call("res.company", "action_close_stock_valuation", args);
         if (action) {
             this.actionService.doAction(action);
