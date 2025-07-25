@@ -9,6 +9,7 @@
             <page name="order_lines" position="after">
                 <page string="Optional Products"
                     name="optional_products"
+                    groups="base.group_system"
                     invisible="state not in ['draft', 'sent']">
                     <field name="sale_order_option_ids" mode="list,kanban" readonly="state in ['cancel', 'sale']">
                         <form string="Optional Products">
