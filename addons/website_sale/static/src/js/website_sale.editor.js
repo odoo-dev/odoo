@@ -14,6 +14,7 @@ options.registry.WebsiteSaleGridLayout = options.Class.extend({
      */
     start: function () {
         const gridEl = this.$target[0].querySelector('#o_wsale_products_grid');
+        if (!gridEl) return;
         this.ppg = parseInt(gridEl.dataset.ppg);
         this.ppr = parseInt(gridEl.dataset.ppr);
         this.gap = this.$target[0].style.getPropertyValue('--o-wsale-products-grid-gap');
