@@ -21,6 +21,9 @@ class HrWorkEntry(models.Model):
     def _reset_conflicting_state(self):
         super()._reset_conflicting_state()
         attendances = self.filtered(lambda w: w.work_entry_type_id and not w.work_entry_type_id.is_leave)
+        if attendances and attendances.leave_id:
+            ic()
+            ic(attendances, attendances.leave_id.name)
         attendances.write({'leave_id': False})
 
     def _check_if_error(self):
@@ -34,23 +37,23 @@ class HrWorkEntry(models.Model):
 
         self.flush_recordset(['date_start', 'date_stop', 'employee_id', 'active'])
         self.env['hr.leave'].flush_model(['date_from', 'date_to', 'state', 'employee_id'])
-
-        query = """
+        self.env.cr.execute("""
             SELECT
-                b.id AS work_entry_id,
-                l.id AS leave_id
-            FROM hr_work_entry b
-            INNER JOIN hr_leave l ON b.employee_id = l.employee_id
+                work_entry.id AS work_entry_id,
+                leave.id AS leave_id
+            FROM hr_work_entry AS work_entry
+            INNER JOIN hr_leave leave ON work_entry.employee_id = leave.employee_id
             WHERE
-                b.active = TRUE AND
-                b.id IN %s AND
-                l.date_from < b.date_stop AND
-                l.date_to > b.date_start AND
-                l.state IN ('confirm', 'validate1');
-        """
-        self.env.cr.execute(query, [tuple(self.ids)])
+                work_entry.active AND
+                work_entry.id IN %s AND
+                -- leave contains work_entry
+                leave.date_from < work_entry.date_stop AND
+                leave.date_to > work_entry.date_start AND
+                leave.state IN ('confirm', 'validate1');
+        """, [tuple(self.ids)])
         conflicts = self.env.cr.dictfetchall()
         for res in conflicts:
+            # TODO: BIB This is the code erasing the leave from the initial lines
             self.browse(res.get('work_entry_id')).write({
                 'state': 'conflict',
                 'leave_id': res.get('leave_id')

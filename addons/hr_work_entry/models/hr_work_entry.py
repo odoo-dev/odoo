@@ -180,6 +180,9 @@ class HrWorkEntry(models.Model):
         return work_entries
 
     def write(self, vals):
+        if self and 'leave_id' in vals:
+            leave = self.env['hr.leave'].browse(vals['leave_id'])
+            __import__('ipdb').set_trace()
         skip_check = not bool({'date_start', 'date_stop', 'employee_id', 'work_entry_type_id', 'active'} & vals.keys())
         if 'state' in vals:
             if vals['state'] == 'draft':

@@ -113,8 +113,10 @@ Contracts:
             |----* work entry ****|
                 |************ work entry leave --------------|
         """
+        included = self.env['hr.work.entry']
+        overlappping = self.env['hr.work.entry']
         if not self:
-            return
+            return included, overlappping
 
         # 1. Create a work entry for each leave
         work_entries_vals_list = []
@@ -142,8 +144,6 @@ Contracts:
                 work_entries_by_employee[employee_id] |= self.env['hr.work.entry'].browse(group.get('work_entry_ids'))
 
             # 3. Archive work entries included in leaves
-            included = self.env['hr.work.entry']
-            overlappping = self.env['hr.work.entry']
             for work_entries in work_entries_by_employee.values():
                 # Work entries for this employee
                 new_employee_work_entries = work_entries & new_leave_work_entries
@@ -159,8 +159,14 @@ Contracts:
 
                 overlappping |= self.env['hr.work.entry']._from_intervals(outside_intervals)
                 included |= previous_employee_work_entries - overlappping
+            # TODO: BIB it might be here if it is flagged as overlapping
+            ic()
+            ic(overlappping)
             overlappping.write({'leave_id': False})
             included.write({'active': False})
+
+        # __import__('ipdb').set_trace()
+        return included, overlappping
 
     def write(self, vals):
         if not self:
@@ -182,8 +188,13 @@ Contracts:
         if any(vals.get('holiday_type', 'employee') == 'employee' and not vals.get('multi_employee', False) and not vals.get('employee_id', False) for vals in vals_list):
             raise ValidationError(_("There is no employee set on the time off. Please make sure you're logged in the correct company."))
         employee_ids = {v['employee_id'] for v in vals_list if v.get('employee_id')}
+        # TODO: BIB I suspect this shitty line to reassign everything
+        # It does flage everything as 'in conflict' and I suspect to set them as 'cancelled' right after
+        ic()
+        ic('create before _error_checking', self)
         with self.env['hr.work.entry']._error_checking(start=min(start_dates, default=False), stop=max(stop_dates, default=False), employee_ids=employee_ids):
             return super().create(vals_list)
+        ic('create after _error_checking', self)
 
     def action_confirm(self):
         start = min(self.mapped('date_from'), default=False)
