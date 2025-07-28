@@ -18,7 +18,7 @@ import {
 } from "@web/../tests/web_test_helpers";
 
 import { registry } from "@web/core/registry";
-import { resetDateFieldWidths } from "@web/views/list/column_width_hook";
+import { FIELD_WIDTHS, resetDateFieldWidths } from "@web/views/list/column_width_hook";
 
 describe.current.tags("desktop");
 
@@ -141,18 +141,23 @@ test(`width computation: no record, lot of fields`, async () => {
         type: "list",
         resModel: "foo",
         arch: `
-            <list>
-                <field name="bar"/>
-                <field name="foo"/>
-                <field name="int_field"/>
-                <field name="m2o"/>
-                <field name="qux"/>
-                <field name="date"/>
-                <field name="datetime"/>
-                <field name="amount"/>
-                <field name="currency_id"/>
-            </list>`,
+        <list>
+        <field name="bar"/>
+        <field name="foo"/>
+        <field name="int_field"/>
+        <field name="m2o"/>
+        <field name="qux"/>
+        <field name="date"/>
+        <field name="datetime"/>
+        <field name="amount"/>
+        <field name="currency_id"/>
+        </list>`,
     });
+    console.warn("FIELD WIDTHS");
+    console.warn(`date ${FIELD_WIDTHS.date}`);
+    console.warn(`datetime ${FIELD_WIDTHS.datetime}`);
+    console.warn(`numeric_date ${FIELD_WIDTHS.numeric_date}`);
+    console.warn(`numeric_datetime ${FIELD_WIDTHS.numeric_datetime}`);
     expect(getColumnWidths()).toEqual([40, 29, 89, 80, 89, 102, 99, 188, 114, 100]);
 });
 

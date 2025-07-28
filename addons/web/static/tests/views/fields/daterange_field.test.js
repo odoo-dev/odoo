@@ -894,7 +894,6 @@ test("list daterange: column widths", async () => {
 test("list daterange: column widths (numeric format)", async () => {
     await resize({ width: 800 });
     document.body.style.fontFamily = "sans-serif";
-
     resetDateFieldWidths();
     after(resetDateFieldWidths);
 
