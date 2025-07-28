@@ -14,7 +14,7 @@ import {
     resize,
 } from "@odoo/hoot-dom";
 import { mockDate, mockTimeZone } from "@odoo/hoot-mock";
-import { resetDateFieldWidths } from "@web/views/list/column_width_hook";
+import { FIELD_WIDTHS, resetDateFieldWidths } from "@web/views/list/column_width_hook";
 import {
     clickSave,
     contains,
@@ -865,7 +865,6 @@ test("list daterange: column widths", async () => {
     document.body.style.fontFamily = "sans-serif";
     resetDateFieldWidths();
     after(resetDateFieldWidths);
-
     Partner._fields.char_field = fields.Char();
     Partner._fields.date_end = fields.Date();
     Partner._records[0].date_end = "2017-02-04";
@@ -885,6 +884,11 @@ test("list daterange: column widths", async () => {
     expect(".o_data_row").toHaveCount(1);
     const columnWidths = queryAllProperties(".o_list_table thead th", "offsetWidth");
     expect(columnWidths).toEqual([40, 220, 396, 144]);
+    console.warn("FIELD WIDTHS");
+    console.warn(`date ${FIELD_WIDTHS.date}`);
+    console.warn(`datetime ${FIELD_WIDTHS.datetime}`);
+    console.warn(`numeric_date ${FIELD_WIDTHS.numeric_date}`);
+    console.warn(`numeric_datetime ${FIELD_WIDTHS.numeric_datetime}`);
 });
 
 test("list daterange: column widths (numeric format)", async () => {
@@ -951,6 +955,11 @@ test("list daterange: column widths (no record)", async () => {
     await resize({ width: 800 });
     document.body.style.fontFamily = "sans-serif";
     resetDateFieldWidths();
+    console.warn("FIELD WIDTHS");
+    console.warn(`date ${FIELD_WIDTHS.date}`);
+    console.warn(`datetime ${FIELD_WIDTHS.datetime}`);
+    console.warn(`numeric_date ${FIELD_WIDTHS.numeric_date}`);
+    console.warn(`numeric_datetime ${FIELD_WIDTHS.numeric_datetime}`);
     after(resetDateFieldWidths);
 
     Partner._fields.char_field = fields.Char();
