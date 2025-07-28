@@ -6,13 +6,13 @@ import { BLOCK_ALIGN } from "@html_builder/utils/option_sequence";
 class BlockAlignmentOptionPlugin extends Plugin {
     static id = "blockAlignmentOption";
     resources = {
-        builder_options: [
-            withSequence(BLOCK_ALIGN, {
-                template: "html_builder.BlockAlignmentOption",
-                selector: ".s_alert, .s_blockquote, .s_text_highlight",
-            }),
-        ],
+        builder_options: [withSequence(BLOCK_ALIGN, BlockAlignmentOption)],
     };
+}
+
+export class BlockAlignmentOption {
+    static template = "html_builder.BlockAlignmentOption";
+    static selector = ".s_alert, .s_blockquote, .s_text_highlight";
 }
 
 registry.category("website-plugins").add(BlockAlignmentOptionPlugin.id, BlockAlignmentOptionPlugin);

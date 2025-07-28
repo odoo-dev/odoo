@@ -6,14 +6,14 @@ import { withSequence } from "@html_editor/utils/resource";
 class VerticalJustifyOptionPlugin extends Plugin {
     static id = "verticalJustifyOption";
     resources = {
-        builder_options: [
-            withSequence(END, {
-                template: "html_builder.VerticalJustifyOption",
-                selector: ".s_masonry_block .o_grid_item, .s_quadrant .o_grid_item",
-                exclude: ".o_grid_item_image",
-            }),
-        ],
+        builder_options: [withSequence(END, VerticalJustifyOption)],
     };
+}
+
+export class VerticalJustifyOption {
+    static template = "html_builder.VerticalJustifyOption";
+    static selector = ".s_masonry_block .o_grid_item, .s_quadrant .o_grid_item";
+    static exclude = ".o_grid_item_image";
 }
 
 registry

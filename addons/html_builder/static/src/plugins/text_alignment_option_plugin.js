@@ -6,13 +6,13 @@ import { withSequence } from "@html_editor/utils/resource";
 class TextAlignmentOptionPlugin extends Plugin {
     static id = "textAlignmentOption";
     resources = {
-        builder_options: [
-            withSequence(TEXT_ALIGNMENT, {
-                template: "html_builder.TextAlignmentOption",
-                selector: ".s_share, .s_text_highlight, .s_social_media",
-            }),
-        ],
+        builder_options: [withSequence(TEXT_ALIGNMENT, TextAlignmentOption)],
     };
+}
+
+export class TextAlignmentOption {
+    static template = "html_builder.TextAlignmentOption";
+    static selector = ".s_share, .s_text_highlight, .s_social_media";
 }
 
 registry.category("website-plugins").add(TextAlignmentOptionPlugin.id, TextAlignmentOptionPlugin);

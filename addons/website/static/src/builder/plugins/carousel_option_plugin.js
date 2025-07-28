@@ -295,6 +295,14 @@ export class CarouselOptionPlugin extends Plugin {
     }
 }
 
+class CarouselOption {
+    static template = "website.CarouselOption";
+    static selector = "section";
+    static exclude =
+        ".s_carousel_intro_wrapper, .s_carousel_cards_wrapper, .s_quotes_carousel_wrapper:has(>.s_quotes_carousel_compact)";
+    static applyTo = ":scope > .carousel";
+}
+
 /**
  * Updates the carousel indicators to make the one at the given index be the
  * active one.
