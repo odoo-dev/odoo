@@ -44,6 +44,9 @@ export class PosConfig extends Base {
         }
         return new Set();
     }
+    get preparationFloors() {
+        return new Set();
+    }
 }
 
 registry.category("pos_available_models").add(PosConfig.pythonModel, PosConfig);

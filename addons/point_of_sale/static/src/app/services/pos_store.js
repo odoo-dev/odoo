@@ -1719,10 +1719,20 @@ export class PosStore extends WithLazyGetterTrap {
         return { webPrintFallback: true };
     }
     getOrderChanges(order = this.getOrder()) {
-        return getOrderChanges(order, this.config.preparationCategories);
+        return getOrderChanges(
+            order,
+            this.config.preparationCategories,
+            this.config.preparationFloors
+        );
     }
     changesToOrder(order, skipped = false, orderPreparationCategories, cancelled = false) {
-        return changesToOrder(order, skipped, orderPreparationCategories, cancelled);
+        return changesToOrder(
+            order,
+            skipped,
+            orderPreparationCategories,
+            cancelled,
+            this.config.preparationFloors
+        );
     }
     async checkPreparationStateAndSentOrderInPreparation(order, cancelled = false) {
         if (typeof order.id !== "number") {
@@ -1765,6 +1775,7 @@ export class PosStore extends WithLazyGetterTrap {
                 let orderChange = changesToOrder(
                     order,
                     this.config.preparationCategories,
+                    this.config.preparationFloors,
                     opts.cancelled
                 );
 

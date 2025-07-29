@@ -1,8 +1,13 @@
-export const changesToOrder = (order, orderPreparationCategories, cancelled = false) => {
+export const changesToOrder = (
+    order,
+    orderPreparationCategories,
+    cancelled = false,
+    orderFloorIds = new Set()
+) => {
     const toAdd = [];
     const toRemove = [];
 
-    const orderChanges = getOrderChanges(order, orderPreparationCategories);
+    const orderChanges = getOrderChanges(order, orderPreparationCategories, orderFloorIds);
     const linesChanges = !cancelled
         ? Object.values(orderChanges.orderlines)
         : Object.values(order.last_order_preparation_change.lines);
@@ -31,7 +36,7 @@ export const changesToOrder = (order, orderPreparationCategories, cancelled = fa
  * it uses the variable last_order_preparation_change which contains the last changes sent
  * to perform this calculation.
  */
-export const getOrderChanges = (order, orderPreparationCategories) => {
+export const getOrderChanges = (order, orderPreparationCategories, orderFloorIds) => {
     const prepaCategoryIds = orderPreparationCategories;
     const oldChanges = order.last_order_preparation_change.lines;
     const changes = {};
@@ -52,7 +57,11 @@ export const getOrderChanges = (order, orderPreparationCategories) => {
             prepaCategoryIds.has(id)
         );
 
-        if (prepaCategoryIds.size === 0 || productCategoryIds.length > 0) {
+        if (
+            prepaCategoryIds.size === 0 ||
+            productCategoryIds.length > 0 ||
+            orderFloorIds.has(order.table_id.floor_id.id)
+        ) {
             const key = Object.keys(order.last_order_preparation_change.lines).find((k) =>
                 k.startsWith(orderline.uuid)
             ); // find old data but note changed
