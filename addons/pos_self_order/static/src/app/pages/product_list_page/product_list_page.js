@@ -31,7 +31,18 @@ export class ProductListPage extends Component {
             this.selfOrder.computeAvailableCategories();
         }
         const availableCategories = this.selfOrder.availableCategories;
-        const topCategories = availableCategories.filter((category) => !category.parent_id);
+        const categoryMap = new Map();
+        availableCategories.forEach(cat => categoryMap.set(cat.id, cat));
+        const allWithParents = [...availableCategories];
+        availableCategories.forEach(cat => {
+                    const parent = cat.parent_id;
+                    if (parent && !categoryMap.has(parent.id)) {
+                        allWithParents.push(parent);
+                        categoryMap.set(parent.id, parent);
+                    }
+                    }
+                );
+        const topCategories = allWithParents.filter(cat => !cat.parent_id);
         const selectedCategory = initCategories ? topCategories[0] : this.selfOrder.currentCategory;
 
         this.state = useState({
