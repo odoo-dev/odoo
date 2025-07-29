@@ -24,7 +24,9 @@ import {
     mountView,
     onRpc,
     pagerNext,
+    patchWithCleanup,
 } from "../../web_test_helpers";
+import { _makeUser, user } from "@web/core/user";
 
 /**
  * @param {string} selector
@@ -862,6 +864,7 @@ test("list daterange with empty start date and end date", async () => {
 
 test("list daterange: column widths", async () => {
     await resize({ width: 800 });
+    patchWithCleanup(user, _makeUser({ user_context: { lang: "fr" } }));
     document.body.style.fontFamily = "sans-serif";
     resetDateFieldWidths();
     after(resetDateFieldWidths);
@@ -883,7 +886,7 @@ test("list daterange: column widths", async () => {
 
     expect(".o_data_row").toHaveCount(1);
     const columnWidths = queryAllProperties(".o_list_table thead th", "offsetWidth");
-    expect(columnWidths).toEqual([40, 220, 396, 144]);
+    expect(columnWidths).toEqual([40, 220, 352, 188]);
     console.warn("FIELD WIDTHS");
     console.warn(`date ${FIELD_WIDTHS.date}`);
     console.warn(`datetime ${FIELD_WIDTHS.datetime}`);
@@ -952,13 +955,9 @@ test("list daterange: column widths (show_time=false)", async () => {
 
 test("list daterange: column widths (no record)", async () => {
     await resize({ width: 800 });
+    patchWithCleanup(user, _makeUser({ user_context: { lang: "fr" } }));
     document.body.style.fontFamily = "sans-serif";
     resetDateFieldWidths();
-    console.warn("FIELD WIDTHS");
-    console.warn(`date ${FIELD_WIDTHS.date}`);
-    console.warn(`datetime ${FIELD_WIDTHS.datetime}`);
-    console.warn(`numeric_date ${FIELD_WIDTHS.numeric_date}`);
-    console.warn(`numeric_datetime ${FIELD_WIDTHS.numeric_datetime}`);
     after(resetDateFieldWidths);
 
     Partner._fields.char_field = fields.Char();
@@ -978,7 +977,12 @@ test("list daterange: column widths (no record)", async () => {
 
     expect(".o_data_row").toHaveCount(0);
     const columnWidths = queryAllProperties(".o_list_table thead th", "offsetWidth");
-    expect(columnWidths).toEqual([40, 220, 396, 144]);
+    expect(columnWidths).toEqual([40, 220, 352, 188]);
+    console.warn("FIELD WIDTHS");
+    console.warn(`date ${FIELD_WIDTHS.date}`);
+    console.warn(`datetime ${FIELD_WIDTHS.datetime}`);
+    console.warn(`numeric_date ${FIELD_WIDTHS.numeric_date}`);
+    console.warn(`numeric_datetime ${FIELD_WIDTHS.numeric_datetime}`);
 });
 
 test.tags("desktop");
