@@ -31,10 +31,10 @@
         --x: -50%;
         --border-color: #{$o-we-color-accent};
         --bg-color: #{rgba($o-we-color-accent, .15)};
+        --gap: 0.25rem;
 
         width: CALC(#{percentage(1/3)} - var(--gap));
         transition: all .5s, transform .25s;
-        border: $o-we-border-width solid var(--border-color);
         background-color: var(--bg-color);
         transform: translateX(var(--x));
 
@@ -63,22 +63,31 @@
         }
     }
 
-    .o-hb-btn {
-        --btn-bg: transparent;
-        --btn-color: #{$o-we-fg-light};
-        --btn-hover-bg: transparent;
-        --btn-hover-color: #{$o-we-fg-lighter};
-        --btn-active-bg: transparent;
-        --btn-active-color: #{$o-we-fg-lighter};
+    .nav-underline {
+        --nav-link-padding-y: #{map-get($spacers, 2)};
+        --nav-link-color: #{$o-we-fg-light};
+        --nav-link-hover-color: #{$o-we-fg-lighter};
+        --nav-underline-gap: 0.25rem;
+        --nav-underline-link-active-color: #{$o-we-fg-light};
 
-        &[data-name="blocks"] {
+        justify-content: space-between;
+
+        .nav-item {
+            width:  calc(#{percentage(1/3)} - var(--nav-underline-gap));
+        }
+
+        .nav-link[data-name="blocks"]{
             --o-snippets-tabs-accent-color: #{$o-we-color-success};
         }
-        &[data-name="customize"] {
+        .nav-link[data-name="customize"] {
             --o-snippets-tabs-accent-color: #{$o-we-color-accent};
         }
-        &[data-name="theme"] {
+        .nav-link[data-name="theme"] {
             --o-snippets-tabs-accent-color: #{$o-we-color-global};
+        }
+
+        .nav-link.active, .nav-link:hover, .nav-link:focus-visible, & .show > .nav-link {
+            border-bottom-color: var(--o-snippets-tabs-accent-color);
         }
 
         & i {
