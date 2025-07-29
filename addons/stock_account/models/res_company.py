@@ -1,3 +1,4 @@
+from collections import defaultdict
 from dateutil.relativedelta import relativedelta
 
 from odoo import Command, _, api, fields, models
@@ -57,6 +58,14 @@ class ResCompany(models.Model):
         moves_vals = []
         accounts_by_product = self._get_accounts_by_product()
 
+        location_account_moves = self.env['account.move']
+
+        vals_list = self._get_location_valuation_vals(accounts_by_product)
+        if vals_list:
+            # Needed directly since it will impact the accounting stock valuation.
+            location_account_moves = self.env['account.move'].create(vals_list)
+
+        # TODO: Use location_account_moves to reduce inventory account value
         vals_list = self._get_stock_valuation_account_vals(accounts_by_product)
         if vals_list:
             moves_vals += vals_list
@@ -70,11 +79,12 @@ class ResCompany(models.Model):
             if vals_list:
                 moves_vals += vals_list
 
-        if not moves_vals:
+        if not moves_vals and not location_account_moves:
             # No account moves to create, so nothing to display.
             raise UserError(_("Nothing to close"))
 
         account_moves = self.env['account.move'].create(moves_vals)
+        account_moves |= location_account_moves
 
         if auto_post:
             account_moves._post()
@@ -162,8 +172,10 @@ class ResCompany(models.Model):
             stock_valuation_accounts_ids.add(accounts['valuation'].id)
         stock_valuation_accounts = self.env['account.account'].browse(stock_valuation_accounts_ids)
         domain = Domain([
-            ('account_id', 'in', stock_valuation_accounts.ids), ('parent_state', '=', 'posted'),
+            ('account_id', 'in', stock_valuation_accounts.ids),
             ('company_id', '=', self.id),
+            ('parent_state', '!=', 'cancel'),
+            '|', ('parent_state', '=', 'posted'), ('move_type', 'not in', ['sale', 'purchase']),
         ])
         if at_date:
             domain = domain & Domain([('date', '<=', at_date)])
@@ -215,10 +227,54 @@ class ResCompany(models.Model):
         return details['accounts'].get(account, {}).get('company', {}).get('value', 0)
 
     def _get_product_inventory_value(self, product, account, details):
-        return details['accounts'].get(account, {}).get('product', {}).get(product, 0)
+        return details['accounts'].get(account, {}).get('products', {}).get(product, 0)
 
     def _get_product_accounting_value(self, product, account, details):
-        return details['accounts'].get(account, {}).get('product', {}).get(product, {}).get('value', 0)
+        return details['accounts'].get(account, {}).get('products', {}).get(product, {}).get('value', 0)
+
+    def _get_location_valuation_vals(self, accounts_by_product):
+        move_vals_list = []
+        valued_location = self.env['stock.location'].search([('valuation_account_id', '!=', False)])
+        quants_by_product_location = self.env['stock.quant']._read_group(
+            [('location_id', 'in', valued_location.ids)],
+            ['product_id', 'location_id'],
+            ['quantity:sum'],
+        )
+        products = set()
+        location_valuation = defaultdict(float)
+        for product, location, quantity in quants_by_product_location:
+            inventory_value = product._run_fifo(quantity, location=location)
+            products.add(product.id)
+            # 1. Get moves with fifo get stack and qty available at location
+            # 2. Compare the value with existing aml
+            # 3. Create aml for the difference
+            location_valuation[product, location.valuation_account_id] += inventory_value
+        products = self.env['product.product'].browse(products)
+        current_valuation = self.env['account.move.line']._read_group(
+            domain=[
+                ('account_id', 'in', valued_location.valuation_account_id.ids),
+                ('product_id', 'in', products.ids),
+                ('company_id', '=', self.id),
+                ('parent_state', '!=', 'cancel'),
+            ],
+            groupby=['product_id', 'account_id'],
+            aggregates=['balance:sum'],
+        )
+        for product, account, balance in current_valuation:
+            # TODO: Issue when multiple locations share same account
+            location_valuation[product, account] -= balance
+        for (product, account), balance in location_valuation.items():
+            if balance == 0:
+                continue
+            move_vals = self._prepare_inventory_am_vals(
+                account,
+                accounts_by_product[product]['valuation'],
+                balance,
+                _('Closing: Location Reclassification - [%(product)s] to [%(account)s]', product=product.display_name, account=account.display_name),
+                product_id=product.id,
+            )
+            move_vals_list.append(move_vals)
+        return move_vals_list
 
     def _get_stock_valuation_account_vals(self, accounts_by_product):
         move_vals_list = []
@@ -260,7 +316,7 @@ class ResCompany(models.Model):
                 company_valuation_acc,
                 company_variation_acc,
                 company_inventory_variation,
-                _('Stock Variation Closing: %(company)s', company=self.display_name),
+                _('Closing: Stock Variation Global for company [%(company)s]', company=self.display_name),
             )
             move_vals_list.append(move_vals)
 
@@ -278,7 +334,7 @@ class ResCompany(models.Model):
                 valuation_acc,
                 variation_acc,
                 variation,
-                _('Stock Variation Closing: %(product)s', product=product.display_name),
+                _('Closing: Stock Variation for product [%(product)s]', product=product.display_name),
                 product_id=product.id,
             )
             move_vals_list.append(move_vals)
@@ -290,6 +346,7 @@ class ResCompany(models.Model):
         """
         if self.anglo_saxon_accounting:
             return []
+
         fiscal_year_date_from = self.compute_fiscalyear_dates(fields.Date.today())['date_from']
         product_ids = set()
         valuation_account_ids = set()
@@ -316,20 +373,20 @@ class ResCompany(models.Model):
             (product, account): balance
             for product, account, balance in valuation_over_period
         }
-        existing_posted_variations = self.env['account.move.line']._read_group(
+        existing_variations = self.env['account.move.line']._read_group(
             domain=[
                 ('account_id', 'in', variation_account_ids),
                 ('product_id', 'in', product_ids),
                 ('date', '>=', fiscal_year_date_from),
-                ('parent_state', '=', 'posted'),
+                ('parent_state', '!=', 'cancel'),
                 ('company_id', '=', self.id),
             ],
             groupby=['product_id', 'account_id'],
             aggregates=['balance:sum'],
         )
-        existing_posted_variations = {
+        existing_variations = {
             (product, account): balance
-            for product, account, balance in existing_posted_variations
+            for product, account, balance in existing_variations
         }
 
         move_vals_list = []
@@ -339,14 +396,14 @@ class ResCompany(models.Model):
             variation_acc = accounts_by_product[product]['variation']
             expense_acc = accounts_by_product[product]['expense']
 
-            balance = valuation_over_period.get((product, valuation_acc), 0) - existing_posted_variations.get((product, variation_acc), 0)
+            balance = valuation_over_period.get((product, valuation_acc), 0) - existing_variations.get((product, variation_acc), 0)
             if not balance:
                 continue
             move_vals = self._prepare_inventory_am_vals(
                 variation_acc,
                 expense_acc,
                 balance,
-                _('Inventory Variation'),
+                _('Closing: Stock Variation for [%(product)s]', product=product.display_name),
                 product_id=product.id,
             )
             move_vals_list.append(move_vals)
@@ -383,7 +440,7 @@ class ResCompany(models.Model):
                 cogs_acc,
                 purchase_acc,
                 balance,
-                _('Stock Valuation Closing: Empty purchase account'),
+                _('Closing: Empty purchase account for product: [%(product)s]', product=product.display_name),
                 product_id=product.id)
             am_vals_list.append(move_vals)
         return am_vals_list
