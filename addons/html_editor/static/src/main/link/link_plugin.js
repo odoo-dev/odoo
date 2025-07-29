@@ -398,11 +398,14 @@ export class LinkPlugin extends Plugin {
         if (this.getResource("link_compatible_selection_predicates").some((p) => p())) {
             return true;
         }
-        const linksInSelection = this.dependencies.selection
-            .getTargetedNodes()
-            .filter((n) => n.tagName === "A");
         const targetedNodes = this.dependencies.selection.getTargetedNodes();
+        const linksInSelection = targetedNodes.filter((n) => n.tagName === "A");
+        const targetedBlocks = [...this.dependencies.selection.getTargetedBlocks()];
+        const topLevelBlocks = targetedBlocks.filter(
+            (block) => !targetedBlocks.some((other) => other !== block && other.contains(block))
+        );
         return (
+            topLevelBlocks.length < 2 &&
             linksInSelection.length < 2 &&
             // Prevent a link across sibling blocks:
             !targetedNodes.some((node) => {
@@ -767,9 +770,8 @@ export class LinkPlugin extends Plugin {
             }
         } else {
             const closestLinkElement = closestElement(selection.anchorNode, "A");
-            const isLinkEditable = this.delegateTo(
-                "is_link_editable_predicates",
-                closestLinkElement) || false;
+            const isLinkEditable =
+                this.delegateTo("is_link_editable_predicates", closestLinkElement) || false;
             if (closestLinkElement && closestLinkElement.isContentEditable) {
                 if (closestLinkElement !== this.linkInDocument || !this.currentOverlay.isOpen) {
                     this.openLinkTools(closestLinkElement);
