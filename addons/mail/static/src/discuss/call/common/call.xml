@@ -3,7 +3,7 @@
 
     <t t-name="discuss.Call">
         <PttAdBanner/>
-        <div class="o-discuss-Call user-select-none d-flex position-relative shadow-sm" t-att-class="{
+        <div class="o-discuss-Call user-select-none d-flex position-relative shadow-sm" t-attf-class="{{props.class}}" t-att-class="{
             'o-fullSize': isFullSize,
             'o-compact': props.compact and !isMobileOs,
             'o-minimized': minimized,

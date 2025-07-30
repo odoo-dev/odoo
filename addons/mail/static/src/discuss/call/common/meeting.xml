@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.Meeting">
+        <div class="o-mail-Meeting h-100 w-100">
+            <div class="o-mail-Meeting-main d-flex h-100 w-100 gap-3 p-3">
+                <Call class="'flex-grow-1 rounded overflow-hidden'"/>
+                <div t-if="store.rtc.meetingChatOpened or state.chatAlreadyOpened" t-att-class="{'o-hide': !store.rtc.meetingChatOpened}" class="o-mail-Meeting-channelViewContainer rounded overflow-hidden d-flex flex-column h-100" t-ref="channelContainer">
+                    <div class="o-mail-Meeting-channelView d-flex flex-column h-100 h-100">
+                        <Thread thread="channel" jumpPresent="state.jumpPresent"/>
+                        <Composer
+                            composer="channel.composer"
+                            className="'o-mail-Meeting-composer'"
+                            autofocus="true"
+                            onDiscardCallback="() => (channel.composer.replyToMessage = undefined)"
+                            onPostCallback.bind="() => this.state.jumpPresent++"
+                            dropzoneRef="channelRef"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -9,6 +9,7 @@ import { Component, onMounted, onPatched, onWillUnmount, toRaw, useRef, useState
 import { browser } from "@web/core/browser/browser";
 import { useService } from "@web/core/utils/hooks";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
+import { debounce } from "@bus/workers/websocket_worker_utils";
 
 /**
  * @typedef CardData
@@ -26,7 +27,7 @@ import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
  */
 export class Call extends Component {
     static components = { CallActionList, CallParticipantCard, PttAdBanner };
-    static props = ["thread?", "compact?", "isPip?"];
+    static props = ["thread?", "compact?", "isPip?", "class?"];
     static template = "discuss.Call";
 
     overlayTimeout;
@@ -47,6 +48,7 @@ export class Call extends Component {
             /** @type {CardData|undefined} */
             insetCard: undefined,
         });
+        this.arrangeTiles = debounce(this.arrangeTiles.bind(this));
         this.store = useService("mail.store");
         onMounted(() => {
             this.resizeObserver = new ResizeObserver(() => this.arrangeTiles());

@@ -1,0 +1,71 @@
+.o-main-components-container:has(.o-mail-Meeting) {
+    background-color: inherit;
+}
+
+.o-mail-Meeting {
+    background-color: var(--o-discuss-Call-bgColor, #{$dark});
+}
+
+.o-mail-Meeting-main {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+
+.o-mail-Meeting-channelView {
+    background-color: $o-webclient-background-color;
+}
+
+.o-mail-Meeting-composer {
+    // pb-2 is always added in the original composer. We need a class
+    // that comes after the definition of pb-2 to clear it.
+    padding-bottom: 0 !important;
+}
+
+
+//==========================================================
+// Chat slide in/out effect
+//==========================================================
+
+$o-meeting-slide-duration: 0.4s;
+$o-meeting-slide-curve: cubic-bezier(0.4, 0, 0.2, 1);
+
+@keyframes o-meeting-channelViewContainer-slideIn {
+    from {
+        transform: translateX(100%);
+        flex: 1 1 25%;
+        min-width: 400px;
+        opacity: 1;
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        flex: 1 1 25%;
+        min-width: 400px;
+        opacity: 1;
+    }
+}
+
+@keyframes o-meeting-channelViewContainer-slideOut {
+    from {
+        transform: translateX(0);
+        flex: 1 1 25%;
+        min-width: 400px;
+    }
+
+    to {
+        transform: translateX(100%);
+        min-width: 0;
+        flex: 0 0 0;
+        opacity: 0;
+    }
+}
+
+.o-mail-Meeting-channelViewContainer {
+    animation: o-meeting-channelViewContainer-slideIn $o-meeting-slide-duration forwards $o-meeting-slide-curve;
+
+    &.o-hide {
+        animation: o-meeting-channelViewContainer-slideOut $o-meeting-slide-duration forwards $o-meeting-slide-curve;
+    }
+
+}

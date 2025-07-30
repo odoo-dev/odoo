@@ -4,6 +4,7 @@
 
 .o-discuss-Call {
     height: 50%; // ensures that the view returns to the right height when resized
+    min-width: 0;
     min-height: 50%;
     background: var(--o-discuss-Call-bgColor, #{$dark});
 
@@ -59,7 +60,7 @@
     min-width: var(--width);
     min-height: var(--height);
     aspect-ratio: 16/9;
-    
+
     &.o-active {
         width: 100%;
         height: auto;

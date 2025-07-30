@@ -103,7 +103,7 @@ callActionsRegistry
                 component.rtc.exitFullscreen();
             } else {
                 component.rtc.closePip();
-                component.rtc.enterFullscreen({ keepBrowserHeader: true });
+                component.rtc.enterMeeting();
             }
         },
         sequence: 70,
@@ -129,6 +129,16 @@ callActionsRegistry
             }
         },
         sequence: 80,
+    })
+    .add("toggle-meeting-chat", {
+        condition: (component) => component.store?.rtc.inMeeting,
+        name: (component) =>
+            component.store.rtc.meetingChatOpened ? _t("Close Chat") : _t("Open Chat"),
+        isActive: (component) => component.store.rtc.meetingChatOpened,
+        icon: "fa-comment",
+        select: (component) =>
+            (component.store.rtc.meetingChatOpened = !component.store.rtc.meetingChatOpened),
+        sequence: 35,
     });
 
 function transformAction(component, id, action) {
