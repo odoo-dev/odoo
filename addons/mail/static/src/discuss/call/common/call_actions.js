@@ -94,7 +94,7 @@ callActionsRegistry
     .add("fullscreen", {
         condition: (component) => Boolean(component.rtc),
         name: (component) =>
-            component.rtc.state.isFullscreen ? _t("Exit Fullscreen") : _t("Enter Full Screen"),
+            component.rtc.state.isFullscreen ? _t("Exit Fullscreen") : _t("Full Screen"),
         isActive: (component) => component.rtc.state.isFullscreen,
         inactiveIcon: "fa-arrows-alt",
         icon: "fa-compress",
@@ -103,7 +103,7 @@ callActionsRegistry
                 component.rtc.exitFullscreen();
             } else {
                 component.rtc.closePip();
-                component.rtc.enterFullscreen();
+                component.rtc.enterFullscreen({ keepBrowserHeader: true });
             }
         },
         sequence: 70,

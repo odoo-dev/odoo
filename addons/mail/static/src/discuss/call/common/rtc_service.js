@@ -682,9 +682,9 @@ export class Rtc extends Record {
         this.soundEffectsService.play("mic-off");
     }
 
-    async enterFullscreen() {
+    async enterFullscreen({ keepBrowserHeader } = {}) {
         const Call = registry.category("discuss.call/components").get("Call");
-        await this.fullscreen.enter(Call, { id: CALL_FULLSCREEN_ID });
+        await this.fullscreen.enter(Call, { keepBrowserHeader, id: CALL_FULLSCREEN_ID });
     }
 
     async exitFullscreen() {
