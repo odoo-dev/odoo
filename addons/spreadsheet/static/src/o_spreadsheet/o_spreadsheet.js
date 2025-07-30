@@ -85630,6 +85630,7 @@ const links = {
     urlRepresentation,
 };
 const components = {
+    BadgeSelection,
     Checkbox,
     Section,
     RoundColorPicker,
