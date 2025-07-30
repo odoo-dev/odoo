@@ -96,6 +96,16 @@
                     <button class="o_color_button btn p-0 selected" t-att-data-color="this.state.currentCustomColor" t-attf-style="background-color: {{this.state.currentCustomColor}}"/>
                 </div>
                 <div class="o_colorpicker_section" t-on-click="onColorApply" t-on-mouseover="onColorHover" t-on-mouseout="onColorHoverOut" t-on-focusin="onColorFocusin" t-on-focusout="onColorHoverOut">
+                    <button data-color="#000000BF" class="o_color_button btn p-0" style="background-color: #000000BF"></button>
+                    <button data-color="#00000080" class="o_color_button btn p-0" style="background-color: #00000080"></button>
+                    <button data-color="#00000040" class="o_color_button btn p-0" style="background-color: #00000040"></button>
+                    <button data-color="#00000026" class="o_color_button btn p-0" style="background-color: #00000026"></button>
+                    <button data-color="#FFFFFF40" class="o_color_button btn p-0" style="background-color: #FFFFFF40"></button>
+                    <button data-color="#FFFFFF80" class="o_color_button btn p-0" style="background-color: #FFFFFF80"></button>
+                    <button data-color="#FFFFFFBF" class="o_color_button btn p-0" style="background-color: #FFFFFFBF"></button>
+                    <button data-color="#FFFFFFD9" class="o_color_button btn p-0" style="background-color: #FFFFFFD9"></button>
+                </div>
+                <div class="o_colorpicker_section" t-on-click="onColorApply" t-on-mouseover="onColorHover" t-on-mouseout="onColorHoverOut" t-on-focusin="onColorFocusin" t-on-focusout="onColorHoverOut">
                     <button data-color="black" class="btn p-0 o_color_button bg-black"></button>
                     <button data-color="900" class="o_color_button btn p-0" style="background-color: var(--900)"></button>
                     <button data-color="800" class="o_color_button btn p-0" style="background-color: var(--800)"></button>
