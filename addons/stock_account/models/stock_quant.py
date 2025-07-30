@@ -58,13 +58,13 @@ class StockQuant(models.Model):
                 continue
             if quant.product_id.lot_valuated:
                 quantity = quant.lot_id.with_company(quant.company_id).product_qty
-                value_svl = quant.lot_id.with_company(quant.company_id).total_value
+                value = quant.lot_id.with_company(quant.company_id).total_value
             else:
                 quantity = quant.product_id.with_company(quant.company_id).qty_available
-                value_svl = quant.product_id.with_company(quant.company_id).total_value
+                value = quant.product_id.with_company(quant.company_id).total_value
             if quant.product_id.uom_id.is_zero(quantity):
                 continue
-            quant.value = quant.quantity * value_svl / quantity
+            quant.value = quant.quantity * value / quantity
 
     def _read_group_select(self, aggregate_spec, query):
         # flag value as aggregatable, and manually sum the values from the

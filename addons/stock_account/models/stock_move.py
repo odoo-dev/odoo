@@ -116,6 +116,7 @@ class StockMove(models.Model):
     def _get_price_unit(self):
         """ Returns the unit price to value this stock move """
         self.ensure_one()
+        # TODO: Don't use self.quantity but real valued quantity
         return self._get_value() / self.quantity
 
     @api.model
@@ -132,13 +133,16 @@ class StockMove(models.Model):
     def _set_value(self):
         """Set the value of the move"""
         # TODO groupby product to avoid using twice the same stack
-        product_to_recompute = set()
+        products_to_recompute = set()
+        lots_to_recompute = set()
 
         for move in self:
             # Incoming moves
             if move.is_in:
                 move.value = move._get_value()[0]
-                product_to_recompute.add(move.product_id.id)
+                products_to_recompute.add(move.product_id.id)
+                if move.product_id.lot_valuated:
+                    lots_to_recompute.update(move.move_line_ids.lot_id.ids)
                 continue
             # Outgoing moves
             if not move._is_out():
@@ -149,7 +153,8 @@ class StockMove(models.Model):
                 move.value = move.product_id.standard_price * move.quantity
 
         # Recompute the standard price
-        self.env['product.product'].browse(product_to_recompute)._update_standard_price()
+        self.env['product.product'].browse(products_to_recompute)._update_standard_price()
+        self.env['stock.lot'].browse(lots_to_recompute)._update_standard_price()
 
     def _get_value(self, forced_std_price=False, at_date=False):
         """Returns the value and the quantity valued on the move
@@ -161,6 +166,7 @@ class StockMove(models.Model):
         Forced standard price is useful when we have to get the value
         of a move in the past with the standard price at that time.
         """
+        # TODO: Make multi
         self.ensure_one()
         # It probably needs a priority order:
         # 1. take from Invoice/Bills
@@ -174,18 +180,21 @@ class StockMove(models.Model):
         remaining_qty -= manual_qty
 
         # 1. take from Invoice/Bills
-        account_move_value, account_move_qty = self._get_value_from_account_move(remaining_qty, at_date)
-        value += account_move_value
-        remaining_qty -= account_move_qty
+        if remaining_qty:
+            account_move_value, account_move_qty = self._get_value_from_account_move(remaining_qty, at_date)
+            value += account_move_value
+            remaining_qty -= account_move_qty
 
         # 2. from SO/PO lines
-        quotation_value, quotation_qty = self._get_value_from_quotation(remaining_qty, at_date)
-        value += quotation_value
-        remaining_qty -= quotation_qty
+        if remaining_qty:
+            quotation_value, quotation_qty = self._get_value_from_quotation(remaining_qty, at_date)
+            value += quotation_value
+            remaining_qty -= quotation_qty
 
         # 3. standard_price
-        std_price_value = self._get_value_from_std_price(remaining_qty, forced_std_price, at_date)
-        value += std_price_value
+        if remaining_qty:
+            std_price_value = self._get_value_from_std_price(remaining_qty, forced_std_price, at_date)
+            value += std_price_value
 
         return value, valued_qty
 
@@ -231,7 +240,7 @@ class StockMove(models.Model):
 
         return move_directions
 
-    def _get_in_move_lines(self):
+    def _get_in_move_lines(self, lot=None):
         """ Returns the `stock.move.line` records of `self` considered as incoming. It is done thanks
         to the `_should_be_valued` method of their source and destionation location as well as their
         owner.
@@ -241,6 +250,8 @@ class StockMove(models.Model):
         """
         res = OrderedSet()
         for move_line in self.move_line_ids:
+            if lot and move_line.lot_id != lot:
+                continue
             if not move_line.picked:
                 continue
             if move_line._should_exclude_for_valuation():
@@ -259,7 +270,7 @@ class StockMove(models.Model):
         self.ensure_one()
         return self._get_in_move_lines() and not self._is_dropshipped_returned()
 
-    def _get_out_move_lines(self):
+    def _get_out_move_lines(self, lot=None):
         """ Returns the `stock.move.line` records of `self` considered as outgoing. It is done thanks
         to the `_should_be_valued` method of their source and destionation location as well as their
         owner.
@@ -269,6 +280,8 @@ class StockMove(models.Model):
         """
         res = self.env['stock.move.line']
         for move_line in self.move_line_ids:
+            if lot and move_line.lot_id != lot:
+                continue
             if not move_line.picked:
                 continue
             if move_line._should_exclude_for_valuation():

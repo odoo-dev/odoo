@@ -40,7 +40,6 @@ Dashboard / Reports for Warehouse Management includes:
         'views/stock_move_views.xml',
         'wizard/stock_move_revaluation.xml',
         'wizard/stock_request_count.xml',
-        'wizard/stock_quantity_history.xml',
         'report/account_invoice_report_view.xml',
         'report/stock_valuation_report.xml',
     ],

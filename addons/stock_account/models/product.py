@@ -192,7 +192,7 @@ class ProductProduct(models.Model):
             return self.standard_price * quantity
         return self._run_fifo(quantity)
 
-    def _run_avco(self, at_date=None, method="realtime"):
+    def _run_avco(self, at_date=None, lot=None, method="realtime"):
         """ Recompute the average cost of the product base on the last closing
         inventory value and all the incoming moves during the period."""
         # TODO remove at the end and do at real time
@@ -203,6 +203,10 @@ class ProductProduct(models.Model):
         moves_domain = Domain([
             ('product_id', '=', self.id),
         ])
+        if lot:
+            moves_domain &= Domain([
+                ('move_line_ids.lot_id', 'in', lot.id),
+            ])
         if at_date:
             moves_domain &= Domain([
                 ('date', '<=', at_date),
@@ -210,13 +214,14 @@ class ProductProduct(models.Model):
         moves_in = self.env['stock.move'].search(moves_domain & Domain([('is_in', '=', True)]))
         moves_out = self.env['stock.move'].search(moves_domain & Domain([('is_out', '=', True)])) if method == "realtime" else self.env['stock.move']
         # TODO convert to company UoM
-        product_value_domain = Domain([
-            ('product_id', '=', self.id),
-        ])
+        product_value_domain = Domain([('product_id', '=', self.id)])
+        if lot:
+            product_value_domain &= Domain(['|', ('lot_id', '=', lot.id), ('lot_id', '=', False)])
+        else:
+            product_value_domain &= Domain([('lot_id', '=', False)])
         if at_date:
-            product_value_domain &= Domain([
-                ('date', '<=', at_date),
-            ])
+            product_value_domain &= Domain([('date', '<=', at_date)])
+
         product_values = self.env['product.value'].search(product_value_domain, order="date")
         avco_value = 0
         avco_total_value = 0
@@ -225,8 +230,11 @@ class ProductProduct(models.Model):
 
         # If the last value was defined by the user just return it
         if product_values and moves_in and product_values[-1].date > moves_in[-1].date:
+            quantity = self.with_context(to_date=at_date).qty_available
+            if lot:
+                quantity = lot.product_qty
             avco_value = product_values[-1].value
-            return avco_value, avco_value * self.with_context(to_date=at_date).qty_available
+            return avco_value, avco_value * quantity
 
         for move in moves:
             if product_values and move.date > product_values[0].date:
@@ -235,30 +243,39 @@ class ProductProduct(models.Model):
                 avco_value = product_value.value
                 avco_total_value = avco_value * quantity
             if move.is_in:
-                in_qty = sum(move._get_in_move_lines().mapped('quantity'))
+                in_qty = sum(move._get_in_move_lines(lot).mapped('quantity'))
                 in_value = move.value
                 if at_date:
                     in_value = move._get_value(at_date=at_date)[0]
+                if lot:
+                    total_qty = sum(move._get_in_move_lines().mapped('quantity'))
+                    in_value = in_value * in_qty / total_qty
                 avco_total_value += in_value
                 quantity += in_qty
                 avco_value = avco_total_value / quantity if quantity else 0
             else:
-                out_qty = sum(move._get_out_move_lines().mapped('quantity'))
+                out_qty = sum(move._get_out_move_lines(lot).mapped('quantity'))
                 avco_total_value -= out_qty * avco_value
                 quantity -= out_qty
 
         return avco_value, avco_total_value
 
-    def _run_fifo_get_stack(self, at_date=None, location=None):
+    def _run_fifo_get_stack(self, lot=None, at_date=None, location=None):
         external_location = location and location.is_valued_external
         fifo_stack = []
-        fifo_stack_size = int(self.with_context(to_date=at_date).qty_available)
+        fifo_stack_size = 0
+        if lot:
+            fifo_stack_size = lot.product_qty
+        else:
+            fifo_stack_size = int(self.with_context(to_date=at_date).qty_available)
         if fifo_stack_size <= 0:
             return fifo_stack, 0
 
         moves_domain = Domain([
             ('product_id', '=', self.id),
         ])
+        if lot:
+            moves_domain &= Domain([('move_line_ids.lot_id', 'in', lot.id)])
         if at_date:
             moves_domain &= Domain([('date', '<=', at_date)])
         if location:
@@ -277,21 +294,21 @@ class ProductProduct(models.Model):
             move = moves_in[0]
             moves_in = moves_in[1:]
             if external_location:
-                in_qty = sum(move._get_out_move_lines().mapped('quantity'))
+                in_qty = sum(move._get_out_move_lines(lot).mapped('quantity'))
             else:
-                in_qty = sum(move._get_in_move_lines().mapped('quantity'))
+                in_qty = sum(move._get_in_move_lines(lot).mapped('quantity'))
             fifo_stack.append(move)
             remaining_qty_on_last_move = min(in_qty, fifo_stack_size)
             fifo_stack_size -= in_qty
         return fifo_stack, remaining_qty_on_last_move
 
-    def _run_fifo(self, quantity, at_date=None, location=None):
+    def _run_fifo(self, quantity, lot=None, at_date=None, location=None):
         """ Returns the value for the next outgoing product base on the qty give as argument."""
         self.ensure_one()
         external_location = location and location.is_valued_external
 
         fifo_cost = 0
-        fifo_stack, __ = self._run_fifo_get_stack(at_date=at_date, location=location)
+        fifo_stack, __ = self._run_fifo_get_stack(lot=lot, at_date=at_date, location=location)
 
         # Going up to get the quantity in the argument
         while quantity > 0 and fifo_stack:
@@ -311,18 +328,11 @@ class ProductProduct(models.Model):
         return fifo_cost
 
     def _update_standard_price(self):
+        # TODO: Add extra value and extra quantity kwargs to avoid total recomputation
         for product in self:
             if product.cost_method == 'standard':
                 continue
             product.with_context(disable_auto_revaluation=True).standard_price = product._run_avco()[0]
-
-    def _update_lots_standard_price(self):
-        grouped_lots = self.env['stock.lot']._read_group(
-            [('product_id', 'in', self.ids), ('product_id.lot_valuated', '=', True)],
-            ['product_id'], ['id:recordset']
-        )
-        for product, lots in grouped_lots:
-            lots.with_context(disable_auto_revaluation=True).write({"standard_price": product.standard_price})
 
 
 class ProductCategory(models.Model):
