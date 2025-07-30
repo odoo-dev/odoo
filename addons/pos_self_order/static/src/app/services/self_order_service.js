@@ -2,7 +2,6 @@ import { Reactive } from "@web/core/utils/reactive";
 import { ConnectionLostError, RPCError, rpc } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 import { formatCurrency as webFormatCurrency } from "@web/core/currency";
-import { attributeFormatter } from "@pos_self_order/app/utils";
 import { markup } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
@@ -691,34 +690,6 @@ export class SelfOrder extends Reactive {
         }
     }
 
-    changeOrderState(access_token, state) {
-        const order = this.orders.filter((o) => o.access_token === access_token);
-        let message = _t("Your order status has been changed");
-
-        if (order.length === 0) {
-            this.handleErrorNotification(new Error("Warning, no order with this access_token"));
-        } else if (order.length !== 1) {
-            this.handleErrorNotification(
-                new Error("Warning, two orders with the same access_token")
-            );
-        } else {
-            order[0].state = state;
-        }
-
-        if (state === "paid") {
-            this.selectedOrderUuid = null;
-            message = _t("Your order has been paid");
-        } else if (state === "cancel") {
-            this.selectedOrderUuid = null;
-            message = _t("Your order has been cancelled");
-        }
-
-        this.notification.add(message, {
-            type: "success",
-        });
-        this.router.navigate("default");
-    }
-
     isOrder() {
         if (!this.currentOrder || !this.currentOrder.lines.length) {
             this.router.navigate("default");
@@ -854,20 +825,6 @@ export class SelfOrder extends Reactive {
     }
     getLinePrice(line) {
         return this.config.iface_tax_included ? line.price_subtotal_incl : line.price_subtotal;
-    }
-    getSelectedAttributes(line) {
-        const attributeValues = line.attribute_value_ids;
-        const customAttr = line.custom_attribute_value_ids;
-        return attributeFormatter(
-            this.models["product.attribute"].getAllBy("id"),
-            attributeValues,
-            customAttr
-        );
-    }
-    getFullProductName(line) {
-        const attrs = this.getSelectedAttributes(line);
-        const attrsStr = " (" + attrs.map((a) => a.value).join(", ") + ")";
-        return line.full_product_name + (attrs.length ? attrsStr : "");
     }
     showDownloadButton(order) {
         return this.config.self_ordering_mode === "mobile" && order.state === "paid";

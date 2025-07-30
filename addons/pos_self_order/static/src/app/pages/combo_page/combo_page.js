@@ -439,15 +439,4 @@ export class ComboPage extends Component {
     goBack() {
         this.router.navigate("product_list");
     }
-
-    /*
-     // TODO
-     get editableProductLine() {
-        const order = this.selfOrder.currentOrder;
-        return !(
-            this.selfOrder.editedLine &&
-            this.selfOrder.editedLine.uuid &&
-            order.lastChangesSent[this.selfOrder.editedLine.uuid]
-        );
-    }*/
 }

@@ -19,12 +19,11 @@ export class ProductPage extends Component {
             return;
         }
 
-        const editedLine = this.selfOrder.editedLine;
         useSubEnv({ selectedValues: {} });
 
         this.selfOrder.lastEditedProductId = this.props.productTemplate.id;
         this.state = useState({
-            qty: editedLine ? editedLine.qty : 1,
+            qty: 1,
             selectedValues: this.env.selectedValues,
             topShadowOpacity: 0,
             bottomShadowOpacity: 0,
@@ -51,8 +50,6 @@ export class ProductPage extends Component {
         });
 
         onWillUnmount(() => {
-            this.selfOrder.editedLine = null;
-
             if (this.observer) {
                 this.observer.unobserve(this.productNameRef.el);
             }
@@ -146,15 +143,4 @@ export class ProductPage extends Component {
     goBack() {
         this.router.navigate("product_list");
     }
-
-    /*
-    // TODO
-    get editableProductLine() {
-        const order = this.selfOrder.currentOrder;
-        return !(
-            this.selfOrder.editedLine &&
-            this.selfOrder.editedLine.uuid &&
-            order.lastChangesSent[this.selfOrder.editedLine.uuid]
-        );
-    }*/
 }

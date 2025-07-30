@@ -46,46 +46,6 @@ export class AttributeSelection extends Component {
 
         return null;
     }
-    /*
-    // TODO: Initialize attributes required for editing a line item
-    initAttribute() {
-
-        const initCustomValue = (value) => {
-            const selectedValue = this.selfOrder.editedLine?.custom_attribute_value_ids.find(
-                (v) => v.custom_product_template_attribute_value_id === value.id
-            );
-
-            return {
-                custom_product_template_attribute_value_id: this.selfOrder.models[
-                    "product.template.attribute.value"
-                ].get(value.id),
-                custom_value: selectedValue || "",
-            };
-        };
-
-        const initValue = (value) => {
-            if (this.selfOrder.editedLine?.attribute_value_ids.includes(value.id)) {
-                return value.id;
-            }
-            return false;
-        };
-
-        for (const attr of this.props.productTemplate.attribute_line_ids) {
-            this.selectedValues[attr.id] = {};
-
-            for (const value of attr.product_template_value_ids) {
-                if (attr.attribute_id.display_type === "multi") {
-                    this.selectedValues[attr.id][value.id] = initValue(value);
-                } else if (typeof this.selectedValues[attr.id] !== "number") {
-                    this.selectedValues[attr.id] = initValue(value);
-                }
-
-                if (value.is_custom) {
-                    this.env.customValues[value.id] = initCustomValue(value);
-                }
-            }
-        }
-    }*/
 
     shouldShowPriceExtra(value) {
         const priceExtra = value.price_extra;

@@ -897,10 +897,6 @@ export class PosData extends Reactive {
         return result;
     }
 
-    deleteUnsyncData(uuid) {
-        this.network.unsyncData = this.network.unsyncData.filter((d) => d.uuid !== uuid);
-    }
-
     async preLoadData(data) {
         return data;
     }
