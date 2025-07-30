@@ -4,17 +4,7 @@ import { stepUtils } from "@web_tour/tour_utils";
 
 function fillSelectMenu(inputID, search) {
     return [
-        {
-            content: "Click selectMenu form item",
-            trigger: `.o_website_links_utm_forms div#${inputID} .o_select_menu_toggler`,
-            run: "click",
-        },
-        ...stepUtils.editSelectMenuInput(`.o_website_links_utm_forms div#${inputID} .o_select_menu_input`, search),
-        {
-            content: "Select found selectMenu item",
-            trigger: `.o_popover .o_select_menu_item:contains("${search}")`,
-            run: "click",
-        },
+        ...stepUtils.editSelectMenuInput(`.o_website_links_utm_forms div#${inputID} .o_select_menu_toggler`, search),
         {
             content: "Check that selectMenu is properly filled",
             trigger: `#${inputID} .o_select_menu_toggler:value('${search}')`,

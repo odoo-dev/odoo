@@ -15,21 +15,48 @@ export const stepUtils = {
         return step;
     },
 
-    editSelectMenuInput(trigger, value) {
-        return [
+    editSelectMenuInput(trigger, value, confirm = true) {
+        let input = trigger;
+        const steps = [
+            {
+                trigger,
+                run: async () => {
+                    const toggler = hoot.queryFirst(trigger);
+                    if (toggler instanceof HTMLButtonElement) {
+                        input = ".o_select_menu_menu .o_select_menu_input";
+                    }
+
+                    if (!hoot.queryFirst(".o_select_menu_menu")) {
+                        await hoot.click(toggler);
+                    }
+                },
+            },
             {
                 content: "Make sure a SelectMenu has been opened",
                 trigger: `.o_select_menu_menu`,
             },
             {
-                trigger,
-                run: async () => {
-                    const input = hoot.queryFirst(trigger);
-                    input.focus();
+                trigger: input,
+                run: async ({ anchor }) => {
+                    anchor.focus();
                     await hoot.edit(value);
+                    if (confirm && !value) {
+                        anchor.blur();
+                    }
                 },
             },
         ];
+
+        if (confirm && value) {
+            steps.push({
+                trigger: `.o_select_menu_item:contains('${value}')`,
+                run: async ({ anchor }) => {
+                    await hoot.click(anchor);
+                },
+            });
+        }
+
+        return steps;
     },
 
     showAppsMenuItem() {
