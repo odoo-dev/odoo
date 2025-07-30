@@ -110,8 +110,8 @@ class WebsiteVisitor(models.Model):
             visitor_sudo = self.sudo().browse(visitor_id)
             if guest := self.env["mail.guest"]._get_guest_from_context():
                 guest_livechats = guest.channel_ids.filtered(lambda c: c.channel_type == "livechat")
-                guest_livechats.channel_ids.livechat_visitor_id = visitor_sudo.id
-                guest_livechats.channel_ids.anonymous_name = (
+                guest_livechats.livechat_visitor_id = visitor_sudo.id
+                guest_livechats.anonymous_name = (
                     "Visitor #%d (%s)" % (visitor_sudo.id, visitor_sudo.country_id.name)
                     if visitor_sudo.country_id
                     else f"Visitor #{visitor_sudo.id}"
