@@ -117,7 +117,9 @@ class StockMove(models.Model):
         """ Returns the unit price to value this stock move """
         self.ensure_one()
         # TODO: Don't use self.quantity but real valued quantity
-        return self._get_value() / self.quantity
+        if not self.quantity:
+            return 0.0
+        return self._get_value()[0] / self.quantity
 
     @api.model
     def _get_valued_types(self):

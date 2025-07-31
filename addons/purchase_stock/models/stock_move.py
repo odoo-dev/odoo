@@ -106,7 +106,7 @@ class StockMove(models.Model):
     # --------------------------------------------------------
 
     def _get_value_from_account_move(self, quantity, at_date=None):
-        if not (self.purchase_line_id and self.is_in and self.purchase_line_id):
+        if not (self.purchase_line_id and self.purchase_line_id):
             return 0, 0
 
         quantity = 0
@@ -127,7 +127,7 @@ class StockMove(models.Model):
 
     def _get_value_from_quotation(self, quantity, at_date=None):
         # TODO: Start from global value
-        if not self.purchase_line_id or not self.is_in:
+        if not self.purchase_line_id:
             return super()._get_value_from_quotation(quantity)
         if at_date and self.purchase_line_id.order_id.date_order > at_date:
             return super()._get_value_from_quotation(quantity)
