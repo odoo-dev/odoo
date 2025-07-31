@@ -661,14 +661,6 @@
                                         t-attf-class="o_wsale_category_description #{'mb-3' if category.website_description else ''}"
                                         t-out="category.website_description"
                                     />
-                                    <t t-set="editor_msg">
-                                        Drag building blocks here to customize the header for categories.
-                                    </t>
-                                    <div
-                                        id="products_header_category_dropzone"
-                                        class="oe_structure oe_empty"
-                                        t-att-data-editor-message="editor_msg"
-                                    />
                                     <t t-set='header_editor_message'>
                                         Drag building blocks here to customize the header for
                                         "<t t-esc='category.name'/>" category.
