@@ -237,6 +237,7 @@ class StockMove(models.Model):
                         'mo_id': mo.id,
                         'product_qty': move.quantity or move.product_uom_qty,
                     }]).change_prod_qty()
+                    mo.action_assign()
             else:
                 productions = move._get_subcontract_production()
                 if not productions:
@@ -274,6 +275,7 @@ class StockMove(models.Model):
                                 'mo_id': lot_mo.id,
                                 'product_qty': ml_qty
                             }]).change_prod_qty()
+                            lot_mo.action_assign()
 
                     # 3. Create new MOs where needed, by splitting them from an existing subcontracting MO
                     if mos_to_create:
