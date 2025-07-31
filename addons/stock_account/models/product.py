@@ -63,18 +63,6 @@ class ProductTemplate(models.Model):
                 product_template.company_id
             ).property_valuation
 
-    @api.onchange('standard_price')
-    def _onchange_standard_price(self):
-        res = super()._onchange_standard_price()
-        if self.lot_valuated and any(p.quantity_svl for p in self.product_variant_ids):
-            return {
-                'warning': {
-                    'title': _("Warning"),
-                    'message': _("This is broken"),
-                }
-            }
-        return res
-
     # -------------------------------------------------------------------------
     # Misc.
     # -------------------------------------------------------------------------

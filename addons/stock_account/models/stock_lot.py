@@ -49,8 +49,8 @@ class StockLot(models.Model):
         lots = super().create(vals_list)
         for product, lots_by_product in lots.grouped('product_id').items():
             if product.lot_valuated:
-                lots_by_product.filtered(lambda lot: not lot.standard_price).with_context(disable_auto_svl=True).write({
-                    'standard_price': product.standard_price
+                lots_by_product.filtered(lambda lot: not lot.standard_price).with_context(disable_auto_revaluation=True).write({
+                    'standard_price': product.standard_price,
                 })
         return lots
 
