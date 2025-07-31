@@ -207,7 +207,8 @@ class ResCompany(models.Model):
         if fields.Date.today() == fields.Date.today() + relativedelta(day=31):
             domain = domain & Domain([('inventory_period', '=', 'monthly')])
         companies = self.env['res.company'].search(domain)
-        companies.action_close_stock_valuation(auto_post=True)
+        for company in companies:
+            company.action_close_stock_valuation(auto_post=True)
 
     def _get_accounts_by_product(self, products=None):
         if not products:
@@ -414,7 +415,7 @@ class ResCompany(models.Model):
         if not self.anglo_saxon_accounting:
             return False
 
-        purchase_accounts = self.env['acount.acount']
+        purchase_accounts = self.env['account.account']
         product_ids = set()
         for product, accounts in accounts_by_product.items():
             if product.valuation != 'periodic':

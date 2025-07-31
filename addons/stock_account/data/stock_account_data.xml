@@ -4,7 +4,7 @@
         <function model="ir.default" name="set" eval="('product.category', 'property_cost_method', 'standard')"/>
         <function model="ir.default" name="set" eval="('product.category', 'property_valuation', 'periodic')"/>
 
-        <record forcecreate="True" id="ir_cron_post_stock_valuation_daily" model="ir.cron">
+        <record forcecreate="True" id="ir_cron_post_stock_valuation" model="ir.cron">
             <field name="name">Stock Account: Inventory Valuation Closing</field>
             <field name="model_id" ref="model_res_company"/>
             <field name="state">code</field>

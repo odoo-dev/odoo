@@ -93,7 +93,7 @@ class StockLot(models.Model):
         # Cannot hide the button in list view for non required field in groupby
         if not self:
             raise UserError(_("Select an existing lot/serial number to be reevaluated"))
-        elif all(self.product_id.uom_id.is_zero(layer.remaining_qty) for layer in self.stock_valuation_layer_ids):
+        elif all(self.product_id.uom_id.is_zero(lot.product_qty) for lot in self):
             raise UserError(_("You cannot adjust the valuation of a layer with zero quantity"))
         self.ensure_one()
         ctx = dict(self.env.context, default_lot_ids=self.ids, default_company_id=self.env.company.id)
