@@ -12,7 +12,7 @@ class StockMove(models.Model):
     def _get_value(self, forced_std_price=False, at_date=False):
         self.ensure_one()
         if self.production_id:
-            valued_qty = sum(self._get_in_move_lines().mapped('quantity'))
+            valued_qty = self._get_valued_qty()
             return self._get_value_from_production(valued_qty), valued_qty
         return super()._get_value(forced_std_price)
 

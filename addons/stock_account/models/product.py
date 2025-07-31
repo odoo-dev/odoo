@@ -211,8 +211,8 @@ class ProductProduct(models.Model):
             moves_domain &= Domain([
                 ('date', '<=', at_date),
             ])
-        moves_in = self.env['stock.move'].search(moves_domain & Domain([('is_in', '=', True)]))
-        moves_out = self.env['stock.move'].search(moves_domain & Domain([('is_out', '=', True)])) if method == "realtime" else self.env['stock.move']
+        moves_in = self.env['stock.move'].search(moves_domain & Domain(['|', ('is_in', '=', True), ('is_dropship', '=', True)]))
+        moves_out = self.env['stock.move'].search(moves_domain & Domain(['|', ('is_out', '=', True), ('is_dropship', '=', True)])) if method == "realtime" else self.env['stock.move']
         # TODO convert to company UoM
         product_value_domain = Domain([('product_id', '=', self.id)])
         if lot:
@@ -242,19 +242,19 @@ class ProductProduct(models.Model):
                 product_values = product_values[1:]
                 avco_value = product_value.value
                 avco_total_value = avco_value * quantity
-            if move.is_in:
-                in_qty = sum(move._get_in_move_lines(lot).mapped('quantity'))
+            if move.is_in or move.is_dropship:
+                in_qty = move._get_valued_qty()
                 in_value = move.value
-                if at_date:
+                if at_date or move.is_dropship:
                     in_value = move._get_value(at_date=at_date)[0]
                 if lot:
-                    total_qty = sum(move._get_in_move_lines().mapped('quantity'))
+                    total_qty = move._get_valued_qty(lot)
                     in_value = in_value * in_qty / total_qty
                 avco_total_value += in_value
                 quantity += in_qty
                 avco_value = avco_total_value / quantity if quantity else 0
-            else:
-                out_qty = sum(move._get_out_move_lines(lot).mapped('quantity'))
+            if move.is_out or move.is_dropship:
+                out_qty = move._get_valued_qty()
                 avco_total_value -= out_qty * avco_value
                 quantity -= out_qty
 
@@ -293,10 +293,7 @@ class ProductProduct(models.Model):
         while fifo_stack_size >= 0 and moves_in:
             move = moves_in[0]
             moves_in = moves_in[1:]
-            if external_location:
-                in_qty = sum(move._get_out_move_lines(lot).mapped('quantity'))
-            else:
-                in_qty = sum(move._get_in_move_lines(lot).mapped('quantity'))
+            in_qty = move._get_valued_qty()
             fifo_stack.append(move)
             remaining_qty_on_last_move = min(in_qty, fifo_stack_size)
             fifo_stack_size -= in_qty
@@ -313,10 +310,7 @@ class ProductProduct(models.Model):
         # Going up to get the quantity in the argument
         while quantity > 0 and fifo_stack:
             move = fifo_stack.pop(0)
-            if external_location:
-                in_qty = sum(move._get_out_move_lines().mapped('quantity'))
-            else:
-                in_qty = sum(move._get_in_move_lines().mapped('quantity'))
+            in_qty = move._get_valued_qty()
             in_value = move.value
             if at_date and not external_location:
                 in_value = move._get_value(at_date=at_date)[0]

@@ -31,6 +31,7 @@ class StockMove(models.Model):
     price_unit = fields.Float("Price Unit")
     is_in = fields.Boolean(string='Is Incoming (valued)', compute='_compute_is_in', store=True)
     is_out = fields.Boolean(string='Is Outgoing (valued)', compute='_compute_is_out', store=True)
+    is_dropship = fields.Boolean(string='Is Dropship', compute='_compute_is_dropship', store=True)
     is_valued = fields.Boolean(string='Is Valued', compute='_compute_is_valued')
 
     remaining_qty = fields.Float(
@@ -54,6 +55,14 @@ class StockMove(models.Model):
                 move.is_out = False
                 continue
             move.is_out = move._is_out()
+
+    @api.depends('state')
+    def _compute_is_dropship(self):
+        for move in self:
+            if move.state != 'done':
+                move.is_dropship = False
+                continue
+            move.is_dropship = move._is_dropshipped() or move._is_dropshipped_returned()
 
     @api.depends('state', 'move_line_ids')
     def _compute_is_valued(self):
@@ -106,10 +115,12 @@ class StockMove(models.Model):
 
     def _action_done(self, cancel_backorder=False):
         # Use _is_out() instead of is_out since the move is not done
+        # It's called before action_done since we need the current fifo
+        # stack. Limitation when validating at same time out and in.s
         moves_out = self.filtered(lambda m: m._is_out())
         moves_out._set_value()
         moves = super()._action_done(cancel_backorder=cancel_backorder)
-        moves_in = moves.filtered(lambda m: m.is_in)
+        moves_in = moves.filtered(lambda m: m.is_in or m.is_dropship)
         moves_in._set_value()
         return moves
 
@@ -140,11 +151,12 @@ class StockMove(models.Model):
 
         for move in self:
             # Incoming moves
-            if move.is_in:
-                move.value = move._get_value()[0]
+            if move.is_dropship or move.is_in:
                 products_to_recompute.add(move.product_id.id)
                 if move.product_id.lot_valuated:
                     lots_to_recompute.update(move.move_line_ids.lot_id.ids)
+            if move.is_in:
+                move.value = move._get_value()[0]
                 continue
             # Outgoing moves
             if not move._is_out():
@@ -174,7 +186,7 @@ class StockMove(models.Model):
         # 1. take from Invoice/Bills
         # 2. from SO/PO lines
         # 3. standard_price
-        valued_qty = remaining_qty = sum(self._get_in_move_lines().mapped('quantity'))
+        valued_qty = remaining_qty = self._get_valued_qty()
         value = 0
 
         manual_value, manual_qty = self._get_manual_value(remaining_qty, at_date)
@@ -199,6 +211,18 @@ class StockMove(models.Model):
             value += std_price_value
 
         return value, valued_qty
+
+    def _get_valued_qty(self, lot=None):
+        self.ensure_one()
+        if self.is_in:
+            return sum(self._get_in_move_lines(lot).mapped('quantity'))
+        if self.is_out:
+            return sum(self._get_out_move_lines(lot).mapped('quantity'))
+        if self.is_dropship:
+            if lot:
+                return sum(self.move_line_ids.filtered(lambda ml: ml.lot_id == lot).mapped('quantity'))
+            return self.quantity
+        return 0
 
     def _get_manual_value(self, quantity, at_date=None):
         domain = Domain([('move_id', '=', self.id)])

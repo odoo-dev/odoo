@@ -104,11 +104,9 @@ class AccountMove(models.Model):
             anglo_saxon_price_ctx = move._get_anglo_saxon_price_ctx()
 
             for line in move.invoice_line_ids:
-
                 # Filter out lines being not eligible for COGS.
                 if not line._eligible_for_stock_account() or line.product_id.valuation != 'real_time':
                     continue
-
                 # Retrieve accounts needed to generate the COGS.
                 accounts = line.product_id.product_tmpl_id.get_product_accounts(fiscal_pos=move.fiscal_position_id)
                 stock_account = accounts['stock_valuation']
