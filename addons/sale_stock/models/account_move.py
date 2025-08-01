@@ -14,7 +14,7 @@ class AccountMove(models.Model):
     def _stock_account_get_last_step_stock_moves(self):
         """ Overridden from stock_account.
         Returns the stock moves associated to this invoice."""
-        rslt = super(AccountMove, self)._stock_account_get_last_step_stock_moves()
+        rslt = super()._stock_account_get_last_step_stock_moves()
         for invoice in self:
             if invoice.move_type not in ['out_invoice', 'out_refund']:
                 continue
@@ -143,7 +143,7 @@ class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
     def _get_stock_moves(self):
-        return self.sale_line_ids.move_ids
+        return super()._get_stock_moves() | self.sale_line_ids.move_ids
 
     def _sale_can_be_reinvoice(self):
         self.ensure_one()
