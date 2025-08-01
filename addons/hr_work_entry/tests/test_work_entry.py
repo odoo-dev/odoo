@@ -327,3 +327,17 @@ class TestWorkEntry(TestWorkEntryBase):
         self.assertEqual(work_entry.duration, 1, "The duration should be 1 hour")
         self.assertEqual(one_day_entry.duration, 24.5, "Duration should be 24 hours and half an hour")
         self.assertEqual(multi_day_entry.duration, 169, "Duration should be 169 hours (7 days and one hour)")
+
+    def test_work_entry_without_resource_calendar(self):
+        """ Test generating work entries without a resource calendar """
+        employee = self.env['hr.employee'].create({
+            'name': 'John Doe',
+            'date_version': '2020-01-01',
+            'contract_date_start': '2020-01-01',
+            'contract_date_end': '2021-12-31',
+            'resource_calendar_id': False,
+        })
+
+        employee.generate_work_entries(datetime(2020, 1, 1), datetime(2020, 1, 31))
+        entries = self.env['hr.work.entry'].search([('employee_id', '=', employee.id)])
+        self.assertTrue(entries)
