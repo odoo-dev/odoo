@@ -170,8 +170,10 @@ class ProductProduct(models.Model):
         for product in self:
             moves, remaining_qty = product._run_fifo_get_stack()
             moves = self.env['stock.move'].concat(*moves)
-            qty_by_move = {m: m.quantity for m in moves[:-1]}
-            qty_by_move[moves[-1]] = remaining_qty
+            if not moves:
+                continue
+            qty_by_move = {m: m.quantity for m in moves[1:]}
+            qty_by_move[moves[0]] = remaining_qty
             moves_qty_by_product[product] = qty_by_move
         return moves_qty_by_product
 
@@ -278,13 +280,14 @@ class ProductProduct(models.Model):
 
         remaining_qty_on_last_move = 0
         # Go to the bottom of the stack
-        while fifo_stack_size >= 0 and moves_in:
+        while fifo_stack_size > 0 and moves_in:
             move = moves_in[0]
             moves_in = moves_in[1:]
             in_qty = move._get_valued_qty()
             fifo_stack.append(move)
             remaining_qty_on_last_move = min(in_qty, fifo_stack_size)
             fifo_stack_size -= in_qty
+        fifo_stack.reverse()
         return fifo_stack, remaining_qty_on_last_move
 
     def _run_fifo(self, quantity, lot=None, at_date=None, location=None):
