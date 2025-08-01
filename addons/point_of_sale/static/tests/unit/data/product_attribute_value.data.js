@@ -20,5 +20,15 @@ export class ProductAttributeValue extends models.ServerModel {
             attribute_id: 1,
             default_extra_price: 5.0,
         },
+        {
+            id: 4,
+            name: "male",
+            attribute_id: 2,
+        },
+        {
+            id: 5,
+            name: "female",
+            attribute_id: 2,
+        },
     ];
 }

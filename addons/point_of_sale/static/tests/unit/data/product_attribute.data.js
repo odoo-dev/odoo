@@ -21,7 +21,7 @@ export class ProductAttribute extends models.ServerModel {
             display_type: "radio",
             template_value_ids: [],
             attribute_line_ids: [],
-            create_variant: "always",
+            create_variant: "never",
         },
         {
             id: 2,
@@ -29,7 +29,7 @@ export class ProductAttribute extends models.ServerModel {
             display_type: "radio",
             template_value_ids: [],
             attribute_line_ids: [],
-            create_variant: "always",
+            create_variant: "never",
         },
         {
             id: 3,

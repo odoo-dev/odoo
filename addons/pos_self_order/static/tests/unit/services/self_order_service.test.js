@@ -172,6 +172,13 @@ describe("self_order_service", () => {
             expect(store.currentOrder.lines).toHaveLength(2);
             expect(store.currentOrder.lines[1].qty).toBe(4);
         });
+        test("Attribute Products", async () => {
+            const store = await setupSelfPosEnv();
+            const models = store.models;
+
+            const attrProduct = models["product.template"].get(15);
+            expect(attrProduct.attribute_line_ids).toHaveLength(2);
+        });
         test("Combo Products", async () => {
             const store = await setupSelfPosEnv();
             const models = store.models;
