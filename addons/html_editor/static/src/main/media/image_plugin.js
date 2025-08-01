@@ -3,9 +3,7 @@ import { _t } from "@web/core/l10n/translation";
 import { isImageUrl } from "@html_editor/utils/url";
 import { ImageDescription, ImageDescriptionPopover } from "./image_description";
 import { ImageToolbarDropdown } from "./image_toolbar_dropdown";
-import { createFileViewer } from "@web/core/file_viewer/file_viewer_hook";
 import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
-import { boundariesOut } from "@html_editor/utils/position";
 import { withSequence } from "@html_editor/utils/resource";
 import { ImageTransformButton } from "./image_transform_button";
 import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
@@ -36,8 +34,16 @@ const IMAGE_SIZE = [
 
 export class ImagePlugin extends Plugin {
     static id = "image";
-    static dependencies = ["history", "link", "powerbox", "dom", "selection", "overlay"];
-    static shared = ["getTargetedImage", "previewImage", "resetImageTransformation"];
+    static dependencies = [
+        "history",
+        "link",
+        "powerbox",
+        "dom",
+        "selection",
+        "overlay",
+        "imagePreview",
+    ];
+    static shared = ["getTargetedImage", "resetImageTransformation"];
     resources = {
         user_commands: [
             {
@@ -45,13 +51,6 @@ export class ImagePlugin extends Plugin {
                 description: _t("Remove (DELETE) image"),
                 icon: "fa-trash text-danger",
                 run: this.deleteImage.bind(this),
-                isAvailable: isHtmlContentSupported,
-            },
-            {
-                id: "previewImage",
-                description: _t("Preview image"),
-                icon: "fa-search-plus",
-                run: this.previewImage.bind(this),
                 isAvailable: isHtmlContentSupported,
             },
             {
@@ -88,18 +87,7 @@ export class ImagePlugin extends Plugin {
                 isAvailable: isHtmlContentSupported,
             },
         ],
-        toolbar_namespaces: [
-            {
-                id: "image",
-                isApplied: (targetedNodes) =>
-                    targetedNodes.every(
-                        // All nodes should be images or its ancestors
-                        (node) => node.nodeName === "IMG" || node.querySelector?.("img")
-                    ),
-            },
-        ],
         toolbar_groups: [
-            withSequence(23, { id: "image_preview", namespaces: ["image"] }),
             withSequence(24, { id: "image_description", namespaces: ["image"] }),
             withSequence(25, { id: "image_shape", namespaces: ["image"] }),
             withSequence(26, { id: "image_padding", namespaces: ["image"] }),
@@ -108,11 +96,6 @@ export class ImagePlugin extends Plugin {
             withSequence(32, { id: "image_delete", namespaces: ["image"] }),
         ],
         toolbar_items: [
-            {
-                id: "image_preview",
-                groupId: "image_preview",
-                commandId: "previewImage",
-            },
             {
                 id: "image_description",
                 description: _t("Edit media description"),
@@ -206,19 +189,6 @@ export class ImagePlugin extends Plugin {
 
     setup() {
         this.imageSize = reactive({ displayName: "Default" });
-        this.addDomListener(this.editable, "pointerup", (e) => {
-            if (e.target.tagName === "IMG") {
-                const [anchorNode, anchorOffset, focusNode, focusOffset] = boundariesOut(e.target);
-                this.dependencies.selection.setSelection({
-                    anchorNode,
-                    anchorOffset,
-                    focusNode,
-                    focusOffset,
-                });
-                this.dependencies.selection.focusEditable();
-            }
-        });
-        this.fileViewer = createFileViewer();
         this.overlay = this.dependencies.overlay.createOverlay(ImageDescriptionPopover, {
             className: "popover",
         });
@@ -271,28 +241,6 @@ export class ImagePlugin extends Plugin {
         }
         targetedImg.classList.toggle(className);
         this.dependencies.history.addStep();
-    }
-
-    previewImage() {
-        const targetedImg = this.getTargetedImage();
-        if (!targetedImg) {
-            return;
-        }
-        let imageName;
-        // Keep the result from the first predicate that returns something.
-        this.getResource("image_name_predicates").find((p) => {
-            imageName = p(targetedImg);
-            return imageName;
-        });
-        const fileModel = {
-            isImage: true,
-            isViewable: true,
-            name: imageName || targetedImg.src,
-            defaultSource: targetedImg.src,
-            downloadUrl: targetedImg.src,
-        };
-        this.document.getSelection().collapseToEnd();
-        this.fileViewer.open(fileModel);
     }
 
     deleteImage() {
