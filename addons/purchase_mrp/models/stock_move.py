@@ -16,7 +16,7 @@ class StockMove(models.Model):
         return vals
 
     def _get_price_unit(self):
-        if self.product_id == self.purchase_line_id.product_id or not self.bom_line_id or self._should_ignore_pol_price():
+        if self.product_id == self.purchase_line_id.product_id or not self.bom_line_id or not self.purchase_line_id:
             return super()._get_price_unit()
         line = self.purchase_line_id
         # price_unit here with uom of product
