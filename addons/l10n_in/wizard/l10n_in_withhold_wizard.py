@@ -187,7 +187,8 @@ class L10n_InWithholdWizard(models.TransientModel):
         for wizard in self:
             if (
                 wizard.related_move_id and
-                wizard.tax_id.l10n_in_section_id not in (self.env.ref('l10n_in.tds_section_194q'), self.env.ref('l10n_in.tds_section_194n'))
+                wizard.tax_id.l10n_in_section_id not in (self.env.ref('l10n_in.tds_section_194q'), self.env.ref('l10n_in.tds_section_194n')) and
+                wizard.related_move_id.line_ids.filtered(lambda l: l.account_id.l10n_in_tds_tcs_section_id == wizard.tax_id.l10n_in_section_id)
             ):
                 wizard.base = sum(wizard.related_move_id.line_ids.filtered(lambda l: l.account_id.l10n_in_tds_tcs_section_id == wizard.tax_id.l10n_in_section_id).mapped('price_subtotal'))
 
