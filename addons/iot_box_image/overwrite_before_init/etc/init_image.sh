@@ -216,7 +216,7 @@ systemctl disable dphys-swapfile.service
 systemctl enable ssh
 systemctl set-default graphical.target
 systemctl disable getty@tty1.service
-systemctl disable systemd-timesyncd.service
+systemctl enable systemd-timesyncd.service
 systemctl unmask hostapd.service
 systemctl disable hostapd.service
 systemctl disable cups-browsed.service
