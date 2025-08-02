@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from datetime import timedelta
 
-from odoo import fields
+from odoo import Command, fields
 from odoo.tests import Form
 from odoo.addons.mrp.tests.common import TestMrpCommon
 from odoo.exceptions import UserError
@@ -1007,3 +1007,43 @@ class TestProcurement(TestMrpCommon):
 
         # Check the generated MO
         self.assertEqual(mo.product_qty, 45)
+
+    def test_mtso_with_empty_bom(self):
+        """Test to ensure that a Manufacturing Order is created in 'draft' state
+        via MTSO route when BoM has no components or operations.
+        """
+        self.warehouse = self.env.ref('stock.warehouse0')
+        route_manufacture = self.warehouse.manufacture_pull_id.route_id
+        # Set up MTSO route.
+        route_mto = self.warehouse.mto_pull_id.route_id
+        route_mto.rule_ids.procure_method = "mts_else_mto"
+
+        # Create a product with a BoM that has no components or operations.
+        product = self.env['product.product'].create({
+            'name': 'Product',
+            'route_ids': [Command.link(route_manufacture.id), Command.link(route_mto.id)],
+        })
+        self.env['mrp.bom'].create({
+            'product_id': product.id,
+            'product_tmpl_id': product.product_tmpl_id.id,
+            'product_qty': 1.0,
+        })
+
+        # Trigger procurement.
+        move_dest = self.env['stock.move'].create({
+            'name': 'MTSO Move',
+            'product_id': product.id,
+            'product_uom': self.ref('uom.product_uom_unit'),
+            'location_id': self.ref('stock.stock_location_stock'),
+            'location_dest_id': self.ref('stock.stock_location_output'),
+            'product_uom_qty': 10,
+            'procure_method': 'make_to_order',
+        })
+        move_dest._action_confirm()
+
+        # Check that the MO is created and remains in 'draft' state.
+        production = self.env['mrp.production'].search([('product_id', '=', product.id)])
+        self.assertTrue(production)
+        self.assertFalse(production.move_raw_ids)
+        self.assertFalse(production.workorder_ids)
+        self.assertEqual(production.state, 'draft')
