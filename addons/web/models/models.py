@@ -27,6 +27,7 @@ if typing.TYPE_CHECKING:
 _lt = LazyTranslate(__name__)
 SEARCH_PANEL_ERROR_MESSAGE = _lt("Too many items to display.")
 MAX_NUMBER_OPENED_GROUPS = 10
+ON_CHANGE_ROLLBACK = True
 
 
 class lazymapping(defaultdict):
@@ -1925,9 +1926,6 @@ class Base(models.AbstractModel):
             }
 
         """
-        # this is for tests using `Form`
-        self.env.flush_all()
-
         env = self.env
         first_call = not field_names
 
@@ -2112,6 +2110,10 @@ class Base(models.AbstractModel):
             title = self.env._("Warnings")
             message = '\n\n'.join([warn_title + '\n\n' + warn_message for warn_title, warn_message, warn_type in warnings])
             result['warning'] = dict(title=title, message=message, type='dialog')
+
+        # rollback the transaction
+        if ON_CHANGE_ROLLBACK:
+            self.env.cr.rollback()
 
         return result
 

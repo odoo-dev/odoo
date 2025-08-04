@@ -1091,6 +1091,9 @@ class TransactionCase(BaseCase):
 
         cls.env = api.Environment(cls.cr, api.SUPERUSER_ID, {})
 
+        cls.onchange_patcher = patch('odoo.addons.web.models.models.ON_CHANGE_ROLLBACK', getattr(cls, 'registry_test_mode', False))  # XXX test
+        cls.startClassPatcher(cls.onchange_patcher)
+
         # speedup CryptContext. Many user an password are done during tests, avoid spending time hasing password with many rounds
         def _crypt_context(self):  # noqa: ARG001
             return CryptContext(

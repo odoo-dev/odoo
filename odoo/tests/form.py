@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 The module :mod:`odoo.tests.form` provides an implementation of a client form
 view for server-side unit tests.
@@ -10,6 +9,7 @@ import collections
 import itertools
 import logging
 from datetime import datetime, date
+from unittest.mock import patch
 
 from lxml import etree
 
@@ -575,9 +575,10 @@ class Form:
                 record = record.with_context(**context)
 
         values = self._get_onchange_values()
-        result = record.onchange(values, field_names, self._view['fields_spec'])
-        self._env.flush_all()
-        self._env.clear()  # discard cache and pending recomputations
+        with patch('odoo.addons.web.models.models.ON_CHANGE_ROLLBACK', False), self._env.cr.savepoint() as sp:
+            result = record.onchange(values, field_names, self._view['fields_spec'])
+            sp.rollback()
+            self._env.clear()  # discard cache and pending recomputations
 
         if result.get('warning'):
             _logger.getChild('onchange').warning("%(title)s %(message)s", result['warning'])
