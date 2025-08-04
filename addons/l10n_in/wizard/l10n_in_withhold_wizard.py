@@ -175,7 +175,7 @@ class L10n_InWithholdWizard(models.TransientModel):
                         ('move_id.l10n_in_withholding_ref_move_id.line_ids.account_id', 'in', account.id),
                         ('move_id.l10n_in_withholding_ref_move_id.line_ids.l10n_in_tds_tcs_section_id', 'in', section.id),
                         ('move_id.state', '=', 'posted'),
-                        ('tax_ids', '!=', False),
+                        ('tax_ids.l10n_in_section_id', '=', section.id),
                     ], limit=1, order='id desc')
                     if withhold_move_line_id:
                         tax_id = withhold_move_line_id.tax_ids.filtered(lambda t: t.l10n_in_section_id == section)
