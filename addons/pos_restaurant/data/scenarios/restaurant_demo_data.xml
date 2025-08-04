@@ -38,6 +38,39 @@
             <field name="attribute_id" ref="pa_sides"/>
         </record>
 
+        <!-- Extras product attribute -->
+        <record id="pa_extras_pizza" model="product.attribute" >
+            <field name="name">Extras</field>
+            <field name="create_variant">no_variant</field>
+            <field name="display_type">multi</field>
+            <field name="sequence">70</field>
+        </record>
+
+        <record id="pav_extras_pizza_pepperoni" model="product.attribute.value">
+            <field name="name">Pepperoni</field>
+            <field name="attribute_id" ref="pa_extras_pizza"/>
+        </record>
+
+        <record id="pav_extras_pizza_mushroom" model="product.attribute.value">
+            <field name="name">Mushroom</field>
+            <field name="attribute_id" ref="pa_extras_pizza"/>
+        </record>
+
+        <record id="pav_extras_pizza_black_olives" model="product.attribute.value">
+            <field name="name">Black olives</field>
+            <field name="attribute_id" ref="pa_extras_pizza"/>
+        </record>
+
+        <record id="pav_extras_pizza_anchovy" model="product.attribute.value">
+            <field name="name">Anchovy</field>
+            <field name="attribute_id" ref="pa_extras_pizza"/>
+        </record>
+
+        <record id="pav_extras_pizza_extra_cheese" model="product.attribute.value">
+            <field name="name">Extra cheese</field>
+            <field name="attribute_id" ref="pa_extras_pizza"/>
+        </record>
+
         <!-- Food products -->
         <record model="product.product" id="pos_food_bacon">
             <field name="name">Bacon Burger</field>
@@ -135,15 +168,15 @@
 
         <record model="product.template.attribute.line" id="product_attribute_line_pizza_extra">
             <field name="product_tmpl_id" ref="pos_restaurant.product_pizza_margherita_template"/>
-            <field name="attribute_id" ref="product.pa_extras_pizza"/>
+            <field name="attribute_id" ref="pa_extras_pizza"/>
             <field
                 name="value_ids"
                 eval="[Command.set([
-                    ref('product.pav_extras_pizza_pepperoni'),
-                    ref('product.pav_extras_pizza_mushroom'),
-                    ref('product.pav_extras_pizza_black_olives'),
-                    ref('product.pav_extras_pizza_anchovy'),
-                    ref('product.pav_extras_pizza_extra_cheese'),
+                    ref('pos_restaurant.pav_extras_pizza_pepperoni'),
+                    ref('pos_restaurant.pav_extras_pizza_mushroom'),
+                    ref('pos_restaurant.pav_extras_pizza_black_olives'),
+                    ref('pos_restaurant.pav_extras_pizza_anchovy'),
+                    ref('pos_restaurant.pav_extras_pizza_extra_cheese'),
             ])]" />
         </record>
 
@@ -217,15 +250,15 @@
 
         <record model="product.template.attribute.line" id="product_attribute_line_pizza_vege_extra">
             <field name="product_tmpl_id" ref="pos_restaurant.product_pizza_vegetarian_template"/>
-            <field name="attribute_id" ref="product.pa_extras_pizza"/>
+            <field name="attribute_id" ref="pa_extras_pizza"/>
             <field
                 name="value_ids"
                 eval="[Command.set([
-                    ref('product.pav_extras_pizza_pepperoni'),
-                    ref('product.pav_extras_pizza_mushroom'),
-                    ref('product.pav_extras_pizza_black_olives'),
-                    ref('product.pav_extras_pizza_anchovy'),
-                    ref('product.pav_extras_pizza_extra_cheese'),
+                    ref('pos_restaurant.pav_extras_pizza_pepperoni'),
+                    ref('pos_restaurant.pav_extras_pizza_mushroom'),
+                    ref('pos_restaurant.pav_extras_pizza_black_olives'),
+                    ref('pos_restaurant.pav_extras_pizza_anchovy'),
+                    ref('pos_restaurant.pav_extras_pizza_extra_cheese'),
             ])]" />
         </record>
 
@@ -299,12 +332,12 @@
 
         <record model="product.template.attribute.line" id="product_attribute_line_pasta_extra">
             <field name="product_tmpl_id" ref="pos_restaurant.product_pasta_4_formaggi_template"/>
-            <field name="attribute_id" ref="product.pa_extras_pizza"/>
+            <field name="attribute_id" ref="pa_extras_pizza"/>
             <field
                 name="value_ids"
                 eval="[Command.set([
-                    ref('product.pav_extras_pizza_extra_cheese'),
-                    ref('product.pav_extras_pizza_mushroom'),
+                    ref('pos_restaurant.pav_extras_pizza_extra_cheese'),
+                    ref('pos_restaurant.pav_extras_pizza_mushroom'),
             ])]" />
         </record>
 
