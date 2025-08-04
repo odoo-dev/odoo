@@ -560,6 +560,18 @@ class Im_LivechatChannel(models.Model):
     def _is_livechat_available(self):
         return self.chatbot_script_count or len(self.available_operator_ids) > 0
 
+    def _get_non_persisted_channel_info(self, /, *, channel_id, operator_partner, chatbot_data, **kwargs):
+        return {
+            "fetchChannelInfoState": "fetched",
+            "id": channel_id,
+            "isLoaded": True,
+            "livechat_operator_id": Store.One(
+                operator_partner, self.env["discuss.channel"]._store_livechat_operator_id_fields(),
+            ),
+            "scrollUnread": False,
+            "channel_type": "livechat",
+            "chatbot": chatbot_data,
+        }
 
 class Im_LivechatChannelRule(models.Model):
     """ Channel Rules

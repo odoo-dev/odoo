@@ -218,7 +218,7 @@ class TestLivechatBasicFlowHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
                         "requested_by_operator": False,
                         "rtc_session_ids": [("ADD", [])],
                         "uuid": channel.uuid,
-                        'livechat_with_ai_agent': False,
+                        'ai_agent_id': False,
                     }
                 ),
                 "discuss.channel.member": [
@@ -329,7 +329,7 @@ class TestLivechatBasicFlowHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
                     "requested_by_operator": False,
                     "rtc_session_ids": [("ADD", [])],
                     "uuid": channel.uuid,
-                    'livechat_with_ai_agent': False,
+                    'ai_agent_id': False,
                 },
             )
         )

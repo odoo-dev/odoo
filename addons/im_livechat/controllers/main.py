@@ -122,18 +122,11 @@ class LivechatController(http.Controller):
                 }
                 store.add(chatbot_script)
                 store.add(welcome_steps)
-            operator_partner = operator_info['operator_partner']
-            channel_info = {
-                "fetchChannelInfoState": "fetched",
-                "id": channel_id,
-                "isLoaded": True,
-                "livechat_operator_id": Store.One(
-                    operator_partner, self.env["discuss.channel"]._store_livechat_operator_id_fields(),
-                ),
-                "scrollUnread": False,
-                "channel_type": "livechat",
-                "chatbot": chatbot_data,
-            }
+            channel_info = self.env['im_livechat.channel']._get_non_persisted_channel_info(
+                channel_id=channel_id,
+                chatbot_data=chatbot_data,
+                **operator_info
+            )
             store.add_model_values("discuss.channel", channel_info)
         else:
             if request.env.user._is_public():

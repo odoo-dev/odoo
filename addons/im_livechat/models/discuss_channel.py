@@ -510,8 +510,12 @@ class DiscussChannel(models.Model):
                 body=Markup('<div class="o_mail_notification o_hide_author">%s</div>')
                 % self._get_visitor_leave_message(**kwargs),
                 message_type='notification',
-                subtype_xmlid='mail.mt_comment'
+                subtype_xmlid='mail.mt_comment',
+                silent=self._silent_message_on_close_livechat(),
             )
+    def _silent_message_on_close_livechat(self):
+        # No need to notify the operator with the `visitor has left channel` message if the operator isn't a human.
+        return bool(self.chatbot_current_step_id)
 
     # Rating Mixin
 

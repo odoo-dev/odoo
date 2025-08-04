@@ -877,7 +877,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "requested_by_operator": False,
                 "rtc_session_ids": [["ADD", []]],
                 "uuid": channel.uuid,
-                'livechat_with_ai_agent': False,
+                'ai_agent_id': False,
             }
         if channel == self.channel_livechat_2:
             return {
@@ -905,7 +905,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "requested_by_operator": False,
                 "rtc_session_ids": [["ADD", []]],
                 "uuid": channel.uuid,
-                'livechat_with_ai_agent': False,
+                'ai_agent_id': False,
             }
         return {}
 
