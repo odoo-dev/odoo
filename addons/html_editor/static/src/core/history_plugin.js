@@ -1242,6 +1242,8 @@ export class HistoryPlugin extends Plugin {
                     case "consumed":
                         totalConsumed += 1;
                         break;
+                    case "x":
+                        break;
                     default:
                         return -1;
                 }
@@ -1629,7 +1631,7 @@ export class HistoryPlugin extends Plugin {
             // DOM after all steps were reverted then applied again.
             this.processNewRecords(this.observer.takeRecords());
             if (this.isReversibleStep(i)) {
-                this.stepsStates.set(currentStep.id, "consumed");
+                this.stepsStates.set(currentStep.id, "x");
                 lastRevertedStep = currentStep;
             }
         }
@@ -1646,7 +1648,7 @@ export class HistoryPlugin extends Plugin {
         this.setSerializedSelection(lastRevertedStep.selection);
         // Register resulting mutations as a new consumed step (prevent undo).
         this.dispatchContentUpdated();
-        this.addStep({ stepState: "consumed" });
+        this.addStep({ stepState: "x" });
     }
 
     setStepExtra(key, value) {
