@@ -15,7 +15,7 @@
             </xpath>
             <xpath expr="//div[@name='button_box']" position="replace"/>
             <xpath expr="//div[hasclass('oe_title')]" position="replace"/>
-            <xpath expr="//div[@name='quantity']" position="replace">
+            <xpath expr="//div[@name='qty']" position="replace">
                 <div class="o_row g-0 d-flex" name="quantity">
                     <field name="product_qty" readonly="1"/>
                 </div>
